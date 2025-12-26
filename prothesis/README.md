@@ -1,0 +1,52 @@
+# Prothesis
+
+Place perspective options before inquiry (πρόθεσις: placing before)
+
+## What is Prothesis?
+
+그리스어 πρόθεσις(앞에 놓기)의 현대적 재해석으로, **탐구 전에 가능한 인식론적 관점들을 제시**하는 프로토콜이다.
+
+### 핵심 문제
+
+사용자는 종종 "어떤 관점에서 분석해야 할지"조차 모른다 (unknown unknowns). 열린 질문 "어떤 관점을 원하세요?"는 이미 답을 알아야 대답할 수 있다.
+
+### 해법
+
+**Recognition over Recall**: 빈칸을 채우는 것(recall)보다 선택지에서 고르는 것(recognition)이 쉽다. AI가 먼저 관점 옵션을 제시하고, 사용자가 선택한 후 분석을 진행한다.
+
+### 소크라테스 방식과의 차이
+
+| 차원 | 소크라테스 산파술 | Prothesis |
+|------|------------------|-----------|
+| 지식 원천 | 대화자 내부에 잠재 | 외부에서 제공 |
+| 전제 | "당신은 이미 알고 있다" | "당신은 옵션을 모른다" |
+| 역할 | 산파 (끌어냄) | 지도 제작자 (경로 공개) |
+| 질문 형태 | 열린 질문 (회상 부담) | 선택지 (인지만 필요) |
+
+## Protocol Flow
+
+```
+Phase 1: Prothesis    → 관점 2-4개 제시 (AskUserQuestion)
+Phase 2: Inquiry      → 선택된 관점별 병렬 분석 (Task subagent)
+Phase 3: Synthesis    → 수렴점/발산점 정리 → 통합 답변
+```
+
+## When to Use
+
+**사용**:
+- 평가, 비교, 추천 요청
+- "전문가 관점에서", "심층 분석" 등 다양한 프레임워크가 가능할 때
+
+**생략**:
+- 단순 사실 질문
+- 사용자가 이미 관점을 명시했을 때
+
+## Usage
+
+```
+/prothesis [your question]
+```
+
+## Author
+
+Jongwon Choi (https://github.com/jongwony)

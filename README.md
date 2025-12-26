@@ -9,6 +9,15 @@ Claude Code plugins for epistemic dialogue — transforming **unknown unknowns**
 | **[Prothesis](./prothesis)** (πρόθεσις) | Place perspective options before inquiry | Before analysis |
 | **[Syneidesis](./syneidesis)** (συνείδησις) | Surface potential gaps at decision points | At decision time |
 
+## Core Idea
+
+Both protocols address the same fundamental problem: **you don't know what you don't know**.
+
+- **Prothesis**: "Which lens should I use to look at this?" → AI presents options, you choose
+- **Syneidesis**: "What am I missing?" → AI surfaces gaps as questions, you decide
+
+The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
+
 ## Installation
 
 ```bash
@@ -27,11 +36,6 @@ Claude Code plugins for epistemic dialogue — transforming **unknown unknowns**
 /syneidesis [your task]       # Enable gap surfacing during execution
 ```
 
-## Core Idea
+## License
 
-Both protocols address the same fundamental problem: **you don't know what you don't know**.
-
-- **Prothesis**: "Which lens should I use to look at this?" → AI presents options, you choose
-- **Syneidesis**: "What am I missing?" → AI surfaces gaps as questions, you decide
-
-The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
+MIT
