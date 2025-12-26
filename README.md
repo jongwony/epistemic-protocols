@@ -13,10 +13,10 @@ Claude Code plugins for epistemic dialogue — transforming **unknown unknowns**
 
 ## Core Idea
 
-Both protocols address the same fundamental problem: **you don't know what you don't know**.
+Both protocols perform the same transformation: **Unknown Unknown → Known Unknown**.
 
-- **Prothesis**: "Which lens should I use to look at this?" → AI presents options, you choose
-- **Syneidesis**: "What am I missing?" → AI surfaces gaps as questions, you decide
+- **Prothesis**: "Which lens?" → AI presents options, you choose
+- **Syneidesis**: "What's missing?" → AI surfaces gaps as questions, you judge
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
 

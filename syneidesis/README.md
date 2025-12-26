@@ -24,6 +24,10 @@ A refined implementation of intentional friction. Materializes the epistemic sta
 
 **Surfacing over Deciding**: The goal is not for AI to "make better decisions" but to **"illuminate cognitive blind spots so users can make better decisions"**.
 
+## User Role
+
+**Judgment, not acknowledgment**: When a gap is surfaced, you evaluate its relevance — address it, dismiss it, or defer. The AI surfaces; you judge.
+
 ## Usage
 
 ```
