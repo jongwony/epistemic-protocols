@@ -1,6 +1,8 @@
 {
   "name": "epistemic-protocols",
-  "owner": "jongwony",
+  "owner": {
+    "name": "jongwony"
+  },
   "plugins": [
     {
       "name": "prothesis",
