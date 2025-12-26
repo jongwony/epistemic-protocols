@@ -1,0 +1,14 @@
+{
+  "plugins": [
+    {
+      "name": "prothesis",
+      "source": "../prothesis",
+      "description": "Place epistemic perspectives before inquiry (πρόθεσις)"
+    },
+    {
+      "name": "syneidesis",
+      "source": "../syneidesis",
+      "description": "Surface potential gaps at decision points (συνείδησις)"
+    }
+  ]
+}

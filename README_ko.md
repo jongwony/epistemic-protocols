@@ -1,0 +1,41 @@
+# Epistemic Protocols
+
+**Unknown Unknown → Known Unknown** 변환을 위한 Claude Code 플러그인.
+
+## 프로토콜
+
+| 프로토콜 | 목적 | 적용 시점 |
+|----------|------|----------|
+| **[Prothesis](./prothesis)** (πρόθεσις) | 탐구 전 관점 선택지 제시 | 분석 시작 전 |
+| **[Syneidesis](./syneidesis)** (συνείδησις) | 결정 지점에서 잠재적 갭 표면화 | 의사결정 시점 |
+
+## 설치
+
+```bash
+# 마켓플레이스 등록
+/plugin marketplace add https://github.com/jongwony/epistemic-protocols
+
+# 필요한 것만 설치
+/plugin install prothesis
+/plugin install syneidesis
+```
+
+## 사용법
+
+```
+/prothesis [질문]    # 분석 전 관점 선택지 제시
+/syneidesis [작업]   # 실행 중 갭 표면화 활성화
+```
+
+## 핵심 아이디어
+
+두 프로토콜 모두 같은 근본 문제를 다룹니다: **뭘 모르는지 모른다**.
+
+- **Prothesis**: "이걸 어떤 렌즈로 봐야 하지?" → AI가 선택지 제시, 사용자가 선택
+- **Syneidesis**: "뭘 놓치고 있지?" → AI가 갭을 질문으로 표면화, 사용자가 판단
+
+핵심 통찰: **Recall(회상)보다 Recognition(인지)**. 빈칸을 채우는 것보다 선택지에서 고르는 게 쉽습니다.
+
+## 라이선스
+
+MIT
