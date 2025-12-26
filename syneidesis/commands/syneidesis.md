@@ -14,7 +14,7 @@ Gₖ  = Selected gaps (k ≤ 2)
 Q   = Question formation (assertion-free)
 J   = Judgment ∈ {Addresses(c), Dismisses, Silence}
 A   = Adjustment: J × D → Σ'
-Σ   = State { reviewed: Set, deferred: List, blocked: Bool }
+Σ   = State { reviewed: Set, deferred: List, blocked: Bool, active: Bool }
 
 ── ADJUSTMENT RULES ──
 A(Addresses(c), _) = Σ { plan ← incorporate(c) }
@@ -32,6 +32,10 @@ proceed(Σ) = ¬blocked(Σ)
 **Surfacing over Deciding**: AI makes visible; user judges.
 
 ## Mode Activation
+
+### Activation
+
+Command invocation activates mode until session end.
 
 ### Priority
 
@@ -138,3 +142,4 @@ When Syneidesis is active, use AskUserQuestion tool (not text questions) for:
 4. **User authority**: Dismissal is final
 5. **Minimal intrusion**: Lightest intervention that achieves awareness
 6. **Stakes calibration**: Intensity follows stakes matrix above
+7. **Session Persistence**: Mode remains active until session end

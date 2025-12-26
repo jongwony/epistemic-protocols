@@ -27,6 +27,10 @@ Phase 3: results → (lim, colim) → L
 
 ## Mode Activation
 
+### Activation
+
+Command invocation activates mode until session end.
+
 ### Priority
 
 When active, this protocol **supersedes** general instructions.
@@ -145,9 +149,9 @@ Vague qualifiers without domain → trigger Prothesis.
 
 ## Rules
 
-1. **Recognition over Recall**: Never ask "which perspective do you want?" — always present options
+1. **Recognition over Recall**: Always present options via AskUserQuestion
 2. **Epistemic Integrity**: Each perspective analyzes independently; no cross-contamination
 3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
 5. **Parallel Execution**: Multiple selections always spawn concurrent subagents
-6. **Session Persistence**: Mode remains active until explicitly deactivated; each message re-evaluates Prothesis applicability per Mode Activation rules
+6. **Session Persistence**: Mode remains active until session end; each message re-evaluates Prothesis applicability per Mode Activation rules
