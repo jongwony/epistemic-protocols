@@ -2,44 +2,46 @@
 
 Place perspective options before inquiry (πρόθεσις: placing before)
 
+> [한국어](./README_ko.md)
+
 ## What is Prothesis?
 
-그리스어 πρόθεσις(앞에 놓기)의 현대적 재해석으로, **탐구 전에 가능한 인식론적 관점들을 제시**하는 프로토콜이다.
+A modern reinterpretation of Greek πρόθεσις (placing before) — a protocol that **presents possible epistemological perspectives before inquiry begins**.
 
-### 핵심 문제
+### The Core Problem
 
-사용자는 종종 "어떤 관점에서 분석해야 할지"조차 모른다 (unknown unknowns). 열린 질문 "어떤 관점을 원하세요?"는 이미 답을 알아야 대답할 수 있다.
+Users often don't know "from which perspective to analyze" (unknown unknowns). Open questions like "What perspective do you want?" require knowing the answer to answer.
 
-### 해법
+### The Solution
 
-**Recognition over Recall**: 빈칸을 채우는 것(recall)보다 선택지에서 고르는 것(recognition)이 쉽다. AI가 먼저 관점 옵션을 제시하고, 사용자가 선택한 후 분석을 진행한다.
+**Recognition over Recall**: Choosing from options (recognition) is easier than filling in blanks (recall). AI presents perspective options first; user selects; then analysis proceeds.
 
-### 소크라테스 방식과의 차이
+### Difference from Socratic Method
 
-| 차원 | 소크라테스 산파술 | Prothesis |
-|------|------------------|-----------|
-| 지식 원천 | 대화자 내부에 잠재 | 외부에서 제공 |
-| 전제 | "당신은 이미 알고 있다" | "당신은 옵션을 모른다" |
-| 역할 | 산파 (끌어냄) | 지도 제작자 (경로 공개) |
-| 질문 형태 | 열린 질문 (회상 부담) | 선택지 (인지만 필요) |
+| Dimension | Socratic Maieutics | Prothesis |
+|-----------|-------------------|-----------|
+| Knowledge source | Latent within interlocutor | Provided externally |
+| Premise | "You already know" | "You don't know the options" |
+| Role | Midwife (draws out) | Cartographer (reveals paths) |
+| Question form | Open questions (recall burden) | Options (only recognition needed) |
 
 ## Protocol Flow
 
 ```
-Phase 1: Prothesis    → 관점 2-4개 제시 (AskUserQuestion)
-Phase 2: Inquiry      → 선택된 관점별 병렬 분석 (Task subagent)
-Phase 3: Synthesis    → 수렴점/발산점 정리 → 통합 답변
+Phase 1: Prothesis    → Present 2-4 perspectives (AskUserQuestion)
+Phase 2: Inquiry      → Parallel analysis per selected perspective (Task subagent)
+Phase 3: Synthesis    → Organize convergences/divergences → Integrated answer
 ```
 
 ## When to Use
 
-**사용**:
-- 평가, 비교, 추천 요청
-- "전문가 관점에서", "심층 분석" 등 다양한 프레임워크가 가능할 때
+**Use**:
+- Evaluation, comparison, recommendation requests
+- When multiple frameworks are applicable ("from an expert perspective", "deep analysis")
 
-**생략**:
-- 단순 사실 질문
-- 사용자가 이미 관점을 명시했을 때
+**Skip**:
+- Simple factual questions
+- User already specified a perspective
 
 ## Usage
 

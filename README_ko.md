@@ -1,5 +1,7 @@
 # Epistemic Protocols
 
+> [English](./README.md)
+
 **Unknown Unknown → Known Unknown** 변환을 위한 Claude Code 플러그인.
 
 ## 프로토콜

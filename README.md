@@ -1,5 +1,7 @@
 # Epistemic Protocols
 
+> [한국어](./README_ko.md)
+
 Claude Code plugins for epistemic dialogue — transforming **unknown unknowns** into **known unknowns**.
 
 ## Protocols

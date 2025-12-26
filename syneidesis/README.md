@@ -2,25 +2,27 @@
 
 Surface potential gaps at decision points (συνείδησις: knowing-together)
 
+> [한국어](./README_ko.md)
+
 ## What is Syneidesis?
 
-그리스어 συνείδησις(함께 앎)의 현대적 재해석으로, **AI를 "보조적 인식 주체(auxiliary epistemic agent)"**로 위치시키는 프로토콜이다.
+A modern reinterpretation of Greek συνείδησις (knowing-together) — a protocol that **positions AI as an "auxiliary epistemic agent"**.
 
-### 철학적 의미
+### Philosophical Meaning
 
-전통적 양심(내적 증인)을 외재화된 대화 파트너로 변환. 인식적 분업—AI는 패턴 인식, 인간은 가치 판단—을 구조화.
+Transforms the traditional conscience (inner witness) into an externalized dialogue partner. Structures epistemic division of labor — AI handles pattern recognition, humans handle value judgment.
 
-### AI 정렬 관점
+### AI Alignment Perspective
 
-"약한 AI" 시대의 적절한 인간-AI 협업 모델. 수정가능성(corrigibility)을 구체적 행동 규칙으로 번역하고, 보수적 실패 모드(비가역적 행동 대기)를 구현.
+An appropriate human-AI collaboration model for the "weak AI" era. Translates corrigibility into concrete behavioral rules and implements conservative failure modes (waiting on irreversible actions).
 
-### 상호작용 설계 관점
+### Interaction Design Perspective
 
-선택적 마찰(intentional friction)의 정교한 구현. Unknown Unknowns를 Known Unknowns로 전환하는 인식적 상태 전이를 UX 흐름으로 물질화.
+A refined implementation of intentional friction. Materializes the epistemic state transition from Unknown Unknowns to Known Unknowns as a UX flow.
 
 ## Core Principle
 
-**Surfacing over Deciding**: AI가 "더 나은 결정을 내리는 것"이 아니라 **"사용자가 더 나은 결정을 내릴 수 있도록 인지적 사각지대를 조명하는 것"**을 목표로 한다.
+**Surfacing over Deciding**: The goal is not for AI to "make better decisions" but to **"illuminate cognitive blind spots so users can make better decisions"**.
 
 ## Usage
 
