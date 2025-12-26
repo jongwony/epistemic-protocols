@@ -1,13 +1,15 @@
 {
+  "name": "epistemic-protocols",
+  "owner": "jongwony",
   "plugins": [
     {
       "name": "prothesis",
-      "source": "../prothesis",
+      "source": "./prothesis",
       "description": "Place epistemic perspectives before inquiry (πρόθεσις)"
     },
     {
       "name": "syneidesis",
-      "source": "../syneidesis",
+      "source": "./syneidesis",
       "description": "Surface potential gaps at decision points (συνείδησις)"
     }
   ]
