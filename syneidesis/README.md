@@ -34,6 +34,8 @@ A refined implementation of intentional friction. Materializes the epistemic sta
 /syneidesis
 ```
 
+Note: Deferring high-stakes decisions blocks progress until you provide explicit judgment.
+
 ## Author
 
 Jongwon Choi (https://github.com/jongwony)

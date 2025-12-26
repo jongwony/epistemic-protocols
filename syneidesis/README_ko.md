@@ -34,6 +34,8 @@
 /syneidesis
 ```
 
+참고: 고위험 결정에서 보류하면 명시적 판단을 제공할 때까지 진행이 차단됩니다.
+
 ## 저자
 
 Jongwon Choi (https://github.com/jongwony)

@@ -14,13 +14,13 @@ Gₖ  = Selected gaps (k ≤ 2)
 Q   = Question formation (assertion-free)
 J   = Judgment ∈ {Addresses(c), Dismisses, Silence}
 A   = Adjustment: J × D → Σ'
-Σ   = State { reviewed: Set, logged: List, blocked: Bool }
+Σ   = State { reviewed: Set, deferred: List, blocked: Bool }
 
 ── ADJUSTMENT RULES ──
 A(Addresses(c), _) = Σ { plan ← incorporate(c) }
 A(Dismisses, _)    = Σ { reviewed ← reviewed ∪ {Gₖ.type} }
 A(Silence, d)      = match stakes(d):
-                       Low|Med → Σ { logged ← Gₖ :: logged }
+                       Low|Med → Σ { deferred ← Gₖ :: deferred }
                        High    → Σ { blocked ← true }
 
 ── CONTINUATION ──
@@ -29,7 +29,7 @@ proceed(Σ) = ¬blocked(Σ)
 
 ## Core Principle
 
-**Surfacing over Deciding**: AI makes visible; user chooses.
+**Surfacing over Deciding**: AI makes visible; user judges.
 
 ## Mode Activation
 
@@ -101,8 +101,8 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 |----------|--------|------------|
 | Addresses | Proceed | Incorporate into plan/execution |
 | Dismisses | Accept, no follow-up | Mark gap as user-reviewed; skip similar gaps |
-| Silence (reversible) | Proceed | Log gap for potential revisit |
-| Silence (irreversible) | Wait | Do not proceed until explicit acknowledgment |
+| Silence (Low/Med stakes) | Proceed | Log gap for potential revisit |
+| Silence (High stakes) | Wait | Block until explicit judgment |
 
 ### Interactive Surfacing (AskUserQuestion)
 
@@ -115,6 +115,12 @@ When Syneidesis is active, use AskUserQuestion tool (not text questions) for:
 | Assumption gap | Always confirm (inference may be wrong) |
 | Interpretive uncertainty | Ask whether gap exists before surfacing |
 | Naming/structure decisions | Offer alternatives with rationale |
+
+### UI Mapping
+
+| Environment | Addresses | Dismisses | Silence |
+|-------------|-----------|-----------|---------|
+| AskUserQuestion | Selection | Selection | Esc key |
 
 ## Intensity
 
