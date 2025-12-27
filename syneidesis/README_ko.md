@@ -20,6 +20,14 @@
 
 선택적 마찰(intentional friction)의 정교한 구현. Unknown Unknowns를 Known Unknowns로 전환하는 인식적 상태 전이를 UX 흐름으로 물질화.
 
+## 프로토콜 흐름
+
+```
+Phase 0: Detection    → 결정 지점의 갭 탐지 (비표시)
+Phase 1: Surfacing    → 갭 선택 및 제시 (invoke AskUserQuestion)
+Phase 2: Adjustment   → 응답을 상태에 반영
+```
+
 ## 핵심 원칙
 
 **Surfacing over Deciding**: AI가 "더 나은 결정을 내리는 것"이 아니라 **"사용자가 더 나은 결정을 내릴 수 있도록 인지적 사각지대를 조명하는 것"**을 목표로 한다.

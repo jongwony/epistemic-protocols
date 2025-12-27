@@ -20,6 +20,14 @@ An appropriate human-AI collaboration model for the "weak AI" era. Translates co
 
 A refined implementation of intentional friction. Materializes the epistemic state transition from Unknown Unknowns to Known Unknowns as a UX flow.
 
+## Protocol Flow
+
+```
+Phase 0: Detection    → Scan decision point for gaps (silent)
+Phase 1: Surfacing    → Select and present gaps (invoke AskUserQuestion)
+Phase 2: Adjustment   → Incorporate response into state
+```
+
 ## Core Principle
 
 **Surfacing over Deciding**: The goal is not for AI to "make better decisions" but to **"illuminate cognitive blind spots so users can make better decisions"**.

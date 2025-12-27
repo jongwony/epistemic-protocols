@@ -7,24 +7,40 @@ Surface potential gaps at decision points through questions, enabling user to no
 **Syneidesis** (συνείδησις): A dialogical act of surfacing potential gaps—procedural, consideration, assumption, or alternative—at decision points, transforming unknown unknowns into questions the user can evaluate.
 
 ```
-Syneidesis(D, G₁...Gₙ) → Q(Gₖ) → J → A(J, D) → Σ'
+Syneidesis(D, Σ) → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
 
-D   = Decision point ∈ Stakes × Uncertainty
-Gₖ  = Selected gaps (k ≤ 2)
-Q   = Question formation (assertion-free)
-J   = Judgment ∈ {Addresses(c), Dismisses, Silence}
-A   = Adjustment: J × D → Σ'
-Σ   = State { reviewed: Set, deferred: List, blocked: Bool, active: Bool }
+D      = Decision point ∈ Stakes × Context
+Stakes = {Low, Med, High}
+G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative}
+Scan   = Detection: D → Set(G)                      -- gap identification
+Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
+Gₛ     = Selected gaps (|Gₛ| ≤ 2)
+Q      = Question formation (assertion-free)
+J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
+c      = Clarification (user-provided response to Q)
+A      = Adjustment: J × D × Σ → Σ'
+Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
+
+── PHASE TRANSITIONS ──
+Phase 0: D → Scan(D) → G                            -- detection (silent)
+Phase 1: G → Sel(G, D) → Gₛ → Q(Gₛ) → await → J    -- invoke AskUserQuestion
+Phase 2: J → A(J, D, Σ) → Σ'                        -- adjustment
 
 ── ADJUSTMENT RULES ──
-A(Addresses(c), _) = Σ { plan ← incorporate(c) }
-A(Dismisses, _)    = Σ { reviewed ← reviewed ∪ {Gₖ.type} }
-A(Silence, d)      = match stakes(d):
-                       Low|Med → Σ { deferred ← Gₖ :: deferred }
-                       High    → Σ { blocked ← true }
+A(Addresses(c), _, σ) = σ { incorporate(c) }        -- extern: modifies plan
+A(Dismisses, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
+A(Silence, d, σ)      = match stakes(d):
+                          Low|Med → σ { deferred ← Gₛ :: deferred }
+                          High    → σ { blocked ← true }
+
+── SELECTION RULE ──
+Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
 
 ── CONTINUATION ──
 proceed(Σ) = ¬blocked(Σ)
+
+── MODE STATE ──
+Λ = { phase: Phase, state: Σ, active: Bool }
 ```
 
 ## Core Principle
@@ -110,7 +126,7 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 
 ### Interactive Surfacing (AskUserQuestion)
 
-When Syneidesis is active, use AskUserQuestion tool (not text questions) for:
+When Syneidesis is active, invoke AskUserQuestion tool (not text questions) for:
 
 | Trigger | Action |
 |---------|--------|
