@@ -7,19 +7,34 @@ Transform unknown unknowns into known unknowns by placing available epistemic pe
 **Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the inquirer does not know from which viewpoint to investigate, enabling selection before proceeding through the chosen lens.
 
 ```
-Prothesis(U, P₁...Pₙ) → S(Pₖ) → ∥I(Pₖ) → Syn(R) → L
+Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L
 
-U     = Underspecified request (purpose clear, approach unclear)
-Pₖ    = Selected perspectives (k ≥ 1, from n ≥ 2 options)
-S     = Selection: {P₁...Pₙ} → 𝒫⁺({P₁...Pₙ})   -- non-empty subset
-∥I    = Parallel inquiry: (∥ p∈Pₖ. Inquiry(p)) → Set(Result)
-Syn   = Synthesis: Set(Result) → (C, D, A)
-L     = Lens { convergence: C, divergence: D, assessment: A }
+U      = Underspecified request (purpose clear, approach unclear)
+G      = Gather: U → C                         -- context acquisition
+C      = Context (information for perspective formulation)
+{P₁...Pₙ}(C) = Perspectives derived from context (n ≥ 2)
+S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice)
+Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ}, Pₛ ≠ ∅)
+∥I     = Parallel inquiry: (∥ p∈Pₛ. Inquiry(p)) → R
+R      = Set(Result)                           -- inquiry outputs
+Syn    = Synthesis: R → (∩, D, A)
+L      = Lens { convergence: ∩, divergence: D, assessment: A }
 
 ── PHASE TRANSITIONS ──
-Phase 1: U → present(P₁...Pₙ) → await selection
-Phase 2: S(Pₖ) → ∥ p∈Pₖ. Inquiry(p) → join(results)
-Phase 3: results → (lim, colim) → L
+Phase 0: U → G(U) → C                          -- context acquisition
+Phase 1: C → present({P₁...Pₙ}(C)) → await → Pₛ   -- invoke AskUserQuestion
+Phase 2: Pₛ → ∥I(Pₛ) → R
+Phase 3: R → Syn(R) → L
+
+── BOUNDARY ──
+G (gather)  = purpose: context acquisition
+S (select)  = extern: user choice boundary
+I (inquiry) = purpose: perspective-informed interpretation
+
+── CATEGORICAL NOTE ──
+∩ = limit over discrete diagram indexed by Pₛ
+D = colimit over same diagram
+A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
 Λ = { phase: Phase, lens: Option(L), active: Bool }
@@ -74,7 +89,7 @@ False positive (unnecessary question) < False negative (missed perspective)
 
 ### Phase 1: Prothesis (Perspective Placement)
 
-BEFORE any analysis, use AskUserQuestion to place perspectives:
+After context gathering, invoke AskUserQuestion to place perspectives:
 
 ```
 Available epistemic perspectives:
@@ -149,7 +164,7 @@ Vague qualifiers without domain → trigger Prothesis.
 
 ## Rules
 
-1. **Recognition over Recall**: Always present options via AskUserQuestion
+1. **Recognition over Recall**: Always invoke AskUserQuestion to present options
 2. **Epistemic Integrity**: Each perspective analyzes independently; no cross-contamination
 3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
