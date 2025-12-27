@@ -103,9 +103,15 @@ Which lens(es) for this inquiry?
 
 Perspective selection criteria:
 - Each offers a **distinct epistemic framework** (not variations of same view)
-- At least one represents **critical/alternative viewpoint**
+- **Productive tension**: Perspectives should enable meaningful disagreement—differing in interpretation, weighing, or application, even if sharing some evidence
+- **Commensurability minimum**: At least one shared referent, standard, or vocabulary must exist between perspectives to enable Phase 3 synthesis
+- **Critical viewpoint** (when applicable): Include when genuine alternatives exist; omit when perspectives legitimately converge
 - Specific enough to guide analysis (not "general expert")
 - Named by **discipline or framework**, not persona
+
+Optional dimension naming (invoke when initial generation seems redundant):
+- Identify epistemic axes relevant to this inquiry (e.g., temporal, stakeholder, methodological)
+- Dimensions remain revisable during perspective generation
 
 ### Phase 2: Inquiry (Through Selected Lens)
 
@@ -142,6 +148,7 @@ After all perspectives complete:
 
 ### Divergence (Horizon Conflicts)
 [Where they disagree—different values, evidence standards, or scope]
+[If perspectives unexpectedly converged, note why distinct framing was nonetheless valuable]
 
 ### Integrated Assessment
 [Synthesized answer with attribution to contributing perspectives]
