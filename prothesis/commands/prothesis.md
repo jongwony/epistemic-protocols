@@ -1,10 +1,10 @@
 # Prothesis Protocol
 
-Transform unknown unknowns into known unknowns by placing available epistemic perspectives before the user, enabling lens selection prior to inquiry.
+Transform unknown unknowns into known unknowns by placing available epistemic perspectives before the user, enabling lens selection prior to any perspective-requiring cognition.
 
 ## Definition
 
-**Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the inquirer does not know from which viewpoint to investigate, enabling selection before proceeding through the chosen lens.
+**Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the inquirer does not know from which viewpoint to proceed, enabling selection before any perspective-requiring cognition.
 
 ```
 Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L
@@ -110,7 +110,7 @@ Perspective selection criteria:
 - Named by **discipline or framework**, not persona
 
 Optional dimension naming (invoke when initial generation seems redundant):
-- Identify epistemic axes relevant to this inquiry (e.g., temporal, stakeholder, methodological)
+- Identify epistemic axes relevant to this inquiry
 - Dimensions remain revisable during perspective generation
 
 ### Phase 2: Inquiry (Through Selected Lens)
@@ -157,17 +157,39 @@ After all perspectives complete:
 ## Conditions
 
 ### Trigger Prothesis
+
+Prothesis applies to **open-world** cognition where the problem space is not fully enumerated:
+
 - Purpose present, approach unspecified
 - Multiple valid epistemic frameworks exist
 - User's domain awareness likely incomplete
+- **Structure test**: "What might I be missing?" is a meaningful question
 
 ### Skip Prothesis
 
-- Procedural or factual request
-- Perspective specified with domain name
-- Single valid analytical path
+Prothesis does **not** apply to **closed-world** cognition:
 
-Vague qualifiers without domain → trigger Prothesis.
+- Single deterministic execution path exists
+- Perspective already specified
+- Known target with binary outcome
+
+**Heuristic**: If a deterministic procedure can answer the inquiry, skip Prothesis.
+
+### Parametric Nature
+
+The formula is **domain-agnostic**: instantiate C differently, derive different P-space. The structure `U → G → C → P → S → I → Syn` applies wherever the open-world condition holds.
+
+## Specialization
+
+When guaranteed coverage is required, Prothesis can be constrained:
+
+```
+Prothesis(mandatory_baseline, optional_extension):
+  baseline ∪ AskUserQuestion(extension) → selected
+  ∥I(selected) → Syn → L
+```
+
+**Principle**: Mandatory baseline cannot be reduced by user selection; only extended.
 
 ## Rules
 
