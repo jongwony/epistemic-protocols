@@ -11,10 +11,10 @@ Claude Code plugin marketplace containing two epistemic dialogue protocols that 
 ```
 epistemic-protocols/
 ├── .claude-plugin/marketplace.json    # Marketplace manifest (registers sub-plugins)
-├── prothesis/                         # v1.2.0
+├── prothesis/                         # v1.5.0
 │   ├── .claude-plugin/plugin.json     # Plugin manifest
 │   └── commands/prothesis.md          # Protocol implementation
-└── syneidesis/                        # v1.2.0
+└── syneidesis/                        # v1.3.0
     ├── .claude-plugin/plugin.json
     └── commands/syneidesis.md
 ```
@@ -26,13 +26,13 @@ epistemic-protocols/
 ### Prothesis (πρόθεσις)
 Present epistemic perspective options before analysis begins.
 - **Flow**: `U → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L`
-- **Key**: Phase 0 gathers context, Phase 1 invokes `AskUserQuestion` for perspective selection
+- **Key**: Phase 0 gathers context, Phase 1 calls `AskUserQuestion` tool for perspective selection
 - **Tools**: `AskUserQuestion` (blocking), `Task` subagents (parallel inquiry)
 
 ### Syneidesis (συνείδησις)
 Surface potential gaps at decision points as questions.
 - **Flow**: `D → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'`
-- **Key**: Phase 0 detects gaps, Phase 1 invokes `AskUserQuestion` for surfacing
+- **Key**: Phase 0 detects gaps, Phase 1 calls `AskUserQuestion` tool for surfacing
 - **Gap types**: Procedural, Consideration, Assumption, Alternative
 - **Stakes**: High-stakes + silence → blocks until explicit judgment
 
@@ -48,4 +48,4 @@ Surface potential gaps at decision points as questions.
 - Formal definitions use category theory notation (limit, colimit, ∥ for parallel)
 - Keep README.md and README_ko.md in sync
 - Bump version in `.claude-plugin/plugin.json` on changes
-- `invoke` (not `use`) for tool-calling instructions to enforce literal interpretation
+- `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy

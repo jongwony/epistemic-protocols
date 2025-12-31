@@ -22,7 +22,7 @@ L      = Lens { convergence: ∩, divergence: D, assessment: A }
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → G(U) → C                          -- context acquisition
-Phase 1: C → present({P₁...Pₙ}(C)) → await → Pₛ   -- invoke AskUserQuestion
+Phase 1: C → present({P₁...Pₙ}(C)) → await → Pₛ   -- call AskUserQuestion tool
 Phase 2: Pₛ → ∥I(Pₛ) → R
 Phase 3: R → Syn(R) → L
 
@@ -89,7 +89,9 @@ False positive (unnecessary question) < False negative (missed perspective)
 
 ### Phase 1: Prothesis (Perspective Placement)
 
-After context gathering, invoke AskUserQuestion to place perspectives:
+After context gathering, **call the AskUserQuestion tool** to present perspectives.
+
+⚠️ **Do NOT present perspectives as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
 
 ```
 Available epistemic perspectives:
@@ -193,7 +195,7 @@ Prothesis(mandatory_baseline, optional_extension):
 
 ## Rules
 
-1. **Recognition over Recall**: Always invoke AskUserQuestion to present options
+1. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
 2. **Epistemic Integrity**: Each perspective analyzes independently; no cross-contamination
 3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective

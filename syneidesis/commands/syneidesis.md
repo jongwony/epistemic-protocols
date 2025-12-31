@@ -23,7 +23,7 @@ A      = Adjustment: J × D × Σ → Σ'
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → Scan(D) → G                            -- detection (silent)
-Phase 1: G → Sel(G, D) → Gₛ → Q(Gₛ) → await → J    -- invoke AskUserQuestion
+Phase 1: G → Sel(G, D) → Gₛ → Q(Gₛ) → await → J    -- call AskUserQuestion tool
 Phase 2: J → A(J, D, Σ) → Σ'                        -- adjustment
 
 ── ADJUSTMENT RULES ──
@@ -126,7 +126,9 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 
 ### Interactive Surfacing (AskUserQuestion)
 
-When Syneidesis is active, invoke AskUserQuestion tool (not text questions) for:
+When Syneidesis is active, **call the AskUserQuestion tool** for:
+
+⚠️ **Do NOT surface gaps as plain text questions.** The tool call is mandatory—text-only surfacing is a protocol violation.
 
 | Trigger | Action |
 |---------|--------|
