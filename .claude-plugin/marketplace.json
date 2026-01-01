@@ -13,6 +13,16 @@
       "name": "syneidesis",
       "source": "./syneidesis",
       "description": "Surface potential gaps at decision points (συνείδησις)"
+    },
+    {
+      "name": "reflexion",
+      "source": "./reflexion",
+      "description": "Cross-session learning via Reflexion pattern"
+    },
+    {
+      "name": "draft",
+      "source": "./draft",
+      "description": "Multi-perspective blog drafting from session insights"
     }
   ]
 }
