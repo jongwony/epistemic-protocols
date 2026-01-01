@@ -1,3 +1,8 @@
+---
+name: draft
+description: Draft blog posts from session insights with multi-perspective analysis.
+---
+
 # Draft Skill
 
 Transform session insights and conceptual explorations into structured, publishable content through multi-perspective analysis and iterative refinement.

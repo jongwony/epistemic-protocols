@@ -1,3 +1,8 @@
+---
+name: reflexion
+description: Cross-session learning via the Reflexion pattern—extract insights from Claude Code sessions into persistent memory.
+---
+
 # Session Reflexion
 
 Extract insights from Claude Code sessions and integrate into appropriate memory scope through structured review.
