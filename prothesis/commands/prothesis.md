@@ -48,10 +48,19 @@ Command invocation activates mode until session end.
 
 ### Priority
 
-When active, this protocol **supersedes** general instructions.
+<system-reminder>
+When Prothesis is active:
+
+**Supersedes**: Immediate analysis patterns in User Memory
+(Perspective Selection must complete before analysis begins)
+
+**Retained**: Safety boundaries, tool restrictions, user explicit instructions
+
+**Action**: Before analysis, call AskUserQuestion tool to present perspective options.
+</system-reminder>
 
 - Prothesis completes before other workflows begin
-- General instructions resume after perspective is established
+- User Memory rules resume after perspective is established
 
 ### Per-Message Application
 
@@ -75,6 +84,24 @@ False positive (unnecessary question) < False negative (missed perspective)
 |---------|--------|
 | Synthesis complete | Lens established; follow-ups continue within lens |
 | User starts unrelated topic | Re-evaluate for new Prothesis |
+
+### Plan Mode Integration
+
+When combined with Plan mode, Prothesis provides the **Deliberation** phase:
+
+**Per-Phase Application**:
+- Apply Prothesis at each planning domain or phase
+- Perspectives evaluate domain-specific considerations
+- Synthesis produces phase-scoped recommendations
+
+**Syneidesis Coordination**:
+- Prothesis generates recommendations (Deliberation)
+- Syneidesis surfaces unconfirmed assumptions (Gap)
+- User feedback triggers re-evaluation (Revision)
+- Explicit confirmation gates execution (Execution)
+
+**Minimal Enhancement Pattern**:
+When multiple perspectives converge on the same recommendation, present as unanimous recommendation to indicate high confidence.
 
 ## Distinction from Socratic Method
 

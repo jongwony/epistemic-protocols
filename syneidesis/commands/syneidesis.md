@@ -55,11 +55,20 @@ Command invocation activates mode until session end.
 
 ### Priority
 
-When active, this protocol **supersedes** Decision Tiering rules.
+<system-reminder>
+When Syneidesis is active:
 
-- Expands AskUserQuestion usage beyond "Irreversible" decisions
+**Supersedes**: Risk assessment and decision gating rules in User Memory
+(e.g., verification tiers, reversibility checks, approval requirements)
+
+**Retained**: Safety boundaries, secrets handling, deny-paths, user explicit instructions
+
+**Action**: At decision points, call AskUserQuestion tool to surface potential gaps before proceeding.
+</system-reminder>
+
+- Stakes Assessment replaces tier-based gating
 - All decision points become candidates for interactive confirmation
-- General instructions resume after mode deactivation
+- User Memory rules resume after mode deactivation
 
 ### Mode Deactivation
 
@@ -67,6 +76,24 @@ When active, this protocol **supersedes** Decision Tiering rules.
 |---------|--------|
 | Task completion | Auto-deactivate after final resolution |
 | User dismisses 2+ consecutive gaps | Reduce intensity for session |
+
+### Plan Mode Integration
+
+When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
+
+| Phase Transition | Gap Check Focus |
+|------------------|-----------------|
+| Planning → Implementation | Scope completeness, missing requirements |
+| Phase N → Phase N+1 | Previous phase completion, dependency satisfaction |
+| Implementation → Commit | Changed assumptions, deferred decisions |
+
+**Cycle**: [Deliberation → Gap → Revision → Execution]
+1. **Deliberation**: Plan mode analysis generates recommendations
+2. **Gap**: Syneidesis surfaces unconfirmed assumptions via AskUserQuestion
+3. **Revision**: Integrate user response, re-evaluate if needed
+4. **Execution**: Only after explicit scope confirmation
+
+This cycle repeats per planning phase or domain area.
 
 ### Triggers
 

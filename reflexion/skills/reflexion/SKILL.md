@@ -29,7 +29,7 @@ Session files are JSONL format, often large (500KB+). Delegate analysis to subag
 
 ### Phase 1.5: Extraction Mode Selection
 
-Invoke AskUserQuestion to select extraction mode:
+Call AskUserQuestion to select extraction mode:
 
 - **Both (default)**: Content + Pattern extraction
 - **Content only**: Explicit decisions, stated facts, technical choices
@@ -136,7 +136,7 @@ Apply Memory Scope Design principle before location selection:
 
 #### Selection Questions
 
-Invoke AskUserQuestion with two questions:
+Call AskUserQuestion with two questions:
 
 1. **Insights to apply**: all / select core / specify by number
 2. **Memory location** (per Memory Scope Design):
@@ -177,7 +177,7 @@ After integration, verify changes don't conflict with Claude Code system prompt.
    - **System Architecture**: Layer boundaries, dependency direction, coupling
    - **Formal Verification**: Logical consistency, contradiction detection, rule satisfiability
 
-2. **Optional Extension**: Invoke AskUserQuestion to offer additional perspectives derived from applied changes context. User may proceed with baseline only.
+2. **Optional Extension**: Call AskUserQuestion to offer additional perspectives derived from applied changes context. User may proceed with baseline only.
 
 3. Spawn parallel Task subagents for all selected lenses (baseline ∪ extension).
 
