@@ -1,6 +1,11 @@
 ---
 name: reflexion
-description: Cross-session learning via the Reflexion pattern—extract insights from Claude Code sessions into persistent memory.
+description: >-
+  Cross-session learning via the Reflexion pattern—extract insights from Claude Code
+  sessions into persistent memory. Triggered by "extract learnings", "what should I
+  remember", "update CLAUDE.md with insights", "reflexion on our work", "save session
+  insights", or "reflect on this conversation". Integrates into CLAUDE.md, rules files,
+  or .insights/ directory based on Scope × Type classification.
 ---
 
 # Session Reflexion
@@ -200,37 +205,7 @@ For deferred/rejected insights:
 
 ## Insight Ontology: Scope × Type
 
-```
-              │ Principle    │ Pattern       │ Decision      │ Style
-──────────────┼──────────────┼───────────────┼───────────────┼──────────────
-Universal     │ ~/.claude/   │ ~/.claude/    │ .insights/    │ preferences.md
-(cross-proj)  │ rules/       │ rules/        │ universal/    │
-──────────────┼──────────────┼───────────────┼───────────────┼──────────────
-Domain        │ .insights/   │ .insights/    │ .insights/    │ .insights/
-(tech stack)  │ domain/      │ domain/       │ domain/       │ domain/
-──────────────┼──────────────┼───────────────┼───────────────┼──────────────
-Project       │ .claude/     │ .claude/      │ .claude/adr/  │ .claude/
-(this repo)   │ CLAUDE.md    │ rules/        │               │ rules/
-```
-
-### Type Definitions
-
-| Type | Definition | Example |
-|------|------------|---------|
-| Principle | Context-free, if-less statement | "Absence over Deprecation" |
-| Pattern | Reusable solution template | "OOM → check backpressure" |
-| Decision | Choice with rationale | "Chose Temporal over Airflow" |
-| Style | Formatting/communication preference | "Korean for PR" |
-
-### Orthogonality Test
-
-| Question | Yes → | No → |
-|----------|-------|------|
-| Applies to 2+ unrelated projects? | Universal | Domain/Project |
-| Requires specific tech stack? | Domain | Universal/Project |
-| Only this codebase? | Project | Universal/Domain |
-
-For detailed category definitions, see `references/category-criteria.md`.
+For classification matrix and placement rules, see `references/classification-matrix.md`.
 
 ## Integration Principles
 

@@ -32,8 +32,8 @@ S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── CATEGORICAL NOTE ──
-∩ = limit over discrete diagram indexed by Pₛ
-D = colimit over same diagram
+∩ = meet (intersection) over comparison morphisms between perspective outputs
+D = join (union of distinct findings) where perspectives diverge
 A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
@@ -61,6 +61,8 @@ When Prothesis is active:
 
 - Prothesis completes before other workflows begin
 - User Memory rules resume after perspective is established
+
+**Dual-activation precedence**: When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
 
 ### Per-Message Application
 

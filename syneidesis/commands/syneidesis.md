@@ -70,6 +70,8 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - User Memory rules resume after mode deactivation
 
+**Dual-activation precedence**: When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
+
 ### Mode Deactivation
 
 | Trigger | Effect |
@@ -88,10 +90,12 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 | Implementation → Commit | Changed assumptions, deferred decisions |
 
 **Cycle**: [Deliberation → Gap → Revision → Execution]
-1. **Deliberation**: Plan mode analysis generates recommendations
+1. **Deliberation**: Plan mode analysis generates recommendations (Prothesis provides multi-perspective deliberation when active)
 2. **Gap**: Syneidesis surfaces unconfirmed assumptions via AskUserQuestion
 3. **Revision**: Integrate user response, re-evaluate if needed
 4. **Execution**: Only after explicit scope confirmation
+
+**Sequencing with Prothesis**: When both active, Prothesis completes perspective selection before Syneidesis applies gap detection. The cycle becomes: [Perspective Selection → Deliberation → Gap → Revision → Execution].
 
 This cycle repeats per planning phase or domain area.
 
