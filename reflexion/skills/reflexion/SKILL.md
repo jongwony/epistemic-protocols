@@ -80,13 +80,55 @@ For detailed process, see `references/workflow-detail.md`.
 
 ### Phase 4: User Selection
 
-1. **Pattern Validation**: Medium/Low-confidence patterns require user confirmation before integration
-2. **Redundancy Visibility**: Present flagged insights with recommendations
-3. **Memory Scope Decision**: Match insight characteristics to location (user/project/defer)
+#### Phase 4.1: Scope Assessment
 
-Call AskUserQuestion with:
-- Insights to apply (all / core / by number)
-- Memory location (user memory / project memory / document only)
+For each insight candidate, call AskUserQuestion:
+
+```
+"What is the scope of insight '[summary]'?"
+
+Options:
+- Universal: Applies to 2+ unrelated projects
+- Domain: Requires specific tech stack
+- Project: Only this codebase
+- Uncertain: Needs validation
+```
+
+#### Phase 4.2: Type Classification
+
+```
+"What type of knowledge is this insight?"
+
+Options:
+- Principle: Context-free guideline (if-less statement)
+- Pattern: Reusable solution template
+- Decision: Choice with rationale (ADR-like)
+- Style: Communication/formatting preference
+```
+
+#### Phase 4.3: Trigger Frequency Estimation
+
+```
+"Expected trigger frequency?"
+
+Options:
+- High (>20%): Integrate to rules
+- Medium (5-20%): Integrate with experimental flag
+- Low (<5%): Document only
+```
+
+#### Phase 4.4: Placement Recommendation
+
+Based on Scope × Type × Frequency:
+
+| Scope | Frequency | Recommendation |
+|-------|-----------|----------------|
+| Universal | High | `~/.claude/rules/` or `CLAUDE.md` |
+| Universal | Low | `.insights/universal/{type}/` |
+| Domain | Any | `.insights/domain/{stack}/` |
+| Project | Any | Project's `.claude/insights/` |
+
+Present recommendation via AskUserQuestion with override option.
 
 Invoke Syneidesis to surface conflicts and validation needs.
 
@@ -132,12 +174,20 @@ For detailed lens definitions and subagent prompts, see `references/alignment-le
 ### Phase 7: Documentation
 
 For deferred/rejected insights:
-1. Create document in `~/.claude/docs/insights/`
+1. Create document in `~/.claude/.insights/` using Scope × Type structure:
+   ```
+   .insights/
+   ├── universal/{principles,patterns,decisions,style}/
+   ├── domain/{tech-stack}/
+   └── archive/
+   ```
 2. Filename format: `YYYY-MM-DD-[topic].md`
-3. Include frontmatter with session reference (progressive disclosure):
+3. Include frontmatter with session reference and classification:
    ```yaml
    ---
    date: YYYY-MM-DD
+   scope: universal|domain|project
+   type: principle|pattern|decision|style
    project: -Users-[user]-[path]
    session: [session-id]
    source: ~/.claude/projects/[project]/[session].jsonl
@@ -148,18 +198,39 @@ For deferred/rejected insights:
    - Deferred insights with rationale and re-evaluation conditions
    - Other insights with exclusion reasons
 
-## Insight Categories
+## Insight Ontology: Scope × Type
 
-| Category | Typical Target | Default Scope |
-|----------|----------------|---------------|
-| Prompt Design | `design.md` | User |
-| Workflow Pattern | `delegation.md` | User |
-| Communication | `communication.md` | User |
-| Technical Decision | Project CLAUDE.md | Project |
-| Tool Usage | `preferences.md` | User/Project |
-| Boundary | `boundaries.md` | User |
+```
+              │ Principle    │ Pattern       │ Decision      │ Style
+──────────────┼──────────────┼───────────────┼───────────────┼──────────────
+Universal     │ ~/.claude/   │ ~/.claude/    │ .insights/    │ preferences.md
+(cross-proj)  │ rules/       │ rules/        │ universal/    │
+──────────────┼──────────────┼───────────────┼───────────────┼──────────────
+Domain        │ .insights/   │ .insights/    │ .insights/    │ .insights/
+(tech stack)  │ domain/      │ domain/       │ domain/       │ domain/
+──────────────┼──────────────┼───────────────┼───────────────┼──────────────
+Project       │ .claude/     │ .claude/      │ .claude/adr/  │ .claude/
+(this repo)   │ CLAUDE.md    │ rules/        │               │ rules/
+```
 
-For detailed category definitions and matching algorithm, see `references/category-criteria.md`.
+### Type Definitions
+
+| Type | Definition | Example |
+|------|------------|---------|
+| Principle | Context-free, if-less statement | "Absence over Deprecation" |
+| Pattern | Reusable solution template | "OOM → check backpressure" |
+| Decision | Choice with rationale | "Chose Temporal over Airflow" |
+| Style | Formatting/communication preference | "Korean for PR" |
+
+### Orthogonality Test
+
+| Question | Yes → | No → |
+|----------|-------|------|
+| Applies to 2+ unrelated projects? | Universal | Domain/Project |
+| Requires specific tech stack? | Domain | Universal/Project |
+| Only this codebase? | Project | Universal/Domain |
+
+For detailed category definitions, see `references/category-criteria.md`.
 
 ## Integration Principles
 

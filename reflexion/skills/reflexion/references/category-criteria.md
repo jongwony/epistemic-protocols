@@ -174,37 +174,62 @@ Read target file and check:
 - Is the level of detail consistent?
 - Would this insight feel natural here?
 
-## Generalizability Assessment
+## Scope × Type Classification
 
-### High Generalizability (Apply)
+### Scope Assessment (Where to place)
 
-- Applies across multiple contexts
-- Based on fundamental principle, not specific case
-- Would benefit most sessions
+| Scope | Test Question | Location |
+|-------|---------------|----------|
+| **Universal** | Applies to 2+ unrelated projects? | `~/.claude/rules/` or `.insights/universal/` |
+| **Domain** | Requires specific tech stack? | `.insights/domain/{stack}/` |
+| **Project** | Only this codebase? | Project's `.claude/insights/` |
 
-Examples:
-- Directive strength hierarchy (applies to all tool calls)
-- Attention-action gap (fundamental LLM behavior)
+**Orthogonality Test**:
+- If removing the insight from user memory would not affect unrelated projects → Domain or Project scope
+- If the insight references specific tools/paths → Domain scope likely
 
-### Medium Generalizability (Consider)
+### Type Classification (How to structure)
 
-- Applies to specific domain but recurring
-- Based on observed pattern with multiple instances
-- Would benefit sessions in that domain
+| Type | Definition | Examples |
+|------|------------|----------|
+| **Principle** | Context-free, if-less statement | "Absence over Deprecation", "Recognition over Recall" |
+| **Pattern** | Reusable solution template | "OOM → check backpressure", "Multi-perspective analysis" |
+| **Decision** | Choice with rationale (ADR-like) | "Chose Temporal over Airflow because..." |
+| **Style** | Formatting/communication preference | "Korean for PR, English for code" |
 
-Examples:
-- Protocol verification approaches (applies to formal specs)
-- Multi-perspective analysis pattern (applies to complex questions)
+### Placement Matrix
 
-### Low Generalizability (Document Only)
+```
+              │ Principle    │ Pattern       │ Decision      │ Style
+──────────────┼──────────────┼───────────────┼───────────────┼──────────────
+Universal     │ rules/       │ rules/        │ .insights/    │ preferences.md
+              │ (integrate)  │ (integrate)   │ universal/    │ (integrate)
+──────────────┼──────────────┼───────────────┼───────────────┼──────────────
+Domain        │ .insights/   │ .insights/    │ .insights/    │ .insights/
+              │ domain/      │ domain/       │ domain/       │ domain/
+──────────────┼──────────────┼───────────────┼───────────────┼──────────────
+Project       │ .claude/     │ .claude/      │ .claude/adr/  │ .claude/
+              │ CLAUDE.md    │ rules/        │               │ rules/
+```
 
-- Specific to single project/session
-- Based on one-time decision
-- Unlikely to recur
+### Trigger Frequency Threshold
 
-Examples:
-- Specific symbol choice (C → ∩ for Convergence)
-- Specific file structure decision
+| Frequency | Threshold | Action |
+|-----------|-----------|--------|
+| High | >20% of interactions | Integrate to rules (if Universal Principle/Pattern) |
+| Medium | 5-20% | Consider rules integration with experimental flag |
+| Low | <5% | Document only → promote on recurrence |
+
+### Legacy Category Mapping
+
+| Old Category | Type Mapping | Notes |
+|--------------|--------------|-------|
+| Prompt Design | Principle | Context-free LLM instruction patterns |
+| Workflow Pattern | Pattern | Reusable procedural templates |
+| Communication | Principle/Style | Interaction guidelines |
+| Technical Decision | Decision | Choice with rationale |
+| Tool Usage | Pattern/Style | Tool-specific patterns |
+| Boundary | Principle | Safety constraints (always Universal) |
 
 ## Conflict Detection
 
