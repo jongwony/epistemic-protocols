@@ -72,86 +72,25 @@ For each insight, identify:
 
 ### Phase 3.5: Tool Description Redundancy + Alignment Check
 
-**Executor**: Main agent (not subagent)
+**Executor**: Main agent only (subagents cannot introspect tool descriptions).
 
-**Rationale**: Main agent has system prompt in context; subagents cannot introspect tool descriptions.
+Compare insights against tool behavioral directives (TodoWrite, Edit/Write, Bash, Task) for redundancy and alignment. Output table with REDUNDANT/ALIGNED/NEUTRAL/UNCLEAR flags.
 
-**Process**:
-1. For each extracted insight, compare against known tool behavioral directives:
-   - TodoWrite: task state constraints, completion rules
-   - Edit/Write: file operation constraints
-   - Bash: command restrictions, safety rules
-   - Task: delegation patterns
-
-2. Check for redundancy (semantic equivalence with tool description)
-
-3. Check for alignment (quick heuristic):
-   - Does insight reinforce system prompt intent? → ALIGNED
-   - Is insight orthogonal (no conflict, no reinforcement)? → NEUTRAL
-   - Does insight need further review? → UNCLEAR
-
-4. Output table:
-   ```
-   | # | Insight | Redundancy | Alignment | Note |
-   |---|---------|------------|-----------|------|
-   | 1 | ... | REDUNDANT | - | TodoWrite already enforces |
-   | 2 | ... | - | ALIGNED | Reinforces delegation model |
-   | 3 | ... | - | NEUTRAL | Novel pattern, no conflict |
-   | 4 | ... | - | UNCLEAR | Uses different vocabulary |
-   ```
+For detailed process, see `references/workflow-detail.md`.
 
 ### Phase 4: User Selection
 
-#### Pattern Validation Gate
+1. **Pattern Validation**: Medium/Low-confidence patterns require user confirmation before integration
+2. **Redundancy Visibility**: Present flagged insights with recommendations
+3. **Memory Scope Decision**: Match insight characteristics to location (user/project/defer)
 
-For Pattern insights with Medium or Low confidence:
+Call AskUserQuestion with:
+- Insights to apply (all / core / by number)
+- Memory location (user memory / project memory / document only)
 
-1. Present: "Pattern suggests [X]. Based on [N] instances. Accurate?"
-2. Options:
-   - **Confirm**: Proceed to integration
-   - **Reject**: Exclude from integration
-   - **Defer**: Document only, re-evaluate later
+Invoke Syneidesis to surface conflicts and validation needs.
 
-Only High-confidence patterns or user-confirmed patterns proceed to Phase 5.
-Low-confidence patterns are documented only, never applied.
-
-#### Redundancy and Alignment Visibility
-
-Present flagged insights with:
-- **REDUNDANT**: Source tool description quoted, recommend "Consider excluding"
-- **NEUTRAL/UNCLEAR**: Recommend "Consider validating empirically"
-- User options: Apply now / Exclude / Document only / Apply as experimental
-
-#### Memory Scope Decision
-
-Apply Memory Scope Design principle before location selection:
-
-| Insight Characteristic | Recommended Location |
-|------------------------|----------------------|
-| Tool-agnostic principle | User memory (`~/.claude/rules/`) |
-| Tool-specific implementation | Project memory (`.claude/rules/`) |
-| Domain-specific (tool names, project paths) | Project memory |
-| Universal pattern (applies to all projects) | User memory |
-| Session-scoped (unvalidated, experimental) | Verbal acknowledgment only (no file write) |
-
-#### Selection Questions
-
-Call AskUserQuestion with two questions:
-
-1. **Insights to apply**: all / select core / specify by number
-2. **Memory location** (per Memory Scope Design):
-   - User memory (universal patterns, principles)
-   - Project memory (domain-specific, implementations)
-   - Insights document only (defer decision)
-
-Pre-populate recommendation based on Generalizability from Phase 3.
-
-Invoke Syneidesis protocol during selection to surface:
-- Potential conflicts with existing rules
-- Insights that may need empirical validation before applying
-- Alternative categorizations
-
-**Transition**: Only proceed to Phase 5 after user confirms scope selection via AskUserQuestion.
+For detailed decision criteria, see `references/workflow-detail.md`.
 
 ### Phase 5: Integration
 
@@ -211,18 +150,16 @@ For deferred/rejected insights:
 
 ## Insight Categories
 
-| Category | Description | Typical Target | Default Scope |
-|----------|-------------|----------------|---------------|
-| Prompt Design | LLM instruction patterns | `design.md` | User |
-| Workflow Pattern | Multi-step procedures | `delegation.md` | User |
-| Communication | Interaction patterns | `communication.md` | User |
-| Technical Decision | Implementation choices | Project CLAUDE.md | Project |
-| Tool Usage | Tool-specific patterns | `preferences.md` | User/Project* |
-| Boundary | Safety/security rules | `boundaries.md` | User |
+| Category | Typical Target | Default Scope |
+|----------|----------------|---------------|
+| Prompt Design | `design.md` | User |
+| Workflow Pattern | `delegation.md` | User |
+| Communication | `communication.md` | User |
+| Technical Decision | Project CLAUDE.md | Project |
+| Tool Usage | `preferences.md` | User/Project |
+| Boundary | `boundaries.md` | User |
 
-**Default Scope** provides initial recommendation; user decision in Phase 4 can override based on context.
-
-*Tool Usage: User if tool-agnostic pattern, Project if tool-specific implementation.
+For detailed category definitions and matching algorithm, see `references/category-criteria.md`.
 
 ## Integration Principles
 
@@ -241,25 +178,7 @@ When insight conflicts with existing rule:
 3. Await user judgment
 4. If deferred, document in insights file
 
-### Quality Criteria
-
-Apply insights that are:
-- **Generalizable**: Useful beyond original context
-- **Actionable**: Clear guidance, not observations
-- **Non-redundant**: Not already covered by:
-  - User rule files (~/.claude/rules/)
-  - Tool behavioral directives in system prompt
-- **Validated**: Emerged from actual experience, not speculation
-
-### Semantic Overlap vs Information Redundancy
-
-Semantic overlap across different pragmatic encodings ≠ information redundancy.
-
-- **Redundancy test**: Remove insight → existing rules still cover the behavior? (REDUNDANT)
-- **Priming test**: Remove insight → rule effectiveness degrades? (FUNCTIONAL DEPENDENCY)
-
-Different encoding (statement → question, positive → negative framing) targets different cognitive pathways.
-Measure functional dependency, not surface similarity.
+For quality criteria and redundancy testing, see `references/category-criteria.md`.
 
 ## Session File Patterns
 

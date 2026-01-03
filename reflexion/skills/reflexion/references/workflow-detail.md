@@ -139,6 +139,41 @@ Check against existing rules:
 3. Identify potential conflicts or redundancies
 4. Flag for user review if conflict detected
 
+## Phase 3.5: Redundancy and Alignment Check - Detail
+
+**Executor**: Main agent only (subagents cannot introspect tool descriptions).
+
+### Process
+
+1. For each extracted insight, compare against known tool behavioral directives:
+   - TodoWrite: task state constraints, completion rules
+   - Edit/Write: file operation constraints
+   - Bash: command restrictions, safety rules
+   - Task: delegation patterns
+
+2. Check for redundancy (semantic equivalence with tool description)
+
+3. Check for alignment (quick heuristic):
+   - Does insight reinforce system prompt intent? → ALIGNED
+   - Is insight orthogonal (no conflict, no reinforcement)? → NEUTRAL
+   - Does insight need further review? → UNCLEAR
+
+4. Output table:
+   ```
+   | # | Insight | Redundancy | Alignment | Note |
+   |---|---------|------------|-----------|------|
+   | 1 | ... | REDUNDANT | - | TodoWrite already enforces |
+   | 2 | ... | - | ALIGNED | Reinforces delegation model |
+   | 3 | ... | - | NEUTRAL | Novel pattern, no conflict |
+   | 4 | ... | - | UNCLEAR | Uses different vocabulary |
+   ```
+
+### Presenting Flagged Insights
+
+- **REDUNDANT**: Source tool description quoted, recommend "Consider excluding"
+- **NEUTRAL/UNCLEAR**: Recommend "Consider validating empirically"
+- User options: Apply now / Exclude / Document only / Apply as experimental
+
 ## Phase 4: User Selection - Detail
 
 ### AskUserQuestion Patterns
@@ -160,6 +195,31 @@ Options:
 - "New rules file" - Create new file in ~/.claude/rules/
 - "Project CLAUDE.md" - Project-specific memory
 ```
+
+### Memory Scope Decision
+
+Apply Memory Scope Design principle before location selection:
+
+| Insight Characteristic | Recommended Location |
+|------------------------|----------------------|
+| Tool-agnostic principle | User memory (`~/.claude/rules/`) |
+| Tool-specific implementation | Project memory (`.claude/rules/`) |
+| Domain-specific (tool names, project paths) | Project memory |
+| Universal pattern (applies to all projects) | User memory |
+| Session-scoped (unvalidated, experimental) | Verbal acknowledgment only (no file write) |
+
+### Pattern Validation Gate
+
+For Pattern insights with Medium or Low confidence:
+
+1. Present: "Pattern suggests [X]. Based on [N] instances. Accurate?"
+2. Options:
+   - **Confirm**: Proceed to integration
+   - **Reject**: Exclude from integration
+   - **Defer**: Document only, re-evaluate later
+
+Only High-confidence patterns or user-confirmed patterns proceed to Phase 5.
+Low-confidence patterns are documented only, never applied.
 
 ### Syneidesis Integration
 

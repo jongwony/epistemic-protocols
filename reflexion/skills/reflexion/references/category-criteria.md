@@ -236,7 +236,13 @@ Examples:
 4. **Contradiction**: Cannot both be true
    - Action: Defer, document for user resolution
 
-## Quality Filters
+## Quality Criteria
+
+Insights must be:
+- **Generalizable**: Useful beyond original context
+- **Actionable**: Clear guidance, not observations
+- **Non-redundant**: Not already covered by user rule files or tool behavioral directives
+- **Validated**: Emerged from actual experience, not speculation
 
 ### Include If
 
@@ -254,6 +260,16 @@ Examples:
 - [ ] Speculative (not validated by experience)
 - [ ] Observation without actionable guidance
 - [ ] Would require extensive explanation
+
+## Semantic Overlap vs Information Redundancy
+
+Semantic overlap across different pragmatic encodings ≠ information redundancy.
+
+- **Redundancy test**: Remove insight → existing rules still cover the behavior? (REDUNDANT)
+- **Priming test**: Remove insight → rule effectiveness degrades? (FUNCTIONAL DEPENDENCY)
+
+Different encoding (statement → question, positive → negative framing) targets different cognitive pathways.
+Measure functional dependency, not surface similarity.
 
 ## Writing Guidelines
 
