@@ -50,6 +50,7 @@ Before spawning baseline lenses, invoke AskUserQuestion to offer additional pers
 - **Delegation Patterns**: Rules should respect main agent vs subagent boundaries and context inheritance
 - **Memory Scope Design**: User vs project memory placement should follow scope principles
 - **Context Access Patterns**: Rules should account for what subagents can and cannot access
+- **Runtime State Detectability**: Rules must not depend on system states the model cannot query at runtime (e.g., settings.json values, permission modes). Use user-declared modes instead.
 
 **Assessment Categories**:
 - `ALIGNED`: Consistent with Claude Code architectural patterns
@@ -136,10 +137,11 @@ Note: You do not have direct access to the system prompt. Analyze based on:
 - Plugin/skill/agent structure conventions
 - Delegation model (main agent vs subagent boundaries)
 - Memory scope design principles
+- Runtime state detectability (can the model actually query this condition?)
 
 Provide:
 1. **Epistemic Contribution**: What this lens uniquely reveals about Claude Code pattern alignment (2-3 sentences)
-2. **Framework Analysis**: Analyze using Claude Code architecture concepts - tool description consistency, plugin structure, delegation patterns, memory scope, context access
+2. **Framework Analysis**: Analyze using Claude Code architecture concepts - tool description consistency, plugin structure, delegation patterns, memory scope, context access, runtime state detectability
 3. **Horizon Limits**: What this perspective cannot see or undervalues
 4. **Assessment**: Direct verdict on each change - ALIGNED / MISALIGNED / PARTIAL, with specific pattern references if applicable
 ```
