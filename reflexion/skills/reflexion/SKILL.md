@@ -1,252 +1,209 @@
 ---
-name: reflexion
 description: >-
-  Cross-session learning via the Reflexion pattern—extract insights from Claude Code
-  sessions into persistent memory. Triggered by "extract learnings", "what should I
-  remember", "update CLAUDE.md with insights", "reflexion on our work", "save session
-  insights", or "reflect on this conversation". Integrates into CLAUDE.md, rules files,
-  or .insights/ directory based on Scope × Type classification.
+  Conversational memory reconstruction skill. Extracts insights from sessions
+  and integrates them into User/Project memory through guided dialogue.
 ---
 
-# Session Reflexion
+# Reflexion v3
 
-Extract insights from Claude Code sessions and integrate into appropriate memory scope through structured review.
+Extract session insights and reconstruct user's memory through conversational guidance.
 
-## Purpose
+## Core Principle
 
-Transform session experiences into persistent knowledge by:
-1. Analyzing session transcripts for patterns, decisions, and learnings
-2. Categorizing insights by type and applicability
-3. Matching insights to existing rules files
-4. Facilitating user review before integration
-5. Documenting deferred insights for future reference
+**Recognition over Recall**: Present options, minimize memory burden.
+
+## Protocol Integration
+
+**When Prothesis is active**: Invoke `/prothesis` before Phase 2 extraction for perspective selection. The selected perspective guides insight extraction focus.
+
+**When Syneidesis is active**: Gap detection applies at Phase 3 decision points (Q2-Q5). Syneidesis may surface additional considerations before each AskUserQuestion.
 
 ## Workflow
 
-### Phase 1: Session Identification
+### Phase 1: Context Detection (Main Agent)
 
-Locate session file using one of:
-- **Session ID**: `~/.claude/projects/*/[session-id].jsonl`
-- **Project path**: Direct path to session file
-- **Recent sessions**: List recent sessions in current project
-
-Session files are JSONL format, often large (500KB+). Delegate analysis to subagent.
-
-### Phase 1.5: Extraction Mode Selection
-
-Call AskUserQuestion to select extraction mode:
-
-- **Both (default)**: Content + Pattern extraction
-- **Content only**: Explicit decisions, stated facts, technical choices
-- **Pattern only**: Recurring behaviors, implicit preferences, interaction styles
-
-### Phase 2: Insight Extraction
-
-Call Task tool with general-purpose subagent to analyze session:
-
-```
-Analyze session file at [path] to extract key insights.
-
-Task:
-1. Read session in chunks (use offset/limit for large files)
-2. Identify main topics, problems solved, decisions made
-3. Extract actionable insights valuable as User Memory entries
-
-Output format per insight:
-- Category: (e.g., Prompt Design, Workflow Pattern, Technical Decision)
-- Insight: Clear, concise statement
-- Context: How this insight emerged
-- Suggested Memory Entry: Compact, reusable form
-
-Focus on patterns and principles over implementation details.
-```
-
-### Phase 3: Insight Review
-
-Present extracted insights in table format:
-
-| # | Category | Insight | Rationale | Target |
-|---|----------|---------|-----------|--------|
-| 1 | Prompt Design | [insight] | [consequence-oriented: Prevents/Enables/Catches...] | design.md |
-| 2 | Communication | [insight] | [consequence-oriented] | communication.md |
-
-For each insight, identify:
-- **Rationale**: One sentence explaining why this insight matters (consequence-oriented)
-- **Applicable rules file**: Which existing file matches
-- **Conflict check**: Does it contradict existing rules?
-
-### Phase 3.5: Tool Description Redundancy + Alignment Check
-
-**Executor**: Main agent only (subagents cannot introspect tool descriptions).
-
-Compare insights against tool behavioral directives (TodoWrite, Edit/Write, Bash, Task) for redundancy and alignment. Output table with REDUNDANT/ALIGNED/NEUTRAL/UNCLEAR flags.
-
-For detailed process, see `references/workflow-detail.md`.
-
-### Phase 4: User Selection
-
-#### Phase 4.1: Scope Assessment
-
-For each insight candidate, call AskUserQuestion:
-
-```
-"What is the scope of insight '[summary]'?"
-
-Options:
-- Universal: Applies to 2+ unrelated projects
-- Domain: Requires specific tech stack
-- Project: Only this codebase
-- Uncertain: Needs validation
-```
-
-#### Phase 4.2: Type Classification
-
-```
-"What type of knowledge is this insight?"
-
-Options:
-- Principle: Context-free guideline (if-less statement)
-- Pattern: Reusable solution template
-- Decision: Choice with rationale (ADR-like)
-- Style: Communication/formatting preference
-```
-
-#### Phase 4.3: Trigger Frequency Estimation
-
-```
-"Expected trigger frequency?"
-
-Options:
-- High (>20%): Integrate to rules
-- Medium (5-20%): Integrate with experimental flag
-- Low (<5%): Document only
-```
-
-#### Phase 4.4: Placement Recommendation
-
-Based on Scope × Type × Frequency:
-
-| Scope | Frequency | Recommendation |
-|-------|-----------|----------------|
-| Universal | High | `~/.claude/rules/` or `CLAUDE.md` |
-| Universal | Low | `.insights/universal/{type}/` |
-| Domain | Any | `.insights/domain/{stack}/` |
-| Project | Any | Project's `.claude/insights/` |
-
-Present recommendation via AskUserQuestion with override option.
-
-Invoke Syneidesis to surface conflicts and validation needs.
-
-For detailed decision criteria, see `references/workflow-detail.md`.
-
-### Phase 5: Integration
-
-For selected insights:
-1. Read target rules file
-2. Identify appropriate section (or create new section)
-3. Apply Directive Strength Hierarchy: use `call` for tool invocations
-4. Edit file with concise, imperative-form entry
-
-### Phase 6: Alignment Verification
-
-After integration, verify changes don't conflict with Claude Code system prompt.
-
-**Structure**: Prothesis Specialization—mandatory baseline + optional extension.
-
-**Trigger**: When any insight was applied (Phase 5 completed with edits).
-
-**Process**:
-
-1. **Mandatory Baseline** (always executed):
-   - **Prompt Engineering**: Instruction priority, override semantics, attention competition
-   - **Claude Code Architecture**: Tool description consistency, plugin structure, delegation patterns
-   - **System Architecture**: Layer boundaries, dependency direction, coupling
-   - **Formal Verification**: Logical consistency, contradiction detection, rule satisfiability
-
-2. **Optional Extension**: Call AskUserQuestion to offer additional perspectives derived from applied changes context. User may proceed with baseline only.
-
-3. Spawn parallel Task subagents for all selected lenses (baseline ∪ extension).
-
-4. Synthesize results:
-   - **Convergence**: Where lenses agree (robust finding)
-   - **Divergence**: Where they disagree (requires judgment)
-   - **Recommendations**: Specific modifications if issues found
-
-5. If issues found, invoke AskUserQuestion with recommended fixes.
-
-For detailed lens definitions and subagent prompts, see `references/alignment-lenses.md`.
-
-### Phase 7: Documentation
-
-For deferred/rejected insights:
-1. Create document in `~/.claude/.insights/` using Scope × Type structure:
+1. **Identify current session path**:
+   ```bash
+   # Session files location pattern:
+   ~/.claude/projects/-{encoded-project-path}/sessions/{session-id}.jsonl
+   # or for User Memory mode:
+   ~/.claude/sessions/{session-id}.jsonl
    ```
-   .insights/
-   ├── universal/{principles,patterns,decisions,style}/
-   ├── domain/{tech-stack}/
-   └── archive/
+   - Use Glob to find recent session: `~/.claude/**/sessions/*.jsonl`
+   - Sort by modification time, take most recent
+   - Or use `/tasks` command to see active session ID
+
+2. **Determine Memory Mode**:
+   - Session path contains `/projects/-` → **Project Memory mode**
+   - Session path is `~/.claude/sessions/` → **User Memory mode**
+
+3. **Create handoff state directory**: `/tmp/.reflexion/{session-id}/`
+
+4. **Write `session-context.json`**:
+   ```json
+   {
+     "sessionId": "abc123",
+     "sessionPath": "~/.claude/projects/-Users-choi-myproject/sessions/abc123.jsonl",
+     "projectPath": "/Users/choi/myproject",
+     "memoryMode": "project",
+     "userMemoryPath": "~/.claude",
+     "projectMemoryPath": "/Users/choi/myproject/.claude"
+   }
    ```
-2. Filename format: `YYYY-MM-DD-[topic].md`
-3. Include frontmatter with session reference and classification:
-   ```yaml
-   ---
-   date: YYYY-MM-DD
-   scope: universal|domain|project
-   type: principle|pattern|decision|style
-   project: -Users-[user]-[path]
-   session: [session-id]
-   source: ~/.claude/projects/[project]/[session].jsonl
-   ---
-   ```
-4. Document body:
-   - Applied insights with locations
-   - Deferred insights with rationale and re-evaluation conditions
-   - Other insights with exclusion reasons
 
-## Insight Ontology: Scope × Type
+### Phase 2: Parallel Extraction (Subagents)
 
-For classification matrix and placement rules, see `references/classification-matrix.md`.
+Call 3 Task subagents in parallel with `run_in_background: true`:
 
-## Integration Principles
+**Task 1: session-summarizer**
+- Read session.jsonl
+- Generate 3-5 sentence summary
+- Write to `/tmp/.reflexion/{session-id}/session-summary.md`
 
-### Consistency Check
+**Task 2: insight-extractor**
+- Extract actionable insights (decisions, patterns, preferences)
+- Format as numbered list with evidence
+- Write to `/tmp/.reflexion/{session-id}/extracted-insights.md`
 
-Before applying insights, verify alignment with:
-- **Directive Strength Hierarchy**: `call` > `invoke` > `use` for tool invocations
-- **Attention-Action Gap**: Blocking mechanisms over instructions alone
-- **Absence over Deprecation**: Remove rather than negate
+**Task 3: knowledge-finder**
+- Search existing knowledge in User/Project memory
+- Find related rules, insights, CLAUDE.md sections
+- Write to `/tmp/.reflexion/{session-id}/related-knowledge.md`
 
-### Conflict Resolution
-
-When insight conflicts with existing rule:
-1. Surface as Syneidesis gap
-2. Present both versions with context
-3. Await user judgment
-4. If deferred, document in insights file
-
-For quality criteria and redundancy testing, see `references/category-criteria.md`.
-
-## Session File Patterns
-
+**Wait for completion**:
 ```
-# Session file locations
-~/.claude/projects/-Users-[user]-[path]/[session-id].jsonl
-
-# Debug files (alternative source)
-~/.claude/debug/[session-id].txt
-
-# Todo snapshots
-~/.claude/todos/[session-id]-*.json
+# After launching all 3 tasks with run_in_background: true
+# Use TaskOutput tool to wait for each:
+TaskOutput(task_id=task1_id, block=true)
+TaskOutput(task_id=task2_id, block=true)
+TaskOutput(task_id=task3_id, block=true)
 ```
 
-## Additional Resources
+### Phase 3: Guided Selection (Main Agent - AskUserQuestion Loop)
 
-### Reference Files
+Read handoff files and conduct guided dialogue:
 
-- **`references/workflow-detail.md`** - Extended workflow with examples
-- **`references/category-criteria.md`** - Detailed categorization guidelines
-- **`references/alignment-lenses.md`** - Phase 6 lens definitions and subagent prompts
+**Q1: Summary Validation**
+```
+"세션 요약이 맞나요?"
+├── "네, 맞습니다"
+├── "수정이 필요합니다" → User provides correction
+└── "요약 건너뛰기"
+```
 
-### Examples
+**Q2: Insight Selection** (multiSelect: true)
+```
+"어떤 인사이트를 저장할까요?"
+├── [Insight 1]
+├── [Insight 2]
+├── ...
+└── "없음 (저장 안함)"
+```
 
-- **`examples/worked-example.md`** - Complete reflection workflow from session to integrated insights
+**Q3: Additional Memory** (optional)
+```
+"놓친 관점이 있나요?"
+├── "네" → User provides additional insight
+└── "아니오, 충분합니다"
+```
+
+**Q4: Merge Decision** (if related knowledge found)
+```
+"기존 지식과 병합할까요?"
+├── "병합 (기존 파일 수정)"
+├── "새로 생성"
+└── "건너뛰기"
+```
+
+**Q5: Storage Location** (per selected insight)
+```
+Project Memory mode:
+├── "이 프로젝트에만 적용 (Project memory - override)"
+├── "모든 프로젝트에 적용 (User memory - foundation)"
+└── "특정 기술 스택에 적용 (Domain)"
+
+User Memory mode:
+├── "모든 프로젝트에 적용 (User memory)"
+└── "특정 기술 스택에 적용 (Domain)"
+```
+
+### Phase 4: Integration (Main Agent or Subagent)
+
+Based on user selections:
+- **New file**: Create in selected location with proper frontmatter
+- **Merge**: Edit existing file, append or modify section
+- **Domain**: Create in `.insights/domain/{tech-stack}/`
+
+If multiple files to edit, delegate to Task subagent.
+
+### Phase 5: Verification (Main Agent)
+
+```
+"완료. 추가 작업이 필요한가요?"
+├── "다른 세션도 분석" → Restart from Phase 1
+├── "관련 룰 검토" → Suggest relevant rules
+└── "완료"
+```
+
+Clean up handoff state: `rm -rf /tmp/.reflexion/{session-id}/`
+
+## Subagent Prompts
+
+### session-summarizer
+```
+Read the session file at {session_path}.
+Generate a 3-5 sentence summary focusing on:
+- Main task accomplished
+- Key decisions made
+- Notable interactions
+
+Write the summary to /tmp/.reflexion/{session-id}/session-summary.md
+Format: Plain markdown, no frontmatter.
+```
+
+### insight-extractor
+```
+Read the session file at {session_path}.
+Extract actionable insights:
+1. Explicit decisions (user stated preferences)
+2. Recurring patterns (repeated behaviors)
+3. Problem-solution pairs
+4. Tool usage preferences
+
+Format as numbered list:
+1. **[Category]**: Insight text
+   - Evidence: "quoted from session"
+
+Write to /tmp/.reflexion/{session-id}/extracted-insights.md
+```
+
+### knowledge-finder
+```
+Search for related knowledge in:
+- {user_memory_path}/CLAUDE.md
+- {user_memory_path}/rules/*.md
+- {user_memory_path}/.insights/**/*.md
+- {project_memory_path}/CLAUDE.md (if project mode)
+- {project_memory_path}/.insights/**/*.md (if project mode)
+
+Find:
+- Similar rules or principles
+- Potentially conflicting guidance
+- Enhancement opportunities
+
+Write to /tmp/.reflexion/{session-id}/related-knowledge.md
+Format: List of file paths with relevant excerpts.
+```
+
+## Error Handling
+
+| Error | Recovery |
+|-------|----------|
+| Session file too large | Use offset/limit in Read tool |
+| Subagent timeout | Retry once, then proceed without that output |
+| User dismisses all insights | Skip to Phase 5 verification |
+| Handoff file missing | Re-run relevant subagent |
+
+## References
+
+- [Memory Hierarchy](references/memory-hierarchy.md)
