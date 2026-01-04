@@ -87,8 +87,12 @@ Read handoff files and conduct guided dialogue:
 ```
 "세션 요약이 맞나요?"
 ├── "네, 맞습니다"
-├── "수정이 필요합니다" → User provides correction
+├── "수정이 필요합니다" → call AskUserQuestion with inferred options
 └── "요약 건너뛰기"
+
+Recognition over Recall: When user requests modification, infer likely
+missing/incorrect items from session context and present as options.
+Never ask open-ended "what should be added?" questions.
 ```
 
 **Q2: Insight Selection** (multiSelect: true)
@@ -103,8 +107,11 @@ Read handoff files and conduct guided dialogue:
 **Q3: Additional Memory** (optional)
 ```
 "놓친 관점이 있나요?"
-├── "네" → User provides additional insight
+├── "네" → call AskUserQuestion with inferred options
 └── "아니오, 충분합니다"
+
+Recognition over Recall: Infer potential insights from session context
+NOT already in extracted list. Present as options, not open-ended questions.
 ```
 
 **Q4: Merge Decision** (if related knowledge found)
