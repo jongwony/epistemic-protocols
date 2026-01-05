@@ -223,6 +223,6 @@ Clean up handoff state: `rm -rf /tmp/.reflexion/{session-id}/`
 - **`agents/`** — Plugin agents for Phase 2 parallel extraction
 - **`references/formal-semantics.md`** — Categorical and type-theoretic formalization
 - **`references/memory-hierarchy.md`** — Memory layer documentation
-- **`references/subagent-prompts.md`** — Prompt templates (legacy, see agents/)
+- **`references/subagent-prompts.md`** — Operational reference (chunking, error handling, invocation)
 - **`references/error-handling.md`** — Error recovery procedures
 - **`examples/worked-example.md`** — Complete walkthrough

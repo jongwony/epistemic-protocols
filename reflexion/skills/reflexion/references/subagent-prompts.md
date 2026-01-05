@@ -1,150 +1,18 @@
-# Subagent Prompts
+# Subagent Operational Reference
 
-Detailed prompts for Phase 2 parallel extraction subagents.
+Operational concerns for Phase 2 parallel extraction agents.
 
 ## Overview
 
-Phase 2 launches 3 Task subagents in parallel with `run_in_background: true`. Each subagent writes output to `/tmp/.reflexion/{session-id}/` for main agent handoff.
+Phase 2 launches 3 plugin agents in parallel with `run_in_background: true`. Each agent writes output to `/tmp/.reflexion/{session-id}/` for main agent handoff.
 
-## session-summarizer
+| Agent | Purpose | Output |
+|-------|---------|--------|
+| `session-summarizer` | Session summary for validation (Q1) | `session-summary.md` |
+| `insight-extractor` | Actionable insights with evidence (Q2) | `extracted-insights.md` |
+| `knowledge-finder` | Related knowledge for merge decisions (Q4) | `related-knowledge.md` |
 
-**Purpose**: Generate concise session summary for user validation (Q1).
-
-```
-Read the Claude Code session file at `{session_path}`.
-
-**Context**: JSONL format, each line is a conversation turn. File may exceed 500KB.
-
-**Task**:
-1. Read session file in chunks (use offset/limit parameters for large files)
-2. Identify the main task, key decisions, and notable interactions
-3. Generate a 3-5 sentence summary
-
-**Focus on**:
-- Main task or goal accomplished
-- Key decisions made with their rationale
-- Notable tool usage patterns
-- Any blockers encountered and how resolved
-
-**Output**:
-Write to `/tmp/.reflexion/{session-id}/session-summary.md`
-
-Format:
-```markdown
-## Session Summary
-
-[3-5 sentence summary in past tense]
-
-**Main Task**: [one-line description]
-**Key Decisions**: [bullet list if multiple]
-**Duration**: [approximate based on message count]
-```
-
-Do not include frontmatter. Plain markdown only.
-```
-
-## insight-extractor
-
-**Purpose**: Extract actionable insights with evidence for user selection (Q2).
-
-```
-Analyze the Claude Code session file at `{session_path}` to extract actionable insights.
-
-**Context**: JSONL format. Focus on assistant responses (contain decisions and reasoning).
-
-**Task**:
-1. Read session file in chunks (use offset/limit parameters)
-2. Identify explicit decisions, recurring patterns, and implicit preferences
-3. Extract insights with direct attribution
-
-**Insight Types**:
-
-| Type | Detection | Confidence |
-|------|-----------|------------|
-| Content | Explicit decision with stated rationale | High |
-| Pattern | Recurring behavior (3+ instances) | High if 5+, Medium if 3-4, Low if 2 |
-| Implicit | Consistent choice without justification | Medium |
-
-**Focus on**:
-- Decisions explicitly stated with rationale (Content)
-- Technical choices and trade-offs (Content)
-- Recurring behaviors across the session (Pattern)
-- Implicit preferences (consistent choices without justification) (Implicit)
-- Interaction patterns (communication style, delegation tendencies) (Pattern)
-
-**Output**:
-Write to `/tmp/.reflexion/{session-id}/extracted-insights.md`
-
-Format per insight:
-```markdown
-## Extracted Insights
-
-### 1. [Category]: [Title]
-
-**Type**: Content | Pattern | Implicit
-**Confidence**: High | Medium | Low
-**Insight**: [Clear, concise statement in imperative form]
-**Evidence**: "[Direct quote]" (line ~N) OR "Lines N, M, P" for patterns
-**Suggested Memory Entry**: [Compact form suitable for rules file]
-**Recommended Target**: [e.g., delegation.md, preferences.md, CLAUDE.md]
-```
-
-Include all insights found. Main agent will present for user selection.
-Minimum 3 insights, maximum 10. Prioritize by confidence level.
-```
-
-## knowledge-finder
-
-**Purpose**: Find related existing knowledge for merge decisions (Q4).
-
-```
-Search for knowledge related to the session insights in User/Project memory.
-
-**Paths to search**:
-- `{user_memory_path}/CLAUDE.md`
-- `{user_memory_path}/rules/*.md`
-- `{user_memory_path}/.insights/**/*.md`
-- `{project_memory_path}/CLAUDE.md` (if project mode)
-- `{project_memory_path}/rules/*.md` (if project mode)
-- `{project_memory_path}/.insights/**/*.md` (if project mode)
-
-**Task**:
-1. Read the extracted insights from `/tmp/.reflexion/{session-id}/extracted-insights.md`
-2. For each insight, search for semantically related content
-3. Identify potential conflicts, redundancies, or enhancement opportunities
-
-**Search Strategy**:
-- Grep for key terms from each insight
-- Check section headers in rules files
-- Look for similar patterns or principles
-
-**Output**:
-Write to `/tmp/.reflexion/{session-id}/related-knowledge.md`
-
-Format:
-```markdown
-## Related Knowledge
-
-### Insight 1: [Title]
-
-**Related Files**:
-- `{path}`: "[Relevant excerpt]" (line N)
-- `{path}`: "[Relevant excerpt]" (line M)
-
-**Relationship**:
-- [ ] Redundant (already covered)
-- [ ] Conflicting (contradicts existing)
-- [ ] Complementary (extends existing)
-- [ ] Novel (no related content found)
-
-**Recommendation**: [Merge with X / Create new / Skip]
-
----
-[Repeat for each insight]
-```
-
-If no related knowledge found for an insight, mark as "Novel" with empty Related Files.
-```
+**Agent Definitions**: See `agents/*.md` for full system prompts and specifications.
 
 ## Chunking Strategy
 
@@ -175,20 +43,50 @@ Read(path, offset=9500, limit=500)   # Final section
 | No insights found | Write "No actionable insights detected" with reason |
 | Memory paths inaccessible | Note in output, continue with accessible paths |
 
-## Subagent Invocation
+## Agent Invocation
+
+### Plugin Agent Pattern (Preferred)
 
 ```
 Task(
-  subagent_type: "general-purpose",
-  prompt: "[Above prompt with variables substituted]",
+  subagent_type: "reflexion:session-summarizer",
+  prompt: "session_path={session_path}, session_id={session_id}",
   run_in_background: true,
-  description: "Extract session insights"
+  description: "Summarize session"
+)
+
+Task(
+  subagent_type: "reflexion:insight-extractor",
+  prompt: "session_path={session_path}, session_id={session_id}",
+  run_in_background: true,
+  description: "Extract insights"
+)
+
+Task(
+  subagent_type: "reflexion:knowledge-finder",
+  prompt: "session_id={session_id}",
+  run_in_background: true,
+  description: "Find related knowledge"
 )
 ```
 
-Wait for all three with:
+### Wait for Completion
+
 ```
 TaskOutput(task_id=summarizer_id, block=true)
 TaskOutput(task_id=extractor_id, block=true)
 TaskOutput(task_id=finder_id, block=true)
+```
+
+### Fallback Pattern
+
+If plugin agent resolution fails, use general-purpose with full prompt from `agents/*.md`:
+
+```
+Task(
+  subagent_type: "general-purpose",
+  prompt: "[Full content from agents/session-summarizer.md body]\n\nsession_path={path}, session_id={id}",
+  run_in_background: true,
+  description: "Summarize session"
+)
 ```
