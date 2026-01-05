@@ -1,16 +1,66 @@
 ---
+name: reflexion
 description: >-
-  Conversational memory reconstruction skill. Extracts insights from sessions
-  and integrates them into User/Project memory through guided dialogue.
+  This skill should be used when the user asks to "reflect on session",
+  "extract insights", "analyze this conversation", "save learnings to memory",
+  "run /reflect", "what did we learn?", "capture this for future sessions",
+  "session wrap-up", or wants to persist session knowledge to User/Project memory.
+  Conversational memory reconstruction through guided dialogue.
 ---
 
 # Reflexion v3
 
 Extract session insights and reconstruct user's memory through conversational guidance.
 
+## Definition
+
+**Reflexion** (Latin *reflexio*, "bending back"): A procedural workflow for extracting tacit session knowledge into explicit memory through guided dialogue, enabling cross-session learning.
+
+```
+Reflexion(S, M) → Ctx(S) → ∥E(S, M) → Δ → Sel(Δ) → (Iₛ, Lₛ) → Int(Iₛ, Lₛ, M) → M'
+
+S      = Session (conversation history as .jsonl)
+M      = Memory { user, project, domain }
+Ctx    = Context detection: S → { sessionId, memoryMode, paths }
+∥E     = Parallel extraction: S × M → Δ                    -- coproduct of 3 subagents
+Δ      = Extracted artifacts { summary, insights[], related[] }
+Sel    = Selection: Δ → (Iₛ, Lₛ)                           -- user-guided via AskUserQuestion
+Iₛ     = Selected insights (subset)
+Lₛ     = Storage locations per insight
+Int    = Integration: (Iₛ, Lₛ, M) → M'                     -- write to memory
+M'     = Updated memory state
+
+── PHASE MAPPING ──
+Phase 1: S → Ctx(S)                                        -- context detection
+Phase 2: Ctx(S), M → ∥E(S, M) → Δ                          -- parallel extraction
+Phase 3: Δ → Sel(Δ) → (Iₛ, Lₛ)                             -- guided selection
+Phase 4: (Iₛ, Lₛ, M) → Int → M'                            -- integration
+Phase 5: M' → Verify → Cleanup                             -- verification
+```
+
+For full categorical notation, see `references/formal-semantics.md`.
+
 ## Core Principle
 
+**Crystallization over Accumulation**: Distill structured insights; do not merely archive raw experience.
+
 **Recognition over Recall**: Present options, minimize memory burden.
+
+## Initialization (MANDATORY)
+
+Upon invocation, call TodoWrite to track phases:
+
+```
+TodoWrite([
+  {content: "Detect session context", activeForm: "Detecting session context", status: "in_progress"},
+  {content: "Extract insights (parallel)", activeForm: "Extracting insights", status: "pending"},
+  {content: "Guide insight selection", activeForm: "Guiding insight selection", status: "pending"},
+  {content: "Integrate selected insights", activeForm: "Integrating insights", status: "pending"},
+  {content: "Verify and cleanup", activeForm: "Verifying completion", status: "pending"}
+])
+```
+
+Update status at each phase transition. This externalizes working memory and prevents phase skipping.
 
 ## Protocol Integration
 
@@ -51,33 +101,41 @@ Extract session insights and reconstruct user's memory through conversational gu
    }
    ```
 
-### Phase 2: Parallel Extraction (Subagents)
+**Phase Completion**: Update TodoWrite (Phase 1: completed, Phase 2: in_progress)
 
-Call 3 Task subagents in parallel with `run_in_background: true`:
+### Phase 2: Parallel Extraction (Plugin Agents)
 
-**Task 1: session-summarizer**
-- Read session.jsonl
-- Generate 3-5 sentence summary
-- Write to `/tmp/.reflexion/{session-id}/session-summary.md`
+Call 3 plugin agents in parallel with `run_in_background: true`:
 
-**Task 2: insight-extractor**
-- Extract actionable insights (decisions, patterns, preferences)
-- Format as numbered list with evidence
-- Write to `/tmp/.reflexion/{session-id}/extracted-insights.md`
+```
+Task(subagent_type: "reflexion:session-summarizer",
+     prompt: "session_path={session_path}, session_id={session_id}",
+     run_in_background: true)
 
-**Task 3: knowledge-finder**
-- Search existing knowledge in User/Project memory
-- Find related rules, insights, CLAUDE.md sections
-- Write to `/tmp/.reflexion/{session-id}/related-knowledge.md`
+Task(subagent_type: "reflexion:insight-extractor",
+     prompt: "session_path={session_path}, session_id={session_id}",
+     run_in_background: true)
+
+Task(subagent_type: "reflexion:knowledge-finder",
+     prompt: "session_id={session_id}",
+     run_in_background: true)
+```
+
+**Outputs** (written by agents):
+- `/tmp/.reflexion/{session-id}/session-summary.md`
+- `/tmp/.reflexion/{session-id}/extracted-insights.md`
+- `/tmp/.reflexion/{session-id}/related-knowledge.md`
 
 **Wait for completion**:
 ```
-# After launching all 3 tasks with run_in_background: true
-# Use TaskOutput tool to wait for each:
-TaskOutput(task_id=task1_id, block=true)
-TaskOutput(task_id=task2_id, block=true)
-TaskOutput(task_id=task3_id, block=true)
+TaskOutput(task_id=summarizer_id, block=true)
+TaskOutput(task_id=extractor_id, block=true)
+TaskOutput(task_id=finder_id, block=true)
 ```
+
+For detailed agent specifications, see `agents/*.md`.
+
+**Phase Completion**: Update TodoWrite (Phase 2: completed, Phase 3: in_progress)
 
 ### Phase 3: Guided Selection (Main Agent - AskUserQuestion Loop)
 
@@ -85,10 +143,10 @@ Read handoff files and conduct guided dialogue:
 
 **Q1: Summary Validation**
 ```
-"세션 요약이 맞나요?"
-├── "네, 맞습니다"
-├── "수정이 필요합니다" → call AskUserQuestion with inferred options
-└── "요약 건너뛰기"
+"Does this summary look correct?"
+├── "Yes, correct"
+├── "Needs modification" → call AskUserQuestion with inferred options
+└── "Skip summary"
 
 Recognition over Recall: When user requests modification, infer likely
 missing/incorrect items from session context and present as options.
@@ -97,18 +155,18 @@ Never ask open-ended "what should be added?" questions.
 
 **Q2: Insight Selection** (multiSelect: true)
 ```
-"어떤 인사이트를 저장할까요?"
+"Which insights should be saved?"
 ├── [Insight 1]
 ├── [Insight 2]
 ├── ...
-└── "없음 (저장 안함)"
+└── "None (skip saving)"
 ```
 
 **Q3: Additional Memory** (optional)
 ```
-"놓친 관점이 있나요?"
-├── "네" → call AskUserQuestion with inferred options
-└── "아니오, 충분합니다"
+"Any missed perspectives?"
+├── "Yes" → call AskUserQuestion with inferred options
+└── "No, sufficient"
 
 Recognition over Recall: Infer potential insights from session context
 NOT already in extracted list. Present as options, not open-ended questions.
@@ -116,23 +174,25 @@ NOT already in extracted list. Present as options, not open-ended questions.
 
 **Q4: Merge Decision** (if related knowledge found)
 ```
-"기존 지식과 병합할까요?"
-├── "병합 (기존 파일 수정)"
-├── "새로 생성"
-└── "건너뛰기"
+"Merge with existing knowledge?"
+├── "Merge (modify existing file)"
+├── "Create new"
+└── "Skip"
 ```
 
 **Q5: Storage Location** (per selected insight)
 ```
 Project Memory mode:
-├── "이 프로젝트에만 적용 (Project memory - override)"
-├── "모든 프로젝트에 적용 (User memory - foundation)"
-└── "특정 기술 스택에 적용 (Domain)"
+├── "This project only (Project memory - override)"
+├── "All projects (User memory - foundation)"
+└── "Specific tech stack (Domain)"
 
 User Memory mode:
-├── "모든 프로젝트에 적용 (User memory)"
-└── "특정 기술 스택에 적용 (Domain)"
+├── "All projects (User memory)"
+└── "Specific tech stack (Domain)"
 ```
+
+**Phase Completion**: Update TodoWrite (Phase 3: completed, Phase 4: in_progress)
 
 ### Phase 4: Integration (Main Agent or Subagent)
 
@@ -143,74 +203,26 @@ Based on user selections:
 
 If multiple files to edit, delegate to Task subagent.
 
+**Phase Completion**: Update TodoWrite (Phase 4: completed, Phase 5: in_progress)
+
 ### Phase 5: Verification (Main Agent)
 
 ```
-"완료. 추가 작업이 필요한가요?"
-├── "다른 세션도 분석" → Restart from Phase 1
-├── "관련 룰 검토" → Suggest relevant rules
-└── "완료"
+"Complete. Any additional actions needed?"
+├── "Analyze another session" → Restart from Phase 1
+├── "Review related rules" → Suggest relevant rules
+└── "Done"
 ```
 
 Clean up handoff state: `rm -rf /tmp/.reflexion/{session-id}/`
 
-## Subagent Prompts
+**Phase Completion**: Update TodoWrite (All phases completed), clean up todo list
 
-### session-summarizer
-```
-Read the session file at {session_path}.
-Generate a 3-5 sentence summary focusing on:
-- Main task accomplished
-- Key decisions made
-- Notable interactions
+## Additional Resources
 
-Write the summary to /tmp/.reflexion/{session-id}/session-summary.md
-Format: Plain markdown, no frontmatter.
-```
-
-### insight-extractor
-```
-Read the session file at {session_path}.
-Extract actionable insights:
-1. Explicit decisions (user stated preferences)
-2. Recurring patterns (repeated behaviors)
-3. Problem-solution pairs
-4. Tool usage preferences
-
-Format as numbered list:
-1. **[Category]**: Insight text
-   - Evidence: "quoted from session"
-
-Write to /tmp/.reflexion/{session-id}/extracted-insights.md
-```
-
-### knowledge-finder
-```
-Search for related knowledge in:
-- {user_memory_path}/CLAUDE.md
-- {user_memory_path}/rules/*.md
-- {user_memory_path}/.insights/**/*.md
-- {project_memory_path}/CLAUDE.md (if project mode)
-- {project_memory_path}/.insights/**/*.md (if project mode)
-
-Find:
-- Similar rules or principles
-- Potentially conflicting guidance
-- Enhancement opportunities
-
-Write to /tmp/.reflexion/{session-id}/related-knowledge.md
-Format: List of file paths with relevant excerpts.
-```
-
-## Error Handling
-
-| Error | Recovery |
-|-------|----------|
-| Session file too large | Use offset/limit in Read tool |
-| Subagent timeout | Retry once, then proceed without that output |
-| User dismisses all insights | Skip to Phase 5 verification |
-| Handoff file missing | Re-run relevant subagent |
-
-## References
-
-- [Memory Hierarchy](references/memory-hierarchy.md)
+- **`agents/`** — Plugin agents for Phase 2 parallel extraction
+- **`references/formal-semantics.md`** — Categorical and type-theoretic formalization
+- **`references/memory-hierarchy.md`** — Memory layer documentation
+- **`references/subagent-prompts.md`** — Prompt templates (legacy, see agents/)
+- **`references/error-handling.md`** — Error recovery procedures
+- **`examples/worked-example.md`** — Complete walkthrough

@@ -14,6 +14,17 @@ User: "Reflect on session 8561885b-fa37-4206-8a61-570257980e7f"
 
 ## Phase 1: Session Identification
 
+**TodoWrite Initialization**:
+```
+TodoWrite([
+  {content: "Detect session context", activeForm: "Detecting session context", status: "in_progress"},
+  {content: "Extract insights (parallel)", activeForm: "Extracting insights", status: "pending"},
+  {content: "Guide insight selection", activeForm: "Guiding insight selection", status: "pending"},
+  {content: "Integrate selected insights", activeForm: "Integrating insights", status: "pending"},
+  {content: "Verify and cleanup", activeForm: "Verifying completion", status: "pending"}
+])
+```
+
 **Action**: Locate session file
 
 ```
@@ -24,27 +35,22 @@ Topic: Plugin development, protocol implementation
 
 **Output**: Session file confirmed, size indicates subagent delegation needed.
 
----
-
-## Phase 1.5: Extraction Mode Selection
-
-**AskUserQuestion invocation**:
-
+**Phase Transition**:
 ```
-Question: "Which extraction mode?"
-Options:
-- "Both (default)" - Content + Pattern extraction  ← Selected
-- "Content only" - Explicit decisions and facts
-- "Pattern only" - Recurring behaviors and preferences
+TodoWrite([
+  {content: "Detect session context", status: "completed", ...},
+  {content: "Extract insights (parallel)", status: "in_progress", ...},
+  ...
+])
 ```
 
 ---
 
 ## Phase 2: Insight Extraction
 
-**Action**: Delegate to general-purpose subagent with Content and Pattern extraction prompts
+**Action**: Delegate to 3 parallel subagents with `run_in_background: true`
 
-**Content Extraction Output**:
+**Content Extraction Output** (`/tmp/.reflexion/{session-id}/extracted-insights.md`):
 
 ```markdown
 ## Content-Based Insights
@@ -96,9 +102,19 @@ Options:
 - **Suggested Entry**: "Prompt for confirmation before irreversible operations."
 ```
 
+**Phase Transition**:
+```
+TodoWrite([
+  {content: "Detect session context", status: "completed", ...},
+  {content: "Extract insights (parallel)", status: "completed", ...},
+  {content: "Guide insight selection", status: "in_progress", ...},
+  ...
+])
+```
+
 ---
 
-## Phase 3: Insight Review
+## Phase 3: Insight Review + User Selection
 
 **Presentation to user**:
 
@@ -115,51 +131,53 @@ Options:
 - New insight: "Prefer positive framing" (similar but from different angle)
 - Assessment: Complementary, not contradictory
 
----
-
-## Phase 4: User Selection
-
-**Pattern Validation Gate**:
+**Q1: Summary Validation**:
 
 ```
-Pattern #4 (Medium confidence): "User tends to prefer positive framing"
-Based on 3 instances. Accurate?
-Options:
-- "Confirm" - Proceed to integration
-- "Reject" - Exclude from integration
-- "Defer" - Document only  ← Selected
-
-Pattern #5 (Low confidence): "User prefers verification before action"
-Based on 2 instances. Low confidence - documenting only.
+"Does this summary look correct?"
+├── "Yes, correct"  ← Selected
+├── "Needs modification"
+└── "Skip summary"
 ```
 
-**AskUserQuestion invocation**:
+**Q2: Insight Selection** (AskUserQuestion with multiSelect: true):
 
 ```
-Question: "Which insights to apply?"
-Options:
-- "All 3 Content + 0 Pattern (remaining after validation)"
-- "Core 3 Content only (recommended)"  ← Selected
-- "Specify by number"
+"Which insights should be saved?"
+├── [1] Attention-Action Gap  ← Selected
+├── [2] Directive Strength Hierarchy  ← Selected
+├── [3] Context Acquisition Phase  ← Selected
+├── [4] Negative Constraint Avoidance
+├── [5] Verification Before Action
+└── "None (skip saving)"
 ```
 
 **Syneidesis gap surfaced**:
 > "Pattern #4 overlaps with 'Absence over Deprecation'. Was this considered?"
-> User response: "Yes, already deferred"
+> User response: "Yes, already excluded"
 
-**AskUserQuestion for location**:
+**Q5: Storage Location**:
 
 ```
-Question: "Where to store?"
-Options:
-- "design.md + delegation.md (recommended)"  ← Selected
-- "New rules file"
-- "Project CLAUDE.md"
+"Where to store?"
+├── "design.md + delegation.md (recommended)"  ← Selected
+├── "New rules file"
+└── "Project CLAUDE.md"
+```
+
+**Phase Transition**:
+```
+TodoWrite([
+  ...,
+  {content: "Guide insight selection", status: "completed", ...},
+  {content: "Integrate selected insights", status: "in_progress", ...},
+  ...
+])
 ```
 
 ---
 
-## Phase 5: Integration
+## Phase 4: Integration
 
 **Edit 1**: `~/.claude/rules/design.md`
 
@@ -191,77 +209,39 @@ Before delegation, explicit context gathering may be needed:
 - Perspectives derive from context: `P(C)`
 ```
 
+**Phase Transition**:
+```
+TodoWrite([
+  ...,
+  {content: "Integrate selected insights", status: "completed", ...},
+  {content: "Verify and cleanup", status: "in_progress", ...}
+])
+```
+
 ---
 
-## Phase 6: Documentation
+## Phase 5: Verification
 
-**Created**: `~/.claude/docs/insights/2025-12-18-prothesis-failure-analysis.md`
+**AskUserQuestion**:
 
-```markdown
-# Prothesis Failure Analysis
+```
+"Complete. Any additional actions needed?"
+├── "Analyze another session"
+├── "Review related rules"
+└── "Done"  ← Selected
+```
 
-- **Session ID**: `8561885b-fa37-4206-8a61-570257980e7f`
-- **Date**: 2025-12-18
-- **Context**: Plugin development session where commit hooks were bypassed
+**Cleanup**: `rm -rf /tmp/.reflexion/8561885b-fa37-4206-8a61-570257980e7f/`
 
-## Applied Insights (Content)
-
-### 1. Attention-Action Gap → `design.md`
-
-**Type**: Content | **Confidence**: High
-
-**Insight**: Task-completion momentum overrides procedural constraints
-
-**Evidence**: Quote from line 342
-
-### 2. Directive Strength Hierarchy → `design.md`
-
-**Type**: Content | **Confidence**: High
-
-**Insight**: `call` > `invoke` > `use` for binding strength
-
-**Evidence**: Quotes from lines 156, 178
-
-### 3. Context Acquisition → `delegation.md`
-
-**Type**: Content | **Confidence**: High
-
-**Insight**: Pre-delegation context gathering phase
-
-**Evidence**: Quote from line 420
-
-## Deferred Insights (Pattern)
-
-### Positive Framing Preference
-
-**Type**: Pattern | **Confidence**: Medium (3 instances)
-
-**Insight**: User tends to prefer positive framing over negative constraints
-
-**Evidence**: Lines 45, 120, 340
-
-**Deferral Reason**: Overlaps with existing "Absence over Deprecation"
-
-**Re-evaluation Condition**: If future sessions show gap between these concepts
-
-### Verification Before Action
-
-**Type**: Pattern | **Confidence**: Low (2 instances)
-
-**Insight**: User prefers explicit verification before irreversible actions
-
-**Evidence**: Lines 89, 456
-
-**Deferral Reason**: Low confidence - insufficient instances for pattern validation
-
-**Re-evaluation Condition**: If 3+ additional instances observed in future sessions
-
-## Other Insights (Not Applied)
-
-| Insight | Type | Reason for Exclusion |
-|---------|------|---------------------|
-| "Use detailed prompts for complex tasks" | Content | Too generic, already implied |
-| "Check session file size before reading" | Content | Implementation detail, not principle |
+**Phase Completion**:
+```
+TodoWrite([
+  {content: "Detect session context", status: "completed", ...},
+  {content: "Extract insights (parallel)", status: "completed", ...},
+  {content: "Guide insight selection", status: "completed", ...},
+  {content: "Integrate selected insights", status: "completed", ...},
+  {content: "Verify and cleanup", status: "completed", ...}
+])
 ```
 
 ---
@@ -270,13 +250,10 @@ Before delegation, explicit context gathering may be needed:
 
 | Phase | Duration | Output |
 |-------|----------|--------|
-| Identification | Immediate | Session file located |
-| Mode Selection | Interactive | Both (Content + Pattern) selected |
-| Extraction | Subagent | 3 Content + 2 Pattern insights extracted |
-| Review | Presented | 1 conflict identified |
-| Pattern Validation | Interactive | 1 Pattern deferred, 1 Low confidence documented only |
-| Selection | Interactive | 3 Content approved |
-| Integration | 2 edits | design.md, delegation.md updated |
-| Documentation | 1 file | Insights document created |
+| 1. Session Identification | Immediate | Session file located, TodoWrite initialized |
+| 2. Insight Extraction | Subagent | 3 Content + 2 Pattern insights extracted |
+| 3. Insight Review + Selection | Interactive | 3 Content approved, 2 Pattern excluded |
+| 4. Integration | 2 edits | design.md, delegation.md updated |
+| 5. Verification | Interactive | Cleanup completed |
 
-**Result**: 3 Content insights integrated into user memory, 2 Pattern insights deferred with re-evaluation conditions.
+**Result**: 3 Content insights integrated into user memory, workflow tracked via TodoWrite throughout.
