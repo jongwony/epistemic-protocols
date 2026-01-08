@@ -8,7 +8,6 @@ description: >-
   epistemic perspectives before the user.
 allowed-tools:
   - AskUserQuestion
-  - Task
   - Read
   - Glob
   - Grep
@@ -39,7 +38,7 @@ L      = Lens { convergence: ∩, divergence: D, assessment: A }
 ── PHASE TRANSITIONS ──
 Phase 0: U → G(U) → C                          -- context acquisition
 Phase 1: C → present({P₁...Pₙ}(C)) → await → Pₛ   -- call AskUserQuestion
-Phase 2: Pₛ → ∥I(Pₛ) → R                       -- parallel Task agents
+Phase 2: Pₛ → ∥I(Pₛ) → R                       -- sequential perspective analysis
 Phase 3: R → Syn(R) → L                        -- synthesis
 ```
 
@@ -103,19 +102,23 @@ Which lens(es) for this inquiry?
 - **Critical viewpoint** (when applicable): Include when genuine alternatives exist
 - Named by **discipline or framework**, not persona
 
-### Phase 2: Inquiry (Parallel Agents)
+### Phase 2: Inquiry (Through Selected Lens)
 
-For each selected perspective, spawn parallel Task agents:
+For each selected perspective, analyze sequentially as that perspective:
 
 ```
-Task(subagent_type: "prothesis:perspective-analyst",
-     prompt: "perspective={perspective_name}, question={original_question}",
-     run_in_background: true)
+You are analyzing from the **[Perspective]** standpoint.
+
+**Question**: {original question verbatim}
+
+Provide:
+1. **Epistemic Contribution**: What this lens uniquely reveals (2-3 sentences)
+2. **Framework Analysis**: Domain-specific concepts, terminology, reasoning
+3. **Horizon Limits**: What this perspective cannot see or undervalues
+4. **Assessment**: Direct answer from this viewpoint
 ```
 
-See `agents/perspective-analyst.md` for agent specification.
-
-Multiple selections → parallel agents (never sequential).
+Multiple selections → analyze each perspective in sequence, maintaining epistemic independence.
 
 ### Phase 3: Synthesis (Horizon Integration)
 
@@ -171,5 +174,4 @@ Prothesis does **not** apply to **closed-world** cognition:
 2. **Epistemic Integrity**: Each perspective analyzes independently; no cross-contamination
 3. **Synthesis Constraint**: Integration only combines what perspectives provided
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
-5. **Parallel Execution**: Multiple selections always spawn concurrent agents
-6. **Session Persistence**: Mode remains active until session end
+5. **Session Persistence**: Mode remains active until session end
