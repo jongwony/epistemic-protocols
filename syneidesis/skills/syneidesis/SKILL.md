@@ -46,6 +46,15 @@ A(Dismisses, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
 A(Silence, d, σ)      = match stakes(d):
                           Low|Med → σ { deferred ← Gₛ :: deferred }
                           High    → σ { blocked ← true }
+
+── SELECTION RULE ──
+Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
+
+── CONTINUATION ──
+proceed(Σ) = ¬blocked(Σ)
+
+── MODE STATE ──
+Λ = { phase: Phase, state: Σ, active: Bool }
 ```
 
 ## Core Principle
@@ -54,7 +63,11 @@ A(Silence, d, σ)      = match stakes(d):
 
 ## Mode Activation
 
+### Activation
+
 Command invocation activates mode until session end.
+
+### Priority
 
 <system-reminder>
 When Syneidesis is active:
@@ -67,7 +80,11 @@ When Syneidesis is active:
 **Action**: At decision points, call AskUserQuestion tool to surface potential gaps before proceeding.
 </system-reminder>
 
-**Dual-activation precedence**: When both Prothesis and Syneidesis are active, Prothesis executes first. Syneidesis applies to decision points within the established perspective.
+- Stakes Assessment replaces tier-based gating
+- All decision points become candidates for interactive confirmation
+- User Memory rules resume after mode deactivation
+
+**Dual-activation precedence**: When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
 
 ### Mode Deactivation
 
@@ -75,6 +92,26 @@ When Syneidesis is active:
 |---------|--------|
 | Task completion | Auto-deactivate after final resolution |
 | User dismisses 2+ consecutive gaps | Reduce intensity for session |
+
+### Plan Mode Integration
+
+When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
+
+| Phase Transition | Gap Check Focus |
+|------------------|-----------------|
+| Planning → Implementation | Scope completeness, missing requirements |
+| Phase N → Phase N+1 | Previous phase completion, dependency satisfaction |
+| Implementation → Commit | Changed assumptions, deferred decisions |
+
+**Cycle**: [Deliberation → Gap → Revision → Execution]
+1. **Deliberation**: Plan mode analysis generates recommendations (Prothesis provides multi-perspective deliberation when active)
+2. **Gap**: Syneidesis surfaces unconfirmed assumptions via AskUserQuestion
+3. **Revision**: Integrate user response, re-evaluate if needed
+4. **Execution**: Only after explicit scope confirmation
+
+**Sequencing with Prothesis**: When both active, Prothesis completes perspective selection before Syneidesis applies gap detection. The cycle becomes: [Perspective Selection → Deliberation → Gap → Revision → Execution].
+
+This cycle repeats per planning phase or domain area.
 
 ### Triggers
 
@@ -95,14 +132,14 @@ When Syneidesis is active:
 
 | Type | Detection | Question Form |
 |------|-----------|---------------|
-| **Procedural** | Expected step absent from stated plan | "Was [step] completed?" |
-| **Consideration** | Relevant factor not mentioned | "Was [factor] considered?" |
+| **Procedural** | Expected step absent from user's stated plan | "Was [step] completed?" |
+| **Consideration** | Relevant factor not mentioned in decision | "Was [factor] considered?" |
 | **Assumption** | Unstated premise inferred from framing | "Are you assuming [X]?" |
 | **Alternative** | Known option not referenced | "Was [alternative] considered?" |
 
 ## Protocol
 
-### Phase 0: Detection (Silent)
+### Detection (Silent)
 
 1. **Stakes assessment**:
    - Irreversible + High impact → High stakes
@@ -113,11 +150,7 @@ When Syneidesis is active:
 
 3. **Filter**: Surface only gaps with observable evidence (not speculation)
 
-### Phase 1: Surfacing
-
-**Call the AskUserQuestion tool** to surface gaps.
-
-**Do NOT surface gaps as plain text questions.** The tool call is mandatory—text-only surfacing is a protocol violation.
+### Surfacing
 
 ```
 Format: "[Question]" (rationale: [1-line])
@@ -127,38 +160,42 @@ High-stakes: append "Anything else to verify?"
 One gap per decision point.
 Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irreversibility.
 
-### Phase 2: Resolution
+### Resolution
 
 | Response | Action | Adjustment |
 |----------|--------|------------|
 | Addresses | Proceed | Incorporate into plan/execution |
-| Dismisses | Accept, no follow-up | Mark gap as user-reviewed; skip similar |
+| Dismisses | Accept, no follow-up | Mark gap as user-reviewed; skip similar gaps |
 | Silence (Low/Med stakes) | Proceed | Log gap for potential revisit |
 | Silence (High stakes) | Wait | Block until explicit judgment |
 
-## Intensity Calibration
+### Interactive Surfacing (AskUserQuestion)
+
+When Syneidesis is active, **call the AskUserQuestion tool** for:
+
+**Do NOT surface gaps as plain text questions.** The tool call is mandatory—text-only surfacing is a protocol violation.
+
+| Trigger | Action |
+|---------|--------|
+| Any confirmation needed | Present as structured options |
+| High-stakes + multiple gaps | Present priority choices |
+| Assumption gap | Always confirm (inference may be wrong) |
+| Interpretive uncertainty | Ask whether gap exists before surfacing |
+| Naming/structure decisions | Offer alternatives with rationale |
+
+### UI Mapping
+
+| Environment | Addresses | Dismisses | Silence |
+|-------------|-----------|-----------|---------|
+| AskUserQuestion | Selection | Selection | Esc key |
+
+## Intensity
 
 | Level | When | Format |
 |-------|------|--------|
 | Light | Reversible, low impact | "[X] confirmed?" |
-| Medium | Reversible + high impact, OR Irreversible + low | "[X] reviewed? (rationale)" |
+| Medium | Reversible + high impact, OR Irreversible + low impact | "[X] reviewed? (rationale)" |
 | Heavy | Irreversible + high impact | "Before proceeding, [X]? (rationale)" |
-
-## Plan Mode Integration
-
-When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
-
-| Phase Transition | Gap Check Focus |
-|------------------|-----------------|
-| Planning → Implementation | Scope completeness, missing requirements |
-| Phase N → Phase N+1 | Previous phase completion, dependency satisfaction |
-| Implementation → Commit | Changed assumptions, deferred decisions |
-
-**Cycle**: [Deliberation → Gap → Revision → Execution]
-1. **Deliberation**: Plan mode analysis generates recommendations
-2. **Gap**: Syneidesis surfaces unconfirmed assumptions via AskUserQuestion
-3. **Revision**: Integrate user response, re-evaluate if needed
-4. **Execution**: Only after explicit scope confirmation
 
 ## Rules
 
@@ -167,5 +204,5 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 3. **Observable evidence**: Surface only gaps with concrete indicators
 4. **User authority**: Dismissal is final
 5. **Minimal intrusion**: Lightest intervention that achieves awareness
-6. **Stakes calibration**: Intensity follows stakes matrix
+6. **Stakes calibration**: Intensity follows stakes matrix above
 7. **Session Persistence**: Mode remains active until session end

@@ -40,11 +40,28 @@ Phase 0: U → G(U) → C                          -- context acquisition
 Phase 1: C → present({P₁...Pₙ}(C)) → await → Pₛ   -- call AskUserQuestion
 Phase 2: Pₛ → ∥I(Pₛ) → R                       -- sequential perspective analysis
 Phase 3: R → Syn(R) → L                        -- synthesis
+
+── BOUNDARY ──
+G (gather)  = purpose: context acquisition
+S (select)  = extern: user choice boundary
+I (inquiry) = purpose: perspective-informed interpretation
+
+── CATEGORICAL NOTE ──
+∩ = meet (intersection) over comparison morphisms between perspective outputs
+D = join (union of distinct findings) where perspectives diverge
+A = synthesized assessment (additional computation)
+
+── MODE STATE ──
+Λ = { phase: Phase, lens: Option(L), active: Bool }
 ```
 
 ## Mode Activation
 
+### Activation
+
 Command invocation activates mode until session end.
+
+### Priority
 
 <system-reminder>
 When Prothesis is active:
@@ -57,9 +74,14 @@ When Prothesis is active:
 **Action**: Before analysis, call AskUserQuestion tool to present perspective options.
 </system-reminder>
 
-**Dual-activation precedence**: When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis).
+- Prothesis completes before other workflows begin
+- User Memory rules resume after perspective is established
+
+**Dual-activation precedence**: When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
 
 ### Per-Message Application
+
+Every user message triggers perspective evaluation:
 
 | Message Type | Action |
 |--------------|--------|
@@ -72,6 +94,40 @@ When Prothesis is active:
 ```
 False positive (unnecessary question) < False negative (missed perspective)
 ```
+
+### Mode Deactivation
+
+| Trigger | Effect |
+|---------|--------|
+| Synthesis complete | Lens established; follow-ups continue within lens |
+| User starts unrelated topic | Re-evaluate for new Prothesis |
+
+### Plan Mode Integration
+
+When combined with Plan mode, Prothesis provides the **Deliberation** phase:
+
+**Per-Phase Application**:
+- Apply Prothesis at each planning domain or phase
+- Perspectives evaluate domain-specific considerations
+- Synthesis produces phase-scoped recommendations
+
+**Syneidesis Coordination**:
+- Prothesis generates recommendations (Deliberation)
+- Syneidesis surfaces unconfirmed assumptions (Gap)
+- User feedback triggers re-evaluation (Revision)
+- Explicit confirmation gates execution (Execution)
+
+**Minimal Enhancement Pattern**:
+When multiple perspectives converge on the same recommendation, present as unanimous recommendation to indicate high confidence.
+
+## Distinction from Socratic Method
+
+| Dimension | Socratic Maieutics | Prothesis |
+|-----------|-------------------|-----------|
+| Knowledge source | Latent within interlocutor | Provided externally |
+| Premise | "You already know" | "You don't know the options" |
+| Role metaphor | Midwife (draws out) | Cartographer (reveals paths) |
+| Question form | Open (Recall burden) | Options (Recognition only) |
 
 ## Protocol
 
@@ -97,10 +153,15 @@ Which lens(es) for this inquiry?
 
 **Perspective selection criteria**:
 - Each offers a **distinct epistemic framework** (not variations of same view)
-- **Productive tension**: Enable meaningful disagreement in interpretation or weighing
-- **Commensurability minimum**: At least one shared referent for Phase 3 synthesis
-- **Critical viewpoint** (when applicable): Include when genuine alternatives exist
+- **Productive tension**: Perspectives should enable meaningful disagreement—differing in interpretation, weighing, or application, even if sharing some evidence
+- **Commensurability minimum**: At least one shared referent, standard, or vocabulary must exist between perspectives to enable Phase 3 synthesis
+- **Critical viewpoint** (when applicable): Include when genuine alternatives exist; omit when perspectives legitimately converge
+- Specific enough to guide analysis (not "general expert")
 - Named by **discipline or framework**, not persona
+
+Optional dimension naming (invoke when initial generation seems redundant):
+- Identify epistemic axes relevant to this inquiry
+- Dimensions remain revisable during perspective generation
 
 ### Phase 2: Inquiry (Through Selected Lens)
 
@@ -135,6 +196,7 @@ After all perspectives complete:
 
 ### Divergence (Horizon Conflicts)
 [Where they disagree—different values, evidence standards, or scope]
+[If perspectives unexpectedly converged, note why distinct framing was nonetheless valuable]
 
 ### Integrated Assessment
 [Synthesized answer with attribution to contributing perspectives]
@@ -144,7 +206,8 @@ After all perspectives complete:
 
 ### Trigger Prothesis
 
-Prothesis applies to **open-world** cognition:
+Prothesis applies to **open-world** cognition where the problem space is not fully enumerated:
+
 - Purpose present, approach unspecified
 - Multiple valid epistemic frameworks exist
 - User's domain awareness likely incomplete
@@ -153,25 +216,33 @@ Prothesis applies to **open-world** cognition:
 ### Skip Prothesis
 
 Prothesis does **not** apply to **closed-world** cognition:
+
 - Single deterministic execution path exists
 - Perspective already specified
 - Known target with binary outcome
 
 **Heuristic**: If a deterministic procedure can answer the inquiry, skip Prothesis.
 
-## Distinction from Socratic Method
+### Parametric Nature
 
-| Dimension | Socratic Maieutics | Prothesis |
-|-----------|-------------------|-----------|
-| Knowledge source | Latent within interlocutor | Provided externally |
-| Premise | "You already know" | "You don't know the options" |
-| Role metaphor | Midwife (draws out) | Cartographer (reveals paths) |
-| Question form | Open (Recall burden) | Options (Recognition only) |
+The formula is **domain-agnostic**: instantiate C differently, derive different P-space. The structure `U → G → C → P → S → I → Syn` applies wherever the open-world condition holds.
+
+## Specialization
+
+When guaranteed coverage is required, Prothesis can be constrained:
+
+```
+Prothesis(mandatory_baseline, optional_extension):
+  baseline ∪ AskUserQuestion(extension) → selected
+  ∥I(selected) → Syn → L
+```
+
+**Principle**: Mandatory baseline cannot be reduced by user selection; only extended.
 
 ## Rules
 
-1. **Recognition over Recall**: Always **call** AskUserQuestion tool (text = violation)
+1. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
 2. **Epistemic Integrity**: Each perspective analyzes independently; no cross-contamination
-3. **Synthesis Constraint**: Integration only combines what perspectives provided
+3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
-5. **Session Persistence**: Mode remains active until session end
+5. **Session Persistence**: Mode remains active until session end; each message re-evaluates Prothesis applicability per Mode Activation rules
