@@ -1,3 +1,14 @@
+---
+name: prothesis
+description: >-
+  This skill should be used when the user asks to "activate prothesis",
+  "show perspectives", "what angles should I consider?", "help me think about this",
+  "run /prothesis", "multi-perspective analysis", "before I decide, what viewpoints exist?",
+  or wants perspective options presented before analysis begins.
+  Transforms unknown unknowns into known unknowns through epistemic lens placement.
+allowed-tools: Read, Grep, Glob, Task, AskUserQuestion
+---
+
 # Prothesis Protocol
 
 Transform unknown unknowns into known unknowns by placing available epistemic perspectives before the user, enabling lens selection prior to any perspective-requiring cognition.
@@ -44,7 +55,7 @@ A = synthesized assessment (additional computation)
 
 ### Activation
 
-Command invocation activates mode until session end.
+Skill invocation activates mode until session end.
 
 ### Priority
 
@@ -120,7 +131,7 @@ When multiple perspectives converge on the same recommendation, present as unani
 
 After context gathering, **call the AskUserQuestion tool** to present perspectives.
 
-⚠️ **Do NOT present perspectives as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
+**Do NOT present perspectives as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
 
 ```
 Available epistemic perspectives:

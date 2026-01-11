@@ -1,5 +1,10 @@
 ---
-description: Analyze current session and extract insights into memory
+name: reflect
+description: >-
+  This skill should be used when the user asks to "reflect on session",
+  "extract insights", "analyze this conversation", "run /reflect",
+  or wants a shortcut to invoke the full reflexion workflow.
+  Alias for the reflexion skill with complete phase execution.
 ---
 
 # /reflect

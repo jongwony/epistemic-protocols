@@ -1,3 +1,14 @@
+---
+name: syneidesis
+description: >-
+  This skill should be used when the user asks to "activate syneidesis",
+  "check for gaps", "what am I missing?", "surface potential issues",
+  "run /syneidesis", "decision review", "before I proceed, any concerns?",
+  or wants potential gaps surfaced at decision points.
+  Transforms unknown unknowns into questions for user evaluation.
+allowed-tools: Read, Grep, Glob, Task, AskUserQuestion
+---
+
 # Syneidesis Protocol
 
 Surface potential gaps at decision points through questions, enabling user to notice what might otherwise remain unnoticed.
@@ -51,7 +62,7 @@ proceed(Σ) = ¬blocked(Σ)
 
 ### Activation
 
-Command invocation activates mode until session end.
+Skill invocation activates mode until session end.
 
 ### Priority
 
@@ -159,7 +170,7 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 
 When Syneidesis is active, **call the AskUserQuestion tool** for:
 
-⚠️ **Do NOT surface gaps as plain text questions.** The tool call is mandatory—text-only surfacing is a protocol violation.
+**Do NOT surface gaps as plain text questions.** The tool call is mandatory—text-only surfacing is a protocol violation.
 
 | Trigger | Action |
 |---------|--------|

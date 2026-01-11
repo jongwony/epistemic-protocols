@@ -11,23 +11,27 @@ Claude Code plugin marketplace for epistemic dialogue — transforms **unknown u
 ```
 epistemic-protocols/
 ├── .claude-plugin/marketplace.json    # Marketplace manifest
-├── prothesis/                         # Protocol: perspective placement
+├── prothesis/                         # Skill: perspective placement
 │   ├── .claude-plugin/plugin.json
-│   └── commands/prothesis.md
-├── syneidesis/                        # Protocol: gap surfacing
+│   └── skills/prothesis/SKILL.md
+├── syneidesis/                        # Skill: gap surfacing
 │   ├── .claude-plugin/plugin.json
-│   └── commands/syneidesis.md
+│   └── skills/syneidesis/SKILL.md
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
-│   └── skills/reflexion/SKILL.md
+│   ├── skills/reflexion/SKILL.md
+│   └── commands/                      # Shortcut commands
+│       ├── reflect.md                 # Full reflexion workflow
+│       └── quick-reflect.md           # Phases 1-2 only
 └── draft/                             # Skill: multi-perspective blog drafting
     ├── .claude-plugin/plugin.json
     └── skills/draft/SKILL.md
 ```
 
-**Plugin Types**:
-- **Protocols** (`commands/*.md`): Dialogue patterns invoked via `/command`
-- **Skills** (`skills/*/SKILL.md`): Task workflows invoked via `/skill`
+**Unified Skill Model**:
+All plugins are now skills (`skills/*/SKILL.md`) invoked via the unified `Skill` tool.
+- Explicit invocation: `/prothesis`, `/syneidesis`, `/reflexion`
+- Auto-invocation: Claude matches user intent to skill descriptions
 
 ## Plugins
 

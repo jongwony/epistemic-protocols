@@ -63,7 +63,7 @@ Analyze protocol definitions for mathematical soundness:
 - Categorical constructions: correct limit/colimit usage
 - State machines: transition totality
 
-Files: prothesis/commands/prothesis.md, syneidesis/commands/syneidesis.md
+Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md
 
 Focus on Definition sections. Output JSON with findings array.
 ```
@@ -80,7 +80,7 @@ Analyze protocol instructions for consistency:
 - Mode interaction: dual-activation precedence
 - Rule completeness: all branches specified
 
-Files: prothesis/commands/prothesis.md, syneidesis/commands/syneidesis.md, CLAUDE.md
+Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, CLAUDE.md
 
 Focus on Mode Activation and Priority sections. Output JSON with findings array.
 ```

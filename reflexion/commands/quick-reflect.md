@@ -1,5 +1,10 @@
 ---
-description: Quick session summary without saving
+name: quick-reflect
+description: >-
+  This skill should be used when the user asks for "quick summary",
+  "session overview", "run /quick-reflect", "what happened this session?",
+  or wants a fast session review without saving to memory.
+  Lightweight reflexion variant: phases 1-2 only, no persistence.
 ---
 
 # /quick-reflect
