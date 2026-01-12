@@ -11,48 +11,54 @@ Claude Code plugin marketplace for epistemic dialogue — transforms **unknown u
 ```
 epistemic-protocols/
 ├── .claude-plugin/marketplace.json    # Marketplace manifest
+├── .claude/skills/verify/             # Project-level verification skill
 ├── prothesis/                         # Protocol: perspective placement
 │   ├── .claude-plugin/plugin.json
-│   └── commands/prothesis.md
+│   ├── commands/prothesis.md          # Lightweight skill invoker
+│   └── skills/prothesis/SKILL.md      # Full protocol definition
 ├── syneidesis/                        # Protocol: gap surfacing
 │   ├── .claude-plugin/plugin.json
-│   └── commands/syneidesis.md
+│   ├── commands/syneidesis.md         # Lightweight skill invoker
+│   └── skills/syneidesis/SKILL.md     # Full protocol definition
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
+│   ├── agents/                        # Parallel extraction agents
+│   ├── commands/                      # /reflect, /quick-reflect
 │   └── skills/reflexion/SKILL.md
 └── draft/                             # Skill: multi-perspective blog drafting
-    ├── .claude-plugin/plugin.json
     └── skills/draft/SKILL.md
 ```
 
-**Plugin Types**:
-- **Protocols** (`commands/*.md`): Dialogue patterns invoked via `/command`
-- **Skills** (`skills/*/SKILL.md`): Task workflows invoked via `/skill`
+**Component Types**:
+- **Skills** (`skills/*/SKILL.md`): Full protocol/workflow definitions with YAML frontmatter for auto-invocation
+- **Commands** (`commands/*.md`): Lightweight invokers that activate skills
+- **Agents** (`agents/*.md`): Subagents for parallel task execution (reflexion only)
 
 ## Plugins
 
 ### Prothesis (πρόθεσις)
-Present perspective options before analysis begins.
-- **Flow**: `U → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L`
-- **Key**: Phase 0 gathers context, Phase 1 calls `AskUserQuestion` for perspective selection
-- **Tools**: `AskUserQuestion` (blocking), `Task` subagents (parallel inquiry)
+Present perspective options before analysis begins. Injected into main agent context.
+- **Flow**: `U → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → I(Pₛ) → R → Syn(R) → L`
+- **Key**: Phase 1 calls `AskUserQuestion` for perspective selection (mandatory—text-only = violation)
+- **Constraint**: No Task subagents—must run in main agent to call AskUserQuestion
 
 ### Syneidesis (συνείδησις)
-Surface potential gaps at decision points as questions.
+Surface potential gaps at decision points as questions. Injected into main agent context.
 - **Flow**: `D → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'`
-- **Key**: Phase 0 detects gaps, Phase 1 calls `AskUserQuestion` for surfacing
+- **Key**: Phase 1 calls `AskUserQuestion` for gap surfacing (mandatory—text-only = violation)
 - **Gap types**: Procedural, Consideration, Assumption, Alternative
+- **Triggers**: "delete", "push", "deploy", "all", "every", "quickly", production, security
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
-- **Flow**: Session → Extract → Review → Select → Integrate → Verify → Document
-- **Key**: Phase 3.5 checks redundancy against tool descriptions (main agent only)
+- **Flow**: Session → Context → ∥Extract → Select → Integrate → Verify
+- **Key**: Phase 2 uses parallel agents (`session-summarizer`, `insight-extractor`, `knowledge-finder`)
 - **References**: `skills/reflexion/references/` for detailed workflows
 
-### Draft
-Transform session insights into structured blog content.
-- **Flow**: Prothesis → Format → Draft → Refine → Validate → Finalize
-- **Key**: Integrates `/prothesis` for analysis and `/syneidesis` for validation
+### Verify (Project-level)
+Pre-commit protocol verification via static checks and expert review.
+- **Location**: `.claude/skills/verify/`
+- **Invocation**: `/verify` before commits
 
 ## Core Principles
 
@@ -67,3 +73,5 @@ Transform session insights into structured blog content.
 - Keep README.md and README_ko.md in sync
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
+- Skills require YAML frontmatter with `name`, `description`, `allowed-tools`
+- Prothesis/Syneidesis: No `agent` field or Task delegation—main agent injection required
