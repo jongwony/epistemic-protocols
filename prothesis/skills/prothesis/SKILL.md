@@ -6,6 +6,7 @@ description: >-
   underspecified request where purpose is clear but approach is unclear.
   Transforms unknown unknowns into known unknowns by placing available
   epistemic perspectives before the user.
+user-invocable: true
 ---
 
 # Prothesis Protocol

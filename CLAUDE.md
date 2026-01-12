@@ -14,12 +14,10 @@ epistemic-protocols/
 ├── .claude/skills/verify/             # Project-level verification skill
 ├── prothesis/                         # Protocol: perspective placement
 │   ├── .claude-plugin/plugin.json
-│   ├── commands/prothesis.md          # Lightweight skill invoker
-│   └── skills/prothesis/SKILL.md      # Full protocol definition
+│   └── skills/prothesis/SKILL.md      # Full protocol definition (user-invocable)
 ├── syneidesis/                        # Protocol: gap surfacing
 │   ├── .claude-plugin/plugin.json
-│   ├── commands/syneidesis.md         # Lightweight skill invoker
-│   └── skills/syneidesis/SKILL.md     # Full protocol definition
+│   └── skills/syneidesis/SKILL.md     # Full protocol definition (user-invocable)
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # Parallel extraction agents
@@ -30,8 +28,8 @@ epistemic-protocols/
 ```
 
 **Component Types**:
-- **Skills** (`skills/*/SKILL.md`): Full protocol/workflow definitions with YAML frontmatter for auto-invocation
-- **Commands** (`commands/*.md`): Lightweight invokers that activate skills
+- **Skills** (`skills/*/SKILL.md`): Full protocol/workflow definitions with YAML frontmatter; user-invocable by default (v2.1.0+)
+- **Commands** (`commands/*.md`): Lightweight invokers (reflexion only—prothesis/syneidesis use skills directly)
 - **Agents** (`agents/*.md`): Subagents for parallel task execution (reflexion only)
 
 ## Plugins
@@ -55,6 +53,11 @@ Extract insights from Claude Code sessions into persistent memory.
 - **Key**: Phase 2 uses parallel agents (`session-summarizer`, `insight-extractor`, `knowledge-finder`)
 - **References**: `skills/reflexion/references/` for detailed workflows
 
+### Draft
+Transform session insights into blog posts through multi-perspective analysis.
+- **Flow**: `Prothesis → Format → Draft → Refine → Syneidesis → Finalize`
+- **Key**: Integrates both protocols—Prothesis for perspective selection, Syneidesis for gap validation
+
 ### Verify (Project-level)
 Pre-commit protocol verification via static checks and expert review.
 - **Location**: `.claude/skills/verify/`
@@ -73,5 +76,5 @@ Pre-commit protocol verification via static checks and expert review.
 - Keep README.md and README_ko.md in sync
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
-- Skills require YAML frontmatter with `name`, `description`, `allowed-tools`
+- Skills require YAML frontmatter with `name`, `description`
 - Prothesis/Syneidesis: No `agent` field or Task delegation—main agent injection required
