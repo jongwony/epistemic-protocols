@@ -5,11 +5,6 @@ description: >-
   or uses trigger words like "delete", "push", "deploy", "all", "every",
   "quickly", "just". Surfaces potential gaps (procedural, consideration,
   assumption, alternative) at decision points through questions.
-allowed-tools:
-  - AskUserQuestion
-  - Read
-  - Glob
-  - Grep
 ---
 
 # Syneidesis Protocol
