@@ -1,9 +1,9 @@
 ---
-name: draft
-description: Draft blog posts from session insights with multi-perspective analysis.
+name: write
+description: Write blog posts from session insights with multi-perspective analysis.
 ---
 
-# Draft Skill
+# Write Skill
 
 Transform session insights and conceptual explorations into structured, publishable content through multi-perspective analysis and iterative refinement.
 
@@ -63,7 +63,7 @@ Present output options:
 
 ### 5. Draft Generation
 
-Write initial draft to `drafts/` directory:
+Write initial draft to `~/.claude/.write/` directory:
 - Filename: `YYYY-MM-DD-{topic-slug}.md`
 - Structure: Hook → Context → Framework → Application → Implications
 

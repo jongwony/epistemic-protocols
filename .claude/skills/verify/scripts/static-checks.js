@@ -246,7 +246,7 @@ function checkCrossReference() {
     // Check in likely locations
     const locations = [
       path.join(projectRoot, 'reflexion/skills/reflexion', refPath),
-      path.join(projectRoot, 'draft/skills/draft', refPath),
+      path.join(projectRoot, 'write/skills/write', refPath),
     ];
 
     const exists = locations.some(loc => fs.existsSync(loc));

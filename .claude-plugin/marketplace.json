@@ -20,8 +20,8 @@
       "description": "Cross-session learning via Reflexion pattern"
     },
     {
-      "name": "draft",
-      "source": "./draft",
+      "name": "write",
+      "source": "./write",
       "description": "Multi-perspective blog drafting from session insights"
     }
   ]

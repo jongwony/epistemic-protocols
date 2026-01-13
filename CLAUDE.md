@@ -23,8 +23,8 @@ epistemic-protocols/
 │   ├── agents/                        # Parallel extraction agents
 │   ├── commands/                      # /reflect, /quick-reflect
 │   └── skills/reflexion/SKILL.md
-└── draft/                             # Skill: multi-perspective blog drafting
-    └── skills/draft/SKILL.md
+└── write/                             # Skill: multi-perspective blog drafting
+    └── skills/write/SKILL.md
 ```
 
 **Component Types**:
@@ -53,9 +53,9 @@ Extract insights from Claude Code sessions into persistent memory.
 - **Key**: Phase 2 uses parallel agents (`session-summarizer`, `insight-extractor`, `knowledge-finder`)
 - **References**: `skills/reflexion/references/` for detailed workflows
 
-### Draft
+### Write
 Transform session insights into blog posts through multi-perspective analysis.
-- **Flow**: `Prothesis → Format → Draft → Refine → Syneidesis → Finalize`
+- **Flow**: `Prothesis → Format → Write → Refine → Syneidesis → Finalize`
 - **Key**: Integrates both protocols—Prothesis for perspective selection, Syneidesis for gap validation
 
 ### Verify (Project-level)

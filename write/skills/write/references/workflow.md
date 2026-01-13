@@ -1,6 +1,6 @@
-# Draft Workflow Reference
+# Write Workflow Reference
 
-Detailed phase descriptions and content transformation rules for the draft skill.
+Detailed phase descriptions and content transformation rules for the write skill.
 
 ## Phase Details
 
@@ -68,7 +68,7 @@ Provide:
 
 **Purpose**: Create initial content artifact.
 
-**File Location**: `drafts/YYYY-MM-DD-{topic-slug}.md`
+**File Location**: `~/.claude/.write/YYYY-MM-DD-{topic-slug}.md`
 
 **Required Sections**:
 1. **Hook** — Problem/tension that motivates reading
@@ -161,7 +161,7 @@ Provide:
 
 ### Selection Criteria
 
-A session becomes draft-worthy when it exhibits:
+A session becomes write-worthy when it exhibits:
 
 | Criterion | Indicator |
 |-----------|-----------|
