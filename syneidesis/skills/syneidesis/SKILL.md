@@ -63,6 +63,8 @@ proceed(Σ) = ¬blocked(Σ)
 
 Command invocation activates mode until session end.
 
+**On activation**: Check existing TodoWrite for deferred gaps (prefix `[Gap:`). Resume tracking if found.
+
 ### Priority
 
 <system-reminder>
@@ -165,6 +167,27 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 | Silence (Low/Med stakes) | Proceed | Log gap for potential revisit |
 | Silence (High stakes) | Wait | Block until explicit judgment |
 
+### Gap Tracking
+
+Record detected gaps using TodoWrite to prevent context loss across decision points.
+
+| Phase | TodoWrite Operation |
+|-------|---------------------|
+| Detection | Add `[Gap:Type] question` as `in_progress` |
+| Addressed | Mark `completed` |
+| Dismissed | Mark `completed` (user authority) |
+| Deferred | Change to `pending` for later revisit |
+
+**Format**: `[Gap:Procedural|Consideration|Assumption|Alternative] Question`
+
+**Workflow**:
+1. Detect gap → `TodoWrite([{content: "[Gap:Assumption] Database backup verified?", status: "in_progress"}])`
+2. Surface via AskUserQuestion
+3. On response → update status, proceed or defer
+4. Multiple gaps → track all, surface sequentially (one `in_progress` at a time)
+
+**Resumption**: Deferred gaps (`pending`) resurface at next relevant decision point or session end.
+
 ### Interactive Surfacing (AskUserQuestion)
 
 When Syneidesis is active, **call the AskUserQuestion tool** for:
@@ -202,3 +225,4 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 5. **Minimal intrusion**: Lightest intervention that achieves awareness
 6. **Stakes calibration**: Intensity follows stakes matrix above
 7. **Session Persistence**: Mode remains active until session end
+8. **Gap Persistence**: Record all detected gaps via TodoWrite; deferred gaps must not be lost
