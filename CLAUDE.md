@@ -52,7 +52,7 @@ Surface potential gaps at decision points as questions. Injected into main agent
 
 ### Hermeneia (ἑρμηνεία)
 Clarify intent-expression gaps through user-initiated dialogue.
-- **Flow**: `(E, I) → D(E, I) → G → C(G) → Q → A → Integrate(A, E, I) → I'`
+- **Flow**: `(E, Î) → D(E, Î) → G → C(G) → Q → A → Integrate(A, E, Î) → Î'`
 - **Key**: User-initiated only; Phase 1 diagnoses (silent), Phase 2 calls `AskUserQuestion` (mandatory)
 - **Gap types**: Expression, Precision, Coherence, Context
 - **Triggers**: "clarify", "what I mean", "did I express this right"
@@ -78,7 +78,7 @@ Pre-commit protocol verification via static checks and expert review.
 
 - **Recognition over Recall**: Options to select, not blanks to fill
 - **Surfacing over Deciding**: AI illuminates, user judges
-- **Session Persistence**: Modes active until session end
+- **Session Persistence**: Modes active until session end (exception: Syneidesis is task-scoped)
 - **Priority Override**: Active protocols supersede default behaviors
 
 ## Protocol Precedence

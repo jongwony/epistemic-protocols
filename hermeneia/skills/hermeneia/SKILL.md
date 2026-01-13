@@ -17,7 +17,7 @@ Transform known unknowns into known knowns by clarifying intent-expression gaps 
 **Hermeneia** (ἑρμηνεία): A dialogical act of clarifying the gap between what the user intends and what they expressed, transforming recognized ambiguity into precise articulation through structured questioning.
 
 ```
-Hermeneia(E) → D(E, Î₀) → Gset → Sel(Gset) → G? → C(G?) → Q(G?) → A → Integrate(A, E, Î) → I'
+Hermeneia(E) → D(E, Î₀) → Gset → Sel(Gset) → G? → C(G?) → Q(G?) → A → Integrate(A, E, Î) → Î'
 
 E      = Expression (user's written prompt)
 I      = Intent (user's actual goal, known only to user—epistemically inaccessible to AI)
@@ -29,41 +29,41 @@ Gap    = {Expression, Precision, Coherence, Context}
 C      = Classify: G → GapCategory             -- categorization
 Q      = Question formation via AskUserQuestion
 A      = Answer (user-provided clarification)
-Integrate = (A × E × I) → I'                   -- merge clarification with expression toward intent
-I'     = Clarified intent (E aligned with I)
+Integrate = (A × E × Î) → Î'                   -- merge clarification to update inferred intent
+Î'     = Updated inferred intent (Î approaching I through clarification)
 
 ── PHASE TRANSITIONS ──
 Phase 0: Trigger → recognize user-initiated clarification request
 Phase 1: (E, Î) → D(E, Î) → Gset → Sel(Gset) → G? → C(G?)  -- diagnosis (silent)
 Phase 2: gsel → match gsel { Some(g) → Q(g) → await → A; None → proceed }  -- call AskUserQuestion if gap exists
-Phase 3: A → Integrate(A, E, Î) → I'           -- integration
+Phase 3: A → Integrate(A, E, Î) → Î'           -- integration (updates inferred intent)
 
 ── BOUNDARY ──
 D (diagnose) = purpose: identify intent-expression gaps
 C (classify) = purpose: categorize gap type for targeted questioning
 Q (question) = extern: user clarification boundary
-I' (intent)  = purpose: refined expression matching user's actual goal
+Î' (inferred)= purpose: refined model of intent, approaching user's actual goal
 
 ── EPISTEMIC TRANSITION ──
 Known unknown (user knows they're unclear) → Known known (user has articulated clearly)
 
 ── DYNAMIC DISCOVERY ──
 After A (Answer):
-  I' = Integrate(A, E, Î)                -- partial clarification (updates Î toward I)
-  G' = D(I', Î)                          -- re-diagnose: clarified expression against updated inferred intent
+  Î' = Integrate(A, E, Î)                -- partial clarification (updates Î toward I)
+  G' = D(E, Î')                          -- re-diagnose: expression against updated inferred intent
   G  = G' \ clarified                    -- exclude resolved gaps
-  if |G| > 0 ∧ progress(G, Î, I'):
-    E := I'; Î := I'                     -- bind expression and update inferred intent for next iteration
+  if |G| > 0 ∧ progress(G, Î, Î'):
+    Î := Î'                              -- update inferred intent for next iteration
     → Phase 2 (Q → await → A)            -- continue loop
 
 ── TERMINATION (Hybrid) ──
-progress(G, Î, I') = ¬cycle(G) ∧ Δ(Î, I') > 0
+progress(G, Î, Î') = ¬cycle(G) ∧ Δ(Î, Î') > 0
 
 cycle(G) = sig(G) ∈ History
 sig(G) = hash(type(G), subject(G), context(G))
 History = { sig(g) | g ∈ resolved_gaps }
 
-Δ(Î, I') = |clarified_elements(I')| - |clarified_elements(Î)|
+Δ(Î, Î') = |clarified_elements(Î')| - |clarified_elements(Î)|
 
 Terminate when:
   cycle(G)           → "This ambiguity was already clarified"
@@ -260,7 +260,7 @@ After user response:
 1. **Incorporate**: Update understanding with user's clarification
 2. **Re-diagnose**: Scan clarified expression for newly surfaced gaps
 3. **Filter**: Exclude gaps already resolved in this session
-4. **Progress check**: Continue only if `progress(I, I') = true` (no cycle, Δ > 0)
+4. **Progress check**: Continue only if `progress(Î, Î') = true` (no cycle, Δ > 0)
 5. **Confirm**: When no gaps remain, present clarified intent for verification
 6. **Proceed**: Continue with clarified expression
 

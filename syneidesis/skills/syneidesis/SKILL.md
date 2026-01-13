@@ -24,7 +24,7 @@ D      = Decision point ∈ Stakes × Context
 Stakes = {Low, Med, High}
 G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative}
 Scan   = Detection: D × Σ → Set(G)                  -- gap identification (Σ₀ = empty state)
-Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
+Sel    = Selection: Set(G) × D → Option(Gₛ)         -- prioritize by stakes; None if G empty
 Gₛ     = Selected gaps (|Gₛ| ≤ 2)
 Q      = Question formation (assertion-free)
 J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
@@ -34,7 +34,7 @@ A      = Adjustment: J × D × Σ → Σ'
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → Scan(D, ∅) → G                         -- detection (silent, initial scan)
-Phase 1: G → Sel(G, D) → Gₛ → Q(Gₛ) → await → J    -- call AskUserQuestion
+Phase 1: G → Sel(G, D) → match { Some(Gₛ) → Q(Gₛ) → await → J; None → skip }  -- call AskUserQuestion if gaps exist
 Phase 2: J → A(J, D, Σ) → Σ'                        -- adjustment
 
 ── ADJUSTMENT RULES ──
@@ -49,8 +49,11 @@ A(Silence, d, σ)      = match stakes(d):
                           High    → σ { blocked ← true }
 
 ── SELECTION RULE ──
-Sel: Set(G) × D → Gₛ where |G| > 0
-Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, if stakes(d) = High then 2 else 1))
+Sel: Set(G) × D → Option(Gₛ)
+Sel(G, d) = match |G| {
+              0 → None
+              _ → Some(take(priority_sort(G, stakes(d)), min(|G|, if stakes(d) = High then 2 else 1)))
+            }
 
 ── CONTINUATION ──
 proceed(Σ) = ¬blocked(Σ)
@@ -291,5 +294,5 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 4. **User authority**: Dismissal is final
 5. **Minimal intrusion**: Lightest intervention that achieves awareness
 6. **Stakes calibration**: Intensity follows stakes matrix above
-7. **Session Persistence**: Mode remains active until session end
+7. **Task-Scoped Persistence**: Mode remains active until task completion (differs from Prothesis—see Mode Deactivation)
 8. **Gap Persistence**: Record all detected gaps via TodoWrite; deferred gaps must not be lost
