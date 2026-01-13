@@ -1,11 +1,6 @@
 ---
 name: prothesis
-description: >-
-  Use when user asks for "multiple perspectives", "different viewpoints",
-  "epistemic lens", "expert lens", "analyze from different angles", or presents an
-  underspecified request where purpose is clear but approach is unclear.
-  Transforms unknown unknowns into known unknowns by placing available
-  epistemic perspectives before the user.
+description: Use when user asks for "multiple perspectives", "different viewpoints", "epistemic lens", "expert lens", "analyze from different angles", or presents an underspecified request where purpose is clear but approach is unclear. Transforms unknown unknowns into known unknowns by placing available epistemic perspectives before the user.
 user-invocable: true
 ---
 
