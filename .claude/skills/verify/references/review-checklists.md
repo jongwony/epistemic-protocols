@@ -12,8 +12,9 @@ You are a **Type Theory and Category Theory Expert**.
 Analyze the protocol definitions for mathematical soundness.
 
 **Files to examine**:
-- prothesis/commands/prothesis.md (Definition section)
-- syneidesis/commands/syneidesis.md (Definition section)
+- prothesis/skills/prothesis/SKILL.md (Definition section)
+- syneidesis/skills/syneidesis/SKILL.md (Definition section)
+- hermeneia/skills/hermeneia/SKILL.md (Definition section)
 
 **Checklist**:
 
@@ -67,8 +68,9 @@ You are an **Instruction Design Expert**.
 Analyze the protocol instructions for consistency and completeness.
 
 **Files to examine**:
-- prothesis/commands/prothesis.md (Mode Activation, Priority sections)
-- syneidesis/commands/syneidesis.md (Mode Activation, Priority sections)
+- prothesis/skills/prothesis/SKILL.md (Mode Activation, Priority sections)
+- syneidesis/skills/syneidesis/SKILL.md (Mode Activation, Priority sections)
+- hermeneia/skills/hermeneia/SKILL.md (Mode Activation, Priority sections)
 - CLAUDE.md (Core Principles)
 
 **Checklist**:
@@ -117,9 +119,78 @@ Analyze the protocol instructions for consistency and completeness.
 | Dual-mode precedence | prothesis.md:60 | Add explicit ordering clause |
 | Follow-up perspective shift | prothesis.md:70-71 | Add handling for related-but-different |
 
+## Claude Code Ecosystem Perspective
+
+### Prompt Template
+
+```
+You are a **Claude Code Ecosystem Expert**.
+
+Validate protocol designs against Claude Code interaction patterns and epistemic principles.
+
+**Files to examine**:
+- prothesis/skills/prothesis/SKILL.md (Mode Activation, Rules sections)
+- syneidesis/skills/syneidesis/SKILL.md (Mode Activation, Rules sections)
+- hermeneia/skills/hermeneia/SKILL.md (Mode Activation, Rules sections)
+- CLAUDE.md (Project Overview, Core Principles)
+
+**Checklist**:
+
+#### UX Pattern Validation
+- [ ] AskUserQuestion mandates: protocols requiring user input use tool call, not text presentation
+- [ ] User agency preserved: no automatic decisions that should be user choices
+- [ ] Recognition over Recall: options presented, not open questions
+- [ ] Session persistence: mode state managed correctly (active until deactivation trigger)
+
+#### Epistemological Soundness
+- [ ] Correct epistemic transition type declared:
+  - Prothesis/Syneidesis: unknown unknowns → known unknowns
+  - Hermeneia: known unknowns → known knowns
+- [ ] Initiator correctly specified (AI-initiated vs User-initiated)
+- [ ] Gap taxonomy matches protocol purpose
+
+#### False Positive Filtering
+When other experts flag these as issues, they should be filtered (not actual issues in Claude Code context):
+- [ ] "Automatic intensity reduction" — unnecessary; AskUserQuestion provides user control
+- [ ] "Automatic deactivation" — unnecessary; user can interrupt/cancel natively (Esc)
+- [ ] "Decay function" — unnecessary; explicit deactivation triggers sufficient
+- [ ] "Topic boundary detection" — context-dependent; model judgment acceptable
+- [ ] "Exhaustive deactivation triggers" — Claude Code native interruption handles edge cases
+
+**Output format**:
+```json
+{
+  "findings": [
+    {
+      "severity": "critical|concern|note",
+      "location": "file:section",
+      "issue": "description",
+      "recommendation": "suggested fix"
+    }
+  ],
+  "filtered": [
+    {
+      "original_finding": "description from other expert",
+      "filter_reason": "why this is not an issue in Claude Code context"
+    }
+  ],
+  "summary": "overall assessment"
+}
+```
+```
+
+### Known Issues to Check
+
+| Pattern | Expected Behavior | Violation |
+|---------|------------------|-----------|
+| AskUserQuestion mandate | Tool call in Phase 1/2 | Text-only presentation |
+| Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
+| User-initiated protocol | Hermeneia activates on user signal only | AI auto-activation |
+| Intent accessibility | Hermeneia uses Î (inferred), not I (actual) | Direct access to user intent |
+
 ## Synthesis Template
 
-After both perspectives complete, synthesize findings:
+After all three perspectives complete, synthesize findings:
 
 ```markdown
 ## Verification Summary
@@ -139,6 +210,9 @@ After both perspectives complete, synthesize findings:
 ### Divergence
 [Where perspectives differ - needs judgment]
 
+### Filtered (Claude Code context)
+[Issues from Type/Instruction experts dismissed by Ecosystem expert]
+
 ### Recommendation
 [Synthesized assessment with options]
 ```
@@ -151,12 +225,17 @@ const perspectives = [
   {
     name: 'type-category-theory',
     prompt: TYPE_THEORY_PROMPT,
-    files: ['prothesis/commands/prothesis.md', 'syneidesis/commands/syneidesis.md']
+    files: ['prothesis/skills/prothesis/SKILL.md', 'syneidesis/skills/syneidesis/SKILL.md', 'hermeneia/skills/hermeneia/SKILL.md']
   },
   {
     name: 'instruction-design',
     prompt: INSTRUCTION_DESIGN_PROMPT,
-    files: ['prothesis/commands/prothesis.md', 'syneidesis/commands/syneidesis.md', 'CLAUDE.md']
+    files: ['prothesis/skills/prothesis/SKILL.md', 'syneidesis/skills/syneidesis/SKILL.md', 'hermeneia/skills/hermeneia/SKILL.md', 'CLAUDE.md']
+  },
+  {
+    name: 'claude-code-ecosystem',
+    prompt: CLAUDE_CODE_ECOSYSTEM_PROMPT,
+    files: ['prothesis/skills/prothesis/SKILL.md', 'syneidesis/skills/syneidesis/SKILL.md', 'hermeneia/skills/hermeneia/SKILL.md', 'CLAUDE.md']
   }
 ];
 
@@ -165,6 +244,10 @@ const results = await Promise.all(
   perspectives.map(p => spawnSubagent(p))
 );
 
+// Apply Claude Code ecosystem filtering
+const ecosystemResult = results.find(r => r.name === 'claude-code-ecosystem');
+const filteredFindings = applyFilters(results, ecosystemResult.filtered);
+
 // Synthesize findings
-const synthesis = synthesize(results);
+const synthesis = synthesize(filteredFindings);
 ```

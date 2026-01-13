@@ -23,6 +23,11 @@
       "name": "write",
       "source": "./write",
       "description": "Multi-perspective blog drafting from session insights"
+    },
+    {
+      "name": "hermeneia",
+      "source": "./hermeneia",
+      "description": "Clarify intent-expression gaps through dialogue"
     }
   ]
 }

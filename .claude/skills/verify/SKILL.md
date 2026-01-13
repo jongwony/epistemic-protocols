@@ -63,7 +63,7 @@ Analyze protocol definitions for mathematical soundness:
 - Categorical constructions: correct limit/colimit usage
 - State machines: transition totality
 
-Files: prothesis/commands/prothesis.md, syneidesis/commands/syneidesis.md
+Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md
 
 Focus on Definition sections. Output JSON with findings array.
 ```
@@ -80,12 +80,34 @@ Analyze protocol instructions for consistency:
 - Mode interaction: dual-activation precedence
 - Rule completeness: all branches specified
 
-Files: prothesis/commands/prothesis.md, syneidesis/commands/syneidesis.md, CLAUDE.md
+Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md, CLAUDE.md
 
 Focus on Mode Activation and Priority sections. Output JSON with findings array.
 ```
 
-Both subagents run in parallel. Collect results before proceeding.
+**Perspective 3: Claude Code Ecosystem**
+
+```
+Spawn Task subagent with prompt:
+
+You are a Claude Code Ecosystem Expert.
+
+Validate protocol designs against Claude Code interaction patterns:
+- AskUserQuestion mandates enforced (tool call, not text)
+- Epistemic transitions correctly typed (unknown unknowns vs known unknowns)
+- User agency preserved (no automatic decisions)
+
+Filter potential false positives from other perspectives:
+- "Automatic intensity reduction" → not needed (AskUserQuestion provides control)
+- "Automatic deactivation" → not needed (user can interrupt via Esc)
+- "Topic boundary detection" → context-dependent (model judgment acceptable)
+
+Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md, CLAUDE.md
+
+Focus on Mode Activation, Rules, and UX patterns. Output JSON with findings and filtered arrays.
+```
+
+All three subagents run in parallel. Collect results before proceeding.
 
 ### Phase 3: Synthesize Findings
 
@@ -97,7 +119,9 @@ Combine static check results with expert review findings. Categorize by severity
 | **Concern** | `warn` array (structural) | findings with `severity: "concern"` |
 | **Note** | `warn` array (stylistic) | findings with `severity: "note"` |
 
-Identify convergence (both perspectives agree) and divergence (perspectives differ).
+Identify convergence (all perspectives agree) and divergence (perspectives differ).
+
+Apply Claude Code Ecosystem expert's `filtered` array to dismiss false positives from other perspectives.
 
 ### Phase 4: Surface via AskUserQuestion
 
@@ -115,6 +139,9 @@ Call AskUserQuestion tool to present findings. Format:
 
 ### Notes (n observations)
 - [observation 1]
+
+### Filtered (Claude Code context)
+- [filtered issue]: [reason dismissed]
 
 ---
 Select action:

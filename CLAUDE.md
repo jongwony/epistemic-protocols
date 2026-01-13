@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — transforms **unknown unknowns** into **known unknowns** during AI-human interaction.
+Claude Code plugin marketplace for epistemic dialogue — transforms **unknown unknowns** into **known unknowns** (Prothesis, Syneidesis) and **known unknowns** into **known knowns** (Hermeneia) during AI-human interaction.
 
 ## Architecture
 
@@ -18,6 +18,9 @@ epistemic-protocols/
 ├── syneidesis/                        # Protocol: gap surfacing
 │   ├── .claude-plugin/plugin.json
 │   └── skills/syneidesis/SKILL.md     # Full protocol definition (user-invocable)
+├── hermeneia/                         # Protocol: intent clarification
+│   ├── .claude-plugin/plugin.json
+│   └── skills/hermeneia/SKILL.md      # Full protocol definition (user-invocable)
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # Parallel extraction agents
@@ -36,16 +39,24 @@ epistemic-protocols/
 
 ### Prothesis (πρόθεσις)
 Present perspective options before analysis begins. Injected into main agent context.
-- **Flow**: `U → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → I(Pₛ) → R → Syn(R) → L`
+- **Flow**: `U → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L`
 - **Key**: Phase 1 calls `AskUserQuestion` for perspective selection (mandatory—text-only = violation)
-- **Constraint**: No Task subagents—must run in main agent to call AskUserQuestion
+- **Phase 2**: Parallel inquiry with epistemic isolation per selected perspective
 
 ### Syneidesis (συνείδησις)
 Surface potential gaps at decision points as questions. Injected into main agent context.
 - **Flow**: `D → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'`
-- **Key**: Phase 1 calls `AskUserQuestion` for gap surfacing (mandatory—text-only = violation)
+- **Key**: Phase 1 calls `AskUserQuestion` for gap surfacing after Phase 0 detection (mandatory—text-only = violation)
 - **Gap types**: Procedural, Consideration, Assumption, Alternative
 - **Triggers**: "delete", "push", "deploy", "all", "every", "quickly", production, security
+
+### Hermeneia (ἑρμηνεία)
+Clarify intent-expression gaps through user-initiated dialogue.
+- **Flow**: `(E, I) → D(E, I) → G → C(G) → Q → A → Integrate(A, E, I) → I'`
+- **Key**: User-initiated only; Phase 1 diagnoses (silent), Phase 2 calls `AskUserQuestion` (mandatory)
+- **Gap types**: Expression, Precision, Coherence, Context
+- **Triggers**: "clarify", "what I mean", "did I express this right"
+- **Invocation**: `/hermeneia [expression]` (user-invocable skill)
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
@@ -70,6 +81,23 @@ Pre-commit protocol verification via static checks and expert review.
 - **Session Persistence**: Modes active until session end
 - **Priority Override**: Active protocols supersede default behaviors
 
+## Protocol Precedence
+
+Multi-activation order: **Hermeneia → Prothesis → Syneidesis**
+
+| Combination | Order | Rationale |
+|-------------|-------|-----------|
+| Hermeneia + Prothesis | H → P | Clarify intent before perspective selection |
+| Prothesis + Syneidesis | P → S | Perspective gates gap detection |
+| All three | H → P → S | Intent → Perspective → Decision gaps |
+
+## Verification
+
+Run `/verify` before commits. Static checks via:
+```bash
+node .claude/skills/verify/scripts/static-checks.js .
+```
+
 ## Editing Guidelines
 
 - Formal notation: category theory (limit, colimit, ∥ for parallel)
@@ -77,4 +105,6 @@ Pre-commit protocol verification via static checks and expert review.
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
 - Skills require YAML frontmatter with `name`, `description`
-- Prothesis/Syneidesis: No `agent` field or Task delegation—main agent injection required
+- Prothesis: Phase 1 (AskUserQuestion) in main agent; Phase 2 uses parallel inquiry with epistemic isolation
+- Syneidesis: No Task delegation—must run entirely in main agent to call AskUserQuestion at decision points
+- Hermeneia: No Task delegation—must run in main agent to call AskUserQuestion for clarification

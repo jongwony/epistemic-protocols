@@ -1,0 +1,9 @@
+{
+  "name": "hermeneia",
+  "description": "Clarify intent-expression gaps through dialogue (ἑρμηνεία: interpretation)",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  }
+}

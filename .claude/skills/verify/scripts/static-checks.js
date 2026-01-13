@@ -271,8 +271,9 @@ function checkCrossReference() {
 // ============================================================
 function checkRequiredSections() {
   const protocolFiles = [
-    'prothesis/commands/prothesis.md',
-    'syneidesis/commands/syneidesis.md',
+    'prothesis/skills/prothesis/SKILL.md',
+    'syneidesis/skills/syneidesis/SKILL.md',
+    'hermeneia/skills/hermeneia/SKILL.md',
   ];
 
   const requiredSections = [

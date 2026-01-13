@@ -17,12 +17,13 @@ Surface potential gaps at decision points through questions, enabling user to no
 **Syneidesis** (συνείδησις): A dialogical act of surfacing potential gaps—procedural, consideration, assumption, or alternative—at decision points, transforming unknown unknowns into questions the user can evaluate.
 
 ```
-Syneidesis(D, Σ) → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
+Syneidesis(D) → Scan(D, Σ₀) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
+                                                                -- Σ₀ = initial empty state
 
 D      = Decision point ∈ Stakes × Context
 Stakes = {Low, Med, High}
 G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative}
-Scan   = Detection: D → Set(G)                      -- gap identification
+Scan   = Detection: D × Σ → Set(G)                  -- gap identification (Σ₀ = empty state)
 Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
 Gₛ     = Selected gaps (|Gₛ| ≤ 2)
 Q      = Question formation (assertion-free)
@@ -32,25 +33,51 @@ A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
 
 ── PHASE TRANSITIONS ──
-Phase 0: D → Scan(D) → G                            -- detection (silent)
+Phase 0: D → Scan(D, ∅) → G                         -- detection (silent, initial scan)
 Phase 1: G → Sel(G, D) → Gₛ → Q(Gₛ) → await → J    -- call AskUserQuestion
 Phase 2: J → A(J, D, Σ) → Σ'                        -- adjustment
 
 ── ADJUSTMENT RULES ──
 A(Addresses(c), _, σ) = σ { incorporate(c) }        -- extern: modifies plan
 A(Dismisses, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
+
+incorporate: Clarification → State → State
+incorporate(c)(σ) = σ { context ← context ⊕ c, reviewed ← reviewed ∪ {Gₛ.type} }
+-- clarification merges into context; gap marked reviewed
 A(Silence, d, σ)      = match stakes(d):
                           Low|Med → σ { deferred ← Gₛ :: deferred }
                           High    → σ { blocked ← true }
 
 ── SELECTION RULE ──
-Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
+Sel: Set(G) × D → Gₛ where |G| > 0
+Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, if stakes(d) = High then 2 else 1))
 
 ── CONTINUATION ──
 proceed(Σ) = ¬blocked(Σ)
 
+── DYNAMIC DISCOVERY ──
+After A (Adjustment):
+  Σ' = A(J, D, Σ)                      -- updated state
+  G' = Scan(D, Σ')                     -- re-scan with updated state
+  G  = G' \ reviewed(Σ')               -- exclude already-reviewed gaps
+  if |G| > 0 ∧ progress(G, Σ, Σ'):
+    → Phase 1 (Sel → Q → J → A)        -- continue loop
+
+── TERMINATION (Hybrid) ──
+progress(G, Σ, Σ') = ¬cycle(G) ∧ Δ(Σ, Σ') > 0
+
+cycle(G) = sig(G) ∈ History
+sig(G) = hash(type(G), subject(G), context(G))
+History = { sig(g) | g ∈ resolved_gaps }
+
+Δ(Σ, Σ') = |addressed(Σ')| - |addressed(Σ)|  -- progress delta
+
+Terminate when:
+  cycle(G)           → "This gap was already addressed"
+  Δ = 0 for 2 rounds → "No progress; rephrase or proceed?"
+
 ── MODE STATE ──
-Λ = { phase: Phase, state: Σ, active: Bool }
+Λ = { phase: Phase, state: Σ, iterations: ℕ, active: Bool }
 ```
 
 ## Core Principle
@@ -78,18 +105,34 @@ When Syneidesis is active:
 **Action**: At decision points, call AskUserQuestion tool to surface potential gaps before proceeding.
 </system-reminder>
 
+**Domain overlap**: When Prothesis is also active, supersession domains are independent.
+Prothesis gates analysis; Syneidesis gates decisions. Execution order (Prothesis → Syneidesis)
+ensures no conflict: perspective established before decision evaluation begins.
+
 - Stakes Assessment replaces tier-based gating
 - All decision points become candidates for interactive confirmation
 - User Memory rules resume after mode deactivation
 
-**Dual-activation precedence**: When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
+**Protocol precedence** (multi-activation order): Hermeneia → Prothesis → Syneidesis
+
+| Active Protocols | Execution Order | Rationale |
+|------------------|-----------------|-----------|
+| Prothesis + Syneidesis | Prothesis → Syneidesis | Perspective selection gates analysis |
+| Hermeneia + Syneidesis | Hermeneia → Syneidesis | Clarified intent informs gap detection |
+| All three active | Hermeneia → Prothesis → Syneidesis | Intent → Perspective → Decision gaps |
+
+Syneidesis applies to decision points after intent and perspective are established.
 
 ### Mode Deactivation
 
 | Trigger | Effect |
 |---------|--------|
-| Task completion | Auto-deactivate after final resolution |
+| Task completion | Auto-deactivate after final resolution (differs from Prothesis—see note) |
 | User dismisses 2+ consecutive gaps | Reduce intensity for session |
+
+**Session lifetime note**: Syneidesis deactivates on task completion (gaps are task-scoped),
+while Prothesis persists until session end (lens applies across tasks). This is intentional:
+perspectives span topics; gaps are decision-specific.
 
 ### Plan Mode Integration
 
@@ -166,6 +209,30 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 | Dismisses | Accept, no follow-up | Mark gap as user-reviewed; skip similar gaps |
 | Silence (Low/Med stakes) | Proceed | Log gap for potential revisit |
 | Silence (High stakes) | Wait | Block until explicit judgment |
+
+### Dynamic Discovery
+
+After each resolution, re-scan the decision context for newly surfaced gaps:
+
+1. **Incorporate answer**: Update state Σ with user's response
+2. **Re-scan**: Apply gap taxonomy to updated context (including answer implications)
+3. **Filter**: Exclude gaps already in `reviewed` set
+4. **Progress check**: Continue only if `progress(Σ, Σ') = true` (no cycle, Δ > 0)
+5. **Queue new gaps**: Add discovered gaps to TodoWrite as `pending`
+
+**Discovery triggers**:
+- User answer reveals new scope ("all files" → "including hidden?")
+- Answer creates new assumption ("I'll use the API" → "rate limits considered?")
+- Clarification shifts context ("actually, it's production" → stakes escalation)
+
+**Termination conditions** (Hybrid strategy):
+| Condition | Detection | Action |
+|-----------|-----------|--------|
+| Cycle | `sig(G) ∈ History` | "This gap was already addressed" |
+| Progress stall | `Δ = 0` for 2 rounds | "No progress; rephrase or proceed?" |
+| User exit | Esc/interrupt | Native Claude Code behavior |
+
+**Gap signature**: `sig(G) = hash(type, subject, context)` prevents semantic repetition, not just syntactic.
 
 ### Gap Tracking
 

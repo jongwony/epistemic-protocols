@@ -10,13 +10,15 @@ Claude Code plugins for epistemic dialogue — transforming **unknown unknowns**
 |----------|---------|--------|
 | **[Prothesis](./prothesis)** (πρόθεσις) | Place perspective options before inquiry | Before analysis |
 | **[Syneidesis](./syneidesis)** (συνείδησις) | Surface potential gaps at decision points | At decision time |
+| **[Hermeneia](./hermeneia)** (ἑρμηνεία) | Clarify intent-expression gaps via dialogue | User-initiated |
 
 ## Core Idea
 
-Both protocols perform the same transformation: **Unknown Unknown → Known Unknown**.
+All protocols share a core transformation pattern:
 
-- **Prothesis**: "Which lens?" → AI presents options, you choose
-- **Syneidesis**: "What's missing?" → AI surfaces gaps as questions, you judge
+- **Prothesis**: "Which lens?" → AI presents options, you choose (**Unknown Unknown → Known Unknown**)
+- **Syneidesis**: "What's missing?" → AI surfaces gaps as questions, you judge (**Unknown Unknown → Known Unknown**)
+- **Hermeneia**: "What do I mean?" → AI presents interpretations, you recognize your intent (**Known Unknown → Known Known**)
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
 
@@ -29,6 +31,7 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 # Install what you need
 /plugin install prothesis
 /plugin install syneidesis
+/plugin install hermeneia
 ```
 
 ## Usage
@@ -36,6 +39,7 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 ```
 /prothesis [your question]    # Get perspective options before analysis
 /syneidesis [your task]       # Enable gap surfacing during execution
+/hermeneia [your expression]  # Clarify ambiguous intent
 ```
 
 ## License
