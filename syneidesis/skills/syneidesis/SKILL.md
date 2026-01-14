@@ -1,6 +1,10 @@
 ---
 name: syneidesis
-description: Surface potential gaps before decisions. Raises procedural, consideration, assumption, and alternative gaps as questions.
+description: >-
+  Use when user is about to make a decision, execute irreversible actions,
+  or uses trigger words like "delete", "push", "deploy", "all", "every",
+  "quickly", "just". Surfaces potential gaps (procedural, consideration,
+  assumption, alternative) at decision points through questions.
 user-invocable: true
 ---
 
@@ -13,31 +17,40 @@ Surface potential gaps at decision points through questions, enabling user to no
 **Syneidesis** (συνείδησις): A dialogical act of surfacing potential gaps—procedural, consideration, assumption, or alternative—at decision points, transforming unknown unknowns into questions the user can evaluate.
 
 ```
-── FLOW ──
-D → G → Gₛ → Q → J → Σ'
+Syneidesis(D, Σ) → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
 
-── TYPES ──
-D  = Decision point (stakes: Low | Med | High)
-G  = Detected gaps ∈ {Procedural, Consideration, Assumption, Alternative}
-Gₛ = Selected gaps for surfacing (|Gₛ| ≤ 2, prioritized by stakes)
-Q  = Questions formed from Gₛ (assertion-free)
-J  = User judgment: Addresses | Dismisses | Silence
-Σ  = State { reviewed, deferred, blocked }
+D      = Decision point ∈ Stakes × Context
+Stakes = {Low, Med, High}
+G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative}
+Scan   = Detection: D → Set(G)                      -- gap identification
+Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
+Gₛ     = Selected gaps (|Gₛ| ≤ 2)
+Q      = Question formation (assertion-free)
+J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
+c      = Clarification (user-provided response to Q)
+A      = Adjustment: J × D × Σ → Σ'
+Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
 
-── PHASES ──
-Phase 0: Scan decision point → G (silent)
-Phase 1: If G non-empty, call AskUserQuestion → J
-Phase 2: Update Σ based on J
-         - Addresses: incorporate clarification
-         - Dismisses: mark reviewed
-         - Silence: defer (Low/Med) or block (High)
+── PHASE TRANSITIONS ──
+Phase 0: D → Scan(D) → G                            -- detection (silent)
+Phase 1: G → Sel(G, D) → Gₛ → Q(Gₛ) → await → J    -- call AskUserQuestion
+Phase 2: J → A(J, D, Σ) → Σ'                        -- adjustment
 
-── LOOP ──
-After Phase 2: re-scan for new gaps, exclude reviewed.
-Continue if progress; terminate on cycle or stall.
+── ADJUSTMENT RULES ──
+A(Addresses(c), _, σ) = σ { incorporate(c) }        -- extern: modifies plan
+A(Dismisses, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
+A(Silence, d, σ)      = match stakes(d):
+                          Low|Med → σ { deferred ← Gₛ :: deferred }
+                          High    → σ { blocked ← true }
 
-── STATE ──
-Λ = { phase, state: Σ, active }
+── SELECTION RULE ──
+Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
+
+── CONTINUATION ──
+proceed(Σ) = ¬blocked(Σ)
+
+── MODE STATE ──
+Λ = { phase: Phase, state: Σ, active: Bool }
 ```
 
 ## Core Principle
@@ -65,34 +78,18 @@ When Syneidesis is active:
 **Action**: At decision points, call AskUserQuestion tool to surface potential gaps before proceeding.
 </system-reminder>
 
-**Domain overlap**: When Prothesis is also active, supersession domains are independent.
-Prothesis gates analysis; Syneidesis gates decisions. Execution order (Prothesis → Syneidesis)
-ensures no conflict: perspective established before decision evaluation begins.
-
 - Stakes Assessment replaces tier-based gating
 - All decision points become candidates for interactive confirmation
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence** (multi-activation order): Hermeneia → Prothesis → Syneidesis
-
-| Active Protocols | Execution Order | Rationale |
-|------------------|-----------------|-----------|
-| Prothesis + Syneidesis | Prothesis → Syneidesis | Perspective selection gates analysis |
-| Hermeneia + Syneidesis | Hermeneia → Syneidesis | Clarified intent informs gap detection |
-| All three active | Hermeneia → Prothesis → Syneidesis | Intent → Perspective → Decision gaps |
-
-Syneidesis applies to decision points after intent and perspective are established.
+**Dual-activation precedence**: When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
 
 ### Mode Deactivation
 
 | Trigger | Effect |
 |---------|--------|
-| Task completion | Auto-deactivate after final resolution (differs from Prothesis—see note) |
+| Task completion | Auto-deactivate after final resolution |
 | User dismisses 2+ consecutive gaps | Reduce intensity for session |
-
-**Session lifetime note**: Syneidesis deactivates on task completion (gaps are task-scoped),
-while Prothesis persists until session end (lens applies across tasks). This is intentional:
-perspectives span topics; gaps are decision-specific.
 
 ### Plan Mode Integration
 
@@ -127,9 +124,7 @@ This cycle repeats per planning phase or domain area.
 **Skip**:
 - User explicitly confirmed in current session
 - Mechanical task (no judgment involved)
-- User already mentioned the **specific gap instance** (type + subject), not just category
-
-**Note on Skip vs Dynamic Discovery**: Skip operates at **instance level** (specific gap about specific subject), not type level. "User mentioned backups" skips `[Assumption] backup verified?` for that specific resource, but Dynamic Discovery may still surface `[Assumption] backup verified?` for a different resource revealed by user's answer.
+- User already mentioned the gap category
 
 ## Gap Taxonomy
 
@@ -171,30 +166,6 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 | Dismisses | Accept, no follow-up | Mark gap as user-reviewed; skip similar gaps |
 | Silence (Low/Med stakes) | Proceed | Log gap for potential revisit |
 | Silence (High stakes) | Wait | Block until explicit judgment |
-
-### Dynamic Discovery
-
-After each resolution, re-scan the decision context for newly surfaced gaps:
-
-1. **Incorporate answer**: Update state Σ with user's response
-2. **Re-scan**: Apply gap taxonomy to updated context (including answer implications)
-3. **Filter**: Exclude gaps already in `reviewed` set
-4. **Progress check**: Continue only if `progress(Σ, Σ') = true` (no cycle, Δ > 0)
-5. **Queue new gaps**: Add discovered gaps to TodoWrite as `pending`
-
-**Discovery triggers**:
-- User answer reveals new scope ("all files" → "including hidden?")
-- Answer creates new assumption ("I'll use the API" → "rate limits considered?")
-- Clarification shifts context ("actually, it's production" → stakes escalation)
-
-**Termination conditions** (Hybrid strategy):
-| Condition | Detection | Action |
-|-----------|-----------|--------|
-| Cycle | `sig(G) ∈ History` | "This gap was already addressed" |
-| Progress stall | `Δ = 0` for 2 rounds | "No progress; rephrase or proceed?" |
-| User exit | Esc/interrupt | Native Claude Code behavior |
-
-**Gap signature**: `sig(G) = hash(type, subject, context)` prevents semantic repetition, not just syntactic.
 
 ### Gap Tracking
 
@@ -253,5 +224,5 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 4. **User authority**: Dismissal is final
 5. **Minimal intrusion**: Lightest intervention that achieves awareness
 6. **Stakes calibration**: Intensity follows stakes matrix above
-7. **Task-Scoped Persistence**: Mode remains active until task completion (differs from Prothesis—see Mode Deactivation)
+7. **Session Persistence**: Mode remains active until session end
 8. **Gap Persistence**: Record all detected gaps via TodoWrite; deferred gaps must not be lost
