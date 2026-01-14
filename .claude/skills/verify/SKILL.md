@@ -51,39 +51,50 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 
 Spawn parallel Task subagents for LLM-based review. Each perspective analyzes independently.
 
-**Perspective 1: Type/Category Theory**
+**Perspective 1: Type Design**
 
 ```
 Spawn Task subagent with prompt:
 
-You are a Type Theory and Category Theory Expert.
+You are a Type Theory Expert analyzing protocol type design.
 
-Analyze protocol definitions for mathematical soundness:
+**Soundness check**:
 - Type signatures: well-formed domain/codomain
-- Categorical constructions: correct limit/colimit usage
 - State machines: transition totality
+- Flow consistency: types match phase transitions
+
+**Necessity check**:
+- Cardinality constraints (|P| ≥ 2): prose sufficient given Esc interrupt?
+- Refinement types: marginal benefit for LLM interpretation?
+- Principle: no type checker exists; social enforcement via prose is primary
 
 Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md
 
-Focus on Definition sections. Output JSON with findings array.
+Focus on Definition sections (FLOW, TYPES, PHASES). Output JSON with findings array.
 ```
 
-**Perspective 2: System Prompt Engineering**
+**Perspective 2: Specification Clarity**
 
 ```
 Spawn Task subagent with prompt:
 
-You are a System Prompt Engineer.
+You are a Specification Clarity Expert analyzing LLM interpretability.
 
-Analyze protocol definitions as system prompts for LLM behavior modification:
-- Activation clarity: trigger conditions unambiguous for model interpretation
-- Priority conflicts: supersession domain overlap; competing directives
+**LLM behavior modification**:
+- Activation clarity: trigger conditions unambiguous
+- Priority conflicts: supersession domain overlap
 - Instruction parsability: rules actionable without implicit reasoning
-- Failure modes: edge cases where model might misinterpret instructions
+
+**Notation complexity**:
+- Flow formulas: understandable at a glance?
+- Standard notation preferred (|P| ≥ 2) over custom constructors (Set²⁺)
+- Section structure: FLOW → TYPES → PHASES → STATE sufficient?
+
+Principle: specification is for human/LLM comprehension, not compiler verification.
 
 Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md, CLAUDE.md
 
-Focus on Mode Activation, Priority, and Rules sections. Output JSON with findings array.
+Focus on Definition, Mode Activation, Priority, Rules sections. Output JSON with findings array.
 ```
 
 **Perspective 3: Claude Code Ecosystem**
@@ -93,67 +104,23 @@ Spawn Task subagent with prompt:
 
 You are a Claude Code Ecosystem Expert.
 
-Validate protocol designs against Claude Code interaction patterns:
+**Pattern validation**:
 - AskUserQuestion mandates enforced (tool call, not text)
 - Epistemic transitions correctly typed (unknown unknowns vs known unknowns)
 - User agency preserved (no automatic decisions)
 
-Filter potential false positives from other perspectives:
+**False positive filtering** (dismiss concerns from other perspectives):
 - "Automatic intensity reduction" → not needed (AskUserQuestion provides control)
 - "Automatic deactivation" → not needed (user can interrupt via Esc)
 - "Topic boundary detection" → context-dependent (model judgment acceptable)
+- "Type-level cardinality" → prose sufficient (low violation cost, Esc recovery)
 
 Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md, CLAUDE.md
 
-Focus on Mode Activation, Rules, and UX patterns. Output JSON with findings and filtered arrays.
+Focus on Mode Activation, Rules, UX patterns. Output JSON with findings and filtered arrays.
 ```
 
-**Perspective 4: Notation Complexity**
-
-```
-Spawn Task subagent with prompt:
-
-You are a Specification Readability Expert.
-
-Review formal notation for complexity vs clarity balance:
-- Flow formulas: can be understood at a glance?
-- Type definitions: standard notation (|P| ≥ 2) preferred over custom constructors (Set²⁺)?
-- Section structure: FLOW → TYPES → PHASES → STATE sufficient?
-- Removed cruft: CATEGORICAL NOTE, BOUNDARY, DYNAMIC DISCOVERY necessary?
-
-Principle: Specification is for human/LLM comprehension, not compiler verification.
-Simpler notation with prose constraints is preferred over complex type-level encoding.
-
-Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md
-
-Focus on Definition sections. Output JSON with findings array.
-```
-
-**Perspective 5: Type Constraint Necessity**
-
-```
-Spawn Task subagent with prompt:
-
-You are a Pragmatic Type Theory Expert.
-
-Analyze whether type-level constraints are necessary or over-engineering:
-- Cardinality constraints (|P| ≥ 2): prose sufficient given Claude Code's Esc interrupt?
-- Refinement types: marginal benefit for LLM interpretation?
-- Enforcement regime: social (prose) vs mechanical (type checker) — which applies here?
-
-Decision criteria:
-- Violation cost: ~5 seconds user retry = low stakes
-- Runtime environment: no type checker, only LLM interpretation
-- User control: Esc key provides recovery mechanism
-
-Recommend: keep/remove/simplify type constraints with rationale.
-
-Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md
-
-Focus on TYPES sections. Output JSON with findings array.
-```
-
-All five subagents run in parallel. Collect results before proceeding.
+All three subagents run in parallel. Collect results before proceeding.
 
 ### Phase 3: Synthesize Findings
 
@@ -221,11 +188,9 @@ Consult `references/criteria.md` for detailed severity definitions and decision 
 ## Review Checklists
 
 Consult `references/review-checklists.md` for:
-- Type/Category Theory expert prompt template
-- System Prompt Engineering expert prompt template
+- Type Design expert prompt template
+- Specification Clarity expert prompt template
 - Claude Code Ecosystem expert prompt template
-- Notation Complexity expert prompt template
-- Type Constraint Necessity expert prompt template
 - Known issues checklist
 - Synthesis template
 
