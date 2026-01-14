@@ -13,25 +13,37 @@ Transform unknown unknowns into known unknowns by placing available epistemic pe
 **Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the inquirer does not know from which viewpoint to proceed, enabling selection before any perspective-requiring cognition.
 
 ```
-── FLOW ──
-U → C → P → Pₛ → ∥I(Pₛ) → R → L
+Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L
 
-── TYPES ──
-U  = Underspecified request
-C  = Context (gathered from U)
-P  = Perspectives derived from C (|P| ≥ 2)
-Pₛ = User-selected perspectives (via AskUserQuestion)
-R  = Inquiry results per perspective
-L  = Lens { convergence, divergence, assessment }
+U      = Underspecified request (purpose clear, approach unclear)
+G      = Gather: U → C                         -- context acquisition
+C      = Context (information for perspective formulation)
+{P₁...Pₙ}(C) = Perspectives derived from context (n ≥ 2)
+S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice)
+Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ}, Pₛ ≠ ∅)
+∥I     = Parallel inquiry: (∥ p∈Pₛ. Inquiry(p)) → R
+R      = Set(Result)                           -- inquiry outputs
+Syn    = Synthesis: R → (∩, D, A)
+L      = Lens { convergence: ∩, divergence: D, assessment: A }
 
-── PHASES ──
-Phase 0: Gather context from U
-Phase 1: Present P, call AskUserQuestion → Pₛ
-Phase 2: ∥ Inquiry(p) for p ∈ Pₛ → R (parallel Task agents)
-Phase 3: Synthesize R → L
+── PHASE TRANSITIONS ──
+Phase 0: U → G(U) → C                          -- context acquisition
+Phase 1: C → present({P₁...Pₙ}(C)) → await → Pₛ   -- call AskUserQuestion
+Phase 2: Pₛ → ∥I(Pₛ) → R                       -- sequential perspective analysis
+Phase 3: R → Syn(R) → L                        -- synthesis
 
-── STATE ──
-Λ = { phase, lens, active }
+── BOUNDARY ──
+G (gather)  = purpose: context acquisition
+S (select)  = extern: user choice boundary
+I (inquiry) = purpose: perspective-informed interpretation
+
+── CATEGORICAL NOTE ──
+∩ = meet (intersection) over comparison morphisms between perspective outputs
+D = join (union of distinct findings) where perspectives diverge
+A = synthesized assessment (additional computation)
+
+── MODE STATE ──
+Λ = { phase: Phase, lens: Option(L), active: Bool }
 ```
 
 ## Mode Activation
@@ -53,42 +65,20 @@ When Prothesis is active:
 **Action**: Before analysis, call AskUserQuestion tool to present perspective options.
 </system-reminder>
 
-**Domain overlap**: When Syneidesis is also active, Prothesis supersession (analysis patterns)
-and Syneidesis supersession (decision gating) are independent. Execution order resolves overlap:
-Prothesis completes before Syneidesis evaluates decision points.
-
 - Prothesis completes before other workflows begin
 - User Memory rules resume after perspective is established
 
-**Protocol precedence** (multi-activation order): Hermeneia → Prothesis → Syneidesis
-
-| Active Protocols | Execution Order | Rationale |
-|------------------|-----------------|-----------|
-| Prothesis + Syneidesis | Prothesis → Syneidesis | Perspective selection gates analysis |
-| Hermeneia + Prothesis | Hermeneia → Prothesis | Clarified intent informs perspective options |
-| All three active | Hermeneia → Prothesis → Syneidesis | Intent → Perspective → Decision gaps |
-
-Syneidesis applies to decision points within the established perspective.
+**Dual-activation precedence**: When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
 
 ### Per-Message Application
 
 Every user message triggers perspective evaluation:
 
-| Message Type | Criteria | Action |
-|--------------|----------|--------|
-| New inquiry | Topic shift OR no prior lens in session | Prothesis |
-| Follow-up within lens | Explicit reference to prior analysis OR same subject matter | Continue with selected perspective |
-| Uncertain | Neither criterion clearly met | Default to Prothesis |
-
-**Within-lens criteria** (any of):
-1. User explicitly references prior analysis ("based on what you said", "continuing with...")
-2. Same subject matter as established lens (semantic continuity)
-3. Request builds on prior conclusion ("given that", "so then...")
-
-**New-inquiry criteria** (any of):
-1. Different domain or subject matter
-2. Contradicts prior lens assumptions
-3. Scope expansion beyond prior analysis
+| Message Type | Action |
+|--------------|--------|
+| New inquiry | Prothesis |
+| Follow-up within established lens | Continue with selected perspective |
+| Uncertain | Default to Prothesis |
 
 **Decision rule**: When uncertain whether perspective is established, default to Prothesis.
 
@@ -164,26 +154,23 @@ Optional dimension naming (invoke when initial generation seems redundant):
 - Identify epistemic axes relevant to this inquiry
 - Dimensions remain revisable during perspective generation
 
-### Phase 2: Inquiry (Parallel Isolated Agents)
+### Phase 2: Inquiry (Through Selected Lens)
 
-For each selected perspective, **call** Task tool for **epistemic isolation**:
+For each selected perspective, analyze sequentially as that perspective:
 
 ```
-Task(subagent_type: "general-purpose",
-     prompt: "Analyze from {perspective_name} viewpoint: {original_question}. Context: {phase0_context}",
-     run_in_background: true)
+You are analyzing from the **[Perspective]** standpoint.
+
+**Question**: {original question verbatim}
+
+Provide:
+1. **Epistemic Contribution**: What this lens uniquely reveals (2-3 sentences)
+2. **Framework Analysis**: Domain-specific concepts, terminology, reasoning
+3. **Horizon Limits**: What this perspective cannot see or undervalues
+4. **Assessment**: Direct answer from this viewpoint
 ```
 
-**Constraint**: Task subagents cannot call AskUserQuestion. All user interaction must complete in Phase 1 before entering Phase 2. This is why perspective selection (Phase 1) is mandatory before inquiry begins.
-
-**Rationale**: Sequential analysis in a single context window causes cross-contamination—later perspectives can see earlier results, violating epistemic independence. Parallel agents ensure each perspective analyzes without access to others' outputs.
-
-**Execution**:
-1. Spawn one agent per selected perspective with `run_in_background: true`
-2. Wait for all agents to complete (use `TaskOutput` to collect results)
-3. Aggregate results for Phase 3 synthesis
-
-Multiple selections → parallel agents (never sequential in main context).
+Multiple selections → analyze each perspective in sequence, maintaining epistemic independence.
 
 ### Phase 3: Synthesis (Horizon Integration)
 
@@ -246,8 +233,7 @@ Prothesis(mandatory_baseline, optional_extension):
 ## Rules
 
 1. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-2. **Epistemic Integrity**: Each perspective analyzes independently via isolated subagents; no cross-contamination
+2. **Epistemic Integrity**: Each perspective analyzes independently; no cross-contamination
 3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
-4. **Verbatim Transmission**: Pass original question unchanged to each perspective agent
-5. **Parallel Isolation**: Phase 2 must **call** Task tool with `run_in_background: true`; never sequential in main context
-6. **Session Persistence**: Mode remains active until session end; each message re-evaluates Prothesis applicability per Mode Activation rules
+4. **Verbatim Transmission**: Pass original question unchanged to each perspective
+5. **Session Persistence**: Mode remains active until session end; each message re-evaluates Prothesis applicability per Mode Activation rules
