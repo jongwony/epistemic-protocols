@@ -108,7 +108,52 @@ Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.m
 Focus on Mode Activation, Rules, and UX patterns. Output JSON with findings and filtered arrays.
 ```
 
-All three subagents run in parallel. Collect results before proceeding.
+**Perspective 4: Notation Complexity**
+
+```
+Spawn Task subagent with prompt:
+
+You are a Specification Readability Expert.
+
+Review formal notation for complexity vs clarity balance:
+- Flow formulas: can be understood at a glance?
+- Type definitions: standard notation (|P| ≥ 2) preferred over custom constructors (Set²⁺)?
+- Section structure: FLOW → TYPES → PHASES → STATE sufficient?
+- Removed cruft: CATEGORICAL NOTE, BOUNDARY, DYNAMIC DISCOVERY necessary?
+
+Principle: Specification is for human/LLM comprehension, not compiler verification.
+Simpler notation with prose constraints is preferred over complex type-level encoding.
+
+Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md
+
+Focus on Definition sections. Output JSON with findings array.
+```
+
+**Perspective 5: Type Constraint Necessity**
+
+```
+Spawn Task subagent with prompt:
+
+You are a Pragmatic Type Theory Expert.
+
+Analyze whether type-level constraints are necessary or over-engineering:
+- Cardinality constraints (|P| ≥ 2): prose sufficient given Claude Code's Esc interrupt?
+- Refinement types: marginal benefit for LLM interpretation?
+- Enforcement regime: social (prose) vs mechanical (type checker) — which applies here?
+
+Decision criteria:
+- Violation cost: ~5 seconds user retry = low stakes
+- Runtime environment: no type checker, only LLM interpretation
+- User control: Esc key provides recovery mechanism
+
+Recommend: keep/remove/simplify type constraints with rationale.
+
+Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md
+
+Focus on TYPES sections. Output JSON with findings array.
+```
+
+All five subagents run in parallel. Collect results before proceeding.
 
 ### Phase 3: Synthesize Findings
 
@@ -177,7 +222,10 @@ Consult `references/criteria.md` for detailed severity definitions and decision 
 
 Consult `references/review-checklists.md` for:
 - Type/Category Theory expert prompt template
-- Instruction Design expert prompt template
+- System Prompt Engineering expert prompt template
+- Claude Code Ecosystem expert prompt template
+- Notation Complexity expert prompt template
+- Type Constraint Necessity expert prompt template
 - Known issues checklist
 - Synthesis template
 
