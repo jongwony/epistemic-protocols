@@ -1,10 +1,6 @@
 ---
 name: hermeneia
-description: >-
-  Use when user recognizes their expression may not match their intent,
-  asks to "clarify what I mean", "help me articulate", "did I express this right",
-  or feels their prompt is ambiguous. Transforms known unknowns into known knowns
-  through structured clarification dialogue.
+description: Clarify when intent and expression may not match. Transforms known unknowns into known knowns.
 user-invocable: true
 ---
 
