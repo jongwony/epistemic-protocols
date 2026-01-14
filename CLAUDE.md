@@ -78,7 +78,7 @@ Pre-commit protocol verification via static checks and expert review.
 
 - **Recognition over Recall**: Options to select, not blanks to fill
 - **Surfacing over Deciding**: AI illuminates, user judges
-- **Session Persistence**: Modes active until session end (exception: Syneidesis is task-scoped)
+- **Session Persistence**: Modes active until session end (exceptions: Syneidesis is task-scoped, Hermeneia is clarification-scoped)
 - **Priority Override**: Active protocols supersede default behaviors
 
 ## Protocol Precedence

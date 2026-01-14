@@ -17,31 +17,34 @@ Transform known unknowns into known knowns by clarifying intent-expression gaps 
 **Hermeneia** (ἑρμηνεία): A dialogical act of clarifying the gap between what the user intends and what they expressed, transforming recognized ambiguity into precise articulation through structured questioning.
 
 ```
-Hermeneia(E) → D(E, Î₀) → Gset → Sel(Gset) → G? → C(G?) → Q(G?) → A → Integrate(A, E, Î) → Î'
+── FLOW ──
+(E, T) → D(E, Î₀) → Gset → Sel(Gset) → g? → Q(g?) → A → Integrate(A, E, Î) → Î'
+-- T = TriggerSignal (user-initiated clarification request)
 
+── TYPES ──
 E      = Expression (user's written prompt)
-I      = Intent (user's actual goal, known only to user—epistemically inaccessible to AI)
-Î      = Inferred intent (AI's model of I, constructed from E and user feedback; Î₀ = initial inference)
-D      = Diagnose: E × Î → Set(GapType)        -- gap identification (compares E against Î)
-Gset   = Set(GapType)                          -- diagnosed gaps
-Sel    = Select: Set(GapType) → Option(Gap)   -- priority-based extraction; returns None if empty
-Gap    = {Expression, Precision, Coherence, Context}
-C      = Classify: G → GapCategory             -- categorization
-Q      = Question formation via AskUserQuestion
+T      = TriggerSignal (meta-signal about E; user acknowledges potential ambiguity)
+I      = Intent: User → Goal (opaque; epistemically inaccessible to AI)
+Î      = InferredIntent: E × Ctx → Goal (observable approximation of I; Î₀ = initial)
+Gap    = {Expression, Precision, Coherence, Context}  -- gap type enumeration
+GapInst = Gap × Subject × Ctx                 -- gap instance (type, subject, context)
+D      = Diagnose: E × Î → Set(GapInst)       -- gap identification (compares E against Î)
+Gset   = Set(GapInst)                         -- diagnosed gap instances
+Sel    = Select: Set(GapInst) → Option(GapInst)  -- priority-based extraction; returns None if empty
+Q      = Question: GapInst → IO(Question)     -- forms question (effect: presents via AskUserQuestion)
 A      = Answer (user-provided clarification)
-Integrate = (A × E × Î) → Î'                   -- merge clarification to update inferred intent
+Integrate = (A × E × Î) → Î'                  -- merge clarification to update inferred intent
 Î'     = Updated inferred intent (Î approaching I through clarification)
 
 ── PHASE TRANSITIONS ──
-Phase 0: Trigger → recognize user-initiated clarification request
-Phase 1: (E, Î) → D(E, Î) → Gset → Sel(Gset) → G? → C(G?)  -- diagnosis (silent)
-Phase 2: gsel → match gsel { Some(g) → Q(g) → await → A; None → proceed }  -- call AskUserQuestion if gap exists
+Phase 0: T → recognize user-initiated clarification request
+Phase 1: (E, Î) → D(E, Î) → Gset → Sel(Gset) → g?  -- diagnosis (silent); g? : Option(GapInst)
+Phase 2: match g? { Some(g) → Q(g) → await → A; None → proceed }  -- call AskUserQuestion if gap exists
 Phase 3: A → Integrate(A, E, Î) → Î'           -- integration (updates inferred intent)
 
 ── BOUNDARY ──
 D (diagnose) = purpose: identify intent-expression gaps
-C (classify) = purpose: categorize gap type for targeted questioning
-Q (question) = extern: user clarification boundary
+Q (question) = extern: user clarification boundary; extracts Gap type from GapInst for question form
 Î' (inferred)= purpose: refined model of intent, approaching user's actual goal
 
 ── EPISTEMIC TRANSITION ──
@@ -70,7 +73,7 @@ Terminate when:
   Δ = 0 for 2 rounds → "We seem stuck; would you like to rephrase?"
 
 ── MODE STATE ──
-Λ = { phase: Phase, gaps: Set(G), iterations: ℕ, clarified: Bool, active: Bool }
+Λ = { phase: Phase, gaps: Set(GapInst), iterations: ℕ, clarified: Bool, active: Bool }
 ```
 
 ## Core Principle

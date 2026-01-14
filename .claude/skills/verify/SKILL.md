@@ -68,21 +68,22 @@ Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.m
 Focus on Definition sections. Output JSON with findings array.
 ```
 
-**Perspective 2: Instruction Design**
+**Perspective 2: System Prompt Engineering**
 
 ```
 Spawn Task subagent with prompt:
 
-You are an Instruction Design Expert.
+You are a System Prompt Engineer.
 
-Analyze protocol instructions for consistency:
-- Priority conflicts: supersession domain overlap
-- Mode interaction: dual-activation precedence
-- Rule completeness: all branches specified
+Analyze protocol definitions as system prompts for LLM behavior modification:
+- Activation clarity: trigger conditions unambiguous for model interpretation
+- Priority conflicts: supersession domain overlap; competing directives
+- Instruction parsability: rules actionable without implicit reasoning
+- Failure modes: edge cases where model might misinterpret instructions
 
 Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md, CLAUDE.md
 
-Focus on Mode Activation and Priority sections. Output JSON with findings array.
+Focus on Mode Activation, Priority, and Rules sections. Output JSON with findings array.
 ```
 
 **Perspective 3: Claude Code Ecosystem**
