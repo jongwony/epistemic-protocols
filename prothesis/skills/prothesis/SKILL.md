@@ -166,7 +166,7 @@ Optional dimension naming (invoke when initial generation seems redundant):
 
 ### Phase 2: Inquiry (Parallel Isolated Agents)
 
-For each selected perspective, spawn parallel Task agents for **epistemic isolation**:
+For each selected perspective, **call** Task tool for **epistemic isolation**:
 
 ```
 Task(subagent_type: "general-purpose",
@@ -249,5 +249,5 @@ Prothesis(mandatory_baseline, optional_extension):
 2. **Epistemic Integrity**: Each perspective analyzes independently via isolated subagents; no cross-contamination
 3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective agent
-5. **Parallel Isolation**: Phase 2 must use Task subagents with `run_in_background: true`; never sequential in main context
+5. **Parallel Isolation**: Phase 2 must **call** Task tool with `run_in_background: true`; never sequential in main context
 6. **Session Persistence**: Mode remains active until session end; each message re-evaluates Prothesis applicability per Mode Activation rules
