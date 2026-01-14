@@ -39,20 +39,20 @@ epistemic-protocols/
 
 ### Prothesis (πρόθεσις)
 Present perspective options before analysis begins. Injected into main agent context.
-- **Flow**: `U → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L`
+- **Flow**: `U → C → P → Pₛ → ∥I(Pₛ) → R → L`
 - **Key**: Phase 1 calls `AskUserQuestion` for perspective selection (mandatory—text-only = violation)
 - **Phase 2**: Parallel inquiry with epistemic isolation per selected perspective
 
 ### Syneidesis (συνείδησις)
 Surface potential gaps at decision points as questions. Injected into main agent context.
-- **Flow**: `D → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'`
+- **Flow**: `D → G → Gₛ → Q → J → Σ'`
 - **Key**: Phase 1 calls `AskUserQuestion` for gap surfacing after Phase 0 detection (mandatory—text-only = violation)
 - **Gap types**: Procedural, Consideration, Assumption, Alternative
 - **Triggers**: "delete", "push", "deploy", "all", "every", "quickly", production, security
 
 ### Hermeneia (ἑρμηνεία)
 Clarify intent-expression gaps through user-initiated dialogue.
-- **Flow**: `(E, Î) → D(E, Î) → G → C(G) → Q → A → Integrate(A, E, Î) → Î'`
+- **Flow**: `E → G → Q → A → Î'`
 - **Key**: User-initiated only; Phase 1 diagnoses (silent), Phase 2 calls `AskUserQuestion` (mandatory)
 - **Gap types**: Expression, Precision, Coherence, Context
 - **Triggers**: "clarify", "what I mean", "did I express this right"
@@ -97,6 +97,13 @@ Run `/verify` before commits. Static checks via:
 ```bash
 node .claude/skills/verify/scripts/static-checks.js .
 ```
+
+**Static checks performed**:
+1. **json-schema**: plugin.json required fields (name, version, description, author), semver format
+2. **notation**: Unicode consistency (→, ∥, ∩, ∪, ⊆, ∈, ≠ over ASCII fallbacks)
+3. **directive-verb**: `call` (not `invoke`/`use`) for tool instructions
+4. **xref**: CLAUDE.md flow formulas sync with source files
+5. **structure**: Required sections in protocol SKILL.md (Definition, Mode Activation, Protocol, Rules, PHASE TRANSITIONS, MODE STATE)
 
 ## Editing Guidelines
 

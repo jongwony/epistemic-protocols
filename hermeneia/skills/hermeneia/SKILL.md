@@ -14,62 +14,28 @@ Transform known unknowns into known knowns by clarifying intent-expression gaps 
 
 ```
 ── FLOW ──
-(E, T) → D(E, Î₀) → Gset → Sel(Gset) → g? → Q(g?) → A → Integrate(A, E, Î) → Î'
--- T = TriggerSignal (user-initiated clarification request)
+E → G → Q → A → Î'
 
 ── TYPES ──
-E      = Expression (user's written prompt)
-T      = TriggerSignal (meta-signal about E; user acknowledges potential ambiguity)
-I      = Intent: User → Goal (opaque; epistemically inaccessible to AI)
-Î      = InferredIntent: E × Ctx → Goal (observable approximation of I; Î₀ = initial)
-Gap    = {Expression, Precision, Coherence, Context}  -- gap type enumeration
-GapInst = Gap × Subject × Ctx                 -- gap instance (type, subject, context)
-D      = Diagnose: E × Î → Set(GapInst)       -- gap identification (compares E against Î)
-Gset   = Set(GapInst)                         -- diagnosed gap instances
-Sel    = Select: Set(GapInst) → Option(GapInst)  -- priority-based extraction; returns None if empty
-Q      = Question: GapInst → IO(Question)     -- forms question (effect: presents via AskUserQuestion)
-A      = Answer (user-provided clarification)
-Integrate = (A × E × Î) → Î'                  -- merge clarification to update inferred intent
-Î'     = Updated inferred intent (Î approaching I through clarification)
+E  = User's expression (the prompt to clarify)
+G  = Detected gaps ∈ {Expression, Precision, Coherence, Context}
+Q  = Clarification question (via AskUserQuestion)
+A  = User's answer
+Î  = Inferred intent (AI's model of user's goal)
+Î' = Updated intent after clarification
 
-── PHASE TRANSITIONS ──
-Phase 0: T → recognize user-initiated clarification request
-Phase 1: (E, Î) → D(E, Î) → Gset → Sel(Gset) → g?  -- diagnosis (silent); g? : Option(GapInst)
-Phase 2: match g? { Some(g) → Q(g) → await → A; None → proceed }  -- call AskUserQuestion if gap exists
-Phase 3: A → Integrate(A, E, Î) → Î'           -- integration (updates inferred intent)
+── PHASES ──
+Phase 0: Recognize user-initiated clarification request
+Phase 1: Diagnose E for gaps → G (silent)
+Phase 2: If G non-empty, call AskUserQuestion → A
+Phase 3: Integrate A → Î'
 
-── BOUNDARY ──
-D (diagnose) = purpose: identify intent-expression gaps
-Q (question) = extern: user clarification boundary; extracts Gap type from GapInst for question form
-Î' (inferred)= purpose: refined model of intent, approaching user's actual goal
+── LOOP ──
+After Phase 3: re-diagnose for newly surfaced gaps.
+Continue if progress; terminate on cycle, stall, or no gaps.
 
-── EPISTEMIC TRANSITION ──
-Known unknown (user knows they're unclear) → Known known (user has articulated clearly)
-
-── DYNAMIC DISCOVERY ──
-After A (Answer):
-  Î' = Integrate(A, E, Î)                -- partial clarification (updates Î toward I)
-  G' = D(E, Î')                          -- re-diagnose: expression against updated inferred intent
-  G  = G' \ clarified                    -- exclude resolved gaps
-  if |G| > 0 ∧ progress(G, Î, Î'):
-    Î := Î'                              -- update inferred intent for next iteration
-    → Phase 2 (Q → await → A)            -- continue loop
-
-── TERMINATION (Hybrid) ──
-progress(G, Î, Î') = ¬cycle(G) ∧ Δ(Î, Î') > 0
-
-cycle(G) = sig(G) ∈ History
-sig(G) = hash(type(G), subject(G), context(G))
-History = { sig(g) | g ∈ resolved_gaps }
-
-Δ(Î, Î') = |clarified_elements(Î')| - |clarified_elements(Î)|
-
-Terminate when:
-  cycle(G)           → "This ambiguity was already clarified"
-  Δ = 0 for 2 rounds → "We seem stuck; would you like to rephrase?"
-
-── MODE STATE ──
-Λ = { phase: Phase, gaps: Set(GapInst), iterations: ℕ, clarified: Bool, active: Bool }
+── STATE ──
+Λ = { phase, gaps, clarified, active }
 ```
 
 ## Core Principle
@@ -91,6 +57,8 @@ Terminate when:
 ### Activation
 
 Command invocation or trigger phrase activates mode until clarification completes.
+
+**Clarification complete** = one of: `|G| = 0` (no gaps remain), `cycle(G)` (already clarified), or `Δ = 0` for 2 rounds (progress stall with user consent to proceed).
 
 ### Priority
 

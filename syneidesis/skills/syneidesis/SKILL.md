@@ -13,70 +13,31 @@ Surface potential gaps at decision points through questions, enabling user to no
 **Syneidesis** (συνείδησις): A dialogical act of surfacing potential gaps—procedural, consideration, assumption, or alternative—at decision points, transforming unknown unknowns into questions the user can evaluate.
 
 ```
-Syneidesis(D) → Scan(D, Σ₀) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
-                                                                -- Σ₀ = initial empty state
+── FLOW ──
+D → G → Gₛ → Q → J → Σ'
 
-D      = Decision point ∈ Stakes × Context
-Stakes = {Low, Med, High}
-G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative}
-Scan   = Detection: D × Σ → Set(G)                  -- gap identification (Σ₀ = empty state)
-Sel    = Selection: Set(G) × D → Option(Gₛ)         -- prioritize by stakes; None if G empty
-Gₛ     = Selected gaps (|Gₛ| ≤ 2)
-Q      = Question formation (assertion-free)
-J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
-c      = Clarification (user-provided response to Q)
-A      = Adjustment: J × D × Σ → Σ'
-Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
+── TYPES ──
+D  = Decision point (stakes: Low | Med | High)
+G  = Detected gaps ∈ {Procedural, Consideration, Assumption, Alternative}
+Gₛ = Selected gaps for surfacing (|Gₛ| ≤ 2, prioritized by stakes)
+Q  = Questions formed from Gₛ (assertion-free)
+J  = User judgment: Addresses | Dismisses | Silence
+Σ  = State { reviewed, deferred, blocked }
 
-── PHASE TRANSITIONS ──
-Phase 0: D → Scan(D, ∅) → G                         -- detection (silent, initial scan)
-Phase 1: G → Sel(G, D) → match { Some(Gₛ) → Q(Gₛ) → await → J; None → skip }  -- call AskUserQuestion if gaps exist
-Phase 2: J → A(J, D, Σ) → Σ'                        -- adjustment
+── PHASES ──
+Phase 0: Scan decision point → G (silent)
+Phase 1: If G non-empty, call AskUserQuestion → J
+Phase 2: Update Σ based on J
+         - Addresses: incorporate clarification
+         - Dismisses: mark reviewed
+         - Silence: defer (Low/Med) or block (High)
 
-── ADJUSTMENT RULES ──
-A(Addresses(c), _, σ) = σ { incorporate(c) }        -- extern: modifies plan
-A(Dismisses, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
+── LOOP ──
+After Phase 2: re-scan for new gaps, exclude reviewed.
+Continue if progress; terminate on cycle or stall.
 
-incorporate: Clarification → State → State
-incorporate(c)(σ) = σ { context ← context ⊕ c, reviewed ← reviewed ∪ {Gₛ.type} }
--- clarification merges into context; gap marked reviewed
-A(Silence, d, σ)      = match stakes(d):
-                          Low|Med → σ { deferred ← Gₛ :: deferred }
-                          High    → σ { blocked ← true }
-
-── SELECTION RULE ──
-Sel: Set(G) × D → Option(Gₛ)
-Sel(G, d) = match |G| {
-              0 → None
-              _ → Some(take(priority_sort(G, stakes(d)), min(|G|, if stakes(d) = High then 2 else 1)))
-            }
-
-── CONTINUATION ──
-proceed(Σ) = ¬blocked(Σ)
-
-── DYNAMIC DISCOVERY ──
-After A (Adjustment):
-  Σ' = A(J, D, Σ)                      -- updated state
-  G' = Scan(D, Σ')                     -- re-scan with updated state
-  G  = G' \ reviewed(Σ')               -- exclude already-reviewed gaps
-  if |G| > 0 ∧ progress(G, Σ, Σ'):
-    → Phase 1 (Sel → Q → J → A)        -- continue loop
-
-── TERMINATION (Hybrid) ──
-progress(G, Σ, Σ') = ¬cycle(G) ∧ Δ(Σ, Σ') > 0
-
-cycle(G) = sig(G) ∈ History
-sig(G) = hash(type(G), subject(G), context(G))
-History = { sig(g) | g ∈ resolved_gaps }
-
-Δ(Σ, Σ') = |addressed(Σ')| - |addressed(Σ)|  -- progress delta
-
-Terminate when:
-  cycle(G)           → "This gap was already addressed"
-  Δ = 0 for 2 rounds → "No progress; rephrase or proceed?"
-
-── MODE STATE ──
-Λ = { phase: Phase, state: Σ, iterations: ℕ, active: Bool }
+── STATE ──
+Λ = { phase, state: Σ, active }
 ```
 
 ## Core Principle
@@ -166,7 +127,9 @@ This cycle repeats per planning phase or domain area.
 **Skip**:
 - User explicitly confirmed in current session
 - Mechanical task (no judgment involved)
-- User already mentioned the gap category
+- User already mentioned the **specific gap instance** (type + subject), not just category
+
+**Note on Skip vs Dynamic Discovery**: Skip operates at **instance level** (specific gap about specific subject), not type level. "User mentioned backups" skips `[Assumption] backup verified?` for that specific resource, but Dynamic Discovery may still surface `[Assumption] backup verified?` for a different resource revealed by user's answer.
 
 ## Gap Taxonomy
 

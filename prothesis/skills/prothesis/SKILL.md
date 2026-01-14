@@ -13,37 +13,25 @@ Transform unknown unknowns into known unknowns by placing available epistemic pe
 **Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the inquirer does not know from which viewpoint to proceed, enabling selection before any perspective-requiring cognition.
 
 ```
-Prothesis(U) → G(U) → C → P(C) → S(P, User) → Pₛ → ∥I(Pₛ) → R → Syn(R) → L
+── FLOW ──
+U → C → P → Pₛ → ∥I(Pₛ) → R → L
 
-U      = Underspecified request (purpose clear, approach unclear)
-G      = Gather: U → C                         -- context acquisition
-C      = Context (information for perspective formulation)
-P      = Perspectives: C → Set(Perspective)    -- derive n ≥ 2 perspectives from context
-S      = Select: Set(Perspective) × User → Set⁺(Perspective) -- extern (user choice; non-empty)
-Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ})
-∥I     = Parallel inquiry: (∥ p∈Pₛ. Inquiry(p)) → R
-R      = Set(Result)                           -- inquiry outputs
-Syn    = Synthesis: R → L
-L      = Lens { convergence: ∩, divergence: D, assessment: A }
+── TYPES ──
+U  = Underspecified request
+C  = Context (gathered from U)
+P  = Perspectives derived from C (|P| ≥ 2)
+Pₛ = User-selected perspectives (via AskUserQuestion)
+R  = Inquiry results per perspective
+L  = Lens { convergence, divergence, assessment }
 
-── PHASE TRANSITIONS ──
-Phase 0: U → G(U) → C                          -- context acquisition
-Phase 1: C → P(C) → present(P) → await → Pₛ    -- call AskUserQuestion
-Phase 2: Pₛ → ∥I(Pₛ) → R                       -- parallel Task agents (isolated)
-Phase 3: R → Syn(R) → L                        -- synthesis
+── PHASES ──
+Phase 0: Gather context from U
+Phase 1: Present P, call AskUserQuestion → Pₛ
+Phase 2: ∥ Inquiry(p) for p ∈ Pₛ → R (parallel Task agents)
+Phase 3: Synthesize R → L
 
-── BOUNDARY ──
-G (gather)  = purpose: context acquisition
-S (select)  = extern: user choice boundary
-I (inquiry) = purpose: perspective-informed interpretation
-
-── CATEGORICAL NOTE ──
-∩ = meet (intersection) over comparison morphisms between perspective outputs
-D = join (union of distinct findings) where perspectives diverge
-A = synthesized assessment (additional computation)
-
-── MODE STATE ──
-Λ = { phase: Phase, lens: Option(L), active: Bool }
+── STATE ──
+Λ = { phase, lens, active }
 ```
 
 ## Mode Activation
@@ -86,11 +74,21 @@ Syneidesis applies to decision points within the established perspective.
 
 Every user message triggers perspective evaluation:
 
-| Message Type | Action |
-|--------------|--------|
-| New inquiry | Prothesis |
-| Follow-up within established lens | Continue with selected perspective |
-| Uncertain | Default to Prothesis |
+| Message Type | Criteria | Action |
+|--------------|----------|--------|
+| New inquiry | Topic shift OR no prior lens in session | Prothesis |
+| Follow-up within lens | Explicit reference to prior analysis OR same subject matter | Continue with selected perspective |
+| Uncertain | Neither criterion clearly met | Default to Prothesis |
+
+**Within-lens criteria** (any of):
+1. User explicitly references prior analysis ("based on what you said", "continuing with...")
+2. Same subject matter as established lens (semantic continuity)
+3. Request builds on prior conclusion ("given that", "so then...")
+
+**New-inquiry criteria** (any of):
+1. Different domain or subject matter
+2. Contradicts prior lens assumptions
+3. Scope expansion beyond prior analysis
 
 **Decision rule**: When uncertain whether perspective is established, default to Prothesis.
 
