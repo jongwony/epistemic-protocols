@@ -156,10 +156,12 @@ Optional dimension naming (invoke when initial generation seems redundant):
 
 ### Phase 2: Inquiry (Through Selected Lens)
 
-For each selected perspective, analyze sequentially as that perspective:
+For each selected perspective, spawn parallel Task subagent:
 
 ```
-You are analyzing from the **[Perspective]** standpoint.
+You are a **[Perspective] Expert**.
+
+Analyze from this epistemic standpoint:
 
 **Question**: {original question verbatim}
 
@@ -170,7 +172,7 @@ Provide:
 4. **Assessment**: Direct answer from this viewpoint
 ```
 
-Multiple selections → analyze each perspective in sequence, maintaining epistemic independence.
+Multiple selections → parallel subagents (never sequential).
 
 ### Phase 3: Synthesis (Horizon Integration)
 
