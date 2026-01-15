@@ -156,6 +156,15 @@ Optional dimension naming (invoke when initial generation seems redundant):
 
 ### Phase 2: Inquiry (Through Selected Lens)
 
+#### Isolated Context Requirement
+
+Each perspective MUST be analyzed in **isolated context** to prevent:
+- Cross-perspective contamination from shared conversation history
+- Confirmation bias from main agent's prior reasoning
+- Anchoring on initial assumptions formed during context gathering
+
+**Structural necessity**: Only Task subagents provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate subagents. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis.
+
 For each selected perspective, spawn parallel Task subagent:
 
 ```
@@ -235,7 +244,7 @@ Prothesis(mandatory_baseline, optional_extension):
 ## Rules
 
 1. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-2. **Epistemic Integrity**: Each perspective analyzes independently; no cross-contamination
+2. **Epistemic Integrity**: Each perspective analyzes in isolated subagent context; main agent direct analysis = protocol violation (violates isolation requirement)
 3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
 5. **Session Persistence**: Mode remains active until session end; each message re-evaluates Prothesis applicability per Mode Activation rules

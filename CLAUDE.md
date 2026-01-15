@@ -41,7 +41,7 @@ epistemic-protocols/
 Present perspective options before analysis begins. Injected into main agent context.
 - **Flow**: `U → C → P → Pₛ → ∥I(Pₛ) → R → L`
 - **Key**: Phase 1 calls `AskUserQuestion` for perspective selection (mandatory—text-only = violation)
-- **Phase 2**: Parallel inquiry with epistemic isolation per selected perspective
+- **Phase 2**: Parallel inquiry via Task subagents (mandatory—main agent direct analysis = violation); subagent isolation prevents cross-perspective contamination and confirmation bias
 
 ### Syneidesis (συνείδησις)
 Surface potential gaps at decision points as questions. Injected into main agent context.
@@ -112,6 +112,6 @@ node .claude/skills/verify/scripts/static-checks.js .
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
 - Skills require YAML frontmatter with `name`, `description`
-- Prothesis: Phase 1 (AskUserQuestion) in main agent; Phase 2 uses parallel inquiry with epistemic isolation
+- Prothesis: Phase 1 (AskUserQuestion) in main agent; Phase 2 MUST use Task subagents—isolated context is structurally required for unbiased perspective analysis
 - Syneidesis: No Task delegation—must run entirely in main agent to call AskUserQuestion at decision points
 - Hermeneia: No Task delegation—must run in main agent to call AskUserQuestion for clarification
