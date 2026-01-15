@@ -24,18 +24,18 @@ A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
 Î' = Updated intent after clarification
 
-── PHASES ──
-Phase 0: Recognize user-initiated clarification request
-Phase 1: Diagnose E for gaps → G (silent)
-Phase 2: If G non-empty, call AskUserQuestion → A
-Phase 3: Integrate A → Î'
+── PHASE TRANSITIONS ──
+Phase 0: E → recognize(E) → trigger?             -- trigger recognition
+Phase 1: E → diagnose(E) → G                     -- gap detection (silent)
+Phase 2: G → Q(G) → await → A                    -- call AskUserQuestion
+Phase 3: A → integrate(A, Î) → Î'                -- intent update
 
 ── LOOP ──
 After Phase 3: re-diagnose for newly surfaced gaps.
 Continue if progress; terminate on cycle, stall, or no gaps.
 
-── STATE ──
-Λ = { phase, gaps, clarified, active }
+── MODE STATE ──
+Λ = { phase: Phase, gaps: Set(Gap), clarified: Set(Gap), active: Bool }
 ```
 
 ## Core Principle
