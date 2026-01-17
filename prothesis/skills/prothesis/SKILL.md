@@ -28,14 +28,21 @@ L      = Lens { convergence: ∩, divergence: D, assessment: A }
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → G(U) → C                          -- context acquisition
-Phase 1: C → present({P₁...Pₙ}(C)) → await → Pₛ   -- call AskUserQuestion
-Phase 2: Pₛ → ∥I(Pₛ) → R                       -- parallel perspective analysis
-Phase 3: R → Syn(R) → L                        -- synthesis
+Phase 1: C → present[S]({P₁...Pₙ}(C)) → await → Pₛ   -- S: AskUserQuestion
+Phase 2: Pₛ → ∥I[Task](Pₛ) → R                 -- Task: parallel subagents
+Phase 3: R → Syn(R) → L                        -- internal synthesis
 
 ── BOUNDARY ──
 G (gather)  = purpose: context acquisition
 S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
+
+── TOOL GROUNDING ──
+S (extern)     → AskUserQuestion tool (mandatory; Escape → fallback)
+∥I (parallel)  → Task subagent (run_in_background: true, isolated context)
+Λ (state)      → TodoWrite (optional, for lens persistence)
+G (gather)     → Read, Glob, Grep (context acquisition)
+Syn (synthesis) → Internal operation (no external tool)
 
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs

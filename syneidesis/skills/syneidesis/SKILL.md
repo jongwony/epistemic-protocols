@@ -29,8 +29,8 @@ A      = Adjustment: J × D × Σ → Σ'
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → Scan(D) → G                            -- detection (silent)
-Phase 1: G → Sel(G, D) → Gₛ → Q(Gₛ) → await → J    -- call AskUserQuestion
-Phase 2: J → A(J, D, Σ) → Σ'                        -- adjustment
+Phase 1: G → Sel(G, D) → Gₛ → Q[AskUserQuestion](Gₛ) → await → J   -- Q: extern
+Phase 2: J → A(J, D, Σ) → Σ'                        -- internal adjustment
 
 ── ADJUSTMENT RULES ──
 A(Addresses(c), _, σ) = σ { incorporate(c) }        -- extern: modifies plan
@@ -44,6 +44,12 @@ Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1)
 
 ── CONTINUATION ──
 proceed(Σ) = ¬blocked(Σ)
+
+── TOOL GROUNDING ──
+Q (extern)     → AskUserQuestion tool (mandatory; Escape → Silence)
+Σ (state)      → TodoWrite (Observable, UI-visible gap tracking)
+Scan (detect)  → Read, Grep (context for gap identification)
+A (adjust)     → Internal state update (no external tool)
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, active: Bool }
@@ -197,6 +203,29 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 | Assumption gap | Always confirm (inference may be wrong) |
 | Interpretive uncertainty | Ask whether gap exists before surfacing |
 | Naming/structure decisions | Offer alternatives with rationale |
+
+#### Gap Count Branching
+
+| Gap Count | Strategy |
+|-----------|----------|
+| Gap ≤ 4 | Single AskUserQuestion with all gaps as options |
+| Gap > 4 | Strategy selection via AskUserQuestion first |
+
+**When Gap > 4**: Call AskUserQuestion to let user choose exploration strategy:
+
+| Option | Description | Workflow |
+|--------|-------------|----------|
+| Sequential exploration (Recommended) | Address gaps one by one with full context | TodoWrite displays all gaps → individual AskUserQuestion per gap |
+| Priority selection | User picks which gaps to address | Present numbered gap list → user specifies gap numbers |
+
+**Sequential exploration workflow**:
+1. Call TodoWrite with all detected gaps (status: `pending`)
+2. Mark first gap as `in_progress`
+3. Call AskUserQuestion for current gap
+4. On response: mark `completed`, advance to next `pending`
+5. Repeat until all addressed or user signals completion
+
+**UX rationale**: TodoWrite renders persistently in UI, providing immediate gap visibility without additional navigation.
 
 ### UI Mapping
 
