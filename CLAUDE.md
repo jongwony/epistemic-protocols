@@ -104,6 +104,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 3. **directive-verb**: `call` (not `invoke`/`use`) for tool instructions
 4. **xref**: CLAUDE.md flow formulas sync with source files
 5. **structure**: Required sections in protocol SKILL.md (Definition, Mode Activation, Protocol, Rules, PHASE TRANSITIONS, MODE STATE)
+6. **tool-grounding**: TOOL GROUNDING section present, external operations have `[Tool]` notation in PHASE TRANSITIONS
 
 ## Editing Guidelines
 

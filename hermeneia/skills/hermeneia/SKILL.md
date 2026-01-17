@@ -26,13 +26,18 @@ A  = User's answer
 
 ── PHASE TRANSITIONS ──
 Phase 0: E → recognize(E) → trigger?             -- trigger recognition
-Phase 1: E → diagnose(E) → G                     -- gap detection (silent)
-Phase 2: G → Q(G) → await → A                    -- call AskUserQuestion
-Phase 3: A → integrate(A, Î) → Î'                -- intent update
+Phase 1: E → diagnose(E) → G                     -- gap detection (internal)
+Phase 2: G → Q[AskUserQuestion](G) → await → A   -- Q: extern
+Phase 3: A → integrate(A, Î) → Î'                -- intent update (internal)
 
 ── LOOP ──
 After Phase 3: re-diagnose for newly surfaced gaps.
 Continue if progress; terminate on cycle, stall, or no gaps.
+
+── TOOL GROUNDING ──
+Q (extern)     → AskUserQuestion tool (mandatory; Escape → cancel)
+diagnose       → Internal analysis (no external tool)
+integrate      → Internal state update (no external tool)
 
 ── MODE STATE ──
 Λ = { phase: Phase, gaps: Set(Gap), clarified: Set(Gap), active: Bool }
