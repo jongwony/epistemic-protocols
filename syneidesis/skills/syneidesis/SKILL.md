@@ -204,28 +204,16 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 | Interpretive uncertainty | Ask whether gap exists before surfacing |
 | Naming/structure decisions | Offer alternatives with rationale |
 
-#### Gap Count Branching
+#### Sequential Surfacing
 
-| Gap Count | Strategy |
-|-----------|----------|
-| Gap ≤ 4 | Single AskUserQuestion with all gaps as options |
-| Gap > 4 | Strategy selection via AskUserQuestion first |
-
-**When Gap > 4**: Call AskUserQuestion to let user choose exploration strategy:
-
-| Option | Description | Workflow |
-|--------|-------------|----------|
-| Sequential exploration (Recommended) | Address gaps one by one with full context | TodoWrite displays all gaps → individual AskUserQuestion per gap |
-| Priority selection | User picks which gaps to address | Present numbered gap list → user specifies gap numbers |
-
-**Sequential exploration workflow**:
+**Workflow**:
 1. Call TodoWrite with all detected gaps (status: `pending`)
 2. Mark first gap as `in_progress`
 3. Call AskUserQuestion for current gap
 4. On response: mark `completed`, advance to next `pending`
 5. Repeat until all addressed or user signals completion
 
-**UX rationale**: TodoWrite renders persistently in UI, providing immediate gap visibility without additional navigation.
+**UX rationale**: TodoWrite renders persistently in UI, providing immediate gap visibility. Early termination when few gaps exist.
 
 ### UI Mapping
 

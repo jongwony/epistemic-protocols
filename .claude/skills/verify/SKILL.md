@@ -62,6 +62,12 @@ You are a Type Theory Expert analyzing protocol type design.
 - Type signatures: well-formed domain/codomain
 - State machines: transition totality
 - Flow consistency: types match phase transitions
+- Tool grounding: TOOL GROUNDING ↔ PHASE TRANSITIONS consistency
+
+**Tool Grounding check**:
+- External operations (extern) have corresponding [Tool] notation in PHASE TRANSITIONS
+- Internal operations marked with "no external tool"
+- Escape behavior semantics match protocol context (fallback/Silence/cancel)
 
 **Necessity check**:
 - Cardinality constraints (|P| ≥ 2): prose sufficient given Esc interrupt?
@@ -70,7 +76,7 @@ You are a Type Theory Expert analyzing protocol type design.
 
 Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md
 
-Focus on Definition sections (FLOW, TYPES, PHASES). Output JSON with findings array.
+Focus on Definition sections (FLOW, TYPES, PHASES, TOOL GROUNDING). Output JSON with findings array.
 ```
 
 **Perspective 2: Specification Clarity**
@@ -84,17 +90,19 @@ You are a Specification Clarity Expert analyzing LLM interpretability.
 - Activation clarity: trigger conditions unambiguous
 - Priority conflicts: supersession domain overlap
 - Instruction parsability: rules actionable without implicit reasoning
+- Tool binding clarity: TOOL GROUNDING section readable and actionable
 
 **Notation complexity**:
 - Flow formulas: understandable at a glance?
 - Standard notation preferred (|P| ≥ 2) over custom constructors (Set²⁺)
-- Section structure: FLOW → TYPES → PHASES → STATE sufficient?
+- Section structure: FLOW → TYPES → PHASES → TOOL GROUNDING → STATE sufficient?
+- [Tool] notation in PHASE TRANSITIONS: adds clarity or noise?
 
 Principle: specification is for human/LLM comprehension, not compiler verification.
 
 Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md, CLAUDE.md
 
-Focus on Definition, Mode Activation, Priority, Rules sections. Output JSON with findings array.
+Focus on Definition, Mode Activation, Priority, Rules, TOOL GROUNDING sections. Output JSON with findings array.
 ```
 
 **Perspective 3: Claude Code Ecosystem**

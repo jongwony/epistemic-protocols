@@ -310,6 +310,113 @@ function checkRequiredSections() {
 }
 
 // ============================================================
+// Check 6: Tool Grounding Consistency
+// ============================================================
+function checkToolGrounding() {
+  const protocolFiles = [
+    'prothesis/skills/prothesis/SKILL.md',
+    'syneidesis/skills/syneidesis/SKILL.md',
+    'hermeneia/skills/hermeneia/SKILL.md',
+  ];
+
+  // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS
+  const MANDATORY_CLASSIFICATIONS = new Set(['extern', 'parallel']);
+
+  // Escape special regex characters
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // Find operation in PHASE TRANSITIONS with any valid pattern
+  function findOperationInPhaseTransitions(phaseSection, operation) {
+    const escapedOp = escapeRegex(operation);
+
+    // Pattern 1: Direct notation - Q[AskUserQuestion]
+    const directPattern = new RegExp(`${escapedOp}\\[`);
+    if (directPattern.test(phaseSection)) return true;
+
+    // Pattern 2: Alias notation - present[S] where S is the operation
+    const aliasPattern = new RegExp(`\\w+\\[${escapedOp}\\]`);
+    if (aliasPattern.test(phaseSection)) return true;
+
+    // Pattern 3: Parallel notation - ∥I[Task]
+    const parallelPattern = new RegExp(`∥${escapedOp}\\[`);
+    if (parallelPattern.test(phaseSection)) return true;
+
+    // Pattern 4: Comment notation - -- S: AskUserQuestion
+    const commentPattern = new RegExp(`--\\s*${escapedOp}:`);
+    if (commentPattern.test(phaseSection)) return true;
+
+    return false;
+  }
+
+  for (const relPath of protocolFiles) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+
+    // Check 6a: TOOL GROUNDING section exists
+    if (!content.includes('── TOOL GROUNDING ──')) {
+      results.fail.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'Missing required section: "── TOOL GROUNDING ──"'
+      });
+      continue;
+    }
+
+    // Check 6b: Extract tool bindings from TOOL GROUNDING section
+    const groundingMatch = content.match(/── TOOL GROUNDING ──([\s\S]*?)(?=──|$)/);
+    if (!groundingMatch) continue;
+
+    const groundingSection = groundingMatch[1];
+    const toolBindings = [];
+
+    // Parse lines like: "S (extern)     → AskUserQuestion tool"
+    // Capture: operation, classification, tool
+    const bindingPattern = /^([∥]?\w+)\s*\((\w+)\)\s*→\s*(\w+)/gm;
+    let match;
+    while ((match = bindingPattern.exec(groundingSection)) !== null) {
+      toolBindings.push({
+        operation: match[1],
+        classification: match[2],
+        tool: match[3]
+      });
+    }
+
+    // Check 6c: Verify PHASE TRANSITIONS reference tool bindings
+    const phaseMatch = content.match(/── PHASE TRANSITIONS ──([\s\S]*?)(?=──|$)/);
+    if (!phaseMatch) continue;
+
+    const phaseSection = phaseMatch[1];
+
+    for (const binding of toolBindings) {
+      // Skip internal operations
+      if (binding.tool === 'Internal') continue;
+
+      // Skip non-mandatory classifications (state, gather, detect, etc.)
+      if (!MANDATORY_CLASSIFICATIONS.has(binding.classification)) continue;
+
+      // Check if operation appears with [Tool] notation in PHASE TRANSITIONS
+      if (!findOperationInPhaseTransitions(phaseSection, binding.operation)) {
+        results.fail.push({
+          check: 'tool-grounding',
+          file: relPath,
+          message: `Mandatory binding "${binding.operation} (${binding.classification}) → ${binding.tool}" not found in PHASE TRANSITIONS with [Tool] notation`
+        });
+      }
+    }
+
+    results.pass.push({
+      check: 'tool-grounding',
+      file: relPath,
+      message: 'Tool grounding consistency verified'
+    });
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -318,6 +425,7 @@ try {
   checkDirectiveVerb();
   checkCrossReference();
   checkRequiredSections();
+  checkToolGrounding();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));

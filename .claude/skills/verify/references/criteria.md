@@ -30,6 +30,13 @@ Quality criteria for epistemic protocol verification, organized by severity.
 - **Activation determinism**: Trigger conditions are unambiguous
 - **Tool call mandate**: `AskUserQuestion` calls are mandatory, not optional
 
+### Tool Grounding Integrity
+
+- **Section present**: `── TOOL GROUNDING ──` section exists in all protocols
+- **Phase reference**: External operations have `[Tool]` notation in PHASE TRANSITIONS
+- **Internal marking**: Internal operations marked with "no external tool"
+- **Escape semantics**: Escape behavior matches protocol context (fallback/Silence/cancel)
+
 ## Concern Criteria
 
 ### Mathematical Precision
@@ -69,8 +76,10 @@ Quality criteria for epistemic protocol verification, organized by severity.
 | Finding Type | Severity | Default Action |
 |--------------|----------|----------------|
 | Missing required section | Critical | Block with explanation |
+| Missing TOOL GROUNDING section | Critical | Block with explanation |
 | Undefined state transition | Critical | Block with explanation |
 | Supersession conflict | Critical | Block with explanation |
+| Tool grounding mismatch | Concern | Surface, user decides |
 | Incorrect categorical term | Concern | Surface, user decides |
 | ASCII notation fallback | Concern | Surface, user decides |
 | Directive verb mismatch | Concern | Surface, user decides |
