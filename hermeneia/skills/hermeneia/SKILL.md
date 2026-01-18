@@ -1,6 +1,6 @@
 ---
 name: hermeneia
-description: Clarify when intent and expression may not match. Transforms known unknowns into known knowns.
+description: Clarify intent-expression gaps. Transforms known unknowns into known knowns when what you mean differs from what you said.
 user-invocable: true
 ---
 

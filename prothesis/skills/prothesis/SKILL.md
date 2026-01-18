@@ -1,6 +1,6 @@
 ---
 name: prothesis
-description: Analyze from multiple perspectives. Select viewpoints before analysis to transform unknown unknowns into known unknowns.
+description: Lens for multi-perspective analysis. Select viewpoints before analysis to transform unknown unknowns into known unknowns.
 user-invocable: true
 ---
 

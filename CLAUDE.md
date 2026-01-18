@@ -37,26 +37,28 @@ epistemic-protocols/
 
 ## Plugins
 
-### Prothesis (πρόθεσις)
+### Prothesis (πρόθεσις) — alias: `lens`
 Present perspective options before analysis begins. Injected into main agent context.
 - **Flow**: `U → C → P → Pₛ → ∥I(Pₛ) → R → L`
 - **Key**: Phase 1 calls `AskUserQuestion` for perspective selection (mandatory—text-only = violation)
 - **Phase 2**: Parallel inquiry via Task subagents (mandatory—main agent direct analysis = violation); subagent isolation prevents cross-perspective contamination and confirmation bias
+- **Invocation**: `/prothesis` or use "lens" in conversation
 
-### Syneidesis (συνείδησις)
+### Syneidesis (συνείδησις) — alias: `gap`
 Surface potential gaps at decision points as questions. Injected into main agent context.
 - **Flow**: `D → G → Gₛ → Q → J → Σ'`
 - **Key**: Phase 1 calls `AskUserQuestion` for gap surfacing after Phase 0 detection (mandatory—text-only = violation)
 - **Gap types**: Procedural, Consideration, Assumption, Alternative
 - **Triggers**: "delete", "push", "deploy", "all", "every", "quickly", production, security
+- **Invocation**: `/syneidesis` or use "gap" in conversation
 
-### Hermeneia (ἑρμηνεία)
+### Hermeneia (ἑρμηνεία) — alias: `clarify`
 Clarify intent-expression gaps through user-initiated dialogue.
 - **Flow**: `E → G → Q → A → Î'`
 - **Key**: User-initiated only; Phase 1 diagnoses (silent), Phase 2 calls `AskUserQuestion` (mandatory)
 - **Gap types**: Expression, Precision, Coherence, Context
 - **Triggers**: "clarify", "what I mean", "did I express this right"
-- **Invocation**: `/hermeneia [expression]` (user-invocable skill)
+- **Invocation**: `/hermeneia` or use "clarify" in conversation
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.

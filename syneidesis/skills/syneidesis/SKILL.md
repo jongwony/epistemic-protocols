@@ -1,6 +1,6 @@
 ---
 name: syneidesis
-description: Surface potential gaps before decisions. Raises procedural, consideration, assumption, and alternative gaps as questions.
+description: Gap surfacing before decisions. Raises procedural, consideration, assumption, and alternative gaps as questions to transform unknown unknowns into known considerations.
 user-invocable: true
 ---
 
