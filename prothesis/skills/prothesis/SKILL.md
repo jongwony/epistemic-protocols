@@ -28,9 +28,17 @@ L      = Lens { convergence: ∩, divergence: D, assessment: A }
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → G(U) → C                          -- context acquisition
-Phase 1: C → present[S]({P₁...Pₙ}(C)) → await → Pₛ   -- S: AskUserQuestion
-Phase 2: Pₛ → ∥I[Task](Pₛ) → R                 -- Task: parallel subagents
+Phase 1: C → present[S]({P₁...Pₙ}(C)) → await → Pₛ   -- S: AskUserQuestion [Tool]
+Phase 2: Pₛ → ∥I[Task](Pₛ) → R                 -- Task: parallel subagents [Tool]
 Phase 3: R → Syn(R) → L                        -- internal synthesis
+Phase 4: L → Q[AskUserQuestion](sufficiency) → await → J   -- sufficiency check [Tool]
+
+── LOOP ──
+After Phase 4:
+  J = sufficient     → terminate with L
+  J = add_perspective → Phase 1 (present additional perspectives)
+  J = ESC            → terminate with current L
+Continue until convergence: user satisfied OR user ESC.
 
 ── BOUNDARY ──
 G (gather)  = purpose: context acquisition
@@ -40,7 +48,8 @@ I (inquiry) = purpose: perspective-informed interpretation
 ── TOOL GROUNDING ──
 S (extern)     → AskUserQuestion tool (mandatory; Escape → fallback)
 ∥I (parallel)  → Task subagent (run_in_background: true, isolated context)
-Λ (state)      → TodoWrite (optional, for lens persistence)
+Phase 4 Q      → AskUserQuestion (sufficiency check; Escape → terminate)
+Λ (state)      → TaskCreate/TaskUpdate (optional, for perspective tracking)
 G (gather)     → Read, Glob, Grep (context acquisition)
 Syn (synthesis) → Internal operation (no external tool)
 
@@ -211,6 +220,27 @@ After all perspectives complete:
 [Synthesized answer with attribution to contributing perspectives]
 ```
 
+### Phase 4: Sufficiency Check
+
+**Call the AskUserQuestion tool** to confirm analysis sufficiency.
+
+```
+Is this analysis sufficient for your inquiry?
+
+Options:
+1. **Sufficient** — proceed with this understanding
+2. **Add perspective** — I'd like to explore additional viewpoints
+3. **Refine existing** — revisit one of the analyzed perspectives
+```
+
+**Loop behavior**:
+- **Sufficient**: Terminate with current Lens L
+- **Add perspective**: Return to Phase 1 with accumulated context
+- **Refine existing**: Return to Phase 2 for targeted re-inquiry
+- **ESC**: Terminate with current Lens L
+
+**Convergence**: Mode terminates when user confirms sufficiency or explicitly exits.
+
 ## Conditions
 
 ### Trigger Prothesis
@@ -254,4 +284,5 @@ Prothesis(mandatory_baseline, optional_extension):
 2. **Epistemic Integrity**: Each perspective analyzes in isolated subagent context; main agent direct analysis = protocol violation (violates isolation requirement)
 3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
-5. **Session Persistence**: Mode remains active until session end; each message re-evaluates Prothesis applicability per Mode Activation rules
+5. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
+6. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis

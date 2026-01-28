@@ -39,23 +39,23 @@ epistemic-protocols/
 
 ### Prothesis (πρόθεσις) — alias: `lens`
 Present perspective options before analysis begins. Injected into main agent context.
-- **Flow**: `U → C → P → Pₛ → ∥I(Pₛ) → R → L`
-- **Key**: Phase 1 calls `AskUserQuestion` for perspective selection (mandatory—text-only = violation)
+- **Flow**: `U → C → P → Pₛ → ∥I(Pₛ) → R → L → (sufficiency check → loop)`
+- **Key**: Phase 1 calls `AskUserQuestion` for perspective selection; Phase 4 calls `AskUserQuestion` for sufficiency check; loop until user satisfied or ESC
 - **Phase 2**: Parallel inquiry via Task subagents (mandatory—main agent direct analysis = violation); subagent isolation prevents cross-perspective contamination and confirmation bias
 - **Invocation**: `/prothesis` or use "lens" in conversation
 
 ### Syneidesis (συνείδησις) — alias: `gap`
 Surface potential gaps at decision points as questions. Injected into main agent context.
-- **Flow**: `D → G → Gₛ → Q → J → Σ'`
-- **Key**: Phase 1 calls `AskUserQuestion` for gap surfacing after Phase 0 detection (mandatory—text-only = violation)
+- **Flow**: `D → G → TaskCreate[all] → Q → J → Σ' → (re-scan → loop)`
+- **Key**: Phase 0 detects ALL gaps → TaskCreate batch registration; Phase 1 surfaces sequentially via `AskUserQuestion`; re-scan after each response; loop until all tasks completed or ESC
 - **Gap types**: Procedural, Consideration, Assumption, Alternative
 - **Triggers**: "delete", "push", "deploy", "all", "every", "quickly", production, security
 - **Invocation**: `/syneidesis` or use "gap" in conversation
 
 ### Hermeneia (ἑρμηνεία) — alias: `clarify`
 Clarify intent-expression gaps through user-initiated dialogue.
-- **Flow**: `E → G → Q → A → Î'`
-- **Key**: User-initiated only; Phase 1 diagnoses (silent), Phase 2 calls `AskUserQuestion` (mandatory)
+- **Flow**: `E → Eᵥ → Gₛ → Q → A → Î' → (loop)`
+- **Key**: User-initiated only; Phase 1a confirms E, Phase 1b asks user to select gap type (no auto-diagnosis), Phase 2 calls `AskUserQuestion` for clarification; loop until convergence
 - **Gap types**: Expression, Precision, Coherence, Context
 - **Triggers**: "clarify", "what I mean", "did I express this right"
 - **Invocation**: `/hermeneia` or use "clarify" in conversation
@@ -79,8 +79,9 @@ Pre-commit protocol verification via static checks and expert review.
 ## Core Principles
 
 - **Recognition over Recall**: Options to select, not blanks to fill
+- **Selection over Detection**: User selects gap types, AI does not auto-diagnose
 - **Surfacing over Deciding**: AI illuminates, user judges
-- **Session Persistence**: Modes active until session end (exception: Hermeneia is clarification-scoped)
+- **Convergence Persistence**: Modes active until convergence (Hermeneia loops until |G| = 0)
 - **Priority Override**: Active protocols supersede default behaviors
 
 ## Protocol Precedence

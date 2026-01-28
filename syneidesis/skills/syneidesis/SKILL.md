@@ -29,8 +29,14 @@ A      = Adjustment: J × D × Σ → Σ'
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → Scan(D) → G                            -- detection (silent)
-Phase 1: G → Sel(G, D) → Gₛ → Q[AskUserQuestion](Gₛ) → await → J   -- Q: extern
-Phase 2: J → A(J, D, Σ) → Σ'                        -- internal adjustment
+Phase 1: G → TaskCreate[all gaps] → Gₛ → Q[AskUserQuestion](Gₛ[0]) → J  -- register all, surface first [Tool]
+Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
+
+── LOOP ──
+After Phase 2: re-scan for newly surfaced gaps from user response.
+If new gaps: TaskCreate → add to queue.
+Continue until: all tasks completed OR user ESC.
+Mode remains active until convergence.
 
 ── ADJUSTMENT RULES ──
 A(Addresses(c), _, σ) = σ { incorporate(c) }        -- extern: modifies plan
@@ -46,8 +52,8 @@ Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1)
 proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
-Q (extern)     → AskUserQuestion tool (mandatory; Escape → Silence)
-Σ (state)      → TodoWrite (Observable, UI-visible gap tracking)
+Q (extern)     → AskUserQuestion tool (mandatory; Escape → terminate loop)
+Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (detect)  → Read, Grep (context for gap identification)
 A (adjust)     → Internal state update (no external tool)
 
@@ -171,24 +177,38 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 
 ### Gap Tracking
 
-Record detected gaps using TodoWrite to prevent context loss across decision points.
+Record all detected gaps using TaskCreate for async tracking with dependencies.
 
-| Phase | TodoWrite Operation |
-|-------|---------------------|
-| Detection | Add `[Gap:Type] question` as `in_progress` |
-| Addressed | Mark `completed` |
-| Dismissed | Mark `completed` (user authority) |
-| Deferred | Change to `pending` for later revisit |
+| Phase | Task Operation |
+|-------|----------------|
+| Detection | TaskCreate for ALL detected gaps (status: `pending`) |
+| Surfacing | TaskUpdate current gap to `in_progress` |
+| Addressed | TaskUpdate to `completed` |
+| Dismissed | TaskUpdate to `completed` (user authority) |
+| New gap from response | TaskCreate → add to queue |
 
-**Format**: `[Gap:Procedural|Consideration|Assumption|Alternative] Question`
+**Task format**:
+```
+TaskCreate({
+  subject: "[Gap:Type] Question",
+  description: "Rationale and context for this gap",
+  activeForm: "Surfacing [Type] gap"
+})
+```
 
 **Workflow**:
-1. Detect gap → `TodoWrite([{content: "[Gap:Assumption] Database backup verified?", status: "in_progress"}])`
-2. Surface via AskUserQuestion
-3. On response → update status, proceed or defer
-4. Multiple gaps → track all, surface sequentially (one `in_progress` at a time)
+1. Detect ALL gaps → TaskCreate for each (batch registration)
+2. TaskUpdate first gap to `in_progress`
+3. Surface via AskUserQuestion
+4. On response:
+   - TaskUpdate to `completed`
+   - Re-scan: if new gaps revealed → TaskCreate
+   - TaskUpdate next pending gap to `in_progress`
+5. Loop until: all tasks `completed` OR user ESC
 
-**Resumption**: Deferred gaps (`pending`) resurface at next relevant decision point or session end.
+**Dependencies**: Use `addBlockedBy` when gaps have logical dependencies (e.g., "backup location" blocked by "backup exists?").
+
+**Convergence**: Mode terminates when task list shows all gaps `completed` or user explicitly exits.
 
 ### Interactive Surfacing (AskUserQuestion)
 
@@ -204,16 +224,22 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 | Interpretive uncertainty | Ask whether gap exists before surfacing |
 | Naming/structure decisions | Offer alternatives with rationale |
 
-#### Sequential Surfacing
+#### Batch Registration + Sequential Surfacing
 
 **Workflow**:
-1. Call TodoWrite with all detected gaps (status: `pending`)
-2. Mark first gap as `in_progress`
-3. Call AskUserQuestion for current gap
-4. On response: mark `completed`, advance to next `pending`
-5. Repeat until all addressed or user signals completion
+1. Scan → detect ALL gaps at decision point
+2. TaskCreate for each gap (batch registration, all `pending`)
+3. TaskUpdate first gap to `in_progress`
+4. AskUserQuestion for current gap
+5. On response:
+   - TaskUpdate to `completed`
+   - Re-scan for newly revealed gaps → TaskCreate if found
+   - TaskUpdate next `pending` to `in_progress`
+6. Loop until: no `pending` tasks remain OR user ESC
 
-**UX rationale**: TodoWrite renders persistently in UI, providing immediate gap visibility. Early termination when few gaps exist.
+**UX rationale**: Task list renders persistently in UI with progress indicator. User sees total gap count upfront. Dependencies visible via blocking relationships.
+
+**Re-scan trigger**: User response may reveal new gaps (e.g., "Yes, backed up" → "Where?" precision gap). Always re-scan after each response.
 
 ### UI Mapping
 
@@ -232,10 +258,11 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 ## Rules
 
 1. **Question > Assertion**: Ask "was X considered?", never "you missed X"
-2. **One gap per point**: Exception for multiple high-stakes (max 2)
+2. **Batch registration**: Register ALL detected gaps via TaskCreate before surfacing any
 3. **Observable evidence**: Surface only gaps with concrete indicators
 4. **User authority**: Dismissal is final
 5. **Minimal intrusion**: Lightest intervention that achieves awareness
 6. **Stakes calibration**: Intensity follows stakes matrix above
-7. **Session Persistence**: Mode remains active until session end
-8. **Gap Persistence**: Record all detected gaps via TodoWrite; deferred gaps must not be lost
+7. **Convergence persistence**: Mode remains active until all gaps resolved or user ESC
+8. **Dynamic discovery**: Re-scan after each response; new gaps → TaskCreate
+9. **Gap dependencies**: Use task blocking when gaps have logical order

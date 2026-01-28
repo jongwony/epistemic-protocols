@@ -14,33 +14,51 @@ Transform known unknowns into known knowns by clarifying intent-expression gaps 
 
 ```
 ── FLOW ──
-E → G → Q → A → Î'
+E → Eᵥ → Gₛ → Q → A → Î' → (loop until converge)
 
 ── TYPES ──
 E  = User's expression (the prompt to clarify)
-G  = Detected gaps ∈ {Expression, Precision, Coherence, Context}
+Eᵥ = Verified expression (user-confirmed binding)
+Gₛ = User-selected gap type ∈ {Expression, Precision, Coherence, Context}
 Q  = Clarification question (via AskUserQuestion)
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
 Î' = Updated intent after clarification
 
+── E-BINDING ──
+bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
+Priority: explicit_arg > colocated_expr > prev_user_turn
+
+/hermeneia "text"              → E = "text"
+"request... clarify"           → E = text before trigger
+/hermeneia (alone)             → E = previous user message
+
+Edge cases:
+- Interrupt: E = original request of interrupted task
+- Queued:    E = previous message at queue time (fixed)
+- Re-invoke: Show prior clarification, confirm or restart
+
 ── PHASE TRANSITIONS ──
-Phase 0: E → recognize(E) → trigger?             -- trigger recognition
-Phase 1: E → diagnose(E) → G                     -- gap detection (internal)
-Phase 2: G → Q[AskUserQuestion](G) → await → A   -- Q: extern
-Phase 3: A → integrate(A, Î) → Î'                -- intent update (internal)
+Phase 0:  E → recognize(E) → trigger?                    -- trigger recognition
+Phase 1a: E → Q[AskUserQuestion](E) → Eᵥ                 -- E confirmation [Tool]
+Phase 1b: Eᵥ → Q[AskUserQuestion](gap_types) → Gₛ        -- gap type selection [Tool]
+Phase 2:  Gₛ → Q[AskUserQuestion](Gₛ) → await → A        -- clarification [Tool]
+Phase 3:  A → integrate(A, Î) → Î'                       -- intent update (internal)
 
 ── LOOP ──
-After Phase 3: re-diagnose for newly surfaced gaps.
-Continue if progress; terminate on cycle, stall, or no gaps.
+After Phase 3: return to Phase 1b for newly surfaced gaps.
+Continue until converge: |G| = 0, cycle detected, or user exits.
+Mode remains active until convergence.
 
 ── TOOL GROUNDING ──
-Q (extern)     → AskUserQuestion tool (mandatory; Escape → cancel)
-diagnose       → Internal analysis (no external tool)
-integrate      → Internal state update (no external tool)
+Phase 1a Q  → AskUserQuestion (E confirmation)
+Phase 1b Q  → AskUserQuestion (gap type selection)
+Phase 2 Q   → AskUserQuestion (clarification options)
+integrate   → Internal state update (no external tool)
 
 ── MODE STATE ──
-Λ = { phase: Phase, gaps: Set(Gap), clarified: Set(Gap), active: Bool }
+Λ = { phase: Phase, E: Expression, Eᵥ: Expression, gaps: Set(Gap),
+      clarified: Set(Gap), history: List<(E, Gₛ, A)>, active: Bool }
 ```
 
 ## Core Principle
@@ -142,14 +160,39 @@ Recognize user-initiated clarification request:
 
 **Do not activate** for AI-perceived ambiguity alone. User must signal awareness of potential gap.
 
-### Phase 1: Diagnosis (Silent)
+### Phase 1a: Expression Confirmation
 
-Analyze user's expression for intent-expression gaps:
+**Call the AskUserQuestion tool** to confirm which expression to clarify.
 
-1. **Parse expression**: Identify stated elements and structure
-2. **Detect gaps**: Check taxonomy against expression
-3. **Prioritize**: Order gaps by priority (Coherence > Context > Expression > Precision)
-4. **Select**: Choose highest-priority gap for clarification
+Present the bound expression E and ask user to confirm or specify:
+
+```
+Which expression would you like to clarify?
+
+Options:
+1. "[bound E]" — the expression I identified
+2. "Specify different" — let me describe what I want to clarify
+```
+
+**Skip condition**: If E was explicitly provided via argument (`/hermeneia "text"`), proceed directly to Phase 1b.
+
+### Phase 1b: Gap Type Selection
+
+**Call the AskUserQuestion tool** to let user select the gap type.
+
+**Do NOT auto-diagnose.** Present gap types for user selection:
+
+```
+What kind of difficulty are you experiencing with this expression?
+
+Options:
+1. **Expression** — I couldn't fully articulate what I meant
+2. **Precision** — The scope or degree is unclear
+3. **Coherence** — There may be internal contradictions
+4. **Context** — Background information is missing
+```
+
+User selection determines the clarification strategy in Phase 2.
 
 ### Phase 2: Clarification
 
@@ -284,11 +327,13 @@ When multiple gaps detected:
 
 1. **User-initiated only**: Activate only when user signals awareness of ambiguity
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-3. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
-4. **Articulation support**: Help user express what they know, don't guess what they mean
-5. **Minimal questioning**: Surface only gaps that affect execution
-6. **Consequential options**: Each option shows interpretation with downstream implications
-7. **User authority**: User's choice is final; no second-guessing selected interpretation
-8. **Session Persistence**: Mode remains active until clarification completes
-9. **Reflective pause**: Include "reconsider" option for complex intent clarification
-10. **Escape hatch**: Always allow user to provide their own phrasing
+3. **Selection over Detection**: Present options for user to select, not auto-diagnose internally
+4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
+5. **Articulation support**: Help user express what they know, don't guess what they mean
+6. **Minimal questioning**: Surface only gaps that affect execution
+7. **Consequential options**: Each option shows interpretation with downstream implications
+8. **User authority**: User's choice is final; no second-guessing selected interpretation
+9. **Convergence persistence**: Mode remains active until convergence (|G| = 0, cycle, or user exit)
+10. **Reflective pause**: Include "reconsider" option for complex intent clarification
+11. **Escape hatch**: Always allow user to provide their own phrasing
+12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases
