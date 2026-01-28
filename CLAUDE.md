@@ -35,6 +35,11 @@ epistemic-protocols/
 - **Commands** (`commands/*.md`): Lightweight invokers (reflexion only—prothesis/syneidesis use skills directly)
 - **Agents** (`agents/*.md`): Subagents for parallel task execution (reflexion only)
 
+**Conventions**:
+- Subagent naming: `plugin-name:agent-name` (e.g., `reflexion:session-summarizer`)
+- References directory: `skills/*/references/` for detailed documentation
+- No external dependencies; Node.js standard library only
+
 ## Plugins
 
 ### Prothesis (πρόθεσις) — alias: `lens`
@@ -86,13 +91,7 @@ Pre-commit protocol verification via static checks and expert review.
 
 ## Protocol Precedence
 
-Multi-activation order: **Hermeneia → Prothesis → Syneidesis**
-
-| Combination | Order | Rationale |
-|-------------|-------|-----------|
-| Hermeneia + Prothesis | H → P | Clarify intent before perspective selection |
-| Prothesis + Syneidesis | P → S | Perspective gates gap detection |
-| All three | H → P → S | Intent → Perspective → Decision gaps |
+Multi-activation order: **Hermeneia → Prothesis → Syneidesis** (intent → perspective → decision gaps)
 
 ## Verification
 
@@ -111,11 +110,11 @@ node .claude/skills/verify/scripts/static-checks.js .
 
 ## Editing Guidelines
 
-- Formal notation: category theory (limit, colimit, ∥ for parallel)
+- **Notation**: `→` (function), `∥` (parallel), `[Tool]` suffix for external operations in PHASE TRANSITIONS
 - Keep README.md and README_ko.md in sync
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
-- Skills require YAML frontmatter with `name`, `description`
-- Prothesis: Phase 1 (AskUserQuestion) in main agent; Phase 2 MUST use Task subagents—isolated context is structurally required for unbiased perspective analysis
-- Syneidesis: No Task delegation—must run entirely in main agent to call AskUserQuestion at decision points
-- Hermeneia: No Task delegation—must run in main agent to call AskUserQuestion for clarification
+- Skills frontmatter: `name` (required), `description` (required), `user-invocable` (boolean), `allowed-tools` (optional)
+- **Delegation rules**:
+  - Prothesis Phase 2: MUST use Task subagents—isolated context required for unbiased perspective analysis
+  - Syneidesis/Hermeneia: No Task delegation—must run in main agent to call AskUserQuestion
