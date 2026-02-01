@@ -102,7 +102,24 @@ Pre-commit protocol verification via static checks and expert review.
 
 ## Protocol Precedence
 
-Multi-activation order: **Hermeneia → Prothesis → Katalepsis → Syneidesis** (intent → perspective → comprehension → decision gaps)
+Multi-activation order: **Hermeneia → Prothesis → Syneidesis → Katalepsis**
+
+### Epistemic Workflow Timeline
+
+```
+[Request] → [Intent] → [Perspective] → [Decision] → [Execution] → [Comprehension]
+               ↑            ↑              ↑                            ↑
+           Hermeneia    Prothesis      Syneidesis                   Katalepsis
+```
+
+| Protocol | Timing | Epistemic Transition |
+|----------|--------|---------------------|
+| **Hermeneia** | Pre-action | Known unknowns → Known knowns |
+| **Prothesis** | Pre-action | Unknown unknowns → Known unknowns |
+| **Syneidesis** | Mid-action (decision points) | Unknown unknowns → Known unknowns |
+| **Katalepsis** | Post-action | Unknown knowns → Known knowns |
+
+**Rationale**: Katalepsis operates on completed AI work (`R = AI's result`). Without a result, there is nothing to comprehend. Syneidesis surfaces gaps at decision points *before* execution, so it precedes Katalepsis in the workflow
 
 ## Verification
 

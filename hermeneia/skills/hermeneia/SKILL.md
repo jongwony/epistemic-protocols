@@ -99,13 +99,14 @@ When Hermeneia is active:
 - Hermeneia completes before other workflows begin
 - User Memory rules resume after intent is clarified
 
-**Protocol precedence** (triple-activation order): Hermeneia → Prothesis → Syneidesis
+**Protocol precedence** (multi-activation order): Hermeneia → Prothesis → Syneidesis → Katalepsis
 
 | Active Protocols | Execution Order | Rationale |
 |------------------|-----------------|-----------|
 | Hermeneia + Prothesis | Hermeneia → Prothesis | Clarify intent before perspective selection |
 | Hermeneia + Syneidesis | Hermeneia → Syneidesis | Clarify intent before gap surfacing |
-| All three active | Hermeneia → Prothesis → Syneidesis | Intent → Perspective → Decision gaps |
+| Hermeneia + Katalepsis | Hermeneia → Katalepsis | Clarify intent before comprehension |
+| All four active | Hermeneia → Prothesis → Syneidesis → Katalepsis | Intent → Perspective → Decision → Comprehension |
 
 Clarified expression becomes input to subsequent protocols.
 
