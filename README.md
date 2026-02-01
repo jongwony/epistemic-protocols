@@ -17,6 +17,10 @@ Claude Code plugins for epistemic dialogue — transforming **unknown unknowns**
 
 All protocols share a core transformation pattern:
 
+<p align="center">
+  <img src="./assets/epistemic-matrix.svg" alt="Epistemic Matrix - Rumsfeld quadrant showing protocol transitions" width="500">
+</p>
+
 - **Prothesis**: "Which lens?" → AI presents options, you choose (**Unknown Unknown → Known Unknown**)
 - **Syneidesis**: "What's missing?" → AI surfaces gaps as questions, you judge (**Unknown Unknown → Known Unknown**)
 - **Hermeneia**: "What do I mean?" → AI presents interpretations, you recognize your intent (**Known Unknown → Known Known**)
