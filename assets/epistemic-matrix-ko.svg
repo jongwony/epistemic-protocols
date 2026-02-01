@@ -1,4 +1,4 @@
-<svg viewBox="0 0 480 340" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 520 360" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
       <path d="M 0 0 L 8 3 L 0 6 z" fill="#6b7280"/>
@@ -6,49 +6,49 @@
   </defs>
 
   <!-- Background -->
-  <rect width="480" height="340" fill="#f5f5f0"/>
+  <rect width="520" height="360" fill="#f5f5f0"/>
 
   <!-- Quadrants with soft pastel colors -->
   <!-- II: Unknown Knowns (top-left) - peach -->
-  <rect x="60" y="50" width="170" height="115" rx="8" fill="#fce8dc"/>
+  <rect x="60" y="60" width="175" height="120" rx="8" fill="#fce8dc"/>
 
   <!-- I: Known Knowns (top-right) - soft green -->
-  <rect x="250" y="50" width="170" height="115" rx="8" fill="#d4edda"/>
+  <rect x="255" y="60" width="175" height="120" rx="8" fill="#d4edda"/>
 
   <!-- III: Unknown Unknowns (bottom-left) - mint/teal -->
-  <rect x="60" y="175" width="170" height="115" rx="8" fill="#d1ecf1"/>
+  <rect x="60" y="195" width="175" height="120" rx="8" fill="#d1ecf1"/>
 
   <!-- IV: Known Unknowns (bottom-right) - soft yellow -->
-  <rect x="250" y="175" width="170" height="115" rx="8" fill="#fff3cd"/>
+  <rect x="255" y="195" width="175" height="120" rx="8" fill="#fff3cd"/>
 
   <!-- Quadrant labels -->
-  <text x="145" y="100" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Unknown Knowns</text>
-  <text x="145" y="118" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">암묵지 / AI 작업 미파악</text>
+  <text x="147" y="112" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Unknown Knowns</text>
+  <text x="147" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">암묵지 / AI 작업 미파악</text>
 
-  <text x="335" y="100" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Known Knowns</text>
-  <text x="335" y="118" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">검증된 이해</text>
+  <text x="342" y="112" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Known Knowns</text>
+  <text x="342" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">검증된 이해</text>
 
-  <text x="145" y="225" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Unknown Unknowns</text>
-  <text x="145" y="243" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">미지의 미지</text>
+  <text x="147" y="247" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Unknown Unknowns</text>
+  <text x="147" y="265" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">미지의 미지</text>
 
-  <text x="335" y="225" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Known Unknowns</text>
-  <text x="335" y="243" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">인식된 무지</text>
+  <text x="342" y="247" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Known Unknowns</text>
+  <text x="342" y="265" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">인식된 무지</text>
 
   <!-- Protocol arrows -->
 
   <!-- Katalepsis: II → I (top, curved over) -->
-  <path d="M 175 50 Q 240 20 305 50" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="240" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Katalepsis</text>
+  <path d="M 180 60 Q 245 25 310 60" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="245" y="35" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Katalepsis</text>
 
-  <!-- Hermeneia: IV → I (right side, curved) -->
-  <path d="M 395 220 Q 415 170 395 107" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="420" y="170" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Hermeneia</text>
+  <!-- Hermeneia: IV → I (right side, curved outside) -->
+  <path d="M 430 280 Q 465 190 430 100" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="460" y="195" text-anchor="start" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Hermeneia</text>
+
+  <!-- Syneidesis: III → IV (middle boundary) -->
+  <path d="M 235 280 Q 255 295 275 280" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="255" y="310" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Syneidesis</text>
 
   <!-- Prothesis: III → IV (bottom, from deep left) -->
-  <path d="M 100 290 Q 180 315 305 290" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="200" y="320" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Prothesis</text>
-
-  <!-- Syneidesis: III → IV (middle, shorter path) -->
-  <path d="M 230 232 Q 250 240 270 232" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="250" y="255" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Syneidesis</text>
+  <path d="M 100 315 Q 200 345 350 315" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="225" y="350" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Prothesis</text>
 </svg>
