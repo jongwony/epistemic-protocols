@@ -274,6 +274,7 @@ function checkRequiredSections() {
     'prothesis/skills/prothesis/SKILL.md',
     'syneidesis/skills/syneidesis/SKILL.md',
     'hermeneia/skills/hermeneia/SKILL.md',
+    'katalepsis/skills/katalepsis/SKILL.md',
   ];
 
   const requiredSections = [
@@ -317,6 +318,7 @@ function checkToolGrounding() {
     'prothesis/skills/prothesis/SKILL.md',
     'syneidesis/skills/syneidesis/SKILL.md',
     'hermeneia/skills/hermeneia/SKILL.md',
+    'katalepsis/skills/katalepsis/SKILL.md',
   ];
 
   // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS

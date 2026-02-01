@@ -28,6 +28,11 @@
       "name": "hermeneia",
       "source": "./hermeneia",
       "description": "Clarify intent-expression gaps through dialogue"
+    },
+    {
+      "name": "katalepsis",
+      "source": "./katalepsis",
+      "description": "Achieve certain comprehension of AI work"
     }
   ]
 }

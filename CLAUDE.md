@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — transforms **unknown unknowns** into **known unknowns** (Prothesis, Syneidesis) and **known unknowns** into **known knowns** (Hermeneia) during AI-human interaction.
+Claude Code plugin marketplace for epistemic dialogue — transforms **unknown unknowns** into **known unknowns** (Prothesis, Syneidesis), **known unknowns** into **known knowns** (Hermeneia), and **unknown knowns** into **known knowns** (Katalepsis) during AI-human interaction.
 
 ## Architecture
 
@@ -21,6 +21,9 @@ epistemic-protocols/
 ├── hermeneia/                         # Protocol: intent clarification
 │   ├── .claude-plugin/plugin.json
 │   └── skills/hermeneia/SKILL.md      # Full protocol definition (user-invocable)
+├── katalepsis/                        # Protocol: comprehension verification
+│   ├── .claude-plugin/plugin.json
+│   └── skills/katalepsis/SKILL.md     # Full protocol definition (user-invocable)
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # Parallel extraction agents
@@ -65,6 +68,14 @@ Clarify intent-expression gaps through user-initiated dialogue.
 - **Triggers**: "clarify", "what I mean", "did I express this right"
 - **Invocation**: `/hermeneia` or use "clarify" in conversation
 
+### Katalepsis (κατάληψις) — alias: `grasp`
+Achieve certain comprehension of AI work through structured verification.
+- **Flow**: `R → C → Sₑ → Tᵣ → P → Δ → Q → A → Tᵤ → P' → (loop until katalepsis)`
+- **Key**: User-initiated; Phase 0 categorizes AI work; Phase 1 calls `AskUserQuestion` for entry point selection; Phase 2 uses `TaskCreate` for tracking; Phase 3 calls `AskUserQuestion` for comprehension verification with `TaskUpdate`
+- **Gap types**: Expectation, Causality, Scope, Sequence
+- **Triggers**: "explain this", "what did you do?", "help me understand"
+- **Invocation**: `/katalepsis` or use "grasp" in conversation
+
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
 - **Flow**: Session → Context → ∥Extract → Select → Integrate → Verify
@@ -91,7 +102,24 @@ Pre-commit protocol verification via static checks and expert review.
 
 ## Protocol Precedence
 
-Multi-activation order: **Hermeneia → Prothesis → Syneidesis** (intent → perspective → decision gaps)
+Multi-activation order: **Hermeneia → Prothesis → Syneidesis → Katalepsis**
+
+### Epistemic Workflow Timeline
+
+```
+[Request] → [Intent] → [Perspective] → [Decision] → [Execution] → [Comprehension]
+               ↑            ↑              ↑                            ↑
+           Hermeneia    Prothesis      Syneidesis                   Katalepsis
+```
+
+| Protocol | Timing | Epistemic Transition |
+|----------|--------|---------------------|
+| **Hermeneia** | Pre-action | Known unknowns → Known knowns |
+| **Prothesis** | Pre-action | Unknown unknowns → Known unknowns |
+| **Syneidesis** | Mid-action (decision points) | Unknown unknowns → Known unknowns |
+| **Katalepsis** | Post-action | Unknown knowns → Known knowns |
+
+**Rationale**: Katalepsis operates on completed AI work (`R = AI's result`). Without a result, there is nothing to comprehend. Syneidesis surfaces gaps at decision points *before* execution, so it precedes Katalepsis in the workflow
 
 ## Verification
 
@@ -117,4 +145,4 @@ node .claude/skills/verify/scripts/static-checks.js .
 - Skills frontmatter: `name` (required), `description` (required), `user-invocable` (boolean), `allowed-tools` (optional)
 - **Delegation rules**:
   - Prothesis Phase 2: MUST use Task subagents—isolated context required for unbiased perspective analysis
-  - Syneidesis/Hermeneia: No Task delegation—must run in main agent to call AskUserQuestion
+  - Syneidesis/Hermeneia/Katalepsis: No Task delegation—must run in main agent to call AskUserQuestion
