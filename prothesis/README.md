@@ -29,7 +29,7 @@ Users often don't know "from which perspective to analyze" (unknown unknowns). O
 
 ```
 Phase 0: Gather       → Context acquisition for perspective formulation
-Phase 1: Prothesis    → Present 2-4 perspectives (invoke AskUserQuestion)
+Phase 1: Prothesis    → Present 2-4 perspectives (call AskUserQuestion)
 Phase 2: Inquiry      → Parallel analysis per selected perspective (Task subagent)
 Phase 3: Synthesis    → Organize convergences/divergences → Integrated answer
 ```

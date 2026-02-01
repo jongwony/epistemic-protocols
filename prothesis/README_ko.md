@@ -29,7 +29,7 @@
 
 ```
 Phase 0: Gather       → 관점 형성을 위한 맥락 수집
-Phase 1: Prothesis    → 관점 2-4개 제시 (invoke AskUserQuestion)
+Phase 1: Prothesis    → 관점 2-4개 제시 (call AskUserQuestion)
 Phase 2: Inquiry      → 선택된 관점별 병렬 분석 (Task subagent)
 Phase 3: Synthesis    → 수렴점/발산점 정리 → 통합 답변
 ```

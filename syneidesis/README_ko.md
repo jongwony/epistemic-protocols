@@ -24,7 +24,7 @@
 
 ```
 Phase 0: Detection    → 결정 지점의 갭 탐지 (비표시)
-Phase 1: Surfacing    → 갭 선택 및 제시 (invoke AskUserQuestion)
+Phase 1: Surfacing    → 갭 선택 및 제시 (call AskUserQuestion)
 Phase 2: Adjustment   → 응답을 상태에 반영
 ```
 
