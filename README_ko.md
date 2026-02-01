@@ -15,7 +15,11 @@
 
 ## 핵심 아이디어
 
-세 프로토콜 모두 핵심 변환 패턴을 공유합니다:
+네 프로토콜 모두 핵심 변환 패턴을 공유합니다:
+
+<p align="center">
+  <img src="./assets/epistemic-matrix-ko.svg" alt="인식론적 매트릭스 - Rumsfeld 사분면과 프로토콜 전환" width="500">
+</p>
 
 - **Prothesis**: "어떤 렌즈로?" → AI가 선택지 제시, 사용자가 선택 (**Unknown Unknown → Known Unknown**)
 - **Syneidesis**: "뭘 놓쳤지?" → AI가 갭을 질문으로 표면화, 사용자가 판단 (**Unknown Unknown → Known Unknown**)
