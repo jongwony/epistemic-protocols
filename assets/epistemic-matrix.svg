@@ -41,8 +41,8 @@
   <text x="240" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Katalepsis</text>
 
   <!-- Hermeneia: IV → I (right side, curved) -->
-  <path d="M 420 220 Q 450 170 420 107" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="455" y="165" text-anchor="start" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Hermeneia</text>
+  <path d="M 395 220 Q 415 170 395 107" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="420" y="170" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Hermeneia</text>
 
   <!-- Prothesis: III → IV (bottom, from deep left) -->
   <path d="M 100 290 Q 180 315 305 290" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
