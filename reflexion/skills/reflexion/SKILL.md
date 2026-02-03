@@ -201,28 +201,34 @@ Based on user selections:
 - **Merge**: Edit existing file, append or modify section
 - **Domain**: Create in `.insights/domain/{tech-stack}/`
 
-**Session Tracking in Frontmatter**:
+**Frontmatter Update Rules**:
+
+| Field | New File | Merge |
+|-------|----------|-------|
+| `date` | Current date | Update to current date |
+| `session` | `[<session-id>]` | Append current session ID |
+| `tags` | From insight | Union (add new, keep existing) |
+| `keywords` | From insight | Union (add new, keep existing) |
+| `summary` | From insight | Revise to reflect merged content |
+| `sections` | From insight | Append new section entries |
+
 ```yaml
-# New file
+# Merge example: before
 ---
-date: 2026-02-04
-session: [<session-id>]            # Array for accumulation
-tags: [...]
-keywords: [...]
-summary: "..."
-sections:
-  - "Section 1: ..."
+date: 2026-01-15
+session: [abc123]
+tags: [hooks, claude-code]
+keywords: [PreToolUse, PostToolUse]
 ---
 
-# Existing file (append current session ID)
+# Merge example: after
 ---
-session: [abc123, xyz789]          # Previous + current
+date: 2026-02-04              # Updated
+session: [abc123, xyz789]     # Appended
+tags: [hooks, claude-code, mcp]  # Union
+keywords: [PreToolUse, PostToolUse, SSE]  # Union
 ---
 ```
-
-- **New file**: `session: [<session-id>]`
-- **Merge**: Append current session ID to existing array
-- **Purpose**: Insight provenance tracking across sessions
 
 If multiple files to edit, delegate to Task subagent.
 
