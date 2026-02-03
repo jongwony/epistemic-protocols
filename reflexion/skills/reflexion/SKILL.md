@@ -201,6 +201,29 @@ Based on user selections:
 - **Merge**: Edit existing file, append or modify section
 - **Domain**: Create in `.insights/domain/{tech-stack}/`
 
+**Session Tracking in Frontmatter**:
+```yaml
+# New file
+---
+date: 2026-02-04
+session: [current-session-id]      # Array for accumulation
+tags: [...]
+keywords: [...]
+summary: "..."
+sections:
+  - "Section 1: ..."
+---
+
+# Existing file (append current session ID)
+---
+session: [abc123, xyz789]          # Previous + current
+---
+```
+
+- **New file**: `session: [{current-session-id}]`
+- **Merge**: Append current session ID to existing array
+- **Purpose**: Insight provenance tracking across sessions
+
 If multiple files to edit, delegate to Task subagent.
 
 **Phase Completion**: Update TodoWrite (Phase 4: completed, Phase 5: in_progress)
