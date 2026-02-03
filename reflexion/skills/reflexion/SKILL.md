@@ -92,12 +92,12 @@ Update status at each phase transition. This externalizes working memory and pre
 4. **Write `session-context.json`**:
    ```json
    {
-     "sessionId": "abc123",
-     "sessionPath": "~/.claude/projects/-Users-choi-myproject/sessions/abc123.jsonl",
-     "projectPath": "/Users/choi/myproject",
-     "memoryMode": "project",
+     "sessionId": "<session-id>",
+     "sessionPath": "<detected-session-path>",
+     "projectPath": "<project-root>",
+     "memoryMode": "project | user",
      "userMemoryPath": "~/.claude",
-     "projectMemoryPath": "/Users/choi/myproject/.claude"
+     "projectMemoryPath": "<project-root>/.claude"
    }
    ```
 
@@ -200,6 +200,35 @@ Based on user selections:
 - **New file**: Create in selected location with proper frontmatter
 - **Merge**: Edit existing file, append or modify section
 - **Domain**: Create in `.insights/domain/{tech-stack}/`
+
+**Frontmatter Update Rules**:
+
+| Field | New File | Merge |
+|-------|----------|-------|
+| `date` | Current date | Update to current date |
+| `session` | `[<session-id>]` | Append current session ID |
+| `tags` | From insight | Union (add new, keep existing) |
+| `keywords` | From insight | Union (add new, keep existing) |
+| `summary` | From insight | Revise to reflect merged content |
+| `sections` | From insight | Append new section entries |
+
+```yaml
+# Before merge
+---
+date: 2026-01-15
+session: [s1]
+tags: [A, B]
+keywords: [x, y]
+---
+
+# After merge (current session: s2, new insight has tag C, keyword z)
+---
+date: 2026-02-04       # → Updated
+session: [s1, s2]      # → Appended
+tags: [A, B, C]        # → Union
+keywords: [x, y, z]    # → Union
+---
+```
 
 If multiple files to edit, delegate to Task subagent.
 
