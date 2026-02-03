@@ -92,12 +92,12 @@ Update status at each phase transition. This externalizes working memory and pre
 4. **Write `session-context.json`**:
    ```json
    {
-     "sessionId": "abc123",
-     "sessionPath": "~/.claude/projects/-Users-choi-myproject/sessions/abc123.jsonl",
-     "projectPath": "/Users/choi/myproject",
-     "memoryMode": "project",
+     "sessionId": "<session-id>",
+     "sessionPath": "<detected-session-path>",
+     "projectPath": "<project-root>",
+     "memoryMode": "project | user",
      "userMemoryPath": "~/.claude",
-     "projectMemoryPath": "/Users/choi/myproject/.claude"
+     "projectMemoryPath": "<project-root>/.claude"
    }
    ```
 
@@ -213,20 +213,20 @@ Based on user selections:
 | `sections` | From insight | Append new section entries |
 
 ```yaml
-# Merge example: before
+# Before merge
 ---
 date: 2026-01-15
-session: [abc123]
-tags: [hooks, claude-code]
-keywords: [PreToolUse, PostToolUse]
+session: [s1]
+tags: [A, B]
+keywords: [x, y]
 ---
 
-# Merge example: after
+# After merge (current session: s2, new insight has tag C, keyword z)
 ---
-date: 2026-02-04              # Updated
-session: [abc123, xyz789]     # Appended
-tags: [hooks, claude-code, mcp]  # Union
-keywords: [PreToolUse, PostToolUse, SSE]  # Union
+date: 2026-02-04       # → Updated
+session: [s1, s2]      # → Appended
+tags: [A, B, C]        # → Union
+keywords: [x, y, z]    # → Union
 ---
 ```
 
