@@ -206,7 +206,7 @@ Based on user selections:
 # New file
 ---
 date: 2026-02-04
-session: [current-session-id]      # Array for accumulation
+session: [<session-id>]            # Array for accumulation
 tags: [...]
 keywords: [...]
 summary: "..."
@@ -220,7 +220,7 @@ session: [abc123, xyz789]          # Previous + current
 ---
 ```
 
-- **New file**: `session: [{current-session-id}]`
+- **New file**: `session: [<session-id>]`
 - **Merge**: Append current session ID to existing array
 - **Purpose**: Insight provenance tracking across sessions
 
