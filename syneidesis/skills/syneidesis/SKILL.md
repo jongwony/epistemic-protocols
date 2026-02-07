@@ -25,11 +25,11 @@ Scan   = Detection: D → Set(G)                      -- gap identification
 Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
 Gₛ     = Selected gaps (|Gₛ| ≤ 2)
 Q      = Question formation (assertion-free)
-J      = Judgment ∈ {Addresses(c), Dismisses, Silence, ESC}
+J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
 c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
-AuditedDecision = Σ' where ∀g ∈ detected(G): g ∈ reviewed ∨ g ∈ addressed
+AuditedDecision = Σ' where ∀ task ∈ registered: task.status = completed
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → Scan(D) → G              -- gate + detection (silent)
@@ -48,7 +48,6 @@ A(Dismisses, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
 A(Silence, d, σ)      = match stakes(d):
                           Low|Med → σ { deferred ← Gₛ :: deferred }
                           High    → σ { blocked ← true }
-A(ESC, _, _)           = terminate loop (unconditional; overrides all rules)
 
 ── SELECTION RULE ──
 Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
@@ -57,7 +56,7 @@ Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1)
 proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
-Q (extern)     → AskUserQuestion tool (mandatory; ESC → unconditional loop termination; Silence ≠ ESC)
+Q (extern)     → AskUserQuestion tool (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (detect)  → Read, Grep (context for gap identification)
 A (adjust)     → Internal state update (no external tool)
@@ -267,7 +266,9 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 
 | Environment | Addresses | Dismisses | Silence |
 |-------------|-----------|-----------|---------|
-| AskUserQuestion | Selection | Selection | Esc key |
+| AskUserQuestion | Selection | Selection | — (N/A) |
+
+Note: Esc key → unconditional loop termination (LOOP level). Silence (no response) is theoretical; AskUserQuestion blocks until response or Esc.
 
 ## Intensity
 

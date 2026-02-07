@@ -27,7 +27,7 @@ Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ}, Pₛ ≠ ∅)
 R      = Set(Result)                           -- inquiry outputs
 Syn    = Synthesis: R → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
-FramedInquiry = L (type signature codomain)
+FramedInquiry = L where |Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → G(U) → C                          -- context acquisition
@@ -49,7 +49,7 @@ S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
-S (extern)     → AskUserQuestion tool (mandatory; Escape → fallback)
+S (extern)     → AskUserQuestion tool (mandatory; Esc → terminate with current L or no lens)
 ∥I (parallel)  → Task subagent (run_in_background: true, isolated context)
 Phase 4 Q      → AskUserQuestion (sufficiency check; Escape → terminate)
 Λ (state)      → TaskCreate/TaskUpdate (optional, for perspective tracking)
