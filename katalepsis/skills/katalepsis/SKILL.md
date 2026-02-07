@@ -1,16 +1,16 @@
 ---
 name: katalepsis
-description: Achieve certain comprehension after AI work. Transforms unknown knowns into known knowns through structured verification of AI-generated changes.
+description: Achieve certain comprehension after AI work. Verifies understanding when results remain ungrasped, producing verified understanding.
 user-invocable: true
 ---
 
 # Katalepsis Protocol
 
-Achieve certain comprehension of AI work through structured verification, enabling the user to follow along and reach firm understanding.
+Achieve certain comprehension of AI work through structured verification, enabling the user to grasp ungrasped results. Type: `(ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding`.
 
 ## Definition
 
-**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—transforming AI-generated results into verified user understanding through categorized entry points and progressive verification.
+**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving ungrasped AI-generated results into verified user understanding through categorized entry points and progressive verification.
 
 ```
 ── FLOW ──
@@ -44,6 +44,7 @@ Continue until: all selected tasks completed OR user ESC.
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
+VerifiedUnderstanding = P' where (∀t ∈ Tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
 
 ── TOOL GROUNDING ──
 Phase 1 Q   → AskUserQuestion (entry point selection)
@@ -71,14 +72,14 @@ Categorize  → Internal analysis (Read for context if needed)
 
 ## Distinction from Other Protocols
 
-| Protocol | Initiator | Transition | Focus |
-|----------|-----------|------------|-------|
-| **Prothesis** | AI | Unknown unknowns → Known unknowns | Perspective selection |
-| **Syneidesis** | AI | Unknown unknowns → Known unknowns | Decision-point gaps |
-| **Hermeneia** | User | Known unknowns → Known knowns | Expression clarification |
-| **Katalepsis** | User | Unknown knowns → Known knowns | Comprehension verification |
+| Protocol | Initiator | Deficit → Resolution | Focus |
+|----------|-----------|----------------------|-------|
+| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective selection |
+| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Expression clarification |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
-**Key difference**: User doesn't know they don't understand (unknown known). AI work exists but user hasn't grasped it yet. Katalepsis guides user to firm understanding through structured verification.
+**Key difference**: AI work exists but the result remains ungrasped by the user. Katalepsis guides user to firm understanding through structured verification.
 
 ## Mode Activation
 
@@ -121,6 +122,8 @@ At Phase 3, call AskUserQuestion for comprehension verification.
 | Comprehension signal | "I don't get it", "what did you change?", "why?" |
 | Following along | "let me catch up", "what's happening here?" |
 | Review request | "show me what you did", "summarize the changes" |
+
+**Qualifying condition**: Activate only when trigger signal co-occurs with recent AI-generated work output (`R` exists in conversation context). Do not activate on general questions unrelated to prior AI work.
 
 **Skip**:
 - User demonstrates understanding through accurate statements
@@ -174,6 +177,8 @@ Analyze AI work result and extract categories:
 
 **Call the AskUserQuestion tool** to let user select where to start.
 
+**Do NOT present entry points as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
+
 ```
 What would you like to understand first?
 
@@ -211,7 +216,10 @@ For each task (category):
 
 2. **Present overview**: Brief summary of the category
 
-3. **Verify comprehension** via AskUserQuestion:
+3. **Verify comprehension** by **calling the AskUserQuestion tool**:
+
+   **Do NOT present verification questions as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
+
    ```
    Do you understand [specific aspect]?
 
@@ -272,7 +280,7 @@ Use:
 ## Rules
 
 1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Recognition over Recall**: Present options for selection, don't ask open questions
+2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
 3. **Verify, don't lecture**: Confirm understanding through questions, not explanations
 4. **Chunk complexity**: Break large changes into digestible categories
 5. **Task tracking**: Use TaskCreate/TaskUpdate for progress visibility

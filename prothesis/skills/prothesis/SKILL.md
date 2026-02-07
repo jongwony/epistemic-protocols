@@ -1,20 +1,22 @@
 ---
 name: prothesis
-description: Lens for multi-perspective analysis. Select viewpoints before analysis to transform unknown unknowns into known unknowns.
+description: Lens for multi-perspective analysis. Selects viewpoints before analysis when the right framework is absent, producing a framed inquiry.
 user-invocable: true
 ---
 
 # Prothesis Protocol
 
-Transform unknown unknowns into known unknowns by placing available epistemic perspectives before the user, enabling lens selection prior to any perspective-requiring cognition.
+Resolve absent frameworks by placing available epistemic perspectives before the user, enabling lens selection prior to any perspective-requiring cognition. Type: `(FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry`.
 
 ## Definition
 
-**Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the inquirer does not know from which viewpoint to proceed, enabling selection before any perspective-requiring cognition.
+**Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the appropriate framework is absent, enabling selection before any perspective-requiring cognition.
 
 ```
+── FLOW ──
 Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L
 
+── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
 G      = Gather: U → C                         -- context acquisition
 C      = Context (information for perspective formulation)
@@ -25,6 +27,7 @@ Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ}, Pₛ ≠ ∅)
 R      = Set(Result)                           -- inquiry outputs
 Syn    = Synthesis: R → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
+FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → G(U) → C                          -- context acquisition
@@ -46,7 +49,7 @@ S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
-S (extern)     → AskUserQuestion tool (mandatory; Escape → fallback)
+S (extern)     → AskUserQuestion tool (mandatory; Esc → terminate with current L or no lens)
 ∥I (parallel)  → Task subagent (run_in_background: true, isolated context)
 Phase 4 Q      → AskUserQuestion (sufficiency check; Escape → terminate)
 Λ (state)      → TaskCreate/TaskUpdate (optional, for perspective tracking)
@@ -288,3 +291,4 @@ Prothesis(mandatory_baseline, optional_extension):
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
 5. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
 6. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
+7. **Minimum perspectives**: Always present at least 2 distinct perspectives (`n ≥ 2`); single-perspective selection produces degenerate synthesis (convergence = identity)

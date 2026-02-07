@@ -10,7 +10,7 @@
 
 ### 핵심 문제
 
-사용자는 종종 자신의 표현이 모호하다는 것을 인식하지만(known unknowns), 명확히 하기 위한 어휘나 구조가 부족하다. "무슨 뜻이에요?"와 같은 열린 질문은 사용자가 이미 자신이 불명확하다는 것을 알고 있을 때 도움이 되지 않는다.
+사용자는 종종 자신의 표현이 모호하다는 것을 인식하지만(`IntentMisarticulated`), 명확히 하기 위한 어휘나 구조가 부족하다. "무슨 뜻이에요?"와 같은 열린 질문은 사용자가 이미 자신이 불명확하다는 것을 알고 있을 때 도움이 되지 않는다.
 
 ### 해결책
 
@@ -18,11 +18,11 @@
 
 ### 다른 프로토콜과의 차이
 
-| 프로토콜 | 주도자 | 변환 대상 |
-|----------|--------|-----------|
-| Prothesis | AI | Unknown unknowns → Known unknowns |
-| Syneidesis | AI | Unknown unknowns → Known unknowns |
-| **Hermeneia** | **사용자** | **Known unknowns → Known knowns** |
+| 프로토콜 | 주도자 | 타입 시그니처 |
+|----------|--------|---------------|
+| Prothesis | AI 감지 | `FrameworkAbsent → FramedInquiry` |
+| Syneidesis | AI 감지 | `GapUnnoticed → AuditedDecision` |
+| **Hermeneia** | **사용자 주도** | **`IntentMisarticulated → ClarifiedIntent`** |
 
 ## 프로토콜 흐름
 

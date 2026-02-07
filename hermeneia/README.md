@@ -10,7 +10,7 @@ A modern reinterpretation of Greek ἑρμηνεία (interpretation) — a prot
 
 ### The Core Problem
 
-Users often recognize their expression is ambiguous (known unknowns) but lack the vocabulary or structure to clarify. Open questions like "What do you mean?" don't help when the user already knows they're unclear.
+Users often recognize their expression is ambiguous (`IntentMisarticulated`) but lack the vocabulary or structure to clarify. Open questions like "What do you mean?" don't help when the user already knows they're unclear.
 
 ### The Solution
 
@@ -18,11 +18,11 @@ Users often recognize their expression is ambiguous (known unknowns) but lack th
 
 ### Difference from Other Protocols
 
-| Protocol | Initiator | What it transforms |
-|----------|-----------|-------------------|
-| Prothesis | AI | Unknown unknowns → Known unknowns |
-| Syneidesis | AI | Unknown unknowns → Known unknowns |
-| **Hermeneia** | **User** | **Known unknowns → Known knowns** |
+| Protocol | Initiator | Type Signature |
+|----------|-----------|---------------|
+| Prothesis | AI-detected | `FrameworkAbsent → FramedInquiry` |
+| Syneidesis | AI-detected | `GapUnnoticed → AuditedDecision` |
+| **Hermeneia** | **User-initiated** | **`IntentMisarticulated → ClarifiedIntent`** |
 
 ## Protocol Flow
 

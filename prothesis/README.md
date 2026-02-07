@@ -10,7 +10,7 @@ A modern reinterpretation of Greek πρόθεσις (placing before) — a proto
 
 ### The Core Problem
 
-Users often don't know "from which perspective to analyze" (unknown unknowns). Open questions like "What perspective do you want?" require knowing the answer to answer.
+Users often lack the analytical framework for their question (`FrameworkAbsent`). Open questions like "What perspective do you want?" require knowing the answer to answer.
 
 ### The Solution
 

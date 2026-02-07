@@ -1,21 +1,24 @@
 ---
 name: syneidesis
-description: Gap surfacing before decisions. Raises procedural, consideration, assumption, and alternative gaps as questions to transform unknown unknowns into known considerations.
+description: Gap surfacing before decisions. Raises procedural, consideration, assumption, and alternative gaps as questions when gaps go unnoticed, producing an audited decision.
 user-invocable: true
 ---
 
 # Syneidesis Protocol
 
-Surface potential gaps at decision points through questions, enabling user to notice what might otherwise remain unnoticed.
+Surface unnoticed gaps at decision points through questions, enabling user to reach an audited decision. Type: `(GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision`.
 
 ## Definition
 
-**Syneidesis** (συνείδησις): A dialogical act of surfacing potential gaps—procedural, consideration, assumption, or alternative—at decision points, transforming unknown unknowns into questions the user can evaluate.
+**Syneidesis** (συνείδησις): A dialogical act of surfacing potential gaps—procedural, consideration, assumption, or alternative—at decision points, transforming unnoticed gaps into questions the user can evaluate.
 
 ```
+── FLOW ──
 Syneidesis(D, Σ) → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
 
-D      = Decision point ∈ Stakes × Context
+── TYPES ──
+D      = Decision point ∈ Committed × Stakes × Context
+Committed = committed(D) ≡ ∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)
 Stakes = {Low, Med, High}
 G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative}
 Scan   = Detection: D → Set(G)                      -- gap identification
@@ -26,9 +29,10 @@ J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
 c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
+AuditedDecision = Σ' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
-Phase 0: D → Scan(D) → G                            -- detection (silent)
+Phase 0: D → committed?(D) → Scan(D) → G              -- gate + detection (silent)
 Phase 1: G → TaskCreate[all gaps] → Gₛ → Q[AskUserQuestion](Gₛ[0]) → J  -- register all, surface first [Tool]
 Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
 
@@ -52,7 +56,7 @@ Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1)
 proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
-Q (extern)     → AskUserQuestion tool (mandatory; Escape → terminate loop)
+Q (extern)     → AskUserQuestion tool (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (detect)  → Read, Grep (context for gap identification)
 A (adjust)     → Internal state update (no external tool)
@@ -71,7 +75,7 @@ A (adjust)     → Internal state update (no external tool)
 
 Command invocation activates mode until session end.
 
-**On activation**: Check existing TodoWrite for deferred gaps (prefix `[Gap:`). Resume tracking if found.
+**On activation**: Check existing Tasks for deferred gaps (subject prefix `[Gap:`). Resume tracking if found.
 
 ### Priority
 
@@ -99,7 +103,6 @@ When both Prothesis and Syneidesis are active, Prothesis executes first (perspec
 | Trigger | Effect |
 |---------|--------|
 | Task completion | Auto-deactivate after final resolution |
-| User dismisses 2+ consecutive gaps | Reduce intensity for session |
 
 ### Plan Mode Integration
 
@@ -121,17 +124,30 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 
 This cycle repeats per planning phase or domain area.
 
-### Triggers
+### Conditions
 
-| Signal | Examples |
-|--------|----------|
-| Scope | "all", "every", "entire" |
-| Irreversibility | "delete", "push", "deploy", "migrate" |
-| Time compression | "quickly", "just", "right now" |
-| Uncertainty | "maybe", "probably", "I think" |
-| Stakes | production, security, data, external API |
+#### Essential (all must hold)
 
-**Skip**:
+| Condition | Predicate | Test |
+|-----------|-----------|------|
+| **Committed action** | `committed(D)` | `∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)` |
+| **Observable gap** | `∃ G : observable(G)` | Concrete indicator exists in context (not speculation) |
+| **Unaddressed** | `¬mentioned(G, context)` | Gap not already raised or resolved in session |
+
+**Scope limitation**: `committed(D)` captures *execution commitment* (actions with immediate effects). It does not capture *direction commitment* — decisions that constrain future work without immediate state change (e.g., "let's use PostgreSQL", "refactor auth to OAuth2"). Direction commitment is partially covered by Plan Mode Integration, which applies Syneidesis at phase boundaries where such decisions materialize into execution plans.
+
+#### Modulating Factors (adjust intensity, not applicability)
+
+| Factor | Effect | Heuristic signals |
+|--------|--------|-------------------|
+| **Irreversibility** | stakes ↑ | "delete", "push", "deploy", "migrate" |
+| **Impact scope** | stakes ↑ | "all", "every", "entire", production, security |
+| **Time pressure** | stakes ↑ (gap miss probability increases) | "quickly", "just", "right now" |
+| **Uncertainty** | scan range ↑ | "maybe", "probably", "I think" |
+
+#### Skip
+
+- `¬committed(D)`: read-only, informational, exploratory actions
 - User explicitly confirmed in current session
 - Mechanical task (no judgment involved)
 - User already mentioned the gap category
@@ -149,14 +165,17 @@ This cycle repeats per planning phase or domain area.
 
 ### Detection (Silent)
 
-1. **Stakes assessment**:
-   - Irreversible + High impact → High stakes
-   - Irreversible + Low impact → Medium stakes
-   - Reversible + Any impact → Low stakes
+1. **Committed check**: Verify `committed(D)` — if false (read-only, exploratory), skip Syneidesis for this decision point
 
 2. **Gap scan**: Check taxonomy against user's stated plan
 
-3. **Filter**: Surface only gaps with observable evidence (not speculation)
+3. **Filter**: Surface only gaps with observable evidence (`observable(G)`) and not already addressed (`¬mentioned(G, context)`)
+
+4. **Stakes assessment** (from modulating factors):
+   - Irreversible + High impact → High stakes
+   - Irreversible + Low impact → Medium stakes
+   - Reversible + Any impact → Low stakes
+   - Time pressure → stakes ↑ one level
 
 ### Surfacing
 
@@ -247,7 +266,9 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 
 | Environment | Addresses | Dismisses | Silence |
 |-------------|-----------|-----------|---------|
-| AskUserQuestion | Selection | Selection | Esc key |
+| AskUserQuestion | Selection | Selection | — (N/A) |
+
+Note: Esc key → unconditional loop termination (LOOP level). Silence (no response) is theoretical; AskUserQuestion blocks until response or Esc.
 
 ## Intensity
 
