@@ -13,8 +13,10 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 **Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the appropriate framework is absent, enabling selection before any perspective-requiring cognition.
 
 ```
+── FLOW ──
 Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L
 
+── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
 G      = Gather: U → C                         -- context acquisition
 C      = Context (information for perspective formulation)
@@ -25,6 +27,7 @@ Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ}, Pₛ ≠ ∅)
 R      = Set(Result)                           -- inquiry outputs
 Syn    = Synthesis: R → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
+FramedInquiry = L (type signature codomain)
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → G(U) → C                          -- context acquisition
@@ -288,3 +291,4 @@ Prothesis(mandatory_baseline, optional_extension):
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
 5. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
 6. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
+7. **Minimum perspectives**: Always present at least 2 distinct perspectives (`n ≥ 2`); single-perspective selection produces degenerate synthesis (convergence = identity)

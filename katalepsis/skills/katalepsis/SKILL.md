@@ -44,6 +44,7 @@ Continue until: all selected tasks completed OR user ESC.
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
+VerifiedUnderstanding = P' where ∀t ∈ Tasks: t.status = completed
 
 ── TOOL GROUNDING ──
 Phase 1 Q   → AskUserQuestion (entry point selection)
@@ -122,6 +123,8 @@ At Phase 3, call AskUserQuestion for comprehension verification.
 | Following along | "let me catch up", "what's happening here?" |
 | Review request | "show me what you did", "summarize the changes" |
 
+**Qualifying condition**: Activate only when trigger signal co-occurs with recent AI-generated work output (`R` exists in conversation context). Do not activate on general questions unrelated to prior AI work.
+
 **Skip**:
 - User demonstrates understanding through accurate statements
 - User explicitly declines explanation
@@ -174,6 +177,8 @@ Analyze AI work result and extract categories:
 
 **Call the AskUserQuestion tool** to let user select where to start.
 
+**Do NOT present entry points as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
+
 ```
 What would you like to understand first?
 
@@ -211,7 +216,10 @@ For each task (category):
 
 2. **Present overview**: Brief summary of the category
 
-3. **Verify comprehension** via AskUserQuestion:
+3. **Verify comprehension** by **calling the AskUserQuestion tool**:
+
+   **Do NOT present verification questions as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
+
    ```
    Do you understand [specific aspect]?
 
@@ -272,7 +280,7 @@ Use:
 ## Rules
 
 1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Recognition over Recall**: Present options for selection, don't ask open questions
+2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
 3. **Verify, don't lecture**: Confirm understanding through questions, not explanations
 4. **Chunk complexity**: Break large changes into digestible categories
 5. **Task tracking**: Use TaskCreate/TaskUpdate for progress visibility

@@ -24,6 +24,7 @@ Q  = Clarification question (via AskUserQuestion)
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
 Î' = Updated intent after clarification
+ClarifiedIntent = Î' where |G| = 0 (convergence: no gaps remain)
 
 ── E-BINDING ──
 bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
@@ -118,6 +119,8 @@ Clarified expression becomes input to subsequent protocols.
 | Self-doubt | "did I express this right?", "is this clear?" |
 | Ambiguity acknowledgment | "I'm not sure how to phrase this", "this might be confusing" |
 | Meta-communication | "what I'm trying to say is...", "let me rephrase" |
+
+**Qualifying condition**: Activate only when user's entire message is a clarification request, or when 2+ trigger signals co-occur in the same message. Do not activate on casual meta-communication embedded in a larger request.
 
 **Skip**:
 - User's expression is unambiguous

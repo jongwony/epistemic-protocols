@@ -143,6 +143,11 @@ node .claude/skills/verify/scripts/static-checks.js .
 5. **structure**: Required sections in protocol SKILL.md (Definition, Mode Activation, Protocol, Rules, PHASE TRANSITIONS, MODE STATE)
 6. **tool-grounding**: TOOL GROUNDING section present, external operations have `[Tool]` notation in PHASE TRANSITIONS
 
+## Delegation Constraint
+
+- **Prothesis Phase 2**: MUST use Task subagents—isolated context required for unbiased perspective analysis
+- **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
+
 ## Editing Guidelines
 
 - **Notation**: `→` (function), `∥` (parallel), `[Tool]` suffix for external operations in PHASE TRANSITIONS
@@ -150,6 +155,3 @@ node .claude/skills/verify/scripts/static-checks.js .
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
 - Skills frontmatter: `name` (required), `description` (required), `user-invocable` (boolean), `allowed-tools` (optional)
-- **Delegation rules**:
-  - Prothesis Phase 2: MUST use Task subagents—isolated context required for unbiased perspective analysis
-  - Syneidesis/Hermeneia/Katalepsis: No Task delegation—must run in main agent to call AskUserQuestion

@@ -13,8 +13,10 @@ Surface unnoticed gaps at decision points through questions, enabling user to re
 **Syneidesis** (συνείδησις): A dialogical act of surfacing potential gaps—procedural, consideration, assumption, or alternative—at decision points, transforming unnoticed gaps into questions the user can evaluate.
 
 ```
+── FLOW ──
 Syneidesis(D, Σ) → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
 
+── TYPES ──
 D      = Decision point ∈ Committed × Stakes × Context
 Committed = committed(D) ≡ ∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)
 Stakes = {Low, Med, High}
@@ -23,10 +25,11 @@ Scan   = Detection: D → Set(G)                      -- gap identification
 Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
 Gₛ     = Selected gaps (|Gₛ| ≤ 2)
 Q      = Question formation (assertion-free)
-J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
+J      = Judgment ∈ {Addresses(c), Dismisses, Silence, ESC}
 c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
+AuditedDecision = Σ' where ∀g ∈ detected(G): g ∈ reviewed ∨ g ∈ addressed
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → Scan(D) → G              -- gate + detection (silent)
@@ -45,6 +48,7 @@ A(Dismisses, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
 A(Silence, d, σ)      = match stakes(d):
                           Low|Med → σ { deferred ← Gₛ :: deferred }
                           High    → σ { blocked ← true }
+A(ESC, _, _)           = terminate loop (unconditional; overrides all rules)
 
 ── SELECTION RULE ──
 Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
@@ -53,7 +57,7 @@ Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1)
 proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
-Q (extern)     → AskUserQuestion tool (mandatory; Escape → terminate loop)
+Q (extern)     → AskUserQuestion tool (mandatory; ESC → unconditional loop termination; Silence ≠ ESC)
 Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (detect)  → Read, Grep (context for gap identification)
 A (adjust)     → Internal state update (no external tool)
@@ -72,7 +76,7 @@ A (adjust)     → Internal state update (no external tool)
 
 Command invocation activates mode until session end.
 
-**On activation**: Check existing TodoWrite for deferred gaps (prefix `[Gap:`). Resume tracking if found.
+**On activation**: Check existing Tasks for deferred gaps (subject prefix `[Gap:`). Resume tracking if found.
 
 ### Priority
 
@@ -100,7 +104,6 @@ When both Prothesis and Syneidesis are active, Prothesis executes first (perspec
 | Trigger | Effect |
 |---------|--------|
 | Task completion | Auto-deactivate after final resolution |
-| User dismisses 2+ consecutive gaps | Reduce intensity for session |
 
 ### Plan Mode Integration
 
@@ -131,13 +134,6 @@ This cycle repeats per planning phase or domain area.
 | **Committed action** | `committed(D)` | `∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)` |
 | **Observable gap** | `∃ G : observable(G)` | Concrete indicator exists in context (not speculation) |
 | **Unaddressed** | `¬mentioned(G, context)` | Gap not already raised or resolved in session |
-
-```
-committed(D) ≡ ∃ action A in plan(D) :
-  mutates_state(A)            -- file write, DB change, config modification
-  ∨ externally_visible(A)     -- git push, API call, message send
-  ∨ consumes_resource(A)      -- paid API, long computation
-```
 
 **Scope limitation**: `committed(D)` captures *execution commitment* (actions with immediate effects). It does not capture *direction commitment* — decisions that constrain future work without immediate state change (e.g., "let's use PostgreSQL", "refactor auth to OAuth2"). Direction commitment is partially covered by Plan Mode Integration, which applies Syneidesis at phase boundaries where such decisions materialize into execution plans.
 
