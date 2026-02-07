@@ -1,21 +1,22 @@
 ---
 name: syneidesis
-description: Gap surfacing before decisions. Raises procedural, consideration, assumption, and alternative gaps as questions to transform unknown unknowns into known considerations.
+description: Gap surfacing before decisions. Raises procedural, consideration, assumption, and alternative gaps as questions when gaps go unnoticed, producing an audited decision.
 user-invocable: true
 ---
 
 # Syneidesis Protocol
 
-Surface potential gaps at decision points through questions, enabling user to notice what might otherwise remain unnoticed.
+Surface unnoticed gaps at decision points through questions, enabling user to reach an audited decision. Type: `(GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision`.
 
 ## Definition
 
-**Syneidesis** (συνείδησις): A dialogical act of surfacing potential gaps—procedural, consideration, assumption, or alternative—at decision points, transforming unknown unknowns into questions the user can evaluate.
+**Syneidesis** (συνείδησις): A dialogical act of surfacing potential gaps—procedural, consideration, assumption, or alternative—at decision points, transforming unnoticed gaps into questions the user can evaluate.
 
 ```
 Syneidesis(D, Σ) → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
 
-D      = Decision point ∈ Stakes × Context
+D      = Decision point ∈ Committed × Stakes × Context
+Committed = committed(D) ≡ ∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)
 Stakes = {Low, Med, High}
 G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative}
 Scan   = Detection: D → Set(G)                      -- gap identification
@@ -28,7 +29,7 @@ A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
 
 ── PHASE TRANSITIONS ──
-Phase 0: D → Scan(D) → G                            -- detection (silent)
+Phase 0: D → committed?(D) → Scan(D) → G              -- gate + detection (silent)
 Phase 1: G → TaskCreate[all gaps] → Gₛ → Q[AskUserQuestion](Gₛ[0]) → J  -- register all, surface first [Tool]
 Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
 
@@ -121,17 +122,37 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 
 This cycle repeats per planning phase or domain area.
 
-### Triggers
+### Conditions
 
-| Signal | Examples |
-|--------|----------|
-| Scope | "all", "every", "entire" |
-| Irreversibility | "delete", "push", "deploy", "migrate" |
-| Time compression | "quickly", "just", "right now" |
-| Uncertainty | "maybe", "probably", "I think" |
-| Stakes | production, security, data, external API |
+#### Essential (all must hold)
 
-**Skip**:
+| Condition | Predicate | Test |
+|-----------|-----------|------|
+| **Committed action** | `committed(D)` | `∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)` |
+| **Observable gap** | `∃ G : observable(G)` | Concrete indicator exists in context (not speculation) |
+| **Unaddressed** | `¬mentioned(G, context)` | Gap not already raised or resolved in session |
+
+```
+committed(D) ≡ ∃ action A in plan(D) :
+  mutates_state(A)            -- file write, DB change, config modification
+  ∨ externally_visible(A)     -- git push, API call, message send
+  ∨ consumes_resource(A)      -- paid API, long computation
+```
+
+**Scope limitation**: `committed(D)` captures *execution commitment* (actions with immediate effects). It does not capture *direction commitment* — decisions that constrain future work without immediate state change (e.g., "let's use PostgreSQL", "refactor auth to OAuth2"). Direction commitment is partially covered by Plan Mode Integration, which applies Syneidesis at phase boundaries where such decisions materialize into execution plans.
+
+#### Modulating Factors (adjust intensity, not applicability)
+
+| Factor | Effect | Heuristic signals |
+|--------|--------|-------------------|
+| **Irreversibility** | stakes ↑ | "delete", "push", "deploy", "migrate" |
+| **Impact scope** | stakes ↑ | "all", "every", "entire", production, security |
+| **Time pressure** | stakes ↑ (gap miss probability increases) | "quickly", "just", "right now" |
+| **Uncertainty** | scan range ↑ | "maybe", "probably", "I think" |
+
+#### Skip
+
+- `¬committed(D)`: read-only, informational, exploratory actions
 - User explicitly confirmed in current session
 - Mechanical task (no judgment involved)
 - User already mentioned the gap category
@@ -149,14 +170,17 @@ This cycle repeats per planning phase or domain area.
 
 ### Detection (Silent)
 
-1. **Stakes assessment**:
-   - Irreversible + High impact → High stakes
-   - Irreversible + Low impact → Medium stakes
-   - Reversible + Any impact → Low stakes
+1. **Committed check**: Verify `committed(D)` — if false (read-only, exploratory), skip Syneidesis for this decision point
 
 2. **Gap scan**: Check taxonomy against user's stated plan
 
-3. **Filter**: Surface only gaps with observable evidence (not speculation)
+3. **Filter**: Surface only gaps with observable evidence (`observable(G)`) and not already addressed (`¬mentioned(G, context)`)
+
+4. **Stakes assessment** (from modulating factors):
+   - Irreversible + High impact → High stakes
+   - Irreversible + Low impact → Medium stakes
+   - Reversible + Any impact → Low stakes
+   - Time pressure → stakes ↑ one level
 
 ### Surfacing
 

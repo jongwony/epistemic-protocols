@@ -1,16 +1,16 @@
 ---
 name: prothesis
-description: Lens for multi-perspective analysis. Select viewpoints before analysis to transform unknown unknowns into known unknowns.
+description: Lens for multi-perspective analysis. Selects viewpoints before analysis when the right framework is absent, producing a framed inquiry.
 user-invocable: true
 ---
 
 # Prothesis Protocol
 
-Transform unknown unknowns into known unknowns by placing available epistemic perspectives before the user, enabling lens selection prior to any perspective-requiring cognition.
+Resolve absent frameworks by placing available epistemic perspectives before the user, enabling lens selection prior to any perspective-requiring cognition. Type: `(FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry`.
 
 ## Definition
 
-**Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the inquirer does not know from which viewpoint to proceed, enabling selection before any perspective-requiring cognition.
+**Prothesis** (πρόθεσις): A dialogical act of presenting available epistemic perspectives as options when the appropriate framework is absent, enabling selection before any perspective-requiring cognition.
 
 ```
 Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L

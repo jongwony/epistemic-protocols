@@ -143,10 +143,14 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 - [ ] Session persistence: mode state managed correctly (active until deactivation trigger)
 
 #### Epistemological Soundness
-- [ ] Correct epistemic transition type declared:
-  - Prothesis/Syneidesis: unknown unknowns → known unknowns
-  - Hermeneia: known unknowns → known knowns
-- [ ] Initiator correctly specified (AI-initiated vs User-initiated)
+- [ ] Correct epistemic type signature declared:
+  - Prothesis: FrameworkAbsent → FramedInquiry (AI-detected, SELECT)
+  - Syneidesis: GapUnnoticed → AuditedDecision (AI-detected, SURFACE)
+  - Hermeneia: IntentMisarticulated → ClarifiedIntent (User-initiated, EXTRACT)
+  - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
+  - Reflexion: KnowledgeTacit → PersistedKnowledge (User-invoked, CRYSTALLIZE)
+  - Write: InsightInternal → ExternalizedKnowledge (User-invoked, EXTERNALIZE)
+- [ ] Initiator correctly specified (AI-detected vs User-initiated vs User-invoked)
 - [ ] Gap taxonomy matches protocol purpose
 
 #### False Positive Filtering

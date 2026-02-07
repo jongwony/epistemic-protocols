@@ -18,7 +18,7 @@ An appropriate human-AI collaboration model for the "weak AI" era. Translates co
 
 ### Interaction Design Perspective
 
-A refined implementation of intentional friction. Materializes the epistemic state transition from Unknown Unknowns to Known Unknowns as a UX flow.
+A refined implementation of intentional friction. Materializes the `GapUnnoticed → AuditedDecision` transformation as a UX flow.
 
 ## Protocol Flow
 

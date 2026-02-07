@@ -18,7 +18,7 @@
 
 ### 상호작용 설계 관점
 
-선택적 마찰(intentional friction)의 정교한 구현. Unknown Unknowns를 Known Unknowns로 전환하는 인식적 상태 전이를 UX 흐름으로 물질화.
+선택적 마찰(intentional friction)의 정교한 구현. `GapUnnoticed → AuditedDecision` 변환을 UX 흐름으로 물질화.
 
 ## 프로토콜 흐름
 

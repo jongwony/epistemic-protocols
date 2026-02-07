@@ -1,16 +1,16 @@
 ---
 name: katalepsis
-description: Achieve certain comprehension after AI work. Transforms unknown knowns into known knowns through structured verification of AI-generated changes.
+description: Achieve certain comprehension after AI work. Verifies understanding when results remain ungrasped, producing verified understanding.
 user-invocable: true
 ---
 
 # Katalepsis Protocol
 
-Achieve certain comprehension of AI work through structured verification, enabling the user to follow along and reach firm understanding.
+Achieve certain comprehension of AI work through structured verification, enabling the user to grasp ungrasped results. Type: `(ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding`.
 
 ## Definition
 
-**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—transforming AI-generated results into verified user understanding through categorized entry points and progressive verification.
+**Katalepsis** (κατάληψις): A dialogical act of achieving firm comprehension—from Stoic philosophy meaning "a grasping firmly"—resolving ungrasped AI-generated results into verified user understanding through categorized entry points and progressive verification.
 
 ```
 ── FLOW ──
@@ -71,14 +71,14 @@ Categorize  → Internal analysis (Read for context if needed)
 
 ## Distinction from Other Protocols
 
-| Protocol | Initiator | Transition | Focus |
-|----------|-----------|------------|-------|
-| **Prothesis** | AI | Unknown unknowns → Known unknowns | Perspective selection |
-| **Syneidesis** | AI | Unknown unknowns → Known unknowns | Decision-point gaps |
-| **Hermeneia** | User | Known unknowns → Known knowns | Expression clarification |
-| **Katalepsis** | User | Unknown knowns → Known knowns | Comprehension verification |
+| Protocol | Initiator | Deficit → Resolution | Focus |
+|----------|-----------|----------------------|-------|
+| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective selection |
+| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Expression clarification |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
-**Key difference**: User doesn't know they don't understand (unknown known). AI work exists but user hasn't grasped it yet. Katalepsis guides user to firm understanding through structured verification.
+**Key difference**: AI work exists but the result remains ungrasped by the user. Katalepsis guides user to firm understanding through structured verification.
 
 ## Mode Activation
 

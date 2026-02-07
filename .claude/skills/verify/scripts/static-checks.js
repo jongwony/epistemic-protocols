@@ -213,29 +213,65 @@ function checkCrossReference() {
 
   const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
 
-  // Extract flow formulas from CLAUDE.md
-  const flowMatches = claudeMd.matchAll(/Flow:\s*`([^`]+)`/g);
+  // Extract flow formulas from CLAUDE.md and validate against SKILL.md sources
+  // Map: protocol name → SKILL.md path (canonical source of truth)
+  const protocolPaths = {
+    prothesis: 'prothesis/skills/prothesis/SKILL.md',
+    syneidesis: 'syneidesis/skills/syneidesis/SKILL.md',
+    hermeneia: 'hermeneia/skills/hermeneia/SKILL.md',
+    katalepsis: 'katalepsis/skills/katalepsis/SKILL.md',
+  };
 
-  for (const match of flowMatches) {
-    const formula = match[1];
+  // Extract CLAUDE.md sections: "### ProtocolName" → "- **Flow**: `...`"
+  const sectionPattern = /###\s+(Prothesis|Syneidesis|Hermeneia|Katalepsis)\b[\s\S]*?-\s*\*\*Flow\*\*:\s*`([^`]+)`/g;
+  let sectionMatch;
+  while ((sectionMatch = sectionPattern.exec(claudeMd)) !== null) {
+    const protocolName = sectionMatch[1].toLowerCase();
+    const formula = sectionMatch[2];
+    const skillPath = path.join(projectRoot, protocolPaths[protocolName]);
 
-    // Check if corresponding protocol file exists and contains matching formula
-    if (formula.includes('Prothesis')) {
-      const prothesisPath = path.join(projectRoot, 'prothesis/commands/prothesis.md');
-      if (fs.existsSync(prothesisPath)) {
-        const content = fs.readFileSync(prothesisPath, 'utf8');
-        // Normalize whitespace for comparison
-        const normalizedFormula = formula.replace(/\s+/g, ' ').trim();
-        const normalizedContent = content.replace(/\s+/g, ' ');
+    if (!fs.existsSync(skillPath)) {
+      results.fail.push({
+        check: 'xref',
+        file: 'CLAUDE.md',
+        message: `${sectionMatch[1]} SKILL.md not found at ${protocolPaths[protocolName]}`
+      });
+      continue;
+    }
 
-        if (!normalizedContent.includes(normalizedFormula.substring(0, 30))) {
-          results.warn.push({
-            check: 'xref',
-            file: 'CLAUDE.md',
-            message: 'Prothesis flow formula may be out of sync with source'
-          });
-        }
-      }
+    const content = fs.readFileSync(skillPath, 'utf8');
+
+    // Extract flow formula from SKILL.md
+    // Two formats: "── FLOW ──\n<formula>" or first line with → in first code block
+    const flowSection = content.match(/── FLOW ──\n([^\n]+)/) ||
+                        content.match(/```\n([^\n]*→[^\n]*)\n/);
+    if (!flowSection) {
+      results.warn.push({
+        check: 'xref',
+        file: protocolPaths[protocolName],
+        message: `${sectionMatch[1]} SKILL.md has no flow formula in first code block`
+      });
+      continue;
+    }
+
+    // Extract variable symbols from CLAUDE.md flow (e.g., "U → C → P" → ["U","C","P"])
+    // Strip parenthesized expressions and loop annotations for symbol extraction
+    const formulaSymbols = formula
+      .replace(/\([^)]*\)/g, '')        // remove parenthesized parts
+      .split(/\s*→\s*/)                 // split on arrows
+      .map(s => s.trim())
+      .filter(s => s && !s.includes('loop') && !s.includes('check'));
+
+    const skillFlowLine = flowSection[1].replace(/\s+/g, ' ');
+
+    // Check that key symbols from CLAUDE.md formula appear in SKILL.md flow
+    const missingSymbols = formulaSymbols.filter(sym => !skillFlowLine.includes(sym));
+    if (missingSymbols.length > formulaSymbols.length / 2) {
+      results.warn.push({
+        check: 'xref',
+        file: 'CLAUDE.md',
+        message: `${sectionMatch[1]} flow formula may be out of sync with SKILL.md (missing: ${missingSymbols.join(', ')})`
+      });
     }
   }
 

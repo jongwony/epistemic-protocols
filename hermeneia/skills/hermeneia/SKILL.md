@@ -1,16 +1,16 @@
 ---
 name: hermeneia
-description: Clarify intent-expression gaps. Transforms known unknowns into known knowns when what you mean differs from what you said.
+description: Clarify intent-expression gaps. Extracts clarified intent when what you mean differs from what you said.
 user-invocable: true
 ---
 
 # Hermeneia Protocol
 
-Transform known unknowns into known knowns by clarifying intent-expression gaps through user-initiated dialogue, enabling precise articulation before action proceeds.
+Resolve intent-expression misalignment through user-initiated dialogue, enabling precise articulation before action proceeds. Type: `(IntentMisarticulated, User, EXTRACT, Expression) → ClarifiedIntent`.
 
 ## Definition
 
-**Hermeneia** (ἑρμηνεία): A dialogical act of clarifying the gap between what the user intends and what they expressed, transforming recognized ambiguity into precise articulation through structured questioning.
+**Hermeneia** (ἑρμηνεία): A dialogical act of clarifying the gap between what the user intends and what they expressed, resolving misaligned intent into precise articulation through structured questioning.
 
 ```
 ── FLOW ──
@@ -67,13 +67,13 @@ integrate   → Internal state update (no external tool)
 
 ## Distinction from Other Protocols
 
-| Protocol | Initiator | Transition | Focus |
-|----------|-----------|------------|-------|
-| **Prothesis** | AI | Unknown unknowns → Known unknowns | Perspective options |
-| **Syneidesis** | AI | Unknown unknowns → Known unknowns | Decision-point gaps |
-| **Hermeneia** | User | Known unknowns → Known knowns | Intent-expression gaps |
+| Protocol | Initiator | Deficit → Resolution | Focus |
+|----------|-----------|----------------------|-------|
+| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
 
-**Key difference**: User already recognizes ambiguity exists (known unknown). Hermeneia helps articulate what user already partially knows.
+**Key difference**: User already recognizes intent-expression misalignment. Hermeneia helps articulate what user already partially knows.
 
 ## Mode Activation
 
@@ -222,7 +222,7 @@ Which best captures your intent?
 
 ### Socratic Questioning Style
 
-Hermeneia transforms **known unknowns → known knowns**. The user already possesses the knowledge; they struggle to articulate it. Apply **maieutic questioning** (Socratic midwifery) to help users "give birth" to their own intent.
+Hermeneia resolves **IntentMisarticulated → ClarifiedIntent**. The user already possesses the knowledge; they struggle to articulate it. Apply **maieutic questioning** (Socratic midwifery) to help users "give birth" to their own intent.
 
 **Maieutic framing for AskUserQuestion**:
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — transforms **unknown unknowns** into **known unknowns** (Prothesis, Syneidesis), **known unknowns** into **known knowns** (Hermeneia), and **unknown knowns** into **known knowns** (Katalepsis) during AI-human interaction.
+Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), and **ResultUngrasped → VerifiedUnderstanding** (Katalepsis) during AI-human interaction.
 
 ## Architecture
 
@@ -57,7 +57,7 @@ Surface potential gaps at decision points as questions. Injected into main agent
 - **Flow**: `D → G → TaskCreate[all] → Q → J → Σ' → (re-scan → loop)`
 - **Key**: Phase 0 detects ALL gaps → TaskCreate batch registration; Phase 1 surfaces sequentially via `AskUserQuestion`; re-scan after each response; loop until all tasks completed or ESC
 - **Gap types**: Procedural, Consideration, Assumption, Alternative
-- **Triggers**: "delete", "push", "deploy", "all", "every", "quickly", production, security
+- **Conditions**: `committed(D)` (mutates state ∨ externally visible ∨ consumes resource) ∧ observable gap ∧ unaddressed
 - **Invocation**: `/syneidesis` or use "gap" in conversation
 
 ### Hermeneia (ἑρμηνεία) — alias: `clarify`
@@ -112,14 +112,21 @@ Multi-activation order: **Hermeneia → Prothesis → Syneidesis → Katalepsis*
            Hermeneia    Prothesis      Syneidesis                   Katalepsis
 ```
 
-| Protocol | Timing | Epistemic Transition |
-|----------|--------|---------------------|
-| **Hermeneia** | Pre-action | Known unknowns → Known knowns |
-| **Prothesis** | Pre-action | Unknown unknowns → Known unknowns |
-| **Syneidesis** | Mid-action (decision points) | Unknown unknowns → Known unknowns |
-| **Katalepsis** | Post-action | Unknown knowns → Known knowns |
+| Protocol | Timing | Initiator | Operation | Type Signature |
+|----------|--------|-----------|-----------|---------------|
+| **Hermeneia** | Before action | User-initiated | EXTRACT | IntentMisarticulated → ClarifiedIntent |
+| **Prothesis** | Before analysis | AI-detected | SELECT | FrameworkAbsent → FramedInquiry |
+| **Syneidesis** | At decision time | AI-detected | SURFACE | GapUnnoticed → AuditedDecision |
+| **Katalepsis** | After AI action | User-initiated | VERIFY | ResultUngrasped → VerifiedUnderstanding |
+| **Reflexion** | After session | User-invoked | CRYSTALLIZE | KnowledgeTacit → PersistedKnowledge |
+| **Write** | After session | User-invoked | EXTERNALIZE | InsightInternal → ExternalizedKnowledge |
 
-**Rationale**: Katalepsis operates on completed AI work (`R = AI's result`). Without a result, there is nothing to comprehend. Syneidesis surfaces gaps at decision points *before* execution, so it precedes Katalepsis in the workflow
+**Initiator taxonomy**:
+- **AI-detected**: AI determines the condition is present (Prothesis, Syneidesis)
+- **User-initiated**: User signals awareness of a deficit (Hermeneia, Katalepsis)
+- **User-invoked**: User runs as deliberate practice; no deficit awareness required (Reflexion, Write)
+
+**Rationale**: Katalepsis resolves `ResultUngrasped` — it operates on completed AI work (`R = AI's result`). Without a result, there is nothing to verify. Syneidesis resolves `GapUnnoticed` at decision points *before* execution, so it precedes Katalepsis in the workflow
 
 ## Verification
 

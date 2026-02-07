@@ -1,4 +1,4 @@
-<svg viewBox="0 0 520 360" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 560 460" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
       <path d="M 0 0 L 8 3 L 0 6 z" fill="#6b7280"/>
@@ -6,49 +6,116 @@
   </defs>
 
   <!-- Background -->
-  <rect width="520" height="360" fill="#f5f5f0"/>
+  <rect width="560" height="460" fill="#f5f5f0"/>
 
-  <!-- Quadrants with soft pastel colors -->
-  <!-- II: Unknown Knowns (top-left) - peach -->
-  <rect x="60" y="60" width="175" height="120" rx="8" fill="#fce8dc"/>
+  <!-- Title -->
+  <text x="280" y="30" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="700" fill="#2d3748">인식론적 타입 변환</text>
 
-  <!-- I: Known Knowns (top-right) - soft green -->
-  <rect x="255" y="60" width="175" height="120" rx="8" fill="#d4edda"/>
+  <!-- Group labels -->
+  <text x="44" y="66" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">AI 감지</text>
+  <text x="44" y="186" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">사용자 개시</text>
+  <text x="44" y="316" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">사용자 호출</text>
 
-  <!-- III: Unknown Unknowns (bottom-left) - mint/teal -->
-  <rect x="60" y="195" width="175" height="120" rx="8" fill="#d1ecf1"/>
+  <!-- Row 1: AI-detected -->
+  <!-- Prothesis -->
+  <rect x="88" y="48" width="145" height="50" rx="8" fill="#d1ecf1"/>
+  <text x="160" y="70" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">FrameworkAbsent</text>
+  <text x="160" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">분석 관점 부재</text>
 
-  <!-- IV: Known Unknowns (bottom-right) - soft yellow -->
-  <rect x="255" y="195" width="175" height="120" rx="8" fill="#fff3cd"/>
+  <line x1="233" y1="73" x2="293" y2="73" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="263" y="66" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">SELECT</text>
 
-  <!-- Quadrant labels -->
-  <text x="147" y="112" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Unknown Knowns</text>
-  <text x="147" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">암묵지 / AI 작업 미파악</text>
+  <rect x="295" y="48" width="145" height="50" rx="8" fill="#d4edda"/>
+  <text x="367" y="70" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">FramedInquiry</text>
+  <text x="367" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">관점 선택 완료</text>
 
-  <text x="342" y="112" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Known Knowns</text>
-  <text x="342" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">검증된 이해</text>
+  <text x="500" y="73" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Prothesis</text>
 
-  <text x="147" y="247" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Unknown Unknowns</text>
-  <text x="147" y="265" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">미지의 미지</text>
+  <!-- Syneidesis -->
+  <rect x="88" y="108" width="145" height="50" rx="8" fill="#d1ecf1"/>
+  <text x="160" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">GapUnnoticed</text>
+  <text x="160" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">미인지 결정 공백</text>
 
-  <text x="342" y="247" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#4a5568">Known Unknowns</text>
-  <text x="342" y="265" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#718096">인식된 무지</text>
+  <line x1="233" y1="133" x2="293" y2="133" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="263" y="126" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">SURFACE</text>
 
-  <!-- Protocol arrows -->
+  <rect x="295" y="108" width="145" height="50" rx="8" fill="#d4edda"/>
+  <text x="367" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">AuditedDecision</text>
+  <text x="367" y="146" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">공백 해소 완료</text>
 
-  <!-- Katalepsis: II → I (top, curved over) -->
-  <path d="M 180 60 Q 245 25 310 60" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="245" y="35" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Katalepsis</text>
+  <text x="500" y="133" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Syneidesis</text>
 
-  <!-- Hermeneia: IV → I (right side, curved outside) -->
-  <path d="M 430 280 Q 465 190 430 100" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="460" y="195" text-anchor="start" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Hermeneia</text>
+  <!-- Separator -->
+  <line x1="88" y1="172" x2="440" y2="172" stroke="#cbd5e0" stroke-width="0.5" stroke-dasharray="4,3"/>
 
-  <!-- Syneidesis: III → IV (middle boundary) -->
-  <path d="M 235 280 Q 255 295 275 280" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="255" y="310" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Syneidesis</text>
+  <!-- Row 2: User-initiated -->
+  <!-- Hermeneia -->
+  <rect x="88" y="182" width="145" height="50" rx="8" fill="#fce8dc"/>
+  <text x="160" y="204" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">IntentMisarticulated</text>
+  <text x="160" y="220" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">표현-의도 불일치</text>
 
-  <!-- Prothesis: III → IV (bottom, from deep left) -->
-  <path d="M 100 315 Q 200 345 350 315" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
-  <text x="225" y="350" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#4a5568">Prothesis</text>
+  <line x1="233" y1="207" x2="293" y2="207" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="263" y="200" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">EXTRACT</text>
+
+  <rect x="295" y="182" width="145" height="50" rx="8" fill="#d4edda"/>
+  <text x="367" y="204" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">ClarifiedIntent</text>
+  <text x="367" y="220" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">의도 명시화 완료</text>
+
+  <text x="500" y="207" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Hermeneia</text>
+
+  <!-- Katalepsis -->
+  <rect x="88" y="242" width="145" height="50" rx="8" fill="#fce8dc"/>
+  <text x="160" y="264" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">ResultUngrasped</text>
+  <text x="160" y="280" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">AI 작업 미파악</text>
+
+  <line x1="233" y1="267" x2="293" y2="267" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="263" y="260" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">VERIFY</text>
+
+  <rect x="295" y="242" width="145" height="50" rx="8" fill="#d4edda"/>
+  <text x="367" y="264" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">VerifiedUnderstanding</text>
+  <text x="367" y="280" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">이해 검증 완료</text>
+
+  <text x="500" y="267" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Katalepsis</text>
+
+  <!-- Separator -->
+  <line x1="88" y1="302" x2="440" y2="302" stroke="#cbd5e0" stroke-width="0.5" stroke-dasharray="4,3"/>
+
+  <!-- Row 3: User-invoked -->
+  <!-- Reflexion -->
+  <rect x="88" y="312" width="145" height="50" rx="8" fill="#fff3cd"/>
+  <text x="160" y="334" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">KnowledgeTacit</text>
+  <text x="160" y="350" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">세션 한정 인사이트</text>
+
+  <line x1="233" y1="337" x2="293" y2="337" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="263" y="330" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">CRYSTALLIZE</text>
+
+  <rect x="295" y="312" width="145" height="50" rx="8" fill="#d4edda"/>
+  <text x="367" y="334" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">PersistedKnowledge</text>
+  <text x="367" y="350" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">메모리 통합 완료</text>
+
+  <text x="500" y="337" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Reflexion</text>
+
+  <!-- Write -->
+  <rect x="88" y="372" width="145" height="50" rx="8" fill="#fff3cd"/>
+  <text x="160" y="394" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">InsightInternal</text>
+  <text x="160" y="410" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">미표현 지식</text>
+
+  <line x1="233" y1="397" x2="293" y2="397" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="263" y="390" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">EXTERNALIZE</text>
+
+  <rect x="295" y="372" width="145" height="50" rx="8" fill="#d4edda"/>
+  <text x="367" y="394" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">ExternalizedKnowledge</text>
+  <text x="367" y="410" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">출판물 생성 완료</text>
+
+  <text x="500" y="397" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Write</text>
+
+  <!-- Legend -->
+  <rect x="88" y="435" width="10" height="10" rx="2" fill="#d1ecf1"/>
+  <text x="103" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">결함 (입력)</text>
+  <rect x="175" y="435" width="10" height="10" rx="2" fill="#d4edda"/>
+  <text x="190" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">해소 (출력)</text>
+  <rect x="270" y="435" width="10" height="10" rx="2" fill="#fce8dc"/>
+  <text x="285" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">사용자 개시 결함</text>
+  <rect x="385" y="435" width="10" height="10" rx="2" fill="#fff3cd"/>
+  <text x="400" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">사용자 호출 결함</text>
 </svg>

@@ -10,7 +10,7 @@ A modern reinterpretation of Stoic κατάληψις (firm grasp, certain compr
 
 ### The Core Problem
 
-When AI completes complex work, users often don't know what they don't understand (unknown knowns). They may think they understand, or feel overwhelmed by changes without a clear entry point.
+When AI completes complex work, users often can't grasp the full result (`ResultUngrasped`). They may think they understand, or feel overwhelmed by changes without a clear entry point.
 
 ### The Solution
 

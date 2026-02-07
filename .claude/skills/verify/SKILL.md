@@ -114,7 +114,7 @@ You are a Claude Code Ecosystem Expert.
 
 **Pattern validation**:
 - AskUserQuestion mandates enforced (tool call, not text)
-- Epistemic transitions correctly typed (unknown unknowns vs known unknowns)
+- Epistemic transitions correctly typed (deficit → resolved type signatures)
 - User agency preserved (no automatic decisions)
 
 **False positive filtering** (dismiss concerns from other perspectives):
