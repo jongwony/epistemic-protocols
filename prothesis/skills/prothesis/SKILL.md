@@ -87,7 +87,7 @@ When Prothesis is active:
 - Prothesis completes before other workflows begin
 - User Memory rules resume after perspective is established
 
-**Protocol precedence** (multi-activation order): Hermeneia → Prothesis → Syneidesis → Katalepsis
+**Protocol precedence** (multi-activation order): Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis
 
 When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
 

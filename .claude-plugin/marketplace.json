@@ -33,6 +33,11 @@
       "name": "katalepsis",
       "source": "./katalepsis",
       "description": "Achieve certain comprehension of AI work"
+    },
+    {
+      "name": "telos",
+      "source": "./telos",
+      "description": "Co-construct defined goals from vague intent (τέλος)"
     }
   ]
 }

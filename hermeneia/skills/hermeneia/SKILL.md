@@ -73,6 +73,7 @@ integrate   → Internal state update (no external tool)
 | **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
 | **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
 
 **Key difference**: User already recognizes intent-expression misalignment. Hermeneia helps articulate what user already partially knows.
 
@@ -100,14 +101,15 @@ When Hermeneia is active:
 - Hermeneia completes before other workflows begin
 - User Memory rules resume after intent is clarified
 
-**Protocol precedence** (multi-activation order): Hermeneia → Prothesis → Syneidesis → Katalepsis
+**Protocol precedence** (multi-activation order): Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis
 
 | Active Protocols | Execution Order | Rationale |
 |------------------|-----------------|-----------|
 | Hermeneia + Prothesis | Hermeneia → Prothesis | Clarify intent before perspective selection |
 | Hermeneia + Syneidesis | Hermeneia → Syneidesis | Clarify intent before gap surfacing |
+| Hermeneia + Telos | Hermeneia → Telos | Clarify intent before goal co-construction |
 | Hermeneia + Katalepsis | Hermeneia → Katalepsis | Clarify intent before comprehension |
-| All four active | Hermeneia → Prothesis → Syneidesis → Katalepsis | Intent → Perspective → Decision → Comprehension |
+| All five active | Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis | Intent → Goal → Perspective → Decision → Comprehension |
 
 Clarified expression becomes input to subsequent protocols.
 
