@@ -44,7 +44,7 @@ Continue until: all selected tasks completed OR user ESC.
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
-VerifiedUnderstanding = P' where ∀t ∈ Tasks: t.status = completed ∧ P' ≅ R
+VerifiedUnderstanding = P' where (∀t ∈ Tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
 
 ── TOOL GROUNDING ──
 Phase 1 Q   → AskUserQuestion (entry point selection)

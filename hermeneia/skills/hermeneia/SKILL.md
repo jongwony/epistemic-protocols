@@ -24,7 +24,7 @@ Q  = Clarification question (via AskUserQuestion)
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
 Î' = Updated intent after clarification
-ClarifiedIntent = Î' where |G| = 0 (convergence: no gaps remain)
+ClarifiedIntent = Î' where |G| = 0 ∨ cycle(G) ∨ stall(Δ, 2) ∨ user_esc
 
 ── E-BINDING ──
 bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn

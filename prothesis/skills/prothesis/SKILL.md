@@ -27,7 +27,7 @@ Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ}, Pₛ ≠ ∅)
 R      = Set(Result)                           -- inquiry outputs
 Syn    = Synthesis: R → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
-FramedInquiry = L where |Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)
+FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → G(U) → C                          -- context acquisition

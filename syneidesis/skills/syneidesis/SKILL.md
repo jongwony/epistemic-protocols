@@ -29,7 +29,7 @@ J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
 c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
-AuditedDecision = Σ' where ∀ task ∈ registered: task.status = completed
+AuditedDecision = Σ' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → Scan(D) → G              -- gate + detection (silent)

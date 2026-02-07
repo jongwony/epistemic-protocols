@@ -111,11 +111,11 @@
 
   <!-- Legend -->
   <rect x="88" y="435" width="10" height="10" rx="2" fill="#d1ecf1"/>
-  <text x="103" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">결함 (입력)</text>
+  <text x="103" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">AI 감지 결핍</text>
   <rect x="175" y="435" width="10" height="10" rx="2" fill="#d4edda"/>
   <text x="190" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">해소 (출력)</text>
   <rect x="270" y="435" width="10" height="10" rx="2" fill="#fce8dc"/>
-  <text x="285" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">사용자 개시 결함</text>
+  <text x="285" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">사용자 개시 결핍</text>
   <rect x="385" y="435" width="10" height="10" rx="2" fill="#fff3cd"/>
-  <text x="400" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">사용자 호출 결함</text>
+  <text x="400" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">사용자 호출 결핍</text>
 </svg>

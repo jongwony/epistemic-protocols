@@ -111,7 +111,7 @@
 
   <!-- Legend -->
   <rect x="88" y="435" width="10" height="10" rx="2" fill="#d1ecf1"/>
-  <text x="103" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">Deficit (input)</text>
+  <text x="103" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">AI-detected deficit</text>
   <rect x="175" y="435" width="10" height="10" rx="2" fill="#d4edda"/>
   <text x="190" y="444" font-family="system-ui, sans-serif" font-size="8" fill="#718096">Resolved (output)</text>
   <rect x="270" y="435" width="10" height="10" rx="2" fill="#fce8dc"/>

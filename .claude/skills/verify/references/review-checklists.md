@@ -15,6 +15,7 @@ Analyze the protocol definitions for mathematical soundness.
 - prothesis/skills/prothesis/SKILL.md (Definition section)
 - syneidesis/skills/syneidesis/SKILL.md (Definition section)
 - hermeneia/skills/hermeneia/SKILL.md (Definition section)
+- katalepsis/skills/katalepsis/SKILL.md (Definition section)
 
 **Checklist**:
 
@@ -71,6 +72,7 @@ Analyze the protocol instructions for consistency and completeness.
 - prothesis/skills/prothesis/SKILL.md (Mode Activation, Priority sections)
 - syneidesis/skills/syneidesis/SKILL.md (Mode Activation, Priority sections)
 - hermeneia/skills/hermeneia/SKILL.md (Mode Activation, Priority sections)
+- katalepsis/skills/katalepsis/SKILL.md (Mode Activation, Priority sections)
 - CLAUDE.md (Core Principles)
 
 **Checklist**:
@@ -132,6 +134,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 - prothesis/skills/prothesis/SKILL.md (Mode Activation, Rules sections)
 - syneidesis/skills/syneidesis/SKILL.md (Mode Activation, Rules sections)
 - hermeneia/skills/hermeneia/SKILL.md (Mode Activation, Rules sections)
+- katalepsis/skills/katalepsis/SKILL.md (Mode Activation, Rules sections)
 - CLAUDE.md (Project Overview, Core Principles)
 
 **Checklist**:
