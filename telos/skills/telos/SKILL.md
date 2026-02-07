@@ -87,11 +87,11 @@ Telos is not simplified requirements gathering. Three differentiators:
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Prothesis** | AI | FrameworkAbsent → FramedInquiry | Perspective options |
-| **Syneidesis** | AI | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | User | IntentMisaligned → ClarifiedIntent | Intent-expression gaps |
-| **Telos** | AI | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Katalepsis** | User | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
+| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key difference**: Hermeneia EXTRACTS (assumes intent exists inside user). Telos CO-CONSTRUCTS (assumes neither party has the complete answer). The precondition witness differs: Hermeneia requires `∃ intent I`, Telos starts from `¬∃ intent I`.
 
