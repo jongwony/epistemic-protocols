@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), and **ResultUngrasped → VerifiedUnderstanding** (Katalepsis) during AI-human interaction.
+Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos) during AI-human interaction.
 
 ## Architecture
 
@@ -24,6 +24,9 @@ epistemic-protocols/
 ├── katalepsis/                        # Protocol: comprehension verification
 │   ├── .claude-plugin/plugin.json
 │   └── skills/katalepsis/SKILL.md     # Full protocol definition (user-invocable)
+├── telos/                             # Protocol: goal co-construction
+│   ├── .claude-plugin/plugin.json
+│   └── skills/telos/SKILL.md          # Full protocol definition (user-invocable)
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # Parallel extraction agents
@@ -76,6 +79,14 @@ Achieve certain comprehension of AI work through structured verification.
 - **Triggers**: "explain this", "what did you do?", "help me understand"
 - **Invocation**: `/katalepsis` or use "grasp" in conversation
 
+### Telos (τέλος) — alias: `goal`
+Co-construct defined goals from vague intent through AI-proposed, user-shaped dialogue.
+- **Flow**: `G → Gᵥ → Dₛ → P → A → C' → (loop until sufficient)`
+- **Key**: AI-detected, user-confirmed (Phase 0); Phase 1 calls `AskUserQuestion` for dimension selection; Phase 2 proposes concrete candidates; Phase 4 calls `AskUserQuestion` for GoalContract approval; loop until user approves or ESC
+- **Gap types**: Outcome, Metric, Boundary, Priority
+- **Triggers**: "not sure what I want", "something like", "ideas for", exploratory framing
+- **Invocation**: `/telos` or use "goal" in conversation
+
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
 - **Flow**: Session → Context → ∥Extract → Select → Integrate → Verify
@@ -102,19 +113,20 @@ Pre-commit protocol verification via static checks and expert review.
 
 ## Protocol Precedence
 
-Multi-activation order: **Hermeneia → Prothesis → Syneidesis → Katalepsis**
+Multi-activation order: **Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis**
 
 ### Epistemic Workflow Timeline
 
 ```
-[Request] → [Intent] → [Perspective] → [Decision] → [Execution] → [Comprehension]
-               ↑            ↑              ↑                            ↑
-           Hermeneia    Prothesis      Syneidesis                   Katalepsis
+[Request] → [Intent] → [Goal] → [Perspective] → [Decision] → [Execution] → [Comprehension]
+               ↑          ↑          ↑              ↑                            ↑
+           Hermeneia    Telos    Prothesis      Syneidesis                   Katalepsis
 ```
 
 | Protocol | Timing | Initiator | Operation | Type Signature |
 |----------|--------|-----------|-----------|---------------|
 | **Hermeneia** | Before action | User-initiated | EXTRACT | IntentMisarticulated → ClarifiedIntent |
+| **Telos** | Pre-action | AI-detected | CO-CONSTRUCT | GoalIndeterminate → DefinedEndState |
 | **Prothesis** | Before analysis | AI-detected | SELECT | FrameworkAbsent → FramedInquiry |
 | **Syneidesis** | At decision time | AI-detected | SURFACE | GapUnnoticed → AuditedDecision |
 | **Katalepsis** | After AI action | User-initiated | VERIFY | ResultUngrasped → VerifiedUnderstanding |
@@ -126,7 +138,7 @@ Multi-activation order: **Hermeneia → Prothesis → Syneidesis → Katalepsis*
 - **User-initiated**: User signals awareness of a deficit (Hermeneia, Katalepsis)
 - **User-invoked**: User runs as deliberate practice; no deficit awareness required (Reflexion, Write)
 
-**Rationale**: Katalepsis resolves `ResultUngrasped` — it operates on completed AI work (`R = AI's result`). Without a result, there is nothing to verify. Syneidesis resolves `GapUnnoticed` at decision points *before* execution, so it precedes Katalepsis in the workflow
+**Rationale**: Telos resolves `GoalIndeterminate` — it co-constructs a defined end state before perspectives or gaps can be meaningfully addressed. Katalepsis resolves `ResultUngrasped` — it operates on completed AI work (`R = AI's result`). Without a result, there is nothing to verify. Syneidesis resolves `GapUnnoticed` at decision points *before* execution, so it precedes Katalepsis in the workflow
 
 ## Verification
 
@@ -147,6 +159,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 
 - **Prothesis Phase 2**: MUST use Task subagents—isolated context required for unbiased perspective analysis
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 
 ## Editing Guidelines
 

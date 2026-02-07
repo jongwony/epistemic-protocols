@@ -77,6 +77,7 @@ Categorize  → Internal analysis (Read for context if needed)
 | **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Expression clarification |
+| **Telos** | AI | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key difference**: AI work exists but the result remains ungrasped by the user. Katalepsis guides user to firm understanding through structured verification.
@@ -106,13 +107,13 @@ At Phase 3, call AskUserQuestion for comprehension verification.
 - Katalepsis provides structured comprehension path
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence** (multi-activation order): Hermeneia → Prothesis → Syneidesis → Katalepsis
+**Protocol precedence** (multi-activation order): Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis
 
 | Active Protocols | Execution Order | Rationale |
 |------------------|-----------------|-----------|
 | Katalepsis + Syneidesis | Syneidesis → Katalepsis | Decide, then comprehend result |
 | Katalepsis + Prothesis | Prothesis → Katalepsis | Perspective first, then comprehend |
-| All four active | Hermeneia → Prothesis → Syneidesis → Katalepsis | Intent → Perspective → Decision → Comprehension |
+| All four active | Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis | Intent → Perspective → Decision → Comprehension |
 
 ### Triggers
 
