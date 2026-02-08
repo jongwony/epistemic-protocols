@@ -73,8 +73,8 @@ Clarify intent-expression gaps through user-initiated dialogue.
 
 ### Katalepsis (κατάληψις) — alias: `grasp`
 Achieve certain comprehension of AI work through structured verification.
-- **Flow**: `R → C → Sₑ → Tᵣ → P → Δ → Q → A → Tₐ → Tᵤ → P' → (loop until katalepsis)`
-- **Key**: User-initiated; Phase 0 categorizes AI work; Phase 1 calls `AskUserQuestion` for entry point selection; Phase 2 uses `TaskCreate` for tracking; Phase 3 calls `AskUserQuestion` for comprehension verification with `TaskUpdate`; novel user proposals archived via `TaskCreate` (Tₐ)
+- **Flow**: `R → C → Sₑ → Tᵣ → P → Δ → Q → A → Tᵤ → P' → (loop until katalepsis)`
+- **Key**: User-initiated; Phase 0 categorizes AI work; Phase 1 calls `AskUserQuestion` for entry point selection; Phase 2 uses `TaskCreate` for tracking; Phase 3 calls `AskUserQuestion` for comprehension verification with `TaskUpdate`; user proposals ejected via `TaskCreate` to maintain comprehension focus
 - **Gap types**: Expectation, Causality, Scope, Sequence
 - **Triggers**: "explain this", "what did you do?", "help me understand"
 - **Invocation**: `/katalepsis` or use "grasp" in conversation
