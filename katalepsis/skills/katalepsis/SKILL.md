@@ -230,6 +230,23 @@ For each task (category):
    3. Let me see the code — [shows relevant code, then re-verify]
    ```
 
+3b. **On proposal detected** (user answer suggests changes or improvements to the discussed system, AND meets at least one auxiliary signal):
+   - Acknowledge briefly: "Noted — recorded as a task. Continuing verification."
+   - Call TaskCreate to eject the proposal:
+     ```
+     TaskCreate({
+       subject: "[Katalepsis:Proposal] Brief description",
+       description: "User proposal during [category]: [verbatim user text]",
+       activeForm: "Archiving user proposal"
+     })
+     ```
+   - Return to comprehension loop immediately
+
+   **Detection criteria**:
+   - **Required**: Suggests changes or improvements to the discussed system (direction toward knowledge capture, not comprehension)
+   - **Auxiliary** (at least one): introduces concepts not in original AI work output `R`; contains action-oriented language directed at the system (should change, could add, how about replacing)
+   - **Exclude**: Requests for further explanation, code navigation, or clarification — even if phrased with action-oriented language (e.g., "could you show me that part?")
+
 4. **On confirmed comprehension**:
    - TaskUpdate to `completed`
    - Move to next pending task
@@ -290,3 +307,4 @@ Use:
 8. **Convergence persistence**: Mode remains active until all selected tasks completed
 9. **Escape hatch**: User can exit at any time
 10. **Phantasia update**: Each verification updates internal model of user's understanding
+11. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
