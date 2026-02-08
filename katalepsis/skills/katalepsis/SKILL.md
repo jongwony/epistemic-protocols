@@ -14,7 +14,7 @@ Achieve certain comprehension of AI work through structured verification, enabli
 
 ```
 ── FLOW ──
-R → C → Sₑ → Tᵣ → P → Δ → Q → A → Tᵤ → P' → (loop until katalepsis)
+R → C → Sₑ → Tᵣ → P → Δ → Q → A → Tₐ → Tᵤ → P' → (loop until katalepsis)
 
 ── TYPES ──
 R  = AI's result (the work output)
@@ -25,6 +25,7 @@ P  = User's phantasia (current representation/understanding)
 Δ  = Detected comprehension gap
 Q  = Verification question (via AskUserQuestion)
 A  = User's answer
+Tₐ = Proposal archive (conditional: only when A contains novel proposal)
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 
@@ -33,7 +34,9 @@ Phase 0: R → Categorize(R) → C                         -- analysis (silent)
 Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point selection [Tool]
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check
-       → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
+       → Q[AskUserQuestion](Δ) → A                      -- verification loop [Tool]
+       → {proposal(A) → TaskCreate[archive]} → Tₐ        -- proposal preservation [Tool]
+       → P' → Tᵤ                                         -- phantasia update
 
 ── LOOP ──
 After Phase 3: Check if current category fully understood.
@@ -50,6 +53,7 @@ VerifiedUnderstanding = P' where (∀t ∈ Tasks: t.status = completed ∧ P' �
 Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 Q   → AskUserQuestion (comprehension verification)
+Phase 3 Tₐ  → TaskCreate (proposal archival, conditional)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Categorize  → Internal analysis (Read for context if needed)
 
@@ -62,6 +66,7 @@ Categorize  → Internal analysis (Read for context if needed)
   tasks: Map<TaskId, Task>,
   current: TaskId,
   phantasia: Understanding,
+  proposals: List<TaskId>,
   active: Bool
 }
 ```
@@ -230,6 +235,23 @@ For each task (category):
    3. Let me see the code — [shows relevant code, then re-verify]
    ```
 
+3b. **On proposal detected** (user answer contains novel suggestion, improvement, or new method beyond comprehension response):
+   - Call TaskCreate immediately:
+     ```
+     TaskCreate({
+       subject: "[Katalepsis:Proposal] Brief description",
+       description: "User proposal during [category]: [verbatim user text]",
+       activeForm: "Archiving user proposal"
+     })
+     ```
+   - Continue comprehension loop without interruption
+
+   **Detection criteria** (any of):
+   - Free-text answer instead of predefined option selection
+   - Contains action-oriented language (should, could, how about, let's)
+   - Introduces concepts not in original AI work output `R`
+   - Suggests changes or improvements to the discussed system
+
 4. **On confirmed comprehension**:
    - TaskUpdate to `completed`
    - Move to next pending task
@@ -290,3 +312,4 @@ Use:
 8. **Convergence persistence**: Mode remains active until all selected tasks completed
 9. **Escape hatch**: User can exit at any time
 10. **Phantasia update**: Each verification updates internal model of user's understanding
+11. **Proposal preservation**: When user answer `A` contains a novel proposal (not just comprehension confirmation), immediately call TaskCreate to archive before continuing. Prevents volatile loss of user-generated insights during verification loops.
