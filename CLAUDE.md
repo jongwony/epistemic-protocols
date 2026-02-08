@@ -115,6 +115,10 @@ Pre-commit protocol verification via static checks and expert review.
 
 Multi-activation order: **Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis**
 
+This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → perspective → gap audit). Users can override by explicitly requesting a different protocol first.
+
+**Katalepsis**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
+
 ### Epistemic Workflow Timeline
 
 ```
@@ -122,6 +126,10 @@ Multi-activation order: **Hermeneia → Telos → Prothesis → Syneidesis → K
                ↑          ↑          ↑              ↑                            ↑
            Hermeneia    Telos    Prothesis      Syneidesis                   Katalepsis
 ```
+
+This diagram shows logical progression, not strict execution order.
+
+### Epistemic Matrix
 
 | Protocol | Timing | Initiator | Operation | Type Signature |
 |----------|--------|-----------|-----------|---------------|
@@ -134,11 +142,9 @@ Multi-activation order: **Hermeneia → Telos → Prothesis → Syneidesis → K
 | **Write** | After session | User-invoked | EXTERNALIZE | InsightInternal → ExternalizedKnowledge |
 
 **Initiator taxonomy**:
-- **AI-detected**: AI determines the condition is present (Prothesis, Syneidesis)
+- **AI-detected**: AI determines the condition is present (Prothesis, Syneidesis, Telos)
 - **User-initiated**: User signals awareness of a deficit (Hermeneia, Katalepsis)
 - **User-invoked**: User runs as deliberate practice; no deficit awareness required (Reflexion, Write)
-
-**Rationale**: Telos resolves `GoalIndeterminate` — it co-constructs a defined end state before perspectives or gaps can be meaningfully addressed. Katalepsis resolves `ResultUngrasped` — it operates on completed AI work (`R = AI's result`). Without a result, there is nothing to verify. Syneidesis resolves `GapUnnoticed` at decision points *before* execution, so it precedes Katalepsis in the workflow
 
 ## Verification
 
