@@ -119,14 +119,7 @@ When Telos is active:
 - Telos completes before implementation workflows begin
 - User Memory rules resume after GoalContract is approved
 
-**Protocol precedence** (multi-activation order): Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis
-
-| Active Protocols | Execution Order | Rationale |
-|------------------|-----------------|-----------|
-| Hermeneia + Telos | Hermeneia → Telos | Clarify expression before constructing goal |
-| Telos + Prothesis | Telos → Prothesis | Define goal before selecting perspectives |
-| Telos + Syneidesis | Telos → Syneidesis | Define goal before surfacing gaps |
-| Telos + Katalepsis | Telos → Katalepsis | Define goal before comprehension verification |
+**Protocol precedence**: Default ordering places Telos after Hermeneia (clarified intent before goal construction) and before Prothesis (defined goals before perspective selection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 Approved GoalContract becomes input to subsequent protocols.
 

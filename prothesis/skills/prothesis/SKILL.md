@@ -87,9 +87,7 @@ When Prothesis is active:
 - Prothesis completes before other workflows begin
 - User Memory rules resume after perspective is established
 
-**Protocol precedence** (multi-activation order): Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis
-
-When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
+**Protocol precedence**: Default ordering places Prothesis after Telos and before Syneidesis (established perspective contextualizes gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
 
 ### Per-Message Application
 
@@ -123,7 +121,7 @@ When combined with Plan mode, Prothesis provides the **Deliberation** phase:
 - Perspectives evaluate domain-specific considerations
 - Synthesis produces phase-scoped recommendations
 
-**Syneidesis Coordination**:
+**Syneidesis Coordination** (following default ordering):
 - Prothesis generates recommendations (Deliberation)
 - Syneidesis surfaces unconfirmed assumptions (Gap)
 - User feedback triggers re-evaluation (Revision)

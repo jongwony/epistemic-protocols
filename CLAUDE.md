@@ -106,7 +106,7 @@ Pre-commit protocol verification via static checks and expert review.
 ## Core Principles
 
 - **Recognition over Recall**: Options to select, not blanks to fill
-- **Selection over Detection**: User selects gap types, AI does not auto-diagnose
+- **Selection over Detection**: User selects gap types, AI does not auto-diagnose. Applies within protocols (user expertise); protocol-to-protocol ordering uses logical defaults with user override
 - **Surfacing over Deciding**: AI illuminates, user judges
 - **Convergence Persistence**: Modes active until convergence (Hermeneia loops until |G| = 0)
 - **Priority Override**: Active protocols supersede default behaviors
@@ -115,7 +115,11 @@ Pre-commit protocol verification via static checks and expert review.
 
 Multi-activation order: **Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis**
 
-### Epistemic Workflow Timeline
+This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → perspective → gap audit). Users can override by explicitly requesting a different protocol first.
+
+**Katalepsis**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
+
+### Epistemic Workflow
 
 ```
 [Request] → [Intent] → [Goal] → [Perspective] → [Decision] → [Execution] → [Comprehension]
@@ -123,22 +127,12 @@ Multi-activation order: **Hermeneia → Telos → Prothesis → Syneidesis → K
            Hermeneia    Telos    Prothesis      Syneidesis                   Katalepsis
 ```
 
-| Protocol | Timing | Initiator | Operation | Type Signature |
-|----------|--------|-----------|-----------|---------------|
-| **Hermeneia** | Before action | User-initiated | EXTRACT | IntentMisarticulated → ClarifiedIntent |
-| **Telos** | Pre-action | AI-detected | CO-CONSTRUCT | GoalIndeterminate → DefinedEndState |
-| **Prothesis** | Before analysis | AI-detected | SELECT | FrameworkAbsent → FramedInquiry |
-| **Syneidesis** | At decision time | AI-detected | SURFACE | GapUnnoticed → AuditedDecision |
-| **Katalepsis** | After AI action | User-initiated | VERIFY | ResultUngrasped → VerifiedUnderstanding |
-| **Reflexion** | After session | User-invoked | CRYSTALLIZE | KnowledgeTacit → PersistedKnowledge |
-| **Write** | After session | User-invoked | EXTERNALIZE | InsightInternal → ExternalizedKnowledge |
+This diagram shows logical progression, not strict execution order.
 
 **Initiator taxonomy**:
-- **AI-detected**: AI determines the condition is present (Prothesis, Syneidesis)
+- **AI-detected**: AI determines the condition is present (Prothesis, Syneidesis, Telos)
 - **User-initiated**: User signals awareness of a deficit (Hermeneia, Katalepsis)
 - **User-invoked**: User runs as deliberate practice; no deficit awareness required (Reflexion, Write)
-
-**Rationale**: Telos resolves `GoalIndeterminate` — it co-constructs a defined end state before perspectives or gaps can be meaningfully addressed. Katalepsis resolves `ResultUngrasped` — it operates on completed AI work (`R = AI's result`). Without a result, there is nothing to verify. Syneidesis resolves `GapUnnoticed` at decision points *before* execution, so it precedes Katalepsis in the workflow
 
 ## Verification
 

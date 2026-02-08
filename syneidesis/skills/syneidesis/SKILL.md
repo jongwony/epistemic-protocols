@@ -94,9 +94,7 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence** (multi-activation order): Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis
-
-When both Prothesis and Syneidesis are active, Prothesis executes first (perspective selection gates subsequent analysis). Syneidesis applies to decision points within the established perspective.
+**Protocol precedence**: Default ordering places Syneidesis after Prothesis (gap detection applies within the established perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
 
 ### Mode Deactivation
 
@@ -120,7 +118,7 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 3. **Revision**: Integrate user response, re-evaluate if needed
 4. **Execution**: Only after explicit scope confirmation
 
-**Sequencing with Prothesis**: When both active, Prothesis completes perspective selection before Syneidesis applies gap detection. The cycle becomes: [Perspective Selection → Deliberation → Gap → Revision → Execution].
+**Sequencing with Prothesis**: Following the default ordering, Prothesis completes perspective selection before Syneidesis applies gap detection. The cycle becomes: [Perspective Selection → Deliberation → Gap → Revision → Execution]. The user can override this ordering by explicitly requesting Syneidesis first.
 
 This cycle repeats per planning phase or domain area.
 
