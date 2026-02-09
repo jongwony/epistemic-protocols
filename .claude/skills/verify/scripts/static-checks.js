@@ -415,7 +415,8 @@ function checkToolGrounding() {
 
     // Parse lines like: "S (extern)     → AskUserQuestion tool"
     // Capture: operation, classification, tool
-    const bindingPattern = /^([∥]?\w+)\s*\((\w+)\)\s*→\s*(\w+)/gm;
+    // Unicode support: [\w\u0370-\u03FF] matches Greek letters (Λ, Σ, Ω, etc.)
+    const bindingPattern = /^([∥]?[\w\u0370-\u03FF]+)\s*\((\w+)\)\s*→\s*(\w+)/gm;
     let match;
     while ((match = bindingPattern.exec(groundingSection)) !== null) {
       toolBindings.push({

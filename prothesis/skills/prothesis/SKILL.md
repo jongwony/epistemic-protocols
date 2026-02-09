@@ -37,7 +37,7 @@ Phase 0:  U → G(U) → C                                          -- context a
 Phase 1:  C → present[S]({P₁...Pₙ}(C)) → await → Pₛ            -- S: AskUserQuestion [Tool]
 Phase 2a: Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ)         -- team setup [Tool]
 Phase 2b: T → ∥I[TaskCreate](T) → D[SendMessage](T) → R         -- inquiry + optional dialogue [Tool]
-Phase 2c: R → Collect[SendMessage](T) → R'                      -- collection + conditional shutdown [Tool]
+Phase 2c: R → Ω[SendMessage](T) → R'                            -- collection + deferred shutdown [Tool]
 Phase 3:  R' → Syn(R') → L                                      -- internal synthesis
 Phase 4:  L → Q[AskUserQuestion](sufficiency) → await → J       -- sufficiency check [Tool]
 
@@ -60,7 +60,7 @@ T (parallel)       → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)  → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)      → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 D (parallel)       → SendMessage tool (type: "message", coordinator-mediated cross-dialogue)
-Collect (extern)   → SendMessage tool (type: "shutdown_request", graceful teammate termination)
+Ω (extern)         → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Phase 4 Q          → AskUserQuestion (sufficiency check; Escape → terminate)
 Λ (state)          → TaskCreate/TaskUpdate (optional, for perspective tracking)
 G (gather)         → Read, Glob, Grep (context acquisition)
@@ -231,9 +231,7 @@ Teammates analyze independently. After results arrive, the coordinator (main age
 
 #### Phase 2c: Collection
 
-Collect all results (initial analyses + any dialogue responses). Conditional shutdown:
-- If Phase 4 will terminate (sufficient/ESC): call SendMessage (type: "shutdown_request") for each teammate, then TeamDelete
-- If Phase 4 may loop (add_perspective/refine): retain team for reuse
+Collect all results (initial analyses + any dialogue responses) into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 4, where the user's sufficiency judgment determines team lifecycle.
 
 #### Isolated Context Requirement
 
@@ -243,6 +241,8 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 - Anchoring on initial assumptions formed during context gathering
 
 **Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. Cross-dialogue is strictly coordinator-mediated to maintain isolation boundaries.
+
+**Isolation trade-off on refine loops**: When `J=refine` reuses a retained teammate via SendMessage, the coordinator's refinement instruction inherently carries synthesis context (what to refine, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested refinement, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
 
 ### Phase 3: Synthesis (Horizon Integration)
 
