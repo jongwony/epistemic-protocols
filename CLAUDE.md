@@ -50,9 +50,9 @@ epistemic-protocols/
 
 ### Prothesis (πρόθεσις) — alias: `lens`
 Present perspective options before analysis begins. Injected into main agent context.
-- **Flow**: `U → C → P → Pₛ → ∥I(Pₛ) → R → L → (sufficiency check → loop)`
+- **Flow**: `U → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → loop)`
 - **Key**: Phase 1 calls `AskUserQuestion` for perspective selection; Phase 4 calls `AskUserQuestion` for sufficiency check; loop until user satisfied or ESC
-- **Phase 2**: Parallel inquiry via Task subagents (mandatory—main agent direct analysis = violation); subagent isolation prevents cross-perspective contamination and confirmation bias
+- **Phase 2**: Agent team via TeamCreate (mandatory); teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 4 loop
 - **Invocation**: `/prothesis` or use "lens" in conversation
 
 ### Syneidesis (συνείδησις) — alias: `gap`
@@ -151,7 +151,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 
 ## Delegation Constraint
 
-- **Prothesis Phase 2**: MUST use Task subagents—isolated context required for unbiased perspective analysis
+- **Prothesis Phase 2**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 

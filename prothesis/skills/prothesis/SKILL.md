@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → ∥I(Pₛ) → R → Syn(R) → L
+Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R → Syn(R) → L
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
@@ -23,24 +23,30 @@ C      = Context (information for perspective formulation)
 {P₁...Pₙ}(C) = Perspectives derived from context (n ≥ 2)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice)
 Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ}, Pₛ ≠ ∅)
-∥I     = Parallel inquiry: (∥ p∈Pₛ. Inquiry(p)) → R
+T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
+∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → D?(T) → R
+D?     = Optional dialogue: selective cross-perspective challenge (coordinator-mediated)
+Ω      = Collection: T → R, shutdown(T) ∨ retain(T)  -- conditional on loop
 R      = Set(Result)                           -- inquiry outputs
 Syn    = Synthesis: R → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
-Phase 0: U → G(U) → C                          -- context acquisition
-Phase 1: C → present[S]({P₁...Pₙ}(C)) → await → Pₛ   -- S: AskUserQuestion [Tool]
-Phase 2: Pₛ → ∥I[Task](Pₛ) → R                 -- Task: parallel subagents [Tool]
-Phase 3: R → Syn(R) → L                        -- internal synthesis
-Phase 4: L → Q[AskUserQuestion](sufficiency) → await → J   -- sufficiency check [Tool]
+Phase 0:  U → G(U) → C                                          -- context acquisition
+Phase 1:  C → present[S]({P₁...Pₙ}(C)) → await → Pₛ            -- S: AskUserQuestion [Tool]
+Phase 2a: Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ)         -- team setup [Tool]
+Phase 2b: T → ∥I[TaskCreate](T) → D[SendMessage](T) → R         -- inquiry + optional dialogue [Tool]
+Phase 2c: R → Ω[SendMessage](T) → R'                            -- collection + deferred shutdown [Tool]
+Phase 3:  R' → Syn(R') → L                                      -- internal synthesis
+Phase 4:  L → Q[AskUserQuestion](sufficiency) → await → J       -- sufficiency check [Tool]
 
 ── LOOP ──
 After Phase 4:
-  J = sufficient     → terminate with L
-  J = add_perspective → Phase 1 (present additional perspectives)
-  J = ESC            → terminate with current L
+  J = sufficient      → Ω(T, shutdown) → TeamDelete → terminate with L
+  J = add_perspective  → Phase 1 (Λ.team retained → spawn into T)
+  J = refine           → Phase 2b (re-inquiry within existing T)
+  J = ESC              → Ω(T, shutdown) → TeamDelete → terminate with current L
 Continue until convergence: user satisfied OR user ESC.
 
 ── BOUNDARY ──
@@ -49,12 +55,16 @@ S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
-S (extern)     → AskUserQuestion tool (mandatory; Esc → terminate with current L or no lens)
-∥I (parallel)  → Task subagent (run_in_background: true, isolated context)
-Phase 4 Q      → AskUserQuestion (sufficiency check; Escape → terminate)
-Λ (state)      → TaskCreate/TaskUpdate (optional, for perspective tracking)
-G (gather)     → Read, Glob, Grep (context acquisition)
-Syn (synthesis) → Internal operation (no external tool)
+S (extern)         → AskUserQuestion tool (mandatory; Esc → terminate with current L or no lens)
+T (parallel)       → TeamCreate tool (creates team with shared task list)
+∥Spawn (parallel)  → Task tool (team_name, name: spawn perspective teammates)
+∥I (parallel)      → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
+D (parallel)       → SendMessage tool (type: "message", coordinator-mediated cross-dialogue)
+Ω (extern)         → SendMessage tool (type: "shutdown_request", graceful teammate termination)
+Phase 4 Q          → AskUserQuestion (sufficiency check; Escape → terminate)
+Λ (state)          → TaskCreate/TaskUpdate (optional, for perspective tracking)
+G (gather)         → Read, Glob, Grep (context acquisition)
+Syn (synthesis)    → Internal operation (no external tool)
 
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs
@@ -62,7 +72,8 @@ D = join (union of distinct findings) where perspectives diverge
 A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
-Λ = { phase: Phase, lens: Option(L), active: Bool }
+Λ = { phase: Phase, lens: Option(L), active: Bool, team: Option(TeamState) }
+TeamState = { name: String, members: Set(String), tasks: Set(TaskId) }
 ```
 
 ## Mode Activation
@@ -175,22 +186,23 @@ Optional dimension naming (invoke when initial generation seems redundant):
 
 ### Phase 2: Inquiry (Through Selected Lens)
 
-#### Isolated Context Requirement
+#### Phase 2a: Team Setup
 
-Each perspective MUST be analyzed in **isolated context** to prevent:
-- Cross-perspective contamination from shared conversation history
-- Confirmation bias from main agent's prior reasoning
-- Anchoring on initial assumptions formed during context gathering
+Create an agent team and spawn perspective teammates:
 
-**Structural necessity**: Only Task subagents provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate subagents. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis.
+1. Call TeamCreate to create a team (e.g., `prothesis-inquiry`)
+2. For each selected perspective, call Task with `team_name` and `name` to spawn a teammate
 
-For each selected perspective, spawn parallel Task subagent:
+Teammates do not inherit the lead's conversation history. Each spawn prompt MUST include Phase 0 context (gathered information, key constraints, domain specifics) alongside the question — without this, teammates lack the context needed for informed analysis.
+
+Each teammate receives the perspective prompt template:
 
 ```
 You are a **[Perspective] Expert**.
 
 Analyze from this epistemic standpoint:
 
+**Context**: {Phase 0 gathered context — key constraints, domain, relevant facts}
 **Question**: {original question verbatim}
 
 Provide:
@@ -198,9 +210,42 @@ Provide:
 2. **Framework Analysis**: Domain-specific concepts, terminology, reasoning
 3. **Horizon Limits**: What this perspective cannot see or undervalues
 4. **Assessment**: Direct answer from this viewpoint
+
+Cross-dialogue: If the coordinator sends you another perspective's finding
+to challenge, respond with a focused rebuttal or concession (2-3 sentences).
+Do not initiate cross-dialogue unprompted.
 ```
 
-Multiple selections → parallel subagents (never sequential).
+Multiple selections → parallel teammates (never sequential).
+
+#### Phase 2b: Inquiry and Dialogue
+
+Teammates analyze independently. After results arrive, the coordinator (main agent) MAY initiate cross-dialogue:
+
+**Cross-dialogue triggers** (all coordinator-mediated):
+- Contradictory conclusions between perspectives
+- One perspective's horizon limit intersects another's core finding
+- Coordinator judges a finding needs adversarial testing
+
+**Cross-dialogue constraints**:
+- 1 exchange per pair: challenge + response (no extended debate)
+- Coordinator relays via SendMessage (type: "message") — no peer-to-peer
+- Dialogue is selective, not mandatory — skip when perspectives cleanly complement
+
+#### Phase 2c: Collection
+
+Collect all results (initial analyses + any dialogue responses) into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 4, where the user's sufficiency judgment determines team lifecycle.
+
+#### Isolated Context Requirement
+
+Each perspective MUST be analyzed in **isolated teammate context** to prevent:
+- Cross-perspective contamination from shared conversation history
+- Confirmation bias from main agent's prior reasoning
+- Anchoring on initial assumptions formed during context gathering
+
+**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. Cross-dialogue is strictly coordinator-mediated to maintain isolation boundaries.
+
+**Isolation trade-off on refine loops**: When `J=refine` reuses a retained teammate via SendMessage, the coordinator's refinement instruction inherently carries synthesis context (what to refine, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested refinement, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
 
 ### Phase 3: Synthesis (Horizon Integration)
 
@@ -236,13 +281,13 @@ Options:
 3. **Refine existing** — revisit one of the analyzed perspectives
 ```
 
-**Loop behavior**:
-- **Sufficient**: Terminate with current Lens L
-- **Add perspective**: Return to Phase 1 with accumulated context
-- **Refine existing**: Return to Phase 2 for targeted re-inquiry
-- **ESC**: Terminate with current Lens L
+**Loop behavior** (team lifecycle aware):
+- **Sufficient**: shutdown_request → TeamDelete → terminate with current Lens L
+- **Add perspective**: Return to Phase 1; existing team T retained → spawn new teammate into T (no TeamCreate)
+- **Refine existing**: Return to Phase 2b; call SendMessage to target teammate for re-analysis within existing T
+- **ESC**: shutdown_request → TeamDelete → terminate with current Lens L
 
-**Convergence**: Mode terminates when user confirms sufficiency or explicitly exits.
+**Convergence**: Mode terminates when user confirms sufficiency or explicitly exits. Team is deleted only at terminal states (sufficient/ESC).
 
 ## Conditions
 
@@ -276,7 +321,7 @@ When guaranteed coverage is required, Prothesis can be constrained:
 ```
 Prothesis(mandatory_baseline, optional_extension):
   baseline ∪ AskUserQuestion(extension) → selected
-  ∥I(selected) → Syn → L
+  T(selected) → ∥I(T) → Syn → L
 ```
 
 **Principle**: Mandatory baseline cannot be reduced by user selection; only extended.
@@ -284,9 +329,10 @@ Prothesis(mandatory_baseline, optional_extension):
 ## Rules
 
 1. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-2. **Epistemic Integrity**: Each perspective analyzes in isolated subagent context; main agent direct analysis = protocol violation (violates isolation requirement)
+2. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Cross-dialogue is coordinator-mediated only — no peer-to-peer exchange
 3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
 5. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
 6. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
 7. **Minimum perspectives**: Always present at least 2 distinct perspectives (`n ≥ 2`); single-perspective selection produces degenerate synthesis (convergence = identity)
+8. **Team persistence**: Team persists across Phase 4 loop iterations; TeamDelete only at terminal states (sufficient/ESC)
