@@ -193,6 +193,8 @@ Create an agent team and spawn perspective teammates:
 1. Call TeamCreate to create a team (e.g., `prothesis-inquiry`)
 2. For each selected perspective, call Task with `team_name` and `name` to spawn a teammate
 
+Teammates do not inherit the lead's conversation history. Each spawn prompt MUST include Phase 0 context (gathered information, key constraints, domain specifics) alongside the question — without this, teammates lack the context needed for informed analysis.
+
 Each teammate receives the perspective prompt template:
 
 ```
@@ -200,6 +202,7 @@ You are a **[Perspective] Expert**.
 
 Analyze from this epistemic standpoint:
 
+**Context**: {Phase 0 gathered context — key constraints, domain, relevant facts}
 **Question**: {original question verbatim}
 
 Provide:
