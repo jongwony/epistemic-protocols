@@ -282,12 +282,12 @@ Options:
 ```
 
 **Loop behavior** (team lifecycle aware):
-- **Sufficient**: shutdown_request → TeamDelete → terminate with current Lens L
+- **Sufficient**: generate decision record (`references/decision-record.md`) → shutdown_request → TeamDelete → terminate with current Lens L
 - **Add perspective**: Return to Phase 1; existing team T retained → spawn new teammate into T (no TeamCreate)
 - **Refine existing**: Return to Phase 2b; call SendMessage to target teammate for re-analysis within existing T
-- **ESC**: shutdown_request → TeamDelete → terminate with current Lens L
+- **ESC**: generate decision record (`references/decision-record.md`) → shutdown_request → TeamDelete → terminate with current Lens L
 
-**Convergence**: Mode terminates when user confirms sufficiency or explicitly exits. Team is deleted only at terminal states (sufficient/ESC).
+**Convergence**: Mode terminates when user confirms sufficiency or explicitly exits. Team is deleted only at terminal states (sufficient/ESC). Decision record is generated before team shutdown.
 
 ## Conditions
 

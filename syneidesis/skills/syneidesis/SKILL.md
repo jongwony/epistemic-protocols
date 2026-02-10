@@ -227,7 +227,7 @@ TaskCreate({
 
 **Dependencies**: Use `addBlockedBy` when gaps have logical dependencies (e.g., "backup location" blocked by "backup exists?").
 
-**Convergence**: Mode terminates when task list shows all gaps `completed` or user explicitly exits.
+**Convergence**: Mode terminates when task list shows all gaps `completed` or user explicitly exits. At termination, generate decision record (`references/decision-record.md`).
 
 ### Interactive Surfacing (AskUserQuestion)
 

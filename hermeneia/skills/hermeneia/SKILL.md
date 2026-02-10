@@ -317,6 +317,7 @@ When multiple gaps detected:
 **Gap queue limit**: Max 4 gaps queued at any time (drop lowest priority if exceeded)
 
 **On termination**:
+- Generate decision record (`references/decision-record.md`)
 - Summarize current understanding
 - Ask user to rephrase if stuck
 - Proceed with best interpretation if user approves

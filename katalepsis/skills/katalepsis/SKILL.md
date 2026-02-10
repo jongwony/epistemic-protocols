@@ -279,7 +279,7 @@ Use:
 | Comprehension verified | TaskUpdate to `completed` |
 | Move to next | TaskUpdate next to `in_progress` |
 
-**Convergence**: Mode terminates when all tasks show `completed` or user explicitly exits.
+**Convergence**: Mode terminates when all tasks show `completed` or user explicitly exits. At termination, generate decision record (`references/decision-record.md`).
 
 ## Intensity
 

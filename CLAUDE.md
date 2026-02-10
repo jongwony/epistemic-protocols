@@ -134,6 +134,18 @@ This diagram shows logical progression, not strict execution order.
 - **User-initiated**: User signals awareness of a deficit (Hermeneia, Katalepsis)
 - **User-invoked**: User runs as deliberate practice; no deficit awareness required (Reflexion, Write)
 
+### Decision Records
+
+Each protocol generates a decision record at convergence (terminal states only — not during loop iterations). Templates are in `skills/*/references/decision-record.md`. Records are designed for sharing as PR comments, ADRs, or onboarding artifacts.
+
+| Protocol | Record Type | Key Fields |
+|----------|-------------|------------|
+| Prothesis | Lens Analysis | Perspectives, convergence/divergence, assessment |
+| Syneidesis | Gap Audit | Stakes, gap table with resolutions, deferred items |
+| Hermeneia | Intent Clarification | Original→clarified mapping, gap types addressed |
+| Katalepsis | Comprehension Record | Categories verified, gaps found, proposals captured |
+| Telos | GoalContract | Outcome/metric/boundary/priority with construction history |
+
 ## Verification
 
 Run `/verify` before commits. Static checks via:

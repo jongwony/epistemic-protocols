@@ -274,6 +274,8 @@ Options:
 3. **Add dimension** — define an additional field
 ```
 
+On approval or ESC, generate decision record (`references/decision-record.md`).
+
 ## Intensity
 
 | Level | When | Format |
