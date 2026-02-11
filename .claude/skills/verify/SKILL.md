@@ -74,7 +74,7 @@ You are a Type Theory Expert analyzing protocol type design.
 - Refinement types: marginal benefit for LLM interpretation?
 - Principle: no type checker exists; social enforcement via prose is primary
 
-Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md
+Files: prothesis/skills/mission/SKILL.md, syneidesis/skills/gap/SKILL.md, hermeneia/skills/clarify/SKILL.md
 
 Focus on Definition sections (FLOW, TYPES, PHASES, TOOL GROUNDING). Output JSON with findings array.
 ```
@@ -100,7 +100,7 @@ You are a Specification Clarity Expert analyzing LLM interpretability.
 
 Principle: specification is for human/LLM comprehension, not compiler verification.
 
-Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md, CLAUDE.md
+Files: prothesis/skills/mission/SKILL.md, syneidesis/skills/gap/SKILL.md, hermeneia/skills/clarify/SKILL.md, CLAUDE.md
 
 Focus on Definition, Mode Activation, Priority, Rules, TOOL GROUNDING sections. Output JSON with findings array.
 ```
@@ -123,7 +123,7 @@ You are a Claude Code Ecosystem Expert.
 - "Topic boundary detection" → context-dependent (model judgment acceptable)
 - "Type-level cardinality" → prose sufficient (low violation cost, Esc recovery)
 
-Files: prothesis/skills/prothesis/SKILL.md, syneidesis/skills/syneidesis/SKILL.md, hermeneia/skills/hermeneia/SKILL.md, CLAUDE.md
+Files: prothesis/skills/mission/SKILL.md, syneidesis/skills/gap/SKILL.md, hermeneia/skills/clarify/SKILL.md, CLAUDE.md
 
 Focus on Mode Activation, Rules, UX patterns. Output JSON with findings and filtered arrays.
 ```

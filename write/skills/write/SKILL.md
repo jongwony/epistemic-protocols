@@ -51,7 +51,7 @@ Phase 3: R → Syn(R) → L        -- Synthesis: convergence, divergence, assess
 - Continues automatically to Format phase after Synthesis
 - Lens L becomes input for content generation
 
-Reference: `prothesis/skills/prothesis/SKILL.md`
+Reference: `prothesis/skills/mission/SKILL.md`
 
 ### 4. Format Decision
 

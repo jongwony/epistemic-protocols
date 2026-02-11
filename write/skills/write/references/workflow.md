@@ -39,7 +39,7 @@ Provide:
 
 **Boundary**: Synthesis complete → Lens L available.
 
-**Reference**: `prothesis/skills/prothesis/SKILL.md`
+**Reference**: `prothesis/skills/mission/SKILL.md`
 
 ---
 
