@@ -423,7 +423,7 @@ After Phase 6, **call the AskUserQuestion tool** to confirm action sufficiency.
 
 **Post-TeamDelete recommendations** (when Fᵤ ∪ Fᵈ ≠ ∅):
 
-**Before** TeamDelete, read deferred findings (`tier ≠ actionable`) from TaskList into L'.deferred — this applies to both the Fₐ≠∅ path (after Phase 6) and the Fₐ=∅ path (skipping Phase 6). TaskList is the canonical source for L'.deferred in all paths. **After** TeamDelete, present them with protocol suggestions:
+**Before** TeamDelete, read deferred findings (`tier ≠ actionable`) from TaskList into L'.deferred — this applies to both the Fₐ≠∅ path (after Phase 6) and the Fₐ=∅ path (skipping Phase 6). TaskList is the canonical source for L'.deferred in all paths. **After** TeamDelete, call TaskCreate for each item in L'.deferred to re-register them in the session task list (bridging team → session context), then present them with protocol suggestions:
 - **Surfaced unknowns** (Fᵤ): Priority — adversarial perspectives identified blind spots. Suggest `/syneidesis`.
 - **Design-level** (Fᵈ): Suggest `/syneidesis` (gap-shaped) or `/telos` (goal-shaped).
 
