@@ -14,5 +14,5 @@ Call the reflexion skill which will:
 5. Integrate selected insights into User/Project memory
 6. Verify completion and cleanup
 
-If Prothesis is active, perspective selection occurs before extraction.
-If Syneidesis is active, gap detection applies at each decision point.
+If Mission is active, perspective selection occurs before extraction.
+If Gap is active, gap detection applies at each decision point.

@@ -147,10 +147,10 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 
 #### Epistemological Soundness
 - [ ] Correct epistemic type signature declared:
-  - Prothesis: FrameworkAbsent → FramedInquiry (AI-detected, SELECT)
-  - Syneidesis: GapUnnoticed → AuditedDecision (AI-detected, SURFACE)
-  - Hermeneia: IntentMisarticulated → ClarifiedIntent (User-initiated, EXTRACT)
-  - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
+  - Mission: FrameworkAbsent → FramedInquiry (AI-detected, SELECT)
+  - Gap: GapUnnoticed → AuditedDecision (AI-detected, SURFACE)
+  - Clarify: IntentMisarticulated → ClarifiedIntent (User-initiated, EXTRACT)
+  - Grasp: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
   - Reflexion: KnowledgeTacit → PersistedKnowledge (User-invoked, CRYSTALLIZE)
   - Write: InsightInternal → ExternalizedKnowledge (User-invoked, EXTERNALIZE)
 - [ ] Initiator correctly specified (AI-detected vs User-initiated vs User-invoked)
@@ -192,8 +192,8 @@ When other experts flag these as issues, they should be filtered (not actual iss
 |---------|------------------|-----------|
 | AskUserQuestion mandate | Tool call in Phase 1/2 | Text-only presentation |
 | Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
-| User-initiated protocol | Hermeneia activates on user signal only | AI auto-activation |
-| Intent accessibility | Hermeneia uses Î (inferred), not I (actual) | Direct access to user intent |
+| User-initiated protocol | Clarify activates on user signal only | AI auto-activation |
+| Intent accessibility | Clarify uses Î (inferred), not I (actual) | Direct access to user intent |
 
 ## Synthesis Template
 

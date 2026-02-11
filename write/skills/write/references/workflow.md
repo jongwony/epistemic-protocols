@@ -39,7 +39,7 @@ Provide:
 
 **Boundary**: Synthesis complete → Lens L available.
 
-**Reference**: `~/.claude/plugins/.../prothesis/commands/prothesis.md`
+**Reference**: `prothesis/skills/prothesis/SKILL.md`
 
 ---
 

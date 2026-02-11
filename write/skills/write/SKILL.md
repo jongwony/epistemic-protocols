@@ -22,7 +22,7 @@ Skip when:
 ## Workflow Overview
 
 ```
-PROTHESIS(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → REFINE → VALIDATE → FINALIZE
+MISSION(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → REFINE → VALIDATE → FINALIZE
 ```
 
 | Phase | Tool | Decision Point |
@@ -51,7 +51,7 @@ Phase 3: R → Syn(R) → L        -- Synthesis: convergence, divergence, assess
 - Continues automatically to Format phase after Synthesis
 - Lens L becomes input for content generation
 
-Reference: `~/.claude/plugins/.../prothesis/commands/prothesis.md`
+Reference: `prothesis/skills/prothesis/SKILL.md`
 
 ### 4. Format Decision
 

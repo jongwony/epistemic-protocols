@@ -213,38 +213,30 @@ function checkCrossReference() {
 
   const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
 
-  // Extract flow formulas from CLAUDE.md and validate against SKILL.md sources
-  // Map: protocol name → SKILL.md path (canonical source of truth)
-  const protocolPaths = {
-    prothesis: 'prothesis/skills/prothesis/SKILL.md',
-    syneidesis: 'syneidesis/skills/syneidesis/SKILL.md',
-    hermeneia: 'hermeneia/skills/hermeneia/SKILL.md',
-    katalepsis: 'katalepsis/skills/katalepsis/SKILL.md',
-    telos: 'telos/skills/telos/SKILL.md',
-  };
-
-  // Map CLAUDE.md heading aliases to directory names
-  const aliasToDir = {
-    'mission': 'prothesis',
-    'gap': 'syneidesis',
-    'clarify': 'hermeneia',
-    'grasp': 'katalepsis',
-    'goal': 'telos',
+  // Map CLAUDE.md heading alias → SKILL.md path (canonical source of truth)
+  const aliasToSkill = {
+    'mission': 'prothesis/skills/prothesis/SKILL.md',
+    'gap': 'syneidesis/skills/syneidesis/SKILL.md',
+    'clarify': 'hermeneia/skills/hermeneia/SKILL.md',
+    'grasp': 'katalepsis/skills/katalepsis/SKILL.md',
+    'goal': 'telos/skills/telos/SKILL.md',
   };
 
   // Extract CLAUDE.md sections: "### Alias (...) — ProtocolName" → "- **Flow**: `...`"
-  const sectionPattern = /###\s+(Mission|Gap|Clarify|Grasp|Goal)\b[\s\S]*?-\s*\*\*Flow\*\*:\s*`([^`]+)`/g;
+  const aliases = Object.keys(aliasToSkill).map(a => a[0].toUpperCase() + a.slice(1)).join('|');
+  const sectionPattern = new RegExp(`###\\s+(${aliases})\\b[\\s\\S]*?-\\s*\\*\\*Flow\\*\\*:\\s*\`([^\`]+)\``, 'g');
   let sectionMatch;
   while ((sectionMatch = sectionPattern.exec(claudeMd)) !== null) {
-    const dirName = aliasToDir[sectionMatch[1].toLowerCase()];
+    const alias = sectionMatch[1].toLowerCase();
     const formula = sectionMatch[2];
-    const skillPath = path.join(projectRoot, protocolPaths[dirName]);
+    const skillRelPath = aliasToSkill[alias];
+    const skillPath = path.join(projectRoot, skillRelPath);
 
     if (!fs.existsSync(skillPath)) {
       results.fail.push({
         check: 'xref',
         file: 'CLAUDE.md',
-        message: `${sectionMatch[1]} SKILL.md not found at ${protocolPaths[dirName]}`
+        message: `${sectionMatch[1]} SKILL.md not found at ${skillRelPath}`
       });
       continue;
     }
@@ -258,7 +250,7 @@ function checkCrossReference() {
     if (!flowSection) {
       results.warn.push({
         check: 'xref',
-        file: protocolPaths[dirName],
+        file: skillRelPath,
         message: `${sectionMatch[1]} SKILL.md has no flow formula in first code block`
       });
       continue;

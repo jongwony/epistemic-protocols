@@ -78,8 +78,8 @@ After Phase 5 (classification guard):
   Fₐ ≠ ∅ → Phase 6 (spawn praxis, execute fixes)
 
 recommend_protocols(deferred):
-  Fᵤ ≠ ∅ → suggest Syneidesis (priority: surfaced unknowns)
-  Fᵈ ≠ ∅ → suggest Syneidesis (gaps) or Telos (goals) by finding type
+  Fᵤ ≠ ∅ → suggest Gap (priority: surfaced unknowns)
+  Fᵈ ≠ ∅ → suggest Gap (gaps) or Goal (goals) by finding type
 
 Continue until convergence: user satisfied OR user ESC.
 
@@ -461,7 +461,7 @@ The formula is **domain-agnostic**: instantiate C differently, derive different 
 When guaranteed coverage is required, Mission can be constrained:
 
 ```
-Prothesis(mandatory_baseline, optional_extension):
+Mission(mandatory_baseline, optional_extension):
   baseline ∪ AskUserQuestion(extension) → selected
   T(selected) → ∥I(T) → Syn → L
 ```
