@@ -27,18 +27,18 @@ PROTHESIS(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → 
 
 | Phase | Tool | Decision Point |
 |-------|------|----------------|
-| Prothesis | /prothesis protocol | Context-derived perspectives, parallel inquiry |
+| Prothesis | /mission protocol | Context-derived perspectives, parallel inquiry |
 | Format | AskUserQuestion | Output type, language |
 | Draft | Write | — |
 | Refine | Edit (loop) | User feedback |
-| Validate | /syneidesis | Gap detection |
+| Validate | /gap | Gap detection |
 | Finalize | Edit | — |
 
 ## Phase Execution
 
 ### 1-3. Prothesis Protocol (Multi-Perspective Analysis)
 
-Apply the prothesis protocol for epistemic analysis:
+Apply the Prothesis protocol (/mission) for epistemic analysis:
 
 ```
 Phase 0: G(U) → C              -- Context acquisition from session/topic
@@ -47,11 +47,11 @@ Phase 2: Pₛ → ∥I(Pₛ) → R       -- Parallel inquiry with Horizon Limits
 Phase 3: R → Syn(R) → L        -- Synthesis: convergence, divergence, assessment
 ```
 
-**Key differences from standalone /prothesis**:
+**Key differences from standalone /mission**:
 - Continues automatically to Format phase after Synthesis
 - Lens L becomes input for content generation
 
-Reference: `~/.claude/plugins/.../prothesis/commands/prothesis.md`
+Reference: `prothesis/skills/prothesis/SKILL.md`
 
 ### 4. Format Decision
 
@@ -79,7 +79,7 @@ Exit conditions:
 
 ### 7. Gap Detection
 
-Invoke /syneidesis for final validation:
+Invoke /gap for final validation:
 - Procedural gaps
 - Consideration gaps
 - Duplicate content
@@ -118,8 +118,8 @@ Apply final edits. Optionally clean intermediate versions.
 ## Integration
 
 This skill integrates with:
-- **/prothesis** — Multi-perspective analysis (Phases 1-3)
-- **/syneidesis** — Gap detection (Phase 7)
+- **/mission** — Multi-perspective analysis (Phases 1-3)
+- **/gap** — Gap detection (Phase 7)
 
 ## Additional Resources
 

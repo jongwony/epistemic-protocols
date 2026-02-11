@@ -1,4 +1,4 @@
-# Hermeneia
+# Hermeneia — /clarify (ἑρμηνεία)
 
 Clarify intent-expression gaps through dialogue (ἑρμηνεία: interpretation)
 
@@ -56,9 +56,7 @@ Phase 3: Integration   → Proceed with clarified expression
 ## Usage
 
 ```
-/hermeneia [your potentially ambiguous request]
-/clarify [request]
-/hmn [request]
+/clarify [your potentially ambiguous request]
 ```
 
 ## Author

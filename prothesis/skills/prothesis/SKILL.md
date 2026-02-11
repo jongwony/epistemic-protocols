@@ -1,6 +1,6 @@
 ---
-name: prothesis
-description: Lens for multi-perspective analysis. Selects viewpoints before analysis when the right framework is absent, producing a framed inquiry.
+name: mission
+description: Multi-perspective investigation and execution. Assembles a team to analyze from selected viewpoints and act on findings when the right framework is absent, producing a framed inquiry.
 user-invocable: true
 ---
 
@@ -297,7 +297,7 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 After all perspectives complete:
 
 ```markdown
-## Prothesis Analysis
+## Mission Analysis
 
 ### Perspective Summaries
 [Each perspective's epistemic contribution + assessment, 2-3 sentences]
@@ -424,8 +424,8 @@ After Phase 6, **call the AskUserQuestion tool** to confirm action sufficiency.
 **Post-TeamDelete recommendations** (when Fᵤ ∪ Fᵈ ≠ ∅):
 
 **Before** TeamDelete, read deferred findings (`tier ≠ actionable`) from TaskList into L'.deferred — this applies to both the Fₐ≠∅ path (after Phase 6) and the Fₐ=∅ path (skipping Phase 6). TaskList is the canonical source for L'.deferred in all paths. **After** TeamDelete, call TaskCreate for each item in L'.deferred to re-register them in the session task list (bridging team → session context), then present them with protocol suggestions:
-- **Surfaced unknowns** (Fᵤ): Priority — adversarial perspectives identified blind spots. Suggest `/syneidesis`.
-- **Design-level** (Fᵈ): Suggest `/syneidesis` (gap-shaped) or `/telos` (goal-shaped).
+- **Surfaced unknowns** (Fᵤ): Priority — adversarial perspectives identified blind spots. Suggest `/gap`.
+- **Design-level** (Fᵈ): Suggest `/gap` (gap-shaped) or `/goal` (goal-shaped).
 
 Recommendations are informational — user decides whether to call follow-up protocols.
 

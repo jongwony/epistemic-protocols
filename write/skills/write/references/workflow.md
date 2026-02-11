@@ -8,7 +8,7 @@ Detailed phase descriptions and content transformation rules for the write skill
 
 **Purpose**: Multi-perspective epistemic analysis before content generation.
 
-**Delegation**: These phases follow the prothesis protocol exactly.
+**Delegation**: These phases follow the Prothesis protocol (/mission) exactly.
 
 ```
 Phase 0: G(U) → C              -- Context acquisition
@@ -22,7 +22,7 @@ Phase 3: R → Syn(R) → L        -- Synthesis: convergence, divergence, assess
 - Parallel inquiry includes explicit Horizon Limits per perspective
 - Synthesis produces Lens L = { convergence, divergence, assessment }
 
-**Subagent Prompt Template** (from prothesis):
+**Subagent Prompt Template** (from Prothesis):
 ```
 You are a **[Perspective] Expert**.
 
@@ -39,7 +39,7 @@ Provide:
 
 **Boundary**: Synthesis complete → Lens L available.
 
-**Reference**: `~/.claude/plugins/.../prothesis/commands/prothesis.md`
+**Reference**: `prothesis/skills/prothesis/SKILL.md`
 
 ---
 
@@ -128,7 +128,7 @@ Provide:
 
 **Purpose**: Surface overlooked issues before finalization.
 
-**Invocation**: `/syneidesis` or manual gap scanning
+**Invocation**: `/gap` or manual gap scanning
 
 **Gap Types**:
 - **Procedural**: Missing steps in workflow
@@ -251,7 +251,7 @@ A session becomes write-worthy when it exhibits:
 ```
 Context → Derive perspectives → User selects → Parallel inquiry (with Horizon Limits) → Synthesis
 ```
-Reference: `/prothesis` — canonical implementation of multi-perspective epistemic analysis
+Reference: `/mission` — canonical implementation of multi-perspective epistemic analysis
 
 ### Incremental Refinement Loop
 ```

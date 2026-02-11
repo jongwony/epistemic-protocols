@@ -1,4 +1,4 @@
-# Katalepsis
+# Katalepsis — /grasp (κατάληψις)
 
 Achieve certain comprehension of AI work (κατάληψις: grasping firmly)
 
@@ -49,7 +49,6 @@ Phase 3: Verify Loop  → Confirm understanding progressively (AskUserQuestion +
 ## Usage
 
 ```
-/katalepsis
 /grasp
 ```
 

@@ -1,5 +1,5 @@
 ---
-name: katalepsis
+name: grasp
 description: Achieve certain comprehension after AI work. Verifies understanding when results remain ungrasped, producing verified understanding.
 user-invocable: true
 ---
@@ -195,7 +195,7 @@ Options (multiSelect):
 
 ```
 TaskCreate({
-  subject: "[Katalepsis] Category name",
+  subject: "[Grasp] Category name",
   description: "Brief description of what to understand",
   activeForm: "Understanding [category]"
 })
@@ -229,7 +229,7 @@ For each task (category):
    - Call TaskCreate to eject the proposal:
      ```
      TaskCreate({
-       subject: "[Katalepsis:Proposal] Brief description",
+       subject: "[Grasp:Proposal] Brief description",
        description: "User proposal during [category]: [verbatim user text]",
        activeForm: "Archiving user proposal"
      })

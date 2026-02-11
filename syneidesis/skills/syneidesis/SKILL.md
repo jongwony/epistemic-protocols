@@ -1,5 +1,5 @@
 ---
-name: syneidesis
+name: gap
 description: Gap surfacing before decisions. Raises procedural, consideration, assumption, and alternative gaps as questions when gaps go unnoticed, producing an audited decision.
 user-invocable: true
 ---
@@ -118,7 +118,7 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 3. **Revision**: Integrate user response, re-evaluate if needed
 4. **Execution**: Only after explicit scope confirmation
 
-**Sequencing with Prothesis**: Following the default ordering, Prothesis completes perspective selection before Syneidesis applies gap detection. The cycle becomes: [Perspective Selection → Deliberation → Gap → Revision → Execution]. The user can override this ordering by explicitly requesting Syneidesis first.
+**Sequencing with Prothesis**: Following the default ordering, Prothesis completes perspective selection before Syneidesis applies gap detection. The cycle becomes: [Perspective Selection → Deliberation → Syneidesis → Revision → Execution]. The user can override this ordering by explicitly requesting Syneidesis first.
 
 This cycle repeats per planning phase or domain area.
 
@@ -132,7 +132,7 @@ This cycle repeats per planning phase or domain area.
 | **Observable gap** | `∃ G : observable(G)` | Concrete indicator exists in context (not speculation) |
 | **Unaddressed** | `¬mentioned(G, context)` | Gap not already raised or resolved in session |
 
-**Scope limitation**: `committed(D)` captures *execution commitment* (actions with immediate effects). It does not capture *direction commitment* — decisions that constrain future work without immediate state change (e.g., "let's use PostgreSQL", "refactor auth to OAuth2"). Direction commitment is partially covered by Plan Mode Integration, which applies Syneidesis at phase boundaries where such decisions materialize into execution plans.
+**Scope limitation**: `committed(D)` captures *execution commitment* (actions with immediate effects). It does not capture *direction commitment* — decisions that constrain future work without immediate state change (e.g., "let's use PostgreSQL", "refactor auth to OAuth2"). Direction commitment is partially covered by Plan Mode Integration, which applies Gap at phase boundaries where such decisions materialize into execution plans.
 
 #### Modulating Factors (adjust intensity, not applicability)
 
@@ -163,7 +163,7 @@ This cycle repeats per planning phase or domain area.
 
 ### Detection (Silent)
 
-1. **Committed check**: Verify `committed(D)` — if false (read-only, exploratory), skip Syneidesis for this decision point
+1. **Committed check**: Verify `committed(D)` — if false (read-only, exploratory), skip Gap for this decision point
 
 2. **Gap scan**: Check taxonomy against user's stated plan
 

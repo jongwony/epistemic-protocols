@@ -8,11 +8,11 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 
 | Protocol | Purpose | Timing |
 |----------|---------|--------|
-| **[Prothesis](./prothesis)** (πρόθεσις) | Place perspective options before inquiry | Before analysis |
-| **[Syneidesis](./syneidesis)** (συνείδησις) | Surface potential gaps at decision points | At decision time |
-| **[Hermeneia](./hermeneia)** (ἑρμηνεία) | Clarify intent-expression gaps via dialogue | Before action |
-| **[Katalepsis](./katalepsis)** (κατάληψις) | Achieve certain comprehension of AI work | After AI action |
-| **[Telos](./telos)** (τέλος) | Co-construct defined goals from vague intent | Pre-action |
+| **[Prothesis](./prothesis)** (πρόθεσις) — /mission | Team-based multi-perspective investigation and execution | Before analysis |
+| **[Syneidesis](./syneidesis)** (συνείδησις) — /gap | Surface potential gaps at decision points | At decision time |
+| **[Hermeneia](./hermeneia)** (ἑρμηνεία) — /clarify | Clarify intent-expression gaps via dialogue | Before action |
+| **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | Achieve certain comprehension of AI work | After AI action |
+| **[Telos](./telos)** (τέλος) — /goal | Co-construct defined goals from vague intent | Pre-action |
 
 ## Core Idea
 
@@ -32,7 +32,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 
 <img src="./assets/epistemic-matrix.svg" alt="Epistemic Type Transformations" width="560">
 
-- **Prothesis**: "Which lens?" → AI presents options, you choose (`FrameworkAbsent → FramedInquiry`)
+- **Prothesis**: "How should we approach this?" → AI assembles a team, investigates from multiple perspectives, acts on findings (`FrameworkAbsent → FramedInquiry`)
 - **Syneidesis**: "What's missing?" → AI surfaces gaps as questions, you judge (`GapUnnoticed → AuditedDecision`)
 - **Hermeneia**: "What do I mean?" → AI presents interpretations, you recognize your intent (`IntentMisarticulated → ClarifiedIntent`)
 - **Katalepsis**: "What did you do?" → AI verifies your understanding through questions (`ResultUngrasped → VerifiedUnderstanding`)
@@ -57,11 +57,11 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 ## Usage
 
 ```
-/prothesis [your question]    # Get perspective options before analysis
-/syneidesis [your task]       # Enable gap surfacing during execution
-/hermeneia [your expression]  # Clarify ambiguous intent
-/katalepsis                   # Verify understanding of AI work
-/telos [your vague idea]      # Co-construct defined goals from intent
+/mission [your question]     # Multi-perspective team investigation and execution
+/gap [your task]             # Enable gap surfacing during execution
+/clarify [your expression]   # Clarify ambiguous intent
+/grasp                       # Verify understanding of AI work
+/goal [your vague idea]      # Co-construct defined goals from intent
 ```
 
 ## License

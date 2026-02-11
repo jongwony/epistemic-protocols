@@ -1,4 +1,4 @@
-# Syneidesis
+# Syneidesis — /gap (συνείδησις)
 
 Surface potential gaps at decision points (συνείδησις: knowing-together)
 
@@ -39,7 +39,7 @@ Phase 2: Adjustment   → Incorporate response into state
 ## Usage
 
 ```
-/syneidesis
+/gap
 ```
 
 Note: Deferring high-stakes decisions blocks progress until you provide explicit judgment.

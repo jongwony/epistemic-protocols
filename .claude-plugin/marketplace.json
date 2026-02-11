@@ -7,12 +7,12 @@
     {
       "name": "prothesis",
       "source": "./prothesis",
-      "description": "Place epistemic perspectives before inquiry (πρόθεσις)"
+      "description": "Multi-perspective investigation and execution — /mission (πρόθεσις: a placing before)"
     },
     {
       "name": "syneidesis",
       "source": "./syneidesis",
-      "description": "Surface potential gaps at decision points (συνείδησις)"
+      "description": "Surface potential gaps at decision points — /gap (συνείδησις: knowing-together)"
     },
     {
       "name": "reflexion",
@@ -27,17 +27,17 @@
     {
       "name": "hermeneia",
       "source": "./hermeneia",
-      "description": "Clarify intent-expression gaps through dialogue"
+      "description": "Clarify intent-expression gaps through dialogue — /clarify (ἑρμηνεία: interpretation)"
     },
     {
       "name": "katalepsis",
       "source": "./katalepsis",
-      "description": "Achieve certain comprehension of AI work"
+      "description": "Achieve certain comprehension of AI work — /grasp (κατάληψις: a grasping firmly)"
     },
     {
       "name": "telos",
       "source": "./telos",
-      "description": "Co-construct defined goals from vague intent (τέλος)"
+      "description": "Co-construct defined goals from vague intent — /goal (τέλος: end, purpose)"
     }
   ]
 }

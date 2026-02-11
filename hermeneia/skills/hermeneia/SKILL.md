@@ -1,5 +1,5 @@
 ---
-name: hermeneia
+name: clarify
 description: Clarify intent-expression gaps. Extracts clarified intent when what you mean differs from what you said.
 user-invocable: true
 ---
@@ -30,9 +30,9 @@ ClarifiedIntent = Î' where |G| = 0 ∨ cycle(G) ∨ stall(Δ, 2) ∨ user_esc
 bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
 Priority: explicit_arg > colocated_expr > prev_user_turn
 
-/hermeneia "text"              → E = "text"
+/clarify "text"                → E = "text"
 "request... clarify"           → E = text before trigger
-/hermeneia (alone)             → E = previous user message
+/clarify (alone)               → E = previous user message
 
 Edge cases:
 - Interrupt: E = original request of interrupted task
@@ -172,7 +172,7 @@ Options:
 2. "Specify different" — let me describe what I want to clarify
 ```
 
-**Skip condition**: If E was explicitly provided via argument (`/hermeneia "text"`), proceed directly to Phase 1b.
+**Skip condition**: If E was explicitly provided via argument (`/clarify "text"`), proceed directly to Phase 1b.
 
 ### Phase 1b: Gap Type Selection
 

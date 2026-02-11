@@ -1,5 +1,5 @@
 ---
-name: telos
+name: goal
 description: Co-construct defined goals from vague intent. Builds a GoalContract when neither party has a clear end state.
 user-invocable: true
 ---
@@ -30,9 +30,9 @@ C'  = Updated GoalContract after integration
 bind(G) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
 Priority: explicit_arg > colocated_expr > prev_user_turn
 
-/telos "text"               → G = "text"
+/goal "text"                → G = "text"
 "define goal... goal"       → G = text before trigger
-/telos (alone)              → G = previous user message
+/goal (alone)               → G = previous user message
 
 Edge cases:
 - Interrupt: G = original request of interrupted task
@@ -99,7 +99,7 @@ Telos is not simplified requirements gathering. Three differentiators:
 
 ### Activation
 
-AI detects goal indeterminacy OR user invokes `/telos`. Activation always requires user confirmation via AskUserQuestion (Phase 0).
+AI detects goal indeterminacy OR user invokes `/goal`. Activation always requires user confirmation via AskUserQuestion (Phase 0).
 
 **Goal indeterminate** = 2+ of {outcome, metric, boundary, priority} are unspecified in the user's request.
 
@@ -132,7 +132,7 @@ Approved GoalContract becomes input to subsequent protocols.
 | Exploratory framing | Strong | "what could we do about", "ideas for", "how might we" |
 | Vague qualitative | Soft (suggest only) | "improve", "better", "optimize" |
 
-**Soft triggers**: AI may suggest Telos activation via AskUserQuestion but must NOT auto-activate. Only strong triggers or explicit `/telos` invocation activate directly.
+**Soft triggers**: AI may suggest Telos activation via AskUserQuestion but must NOT auto-activate. Only strong triggers or explicit `/goal` invocation activate directly.
 
 **Skip**:
 - User's goal is already verifiable (concrete deliverable + criteria specified)
@@ -174,7 +174,7 @@ Recognize goal indeterminacy and confirm activation:
 
 1. **Strong trigger**: User uses uncertainty/exploratory language → activate with confirmation
 2. **Soft trigger**: User uses vague qualitative ("improve") → suggest only, do not activate
-3. **Explicit invocation**: `/telos` → skip confirmation, proceed to Phase 1
+3. **Explicit invocation**: `/goal` → skip confirmation, proceed to Phase 1
 
 **Call the AskUserQuestion tool** to confirm activation:
 
@@ -186,7 +186,7 @@ Options:
 2. **Proceed as-is** — the current description is sufficient
 ```
 
-**Skip condition**: If G was explicitly provided via `/telos "text"`, proceed directly to Phase 1.
+**Skip condition**: If G was explicitly provided via `/goal "text"`, proceed directly to Phase 1.
 
 ### Phase 1: Dimension Selection
 

@@ -1,4 +1,4 @@
-# Katalepsis
+# Katalepsis — /grasp (κατάληψις)
 
 AI 작업에 대한 확실한 이해 달성 (κατάληψις: 확고하게 파악함)
 
@@ -49,7 +49,6 @@ Phase 3: 검증 루프  → 점진적으로 이해 확인 (AskUserQuestion + Tas
 ## 사용법
 
 ```
-/katalepsis
 /grasp
 ```
 

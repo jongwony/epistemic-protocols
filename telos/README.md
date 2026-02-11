@@ -1,4 +1,4 @@
-# Telos
+# Telos — /goal (τέλος)
 
 Co-construct defined end-states from vague goals (τέλος: end, purpose)
 
@@ -70,14 +70,13 @@ Telos follows Hermeneia: if intent exists but is misarticulated, clarify first. 
 - When starting a project with undefined scope
 
 **Skip**:
-- When your goal is clear but poorly expressed (use Hermeneia)
-- When you have a defined goal and need perspective analysis (use Prothesis)
+- When your goal is clear but poorly expressed (use Hermeneia — /clarify)
+- When you have a defined goal and need perspective analysis (use Prothesis — /mission)
 
 ## Usage
 
 ```
-/telos [your vague goal or aspiration]
-/goal [aspiration]
+/goal [your vague goal or aspiration]
 ```
 
 ## Author

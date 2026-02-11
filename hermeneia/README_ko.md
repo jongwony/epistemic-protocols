@@ -1,4 +1,4 @@
-# Hermeneia
+# Hermeneia — /clarify (ἑρμηνεία)
 
 대화를 통한 의도-표현 갭 명확화 (ἑρμηνεία: 해석)
 
@@ -56,9 +56,7 @@ Phase 3: Integration   → 명확화된 표현으로 진행
 ## 사용법
 
 ```
-/hermeneia [잠재적으로 모호한 요청]
-/clarify [요청]
-/hmn [요청]
+/clarify [잠재적으로 모호한 요청]
 ```
 
 ## 저자
