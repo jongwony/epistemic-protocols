@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R → Syn(R) → L
+Prothesis(U) → G(U) → C → {P₁...Pₙ}(C) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R → Syn(R) → L → K?(L) → ∥F(T) → V(T) → L'
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
@@ -32,6 +32,21 @@ Syn    = Synthesis: R → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
 
+── ACTION TYPES ──
+K?     = Classify: L → (Fₐ, Fᵤ, Fᵈ)              -- 3-tier finding classification (conditional on J=act)
+Fₐ     = { f | source_determined(f) ∧ perspective_confirmed(f) }          -- actionable
+Fᵤ     = { f | ¬source_determined(f) ∧ adversarial_origin(f) }            -- surfaced unknown
+Fᵈ     = { f | f ∉ Fₐ ∧ f ∉ Fᵤ }                                         -- design-level (catch-all)
+∥F     = Parallel fix: (∥ f∈Fₐ. Fix(f, T))          -- praxis agent within team
+V      = Verify: ∀ f∈Fₐ. peer_verify(f, origin(f))  -- originating perspective confirms
+L'     = Lens post-action: L ∪ { fixes: Set(Fix), deferred: Fᵤ ∪ Fᵈ }
+
+── CLASSIFICATION PREDICATES ──
+source_determined(f)     ≡ fix direction deterministically derivable from existing source
+perspective_confirmed(f) ≡ originating perspective validated the finding
+adversarial_origin(f)    ≡ finding surfaced by adversarial perspective
+conservative_default     ≡ Fᵈ is catch-all; ambiguous predicate evaluation → Fᵈ  (false_actionable cost > false_deferred cost)
+
 ── PHASE TRANSITIONS ──
 Phase 0:  U → G(U) → C                                          -- context acquisition
 Phase 1:  C → present[S]({P₁...Pₙ}(C)) → await → Pₛ            -- S: AskUserQuestion [Tool]
@@ -40,13 +55,32 @@ Phase 2b: T → ∥I[TaskCreate](T) → D[SendMessage](T) → R         -- inqui
 Phase 2c: R → Ω[SendMessage](T) → R'                            -- collection + deferred shutdown [Tool]
 Phase 3:  R' → Syn(R') → L                                      -- internal synthesis
 Phase 4:  L → Q[AskUserQuestion](sufficiency) → await → J       -- sufficiency check [Tool]
+Phase 5:  L → K[TaskCreate](L) → ∥Spawn[Task](T, praxis)                  -- classify + spawn praxis [Tool]
+Phase 6:  ∥F[TaskUpdate](T, Fₐ) → V[SendMessage](T) → L'                 -- fix + peer verify [Tool]
+Phase 4': L' → Q'[AskUserQuestion](action_sufficiency) → await → J'       -- action sufficiency [Tool]
 
 ── LOOP ──
-After Phase 4:
+After Phase 4 (analysis sufficiency):
   J = sufficient      → Ω(T, shutdown) → TeamDelete → terminate with L
   J = add_perspective  → Phase 1 (Λ.team retained → spawn into T)
   J = refine           → Phase 2b (re-inquiry within existing T)
+  J = act              → Phase 5 (classify findings, spawn praxis into T)
   J = ESC              → Ω(T, shutdown) → TeamDelete → terminate with current L
+
+After Phase 4' (action sufficiency):
+  J' = sufficient     → Ω(T, shutdown) → TeamDelete → terminate with L'
+                         → recommend_protocols(Fᵤ ∪ Fᵈ)
+  J' = ESC            → Ω(T, shutdown) → TeamDelete → terminate with current L'
+                         → recommend_protocols(Fᵤ ∪ Fᵈ)
+
+After Phase 5 (classification guard):
+  Fₐ = ∅ → Phase 4' (L' = L ∪ { fixes: ∅, deferred: Fᵤ ∪ Fᵈ })
+  Fₐ ≠ ∅ → Phase 6 (spawn praxis, execute fixes)
+
+recommend_protocols(deferred):
+  Fᵤ ≠ ∅ → suggest Syneidesis (priority: surfaced unknowns)
+  Fᵈ ≠ ∅ → suggest Syneidesis (gaps) or Telos (goals) by finding type
+
 Continue until convergence: user satisfied OR user ESC.
 
 ── BOUNDARY ──
@@ -65,6 +99,12 @@ Phase 4 Q          → AskUserQuestion (sufficiency check; Escape → terminate)
 Λ (state)          → TaskCreate/TaskUpdate (optional, for perspective tracking)
 G (gather)         → Read, Glob, Grep (context acquisition)
 Syn (synthesis)    → Internal operation (no external tool)
+K (parallel)          → TaskCreate tool (classify findings, register all tiers with metadata)
+∥Spawn praxis (parallel) → Task tool (team_name, name: spawn praxis into existing T)
+G(praxis)                 → TaskList/TaskGet tools (praxis context acquisition: discovery + full descriptions)
+∥F (parallel)         → TaskUpdate/Edit/Write tools (praxis applies fixes to Fₐ items)
+V (parallel)          → SendMessage tool (type: "message", peer-to-peer praxis ↔ originating perspective)
+Phase 4' Q' (extern)  → AskUserQuestion (action sufficiency check; Escape → terminate)
 
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs
@@ -72,8 +112,9 @@ D = join (union of distinct findings) where perspectives diverge
 A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
-Λ = { phase: Phase, lens: Option(L), active: Bool, team: Option(TeamState) }
+Λ = { phase: Phase, lens: Option(L), active: Bool, team: Option(TeamState), action: Option(ActionState) }
 TeamState = { name: String, members: Set(String), tasks: Set(TaskId) }
+ActionState = { classified: (Fₐ, Fᵤ, Fᵈ), praxis: Option(String) }
 ```
 
 ## Mode Activation
@@ -243,9 +284,13 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 - Confirmation bias from main agent's prior reasoning
 - Anchoring on initial assumptions formed during context gathering
 
-**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. Cross-dialogue is strictly coordinator-mediated to maintain isolation boundaries.
+**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 2 (analysis), cross-dialogue is strictly coordinator-mediated to prevent confirmation bias. In Phase 6 (action), peer-to-peer is allowed between praxis and originating perspectives for verification and context restoration — analysis isolation has served its purpose, and direct channels reduce information loss through coordinator relay.
 
 **Isolation trade-off on refine loops**: When `J=refine` reuses a retained teammate via SendMessage, the coordinator's refinement instruction inherently carries synthesis context (what to refine, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested refinement, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
+
+**Isolation trade-off on action phase**: When `J=act` proceeds to Phase 6, the praxis agent communicates directly with originating perspectives. This is acceptable because: (1) the user explicitly chose `act`, sanctioning the topology shift; (2) analysis-phase isolation already produced unbiased findings; (3) peer-to-peer verification is epistemically necessary — coordinator relay introduces State-Cognition Gap (information loss at each transfer layer).
+
+**Scope extension note**: Phase 5-6 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
 
 ### Phase 3: Synthesis (Horizon Integration)
 
@@ -276,18 +321,115 @@ After all perspectives complete:
 Is this analysis sufficient for your inquiry?
 
 Options:
-1. **Sufficient** — proceed with this understanding
-2. **Add perspective** — I'd like to explore additional viewpoints
-3. **Refine existing** — revisit one of the analyzed perspectives
+1. **Sufficient** — conclude analysis and dissolve the team
+2. **Add perspective** — explore additional viewpoints (team retained)
+3. **Refine existing** — revisit an analyzed perspective (team retained)
+4. **Act on findings** — address actionable findings within the current team
 ```
 
 **Loop behavior** (team lifecycle aware):
 - **Sufficient**: shutdown_request → TeamDelete → terminate with current Lens L
 - **Add perspective**: Return to Phase 1; existing team T retained → spawn new teammate into T (no TeamCreate)
 - **Refine existing**: Return to Phase 2b; call SendMessage to target teammate for re-analysis within existing T
+- **Act on findings**: Proceed to Phase 5; coordinator classifies findings into 3 tiers, spawns praxis into existing T for actionable items
 - **ESC**: shutdown_request → TeamDelete → terminate with current Lens L
 
-**Convergence**: Mode terminates when user confirms sufficiency or explicitly exits. Team is deleted only at terminal states (sufficient/ESC).
+All terminal paths (sufficient and ESC, from both Phase 4 and Phase 4') read deferred findings from TaskList before TeamDelete to preserve L'.deferred for post-TeamDelete recommendations.
+
+**Convergence**: Mode terminates when user confirms sufficiency (Phase 4 or Phase 4') or explicitly exits. Team is deleted only at terminal states.
+
+### Theoria → Praxis
+
+Phases 0–4 constitute **theoria** (θεωρία) — contemplative inquiry that produces the Lens L as a theoretical artifact: what different frameworks reveal, without changing anything. Phase 5–6 extend into **praxis** (πρᾶξις) — perspective-informed action on deterministically fixable findings, reusing the team's analytical context.
+
+This transition requires the user's explicit `act` selection at Phase 4 — a deliberate shift from understanding to changing, which warrants different epistemic commitments (see Phase-dependent topology in Phase 6b).
+
+### Phase 5: Action Planning
+
+When the user selects `act` at Phase 4, the coordinator classifies findings from L.
+
+**3-tier classification**:
+
+| Tier | Predicate | Destination |
+|------|-----------|-------------|
+| **Actionable** (Fₐ) | `source_determined(f) ∧ perspective_confirmed(f)` | Phase 6 (fix within team) |
+| **Surfaced unknown** (Fᵤ) | `¬source_determined(f) ∧ adversarial_origin(f)` | Post-TeamDelete (priority) |
+| **Design-level** (Fᵈ) | `f ∉ Fₐ ∧ f ∉ Fᵤ` (catch-all) | Post-TeamDelete |
+
+**Classification authority**:
+- Perspectives MAY include `suggested_class` metadata when creating findings via TaskCreate
+- Coordinator makes final classification
+- Conservative default: `ambiguous(f) → Fᵈ` (false actionable cost > false deferred cost)
+
+Call TaskCreate for **all** classified findings with tier metadata.
+
+**Scope enforcement**: All classified findings are registered via TaskCreate with tier identification through two channels:
+- **Subject prefix** (primary): `[Fₐ]`, `[Fᵤ]`, `[Fᵈ]` — always visible in TaskList summary
+- **Metadata** (supplementary): `{ "tier": "actionable" | "surfaced_unknown" | "design_level" }` — structured data when accessible
+
+The description SHOULD also state the tier in natural language. Subject prefix is the canonical filtering channel because TaskList reliably surfaces subject text, while metadata visibility through TaskList/TaskGet is platform-dependent.
+
+This persists deferred findings on disk (team task list), making them resistant to coordinator context compaction. Praxis scope is enforced by prompt instruction ("Only fix tier=actionable"), not by structural omission — a deliberate trade-off favoring durability over structural isolation.
+
+### Phase 6: Execution and Peer Verification
+
+#### Phase 6a: Praxis Spawn
+
+Call Task with `team_name` to spawn a praxis into existing team T.
+
+The praxis reads TaskList for discovery, then TaskGet for each finding's full description — not relying on spawn prompt alone. TaskCreate descriptions written by originating perspectives preserve analytical nuance that coordinator summarization would lose.
+
+The praxis receives the praxis prompt template:
+
+```
+You are a **Praxis** agent in team {team_name}.
+
+Read TaskList to discover actionable findings (Fₐ), then TaskGet each
+for full context. Apply fixes to the relevant artifacts.
+
+For each fix:
+1. Read the target artifact (code, document, configuration)
+2. Apply the minimal change that addresses the finding
+3. After fixing, call SendMessage to the originating perspective
+   teammate for verification (include: what you changed and why)
+
+Scope constraint: Only fix items with subject prefix `[Fₐ]` (actionable).
+Skip items prefixed `[Fᵤ]` (surfaced unknown) or `[Fᵈ]` (design level).
+When in doubt, check the task description for tier classification.
+```
+
+#### Phase 6b: Peer Verification
+
+Praxis communicates directly with originating perspective teammates via SendMessage for:
+- **Verification**: confirming fix addresses the finding (mandatory per fix)
+- **Context restoration**: clarifying finding intent when ambiguous
+
+This is a **phase-dependent topology shift**:
+
+| Phase | Topology | Rationale |
+|-------|----------|-----------|
+| Phase 2 (Analysis) | Coordinator-mediated only | Prevents confirmation bias (Asch conformity) |
+| Phase 6 (Action) | Peer-to-peer (praxis ↔ originating perspective) | Enables accurate verification; reduces information loss through coordinator relay |
+
+One exchange per finding: fix proposal → confirmation or revision request.
+
+#### Phase 6c: Collection
+
+Collect fix results and verifications into L' (updated Lens). L'.deferred is populated from TaskList (tier ≠ actionable) as an **intermediate snapshot** — these tasks remain in the team task list for durability until TeamDelete. The pre-TeamDelete read (Phase 4' post-resolution) confirms the **final state** of deferred findings after any further changes. After collection, the praxis's task is complete. The praxis remains in team T but takes no further action — team-wide shutdown occurs at terminal states (Phase 4' sufficient/ESC).
+
+### Phase 4': Action Sufficiency Check
+
+After Phase 6, **call the AskUserQuestion tool** to confirm action sufficiency.
+
+**Post-TeamDelete recommendations** (when Fᵤ ∪ Fᵈ ≠ ∅):
+
+**Before** TeamDelete, read deferred findings (`tier ≠ actionable`) from TaskList into L'.deferred — this applies to both the Fₐ≠∅ path (after Phase 6) and the Fₐ=∅ path (skipping Phase 6). TaskList is the canonical source for L'.deferred in all paths. **After** TeamDelete, call TaskCreate for each item in L'.deferred to re-register them in the session task list (bridging team → session context), then present them with protocol suggestions:
+- **Surfaced unknowns** (Fᵤ): Priority — adversarial perspectives identified blind spots. Suggest `/syneidesis`.
+- **Design-level** (Fᵈ): Suggest `/syneidesis` (gap-shaped) or `/telos` (goal-shaped).
+
+Recommendations are informational — user decides whether to call follow-up protocols.
+
+**No re-entry to Phase 4**: Phase 4' offers only sufficient/ESC, not add_perspective or refine. This is intentional — action results constitute a different epistemic object than analysis results. Re-analysis after action requires fresh context (new perspectives evaluating the changed state), which is better served by a new Prothesis invocation than by recycling the current team's analytical frame.
 
 ## Conditions
 
@@ -329,10 +471,13 @@ Prothesis(mandatory_baseline, optional_extension):
 ## Rules
 
 1. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-2. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Cross-dialogue is coordinator-mediated only — no peer-to-peer exchange
+2. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 2: cross-dialogue is coordinator-mediated only. Phase 6: peer-to-peer allowed between praxis and originating perspectives for verification
 3. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 4. **Verbatim Transmission**: Pass original question unchanged to each perspective
 5. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
 6. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
 7. **Minimum perspectives**: Always present at least 2 distinct perspectives (`n ≥ 2`); single-perspective selection produces degenerate synthesis (convergence = identity)
-8. **Team persistence**: Team persists across Phase 4 loop iterations; TeamDelete only at terminal states (sufficient/ESC)
+8. **Team persistence**: Team persists across Phase 4 loop iterations and through Phase 5-6 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 4 or Phase 4')
+9. **Classification authority**: Coordinator makes final classification; perspective suggestions are advisory. Conservative default: ambiguous → deferred
+10. **Phase-dependent topology**: Analysis (Phase 2) enforces strict isolation; action (Phase 6) allows peer-to-peer between praxis and originating perspectives only
+11. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations

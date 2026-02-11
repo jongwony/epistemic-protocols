@@ -46,13 +46,27 @@ epistemic-protocols/
 - References directory: `skills/*/references/` for detailed documentation
 - No external dependencies; Node.js standard library only
 
+**SKILL.md Formal Block Anatomy** (all protocols share this structure within `Definition` code block):
+```
+── FLOW ──              One-line formula: full protocol path with symbols
+── TYPES ──             Symbol definitions with type signatures and comments
+── ACTION TYPES ──      (if applicable) Extended types for action phases
+── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
+── LOOP ──              Post-phase control flow (J values → next phase or terminal)
+── BOUNDARY ──          Purpose annotations for key operations
+── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping
+── MODE STATE ──        Runtime state type (Λ) with nested state types
+```
+Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.
+
 ## Plugins
 
 ### Prothesis (πρόθεσις) — alias: `lens`
 Present perspective options before analysis begins. Injected into main agent context.
-- **Flow**: `U → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → loop)`
-- **Key**: Phase 1 calls `AskUserQuestion` for perspective selection; Phase 4 calls `AskUserQuestion` for sufficiency check; loop until user satisfied or ESC
-- **Phase 2**: Agent team via TeamCreate (mandatory); teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 4 loop
+- **Flow**: `U → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → K? → ∥F → V → L' → loop)`
+- **Key**: Phase 1 calls `AskUserQuestion` for perspective selection; Phase 4 calls `AskUserQuestion` for sufficiency check with `act` option; Phase 5-6 classify findings and execute fixes with peer verification; loop until user satisfied or ESC
+- **Phase 2**: Agent team via TeamCreate (mandatory); teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 4 loop and through Phase 5-6
+- **Phase 5-6**: 3-tier finding classification (actionable/surfaced-unknown/design-level) + praxis agent with peer verification; peer-to-peer in Phase 6 only; post-TeamDelete recommends follow-up protocols for deferred findings
 - **Invocation**: `/prothesis` or use "lens" in conversation
 
 ### Syneidesis (συνείδησις) — alias: `gap`
@@ -152,6 +166,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 ## Delegation Constraint
 
 - **Prothesis Phase 2**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
+- **Prothesis Phase 5-6**: Praxis agent spawned via Task into existing team T; Phase 6 allows peer-to-peer (praxis ↔ originating perspective) for verification
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 
@@ -162,3 +177,13 @@ node .claude/skills/verify/scripts/static-checks.js .
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
 - Skills frontmatter: `name` (required), `description` (required), `user-invocable` (boolean), `allowed-tools` (optional)
+
+**Co-change pattern** (protocol modifications require synchronized edits):
+
+| Change | Files to update |
+|--------|----------------|
+| New/modified phase | SKILL.md (formal block + prose), CLAUDE.md (flow formula + key behaviors) |
+| New tool usage | SKILL.md (PHASE TRANSITIONS `[Tool]` + TOOL GROUNDING entry) |
+| New loop option | SKILL.md (LOOP + Phase 4 prose + Rules), CLAUDE.md (key behaviors) |
+| Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
+| Any protocol change | `plugin.json` version bump, then `/verify` |
