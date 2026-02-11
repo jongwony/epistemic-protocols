@@ -64,9 +64,10 @@ Phase 7:  ∥F[TaskUpdate](T, Fₐ) → V[SendMessage](T) → L'       -- fix + 
 Phase 5': L' → Q'[AskUserQuestion](action_sufficiency) → await → J'  -- action sufficiency [Tool]
 
 ── LOOP ──
-After Phase 0 (Mission Brief modification):
+After Phase 0 (Mission Brief):
   J_mb = confirm       → Phase 1
   J_mb = modify(field) → re-present Q(MB') → await → MBᵥ → Phase 1
+  J_mb = ESC           → terminate (no team exists)
 
 After Phase 5 (analysis sufficiency):
   J = sufficient      → Ω(T, shutdown) → TeamDelete → terminate with L
@@ -207,7 +208,7 @@ When multiple perspectives converge on the same recommendation, present as unani
 
 Construct a Mission Brief from the user's request and **call the AskUserQuestion tool** to confirm it.
 
-**Do NOT skip this phase.** The Mission Brief is the primary context vehicle for teammate spawn prompts.
+**Do NOT skip this phase.** The Mission Brief is the primary context vehicle for teammate spawn prompts — it ensures agent-teams best practice ("give teammates enough context") is structurally guaranteed rather than depending on coordinator inference.
 
 The coordinator infers the Mission Brief from U (the user's request):
 
@@ -232,6 +233,8 @@ Options:
 ```
 
 **Pre-fill from explicit text**: `/mission "text"` → pre-fill from provided text, still confirm.
+
+**Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context for agent-teams), not the epistemic layer. Hermeneia resolves user-initiated intent-expression gaps; Telos co-constructs goals from vague intent. Phase 0 packages confirmed intent into a structured vehicle for teammate consumption — a prerequisite for quality spawn prompts, not a substitute for intent clarification or goal construction.
 
 ### Phase 1: Context Gathering
 
@@ -287,7 +290,7 @@ You are a **[Perspective] Expert**.
 **Mission Brief**:
 - Intent: {MBᵥ.inquiry_intent}
 - Deliverable: {MBᵥ.expected_deliverable}
-- Scope: {MBᵥ.scope_constraint}
+- Scope: {MBᵥ.scope_constraint} — constrain your analysis to this boundary
 
 Analyze from this epistemic standpoint:
 
@@ -502,7 +505,7 @@ Prothesis does **not** apply to **closed-world** cognition:
 
 ### Parametric Nature
 
-The formula is **domain-agnostic**: instantiate C differently, derive different P-space. The structure `U → G → C → P → S → I → Syn` applies wherever the open-world condition holds.
+The formula is **domain-agnostic**: instantiate C differently, derive different P-space. The structure `U → MB → G → C → P → S → I → Syn` applies wherever the open-world condition holds.
 
 ## Specialization
 
@@ -518,7 +521,7 @@ Prothesis(mandatory_baseline, optional_extension):
 
 ## Rules
 
-1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate)
+1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/mission "text"`) still requires confirmation. Modify loops re-present until confirmed.
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
 3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 3: cross-dialogue is coordinator-mediated only. Phase 7: peer-to-peer allowed between praxis and originating perspectives for verification
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
