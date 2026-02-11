@@ -1,10 +1,10 @@
-# Hermeneia
+# Clarify — Hermeneia (ἑρμηνεία)
 
 대화를 통한 의도-표현 갭 명확화 (ἑρμηνεία: 해석)
 
 > [English](./README.md)
 
-## Hermeneia란?
+## Clarify란?
 
 그리스어 ἑρμηνεία(해석)의 현대적 재해석으로, **사용자가 이미 알고 있지만 표현하기 어려운 것을 명확히 표현하도록 돕는** 프로토콜이다.
 
@@ -20,9 +20,9 @@
 
 | 프로토콜 | 주도자 | 타입 시그니처 |
 |----------|--------|---------------|
-| Prothesis | AI 감지 | `FrameworkAbsent → FramedInquiry` |
-| Syneidesis | AI 감지 | `GapUnnoticed → AuditedDecision` |
-| **Hermeneia** | **사용자 주도** | **`IntentMisarticulated → ClarifiedIntent`** |
+| Mission | AI 감지 | `FrameworkAbsent → FramedInquiry` |
+| Gap | AI 감지 | `GapUnnoticed → AuditedDecision` |
+| **Clarify** | **사용자 주도** | **`IntentMisarticulated → ClarifiedIntent`** |
 
 ## 프로토콜 흐름
 
@@ -56,9 +56,7 @@ Phase 3: Integration   → 명확화된 표현으로 진행
 ## 사용법
 
 ```
-/hermeneia [잠재적으로 모호한 요청]
-/clarify [요청]
-/hmn [요청]
+/clarify [잠재적으로 모호한 요청]
 ```
 
 ## 저자

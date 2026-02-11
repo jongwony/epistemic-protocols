@@ -1,10 +1,10 @@
 ---
-name: hermeneia
+name: clarify
 description: Clarify intent-expression gaps. Extracts clarified intent when what you mean differs from what you said.
 user-invocable: true
 ---
 
-# Hermeneia Protocol
+# Clarify Protocol
 
 Resolve intent-expression misalignment through user-initiated dialogue, enabling precise articulation before action proceeds. Type: `(IntentMisarticulated, User, EXTRACT, Expression) → ClarifiedIntent`.
 
@@ -30,9 +30,9 @@ ClarifiedIntent = Î' where |G| = 0 ∨ cycle(G) ∨ stall(Δ, 2) ∨ user_esc
 bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
 Priority: explicit_arg > colocated_expr > prev_user_turn
 
-/hermeneia "text"              → E = "text"
+/clarify "text"                → E = "text"
 "request... clarify"           → E = text before trigger
-/hermeneia (alone)             → E = previous user message
+/clarify (alone)               → E = previous user message
 
 Edge cases:
 - Interrupt: E = original request of interrupted task
@@ -70,12 +70,12 @@ integrate   → Internal state update (no external tool)
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
-| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
-| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Mission** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Gap** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Clarify** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Goal** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
 
-**Key difference**: User already recognizes intent-expression misalignment. Hermeneia helps articulate what user already partially knows.
+**Key difference**: User already recognizes intent-expression misalignment. Clarify helps articulate what user already partially knows.
 
 ## Mode Activation
 
@@ -88,7 +88,7 @@ Command invocation or trigger phrase activates mode until clarification complete
 ### Priority
 
 <system-reminder>
-When Hermeneia is active:
+When Clarify is active:
 
 **Supersedes**: Direct action patterns in User Memory
 (Clarification must complete before any tool execution or code changes)
@@ -98,10 +98,10 @@ When Hermeneia is active:
 **Action**: At Phase 2, call AskUserQuestion tool to present clarification options.
 </system-reminder>
 
-- Hermeneia completes before other workflows begin
+- Clarify completes before other workflows begin
 - User Memory rules resume after intent is clarified
 
-**Protocol precedence**: Default ordering is Hermeneia → Telos → Prothesis → Syneidesis (intent clarification logically precedes goal construction and analysis). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering is Clarify → Goal → Mission → Gap (intent clarification logically precedes goal construction and analysis). The user can override this default by explicitly requesting a different protocol first. Grasp is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 Clarified expression becomes input to subsequent protocols.
 
@@ -172,7 +172,7 @@ Options:
 2. "Specify different" — let me describe what I want to clarify
 ```
 
-**Skip condition**: If E was explicitly provided via argument (`/hermeneia "text"`), proceed directly to Phase 1b.
+**Skip condition**: If E was explicitly provided via argument (`/clarify "text"`), proceed directly to Phase 1b.
 
 ### Phase 1b: Gap Type Selection
 
@@ -219,7 +219,7 @@ Which best captures your intent?
 
 ### Socratic Questioning Style
 
-Hermeneia resolves **IntentMisarticulated → ClarifiedIntent**. The user already possesses the knowledge; they struggle to articulate it. Apply **maieutic questioning** (Socratic midwifery) to help users "give birth" to their own intent.
+Clarify resolves **IntentMisarticulated → ClarifiedIntent**. The user already possesses the knowledge; they struggle to articulate it. Apply **maieutic questioning** (Socratic midwifery) to help users "give birth" to their own intent.
 
 **Maieutic framing for AskUserQuestion**:
 

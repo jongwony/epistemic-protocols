@@ -1,10 +1,10 @@
-# Hermeneia
+# Clarify — Hermeneia (ἑρμηνεία)
 
 Clarify intent-expression gaps through dialogue (ἑρμηνεία: interpretation)
 
 > [한국어](./README_ko.md)
 
-## What is Hermeneia?
+## What is Clarify?
 
 A modern reinterpretation of Greek ἑρμηνεία (interpretation) — a protocol that **helps users articulate what they already know but struggle to express**.
 
@@ -20,9 +20,9 @@ Users often recognize their expression is ambiguous (`IntentMisarticulated`) but
 
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
-| Prothesis | AI-detected | `FrameworkAbsent → FramedInquiry` |
-| Syneidesis | AI-detected | `GapUnnoticed → AuditedDecision` |
-| **Hermeneia** | **User-initiated** | **`IntentMisarticulated → ClarifiedIntent`** |
+| Mission | AI-detected | `FrameworkAbsent → FramedInquiry` |
+| Gap | AI-detected | `GapUnnoticed → AuditedDecision` |
+| **Clarify** | **User-initiated** | **`IntentMisarticulated → ClarifiedIntent`** |
 
 ## Protocol Flow
 
@@ -56,9 +56,7 @@ Phase 3: Integration   → Proceed with clarified expression
 ## Usage
 
 ```
-/hermeneia [your potentially ambiguous request]
-/clarify [request]
-/hmn [request]
+/clarify [your potentially ambiguous request]
 ```
 
 ## Author

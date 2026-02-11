@@ -1,20 +1,20 @@
-# Prothesis
+# Mission — Prothesis (πρόθεσις)
 
-Place perspective options before inquiry (πρόθεσις: placing before)
+Team-based multi-perspective investigation and execution (πρόθεσις: placing before)
 
 > [한국어](./README_ko.md)
 
-## What is Prothesis?
+## What is Mission?
 
-A modern reinterpretation of Greek πρόθεσις (placing before) — a protocol that **presents possible epistemological perspectives before inquiry begins**.
+A modern reinterpretation of Greek πρόθεσις (placing before) — a protocol that **assembles a team to investigate from multiple perspectives, then acts on findings**.
 
 ### The Core Problem
 
-Users often lack the analytical framework for their question (`FrameworkAbsent`). Open questions like "What perspective do you want?" require knowing the answer to answer.
+Users often lack the analytical framework for their question (`FrameworkAbsent`). Open questions like "What perspective do you want?" require knowing the answer to answer. Beyond perspective selection, complex questions need parallel investigation from distinct viewpoints and coordinated execution.
 
 ### The Solution
 
-**Recognition over Recall**: Choosing from options (recognition) is easier than filling in blanks (recall). AI presents perspective options first; user selects; then analysis proceeds.
+**Recognition over Recall + Team Investigation**: AI presents perspective options; user selects; an agent team investigates in parallel; findings are classified and executed with peer verification. The full lifecycle: team assembly → parallel investigation → cross-dialogue → execution → dissolution.
 
 ### Difference from Socratic Method
 
@@ -47,7 +47,7 @@ Phase 3: Synthesis    → Organize convergences/divergences → Integrated answe
 ## Usage
 
 ```
-/prothesis [your question]
+/mission [your question]
 ```
 
 ## Author

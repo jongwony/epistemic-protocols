@@ -1,10 +1,10 @@
-# Syneidesis
+# Gap — Syneidesis (συνείδησις)
 
 결정 지점에서 잠재적 갭 표면화 (συνείδησις: 함께 앎)
 
 > [English](./README.md)
 
-## Syneidesis란?
+## Gap이란?
 
 그리스어 συνείδησις(함께 앎)의 현대적 재해석으로, **AI를 "보조적 인식 주체(auxiliary epistemic agent)"**로 위치시키는 프로토콜이다.
 
@@ -39,7 +39,7 @@ Phase 2: Adjustment   → 응답을 상태에 반영
 ## 사용법
 
 ```
-/syneidesis
+/gap
 ```
 
 참고: 고위험 결정에서 보류하면 명시적 판단을 제공할 때까지 진행이 차단됩니다.

@@ -220,21 +220,31 @@ function checkCrossReference() {
     syneidesis: 'syneidesis/skills/syneidesis/SKILL.md',
     hermeneia: 'hermeneia/skills/hermeneia/SKILL.md',
     katalepsis: 'katalepsis/skills/katalepsis/SKILL.md',
+    telos: 'telos/skills/telos/SKILL.md',
   };
 
-  // Extract CLAUDE.md sections: "### ProtocolName" → "- **Flow**: `...`"
-  const sectionPattern = /###\s+(Prothesis|Syneidesis|Hermeneia|Katalepsis)\b[\s\S]*?-\s*\*\*Flow\*\*:\s*`([^`]+)`/g;
+  // Map CLAUDE.md heading aliases to directory names
+  const aliasToDir = {
+    'mission': 'prothesis',
+    'gap': 'syneidesis',
+    'clarify': 'hermeneia',
+    'grasp': 'katalepsis',
+    'goal': 'telos',
+  };
+
+  // Extract CLAUDE.md sections: "### Alias (...) — ProtocolName" → "- **Flow**: `...`"
+  const sectionPattern = /###\s+(Mission|Gap|Clarify|Grasp|Goal)\b[\s\S]*?-\s*\*\*Flow\*\*:\s*`([^`]+)`/g;
   let sectionMatch;
   while ((sectionMatch = sectionPattern.exec(claudeMd)) !== null) {
-    const protocolName = sectionMatch[1].toLowerCase();
+    const dirName = aliasToDir[sectionMatch[1].toLowerCase()];
     const formula = sectionMatch[2];
-    const skillPath = path.join(projectRoot, protocolPaths[protocolName]);
+    const skillPath = path.join(projectRoot, protocolPaths[dirName]);
 
     if (!fs.existsSync(skillPath)) {
       results.fail.push({
         check: 'xref',
         file: 'CLAUDE.md',
-        message: `${sectionMatch[1]} SKILL.md not found at ${protocolPaths[protocolName]}`
+        message: `${sectionMatch[1]} SKILL.md not found at ${protocolPaths[dirName]}`
       });
       continue;
     }
@@ -248,7 +258,7 @@ function checkCrossReference() {
     if (!flowSection) {
       results.warn.push({
         check: 'xref',
-        file: protocolPaths[protocolName],
+        file: protocolPaths[dirName],
         message: `${sectionMatch[1]} SKILL.md has no flow formula in first code block`
       });
       continue;

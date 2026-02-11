@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos) during AI-human interaction.
+Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Mission), **GapUnnoticed → AuditedDecision** (Gap), **IntentMisarticulated → ClarifiedIntent** (Clarify), **ResultUngrasped → VerifiedUnderstanding** (Grasp), **GoalIndeterminate → DefinedEndState** (Goal) during AI-human interaction.
 
 ## Architecture
 
@@ -12,7 +12,7 @@ Claude Code plugin marketplace for epistemic dialogue — each protocol resolves
 epistemic-protocols/
 ├── .claude-plugin/marketplace.json    # Marketplace manifest
 ├── .claude/skills/verify/             # Project-level verification skill
-├── prothesis/                         # Protocol: perspective placement
+├── prothesis/                         # Protocol: multi-perspective investigation
 │   ├── .claude-plugin/plugin.json
 │   └── skills/prothesis/SKILL.md      # Full protocol definition (user-invocable)
 ├── syneidesis/                        # Protocol: gap surfacing
@@ -61,45 +61,45 @@ Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases 
 
 ## Plugins
 
-### Prothesis (πρόθεσις) — alias: `lens`
-Present perspective options before analysis begins. Injected into main agent context.
+### Mission (πρόθεσις) — Prothesis
+Team-based multi-perspective investigation and execution. Injected into main agent context.
 - **Flow**: `U → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → K? → ∥F → V → L' → loop)`
 - **Key**: Phase 1 calls `AskUserQuestion` for perspective selection; Phase 4 calls `AskUserQuestion` for sufficiency check with `act` option; Phase 5-6 classify findings and execute fixes with peer verification; loop until user satisfied or ESC
 - **Phase 2**: Agent team via TeamCreate (mandatory); teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 4 loop and through Phase 5-6
 - **Phase 5-6**: 3-tier finding classification (actionable/surfaced-unknown/design-level) + praxis agent with peer verification; peer-to-peer in Phase 6 only; post-TeamDelete recommends follow-up protocols for deferred findings
-- **Invocation**: `/prothesis` or use "lens" in conversation
+- **Invocation**: `/mission` or use "mission" in conversation
 
-### Syneidesis (συνείδησις) — alias: `gap`
+### Gap (συνείδησις) — Syneidesis
 Surface potential gaps at decision points as questions. Injected into main agent context.
 - **Flow**: `D → G → TaskCreate[all] → Q → J → Σ' → (re-scan → loop)`
 - **Key**: Phase 0 detects ALL gaps → TaskCreate batch registration; Phase 1 surfaces sequentially via `AskUserQuestion`; re-scan after each response; loop until all tasks completed or ESC
 - **Gap types**: Procedural, Consideration, Assumption, Alternative
 - **Conditions**: `committed(D)` (mutates state ∨ externally visible ∨ consumes resource) ∧ observable gap ∧ unaddressed
-- **Invocation**: `/syneidesis` or use "gap" in conversation
+- **Invocation**: `/gap` or use "gap" in conversation
 
-### Hermeneia (ἑρμηνεία) — alias: `clarify`
+### Clarify (ἑρμηνεία) — Hermeneia
 Clarify intent-expression gaps through user-initiated dialogue.
 - **Flow**: `E → Eᵥ → Gₛ → Q → A → Î' → (loop)`
 - **Key**: User-initiated only; Phase 1a confirms E, Phase 1b asks user to select gap type (no auto-diagnosis), Phase 2 calls `AskUserQuestion` for clarification; loop until convergence
 - **Gap types**: Expression, Precision, Coherence, Context
 - **Triggers**: "clarify", "what I mean", "did I express this right"
-- **Invocation**: `/hermeneia` or use "clarify" in conversation
+- **Invocation**: `/clarify` or use "clarify" in conversation
 
-### Katalepsis (κατάληψις) — alias: `grasp`
+### Grasp (κατάληψις) — Katalepsis
 Achieve certain comprehension of AI work through structured verification.
 - **Flow**: `R → C → Sₑ → Tᵣ → P → Δ → Q → A → Tᵤ → P' → (loop until katalepsis)`
 - **Key**: User-initiated; Phase 0 categorizes AI work; Phase 1 calls `AskUserQuestion` for entry point selection; Phase 2 uses `TaskCreate` for tracking; Phase 3 calls `AskUserQuestion` for comprehension verification with `TaskUpdate`; user proposals ejected via `TaskCreate` to maintain comprehension focus
 - **Gap types**: Expectation, Causality, Scope, Sequence
 - **Triggers**: "explain this", "what did you do?", "help me understand"
-- **Invocation**: `/katalepsis` or use "grasp" in conversation
+- **Invocation**: `/grasp` or use "grasp" in conversation
 
-### Telos (τέλος) — alias: `goal`
+### Goal (τέλος) — Telos
 Co-construct defined goals from vague intent through AI-proposed, user-shaped dialogue.
 - **Flow**: `G → Gᵥ → Dₛ → P → A → C' → (loop until sufficient)`
 - **Key**: AI-detected, user-confirmed (Phase 0); Phase 1 calls `AskUserQuestion` for dimension selection; Phase 2 proposes concrete candidates; Phase 4 calls `AskUserQuestion` for GoalContract approval; loop until user approves or ESC
 - **Gap types**: Outcome, Metric, Boundary, Priority
 - **Triggers**: "not sure what I want", "something like", "ideas for", exploratory framing
-- **Invocation**: `/telos` or use "goal" in conversation
+- **Invocation**: `/goal` or use "goal" in conversation
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
@@ -109,8 +109,8 @@ Extract insights from Claude Code sessions into persistent memory.
 
 ### Write
 Transform session insights into blog posts through multi-perspective analysis.
-- **Flow**: `Prothesis → Format → Write → Refine → Syneidesis → Finalize`
-- **Key**: Integrates both protocols—Prothesis for perspective selection, Syneidesis for gap validation
+- **Flow**: `Mission → Format → Write → Refine → Gap → Finalize`
+- **Key**: Integrates both protocols—Mission for perspective selection, Gap for gap validation
 
 ### Verify (Project-level)
 Pre-commit protocol verification via static checks and expert review.
@@ -122,30 +122,30 @@ Pre-commit protocol verification via static checks and expert review.
 - **Recognition over Recall**: Options to select, not blanks to fill
 - **Selection over Detection**: User selects gap types, AI does not auto-diagnose. Applies within protocols (user expertise); protocol-to-protocol ordering uses logical defaults with user override
 - **Surfacing over Deciding**: AI illuminates, user judges
-- **Convergence Persistence**: Modes active until convergence (Hermeneia loops until |G| = 0)
+- **Convergence Persistence**: Modes active until convergence (Clarify loops until |G| = 0)
 - **Priority Override**: Active protocols supersede default behaviors
 
 ## Protocol Precedence
 
-Multi-activation order: **Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis**
+Multi-activation order: **Clarify → Goal → Mission → Gap → Grasp**
 
 This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → perspective → gap audit). Users can override by explicitly requesting a different protocol first.
 
-**Katalepsis**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
+**Grasp**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
 
 ### Epistemic Workflow
 
 ```
 [Request] → [Intent] → [Goal] → [Perspective] → [Decision] → [Execution] → [Comprehension]
                ↑          ↑          ↑              ↑                            ↑
-           Hermeneia    Telos    Prothesis      Syneidesis                   Katalepsis
+            Clarify      Goal     Mission          Gap                         Grasp
 ```
 
 This diagram shows logical progression, not strict execution order.
 
 **Initiator taxonomy**:
-- **AI-detected**: AI determines the condition is present (Prothesis, Syneidesis, Telos)
-- **User-initiated**: User signals awareness of a deficit (Hermeneia, Katalepsis)
+- **AI-detected**: AI determines the condition is present (Mission, Gap, Goal)
+- **User-initiated**: User signals awareness of a deficit (Clarify, Grasp)
 - **User-invoked**: User runs as deliberate practice; no deficit awareness required (Reflexion, Write)
 
 ## Verification
@@ -165,10 +165,10 @@ node .claude/skills/verify/scripts/static-checks.js .
 
 ## Delegation Constraint
 
-- **Prothesis Phase 2**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
-- **Prothesis Phase 5-6**: Praxis agent spawned via Task into existing team T; Phase 6 allows peer-to-peer (praxis ↔ originating perspective) for verification
-- **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Mission Phase 2**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
+- **Mission Phase 5-6**: Praxis agent spawned via Task into existing team T; Phase 6 allows peer-to-peer (praxis ↔ originating perspective) for verification
+- **Gap/Clarify/Grasp**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Goal**: No Task delegation—must run in main agent to call AskUserQuestion
 
 ## Editing Guidelines
 

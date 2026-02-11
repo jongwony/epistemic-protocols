@@ -1,10 +1,10 @@
-# Syneidesis
+# Gap — Syneidesis (συνείδησις)
 
 Surface potential gaps at decision points (συνείδησις: knowing-together)
 
 > [한국어](./README_ko.md)
 
-## What is Syneidesis?
+## What is Gap?
 
 A modern reinterpretation of Greek συνείδησις (knowing-together) — a protocol that **positions AI as an "auxiliary epistemic agent"**.
 
@@ -39,7 +39,7 @@ Phase 2: Adjustment   → Incorporate response into state
 ## Usage
 
 ```
-/syneidesis
+/gap
 ```
 
 Note: Deferring high-stakes decisions blocks progress until you provide explicit judgment.

@@ -1,10 +1,10 @@
-# Katalepsis
+# Grasp — Katalepsis (κατάληψις)
 
 AI 작업에 대한 확실한 이해 달성 (κατάληψις: 확고하게 파악함)
 
 > [English](./README.md)
 
-## Katalepsis란?
+## Grasp란?
 
 스토아 철학의 κατάληψις (확고한 파악, 확실한 이해)를 현대적으로 재해석한 프로토콜 — **AI가 생성한 작업을 사용자가 따라가며 검증된 이해에 도달**할 수 있게 합니다.
 
@@ -49,7 +49,6 @@ Phase 3: 검증 루프  → 점진적으로 이해 확인 (AskUserQuestion + Tas
 ## 사용법
 
 ```
-/katalepsis
 /grasp
 ```
 

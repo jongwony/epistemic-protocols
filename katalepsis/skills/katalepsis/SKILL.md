@@ -1,10 +1,10 @@
 ---
-name: katalepsis
+name: grasp
 description: Achieve certain comprehension after AI work. Verifies understanding when results remain ungrasped, producing verified understanding.
 user-invocable: true
 ---
 
-# Katalepsis Protocol
+# Grasp Protocol
 
 Achieve certain comprehension of AI work through structured verification, enabling the user to grasp ungrasped results. Type: `(ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding`.
 
@@ -74,13 +74,13 @@ Categorize  → Internal analysis (Read for context if needed)
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
+| **Mission** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective selection |
+| **Gap** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Clarify** | User-initiated | IntentMisarticulated → ClarifiedIntent | Expression clarification |
+| **Goal** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Grasp** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
-**Key difference**: AI work exists but the result remains ungrasped by the user. Katalepsis guides user to firm understanding through structured verification.
+**Key difference**: AI work exists but the result remains ungrasped by the user. Grasp guides user to firm understanding through structured verification.
 
 ## Mode Activation
 
@@ -93,7 +93,7 @@ Command invocation or trigger phrase activates mode until comprehension is verif
 ### Priority
 
 <system-reminder>
-When Katalepsis is active:
+When Grasp is active:
 
 **Supersedes**: Default explanation patterns in AI responses
 (Verification questions replace unsolicited explanations)
@@ -104,10 +104,10 @@ When Katalepsis is active:
 At Phase 3, call AskUserQuestion for comprehension verification.
 </system-reminder>
 
-- Katalepsis provides structured comprehension path
+- Grasp provides structured comprehension path
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence**: Non-Katalepsis protocols follow a default ordering (Hermeneia → Telos → Prothesis → Syneidesis) which the user can override. Katalepsis is a structural constraint — it requires completed AI work (`R`), so it always executes last. Do not include Katalepsis as an option in any multi-activation ordering choice.
+**Protocol precedence**: Non-Grasp protocols follow a default ordering (Clarify → Goal → Mission → Gap) which the user can override. Grasp is a structural constraint — it requires completed AI work (`R`), so it always executes last. Do not include Grasp as an option in any multi-activation ordering choice.
 
 ### Triggers
 
@@ -129,7 +129,7 @@ At Phase 3, call AskUserQuestion for comprehension verification.
 
 | Trigger | Effect |
 |---------|--------|
-| All selected tasks completed | Katalepsis achieved; proceed |
+| All selected tasks completed | Grasp achieved; proceed |
 | User explicitly cancels | Accept current understanding |
 | User demonstrates full comprehension | Early termination |
 
@@ -195,7 +195,7 @@ Options (multiSelect):
 
 ```
 TaskCreate({
-  subject: "[Katalepsis] Category name",
+  subject: "[Grasp] Category name",
   description: "Brief description of what to understand",
   activeForm: "Understanding [category]"
 })
@@ -229,7 +229,7 @@ For each task (category):
    - Call TaskCreate to eject the proposal:
      ```
      TaskCreate({
-       subject: "[Katalepsis:Proposal] Brief description",
+       subject: "[Grasp:Proposal] Brief description",
        description: "User proposal during [category]: [verbatim user text]",
        activeForm: "Archiving user proposal"
      })
