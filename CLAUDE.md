@@ -63,10 +63,10 @@ Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases 
 
 ### Mission (πρόθεσις) — Prothesis
 Team-based multi-perspective investigation and execution. Injected into main agent context.
-- **Flow**: `U → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → K? → ∥F → V → L' → loop)`
-- **Key**: Phase 1 calls `AskUserQuestion` for perspective selection; Phase 4 calls `AskUserQuestion` for sufficiency check with `act` option; Phase 5-6 classify findings and execute fixes with peer verification; loop until user satisfied or ESC
-- **Phase 2**: Agent team via TeamCreate (mandatory); teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 4 loop and through Phase 5-6
-- **Phase 5-6**: 3-tier finding classification (actionable/surfaced-unknown/design-level) + praxis agent with peer verification; peer-to-peer in Phase 6 only; post-TeamDelete recommends follow-up protocols for deferred findings
+- **Flow**: `U → MB → MBᵥ → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → K? → ∥F → V → L' → loop)`
+- **Key**: Phase 0 calls `AskUserQuestion` for Mission Brief confirmation; Phase 1 gathers context guided by MBᵥ; Phase 2 for perspective selection; Phase 5 for sufficiency check with `act` option; Phase 6-7 classify findings and execute fixes with peer verification; loop until user satisfied or ESC
+- **Phase 3**: Agent team via TeamCreate (mandatory); spawn prompt includes Mission Brief; teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 5 loop and through Phase 6-7
+- **Phase 6-7**: 3-tier finding classification (actionable/surfaced-unknown/design-level) + praxis agent with peer verification; peer-to-peer in Phase 7 only; post-TeamDelete recommends follow-up protocols for deferred findings
 - **Invocation**: `/mission` or use "mission" in conversation
 
 ### Gap (συνείδησις) — Syneidesis
@@ -165,8 +165,9 @@ node .claude/skills/verify/scripts/static-checks.js .
 
 ## Delegation Constraint
 
-- **Prothesis Phase 2**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
-- **Prothesis Phase 5-6**: Praxis agent spawned via Task into existing team T; Phase 6 allows peer-to-peer (praxis ↔ originating perspective) for verification
+- **Prothesis Phase 0-1**: Main agent only (AskUserQuestion for Mission Brief confirmation + targeted context gathering)
+- **Prothesis Phase 3**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
+- **Prothesis Phase 6-7**: Praxis agent spawned via Task into existing team T; Phase 7 allows peer-to-peer (praxis ↔ originating perspective) for verification
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 
@@ -184,6 +185,6 @@ node .claude/skills/verify/scripts/static-checks.js .
 |--------|----------------|
 | New/modified phase | SKILL.md (formal block + prose), CLAUDE.md (flow formula + key behaviors) |
 | New tool usage | SKILL.md (PHASE TRANSITIONS `[Tool]` + TOOL GROUNDING entry) |
-| New loop option | SKILL.md (LOOP + Phase 4 prose + Rules), CLAUDE.md (key behaviors) |
+| New loop option | SKILL.md (LOOP + Phase 5 prose + Rules), CLAUDE.md (key behaviors) |
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
