@@ -46,6 +46,19 @@ epistemic-protocols/
 - References directory: `skills/*/references/` for detailed documentation
 - No external dependencies; Node.js standard library only
 
+**SKILL.md Formal Block Anatomy** (all protocols share this structure within `Definition` code block):
+```
+── FLOW ──              One-line formula: full protocol path with symbols
+── TYPES ──             Symbol definitions with type signatures and comments
+── ACTION TYPES ──      (if applicable) Extended types for action phases
+── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
+── LOOP ──              Post-phase control flow (J values → next phase or terminal)
+── BOUNDARY ──          Purpose annotations for key operations
+── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping
+── MODE STATE ──        Runtime state type (Λ) with nested state types
+```
+Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.
+
 ## Plugins
 
 ### Prothesis (πρόθεσις) — alias: `lens`
@@ -164,3 +177,13 @@ node .claude/skills/verify/scripts/static-checks.js .
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
 - Skills frontmatter: `name` (required), `description` (required), `user-invocable` (boolean), `allowed-tools` (optional)
+
+**Co-change pattern** (protocol modifications require synchronized edits):
+
+| Change | Files to update |
+|--------|----------------|
+| New/modified phase | SKILL.md (formal block + prose), CLAUDE.md (flow formula + key behaviors) |
+| New tool usage | SKILL.md (PHASE TRANSITIONS `[Tool]` + TOOL GROUNDING entry) |
+| New loop option | SKILL.md (LOOP + Phase 4 prose + Rules), CLAUDE.md (key behaviors) |
+| Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
+| Any protocol change | `plugin.json` version bump, then `/verify` |
