@@ -66,7 +66,7 @@ Present perspective options before analysis begins. Injected into main agent con
 - **Flow**: `U → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → K? → ∥F → V → L' → loop)`
 - **Key**: Phase 1 calls `AskUserQuestion` for perspective selection; Phase 4 calls `AskUserQuestion` for sufficiency check with `act` option; Phase 5-6 classify findings and execute fixes with peer verification; loop until user satisfied or ESC
 - **Phase 2**: Agent team via TeamCreate (mandatory); teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 4 loop and through Phase 5-6
-- **Phase 5-6**: 3-tier finding classification (actionable/surfaced-unknown/design-level) + fixer with peer verification; peer-to-peer in Phase 6 only; post-TeamDelete recommends follow-up protocols for deferred findings
+- **Phase 5-6**: 3-tier finding classification (actionable/surfaced-unknown/design-level) + praxis agent with peer verification; peer-to-peer in Phase 6 only; post-TeamDelete recommends follow-up protocols for deferred findings
 - **Invocation**: `/prothesis` or use "lens" in conversation
 
 ### Syneidesis (συνείδησις) — alias: `gap`
@@ -166,7 +166,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 ## Delegation Constraint
 
 - **Prothesis Phase 2**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
-- **Prothesis Phase 5-6**: Fixer spawned via Task into existing team T; Phase 6 allows peer-to-peer (fixer ↔ originating perspective) for verification
+- **Prothesis Phase 5-6**: Praxis agent spawned via Task into existing team T; Phase 6 allows peer-to-peer (praxis ↔ originating perspective) for verification
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 
