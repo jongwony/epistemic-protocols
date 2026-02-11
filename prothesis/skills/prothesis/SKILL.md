@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R → Syn(R) → L → K?(L) → ∥F(T) → V(T) → L'
+Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R' → Syn(R') → L → K?(L) → ∥F(T) → V(T) → L'
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
