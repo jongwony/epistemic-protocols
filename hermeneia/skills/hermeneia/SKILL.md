@@ -4,7 +4,7 @@ description: Clarify intent-expression gaps. Extracts clarified intent when what
 user-invocable: true
 ---
 
-# Clarify Protocol
+# Hermeneia Protocol
 
 Resolve intent-expression misalignment through user-initiated dialogue, enabling precise articulation before action proceeds. Type: `(IntentMisarticulated, User, EXTRACT, Expression) → ClarifiedIntent`.
 
@@ -70,12 +70,12 @@ integrate   → Internal state update (no external tool)
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Mission** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
-| **Gap** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Clarify** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
-| **Goal** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
 
-**Key difference**: User already recognizes intent-expression misalignment. Clarify helps articulate what user already partially knows.
+**Key difference**: User already recognizes intent-expression misalignment. Hermeneia helps articulate what user already partially knows.
 
 ## Mode Activation
 
@@ -88,7 +88,7 @@ Command invocation or trigger phrase activates mode until clarification complete
 ### Priority
 
 <system-reminder>
-When Clarify is active:
+When Hermeneia is active:
 
 **Supersedes**: Direct action patterns in User Memory
 (Clarification must complete before any tool execution or code changes)
@@ -98,10 +98,10 @@ When Clarify is active:
 **Action**: At Phase 2, call AskUserQuestion tool to present clarification options.
 </system-reminder>
 
-- Clarify completes before other workflows begin
+- Hermeneia completes before other workflows begin
 - User Memory rules resume after intent is clarified
 
-**Protocol precedence**: Default ordering is Clarify → Goal → Mission → Gap (intent clarification logically precedes goal construction and analysis). The user can override this default by explicitly requesting a different protocol first. Grasp is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering is Hermeneia → Telos → Prothesis → Syneidesis (intent clarification logically precedes goal construction and analysis). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 Clarified expression becomes input to subsequent protocols.
 
@@ -219,7 +219,7 @@ Which best captures your intent?
 
 ### Socratic Questioning Style
 
-Clarify resolves **IntentMisarticulated → ClarifiedIntent**. The user already possesses the knowledge; they struggle to articulate it. Apply **maieutic questioning** (Socratic midwifery) to help users "give birth" to their own intent.
+Hermeneia resolves **IntentMisarticulated → ClarifiedIntent**. The user already possesses the knowledge; they struggle to articulate it. Apply **maieutic questioning** (Socratic midwifery) to help users "give birth" to their own intent.
 
 **Maieutic framing for AskUserQuestion**:
 

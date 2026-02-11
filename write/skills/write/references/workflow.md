@@ -4,11 +4,11 @@ Detailed phase descriptions and content transformation rules for the write skill
 
 ## Phase Details
 
-### Phases 1-3: Mission Protocol
+### Phases 1-3: Prothesis Protocol
 
 **Purpose**: Multi-perspective epistemic analysis before content generation.
 
-**Delegation**: These phases follow the mission protocol exactly.
+**Delegation**: These phases follow the Prothesis protocol (/mission) exactly.
 
 ```
 Phase 0: G(U) → C              -- Context acquisition
@@ -22,7 +22,7 @@ Phase 3: R → Syn(R) → L        -- Synthesis: convergence, divergence, assess
 - Parallel inquiry includes explicit Horizon Limits per perspective
 - Synthesis produces Lens L = { convergence, divergence, assessment }
 
-**Subagent Prompt Template** (from mission):
+**Subagent Prompt Template** (from Prothesis):
 ```
 You are a **[Perspective] Expert**.
 
@@ -247,7 +247,7 @@ A session becomes write-worthy when it exhibits:
 
 ## Reusable Patterns
 
-### Mission Protocol Pattern
+### Prothesis Protocol Pattern
 ```
 Context → Derive perspectives → User selects → Parallel inquiry (with Horizon Limits) → Synthesis
 ```

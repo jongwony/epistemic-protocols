@@ -1,10 +1,10 @@
-# Gap — Syneidesis (συνείδησις)
+# Syneidesis — /gap (συνείδησις)
 
 결정 지점에서 잠재적 갭 표면화 (συνείδησις: 함께 앎)
 
 > [English](./README.md)
 
-## Gap이란?
+## Syneidesis란?
 
 그리스어 συνείδησις(함께 앎)의 현대적 재해석으로, **AI를 "보조적 인식 주체(auxiliary epistemic agent)"**로 위치시키는 프로토콜이다.
 

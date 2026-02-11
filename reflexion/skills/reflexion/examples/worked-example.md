@@ -152,7 +152,7 @@ TodoWrite([
 └── "None (skip saving)"
 ```
 
-**Gap surfaced**:
+**Syneidesis gap surfaced**:
 > "Pattern #4 overlaps with 'Absence over Deprecation'. Was this considered?"
 > User response: "Yes, already excluded"
 

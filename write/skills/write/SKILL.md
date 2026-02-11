@@ -22,12 +22,12 @@ Skip when:
 ## Workflow Overview
 
 ```
-MISSION(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → REFINE → VALIDATE → FINALIZE
+PROTHESIS(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → REFINE → VALIDATE → FINALIZE
 ```
 
 | Phase | Tool | Decision Point |
 |-------|------|----------------|
-| Mission | /mission protocol | Context-derived perspectives, parallel inquiry |
+| Prothesis | /mission protocol | Context-derived perspectives, parallel inquiry |
 | Format | AskUserQuestion | Output type, language |
 | Draft | Write | — |
 | Refine | Edit (loop) | User feedback |
@@ -36,9 +36,9 @@ MISSION(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → RE
 
 ## Phase Execution
 
-### 1-3. Mission Protocol (Multi-Perspective Analysis)
+### 1-3. Prothesis Protocol (Multi-Perspective Analysis)
 
-Apply the mission protocol for epistemic analysis:
+Apply the Prothesis protocol (/mission) for epistemic analysis:
 
 ```
 Phase 0: G(U) → C              -- Context acquisition from session/topic

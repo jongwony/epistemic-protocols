@@ -212,13 +212,13 @@ Consult `references/review-checklists.md` for:
 
 ## Integration Notes
 
-### With Mission
+### With Prothesis
 
 Verification may trigger perspective selection if findings require analysis approach decision.
 
-### With Gap
+### With Syneidesis
 
-Critical findings surface as high-stakes gaps. Gap detection may augment verification.
+Critical findings surface as high-stakes gaps. Syneidesis gap detection may augment verification.
 
 ### Standalone Usage
 

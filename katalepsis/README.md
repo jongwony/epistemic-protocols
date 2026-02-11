@@ -1,10 +1,10 @@
-# Grasp — Katalepsis (κατάληψις)
+# Katalepsis — /grasp (κατάληψις)
 
 Achieve certain comprehension of AI work (κατάληψις: grasping firmly)
 
 > [한국어](./README_ko.md)
 
-## What is Grasp?
+## What is Katalepsis?
 
 A modern reinterpretation of Stoic κατάληψις (firm grasp, certain comprehension) — a protocol that **enables users to follow along and achieve verified understanding of AI-generated work**.
 

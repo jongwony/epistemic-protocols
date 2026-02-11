@@ -1,10 +1,10 @@
-# Mission — Prothesis (πρόθεσις)
+# Prothesis — /mission (πρόθεσις)
 
 Team-based multi-perspective investigation and execution (πρόθεσις: placing before)
 
 > [한국어](./README_ko.md)
 
-## What is Mission?
+## What is Prothesis?
 
 A modern reinterpretation of Greek πρόθεσις (placing before) — a protocol that **assembles a team to investigate from multiple perspectives, then acts on findings**.
 

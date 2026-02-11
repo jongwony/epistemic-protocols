@@ -1,10 +1,10 @@
-# Goal — Telos (τέλος)
+# Telos — /goal (τέλος)
 
 모호한 목표로부터 정의된 최종 상태를 공동 구축 (τέλος: 목적, 끝)
 
 > [English](./README.md)
 
-## Goal이란?
+## Telos란?
 
 그리스어 τέλος(목적, 끝)의 현대적 재해석으로, **이미 존재하는 목표를 추출하는 것이 아니라 아직 존재하지 않는 목표 정의를 함께 구축하도록 돕는** 프로토콜이다.
 
@@ -20,10 +20,10 @@
 
 | 프로토콜 | 모드 | 타입 시그니처 |
 |----------|------|---------------|
-| Clarify | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
-| **Goal** | **CO-CONSTRUCT** | **`GoalIndeterminate → DefinedEndState`** |
+| Hermeneia | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
+| **Telos** | **CO-CONSTRUCT** | **`GoalIndeterminate → DefinedEndState`** |
 
-**핵심 구분**: Clarify는 사용자가 의도를 *가지고 있지만* 표현에 어려움을 겪는다고 가정한다 — Goal은 아직 잘 형성된 의도가 존재하지 않을 때 작동한다. Clarify는 추출하고, Goal은 구축한다.
+**핵심 구분**: Hermeneia는 사용자가 의도를 *가지고 있지만* 표현에 어려움을 겪는다고 가정한다 — Telos는 아직 잘 형성된 의도가 존재하지 않을 때 작동한다. Hermeneia는 추출하고, Telos는 구축한다.
 
 ### 요구사항 공학과의 차이
 
@@ -56,10 +56,10 @@ Phase 4: Sufficiency    → 완전성 검증 (call AskUserQuestion)
 ## 프로토콜 우선순위
 
 ```
-Clarify → Goal → Mission → Gap → Grasp
+Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis
 ```
 
-Goal은 Clarify 다음에 온다: 의도가 존재하지만 잘못 표현된 경우 먼저 명확화한다. 의도가 존재하지 않으면 공동 구축한다. 목표가 정의되면 관점 프레이밍(Mission)과 갭 감사(Gap)를 진행할 수 있다.
+Telos는 Hermeneia 다음에 온다: 의도가 존재하지만 잘못 표현된 경우 먼저 명확화한다. 의도가 존재하지 않으면 공동 구축한다. 목표가 정의되면 관점 프레이밍(Prothesis)과 갭 감사(Syneidesis)를 진행할 수 있다.
 
 ## 사용 시기
 
@@ -70,8 +70,8 @@ Goal은 Clarify 다음에 온다: 의도가 존재하지만 잘못 표현된 경
 - 정의되지 않은 범위로 프로젝트를 시작할 때
 
 **건너뛰기**:
-- 목표가 명확하지만 표현이 부족할 때 (Clarify 사용)
-- 정의된 목표가 있고 관점 분석이 필요할 때 (Mission 사용)
+- 목표가 명확하지만 표현이 부족할 때 (Hermeneia 사용 — /clarify)
+- 정의된 목표가 있고 관점 분석이 필요할 때 (Prothesis 사용 — /mission)
 
 ## 사용법
 

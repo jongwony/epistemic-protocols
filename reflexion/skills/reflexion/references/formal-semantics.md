@@ -87,8 +87,8 @@ The 2-dimensional output (what × where) distinguishes Reflexion from simpler ex
 
 | Protocol | Extern Type | Dimension |
 |----------|-------------|-----------|
-| Mission | Perspective selection | 1D (which P) |
-| Gap | Gap judgment | 1D (J ∈ {Addresses, Dismisses, Silence}) |
+| Prothesis | Perspective selection | 1D (which P) |
+| Syneidesis | Gap judgment | 1D (J ∈ {Addresses, Dismisses, Silence}) |
 | Reflexion | Insight + Location | 2D (Iₛ × Lₛ) |
 
 ## TodoWrite as State Machine
@@ -137,21 +137,21 @@ The second property is approximate due to user-guided selection (not purely dete
 
 ## Protocol Integration Semantics
 
-### With Mission
+### With Prothesis
 
 ```
-Mission ; Reflexion
+Prothesis ; Reflexion
 
--- Mission output (selected perspective) constrains E₂ focus
+-- Prothesis output (selected perspective) constrains E₂ focus
 -- Formally: E₂ becomes E₂|P where P is the selected perspective
 ```
 
-### With Gap
+### With Syneidesis
 
 ```
-Reflexion[Gap]
+Reflexion[Syneidesis]
 
--- Gap applies at Q2-Q5 decision points
+-- Syneidesis applies at Q2-Q5 decision points
 -- Each Sel step may trigger gap detection before AskUserQuestion
 -- Formally: Sel becomes Syn ∘ Sel where Syn surfaces gaps
 ```

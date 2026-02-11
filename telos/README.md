@@ -1,10 +1,10 @@
-# Goal — Telos (τέλος)
+# Telos — /goal (τέλος)
 
 Co-construct defined end-states from vague goals (τέλος: end, purpose)
 
 > [한국어](./README_ko.md)
 
-## What is Goal?
+## What is Telos?
 
 A modern reinterpretation of Greek τέλος (end, purpose) — a protocol that **helps users build goal definitions that don't yet exist, rather than extracting ones that do**.
 
@@ -20,10 +20,10 @@ Users often arrive with vague aspirations (`GoalIndeterminate`) — they know th
 
 | Protocol | Mode | Type Signature |
 |----------|------|---------------|
-| Clarify | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
-| **Goal** | **CO-CONSTRUCT** | **`GoalIndeterminate → DefinedEndState`** |
+| Hermeneia | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
+| **Telos** | **CO-CONSTRUCT** | **`GoalIndeterminate → DefinedEndState`** |
 
-**Key distinction**: Clarify assumes the user *has* an intent but struggles to express it — Goal operates when no well-formed intent exists yet. Clarify extracts; Goal constructs.
+**Key distinction**: Hermeneia assumes the user *has* an intent but struggles to express it — Telos operates when no well-formed intent exists yet. Hermeneia extracts; Telos constructs.
 
 ### Difference from Requirements Engineering
 
@@ -56,10 +56,10 @@ Phase 4: Sufficiency    → Verify completeness (call AskUserQuestion)
 ## Protocol Precedence
 
 ```
-Clarify → Goal → Mission → Gap → Grasp
+Hermeneia → Telos → Prothesis → Syneidesis → Katalepsis
 ```
 
-Goal follows Clarify: if intent exists but is misarticulated, clarify first. If no intent exists, co-construct. Once a goal is defined, perspective framing (Mission) and gap auditing (Gap) can proceed.
+Telos follows Hermeneia: if intent exists but is misarticulated, clarify first. If no intent exists, co-construct. Once a goal is defined, perspective framing (Prothesis) and gap auditing (Syneidesis) can proceed.
 
 ## When to Use
 
@@ -70,8 +70,8 @@ Goal follows Clarify: if intent exists but is misarticulated, clarify first. If 
 - When starting a project with undefined scope
 
 **Skip**:
-- When your goal is clear but poorly expressed (use Clarify)
-- When you have a defined goal and need perspective analysis (use Mission)
+- When your goal is clear but poorly expressed (use Hermeneia — /clarify)
+- When you have a defined goal and need perspective analysis (use Prothesis — /mission)
 
 ## Usage
 

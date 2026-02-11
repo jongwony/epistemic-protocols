@@ -4,7 +4,7 @@ description: Multi-perspective investigation and execution. Assembles a team to 
 user-invocable: true
 ---
 
-# Mission Protocol
+# Prothesis Protocol
 
 Resolve absent frameworks by placing available epistemic perspectives before the user, enabling lens selection prior to any perspective-requiring cognition. Type: `(FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry`.
 
@@ -78,8 +78,8 @@ After Phase 5 (classification guard):
   Fₐ ≠ ∅ → Phase 6 (spawn praxis, execute fixes)
 
 recommend_protocols(deferred):
-  Fᵤ ≠ ∅ → suggest Gap (priority: surfaced unknowns)
-  Fᵈ ≠ ∅ → suggest Gap (gaps) or Goal (goals) by finding type
+  Fᵤ ≠ ∅ → suggest Syneidesis (priority: surfaced unknowns)
+  Fᵈ ≠ ∅ → suggest Syneidesis (gaps) or Telos (goals) by finding type
 
 Continue until convergence: user satisfied OR user ESC.
 
@@ -126,7 +126,7 @@ Command invocation activates mode until session end.
 ### Priority
 
 <system-reminder>
-When Mission is active:
+When Prothesis is active:
 
 **Supersedes**: Immediate analysis patterns in User Memory
 (Perspective Selection must complete before analysis begins)
@@ -136,10 +136,10 @@ When Mission is active:
 **Action**: Before analysis, call AskUserQuestion tool to present perspective options.
 </system-reminder>
 
-- Mission completes before other workflows begin
+- Prothesis completes before other workflows begin
 - User Memory rules resume after perspective is established
 
-**Protocol precedence**: Default ordering places Mission after Goal and before Gap (established perspective contextualizes gap detection). The user can override this default by explicitly requesting a different protocol first. Grasp is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Prothesis after Telos and before Syneidesis (established perspective contextualizes gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
 
 ### Per-Message Application
 
@@ -147,11 +147,11 @@ Every user message triggers perspective evaluation:
 
 | Message Type | Action |
 |--------------|--------|
-| New inquiry | Mission |
+| New inquiry | Prothesis |
 | Follow-up within established lens | Continue with selected perspective |
-| Uncertain | Default to Mission |
+| Uncertain | Default to Prothesis |
 
-**Decision rule**: When uncertain whether perspective is established, default to Mission.
+**Decision rule**: When uncertain whether perspective is established, default to Prothesis.
 
 ```
 False positive (unnecessary question) < False negative (missed perspective)
@@ -162,20 +162,20 @@ False positive (unnecessary question) < False negative (missed perspective)
 | Trigger | Effect |
 |---------|--------|
 | Synthesis complete | Lens established; follow-ups continue within lens |
-| User starts unrelated topic | Re-evaluate for new Mission |
+| User starts unrelated topic | Re-evaluate for new Prothesis |
 
 ### Plan Mode Integration
 
-When combined with Plan mode, Mission provides the **Deliberation** phase:
+When combined with Plan mode, Prothesis provides the **Deliberation** phase:
 
 **Per-Phase Application**:
-- Apply Mission at each planning domain or phase
+- Apply Prothesis at each planning domain or phase
 - Perspectives evaluate domain-specific considerations
 - Synthesis produces phase-scoped recommendations
 
-**Gap Coordination** (following default ordering):
-- Mission generates recommendations (Deliberation)
-- Gap surfaces unconfirmed assumptions (Gap)
+**Syneidesis Coordination** (following default ordering):
+- Prothesis generates recommendations (Deliberation)
+- Syneidesis surfaces unconfirmed assumptions (Gap)
 - User feedback triggers re-evaluation (Revision)
 - Explicit confirmation gates execution (Execution)
 
@@ -184,7 +184,7 @@ When multiple perspectives converge on the same recommendation, present as unani
 
 ## Distinction from Socratic Method
 
-| Dimension | Socratic Maieutics | Mission |
+| Dimension | Socratic Maieutics | Prothesis |
 |-----------|-------------------|-----------|
 | Knowledge source | Latent within interlocutor | Provided externally |
 | Premise | "You already know" | "You don't know the options" |
@@ -197,7 +197,7 @@ When multiple perspectives converge on the same recommendation, present as unani
 
 Gather context sufficient to formulate distinct perspectives. Do not proceed to Phase 1 until context is established.
 
-### Phase 1: Mission (Perspective Placement)
+### Phase 1: Prothesis (Perspective Placement)
 
 After context gathering, **call the AskUserQuestion tool** to present perspectives.
 
@@ -290,7 +290,7 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 
 **Isolation trade-off on action phase**: When `J=act` proceeds to Phase 6, the praxis agent communicates directly with originating perspectives. This is acceptable because: (1) the user explicitly chose `act`, sanctioning the topology shift; (2) analysis-phase isolation already produced unbiased findings; (3) peer-to-peer verification is epistemically necessary — coordinator relay introduces State-Cognition Gap (information loss at each transfer layer).
 
-**Scope extension note**: Phase 5-6 extends Mission from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
+**Scope extension note**: Phase 5-6 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
 
 ### Phase 3: Synthesis (Horizon Integration)
 
@@ -429,28 +429,28 @@ After Phase 6, **call the AskUserQuestion tool** to confirm action sufficiency.
 
 Recommendations are informational — user decides whether to call follow-up protocols.
 
-**No re-entry to Phase 4**: Phase 4' offers only sufficient/ESC, not add_perspective or refine. This is intentional — action results constitute a different epistemic object than analysis results. Re-analysis after action requires fresh context (new perspectives evaluating the changed state), which is better served by a new Mission invocation than by recycling the current team's analytical frame.
+**No re-entry to Phase 4**: Phase 4' offers only sufficient/ESC, not add_perspective or refine. This is intentional — action results constitute a different epistemic object than analysis results. Re-analysis after action requires fresh context (new perspectives evaluating the changed state), which is better served by a new Prothesis invocation than by recycling the current team's analytical frame.
 
 ## Conditions
 
-### Trigger Mission
+### Trigger Prothesis
 
-Mission applies to **open-world** cognition where the problem space is not fully enumerated:
+Prothesis applies to **open-world** cognition where the problem space is not fully enumerated:
 
 - Purpose present, approach unspecified
 - Multiple valid epistemic frameworks exist
 - User's domain awareness likely incomplete
 - **Structure test**: "What might I be missing?" is a meaningful question
 
-### Skip Mission
+### Skip Prothesis
 
-Mission does **not** apply to **closed-world** cognition:
+Prothesis does **not** apply to **closed-world** cognition:
 
 - Single deterministic execution path exists
 - Perspective already specified
 - Known target with binary outcome
 
-**Heuristic**: If a deterministic procedure can answer the inquiry, skip Mission.
+**Heuristic**: If a deterministic procedure can answer the inquiry, skip Prothesis.
 
 ### Parametric Nature
 
@@ -458,10 +458,10 @@ The formula is **domain-agnostic**: instantiate C differently, derive different 
 
 ## Specialization
 
-When guaranteed coverage is required, Mission can be constrained:
+When guaranteed coverage is required, Prothesis can be constrained:
 
 ```
-Mission(mandatory_baseline, optional_extension):
+Prothesis(mandatory_baseline, optional_extension):
   baseline ∪ AskUserQuestion(extension) → selected
   T(selected) → ∥I(T) → Syn → L
 ```

@@ -4,7 +4,7 @@ description: Co-construct defined goals from vague intent. Builds a GoalContract
 user-invocable: true
 ---
 
-# Goal Protocol
+# Telos Protocol
 
 Co-construct defined end states from vague goals through AI-proposed, user-shaped dialogue. Type: `(GoalIndeterminate, AI, CO-CONSTRUCT, VagueGoal) → DefinedEndState`.
 
@@ -78,7 +78,7 @@ Phase 4 Q  (extern)  → AskUserQuestion (GoalContract review + approval)
 
 ## Epistemic Distinction from Requirements Engineering
 
-Goal is not simplified requirements gathering. Three differentiators:
+Telos is not simplified requirements gathering. Three differentiators:
 1. **Selection over Detection**: User selects which dimensions are indeterminate (not elicited by checklist)
 2. **Morphism firing**: Activates only when `GoalIndeterminate` precondition is recognized — not a mandatory pipeline stage
 3. **Falsifiable proposals**: AI proposes specific candidates that can be directly accepted or rejected, surfacing value conflicts and trade-offs (epistemic function) rather than collecting specifications (engineering function)
@@ -87,13 +87,13 @@ Goal is not simplified requirements gathering. Three differentiators:
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Mission** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
-| **Gap** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Clarify** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
-| **Goal** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Grasp** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
+| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
-**Key difference**: Clarify EXTRACTS (assumes intent exists inside user). Goal CO-CONSTRUCTS (assumes neither party has the complete answer). The precondition witness differs: Clarify requires `∃ intent I`, Goal starts from `¬∃ intent I`.
+**Key difference**: Hermeneia EXTRACTS (assumes intent exists inside user). Telos CO-CONSTRUCTS (assumes neither party has the complete answer). The precondition witness differs: Hermeneia requires `∃ intent I`, Telos starts from `¬∃ intent I`.
 
 ## Mode Activation
 
@@ -106,7 +106,7 @@ AI detects goal indeterminacy OR user invokes `/goal`. Activation always require
 ### Priority
 
 <system-reminder>
-When Goal is active:
+When Telos is active:
 
 **Supersedes**: Direct execution patterns in User Memory
 (Goal must be defined before any implementation begins)
@@ -116,10 +116,10 @@ When Goal is active:
 **Action**: At Phase 2, call AskUserQuestion tool to present concrete proposals for goal construction.
 </system-reminder>
 
-- Goal completes before implementation workflows begin
+- Telos completes before implementation workflows begin
 - User Memory rules resume after GoalContract is approved
 
-**Protocol precedence**: Default ordering places Goal after Clarify (clarified intent before goal construction) and before Mission (defined goals before perspective selection). The user can override this default by explicitly requesting a different protocol first. Grasp is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Telos after Hermeneia (clarified intent before goal construction) and before Prothesis (defined goals before perspective selection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 Approved GoalContract becomes input to subsequent protocols.
 
@@ -132,7 +132,7 @@ Approved GoalContract becomes input to subsequent protocols.
 | Exploratory framing | Strong | "what could we do about", "ideas for", "how might we" |
 | Vague qualitative | Soft (suggest only) | "improve", "better", "optimize" |
 
-**Soft triggers**: AI may suggest Goal activation via AskUserQuestion but must NOT auto-activate. Only strong triggers or explicit `/goal` invocation activate directly.
+**Soft triggers**: AI may suggest Telos activation via AskUserQuestion but must NOT auto-activate. Only strong triggers or explicit `/goal` invocation activate directly.
 
 **Skip**:
 - User's goal is already verifiable (concrete deliverable + criteria specified)

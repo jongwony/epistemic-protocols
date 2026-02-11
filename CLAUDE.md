@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Mission), **GapUnnoticed → AuditedDecision** (Gap), **IntentMisarticulated → ClarifiedIntent** (Clarify), **ResultUngrasped → VerifiedUnderstanding** (Grasp), **GoalIndeterminate → DefinedEndState** (Goal) during AI-human interaction.
+Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos) during AI-human interaction.
 
 ## Architecture
 
@@ -110,7 +110,7 @@ Extract insights from Claude Code sessions into persistent memory.
 ### Write
 Transform session insights into blog posts through multi-perspective analysis.
 - **Flow**: `Mission → Format → Write → Refine → Gap → Finalize`
-- **Key**: Integrates both protocols—Mission for perspective selection, Gap for gap validation
+- **Key**: Integrates both protocols—Prothesis for perspective selection, Syneidesis for gap validation
 
 ### Verify (Project-level)
 Pre-commit protocol verification via static checks and expert review.
@@ -122,7 +122,7 @@ Pre-commit protocol verification via static checks and expert review.
 - **Recognition over Recall**: Options to select, not blanks to fill
 - **Selection over Detection**: User selects gap types, AI does not auto-diagnose. Applies within protocols (user expertise); protocol-to-protocol ordering uses logical defaults with user override
 - **Surfacing over Deciding**: AI illuminates, user judges
-- **Convergence Persistence**: Modes active until convergence (Clarify loops until |G| = 0)
+- **Convergence Persistence**: Modes active until convergence (Hermeneia loops until |G| = 0)
 - **Priority Override**: Active protocols supersede default behaviors
 
 ## Protocol Precedence
@@ -131,21 +131,21 @@ Multi-activation order: **Clarify → Goal → Mission → Gap → Grasp**
 
 This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → perspective → gap audit). Users can override by explicitly requesting a different protocol first.
 
-**Grasp**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
+**Katalepsis**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
 
 ### Epistemic Workflow
 
 ```
 [Request] → [Intent] → [Goal] → [Perspective] → [Decision] → [Execution] → [Comprehension]
                ↑          ↑          ↑              ↑                            ↑
-            Clarify      Goal     Mission          Gap                         Grasp
+           Hermeneia    Telos    Prothesis      Syneidesis                   Katalepsis
 ```
 
 This diagram shows logical progression, not strict execution order.
 
 **Initiator taxonomy**:
-- **AI-detected**: AI determines the condition is present (Mission, Gap, Goal)
-- **User-initiated**: User signals awareness of a deficit (Clarify, Grasp)
+- **AI-detected**: AI determines the condition is present (Prothesis, Syneidesis, Telos)
+- **User-initiated**: User signals awareness of a deficit (Hermeneia, Katalepsis)
 - **User-invoked**: User runs as deliberate practice; no deficit awareness required (Reflexion, Write)
 
 ## Verification
@@ -165,10 +165,10 @@ node .claude/skills/verify/scripts/static-checks.js .
 
 ## Delegation Constraint
 
-- **Mission Phase 2**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
-- **Mission Phase 5-6**: Praxis agent spawned via Task into existing team T; Phase 6 allows peer-to-peer (praxis ↔ originating perspective) for verification
-- **Gap/Clarify/Grasp**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Goal**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Prothesis Phase 2**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
+- **Prothesis Phase 5-6**: Praxis agent spawned via Task into existing team T; Phase 6 allows peer-to-peer (praxis ↔ originating perspective) for verification
+- **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 
 ## Editing Guidelines
 
