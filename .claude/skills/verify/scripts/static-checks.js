@@ -215,11 +215,11 @@ function checkCrossReference() {
 
   // Map CLAUDE.md heading alias → SKILL.md path (canonical source of truth)
   const aliasToSkill = {
-    'mission': 'prothesis/skills/prothesis/SKILL.md',
-    'gap': 'syneidesis/skills/syneidesis/SKILL.md',
-    'clarify': 'hermeneia/skills/hermeneia/SKILL.md',
-    'grasp': 'katalepsis/skills/katalepsis/SKILL.md',
-    'goal': 'telos/skills/telos/SKILL.md',
+    'mission': 'prothesis/skills/mission/SKILL.md',
+    'gap': 'syneidesis/skills/gap/SKILL.md',
+    'clarify': 'hermeneia/skills/clarify/SKILL.md',
+    'grasp': 'katalepsis/skills/grasp/SKILL.md',
+    'goal': 'telos/skills/goal/SKILL.md',
   };
 
   // Extract CLAUDE.md sections: "### Alias (...) — ProtocolName" → "- **Flow**: `...`"
@@ -309,11 +309,11 @@ function checkCrossReference() {
 // ============================================================
 function checkRequiredSections() {
   const protocolFiles = [
-    'prothesis/skills/prothesis/SKILL.md',
-    'syneidesis/skills/syneidesis/SKILL.md',
-    'hermeneia/skills/hermeneia/SKILL.md',
-    'katalepsis/skills/katalepsis/SKILL.md',
-    'telos/skills/telos/SKILL.md',
+    'prothesis/skills/mission/SKILL.md',
+    'syneidesis/skills/gap/SKILL.md',
+    'hermeneia/skills/clarify/SKILL.md',
+    'katalepsis/skills/grasp/SKILL.md',
+    'telos/skills/goal/SKILL.md',
   ];
 
   const requiredSections = [
@@ -354,11 +354,11 @@ function checkRequiredSections() {
 // ============================================================
 function checkToolGrounding() {
   const protocolFiles = [
-    'prothesis/skills/prothesis/SKILL.md',
-    'syneidesis/skills/syneidesis/SKILL.md',
-    'hermeneia/skills/hermeneia/SKILL.md',
-    'katalepsis/skills/katalepsis/SKILL.md',
-    'telos/skills/telos/SKILL.md',
+    'prothesis/skills/mission/SKILL.md',
+    'syneidesis/skills/gap/SKILL.md',
+    'hermeneia/skills/clarify/SKILL.md',
+    'katalepsis/skills/grasp/SKILL.md',
+    'telos/skills/goal/SKILL.md',
   ];
 
   // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS

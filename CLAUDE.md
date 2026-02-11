@@ -14,19 +14,19 @@ epistemic-protocols/
 ├── .claude/skills/verify/             # Project-level verification skill
 ├── prothesis/                         # Protocol: multi-perspective investigation
 │   ├── .claude-plugin/plugin.json
-│   └── skills/prothesis/SKILL.md      # Full protocol definition (user-invocable)
+│   └── skills/mission/SKILL.md      # Full protocol definition (user-invocable)
 ├── syneidesis/                        # Protocol: gap surfacing
 │   ├── .claude-plugin/plugin.json
-│   └── skills/syneidesis/SKILL.md     # Full protocol definition (user-invocable)
+│   └── skills/gap/SKILL.md     # Full protocol definition (user-invocable)
 ├── hermeneia/                         # Protocol: intent clarification
 │   ├── .claude-plugin/plugin.json
-│   └── skills/hermeneia/SKILL.md      # Full protocol definition (user-invocable)
+│   └── skills/clarify/SKILL.md      # Full protocol definition (user-invocable)
 ├── katalepsis/                        # Protocol: comprehension verification
 │   ├── .claude-plugin/plugin.json
-│   └── skills/katalepsis/SKILL.md     # Full protocol definition (user-invocable)
+│   └── skills/grasp/SKILL.md     # Full protocol definition (user-invocable)
 ├── telos/                             # Protocol: goal co-construction
 │   ├── .claude-plugin/plugin.json
-│   └── skills/telos/SKILL.md          # Full protocol definition (user-invocable)
+│   └── skills/goal/SKILL.md          # Full protocol definition (user-invocable)
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # Parallel extraction agents
