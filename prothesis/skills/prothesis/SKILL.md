@@ -33,10 +33,10 @@ L      = Lens { convergence: ∩, divergence: D, assessment: A }
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
 
 ── ACTION TYPES ──
-K      = Classify: L → (Fₐ, Fᵤ, Fᵈ)              -- 3-tier finding classification (conditional on J=act)
+K?     = Classify: L → (Fₐ, Fᵤ, Fᵈ)              -- 3-tier finding classification (conditional on J=act)
 Fₐ     = { f | source_determined(f) ∧ perspective_confirmed(f) }          -- actionable
 Fᵤ     = { f | ¬source_determined(f) ∧ adversarial_origin(f) }            -- surfaced unknown
-Fᵈ     = { f | ¬source_determined(f) ∧ perspective_confirmed(f) }         -- design-level
+Fᵈ     = { f | f ∉ Fₐ ∧ f ∉ Fᵤ }                                         -- design-level (catch-all)
 ∥F     = Parallel fix: (∥ f∈Fₐ. Fix(f, T))          -- fixer agent within team
 V      = Verify: ∀ f∈Fₐ. peer_verify(f, origin(f))  -- originating perspective confirms
 L'     = Lens post-action: L ∪ { fixes: Set(Fix), deferred: Fᵤ ∪ Fᵈ }
@@ -45,7 +45,7 @@ L'     = Lens post-action: L ∪ { fixes: Set(Fix), deferred: Fᵤ ∪ Fᵈ }
 source_determined(f)     ≡ fix direction deterministically derivable from existing source
 perspective_confirmed(f) ≡ originating perspective validated the finding
 adversarial_origin(f)    ≡ finding surfaced by adversarial perspective
-conservative_default     ≡ ambiguous(f) → Fᵈ  (false_actionable cost > false_deferred cost)
+conservative_default     ≡ Fᵈ is catch-all; ambiguous predicate evaluation → Fᵈ  (false_actionable cost > false_deferred cost)
 
 ── PHASE TRANSITIONS ──
 Phase 0:  U → G(U) → C                                          -- context acquisition
@@ -73,6 +73,10 @@ After Phase 4' (action sufficiency):
   J' = ESC            → Ω(T, shutdown) → TeamDelete → terminate with current L'
                          → recommend_protocols(Fᵤ ∪ Fᵈ)
 
+After Phase 5 (classification guard):
+  Fₐ = ∅ → Phase 4' (L' = L ∪ { fixes: ∅, deferred: Fᵤ ∪ Fᵈ })
+  Fₐ ≠ ∅ → Phase 6 (spawn fixer, execute fixes)
+
 recommend_protocols(deferred):
   Fᵤ ≠ ∅ → suggest Syneidesis (priority: surfaced unknowns)
   Fᵈ ≠ ∅ → suggest Syneidesis (gaps) or Telos (goals) by finding type
@@ -96,7 +100,9 @@ Phase 4 Q          → AskUserQuestion (sufficiency check; Escape → terminate)
 G (gather)         → Read, Glob, Grep (context acquisition)
 Syn (synthesis)    → Internal operation (no external tool)
 K (parallel)          → TaskCreate tool (classify findings, register actionable items)
-∥F (parallel)         → Task tool (team_name, name: spawn fixer into existing T)
+∥Spawn fixer (parallel) → Task tool (team_name, name: spawn fixer into existing T)
+G(fixer)                 → TaskList/TaskGet tools (fixer context acquisition: discovery + full descriptions)
+∥F (parallel)         → TaskUpdate/Edit tools (fixer executes fixes on Fₐ items)
 V (parallel)          → SendMessage tool (type: "message", peer-to-peer fixer ↔ originating perspective)
 Phase 4' Q' (extern)  → AskUserQuestion (action sufficiency check; Escape → terminate)
 
@@ -284,6 +290,8 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 
 **Isolation trade-off on action phase**: When `J=act` proceeds to Phase 6, the fixer agent communicates directly with originating perspectives. This is acceptable because: (1) the user explicitly chose `act`, sanctioning the topology shift; (2) analysis-phase isolation already produced unbiased findings; (3) peer-to-peer verification is epistemically necessary — coordinator relay introduces State-Cognition Gap (information loss at each transfer layer).
 
+**Scope extension note**: Phase 5-6 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
+
 ### Phase 3: Synthesis (Horizon Integration)
 
 After all perspectives complete:
@@ -313,9 +321,9 @@ After all perspectives complete:
 Is this analysis sufficient for your inquiry?
 
 Options:
-1. **Sufficient** — proceed with this understanding
-2. **Add perspective** — I'd like to explore additional viewpoints
-3. **Refine existing** — revisit one of the analyzed perspectives
+1. **Sufficient** — conclude analysis and dissolve the team
+2. **Add perspective** — explore additional viewpoints (team retained)
+3. **Refine existing** — revisit an analyzed perspective (team retained)
 4. **Act on findings** — address actionable findings within the current team
 ```
 
@@ -338,7 +346,7 @@ When the user selects `act` at Phase 4, the coordinator classifies findings from
 |------|-----------|-------------|
 | **Actionable** (Fₐ) | `source_determined(f) ∧ perspective_confirmed(f)` | Phase 6 (fix within team) |
 | **Surfaced unknown** (Fᵤ) | `¬source_determined(f) ∧ adversarial_origin(f)` | Post-TeamDelete (priority) |
-| **Design-level** (Fᵈ) | `¬source_determined(f) ∧ perspective_confirmed(f)` | Post-TeamDelete |
+| **Design-level** (Fᵈ) | `f ∉ Fₐ ∧ f ∉ Fᵤ` (catch-all) | Post-TeamDelete |
 
 **Classification authority**:
 - Perspectives MAY include `suggested_class` metadata when creating findings via TaskCreate
@@ -347,13 +355,32 @@ When the user selects `act` at Phase 4, the coordinator classifies findings from
 
 Call TaskCreate for each actionable finding. Record Fᵤ and Fᵈ in the Lens for post-TeamDelete recommendation.
 
+**Scope enforcement**: Fₐ items are registered via TaskCreate with metadata `{ "tier": "actionable" }`. Fᵤ and Fᵈ are recorded in Lens metadata only — not as tasks — preventing the fixer from discovering them via TaskList.
+
 ### Phase 6: Execution and Peer Verification
 
 #### Phase 6a: Fixer Spawn
 
 Call Task with `team_name` to spawn a fixer into existing team T.
 
-The fixer reads TaskList for full context — not relying on spawn prompt alone. TaskCreate descriptions written by originating perspectives preserve analytical nuance that coordinator summarization would lose.
+The fixer reads TaskList for discovery, then TaskGet for each finding's full description — not relying on spawn prompt alone. TaskCreate descriptions written by originating perspectives preserve analytical nuance that coordinator summarization would lose.
+
+The fixer receives the fixer prompt template:
+
+```
+You are a **Fixer** agent in team {team_name}.
+
+Read TaskList to discover actionable findings (Fₐ), then TaskGet each
+for full context. Apply fixes to the codebase.
+
+For each fix:
+1. Read the target file
+2. Apply the minimal change that addresses the finding
+3. After fixing, call SendMessage to the originating perspective
+   teammate for verification (include: what you changed and why)
+
+Scope constraint: Only fix Fₐ items. Skip any Fᵤ or Fᵈ items.
+```
 
 #### Phase 6b: Peer Verification
 
@@ -372,7 +399,7 @@ One exchange per finding: fix proposal → confirmation or revision request.
 
 #### Phase 6c: Collection
 
-Collect fix results and verifications into L' (updated Lens).
+Collect fix results and verifications into L' (updated Lens). After collection, the fixer's task is complete. The fixer remains in team T but takes no further action — team-wide shutdown occurs at terminal states (Phase 4' sufficient/ESC).
 
 ### Phase 4': Action Sufficiency Check
 
@@ -385,6 +412,8 @@ After TeamDelete, present deferred findings with protocol suggestions:
 - **Design-level** (Fᵈ): Suggest `/syneidesis` (gap-shaped) or `/telos` (goal-shaped).
 
 Recommendations are informational — user decides whether to call follow-up protocols.
+
+**No re-entry to Phase 4**: Phase 4' offers only sufficient/ESC, not add_perspective or refine. This is intentional — action results constitute a different epistemic object than analysis results. Re-analysis after action requires fresh context (new perspectives evaluating the changed state), which is better served by a new Prothesis invocation than by recycling the current team's analytical frame.
 
 ## Conditions
 

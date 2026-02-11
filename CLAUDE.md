@@ -50,7 +50,7 @@ epistemic-protocols/
 
 ### Prothesis (πρόθεσις) — alias: `lens`
 Present perspective options before analysis begins. Injected into main agent context.
-- **Flow**: `U → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → act? → K → ∥F → V → L' → loop)`
+- **Flow**: `U → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → K? → ∥F → V → L' → loop)`
 - **Key**: Phase 1 calls `AskUserQuestion` for perspective selection; Phase 4 calls `AskUserQuestion` for sufficiency check with `act` option; Phase 5-6 classify findings and execute fixes with peer verification; loop until user satisfied or ESC
 - **Phase 2**: Agent team via TeamCreate (mandatory); teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 4 loop and through Phase 5-6
 - **Phase 5-6**: 3-tier finding classification (actionable/surfaced-unknown/design-level) + fixer with peer verification; peer-to-peer in Phase 6 only; post-TeamDelete recommends follow-up protocols for deferred findings
