@@ -100,7 +100,7 @@ I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
 Phase 0 Q (extern)       → AskUserQuestion (Mission Brief confirmation; Esc → terminate)
-S (extern)               → AskUserQuestion tool (mandatory; Esc → terminate with current L or no lens)
+S (extern)               → AskUserQuestion tool (mandatory; multiSelect: true; Esc → terminate with current L or no lens)
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
@@ -244,18 +244,22 @@ MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and
 
 ### Phase 2: Prothesis (Perspective Placement)
 
-After context gathering (Phase 1), **call the AskUserQuestion tool** to present perspectives.
+After context gathering (Phase 1), **call the AskUserQuestion tool** with `multiSelect: true` to present perspectives.
 
 **Do NOT present perspectives as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
 
+Each perspective is an **individual option**. Do not pre-combine perspectives into composite options (e.g., "All three", "1+2 only"). The user selects one or more perspectives directly.
+
 ```
-Available epistemic perspectives:
-
-1. **[Perspective A]**: [distinctive analytical contribution - 1 line]
-2. **[Perspective B]**: [distinctive analytical contribution - 1 line]
-3. **[Perspective C]**: [distinctive analytical contribution - 1 line]
-
-Which lens(es) for this inquiry?
+question: "Which lens(es) for this inquiry?"
+multiSelect: true
+options:
+  - label: "[Perspective A]"
+    description: "[distinctive analytical contribution - 1 line]"
+  - label: "[Perspective B]"
+    description: "[distinctive analytical contribution - 1 line]"
+  - label: "[Perspective C]"
+    description: "[distinctive analytical contribution - 1 line]"
 ```
 
 **Perspective selection criteria**:
@@ -267,7 +271,7 @@ Which lens(es) for this inquiry?
 - Specific enough to guide analysis (not "general expert")
 - Named by **discipline or framework**, not persona
 
-Optional dimension naming (invoke when initial generation seems redundant):
+Optional dimension naming (apply when initial generation seems redundant):
 - Identify epistemic axes relevant to this inquiry
 - Dimensions remain revisable during perspective generation
 

@@ -175,18 +175,20 @@ Analyze AI work result and extract categories:
 **Do NOT present entry points as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
 
 ```
-What would you like to understand first?
-
-Options (multiSelect):
-1. [Category A]: [brief description]
-2. [Category B]: [brief description]
-3. [Category C]: [brief description]
-4. All of the above
+question: "What would you like to understand first?"
+multiSelect: true
+options:
+  - label: "[Category A]"
+    description: "[brief description]"
+  - label: "[Category B]"
+    description: "[brief description]"
+  - label: "[Category C]"
+    description: "[brief description]"
 ```
 
 **Design principles**:
 - Show max 4 categories per question
-- Include "All of the above" when appropriate
+- Each category is an individual option (do not pre-combine into composite options)
 - Allow multi-select for related categories
 
 ### Phase 2: Task Registration
