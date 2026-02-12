@@ -107,7 +107,7 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 D (parallel)             → SendMessage tool (type: "message", coordinator-mediated cross-dialogue)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Phase 5 Q                → AskUserQuestion (sufficiency check; Escape → terminate)
-Λ (state)                → TaskCreate/TaskUpdate (mandatory at Phase 3a per perspective; TaskUpdate for status tracking)
+Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3a spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Syn (synthesis)          → Internal operation (no external tool)
 K (parallel)             → TaskCreate tool (classify findings, register all tiers with metadata)
@@ -175,32 +175,7 @@ False positive (unnecessary question) < False negative (missed perspective)
 | Synthesis complete | Lens established; follow-ups continue within lens |
 | User starts unrelated topic | Re-evaluate for new Prothesis |
 
-### Plan Mode Integration
-
-When combined with Plan mode, Prothesis provides the **Deliberation** phase:
-
-**Per-Phase Application**:
-- Apply Prothesis at each planning domain or phase
-- Perspectives evaluate domain-specific considerations
-- Synthesis produces phase-scoped recommendations
-
-**Syneidesis Coordination** (following default ordering):
-- Prothesis generates recommendations (Deliberation)
-- Syneidesis surfaces unconfirmed assumptions (Gap)
-- User feedback triggers re-evaluation (Revision)
-- Explicit confirmation gates execution (Execution)
-
-**Minimal Enhancement Pattern**:
-When multiple perspectives converge on the same recommendation, present as unanimous recommendation to indicate high confidence.
-
-## Distinction from Socratic Method
-
-| Dimension | Socratic Maieutics | Prothesis |
-|-----------|-------------------|-----------|
-| Knowledge source | Latent within interlocutor | Provided externally |
-| Premise | "You already know" | "You don't know the options" |
-| Role metaphor | Midwife (draws out) | Cartographer (reveals paths) |
-| Question form | Open (Recall burden) | Options (Recognition only) |
+<!-- See references/conceptual-foundations.md for: Plan Mode Integration, Distinction from Socratic Method -->
 
 ## Protocol
 
@@ -395,11 +370,7 @@ All terminal paths (sufficient and ESC, from both Phase 5 and Phase 5') read def
 
 **Convergence**: Mode terminates when user confirms sufficiency (Phase 5 or Phase 5') or explicitly exits. Team is deleted only at terminal states.
 
-### Theoria → Praxis
-
-Phases 0–5 constitute **theoria** (θεωρία) — contemplative inquiry that produces the Lens L as a theoretical artifact: what different frameworks reveal, without changing anything. Phase 6–7 extend into **praxis** (πρᾶξις) — perspective-informed action on deterministically fixable findings, reusing the team's analytical context.
-
-This transition requires the user's explicit `act` selection at Phase 5 — a deliberate shift from understanding to changing, which warrants different epistemic commitments (see Phase-dependent topology in Phase 7b).
+<!-- See references/conceptual-foundations.md for: Theoria → Praxis conceptual distinction -->
 
 ### Phase 6: Action Planning
 
@@ -509,21 +480,7 @@ Prothesis does **not** apply to **closed-world** cognition:
 
 **Heuristic**: If a deterministic procedure can answer the inquiry, skip Prothesis.
 
-### Parametric Nature
-
-The formula is **domain-agnostic**: instantiate C differently, derive different P-space. The structure `U → MB → G → C → P → S → I → Syn` applies wherever the open-world condition holds.
-
-## Specialization
-
-When guaranteed coverage is required, Prothesis can be constrained:
-
-```
-Prothesis(mandatory_baseline, optional_extension):
-  baseline ∪ AskUserQuestion(extension) → selected
-  T(selected) → ∥I(T) → Syn → L
-```
-
-**Principle**: Mandatory baseline cannot be reduced by user selection; only extended.
+<!-- See references/conceptual-foundations.md for: Parametric Nature, Specialization -->
 
 ## Rules
 
@@ -540,36 +497,3 @@ Prothesis(mandatory_baseline, optional_extension):
 11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
 12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
 
-## Agent-Teams Best Practice Applicability by Phase
-
-Not all agent-teams best practices apply uniformly across Prothesis phases. This reference table maps which BPs are active, intentionally restricted, or not yet applicable at each phase — preventing compliance frame mismatch when evaluating phase-specific sessions.
-
-| Best Practice | Phase 0-2 (Setup) | Phase 3 (Theoria) | Phase 4-5 (Synthesis) | Phase 6-7 (Praxis) |
-|---------------|-------------------|-------------------|----------------------|---------------------|
-| BP1: Context in spawn prompts | — | **Active** (Mission Brief in prompt) | — | **Active** (finding context in praxis prompt) |
-| BP2: Distinct teammate roles | — | **Active** (perspective = role) | — | **Active** (praxis = role) |
-| BP3: Wait for completion | — | **Active** (await all perspectives) | — | **Active** (await fix + verification) |
-| BP4: Research-oriented tasks | — | **Active** (perspectives analyze) | — | Partial (praxis reads then acts) |
-| BP5: Scope-limited tasks | — | **Active** (1 perspective = 1 scope) | — | **Active** (1 finding = 1 fix) |
-| BP6: Mid-flight monitoring | — | Optional (coordinator may check) | — | Optional |
-| BP7: Cross-dialogue | — | **Restricted** (coordinator-mediated) | — | Phase-shifted (peer-to-peer for verification) |
-| BP8: Graceful shutdown | — | — | Deferred to terminal | **Active** at terminal |
-| BP9: Shared task list | — | **Active** (TaskCreate per perspective) | — | **Active** (TaskCreate per finding) |
-| BP10: Cross-team communication | — | **Restricted** (isolation required) | — | **Active** (praxis ↔ perspectives) |
-| BP11: Hook integration | Environment-dependent | Environment-dependent | — | Environment-dependent |
-| BP12: Error handling | — | **Active** | — | **Active** |
-| BP13: Team lifecycle | — | Team created | Team retained | Team retained until terminal |
-
-**Reading this table**: "Restricted" means the BP is intentionally suppressed for epistemic reasons (not a compliance gap). "—" means the BP does not apply at that phase. "Environment-dependent" means the BP is configurable outside the protocol.
-
-### Hook Integration Points
-
-Claude Code hooks (TeammateIdle, TaskCompleted) can augment Prothesis sessions when configured in the environment. These are recommendations, not mandates — hooks remain environment-configurable and outside the protocol's formal specification.
-
-| Hook | Phase | Value |
-|------|-------|-------|
-| **TeammateIdle** | After Phase 3b | Detect stuck perspectives; enforce minimum analysis depth (e.g., alert if a perspective completes in <30s, suggesting shallow analysis) |
-| **TaskCompleted** | After Phase 7 | Automate verification tracking; prevent premature fix completion (e.g., require peer verification before marking Fₐ task complete) |
-| **SubagentStart** | Phase 3a, 7a | Log perspective/praxis spawns for session diagnostics (plugin-only; not configurable in settings.json) |
-
-**Caveat**: TeammateIdle and TaskCompleted fire unconditionally (no matcher support) — hook commands must filter by team name or task metadata to scope to Prothesis sessions.
