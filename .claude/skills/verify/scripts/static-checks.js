@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const projectRoot = process.argv[2] || process.cwd();
 
@@ -460,6 +461,131 @@ function checkToolGrounding() {
 }
 
 // ============================================================
+// Check 7: Version Staleness Detection
+// ============================================================
+function checkVersionStaleness() {
+  // Verify git repo
+  try {
+    execSync('git rev-parse --is-inside-work-tree', { cwd: projectRoot, stdio: 'pipe' });
+  } catch {
+    // Not a git repo — silent return
+    return;
+  }
+
+  // Collect all uncommitted changes (staged + unstaged + untracked)
+  let changedFiles;
+  try {
+    const diffOutput = execSync('git diff HEAD --name-only', { cwd: projectRoot, encoding: 'utf8' }).trim();
+    const untrackedOutput = execSync('git ls-files --others --exclude-standard', { cwd: projectRoot, encoding: 'utf8' }).trim();
+    changedFiles = [
+      ...(diffOutput ? diffOutput.split('\n') : []),
+      ...(untrackedOutput ? untrackedOutput.split('\n') : []),
+    ];
+  } catch {
+    // git diff HEAD fails on initial commit (no HEAD) — fall back to staged + untracked only
+    try {
+      const stagedOutput = execSync('git diff --cached --name-only', { cwd: projectRoot, encoding: 'utf8' }).trim();
+      const untrackedOutput = execSync('git ls-files --others --exclude-standard', { cwd: projectRoot, encoding: 'utf8' }).trim();
+      changedFiles = [
+        ...(stagedOutput ? stagedOutput.split('\n') : []),
+        ...(untrackedOutput ? untrackedOutput.split('\n') : []),
+      ];
+    } catch {
+      return;
+    }
+  }
+
+  if (changedFiles.length === 0) {
+    results.pass.push({
+      check: 'version-staleness',
+      file: 'working tree',
+      message: 'No uncommitted changes'
+    });
+    return;
+  }
+
+  // Find all plugin directories (contain .claude-plugin/plugin.json)
+  const pluginDirs = new Map(); // pluginDir → plugin.json relative path
+  function findPluginDirs(dir, depth = 0) {
+    if (depth > 3) return;
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isDirectory() || entry.name === 'node_modules') continue;
+        const fullPath = path.join(dir, entry.name);
+        if (entry.name === '.claude-plugin') {
+          const pjPath = path.join(fullPath, 'plugin.json');
+          if (fs.existsSync(pjPath)) {
+            const parentRel = path.relative(projectRoot, dir);
+            const pjRel = path.relative(projectRoot, pjPath);
+            pluginDirs.set(parentRel || '.', pjRel);
+          }
+        } else if (!entry.name.startsWith('.')) {
+          findPluginDirs(fullPath, depth + 1);
+        }
+      }
+    } catch { /* ignore */ }
+  }
+  findPluginDirs(projectRoot);
+
+  // Group changed files by plugin directory
+  for (const [pluginDir, pluginJsonRel] of pluginDirs) {
+    const prefix = pluginDir === '.' ? '' : pluginDir + '/';
+    const pluginMetaPrefix = prefix + '.claude-plugin/';
+
+    // Content changes = files in this plugin dir, excluding .claude-plugin/ itself
+    const contentChanges = changedFiles.filter(f => {
+      if (prefix && !f.startsWith(prefix)) return false;
+      if (!prefix && f.includes('/') && ![...pluginDirs.keys()].every(d => d === '.' || !f.startsWith(d + '/'))) return false;
+      if (f.startsWith(pluginMetaPrefix)) return false;
+      // For root plugin, exclude files belonging to sub-plugin directories
+      if (prefix === '') {
+        for (const [otherDir] of pluginDirs) {
+          if (otherDir !== '.' && f.startsWith(otherDir + '/')) return false;
+        }
+      }
+      return true;
+    });
+
+    if (contentChanges.length === 0) continue;
+
+    // Check if plugin.json has a version bump
+    let versionBumped = false;
+
+    // New untracked plugin.json counts as version set
+    if (changedFiles.includes(pluginJsonRel)) {
+      try {
+        const diffResult = execSync(`git diff HEAD -- "${pluginJsonRel}"`, { cwd: projectRoot, encoding: 'utf8' });
+        if (/^\+\s*"version":/m.test(diffResult)) {
+          versionBumped = true;
+        }
+      } catch {
+        // If diff fails (e.g., untracked file), check if file is untracked (new plugin)
+        const untrackedOutput = execSync('git ls-files --others --exclude-standard', { cwd: projectRoot, encoding: 'utf8' }).trim();
+        if (untrackedOutput.split('\n').includes(pluginJsonRel)) {
+          versionBumped = true; // New plugin — initial version is set
+        }
+      }
+    }
+
+    if (!versionBumped) {
+      const pluginName = pluginDir === '.' ? 'root' : pluginDir;
+      results.warn.push({
+        check: 'version-staleness',
+        file: pluginJsonRel,
+        message: `Plugin "${pluginName}" has content changes but no version bump in plugin.json (${contentChanges.length} file(s) changed)`
+      });
+    }
+  }
+
+  results.pass.push({
+    check: 'version-staleness',
+    file: 'all plugins',
+    message: 'Version staleness check completed'
+  });
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -469,6 +595,7 @@ try {
   checkCrossReference();
   checkRequiredSections();
   checkToolGrounding();
+  checkVersionStaleness();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
