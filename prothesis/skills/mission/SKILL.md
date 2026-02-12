@@ -271,7 +271,7 @@ options:
 - Specific enough to guide analysis (not "general expert")
 - Named by **discipline or framework**, not persona
 
-Optional dimension naming (invoke when initial generation seems redundant):
+Optional dimension naming (apply when initial generation seems redundant):
 - Identify epistemic axes relevant to this inquiry
 - Dimensions remain revisable during perspective generation
 
