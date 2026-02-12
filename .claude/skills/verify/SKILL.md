@@ -46,6 +46,8 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 - Directive verb enforcement (`call` not `invoke`/`use` for tools)
 - Cross-reference integrity (CLAUDE.md ↔ source files)
 - Required sections in protocols (Definition, Mode Activation, Protocol, Rules)
+- Tool grounding consistency (TOOL GROUNDING ↔ PHASE TRANSITIONS)
+- Version staleness detection (content changes without version bump)
 
 ### Phase 2: Expert Review
 

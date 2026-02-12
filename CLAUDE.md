@@ -162,6 +162,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 4. **xref**: CLAUDE.md flow formulas sync with source files
 5. **structure**: Required sections in protocol SKILL.md (Definition, Mode Activation, Protocol, Rules, PHASE TRANSITIONS, MODE STATE)
 6. **tool-grounding**: TOOL GROUNDING section present, external operations have `[Tool]` notation in PHASE TRANSITIONS
+7. **version-staleness**: plugin content changed without plugin.json version bump (git-aware, warn level)
 
 ## Delegation Constraint
 
