@@ -107,7 +107,7 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 D (parallel)             → SendMessage tool (type: "message", coordinator-mediated cross-dialogue)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Phase 5 Q                → AskUserQuestion (sufficiency check; Escape → terminate)
-Λ (state)                → TaskCreate/TaskUpdate (optional, for perspective tracking)
+Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3a spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Syn (synthesis)          → Internal operation (no external tool)
 K (parallel)             → TaskCreate tool (classify findings, register all tiers with metadata)
@@ -175,32 +175,7 @@ False positive (unnecessary question) < False negative (missed perspective)
 | Synthesis complete | Lens established; follow-ups continue within lens |
 | User starts unrelated topic | Re-evaluate for new Prothesis |
 
-### Plan Mode Integration
-
-When combined with Plan mode, Prothesis provides the **Deliberation** phase:
-
-**Per-Phase Application**:
-- Apply Prothesis at each planning domain or phase
-- Perspectives evaluate domain-specific considerations
-- Synthesis produces phase-scoped recommendations
-
-**Syneidesis Coordination** (following default ordering):
-- Prothesis generates recommendations (Deliberation)
-- Syneidesis surfaces unconfirmed assumptions (Gap)
-- User feedback triggers re-evaluation (Revision)
-- Explicit confirmation gates execution (Execution)
-
-**Minimal Enhancement Pattern**:
-When multiple perspectives converge on the same recommendation, present as unanimous recommendation to indicate high confidence.
-
-## Distinction from Socratic Method
-
-| Dimension | Socratic Maieutics | Prothesis |
-|-----------|-------------------|-----------|
-| Knowledge source | Latent within interlocutor | Provided externally |
-| Premise | "You already know" | "You don't know the options" |
-| Role metaphor | Midwife (draws out) | Cartographer (reveals paths) |
-| Question form | Open (Recall burden) | Options (Recognition only) |
+<!-- See references/conceptual-foundations.md for: Plan Mode Integration, Distinction from Socratic Method -->
 
 ## Protocol
 
@@ -314,6 +289,8 @@ Do not initiate cross-dialogue unprompted.
 
 Multiple selections → parallel teammates (never sequential).
 
+**TaskCreate per perspective** (mandatory): After spawning each perspective teammate, the coordinator MUST call TaskCreate for that perspective — one task per perspective. This enables progress tracking via TaskList/TaskUpdate during inquiry, and ensures team coordination is observable rather than implicit. The task subject should identify the perspective; the description should include the inquiry question and scope.
+
 #### Phase 3b: Inquiry and Dialogue
 
 Teammates analyze independently. After results arrive, the coordinator (main agent) MAY initiate cross-dialogue:
@@ -393,11 +370,7 @@ All terminal paths (sufficient and ESC, from both Phase 5 and Phase 5') read def
 
 **Convergence**: Mode terminates when user confirms sufficiency (Phase 5 or Phase 5') or explicitly exits. Team is deleted only at terminal states.
 
-### Theoria → Praxis
-
-Phases 0–5 constitute **theoria** (θεωρία) — contemplative inquiry that produces the Lens L as a theoretical artifact: what different frameworks reveal, without changing anything. Phase 6–7 extend into **praxis** (πρᾶξις) — perspective-informed action on deterministically fixable findings, reusing the team's analytical context.
-
-This transition requires the user's explicit `act` selection at Phase 5 — a deliberate shift from understanding to changing, which warrants different epistemic commitments (see Phase-dependent topology in Phase 7b).
+<!-- See references/conceptual-foundations.md for: Theoria → Praxis conceptual distinction -->
 
 ### Phase 6: Action Planning
 
@@ -507,21 +480,7 @@ Prothesis does **not** apply to **closed-world** cognition:
 
 **Heuristic**: If a deterministic procedure can answer the inquiry, skip Prothesis.
 
-### Parametric Nature
-
-The formula is **domain-agnostic**: instantiate C differently, derive different P-space. The structure `U → MB → G → C → P → S → I → Syn` applies wherever the open-world condition holds.
-
-## Specialization
-
-When guaranteed coverage is required, Prothesis can be constrained:
-
-```
-Prothesis(mandatory_baseline, optional_extension):
-  baseline ∪ AskUserQuestion(extension) → selected
-  T(selected) → ∥I(T) → Syn → L
-```
-
-**Principle**: Mandatory baseline cannot be reduced by user selection; only extended.
+<!-- See references/conceptual-foundations.md for: Parametric Nature, Specialization -->
 
 ## Rules
 
@@ -537,3 +496,4 @@ Prothesis(mandatory_baseline, optional_extension):
 10. **Classification authority**: Coordinator makes final classification; perspective suggestions are advisory. Conservative default: ambiguous → deferred
 11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
 12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
+
