@@ -1,6 +1,6 @@
 ---
 name: mission
-description: Multi-perspective investigation and execution. Assembles a team to analyze from selected viewpoints and act on findings when the right framework is absent, producing a framed inquiry.
+description: Multi-perspective investigation and execution. Assembles a team to analyze from selected viewpoints and act on findings when the right framework is absent, producing a framed inquiry. Alias: Prothesis(πρόθεσις).
 user-invocable: true
 ---
 
