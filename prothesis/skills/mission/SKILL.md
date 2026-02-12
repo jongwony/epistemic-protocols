@@ -107,7 +107,7 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 D (parallel)             → SendMessage tool (type: "message", coordinator-mediated cross-dialogue)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Phase 5 Q                → AskUserQuestion (sufficiency check; Escape → terminate)
-Λ (state)                → TaskCreate/TaskUpdate (optional, for perspective tracking)
+Λ (state)                → TaskCreate/TaskUpdate (mandatory at Phase 3a per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Syn (synthesis)          → Internal operation (no external tool)
 K (parallel)             → TaskCreate tool (classify findings, register all tiers with metadata)
@@ -313,6 +313,8 @@ Do not initiate cross-dialogue unprompted.
 ```
 
 Multiple selections → parallel teammates (never sequential).
+
+**TaskCreate per perspective** (mandatory): After spawning each perspective teammate, the coordinator MUST call TaskCreate for that perspective — one task per perspective. This enables progress tracking via TaskList/TaskUpdate during inquiry, and ensures team coordination is observable rather than implicit. The task subject should identify the perspective; the description should include the inquiry question and scope.
 
 #### Phase 3b: Inquiry and Dialogue
 
@@ -537,3 +539,37 @@ Prothesis(mandatory_baseline, optional_extension):
 10. **Classification authority**: Coordinator makes final classification; perspective suggestions are advisory. Conservative default: ambiguous → deferred
 11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
 12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
+
+## Agent-Teams Best Practice Applicability by Phase
+
+Not all agent-teams best practices apply uniformly across Prothesis phases. This reference table maps which BPs are active, intentionally restricted, or not yet applicable at each phase — preventing compliance frame mismatch when evaluating phase-specific sessions.
+
+| Best Practice | Phase 0-2 (Setup) | Phase 3 (Theoria) | Phase 4-5 (Synthesis) | Phase 6-7 (Praxis) |
+|---------------|-------------------|-------------------|----------------------|---------------------|
+| BP1: Context in spawn prompts | — | **Active** (Mission Brief in prompt) | — | **Active** (finding context in praxis prompt) |
+| BP2: Distinct teammate roles | — | **Active** (perspective = role) | — | **Active** (praxis = role) |
+| BP3: Wait for completion | — | **Active** (await all perspectives) | — | **Active** (await fix + verification) |
+| BP4: Research-oriented tasks | — | **Active** (perspectives analyze) | — | Partial (praxis reads then acts) |
+| BP5: Scope-limited tasks | — | **Active** (1 perspective = 1 scope) | — | **Active** (1 finding = 1 fix) |
+| BP6: Mid-flight monitoring | — | Optional (coordinator may check) | — | Optional |
+| BP7: Cross-dialogue | — | **Restricted** (coordinator-mediated) | — | Phase-shifted (peer-to-peer for verification) |
+| BP8: Graceful shutdown | — | — | Deferred to terminal | **Active** at terminal |
+| BP9: Shared task list | — | **Active** (TaskCreate per perspective) | — | **Active** (TaskCreate per finding) |
+| BP10: Cross-team communication | — | **Restricted** (isolation required) | — | **Active** (praxis ↔ perspectives) |
+| BP11: Hook integration | Environment-dependent | Environment-dependent | — | Environment-dependent |
+| BP12: Error handling | — | **Active** | — | **Active** |
+| BP13: Team lifecycle | — | Team created | Team retained | Team retained until terminal |
+
+**Reading this table**: "Restricted" means the BP is intentionally suppressed for epistemic reasons (not a compliance gap). "—" means the BP does not apply at that phase. "Environment-dependent" means the BP is configurable outside the protocol.
+
+### Hook Integration Points
+
+Claude Code hooks (TeammateIdle, TaskCompleted) can augment Prothesis sessions when configured in the environment. These are recommendations, not mandates — hooks remain environment-configurable and outside the protocol's formal specification.
+
+| Hook | Phase | Value |
+|------|-------|-------|
+| **TeammateIdle** | After Phase 3b | Detect stuck perspectives; enforce minimum analysis depth (e.g., alert if a perspective completes in <30s, suggesting shallow analysis) |
+| **TaskCompleted** | After Phase 7 | Automate verification tracking; prevent premature fix completion (e.g., require peer verification before marking Fₐ task complete) |
+| **SubagentStart** | Phase 3a, 7a | Log perspective/praxis spawns for session diagnostics (plugin-only; not configurable in settings.json) |
+
+**Caveat**: TeammateIdle and TaskCompleted fire unconditionally (no matcher support) — hook commands must filter by team name or task metadata to scope to Prothesis sessions.
