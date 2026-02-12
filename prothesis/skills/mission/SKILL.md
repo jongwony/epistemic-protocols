@@ -23,9 +23,10 @@ Q(MB)  = Confirm: MB → MBᵥ                     -- extern (user confirmation/
 MBᵥ    = Verified MissionBrief (user-confirmed)
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
 C      = Context (information for perspective formulation)
-{P₁...Pₙ}(C, MBᵥ) = Perspectives derived from context and mission brief (n ≥ 2)
-S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice)
-Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ}, Pₛ ≠ ∅)
+Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in Pₛ)
+{P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2)
+S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
+Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2)
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
 ∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → D?(T) → R
 D?     = Optional dialogue: selective cross-perspective challenge (coordinator-mediated)
@@ -250,6 +251,13 @@ Optional dimension naming (apply when initial generation seems redundant):
 - Identify epistemic axes relevant to this inquiry
 - Dimensions remain revisable during perspective generation
 
+**Pre-suggested perspective handling**: When the user supplies perspectives in U (e.g., naming specific agents, frameworks, or roles), treat these as **pre-confirmed base perspectives** (Pᵦ):
+
+- Pᵦ are **auto-included** in Pₛ — do not re-present them as selectable options
+- AskUserQuestion presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
+- State Pᵦ in the question text as context (e.g., "Base: [Pᵦ names]. Which additional lens(es)?")
+- AI must propose at least 1 novel perspective when Pᵦ ≠ ∅ — re-presenting known perspectives as options saturates the finite option space and structurally conceals unknown unknowns
+
 ### Phase 3: Inquiry (Through Selected Lens)
 
 #### Phase 3a: Team Setup
@@ -347,6 +355,14 @@ After all perspectives complete:
 
 ### Phase 5: Sufficiency Check
 
+**Classification preview**: Before the sufficiency question, present a preliminary 3-tier classification of findings from L. This gives the user visibility into what "Act on findings" entails:
+
+| Finding | Preliminary Tier | Rationale |
+|---------|-----------------|-----------|
+| [each finding from synthesis] | Fₐ / Fᵤ / Fᵈ | [classification basis] |
+
+The preview is **informational** — formal classification occurs in Phase 6 after `J=act`. The preview enables informed consent: Fₐ items will be fixed by a praxis agent with peer verification; Fᵤ/Fᵈ items will be deferred to post-TeamDelete protocol recommendations.
+
 **Call the AskUserQuestion tool** to confirm analysis sufficiency.
 
 ```
@@ -356,7 +372,7 @@ Options:
 1. **Sufficient** — conclude analysis and dissolve the team
 2. **Add perspective** — explore additional viewpoints (team retained)
 3. **Refine existing** — revisit an analyzed perspective (team retained)
-4. **Act on findings** — address actionable findings within the current team
+4. **Act on findings** — fix Fₐ items (per preview) within the team; Fᵤ/Fᵈ deferred with protocol recommendations
 ```
 
 **Loop behavior** (team lifecycle aware):
@@ -491,7 +507,7 @@ Prothesis does **not** apply to **closed-world** cognition:
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
 7. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
-8. **Minimum perspectives**: Always present at least 2 distinct perspectives (`n ≥ 2`); single-perspective selection produces degenerate synthesis (convergence = identity)
+8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
 9. **Team persistence**: Team persists across Phase 5 loop iterations and through Phase 6-7 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 5 or Phase 5')
 10. **Classification authority**: Coordinator makes final classification; perspective suggestions are advisory. Conservative default: ambiguous → deferred
 11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
