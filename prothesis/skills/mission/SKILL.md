@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R' → Syn(R') → L → K?(L) → ∥F(T) → V(T) → L'
+Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R' → Syn(R') → L → K_i(L) → ∥F(T) → V(T) → L'
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
@@ -23,9 +23,10 @@ Q(MB)  = Confirm: MB → MBᵥ                     -- extern (user confirmation/
 MBᵥ    = Verified MissionBrief (user-confirmed)
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
 C      = Context (information for perspective formulation)
-{P₁...Pₙ}(C, MBᵥ) = Perspectives derived from context and mission brief (n ≥ 2)
-S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice)
-Pₛ     = Selected perspectives (Pₛ ⊆ {P₁...Pₙ}, Pₛ ≠ ∅)
+Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in Pₛ)
+{P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2)
+S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
+Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2)
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
 ∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → D?(T) → R
 D?     = Optional dialogue: selective cross-perspective challenge (coordinator-mediated)
@@ -36,7 +37,7 @@ L      = Lens { convergence: ∩, divergence: D, assessment: A }
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
 
 ── ACTION TYPES ──
-K?     = Classify: L → (Fₐ, Fᵤ, Fᵈ)              -- 3-tier finding classification (conditional on J=act)
+K_i    = Interactive classify: L → AskUserQuestion → (Fₐ, Fᵤ, Fᵈ)  -- user-confirmed 3-tier classification
 Fₐ     = { f | source_determined(f) ∧ perspective_confirmed(f) }          -- actionable
 Fᵤ     = { f | ¬source_determined(f) ∧ adversarial_origin(f) }            -- surfaced unknown
 Fᵈ     = { f | f ∉ Fₐ ∧ f ∉ Fᵤ }                                         -- design-level (catch-all)
@@ -58,8 +59,9 @@ Phase 3a: Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ)   -- t
 Phase 3b: T → ∥I[TaskCreate](T) → D[SendMessage](T) → R         -- inquiry + optional dialogue [Tool]
 Phase 3c: R → Ω[SendMessage](T) → R'                            -- collection + deferred shutdown [Tool]
 Phase 4:  R' → Syn(R') → L                                      -- internal synthesis
-Phase 5:  L → Q[AskUserQuestion](sufficiency) → await → J       -- sufficiency check [Tool]
-Phase 6:  L → K[TaskCreate](L) → ∥Spawn[Task](T, praxis)        -- classify + spawn praxis [Tool]
+Phase 5a: L → K_i(L) → Q[AskUserQuestion](classification) → await → (Fₐ, Fᵤ, Fᵈ)  -- interactive classification [Tool]
+Phase 5b: (Fₐ, Fᵤ, Fᵈ) → Q[AskUserQuestion](sufficiency) → await → J              -- sufficiency check [Tool]
+Phase 6:  (Fₐ, Fᵤ, Fᵈ) → TaskCreate[all] → ∥Spawn[Task](T, praxis)                 -- register + spawn praxis [Tool]
 Phase 7:  ∥F[TaskUpdate](T, Fₐ) → V[SendMessage](T) → L'       -- fix + peer verify [Tool]
 Phase 5': L' → Q'[AskUserQuestion](action_sufficiency) → await → J'  -- action sufficiency [Tool]
 
@@ -69,11 +71,15 @@ After Phase 0 (Mission Brief):
   J_mb = modify(field) → re-present Q(MB') → await → MBᵥ → Phase 1
   J_mb = ESC           → terminate (no team exists)
 
-After Phase 5 (analysis sufficiency):
+After Phase 5a (interactive classification):
+  J_k = confirm          → Phase 5b
+  J_k = modify(finding)  → re-classify → re-present K_i → await
+
+After Phase 5b (analysis sufficiency):
   J = sufficient      → Ω(T, shutdown) → TeamDelete → terminate with L
   J = add_perspective  → Phase 2 (Λ.team retained; MB re-confirmation unnecessary)
   J = refine           → Phase 3b (re-inquiry within existing T)
-  J = act              → Phase 6 (classify findings, spawn praxis into T)
+  J = act              → Phase 6 (confirmed classification → spawn praxis into T)
   J = ESC              → Ω(T, shutdown) → TeamDelete → terminate with current L
 
 After Phase 5' (action sufficiency):
@@ -106,11 +112,13 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 D (parallel)             → SendMessage tool (type: "message", coordinator-mediated cross-dialogue)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
-Phase 5 Q                → AskUserQuestion (sufficiency check; Escape → terminate)
+Phase 5a Q               → AskUserQuestion (interactive classification; confirm or modify)
+Phase 5b Q               → AskUserQuestion (sufficiency check; Escape → terminate)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3a spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Syn (synthesis)          → Internal operation (no external tool)
-K (parallel)             → TaskCreate tool (classify findings, register all tiers with metadata)
+K_i (interactive)        → AskUserQuestion + internal classification (coordinator proposes, user confirms)
+TaskCreate (Phase 6)     → TaskCreate tool (register confirmed tiers with metadata)
 ∥Spawn praxis (parallel) → Task tool (team_name, name: spawn praxis into existing T)
 G(praxis)                → TaskList/TaskGet tools (praxis context acquisition: discovery + full descriptions)
 ∥F (parallel)            → TaskUpdate/Edit/Write tools (praxis applies fixes to Fₐ items)
@@ -250,6 +258,13 @@ Optional dimension naming (apply when initial generation seems redundant):
 - Identify epistemic axes relevant to this inquiry
 - Dimensions remain revisable during perspective generation
 
+**Pre-suggested perspective handling**: When the user supplies perspectives in U (e.g., naming specific agents, frameworks, or roles), treat these as **pre-confirmed base perspectives** (Pᵦ):
+
+- Pᵦ are **auto-included** in Pₛ — do not re-present them as selectable options
+- AskUserQuestion presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
+- State Pᵦ in the question text as context (e.g., "Base: [Pᵦ names]. Which additional lens(es)?")
+- AI must propose at least 1 novel perspective when Pᵦ ≠ ∅ — re-presenting known perspectives as options saturates the finite option space and structurally conceals unknown unknowns
+
 ### Phase 3: Inquiry (Through Selected Lens)
 
 #### Phase 3a: Team Setup
@@ -307,7 +322,7 @@ Teammates analyze independently. After results arrive, the coordinator (main age
 
 #### Phase 3c: Collection
 
-Collect all results (initial analyses + any dialogue responses) into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 5, where the user's sufficiency judgment determines team lifecycle.
+Collect all results (initial analyses + any dialogue responses) into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 5b, where the user's sufficiency judgment determines team lifecycle.
 
 #### Isolated Context Requirement
 
@@ -345,7 +360,45 @@ After all perspectives complete:
 [Synthesized answer with attribution to contributing perspectives]
 ```
 
-### Phase 5: Sufficiency Check
+### Phase 5a: Interactive Classification
+
+After synthesis, present a 3-tier classification of findings from L for user confirmation.
+
+**Entry condition**: L contains findings with potential action implications (from divergence or assessment sections). Skip Phase 5a and proceed directly to Phase 5b when L is purely confirmatory.
+
+The coordinator proposes initial classification using the standard predicates:
+
+| Predicate | Tier | Meaning |
+|-----------|------|---------|
+| `source_determined(f) ∧ perspective_confirmed(f)` | Fₐ (actionable) | Fix direction deterministic |
+| `¬source_determined(f) ∧ adversarial_origin(f)` | Fᵤ (surfaced unknown) | Adversarial-origin blind spot |
+| `f ∉ Fₐ ∧ f ∉ Fᵤ` | Fᵈ (design-level) | Catch-all (conservative default) |
+
+**Call the AskUserQuestion tool** with the proposed classification:
+
+```
+Please confirm the findings classification.
+
+| Finding | Proposed Tier | Rationale |
+|---------|--------------|-----------|
+| [finding 1] | Fₐ / Fᵤ / Fᵈ | [classification basis] |
+| ... | ... | ... |
+
+Options:
+1. **Confirm** — proceed with this classification
+2. **Modify** — adjust specific finding tiers (e.g., Fᵈ→Fₐ)
+```
+
+**Classification loop**:
+- **Confirm**: (Fₐ, Fᵤ, Fᵈ) confirmed → Phase 5b
+- **Modify**: User specifies tier changes → coordinator updates classification → re-present → await confirmation
+
+**Classification authority**:
+- Coordinator proposes initial classification (conservative default: ambiguous → Fᵈ)
+- **User confirms or modifies** — user has final authority over tier assignments
+- Perspectives MAY include `suggested_class` metadata; coordinator considers these in initial proposal
+
+### Phase 5b: Sufficiency Check
 
 **Call the AskUserQuestion tool** to confirm analysis sufficiency.
 
@@ -356,40 +409,29 @@ Options:
 1. **Sufficient** — conclude analysis and dissolve the team
 2. **Add perspective** — explore additional viewpoints (team retained)
 3. **Refine existing** — revisit an analyzed perspective (team retained)
-4. **Act on findings** — address actionable findings within the current team
+4. **Act on findings** — execute confirmed Fₐ fixes within the team; Fᵤ/Fᵈ deferred with protocol recommendations
 ```
+
+**"Act on findings" availability**: Only present when confirmed Fₐ ≠ ∅ from Phase 5a. When Fₐ = ∅ (all findings deferred), omit this option.
 
 **Loop behavior** (team lifecycle aware):
 - **Sufficient**: shutdown_request → TeamDelete → terminate with current Lens L
 - **Add perspective**: Return to Phase 2; existing team T retained → spawn new teammate into T (no TeamCreate)
 - **Refine existing**: Return to Phase 3b; call SendMessage to target teammate for re-analysis within existing T
-- **Act on findings**: Proceed to Phase 6; coordinator classifies findings into 3 tiers, spawns praxis into existing T for actionable items
+- **Act on findings**: Proceed to Phase 6; uses confirmed classification from Phase 5a — no re-classification
 - **ESC**: shutdown_request → TeamDelete → terminate with current Lens L
 
-All terminal paths (sufficient and ESC, from both Phase 5 and Phase 5') read deferred findings from TaskList before TeamDelete to preserve L'.deferred for post-TeamDelete recommendations.
+All terminal paths (sufficient and ESC, from both Phase 5b and Phase 5') read deferred findings from TaskList before TeamDelete to preserve L'.deferred for post-TeamDelete recommendations.
 
-**Convergence**: Mode terminates when user confirms sufficiency (Phase 5 or Phase 5') or explicitly exits. Team is deleted only at terminal states.
+**Convergence**: Mode terminates when user confirms sufficiency (Phase 5b or Phase 5') or explicitly exits. Team is deleted only at terminal states.
 
 <!-- See references/conceptual-foundations.md for: Theoria → Praxis conceptual distinction -->
 
 ### Phase 6: Action Planning
 
-When the user selects `act` at Phase 5, the coordinator classifies findings from L.
+When the user selects `act` at Phase 5b, the coordinator uses the **confirmed classification from Phase 5a** — no re-classification occurs.
 
-**3-tier classification**:
-
-| Tier | Predicate | Destination |
-|------|-----------|-------------|
-| **Actionable** (Fₐ) | `source_determined(f) ∧ perspective_confirmed(f)` | Phase 7 (fix within team) |
-| **Surfaced unknown** (Fᵤ) | `¬source_determined(f) ∧ adversarial_origin(f)` | Post-TeamDelete (priority) |
-| **Design-level** (Fᵈ) | `f ∉ Fₐ ∧ f ∉ Fᵤ` (catch-all) | Post-TeamDelete |
-
-**Classification authority**:
-- Perspectives MAY include `suggested_class` metadata when creating findings via TaskCreate
-- Coordinator makes final classification
-- Conservative default: `ambiguous(f) → Fᵈ` (false actionable cost > false deferred cost)
-
-Call TaskCreate for **all** classified findings with tier metadata.
+Call TaskCreate for **all** confirmed findings with tier metadata.
 
 **Scope enforcement**: All classified findings are registered via TaskCreate with tier identification through two channels:
 - **Subject prefix** (primary): `[Fₐ]`, `[Fᵤ]`, `[Fᵈ]` — always visible in TaskList summary
@@ -457,7 +499,7 @@ After Phase 7, **call the AskUserQuestion tool** to confirm action sufficiency.
 
 Recommendations are informational — user decides whether to call follow-up protocols.
 
-**No re-entry to Phase 5**: Phase 5' offers only sufficient/ESC, not add_perspective or refine. This is intentional — action results constitute a different epistemic object than analysis results. Re-analysis after action requires fresh context (new perspectives evaluating the changed state), which is better served by a new Prothesis invocation than by recycling the current team's analytical frame.
+**No re-entry to Phase 5a/5b**: Phase 5' offers only sufficient/ESC, not add_perspective or refine. This is intentional — action results constitute a different epistemic object than analysis results. Re-analysis after action requires fresh context (new perspectives evaluating the changed state), which is better served by a new Prothesis invocation than by recycling the current team's analytical frame.
 
 ## Conditions
 
@@ -491,9 +533,9 @@ Prothesis does **not** apply to **closed-world** cognition:
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
 7. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
-8. **Minimum perspectives**: Always present at least 2 distinct perspectives (`n ≥ 2`); single-perspective selection produces degenerate synthesis (convergence = identity)
-9. **Team persistence**: Team persists across Phase 5 loop iterations and through Phase 6-7 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 5 or Phase 5')
-10. **Classification authority**: Coordinator makes final classification; perspective suggestions are advisory. Conservative default: ambiguous → deferred
+8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
+9. **Team persistence**: Team persists across Phase 5a/5b loop iterations and through Phase 6-7 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 5b or Phase 5')
+10. **Classification authority**: Coordinator proposes initial classification; user confirms or modifies (final authority). Conservative default applies to initial proposal: ambiguous → Fᵈ
 11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
 12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
 

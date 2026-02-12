@@ -63,9 +63,9 @@ Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases 
 
 ### Mission (πρόθεσις) — Prothesis
 Team-based multi-perspective investigation and execution. Injected into main agent context.
-- **Flow**: `U → MB → MBᵥ → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (sufficiency check → K? → ∥F → V → L' → loop)`
-- **Key**: Phase 0 calls `AskUserQuestion` for Mission Brief confirmation; Phase 1 gathers context guided by MBᵥ; Phase 2 for perspective selection (multiSelect: individual options); Phase 5 for sufficiency check with `act` option; Phase 6-7 classify findings and execute fixes with peer verification; loop until user satisfied or ESC
-- **Phase 3**: Agent team via TeamCreate (mandatory); spawn prompt includes Mission Brief; teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 5 loop and through Phase 6-7
+- **Flow**: `U → MB → MBᵥ → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (K_i → sufficiency check → ∥F → V → L' → loop)`
+- **Key**: Phase 0 calls `AskUserQuestion` for Mission Brief confirmation; Phase 1 gathers context guided by MBᵥ; Phase 2 for perspective selection (multiSelect: individual options; user-supplied Pᵦ auto-included, novel perspectives only proposed); Phase 5a interactive classification (user-confirmed); Phase 5b sufficiency check with `act` option; Phase 6-7 classify findings and execute fixes with peer verification; loop until user satisfied or ESC
+- **Phase 3**: Agent team via TeamCreate (mandatory); spawn prompt includes Mission Brief; teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 5a/5b loop and through Phase 6-7
 - **Phase 6-7**: 3-tier finding classification (actionable/surfaced-unknown/design-level) + praxis agent with peer verification; peer-to-peer in Phase 7 only; post-TeamDelete recommends follow-up protocols for deferred findings
 - **Invocation**: `/mission` or use "mission" in conversation
 
