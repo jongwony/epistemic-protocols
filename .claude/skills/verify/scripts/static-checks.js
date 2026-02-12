@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 
 const projectRoot = process.argv[2] || process.cwd();
 
@@ -473,14 +473,19 @@ function checkVersionStaleness() {
   }
 
   // Collect all uncommitted changes (staged + unstaged + untracked)
+  // Union of diff HEAD (working tree vs HEAD) and diff --cached (index vs HEAD)
+  // to cover staged-only changes (e.g., git add file then revert working tree)
   let changedFiles;
   try {
-    const diffOutput = execSync('git diff HEAD --name-only', { cwd: projectRoot, encoding: 'utf8' }).trim();
+    const diffHeadOutput = execSync('git diff HEAD --name-only', { cwd: projectRoot, encoding: 'utf8' }).trim();
+    const diffCachedOutput = execSync('git diff --cached --name-only', { cwd: projectRoot, encoding: 'utf8' }).trim();
     const untrackedOutput = execSync('git ls-files --others --exclude-standard', { cwd: projectRoot, encoding: 'utf8' }).trim();
-    changedFiles = [
-      ...(diffOutput ? diffOutput.split('\n') : []),
+    const fileSet = new Set([
+      ...(diffHeadOutput ? diffHeadOutput.split('\n') : []),
+      ...(diffCachedOutput ? diffCachedOutput.split('\n') : []),
       ...(untrackedOutput ? untrackedOutput.split('\n') : []),
-    ];
+    ]);
+    changedFiles = [...fileSet];
   } catch {
     // git diff HEAD fails on initial commit (no HEAD) — fall back to staged + untracked only
     try {
@@ -500,6 +505,18 @@ function checkVersionStaleness() {
       check: 'version-staleness',
       file: 'working tree',
       message: 'No uncommitted changes'
+    });
+    return;
+  }
+
+  // Skip version staleness check during conflict states (diff output unreliable)
+  const conflictHeads = ['MERGE_HEAD', 'REBASE_HEAD', 'CHERRY_PICK_HEAD'];
+  const activeConflict = conflictHeads.find(h => fs.existsSync(path.join(projectRoot, '.git', h)));
+  if (activeConflict) {
+    results.pass.push({
+      check: 'version-staleness',
+      file: 'working tree',
+      message: `${activeConflict} detected — skipping version staleness check`
     });
     return;
   }
@@ -528,16 +545,24 @@ function checkVersionStaleness() {
   }
   findPluginDirs(projectRoot);
 
+  // Track warn count to avoid pass+warn co-emission
+  let stalenessWarns = 0;
+
+  // Non-semantic files that don't warrant a version bump
+  const STALENESS_IGNORE = new Set([
+    'README.md', 'README_ko.md', 'LICENSE', '.gitignore', '.gitattributes',
+  ]);
+
   // Group changed files by plugin directory
   for (const [pluginDir, pluginJsonRel] of pluginDirs) {
     const prefix = pluginDir === '.' ? '' : pluginDir + '/';
     const pluginMetaPrefix = prefix + '.claude-plugin/';
 
-    // Content changes = files in this plugin dir, excluding .claude-plugin/ itself
+    // Content changes = files in this plugin dir, excluding .claude-plugin/ and non-semantic files
     const contentChanges = changedFiles.filter(f => {
       if (prefix && !f.startsWith(prefix)) return false;
-      if (!prefix && f.includes('/') && ![...pluginDirs.keys()].every(d => d === '.' || !f.startsWith(d + '/'))) return false;
       if (f.startsWith(pluginMetaPrefix)) return false;
+      if (STALENESS_IGNORE.has(path.basename(f))) return false;
       // For root plugin, exclude files belonging to sub-plugin directories
       if (prefix === '') {
         for (const [otherDir] of pluginDirs) {
@@ -555,15 +580,27 @@ function checkVersionStaleness() {
     // New untracked plugin.json counts as version set
     if (changedFiles.includes(pluginJsonRel)) {
       try {
-        const diffResult = execSync(`git diff HEAD -- "${pluginJsonRel}"`, { cwd: projectRoot, encoding: 'utf8' });
+        const diffResult = execFileSync('git', ['diff', 'HEAD', '--', pluginJsonRel], { cwd: projectRoot, encoding: 'utf8' });
         if (/^\+\s*"version":/m.test(diffResult)) {
           versionBumped = true;
         }
       } catch {
-        // If diff fails (e.g., untracked file), check if file is untracked (new plugin)
-        const untrackedOutput = execSync('git ls-files --others --exclude-standard', { cwd: projectRoot, encoding: 'utf8' }).trim();
-        if (untrackedOutput.split('\n').includes(pluginJsonRel)) {
-          versionBumped = true; // New plugin — initial version is set
+        // If diff fails (e.g., initial commit with no HEAD), check untracked and staged files
+        try {
+          const untrackedOutput = execSync('git ls-files --others --exclude-standard', { cwd: projectRoot, encoding: 'utf8' }).trim();
+          if (untrackedOutput.split('\n').includes(pluginJsonRel)) {
+            versionBumped = true; // New plugin — initial version is set
+          }
+          // Also check staged changes (file may be git-added but no HEAD exists yet)
+          if (!versionBumped) {
+            const stagedDiff = execFileSync('git', ['diff', '--cached', '--', pluginJsonRel], { cwd: projectRoot, encoding: 'utf8' });
+            if (/^\+\s*"version":/m.test(stagedDiff)) {
+              versionBumped = true;
+            }
+          }
+        } catch {
+          // Git commands failed (e.g., index.lock, permissions) — conservative: assume no bump
+          versionBumped = false;
         }
       }
     }
@@ -575,14 +612,17 @@ function checkVersionStaleness() {
         file: pluginJsonRel,
         message: `Plugin "${pluginName}" has content changes but no version bump in plugin.json (${contentChanges.length} file(s) changed)`
       });
+      stalenessWarns++;
     }
   }
 
-  results.pass.push({
-    check: 'version-staleness',
-    file: 'all plugins',
-    message: 'Version staleness check completed'
-  });
+  if (stalenessWarns === 0) {
+    results.pass.push({
+      check: 'version-staleness',
+      file: 'all plugins',
+      message: 'Version staleness check completed'
+    });
+  }
 }
 
 // ============================================================
