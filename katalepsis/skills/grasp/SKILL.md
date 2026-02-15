@@ -28,6 +28,7 @@ A  = User's answer
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 Eₓ = On-demand scenario example (from references/scenarios.md)
+Rₐ = Actual code reference (Read target artifact for the aspect under verification)
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Categorize(R) → C                         -- analysis (silent)
@@ -36,6 +37,7 @@ Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registrat
 Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
        | A(Eₓ) → Read(references/) → present(Eₓ) → Q   -- on-demand example [Tool]
+       | A(Rₐ) → Read(source) → present(Rₐ) → Q          -- actual code view [Tool]
 
 ── LOOP ──
 After Phase 3: Check if current category fully understood.
@@ -53,6 +55,7 @@ Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 Q   → AskUserQuestion (comprehension verification)
 Phase 3 Eₓ  → Read (references/scenarios.md for on-demand examples)
+Phase 3 Rₐ  → Read (actual source artifact for the aspect under verification)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Categorize  → Internal analysis (Read for context if needed)
 
@@ -225,8 +228,10 @@ For each task (category):
 
    Options:
    1. Yes, I understand — [proceed to next aspect or category]
-   2. Not yet — [explains further with code context, then re-verify]
-   3. Show me an example — [reads scenario from references/, presents, then re-verify]
+   2. Show me an example — [reads scenario from references/, presents, then re-verify]
+   3. Let me see the code — [reads actual source artifact, presents relevant section, then re-verify]
+   4. Explain the reasoning — [explains the causal/logical rationale behind this aspect, then re-verify]
+   Other: (implicit) user types free text — [addresses response, then re-verify]
    ```
 
 3b. **On proposal detected** (user answer suggests changes or improvements to the discussed system, AND meets at least one auxiliary signal):
@@ -248,8 +253,22 @@ For each task (category):
 
 3c. **On "show example" selected** (A = Eₓ):
    - Call Read on `references/scenarios.md`
-   - Identify the matching scenario by current (Category, GapType) pair; if no exact match, use closest category match
+   - Identify the matching scenario by current (Category, GapType) pair using priority order:
+     1. Exact match: same Category AND same GapType
+     2. GapType match: same GapType, any Category (GapType carries verification-specific signal)
+     3. Category match: same Category, any GapType
+     4. No match: use the scenario with closest Category; note to user that it is approximate
    - Present the scenario walkthrough as text (setup + 4-step verification table)
+   - Resume comprehension verification by calling AskUserQuestion again for the same aspect
+
+3d. **On "see the code" selected** (A = Rₐ):
+   - Call Read on the actual source artifact relevant to the current aspect
+   - Present the relevant code section with file path and line numbers
+   - Resume comprehension verification by calling AskUserQuestion again for the same aspect
+
+3e. **On "explain reasoning" selected**:
+   - Explain the causal or logical rationale behind the current aspect (why this approach, why this change, why this structure)
+   - Ground explanation in specific code decisions, not general principles
    - Resume comprehension verification by calling AskUserQuestion again for the same aspect
 
 4. **On confirmed comprehension**:

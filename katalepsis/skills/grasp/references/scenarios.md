@@ -5,9 +5,13 @@ scenario when user selects "Show me an example". Match by (Category, Gap Type).
 
 ## How to Use
 
-Match current category and gap type to a scenario below. If no exact match,
-use the closest category. Present setup + walkthrough table, then resume
-AskUserQuestion verification.
+Match current category and gap type to a scenario below using priority order:
+1. Exact match: same Category AND same GapType
+2. GapType match: same GapType, any Category (GapType carries verification-specific signal)
+3. Category match: same Category, any GapType
+4. No match: use closest Category scenario; note to user that it is approximate
+
+Present setup + walkthrough table, then resume AskUserQuestion verification.
 
 ## Scenario Catalog
 
