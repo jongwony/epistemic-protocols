@@ -1,15 +1,18 @@
 # Comprehension Scenarios
 
-On-demand verification scenarios for Katalepsis Phase 3. Present the matching
-scenario when user selects "Show me an example". Match by (Category, Gap Type).
+Verification scenarios for Katalepsis Phase 3. AI presents scenario walkthrough
+when user response reveals a comprehension gap that would benefit from concrete
+example. AI determines when to use scenarios based on evaluation of user's
+answer — not user selection.
 
 ## How to Use
 
-Match current category and gap type to a scenario below using priority order:
+When AI determines a scenario walkthrough is appropriate, match current category
+and gap type using priority order:
 1. Exact match: same Category AND same GapType
 2. GapType match: same GapType, any Category (GapType carries verification-specific signal)
 3. Category match: same Category, any GapType
-4. No match: use closest Category scenario; note to user that it is approximate
+4. No match: use closest Category scenario
 
 Present setup + walkthrough table, then resume AskUserQuestion verification.
 

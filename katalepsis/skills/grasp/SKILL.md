@@ -27,8 +27,6 @@ Q  = Verification question (via AskUserQuestion)
 A  = User's answer
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
-Eₓ = On-demand scenario example (from references/scenarios.md)
-Rₐ = Actual code reference (Read target artifact for the aspect under verification)
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Categorize(R) → C                         -- analysis (silent)
@@ -36,8 +34,7 @@ Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point sele
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
-       | A(Eₓ) → Read(references/) → present(Eₓ) → Q   -- on-demand example [Tool]
-       | A(Rₐ) → Read(source) → present(Rₐ) → Q          -- actual code view [Tool]
+       → Read(source|references) if eval(A) requires   -- AI-determined reference [Tool]
 
 ── LOOP ──
 After Phase 3: Check if current category fully understood.
@@ -54,8 +51,7 @@ VerifiedUnderstanding = P' where (∀t ∈ Tasks: t.status = completed ∧ P' �
 Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 Q   → AskUserQuestion (comprehension verification)
-Phase 3 Eₓ  → Read (references/scenarios.md for on-demand examples)
-Phase 3 Rₐ  → Read (actual source artifact for the aspect under verification)
+Phase 3 Ref → Read (source artifact or references/scenarios.md, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Categorize  → Internal analysis (Read for context if needed)
 
@@ -219,19 +215,25 @@ For each task (category):
 
 2. **Present overview**: Brief summary of the category
 
-3. **Verify comprehension** by **calling the AskUserQuestion tool**:
+3. **Verify comprehension** by **calling the AskUserQuestion tool** with a Socratic probe:
 
    **Do NOT present verification questions as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
 
-   ```
-   Do you understand [specific aspect]?
+   Construct a probe based on the detected gap type:
 
-   Options:
-   1. Yes, I understand — [proceed to next aspect or category]
-   2. Show me an example — [reads scenario from references/, presents, then re-verify]
-   3. Let me see the code — [reads actual source artifact, presents relevant section, then re-verify]
-   4. Explain the reasoning — [explains the causal/logical rationale behind this aspect, then re-verify]
-   Other: (implicit) user types free text — [addresses response, then re-verify]
+   | Gap Type | Probe Form | Tests |
+   |----------|------------|-------|
+   | Expectation | "If [specific input], what result would you expect?" | Predicted vs actual behavior |
+   | Causality | "Why does [this component] behave this way?" | Causal chain understanding |
+   | Scope | "What other parts are affected by this change?" | Impact awareness |
+   | Sequence | "Which happens first — [A] or [B]?" | Execution order |
+
+   Options represent understanding levels (not action choices):
+   ```
+   1. [Correct understanding] — confirms katalepsis for this aspect
+   2. [Partial/uncertain response] — reveals specific gap area
+   3. [Misconception] — indicates correction needed
+   Other: (implicit) user explains freely — AI evaluates comprehension level
    ```
 
 3b. **On proposal detected** (user answer suggests changes or improvements to the discussed system, AND meets at least one auxiliary signal):
@@ -251,25 +253,23 @@ For each task (category):
    - **Auxiliary** (at least one): introduces concepts not in original AI work output `R`; contains action-oriented language directed at the system (should change, could add, how about replacing)
    - **Exclude**: Requests for further explanation, code navigation, or clarification — even if phrased with action-oriented language (e.g., "could you show me that part?")
 
-3c. **On "show example" selected** (A = Eₓ):
-   - Call Read on `references/scenarios.md`
-   - Identify the matching scenario by current (Category, GapType) pair using priority order:
-     1. Exact match: same Category AND same GapType
-     2. GapType match: same GapType, any Category (GapType carries verification-specific signal)
-     3. Category match: same Category, any GapType
-     4. No match: use the scenario with closest Category; note to user that it is approximate
-   - Present the scenario walkthrough as text (setup + 4-step verification table)
-   - Resume comprehension verification by calling AskUserQuestion again for the same aspect
+3c. **AI-determined response** (after evaluating user answer A):
 
-3d. **On "see the code" selected** (A = Rₐ):
-   - Call Read on the actual source artifact relevant to the current aspect
-   - Present the relevant code section with file path and line numbers
-   - Resume comprehension verification by calling AskUserQuestion again for the same aspect
+   AI evaluates A against expected understanding and determines response:
 
-3e. **On "explain reasoning" selected**:
-   - Explain the causal or logical rationale behind the current aspect (why this approach, why this change, why this structure)
-   - Ground explanation in specific code decisions, not general principles
-   - Resume comprehension verification by calling AskUserQuestion again for the same aspect
+   | Evaluation | Action | Tool |
+   |------------|--------|------|
+   | Correct (P' ≅ R) | Confirm, proceed to next aspect or category | TaskUpdate |
+   | Partial gap | Targeted followup probe on the gap area | AskUserQuestion |
+   | Misconception | Correction + supporting reference if needed | Read (AI-determined) |
+
+   **Reference selection** (AI-determined, not user-selected):
+   - Source code: when user's gap relates to specific implementation detail
+   - Scenario walkthrough: when user's gap relates to broader behavioral pattern (Read references/scenarios.md)
+   - Explanation: when user's gap relates to rationale or design choice
+
+   Selection is transparent — AI states what it is showing and why.
+   Resume comprehension verification by calling AskUserQuestion again for the same aspect.
 
 4. **On confirmed comprehension**:
    - TaskUpdate to `completed`
@@ -294,6 +294,22 @@ Use:
 "What do you think this function does?"
 → If correct: "That's right. Ready for the next part?"
 → If incorrect: "Actually, it does X. Does that make sense now?"
+```
+
+**Gap-type probing examples**:
+
+Expectation gap:
+```
+Probe: "After this refactoring, if you call validate() from a new endpoint, what happens?"
+→ Correct: "It uses the shared utility" → Confirm
+→ Partial: "It... calls the old validation?" → Show the import path (Read)
+```
+
+Causality gap:
+```
+Probe: "Why did this null error only appear with optional configs?"
+→ Correct: "Because the field defaults to undefined" → Confirm
+→ Misconception: "The config file was corrupted" → Correct with code reference
 ```
 
 **Chunking**: Break complex changes into digestible pieces. Verify each chunk before proceeding.
@@ -322,7 +338,7 @@ Use:
 ## Rules
 
 1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
+2. **Socratic probing**: Always **call** AskUserQuestion with comprehension-testing questions, not meta-selection options (text presentation = protocol violation)
 3. **Verify, don't lecture**: Confirm understanding through questions, not explanations
 4. **Chunk complexity**: Break large changes into digestible categories
 5. **Task tracking**: Use TaskCreate/TaskUpdate for progress visibility
