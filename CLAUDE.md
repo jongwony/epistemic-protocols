@@ -33,6 +33,7 @@ epistemic-protocols/
 │   ├── commands/                      # /reflect, /quick-reflect
 │   └── skills/reflexion/SKILL.md
 └── write/                             # Skill: multi-perspective blog drafting
+    ├── .claude-plugin/plugin.json
     └── skills/write/SKILL.md
 ```
 
@@ -43,7 +44,7 @@ epistemic-protocols/
 
 **Conventions**:
 - Subagent naming: `plugin-name:agent-name` (e.g., `reflexion:session-summarizer`)
-- References directory: `skills/*/references/` for detailed documentation
+- References directory: `skills/*/references/` for detailed documentation (optional per plugin)
 - No external dependencies; Node.js standard library only
 
 **SKILL.md Formal Block Anatomy** (all protocols share this structure within `Definition` code block):
@@ -53,7 +54,7 @@ epistemic-protocols/
 ── ACTION TYPES ──      (if applicable) Extended types for action phases
 ── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
-── BOUNDARY ──          Purpose annotations for key operations
+── BOUNDARY ──          (if applicable) Purpose annotations for key operations
 ── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ```
@@ -156,13 +157,13 @@ node .claude/skills/verify/scripts/static-checks.js .
 ```
 
 **Static checks performed**:
-1. **json-schema**: plugin.json required fields (name, version, description, author), semver format
+1. **json-schema**: plugin.json required fields (name, version, description, author), semver format, name format (`/^[a-z][a-z0-9-]*$/`)
 2. **notation**: Unicode consistency (→, ∥, ∩, ∪, ⊆, ∈, ≠ over ASCII fallbacks)
 3. **directive-verb**: `call` (not `invoke`/`use`) for tool instructions
 4. **xref**: CLAUDE.md flow formulas sync with source files
 5. **structure**: Required sections in protocol SKILL.md (Definition, Mode Activation, Protocol, Rules, PHASE TRANSITIONS, MODE STATE)
 6. **tool-grounding**: TOOL GROUNDING section present, external operations have `[Tool]` notation in PHASE TRANSITIONS
-7. **version-staleness**: plugin content changed without plugin.json version bump (git-aware, warn level)
+7. **version-staleness**: plugin content changed without plugin.json version bump (git-aware, warn level; skips during merge/rebase conflicts; ignores README, LICENSE, .gitignore)
 
 ## Delegation Constraint
 
@@ -178,7 +179,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - Keep README.md and README_ko.md in sync
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
-- Skills frontmatter: `name` (required), `description` (required), `user-invocable` (boolean), `allowed-tools` (optional)
+- Skills frontmatter: `name` (required), `description` (required, quote if contains `:`), `user-invocable` (boolean), `allowed-tools` (optional)
 
 **Co-change pattern** (protocol modifications require synchronized edits):
 
@@ -189,3 +190,4 @@ node .claude/skills/verify/scripts/static-checks.js .
 | New loop option | SKILL.md (LOOP + Phase 5 prose + Rules), CLAUDE.md (key behaviors) |
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
+| New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
