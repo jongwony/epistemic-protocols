@@ -27,6 +27,7 @@ Q  = Verification question (via AskUserQuestion)
 A  = User's answer
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
+Eₓ = On-demand scenario example (from references/scenarios.md)
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Categorize(R) → C                         -- analysis (silent)
@@ -34,6 +35,7 @@ Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point sele
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
+       | A(Eₓ) → Read(references/) → present(Eₓ) → Q   -- on-demand example [Tool]
 
 ── LOOP ──
 After Phase 3: Check if current category fully understood.
@@ -50,6 +52,7 @@ VerifiedUnderstanding = P' where (∀t ∈ Tasks: t.status = completed ∧ P' �
 Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 Q   → AskUserQuestion (comprehension verification)
+Phase 3 Eₓ  → Read (references/scenarios.md for on-demand examples)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Categorize  → Internal analysis (Read for context if needed)
 
@@ -221,9 +224,9 @@ For each task (category):
    Do you understand [specific aspect]?
 
    Options:
-   1. Yes, I get it — [proceed to next aspect or category]
-   2. Not quite — [explains further, then re-verify]
-   3. Let me see the code — [shows relevant code, then re-verify]
+   1. Yes, I understand — [proceed to next aspect or category]
+   2. Not yet — [explains further with code context, then re-verify]
+   3. Show me an example — [reads scenario from references/, presents, then re-verify]
    ```
 
 3b. **On proposal detected** (user answer suggests changes or improvements to the discussed system, AND meets at least one auxiliary signal):
@@ -242,6 +245,12 @@ For each task (category):
    - **Required**: Suggests changes or improvements to the discussed system (direction toward knowledge capture, not comprehension)
    - **Auxiliary** (at least one): introduces concepts not in original AI work output `R`; contains action-oriented language directed at the system (should change, could add, how about replacing)
    - **Exclude**: Requests for further explanation, code navigation, or clarification — even if phrased with action-oriented language (e.g., "could you show me that part?")
+
+3c. **On "show example" selected** (A = Eₓ):
+   - Call Read on `references/scenarios.md`
+   - Identify the matching scenario by current (Category, GapType) pair; if no exact match, use closest category match
+   - Present the scenario walkthrough as text (setup + 4-step verification table)
+   - Resume comprehension verification by calling AskUserQuestion again for the same aspect
 
 4. **On confirmed comprehension**:
    - TaskUpdate to `completed`

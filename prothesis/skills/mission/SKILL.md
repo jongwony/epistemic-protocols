@@ -297,6 +297,12 @@ Provide:
 3. **Horizon Limits**: What this perspective cannot see or undervalues
 4. **Assessment**: Direct answer from this viewpoint, aligned with the expected deliverable
 
+**Output grounding**: Every table cell, list item, and comparison point must contain
+substantive content — real data, file paths, specific scenarios, or quantified evidence.
+Self-check: if a cell could be replaced by "TBD" without changing meaning, it lacks substance.
+Exception: when the inquiry explicitly requires abstract/general patterns, prioritize breadth
+over specificity.
+
 Cross-dialogue: If the coordinator sends you another perspective's finding
 to challenge, respond with a focused rebuttal or concession (2-3 sentences).
 Do not initiate cross-dialogue unprompted.
@@ -466,6 +472,10 @@ For each fix:
 Scope constraint: Only fix items with subject prefix `[Fₐ]` (actionable).
 Skip items prefixed `[Fᵤ]` (surfaced unknown) or `[Fᵈ]` (design level).
 When in doubt, check the task description for tier classification.
+
+**Output grounding**: When reporting fixes, include concrete evidence — file paths
+changed, specific lines modified, before/after snippets. Avoid abstract summaries.
+If a fix description could apply to any codebase without modification, it lacks substance.
 ```
 
 #### Phase 7b: Peer Verification
