@@ -34,7 +34,7 @@ Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point sele
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
-       → Read(source|references) if eval(A) requires   -- AI-determined reference [Tool]
+       → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
 
 ── LOOP ──
 After Phase 3: Check if current category fully understood.
@@ -51,7 +51,7 @@ VerifiedUnderstanding = P' where (∀t ∈ Tasks: t.status = completed ∧ P' �
 Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 Q   → AskUserQuestion (comprehension verification)
-Phase 3 Ref → Read (source artifact or references/scenarios.md, AI-determined)
+Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Categorize  → Internal analysis (Read for context if needed)
 
