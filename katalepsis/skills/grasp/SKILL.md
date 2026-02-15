@@ -263,12 +263,6 @@ For each task (category):
    | Partial gap | Targeted followup probe on the gap area | AskUserQuestion |
    | Misconception | Correction + supporting reference if needed | Read (AI-determined) |
 
-   **Reference selection** (AI-determined, not user-selected):
-   - Source code: when user's gap relates to specific implementation detail
-   - Scenario walkthrough: when user's gap relates to broader behavioral pattern (Read references/scenarios.md)
-   - Explanation: when user's gap relates to rationale or design choice
-
-   Selection is transparent — AI states what it is showing and why.
    Resume comprehension verification by calling AskUserQuestion again for the same aspect.
 
 4. **On confirmed comprehension**:

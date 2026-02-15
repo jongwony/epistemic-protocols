@@ -7,13 +7,6 @@ answer — not user selection.
 
 ## How to Use
 
-When AI determines a scenario walkthrough is appropriate, match current category
-and gap type using priority order:
-1. Exact match: same Category AND same GapType
-2. GapType match: same GapType, any Category (GapType carries verification-specific signal)
-3. Category match: same Category, any GapType
-4. No match: use closest Category scenario
-
 Present setup + walkthrough table, then resume AskUserQuestion verification.
 
 ## Scenario Catalog
