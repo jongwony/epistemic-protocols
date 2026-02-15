@@ -296,22 +296,6 @@ Use:
 → If incorrect: "Actually, it does X. Does that make sense now?"
 ```
 
-**Gap-type probing examples**:
-
-Expectation gap:
-```
-Probe: "After this refactoring, if you call validate() from a new endpoint, what happens?"
-→ Correct: "It uses the shared utility" → Confirm
-→ Partial: "It... calls the old validation?" → Show the import path (Read)
-```
-
-Causality gap:
-```
-Probe: "Why did this null error only appear with optional configs?"
-→ Correct: "Because the field defaults to undefined" → Confirm
-→ Misconception: "The config file was corrupted" → Correct with code reference
-```
-
 **Chunking**: Break complex changes into digestible pieces. Verify each chunk before proceeding.
 
 **Code reference**: When explaining, always reference specific line numbers or file paths.
