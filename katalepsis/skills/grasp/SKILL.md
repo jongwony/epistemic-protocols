@@ -338,7 +338,7 @@ Probe: "Why did this null error only appear with optional configs?"
 ## Rules
 
 1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Socratic probing**: Always **call** AskUserQuestion with comprehension-testing questions, not meta-selection options (text presentation = protocol violation)
+2. **Recognition over Recall**: Always **call** AskUserQuestion with Socratic probing questions — comprehension-testing options, not meta-selection (text presentation = protocol violation)
 3. **Verify, don't lecture**: Confirm understanding through questions, not explanations
 4. **Chunk complexity**: Break large changes into digestible categories
 5. **Task tracking**: Use TaskCreate/TaskUpdate for progress visibility
