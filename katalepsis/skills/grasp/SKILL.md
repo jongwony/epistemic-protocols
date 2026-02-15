@@ -219,10 +219,10 @@ For each task (category):
 
    **Do NOT present verification questions as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
 
-   Construct a probe based on the detected gap type:
+   Construct a probe based on the detected gap type. Examples (not exhaustive — adapt freely to context):
 
-   | Gap Type | Probe Form | Tests |
-   |----------|------------|-------|
+   | Gap Type | Probe Form (illustrative) | Tests |
+   |----------|---------------------------|-------|
    | Expectation | "If [specific input], what result would you expect?" | Predicted vs actual behavior |
    | Causality | "Why does [this component] behave this way?" | Causal chain understanding |
    | Scope | "What other parts are affected by this change?" | Impact awareness |
