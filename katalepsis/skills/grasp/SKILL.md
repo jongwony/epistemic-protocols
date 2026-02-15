@@ -32,7 +32,7 @@ P' = Updated phantasia (refined understanding)
 Phase 0: R → Categorize(R) → C                         -- analysis (silent)
 Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point selection [Tool]
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
-Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check
+Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check [Tool]
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
        → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
 
@@ -269,10 +269,7 @@ For each task (category):
    - TaskUpdate to `completed`
    - Move to next pending task
 
-5. **On gap detected**:
-   - Provide targeted explanation
-   - Re-verify understanding
-   - Do not mark complete until user confirms
+5. **On gap detected**: Handle per step 3c evaluation table. Do not mark complete until user confirms.
 
 ### Verification Style
 
@@ -309,9 +306,9 @@ Use:
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Simple change, user seems familiar | "This adds X. Got it?" |
-| Medium | Moderate complexity | "Let me walk through this. [explanation]. Clear?" |
-| Heavy | Complex architecture or unfamiliar pattern | "This is a significant change. Let's take it step by step." |
+| Light | Simple change, user seems familiar | "What does this new function do?" |
+| Medium | Moderate complexity | "If [input], what would you expect this to return?" |
+| Heavy | Complex architecture or unfamiliar pattern | "Let's take this step by step. Why does [A] call [B] here?" |
 
 ## Rules
 
@@ -319,7 +316,7 @@ Use:
 2. **Recognition over Recall**: Always **call** AskUserQuestion with Socratic probing questions — comprehension-testing options, not meta-selection (text presentation = protocol violation)
 3. **Verify, don't lecture**: Confirm understanding through questions, not explanations
 4. **Chunk complexity**: Break large changes into digestible categories
-5. **Task tracking**: Use TaskCreate/TaskUpdate for progress visibility
+5. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
 6. **Code grounding**: Reference specific code locations
 7. **User authority**: User's "I understand" is final
 8. **Convergence persistence**: Mode remains active until all selected tasks completed
