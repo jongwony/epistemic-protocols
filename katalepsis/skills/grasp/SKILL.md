@@ -32,8 +32,9 @@ P' = Updated phantasia (refined understanding)
 Phase 0: R → Categorize(R) → C                         -- analysis (silent)
 Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point selection [Tool]
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
-Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check
+Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check [Tool]
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
+       → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
 
 ── LOOP ──
 After Phase 3: Check if current category fully understood.
@@ -50,6 +51,7 @@ VerifiedUnderstanding = P' where (∀t ∈ Tasks: t.status = completed ∧ P' �
 Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 Q   → AskUserQuestion (comprehension verification)
+Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Categorize  → Internal analysis (Read for context if needed)
 
@@ -213,17 +215,25 @@ For each task (category):
 
 2. **Present overview**: Brief summary of the category
 
-3. **Verify comprehension** by **calling the AskUserQuestion tool**:
+3. **Verify comprehension** by **calling the AskUserQuestion tool** with a Socratic probe:
 
    **Do NOT present verification questions as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
 
-   ```
-   Do you understand [specific aspect]?
+   Construct a probe based on the detected gap type. Examples (not exhaustive — adapt freely to context):
 
-   Options:
-   1. Yes, I get it — [proceed to next aspect or category]
-   2. Not quite — [explains further, then re-verify]
-   3. Let me see the code — [shows relevant code, then re-verify]
+   | Gap Type | Probe Form (illustrative) | Tests |
+   |----------|---------------------------|-------|
+   | Expectation | "If [specific input], what result would you expect?" | Predicted vs actual behavior |
+   | Causality | "Why does [this component] behave this way?" | Causal chain understanding |
+   | Scope | "What other parts are affected by this change?" | Impact awareness |
+   | Sequence | "Which happens first — [A] or [B]?" | Execution order |
+
+   Options represent understanding levels (not action choices):
+   ```
+   1. [Correct understanding] — confirms katalepsis for this aspect
+   2. [Partial/uncertain response] — reveals specific gap area
+   3. [Misconception] — indicates correction needed
+   Other: (implicit) user explains freely — AI evaluates comprehension level
    ```
 
 3b. **On proposal detected** (user answer suggests changes or improvements to the discussed system, AND meets at least one auxiliary signal):
@@ -243,14 +253,23 @@ For each task (category):
    - **Auxiliary** (at least one): introduces concepts not in original AI work output `R`; contains action-oriented language directed at the system (should change, could add, how about replacing)
    - **Exclude**: Requests for further explanation, code navigation, or clarification — even if phrased with action-oriented language (e.g., "could you show me that part?")
 
+3c. **AI-determined response** (after evaluating user answer A):
+
+   AI evaluates A against expected understanding and determines response:
+
+   | Evaluation | Action | Tool |
+   |------------|--------|------|
+   | Correct (P' ≅ R) | Confirm, proceed to next aspect or category | TaskUpdate |
+   | Partial gap | Targeted followup probe on the gap area | AskUserQuestion |
+   | Misconception | Correction + supporting reference if needed | Read (AI-determined) |
+
+   Resume comprehension verification by calling AskUserQuestion again for the same aspect.
+
 4. **On confirmed comprehension**:
    - TaskUpdate to `completed`
    - Move to next pending task
 
-5. **On gap detected**:
-   - Provide targeted explanation
-   - Re-verify understanding
-   - Do not mark complete until user confirms
+5. **On gap detected**: Handle per step 3c evaluation table. Do not mark complete until user confirms.
 
 ### Verification Style
 
@@ -287,17 +306,17 @@ Use:
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Simple change, user seems familiar | "This adds X. Got it?" |
-| Medium | Moderate complexity | "Let me walk through this. [explanation]. Clear?" |
-| Heavy | Complex architecture or unfamiliar pattern | "This is a significant change. Let's take it step by step." |
+| Light | Simple change, user seems familiar | "What does this new function do?" |
+| Medium | Moderate complexity | "If [input], what would you expect this to return?" |
+| Heavy | Complex architecture or unfamiliar pattern | "Let's take this step by step. Why does [A] call [B] here?" |
 
 ## Rules
 
 1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
+2. **Recognition over Recall**: Always **call** AskUserQuestion with Socratic probing questions — comprehension-testing options, not meta-selection (text presentation = protocol violation)
 3. **Verify, don't lecture**: Confirm understanding through questions, not explanations
 4. **Chunk complexity**: Break large changes into digestible categories
-5. **Task tracking**: Use TaskCreate/TaskUpdate for progress visibility
+5. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
 6. **Code grounding**: Reference specific code locations
 7. **User authority**: User's "I understand" is final
 8. **Convergence persistence**: Mode remains active until all selected tasks completed
