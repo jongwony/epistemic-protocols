@@ -146,6 +146,21 @@ When multiple gaps detected:
 3. **Expression**: Core articulation gaps
 4. **Precision** (lowest): Refinement after core is clear
 
+## Rules
+
+1. **User-initiated only**: Activate only when user signals awareness of ambiguity
+2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
+3. **Selection over Detection**: Present options for user to select, not auto-diagnose internally
+4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
+5. **Articulation support**: Help user express what they know, don't guess what they mean
+6. **Minimal questioning**: Surface only gaps that affect execution
+7. **Consequential options**: Each option shows interpretation with downstream implications
+8. **User authority**: User's choice is final; no second-guessing selected interpretation
+9. **Convergence persistence**: Mode remains active until convergence (|G| = 0, cycle, or user exit)
+10. **Reflective pause**: Include "reconsider" option for complex intent clarification
+11. **Escape hatch**: Always allow user to provide their own phrasing
+12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases
+
 ## Protocol
 
 ### Phase 0: Trigger Recognition
@@ -321,17 +336,3 @@ When multiple gaps detected:
 - Ask user to rephrase if stuck
 - Proceed with best interpretation if user approves
 
-## Rules
-
-1. **User-initiated only**: Activate only when user signals awareness of ambiguity
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-3. **Selection over Detection**: Present options for user to select, not auto-diagnose internally
-4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
-5. **Articulation support**: Help user express what they know, don't guess what they mean
-6. **Minimal questioning**: Surface only gaps that affect execution
-7. **Consequential options**: Each option shows interpretation with downstream implications
-8. **User authority**: User's choice is final; no second-guessing selected interpretation
-9. **Convergence persistence**: Mode remains active until convergence (|G| = 0, cycle, or user exit)
-10. **Reflective pause**: Include "reconsider" option for complex intent clarification
-11. **Escape hatch**: Always allow user to provide their own phrasing
-12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases

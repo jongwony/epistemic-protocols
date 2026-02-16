@@ -159,6 +159,20 @@ Comprehension gaps within each category:
 | **Scope** | User doesn't see full impact | "Did you notice this also affects Y?" |
 | **Sequence** | User doesn't understand execution order | "Do you see that A happens before B?" |
 
+## Rules
+
+1. **User-initiated only**: Activate only when user signals desire to understand
+2. **Recognition over Recall**: Always **call** AskUserQuestion with Socratic probing questions — comprehension-testing options, not meta-selection (text presentation = protocol violation)
+3. **Verify, don't lecture**: Confirm understanding through questions, not explanations
+4. **Chunk complexity**: Break large changes into digestible categories
+5. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
+6. **Code grounding**: Reference specific code locations
+7. **User authority**: User's "I understand" is final
+8. **Convergence persistence**: Mode remains active until all selected tasks completed
+9. **Escape hatch**: User can exit at any time
+10. **Phantasia update**: Each verification updates internal model of user's understanding
+11. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
+
 ## Protocol
 
 ### Phase 0: Categorization (Silent)
@@ -310,16 +324,3 @@ Use:
 | Medium | Moderate complexity | "If [input], what would you expect this to return?" |
 | Heavy | Complex architecture or unfamiliar pattern | "Let's take this step by step. Why does [A] call [B] here?" |
 
-## Rules
-
-1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Recognition over Recall**: Always **call** AskUserQuestion with Socratic probing questions — comprehension-testing options, not meta-selection (text presentation = protocol violation)
-3. **Verify, don't lecture**: Confirm understanding through questions, not explanations
-4. **Chunk complexity**: Break large changes into digestible categories
-5. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
-6. **Code grounding**: Reference specific code locations
-7. **User authority**: User's "I understand" is final
-8. **Convergence persistence**: Mode remains active until all selected tasks completed
-9. **Escape hatch**: User can exit at any time
-10. **Phantasia update**: Each verification updates internal model of user's understanding
-11. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.

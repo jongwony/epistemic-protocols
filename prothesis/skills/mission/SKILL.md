@@ -185,6 +185,21 @@ False positive (unnecessary question) < False negative (missed perspective)
 
 <!-- See references/conceptual-foundations.md for: Plan Mode Integration, Distinction from Socratic Method -->
 
+## Rules
+
+1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/mission "text"`) still requires confirmation. Modify loops re-present until confirmed.
+2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
+3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 3: cross-dialogue is coordinator-mediated only. Phase 7: peer-to-peer allowed between praxis and originating perspectives for verification
+4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
+5. **Verbatim Transmission**: Pass original question unchanged to each perspective
+6. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
+7. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
+8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
+9. **Team persistence**: Team persists across Phase 5a/5b loop iterations and through Phase 6-7 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 5b or Phase 5')
+10. **Classification authority**: Coordinator proposes initial classification; user confirms or modifies (final authority). Conservative default applies to initial proposal: ambiguous → Fᵈ
+11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
+12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
+
 ## Protocol
 
 ### Phase 0: Intent Confirmation (Mission Brief)
@@ -534,18 +549,4 @@ Prothesis does **not** apply to **closed-world** cognition:
 
 <!-- See references/conceptual-foundations.md for: Parametric Nature, Specialization -->
 
-## Rules
-
-1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/mission "text"`) still requires confirmation. Modify loops re-present until confirmed.
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 3: cross-dialogue is coordinator-mediated only. Phase 7: peer-to-peer allowed between praxis and originating perspectives for verification
-4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
-5. **Verbatim Transmission**: Pass original question unchanged to each perspective
-6. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
-7. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
-8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
-9. **Team persistence**: Team persists across Phase 5a/5b loop iterations and through Phase 6-7 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 5b or Phase 5')
-10. **Classification authority**: Coordinator proposes initial classification; user confirms or modifies (final authority). Conservative default applies to initial proposal: ambiguous → Fᵈ
-11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
-12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
 

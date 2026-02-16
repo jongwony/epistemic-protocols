@@ -166,6 +166,21 @@ When multiple dimensions are undefined:
 
 Outcome is always included in applicable dimensions (minimum `|Dₐ| ≥ 1`).
 
+## Rules
+
+1. **AI-detected, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via AskUserQuestion (Phase 0)
+2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation). Modify options use structured sub-choices, not free text
+3. **Selection over Detection**: User selects applicable dimensions in Phase 1; AI does not auto-sequence or force all 4
+4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions
+5. **Concrete proposals**: Every proposal must be specific enough to accept or reject
+6. **User authority**: User shapes, accepts, or rejects; AI does not override
+7. **Progress visibility**: Show GoalContract completion status (defined/total selected) at each Phase 1
+8. **Convergence persistence**: Mode active until GoalContract approved or user ESC
+9. **Early exit**: User can declare sufficient at any point (any progress level permitted)
+10. **Context grounding**: Proposals based on Read/Grep when available; template fallback when not
+11. **Small phases**: One dimension per cycle; no bundling unless user requests
+12. **Escape hatch**: User can provide own definition for any field directly
+
 ## Protocol
 
 ### Phase 0: Trigger Recognition + Confirmation
@@ -282,17 +297,3 @@ Options:
 | Medium | Multiple undefined dimensions | "[Dimension]. Proposal: [X]. Accept/Modify?" |
 | Heavy | Core outcome undefined, high stakes | "Before proceeding: [detailed proposal with trade-offs]" |
 
-## Rules
-
-1. **AI-detected, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via AskUserQuestion (Phase 0)
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation). Modify options use structured sub-choices, not free text
-3. **Selection over Detection**: User selects applicable dimensions in Phase 1; AI does not auto-sequence or force all 4
-4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions
-5. **Concrete proposals**: Every proposal must be specific enough to accept or reject
-6. **User authority**: User shapes, accepts, or rejects; AI does not override
-7. **Progress visibility**: Show GoalContract completion status (defined/total selected) at each Phase 1
-8. **Convergence persistence**: Mode active until GoalContract approved or user ESC
-9. **Early exit**: User can declare sufficient at any point (any progress level permitted)
-10. **Context grounding**: Proposals based on Read/Grep when available; template fallback when not
-11. **Small phases**: One dimension per cycle; no bundling unless user requests
-12. **Escape hatch**: User can provide own definition for any field directly

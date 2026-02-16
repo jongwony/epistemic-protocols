@@ -159,6 +159,18 @@ This cycle repeats per planning phase or domain area.
 | **Assumption** | Unstated premise inferred from framing | "Are you assuming [X]?" |
 | **Alternative** | Known option not referenced | "Was [alternative] considered?" |
 
+## Rules
+
+1. **Question > Assertion**: Ask "was X considered?", never "you missed X"
+2. **Batch registration**: Register ALL detected gaps via TaskCreate before surfacing any
+3. **Observable evidence**: Surface only gaps with concrete indicators
+4. **User authority**: Dismissal is final
+5. **Minimal intrusion**: Lightest intervention that achieves awareness
+6. **Stakes calibration**: Intensity follows stakes matrix above
+7. **Convergence persistence**: Mode remains active until all gaps resolved or user ESC
+8. **Dynamic discovery**: Re-scan after each response; new gaps → TaskCreate
+9. **Gap dependencies**: Use task blocking when gaps have logical order
+
 ## Protocol
 
 ### Detection (Silent)
@@ -276,14 +288,3 @@ Note: Esc key → unconditional loop termination (LOOP level). Silence (no respo
 | Medium | Reversible + high impact, OR Irreversible + low impact | "[X] reviewed? (rationale)" |
 | Heavy | Irreversible + high impact | "Before proceeding, [X]? (rationale)" |
 
-## Rules
-
-1. **Question > Assertion**: Ask "was X considered?", never "you missed X"
-2. **Batch registration**: Register ALL detected gaps via TaskCreate before surfacing any
-3. **Observable evidence**: Surface only gaps with concrete indicators
-4. **User authority**: Dismissal is final
-5. **Minimal intrusion**: Lightest intervention that achieves awareness
-6. **Stakes calibration**: Intensity follows stakes matrix above
-7. **Convergence persistence**: Mode remains active until all gaps resolved or user ESC
-8. **Dynamic discovery**: Re-scan after each response; new gaps → TaskCreate
-9. **Gap dependencies**: Use task blocking when gaps have logical order
