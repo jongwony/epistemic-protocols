@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R' → Syn(R') → L → K_i(L) → ∥F(T) → V(T) → L'
+Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R' → Δ?(R') → Syn(R'') → L → K_i(L) → ∥F(T) → V(T) → L'
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
@@ -28,8 +28,8 @@ Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2)
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
-∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → D?(T) → R
-D?     = Optional dialogue: selective cross-perspective challenge (coordinator-mediated)
+∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → R
+Δ?     = Conditional cross-dialogue: trigger check → coordinator-mediated challenge (Phase 4a)
 Ω      = Collection: T → R, shutdown(T) ∨ retain(T)  -- conditional on loop
 R      = Set(Result)                           -- inquiry outputs
 Syn    = Synthesis: R → (∩, D, A)
@@ -56,9 +56,10 @@ Phase 0:  U → MB(U) → Q[AskUserQuestion](MB) → await → MBᵥ     -- Miss
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → present[S]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ  -- S: AskUserQuestion [Tool]
 Phase 3a: Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ)   -- team setup [Tool]
-Phase 3b: T → ∥I[TaskCreate](T) → D[SendMessage](T) → R         -- inquiry + optional dialogue [Tool]
-Phase 3c: R → Ω[SendMessage](T) → R'                            -- collection + deferred shutdown [Tool]
-Phase 4:  R' → Syn(R') → L                                      -- internal synthesis
+Phase 3b: T → ∥I[TaskCreate](T) → R                              -- inquiry [Tool]
+Phase 3c: R → Ω[SendMessage](T) → R'                            -- collection [Tool]
+Phase 4a: R' → Δ(R') → D?[SendMessage](T) → R''                 -- cross-dialogue check [Tool]
+Phase 4b: R'' → Syn(R'') → L                                    -- synthesis (internal)
 Phase 5:  L → K_i(L) → Q[AskUserQuestion](classification + routing) → await → ((Fₐ, Fᵤ, Fᵈ), J)  -- unified classification + routing [Tool]
 Phase 6:  (Fₐ, Fᵤ, Fᵈ) → TaskCreate[all] → ∥Spawn[Task](T, praxis)                 -- register + spawn praxis [Tool]
 Phase 7:  ∥F[TaskUpdate](T, Fₐ) → V[SendMessage](T) → L'       -- fix + peer verify [Tool]
@@ -105,12 +106,13 @@ S (extern)               → AskUserQuestion tool (mandatory; multiSelect: true;
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
-D (parallel)             → SendMessage tool (type: "message", coordinator-mediated cross-dialogue)
+Phase 4a Δ (detect)      → Internal operation (trigger check: contradictions, horizon intersections, adversarial needs)
+Phase 4a D? (conditional) → SendMessage tool (type: "message", coordinator-mediated cross-dialogue; skip if Δ = ∅)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Phase 5 K_i/Q            → AskUserQuestion (classification + routing: act/modify/extend/wrap_up; extend triggers follow-up AskUserQuestion; Escape → terminate)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3a spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
-Syn (synthesis)          → Internal operation (no external tool)
+Phase 4b Syn (synthesis) → Internal operation (no external tool)
 TaskCreate (Phase 6)     → TaskCreate tool (register confirmed tiers with metadata)
 ∥Spawn praxis (parallel) → Task tool (team_name, name: spawn praxis into existing T)
 G(praxis)                → TaskList/TaskGet tools (praxis context acquisition: discovery + full descriptions)
@@ -305,19 +307,9 @@ Multiple selections → parallel teammates (never sequential).
 
 **TaskCreate per perspective** (mandatory): After spawning each perspective teammate, the coordinator MUST call TaskCreate for that perspective — one task per perspective. This enables progress tracking via TaskList/TaskUpdate during inquiry, and ensures team coordination is observable rather than implicit. The task subject should identify the perspective; the description should include the inquiry question and scope.
 
-#### Phase 3b: Inquiry and Dialogue
+#### Phase 3b: Inquiry
 
-Teammates analyze independently. After results arrive, the coordinator (main agent) MAY initiate cross-dialogue:
-
-**Cross-dialogue triggers** (all coordinator-mediated):
-- Contradictory conclusions between perspectives
-- One perspective's horizon limit intersects another's core finding
-- Coordinator judges a finding needs adversarial testing
-
-**Cross-dialogue constraints**:
-- 1 exchange per pair: challenge + response (no extended debate)
-- Coordinator relays via SendMessage (type: "message") — no peer-to-peer
-- Dialogue is selective, not mandatory — skip when perspectives cleanly complement
+Teammates analyze independently. Results arrive via idle notifications. Proceed to Phase 3c for collection.
 
 #### Phase 3c: Collection
 
@@ -330,17 +322,35 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 - Confirmation bias from main agent's prior reasoning
 - Anchoring on initial assumptions formed during context gathering
 
-**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 3 (analysis), cross-dialogue is strictly coordinator-mediated to prevent confirmation bias. In Phase 7 (action), peer-to-peer is allowed between praxis and originating perspectives for verification and context restoration — analysis isolation has served its purpose, and direct channels reduce information loss through coordinator relay.
+**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 3 (analysis), perspectives operate in strict isolation — no cross-dialogue occurs. Cross-dialogue is deferred to Phase 4a where the coordinator mediates after full collection, with explicit trigger checking. In Phase 7 (action), peer-to-peer is allowed between praxis and originating perspectives for verification and context restoration — analysis isolation has served its purpose, and direct channels reduce information loss through coordinator relay.
 
-**Isolation trade-off on refine loops**: When `J=refine` reuses a retained teammate via SendMessage, the coordinator's refinement instruction inherently carries synthesis context (what to refine, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested refinement, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
+**Isolation trade-off on extend loops**: When `J=extend` deepens an existing perspective via SendMessage, the coordinator's re-inquiry instruction inherently carries synthesis context (what to deepen, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested extension, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
 
 **Isolation trade-off on action phase**: When `J=act` proceeds to Phase 7, the praxis agent communicates directly with originating perspectives. This is acceptable because: (1) the user explicitly chose to act, sanctioning the topology shift; (2) analysis-phase isolation already produced unbiased findings; (3) peer-to-peer verification is epistemically necessary — coordinator relay introduces State-Cognition Gap (information loss at each transfer layer).
 
 **Scope extension note**: Phase 6-7 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
 
-### Phase 4: Synthesis (Horizon Integration)
+### Phase 4a: Cross-Dialogue Check
 
-After all perspectives complete:
+After collecting all perspective results (R'), the coordinator reviews for cross-dialogue triggers before synthesis.
+
+**Trigger conditions** (all coordinator-detected from R'):
+- Contradictory conclusions between perspectives
+- One perspective's horizon limit intersects another's core finding
+- A finding needs adversarial testing
+
+**If triggers detected**: Coordinator mediates cross-dialogue via SendMessage:
+- Relay the challenging finding to the target perspective
+- 1 exchange per pair: challenge + response (no extended debate)
+- Coordinator controls what information crosses perspective boundaries
+
+**If no triggers**: Skip directly to Phase 4b.
+
+**Design rationale**: Cross-dialogue is placed after collection (Phase 3c) and before synthesis (Phase 4b) so the coordinator evaluates all perspectives before deciding which contradictions warrant live challenge. This makes trigger detection an explicit step — the coordinator checks for contradictions rather than relying on incidental discovery during synthesis.
+
+### Phase 4b: Synthesis (Horizon Integration)
+
+After Phase 4a (R'' = R' + any cross-dialogue responses):
 
 ```markdown
 ## Mission Analysis
@@ -469,7 +479,8 @@ This is a **phase-dependent topology shift**:
 
 | Phase | Topology | Rationale |
 |-------|----------|-----------|
-| Phase 3 (Analysis) | Coordinator-mediated only | Prevents confirmation bias (Asch conformity) |
+| Phase 3 (Analysis) | Strict isolation | Independent perspective analysis without cross-contamination |
+| Phase 4a (Cross-dialogue) | Coordinator-mediated | Structured contradiction resolution; coordinator controls information crossing |
 | Phase 7 (Action) | Peer-to-peer (praxis ↔ originating perspective) | Enables accurate verification; reduces information loss through coordinator relay |
 
 One exchange per finding: fix proposal → confirmation or revision request.
@@ -519,7 +530,7 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 
 1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/mission "text"`) still requires confirmation. Modify loops re-present until confirmed.
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 3: cross-dialogue is coordinator-mediated only. Phase 7: peer-to-peer allowed between praxis and originating perspectives for verification
+3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 3: strict isolation (no cross-dialogue). Phase 4a: coordinator-mediated cross-dialogue. Phase 7: peer-to-peer allowed between praxis and originating perspectives for verification
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
@@ -527,6 +538,6 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
 9. **Team persistence**: Team persists across Phase 5 loop iterations and through Phase 6-7 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 5 or Phase 5')
 10. **Classification authority**: Coordinator proposes initial classification; user confirms or modifies (final authority). Conservative default applies to initial proposal: ambiguous → Fᵈ
-11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
+11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4a) is coordinator-mediated with explicit trigger check; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
 12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
 
