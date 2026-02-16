@@ -390,6 +390,8 @@ Options:
 4. **Wrap up** — preserve deferred findings (Fᵤ/Fᵈ) and dissolve team
 ```
 
+**Option exhaustiveness**: Present exactly the options listed above. Do not generate, substitute, or reorder options beyond this template.
+
 **"Act on findings" availability**: Only present when Fₐ ≠ ∅ in the proposed classification. When all findings are deferred (Fₐ = ∅), omit this option.
 
 **Classification loop**: When the user selects "Modify classification", update the tiers per user specification → re-present the table with updated classification → await new decision. The modification loop stays within Phase 5.
