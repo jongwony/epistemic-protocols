@@ -63,42 +63,32 @@ Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases 
 ## Plugins
 
 ### Mission (πρόθεσις) — Prothesis
-Team-based multi-perspective investigation and execution. Injected into main agent context.
-- **Flow**: `U → MB → MBᵥ → C → P → Pₛ → T(Pₛ) → ∥I(T) → R → L → (K_i → sufficiency check → ∥F → V → L' → loop)`
-- **Key**: Phase 0 calls `AskUserQuestion` for Mission Brief confirmation; Phase 1 gathers context guided by MBᵥ; Phase 2 for perspective selection (multiSelect: individual options; user-supplied Pᵦ auto-included, novel perspectives only proposed); Phase 5a interactive classification (user-confirmed); Phase 5b sufficiency check with `act` option; Phase 6-7 classify findings and execute fixes with peer verification; loop until user satisfied or ESC
-- **Phase 3**: Agent team via TeamCreate (mandatory); spawn prompt includes Mission Brief; teammate isolation prevents cross-perspective contamination and confirmation bias; coordinator-mediated cross-dialogue; team persists across Phase 5a/5b loop and through Phase 6-7
-- **Phase 6-7**: 3-tier finding classification (actionable/surfaced-unknown/design-level) + praxis agent with peer verification; peer-to-peer in Phase 7 only; post-TeamDelete recommends follow-up protocols for deferred findings
+Resolve absent frameworks by assembling a team to analyze from selected viewpoints.
+- **Deficit**: FrameworkAbsent → FramedInquiry
+- **Triggers**: Purpose present but approach unspecified; multiple valid frameworks exist
 - **Invocation**: `/mission` or use "mission" in conversation
 
 ### Gap (συνείδησις) — Syneidesis
-Surface potential gaps at decision points as questions. Injected into main agent context.
-- **Flow**: `D → G → TaskCreate[all] → Q → J → Σ' → (re-scan → loop)`
-- **Key**: Phase 0 detects ALL gaps → TaskCreate batch registration; Phase 1 surfaces sequentially via `AskUserQuestion`; re-scan after each response; loop until all tasks completed or ESC
-- **Gap types**: Procedural, Consideration, Assumption, Alternative
-- **Conditions**: `committed(D)` (mutates state ∨ externally visible ∨ consumes resource) ∧ observable gap ∧ unaddressed
+Surface unnoticed gaps at decision points as questions.
+- **Deficit**: GapUnnoticed → AuditedDecision
+- **Triggers**: Committed action detected with observable, unaddressed gaps
 - **Invocation**: `/gap` or use "gap" in conversation
 
 ### Clarify (ἑρμηνεία) — Hermeneia
 Clarify intent-expression gaps through user-initiated dialogue.
-- **Flow**: `E → Eᵥ → Gₛ → Q → A → Î' → (loop)`
-- **Key**: User-initiated only; Phase 1a confirms E, Phase 1b asks user to select gap type (no auto-diagnosis), Phase 2 calls `AskUserQuestion` for clarification; loop until convergence
-- **Gap types**: Expression, Precision, Coherence, Context
+- **Deficit**: IntentMisarticulated → ClarifiedIntent
 - **Triggers**: "clarify", "what I mean", "did I express this right"
 - **Invocation**: `/clarify` or use "clarify" in conversation
 
 ### Grasp (κατάληψις) — Katalepsis
 Achieve certain comprehension of AI work through structured verification.
-- **Flow**: `R → C → Sₑ → Tᵣ → P → Δ → Q → A → Tᵤ → P' → (loop until katalepsis)`
-- **Key**: User-initiated; Phase 0 categorizes AI work; Phase 1 calls `AskUserQuestion` for entry point selection; Phase 2 calls `TaskCreate` for tracking; Phase 3 calls `AskUserQuestion` with Socratic probing questions (gap-type-specific comprehension tests); AI evaluates response and determines supporting reference via `Read` when needed; user proposals ejected via `TaskCreate` to maintain comprehension focus
-- **Gap types**: Expectation, Causality, Scope, Sequence
+- **Deficit**: ResultUngrasped → VerifiedUnderstanding
 - **Triggers**: "explain this", "what did you do?", "help me understand"
 - **Invocation**: `/grasp` or use "grasp" in conversation
 
 ### Goal (τέλος) — Telos
 Co-construct defined goals from vague intent through AI-proposed, user-shaped dialogue.
-- **Flow**: `G → Gᵥ → Dₛ → P → A → C' → (loop until sufficient)`
-- **Key**: AI-detected, user-confirmed (Phase 0); Phase 1 calls `AskUserQuestion` for dimension selection; Phase 2 proposes concrete candidates; Phase 4 calls `AskUserQuestion` for GoalContract approval; loop until user approves or ESC
-- **Gap types**: Outcome, Metric, Boundary, Priority
+- **Deficit**: GoalIndeterminate → DefinedEndState
 - **Triggers**: "not sure what I want", "something like", "ideas for", exploratory framing
 - **Invocation**: `/goal` or use "goal" in conversation
 
@@ -121,9 +111,9 @@ Pre-commit protocol verification via static checks and expert review.
 ## Core Principles
 
 - **Recognition over Recall**: Options to select, not blanks to fill
-- **Selection over Detection**: User selects gap types, AI does not auto-diagnose. Applies within protocols (user expertise); protocol-to-protocol ordering uses logical defaults with user override
+- **Selection over Detection**: User selects gap types; AI does not auto-diagnose
 - **Surfacing over Deciding**: AI illuminates, user judges
-- **Convergence Persistence**: Modes active until convergence (Hermeneia loops until |G| = 0)
+- **Convergence Persistence**: Modes active until convergence
 - **Priority Override**: Active protocols supersede default behaviors
 
 ## Protocol Precedence
@@ -160,16 +150,14 @@ node .claude/skills/verify/scripts/static-checks.js .
 1. **json-schema**: plugin.json required fields (name, version, description, author), semver format, name format (`/^[a-z][a-z0-9-]*$/`)
 2. **notation**: Unicode consistency (→, ∥, ∩, ∪, ⊆, ∈, ≠ over ASCII fallbacks)
 3. **directive-verb**: `call` (not `invoke`/`use`) for tool instructions
-4. **xref**: CLAUDE.md flow formulas sync with source files
+4. **xref**: Referenced file paths exist in expected locations
 5. **structure**: Required sections in protocol SKILL.md (Definition, Mode Activation, Protocol, Rules, PHASE TRANSITIONS, MODE STATE)
 6. **tool-grounding**: TOOL GROUNDING section present, external operations have `[Tool]` notation in PHASE TRANSITIONS
 7. **version-staleness**: plugin content changed without plugin.json version bump (git-aware, warn level; skips during merge/rebase conflicts; ignores README, LICENSE, .gitignore)
 
 ## Delegation Constraint
 
-- **Prothesis Phase 0-1**: Main agent only (AskUserQuestion for Mission Brief confirmation + targeted context gathering)
-- **Prothesis Phase 3**: MUST use agent team (TeamCreate + Task teammates)—isolated context required for unbiased perspective analysis; cross-dialogue is coordinator-mediated
-- **Prothesis Phase 6-7**: Praxis agent spawned via Task into existing team T; Phase 7 allows peer-to-peer (praxis ↔ originating perspective) for verification
+- **Prothesis**: See SKILL.md for phase-specific delegation rules (Phase 0-1 main agent, Phase 3+ agent team)
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 
@@ -185,9 +173,9 @@ node .claude/skills/verify/scripts/static-checks.js .
 
 | Change | Files to update |
 |--------|----------------|
-| New/modified phase | SKILL.md (formal block + prose), CLAUDE.md (flow formula + key behaviors) |
+| New/modified phase | SKILL.md (formal block + prose) |
 | New tool usage | SKILL.md (PHASE TRANSITIONS `[Tool]` + TOOL GROUNDING entry) |
-| New loop option | SKILL.md (LOOP + Phase 5 prose + Rules), CLAUDE.md (key behaviors) |
+| New loop option | SKILL.md (LOOP + Phase 5 prose + Rules) |
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |

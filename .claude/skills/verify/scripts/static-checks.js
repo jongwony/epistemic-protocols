@@ -223,60 +223,8 @@ function checkCrossReference() {
     'goal': 'telos/skills/goal/SKILL.md',
   };
 
-  // Extract CLAUDE.md sections: "### Alias (...) — ProtocolName" → "- **Flow**: `...`"
-  const aliases = Object.keys(aliasToSkill).map(a => a[0].toUpperCase() + a.slice(1)).join('|');
-  const sectionPattern = new RegExp(`###\\s+(${aliases})\\b[\\s\\S]*?-\\s*\\*\\*Flow\\*\\*:\\s*\`([^\`]+)\``, 'g');
-  let sectionMatch;
-  while ((sectionMatch = sectionPattern.exec(claudeMd)) !== null) {
-    const alias = sectionMatch[1].toLowerCase();
-    const formula = sectionMatch[2];
-    const skillRelPath = aliasToSkill[alias];
-    const skillPath = path.join(projectRoot, skillRelPath);
-
-    if (!fs.existsSync(skillPath)) {
-      results.fail.push({
-        check: 'xref',
-        file: 'CLAUDE.md',
-        message: `${sectionMatch[1]} SKILL.md not found at ${skillRelPath}`
-      });
-      continue;
-    }
-
-    const content = fs.readFileSync(skillPath, 'utf8');
-
-    // Extract flow formula from SKILL.md
-    // Two formats: "── FLOW ──\n<formula>" or first line with → in first code block
-    const flowSection = content.match(/── FLOW ──\n([^\n]+)/) ||
-                        content.match(/```\n([^\n]*→[^\n]*)\n/);
-    if (!flowSection) {
-      results.warn.push({
-        check: 'xref',
-        file: skillRelPath,
-        message: `${sectionMatch[1]} SKILL.md has no flow formula in first code block`
-      });
-      continue;
-    }
-
-    // Extract variable symbols from CLAUDE.md flow (e.g., "U → C → P" → ["U","C","P"])
-    // Strip parenthesized expressions and loop annotations for symbol extraction
-    const formulaSymbols = formula
-      .replace(/\([^)]*\)/g, '')        // remove parenthesized parts
-      .split(/\s*→\s*/)                 // split on arrows
-      .map(s => s.trim())
-      .filter(s => s && !s.includes('loop') && !s.includes('check'));
-
-    const skillFlowLine = flowSection[1].replace(/\s+/g, ' ');
-
-    // Check that key symbols from CLAUDE.md formula appear in SKILL.md flow
-    const missingSymbols = formulaSymbols.filter(sym => !skillFlowLine.includes(sym));
-    if (missingSymbols.length > formulaSymbols.length / 2) {
-      results.warn.push({
-        check: 'xref',
-        file: 'CLAUDE.md',
-        message: `${sectionMatch[1]} flow formula may be out of sync with SKILL.md (missing: ${missingSymbols.join(', ')})`
-      });
-    }
-  }
+  // Flow-formula comparison removed (GH #36): CLAUDE.md no longer contains flow formulas.
+  // Flow formulas live exclusively in each SKILL.md's formal definition block.
 
   // Check referenced files exist
   const fileRefs = claudeMd.matchAll(/`(references\/[^`]+)`/g);
