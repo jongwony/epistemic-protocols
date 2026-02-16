@@ -71,11 +71,10 @@ After Phase 0 (Mission Brief):
   J_mb = ESC           → terminate (no team exists)
 
 After Phase 5 (classification + routing):
-  J = confirm_act      → Phase 6 (Fₐ confirmed → spawn praxis into T; team retained)
-  J = confirm_done     → Ω(T, shutdown) → TeamDelete → terminate with L
+  J = act              → Phase 6 (Fₐ confirmed → spawn praxis into T; team retained)
   J = modify(finding)  → re-classify → re-present K_i → await
-  J = add_perspective  → Phase 2 (Λ.team retained; MB re-confirmation unnecessary)
-  J = refine           → Phase 3b (re-inquiry within existing T)
+  J = extend           → Q[AskUserQuestion](add new perspective | deepen existing) → Phase 2 or Phase 3b (team retained)
+  J = wrap_up          → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with L
   J = ESC              → Ω(T, shutdown) → TeamDelete → terminate with current L
 
 After Phase 5' (action sufficiency):
@@ -108,7 +107,7 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 D (parallel)             → SendMessage tool (type: "message", coordinator-mediated cross-dialogue)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
-Phase 5 K_i/Q            → AskUserQuestion (coordinator proposes classification, user confirms or routes; modify re-classifies; Escape → terminate)
+Phase 5 K_i/Q            → AskUserQuestion (classification + routing: act/modify/extend/wrap_up; extend triggers follow-up AskUserQuestion; Escape → terminate)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3a spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Syn (synthesis)          → Internal operation (no external tool)
@@ -335,9 +334,9 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 
 **Isolation trade-off on refine loops**: When `J=refine` reuses a retained teammate via SendMessage, the coordinator's refinement instruction inherently carries synthesis context (what to refine, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested refinement, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
 
-**Isolation trade-off on action phase**: When `J=confirm_act` proceeds to Phase 7, the praxis agent communicates directly with originating perspectives. This is acceptable because: (1) the user explicitly chose `confirm_act`, sanctioning the topology shift; (2) analysis-phase isolation already produced unbiased findings; (3) peer-to-peer verification is epistemically necessary — coordinator relay introduces State-Cognition Gap (information loss at each transfer layer).
+**Isolation trade-off on action phase**: When `J=act` proceeds to Phase 7, the praxis agent communicates directly with originating perspectives. This is acceptable because: (1) the user explicitly chose to act, sanctioning the topology shift; (2) analysis-phase isolation already produced unbiased findings; (3) peer-to-peer verification is epistemically necessary — coordinator relay introduces State-Cognition Gap (information loss at each transfer layer).
 
-**Scope extension note**: Phase 6-7 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `confirm_act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
+**Scope extension note**: Phase 6-7 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
 
 ### Phase 4: Synthesis (Horizon Integration)
 
@@ -364,7 +363,7 @@ After all perspectives complete:
 
 After synthesis, present a unified classification of findings from L with routing options for user decision.
 
-**Entry condition**: L contains findings with potential action implications (from divergence or assessment sections). When L is purely confirmatory, skip the classification table and present only routing options (confirm_done/add_perspective/refine).
+**Entry condition**: L contains findings with potential action implications (from divergence or assessment sections). When L is purely confirmatory, skip the classification table and present only routing options (extend/wrap_up).
 
 The coordinator proposes initial classification using the standard predicates:
 
@@ -377,7 +376,7 @@ The coordinator proposes initial classification using the standard predicates:
 **Call the AskUserQuestion tool** with classification and routing combined:
 
 ```
-Please confirm the findings classification and choose next step.
+Findings classification:
 
 | Finding | Proposed Tier | Rationale |
 |---------|--------------|-----------|
@@ -385,14 +384,13 @@ Please confirm the findings classification and choose next step.
 | ... | ... | ... |
 
 Options:
-1. **Confirm and act** — proceed to fix Fₐ items (team retained)
-2. **Confirm and conclude** — analysis sufficient, dissolve team
-3. **Modify classification** — adjust specific finding tiers (e.g., Fᵈ→Fₐ)
-4. **Add perspective** — explore additional viewpoints (team retained)
-5. **Refine existing** — revisit an analyzed perspective (team retained)
+1. **Act on findings** — execute Fₐ fixes within the team
+2. **Modify classification** — adjust specific finding tiers (e.g., Fᵈ→Fₐ)
+3. **Extend analysis** — add new perspective or deepen existing (team retained)
+4. **Wrap up** — preserve deferred findings (Fᵤ/Fᵈ) and dissolve team
 ```
 
-**"Confirm and act" availability**: Only present when Fₐ ≠ ∅ in the proposed classification. When all findings are deferred (Fₐ = ∅), omit this option.
+**"Act on findings" availability**: Only present when Fₐ ≠ ∅ in the proposed classification. When all findings are deferred (Fₐ = ∅), omit this option.
 
 **Classification loop**: When the user selects "Modify classification", update the tiers per user specification → re-present the table with updated classification → await new decision. The modification loop stays within Phase 5.
 
@@ -402,21 +400,21 @@ Options:
 - Perspectives MAY include `suggested_class` metadata; coordinator considers these in initial proposal
 
 **Loop behavior** (team lifecycle aware):
-- **Confirm and act**: Proceed to Phase 6; uses confirmed classification — no re-classification
-- **Confirm and conclude**: shutdown_request → TeamDelete → terminate with current Lens L
-- **Add perspective**: Return to Phase 2; existing team T retained → spawn new teammate into T (no TeamCreate)
-- **Refine existing**: Return to Phase 3b; call SendMessage to target teammate for re-analysis within existing T
+- **Act on findings**: Proceed to Phase 6; uses confirmed classification — no re-classification (team retained)
+- **Modify classification**: Update tiers per user specification → re-present K_i → await
+- **Extend analysis**: Follow-up AskUserQuestion — "Add new perspective" → Phase 2 (spawn new teammate into T) or "Deepen existing" → Phase 3b (SendMessage re-inquiry to target teammate). Team retained in both cases
+- **Wrap up**: Read deferred findings (Fᵤ/Fᵈ) from TaskList → shutdown_request → TeamDelete → re-register deferred in session task list → recommend follow-up protocols
 - **ESC**: shutdown_request → TeamDelete → terminate with current Lens L
 
-All terminal paths (confirm_done and ESC, from both Phase 5 and Phase 5') read deferred findings from TaskList before TeamDelete to preserve L'.deferred for post-TeamDelete recommendations.
+All terminal paths (wrap_up and ESC, from both Phase 5 and Phase 5') read deferred findings from TaskList before TeamDelete to preserve L'.deferred for post-TeamDelete recommendations.
 
-**Convergence**: Mode terminates when user confirms (Phase 5 or Phase 5') or explicitly exits. Team is deleted only at terminal states.
+**Convergence**: Mode terminates when user selects wrap_up (Phase 5 or Phase 5') or explicitly exits (ESC). Team is deleted only at terminal states.
 
 Consult `references/conceptual-foundations.md` for Theoria → Praxis conceptual distinction.
 
 ### Phase 6: Action Planning
 
-When the user selects `confirm_act` at Phase 5, the coordinator uses the **confirmed classification** — no re-classification occurs.
+When the user selects `act` at Phase 5, the coordinator uses the **confirmed classification** — no re-classification occurs.
 
 Call TaskCreate for **all** confirmed findings with tier metadata.
 
@@ -490,7 +488,7 @@ After Phase 7, **call the AskUserQuestion tool** to confirm action sufficiency.
 
 Recommendations are informational — user decides whether to call follow-up protocols.
 
-**No re-entry to Phase 5**: Phase 5' offers only sufficient/ESC, not add_perspective or refine. This is intentional — action results constitute a different epistemic object than analysis results. Re-analysis after action requires fresh context (new perspectives evaluating the changed state), which is better served by a new Prothesis invocation than by recycling the current team's analytical frame.
+**No re-entry to Phase 5**: Phase 5' offers only sufficient/ESC, not extend. This is intentional — action results constitute a different epistemic object than analysis results. Re-analysis after action requires fresh context (new perspectives evaluating the changed state), which is better served by a new Prothesis invocation than by recycling the current team's analytical frame.
 
 ## Conditions
 
