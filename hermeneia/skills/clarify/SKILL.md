@@ -217,7 +217,7 @@ Which best captures your intent?
 - **Escape hatch**: Include "something else" option when appropriate
 - **Minimal options**: 2-4 choices maximum per gap
 
-<!-- See references/socratic-style.md for: maieutic framing examples, Socratic elements, example transformation -->
+Consult `references/socratic-style.md` for maieutic framing examples, Socratic elements, and example transformation.
 
 ### Phase 3: Integration
 
