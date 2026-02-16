@@ -59,7 +59,7 @@ Phase 3a: Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ)   -- t
 Phase 3b: T → ∥I[TaskCreate](T) → D[SendMessage](T) → R         -- inquiry + optional dialogue [Tool]
 Phase 3c: R → Ω[SendMessage](T) → R'                            -- collection + deferred shutdown [Tool]
 Phase 4:  R' → Syn(R') → L                                      -- internal synthesis
-Phase 5:  L → K_i(L) → Q[AskUserQuestion](classification + routing) → await → J     -- unified classification + routing [Tool]
+Phase 5:  L → K_i(L) → Q[AskUserQuestion](classification + routing) → await → ((Fₐ, Fᵤ, Fᵈ), J)  -- unified classification + routing [Tool]
 Phase 6:  (Fₐ, Fᵤ, Fᵈ) → TaskCreate[all] → ∥Spawn[Task](T, praxis)                 -- register + spawn praxis [Tool]
 Phase 7:  ∥F[TaskUpdate](T, Fₐ) → V[SendMessage](T) → L'       -- fix + peer verify [Tool]
 Phase 5': L' → Q'[AskUserQuestion](action_sufficiency) → await → J'  -- action sufficiency [Tool]
@@ -71,7 +71,7 @@ After Phase 0 (Mission Brief):
   J_mb = ESC           → terminate (no team exists)
 
 After Phase 5 (classification + routing):
-  J = confirm_act      → Phase 6 (Fₐ confirmed → spawn praxis into T)
+  J = confirm_act      → Phase 6 (Fₐ confirmed → spawn praxis into T; team retained)
   J = confirm_done     → Ω(T, shutdown) → TeamDelete → terminate with L
   J = modify(finding)  → re-classify → re-present K_i → await
   J = add_perspective  → Phase 2 (Λ.team retained; MB re-confirmation unnecessary)
@@ -108,11 +108,10 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 D (parallel)             → SendMessage tool (type: "message", coordinator-mediated cross-dialogue)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
-Phase 5 Q                → AskUserQuestion (classification + routing; modify re-classifies; Escape → terminate)
+Phase 5 K_i/Q            → AskUserQuestion (coordinator proposes classification, user confirms or routes; modify re-classifies; Escape → terminate)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3a spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Syn (synthesis)          → Internal operation (no external tool)
-K_i (interactive)        → AskUserQuestion + internal classification (coordinator proposes, user confirms)
 TaskCreate (Phase 6)     → TaskCreate tool (register confirmed tiers with metadata)
 ∥Spawn praxis (parallel) → Task tool (team_name, name: spawn praxis into existing T)
 G(praxis)                → TaskList/TaskGet tools (praxis context acquisition: discovery + full descriptions)
@@ -336,9 +335,9 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 
 **Isolation trade-off on refine loops**: When `J=refine` reuses a retained teammate via SendMessage, the coordinator's refinement instruction inherently carries synthesis context (what to refine, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested refinement, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
 
-**Isolation trade-off on action phase**: When `J=act` proceeds to Phase 7, the praxis agent communicates directly with originating perspectives. This is acceptable because: (1) the user explicitly chose `act`, sanctioning the topology shift; (2) analysis-phase isolation already produced unbiased findings; (3) peer-to-peer verification is epistemically necessary — coordinator relay introduces State-Cognition Gap (information loss at each transfer layer).
+**Isolation trade-off on action phase**: When `J=confirm_act` proceeds to Phase 7, the praxis agent communicates directly with originating perspectives. This is acceptable because: (1) the user explicitly chose `confirm_act`, sanctioning the topology shift; (2) analysis-phase isolation already produced unbiased findings; (3) peer-to-peer verification is epistemically necessary — coordinator relay introduces State-Cognition Gap (information loss at each transfer layer).
 
-**Scope extension note**: Phase 6-7 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
+**Scope extension note**: Phase 6-7 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `confirm_act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
 
 ### Phase 4: Synthesis (Horizon Integration)
 
