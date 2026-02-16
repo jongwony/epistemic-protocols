@@ -183,7 +183,7 @@ False positive (unnecessary question) < False negative (missed perspective)
 | Synthesis complete | Lens established; follow-ups continue within lens |
 | User starts unrelated topic | Re-evaluate for new Prothesis |
 
-<!-- See references/conceptual-foundations.md for: Plan Mode Integration, Distinction from Socratic Method -->
+Consult `references/conceptual-foundations.md` for Plan Mode Integration and Distinction from Socratic Method.
 
 ## Protocol
 
@@ -431,7 +431,7 @@ All terminal paths (sufficient and ESC, from both Phase 5b and Phase 5') read de
 
 **Convergence**: Mode terminates when user confirms sufficiency (Phase 5b or Phase 5') or explicitly exits. Team is deleted only at terminal states.
 
-<!-- See references/conceptual-foundations.md for: Theoria → Praxis conceptual distinction -->
+Consult `references/conceptual-foundations.md` for Theoria → Praxis conceptual distinction.
 
 ### Phase 6: Action Planning
 
@@ -532,7 +532,7 @@ Prothesis does **not** apply to **closed-world** cognition:
 
 **Heuristic**: If a deterministic procedure can answer the inquiry, skip Prothesis.
 
-<!-- See references/conceptual-foundations.md for: Parametric Nature, Specialization -->
+Consult `references/conceptual-foundations.md` for Parametric Nature and Specialization.
 
 ## Rules
 
