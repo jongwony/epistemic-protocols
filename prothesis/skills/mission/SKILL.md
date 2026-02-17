@@ -76,12 +76,12 @@ After Phase 5 (classification + routing):
   J = modify(finding)  → re-classify → re-present K_i → await
   J = extend           → Q[AskUserQuestion](add new perspective | deepen existing) → Phase 2 or Phase 3 inquiry (team retained)
   J = wrap_up          → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with L
-  J = ESC              → Ω(T, shutdown) → TeamDelete → terminate with current L
+  J = ESC              → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with current L
 
 After Phase 5' (action sufficiency):
-  J' = sufficient     → Ω(T, shutdown) → TeamDelete → terminate with L'
+  J' = sufficient     → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with L'
                          → recommend_protocols(Fᵤ ∪ Fᵈ)
-  J' = ESC            → Ω(T, shutdown) → TeamDelete → terminate with current L'
+  J' = ESC            → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with current L'
                          → recommend_protocols(Fᵤ ∪ Fᵈ)
 
 After Phase 6 (classification guard):
