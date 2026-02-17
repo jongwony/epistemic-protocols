@@ -48,8 +48,8 @@ integrate  (state)   → Internal state update (no external tool)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: ExecutionPlan, gaps: Set(ContextGap),
-      resolved: Set(ContextGap), history: List<(Cₛ, A)>,
-      cause_tag: CauseTag, active: Bool }
+      resolved: Set(ContextGap), dismissed: Set(ContextGap),
+      history: List<(Cₛ, A)>, cause_tag: CauseTag, active: Bool }
 CauseTag ∈ {constraint_drift, dissatisfaction, failure_pattern, assumption_stale}
 ```
 
@@ -211,7 +211,7 @@ After integration:
 | Cooldown | Suppress re-trigger on same ContextGap type within action | TBD |
 | Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same decision point | TBD |
 
-**TBD thresholds** will be calibrated during pilot usage. Until then, conservative defaults apply: when in doubt, suppress rather than surface.
+**TBD thresholds** will be calibrated during pilot usage. Until then, when in doubt, surface at Light intensity rather than suppress — route uncertainty through intensity levels (Light/Medium/Heavy), not binary suppress/activate.
 
 ## Rules
 
