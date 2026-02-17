@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → Ω(T) → R' → Δ?(R') → Syn(R'') → L → K_i(L) → ∥F(T) → V(T) → L'
+Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → L → K_i(L) → ∥F(T) → V(T) → L'
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
@@ -29,10 +29,13 @@ S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; P
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2)
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
 ∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → R
-Δ?     = Conditional cross-dialogue: trigger check → coordinator-mediated challenge (Phase 4a)
-Ω      = Collection: T → R, shutdown(T) ∨ retain(T)  -- conditional on loop
-R      = Set(Result)                           -- inquiry outputs
-Syn    = Synthesis: R → (∩, D, A)
+Ω      = Collection: R → R', retain(T)               -- finalize results; team lifecycle deferred to loop
+R      = Set(Result)                                  -- raw inquiry outputs
+R'     = Set(Result) post-collection                  -- after Phase 3c collection
+R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue responses (R'' = R' when Δ = ∅)
+Δ      = Trigger detection: R' → Set(Trigger)         -- contradictions, horizon intersections, adversarial needs
+D?     = Conditional dialogue: Δ ≠ ∅ → coordinator-mediated challenge; Δ = ∅ → skip
+Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
 
@@ -243,7 +246,7 @@ options:
 **Perspective selection criteria**:
 - Each offers a **distinct epistemic framework** (not variations of same view)
 - **Productive tension**: Perspectives should enable meaningful disagreement—differing in interpretation, weighing, or application, even if sharing some evidence
-- **Commensurability minimum**: At least one shared referent, standard, or vocabulary must exist between perspectives to enable Phase 4 synthesis
+- **Commensurability minimum**: At least one shared referent, standard, or vocabulary must exist between perspectives to enable Phase 4b synthesis
 - **Deliverable-aligned**: Perspectives should produce assessments relevant to MBᵥ.expected_deliverable
 - **Critical viewpoint** (when applicable): Include when genuine alternatives exist; omit when perspectives legitimately converge
 - Specific enough to guide analysis (not "general expert")
@@ -313,7 +316,7 @@ Teammates analyze independently. Results arrive via idle notifications. Proceed 
 
 #### Phase 3c: Collection
 
-Collect all results (initial analyses + any dialogue responses) into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 5, where the user's sufficiency judgment determines team lifecycle.
+Collect inquiry results into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 5, where the user's sufficiency judgment determines team lifecycle.
 
 #### Isolated Context Requirement
 
