@@ -1,0 +1,328 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jongwony/epistemic-protocols/codex/schemas/canonical-prompt.schema.json",
+  "title": "Canonical Prompt Spec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "version",
+    "source",
+    "source_prompts",
+    "steps"
+  ],
+  "properties": {
+    "protocol": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[^\\n]+\\.md$"
+    },
+    "source_prompts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/sourcePrompt"
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    },
+    "task_sync": {
+      "$ref": "#/$defs/taskSync"
+    }
+  },
+  "$defs": {
+    "sourcePrompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_phase",
+        "source_options_count",
+        "mapped_step_ids"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "source_phase": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_options_count": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "overflow_strategy": {
+          "type": "string",
+          "enum": [
+            "two_stage_routing"
+          ]
+        },
+        "mapped_step_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "source_options_count": {
+                "minimum": 4
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "overflow_strategy"
+            ]
+          }
+        }
+      ]
+    },
+    "stepOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "description"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "implication": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answer",
+        "next_step"
+      ],
+      "properties": {
+        "answer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "next_step": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        }
+      }
+    },
+    "taskTransition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to",
+        "emit_update_plan"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "in_progress",
+            "completed"
+          ]
+        },
+        "to": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "in_progress",
+            "completed"
+          ]
+        },
+        "emit_update_plan": {
+          "type": "boolean"
+        }
+      }
+    },
+    "taskSyncCreate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "emit",
+        "default_status"
+      ],
+      "properties": {
+        "emit": {
+          "type": "boolean"
+        },
+        "default_status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "in_progress",
+            "completed"
+          ]
+        }
+      }
+    },
+    "taskSync": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_tool",
+        "target_tool",
+        "create",
+        "transitions",
+        "single_in_progress",
+        "fallback_mode"
+      ],
+      "properties": {
+        "source_tool": {
+          "type": "string",
+          "const": "TaskCreate"
+        },
+        "target_tool": {
+          "type": "string",
+          "const": "update_plan"
+        },
+        "create": {
+          "$ref": "#/$defs/taskSyncCreate"
+        },
+        "transitions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/taskTransition"
+          }
+        },
+        "single_in_progress": {
+          "type": "boolean"
+        },
+        "fallback_mode": {
+          "type": "string",
+          "enum": [
+            "internal_state_only"
+          ]
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "intent",
+        "question",
+        "options",
+        "on_escape"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "intent": {
+          "type": "string",
+          "enum": [
+            "confirm",
+            "select_one",
+            "select_many",
+            "judge",
+            "terminate"
+          ]
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/stepOption"
+          }
+        },
+        "max_choices": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "on_escape": {
+          "type": "string",
+          "enum": [
+            "terminate",
+            "return_previous",
+            "defer"
+          ]
+        },
+        "next": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transition"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "intent": {
+                "const": "select_many"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "max_choices"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "intent": {
+                "enum": [
+                  "confirm",
+                  "select_one",
+                  "judge",
+                  "terminate"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "max_choices": {
+                "const": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

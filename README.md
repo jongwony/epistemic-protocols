@@ -64,6 +64,23 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 /goal [your vague idea]      # Co-construct defined goals from intent
 ```
 
+## Codex Compatibility Layer
+
+This repository now includes a Codex mapping layer for:
+
+- `AskUserQuestion → request_user_input`
+- `TaskCreate / selective TaskUpdate → update_plan`
+
+- Mapping spec: `codex/compat/request-user-input-mapping.md`
+- Canonical schema: `codex/schemas/canonical-prompt.schema.json`
+- Pilot protocol mappings: `codex/examples/{hermeneia,syneidesis,telos,katalepsis}.json`
+- Validation: `node .claude/skills/verify/scripts/check-codex-compat.js .`
+
+Design rules:
+- when source option count exceeds 3, mappings must use `two_stage_routing` decomposition
+- `TaskCreate` always maps to `update_plan` step creation (`pending`)
+- `TaskUpdate` maps only for `pending → in_progress` and `in_progress → completed`
+
 ## License
 
 MIT

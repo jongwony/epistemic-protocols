@@ -1,0 +1,164 @@
+{
+  "protocol": "hermeneia",
+  "version": "1.0.0",
+  "source": "hermeneia/skills/clarify/SKILL.md",
+  "source_prompts": [
+    {
+      "id": "phase1a_expression_confirmation",
+      "source_phase": "Phase 1a",
+      "source_options_count": 2,
+      "mapped_step_ids": [
+        "phase1a_expression_confirmation"
+      ]
+    },
+    {
+      "id": "phase1b_gap_type_selection",
+      "source_phase": "Phase 1b",
+      "source_options_count": 4,
+      "overflow_strategy": "two_stage_routing",
+      "mapped_step_ids": [
+        "phase1b_gap_cluster",
+        "phase1b_gap_detail"
+      ]
+    },
+    {
+      "id": "phase2_clarification_options",
+      "source_phase": "Phase 2",
+      "source_options_count": 4,
+      "overflow_strategy": "two_stage_routing",
+      "mapped_step_ids": [
+        "phase2_interpretation_cluster",
+        "phase2_interpretation_detail",
+        "phase2_sufficiency_check"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "phase1a_expression_confirmation",
+      "intent": "confirm",
+      "question": "Which expression should we clarify first?",
+      "options": [
+        {
+          "label": "Use bound expression",
+          "description": "Clarify the expression inferred from your request."
+        },
+        {
+          "label": "Specify another expression",
+          "description": "Provide a different expression to clarify."
+        },
+        {
+          "label": "Stop clarification",
+          "description": "Terminate clarification mode without changes."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase1b_gap_cluster",
+      "intent": "select_one",
+      "question": "Which gap family best matches your difficulty?",
+      "options": [
+        {
+          "label": "Expression or precision",
+          "description": "You need help with wording or scope detail."
+        },
+        {
+          "label": "Coherence or context",
+          "description": "You need help with consistency or missing background."
+        },
+        {
+          "label": "Stop clarification",
+          "description": "Exit without additional gap diagnosis."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase1b_gap_detail",
+      "intent": "select_one",
+      "question": "Which specific gap should we resolve now?",
+      "options": [
+        {
+          "label": "Expression",
+          "description": "Clarify what you intended to say."
+        },
+        {
+          "label": "Precision",
+          "description": "Clarify scope, degree, or threshold."
+        },
+        {
+          "label": "Back to gap families",
+          "description": "Return and choose a different family."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase2_interpretation_cluster",
+      "intent": "select_one",
+      "question": "Which interpretation bucket is closest to your intent?",
+      "options": [
+        {
+          "label": "Core intent",
+          "description": "Select among interpretations of the main objective."
+        },
+        {
+          "label": "Constraints",
+          "description": "Select among interpretations of limits and scope."
+        },
+        {
+          "label": "Priority and tone",
+          "description": "Select among interpretations of trade-offs and emphasis."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase2_interpretation_detail",
+      "intent": "select_one",
+      "question": "Which interpretation best captures your intent?",
+      "options": [
+        {
+          "label": "Interpretation A",
+          "description": "Prioritizes speed with minimal additional constraints."
+        },
+        {
+          "label": "Interpretation B",
+          "description": "Balances speed with explicit validation criteria."
+        },
+        {
+          "label": "Interpretation C",
+          "description": "Prioritizes correctness and full edge-case coverage."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase2_sufficiency_check",
+      "intent": "judge",
+      "question": "Is the current interpretation sufficient to proceed?",
+      "options": [
+        {
+          "label": "Proceed",
+          "description": "Use the current interpretation and continue."
+        },
+        {
+          "label": "Refine one more time",
+          "description": "Ask one more clarification question."
+        },
+        {
+          "label": "Stop clarification",
+          "description": "Exit with current understanding."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    }
+  ]
+}

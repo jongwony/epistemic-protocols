@@ -574,6 +574,57 @@ function checkVersionStaleness() {
 }
 
 // ============================================================
+// Check 8: Codex Compatibility (AskUserQuestion -> request_user_input)
+// ============================================================
+function checkCodexCompat() {
+  const scriptRel = '.claude/skills/verify/scripts/check-codex-compat.js';
+  const scriptPath = path.join(projectRoot, scriptRel);
+
+  if (!fs.existsSync(scriptPath)) {
+    results.warn.push({
+      check: 'codex-compat',
+      file: scriptRel,
+      message: 'Codex compatibility checker not found; skipping'
+    });
+    return;
+  }
+
+  try {
+    const output = execFileSync(
+      process.execPath,
+      [scriptPath, projectRoot],
+      { cwd: projectRoot, encoding: 'utf8' }
+    );
+
+    const parsed = JSON.parse(output);
+    for (const key of ['pass', 'fail', 'warn']) {
+      if (!Array.isArray(parsed[key])) continue;
+      for (const item of parsed[key]) {
+        results[key].push(item);
+      }
+    }
+  } catch (e) {
+    // If checker reports failures it exits 1; stderr/stdout may both carry JSON.
+    const payload = (e.stdout || e.stderr || '').toString().trim();
+    try {
+      const parsed = JSON.parse(payload);
+      for (const key of ['pass', 'fail', 'warn']) {
+        if (!Array.isArray(parsed[key])) continue;
+        for (const item of parsed[key]) {
+          results[key].push(item);
+        }
+      }
+    } catch {
+      results.fail.push({
+        check: 'codex-compat',
+        file: scriptRel,
+        message: `Failed to execute checker: ${e.message}`
+      });
+    }
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -584,6 +635,7 @@ try {
   checkRequiredSections();
   checkToolGrounding();
   checkVersionStaleness();
+  checkCodexCompat();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));

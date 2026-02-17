@@ -64,6 +64,23 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 /goal [모호한 아이디어]   # 의도에서 정의된 목표 공동 구성
 ```
 
+## Codex 호환 계층
+
+이 저장소는 다음 Codex 호환 매핑 계층을 포함합니다.
+
+- `AskUserQuestion → request_user_input`
+- `TaskCreate / 선택적 TaskUpdate → update_plan`
+
+- 매핑 규약: `codex/compat/request-user-input-mapping.md`
+- Canonical 스키마: `codex/schemas/canonical-prompt.schema.json`
+- 파일럿 매핑: `codex/examples/{hermeneia,syneidesis,telos,katalepsis}.json`
+- 검증 명령: `node .claude/skills/verify/scripts/check-codex-compat.js .`
+
+핵심 규칙:
+- 원본 옵션 수가 4개 이상이면 반드시 `two_stage_routing` 분해를 사용합니다.
+- `TaskCreate`는 항상 `update_plan` step 생성(`pending`)으로 매핑합니다.
+- `TaskUpdate`는 `pending → in_progress`, `in_progress → completed` 전이만 매핑합니다.
+
 ## 라이선스
 
 MIT

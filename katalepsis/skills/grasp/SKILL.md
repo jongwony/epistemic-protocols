@@ -271,6 +271,42 @@ For each task (category):
 
 5. **On gap detected**: Handle per step 3c evaluation table. Do not mark complete until user confirms.
 
+## Codex Mapping
+
+For Codex runtime, convert `AskUserQuestion` stages into `request_user_input` through canonical step routing:
+
+- Source profile: `codex/examples/katalepsis.json`
+- Mapping contract: `codex/compat/request-user-input-mapping.md`
+- Schema: `codex/schemas/canonical-prompt.schema.json`
+
+### Step Mapping (Pilot)
+
+| AskUserQuestion Stage | Codex Canonical Steps | Rule |
+|-----------------------|-----------------------|------|
+| Phase 1 entry point selection (`multiSelect`, max 4 categories) | `phase1_category_router` → `phase1_category_detail` → `phase1_category_continue` | required `two_stage_routing` + iterative selection |
+| Phase 3 comprehension verification | `phase3_probe` | direct |
+| Phase 3 next-action gate | `phase3_next_action` | explicit continue/advance/stop |
+
+### Task Mapping (Codex)
+
+| Source Task Event | Codex Tool | Rule |
+|-------------------|------------|------|
+| Register selected categories (`TaskCreate`) | `update_plan` step create | mandatory; default status `pending` |
+| Category starts (`TaskUpdate`: `pending → in_progress`) | `update_plan` status sync | emitted |
+| Category mastered (`TaskUpdate`: `in_progress → completed`) | `update_plan` status sync | emitted |
+| Non-critical TaskUpdate transitions | internal runtime state | no `update_plan` call |
+
+### Codex Constraints
+
+- Every step must declare `intent`.
+- Every step must declare `on_escape` (`terminate` default).
+- Source options > 3 require `two_stage_routing` decomposition.
+- Effective multi-select uses repeated single-choice turns with explicit continuation.
+- `TaskCreate` must map to `update_plan` step creation.
+- `TaskUpdate` maps only for `pending → in_progress` and `in_progress → completed`.
+- Keep at most one `in_progress` item in `update_plan`.
+- If `update_plan` is unavailable, keep Task state internally (`internal_state_only`).
+
 ### Verification Style
 
 **Socratic verification**: Ask rather than tell.
@@ -323,3 +359,4 @@ Use:
 9. **Escape hatch**: User can exit at any time
 10. **Phantasia update**: Each verification updates internal model of user's understanding
 11. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
+12. **Codex task sync**: In Codex runtime, mirror TaskCreate always and mirror TaskUpdate only on high-signal transitions

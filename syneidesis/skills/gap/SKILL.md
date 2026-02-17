@@ -268,6 +268,42 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 
 Note: Esc key → unconditional loop termination (LOOP level). Silence (no response) is theoretical; AskUserQuestion blocks until response or Esc.
 
+## Codex Mapping
+
+For Codex runtime, map `AskUserQuestion` to `request_user_input` through canonical decomposition:
+
+- Source profile: `codex/examples/syneidesis.json`
+- Mapping contract: `codex/compat/request-user-input-mapping.md`
+- Schema: `codex/schemas/canonical-prompt.schema.json`
+
+### Step Mapping (Pilot)
+
+| AskUserQuestion Stage | Codex Canonical Steps | Rule |
+|-----------------------|-----------------------|------|
+| Phase 1 gap surfacing (up to 4 options) | `phase1_gap_cluster` → `phase1_gap_detail` | required `two_stage_routing` for overflow |
+| Phase 2 judgment | `phase2_judgment` | direct (3-option judgment) |
+| Loop continuation | `phase2_continue` | explicit continue/stop gate |
+
+### Task Mapping (Codex)
+
+| Source Task Event | Codex Tool | Rule |
+|-------------------|------------|------|
+| Detect ALL gaps (`TaskCreate`) | `update_plan` step create | mandatory; default status `pending` |
+| Current gap starts (`TaskUpdate`: `pending → in_progress`) | `update_plan` status sync | emitted |
+| Gap resolved (`TaskUpdate`: `in_progress → completed`) | `update_plan` status sync | emitted |
+| Non-critical TaskUpdate transitions | internal runtime state | no `update_plan` call |
+
+### Codex Constraints
+
+- `intent` is required on every step.
+- `on_escape` is required on every step (`terminate` default).
+- Source options > 3 must be split into 2-stage routes before tool call.
+- Each Codex question remains 2-3 mutually exclusive options.
+- `TaskCreate` must map to `update_plan` step creation.
+- `TaskUpdate` maps only for `pending → in_progress` and `in_progress → completed`.
+- Keep at most one `in_progress` item in `update_plan`.
+- If `update_plan` is unavailable, keep Task state internally (`internal_state_only`).
+
 ## Intensity
 
 | Level | When | Format |
@@ -287,3 +323,4 @@ Note: Esc key → unconditional loop termination (LOOP level). Silence (no respo
 7. **Convergence persistence**: Mode remains active until all gaps resolved or user ESC
 8. **Dynamic discovery**: Re-scan after each response; new gaps → TaskCreate
 9. **Gap dependencies**: Use task blocking when gaps have logical order
+10. **Codex task sync**: In Codex runtime, mirror TaskCreate always and mirror TaskUpdate only on high-signal transitions

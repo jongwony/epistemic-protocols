@@ -1,0 +1,166 @@
+{
+  "protocol": "katalepsis",
+  "version": "1.0.0",
+  "source": "katalepsis/skills/grasp/SKILL.md",
+  "source_prompts": [
+    {
+      "id": "phase1_entry_points",
+      "source_phase": "Phase 1",
+      "source_options_count": 4,
+      "overflow_strategy": "two_stage_routing",
+      "mapped_step_ids": [
+        "phase1_category_router",
+        "phase1_category_detail",
+        "phase1_category_continue"
+      ]
+    },
+    {
+      "id": "phase3_comprehension_probe",
+      "source_phase": "Phase 3",
+      "source_options_count": 3,
+      "mapped_step_ids": [
+        "phase3_probe",
+        "phase3_next_action"
+      ]
+    }
+  ],
+  "task_sync": {
+    "source_tool": "TaskCreate",
+    "target_tool": "update_plan",
+    "create": {
+      "emit": true,
+      "default_status": "pending"
+    },
+    "transitions": [
+      {
+        "from": "pending",
+        "to": "in_progress",
+        "emit_update_plan": true
+      },
+      {
+        "from": "in_progress",
+        "to": "completed",
+        "emit_update_plan": true
+      },
+      {
+        "from": "pending",
+        "to": "pending",
+        "emit_update_plan": false
+      },
+      {
+        "from": "completed",
+        "to": "completed",
+        "emit_update_plan": false
+      }
+    ],
+    "single_in_progress": true,
+    "fallback_mode": "internal_state_only"
+  },
+  "steps": [
+    {
+      "id": "phase1_category_router",
+      "intent": "select_one",
+      "question": "Which category should we verify first?",
+      "options": [
+        {
+          "label": "Architecture and dependencies",
+          "description": "Start with structural and dependency-level understanding."
+        },
+        {
+          "label": "Code-level changes",
+          "description": "Start with new code, modifications, or refactoring details."
+        },
+        {
+          "label": "Stop grasp mode",
+          "description": "Terminate comprehension verification."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase1_category_detail",
+      "intent": "select_one",
+      "question": "Pick the exact category to verify now.",
+      "options": [
+        {
+          "label": "New code",
+          "description": "Verify understanding of newly introduced logic."
+        },
+        {
+          "label": "Modification",
+          "description": "Verify understanding of altered existing behavior."
+        },
+        {
+          "label": "Refactoring",
+          "description": "Verify understanding of structural changes without behavior change."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase1_category_continue",
+      "intent": "judge",
+      "question": "Do you want to add another category for verification?",
+      "options": [
+        {
+          "label": "Add another category",
+          "description": "Queue one more category before probing."
+        },
+        {
+          "label": "Start probing now",
+          "description": "Begin comprehension checks for selected categories."
+        },
+        {
+          "label": "Stop grasp mode",
+          "description": "Exit without additional category selection."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase3_probe",
+      "intent": "judge",
+      "question": "Which response best matches your current understanding?",
+      "options": [
+        {
+          "label": "I can explain it confidently",
+          "description": "Confirms comprehension for this category."
+        },
+        {
+          "label": "I am partially unsure",
+          "description": "Indicates a targeted follow-up probe is needed."
+        },
+        {
+          "label": "I have a misconception",
+          "description": "Triggers correction with source grounding."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase3_next_action",
+      "intent": "judge",
+      "question": "What should happen after this probe?",
+      "options": [
+        {
+          "label": "Continue same category",
+          "description": "Run another probe in the current category."
+        },
+        {
+          "label": "Move to next category",
+          "description": "Mark current task complete and advance."
+        },
+        {
+          "label": "Stop grasp mode",
+          "description": "Terminate verification with current understanding."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    }
+  ]
+}

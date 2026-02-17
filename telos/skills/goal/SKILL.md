@@ -274,6 +274,30 @@ Options:
 3. **Add dimension** — define an additional field
 ```
 
+## Codex Mapping
+
+For Codex runtime, map `AskUserQuestion` stages to `request_user_input` via canonical step decomposition:
+
+- Source profile: `codex/examples/telos.json`
+- Mapping contract: `codex/compat/request-user-input-mapping.md`
+- Schema: `codex/schemas/canonical-prompt.schema.json`
+
+### Step Mapping (Pilot)
+
+| AskUserQuestion Stage | Codex Canonical Steps | Rule |
+|-----------------------|-----------------------|------|
+| Phase 0 activation confirmation | `phase0_activation_confirm` | direct |
+| Phase 1 dimension selection (4 options + multi-select intent) | `phase1_dimension_router` → `phase1_dimension_detail` → `phase1_dimension_continue` | required `two_stage_routing` + iterative multi-select loop |
+| Phase 2 proposal response (can exceed 3 options in fallback path) | `phase2_response_router` → `phase2_modify_focus` | required when source options > 3 |
+| Phase 4 sufficiency check | `phase4_sufficiency` | direct |
+
+### Codex Constraints
+
+- Every step defines `intent`.
+- Every step defines `on_escape` (`terminate` default).
+- Source option overflow (>3) must use `two_stage_routing`.
+- Multi-select is modeled as repeated single-choice turns with explicit continue/stop judgment.
+
 ## Intensity
 
 | Level | When | Format |

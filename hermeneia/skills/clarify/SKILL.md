@@ -245,6 +245,29 @@ Based on your clarification:
 Proceeding with this understanding.
 ```
 
+## Codex Mapping
+
+For Codex runtime, map `AskUserQuestion` stages to `request_user_input` via Canonical Prompt Spec:
+
+- Source profile: `codex/examples/hermeneia.json`
+- Mapping contract: `codex/compat/request-user-input-mapping.md`
+- Schema: `codex/schemas/canonical-prompt.schema.json`
+
+### Step Mapping (Pilot)
+
+| AskUserQuestion Stage | Codex Canonical Steps | Rule |
+|-----------------------|-----------------------|------|
+| Phase 1a expression confirmation | `phase1a_expression_confirmation` | direct (2-3 options) |
+| Phase 1b gap type selection (4 options) | `phase1b_gap_cluster` → `phase1b_gap_detail` | required `two_stage_routing` |
+| Phase 2 clarification options (2-4 options) | `phase2_interpretation_cluster` → `phase2_interpretation_detail` → `phase2_sufficiency_check` | required when source options > 3 |
+
+### Codex Constraints
+
+- Every step must include `intent`.
+- Every step must include `on_escape` (`terminate` default).
+- Any source stage with options > 3 must be decomposed via `two_stage_routing`.
+- Multi-choice behavior uses iterative re-entry, not wide one-shot option lists.
+
 ## Intensity
 
 | Level | When | Format |

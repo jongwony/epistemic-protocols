@@ -1,0 +1,189 @@
+{
+  "protocol": "telos",
+  "version": "1.0.0",
+  "source": "telos/skills/goal/SKILL.md",
+  "source_prompts": [
+    {
+      "id": "phase0_activation_confirm",
+      "source_phase": "Phase 0",
+      "source_options_count": 2,
+      "mapped_step_ids": [
+        "phase0_activation_confirm"
+      ]
+    },
+    {
+      "id": "phase1_dimension_selection",
+      "source_phase": "Phase 1",
+      "source_options_count": 4,
+      "overflow_strategy": "two_stage_routing",
+      "mapped_step_ids": [
+        "phase1_dimension_router",
+        "phase1_dimension_detail",
+        "phase1_dimension_continue"
+      ]
+    },
+    {
+      "id": "phase2_proposal_response",
+      "source_phase": "Phase 2",
+      "source_options_count": 4,
+      "overflow_strategy": "two_stage_routing",
+      "mapped_step_ids": [
+        "phase2_response_router",
+        "phase2_modify_focus"
+      ]
+    },
+    {
+      "id": "phase4_sufficiency",
+      "source_phase": "Phase 4",
+      "source_options_count": 3,
+      "mapped_step_ids": [
+        "phase4_sufficiency"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "id": "phase0_activation_confirm",
+      "intent": "confirm",
+      "question": "Should we define the goal before execution?",
+      "options": [
+        {
+          "label": "Define goal together",
+          "description": "Start co-construction of a GoalContract."
+        },
+        {
+          "label": "Proceed as-is",
+          "description": "Skip Telos and continue with current goal framing."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase1_dimension_router",
+      "intent": "select_one",
+      "question": "Which dimension family should we define first?",
+      "options": [
+        {
+          "label": "Outcome first",
+          "description": "Define the concrete end state before other dimensions."
+        },
+        {
+          "label": "Boundary or priority",
+          "description": "Define scope or trade-off policy first."
+        },
+        {
+          "label": "Metric first",
+          "description": "Define how success will be measured first."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase1_dimension_detail",
+      "intent": "select_one",
+      "question": "Select the next specific dimension to define.",
+      "options": [
+        {
+          "label": "Boundary",
+          "description": "Specify inclusions, exclusions, and limits."
+        },
+        {
+          "label": "Priority",
+          "description": "Specify trade-off order when values conflict."
+        },
+        {
+          "label": "Metric",
+          "description": "Specify measurable success criteria."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase1_dimension_continue",
+      "intent": "judge",
+      "question": "Do you want to define another dimension now?",
+      "options": [
+        {
+          "label": "Define another dimension",
+          "description": "Continue the dimension selection loop."
+        },
+        {
+          "label": "Move to proposal",
+          "description": "Use current dimensions and generate a proposal."
+        },
+        {
+          "label": "Stop Telos",
+          "description": "Terminate goal co-construction."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase2_response_router",
+      "intent": "judge",
+      "question": "How do you want to handle this proposal?",
+      "options": [
+        {
+          "label": "Accept",
+          "description": "Adopt the proposal as the current contract value."
+        },
+        {
+          "label": "Modify",
+          "description": "Adjust one aspect while keeping proposal structure."
+        },
+        {
+          "label": "Reject",
+          "description": "Discard and request an alternative proposal."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase2_modify_focus",
+      "intent": "select_one",
+      "question": "Which aspect should be modified first?",
+      "options": [
+        {
+          "label": "Target level",
+          "description": "Change strictness, scope, or expected impact size."
+        },
+        {
+          "label": "Time horizon",
+          "description": "Change delivery timing or milestone boundaries."
+        },
+        {
+          "label": "Constraint baseline",
+          "description": "Change required constraints or mandatory safeguards."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase4_sufficiency",
+      "intent": "confirm",
+      "question": "Is the current GoalContract sufficient?",
+      "options": [
+        {
+          "label": "Approve and proceed",
+          "description": "Finalize goal definition and continue execution."
+        },
+        {
+          "label": "Revise contract",
+          "description": "Return to unresolved dimensions or proposal updates."
+        },
+        {
+          "label": "Stop goal mode",
+          "description": "Exit Telos without further refinement."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    }
+  ]
+}

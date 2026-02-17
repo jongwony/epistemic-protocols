@@ -48,6 +48,7 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 - Required sections in protocols (Definition, Mode Activation, Protocol, Rules)
 - Tool grounding consistency (TOOL GROUNDING ↔ PHASE TRANSITIONS)
 - Version staleness detection (content changes without version bump)
+- Codex compatibility (pilot mappings for `AskUserQuestion → request_user_input` and task sync rules for `TaskCreate/TaskUpdate → update_plan`)
 
 ### Phase 2: Expert Review
 

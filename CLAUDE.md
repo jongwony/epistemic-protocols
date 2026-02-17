@@ -12,6 +12,10 @@ Claude Code plugin marketplace for epistemic dialogue — each protocol resolves
 epistemic-protocols/
 ├── .claude-plugin/marketplace.json    # Marketplace manifest
 ├── .claude/skills/verify/             # Project-level verification skill
+├── codex/                             # Codex compatibility layer
+│   ├── compat/request-user-input-mapping.md
+│   ├── schemas/canonical-prompt.schema.json
+│   └── examples/                      # Pilot protocol mappings
 ├── prothesis/                         # Protocol: multi-perspective investigation
 │   ├── .claude-plugin/plugin.json
 │   └── skills/mission/SKILL.md      # Full protocol definition (user-invocable)
@@ -146,6 +150,11 @@ Run `/verify` before commits. Static checks via:
 node .claude/skills/verify/scripts/static-checks.js .
 ```
 
+Codex mapping check can be run standalone:
+```bash
+node .claude/skills/verify/scripts/check-codex-compat.js .
+```
+
 **Static checks performed**:
 1. **json-schema**: plugin.json required fields (name, version, description, author), semver format, name format (`/^[a-z][a-z0-9-]*$/`)
 2. **notation**: Unicode consistency (→, ∥, ∩, ∪, ⊆, ∈, ≠ over ASCII fallbacks)
@@ -154,6 +163,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 5. **structure**: Required sections in protocol SKILL.md (Definition, Mode Activation, Protocol, Rules, PHASE TRANSITIONS, MODE STATE)
 6. **tool-grounding**: TOOL GROUNDING section present, external operations have `[Tool]` notation in PHASE TRANSITIONS
 7. **version-staleness**: plugin content changed without plugin.json version bump (git-aware, warn level; skips during merge/rebase conflicts; ignores README, LICENSE, .gitignore)
+8. **codex-compat**: pilot protocol Codex mappings present and valid (intent/on_escape required, source option overflow must use `two_stage_routing`, and task-tracking protocols must map `TaskCreate` plus selective `TaskUpdate` to `update_plan`)
 
 ## Delegation Constraint
 

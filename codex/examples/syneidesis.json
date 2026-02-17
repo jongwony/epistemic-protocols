@@ -1,0 +1,144 @@
+{
+  "protocol": "syneidesis",
+  "version": "1.0.0",
+  "source": "syneidesis/skills/gap/SKILL.md",
+  "source_prompts": [
+    {
+      "id": "phase1_gap_surface",
+      "source_phase": "Phase 1",
+      "source_options_count": 4,
+      "overflow_strategy": "two_stage_routing",
+      "mapped_step_ids": [
+        "phase1_gap_cluster",
+        "phase1_gap_detail"
+      ]
+    },
+    {
+      "id": "phase2_judgment",
+      "source_phase": "Phase 2",
+      "source_options_count": 3,
+      "mapped_step_ids": [
+        "phase2_judgment",
+        "phase2_continue"
+      ]
+    }
+  ],
+  "task_sync": {
+    "source_tool": "TaskCreate",
+    "target_tool": "update_plan",
+    "create": {
+      "emit": true,
+      "default_status": "pending"
+    },
+    "transitions": [
+      {
+        "from": "pending",
+        "to": "in_progress",
+        "emit_update_plan": true
+      },
+      {
+        "from": "in_progress",
+        "to": "completed",
+        "emit_update_plan": true
+      },
+      {
+        "from": "pending",
+        "to": "pending",
+        "emit_update_plan": false
+      },
+      {
+        "from": "completed",
+        "to": "completed",
+        "emit_update_plan": false
+      }
+    ],
+    "single_in_progress": true,
+    "fallback_mode": "internal_state_only"
+  },
+  "steps": [
+    {
+      "id": "phase1_gap_cluster",
+      "intent": "select_one",
+      "question": "Which gap class should we audit first?",
+      "options": [
+        {
+          "label": "Process and assumptions",
+          "description": "Check missing procedural steps and unstated assumptions."
+        },
+        {
+          "label": "Considerations and alternatives",
+          "description": "Check omitted factors and untested options."
+        },
+        {
+          "label": "Stop gap audit",
+          "description": "Terminate the gap surfacing loop."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase1_gap_detail",
+      "intent": "select_one",
+      "question": "Which concrete gap do you want to judge now?",
+      "options": [
+        {
+          "label": "Current top-priority gap",
+          "description": "Review the highest-stakes gap in this class."
+        },
+        {
+          "label": "Next queued gap",
+          "description": "Skip to the next pending gap in the queue."
+        },
+        {
+          "label": "Back to gap classes",
+          "description": "Return and choose another class."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase2_judgment",
+      "intent": "judge",
+      "question": "How should this surfaced gap be handled?",
+      "options": [
+        {
+          "label": "Address now",
+          "description": "Integrate mitigation before proceeding."
+        },
+        {
+          "label": "Dismiss",
+          "description": "Mark as reviewed and proceed without changes."
+        },
+        {
+          "label": "Defer",
+          "description": "Log for follow-up and continue with caution."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    },
+    {
+      "id": "phase2_continue",
+      "intent": "judge",
+      "question": "Do you want to surface another pending gap?",
+      "options": [
+        {
+          "label": "Continue gap loop",
+          "description": "Move to the next pending gap."
+        },
+        {
+          "label": "Wrap up gap loop",
+          "description": "Exit after recording current state."
+        },
+        {
+          "label": "Stop immediately",
+          "description": "Terminate without further checks."
+        }
+      ],
+      "max_choices": 1,
+      "on_escape": "terminate"
+    }
+  ]
+}
