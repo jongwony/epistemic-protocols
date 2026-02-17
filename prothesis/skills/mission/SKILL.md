@@ -33,7 +33,7 @@ T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with 
 R      = Set(Result)                                  -- raw inquiry outputs
 R'     = Set(Result) post-collection                  -- after Phase 3c collection
 R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue responses (R'' = R' when Δ = ∅)
-Δ      = Trigger detection: R' → Set(Trigger)         -- contradictions, horizon intersections, adversarial needs
+Δ      = Trigger detection: R' → Set(Trigger)         -- contradictions, horizon intersections, uncorroborated high-stakes
 D?     = Conditional dialogue: Δ ≠ ∅ → coordinator-mediated challenge; Δ = ∅ → skip
 Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
@@ -109,7 +109,7 @@ S (extern)               → AskUserQuestion tool (mandatory; multiSelect: true;
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
-Phase 4a Δ (detect)      → Internal operation (trigger check: contradictions, horizon intersections, adversarial needs)
+Phase 4a Δ (detect)      → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
 Phase 4a D? (conditional) → SendMessage tool (type: "message", coordinator-mediated cross-dialogue; skip if Δ = ∅)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Phase 5 K_i/Q            → AskUserQuestion (classification + routing: act/modify/extend/wrap_up; extend triggers follow-up AskUserQuestion; Escape → terminate)
@@ -340,14 +340,14 @@ After collecting all perspective results (R'), the coordinator reviews for cross
 **Trigger conditions** (all coordinator-detected from R'):
 - Contradictory conclusions between perspectives
 - One perspective's horizon limit intersects another's core finding
-- A finding needs adversarial testing
+- A high-stakes finding is supported by a single perspective with no corroboration
 
 **If triggers detected**: Coordinator mediates cross-dialogue via SendMessage:
 - Relay the challenging finding to the target perspective
 - 1 exchange per pair: challenge + response (no extended debate)
 - Coordinator controls what information crosses perspective boundaries
 
-**If no triggers**: Skip directly to Phase 4b.
+**If no triggers**: Skip to Phase 4b with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected").
 
 **Design rationale**: Cross-dialogue is placed after collection (Phase 3c) and before synthesis (Phase 4b) so the coordinator evaluates all perspectives before deciding which contradictions warrant live challenge. This makes trigger detection an explicit step — the coordinator checks for contradictions rather than relying on incidental discovery during synthesis.
 

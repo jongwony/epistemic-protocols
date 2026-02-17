@@ -31,7 +31,7 @@ Users often lack the analytical framework for their question (`FrameworkAbsent`)
 Phase 0: Gather       → Context acquisition for perspective formulation
 Phase 1: Prothesis    → Present 2-4 perspectives (call AskUserQuestion)
 Phase 2: Inquiry      → Agent team analysis per selected perspective (TeamCreate + teammates)
-Phase 3: Synthesis    → Organize convergences/divergences → Integrated answer
+Phase 3: Synthesis    → Cross-dialogue check → Convergence/divergence → Integrated answer
 ```
 
 ## When to Use
