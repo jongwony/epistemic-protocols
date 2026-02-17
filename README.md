@@ -39,7 +39,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Hermeneia**: "What do I mean?" → AI presents interpretations, you recognize your intent (`IntentMisarticulated → ClarifiedIntent`)
 - **Katalepsis**: "What did you do?" → AI verifies your understanding through questions (`ResultUngrasped → VerifiedUnderstanding`)
 - **Telos**: "What do I actually want?" → AI proposes goals, you shape and approve (`GoalIndeterminate → DefinedEndState`)
-- **Aitesis**: "Am I missing something?" → AI detects context gaps and inquires for resolution before proceeding (`ContextInsufficient → InformedExecution`)
+- **Aitesis**: "Am I missing something?" → AI detects its own context insufficiency and inquires for missing information before proceeding (`ContextInsufficient → InformedExecution`)
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
 
