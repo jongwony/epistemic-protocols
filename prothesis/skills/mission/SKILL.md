@@ -74,7 +74,7 @@ After Phase 0 (Mission Brief):
 After Phase 5 (classification + routing):
   J = act              → Phase 6 (Fₐ confirmed → spawn praxis into T; team retained)
   J = modify(finding)  → re-classify → re-present K_i → await
-  J = extend           → Q[AskUserQuestion](add new perspective | deepen existing) → Phase 2 or Phase 3 (team retained)
+  J = extend           → Q[AskUserQuestion](add new perspective | deepen existing) → Phase 2 or Phase 3 inquiry (team retained)
   J = wrap_up          → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with L
   J = ESC              → Ω(T, shutdown) → TeamDelete → terminate with current L
 
@@ -322,7 +322,7 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 - Confirmation bias from main agent's prior reasoning
 - Anchoring on initial assumptions formed during context gathering
 
-**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 3 (inquiry), perspectives operate in strict isolation — no cross-dialogue occurs. Cross-dialogue is deferred to Phase 4 where the coordinator mediates after full collection. In Phase 7 (action), peer-to-peer is allowed between praxis and originating perspectives for verification and context restoration — analysis isolation has served its purpose, and direct channels reduce information loss through coordinator relay.
+**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 3 (inquiry), perspectives operate in strict isolation — no cross-dialogue occurs. Cross-dialogue is deferred to Phase 4 where the coordinator mediates after full collection, with explicit trigger checking. In Phase 7 (action), peer-to-peer is allowed between praxis and originating perspectives for verification and context restoration — analysis isolation has served its purpose, and direct channels reduce information loss through coordinator relay.
 
 **Isolation trade-off on extend loops**: When `J=extend` deepens an existing perspective via SendMessage, the coordinator's re-inquiry instruction inherently carries synthesis context (what to deepen, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested extension, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
 
@@ -336,7 +336,7 @@ After collecting all perspective results (R'), the coordinator reviews for cross
 
 **Cross-Dialogue**
 
-The coordinator naturally identifies tensions while reviewing R'. Trigger conditions that warrant mediated exchange:
+The coordinator explicitly checks R' for cross-dialogue triggers before proceeding to synthesis. Trigger conditions that warrant mediated exchange:
 - Contradictory conclusions between perspectives
 - One perspective's horizon limit intersects another's core finding
 - A high-stakes finding supported by a single perspective with no corroboration
@@ -346,7 +346,9 @@ The coordinator naturally identifies tensions while reviewing R'. Trigger condit
 - 1 exchange per pair: challenge + response (no extended debate)
 - Coordinator controls what information crosses perspective boundaries
 
-**If no triggers**: Proceed to synthesis with brief justification.
+**If no triggers**: Proceed to synthesis with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected").
+
+Cross-dialogue precedes synthesis so the coordinator evaluates all perspectives before integration. Trigger detection is an explicit checkpoint — not incidental discovery during synthesis.
 
 **Synthesis (Horizon Integration)**
 
@@ -538,6 +540,6 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
 9. **Team persistence**: Team persists across Phase 5 loop iterations and through Phase 6-7 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 5 or Phase 5')
 10. **Classification authority**: Coordinator proposes initial classification; user confirms or modifies (final authority). Conservative default applies to initial proposal: ambiguous → Fᵈ
-11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) is coordinator-mediated; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
+11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) is coordinator-mediated with explicit trigger check; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
 12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
 
