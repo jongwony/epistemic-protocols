@@ -38,6 +38,11 @@
       "name": "telos",
       "source": "./telos",
       "description": "Co-construct defined goals from vague intent — /goal (τέλος: end, purpose)"
+    },
+    {
+      "name": "aitesis",
+      "source": "./aitesis",
+      "description": "Detect context insufficiency before execution — /solicit (αἴτησις: a requesting)"
     }
   ]
 }

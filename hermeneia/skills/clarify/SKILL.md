@@ -101,7 +101,7 @@ When Hermeneia is active:
 - Hermeneia completes before other workflows begin
 - User Memory rules resume after intent is clarified
 
-**Protocol precedence**: Default ordering is Hermeneia → Telos → Prothesis → Syneidesis (intent clarification logically precedes goal construction and analysis). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering is Hermeneia → Telos → Aitesis → Prothesis → Syneidesis (intent clarification logically precedes goal construction, context verification, and analysis). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 Clarified expression becomes input to subsequent protocols.
 
