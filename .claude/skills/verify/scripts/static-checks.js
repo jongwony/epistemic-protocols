@@ -364,10 +364,10 @@ function checkToolGrounding() {
     const groundingSection = groundingMatch[1];
     const toolBindings = [];
 
-    // Parse lines like: "S (extern)     → AskUserQuestion tool"
+    // Parse lines like: "S (extern) → ..." or "Phase 4a Δ (detect) → ..."
     // Capture: operation, classification, tool
-    // Unicode support: [\w\u0370-\u03FF] matches Greek letters (Λ, Σ, Ω, etc.)
-    const bindingPattern = /^([∥]?[\w\u0370-\u03FF]+)\s*\((\w+)\)\s*→\s*(\w+)/gm;
+    // Supports: Phase prefix, qualifier word (e.g., "praxis"), Greek letters, ?'/
+    const bindingPattern = /^(?:Phase\s+\S+\s+)?([∥]?[\w\u0370-\u03FF?'\/]+)(?:\s+\w+)?\s*\((\w+)\)\s*→\s*(\w+)/gm;
     let match;
     while ((match = bindingPattern.exec(groundingSection)) !== null) {
       toolBindings.push({
