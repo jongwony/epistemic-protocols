@@ -29,7 +29,7 @@ epistemic-protocols/
 │   └── skills/goal/SKILL.md          # Full protocol definition (user-invocable)
 ├── aitesis/                           # Protocol: context insufficiency detection
 │   ├── .claude-plugin/plugin.json
-│   └── skills/solicit/SKILL.md       # Full protocol definition (user-invocable)
+│   └── skills/inquire/SKILL.md       # Full protocol definition (user-invocable)
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # Parallel extraction agents
@@ -95,11 +95,11 @@ Co-construct defined goals from vague intent through AI-proposed, user-shaped di
 - **Triggers**: "not sure what I want", "something like", "ideas for", exploratory framing
 - **Invocation**: `/goal` or use "goal" in conversation
 
-### Solicit (αἴτησις) — Aitesis
-Detect context insufficiency before execution through AI-detected solicitation.
+### Inquire (αἴτησις) — Aitesis
+Detect context insufficiency before execution through AI-detected inquiry.
 - **Deficit**: ContextInsufficient → InformedExecution
 - **Triggers**: Environment changed, user dissatisfaction patterns, repeated failures, stale assumptions
-- **Invocation**: `/solicit` or use "solicit" in conversation
+- **Invocation**: `/inquire` or use "inquire" in conversation
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
@@ -127,7 +127,7 @@ Pre-commit protocol verification via static checks and expert review.
 
 ## Protocol Precedence
 
-Multi-activation order: **Clarify → Goal → Solicit → Mission → Gap → Grasp**
+Multi-activation order: **Clarify → Goal → Inquire → Mission → Gap → Grasp**
 
 This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → context verification → perspective → gap audit). Users can override by explicitly requesting a different protocol first.
 

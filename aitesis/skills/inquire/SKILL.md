@@ -1,16 +1,16 @@
 ---
-name: solicit
-description: "Detect context insufficiency before execution. Solicits missing context when AI detects indicators of context gaps, producing informed execution. Alias: Aitesis(αἴτησις)."
+name: inquire
+description: "Detect context insufficiency before execution. Inquires about missing context when AI detects indicators of context gaps, producing informed execution. Alias: Aitesis(αἴτησις)."
 user-invocable: true
 ---
 
 # Aitesis Protocol
 
-Detect context insufficiency before execution through AI-detected solicitation. Type: `(ContextInsufficient, AI, SOLICIT, ExecutionPlan) → InformedExecution`.
+Detect context insufficiency before execution through AI-detected inquiry. Type: `(ContextInsufficient, AI, INQUIRE, ExecutionPlan) → InformedExecution`.
 
 ## Definition
 
-**Aitesis** (αἴτησις): A dialogical act of soliciting missing context before execution, where AI detects indicators of context insufficiency and presents candidates for user resolution through structured mini-choices.
+**Aitesis** (αἴτησις): A dialogical act of inquiring about missing context before execution, where AI detects indicators of context insufficiency and presents candidates for user resolution through structured mini-choices.
 
 ```
 ── FLOW ──
@@ -21,7 +21,7 @@ X   = Execution plan (current task/action about to execute)
 Δₘ  = Context insufficiency monitor: X → Set(ContextGap)
 ContextGap ∈ {ConstraintDrift, DissatisfactionSignal, FailurePattern, AssumptionStale}
 Cₛ  = Candidate set: Set(ContextGap) → List<Candidate>
-Q   = Solicitation question (via AskUserQuestion)
+Q   = Inquiry question (via AskUserQuestion)
 A   = User's answer ∈ {Select(option), Provide(context), Dismiss, ESC}
 X'  = Updated execution plan incorporating user-provided context
 InformedExecution = X' where (∀g ∈ detected: resolved(g) ∨ dismissed(g)) ∨ user_esc
@@ -55,7 +55,7 @@ CauseTag ∈ {constraint_drift, dissatisfaction, failure_pattern, assumption_sta
 
 ## Core Principle
 
-**Solicitation over Assumption**: When AI detects indicators of context insufficiency, it solicits missing context through structured mini-choices rather than assuming defaults or proceeding silently. The user decides whether the gap matters.
+**Inquiry over Assumption**: When AI detects indicators of context insufficiency, it inquires about missing context through structured mini-choices rather than assuming defaults or proceeding silently. The user decides whether the gap matters.
 
 ## Distinction from Other Protocols
 
@@ -65,13 +65,13 @@ CauseTag ∈ {constraint_drift, dissatisfaction, failure_pattern, assumption_sta
 | **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
 | **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context gaps |
+| **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
-- **Syneidesis** surfaces gaps at decision points for the user to judge — Aitesis detects context insufficiency before execution and solicits resolution
+- **Syneidesis** surfaces gaps at decision points for the user to judge — Aitesis detects context insufficiency before execution and inquires for resolution
 - **Telos** co-constructs goals when intent is indeterminate — Aitesis operates when goals exist but execution context is insufficient
-- **Hermeneia** extracts intent the user already has — Aitesis addresses context the system lacks
+- **Hermeneia** extracts intent the user already has — Aitesis inquires about context the system lacks
 
 **Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). This ontological difference justifies separate protocols despite surface similarity.
 
@@ -79,7 +79,7 @@ CauseTag ∈ {constraint_drift, dissatisfaction, failure_pattern, assumption_sta
 
 ### Activation
 
-AI detects context insufficiency indicators OR user calls `/solicit`. Detection is silent (Phase 0); surfacing always requires user interaction via AskUserQuestion (Phase 1).
+AI detects context insufficiency indicators OR user calls `/inquire`. Detection is silent (Phase 0); surfacing always requires user interaction via AskUserQuestion (Phase 1).
 
 **Context insufficient** = at least one ContextGap type's trigger condition is met for the current execution plan.
 
@@ -218,7 +218,7 @@ After integration:
 1. **AI-detected, user-resolved**: AI detects context insufficiency; resolution requires user choice via AskUserQuestion (Phase 1)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present structured options (text presentation = protocol violation)
 3. **Selection over Detection**: User selects resolution from presented candidates; AI does not auto-resolve
-4. **Solicitation over Assumption**: When context is insufficient, solicit rather than assume — silence is worse than a dismissed question
+4. **Inquiry over Assumption**: When context is insufficient, inquire rather than assume — silence is worse than a dismissed question
 5. **Evidence-grounded**: Every surfaced gap must cite specific observable evidence, not speculation
 6. **One at a time**: Surface one gap per Phase 1 cycle; do not bundle multiple gaps
 7. **Dismiss respected**: User dismissal is final for that ContextGap type in the current session

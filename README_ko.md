@@ -13,7 +13,7 @@
 | **[Hermeneia](./hermeneia)** (ἑρμηνεία) — /clarify | 의도-표현 갭을 대화로 명확화 | 실행 전 |
 | **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | AI 작업에 대한 확실한 이해 달성 | AI 작업 완료 후 |
 | **[Telos](./telos)** (τέλος) — /goal | 모호한 의도에서 정의된 목표 공동 구성 | 실행 전 |
-| **[Aitesis](./aitesis)** (αἴτησις) — /solicit | 실행 전 맥락 부족 감지 | 실행 전 |
+| **[Aitesis](./aitesis)** (αἴτησις) — /inquire | 실행 전 맥락 부족 감지 | 실행 전 |
 
 ## 핵심 아이디어
 
@@ -30,7 +30,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 | **Hermeneia** | IntentMisarticulated | User-initiated | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
 | **Katalepsis** | ResultUngrasped | User-initiated | VERIFY | `ResultUngrasped → VerifiedUnderstanding` |
 | **Telos** | GoalIndeterminate | AI-detected | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
-| **Aitesis** | ContextInsufficient | AI-detected | SOLICIT | `ContextInsufficient → InformedExecution` |
+| **Aitesis** | ContextInsufficient | AI-detected | INQUIRE | `ContextInsufficient → InformedExecution` |
 
 <img src="./assets/epistemic-matrix-ko.svg" alt="인식론적 타입 변환" width="560">
 
@@ -66,7 +66,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 /clarify [표현]      # 모호한 의도 명확화
 /grasp               # AI 작업에 대한 이해 검증
 /goal [모호한 아이디어]   # 의도에서 정의된 목표 공동 구성
-/solicit [작업]          # 실행 전 맥락 부족 감지 및 해결
+/inquire [작업]          # 실행 전 맥락 부족 감지 및 해결
 ```
 
 ## 라이선스

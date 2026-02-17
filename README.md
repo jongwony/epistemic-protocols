@@ -13,7 +13,7 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 | **[Hermeneia](./hermeneia)** (ἑρμηνεία) — /clarify | Clarify intent-expression gaps via dialogue | Before action |
 | **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | Achieve certain comprehension of AI work | After AI action |
 | **[Telos](./telos)** (τέλος) — /goal | Co-construct defined goals from vague intent | Pre-action |
-| **[Aitesis](./aitesis)** (αἴτησις) — /solicit | Detect context insufficiency before execution | Pre-execution |
+| **[Aitesis](./aitesis)** (αἴτησις) — /inquire | Detect context insufficiency before execution | Pre-execution |
 
 ## Core Idea
 
@@ -30,7 +30,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 | **Hermeneia** | IntentMisarticulated | User-initiated | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
 | **Katalepsis** | ResultUngrasped | User-initiated | VERIFY | `ResultUngrasped → VerifiedUnderstanding` |
 | **Telos** | GoalIndeterminate | AI-detected | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
-| **Aitesis** | ContextInsufficient | AI-detected | SOLICIT | `ContextInsufficient → InformedExecution` |
+| **Aitesis** | ContextInsufficient | AI-detected | INQUIRE | `ContextInsufficient → InformedExecution` |
 
 <img src="./assets/epistemic-matrix.svg" alt="Epistemic Type Transformations" width="560">
 
@@ -39,7 +39,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Hermeneia**: "What do I mean?" → AI presents interpretations, you recognize your intent (`IntentMisarticulated → ClarifiedIntent`)
 - **Katalepsis**: "What did you do?" → AI verifies your understanding through questions (`ResultUngrasped → VerifiedUnderstanding`)
 - **Telos**: "What do I actually want?" → AI proposes goals, you shape and approve (`GoalIndeterminate → DefinedEndState`)
-- **Aitesis**: "Am I missing something?" → AI detects context gaps and solicits resolution before proceeding (`ContextInsufficient → InformedExecution`)
+- **Aitesis**: "Am I missing something?" → AI detects context gaps and inquires for resolution before proceeding (`ContextInsufficient → InformedExecution`)
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
 
@@ -66,7 +66,7 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 /clarify [your expression]   # Clarify ambiguous intent
 /grasp                       # Verify understanding of AI work
 /goal [your vague idea]      # Co-construct defined goals from intent
-/solicit [your task]          # Detect and resolve context insufficiency before execution
+/inquire [your task]          # Detect and resolve context insufficiency before execution
 ```
 
 ## License

@@ -1,4 +1,4 @@
-# Aitesis — /solicit (αἴτησις)
+# Aitesis — /inquire (αἴτησις)
 
 실행 전 맥락 부족 감지 (αἴτησις: 요청)
 
@@ -14,14 +14,14 @@ AI 시스템은 맥락이 불충분한 상태(`ContextInsufficient`)에서도 �
 
 ### 해결책
 
-**가정보다 요청(Solicitation over Assumption)**: AI가 맥락 부족 지표를 감지하면, 사용자가 해결하거나 무시하거나 재정의할 수 있는 구조화된 미니 선택지를 표면화합니다. 표적화된 요청을 통해 불충분한 맥락을 정보에 기반한 실행으로 변환합니다.
+**가정보다 질의(Inquiry over Assumption)**: AI가 맥락 부족 지표를 감지하면, 사용자가 해결하거나 무시하거나 재정의할 수 있는 구조화된 미니 선택지를 표면화합니다. 표적화된 요청을 통해 불충분한 맥락을 정보에 기반한 실행으로 변환합니다.
 
 ### 다른 프로토콜과의 차이
 
 | 프로토콜 | 모드 | 타입 시그니처 |
 |----------|------|---------------|
 | Syneidesis | SURFACE | `GapUnnoticed → AuditedDecision` |
-| **Aitesis** | **SOLICIT** | **`ContextInsufficient → InformedExecution`** |
+| **Aitesis** | **INQUIRE** | **`ContextInsufficient → InformedExecution`** |
 
 **핵심 구분**: Syneidesis는 의사결정 시점에서 사용자가 판단할 갭을 표면화합니다(메타인지 — 사용자의 결정 품질 모니터링). Aitesis는 실행 전에 AI 자체의 맥락 부족을 감지합니다(이타인지 — "내가 충분한 맥락을 가지고 있는가?").
 
@@ -65,7 +65,7 @@ Aitesis는 Telos 다음: 목표가 정의된 후, 실행 맥락이 충분한지 
 ## 사용법
 
 ```
-/solicit [현재 작업 또는 맥락]
+/inquire [현재 작업 또는 맥락]
 ```
 
 ## 저자

@@ -1,4 +1,4 @@
-# Aitesis — /solicit (αἴτησις)
+# Aitesis — /inquire (αἴτησις)
 
 Detect context insufficiency before execution (αἴτησις: a requesting)
 
@@ -6,7 +6,7 @@ Detect context insufficiency before execution (αἴτησις: a requesting)
 
 ## What is Aitesis?
 
-A modern reinterpretation of Greek αἴτησις (a requesting) — a protocol that **detects when AI lacks sufficient context and solicits what's missing before proceeding, rather than assuming defaults silently**.
+A modern reinterpretation of Greek αἴτησις (a requesting) — a protocol that **detects when AI lacks sufficient context and inquires about what's missing before proceeding, rather than assuming defaults silently**.
 
 ### The Core Problem
 
@@ -14,14 +14,14 @@ AI systems often proceed with execution despite insufficient context (`ContextIn
 
 ### The Solution
 
-**Solicitation over Assumption**: When AI detects indicators of context insufficiency, it surfaces structured mini-choices for the user to resolve, dismiss, or override. Transforms insufficient context into informed execution through targeted solicitation.
+**Inquiry over Assumption**: When AI detects indicators of context insufficiency, it surfaces structured mini-choices for the user to resolve, dismiss, or override. Transforms insufficient context into informed execution through targeted inquiry.
 
 ### Difference from Other Protocols
 
 | Protocol | Mode | Type Signature |
 |----------|------|---------------|
 | Syneidesis | SURFACE | `GapUnnoticed → AuditedDecision` |
-| **Aitesis** | **SOLICIT** | **`ContextInsufficient → InformedExecution`** |
+| **Aitesis** | **INQUIRE** | **`ContextInsufficient → InformedExecution`** |
 
 **Key distinction**: Syneidesis surfaces gaps at decision points for the user to judge (metacognitive — monitoring the user's decision quality). Aitesis detects the AI's own context insufficiency before execution (heterocognitive — "do I have enough context?").
 
@@ -65,7 +65,7 @@ Aitesis follows Telos: once goals are defined, verify execution context is suffi
 ## Usage
 
 ```
-/solicit [your current task or context]
+/inquire [your current task or context]
 ```
 
 ## Author
