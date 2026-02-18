@@ -44,7 +44,7 @@ K_i    = Interactive classify + route: L → AskUserQuestion → ((Fₐ, Fᵤ, F
 Fₐ     = { f | source_determined(f) ∧ perspective_confirmed(f) }          -- actionable
 Fᵤ     = { f | ¬source_determined(f) ∧ adversarial_origin(f) }            -- surfaced unknown
 Fᵈ     = { f | f ∉ Fₐ ∧ f ∉ Fᵤ }                                         -- design-level (catch-all)
-Q_π    = Plan approval: AskUserQuestion → approved | rejected          -- plan confirmation gate
+Q_π    = Plan approval: AskUserQuestion → approved | revise | reclassify  -- plan confirmation gate
 Π      = Plan: TaskList(Fₐ) → StructuredPlan                          -- planner-designed implementation plan
 Πᵥ     = Verified plan: Q_π(Π) → approved                             -- user-approved plan
 ∥F     = Parallel fix: (∥ f∈Fₐ. Fix(f, T, Πᵥ))    -- praxis agent within team (follows approved plan)
@@ -90,11 +90,11 @@ After Phase 5' (action sufficiency):
 
 After Phase 6a (plan approval):
   Πᵥ = approved        → Phase 6b (spawn praxis with plan context)
-  Πᵥ = rejected        → coordinator relays feedback to planner via SendMessage → re-collect → re-present Q_π
+  Πᵥ = revise          → coordinator relays feedback to planner via SendMessage → re-collect → re-present Q_π
   Πᵥ = reclassify      → Phase 5 (re-present classification; planner shutdown, tasks retained)
   Πᵥ = ESC             → Phase 5 (re-present classification; planner shutdown, tasks retained)
 
-After Phase 6b (classification guard):
+After Phase 6b (pre-execution guard):
   Fₐ = ∅ → Phase 5' (L' = L ∪ { fixes: ∅, deferred: Fᵤ ∪ Fᵈ })
   Fₐ ≠ ∅ → Phase 7 (execute fixes per approved plan)
 
@@ -125,8 +125,8 @@ G (gather)               → Read, Glob, Grep (targeted context acquisition, gui
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
 TaskCreate (Phase 6a)     → TaskCreate tool (register confirmed tiers with metadata)
 ∥Spawn planner (parallel) → Task tool (team_name, name, subagent_type=Plan: spawn planner into existing T)
-Phase 6a Q_π (extern)     → AskUserQuestion (plan approval: approve/reject/reclassify; Escape → Phase 5)
-Phase 6a reject (conditional) → SendMessage tool (type: "message", coordinator relays rejection feedback to planner)
+Phase 6a Q_π (extern)     → AskUserQuestion (plan approval: approve/revise/reclassify; Escape → Phase 5)
+Phase 6a revise (conditional) → SendMessage tool (type: "message", coordinator relays revision feedback to planner)
 ∥Spawn praxis (parallel)  → Task tool (team_name, name: spawn praxis into existing T)
 G(praxis)                 → TaskList/TaskGet tools (praxis context: Πᵥ + discovery)
 ∥F (parallel)            → TaskUpdate/Edit/Write tools (praxis applies fixes to Fₐ items)
@@ -343,7 +343,7 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 
 **Isolation trade-off on cross-dialogue and action phases**: Phase 4 and Phase 7 both allow peer-to-peer communication. This is acceptable because: (1) Phase 3 already secured independent analysis — isolation has served its epistemic purpose; (2) direct peer exchange produces richer negotiation than coordinator relay, which introduces State-Cognition Gap (information loss at each transfer layer); (3) the coordinator retains structural control — topic signaling (Phase 4) and scope enforcement (Phase 7) — without acting as message intermediary.
 
-**Scope extension note**: Phase 6-7 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
+**Scope extension note**: Phase 6-7 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `plan_act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
 
 ### Phase 4: Cross-Dialogue & Synthesis
 
