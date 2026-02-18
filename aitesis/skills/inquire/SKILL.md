@@ -22,12 +22,13 @@ Scan  = Context sufficiency scan: X → Set(Gap)
 Gap   = { domain: String, description: String, severity: Severity }
 Severity ∈ {Blocking, Important, Minor}
 Gᵢ    = Identified gaps from Scan(X)
-Inv   = Self-investigation: Gᵢ → (Gᵣ, Resolved)
+Inv   = Self-investigation: Gᵢ → (Gᵣ, Sᵣ)
+Sᵣ    = Set(Gap)                                    -- self-resolved during investigation
 Gᵣ    = Remaining gaps (¬self_resolved)
 Q     = Inquiry (AskUserQuestion)
 A     = User answer ∈ {Provide(context), Point(location), Dismiss, ESC}
 X'    = Updated execution plan
-InformedExecution = X' where (∀g ∈ Gᵣ: resolved(g) ∨ dismissed(g)) ∨ user_esc
+InformedExecution = X' where remaining = ∅ ∨ user_esc
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → Scan(X) → Gᵢ?                               -- context sufficiency gate (silent)
@@ -36,15 +37,16 @@ Phase 2: Gᵣ → Q[AskUserQuestion](Gᵣ[0], progress) → A    -- gap surfacin
 Phase 3: A → integrate(A, X) → X'                         -- plan update (internal)
 
 ── LOOP ──
-After Phase 3: re-scan X' for remaining gaps.
+After Phase 3: re-scan X' for remaining or newly emerged gaps.
+New gaps accumulate into gaps (cumulative, never replace).
 If Gᵣ remains: return to Phase 1 (self-investigate new gaps).
-If Gᵣ = ∅ OR all dismissed: proceed with execution.
+If remaining = ∅: proceed with execution.
 User can exit at Phase 2 (early_exit).
-Continue until: informed(X', Gᵣ) OR user ESC.
+Continue until: informed(X') OR user ESC.
 
 ── CONVERGENCE ──
-informed(X', Gᵣ) = ∀g ∈ Gᵣ: resolved(g) ∨ dismissed(g)
-progress(Gᵢ, Gᵣ) = |resolved ∪ dismissed| / |Gᵢ|
+informed(X') = remaining = ∅
+progress(Λ) = 1 - |remaining| / |gaps|
 diminishing(Gᵣ) = max(severity(Gᵣ)) < max(severity(Gᵢ))
 early_exit = user_declares_sufficient
 
@@ -52,12 +54,14 @@ early_exit = user_declares_sufficient
 Phase 1 Inv  (detect)  → Read, Grep (self-investigation)
 Phase 2 Q    (extern)  → AskUserQuestion (gap surfacing + progress)
 Phase 3      (state)   → Internal state update
-Scan         (detect)  → Internal analysis (no external tool)
+Phase 0 Scan (detect)  → Internal analysis (no external tool)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: ExecutionPlan, gaps: Set(Gap),
-      self_resolved: Set(Gap), remaining: Set(Gap),
-      dismissed: Set(Gap), history: List<(Gap, A)>, active: Bool }
+      self_resolved: Set(Gap), user_resolved: Set(Gap),
+      remaining: Set(Gap), dismissed: Set(Gap),
+      history: List<(Gap, A)>, active: Bool }
+-- Invariant: gaps = self_resolved ∪ user_resolved ∪ remaining ∪ dismissed (pairwise disjoint)
 ```
 
 ## Core Principle
@@ -83,6 +87,12 @@ Scan         (detect)  → Internal analysis (no external tool)
 - **Epitrope** calibrates delegation scope before work begins — Aitesis verifies execution context after delegation is established
 
 **Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context to execute?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). The operational test: if the information gap would be filled by the user providing context, it's Aitesis; if it would be filled by the user reconsidering their decision, it's Syneidesis.
+
+**Factual vs evaluative**: Aitesis gaps are factual — they have objectively correct answers discoverable from the environment (configs, versions, schemas). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. This is why Phase 1 self-investigation exists: factual gaps may be resolvable from the codebase. Evaluative gaps cannot be self-resolved.
+
+**Litmus-test examples** (same scenario, different classification):
+- Aitesis: "The codebase has both v1 and v2 API schemas — which version is the current production target?" (AI lacks a fact)
+- Syneidesis: "Have you considered that migrating from v1 to v2 will require a data backfill?" (user has not considered a consequence)
 
 ## Mode Activation
 
@@ -123,13 +133,13 @@ Heuristic signals for context insufficiency detection (not hard gates):
 |--------|-----------|
 | Novel domain | Knowledge area not previously addressed in session |
 | Implicit requirements | Task carries unstated assumptions |
-| Ambiguous scope | Multiple valid interpretations of execution approach |
+| Ambiguous scope | Multiple valid interpretations exist and AI cannot determine intended approach from available context |
 | Environmental dependency | Relies on external state (configs, APIs, versions) |
 
 **Skip**:
 - Execution context is fully specified in current message
 - User explicitly says "just do it" or "proceed"
-- Same gap domain was dismissed in current session (session immunity)
+- Same (domain, description) pair was dismissed in current session (session immunity)
 - Phase 1 self-investigation resolves all identified gaps
 - Read-only / exploratory task — no execution plan to verify
 
@@ -154,8 +164,8 @@ Gaps are identified dynamically per task — no fixed taxonomy. Each gap is char
 | Level | Criterion | Action |
 |-------|-----------|--------|
 | **Blocking** | Execution cannot proceed without resolution | Must resolve before execution |
-| **Important** | Suboptimal outcome likely without resolution | Surface to user for decision |
-| **Minor** | Reasonable default exists | Self-resolve with default, note in output |
+| **Important** | Suboptimal outcome likely without resolution | Surface to user for context |
+| **Minor** | Reasonable default exists | Surface with pre-selected Dismiss option |
 
 When multiple gaps are identified, surface in severity order (Blocking → Important → Minor). Only one gap surfaced per Phase 2 cycle.
 
@@ -179,7 +189,8 @@ Attempt to resolve identified gaps through codebase exploration before asking th
 1. For each gap in `Gᵢ` (severity order):
    - **Call Read/Grep** to search for relevant information in codebase, configs, documentation
    - If found: mark as self-resolved, integrate into execution context
-   - If not found or ambiguous: retain in `Gᵣ`
+   - If not found: retain in `Gᵣ`
+   - If ambiguous (conflicting evidence): retain in `Gᵣ`, include findings in Phase 2 surfacing context
 2. If `Gᵣ = ∅`: proceed with execution (all gaps self-resolved, no user interruption)
 3. If `Gᵣ ≠ ∅`: proceed to Phase 2
 
@@ -216,7 +227,7 @@ Options:
 After user response:
 
 1. **Provide(context)**: Integrate user-provided context into execution plan `X'`
-2. **Point(location)**: Read the indicated location, integrate into `X'`
+2. **Point(location)**: Record location, resolve via next Phase 1 iteration
 3. **Dismiss**: Mark gap as dismissed, note default assumption used
 4. **ESC**: Deactivate Aitesis entirely
 
@@ -230,7 +241,7 @@ After integration:
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Minor severity gaps only | Brief inline note with assumed default |
+| Light | Minor severity gaps only | AskUserQuestion with Dismiss as default option |
 | Medium | Important severity gaps, self-investigation partially resolved | Structured AskUserQuestion with progress |
 | Heavy | Blocking severity, multiple unresolved gaps | Detailed evidence + investigation results + resolution paths |
 
@@ -241,11 +252,11 @@ After integration:
 | Gate specificity | `activate(Aitesis) only if ∃ requirement(r) : ¬available(r) ∧ ¬trivially_inferrable(r)` | Prevents false activation on clear tasks |
 | Self-resolution first | Phase 1 before Phase 2 | Minimizes user interruption |
 | Gap cap | One gap per Phase 2 cycle, severity order | Prevents question overload |
-| Session immunity | Dismissed gap domain → skip for session | Respects user's dismissal |
+| Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
 | Progress visibility | `[N resolved / M total]` in Phase 2 | User sees progress toward completion |
 | Diminishing returns | Signal when `max(severity(Gᵣ)) < max(severity(Gᵢ))` | User can exit when remaining gaps are minor |
 | Early exit | User can declare sufficient at any Phase 2 | Full control over inquiry depth |
-| Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same decision point | Prevents protocol stacking |
+| Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context gaps ≠ Syneidesis decision gaps, so reverse suppression not needed) |
 
 ## Rules
 
@@ -260,4 +271,4 @@ After integration:
 9. **Convergence persistence**: Mode active until all identified gaps are resolved or dismissed
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N resolved / M total]`
 11. **Early exit honored**: When user declares context sufficient, accept immediately regardless of remaining gaps
-12. **Cross-protocol awareness**: Defer to Syneidesis when gap surfacing is already active for the same decision point
+12. **Cross-protocol awareness**: Defer to Syneidesis when gap surfacing is already active for the same task scope

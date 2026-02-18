@@ -41,7 +41,7 @@ Gaps are identified dynamically per task — no fixed taxonomy:
 | Severity | Criterion | Example |
 |----------|-----------|---------|
 | **Blocking** | Execution cannot proceed | "Which database schema version should I target?" |
-| **Important** | Suboptimal outcome likely | "Should error messages be user-facing or developer-facing?" |
+| **Important** | Suboptimal outcome likely | "Both REST and GraphQL endpoints exist — which API layer does this service consume?" |
 | **Minor** | Reasonable default exists | "Prefer tabs or spaces for this file?" |
 
 ## Protocol Precedence
@@ -57,7 +57,7 @@ Aitesis follows Epitrope: once delegation is calibrated, verify execution contex
 **Use**:
 - Before complex tasks where AI may lack domain context
 - When task has implicit requirements or environmental dependencies
-- When scope is ambiguous with multiple valid interpretations
+- When scope is ambiguous and AI cannot determine intended approach from available context
 - When entering a novel domain not previously discussed in session
 
 **Skip**:
