@@ -14,22 +14,25 @@ Calibrate delegation autonomy through scenario-based interview. Type: `(Delegati
 
 ```
 ── FLOW ──
-Epitrope(T) → Decompose(T) → {Dᵢ} → Scenario(Dᵢ) → R → integrate(R) → DC → (loop until calibrated)
+Epitrope(T) → Decompose(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integrate(R) → DC → Q(DC) → approve → (loop until calibrated)
 
 ── TYPES ──
 T    = TaskScope (task/project to calibrate delegation for)
 Dᵢ   = ActionDomain ∈ {FileModification, Exploration, Strategy, External}
 Sₖ   = Scenario (concrete situation-based question)
 R    = Response ∈ {Autonomous, ReportThenAct, AskBefore, Halt}
+         -- Domain-specific refinements (⊆ base R):
+         --   Minimal ⊆ Autonomous, ProposeThenChoose ⊆ ReportThenAct,
+         --   SwitchAutonomously ⊆ Autonomous, AlwaysAsk ⊆ AskBefore
 DC   = DelegationContract { autonomous, report_then_act, ask_before, halt_conditions, exploration }
 ExplorationScope = { depth: N, breadth: N, drift_action: report | halt }
 CalibratedAutonomy = DC where (∀ d ∈ applicable: calibrated(d)) ∨ user_esc
 
 ── SCENARIO TEMPLATES ──
 FileModification:  "When files need to be modified for this task?" → {Autonomous, ReportThenAct, AskBefore}
-Exploration:       "When related information is found during investigation?" → {Autonomous, ReportThenAct, Minimal}
-Strategy:          "When a different approach looks better than the original plan?" → {ProposeThenChoose, SwitchAutonomously}
-External:          "When git push or PR creation is needed?" → {Autonomous, AlwaysAsk}
+Exploration:       "When related information is found during investigation?" → {Autonomous, ReportThenAct, Minimal(⊆Autonomous)}
+Strategy:          "When a different approach looks better than the original plan?" → {ProposeThenChoose(⊆ReportThenAct), SwitchAutonomously(⊆Autonomous)}
+External:          "When git push or PR creation is needed?" → {Autonomous, AlwaysAsk(⊆AskBefore)}
 (Each domain has refinement questions — hybrid question tree)
 
 ── PHASE TRANSITIONS ──
@@ -51,7 +54,8 @@ decompose  (detect)  → Read, Grep (task analysis)
 
 ── MODE STATE ──
 Λ = { phase: Phase, T: TaskScope, domains: Set(ActionDomain),
-      contract: DelegationContract, history: List<(Dᵢ, Sₖ, R)>, active: Bool }
+      calibrated: Set(ActionDomain), contract: DelegationContract,
+      history: List<(Dᵢ, Sₖ, R)>, active: Bool }
 ```
 
 ## Core Principle

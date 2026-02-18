@@ -14,7 +14,7 @@
 | **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | AI 작업에 대한 확실한 이해 달성 | AI 작업 완료 후 |
 | **[Telos](./telos)** (τέλος) — /goal | 모호한 의도에서 정의된 목표 공동 구성 | 실행 전 |
 | **[Aitesis](./aitesis)** (αἴτησις) — /inquire | 실행 전 맥락 부족 감지 | 실행 전 |
-| **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | 시나리오 인터뷰로 위임 자율성 캘리브레이션 | 실행 전 |
+| **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | 시나리오 기반 인터뷰로 위임 자율성 캘리브레이션 | 실행 전 |
 
 ## 핵심 아이디어
 
@@ -71,7 +71,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 /grasp               # AI 작업에 대한 이해 검증
 /goal [모호한 아이디어]   # 의도에서 정의된 목표 공동 구성
 /inquire [작업]          # 실행 전 맥락 부족 감지 및 해결
-/calibrate [작업]        # 시나리오 인터뷰로 위임 자율성 캘리브레이션
+/calibrate [작업]        # 시나리오 기반 인터뷰로 위임 자율성 캘리브레이션
 ```
 
 ## 라이선스
