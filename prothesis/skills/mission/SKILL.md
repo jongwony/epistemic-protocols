@@ -34,7 +34,7 @@ R      = Set(Result)                                  -- raw inquiry outputs
 R'     = Set(Result) post-collection                  -- after Phase 3 collection
 R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue responses (R'' = R' when Δ = ∅)
 Δ      = Trigger detection: R' → Set(Trigger)         -- contradictions, horizon intersections, uncorroborated high-stakes
-D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation (≤3 exchanges/pair, coordinator as referee); Δ = ∅ → skip
+D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation (≤3 exchanges/pair) → structured report (4-field) → conditional hub-spoke (Synthesizer, 1×/peer if divergence) → user review; Δ = ∅ → skip
 Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
@@ -62,7 +62,7 @@ Phase 0:  U → MB(U) → Q[AskUserQuestion](MB) → await → MBᵥ     -- Miss
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → present[S]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ  -- S: AskUserQuestion [Tool]
 Phase 3:  Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R'  -- inquiry + collection [Tool]
-Phase 4:  R' → Δ(R') → D?[SendMessage](T) → R'' → Syn(R'') → L  -- cross-dialogue & synthesis [Tool]
+Phase 4:  R' → Δ(R') → D?[SendMessage](T) → R'' → Syn(R'') → Q[AskUserQuestion](Syn) → L  -- cross-dialogue, synthesis & review [Tool]
 Phase 5:  L → K_i(L) → Q[AskUserQuestion](classification + routing) → await → ((Fₐ, Fᵤ, Fᵈ), J)  -- unified classification + routing [Tool]
 Phase 6a: (Fₐ, Fᵤ, Fᵈ) → TaskCreate[all] → ∥Spawn[Task](T, planner) → Π → Q_π[AskUserQuestion](plan approval) → await → Πᵥ  -- register + plan [Tool]
 Phase 6b: Πᵥ → ∥Spawn[Task](T, praxis, Πᵥ)                           -- spawn praxis with plan [Tool]
@@ -117,7 +117,8 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
-Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peers exchange directly ≤3 per pair → coordinator evaluates result; skip if Δ = ∅)
+Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic + structured report format to peer pair → peers exchange directly ≤3 per pair → peers submit 4-field structured report → conditional hub-spoke: coordinator queries each peer 1× if remaining_divergence → coordinator synthesizes independently; skip if Δ = ∅)
+Phase 4 Q (extern)       → AskUserQuestion (synthesis result review + user additional input; proceeds to Phase 5 on confirm)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Phase 5 K_i/Q            → AskUserQuestion (classification + routing: plan_act/modify/extend/wrap_up; extend triggers follow-up AskUserQuestion; Escape → terminate)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
@@ -313,9 +314,16 @@ over specificity.
 
 Cross-dialogue: The coordinator may signal a tension topic and connect you
 with another perspective for direct exchange (≤3 messages per pair).
-Present your position, engage with the other's reasoning, and report
-your agreement or remaining disagreement. Do not initiate cross-dialogue
-unprompted — wait for the coordinator's topic signal.
+Present your position, engage with the other's reasoning, and work toward
+common ground. After exchange, submit a structured report to the coordinator:
+- Final position: your concluded stance
+- Agreement points: what you agreed on
+- Remaining divergence: unresolved disagreements (empty if fully agreed)
+- Rationale: why you hold this position
+If divergence remains, the coordinator may ask one follow-up question for
+integration — respond with specific evidence or impact analysis.
+Do not initiate cross-dialogue unprompted — wait for the coordinator's
+topic signal.
 ```
 
 Multiple selections → parallel teammates (never sequential).
@@ -337,11 +345,11 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 - Confirmation bias from main agent's prior reasoning
 - Anchoring on initial assumptions formed during context gathering
 
-**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 3 (inquiry), perspectives operate in strict isolation — no cross-dialogue occurs. In Phase 4 (cross-dialogue), peers negotiate directly on coordinator-identified tension topics (≤3 exchanges per pair) — analysis isolation has served its purpose in Phase 3, and direct peer engagement produces richer agreement than coordinator relay. The coordinator's role shifts from messenger to referee: signaling tension topics and evaluating peer-negotiated results. In Phase 7 (action), peer-to-peer is allowed between praxis and originating perspectives for verification and context restoration.
+**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 3 (inquiry), perspectives operate in strict isolation — no cross-dialogue occurs. In Phase 4 (cross-dialogue), peers negotiate directly on coordinator-identified tension topics (≤3 exchanges per pair), then submit structured reports. If divergence remains, the coordinator queries each divergent peer once (hub-spoke) before synthesizing independently. The coordinator's role progresses: referee during peer exchange, Synthesizer during hub-spoke and integration. Analysis isolation has served its purpose in Phase 3, and direct peer engagement produces richer negotiation than coordinator relay. In Phase 7 (action), peer-to-peer is allowed between praxis and originating perspectives for verification and context restoration.
 
 **Isolation trade-off on extend loops**: When `J=extend` deepens an existing perspective via SendMessage, the coordinator's re-inquiry instruction inherently carries synthesis context (what to deepen, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested extension, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
 
-**Isolation trade-off on cross-dialogue and action phases**: Phase 4 and Phase 7 both allow peer-to-peer communication. This is acceptable because: (1) Phase 3 already secured independent analysis — isolation has served its epistemic purpose; (2) direct peer exchange produces richer negotiation than coordinator relay, which introduces State-Cognition Gap (information loss at each transfer layer); (3) the coordinator retains structural control — topic signaling (Phase 4) and scope enforcement (Phase 7) — without acting as message intermediary.
+**Isolation trade-off on cross-dialogue and action phases**: Phase 4 and Phase 7 both allow peer-to-peer communication. This is acceptable because: (1) Phase 3 already secured independent analysis — isolation has served its epistemic purpose; (2) direct peer exchange produces richer negotiation than coordinator relay, which introduces State-Cognition Gap (information loss at each transfer layer); (3) the coordinator retains structural control — topic signaling, structured report collection, conditional hub-spoke (Phase 4) and scope enforcement (Phase 7) — without acting as message intermediary during peer exchange. Hub-spoke is a controlled reversion to coordinator-mediated interaction, justified by the need for independent synthesis when peers cannot resolve divergence themselves.
 
 **Scope extension note**: Phase 6-7 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `plan_act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
 
@@ -356,16 +364,34 @@ The coordinator explicitly checks R' for cross-dialogue triggers before proceedi
 - One perspective's horizon limit intersects another's core finding
 - A high-stakes finding supported by a single perspective with no corroboration
 
-**If triggers detected**: Coordinator initiates peer negotiation:
+**If triggers detected**: Coordinator initiates peer negotiation with structured reporting:
 
-1. **Topic signal**: Coordinator identifies the tension topic and sends it to the involved peer pair via SendMessage (e.g., "Tension detected on [topic Z] between your perspectives. Exchange directly and report your agreement or remaining disagreement.")
+1. **Topic signal**: Coordinator identifies the tension topic and sends it to the involved peer pair via SendMessage, including the structured report format (e.g., "Tension detected on [topic Z] between your perspectives. Exchange directly (≤3 messages), then each submit a structured report: final position / agreement points / remaining divergence / rationale.")
 2. **Peer exchange**: Peers communicate directly (≤3 exchanges per pair). Each peer presents their position, responds to the other's reasoning, and works toward common ground. The coordinator does not relay or frame — peers engage with each other's actual arguments.
-3. **Result report**: Peers report their consensus, concessions, and any remaining divergence to the coordinator.
-4. **Coordinator evaluation**: Coordinator evaluates the peer-negotiated result and integrates it into synthesis.
+3. **Structured report**: Each peer submits a 4-field report to the coordinator:
+   - **Final position**: Peer's concluded stance after exchange
+   - **Agreement points**: What the peers agreed on
+   - **Remaining divergence**: Specific unresolved disagreements (empty if fully agreed)
+   - **Rationale**: Why this position is held
+4. **Conditional hub-spoke**: If any peer's `remaining_divergence` is non-empty, coordinator initiates hub-spoke reconciliation — one targeted question per divergent peer (e.g., "Peer B argues [X]. Explain the concrete impact of your position on [specific aspect]."). Each peer responds once. Coordinator collects responses for independent synthesis. If `remaining_divergence` is empty for all peers, skip to step 5.
+5. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises independent judgment as Synthesizer: information collection from peers, but the integration decision is the coordinator's own.
+6. **User review**: **Call the AskUserQuestion tool** to present the synthesis result and solicit additional input before proceeding to Phase 5. The user sees the full cross-dialogue outcome for the first time here.
+
+   ```
+   Cross-dialogue synthesis:
+
+   [Synthesis content — convergence, divergence resolution, integrated assessment]
+
+   Options:
+   1. **Confirm** — proceed to classification (Phase 5)
+   2. **Add input** — provide additional context or opinions for synthesis revision
+   ```
 
 **Exchange limit**: Maximum 3 SendMessage exchanges per peer pair (e.g., A→B, B→A, A→B). This bounds dialogue while allowing substantive negotiation beyond a single challenge-response. If peers reach agreement before 3 exchanges, they may stop early.
 
-**If no triggers**: Proceed to synthesis with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected").
+**Hub-spoke budget**: When triggered, 1 SendMessage per divergent peer (coordinator→peer question + peer→coordinator response). Coordinator does not re-engage peers after receiving responses — synthesis is independent.
+
+**If no triggers**: Proceed to synthesis (step 5) with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected"), then user review (step 6).
 
 Cross-dialogue precedes synthesis so the coordinator evaluates all perspectives before integration. Trigger detection is an explicit checkpoint — not incidental discovery during synthesis.
 
@@ -557,7 +583,7 @@ This is a **phase-dependent topology shift**:
 | Phase | Topology | Rationale |
 |-------|----------|-----------|
 | Phase 3 (Inquiry) | Strict isolation | Independent perspective analysis without cross-contamination |
-| Phase 4 (Cross-dialogue & Synthesis) | Peer-to-peer (coordinator as referee) | Peers negotiate directly on tension topics; coordinator signals topic and evaluates result |
+| Phase 4 (Cross-dialogue & Synthesis) | Peer-to-peer → structured report → conditional hub-spoke → user review | Peers negotiate directly → 4-field report → coordinator queries divergent peers (Synthesizer) → user confirms synthesis |
 | Phase 6a (Planning) | Planner-only (read-only) | Independent plan design without execution capability |
 | Phase 7 (Action) | Peer-to-peer (praxis ↔ originating perspective) | Enables accurate verification; reduces information loss through coordinator relay |
 
@@ -608,7 +634,7 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 
 1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/mission "text"`) still requires confirmation. Modify loops re-present until confirmed.
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 3: strict isolation (no cross-dialogue). Phase 4: peer-to-peer negotiation (≤3 exchanges/pair, coordinator as referee). Phase 7: peer-to-peer allowed between praxis and originating perspectives for verification
+3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 3: strict isolation (no cross-dialogue). Phase 4: peer-to-peer negotiation (≤3 exchanges/pair) → structured report (4-field) → conditional hub-spoke (Synthesizer, 1×/peer if divergence) → user review. Phase 7: peer-to-peer allowed between praxis and originating perspectives for verification
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
@@ -616,7 +642,7 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
 9. **Team persistence**: Team persists across Phase 5 loop iterations and through Phase 6-7 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 5 or Phase 5')
 10. **Classification authority**: Coordinator proposes initial classification; user confirms or modifies (final authority). Conservative default applies to initial proposal: ambiguous → Fᵈ
-11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; plan mode (Phase 6a) is planner-only (read-only subagent); cross-dialogue (Phase 4) uses peer-to-peer negotiation with coordinator as referee (≤3 exchanges/pair, explicit trigger check); action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
+11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; plan mode (Phase 6a) is planner-only (read-only subagent); cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
 12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
 13. **Plan scope**: Phase 6a planner operates read-only (`subagent_type=Plan`); approved plans (Πᵥ) are forwarded to praxis as execution guidance, not binding contracts — praxis retains professional judgment within Fₐ scope
 
