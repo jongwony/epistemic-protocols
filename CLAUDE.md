@@ -101,7 +101,7 @@ Co-construct defined goals from vague intent through AI-proposed, user-shaped di
 ### Inquire (αἴτησις) — Aitesis
 Detect context insufficiency before execution through AI-detected inquiry.
 - **Deficit**: ContextInsufficient → InformedExecution
-- **Triggers**: Environment changed, user dissatisfaction patterns, repeated failures, stale assumptions
+- **Triggers**: Context insufficiency heuristics (ambiguous execution scope, external dependency, implicit requirements)
 - **Invocation**: `/inquire` or use "inquire" in conversation
 
 ### Calibrate (ἐπιτροπή) — Epitrope
