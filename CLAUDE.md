@@ -171,10 +171,17 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
 
+## Git Conventions
+
+- **Commit message**: `type(scope): Korean description` — type ∈ {feat, fix, refactor, style}, scope = plugin name
+- **Branch naming**: `feat/name-protocol`, `refactor/description`, `fix/description`
+- **PR body language**: Korean (hook-enforced)
+
 ## Editing Guidelines
 
 - **Notation**: `→` (function), `∥` (parallel), `[Tool]` suffix for external operations in PHASE TRANSITIONS
 - Keep README.md and README_ko.md in sync
+- Update `assets/epistemic-matrix*.svg` when the protocol table changes (referenced by both READMEs)
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
 - Skills frontmatter: `name` (required), `description` (required, quote if contains `:`), `user-invocable` (boolean), `allowed-tools` (optional)
@@ -189,3 +196,5 @@ node .claude/skills/verify/scripts/static-checks.js .
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
+| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (3 arrays: `aliasToSkill`, `checkRequiredSections`, `checkToolGrounding`), ALL existing SKILL.md precedence descriptions, README.md + README_ko.md |
+| Precedence change | CLAUDE.md (precedence section + workflow diagram), ALL SKILL.md precedence descriptions |
