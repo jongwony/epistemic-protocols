@@ -39,6 +39,7 @@ Phase 3: Review          → 계약 승인 요청 (AskUserQuestion 호출)
 | 도메인 | 예시 |
 |--------|------|
 | FileModification | "파일 수정이 필요하면 바로 진행할까요, 먼저 물어볼까요?" |
+| ↳ *ephemeral/durable* | "설정 파일, 규칙 등 영속 파일은 일반 코드와 다른 자율성이 필요할 수 있음" |
 | Exploration | "조사 중 관련 정보를 발견하면..." |
 | Strategy | "작업 중 더 나은 접근을 발견하면..." |
 | External | "git push, PR 생성 — 항상 물어볼까요?" |

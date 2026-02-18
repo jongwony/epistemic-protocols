@@ -39,6 +39,7 @@ Phase 3: Review          → Present contract for approval (call AskUserQuestion
 | Domain | Example |
 |--------|---------|
 | FileModification | "When I need to modify files, should I proceed or ask first?" |
+| ↳ *ephemeral/durable* | "Persistent files (config, rules) may need different autonomy than regular code" |
 | Exploration | "If I find related information while investigating, should I..." |
 | Strategy | "If I find a better approach mid-task, should I..." |
 | External | "For git push, PR creation — should I always ask?" |

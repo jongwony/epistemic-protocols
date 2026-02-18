@@ -19,17 +19,22 @@ Epitrope(T) → Decompose(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integ
 ── TYPES ──
 T    = TaskScope (task/project to calibrate delegation for)
 Dᵢ   = ActionDomain ∈ {FileModification, Exploration, Strategy, External}
+         -- FileModification.persistence ∈ {ephemeral, durable}
+         --   ephemeral: temp files, build artifacts, generated code
+         --   durable: source code, config, memory writes, CLAUDE.md, rules
 Sₖ   = Scenario (concrete situation-based question)
 R    = Response ∈ {Autonomous, ReportThenAct, AskBefore, Halt}
          -- Domain-specific refinements (⊆ base R):
          --   Minimal ⊆ Autonomous, ProposeThenChoose ⊆ ReportThenAct,
          --   SwitchAutonomously ⊆ Autonomous, AlwaysAsk ⊆ AskBefore
 DC   = DelegationContract { autonomous, report_then_act, ask_before, halt_conditions, exploration }
+         -- Subagent inheritance: spawned agents inherit parent DC unless explicitly overridden
 ExplorationScope = { depth: N, breadth: N, drift_action: report | halt }
 CalibratedAutonomy = DC where (∀ d ∈ applicable: calibrated(d)) ∨ user_esc
 
 ── SCENARIO TEMPLATES ──
 FileModification:  "When files need to be modified for this task?" → {Autonomous, ReportThenAct, AskBefore}
+  └─ persistence: "When persistent files (config, memory, rules) need changes?" → {same R, may differ from ephemeral}
 Exploration:       "When related information is found during investigation?" → {Autonomous, ReportThenAct, Minimal(⊆Autonomous)}
 Strategy:          "When a different approach looks better than the original plan?" → {ProposeThenChoose(⊆ReportThenAct), SwitchAutonomously(⊆Autonomous)}
 External:          "When git push or PR creation is needed?" → {Autonomous, AlwaysAsk(⊆AskBefore)}
@@ -46,6 +51,17 @@ After Phase 2: check uncalibrated domains.
 If domains remain: return to Phase 1 (next domain or refinement).
 If all calibrated or user ESC: proceed to Phase 3.
 
+── RECALIBRATION ──
+recalibrate(DC, T') = new_domain_activated(T') ∨ stakes_escalated(T')
+stakes_escalated(T') ≡ stakes(T') = High ∧ stakes(T) ∈ {Low, Med}
+  -- Low→Med: no recalibration (interruption minimization)
+  -- Low/Med→High: recalibration triggered
+
+── WILDCARD ──
+wildcard(history) = variance_detected(history) → +1 refinement question
+variance_detected(h) ≡ ∃(Dᵢ, Sₖ, R₁), (Dᵢ, Sₖ', R₂) ∈ h : R₁ ≠ R₂ within same domain
+|questions| ≤ 9 (base 8 + wildcard 1)
+
 ── TOOL GROUNDING ──
 Phase 1 Q  (extern)  → AskUserQuestion (scenario with autonomy options)
 Phase 2    (state)   → Internal DelegationContract update
@@ -54,7 +70,8 @@ decompose  (detect)  → Read, Grep (task analysis)
 
 ── MODE STATE ──
 Λ = { phase: Phase, T: TaskScope, domains: Set(ActionDomain),
-      calibrated: Set(ActionDomain), contract: DelegationContract,
+      calibrated: Set(ActionDomain), skipped: Set(ActionDomain),
+      contract: DelegationContract,
       history: List<(Dᵢ, Sₖ, R)>, active: Bool }
 ```
 
@@ -135,6 +152,8 @@ When Epitrope is active:
 | Domain | Scope | Example Actions |
 |--------|-------|-----------------|
 | **FileModification** | Creating, editing, deleting files | Write new modules, refactor existing code, delete unused files |
+| ↳ *ephemeral* | Temp files, build artifacts, generated code | — (follows FileModification autonomy level) |
+| ↳ *durable* | Source code, config, memory, CLAUDE.md, rules | May require different autonomy than ephemeral |
 | **Exploration** | Reading files, searching codebase, web research | Grep for patterns, read adjacent files, fetch documentation |
 | **Strategy** | Choosing implementation approach | Select architecture pattern, decide refactoring scope, pick library |
 | **External** | Actions visible outside local environment | git push, PR creation, Slack messages, issue comments |
@@ -185,7 +204,7 @@ Options:
 - **Domain cap**: Maximum 4 domains per calibration session
 
 **Refinement questions** (optional, one per domain):
-- FileModification: "What about creating entirely new files vs. editing existing ones?"
+- FileModification: "What about persistent files (config, memory, rules) vs. regular code changes?"
 - Exploration: "How far should I look beyond the immediate task scope?"
 - Strategy: "If I find a better approach mid-execution, should I...?"
 - External: "Should I draft PR descriptions for your review or create directly?"
@@ -221,6 +240,13 @@ Here's the delegation contract for this task:
 **Halt conditions** (I'll stop and escalate):
 - [list of halt conditions]
 
+**Skipped** (not applicable to this task):
+- [list of domains from Λ.skipped, if any]
+
+**Defaults** (uncalibrated domains default):
+- Exploration: autonomous (read-only, inherently safe)
+- Others: ask-before
+
 Options:
 1. **Approve** — apply this contract
 2. **Adjust** — I'd like to change something
@@ -240,9 +266,9 @@ If user selects "Adjust": return to Phase 1 for the specified domain. If approve
 
 | Rule | Structure | Threshold |
 |------|-----------|-----------|
-| Session immunity | Approved DC → skip recalibration for session | Until task scope changes significantly |
+| Session immunity | Approved DC → skip recalibration for session | `¬recalibrate(DC, T')`: recalibrate only on `new_domain_activated ∨ stakes_escalated(→High)` |
 | Domain cap | `\|domains\| ≤ 4` | Confirmed (taxonomy is exhaustive) |
-| Question cap | `\|questions\| ≤ 8` (4 domains × 2 including refinement) | Confirmed |
+| Question cap | `\|questions\| ≤ 9` (4 domains × 2 + wildcard 1) | Wildcard triggers on response variance within same domain |
 | Cross-protocol fatigue | Telos triggered → reduce Epitrope to Light intensity | TBD |
 | Blanket escape | "Just do it" → immediate ESC, default autonomy | Confirmed |
 
@@ -255,7 +281,7 @@ If user selects "Adjust": return to Phase 1 for the specified domain. If approve
 5. **Session-scoped**: DelegationContract applies for current session only; does not persist across sessions
 6. **Domain priority**: Calibrate External first (highest impact), then FileModification, Strategy, Exploration
 7. **Minimal interruption**: Skip calibration for single-domain clear-scope tasks; use Light intensity when possible
-8. **ESC respected**: User can exit at any point; partial contract applies to calibrated domains, defaults to ask-before for uncalibrated
+8. **ESC respected**: User can exit at any point; partial contract applies to calibrated domains. Uncalibrated defaults: Exploration → autonomous (read-only, inherently safe), others → ask-before. Defaults explicitly shown in Phase 3 contract review
 9. **Convergence persistence**: Mode active until DelegationContract approved or ESC
 10. **Cross-protocol awareness**: Calibrated DC informs but does not replace Aitesis context verification or Syneidesis gap surfacing
 
@@ -264,7 +290,7 @@ If user selects "Adjust": return to Phase 1 for the specified domain. If approve
 Approved DelegationContract becomes input to subsequent protocols:
 
 - **Prothesis**: `DC.exploration` constrains agent team investigation scope; `DC.autonomous` domains allow agents to proceed without main-agent confirmation
-- **Syneidesis**: `DC.autonomous` domains may suppress gap surfacing for delegation-related gaps; `DC.ask_before` domains always trigger gap surface for scope changes
-- **Aitesis**: When DC already covers a domain, Aitesis suppresses delegation-related context inquiries for that domain (delegation ≠ context gap)
+- **Syneidesis**: Epitrope(planning layer: "am I allowed to?") and Syneidesis(execution layer: "is this decision sound?") operate on different temporal layers — they complement rather than suppress each other. `DC.ask_before` domains surface delegation-scope changes as gaps; `DC.autonomous` domains do not suppress Syneidesis (execution gaps remain independent of delegation calibration)
+- **Aitesis**: Interface deferred to Issue #57 (proactive Aitesis redesign). Current reactive triggers are being redesigned; Epitrope should target the new Aitesis architecture. Delegation coverage (Epitrope) and context sufficiency (Aitesis) remain orthogonal axes
 
-**Note**: Cross-protocol integration is documented here for design reference. Actual integration is out of scope for v1.0.0.
+**Note**: Prothesis interface is design-ready. Syneidesis interface reflects planning/execution layer model (Gap audit, session c20ed886). Aitesis interface pending Issue #57. Actual enforcement is out of scope for v1.1.0.
