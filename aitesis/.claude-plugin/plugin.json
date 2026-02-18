@@ -1,0 +1,9 @@
+{
+  "name": "aitesis",
+  "description": "Detect context insufficiency before execution — /inquire (αἴτησις: a requesting)",
+  "version": "1.0.1",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  }
+}
