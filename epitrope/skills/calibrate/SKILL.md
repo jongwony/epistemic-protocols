@@ -1,0 +1,266 @@
+---
+name: calibrate
+description: "Calibrate delegation autonomy through scenario-based interview. Produces a DelegationContract when delegation scope is ambiguous. Alias: Epitrope(ἐπιτροπή)."
+user-invocable: true
+---
+
+# Epitrope Protocol
+
+Calibrate delegation autonomy through scenario-based interview. Type: `(DelegationAmbiguous, AI, CALIBRATE, TaskScope) → CalibratedAutonomy`.
+
+## Definition
+
+**Epitrope** (ἐπιτροπή): A dialogical act of calibrating delegation boundaries through concrete scenario-based questions, where AI detects ambiguous delegation scope and produces a DelegationContract through structured binary interview.
+
+```
+── FLOW ──
+Epitrope(T) → Decompose(T) → {Dᵢ} → Scenario(Dᵢ) → R → integrate(R) → DC → (loop until calibrated)
+
+── TYPES ──
+T    = TaskScope (task/project to calibrate delegation for)
+Dᵢ   = ActionDomain ∈ {FileModification, Exploration, Strategy, External}
+Sₖ   = Scenario (concrete situation-based question)
+R    = Response ∈ {Autonomous, ReportThenAct, AskBefore, Halt}
+DC   = DelegationContract { autonomous, report_then_act, ask_before, halt_conditions, exploration }
+ExplorationScope = { depth: N, breadth: N, drift_action: report | halt }
+CalibratedAutonomy = DC where (∀ d ∈ applicable: calibrated(d)) ∨ user_esc
+
+── SCENARIO TEMPLATES ──
+FileModification:  "When files need to be modified for this task?" → {Autonomous, ReportThenAct, AskBefore}
+Exploration:       "When related information is found during investigation?" → {Autonomous, ReportThenAct, Minimal}
+Strategy:          "When a different approach looks better than the original plan?" → {ProposeThenChoose, SwitchAutonomously}
+External:          "When git push or PR creation is needed?" → {Autonomous, AlwaysAsk}
+(Each domain has refinement questions — hybrid question tree)
+
+── PHASE TRANSITIONS ──
+Phase 0:  T → decompose(T) → {Dᵢ}                               -- task decomposition (silent)
+Phase 1:  Dᵢ → template(Dᵢ) → Sₖ → Q[AskUserQuestion](Sₖ) → R  -- scenario interview [Tool]
+Phase 2:  R → integrate(R, DC) → DC'                             -- contract update (internal)
+Phase 3:  DC' → Q[AskUserQuestion](DC', progress) → approve      -- contract review [Tool]
+
+── LOOP ──
+After Phase 2: check uncalibrated domains.
+If domains remain: return to Phase 1 (next domain or refinement).
+If all calibrated or user ESC: proceed to Phase 3.
+
+── TOOL GROUNDING ──
+Phase 1 Q  (extern)  → AskUserQuestion (scenario with autonomy options)
+Phase 2    (state)   → Internal DelegationContract update
+Phase 3 Q  (extern)  → AskUserQuestion (contract review + approval)
+decompose  (detect)  → Read, Grep (task analysis)
+
+── MODE STATE ──
+Λ = { phase: Phase, T: TaskScope, domains: Set(ActionDomain),
+      contract: DelegationContract, history: List<(Dᵢ, Sₖ, R)>, active: Bool }
+```
+
+## Core Principle
+
+**Calibration over Declaration**: When delegation scope is ambiguous, calibrate boundaries through concrete scenarios rather than abstract declarations. Scenario-based questions ("When X happens, what should I do?") surface implicit preferences that abstract rules miss.
+
+## Distinction from Other Protocols
+
+| Protocol | Initiator | Deficit → Resolution | Focus |
+|----------|-----------|----------------------|-------|
+| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-detected | DelegationAmbiguous → CalibratedAutonomy | Delegation boundary calibration |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
+
+**Key differences**:
+- **Telos** co-constructs goals when intent is indeterminate — Epitrope calibrates how much autonomy the AI should have for an already-defined goal
+- **Aitesis** detects insufficient context for execution — Epitrope addresses ambiguous delegation scope (not missing context, but undefined authority)
+- **Syneidesis** surfaces gaps in the user's decision — Epitrope surfaces gaps in the AI's mandate
+
+**Delegation distinction**: Epitrope operates on an independent axis from the 6-stage epistemic workflow. Context insufficiency (Aitesis) asks "do I know enough?"; delegation ambiguity (Epitrope) asks "am I allowed to?". A task can have sufficient context but ambiguous delegation, or clear delegation but insufficient context.
+
+## Mode Activation
+
+### Activation
+
+AI detects ambiguous delegation scope OR user calls `/calibrate`. Detection is silent (Phase 0); calibration always requires user interaction via AskUserQuestion (Phase 1+).
+
+**Delegation ambiguous** = task involves multiple action domains where autonomy level is not explicitly specified or inferable from existing instructions.
+
+### Priority
+
+<system-reminder>
+When Epitrope is active:
+
+**Supersedes**: Default autonomy assumptions in User Memory
+(Delegation must be calibrated before multi-domain execution begins)
+
+**Retained**: Safety boundaries, tool restrictions, user explicit instructions
+
+**Action**: At Phase 1, call AskUserQuestion tool to present scenario-based delegation questions.
+</system-reminder>
+
+- Epitrope completes before multi-domain execution proceeds
+- User Memory rules resume after DelegationContract is approved or ESC
+
+**Protocol precedence**: Default ordering places Epitrope after Telos (defined goals before delegation calibration) and before Aitesis (calibrated delegation before context verification). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+
+### Triggers
+
+| Signal | Detection |
+|--------|-----------|
+| Multi-domain task with no explicit delegation cues | Task spans File + External + Strategy without prior calibration |
+| Ambiguous scope keywords | "handle this", "take care of", "do what you think is best" |
+| Prior wrong_approach or excessive_changes friction | History of autonomy misalignment in similar tasks |
+| New project or unfamiliar codebase | No established delegation patterns |
+
+**Skip**:
+- Single-domain task with clear scope (e.g., "fix the typo on line 42")
+- User explicitly says "just do it" or "proceed" (blanket autonomy)
+- DelegationContract already exists for this session and covers the task domains
+- Task is fully specified with explicit step-by-step instructions
+
+### Mode Deactivation
+
+| Trigger | Effect |
+|---------|--------|
+| DelegationContract approved | Apply contract to subsequent execution |
+| User ESC | Return to default autonomy assumptions |
+| User cancels | Discard partial contract, return to normal |
+
+## Domain Taxonomy
+
+| Domain | Scope | Example Actions |
+|--------|-------|-----------------|
+| **FileModification** | Creating, editing, deleting files | Write new modules, refactor existing code, delete unused files |
+| **Exploration** | Reading files, searching codebase, web research | Grep for patterns, read adjacent files, fetch documentation |
+| **Strategy** | Choosing implementation approach | Select architecture pattern, decide refactoring scope, pick library |
+| **External** | Actions visible outside local environment | git push, PR creation, Slack messages, issue comments |
+
+### Domain Priority
+
+When calibrating, interview in this order (highest impact first):
+1. **External** (highest): Hardest to reverse, visible to others
+2. **FileModification**: Changes to codebase, tracked by git
+3. **Strategy**: Approach decisions, affect scope of work
+4. **Exploration** (lowest): Read-only, inherently safe
+
+Only domains applicable to the current task are calibrated. Skip irrelevant domains.
+
+## Protocol
+
+### Phase 0: Task Decomposition (Silent)
+
+Analyze the task to identify applicable action domains. This phase is **silent** — no user interaction.
+
+1. **Read task description** and identify which ActionDomains are involved
+2. If only one domain with clear scope: skip Epitrope (delegation unambiguous)
+3. If multiple domains or unclear scope: identify applicable domains, proceed to Phase 1
+
+**Decomposition scope**: Current task description, user instructions, and observable project context. Does NOT require proactive investigation.
+
+### Phase 1: Scenario Interview
+
+**Call the AskUserQuestion tool** to present the next uncalibrated domain as a concrete scenario.
+
+**Scenario format** (Akinator-style binary/ternary choice):
+
+```
+For this task, I'd like to calibrate how I should handle [domain]:
+
+[Concrete scenario description relevant to the actual task]
+
+Options:
+1. **[Autonomy level A]** — [what this means in practice]
+2. **[Autonomy level B]** — [what this means in practice]
+3. **[Autonomy level C]** — [if applicable]
+```
+
+**Design principles**:
+- **Concrete scenarios**: Use task-specific situations, not abstract policy questions
+- **Binary/ternary**: Maximum 3 options per question (excluding "Other")
+- **Refinement available**: After initial answer, may ask one follow-up for precision
+- **Domain cap**: Maximum 4 domains per calibration session
+
+**Refinement questions** (optional, one per domain):
+- FileModification: "What about creating entirely new files vs. editing existing ones?"
+- Exploration: "How far should I look beyond the immediate task scope?"
+- Strategy: "If I find a better approach mid-execution, should I...?"
+- External: "Should I draft PR descriptions for your review or create directly?"
+
+### Phase 2: Contract Integration
+
+After user response, update the DelegationContract:
+
+1. Map response to contract field (e.g., FileModification + Autonomous → `DC.autonomous ∪ {FileModification}`)
+2. Record `(Dᵢ, Sₖ, R)` in history
+3. Check remaining uncalibrated domains
+4. If domains remain: return to Phase 1 (next domain by priority)
+5. If all calibrated or user ESC: proceed to Phase 3
+
+### Phase 3: Contract Review
+
+**Call the AskUserQuestion tool** to present the assembled DelegationContract for approval.
+
+**Contract format**:
+
+```
+Here's the delegation contract for this task:
+
+**Autonomous** (I'll proceed without asking):
+- [list of calibrated autonomous actions]
+
+**Report then act** (I'll tell you what I'm doing, then proceed):
+- [list of report-then-act actions]
+
+**Ask before** (I'll ask for permission first):
+- [list of ask-before actions]
+
+**Halt conditions** (I'll stop and escalate):
+- [list of halt conditions]
+
+Options:
+1. **Approve** — apply this contract
+2. **Adjust** — I'd like to change something
+```
+
+If user selects "Adjust": return to Phase 1 for the specified domain. If approved: apply contract to session.
+
+## Intensity
+
+| Level | When | Format |
+|-------|------|--------|
+| Light | 1-2 domains, familiar task type | Single question covering key domain |
+| Medium | 3+ domains, moderate ambiguity | Sequential domain interviews (1 question each) |
+| Heavy | New project, history of friction, 4 domains | Full interview with refinement questions |
+
+## UX Safeguards
+
+| Rule | Structure | Threshold |
+|------|-----------|-----------|
+| Session immunity | Approved DC → skip recalibration for session | Until task scope changes significantly |
+| Domain cap | `\|domains\| ≤ 4` | Confirmed (taxonomy is exhaustive) |
+| Question cap | `\|questions\| ≤ 8` (4 domains × 2 including refinement) | Confirmed |
+| Cross-protocol fatigue | Telos triggered → reduce Epitrope to Light intensity | TBD |
+| Blanket escape | "Just do it" → immediate ESC, default autonomy | Confirmed |
+
+## Rules
+
+1. **AI-detected, user-calibrated**: AI detects ambiguous delegation; calibration requires user choice via AskUserQuestion (Phase 1/3)
+2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present concrete scenarios (text presentation = protocol violation)
+3. **Selection over Detection**: User selects autonomy level from presented options; AI does not auto-calibrate
+4. **Calibration over Declaration**: Concrete scenarios over abstract policy statements — "When X happens, should I..." beats "What's your general preference for..."
+5. **Session-scoped**: DelegationContract applies for current session only; does not persist across sessions
+6. **Domain priority**: Calibrate External first (highest impact), then FileModification, Strategy, Exploration
+7. **Minimal interruption**: Skip calibration for single-domain clear-scope tasks; use Light intensity when possible
+8. **ESC respected**: User can exit at any point; partial contract applies to calibrated domains, defaults to ask-before for uncalibrated
+9. **Convergence persistence**: Mode active until DelegationContract approved or ESC
+10. **Cross-protocol awareness**: Calibrated DC informs but does not replace Aitesis context verification or Syneidesis gap surfacing
+
+## Cross-Protocol Interface
+
+Approved DelegationContract becomes input to subsequent protocols:
+
+- **Prothesis**: `DC.exploration` constrains agent team investigation scope; `DC.autonomous` domains allow agents to proceed without main-agent confirmation
+- **Syneidesis**: `DC.autonomous` domains may suppress gap surfacing for delegation-related gaps; `DC.ask_before` domains always trigger gap surface for scope changes
+- **Aitesis**: When DC already covers a domain, Aitesis suppresses delegation-related context inquiries for that domain (delegation ≠ context gap)
+
+**Note**: Cross-protocol integration is documented here for design reference. Actual integration is out of scope for v1.0.0.
