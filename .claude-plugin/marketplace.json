@@ -43,6 +43,11 @@
       "name": "aitesis",
       "source": "./aitesis",
       "description": "Detect context insufficiency before execution — /inquire (αἴτησις: a requesting)"
+    },
+    {
+      "name": "epitrope",
+      "source": "./epitrope",
+      "description": "Calibrate delegation autonomy through scenario-based interview — /calibrate (ἐπιτροπή: a turning over to)"
     }
   ]
 }

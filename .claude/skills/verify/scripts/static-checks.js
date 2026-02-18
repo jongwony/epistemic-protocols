@@ -222,6 +222,7 @@ function checkCrossReference() {
     'grasp': 'katalepsis/skills/grasp/SKILL.md',
     'goal': 'telos/skills/goal/SKILL.md',
     'inquire': 'aitesis/skills/inquire/SKILL.md',
+    'calibrate': 'epitrope/skills/calibrate/SKILL.md',
   };
 
   // Flow-formula comparison removed (GH #36): CLAUDE.md no longer contains flow formulas.
@@ -265,6 +266,7 @@ function checkRequiredSections() {
     'katalepsis/skills/grasp/SKILL.md',
     'telos/skills/goal/SKILL.md',
     'aitesis/skills/inquire/SKILL.md',
+    'epitrope/skills/calibrate/SKILL.md',
   ];
 
   const requiredSections = [
@@ -311,6 +313,7 @@ function checkToolGrounding() {
     'katalepsis/skills/grasp/SKILL.md',
     'telos/skills/goal/SKILL.md',
     'aitesis/skills/inquire/SKILL.md',
+    'epitrope/skills/calibrate/SKILL.md',
   ];
 
   // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS

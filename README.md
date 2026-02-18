@@ -14,6 +14,7 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 | **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | Achieve certain comprehension of AI work | After AI action |
 | **[Telos](./telos)** (τέλος) — /goal | Co-construct defined goals from vague intent | Pre-action |
 | **[Aitesis](./aitesis)** (αἴτησις) — /inquire | Detect context insufficiency before execution | Pre-execution |
+| **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | Calibrate delegation autonomy through scenario-based interview | Pre-execution |
 
 ## Core Idea
 
@@ -31,6 +32,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 | **Katalepsis** | ResultUngrasped | User-initiated | VERIFY | `ResultUngrasped → VerifiedUnderstanding` |
 | **Telos** | GoalIndeterminate | AI-detected | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
 | **Aitesis** | ContextInsufficient | AI-detected | INQUIRE | `ContextInsufficient → InformedExecution` |
+| **Epitrope** | DelegationAmbiguous | AI-detected | CALIBRATE | `DelegationAmbiguous → CalibratedAutonomy` |
 
 <img src="./assets/epistemic-matrix.svg" alt="Epistemic Type Transformations" width="560">
 
@@ -40,6 +42,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Katalepsis**: "What did you do?" → AI verifies your understanding through questions (`ResultUngrasped → VerifiedUnderstanding`)
 - **Telos**: "What do I actually want?" → AI proposes goals, you shape and approve (`GoalIndeterminate → DefinedEndState`)
 - **Aitesis**: "Am I missing something?" → AI detects its own context insufficiency and inquires for missing information before proceeding (`ContextInsufficient → InformedExecution`)
+- **Epitrope**: "How much should I handle?" → AI calibrates delegation boundaries through scenario-based questions, producing a session contract (`DelegationAmbiguous → CalibratedAutonomy`)
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
 
@@ -56,6 +59,7 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 /plugin install katalepsis
 /plugin install telos
 /plugin install aitesis
+/plugin install epitrope
 ```
 
 ## Usage
@@ -67,6 +71,7 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 /grasp                       # Verify understanding of AI work
 /goal [your vague idea]      # Co-construct defined goals from intent
 /inquire [your task]          # Detect and resolve context insufficiency before execution
+/calibrate [your task]        # Calibrate delegation autonomy through scenario-based interview
 ```
 
 ## License

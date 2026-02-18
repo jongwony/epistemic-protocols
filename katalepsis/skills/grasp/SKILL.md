@@ -109,7 +109,7 @@ At Phase 3, call AskUserQuestion for comprehension verification.
 - Katalepsis provides structured comprehension path
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence**: Non-Katalepsis protocols follow a default ordering (Hermeneia → Telos → Aitesis → Prothesis → Syneidesis) which the user can override. Katalepsis is a structural constraint — it requires completed AI work (`R`), so it always executes last. Do not include Katalepsis as an option in any multi-activation ordering choice.
+**Protocol precedence**: Non-Katalepsis protocols follow a default ordering (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis) which the user can override. Katalepsis is a structural constraint — it requires completed AI work (`R`), so it always executes last. Do not include Katalepsis as an option in any multi-activation ordering choice.
 
 ### Triggers
 

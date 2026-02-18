@@ -45,10 +45,10 @@ Phase 2: Integration    → Update execution plan with user's resolution
 ## Protocol Precedence
 
 ```
-Hermeneia → Telos → Aitesis → Prothesis → Syneidesis → Katalepsis
+Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Katalepsis
 ```
 
-Aitesis follows Telos: once goals are defined, verify execution context is sufficient. Before perspective framing (Prothesis) and gap auditing (Syneidesis), ensure the AI has the context it needs.
+Aitesis follows Epitrope: once delegation is calibrated, verify execution context is sufficient. Before perspective framing (Prothesis) and gap auditing (Syneidesis), ensure the AI has the context it needs.
 
 ## When to Use
 

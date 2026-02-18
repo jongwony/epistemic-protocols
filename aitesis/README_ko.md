@@ -45,10 +45,10 @@ Phase 2: Integration    → 사용자 응답으로 실행 계획 갱신
 ## 프로토콜 우선순위
 
 ```
-Hermeneia → Telos → Aitesis → Prothesis → Syneidesis → Katalepsis
+Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Katalepsis
 ```
 
-Aitesis는 Telos 다음: 목표가 정의된 후, 실행 맥락이 충분한지 확인합니다. 관점 프레이밍(Prothesis)과 갭 감사(Syneidesis) 전에 AI가 필요한 맥락을 갖추도록 합니다.
+Aitesis는 Epitrope 다음: 위임이 캘리브레이션된 후, 실행 맥락이 충분한지 확인합니다. 관점 프레이밍(Prothesis)과 갭 감사(Syneidesis) 전에 AI가 필요한 맥락을 갖추도록 합니다.
 
 ## 사용 시기
 

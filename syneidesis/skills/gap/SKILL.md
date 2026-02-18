@@ -94,7 +94,7 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence**: Default ordering places Syneidesis after Aitesis and Prothesis (Hermeneia → Telos → Aitesis → Prothesis → Syneidesis; gap detection applies within the established, context-verified perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Syneidesis after Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis; gap detection applies within the established, context-verified perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
 
 ### Mode Deactivation
 
