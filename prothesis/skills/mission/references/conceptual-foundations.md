@@ -33,7 +33,18 @@ When multiple perspectives converge on the same recommendation, present as unani
 
 Phases 0–5 constitute **theoria** (θεωρία) — contemplative inquiry that produces the Lens L as a theoretical artifact: what different frameworks reveal, without changing anything. Phase 6–7 extend into **praxis** (πρᾶξις) — perspective-informed action on deterministically fixable findings, reusing the team's analytical context.
 
-This transition requires the user's explicit `act` selection at Phase 5 — a deliberate shift from understanding to changing, which warrants different epistemic commitments (see Phase-dependent topology in Phase 7b).
+This transition requires the user's explicit `plan_act` selection at Phase 5 — a deliberate shift from understanding to changing, which warrants different epistemic commitments (see Phase-dependent topology in Phase 7b).
+
+### Planning as Theoria-Praxis Bridge (Phase 6a)
+
+Phase 6a introduces a Plan subagent between classification (theoria) and execution (praxis).
+The planner operates in read-only mode (`subagent_type=Plan`), designing how to implement
+without implementing — a structured transition from "what to fix" to "how to fix" that preserves
+the explicit `plan_act` gate while adding user-approved execution strategy.
+
+This differs from the external Plan Mode Integration above: there, plan mode is the outer frame
+with Prothesis providing perspectives per planning phase. Here, Prothesis is the outer frame,
+and the planner structures the theoria → praxis transition.
 
 ## Parametric Nature
 

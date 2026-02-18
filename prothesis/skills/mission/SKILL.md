@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → L → K_i(L) → ∥F(T) → V(T) → L'
+Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → L → K_i(L) → Π → ∥F(T, Πᵥ) → V(T) → L'
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
@@ -34,7 +34,7 @@ R      = Set(Result)                                  -- raw inquiry outputs
 R'     = Set(Result) post-collection                  -- after Phase 3 collection
 R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue responses (R'' = R' when Δ = ∅)
 Δ      = Trigger detection: R' → Set(Trigger)         -- contradictions, horizon intersections, uncorroborated high-stakes
-D?     = Conditional dialogue: Δ ≠ ∅ → coordinator-mediated challenge; Δ = ∅ → skip
+D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation (≤3 exchanges/pair, coordinator as referee); Δ = ∅ → skip
 Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
@@ -44,7 +44,10 @@ K_i    = Interactive classify + route: L → AskUserQuestion → ((Fₐ, Fᵤ, F
 Fₐ     = { f | source_determined(f) ∧ perspective_confirmed(f) }          -- actionable
 Fᵤ     = { f | ¬source_determined(f) ∧ adversarial_origin(f) }            -- surfaced unknown
 Fᵈ     = { f | f ∉ Fₐ ∧ f ∉ Fᵤ }                                         -- design-level (catch-all)
-∥F     = Parallel fix: (∥ f∈Fₐ. Fix(f, T))          -- praxis agent within team
+Q_π    = Plan approval: AskUserQuestion → approved | rejected          -- plan confirmation gate
+Π      = Plan: TaskList(Fₐ) → StructuredPlan                          -- planner-designed implementation plan
+Πᵥ     = Verified plan: Q_π(Π) → approved                             -- user-approved plan
+∥F     = Parallel fix: (∥ f∈Fₐ. Fix(f, T, Πᵥ))    -- praxis agent within team (follows approved plan)
 V      = Verify: ∀ f∈Fₐ. peer_verify(f, origin(f))  -- originating perspective confirms
 L'     = Lens post-action: L ∪ { fixes: Set(Fix), deferred: Fᵤ ∪ Fᵈ }
 
@@ -61,7 +64,8 @@ Phase 2:  (C, MBᵥ) → present[S]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ 
 Phase 3:  Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R'  -- inquiry + collection [Tool]
 Phase 4:  R' → Δ(R') → D?[SendMessage](T) → R'' → Syn(R'') → L  -- cross-dialogue & synthesis [Tool]
 Phase 5:  L → K_i(L) → Q[AskUserQuestion](classification + routing) → await → ((Fₐ, Fᵤ, Fᵈ), J)  -- unified classification + routing [Tool]
-Phase 6:  (Fₐ, Fᵤ, Fᵈ) → TaskCreate[all] → ∥Spawn[Task](T, praxis)                 -- register + spawn praxis [Tool]
+Phase 6a: (Fₐ, Fᵤ, Fᵈ) → TaskCreate[all] → ∥Spawn[Task](T, planner) → Π → Q_π[AskUserQuestion](plan approval) → await → Πᵥ  -- register + plan [Tool]
+Phase 6b: Πᵥ → ∥Spawn[Task](T, praxis, Πᵥ)                           -- spawn praxis with plan [Tool]
 Phase 7:  ∥F[TaskUpdate](T, Fₐ) → V[SendMessage](T) → L'       -- fix + peer verify [Tool]
 Phase 5': L' → Q'[AskUserQuestion](action_sufficiency) → await → J'  -- action sufficiency [Tool]
 
@@ -72,7 +76,7 @@ After Phase 0 (Mission Brief):
   J_mb = ESC           → terminate (no team exists)
 
 After Phase 5 (classification + routing):
-  J = act              → Phase 6 (Fₐ confirmed → spawn praxis into T; team retained)
+  J = plan_act         → Phase 6a (TaskCreate + spawn planner into T; team retained)
   J = modify(finding)  → re-classify → re-present K_i → await
   J = extend           → Q[AskUserQuestion](add new perspective | deepen existing) → Phase 2 or Phase 3 inquiry (team retained)
   J = wrap_up          → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with L
@@ -84,9 +88,15 @@ After Phase 5' (action sufficiency):
   J' = ESC            → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with current L'
                          → recommend_protocols(Fᵤ ∪ Fᵈ)
 
-After Phase 6 (classification guard):
+After Phase 6a (plan approval):
+  Πᵥ = approved        → Phase 6b (spawn praxis with plan context)
+  Πᵥ = rejected        → coordinator relays feedback to planner via SendMessage → re-collect → re-present Q_π
+  Πᵥ = reclassify      → Phase 5 (re-present classification; planner shutdown, tasks retained)
+  Πᵥ = ESC             → Phase 5 (re-present classification; planner shutdown, tasks retained)
+
+After Phase 6b (classification guard):
   Fₐ = ∅ → Phase 5' (L' = L ∪ { fixes: ∅, deferred: Fᵤ ∪ Fᵈ })
-  Fₐ ≠ ∅ → Phase 7 (spawn praxis, execute fixes)
+  Fₐ ≠ ∅ → Phase 7 (execute fixes per approved plan)
 
 recommend_protocols(deferred):
   Fᵤ ≠ ∅ → suggest Syneidesis (priority: surfaced unknowns)
@@ -107,15 +117,18 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
-Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator-mediated cross-dialogue; skip if Δ = ∅)
+Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peers exchange directly ≤3 per pair → coordinator evaluates result; skip if Δ = ∅)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
-Phase 5 K_i/Q            → AskUserQuestion (classification + routing: act/modify/extend/wrap_up; extend triggers follow-up AskUserQuestion; Escape → terminate)
+Phase 5 K_i/Q            → AskUserQuestion (classification + routing: plan_act/modify/extend/wrap_up; extend triggers follow-up AskUserQuestion; Escape → terminate)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
-TaskCreate (Phase 6)     → TaskCreate tool (register confirmed tiers with metadata)
-∥Spawn praxis (parallel) → Task tool (team_name, name: spawn praxis into existing T)
-G(praxis)                → TaskList/TaskGet tools (praxis context acquisition: discovery + full descriptions)
+TaskCreate (Phase 6a)     → TaskCreate tool (register confirmed tiers with metadata)
+∥Spawn planner (parallel) → Task tool (team_name, name, subagent_type=Plan: spawn planner into existing T)
+Phase 6a Q_π (extern)     → AskUserQuestion (plan approval: approve/reject/reclassify; Escape → Phase 5)
+Phase 6a reject (conditional) → SendMessage tool (type: "message", coordinator relays rejection feedback to planner)
+∥Spawn praxis (parallel)  → Task tool (team_name, name: spawn praxis into existing T)
+G(praxis)                 → TaskList/TaskGet tools (praxis context: Πᵥ + discovery)
 ∥F (parallel)            → TaskUpdate/Edit/Write tools (praxis applies fixes to Fₐ items)
 V (parallel)             → SendMessage tool (type: "message", peer-to-peer praxis ↔ originating perspective)
 Phase 5' Q' (extern)    → AskUserQuestion (action sufficiency check; Escape → terminate)
@@ -128,7 +141,7 @@ A = synthesized assessment (additional computation)
 ── MODE STATE ──
 Λ = { phase: Phase, mission_brief: Option(MBᵥ), lens: Option(L), active: Bool, team: Option(TeamState), action: Option(ActionState) }
 TeamState = { name: String, members: Set(String), tasks: Set(TaskId) }
-ActionState = { classified: (Fₐ, Fᵤ, Fᵈ), praxis: Option(String) }
+ActionState = { classified: (Fₐ, Fᵤ, Fᵈ), planner: Option(String), plan: Option(Πᵥ), praxis: Option(String) }
 ```
 
 ## Mode Activation
@@ -298,9 +311,11 @@ Self-check: if a cell could be replaced by "TBD" without changing meaning, it la
 Exception: when the inquiry explicitly requires abstract/general patterns, prioritize breadth
 over specificity.
 
-Cross-dialogue: If the coordinator sends you another perspective's finding
-to challenge, respond with a focused rebuttal or concession (2-3 sentences).
-Do not initiate cross-dialogue unprompted.
+Cross-dialogue: The coordinator may signal a tension topic and connect you
+with another perspective for direct exchange (≤3 messages per pair).
+Present your position, engage with the other's reasoning, and report
+your agreement or remaining disagreement. Do not initiate cross-dialogue
+unprompted — wait for the coordinator's topic signal.
 ```
 
 Multiple selections → parallel teammates (never sequential).
@@ -322,11 +337,11 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 - Confirmation bias from main agent's prior reasoning
 - Anchoring on initial assumptions formed during context gathering
 
-**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 3 (inquiry), perspectives operate in strict isolation — no cross-dialogue occurs. Cross-dialogue is deferred to Phase 4 where the coordinator mediates after full collection, with explicit trigger checking. In Phase 7 (action), peer-to-peer is allowed between praxis and originating perspectives for verification and context restoration — analysis isolation has served its purpose, and direct channels reduce information loss through coordinator relay.
+**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 3 (inquiry), perspectives operate in strict isolation — no cross-dialogue occurs. In Phase 4 (cross-dialogue), peers negotiate directly on coordinator-identified tension topics (≤3 exchanges per pair) — analysis isolation has served its purpose in Phase 3, and direct peer engagement produces richer agreement than coordinator relay. The coordinator's role shifts from messenger to referee: signaling tension topics and evaluating peer-negotiated results. In Phase 7 (action), peer-to-peer is allowed between praxis and originating perspectives for verification and context restoration.
 
 **Isolation trade-off on extend loops**: When `J=extend` deepens an existing perspective via SendMessage, the coordinator's re-inquiry instruction inherently carries synthesis context (what to deepen, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested extension, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
 
-**Isolation trade-off on action phase**: When `J=act` proceeds to Phase 7, the praxis agent communicates directly with originating perspectives. This is acceptable because: (1) the user explicitly chose to act, sanctioning the topology shift; (2) analysis-phase isolation already produced unbiased findings; (3) peer-to-peer verification is epistemically necessary — coordinator relay introduces State-Cognition Gap (information loss at each transfer layer).
+**Isolation trade-off on cross-dialogue and action phases**: Phase 4 and Phase 7 both allow peer-to-peer communication. This is acceptable because: (1) Phase 3 already secured independent analysis — isolation has served its epistemic purpose; (2) direct peer exchange produces richer negotiation than coordinator relay, which introduces State-Cognition Gap (information loss at each transfer layer); (3) the coordinator retains structural control — topic signaling (Phase 4) and scope enforcement (Phase 7) — without acting as message intermediary.
 
 **Scope extension note**: Phase 6-7 extends Prothesis from "perspective placement" (πρόθεσις = "setting before") to "perspective-informed action." This is an intentional design decision: when the team is already assembled and findings are actionable, dissolving the team and re-creating it for action would waste analytical context. The extension is bounded — only user-selected `act` triggers it, only Fₐ items are acted upon, and Fᵤ/Fᵈ are deferred to other protocols.
 
@@ -334,17 +349,21 @@ Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 
 After collecting all perspective results (R'), the coordinator reviews for cross-dialogue triggers and synthesizes findings.
 
-**Cross-Dialogue**
+**Cross-Dialogue (Peer Negotiation)**
 
-The coordinator explicitly checks R' for cross-dialogue triggers before proceeding to synthesis. Trigger conditions that warrant mediated exchange:
+The coordinator explicitly checks R' for cross-dialogue triggers before proceeding to synthesis. Trigger conditions that warrant peer exchange:
 - Contradictory conclusions between perspectives
 - One perspective's horizon limit intersects another's core finding
 - A high-stakes finding supported by a single perspective with no corroboration
 
-**If triggers detected**: Coordinator mediates via SendMessage:
-- Relay the challenging finding to the target perspective
-- 1 exchange per pair: challenge + response (no extended debate)
-- Coordinator controls what information crosses perspective boundaries
+**If triggers detected**: Coordinator initiates peer negotiation:
+
+1. **Topic signal**: Coordinator identifies the tension topic and sends it to the involved peer pair via SendMessage (e.g., "Tension detected on [topic Z] between your perspectives. Exchange directly and report your agreement or remaining disagreement.")
+2. **Peer exchange**: Peers communicate directly (≤3 exchanges per pair). Each peer presents their position, responds to the other's reasoning, and works toward common ground. The coordinator does not relay or frame — peers engage with each other's actual arguments.
+3. **Result report**: Peers report their consensus, concessions, and any remaining divergence to the coordinator.
+4. **Coordinator evaluation**: Coordinator evaluates the peer-negotiated result and integrates it into synthesis.
+
+**Exchange limit**: Maximum 3 SendMessage exchanges per peer pair (e.g., A→B, B→A, A→B). This bounds dialogue while allowing substantive negotiation beyond a single challenge-response. If peers reach agreement before 3 exchanges, they may stop early.
 
 **If no triggers**: Proceed to synthesis with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected").
 
@@ -396,7 +415,7 @@ Findings classification:
 | ... | ... | ... |
 
 Options:
-1. **Act on findings** — execute Fₐ fixes within the team
+1. **Plan & Act** — design implementation plan, approve, then execute Fₐ fixes
 2. **Modify classification** — adjust specific finding tiers (e.g., Fᵈ→Fₐ)
 3. **Extend analysis** — add new perspective or deepen existing (team retained)
 4. **Wrap up** — preserve deferred findings (Fᵤ/Fᵈ) and dissolve team
@@ -404,7 +423,7 @@ Options:
 
 **Option exhaustiveness**: Present exactly the options listed above. Do not generate, substitute, or reorder options beyond this template.
 
-**"Act on findings" availability**: Only present when Fₐ ≠ ∅ in the proposed classification. When all findings are deferred (Fₐ = ∅), omit this option.
+**"Plan & Act" availability**: Only present when Fₐ ≠ ∅ in the proposed classification. When all findings are deferred (Fₐ = ∅), omit this option.
 
 **Classification loop**: When the user selects "Modify classification", update the tiers per user specification → re-present the table with updated classification → await new decision. The modification loop stays within Phase 5.
 
@@ -414,7 +433,7 @@ Options:
 - Perspectives MAY include `suggested_class` metadata; coordinator considers these in initial proposal
 
 **Loop behavior** (team lifecycle aware):
-- **Act on findings**: Proceed to Phase 6; uses confirmed classification — no re-classification (team retained)
+- **Plan & Act**: Proceed to Phase 6a; spawn planner, design plan, user approval, then Phase 6b praxis spawn (team retained)
 - **Modify classification**: Update tiers per user specification → re-present K_i → await
 - **Extend analysis**: Follow-up AskUserQuestion — "Add new perspective" → Phase 2 (spawn new teammate into T) or "Deepen existing" → Phase 3 (SendMessage re-inquiry to target teammate). Team retained in both cases
 - **Wrap up**: Read deferred findings (Fᵤ/Fᵈ) from TaskList → shutdown_request → TeamDelete → re-register deferred in session task list → recommend follow-up protocols
@@ -426,9 +445,9 @@ All terminal paths (wrap_up and ESC, from both Phase 5 and Phase 5') read deferr
 
 Consult `references/conceptual-foundations.md` for Theoria → Praxis conceptual distinction.
 
-### Phase 6: Action Planning
+### Phase 6a: Implementation Planning
 
-When the user selects `act` at Phase 5, the coordinator uses the **confirmed classification** — no re-classification occurs.
+When the user selects `plan_act` at Phase 5, the coordinator uses the **confirmed classification** — no re-classification occurs.
 
 Call TaskCreate for **all** confirmed findings with tier metadata.
 
@@ -439,6 +458,57 @@ Call TaskCreate for **all** confirmed findings with tier metadata.
 The description SHOULD also state the tier in natural language. Subject prefix is the canonical filtering channel because TaskList reliably surfaces subject text, while metadata visibility through TaskList/TaskGet is platform-dependent.
 
 This persists deferred findings on disk (team task list), making them resistant to coordinator context compaction. Praxis scope is enforced by prompt instruction ("Only fix tier=actionable"), not by structural omission — a deliberate trade-off favoring durability over structural isolation.
+
+**Planner Spawn**
+
+Call Task with `team_name` and `subagent_type=Plan` to spawn a planner into existing team T. The planner is read-only — it can explore the codebase and read tasks but cannot edit files.
+
+The planner receives the planner prompt template:
+
+```
+You are a **Planner** agent in team {team_name}.
+
+**Mission Brief**:
+- Intent: {MBᵥ.inquiry_intent}
+- Deliverable: Implementation plan for actionable findings
+- Scope: {MBᵥ.scope_constraint}
+
+Read TaskList to discover all findings, then TaskGet each for full context.
+Explore the codebase to understand target artifacts.
+Design a structured implementation plan for actionable findings (subject prefix `[Fₐ]`).
+
+For each Fₐ item:
+1. **Target**: File path(s), specific location(s), affected components
+2. **Strategy**: Concrete implementation approach
+3. **Dependencies**: Which fixes must precede others
+4. **Risk**: What could go wrong (informed by the finding's originating perspective)
+
+Output: Numbered implementation plan ordered by dependency.
+Note Fᵤ/Fᵈ items as out-of-scope (for coordinator reference only).
+
+When done, call SendMessage to the coordinator with the complete plan.
+```
+
+**Plan Approval**
+
+After receiving the planner's plan via SendMessage, **call the AskUserQuestion tool** to present it for approval:
+
+```
+Implementation Plan (from Planner):
+
+{plan content}
+
+Options:
+1. **Approve** — proceed to execution per this plan
+2. **Revise** — provide feedback for plan revision
+3. **Reclassify** — return to classification (plan discarded)
+```
+
+**Approval loop**: When the user selects "Revise", the coordinator relays the feedback to the planner via SendMessage → planner revises → coordinator re-presents Q_π. "Reclassify" and ESC return to Phase 5 (planner shutdown, tasks retained).
+
+### Phase 6b: Praxis Spawn
+
+After plan approval (Πᵥ), spawn the praxis agent with the approved plan as execution context.
 
 ### Phase 7: Execution and Peer Verification
 
@@ -452,6 +522,11 @@ The praxis receives the praxis prompt template:
 
 ```
 You are a **Praxis** agent in team {team_name}.
+
+**Approved Implementation Plan**:
+{Πᵥ content}
+
+Follow this plan's ordering and strategy when applying fixes.
 
 Read TaskList to discover actionable findings (Fₐ), then TaskGet each
 for full context. Apply fixes to the relevant artifacts.
@@ -482,7 +557,8 @@ This is a **phase-dependent topology shift**:
 | Phase | Topology | Rationale |
 |-------|----------|-----------|
 | Phase 3 (Inquiry) | Strict isolation | Independent perspective analysis without cross-contamination |
-| Phase 4 (Cross-dialogue & Synthesis) | Coordinator-mediated | Structured contradiction resolution; coordinator controls information crossing |
+| Phase 4 (Cross-dialogue & Synthesis) | Peer-to-peer (coordinator as referee) | Peers negotiate directly on tension topics; coordinator signals topic and evaluates result |
+| Phase 6a (Planning) | Planner-only (read-only) | Independent plan design without execution capability |
 | Phase 7 (Action) | Peer-to-peer (praxis ↔ originating perspective) | Enables accurate verification; reduces information loss through coordinator relay |
 
 One exchange per finding: fix proposal → confirmation or revision request.
@@ -532,7 +608,7 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 
 1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/mission "text"`) still requires confirmation. Modify loops re-present until confirmed.
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 3: strict isolation (no cross-dialogue). Phase 4: coordinator-mediated cross-dialogue. Phase 7: peer-to-peer allowed between praxis and originating perspectives for verification
+3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase 3: strict isolation (no cross-dialogue). Phase 4: peer-to-peer negotiation (≤3 exchanges/pair, coordinator as referee). Phase 7: peer-to-peer allowed between praxis and originating perspectives for verification
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
@@ -540,6 +616,7 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
 9. **Team persistence**: Team persists across Phase 5 loop iterations and through Phase 6-7 action chain; TeamDelete only at terminal states (sufficient/ESC from Phase 5 or Phase 5')
 10. **Classification authority**: Coordinator proposes initial classification; user confirms or modifies (final authority). Conservative default applies to initial proposal: ambiguous → Fᵈ
-11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) is coordinator-mediated with explicit trigger check; action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
+11. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; plan mode (Phase 6a) is planner-only (read-only subagent); cross-dialogue (Phase 4) uses peer-to-peer negotiation with coordinator as referee (≤3 exchanges/pair, explicit trigger check); action (Phase 7) allows peer-to-peer between praxis and originating perspectives only
 12. **Praxis scope**: Limited to actionable findings (Fₐ); design-level (Fᵈ) and surfaced-unknown (Fᵤ) are deferred to post-TeamDelete recommendations
+13. **Plan scope**: Phase 6a planner operates read-only (`subagent_type=Plan`); approved plans (Πᵥ) are forwarded to praxis as execution guidance, not binding contracts — praxis retains professional judgment within Fₐ scope
 
