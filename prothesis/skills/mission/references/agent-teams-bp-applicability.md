@@ -10,7 +10,7 @@ Not all agent-teams best practices apply uniformly across Prothesis phases. This
 | BP4: Research-oriented tasks | — | **Active** (perspectives analyze) | — | Partial (praxis reads then acts) |
 | BP5: Scope-limited tasks | — | **Active** (1 perspective = 1 scope) | — | **Active** (1 finding = 1 fix) |
 | BP6: Mid-flight monitoring | — | Optional (coordinator may check) | — | Optional |
-| BP7: Cross-dialogue | — | **Restricted** (coordinator-mediated) | **Active** (Phase 4 coordinator-mediated triggers) | Phase-shifted (peer-to-peer for verification) |
+| BP7: Cross-dialogue | — | **Restricted** (strict isolation — no cross-dialogue) | **Active** (Phase 4 peer negotiation → structured report → conditional hub-spoke) | Phase-shifted (peer-to-peer for verification) |
 | BP8: Graceful shutdown | — | — | Deferred to terminal | **Active** at terminal |
 | BP9: Shared task list | — | **Active** (TaskCreate per perspective) | — | **Active** (TaskCreate per finding) |
 | BP10: Cross-team communication | — | **Restricted** (isolation required) | — | **Active** (praxis ↔ perspectives) |
