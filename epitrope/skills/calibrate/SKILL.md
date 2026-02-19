@@ -1,7 +1,6 @@
 ---
 name: calibrate
 description: "Calibrate delegation autonomy through scenario-based interview. Produces a DelegationContract when delegation scope is ambiguous. Alias: Epitrope(ἐπιτροπή)."
-user-invocable: true
 ---
 
 # Epitrope Protocol

@@ -1,7 +1,6 @@
 ---
 name: grasp
 description: "Achieve certain comprehension after AI work. Verifies understanding when results remain ungrasped, producing verified understanding. Alias: Katalepsis(κατάληψις)."
-user-invocable: true
 ---
 
 # Katalepsis Protocol
