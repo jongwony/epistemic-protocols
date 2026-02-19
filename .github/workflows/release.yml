@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build ZIP packages
+        run: node scripts/package.js
+
+      - name: Verify ZIP integrity
+        run: |
+          for zip in dist/*.zip; do
+            unzip -t "$zip"
+          done
+
+      - name: Create GitHub Release (draft)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --draft \
+            --title "Epistemic Protocols ${{ github.ref_name }}" \
+            --notes-file dist/release-notes.md \
+            dist/*.zip

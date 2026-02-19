@@ -4,9 +4,8 @@
  * Zero external dependencies: Node.js standard library only
  *
  * Usage:
- *   node scripts/package.js                    # Build ZIPs to dist/
- *   node scripts/package.js --release v1.0.0   # Build + create GitHub Release draft
- *   node scripts/package.js --dry-run          # Simulate build (no file creation)
+ *   node scripts/package.js            # Build ZIPs to dist/
+ *   node scripts/package.js --dry-run  # Simulate build (no file creation)
  *
  * Output: JSON { warnings: [], results: [], dryRun: bool }
  */
@@ -14,8 +13,6 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
-const { execSync } = require('child_process');
-
 const projectRoot = path.resolve(__dirname, '..');
 
 // ============================================================
@@ -274,13 +271,6 @@ function collectFiles(baseDir, prefix) {
 function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
-  const releaseIdx = args.indexOf('--release');
-  const releaseTag = releaseIdx !== -1 ? args[releaseIdx + 1] : null;
-
-  if (releaseIdx !== -1 && !releaseTag) {
-    console.error('ERROR: --release requires a tag (e.g., --release v1.0.0)');
-    process.exit(1);
-  }
 
   const warnings = [];
   const buildResults = [];
@@ -356,20 +346,14 @@ function main() {
     bytes: bundleBuffer.length,
   });
 
-  // Output
-  for (const w of warnings) console.error(`WARN: ${w}`);
-  console.log(JSON.stringify({ warnings, results: buildResults, dryRun }, null, 2));
-
-  // GitHub Release (draft)
-  if (releaseTag && !dryRun) {
+  // Release notes (consumed by CI workflow)
+  if (!dryRun) {
     const versionLines = buildResults
       .filter(r => r.version)
       .map(r => `| ${r.plugin} | ${r.version} | ${r.zip} |`)
       .join('\n');
 
     const notes = [
-      `## Epistemic Protocols ${releaseTag}`,
-      '',
       '| Plugin | Version | Asset |',
       '|--------|---------|-------|',
       versionLines,
@@ -377,23 +361,12 @@ function main() {
       `Bundle: \`${bundleFile}\``,
     ].join('\n');
 
-    const notesFile = path.join(DIST_DIR, '.release-notes.md');
-    fs.writeFileSync(notesFile, notes, 'utf8');
-
-    const zipPaths = buildResults.map(r => `"${path.join(DIST_DIR, r.zip)}"`).join(' ');
-
-    try {
-      execSync(
-        `gh release create "${releaseTag}" --draft --title "Epistemic Protocols ${releaseTag}" --notes-file "${notesFile}" ${zipPaths}`,
-        { cwd: projectRoot, stdio: 'inherit' }
-      );
-    } catch (e) {
-      console.error(`ERROR: gh release create failed: ${e.message}`);
-      process.exit(1);
-    } finally {
-      try { fs.unlinkSync(notesFile); } catch { /* cleanup */ }
-    }
+    fs.writeFileSync(path.join(DIST_DIR, 'release-notes.md'), notes, 'utf8');
   }
+
+  // Output
+  for (const w of warnings) console.error(`WARN: ${w}`);
+  console.log(JSON.stringify({ warnings, results: buildResults, dryRun }, null, 2));
 }
 
 try {
