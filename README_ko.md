@@ -62,6 +62,22 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 /plugin install epitrope
 ```
 
+## Codex 호환
+
+Epistemic protocols를 [Codex](https://github.com/openai/codex) 스킬로도 사용할 수 있습니다:
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo jongwony/epistemic-protocols \
+  --path aitesis/skills/inquire epitrope/skills/calibrate \
+        hermeneia/skills/clarify katalepsis/skills/grasp syneidesis/skills/gap \
+        telos/skills/goal
+```
+
+각 프로토콜의 대화형 워크플로우를 위해 **plan mode**로 실행하세요.
+
+> **Codex 미지원**: Prothesis (`/mission`), Reflexion (`/reflect`), Write (`/write`) — 에이전트 팀과 병렬 서브에이전트가 필요합니다.
+
 ## 사용법
 
 ```

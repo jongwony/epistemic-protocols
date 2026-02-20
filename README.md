@@ -62,6 +62,22 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 /plugin install epitrope
 ```
 
+## Codex Compatibility
+
+Epistemic protocols can also be used as [Codex](https://github.com/openai/codex) skills:
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo jongwony/epistemic-protocols \
+  --path aitesis/skills/inquire epitrope/skills/calibrate \
+        hermeneia/skills/clarify katalepsis/skills/grasp syneidesis/skills/gap \
+        telos/skills/goal
+```
+
+Run in **plan mode** for interactive protocol workflows that require user decisions at each phase.
+
+> **Not yet supported in Codex**: Prothesis (`/mission`), Reflexion (`/reflect`), Write (`/write`) — these require agent teams and parallel subagents.
+
 ## Usage
 
 ```
