@@ -34,11 +34,14 @@ Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registrat
 Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check [Tool]
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
        → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
+       → Q[AskUserQuestion](coverage) if correct(A)     -- aspect summary [Tool]
 
 ── LOOP ──
-After Phase 3: Check if current category fully understood.
-If understood: TaskUpdate → completed, move to next pending task.
-If new gaps: Continue questioning within current category.
+After Phase 3 verification: Evaluate comprehension per gap type.
+If gap detected: Continue questioning within current category.
+If correct: Aspect summary — show probed vs unprobed gap types.
+  User selects "sufficient" → TaskUpdate completed, next pending task.
+  User selects additional aspect → Resume with selected gap type.
 Continue until: all selected tasks completed OR user ESC.
 
 ── CONVERGENCE ──
@@ -49,7 +52,7 @@ VerifiedUnderstanding = P' where (∀t ∈ Tasks: t.status = completed ∧ P' �
 ── TOOL GROUNDING ──
 Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
-Phase 3 Q   → AskUserQuestion (comprehension verification)
+Phase 3 Q   → AskUserQuestion (comprehension verification, aspect coverage)
 Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Categorize  → Internal analysis (Read for context if needed)
@@ -264,6 +267,27 @@ For each task (category):
    | Misconception | Correction + supporting reference if needed | Read (AI-determined) |
 
    Resume comprehension verification by calling AskUserQuestion again for the same aspect.
+
+3d. **Aspect coverage check** (before marking category complete):
+
+   When step 3c evaluates as Correct for the current gap type:
+
+   1. Compare probed gap types vs. potentially relevant unprobed gap types for this category
+   2. If unprobed aspects exist, **call AskUserQuestion**:
+
+   ```
+   question: "Verified [probed aspects] in [Category]. Any other aspects to explore?"
+   options:
+     - label: "Sufficient"
+       description: "Proceed to next category with current understanding"
+     - label: "[Unprobed gap type]"
+       description: "[Why this gap type is relevant to this category]"
+   ```
+
+   3. "Sufficient" → proceed to step 4
+   4. Additional gap type selected → return to step 3 with selected gap type as Δ
+
+   Skip if all relevant gap types already probed during the verification loop.
 
 4. **On confirmed comprehension**:
    - TaskUpdate to `completed`
