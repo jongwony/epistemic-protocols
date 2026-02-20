@@ -189,7 +189,7 @@ Options:
 
 ### Phase 1: Dimension Selection
 
-**Call the AskUserQuestion tool** to let user select applicable dimensions.
+**Call the AskUserQuestion tool** with `multiSelect: true` to let user select applicable dimensions.
 
 Present dimensions with current GoalContract progress:
 
