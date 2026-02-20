@@ -52,6 +52,8 @@ const BUNDLE_NAME = 'epistemic-protocols-bundle';
 
 // ============================================================
 // Section 2: YAML Frontmatter Parser
+// Supports: simple key-value, quoted values, >-/> folded scalar
+// Unsupported: lists, nested objects, | literal block, multi-line unquoted values
 // ============================================================
 
 function parseFrontmatter(content) {
@@ -112,7 +114,7 @@ function serializeFrontmatter(fields) {
     const needsQuote = value.includes(':') || value.includes('#') ||
       value.includes('"') || value.startsWith('{') || value.startsWith('[');
     if (needsQuote) {
-      yaml += `${key}: "${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"\n`;
+      yaml += `${key}: "${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\t/g, '\\t')}"\n`;
     } else {
       yaml += `${key}: ${value}\n`;
     }
@@ -186,7 +188,7 @@ function createZip(entries) {
     const local = Buffer.alloc(30);
     local.writeUInt32LE(0x04034b50, 0);
     local.writeUInt16LE(20, 4);
-    local.writeUInt16LE(0, 6);
+    local.writeUInt16LE(0x0800, 6);
     local.writeUInt16LE(method, 8);
     local.writeUInt16LE(time, 10);
     local.writeUInt16LE(date, 12);
@@ -202,7 +204,7 @@ function createZip(entries) {
     central.writeUInt32LE(0x02014b50, 0);
     central.writeUInt16LE(20, 4);
     central.writeUInt16LE(20, 6);
-    central.writeUInt16LE(0, 8);
+    central.writeUInt16LE(0x0800, 8);
     central.writeUInt16LE(method, 10);
     central.writeUInt16LE(time, 12);
     central.writeUInt16LE(date, 14);
@@ -245,10 +247,11 @@ function collectFiles(baseDir, prefix) {
   const files = [];
 
   function walk(dir, rel) {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const entries = fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
     for (const entry of entries) {
       if (EXCLUDE_NAMES.has(entry.name)) continue;
       if (EXCLUDE_EXTS.has(path.extname(entry.name))) continue;
+      if (entry.isSymbolicLink()) continue;
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         if (EXCLUDE_DIRS.has(entry.name)) continue;
@@ -287,7 +290,13 @@ function main() {
       continue;
     }
 
-    const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+    let pluginJson;
+    try {
+      pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+    } catch (e) {
+      warnings.push(`${plugin.dir}: failed to read plugin.json: ${e.message}`);
+      continue;
+    }
     const files = collectFiles(skillDir, plugin.skill);
     const zipEntries = [];
 
@@ -296,7 +305,7 @@ function main() {
 
       if (file.isSkillMd) {
         const content = data.toString('utf8');
-        const lineCount = content.split('\n').length;
+        const lineCount = content.split('\n').length - (content.endsWith('\n') ? 1 : 0);
 
         if (lineCount > LINE_GUIDELINE) {
           warnings.push(`${plugin.dir}: Skill.md is ${lineCount} lines (${lineCount - LINE_GUIDELINE} over ${LINE_GUIDELINE}-line guideline)`);

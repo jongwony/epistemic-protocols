@@ -23,16 +23,24 @@ jobs:
 
       - name: Verify ZIP integrity
         run: |
-          for zip in dist/*.zip; do
+          set -e
+          shopt -s nullglob
+          zips=(dist/*.zip)
+          if [ ${#zips[@]} -eq 0 ]; then
+            echo "ERROR: No ZIP files found in dist/"
+            exit 1
+          fi
+          for zip in "${zips[@]}"; do
             unzip -t "$zip"
           done
 
       - name: Create GitHub Release (draft)
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.ref_name }}
         run: |
-          gh release create "${{ github.ref_name }}" \
+          gh release create "$TAG_NAME" \
             --draft \
-            --title "Epistemic Protocols ${{ github.ref_name }}" \
+            --title "Epistemic Protocols $TAG_NAME" \
             --notes-file dist/release-notes.md \
             dist/*.zip
