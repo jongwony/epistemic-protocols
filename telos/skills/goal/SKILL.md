@@ -1,7 +1,6 @@
 ---
 name: goal
 description: "Co-construct defined goals from vague intent. Builds a GoalContract when neither party has a clear end state. Alias: Telos(τέλος)."
-user-invocable: true
 ---
 
 # Telos Protocol

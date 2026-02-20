@@ -186,6 +186,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Commit message**: `type(scope): Korean description` — type ∈ {feat, fix, refactor, style}, scope = plugin name
 - **Branch naming**: `feat/name-protocol`, `refactor/description`, `fix/description`
 - **PR body language**: Korean (hook-enforced)
+- **Release tag**: CalVer `v{YYYY}.{MM}.{DD}[.{N}]` — tag push triggers CI release (`gh release create --draft`)
 
 ## Editing Guidelines
 
@@ -194,7 +195,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - Update `assets/epistemic-matrix*.svg` when the protocol table changes (referenced by both READMEs)
 - Bump version in `.claude-plugin/plugin.json` on changes
 - `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
-- Skills frontmatter: `name` (required), `description` (required, quote if contains `:`), `user-invocable` (boolean), `allowed-tools` (optional)
+- Skills frontmatter: `name` (required), `description` (required, quote if contains `:`), `allowed-tools` (optional), `license`, `compatibility`, `metadata`
 
 **Co-change pattern** (protocol modifications require synchronized edits):
 

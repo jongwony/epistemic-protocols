@@ -1,7 +1,6 @@
 ---
 name: inquire
 description: "Detect context insufficiency before execution. Inquires about missing context when AI detects indicators of context gaps, producing informed execution. Alias: Aitesis(αἴτησις)."
-user-invocable: true
 ---
 
 # Aitesis Protocol

@@ -1,7 +1,6 @@
 ---
 name: clarify
 description: "Clarify intent-expression gaps. Extracts clarified intent when what you mean differs from what you said. Alias: Hermeneia(ἑρμηνεία)."
-user-invocable: true
 ---
 
 # Hermeneia Protocol
