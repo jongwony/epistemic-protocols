@@ -146,6 +146,7 @@ Categories are extracted from AI work results. Common categories:
 | **Dependency** | Changes to imports, packages, configs | "Added new npm package" |
 | **Architecture** | Structural or design pattern changes | "Introduced factory pattern" |
 | **Bug Fix** | Corrections to existing behavior | "Fixed null pointer in edge case" |
+| **Deletion** | Removed code, features, or dependencies | "Removed deprecated `legacyAuth()` function" |
 
 ## Gap Taxonomy
 
