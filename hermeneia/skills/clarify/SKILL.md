@@ -18,7 +18,7 @@ E → Eᵥ → Gₛ → Q → A → Î' → (loop until converge)
 ── TYPES ──
 E  = User's expression (the prompt to clarify)
 Eᵥ = Verified expression (user-confirmed binding)
-Gₛ = User-selected gap type ∈ {Expression, Precision, Coherence, Context}
+Gₛ = User-selected gap types ⊆ {Expression, Precision, Coherence, Context}
 Q  = Clarification question (via AskUserQuestion)
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
@@ -175,12 +175,12 @@ Options:
 
 ### Phase 1b: Gap Type Selection
 
-**Call the AskUserQuestion tool** to let user select the gap type.
+**Call the AskUserQuestion tool** with `multiSelect: true` to let user select gap types.
 
-**Do NOT auto-diagnose.** Present gap types for user selection:
+**Do NOT auto-diagnose.** Present gap types for user selection (multiple selection allowed):
 
 ```
-What kind of difficulty are you experiencing with this expression?
+What kinds of difficulty are you experiencing with this expression?
 
 Options:
 1. **Expression** — I couldn't fully articulate what I meant
@@ -189,7 +189,7 @@ Options:
 4. **Context** — Background information is missing
 ```
 
-User selection determines the clarification strategy in Phase 2.
+User selection determines the clarification strategy in Phase 2. If multiple selected, address in priority order (Coherence → Context → Expression → Precision).
 
 ### Phase 2: Clarification
 
