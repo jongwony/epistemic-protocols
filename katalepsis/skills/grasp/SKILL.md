@@ -13,7 +13,7 @@ Achieve certain comprehension of AI work through structured verification, enabli
 
 ```
 ── FLOW ──
-R → C → Sₑ → Tᵣ → P → Δ → Q → A → Tᵤ → P' → (loop until katalepsis)
+R → C → Sₑ → Tᵣ → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
 
 ── TYPES ──
 R  = AI's result (the work output)
@@ -66,6 +66,7 @@ Categorize  → Internal analysis (Read for context if needed)
   tasks: Map<TaskId, Task>,
   current: TaskId,
   phantasia: Understanding,
+  probed: Map<TaskId, Set<GapType>>,
   active: Bool
 }
 ```
@@ -272,7 +273,7 @@ For each task (category):
 
    When step 3c evaluates as Correct for the current gap type:
 
-   1. Compare probed gap types vs. potentially relevant unprobed gap types for this category
+   1. Compare probed vs. unprobed gap types relevant to this category
    2. If unprobed aspects exist, **call AskUserQuestion**:
 
    ```
@@ -284,8 +285,8 @@ For each task (category):
        description: "[Why this gap type is relevant to this category]"
    ```
 
-   3. "Sufficient" → proceed to step 4
-   4. Additional gap type selected → return to step 3 with selected gap type as Δ
+   3. User selects "Sufficient" → proceed to step 4
+   4. User selects gap type → return to step 3 with selected gap type as Δ
 
    Skip if all relevant gap types already probed during the verification loop.
 
