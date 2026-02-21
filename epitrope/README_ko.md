@@ -52,7 +52,7 @@ Phase 5: Application       → DC를 팀에 적용 (팀 모드만)
 Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Katalepsis
 ```
 
-Epitrope는 Telos 다음: 목표가 정의된 후, 위임 자율성을 캘리브레이션합니다. 맥락 검증(Aitesis), 관점 프레이밍(Prothesis), 갭 감사(Syneidesis) 전에 AI의 권한 범위를 확정합니다.
+Epitrope는 Telos 다음: 목표가 정의된 후, 구조(WHO), 범위(WHAT), 자율성(HOW MUCH) 3차원으로 위임을 캘리브레이션합니다. 맥락 검증(Aitesis), 관점 프레이밍(Prothesis), 갭 감사(Syneidesis) 전에 AI의 권한 범위를 확정합니다.
 
 ## 사용 시기
 

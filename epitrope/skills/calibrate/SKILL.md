@@ -32,15 +32,19 @@ R    = Response ∈ {Autonomous, ReportThenAct, AskBefore, Halt}
          --   SwitchAutonomously ⊆ Autonomous, AlwaysAsk ⊆ AskBefore
 
 ── ENTRY TYPES ──
+Phase ∈ {0, 1, 2, 3, 4, 5}
 EntryMode ∈ {TeamAugment, TeamCreate, Solo}
+         -- TeamAugment requires team(Ctx)
 Ctx   = DetectedContext { team: Option(TeamRef), lens: Option(L), complexity: Complexity }
+L      = Lens { convergence: Set, divergence: Set, assessment: Any }  -- from Prothesis; Option(L) = None when standalone
 TeamRef = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef = { name: String, type: String, perspective: Option(String) }
 Complexity ∈ {Single, Multi}
-         -- Single ≡ task spans ≤ 1 ActionDomain or has fully specified step-by-step instructions
-         -- Multi  ≡ task spans > 1 ActionDomain or has ambiguous scope keywords
+         -- Single ≡ fully specified step-by-step instructions OR task spans ≤ 1 ActionDomain
+         -- Multi  ≡ ¬Single
 
 ── DELEGATION TYPES ──
+Condition = { trigger: String, action: halt ∨ escalate }
 DC    = DelegationContract {
           who: TeamStructure,
           what: Set(ActionDomain),
@@ -49,7 +53,9 @@ DC    = DelegationContract {
           exploration: ExplorationScope
         }
          -- Subagent inheritance: spawned agents inherit parent DC unless explicitly overridden
+         -- invariant: dom(how_much) ⊇ what (uncalibrated domains filled by defaults in Phase 4)
 TeamStructure ∈ {Solo, Augmented(TeamRef, Set(AgentRole)), Created(Set(AgentRole), Topology)}
+         -- |roles| ≥ 1 for Augmented/Created; |roles| ≤ 6 (WHO cap)
 AgentRole = { name: String, type: String, focus: String }
 Topology ∈ {HubSpoke, PeerReview, Pipeline}
 ExplorationScope = { depth: N, breadth: N, drift_action: report | halt }
@@ -69,9 +75,10 @@ ScopeCreep:        "When agent discovers work outside its focus?" → {Autonomou
 
 ── PHASE TRANSITIONS ──
 Phase 0:  T → detect(T) → Ctx → Q[AskUserQuestion](propose_mode(Ctx)) → EntryMode  -- mode selection [Tool]
+  Single(Ctx) ∧ ¬team(Ctx) → skip (delegation unambiguous; no DC produced)
   propose_mode(Ctx):
-    team_active(Ctx)  → propose TeamAugment (Solo alternative)     -- independent of Lens presence
-    ¬team(Ctx)        → propose Solo (TeamCreate alternative)      -- user may opt for team operation
+    team_active(Ctx)            → propose TeamAugment (Solo alternative)   -- independent of Lens presence
+    ¬team(Ctx) ∧ Multi(Ctx)    → propose Solo (TeamCreate alternative)    -- user may opt for team operation
 
 Phase 1:  (mode-dependent)                                         -- structure + decomposition
   Solo:         T → decompose[Tool](T) → {Dᵢ}                      -- decomposition via Read/Grep
@@ -91,18 +98,26 @@ Phase 5:  (team modes only)                                        -- team appli
   TeamCreate:  T[TeamCreate](DC.who) → ∥S[Task](DC.who.roles) → DC[SendMessage](team, DC)  [Tool]
 
 ── LOOP ──
+After Phase 0 (mode selection):
+  mode_selected → Phase 1
+  skip (Single ∧ ¬team) → terminate (delegation unambiguous; no DC produced)
+
 After Phase 3: check uncalibrated domains.
 If domains remain: return to Phase 2 (next domain or refinement).
 If all calibrated or user ESC: proceed to Phase 4.
 
 After Phase 4 (contract review):
-  approve → Phase 5 (team modes) or terminate (Solo)
-  adjust  → return to Phase 1 (WHO) or Phase 2 (domain)
-  ESC     → terminate; partial DC applies to calibrated domains
+  approve        → Phase 5 (team modes) or terminate (Solo)
+  adjust(who)    → return to Phase 1 (TeamAugment/TeamCreate only; unavailable in Solo)
+  adjust(domain) → return to Phase 2
+  ESC            → terminate; partial DC applies to calibrated domains
 
 After Phase 5 (team application):
   TeamAugment: authority applied → terminate with active DC
   TeamCreate:  team created + authority applied → terminate with active DC
+  TeamCreate fail     → inform user; offer retry or terminate
+  Task (spawn) partial fail → inform user; partial team active; offer continue-with-partial or cleanup
+  SendMessage fail    → team exists; DC not distributed; retry or inform user
 
 ── RECALIBRATION ──
 recalibrate(DC, T') = new_domain_activated(T') ∨ stakes_escalated(T') ∨ team_topology_changed(T')
@@ -135,6 +150,9 @@ inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.jso
       contract: DelegationContract, who_confirmed: Bool,
       history: List<(Dᵢ, Sₖ, R)>, active: Bool,
       team: Option(TeamRef) }
+         -- calibrated ∪ skipped ⊆ domains; calibrated ∩ skipped = ∅
+         -- who_confirmed: Solo → true (implicit); TeamAugment → set at Phase 1 WHO confirmation; TeamCreate → set at Phase 1 WHO design
+         -- team: ctx.team is Phase 0 snapshot; team is live reference (updated at Phase 5 TeamCreate or inherited for TeamAugment)
 ```
 
 ## Core Principle
@@ -382,7 +400,7 @@ Options:
 2. **Adjust** — I'd like to change something
 ```
 
-If user selects "Adjust": return to Phase 1 (WHO) or Phase 2 (domain). If approved: Solo terminates; team modes proceed to Phase 5.
+If user selects "Adjust": present sub-options — "Adjust team structure" (→ Phase 1, TeamAugment/TeamCreate only) or "Adjust domain calibration" (→ Phase 2). Solo mode only offers "Adjust domain calibration". If approved: Solo terminates; team modes proceed to Phase 5.
 
 **Authority confirmation**: TeamAugment requires explicit approval before DC distribution — the user must confirm before the team's operating contract changes.
 
@@ -419,14 +437,14 @@ Both modes terminate with active DC after distribution.
 
 ## Rules
 
-1. **AI-detected, user-calibrated**: AI detects ambiguous delegation; calibration requires user choice via AskUserQuestion (Phase 1/3)
+1. **AI-detected, user-calibrated**: AI detects ambiguous delegation; calibration requires user choice via AskUserQuestion (Phase 0/2/4)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present concrete scenarios (text presentation = protocol violation)
 3. **Selection over Detection**: User selects autonomy level from presented options; AI does not auto-calibrate
 4. **Calibration over Declaration**: Concrete scenarios over abstract policy statements — "When X happens, should I..." beats "What's your general preference for..."
 5. **Session-scoped**: DelegationContract applies for current session only; does not persist across sessions
 6. **Domain priority**: Calibrate External first (highest impact), then FileModification, Strategy, Exploration
 7. **Minimal interruption**: Skip calibration for single-domain clear-scope tasks; use Light intensity when possible
-8. **ESC respected**: User can exit at any point; partial contract applies to calibrated domains. Uncalibrated defaults: Exploration → autonomous (read-only, inherently safe), others → ask-before. Defaults explicitly shown in Phase 3 contract review
+8. **ESC respected**: User can exit at any point; partial contract applies to calibrated domains. Uncalibrated defaults: Exploration → autonomous (read-only, inherently safe), others → ask-before. Defaults explicitly shown in Phase 4 contract review
 9. **Convergence persistence**: Mode active until DelegationContract approved or ESC
 10. **Cross-protocol awareness**: Calibrated DC informs but does not replace Aitesis context verification or Syneidesis gap surfacing
 11. **Authority distribution**: DC must not be distributed to team members (SendMessage) before user approval in Phase 4
@@ -440,7 +458,7 @@ When Prothesis Phase 5 routing selects `J=calibrate`:
 
 1. Coordinator calls `Skill("calibrate")` — Epitrope SKILL.md loads into conversation context
 2. Epitrope Phase 0 detects `team_active` → proposes TeamAugment mode
-3. No formal handoff type needed — session context provides implicit handoff
+3. Handoff via session context: `T = TaskScope` derived from conversation (original request U, verified MissionBrief MBᵥ, and Lens L are all available in session context; no explicit transfer type needed)
 
 **Context availability** (present in session without explicit transfer):
 - **Team**: `~/.claude/teams/{name}/config.json` (Read) — {name} from conversation context (mode-switch: coordinator retains team name) or Glob discovery (standalone: `~/.claude/teams/*/config.json`)

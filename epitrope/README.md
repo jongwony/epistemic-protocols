@@ -52,7 +52,7 @@ Phase 5: Application       → Apply DC to team (team modes only)
 Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Katalepsis
 ```
 
-Epitrope follows Telos: once goals are defined, calibrate delegation autonomy. Before context verification (Aitesis), perspective framing (Prothesis), and gap auditing (Syneidesis).
+Epitrope follows Telos: once goals are defined, calibrate delegation across structure, scope, and autonomy (WHO/WHAT/HOW MUCH). Before context verification (Aitesis), perspective framing (Prothesis), and gap auditing (Syneidesis).
 
 ## When to Use
 

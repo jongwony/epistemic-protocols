@@ -55,7 +55,7 @@ After Phase 0 (Mission Brief):
   J_mb = ESC           → terminate (no team exists)
 
 After Phase 5 (routing):
-  J = calibrate  → Activate[Skill]("calibrate") | fail → inform user; offer wrap_up  -- team retained if Activate succeeds
+  J = calibrate  → Activate[Skill]("calibrate") | fail → inform user; team retained; offer {extend, wrap_up}  -- fail ≡ Skill load error (plugin absent or malformed)
   J = extend     → Q[AskUserQuestion](add perspective | deepen existing) → Phase 2 or Phase 3 (team retained)
   J = wrap_up    → Ω(T, shutdown) → TeamDelete → terminate with L
                    → recommend_protocols(L)
@@ -96,7 +96,8 @@ A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
 Λ = { phase: Phase, mission_brief: Option(MBᵥ), lens: Option(L), active: Bool, team: Option(TeamState) }
-TeamState = { name: String, members: Set(String), tasks: Set(TaskId) }
+TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
+AgentRef  = { name: String, type: String, perspective: Option(String) }
 ```
 
 ## Mode Activation

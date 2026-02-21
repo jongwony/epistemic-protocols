@@ -14,7 +14,7 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 | **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | Achieve certain comprehension of AI work | After AI action |
 | **[Telos](./telos)** (τέλος) — /goal | Co-construct defined goals from vague intent | Pre-action |
 | **[Aitesis](./aitesis)** (αἴτησις) — /inquire | Detect context insufficiency before execution | Pre-execution |
-| **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | Calibrate delegation autonomy through scenario-based interview | Pre-execution |
+| **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | Context-adaptive delegation calibration through scenario-based interview | Pre-execution |
 
 ## Core Idea
 
@@ -87,7 +87,7 @@ Run in **plan mode** for interactive protocol workflows that require user decisi
 /grasp                       # Verify understanding of AI work
 /goal [your vague idea]      # Co-construct defined goals from intent
 /inquire [your task]          # Detect and resolve context insufficiency before execution
-/calibrate [your task]        # Calibrate delegation autonomy through scenario-based interview
+/calibrate [your task]        # Context-adaptive delegation calibration through scenario-based interview
 ```
 
 ## License

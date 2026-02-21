@@ -28,10 +28,12 @@
 ## 프로토콜 흐름
 
 ```
-Phase 0: Gather       → 관점 형성을 위한 맥락 수집
-Phase 1: Prothesis    → 관점 2-4개 제시 (call AskUserQuestion)
-Phase 2: Inquiry      → 선택된 관점별 에이전트 팀 분석 (TeamCreate + teammates)
-Phase 3: Synthesis    → 교차 대화 확인 → 수렴점/발산점 정리 → 통합 답변
+Phase 0: Mission Brief → 탐구 의도 및 범위 확인 (call AskUserQuestion)
+Phase 1: Gather        → 관점 형성을 위한 대상 맥락 수집
+Phase 2: Prothesis     → 관점 2-4개 제시 (call AskUserQuestion)
+Phase 3: Inquiry       → 선택된 관점별 에이전트 팀 분석 (TeamCreate + teammates)
+Phase 4: Synthesis     → 교차 대화 확인 → 수렴점/발산점 정리 → 통합 답변
+Phase 5: Routing       → 사용자 다음 행동 선택: calibrate / extend / wrap up
 ```
 
 ## 사용 시점
