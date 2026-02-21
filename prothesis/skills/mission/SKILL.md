@@ -55,14 +55,14 @@ After Phase 0 (Mission Brief):
   J_mb = ESC           → terminate (no team exists)
 
 After Phase 5 (routing):
-  J = calibrate  → Activate[Skill]("calibrate"); team retained for Epitrope reuse  -- coordinator calls Skill directly
+  J = calibrate  → Activate[Skill]("calibrate") | fail → inform user; offer wrap_up  -- team retained if Activate succeeds
   J = extend     → Q[AskUserQuestion](add perspective | deepen existing) → Phase 2 or Phase 3 (team retained)
   J = wrap_up    → Ω(T, shutdown) → TeamDelete → terminate with L
                    → recommend_protocols(L)
   J = ESC        → Ω(T, shutdown) → TeamDelete → terminate with current L
 
 recommend_protocols(L):
-  L.divergence ≠ ∅ → suggest Epitrope (act on findings) or Syneidesis (gap audit)
+  L.divergence ≠ ∅ → suggest Syneidesis (gap audit) or Epitrope (calibrate delegation — provide task scope T when calling /calibrate)
   L.assessment reveals indeterminate goals → suggest Telos
 
 Continue until convergence: user satisfied OR user ESC.

@@ -37,6 +37,8 @@ Ctx   = DetectedContext { team: Option(TeamRef), lens: Option(L), complexity: Co
 TeamRef = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef = { name: String, type: String, perspective: Option(String) }
 Complexity ∈ {Single, Multi}
+         -- Single ≡ task spans ≤ 1 ActionDomain or has fully specified step-by-step instructions
+         -- Multi  ≡ task spans > 1 ActionDomain or has ambiguous scope keywords
 
 ── DELEGATION TYPES ──
 DC    = DelegationContract {
@@ -428,7 +430,7 @@ Both modes terminate with active DC after distribution.
 9. **Convergence persistence**: Mode active until DelegationContract approved or ESC
 10. **Cross-protocol awareness**: Calibrated DC informs but does not replace Aitesis context verification or Syneidesis gap surfacing
 11. **Authority distribution**: DC must not be distributed to team members (SendMessage) before user approval in Phase 4
-12. **Solo backward compatibility**: Solo mode preserves identical behavior to v1.1.1 — Phase 0 mode selection is the only new user-facing step, and it defaults to Solo when no team is active
+12. **Solo backward compatibility**: Solo mode preserves near-identical behavior to v1.1.1 — Phase 0 adds one new user-facing step (mode selection, defaulting to Solo when no team is active); subsequent phases proceed identically to v1.1.1
 
 ## Cross-Protocol Interface
 
@@ -441,7 +443,7 @@ When Prothesis Phase 5 routing selects `J=calibrate`:
 3. No formal handoff type needed — session context provides implicit handoff
 
 **Context availability** (present in session without explicit transfer):
-- **Team**: `~/.claude/teams/{name}/config.json` (Read)
+- **Team**: `~/.claude/teams/{name}/config.json` (Read) — {name} from conversation context (mode-switch: coordinator retains team name) or Glob discovery (standalone: `~/.claude/teams/*/config.json`)
 - **Lens L**: Conversation context (presented to user in Prothesis Phase 4)
 - **Findings**: Team task list (TaskList/TaskGet access)
 - **Mission brief**: Conversation context (confirmed in Prothesis Phase 0)
