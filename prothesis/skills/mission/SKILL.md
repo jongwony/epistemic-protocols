@@ -13,7 +13,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → Q(Syn) → L → K_i(L) → Π → Q_π(Π) → Πᵥ → ∥F(T, Πᵥ) → V(T) → L'
+Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → Q(Syn) → L
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
@@ -36,25 +36,7 @@ R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue respons
 D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → user review; Δ = ∅ → skip dialogue (synthesis + user review still proceed)
 Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
-FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_confirmed(sufficiency)) ∨ user_esc
-
-── ACTION TYPES ──
-K_i    = Interactive classify + route: L → AskUserQuestion → ((Fₐ, Fᵤ, Fᵈ), J)  -- user-confirmed classification with routing
-Fₐ     = { f | source_determined(f) ∧ perspective_confirmed(f) }          -- actionable
-Fᵤ     = { f | ¬source_determined(f) ∧ adversarial_origin(f) }            -- surfaced unknown
-Fᵈ     = { f | f ∉ Fₐ ∧ f ∉ Fᵤ }                                         -- design-level (catch-all)
-Q_π    = Plan approval: AskUserQuestion → approved | revise | reclassify  -- plan confirmation gate
-Π      = Plan: (TaskList(all), Codebase) → StructuredPlan              -- planner reads all tiers + explores codebase; plans only Fₐ
-Πᵥ     = Verified plan: Q_π(Π) → approved                             -- user-approved plan
-∥F     = Parallel fix: (∥ f∈Fₐ. Fix(f, T, Πᵥ))    -- praxis agent within team (follows approved plan)
-V      = Verify: ∀ f∈Fₐ. peer_verify(f, origin(f))  -- originating perspective confirms
-L'     = Lens post-action: L ∪ { fixes: Set(Fix), deferred: Fᵤ ∪ Fᵈ }
-
-── CLASSIFICATION PREDICATES ──
-source_determined(f)     ≡ fix direction deterministically derivable from existing source
-perspective_confirmed(f) ≡ originating perspective validated the finding
-adversarial_origin(f)    ≡ finding surfaced by adversarial perspective
-conservative_default     ≡ Fᵈ is catch-all; ambiguous predicate evaluation → Fᵈ  (false_actionable cost > false_deferred cost)
+FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
 Phase 0:  U → MB(U) → Q[AskUserQuestion](MB) → await → MBᵥ     -- Mission Brief confirmation [Tool]
@@ -62,11 +44,7 @@ Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targe
 Phase 2:  (C, MBᵥ) → present[S]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ  -- S: AskUserQuestion [Tool]
 Phase 3:  Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R'  -- inquiry + collection [Tool]
 Phase 4:  R' → Δ(R') → D?[SendMessage](T) → R'' → Syn(R'') → Q[AskUserQuestion](Syn) → L  -- cross-dialogue, synthesis & review [Tool]
-Phase 5:  L → K_i(L) → Q[AskUserQuestion](classification + routing) → await → ((Fₐ, Fᵤ, Fᵈ), J)  -- unified classification + routing [Tool]
-Phase 6a: (Fₐ, Fᵤ, Fᵈ) → TaskCreate[all] → ∥Spawn[Task](T, planner) → Π → Q_π[AskUserQuestion](plan approval) → await → Πᵥ  -- register + plan [Tool]
-Phase 6b: Πᵥ → Spawn[Task](T, praxis, Πᵥ)                            -- spawn praxis with plan [Tool]
-Phase 7:  ∥F[TaskUpdate](T, Fₐ) → V[SendMessage](T) → L'       -- fix + peer verify [Tool]
-Phase 5': L' → Q'[AskUserQuestion](action_sufficiency) → await → J'  -- action sufficiency [Tool]
+Phase 5:  L → Q[AskUserQuestion](routing) → await → J                          -- routing decision [Tool]
 
 ── LOOP ──
 After Phase 0 (Mission Brief):
@@ -74,32 +52,16 @@ After Phase 0 (Mission Brief):
   J_mb = modify(field) → re-present Q(MB') → await → MBᵥ → Phase 1
   J_mb = ESC           → terminate (no team exists)
 
-After Phase 5 (classification + routing):
-  J = plan_act         → Phase 6a (TaskCreate + spawn planner into T; team retained)
-  J = modify(finding)  → re-classify → re-present K_i → await
-  J = extend           → Q[AskUserQuestion](add new perspective | deepen existing) → Phase 2 or Phase 3 inquiry (team retained)
-  J = wrap_up          → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with L
-  J = ESC              → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with current L
+After Phase 5 (routing):
+  J = calibrate  → Skill[Skill]("calibrate"); team retained for Epitrope reuse  -- coordinator calls Skill directly
+  J = extend     → Q[AskUserQuestion](add perspective | deepen existing) → Phase 2 or Phase 3 (team retained)
+  J = wrap_up    → Ω(T, shutdown) → TeamDelete → terminate with L
+                   → recommend_protocols(L)
+  J = ESC        → Ω(T, shutdown) → TeamDelete → terminate with current L
 
-After Phase 5' (action sufficiency):
-  J' = sufficient     → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with L'
-                         → recommend_protocols(Fᵤ ∪ Fᵈ)
-  J' = ESC            → Ω(T, shutdown) → preserve_deferred(Fᵤ ∪ Fᵈ) → TeamDelete → terminate with current L'
-                         → recommend_protocols(Fᵤ ∪ Fᵈ)
-
-After Phase 6a (plan approval):
-  Πᵥ = approved        → Phase 6b (spawn praxis with plan context)
-  Πᵥ = revise          → coordinator relays feedback to planner via SendMessage → re-collect → re-present Q_π
-  Πᵥ = reclassify      → Phase 5 (re-present classification; planner shutdown, tasks retained)
-  Πᵥ = ESC             → Phase 5 (re-present classification; planner shutdown, tasks retained)
-
-After Phase 6b (pre-execution guard):                     -- defensive: Fₐ = ∅ structurally unreachable (Phase 5 gates plan_act on Fₐ ≠ ∅)
-  Fₐ = ∅ → Phase 5' (L' = L ∪ { fixes: ∅, deferred: Fᵤ ∪ Fᵈ })
-  Fₐ ≠ ∅ → Phase 7 (execute fixes per approved plan)
-
-recommend_protocols(deferred):
-  Fᵤ ≠ ∅ → suggest Syneidesis (priority: surfaced unknowns)
-  Fᵈ ≠ ∅ → suggest Syneidesis (gaps) or Telos (goals) by finding type
+recommend_protocols(L):
+  L.divergence ≠ ∅ → suggest Epitrope (act on findings) or Syneidesis (gap audit)
+  L.assessment reveals indeterminate goals → suggest Telos
 
 Continue until convergence: user satisfied OR user ESC.
 
@@ -119,19 +81,11 @@ Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions,
 Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke → independent synthesis; skip if Δ = ∅)
 Phase 4 Q (extern)       → AskUserQuestion (synthesis result review + user additional input; proceeds to Phase 5 on confirm)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
-Phase 5 K_i/Q            → AskUserQuestion (classification + routing: plan_act/modify/extend/wrap_up; extend triggers follow-up AskUserQuestion; Escape → terminate)
+Phase 5 Q (extern)       → AskUserQuestion (routing: calibrate/extend/wrap_up; Escape → terminate)
+J=calibrate (extern)     → Skill tool (protocol transition: activate Epitrope)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
-TaskCreate (Phase 6a)     → TaskCreate tool (register confirmed tiers with metadata)
-∥Spawn planner (parallel) → Task tool (team_name, name, subagent_type=Plan: spawn planner into existing T)
-Phase 6a Q_π (extern)     → AskUserQuestion (plan approval: approve/revise/reclassify; Escape → Phase 5)
-Phase 6a revise (conditional) → SendMessage tool (type: "message", coordinator relays revision feedback to planner)
-Spawn praxis (Phase 6b)   → Task tool (team_name, name: spawn praxis into existing T with Πᵥ context)
-G(praxis)                 → TaskList/TaskGet tools (praxis context: Πᵥ + discovery)
-∥F (parallel)            → TaskUpdate/Edit/Write tools (praxis applies fixes to Fₐ items)
-V (parallel)             → SendMessage tool (type: "message", peer-to-peer praxis ↔ originating perspective)
-Phase 5' Q' (extern)    → AskUserQuestion (action sufficiency check; Escape → terminate)
 
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs
@@ -139,9 +93,8 @@ D = join (union of distinct findings) where perspectives diverge
 A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
-Λ = { phase: Phase, mission_brief: Option(MBᵥ), lens: Option(L), active: Bool, team: Option(TeamState), action: Option(ActionState) }
+Λ = { phase: Phase, mission_brief: Option(MBᵥ), lens: Option(L), active: Bool, team: Option(TeamState) }
 TeamState = { name: String, members: Set(String), tasks: Set(TaskId) }
-ActionState = { classified: (Fₐ, Fᵤ, Fᵈ), planner: Option(String), plan: Option(Πᵥ), praxis: Option(String) }
 ```
 
 ## Mode Activation
