@@ -20,13 +20,13 @@ Extract session insights and reconstruct user's memory through conversational gu
 Reflexion(S, M) → Ctx(S) → ∥E(S, M) → Δ → Sel(Δ) → (Iₛ, Lₛ) → Int(Iₛ, Lₛ, M) → M'
 
 S      = Session (conversation history as .jsonl)
-M      = Memory { user, project, domain }
+M      = Memory { auto: MEMORY.md, user, project, domain }
 Ctx    = Context detection: S → { sessionId, memoryMode, paths }
 ∥E     = Parallel extraction: S × M → Δ                    -- coproduct of 3 subagents
 Δ      = Extracted artifacts { summary, insights[], related[] }
 Sel    = Selection: Δ → (Iₛ, Lₛ)                           -- user-guided via AskUserQuestion
 Iₛ     = Selected insights (subset)
-Lₛ     = Storage locations per insight
+Lₛ     = Storage tier per insight: { tier ∈ {A: MEMORY.md, B: .insights/}, path }
 Int    = Integration: (Iₛ, Lₛ, M) → M'                     -- write to memory
 M'     = Updated memory state
 
@@ -180,16 +180,32 @@ NOT already in extracted list. Present as options, not open-ended questions.
 └── "Skip"
 ```
 
-**Q5: Storage Location** (per selected insight)
+**Q5: Storage Tier** (per selected insight)
+
+Project Memory mode:
+```
+├── "Tier A — MEMORY.md (always loaded, concise entry)"
+└── "Tier B — .insights/ (reference-on-demand, detailed archive)"
+```
+
+User Memory mode (sessions under `~/.claude/sessions/`):
+```
+└── "Tier B — .insights/ only (no project MEMORY.md in User mode)"
+```
+
+Tier A guidance: suitable for recurring patterns, architecture decisions, project conventions — content read every session.
+Tier B guidance: suitable for archival knowledge, domain references, project-independent notes — loaded only when relevant.
+
+If Tier B selected → **Q5b: .insights/ Scope**:
 ```
 Project Memory mode:
-├── "This project only (Project memory - override)"
-├── "All projects (User memory - foundation)"
-└── "Specific tech stack (Domain)"
+├── "Project .insights/ (project-specific archival)"
+├── "User .insights/ ~/.claude/.insights/ (cross-project reference)"
+└── "Domain .insights/ (tech-stack specific)"
 
 User Memory mode:
-├── "All projects (User memory)"
-└── "Specific tech stack (Domain)"
+├── "User .insights/ ~/.claude/.insights/ (cross-project reference)"
+└── "Domain .insights/ (tech-stack specific)"
 ```
 
 **Phase Completion**: Update TodoWrite (Phase 3: completed, Phase 4: in_progress)
@@ -197,9 +213,16 @@ User Memory mode:
 ### Phase 4: Integration (Main Agent or Subagent)
 
 Based on user selections:
-- **New file**: Create in selected location with proper frontmatter
-- **Merge**: Edit existing file, append or modify section
-- **Domain**: Create in `.insights/domain/{tech-stack}/`
+- **Tier A (MEMORY.md)**: Append compact entry to project auto-memory MEMORY.md
+  - **Project mode only**: path derived from session path by replacing `sessions/{session-id}.jsonl` → `memory/MEMORY.md`
+  - Path: `~/.claude/projects/{encoded}/memory/MEMORY.md`
+  - **User mode**: Tier A unavailable — `~/.claude/memory/` does not exist; Q5 must show Tier B only
+  - Format: concise markdown under existing topic header or new `## {Topic}` section
+  - Language: English (hook-enforced); no YAML frontmatter
+  - Constraint: keep MEMORY.md ≤200 lines (truncation limit); consolidate or move to .insights/ if near limit
+- **Tier B — New file**: Create in selected .insights/ location with proper frontmatter
+- **Tier B — Merge**: Edit existing .insights/ file, append or modify section
+- **Tier B — Domain**: Create in `.insights/domain/{tech-stack}/`
 
 **Frontmatter Update Rules**:
 
