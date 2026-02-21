@@ -82,9 +82,9 @@ Surface unnoticed gaps at decision points as questions.
 - **Invocation**: `/gap` or use "gap" in conversation
 
 ### Clarify (ἑρμηνεία) — Hermeneia
-Clarify intent-expression gaps through user-initiated dialogue.
+Clarify intent-expression gaps through hybrid-initiated dialogue.
 - **Deficit**: IntentMisarticulated → ClarifiedIntent
-- **Triggers**: "clarify", "what I mean", "did I express this right"
+- **Triggers**: "clarify", "what I mean", "did I express this right"; also AI-detected expression ambiguity (requires user confirmation)
 - **Invocation**: `/clarify` or use "clarify" in conversation
 
 ### Grasp (κατάληψις) — Katalepsis
@@ -155,7 +155,8 @@ This diagram shows logical progression, not strict execution order.
 
 **Initiator taxonomy**:
 - **AI-detected**: AI determines the condition is present (Prothesis, Syneidesis, Telos, Aitesis, Epitrope)
-- **User-initiated**: User signals awareness of a deficit (Hermeneia, Katalepsis)
+- **Hybrid**: Both user signal and AI detection can initiate; AI-detected path requires user confirmation (Hermeneia)
+- **User-initiated**: User signals awareness of a deficit (Katalepsis)
 - **User-invoked**: User runs as deliberate practice; no deficit awareness required (Reflexion, Write)
 
 ## Verification

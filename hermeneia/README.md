@@ -22,12 +22,12 @@ Users often recognize their expression is ambiguous (`IntentMisarticulated`) but
 |----------|-----------|---------------|
 | Prothesis | AI-detected | `FrameworkAbsent → FramedInquiry` |
 | Syneidesis | AI-detected | `GapUnnoticed → AuditedDecision` |
-| **Hermeneia** | **User-initiated** | **`IntentMisarticulated → ClarifiedIntent`** |
+| **Hermeneia** | **Hybrid** | **`IntentMisarticulated → ClarifiedIntent`** |
 
 ## Protocol Flow
 
 ```
-Phase 0: Trigger       → Recognize user-initiated clarification request
+Phase 0: Trigger       → Recognize clarification request (user-initiated or AI-detected ambiguity)
 Phase 1: Diagnosis     → Identify intent-expression gaps (silent)
 Phase 2: Clarification → Present options (call AskUserQuestion)
 Phase 3: Integration   → Proceed with clarified expression
@@ -48,6 +48,7 @@ Phase 3: Integration   → Proceed with clarified expression
 - When you recognize your expression might be ambiguous
 - When you're unsure how to phrase your request
 - When you want help articulating your intent
+- When AI detects expression ambiguity and proposes clarification (with your confirmation)
 
 **Skip**:
 - When your expression is clear

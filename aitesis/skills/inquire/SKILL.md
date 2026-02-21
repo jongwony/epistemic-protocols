@@ -73,7 +73,7 @@ Phase 0 Scan (detect)  → Internal analysis (no external tool)
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
 | **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
 | **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 | **Epitrope** | AI-detected | DelegationAmbiguous → CalibratedDelegation | Context-adaptive delegation calibration (WHO/WHAT/HOW MUCH) |
@@ -82,7 +82,7 @@ Phase 0 Scan (detect)  → Internal analysis (no external tool)
 **Key differences**:
 - **Syneidesis** surfaces gaps at decision points for the user to judge (information flows AI→user) — Aitesis inquires about context the AI lacks before execution (information flows user→AI)
 - **Telos** co-constructs goals when intent is indeterminate — Aitesis operates when goals exist but execution context is insufficient
-- **Hermeneia** extracts intent the user already has — Aitesis inquires about context the system lacks
+- **Hermeneia** extracts intent the user already has (user signal) or detects expression ambiguity (AI-detected, requires confirmation) — Aitesis inquires about context the system lacks
 - **Epitrope** calibrates delegation (structure, scope, autonomy) before work begins — Aitesis verifies execution context after delegation is established
 
 **Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context to execute?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). The operational test: if the information gap would be filled by the user providing context, it's Aitesis; if it would be filled by the user reconsidering their decision, it's Syneidesis.

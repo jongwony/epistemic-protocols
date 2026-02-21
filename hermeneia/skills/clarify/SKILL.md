@@ -5,7 +5,7 @@ description: "Clarify intent-expression gaps. Extracts clarified intent when wha
 
 # Hermeneia Protocol
 
-Resolve intent-expression misalignment through user-initiated dialogue, enabling precise articulation before action proceeds. Type: `(IntentMisarticulated, User, EXTRACT, Expression) → ClarifiedIntent`.
+Resolve intent-expression misalignment through hybrid-initiated dialogue, enabling precise articulation before action proceeds. Type: `(IntentMisarticulated, Hybrid, EXTRACT, Expression) → ClarifiedIntent`.
 
 ## Definition
 
@@ -13,7 +13,7 @@ Resolve intent-expression misalignment through user-initiated dialogue, enabling
 
 ```
 ── FLOW ──
-E → Eᵥ → Gₛ → Q → A → Î' → (loop until converge)
+E → recognize(E) → Eᵥ → Gₛ → Q → A → Î' → (loop until converge)
 
 ── TYPES ──
 E  = User's expression (the prompt to clarify)
@@ -24,14 +24,17 @@ A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
 Î' = Updated intent after clarification
 ClarifiedIntent = Î' where |G| = 0 ∨ cycle(G) ∨ stall(Δ, 2) ∨ user_esc
+T  = Trigger source ∈ {user_signal, ai_strong, ai_soft}
+suggest_only = ai_soft terminal: passive suggestion without activation (no AskUserQuestion; Λ.active = false)
 
 ── E-BINDING ──
-bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
-Priority: explicit_arg > colocated_expr > prev_user_turn
+bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_expr
+Priority: explicit_arg > colocated_expr > prev_user_turn > ai_identified_expr
 
 /clarify "text"                → E = "text"
 "request... clarify"           → E = text before trigger
 /clarify (alone)               → E = previous user message
+AI-detected trigger             → E = expression AI identified as ambiguous
 
 Edge cases:
 - Interrupt: E = original request of interrupted task
@@ -39,7 +42,10 @@ Edge cases:
 - Re-invoke: Show prior clarification, confirm or restart
 
 ── PHASE TRANSITIONS ──
-Phase 0:  E → recognize(E) → trigger?                    -- trigger recognition
+Phase 0:  E → recognize(E) → T                           -- trigger recognition
+          T = user_signal → Phase 1a                      -- user-initiated path
+          T = ai_strong   → Q[AskUserQuestion](confirm) → {yes: Phase 1a | no: immune(E)}  -- AI-detected confirm [Tool]
+          T = ai_soft     → suggest_only                  -- suggest, do not activate
 Phase 1a: E → Q[AskUserQuestion](E) → Eᵥ                 -- E confirmation [Tool]
 Phase 1b: Eᵥ → Q[AskUserQuestion](gap_types) → Gₛ        -- gap type selection [Tool]
 Phase 2:  Gₛ → Q[AskUserQuestion](Gₛ) → await → A        -- clarification [Tool]
@@ -51,14 +57,16 @@ Continue until converge: |G| = 0, cycle detected, or user exits.
 Mode remains active until convergence.
 
 ── TOOL GROUNDING ──
-Phase 1a Q  → AskUserQuestion (E confirmation)
-Phase 1b Q  → AskUserQuestion (gap type selection)
-Phase 2 Q   → AskUserQuestion (clarification options)
-integrate   → Internal state update (no external tool)
+Phase 0 Q    → AskUserQuestion (AI-detected activation confirmation; ai_strong only)
+Phase 1a Q   → AskUserQuestion (E confirmation)
+Phase 1b Q   → AskUserQuestion (gap type selection)
+Phase 2 Q    → AskUserQuestion (clarification options)
+suggest_only → no tool call (passive suggestion; Λ.active = false)
+integrate    → Internal state update (no external tool)
 
 ── MODE STATE ──
-Λ = { phase: Phase, E: Expression, Eᵥ: Expression, gaps: Set(Gap),
-      clarified: Set(Gap), history: List<(E, Gₛ, A)>, active: Bool }
+Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, gaps: Set(Gap),
+      clarified: Set(Gap), immune: Set(Expression), history: List<(E, Gₛ, A)>, active: Bool }
 ```
 
 ## Core Principle
@@ -71,16 +79,17 @@ integrate   → Internal state update (no external tool)
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
 | **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
 | **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 
-**Key difference**: User already recognizes intent-expression misalignment. Hermeneia helps articulate what user already partially knows.
+**Key differences**: User recognizes intent-expression misalignment (user signal), or AI detects ambiguous expression (AI-detected, requires user confirmation). Both paths help articulate what the user partially knows. Boundary with Aitesis: if the ambiguity is in the user's *expression* of intent (how it was said), use Hermeneia; if the AI lacks *factual execution context* (what information the system needs), use Aitesis.
 
 ## Mode Activation
 
 ### Activation
 
-Command invocation or trigger phrase activates mode until clarification completes.
+Command invocation, trigger phrase, or AI-detected expression ambiguity activates mode until clarification completes. AI-detected activation requires user confirmation before proceeding to Phase 1a.
 
 **Clarification complete** = one of: `|G| = 0` (no gaps remain), `cycle(G)` (already clarified), or `Δ = 0` for 2 rounds (progress stall with user consent to proceed).
 
@@ -106,6 +115,8 @@ Clarified expression becomes input to subsequent protocols.
 
 ### Triggers
 
+**User-Initiated Signals** (`T = user_signal`):
+
 | Signal | Examples |
 |--------|----------|
 | Direct request | "clarify what I mean", "help me articulate" |
@@ -115,10 +126,24 @@ Clarified expression becomes input to subsequent protocols.
 
 **Qualifying condition**: Activate only when user's entire message is a clarification request, or when 2+ trigger signals co-occur in the same message. Do not activate on casual meta-communication embedded in a larger request.
 
-**Skip**:
+**AI-Detected Signals**:
+
+| Strength | Trigger | Action |
+|----------|---------|--------|
+| Strong (`ai_strong`) | Standalone ambiguous expression with multiple valid interpretations | Confirm with AskUserQuestion, then activate |
+| Strong (`ai_strong`) | Request referencing undefined scope or entity | Confirm with AskUserQuestion, then activate |
+| Strong (`ai_strong`) | Scope-reference mismatch (expression scope ≠ referenced context) | Confirm with AskUserQuestion, then activate |
+| Soft (`ai_soft`) | Minor lexical ambiguity resolvable from context | Suggest only; do not activate |
+
+**Skip** (user-initiated):
 - User's expression is unambiguous
 - User explicitly declines clarification
 - Expression already clarified in current session
+
+**Skip** (AI-detected):
+- User says "just do it", "proceed as-is", or equivalent
+- Session immunity: user declined AI-detected clarification for this expression already
+- Soft trigger resolved by context
 
 ### Mode Deactivation
 
@@ -149,13 +174,31 @@ When multiple gaps detected:
 
 ### Phase 0: Trigger Recognition
 
-Recognize user-initiated clarification request:
+Recognize trigger source and determine activation path:
+
+**User-Initiated Path** (`T = user_signal`):
 
 1. **Explicit request**: User directly asks for clarification help
 2. **Implicit signal**: User expresses doubt about their own expression
 3. **Meta-communication**: User attempts to rephrase or explain their intent
 
-**Do not activate** for AI-perceived ambiguity alone. User must signal awareness of potential gap.
+→ Proceed directly to Phase 1a.
+
+**AI-Detected Path** (`T = ai_strong`):
+
+When AI detects a strong ambiguity trigger (see Triggers: AI-Detected Signals), **call AskUserQuestion** to confirm activation:
+
+```
+I notice this expression may be ambiguous — would you like to clarify it?
+
+Options:
+1. Yes, help me clarify — start Hermeneia
+2. No, proceed as-is — continue without clarification
+```
+
+User confirmation required before proceeding to Phase 1a. If user selects option 2, mark session immunity and do not re-trigger for this expression.
+
+`T = ai_soft` → suggest only; do not call AskUserQuestion, do not activate.
 
 ### Phase 1a: Expression Confirmation
 
@@ -172,6 +215,8 @@ Options:
 ```
 
 **Skip condition**: If E was explicitly provided via argument (`/clarify "text"`), proceed directly to Phase 1b.
+
+**Note (AI-detected path)**: If triggered via `T = ai_strong`, E is already identified by AI — Phase 1a confirmation verifies the AI's identification; user may still select Option 2 to redirect to a different expression.
 
 ### Phase 1b: Gap Type Selection
 
@@ -275,7 +320,7 @@ When multiple gaps detected:
 
 ## Rules
 
-1. **User-initiated only**: Activate only when user signals awareness of ambiguity
+1. **Hybrid-initiated, user-confirmed**: Activate on user signal, or with user confirmation when AI detects ambiguous expression
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
 3. **Selection over Detection**: Present options for user to select, not auto-diagnose internally
 4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
