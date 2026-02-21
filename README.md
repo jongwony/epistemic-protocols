@@ -28,7 +28,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 |----------|---------|-----------|-----------|----------------|
 | **Prothesis** | FrameworkAbsent | AI-detected | SELECT | `FrameworkAbsent → FramedInquiry` |
 | **Syneidesis** | GapUnnoticed | AI-detected | SURFACE | `GapUnnoticed → AuditedDecision` |
-| **Hermeneia** | IntentMisarticulated | User-initiated | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
+| **Hermeneia** | IntentMisarticulated | Hybrid | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
 | **Katalepsis** | ResultUngrasped | User-initiated | VERIFY | `ResultUngrasped → VerifiedUnderstanding` |
 | **Telos** | GoalIndeterminate | AI-detected | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
 | **Aitesis** | ContextInsufficient | AI-detected | INQUIRE | `ContextInsufficient → InformedExecution` |
@@ -38,7 +38,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 
 - **Prothesis**: "How should we approach this?" → AI assembles a team, investigates from multiple perspectives, produces a framed inquiry (`FrameworkAbsent → FramedInquiry`)
 - **Syneidesis**: "What's missing?" → AI surfaces gaps as questions, you judge (`GapUnnoticed → AuditedDecision`)
-- **Hermeneia**: "What do I mean?" → AI presents interpretations, you recognize your intent (`IntentMisarticulated → ClarifiedIntent`)
+- **Hermeneia**: "What do I mean?" → AI presents interpretations, you recognize your intent; or AI detects ambiguity, you confirm and clarify (`IntentMisarticulated → ClarifiedIntent`)
 - **Katalepsis**: "What did you do?" → AI verifies your understanding through questions (`ResultUngrasped → VerifiedUnderstanding`)
 - **Telos**: "What do I actually want?" → AI proposes goals, you shape and approve (`GoalIndeterminate → DefinedEndState`)
 - **Aitesis**: "Am I missing something?" → AI detects its own context insufficiency and inquires for missing information before proceeding (`ContextInsufficient → InformedExecution`)

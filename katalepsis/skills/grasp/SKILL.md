@@ -81,7 +81,7 @@ Categorize  → Internal analysis (Read for context if needed)
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Expression clarification |
+| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 

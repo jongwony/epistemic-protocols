@@ -149,11 +149,11 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 - [ ] Correct epistemic type signature declared:
   - Prothesis: FrameworkAbsent → FramedInquiry (AI-detected, SELECT)
   - Syneidesis: GapUnnoticed → AuditedDecision (AI-detected, SURFACE)
-  - Hermeneia: IntentMisarticulated → ClarifiedIntent (User-initiated, EXTRACT)
+  - Hermeneia: IntentMisarticulated → ClarifiedIntent (Hybrid, EXTRACT)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
   - Reflexion: KnowledgeTacit → PersistedKnowledge (User-invoked, CRYSTALLIZE)
   - Write: InsightInternal → ExternalizedKnowledge (User-invoked, EXTERNALIZE)
-- [ ] Initiator correctly specified (AI-detected vs User-initiated vs User-invoked)
+- [ ] Initiator correctly specified (AI-detected vs Hybrid vs User-initiated vs User-invoked)
 - [ ] Gap taxonomy matches protocol purpose
 
 #### False Positive Filtering
@@ -192,7 +192,7 @@ When other experts flag these as issues, they should be filtered (not actual iss
 |---------|------------------|-----------|
 | AskUserQuestion mandate | Tool call in Phase 1/2 | Text-only presentation |
 | Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
-| User-initiated protocol | Hermeneia activates on user signal only | AI auto-activation |
+| Hybrid protocol | Hermeneia activates on user signal or with confirmation when AI-detected | Unconfirmed AI auto-activation |
 | Intent accessibility | Hermeneia uses Î (inferred), not I (actual) | Direct access to user intent |
 
 ## Synthesis Template

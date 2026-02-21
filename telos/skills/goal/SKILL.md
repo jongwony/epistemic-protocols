@@ -88,7 +88,7 @@ Telos is not simplified requirements gathering. Three differentiators:
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
 | **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
 | **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 

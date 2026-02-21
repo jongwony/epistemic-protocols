@@ -165,7 +165,7 @@ inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.jso
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
 | **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
+| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
 | **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 | **Epitrope** | AI-detected | DelegationAmbiguous → CalibratedDelegation | Context-adaptive delegation calibration |

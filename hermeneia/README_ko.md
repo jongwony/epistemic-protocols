@@ -22,12 +22,12 @@
 |----------|--------|---------------|
 | Prothesis | AI 감지 | `FrameworkAbsent → FramedInquiry` |
 | Syneidesis | AI 감지 | `GapUnnoticed → AuditedDecision` |
-| **Hermeneia** | **사용자 주도** | **`IntentMisarticulated → ClarifiedIntent`** |
+| **Hermeneia** | **Hybrid** | **`IntentMisarticulated → ClarifiedIntent`** |
 
 ## 프로토콜 흐름
 
 ```
-Phase 0: Trigger       → 사용자 주도 명확화 요청 인식
+Phase 0: Trigger       → 명확화 요청 인식 (사용자 주도 또는 AI 모호성 감지)
 Phase 1: Diagnosis     → 의도-표현 갭 식별 (비표시)
 Phase 2: Clarification → 옵션 제시 (call AskUserQuestion)
 Phase 3: Integration   → 명확화된 표현으로 진행
@@ -48,6 +48,7 @@ Phase 3: Integration   → 명확화된 표현으로 진행
 - 표현이 모호할 수 있다고 인식할 때
 - 요청을 어떻게 표현해야 할지 확실하지 않을 때
 - 의도를 명확히 표현하는 데 도움이 필요할 때
+- AI가 표현 모호성을 감지하여 명확화를 제안할 때 (사용자 확인 후 진행)
 
 **건너뛰기**:
 - 표현이 명확할 때
