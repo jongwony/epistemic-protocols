@@ -73,10 +73,10 @@ Phase 0:  T → detect(T) → Ctx → Q[AskUserQuestion](propose_mode(Ctx)) → 
 
 Phase 1:  (mode-dependent)                                         -- structure + decomposition
   Solo:         T → decompose(T) → {Dᵢ}                            -- decomposition (silent)
-  TeamAugment:  T → inherit(Ctx.team) → Q[AskUserQuestion](WHO_adjust?) → TeamStructure
+  TeamAugment:  T → inherit(Ctx.team) → WHO[AskUserQuestion](adjust?) → TeamStructure
                   → decompose(T) → {Dᵢ}                            [Tool]
   TeamCreate:   T → decompose(T) → {Dᵢ}
-                  → Q[AskUserQuestion](WHO_design, Dᵢ) → TeamStructure  [Tool]
+                  → WHO[AskUserQuestion](design, Dᵢ) → TeamStructure  [Tool]
 
 Phase 2:  Dᵢ → template(Dᵢ, mode) → Sₖ → Q[AskUserQuestion](Sₖ) → R  -- scenario interview [Tool]
 
@@ -85,8 +85,8 @@ Phase 3:  R → integrate(R, DC) → DC'                              -- contrac
 Phase 4:  DC' → Q[AskUserQuestion](DC', progress) → approve        -- contract review [Tool]
 
 Phase 5:  (team modes only)                                        -- team application [Tool]
-  TeamAugment: DC → apply_authority(DC, Ctx.team) → SendMessage[team](DC)
-  TeamCreate:  DC → TeamCreate[tool](DC.who) → ∥Spawn[Task](DC.who.roles) → SendMessage[team](DC)
+  TeamAugment: DC[SendMessage](team, DC) → apply_authority(DC, Ctx.team)             [Tool]
+  TeamCreate:  T[TeamCreate](DC.who) → ∥S[Task](DC.who.roles) → DC[SendMessage](team, DC)  [Tool]
 
 ── LOOP ──
 After Phase 3: check uncalibrated domains.
