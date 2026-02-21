@@ -8,7 +8,7 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 
 | Protocol | Purpose | Timing |
 |----------|---------|--------|
-| **[Prothesis](./prothesis)** (πρόθεσις) — /mission | Team-based multi-perspective investigation | Before analysis |
+| **[Prothesis](./prothesis)** (πρόθεσις) — /frame | Team-based multi-perspective investigation | Before analysis |
 | **[Syneidesis](./syneidesis)** (συνείδησις) — /gap | Surface potential gaps at decision points | At decision time |
 | **[Hermeneia](./hermeneia)** (ἑρμηνεία) — /clarify | Clarify intent-expression gaps via dialogue | Before action |
 | **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | Achieve certain comprehension of AI work | After AI action |
@@ -76,12 +76,12 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 
 Run in **plan mode** for interactive protocol workflows that require user decisions at each phase.
 
-> **Not yet supported in Codex**: Prothesis (`/mission`), Reflexion (`/reflect`), Write (`/write`) — these require agent teams and parallel subagents.
+> **Not yet supported in Codex**: Prothesis (`/frame`), Reflexion (`/reflect`), Write (`/write`) — these require agent teams and parallel subagents.
 
 ## Usage
 
 ```
-/mission [your question]     # Multi-perspective team investigation
+/frame [your question]      # Multi-perspective team investigation
 /gap [your task]             # Enable gap surfacing during execution
 /clarify [your expression]   # Clarify ambiguous intent
 /grasp                       # Verify understanding of AI work

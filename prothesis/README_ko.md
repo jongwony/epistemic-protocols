@@ -1,4 +1,4 @@
-# Prothesis — /mission (πρόθεσις)
+# Prothesis — /frame (πρόθεσις)
 
 다관점 조사를 위한 팀 기반 분석 (πρόθεσις: 앞에 놓기)
 
@@ -49,7 +49,7 @@ Phase 5: Routing       → 사용자 다음 행동 선택: calibrate / extend / 
 ## 사용법
 
 ```
-/mission [질문]
+/frame [질문]
 ```
 
 ## 저자

@@ -61,7 +61,7 @@ Aitesis follows Epitrope: once delegation is calibrated, verify execution contex
 - When entering a novel domain not previously discussed in session
 
 **Skip**:
-- When execution context is fully specified (use Prothesis — /mission for perspective)
+- When execution context is fully specified (use Prothesis — /frame for perspective)
 - When gaps are at decision points, not execution context (use Syneidesis — /gap)
 - When delegation scope is unclear (use Epitrope — /calibrate first)
 

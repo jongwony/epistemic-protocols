@@ -216,7 +216,7 @@ function checkCrossReference() {
 
   // Map CLAUDE.md heading alias → SKILL.md path (canonical source of truth)
   const aliasToSkill = {
-    'mission': 'prothesis/skills/mission/SKILL.md',
+    'frame': 'prothesis/skills/frame/SKILL.md',
     'gap': 'syneidesis/skills/gap/SKILL.md',
     'clarify': 'hermeneia/skills/clarify/SKILL.md',
     'grasp': 'katalepsis/skills/grasp/SKILL.md',
@@ -260,7 +260,7 @@ function checkCrossReference() {
 // ============================================================
 function checkRequiredSections() {
   const protocolFiles = [
-    'prothesis/skills/mission/SKILL.md',
+    'prothesis/skills/frame/SKILL.md',
     'syneidesis/skills/gap/SKILL.md',
     'hermeneia/skills/clarify/SKILL.md',
     'katalepsis/skills/grasp/SKILL.md',
@@ -307,7 +307,7 @@ function checkRequiredSections() {
 // ============================================================
 function checkToolGrounding() {
   const protocolFiles = [
-    'prothesis/skills/mission/SKILL.md',
+    'prothesis/skills/frame/SKILL.md',
     'syneidesis/skills/gap/SKILL.md',
     'hermeneia/skills/clarify/SKILL.md',
     'katalepsis/skills/grasp/SKILL.md',

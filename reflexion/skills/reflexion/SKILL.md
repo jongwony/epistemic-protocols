@@ -64,7 +64,7 @@ Update status at each phase transition. This externalizes working memory and pre
 
 ## Protocol Integration
 
-**When Prothesis is active**: Invoke `/mission` before Phase 2 extraction for perspective selection. The selected perspective guides insight extraction focus.
+**When Prothesis is active**: Invoke `/frame` before Phase 2 extraction for perspective selection. The selected perspective guides insight extraction focus.
 
 **When Syneidesis is active**: Gap detection applies at Phase 3 decision points (Q2-Q5). Syneidesis may surface additional considerations before each AskUserQuestion.
 
