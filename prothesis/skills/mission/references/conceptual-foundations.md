@@ -31,20 +31,11 @@ When multiple perspectives converge on the same recommendation, present as unani
 
 ## Theoria → Praxis
 
-Phases 0–5 constitute **theoria** (θεωρία) — contemplative inquiry that produces the Lens L as a theoretical artifact: what different frameworks reveal, without changing anything. Phase 6–7 extend into **praxis** (πρᾶξις) — perspective-informed action on deterministically fixable findings, reusing the team's analytical context.
+Prothesis (Phases 0–5) constitutes pure **theoria** (θεωρία) — contemplative inquiry that produces the Lens L as a theoretical artifact: what different frameworks reveal, without changing anything.
 
-This transition requires the user's explicit `plan_act` selection at Phase 5 — a deliberate shift from understanding to changing, which warrants different epistemic commitments (see Phase-dependent topology in Phase 7b).
+The transition to **praxis** (πρᾶξις) — perspective-informed action — is delegated to Epitrope. When the user selects `J=calibrate` at Phase 5, the coordinator calls `Skill("calibrate")` to activate Epitrope, which detects the active team and proposes TeamAugment mode. This is a mode switch, not a composition: the same coordinator transitions from perspective analysis to delegation calibration, with the team's analytical context preserved.
 
-### Planning as Theoria-Praxis Bridge (Phase 6a)
-
-Phase 6a introduces a Plan subagent between classification (theoria) and execution (praxis).
-The planner operates in read-only mode (`subagent_type=Plan`), designing how to implement
-without implementing — a structured transition from "what to fix" to "how to fix" that preserves
-the explicit `plan_act` gate while adding user-approved execution strategy.
-
-This differs from the external Plan Mode Integration above: there, plan mode is the outer frame
-with Prothesis providing perspectives per planning phase. Here, Prothesis is the outer frame,
-and the planner structures the theoria → praxis transition.
+This separation reflects a clean epistemic boundary: Prothesis answers "what do different frameworks reveal?" while Epitrope answers "how should we act on these findings?" The `calibrate` option at Phase 5 is the deliberate shift from understanding to changing.
 
 ## Parametric Nature
 
