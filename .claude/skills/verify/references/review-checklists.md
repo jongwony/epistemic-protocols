@@ -192,7 +192,7 @@ When other experts flag these as issues, they should be filtered (not actual iss
 |---------|------------------|-----------|
 | AskUserQuestion mandate | Tool call in Phase 1/2 | Text-only presentation |
 | Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
-| Hybrid protocol | Hermeneia activates on user signal or with confirmation when AI-detected | Uncofirmed AI auto-activation |
+| Hybrid protocol | Hermeneia activates on user signal or with confirmation when AI-detected | Unconfirmed AI auto-activation |
 | Intent accessibility | Hermeneia uses Î (inferred), not I (actual) | Direct access to user intent |
 
 ## Synthesis Template

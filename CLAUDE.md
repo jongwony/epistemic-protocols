@@ -84,7 +84,7 @@ Surface unnoticed gaps at decision points as questions.
 ### Clarify (ἑρμηνεία) — Hermeneia
 Clarify intent-expression gaps through hybrid-initiated dialogue.
 - **Deficit**: IntentMisarticulated → ClarifiedIntent
-- **Triggers**: "clarify", "what I mean", "did I express this right"
+- **Triggers**: "clarify", "what I mean", "did I express this right"; also AI-detected expression ambiguity (requires user confirmation)
 - **Invocation**: `/clarify` or use "clarify" in conversation
 
 ### Grasp (κατάληψις) — Katalepsis

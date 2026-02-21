@@ -13,7 +13,7 @@ Resolve intent-expression misalignment through hybrid-initiated dialogue, enabli
 
 ```
 ── FLOW ──
-E → T(E) → Eᵥ → Gₛ → Q → A → Î' → (loop until converge)
+E → recognize(E) → Eᵥ → Gₛ → Q → A → Î' → (loop until converge)
 
 ── TYPES ──
 E  = User's expression (the prompt to clarify)
@@ -25,15 +25,16 @@ A  = User's answer
 Î' = Updated intent after clarification
 ClarifiedIntent = Î' where |G| = 0 ∨ cycle(G) ∨ stall(Δ, 2) ∨ user_esc
 T  = Trigger source ∈ {user_signal, ai_strong, ai_soft}
+suggest_only = ai_soft terminal: passive suggestion without activation (no AskUserQuestion; Λ.active = false)
 
 ── E-BINDING ──
-bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
-Priority: explicit_arg > colocated_expr > prev_user_turn
+bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_expr
+Priority: explicit_arg > colocated_expr > prev_user_turn > ai_identified_expr
 
 /clarify "text"                → E = "text"
 "request... clarify"           → E = text before trigger
 /clarify (alone)               → E = previous user message
-AI-detected trigger             → E = ambiguous expression detected
+AI-detected trigger             → E = expression AI identified as ambiguous
 
 Edge cases:
 - Interrupt: E = original request of interrupted task
@@ -43,7 +44,7 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0:  E → recognize(E) → T                           -- trigger recognition
           T = user_signal → Phase 1a                      -- user-initiated path
-          T = ai_strong   → Q[AskUserQuestion](confirm) → Phase 1a  -- AI-detected confirm [Tool]
+          T = ai_strong   → Q[AskUserQuestion](confirm) → {yes: Phase 1a | no: immune(E)}  -- AI-detected confirm [Tool]
           T = ai_soft     → suggest_only                  -- suggest, do not activate
 Phase 1a: E → Q[AskUserQuestion](E) → Eᵥ                 -- E confirmation [Tool]
 Phase 1b: Eᵥ → Q[AskUserQuestion](gap_types) → Gₛ        -- gap type selection [Tool]
@@ -56,15 +57,16 @@ Continue until converge: |G| = 0, cycle detected, or user exits.
 Mode remains active until convergence.
 
 ── TOOL GROUNDING ──
-Phase 0 Q  → AskUserQuestion (AI-detected activation confirmation)
-Phase 1a Q  → AskUserQuestion (E confirmation)
-Phase 1b Q  → AskUserQuestion (gap type selection)
-Phase 2 Q   → AskUserQuestion (clarification options)
-integrate   → Internal state update (no external tool)
+Phase 0 Q    → AskUserQuestion (AI-detected activation confirmation; ai_strong only)
+Phase 1a Q   → AskUserQuestion (E confirmation)
+Phase 1b Q   → AskUserQuestion (gap type selection)
+Phase 2 Q    → AskUserQuestion (clarification options)
+suggest_only → no tool call (passive suggestion; Λ.active = false)
+integrate    → Internal state update (no external tool)
 
 ── MODE STATE ──
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, gaps: Set(Gap),
-      clarified: Set(Gap), history: List<(E, Gₛ, A)>, active: Bool }
+      clarified: Set(Gap), immune: Set(Expression), history: List<(E, Gₛ, A)>, active: Bool }
 ```
 
 ## Core Principle
@@ -79,8 +81,9 @@ integrate   → Internal state update (no external tool)
 | **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
 | **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 
-**Key difference**: User recognizes intent-expression misalignment (user signal), or AI detects ambiguous expression (AI-detected, requires user confirmation). Both paths help articulate what the user partially knows.
+**Key differences**: User recognizes intent-expression misalignment (user signal), or AI detects ambiguous expression (AI-detected, requires user confirmation). Both paths help articulate what the user partially knows. Boundary with Aitesis: if the ambiguity is in the user's *expression* of intent (how it was said), use Hermeneia; if the AI lacks *factual execution context* (what information the system needs), use Aitesis.
 
 ## Mode Activation
 
@@ -213,7 +216,7 @@ Options:
 
 **Skip condition**: If E was explicitly provided via argument (`/clarify "text"`), proceed directly to Phase 1b.
 
-**Note (AI-detected path)**: If triggered via `T = ai_strong`, E is already identified by AI — Phase 1a confirmation verifies the AI's identification rather than prompting user selection.
+**Note (AI-detected path)**: If triggered via `T = ai_strong`, E is already identified by AI — Phase 1a confirmation verifies the AI's identification; user may still select Option 2 to redirect to a different expression.
 
 ### Phase 1b: Gap Type Selection
 
