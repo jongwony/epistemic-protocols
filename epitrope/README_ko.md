@@ -1,12 +1,12 @@
 # Epitrope — /calibrate (ἐπιτροπή)
 
-시나리오 기반 인터뷰로 위임 자율성 캘리브레이션 (ἐπιτροπή: 맡김)
+컨텍스트 적응형 위임 캘리브레이션 (ἐπιτροπή: 맡김)
 
 > [English](./README.md)
 
 ## Epitrope란?
 
-그리스어 ἐπιτροπή(맡김)의 현대적 재해석 — **AI가 암묵적인 위임 범위 가정에 의존하는 대신, 구체적인 시나리오 질문을 통해 자율성 수준을 캘리브레이션하는** 프로토콜.
+그리스어 ἐπιτροπή(맡김)의 현대적 재해석 — **실행 컨텍스트를 탐지하고 적절한 진입 모드(Solo/TeamAugment/TeamCreate)를 선택한 후, 3차원(WHO/WHAT/HOW MUCH)으로 위임을 캘리브레이션하는** 프로토콜.
 
 ### 핵심 문제
 
@@ -14,24 +14,26 @@ AI 시스템은 암묵적인 위임 경계(`DelegationAmbiguous`)로 작동합�
 
 ### 해결책
 
-**선언보다 캘리브레이션(Calibration over Declaration)**: 아키네이터식 시나리오 질문("X 상황이 발생하면 어떻게 할까요?")을 통해 암묵적 위임 선호를 표면화하고, 세션 자율성을 관리하는 DelegationContract를 생성합니다.
+**선언보다 캘리브레이션(Calibration over Declaration)**: 실행 컨텍스트를 탐지하여 진입 모드를 선택하고, 아키네이터식 시나리오 질문을 통해 구조(WHO), 범위(WHAT), 자율성(HOW MUCH) 3차원의 DelegationContract를 생성합니다.
 
 ### 다른 프로토콜과의 차이
 
 | 프로토콜 | 모드 | 타입 시그니처 |
 |----------|------|---------------|
 | Aitesis | INQUIRE | `ContextInsufficient → InformedExecution` |
-| **Epitrope** | **CALIBRATE** | **`DelegationAmbiguous → CalibratedAutonomy`** |
+| **Epitrope** | **CALIBRATE** | **`DelegationAmbiguous → CalibratedDelegation`** |
 
 **핵심 구분**: Aitesis는 "충분히 알고 있는가?"(맥락 갭)를 묻습니다. Epitrope는 "이렇게 해도 되는가?"(위임 갭)를 묻습니다. 맥락은 충분하지만 위임이 모호한 작업이 있을 수 있습니다.
 
 ## 프로토콜 흐름
 
 ```
-Phase 0: Decomposition  → 적용 가능한 행동 도메인 식별 (무성)
-Phase 1: Interview       → 시나리오 기반 위임 질문 (AskUserQuestion 호출)
-Phase 2: Integration     → DelegationContract 갱신
-Phase 3: Review          → 계약 승인 요청 (AskUserQuestion 호출)
+Phase 0: Context Detection → 컨텍스트 탐지, 진입 모드 제안 (AskUserQuestion 호출)
+Phase 1: Structure         → WHO: 팀 구조 + 작업 분해 (모드별)
+Phase 2: Interview         → 시나리오 기반 위임 질문 (AskUserQuestion 호출)
+Phase 3: Integration       → DelegationContract 갱신
+Phase 4: Review            → 계약 승인 요청 (AskUserQuestion 호출)
+Phase 5: Application       → DC를 팀에 적용 (팀 모드만)
 ```
 
 ## 행동 도메인
@@ -50,7 +52,7 @@ Phase 3: Review          → 계약 승인 요청 (AskUserQuestion 호출)
 Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Katalepsis
 ```
 
-Epitrope는 Telos 다음: 목표가 정의된 후, 위임 자율성을 캘리브레이션합니다. 맥락 검증(Aitesis), 관점 프레이밍(Prothesis), 갭 감사(Syneidesis) 전에 AI의 권한 범위를 확정합니다.
+Epitrope는 Telos 다음: 목표가 정의된 후, 구조(WHO), 범위(WHAT), 자율성(HOW MUCH) 3차원으로 위임을 캘리브레이션합니다. 맥락 검증(Aitesis), 관점 프레이밍(Prothesis), 갭 감사(Syneidesis) 전에 AI의 권한 범위를 확정합니다.
 
 ## 사용 시기
 

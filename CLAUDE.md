@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **ContextInsufficient → InformedExecution** (Aitesis), **DelegationAmbiguous → CalibratedAutonomy** (Epitrope) during AI-human interaction.
+Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **ContextInsufficient → InformedExecution** (Aitesis), **DelegationAmbiguous → CalibratedDelegation** (Epitrope) during AI-human interaction.
 
 ## Architecture
 
@@ -30,7 +30,7 @@ epistemic-protocols/
 ├── aitesis/                           # Protocol: context insufficiency detection
 │   ├── .claude-plugin/plugin.json
 │   └── skills/inquire/SKILL.md       # Full protocol definition (user-invocable)
-├── epitrope/                          # Protocol: delegation autonomy calibration
+├── epitrope/                          # Protocol: context-adaptive delegation calibration
 │   ├── .claude-plugin/plugin.json
 │   └── skills/calibrate/SKILL.md     # Full protocol definition (user-invocable)
 ├── reflexion/                         # Skill: cross-session learning
@@ -57,7 +57,8 @@ epistemic-protocols/
 ```
 ── FLOW ──              One-line formula: full protocol path with symbols
 ── TYPES ──             Symbol definitions with type signatures and comments
-── ACTION TYPES ──      (if applicable) Extended types for action phases
+── ENTRY TYPES ──       (if applicable) Extended types for entry modes (e.g., Epitrope)
+── DELEGATION TYPES ──  (if applicable) Extended types for delegation structure (e.g., Epitrope)
 ── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
@@ -105,9 +106,9 @@ Detect context insufficiency before execution through AI-detected inquiry.
 - **Invocation**: `/inquire` or use "inquire" in conversation
 
 ### Calibrate (ἐπιτροπή) — Epitrope
-Calibrate delegation autonomy through scenario-based interview.
-- **Deficit**: DelegationAmbiguous → CalibratedAutonomy
-- **Triggers**: Multi-domain task, ambiguous scope keywords, prior autonomy friction
+Context-adaptive delegation calibration through scenario-based interview.
+- **Deficit**: DelegationAmbiguous → CalibratedDelegation
+- **Triggers**: Multi-domain task, ambiguous scope keywords, prior autonomy friction, active team without DC
 - **Invocation**: `/calibrate` or use "calibrate" in conversation
 
 ### Reflexion
@@ -175,11 +176,11 @@ node .claude/skills/verify/scripts/static-checks.js .
 
 ## Delegation Constraint
 
-- **Prothesis**: See SKILL.md for phase-specific delegation rules (Phase 0-1 main agent, Phase 3+ agent team)
+- **Prothesis**: See SKILL.md for phase-specific delegation rules (Phase 0-2 main agent, Phase 3-4 agent team, Phase 5 main agent)
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Epitrope**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Epitrope**: Solo mode: no Task delegation—must run in main agent to call AskUserQuestion. Team modes: Phase 5 uses Task/TeamCreate/SendMessage for team application
 
 ## Git Conventions
 

@@ -82,7 +82,7 @@
   <text x="263" y="306" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">CALIBRATE</text>
 
   <rect x="295" y="288" width="145" height="50" rx="8" fill="#d4edda"/>
-  <text x="367" y="310" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">CalibratedAutonomy</text>
+  <text x="367" y="310" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">CalibratedDelegation</text>
   <text x="367" y="326" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">위임 계약 수립</text>
 
   <text x="500" y="313" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Epitrope</text>

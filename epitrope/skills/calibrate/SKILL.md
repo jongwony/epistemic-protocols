@@ -1,19 +1,23 @@
 ---
 name: calibrate
-description: "Calibrate delegation autonomy through scenario-based interview. Produces a DelegationContract when delegation scope is ambiguous. Alias: Epitrope(ἐπιτροπή)."
+description: "Context-adaptive delegation calibration through scenario-based interview. Detects execution context to select entry mode (Solo/TeamAugment/TeamCreate) and produces a DelegationContract. Alias: Epitrope(ἐπιτροπή)."
 ---
 
 # Epitrope Protocol
 
-Calibrate delegation autonomy through scenario-based interview. Type: `(DelegationAmbiguous, AI, CALIBRATE, TaskScope) → CalibratedAutonomy`.
+Context-adaptive delegation calibration through scenario-based interview, detecting execution context to select appropriate entry mode. Type: `(DelegationAmbiguous, AI, CALIBRATE, TaskScope) → CalibratedDelegation`.
 
 ## Definition
 
-**Epitrope** (ἐπιτροπή): A dialogical act of calibrating delegation boundaries through concrete scenario-based questions, where AI detects ambiguous delegation scope and produces a DelegationContract through structured binary interview.
+**Epitrope** (ἐπιτροπή): A dialogical act of calibrating delegation boundaries through concrete scenario-based questions, where AI detects ambiguous delegation scope, identifies execution context (active team, solo, or new team needed), and produces a DelegationContract covering structure (WHO), scope (WHAT), and autonomy (HOW MUCH).
 
 ```
 ── FLOW ──
-Epitrope(T) → Decompose(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integrate(R) → DC → Q(DC) → approve → (loop until calibrated)
+Epitrope(T) → Ctx(T) → Q(propose_mode) → EntryMode →
+  Solo:         Decompose(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integrate(R) → DC → Q(DC) → approve
+  TeamAugment:  inherit(T) → WHO?(T) → {Dᵢ} → Scenario(Dᵢ, T) → Q → R → integrate(R) → DC → Q(DC) → apply(DC, T)
+  TeamCreate:   Decompose(T) → WHO(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integrate(R) → DC → Q(DC) → create(DC) → apply(DC, T)
+  → (loop until calibrated)
 
 ── TYPES ──
 T    = TaskScope (task/project to calibrate delegation for)
@@ -26,10 +30,36 @@ R    = Response ∈ {Autonomous, ReportThenAct, AskBefore, Halt}
          -- Domain-specific refinements (⊆ base R):
          --   Minimal ⊆ Autonomous, ProposeThenChoose ⊆ ReportThenAct,
          --   SwitchAutonomously ⊆ Autonomous, AlwaysAsk ⊆ AskBefore
-DC   = DelegationContract { autonomous, report_then_act, ask_before, halt_conditions, exploration }
+
+── ENTRY TYPES ──
+Phase ∈ {0, 1, 2, 3, 4, 5}
+EntryMode ∈ {TeamAugment, TeamCreate, Solo}
+         -- TeamAugment requires team(Ctx)
+Ctx   = DetectedContext { team: Option(TeamRef), lens: Option(L), complexity: Complexity }
+L      = Lens { convergence: Set, divergence: Set, assessment: Any }  -- from Prothesis; Option(L) = None when standalone
+TeamRef = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
+AgentRef = { name: String, type: String, perspective: Option(String) }
+Complexity ∈ {Single, Multi}
+         -- Single ≡ fully specified step-by-step instructions OR task spans ≤ 1 ActionDomain
+         -- Multi  ≡ ¬Single
+
+── DELEGATION TYPES ──
+Condition = { trigger: String, action: halt ∨ escalate }
+DC    = DelegationContract {
+          who: TeamStructure,
+          what: Set(ActionDomain),
+          how_much: Map(ActionDomain, R),
+          halt_conditions: Set(Condition),
+          exploration: ExplorationScope
+        }
          -- Subagent inheritance: spawned agents inherit parent DC unless explicitly overridden
+         -- invariant: dom(how_much) ⊇ what (uncalibrated domains filled by defaults in Phase 4)
+TeamStructure ∈ {Solo, Augmented(TeamRef, Set(AgentRole)), Created(Set(AgentRole), Topology)}
+         -- |roles| ≥ 1 for Augmented/Created; |roles| ≤ 6 (WHO cap)
+AgentRole = { name: String, type: String, focus: String }
+Topology ∈ {HubSpoke, PeerReview, Pipeline}
 ExplorationScope = { depth: N, breadth: N, drift_action: report | halt }
-CalibratedAutonomy = DC where (∀ d ∈ applicable: calibrated(d)) ∨ user_esc
+CalibratedDelegation = DC where (∀ d ∈ applicable: calibrated(d)) ∨ user_esc
 
 ── SCENARIO TEMPLATES ──
 FileModification:  "When files need to be modified for this task?" → {Autonomous, ReportThenAct, AskBefore}
@@ -39,19 +69,58 @@ Strategy:          "When a different approach looks better than the original pla
 External:          "When git push or PR creation is needed?" → {Autonomous, AlwaysAsk(⊆AskBefore)}
 (Each domain has refinement questions — hybrid question tree)
 
+── SCENARIO TEMPLATES (team extension) ──
+TeamCoordination:  "When agents' findings contradict?" → {Autonomous(resolve), ReportThenAct, AskBefore}
+ScopeCreep:        "When agent discovers work outside its focus?" → {Autonomous(extend), ReportThenAct, Halt}
+
 ── PHASE TRANSITIONS ──
-Phase 0:  T → decompose(T) → {Dᵢ}                               -- task decomposition (silent)
-Phase 1:  Dᵢ → template(Dᵢ) → Sₖ → Q[AskUserQuestion](Sₖ) → R  -- scenario interview [Tool]
-Phase 2:  R → integrate(R, DC) → DC'                             -- contract update (internal)
-Phase 3:  DC' → Q[AskUserQuestion](DC', progress) → approve      -- contract review [Tool]
+Phase 0:  T → detect(T) → Ctx → Q[AskUserQuestion](propose_mode(Ctx)) → EntryMode  -- mode selection [Tool]
+  Single(Ctx) ∧ ¬team(Ctx) → skip (delegation unambiguous; no DC produced)
+  propose_mode(Ctx):
+    team_active(Ctx)            → propose TeamAugment (Solo alternative)   -- independent of Lens presence
+    ¬team(Ctx) ∧ Multi(Ctx)    → propose Solo (TeamCreate alternative)    -- user may opt for team operation
+
+Phase 1:  (mode-dependent)                                         -- structure + decomposition
+  Solo:         T → decompose[Tool](T) → {Dᵢ}                      -- decomposition via Read/Grep
+  TeamAugment:  T → inherit(Ctx.team) → WHO[AskUserQuestion](adjust?) → TeamStructure
+                  → decompose(T) → {Dᵢ}                            [Tool]
+  TeamCreate:   T → decompose(T) → {Dᵢ}
+                  → WHO[AskUserQuestion](design, Dᵢ) → TeamStructure  [Tool]
+
+Phase 2:  Dᵢ → template(Dᵢ, mode) → Sₖ → Q[AskUserQuestion](Sₖ) → R  -- scenario interview [Tool]
+
+Phase 3:  R → integrate(R, DC) → DC'                              -- contract update (internal)
+
+Phase 4:  DC' → Q[AskUserQuestion](DC', progress) → approve        -- contract review [Tool]
+
+Phase 5:  (team modes only)                                        -- team application [Tool]
+  TeamAugment: DC[SendMessage](team, DC) → apply_authority(DC, Ctx.team)             [Tool]  -- SendMessage=extern; apply_authority=state
+  TeamCreate:  T[TeamCreate](DC.who) → ∥S[Task](DC.who.roles) → DC[SendMessage](team, DC)  [Tool]
 
 ── LOOP ──
-After Phase 2: check uncalibrated domains.
-If domains remain: return to Phase 1 (next domain or refinement).
-If all calibrated or user ESC: proceed to Phase 3.
+After Phase 0 (mode selection):
+  mode_selected → Phase 1
+  skip (Single ∧ ¬team) → terminate (delegation unambiguous; no DC produced)
+
+After Phase 3: check uncalibrated domains.
+If domains remain: return to Phase 2 (next domain or refinement).
+If all calibrated or user ESC: proceed to Phase 4.
+
+After Phase 4 (contract review):
+  approve        → Phase 5 (team modes) or terminate (Solo)
+  adjust(who)    → return to Phase 1 (TeamAugment/TeamCreate only; unavailable in Solo)
+  adjust(domain) → return to Phase 2
+  ESC            → terminate; partial DC applies to calibrated domains
+
+After Phase 5 (team application):
+  TeamAugment: authority applied → terminate with active DC
+  TeamCreate:  team created + authority applied → terminate with active DC
+  TeamCreate fail     → inform user; offer retry or terminate
+  Task (spawn) partial fail → inform user; partial team active; offer continue-with-partial or cleanup
+  SendMessage fail    → team exists; DC not distributed; retry or inform user
 
 ── RECALIBRATION ──
-recalibrate(DC, T') = new_domain_activated(T') ∨ stakes_escalated(T')
+recalibrate(DC, T') = new_domain_activated(T') ∨ stakes_escalated(T') ∨ team_topology_changed(T')
 stakes_escalated(T') ≡ stakes(T') = High ∧ stakes(T) ∈ {Low, Med}
   -- Low→Med: no recalibration (interruption minimization)
   -- Low/Med→High: recalibration triggered
@@ -59,19 +128,31 @@ stakes_escalated(T') ≡ stakes(T') = High ∧ stakes(T) ∈ {Low, Med}
 ── WILDCARD ──
 wildcard(history) = variance_detected(history) → +1 refinement question
 variance_detected(h) ≡ ∃(Dᵢ, Sₖ, R₁), (Dᵢ, Sₖ', R₂) ∈ h : R₁ ≠ R₂ within same domain
-|questions| ≤ 9 (base 8 + wildcard 1)
+|questions| ≤ 12 (Solo: 9, Team: 12)
 
 ── TOOL GROUNDING ──
-Phase 1 Q  (extern)  → AskUserQuestion (scenario with autonomy options)
-Phase 2    (state)   → Internal DelegationContract update
-Phase 3 Q  (extern)  → AskUserQuestion (contract review + approval)
-decompose  (detect)  → Read, Grep (task analysis)
+Phase 0 Q   (extern)    → AskUserQuestion (mode selection: TeamAugment/TeamCreate/Solo)
+Phase 1 WHO (extern)    → AskUserQuestion (team structure: adjust or design)  -- TeamAugment/TeamCreate
+Phase 1     (detect)    → Read, Grep (task analysis for decomposition)
+Phase 2 Q   (extern)    → AskUserQuestion (scenario with autonomy options)
+Phase 3     (state)     → Internal DelegationContract update
+Phase 4 Q   (extern)    → AskUserQuestion (contract review + approval)
+Phase 5 T   (parallel)  → TeamCreate tool (create team from DC.who)           -- TeamCreate only
+Phase 5 ∥S  (parallel)  → Task tool (spawn team members)                      -- TeamCreate only
+Phase 5 DC  (extern)    → SendMessage tool (distribute DC to team)            -- team modes
+apply_authority (state) → Internal state transition (MissionBrief authority → DelegationContract authority; no external tool)  -- TeamAugment
+inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.json)  -- TeamAugment
 
 ── MODE STATE ──
-Λ = { phase: Phase, T: TaskScope, domains: Set(ActionDomain),
+Λ = { phase: Phase, T: TaskScope, mode: EntryMode,
+      ctx: DetectedContext, domains: Set(ActionDomain),
       calibrated: Set(ActionDomain), skipped: Set(ActionDomain),
-      contract: DelegationContract,
-      history: List<(Dᵢ, Sₖ, R)>, active: Bool }
+      contract: DelegationContract, who_confirmed: Bool,
+      history: List<(Dᵢ, Sₖ, R)>, active: Bool,
+      team: Option(TeamRef) }
+         -- calibrated ∪ skipped ⊆ domains; calibrated ∩ skipped = ∅
+         -- who_confirmed: Solo → true (implicit); TeamAugment → set at Phase 1 WHO confirmation; TeamCreate → set at Phase 1 WHO design
+         -- team: ctx.team is Phase 0 snapshot; team is live reference (updated at Phase 5 TeamCreate or inherited for TeamAugment)
 ```
 
 ## Core Principle
@@ -87,7 +168,7 @@ decompose  (detect)  → Read, Grep (task analysis)
 | **Hermeneia** | User-initiated | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
 | **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
-| **Epitrope** | AI-detected | DelegationAmbiguous → CalibratedAutonomy | Delegation boundary calibration |
+| **Epitrope** | AI-detected | DelegationAmbiguous → CalibratedDelegation | Context-adaptive delegation calibration |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
@@ -101,9 +182,9 @@ decompose  (detect)  → Read, Grep (task analysis)
 
 ### Activation
 
-AI detects ambiguous delegation scope OR user calls `/calibrate`. Detection is silent (Phase 0); calibration always requires user interaction via AskUserQuestion (Phase 1+).
+AI detects ambiguous delegation scope OR user calls `/calibrate`. Context detection (Phase 0) proposes an entry mode; calibration always requires user interaction via AskUserQuestion (Phase 0+).
 
-**Delegation ambiguous** = task involves multiple action domains where autonomy level is not explicitly specified or inferable from existing instructions.
+**Delegation ambiguous** = task involves multiple action domains where autonomy level is not explicitly specified or inferable from existing instructions, OR an active team exists without an explicit DelegationContract.
 
 ### Priority
 
@@ -115,13 +196,13 @@ When Epitrope is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 1, call AskUserQuestion tool to present scenario-based delegation questions.
+**Action**: At Phase 0, call AskUserQuestion tool to present entry mode; at Phase 2, present scenario-based delegation questions.
 </system-reminder>
 
 - Epitrope completes before multi-domain execution proceeds
 - User Memory rules resume after DelegationContract is approved or ESC
 
-**Protocol precedence**: Default ordering places Epitrope after Telos (defined goals before delegation calibration) and before Aitesis (calibrated delegation before context verification). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Epitrope after Telos (defined goals before context-adaptive delegation calibration) and before Aitesis (calibrated delegation before context verification). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 ### Triggers
 
@@ -131,6 +212,8 @@ When Epitrope is active:
 | Ambiguous scope keywords | "handle this", "take care of", "do what you think is best" |
 | Prior wrong_approach or excessive_changes friction | History of autonomy misalignment in similar tasks |
 | New project or unfamiliar codebase | No established delegation patterns |
+| Active team without delegation contract | Team exists (e.g., from Prothesis) but DC not yet established |
+| Prothesis J=calibrate transition | Coordinator calls Skill("calibrate") with active team |
 
 **Skip**:
 - Single-domain task with clear scope (e.g., "fix the typo on line 42")
@@ -169,19 +252,63 @@ Only domains applicable to the current task are calibrated. Skip irrelevant doma
 
 ## Protocol
 
-### Phase 0: Task Decomposition (Silent)
+### Phase 0: Context Detection and Mode Selection
 
-Analyze the task to identify applicable action domains. This phase is **silent** — no user interaction.
+Detect execution context and propose an entry mode. **Call the AskUserQuestion tool** to present the proposed mode.
 
-1. **Read task description** and identify which ActionDomains are involved
-2. If only one domain with clear scope: skip Epitrope (delegation unambiguous)
-3. If multiple domains or unclear scope: identify applicable domains, proceed to Phase 1
+1. **Detect context**: Check for active team (`~/.claude/teams/{name}/config.json`), existing Lens (from Prothesis), and task complexity
+2. **Propose mode** based on detected context:
+   - **team_active**: Propose TeamAugment (existing team can be reused with new authority); Solo as alternative
+   - **no team**: Propose Solo (single-agent execution); TeamCreate as alternative if complexity warrants it
+3. If only one domain with clear scope and no team: skip Epitrope (delegation unambiguous)
 
-**Decomposition scope**: Current task description, user instructions, and observable project context. Does NOT require proactive investigation.
+```
+Execution context detected:
 
-### Phase 1: Scenario Interview
+[Context summary: active team / no team, lens presence, complexity]
 
-**Call the AskUserQuestion tool** to present the next uncalibrated domain as a concrete scenario.
+Options:
+1. **[Proposed mode]** — [what this means]
+2. **[Alternative mode]** — [what this means]
+```
+
+**TeamAugment independence from Lens**: TeamAugment is proposed whenever a team is active, regardless of whether a Lens exists. The Lens enriches context (available findings inform scenarios) but is not a gating condition — a team created for any purpose can benefit from delegation calibration.
+
+### Phase 1: Structure and Decomposition
+
+Mode-dependent phase:
+
+**Solo**: Decompose task into applicable ActionDomains (silent — no user interaction). Proceed to Phase 2.
+
+**TeamAugment**: Inherit existing team structure. **Call AskUserQuestion** to confirm or adjust WHO:
+```
+Current team: {team members and their perspectives}
+
+Options:
+1. **Keep team as-is** — retain current structure for execution
+2. **Adjust roles** — modify member focus areas for the new task
+```
+Then decompose task into applicable ActionDomains.
+
+**TeamCreate**: Decompose task into applicable ActionDomains first. Then **call AskUserQuestion** to design WHO:
+```
+Task domains identified: {list of ActionDomains}
+
+Team structure proposal:
+- [Role 1]: [focus] — [type]
+- [Role 2]: [focus] — [type]
+
+Options:
+1. **Approve structure** — proceed with this team design
+2. **Modify** — adjust roles, add, or remove members
+```
+
+**WHO cap**: `|roles| ≤ 6` for any team structure.
+**Team mode fallback**: When TeamCreate is selected but `|Dᵢ| ≤ 2`, suggest Solo instead (team overhead exceeds benefit).
+
+### Phase 2: Scenario Interview
+
+**Call the AskUserQuestion tool** to present the next uncalibrated domain as a concrete scenario. Team modes include team-specific scenarios (TeamCoordination, ScopeCreep) alongside standard domain scenarios.
 
 **Scenario format** (Akinator-style binary/ternary choice):
 
@@ -208,21 +335,21 @@ Options:
 - Strategy: "If I find a better approach mid-execution, should I...?"
 - External: "Should I draft PR descriptions for your review or create directly?"
 
-### Phase 2: Contract Integration
+### Phase 3: Contract Integration
 
 After user response, update the DelegationContract:
 
-1. Map response to contract field (e.g., FileModification + Autonomous → `DC.autonomous ∪ {FileModification}`)
+1. Map response to contract field (e.g., FileModification + Autonomous → `DC.how_much[FileModification] = Autonomous`)
 2. Record `(Dᵢ, Sₖ, R)` in history
 3. Check remaining uncalibrated domains
-4. If domains remain: return to Phase 1 (next domain by priority)
-5. If all calibrated or user ESC: proceed to Phase 3
+4. If domains remain: return to Phase 2 (next domain by priority)
+5. If all calibrated or user ESC: proceed to Phase 4
 
-### Phase 3: Contract Review
+### Phase 4: Contract Review
 
 **Call the AskUserQuestion tool** to present the assembled DelegationContract for approval.
 
-**Contract format**:
+**Contract format** (Solo mode — WHAT + HOW MUCH):
 
 ```
 Here's the delegation contract for this task:
@@ -251,7 +378,41 @@ Options:
 2. **Adjust** — I'd like to change something
 ```
 
-If user selects "Adjust": return to Phase 1 for the specified domain. If approved: apply contract to session.
+**Contract format** (Team modes — WHO + WHAT + HOW MUCH):
+
+```
+Here's the delegation contract for this task:
+
+**Team Structure** (WHO):
+- [role assignments and topology]
+
+**Autonomous** (proceed without asking):
+- [list of calibrated autonomous actions]
+
+**Report then act** / **Ask before** / **Halt conditions**:
+- [as in Solo format]
+
+**Authority confirmation**:
+This contract will be distributed to the team via SendMessage.
+
+Options:
+1. **Approve** — apply this contract [and distribute to team]
+2. **Adjust** — I'd like to change something
+```
+
+If user selects "Adjust": present sub-options — "Adjust team structure" (→ Phase 1, TeamAugment/TeamCreate only) or "Adjust domain calibration" (→ Phase 2). Solo mode only offers "Adjust domain calibration". If approved: Solo terminates; team modes proceed to Phase 5.
+
+**Authority confirmation**: TeamAugment requires explicit approval before DC distribution — the user must confirm before the team's operating contract changes.
+
+### Phase 5: Team Application
+
+Team modes only. After contract approval:
+
+**TeamAugment**: Apply authority layer replacement to existing team. The team's operating contract transitions from its previous context (e.g., MissionBrief from Prothesis) to the DelegationContract. Call SendMessage to distribute DC to team members. Agents themselves are retained; the coordinator relationship shifts from "perspective collection" to "delegated execution within DC scope."
+
+**TeamCreate**: Create team from DC.who specification. Call TeamCreate tool, then spawn team members via Task tool with appropriate roles and focus areas. Call SendMessage to distribute DC to all members.
+
+Both modes terminate with active DC after distribution.
 
 ## Intensity
 
@@ -267,29 +428,59 @@ If user selects "Adjust": return to Phase 1 for the specified domain. If approve
 |------|-----------|-----------|
 | Session immunity | Approved DC → skip recalibration for session | `¬recalibrate(DC, T')`: recalibrate only on `new_domain_activated ∨ stakes_escalated(→High)` |
 | Domain cap | `\|domains\| ≤ 4` | Confirmed (taxonomy is exhaustive) |
-| Question cap | `\|questions\| ≤ 9` (4 domains × 2 + wildcard 1) | Wildcard triggers on response variance within same domain |
-| Cross-protocol fatigue | Telos triggered → reduce Epitrope to Light intensity | TBD |
+| Question cap | `\|questions\| ≤ 12` (Solo: 9, Team: 12) | Wildcard triggers on response variance within same domain |
+| Cross-protocol fatigue | `prior_protocol_count(session) ≥ 2` → reduce intensity one level | Confirmed |
+| Prothesis mode-switch | `ctx.team ≠ ∅ ∧ ctx.lens ≠ ∅` → skip domains with unanimous Lens convergence | Confirmed |
+| WHO cap | `\|roles\| ≤ 6` for any team structure | Confirmed |
+| Team mode fallback | `TeamCreate + \|Dᵢ\| ≤ 2` → suggest Solo | Confirmed |
 | Blanket escape | "Just do it" → immediate ESC, default autonomy | Confirmed |
 
 ## Rules
 
-1. **AI-detected, user-calibrated**: AI detects ambiguous delegation; calibration requires user choice via AskUserQuestion (Phase 1/3)
+1. **AI-detected, user-calibrated**: AI detects ambiguous delegation; calibration requires user choice via AskUserQuestion (Phase 0/2/4)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present concrete scenarios (text presentation = protocol violation)
 3. **Selection over Detection**: User selects autonomy level from presented options; AI does not auto-calibrate
 4. **Calibration over Declaration**: Concrete scenarios over abstract policy statements — "When X happens, should I..." beats "What's your general preference for..."
 5. **Session-scoped**: DelegationContract applies for current session only; does not persist across sessions
 6. **Domain priority**: Calibrate External first (highest impact), then FileModification, Strategy, Exploration
 7. **Minimal interruption**: Skip calibration for single-domain clear-scope tasks; use Light intensity when possible
-8. **ESC respected**: User can exit at any point; partial contract applies to calibrated domains. Uncalibrated defaults: Exploration → autonomous (read-only, inherently safe), others → ask-before. Defaults explicitly shown in Phase 3 contract review
+8. **ESC respected**: User can exit at any point; partial contract applies to calibrated domains. Uncalibrated defaults: Exploration → autonomous (read-only, inherently safe), others → ask-before. Defaults explicitly shown in Phase 4 contract review
 9. **Convergence persistence**: Mode active until DelegationContract approved or ESC
 10. **Cross-protocol awareness**: Calibrated DC informs but does not replace Aitesis context verification or Syneidesis gap surfacing
+11. **Authority distribution**: DC must not be distributed to team members (SendMessage) before user approval in Phase 4
+12. **Solo backward compatibility**: Solo mode preserves near-identical behavior to v1.1.1 — Phase 0 adds one new user-facing step (mode selection, defaulting to Solo when no team is active); subsequent phases proceed identically to v1.1.1
 
 ## Cross-Protocol Interface
 
+### Prothesis → Epitrope Transition
+
+When Prothesis Phase 5 routing selects `J=calibrate`:
+
+1. Coordinator calls `Skill("calibrate")` — Epitrope SKILL.md loads into conversation context
+2. Epitrope Phase 0 detects `team_active` → proposes TeamAugment mode
+3. Handoff via session context: `T = TaskScope` derived from conversation (original request U, verified MissionBrief MBᵥ, and Lens L are all available in session context; no explicit transfer type needed)
+
+**Context availability** (present in session without explicit transfer):
+- **Team**: `~/.claude/teams/{name}/config.json` (Read) — {name} from conversation context (mode-switch: coordinator retains team name) or Glob discovery (standalone: `~/.claude/teams/*/config.json`)
+- **Lens L**: Conversation context (presented to user in Prothesis Phase 4)
+- **Findings**: Team task list (TaskList/TaskGet access)
+- **Mission brief**: Conversation context (confirmed in Prothesis Phase 0)
+
+**Authority layer replacement**: The team's operating contract transitions from MissionBrief to DelegationContract. Agents remain; the coordinator relationship shifts from "perspective collection" to "delegated execution within DC scope."
+
+**Findings management**:
+
+| Layer | Artifact | Created | Persistence |
+|-------|----------|---------|-------------|
+| Individual findings | Task items | Prothesis Phase 3 TaskCreate | Team task list (until TeamDelete) |
+| Per-perspective results | R (raw results) | Phase 3 SendMessage collection | Conversation context |
+| Convergence/divergence | L (Lens) | Phase 4 Syn | Conversation context |
+
+When `J=calibrate`, TeamDelete is NOT called — task list persists for Epitrope reuse.
+
+### Downstream Protocols
+
 Approved DelegationContract becomes input to subsequent protocols:
 
-- **Prothesis**: `DC.exploration` constrains agent team investigation scope; `DC.autonomous` domains allow agents to proceed without main-agent confirmation
-- **Syneidesis**: Epitrope(planning layer: "am I allowed to?") and Syneidesis(execution layer: "is this decision sound?") operate on different temporal layers — they complement rather than suppress each other. `DC.ask_before` domains surface delegation-scope changes as gaps; `DC.autonomous` domains do not suppress Syneidesis (execution gaps remain independent of delegation calibration)
-- **Aitesis**: Interface deferred to Issue #57 (proactive Aitesis redesign). Current reactive triggers are being redesigned; Epitrope should target the new Aitesis architecture. Delegation coverage (Epitrope) and context sufficiency (Aitesis) remain orthogonal axes
-
-**Note**: Prothesis interface is design-ready. Syneidesis interface reflects planning/execution layer model (Gap audit, session c20ed886). Aitesis interface pending Issue #57. Actual enforcement is out of scope for v1.1.0.
+- **Syneidesis**: Epitrope (planning layer: "am I allowed to?") and Syneidesis (execution layer: "is this decision sound?") operate on different temporal layers — they complement rather than suppress each other. `DC.how_much[d] = AskBefore` domains surface delegation-scope changes as gaps; autonomous domains do not suppress Syneidesis (execution gaps remain independent of delegation calibration)
+- **Aitesis**: Delegation coverage (Epitrope) and context sufficiency (Aitesis) remain orthogonal axes. Interface deferred to Issue #57 (proactive Aitesis redesign)
