@@ -13,7 +13,11 @@ Calibrate delegation autonomy through scenario-based interview. Type: `(Delegati
 
 ```
 ── FLOW ──
-Epitrope(T) → Decompose(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integrate(R) → DC → Q(DC) → approve → (loop until calibrated)
+Epitrope(T) → Ctx(T) → Q(propose_mode) → EntryMode →
+  Solo:         Decompose(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integrate(R) → DC → Q(DC) → approve
+  TeamAugment:  inherit(T) → WHO?(T) → {Dᵢ} → Scenario(Dᵢ, T) → Q → R → integrate(R) → DC → Q(DC) → apply(DC, T)
+  TeamCreate:   Decompose(T) → WHO(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integrate(R) → DC → Q(DC) → create(DC) → apply(DC, T)
+  → (loop until calibrated)
 
 ── TYPES ──
 T    = TaskScope (task/project to calibrate delegation for)
@@ -26,10 +30,28 @@ R    = Response ∈ {Autonomous, ReportThenAct, AskBefore, Halt}
          -- Domain-specific refinements (⊆ base R):
          --   Minimal ⊆ Autonomous, ProposeThenChoose ⊆ ReportThenAct,
          --   SwitchAutonomously ⊆ Autonomous, AlwaysAsk ⊆ AskBefore
-DC   = DelegationContract { autonomous, report_then_act, ask_before, halt_conditions, exploration }
+
+── ENTRY TYPES ──
+EntryMode ∈ {TeamAugment, TeamCreate, Solo}
+Ctx   = DetectedContext { team: Option(TeamRef), lens: Option(L), complexity: Complexity }
+TeamRef = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
+AgentRef = { name: String, type: String, perspective: Option(String) }
+Complexity ∈ {Single, Multi}
+
+── DELEGATION TYPES ──
+DC    = DelegationContract {
+          who: TeamStructure,
+          what: Set(ActionDomain),
+          how_much: Map(ActionDomain, R),
+          halt_conditions: Set(Condition),
+          exploration: ExplorationScope
+        }
          -- Subagent inheritance: spawned agents inherit parent DC unless explicitly overridden
+TeamStructure ∈ {Solo, Augmented(TeamRef, Set(AgentRole)), Created(Set(AgentRole), Topology)}
+AgentRole = { name: String, type: String, focus: String }
+Topology ∈ {HubSpoke, PeerReview, Pipeline}
 ExplorationScope = { depth: N, breadth: N, drift_action: report | halt }
-CalibratedAutonomy = DC where (∀ d ∈ applicable: calibrated(d)) ∨ user_esc
+CalibratedDelegation = DC where (∀ d ∈ applicable: calibrated(d)) ∨ user_esc
 
 ── SCENARIO TEMPLATES ──
 FileModification:  "When files need to be modified for this task?" → {Autonomous, ReportThenAct, AskBefore}
@@ -39,19 +61,49 @@ Strategy:          "When a different approach looks better than the original pla
 External:          "When git push or PR creation is needed?" → {Autonomous, AlwaysAsk(⊆AskBefore)}
 (Each domain has refinement questions — hybrid question tree)
 
+── SCENARIO TEMPLATES (team extension) ──
+TeamCoordination:  "When agents' findings contradict?" → {Autonomous(resolve), ReportThenAct, AskBefore}
+ScopeCreep:        "When agent discovers work outside its focus?" → {Autonomous(extend), ReportThenAct, Halt}
+
 ── PHASE TRANSITIONS ──
-Phase 0:  T → decompose(T) → {Dᵢ}                               -- task decomposition (silent)
-Phase 1:  Dᵢ → template(Dᵢ) → Sₖ → Q[AskUserQuestion](Sₖ) → R  -- scenario interview [Tool]
-Phase 2:  R → integrate(R, DC) → DC'                             -- contract update (internal)
-Phase 3:  DC' → Q[AskUserQuestion](DC', progress) → approve      -- contract review [Tool]
+Phase 0:  T → detect(T) → Ctx → Q[AskUserQuestion](propose_mode(Ctx)) → EntryMode  -- mode selection [Tool]
+  propose_mode(Ctx):
+    team_active(Ctx)  → propose TeamAugment (Solo alternative)     -- independent of Lens presence
+    ¬team(Ctx)        → propose Solo (TeamCreate alternative)      -- user may opt for team operation
+
+Phase 1:  (mode-dependent)                                         -- structure + decomposition
+  Solo:         T → decompose(T) → {Dᵢ}                            -- decomposition (silent)
+  TeamAugment:  T → inherit(Ctx.team) → Q[AskUserQuestion](WHO_adjust?) → TeamStructure
+                  → decompose(T) → {Dᵢ}                            [Tool]
+  TeamCreate:   T → decompose(T) → {Dᵢ}
+                  → Q[AskUserQuestion](WHO_design, Dᵢ) → TeamStructure  [Tool]
+
+Phase 2:  Dᵢ → template(Dᵢ, mode) → Sₖ → Q[AskUserQuestion](Sₖ) → R  -- scenario interview [Tool]
+
+Phase 3:  R → integrate(R, DC) → DC'                              -- contract update (internal)
+
+Phase 4:  DC' → Q[AskUserQuestion](DC', progress) → approve        -- contract review [Tool]
+
+Phase 5:  (team modes only)                                        -- team application [Tool]
+  TeamAugment: DC → apply_authority(DC, Ctx.team) → SendMessage[team](DC)
+  TeamCreate:  DC → TeamCreate[tool](DC.who) → ∥Spawn[Task](DC.who.roles) → SendMessage[team](DC)
 
 ── LOOP ──
-After Phase 2: check uncalibrated domains.
-If domains remain: return to Phase 1 (next domain or refinement).
-If all calibrated or user ESC: proceed to Phase 3.
+After Phase 3: check uncalibrated domains.
+If domains remain: return to Phase 2 (next domain or refinement).
+If all calibrated or user ESC: proceed to Phase 4.
+
+After Phase 4 (contract review):
+  approve → Phase 5 (team modes) or terminate (Solo)
+  adjust  → return to Phase 1 (WHO) or Phase 2 (domain)
+  ESC     → terminate; partial DC applies to calibrated domains
+
+After Phase 5 (team application):
+  TeamAugment: authority applied → terminate with active DC
+  TeamCreate:  team created + authority applied → terminate with active DC
 
 ── RECALIBRATION ──
-recalibrate(DC, T') = new_domain_activated(T') ∨ stakes_escalated(T')
+recalibrate(DC, T') = new_domain_activated(T') ∨ stakes_escalated(T') ∨ team_topology_changed(T')
 stakes_escalated(T') ≡ stakes(T') = High ∧ stakes(T) ∈ {Low, Med}
   -- Low→Med: no recalibration (interruption minimization)
   -- Low/Med→High: recalibration triggered
@@ -59,19 +111,27 @@ stakes_escalated(T') ≡ stakes(T') = High ∧ stakes(T) ∈ {Low, Med}
 ── WILDCARD ──
 wildcard(history) = variance_detected(history) → +1 refinement question
 variance_detected(h) ≡ ∃(Dᵢ, Sₖ, R₁), (Dᵢ, Sₖ', R₂) ∈ h : R₁ ≠ R₂ within same domain
-|questions| ≤ 9 (base 8 + wildcard 1)
+|questions| ≤ 12 (Solo: 9, Team: 12)
 
 ── TOOL GROUNDING ──
-Phase 1 Q  (extern)  → AskUserQuestion (scenario with autonomy options)
-Phase 2    (state)   → Internal DelegationContract update
-Phase 3 Q  (extern)  → AskUserQuestion (contract review + approval)
-decompose  (detect)  → Read, Grep (task analysis)
+Phase 0 Q   (extern)    → AskUserQuestion (mode selection: TeamAugment/TeamCreate/Solo)
+Phase 1 WHO (extern)    → AskUserQuestion (team structure: adjust or design)  -- TeamAugment/TeamCreate
+Phase 1     (detect)    → Read, Grep (task analysis for decomposition)
+Phase 2 Q   (extern)    → AskUserQuestion (scenario with autonomy options)
+Phase 3     (state)     → Internal DelegationContract update
+Phase 4 Q   (extern)    → AskUserQuestion (contract review + approval)
+Phase 5 T   (parallel)  → TeamCreate tool (create team from DC.who)           -- TeamCreate only
+Phase 5 ∥S  (parallel)  → Task tool (spawn team members)                      -- TeamCreate only
+Phase 5 DC  (extern)    → SendMessage tool (distribute DC to team)            -- team modes
+inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.json)  -- TeamAugment
 
 ── MODE STATE ──
-Λ = { phase: Phase, T: TaskScope, domains: Set(ActionDomain),
+Λ = { phase: Phase, T: TaskScope, mode: EntryMode,
+      ctx: DetectedContext, domains: Set(ActionDomain),
       calibrated: Set(ActionDomain), skipped: Set(ActionDomain),
-      contract: DelegationContract,
-      history: List<(Dᵢ, Sₖ, R)>, active: Bool }
+      contract: DelegationContract, who_confirmed: Bool,
+      history: List<(Dᵢ, Sₖ, R)>, active: Bool,
+      team: Option(TeamRef) }
 ```
 
 ## Core Principle
