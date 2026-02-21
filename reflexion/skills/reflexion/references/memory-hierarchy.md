@@ -35,3 +35,33 @@ Session path contains project root?
 ├── Yes → Project Memory mode (can store to Project or User)
 └── No (~/.claude session) → User Memory mode (User only)
 ```
+
+## Two-Tier Storage
+
+Within the Project memory layer, insights are stored in one of two tiers based on access frequency. In User Memory mode, only Tier B (.insights/) is available.
+
+| Tier | File | Load Behavior | Content |
+|------|------|--------------|---------|
+| A | `memory/MEMORY.md` | Auto-loaded every session | Recurring patterns, conventions, architecture decisions |
+| B | `.insights/*.md` | On-demand (3-stage progressive loading) | Archival, domain knowledge, reference-on-demand |
+
+**Tier A path derivation** (from session path):
+```
+~/.claude/projects/{encoded}/sessions/{id}.jsonl
+→ ~/.claude/projects/{encoded}/memory/MEMORY.md   (Project mode only)
+
+~/.claude/sessions/{id}.jsonl
+→ Tier A unavailable — ~/.claude/memory/ does not exist
+```
+
+**Tier A write constraints**:
+- English (Korean blocked by hook)
+- No YAML frontmatter
+- Keep total MEMORY.md ≤200 lines (only first 200 lines are loaded into context)
+- If near limit: consolidate entries or downgrade to Tier B
+
+**Selection heuristic**:
+```
+Read every session? → Tier A
+Referenced occasionally? → Tier B
+```
