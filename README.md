@@ -8,7 +8,7 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 
 | Protocol | Purpose | Timing |
 |----------|---------|--------|
-| **[Prothesis](./prothesis)** (πρόθεσις) — /mission | Team-based multi-perspective investigation and execution | Before analysis |
+| **[Prothesis](./prothesis)** (πρόθεσις) — /mission | Team-based multi-perspective investigation | Before analysis |
 | **[Syneidesis](./syneidesis)** (συνείδησις) — /gap | Surface potential gaps at decision points | At decision time |
 | **[Hermeneia](./hermeneia)** (ἑρμηνεία) — /clarify | Clarify intent-expression gaps via dialogue | Before action |
 | **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | Achieve certain comprehension of AI work | After AI action |
@@ -81,7 +81,7 @@ Run in **plan mode** for interactive protocol workflows that require user decisi
 ## Usage
 
 ```
-/mission [your question]     # Multi-perspective team investigation and execution
+/mission [your question]     # Multi-perspective team investigation
 /gap [your task]             # Enable gap surfacing during execution
 /clarify [your expression]   # Clarify ambiguous intent
 /grasp                       # Verify understanding of AI work

@@ -37,6 +37,8 @@ D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation → structured re
 Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc
+user_wrap_up  = (J = wrap_up) at Phase 5   -- user selects wrap_up routing option
+user_esc      = J = ESC at any phase        -- user selects ESC (Escape)
 
 ── PHASE TRANSITIONS ──
 Phase 0:  U → MB(U) → Q[AskUserQuestion](MB) → await → MBᵥ     -- Mission Brief confirmation [Tool]
@@ -53,7 +55,7 @@ After Phase 0 (Mission Brief):
   J_mb = ESC           → terminate (no team exists)
 
 After Phase 5 (routing):
-  J = calibrate  → Skill[Skill]("calibrate"); team retained for Epitrope reuse  -- coordinator calls Skill directly
+  J = calibrate  → Activate[Skill]("calibrate"); team retained for Epitrope reuse  -- coordinator calls Skill directly
   J = extend     → Q[AskUserQuestion](add perspective | deepen existing) → Phase 2 or Phase 3 (team retained)
   J = wrap_up    → Ω(T, shutdown) → TeamDelete → terminate with L
                    → recommend_protocols(L)
@@ -82,7 +84,7 @@ Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator sign
 Phase 4 Q (extern)       → AskUserQuestion (synthesis result review + user additional input; proceeds to Phase 5 on confirm)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Phase 5 Q (extern)       → AskUserQuestion (routing: calibrate/extend/wrap_up; Escape → terminate)
-J=calibrate (extern)     → Skill tool (protocol transition: activate Epitrope)
+J=calibrate (extern)     → Skill tool (protocol transition: Activate[Skill]("calibrate") → activate Epitrope; in LOOP after Phase 5)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
@@ -376,10 +378,12 @@ Options:
 
 **"Calibrate" availability**: Present when L contains actionable findings (divergence with clear fix directions, or assessment with implementation implications). When L is purely confirmatory or exploratory, omit this option.
 
+**v4.0.0 scope note**: Prothesis is pure theoria (analysis only). Prior to v4.0.0, Phase 5 included classification (Fₐ/Fᵤ/Fᵈ) and execution (plan → praxis → verify). These phases have been extracted to Epitrope. Users seeking end-to-end execution should select "Calibrate" to transition to Epitrope, which establishes a DelegationContract covering WHO/WHAT/HOW MUCH for the implementation team. The Lens L persists in conversation context for Epitrope to reference.
+
 **Loop behavior** (team lifecycle aware):
 - **Calibrate**: Call Skill("calibrate") to activate Epitrope. Team retained — Epitrope detects the active team and proposes TeamAugment mode. Coordinator transitions from perspective analysis to delegation calibration
 - **Extend**: Follow-up AskUserQuestion — "Add new perspective" → Phase 2 (spawn new teammate into T) or "Deepen existing" → Phase 3 (SendMessage re-inquiry to target teammate). Team retained in both cases
-- **Wrap up**: shutdown_request → TeamDelete → terminate with L → recommend_protocols(L)
+- **Wrap up**: shutdown_request → TeamDelete → terminate with L → recommend_protocols(L). Findings persist in L (conversation context); individual finding granularity (previously TaskCreate-persisted per finding) is intentionally consolidated into L.convergence / L.divergence / L.assessment. For multi-session durable retention, manually TaskCreate from L.divergence entries before wrapping up.
 - **ESC**: shutdown_request → TeamDelete → terminate with current Lens L
 
 **Convergence**: Mode terminates when user selects wrap_up or explicitly exits (ESC). Team is deleted only at terminal states.

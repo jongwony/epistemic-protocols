@@ -72,7 +72,7 @@ Phase 0:  T → detect(T) → Ctx → Q[AskUserQuestion](propose_mode(Ctx)) → 
     ¬team(Ctx)        → propose Solo (TeamCreate alternative)      -- user may opt for team operation
 
 Phase 1:  (mode-dependent)                                         -- structure + decomposition
-  Solo:         T → decompose(T) → {Dᵢ}                            -- decomposition (silent)
+  Solo:         T → decompose[Tool](T) → {Dᵢ}                      -- decomposition via Read/Grep
   TeamAugment:  T → inherit(Ctx.team) → WHO[AskUserQuestion](adjust?) → TeamStructure
                   → decompose(T) → {Dᵢ}                            [Tool]
   TeamCreate:   T → decompose(T) → {Dᵢ}
@@ -85,7 +85,7 @@ Phase 3:  R → integrate(R, DC) → DC'                              -- contrac
 Phase 4:  DC' → Q[AskUserQuestion](DC', progress) → approve        -- contract review [Tool]
 
 Phase 5:  (team modes only)                                        -- team application [Tool]
-  TeamAugment: DC[SendMessage](team, DC) → apply_authority(DC, Ctx.team)             [Tool]
+  TeamAugment: DC[SendMessage](team, DC) → apply_authority(DC, Ctx.team)             [Tool]  -- SendMessage=extern; apply_authority=state
   TeamCreate:  T[TeamCreate](DC.who) → ∥S[Task](DC.who.roles) → DC[SendMessage](team, DC)  [Tool]
 
 ── LOOP ──
@@ -123,6 +123,7 @@ Phase 4 Q   (extern)    → AskUserQuestion (contract review + approval)
 Phase 5 T   (parallel)  → TeamCreate tool (create team from DC.who)           -- TeamCreate only
 Phase 5 ∥S  (parallel)  → Task tool (spawn team members)                      -- TeamCreate only
 Phase 5 DC  (extern)    → SendMessage tool (distribute DC to team)            -- team modes
+apply_authority (state) → Internal state transition (MissionBrief authority → DelegationContract authority; no external tool)  -- TeamAugment
 inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.json)  -- TeamAugment
 
 ── MODE STATE ──

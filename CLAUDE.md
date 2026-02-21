@@ -57,7 +57,8 @@ epistemic-protocols/
 ```
 ── FLOW ──              One-line formula: full protocol path with symbols
 ── TYPES ──             Symbol definitions with type signatures and comments
-── ACTION TYPES ──      (if applicable) Extended types for action phases
+── ENTRY TYPES ──       (if applicable) Extended types for entry modes (e.g., Epitrope)
+── DELEGATION TYPES ──  (if applicable) Extended types for delegation structure (e.g., Epitrope)
 ── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
