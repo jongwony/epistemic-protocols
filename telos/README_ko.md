@@ -71,7 +71,7 @@ Telos는 Hermeneia 다음에 온다: 의도가 존재하지만 잘못 표현된 
 
 **건너뛰기**:
 - 목표가 명확하지만 표현이 부족할 때 (Hermeneia 사용 — /clarify)
-- 정의된 목표가 있고 관점 분석이 필요할 때 (Prothesis 사용 — /mission)
+- 정의된 목표가 있고 관점 분석이 필요할 때 (Prothesis 사용 — /frame)
 
 ## 사용법
 

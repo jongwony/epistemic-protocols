@@ -71,7 +71,7 @@ Telos follows Hermeneia: if intent exists but is misarticulated, clarify first. 
 
 **Skip**:
 - When your goal is clear but poorly expressed (use Hermeneia — /clarify)
-- When you have a defined goal and need perspective analysis (use Prothesis — /mission)
+- When you have a defined goal and need perspective analysis (use Prothesis — /frame)
 
 ## Usage
 

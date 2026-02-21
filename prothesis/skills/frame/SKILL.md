@@ -1,5 +1,5 @@
 ---
-name: mission
+name: frame
 description: "Multi-perspective investigation. Assembles a team to analyze from selected viewpoints when the right framework is absent, producing a framed inquiry. Alias: Prothesis(πρόθεσις)."
 ---
 
@@ -179,7 +179,7 @@ Options:
 4. **Modify scope** — adjust inclusions/exclusions
 ```
 
-**Pre-fill from explicit text**: `/mission "text"` → pre-fill from provided text, still confirm.
+**Pre-fill from explicit text**: `/frame "text"` → pre-fill from provided text, still confirm.
 
 **Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context for agent-teams), not the epistemic layer. Hermeneia resolves intent-expression gaps (user-initiated or AI-detected); Telos co-constructs goals from vague intent. Phase 0 packages confirmed intent into a structured vehicle for teammate consumption — a prerequisite for quality spawn prompts, not a substitute for intent clarification or goal construction.
 
@@ -348,7 +348,7 @@ Cross-dialogue precedes synthesis so the coordinator evaluates all perspectives 
 After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if no triggers:
 
 ```markdown
-## Mission Analysis
+## Framed Analysis
 
 ### Perspective Summaries
 [Each perspective's epistemic contribution + assessment, 2-3 sentences]
@@ -420,7 +420,7 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 
 ## Rules
 
-1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/mission "text"`) still requires confirmation. Modify loops re-present until confirmed.
+1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation. Modify loops re-present until confirmed.
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
 3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase topology per Rule 11
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis

@@ -8,7 +8,7 @@ Detailed phase descriptions and content transformation rules for the write skill
 
 **Purpose**: Multi-perspective epistemic analysis before content generation.
 
-**Delegation**: These phases follow the Prothesis protocol (/mission) exactly.
+**Delegation**: These phases follow the Prothesis protocol (/frame) exactly.
 
 ```
 Phase 0: G(U) → C              -- Context acquisition
@@ -39,7 +39,7 @@ Provide:
 
 **Boundary**: Synthesis complete → Lens L available.
 
-**Reference**: `prothesis/skills/mission/SKILL.md`
+**Reference**: `prothesis/skills/frame/SKILL.md`
 
 ---
 
@@ -251,7 +251,7 @@ A session becomes write-worthy when it exhibits:
 ```
 Context → Derive perspectives → User selects → Parallel inquiry (with Horizon Limits) → Synthesis
 ```
-Reference: `/mission` — canonical implementation of multi-perspective epistemic analysis
+Reference: `/frame` — canonical implementation of multi-perspective epistemic analysis
 
 ### Incremental Refinement Loop
 ```
