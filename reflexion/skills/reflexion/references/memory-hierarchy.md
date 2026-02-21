@@ -38,12 +38,12 @@ Session path contains project root?
 
 ## Two-Tier Storage
 
-Within each memory layer, insights are stored in one of two tiers based on access frequency:
+Within the Project memory layer, insights are stored in one of two tiers based on access frequency. In User Memory mode, only Tier B (.insights/) is available.
 
 | Tier | File | Load Behavior | Content |
 |------|------|--------------|---------|
 | A | `memory/MEMORY.md` | Auto-loaded every session | Recurring patterns, conventions, architecture decisions |
-| B | `.insights/*.md` | Progressive disclosure (Tier 1/2/3) | Archival, domain knowledge, reference-on-demand |
+| B | `.insights/*.md` | On-demand (3-stage progressive loading) | Archival, domain knowledge, reference-on-demand |
 
 **Tier A path derivation** (from session path):
 ```
@@ -55,9 +55,9 @@ Within each memory layer, insights are stored in one of two tiers based on acces
 ```
 
 **Tier A write constraints**:
-- English only (hook-enforced)
+- English (Korean blocked by hook)
 - No YAML frontmatter
-- Keep total MEMORY.md ≤200 lines (system truncation limit)
+- Keep total MEMORY.md ≤200 lines (only first 200 lines are loaded into context)
 - If near limit: consolidate entries or downgrade to Tier B
 
 **Selection heuristic**:

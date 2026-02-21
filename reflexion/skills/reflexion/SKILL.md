@@ -218,13 +218,13 @@ Based on user selections:
   - Path: `~/.claude/projects/{encoded}/memory/MEMORY.md`
   - **User mode**: Tier A unavailable — `~/.claude/memory/` does not exist; Q5 must show Tier B only
   - Format: concise markdown under existing topic header or new `## {Topic}` section
-  - Language: English (hook-enforced); no YAML frontmatter
-  - Constraint: keep MEMORY.md ≤200 lines (truncation limit); consolidate or move to .insights/ if near limit
+  - Language: English (Korean blocked by hook); no YAML frontmatter
+  - Constraint: keep MEMORY.md ≤200 lines (only first 200 lines loaded); consolidate or move to .insights/ if near limit
 - **Tier B — New file**: Create in selected .insights/ location with proper frontmatter
 - **Tier B — Merge**: Edit existing .insights/ file, append or modify section
 - **Tier B — Domain**: Create in `.insights/domain/{tech-stack}/`
 
-**Frontmatter Update Rules**:
+**Frontmatter Update Rules** (Tier B only):
 
 | Field | New File | Merge |
 |-------|----------|-------|
