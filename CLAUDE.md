@@ -14,7 +14,7 @@ epistemic-protocols/
 ├── .claude/skills/verify/             # Project-level verification skill
 ├── prothesis/                         # Protocol: multi-perspective investigation
 │   ├── .claude-plugin/plugin.json
-│   └── skills/mission/SKILL.md      # Full protocol definition (user-invocable)
+│   └── skills/frame/SKILL.md       # Full protocol definition (user-invocable)
 ├── syneidesis/                        # Protocol: gap surfacing
 │   ├── .claude-plugin/plugin.json
 │   └── skills/gap/SKILL.md     # Full protocol definition (user-invocable)
@@ -69,11 +69,11 @@ Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases 
 
 ## Plugins
 
-### Mission (πρόθεσις) — Prothesis
+### Frame (πρόθεσις) — Prothesis
 Resolve absent frameworks by assembling a team to analyze from selected viewpoints.
 - **Deficit**: FrameworkAbsent → FramedInquiry
 - **Triggers**: Purpose present but approach unspecified; multiple valid frameworks exist
-- **Invocation**: `/mission` or use "mission" in conversation
+- **Invocation**: `/frame` or use "frame" in conversation
 
 ### Gap (συνείδησις) — Syneidesis
 Surface unnoticed gaps at decision points as questions.
@@ -119,7 +119,7 @@ Extract insights from Claude Code sessions into persistent memory.
 
 ### Write
 Transform session insights into blog posts through multi-perspective analysis.
-- **Flow**: `Mission → Format → Write → Refine → Gap → Finalize`
+- **Flow**: `Frame → Format → Write → Refine → Gap → Finalize`
 - **Key**: Integrates both protocols—Prothesis for perspective selection, Syneidesis for gap validation
 
 ### Verify (Project-level)
@@ -137,7 +137,7 @@ Pre-commit protocol verification via static checks and expert review.
 
 ## Protocol Precedence
 
-Multi-activation order: **Clarify → Goal → Calibrate → Inquire → Mission → Gap → Grasp**
+Multi-activation order: **Clarify → Goal → Calibrate → Inquire → Frame → Gap → Grasp**
 
 This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → delegation calibration → context verification → perspective → gap audit). Users can override by explicitly requesting a different protocol first.
 

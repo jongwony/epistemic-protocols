@@ -12,7 +12,7 @@ You are a **Type Theory and Category Theory Expert**.
 Analyze the protocol definitions for mathematical soundness.
 
 **Files to examine**:
-- prothesis/skills/mission/SKILL.md (Definition section)
+- prothesis/skills/frame/SKILL.md (Definition section)
 - syneidesis/skills/gap/SKILL.md (Definition section)
 - hermeneia/skills/clarify/SKILL.md (Definition section)
 - katalepsis/skills/grasp/SKILL.md (Definition section)
@@ -69,7 +69,7 @@ You are an **Instruction Design Expert**.
 Analyze the protocol instructions for consistency and completeness.
 
 **Files to examine**:
-- prothesis/skills/mission/SKILL.md (Mode Activation, Priority sections)
+- prothesis/skills/frame/SKILL.md (Mode Activation, Priority sections)
 - syneidesis/skills/gap/SKILL.md (Mode Activation, Priority sections)
 - hermeneia/skills/clarify/SKILL.md (Mode Activation, Priority sections)
 - katalepsis/skills/grasp/SKILL.md (Mode Activation, Priority sections)
@@ -131,7 +131,7 @@ You are a **Claude Code Ecosystem Expert**.
 Validate protocol designs against Claude Code interaction patterns and epistemic principles.
 
 **Files to examine**:
-- prothesis/skills/mission/SKILL.md (Mode Activation, Rules sections)
+- prothesis/skills/frame/SKILL.md (Mode Activation, Rules sections)
 - syneidesis/skills/gap/SKILL.md (Mode Activation, Rules sections)
 - hermeneia/skills/clarify/SKILL.md (Mode Activation, Rules sections)
 - katalepsis/skills/grasp/SKILL.md (Mode Activation, Rules sections)
@@ -232,17 +232,17 @@ const perspectives = [
   {
     name: 'type-category-theory',
     prompt: TYPE_THEORY_PROMPT,
-    files: ['prothesis/skills/mission/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'hermeneia/skills/clarify/SKILL.md']
+    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'hermeneia/skills/clarify/SKILL.md']
   },
   {
     name: 'instruction-design',
     prompt: INSTRUCTION_DESIGN_PROMPT,
-    files: ['prothesis/skills/mission/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'hermeneia/skills/clarify/SKILL.md', 'CLAUDE.md']
+    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'hermeneia/skills/clarify/SKILL.md', 'CLAUDE.md']
   },
   {
     name: 'claude-code-ecosystem',
     prompt: CLAUDE_CODE_ECOSYSTEM_PROMPT,
-    files: ['prothesis/skills/mission/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'hermeneia/skills/clarify/SKILL.md', 'CLAUDE.md']
+    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'hermeneia/skills/clarify/SKILL.md', 'CLAUDE.md']
   }
 ];
 

@@ -8,7 +8,7 @@
 
 | 프로토콜 | 목적 | 적용 시점 |
 |----------|------|----------|
-| **[Prothesis](./prothesis)** (πρόθεσις) — /mission | 다관점 조사를 위한 팀 기반 분석 | 분석 시작 전 |
+| **[Prothesis](./prothesis)** (πρόθεσις) — /frame | 다관점 조사를 위한 팀 기반 분석 | 분석 시작 전 |
 | **[Syneidesis](./syneidesis)** (συνείδησις) — /gap | 결정 지점에서 잠재적 갭 표면화 | 의사결정 시점 |
 | **[Hermeneia](./hermeneia)** (ἑρμηνεία) — /clarify | 의도-표현 갭을 대화로 명확화 | 실행 전 |
 | **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | AI 작업에 대한 확실한 이해 달성 | AI 작업 완료 후 |
@@ -76,12 +76,12 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 
 각 프로토콜의 대화형 워크플로우를 위해 **plan mode**로 실행하세요.
 
-> **Codex 미지원**: Prothesis (`/mission`), Reflexion (`/reflect`), Write (`/write`) — 에이전트 팀과 병렬 서브에이전트가 필요합니다.
+> **Codex 미지원**: Prothesis (`/frame`), Reflexion (`/reflect`), Write (`/write`) — 에이전트 팀과 병렬 서브에이전트가 필요합니다.
 
 ## 사용법
 
 ```
-/mission [질문]      # 다관점 팀 조사
+/frame [질문]       # 다관점 팀 조사
 /gap [작업]          # 실행 중 갭 표면화 활성화
 /clarify [표현]      # 모호한 의도 명확화
 /grasp               # AI 작업에 대한 이해 검증

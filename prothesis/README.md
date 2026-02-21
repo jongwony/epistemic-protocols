@@ -1,4 +1,4 @@
-# Prothesis — /mission (πρόθεσις)
+# Prothesis — /frame (πρόθεσις)
 
 Team-based multi-perspective investigation (πρόθεσις: placing before)
 
@@ -49,7 +49,7 @@ Phase 5: Routing       → User selects next action: calibrate / extend / wrap u
 ## Usage
 
 ```
-/mission [your question]
+/frame [your question]
 ```
 
 ## Author

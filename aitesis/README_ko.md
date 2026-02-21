@@ -61,7 +61,7 @@ Aitesis는 Epitrope 다음: 위임이 캘리브레이션된 후, 실행 맥락�
 - 세션에서 이전에 다루지 않은 새로운 도메인에 진입할 때
 
 **건너뛰기**:
-- 실행 맥락이 완전히 명시되어 있을 때 (관점 분석은 Prothesis — /mission)
+- 실행 맥락이 완전히 명시되어 있을 때 (관점 분석은 Prothesis — /frame)
 - 갭이 실행 맥락이 아닌 의사결정 시점에 있을 때 (Syneidesis — /gap)
 - 위임 범위가 불명확할 때 (Epitrope — /calibrate 먼저)
 
