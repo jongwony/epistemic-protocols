@@ -1,0 +1,9 @@
+{
+  "name": "epharmoge",
+  "description": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  }
+}

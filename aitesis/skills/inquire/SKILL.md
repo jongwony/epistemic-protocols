@@ -5,7 +5,7 @@ description: "Detect context insufficiency before execution. Inquires about miss
 
 # Aitesis Protocol
 
-Detect context insufficiency before execution through AI-detected inquiry. Type: `(ContextInsufficient, AI, INQUIRE, ExecutionPlan) → InformedExecution`.
+Detect context insufficiency before execution through AI-guided inquiry. Type: `(ContextInsufficient, AI, INQUIRE, ExecutionPlan) → InformedExecution`.
 
 ## Definition
 
@@ -59,7 +59,8 @@ Phase 0 Scan (detect)  → Internal analysis (no external tool)
 Λ = { phase: Phase, X: ExecutionPlan, gaps: Set(Gap),
       self_resolved: Set(Gap), user_resolved: Set(Gap),
       remaining: Set(Gap), dismissed: Set(Gap),
-      history: List<(Gap, A)>, active: Bool }
+      history: List<(Gap, A)>, active: Bool,
+      cause_tag: String }
 -- Invariant: gaps = self_resolved ∪ user_resolved ∪ remaining ∪ dismissed (pairwise disjoint)
 ```
 
@@ -71,12 +72,13 @@ Phase 0 Scan (detect)  → Internal analysis (no external tool)
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
-| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
-| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
-| **Epitrope** | AI-detected | DelegationAmbiguous → CalibratedDelegation | Context-adaptive delegation calibration (WHO/WHAT/HOW MUCH) |
+| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Context-adaptive delegation calibration (WHO/WHAT/HOW MUCH) |
+| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
@@ -98,6 +100,10 @@ Phase 0 Scan (detect)  → Internal analysis (no external tool)
 ### Activation
 
 AI detects context insufficiency before execution OR user calls `/inquire`. Detection is silent (Phase 0); surfacing always requires user interaction via AskUserQuestion (Phase 2).
+
+**Activation layers**:
+- **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
+- **Layer 2 (AI-guided)**: Context insufficiency detected before execution via in-protocol heuristics. Detection is silent (Phase 0).
 
 **Context insufficient** = the execution plan contains requirements not available in the current context and not trivially inferrable.
 
@@ -259,7 +265,7 @@ After integration:
 
 ## Rules
 
-1. **AI-detected, user-resolved**: AI detects context insufficiency; resolution requires user choice via AskUserQuestion (Phase 2)
+1. **AI-guided, user-resolved**: AI detects context insufficiency; resolution requires user choice via AskUserQuestion (Phase 2)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present structured options (text presentation = protocol violation)
 3. **Self-investigation first**: Before asking the user, attempt to resolve gaps through Read/Grep codebase exploration (Phase 1)
 4. **Inquiry over Assumption**: When context is insufficient and self-investigation fails, inquire rather than assume — silence is worse than a dismissed question

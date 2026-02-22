@@ -74,6 +74,10 @@ A (adjust)     → Internal state update (no external tool)
 
 Command invocation activates mode until session end.
 
+**Activation layers**:
+- **Layer 1 (User-invocable)**: `/gap` slash command or description-matching input. Always available.
+- **Layer 2 (AI-guided)**: Committed action detected with observable, unaddressed gaps via in-protocol heuristics.
+
 **On activation**: Check existing Tasks for deferred gaps (subject prefix `[Gap:`). Resume tracking if found.
 
 ### Priority
@@ -93,7 +97,7 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence**: Default ordering places Syneidesis after Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis; gap detection applies within the established, context-verified perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Syneidesis after Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Epharmoge; gap detection applies within the established, context-verified perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
 
 ### Mode Deactivation
 

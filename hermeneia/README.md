@@ -20,8 +20,8 @@ Users often recognize their expression is ambiguous (`IntentMisarticulated`) but
 
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
-| Prothesis | AI-detected | `FrameworkAbsent → FramedInquiry` |
-| Syneidesis | AI-detected | `GapUnnoticed → AuditedDecision` |
+| Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
+| Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | **Hermeneia** | **Hybrid** | **`IntentMisarticulated → ClarifiedIntent`** |
 
 ## Protocol Flow

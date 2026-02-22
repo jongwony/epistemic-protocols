@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **ContextInsufficient → InformedExecution** (Aitesis), **DelegationAmbiguous → CalibratedDelegation** (Epitrope) during AI-human interaction.
+Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **ContextInsufficient → InformedExecution** (Aitesis), **DelegationAmbiguous → CalibratedDelegation** (Epitrope), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge) during AI-human interaction.
 
 ## Architecture
 
@@ -33,6 +33,9 @@ epistemic-protocols/
 ├── epitrope/                          # Protocol: context-adaptive delegation calibration
 │   ├── .claude-plugin/plugin.json
 │   └── skills/calibrate/SKILL.md     # Full protocol definition (user-invocable)
+├── epharmoge/                         # Protocol: application-context mismatch detection (conditional)
+│   ├── .claude-plugin/plugin.json
+│   └── skills/contextualize/SKILL.md # Full protocol definition (user-invocable)
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # Parallel extraction agents
@@ -100,7 +103,7 @@ Co-construct defined goals from vague intent through AI-proposed, user-shaped di
 - **Invocation**: `/goal` or use "goal" in conversation
 
 ### Inquire (αἴτησις) — Aitesis
-Detect context insufficiency before execution through AI-detected inquiry.
+Detect context insufficiency before execution through AI-guided inquiry.
 - **Deficit**: ContextInsufficient → InformedExecution
 - **Triggers**: Context insufficiency heuristics (ambiguous execution scope, external dependency, implicit requirements)
 - **Invocation**: `/inquire` or use "inquire" in conversation
@@ -110,6 +113,13 @@ Context-adaptive delegation calibration through scenario-based interview.
 - **Deficit**: DelegationAmbiguous → CalibratedDelegation
 - **Triggers**: Multi-domain task, ambiguous scope keywords, prior autonomy friction, active team without DC
 - **Invocation**: `/calibrate` or use "calibrate" in conversation
+
+### Contextualize (ἐφαρμογή) — Epharmoge
+Detect application-context mismatch after execution when correct output may not fit context.
+- **Deficit**: ApplicationDecontextualized → ContextualizedExecution
+- **Triggers**: Post-execution applicability heuristics (environment assumption, convention mismatch, scope overflow)
+- **Invocation**: `/contextualize` or use "contextualize" in conversation
+- **Status**: Conditional — requires Aitesis operational experience
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
@@ -137,27 +147,29 @@ Pre-commit protocol verification via static checks and expert review.
 
 ## Protocol Precedence
 
-Multi-activation order: **Clarify → Goal → Calibrate → Inquire → Frame → Gap → Grasp**
+Multi-activation order: **Clarify → Goal → Calibrate → Inquire → Frame → Gap → Contextualize → Grasp**
 
-This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → delegation calibration → context verification → perspective → gap audit). Users can override by explicitly requesting a different protocol first.
+This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → delegation calibration → context verification → perspective → gap audit → applicability check). Users can override by explicitly requesting a different protocol first.
 
 **Katalepsis**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
 
 ### Epistemic Workflow
 
 ```
-[Request] → [Intent] → [Goal] → [Delegation] → [Context] → [Perspective] → [Decision] → [Execution] → [Comprehension]
-               ↑          ↑          ↑              ↑             ↑              ↑                            ↑
-           Hermeneia    Telos    Epitrope        Aitesis      Prothesis      Syneidesis                   Katalepsis
+[Request] → [Intent] → [Goal] → [Delegation] → [Context] → [Perspective] → [Decision] → [Execution] → [Application] → [Comprehension]
+               ↑          ↑          ↑              ↑             ↑              ↑                            ↑               ↑
+           Hermeneia    Telos    Epitrope        Aitesis      Prothesis      Syneidesis                   Epharmoge       Katalepsis
 ```
 
 This diagram shows logical progression, not strict execution order.
 
-**Initiator taxonomy**:
-- **AI-detected**: AI determines the condition is present (Prothesis, Syneidesis, Telos, Aitesis, Epitrope)
-- **Hybrid**: Both user signal and AI detection can initiate; AI-detected path requires user confirmation (Hermeneia)
-- **User-initiated**: User signals awareness of a deficit (Katalepsis)
-- **User-invoked**: User runs as deliberate practice; no deficit awareness required (Reflexion, Write)
+**Initiator taxonomy** (2-layer model):
+- **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.
+- **Layer 2** (in-protocol heuristics): Behavior varies by initiator type:
+  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Aitesis, Epitrope, Epharmoge)
+  - **Hybrid**: Both user signal and AI detection can initiate; AI-detected path requires user confirmation (Hermeneia)
+  - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis)
+  - **User-invoked**: Deliberate practice; no deficit awareness required (Reflexion, Write)
 
 ## Verification
 
@@ -182,6 +194,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Epitrope**: Solo mode: no Task delegation—must run in main agent to call AskUserQuestion. Team modes: Phase 5 uses Task/TeamCreate/SendMessage for team application
+- **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
 
 ## Git Conventions
 
@@ -209,5 +222,6 @@ node .claude/skills/verify/scripts/static-checks.js .
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
-| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (3 arrays: `aliasToSkill`, `checkRequiredSections`, `checkToolGrounding`), ALL existing SKILL.md precedence descriptions, README.md + README_ko.md |
+| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (3 arrays: `aliasToSkill`, `checkRequiredSections`, `checkToolGrounding`), ALL existing SKILL.md (precedence descriptions + distinction tables), README.md + README_ko.md |
 | Precedence change | CLAUDE.md (precedence section + workflow diagram), ALL SKILL.md precedence descriptions |
+| Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |

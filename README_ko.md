@@ -26,13 +26,14 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 
 | 프로토콜 | 결핍 | 개시자 | 연산 | 타입 시그니처 |
 |----------|------|--------|------|---------------|
-| **Prothesis** | FrameworkAbsent | AI-detected | SELECT | `FrameworkAbsent → FramedInquiry` |
-| **Syneidesis** | GapUnnoticed | AI-detected | SURFACE | `GapUnnoticed → AuditedDecision` |
+| **Prothesis** | FrameworkAbsent | AI-guided | SELECT | `FrameworkAbsent → FramedInquiry` |
+| **Syneidesis** | GapUnnoticed | AI-guided | SURFACE | `GapUnnoticed → AuditedDecision` |
 | **Hermeneia** | IntentMisarticulated | Hybrid | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
 | **Katalepsis** | ResultUngrasped | User-initiated | VERIFY | `ResultUngrasped → VerifiedUnderstanding` |
-| **Telos** | GoalIndeterminate | AI-detected | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
-| **Aitesis** | ContextInsufficient | AI-detected | INQUIRE | `ContextInsufficient → InformedExecution` |
-| **Epitrope** | DelegationAmbiguous | AI-detected | CALIBRATE | `DelegationAmbiguous → CalibratedDelegation` |
+| **Telos** | GoalIndeterminate | AI-guided | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
+| **Aitesis** | ContextInsufficient | AI-guided | INQUIRE | `ContextInsufficient → InformedExecution` |
+| **Epitrope** | DelegationAmbiguous | AI-guided | CALIBRATE | `DelegationAmbiguous → CalibratedDelegation` |
+| **Epharmoge** | ApplicationDecontextualized | AI-guided | CONTEXTUALIZE | `ApplicationDecontextualized → ContextualizedExecution` |
 
 <img src="./assets/epistemic-matrix-ko.svg" alt="인식론적 타입 변환" width="560">
 
@@ -43,6 +44,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Telos**: "내가 진짜 원하는 게 뭐지?" → AI가 목표를 제안, 사용자가 형성하고 승인 (`GoalIndeterminate → DefinedEndState`)
 - **Aitesis**: "뭔가 빠진 건 아닐까?" → AI가 자체 맥락 부족을 감지하고, 실행 전 빠진 정보를 사용자에게 질의 (`ContextInsufficient → InformedExecution`)
 - **Epitrope**: "어디까지 맡길까?" → AI가 컨텍스트를 탐지하고 진입 모드를 선택, 위임(WHO/WHAT/HOW MUCH) 캘리브레이션 (`DelegationAmbiguous → CalibratedDelegation`)
+- **Epharmoge**: "이게 실제로 맞나?" → AI가 정확한 출력이 실제 컨텍스트에 맞는지 평가하고, 불일치를 사용자 판단에 표면화 (`ApplicationDecontextualized → ContextualizedExecution`)
 
 핵심 통찰: **Recall(회상)보다 Recognition(인지)**. 빈칸을 채우는 것보다 선택지에서 고르는 게 쉽습니다.
 
@@ -60,6 +62,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 /plugin install telos
 /plugin install aitesis
 /plugin install epitrope
+/plugin install epharmoge
 ```
 
 ## Codex 호환
