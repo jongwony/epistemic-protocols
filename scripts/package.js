@@ -20,7 +20,7 @@ const projectRoot = path.resolve(__dirname, '..');
 // ============================================================
 
 const PLUGINS = [
-  { dir: 'prothesis', skill: 'mission' },
+  { dir: 'prothesis', skill: 'frame' },
   { dir: 'syneidesis', skill: 'gap' },
   { dir: 'hermeneia', skill: 'clarify' },
   { dir: 'katalepsis', skill: 'grasp' },
@@ -33,7 +33,8 @@ const PLUGINS = [
 
 // claude.ai description overrides (originals exceed 200 chars)
 const DESCRIPTION_OVERRIDES = {
-  mission: 'Assemble a team to analyze from multiple perspectives when the right framework is absent. Produces a framed inquiry from selected viewpoints.',
+  frame: 'Assemble a team to analyze from multiple perspectives when the right framework is absent. Produces a framed inquiry from selected viewpoints.',
+  calibrate: 'Calibrate delegation autonomy through scenario-based interview. Produces a DelegationContract when delegation scope is ambiguous.',
   reflexion: 'Extract session insights into persistent memory through guided dialogue. Reconstructs learnings from conversation history.',
 };
 
