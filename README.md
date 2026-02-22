@@ -15,6 +15,7 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 | **[Telos](./telos)** (τέλος) — /goal | Co-construct defined goals from vague intent | Pre-action |
 | **[Aitesis](./aitesis)** (αἴτησις) — /inquire | Detect context insufficiency before execution | Pre-execution |
 | **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | Context-adaptive delegation calibration through scenario-based interview | Pre-execution |
+| **[Epharmoge](./epharmoge)** (ἐφαρμογή) — /contextualize | Detect application-context mismatch after execution | Post-execution |
 
 ## Core Idea
 
@@ -72,7 +73,7 @@ Epistemic protocols can also be used as [Codex](https://github.com/openai/codex)
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo jongwony/epistemic-protocols \
-  --path aitesis/skills/inquire epitrope/skills/calibrate \
+  --path aitesis/skills/inquire epitrope/skills/calibrate epharmoge/skills/contextualize \
         hermeneia/skills/clarify katalepsis/skills/grasp syneidesis/skills/gap \
         telos/skills/goal
 ```
@@ -91,6 +92,7 @@ Run in **plan mode** for interactive protocol workflows that require user decisi
 /goal [your vague idea]      # Co-construct defined goals from intent
 /inquire [your task]          # Detect and resolve context insufficiency before execution
 /calibrate [your task]        # Context-adaptive delegation calibration through scenario-based interview
+/contextualize [your task]    # Detect application-context mismatch after execution
 ```
 
 ## License

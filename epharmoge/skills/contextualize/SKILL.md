@@ -41,7 +41,7 @@ Continue until: contextualized(R') OR user ESC.
 
 ── CONVERGENCE ──
 applicable(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X)
-warranted(a, R, X) = correct(R) → fits(R, X)                -- correctness alone is insufficient
+warranted(a, R, X) = correct(R) ∧ fits(R, X)                -- correctness AND contextual fit required (not material conditional)
 contextualized(R') = applicable(R', X) ∨ user_esc
 progress(Λ) = 1 - |remaining| / |mismatches|
 
@@ -49,6 +49,7 @@ progress(Λ) = 1 - |remaining| / |mismatches|
 Phase 0 Eval  (detect)  → Internal analysis (no external tool)
 Phase 1 Q     (extern)  → AskUserQuestion (mismatch surfacing + evidence)
 Phase 2 adapt (modify)  → Edit, Write (result adaptation based on user direction)
+                           -- (modify): tool call that changes existing artifacts (distinct from (extern) user-facing, (detect) read-only, (state) internal)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
@@ -255,7 +256,7 @@ After adaptation:
 | Session immunity | Dismissed (aspect, description) → skip for session | Respects user's dismissal |
 | Progress visibility | `[N addressed / M total]` in Phase 1 | User sees progress toward completion |
 | Early exit | User can dismiss all at any Phase 1 | Full control over review depth |
-| Cross-protocol cooldown | `suppress(Epharmoge) if Aitesis.triggered ∧ Aitesis.topic ⊆ Epharmoge.topic` | Prevents same-topic pre+post stacking |
+| Cross-protocol cooldown | `suppress(Epharmoge) if Aitesis.resolved_in_same_scope ∧ overlap(Aitesis.domains, Epharmoge.aspects)` | Prevents same-scope pre+post stacking |
 | Cooldown scope | Cooldown applies within recommendation chains only; direct `/contextualize` invocation is never suppressed | User authority preserved |
 | Natural integration | "Done. One thing to verify:" pattern | Fits completion flow, not interrogation |
 
@@ -270,5 +271,5 @@ After adaptation:
 7. **Convergence persistence**: Mode active until all identified mismatches are resolved or dismissed
 8. **Non-circularity**: Information source is the execution result itself compared against context, not pre-execution context scans (independence from Aitesis)
 9. **Early exit honored**: When user accepts result as-is, accept immediately regardless of remaining mismatches
-10. **Cross-protocol awareness**: Suppress when Aitesis already addressed the same topic in the same execution scope (within recommendation chains only)
+10. **Cross-protocol awareness**: Suppress when Aitesis resolved overlapping domains in the same execution scope (within recommendation chains only)
 11. **Conditional gate**: AI-guided activation (Layer 2) requires Aitesis operational experience confirmation. User-invocable activation (Layer 1 / `/contextualize`) is always available

@@ -68,6 +68,21 @@ A (adjust)     → Internal state update (no external tool)
 
 **Surfacing over Deciding**: AI makes visible; user judges.
 
+## Distinction from Other Protocols
+
+| Protocol | Initiator | Deficit → Resolution | Focus |
+|----------|-----------|----------------------|-------|
+| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
+| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
+| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
+
+**Key difference**: Syneidesis audits the user's decision quality at committed action points (metacognitive: "has the user considered all angles?"). This is distinct from Aitesis, which monitors AI's context sufficiency (heterocognitive: "do I have enough context to execute?"), and Epharmoge, which evaluates AI's execution quality post-hoc ("does the result fit the context?"). The operational test: if the gap would be filled by the user reconsidering their decision, it's Syneidesis; if by providing context, it's Aitesis; if by adapting the result, it's Epharmoge.
+
 ## Mode Activation
 
 ### Activation

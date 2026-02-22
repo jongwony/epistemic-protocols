@@ -15,6 +15,7 @@
 | **[Telos](./telos)** (τέλος) — /goal | 모호한 의도에서 정의된 목표 공동 구성 | 실행 전 |
 | **[Aitesis](./aitesis)** (αἴτησις) — /inquire | 실행 전 맥락 부족 감지 | 실행 전 |
 | **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | 시나리오 기반 인터뷰로 컨텍스트 적응형 위임 캘리브레이션 | 실행 전 |
+| **[Epharmoge](./epharmoge)** (ἐφαρμογή) — /contextualize | 실행 후 적용-맥락 불일치 감지 | 실행 후 |
 
 ## 핵심 아이디어
 
@@ -72,7 +73,7 @@ Epistemic protocols를 [Codex](https://github.com/openai/codex) 스킬로도 사
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo jongwony/epistemic-protocols \
-  --path aitesis/skills/inquire epitrope/skills/calibrate \
+  --path aitesis/skills/inquire epitrope/skills/calibrate epharmoge/skills/contextualize \
         hermeneia/skills/clarify katalepsis/skills/grasp syneidesis/skills/gap \
         telos/skills/goal
 ```
@@ -91,6 +92,7 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 /goal [모호한 아이디어]   # 의도에서 정의된 목표 공동 구성
 /inquire [작업]          # 실행 전 맥락 부족 감지 및 해결
 /calibrate [작업]        # 시나리오 기반 인터뷰로 컨텍스트 적응형 위임 캘리브레이션
+/contextualize [작업]    # 실행 후 적용-맥락 불일치 감지
 ```
 
 ## 라이선스

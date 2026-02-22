@@ -100,6 +100,21 @@ TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
 ```
 
+## Distinction from Other Protocols
+
+| Protocol | Initiator | Deficit → Resolution | Focus |
+|----------|-----------|----------------------|-------|
+| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
+| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
+| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
+
+**Key difference**: Prothesis operates at the framework-selection level — choosing which analytical lenses to apply — while all other protocols operate within an already-established framework. It is also the only protocol that assembles a multi-agent team for parallel perspective analysis. Syneidesis surfaces gaps in a decision, Aitesis verifies execution context, but both assume the analytical lens is already chosen. Prothesis is the protocol that chooses the lens.
+
 ## Mode Activation
 
 ### Activation
