@@ -231,6 +231,8 @@ Optional dimension naming (apply when initial generation seems redundant):
 
 ### Phase 3: Inquiry (Through Selected Lens)
 
+**Plan mode**: When active, `TeamCreate` and `Task` are unavailable — see `references/conceptual-foundations.md` for Phase 3 degradation behavior (`ExitPlanMode` presents inquiry outlines as plan output; actual team execution deferred to a subsequent normal-mode session).
+
 **Team Setup**
 
 Create an agent team and spawn perspective teammates:

@@ -20,6 +20,16 @@ When combined with Plan mode, Prothesis provides the **Deliberation** phase:
 **Minimal Enhancement Pattern**:
 When multiple perspectives converge on the same recommendation, present as unanimous recommendation to indicate high confidence.
 
+**Phase 3 Degradation**:
+When Prothesis activates within an active plan mode session, `TeamCreate` and `Task` (spawn) tools are unavailable. The protocol adapts:
+
+- Phases 0–2 execute normally (`AskUserQuestion` available in plan mode)
+- Phase 3 degrades: for each selected perspective (Pₛ), the coordinator drafts a structured inquiry outline — epistemic stance, key analysis questions, expected finding shape — without spawning teammates
+- `ExitPlanMode` presents this outline as plan output (inquiry blueprint — not L; actual Lens requires team execution)
+- Phases 4–5 (cross-dialogue, synthesis, routing) require re-invoking `/frame` in a subsequent normal-mode session
+
+This degradation preserves Phase 0–2 epistemic value: Mission Brief confirmation and perspective selection complete before analysis begins, maintaining Recognition over Recall even when execution is constrained. The plan output serves as a blueprint for a subsequent active session.
+
 ## Distinction from Socratic Method
 
 | Dimension | Socratic Maieutics | Prothesis |
