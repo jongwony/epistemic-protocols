@@ -77,11 +77,14 @@ integrate    → Internal state update (no external tool)
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
-| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
-| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**: User recognizes intent-expression misalignment (user signal), or AI detects ambiguous expression (AI-detected, requires user confirmation). Both paths help articulate what the user partially knows. Boundary with Aitesis: if the ambiguity is in the user's *expression* of intent (how it was said), use Hermeneia; if the AI lacks *factual execution context* (what information the system needs), use Aitesis.
 
@@ -90,6 +93,10 @@ integrate    → Internal state update (no external tool)
 ### Activation
 
 Command invocation, trigger phrase, or AI-detected expression ambiguity activates mode until clarification completes. AI-detected activation requires user confirmation before proceeding to Phase 1a.
+
+**Activation layers**:
+- **Layer 1 (User-invocable)**: `/clarify` slash command or description-matching input. Always available.
+- **Layer 2 (Hybrid)**: User trigger signals proceed directly; AI-detected expression ambiguity (`ai_strong`) requires user confirmation; minor ambiguity (`ai_soft`) suggests only.
 
 **Clarification complete** = one of: `|G| = 0` (no gaps remain), `cycle(G)` (already clarified), or `Δ = 0` for 2 rounds (progress stall with user consent to proceed).
 
@@ -109,7 +116,7 @@ When Hermeneia is active:
 - Hermeneia completes before other workflows begin
 - User Memory rules resume after intent is clarified
 
-**Protocol precedence**: Default ordering is Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis (intent clarification logically precedes goal construction, delegation calibration, context verification, and analysis). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering is Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Epharmoge (intent clarification logically precedes goal construction, delegation calibration, context verification, analysis, and applicability check). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 Clarified expression becomes input to subsequent protocols.
 

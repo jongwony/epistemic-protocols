@@ -86,10 +86,13 @@ Telos is not simplified requirements gathering. Three differentiators:
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
-| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
-| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key difference**: Hermeneia EXTRACTS (assumes intent exists inside user). Telos CO-CONSTRUCTS (assumes neither party has the complete answer). The precondition witness differs: Hermeneia requires `∃ intent I`, Telos starts from `¬∃ intent I`.
@@ -99,6 +102,10 @@ Telos is not simplified requirements gathering. Three differentiators:
 ### Activation
 
 AI detects goal indeterminacy OR user invokes `/goal`. Activation always requires user confirmation via AskUserQuestion (Phase 0).
+
+**Activation layers**:
+- **Layer 1 (User-invocable)**: `/goal` slash command or description-matching input. Always available.
+- **Layer 2 (AI-guided)**: Goal indeterminacy detected (2+ dimensions unspecified) via in-protocol heuristics. Activation requires user confirmation.
 
 **Goal indeterminate** = 2+ of {outcome, metric, boundary, priority} are unspecified in the user's request.
 
@@ -283,7 +290,7 @@ Options:
 
 ## Rules
 
-1. **AI-detected, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via AskUserQuestion (Phase 0)
+1. **AI-guided, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via AskUserQuestion (Phase 0)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation). Modify options use structured sub-choices, not free text
 3. **Selection over Detection**: User selects applicable dimensions in Phase 1; AI does not auto-sequence or force all 4
 4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions

@@ -163,12 +163,13 @@ inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.jso
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective options |
-| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective options |
+| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Intent-expression gaps |
-| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Aitesis** | AI-detected | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
-| **Epitrope** | AI-detected | DelegationAmbiguous → CalibratedDelegation | Context-adaptive delegation calibration |
+| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Context-adaptive delegation calibration |
+| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
@@ -183,6 +184,10 @@ inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.jso
 ### Activation
 
 AI detects ambiguous delegation scope OR user calls `/calibrate`. Context detection (Phase 0) proposes an entry mode; calibration always requires user interaction via AskUserQuestion (Phase 0+).
+
+**Activation layers**:
+- **Layer 1 (User-invocable)**: `/calibrate` slash command or description-matching input. Always available.
+- **Layer 2 (AI-guided)**: Ambiguous delegation scope detected via in-protocol heuristics. Context detection (Phase 0) proposes entry mode.
 
 **Delegation ambiguous** = task involves multiple action domains where autonomy level is not explicitly specified or inferable from existing instructions, OR an active team exists without an explicit DelegationContract.
 
@@ -437,7 +442,7 @@ Both modes terminate with active DC after distribution.
 
 ## Rules
 
-1. **AI-detected, user-calibrated**: AI detects ambiguous delegation; calibration requires user choice via AskUserQuestion (Phase 0/2/4)
+1. **AI-guided, user-calibrated**: AI detects ambiguous delegation; calibration requires user choice via AskUserQuestion (Phase 0/2/4)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present concrete scenarios (text presentation = protocol violation)
 3. **Selection over Detection**: User selects autonomy level from presented options; AI does not auto-calibrate
 4. **Calibration over Declaration**: Concrete scenarios over abstract policy statements — "When X happens, should I..." beats "What's your general preference for..."

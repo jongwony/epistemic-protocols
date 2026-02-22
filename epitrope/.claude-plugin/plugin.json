@@ -1,7 +1,7 @@
 {
   "name": "epitrope",
   "description": "Context-adaptive delegation calibration through scenario-based interview — /calibrate (ἐπιτροπή: a turning over to)",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

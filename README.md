@@ -26,13 +26,14 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 
 | Protocol | Deficit | Initiator | Operation | Type Signature |
 |----------|---------|-----------|-----------|----------------|
-| **Prothesis** | FrameworkAbsent | AI-detected | SELECT | `FrameworkAbsent → FramedInquiry` |
-| **Syneidesis** | GapUnnoticed | AI-detected | SURFACE | `GapUnnoticed → AuditedDecision` |
+| **Prothesis** | FrameworkAbsent | AI-guided | SELECT | `FrameworkAbsent → FramedInquiry` |
+| **Syneidesis** | GapUnnoticed | AI-guided | SURFACE | `GapUnnoticed → AuditedDecision` |
 | **Hermeneia** | IntentMisarticulated | Hybrid | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
 | **Katalepsis** | ResultUngrasped | User-initiated | VERIFY | `ResultUngrasped → VerifiedUnderstanding` |
-| **Telos** | GoalIndeterminate | AI-detected | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
-| **Aitesis** | ContextInsufficient | AI-detected | INQUIRE | `ContextInsufficient → InformedExecution` |
-| **Epitrope** | DelegationAmbiguous | AI-detected | CALIBRATE | `DelegationAmbiguous → CalibratedDelegation` |
+| **Telos** | GoalIndeterminate | AI-guided | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
+| **Aitesis** | ContextInsufficient | AI-guided | INQUIRE | `ContextInsufficient → InformedExecution` |
+| **Epitrope** | DelegationAmbiguous | AI-guided | CALIBRATE | `DelegationAmbiguous → CalibratedDelegation` |
+| **Epharmoge** | ApplicationDecontextualized | AI-guided | CONTEXTUALIZE | `ApplicationDecontextualized → ContextualizedExecution` |
 
 <img src="./assets/epistemic-matrix.svg" alt="Epistemic Type Transformations" width="560">
 
@@ -43,6 +44,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Telos**: "What do I actually want?" → AI proposes goals, you shape and approve (`GoalIndeterminate → DefinedEndState`)
 - **Aitesis**: "Am I missing something?" → AI detects its own context insufficiency and inquires for missing information before proceeding (`ContextInsufficient → InformedExecution`)
 - **Epitrope**: "How much should I handle?" → AI detects context, selects entry mode, calibrates delegation (WHO/WHAT/HOW MUCH) through scenarios (`DelegationAmbiguous → CalibratedDelegation`)
+- **Epharmoge**: "Does this actually fit?" → AI evaluates whether correct output fits the actual context, surfaces mismatches for user judgment (`ApplicationDecontextualized → ContextualizedExecution`)
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
 
@@ -60,6 +62,7 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 /plugin install telos
 /plugin install aitesis
 /plugin install epitrope
+/plugin install epharmoge
 ```
 
 ## Codex Compatibility
