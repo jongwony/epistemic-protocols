@@ -231,6 +231,8 @@ Optional dimension naming (apply when initial generation seems redundant):
 
 ### Phase 3: Inquiry (Through Selected Lens)
 
+**Plan mode**: When active, `TeamCreate` is unavailable — `Plan` subagents (per perspective) and `Explore` subagent (context) remain available. See `references/conceptual-foundations.md` for Phase 3 degradation behavior (`ExitPlanMode` presents Plan subagent analyses as plan output; actual Lens L requires a fresh `/frame` session from Phase 0 in normal mode).
+
 **Team Setup**
 
 Create an agent team and spawn perspective teammates:
