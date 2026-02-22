@@ -173,10 +173,14 @@ NOT already in extracted list. Present as options, not open-ended questions.
 ```
 
 **Q4: Merge Decision** (if related knowledge found)
+
+Monotonic merge semantics apply: information accumulates, never decreases. The knowledge-finder classifies each relationship as Redundant/Conflicting/Complementary/Novel with merge rules (see `agents/knowledge-finder.md`).
+
 ```
 "Merge with existing knowledge?"
-├── "Merge (modify existing file)"
+├── "Merge (monotonic union — extends existing, never removes)"
 ├── "Create new"
+├── "Flag conflict (existing contradicts new — present both)"
 └── "Skip"
 ```
 

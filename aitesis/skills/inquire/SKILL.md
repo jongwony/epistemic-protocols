@@ -56,10 +56,22 @@ Phase 3      (state)   → Internal state update
 Phase 0 Scan (detect)  → Internal analysis (no external tool)
 
 ── MODE STATE ──
+EpistemicCell = {                                 -- cross-protocol monotonic accumulator
+  intent: Option(ClarifiedIntent),               -- ← Hermeneia
+  goal: Option(DefinedEndState),                 -- ← Telos
+  delegation: Option(CalibratedDelegation),      -- ← Epitrope
+  context: Option(InformedExecution),            -- ← Aitesis
+  perspective: Option(FramedInquiry),            -- ← Prothesis
+  audit: Option(AuditedDecision),               -- ← Syneidesis
+  comprehension: Option(VerifiedUnderstanding)   -- ← Katalepsis
+}
+merge(c₁, c₂) → c where ∀f: c.f = c₂.f ?? c₁.f  -- monotonic: no information loss
+
 Λ = { phase: Phase, X: ExecutionPlan, gaps: Set(Gap),
       self_resolved: Set(Gap), user_resolved: Set(Gap),
       remaining: Set(Gap), dismissed: Set(Gap),
-      history: List<(Gap, A)>, active: Bool }
+      history: List<(Gap, A)>,
+      cell: EpistemicCell, active: Bool }        -- reads cell.intent, cell.goal, cell.delegation; writes cell.context
 -- Invariant: gaps = self_resolved ∪ user_resolved ∪ remaining ∪ dismissed (pairwise disjoint)
 ```
 

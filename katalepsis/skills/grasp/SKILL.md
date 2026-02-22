@@ -58,6 +58,17 @@ Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Categorize  → Internal analysis (Read for context if needed)
 
 ── MODE STATE ──
+EpistemicCell = {                                 -- cross-protocol monotonic accumulator
+  intent: Option(ClarifiedIntent),               -- ← Hermeneia
+  goal: Option(DefinedEndState),                 -- ← Telos
+  delegation: Option(CalibratedDelegation),      -- ← Epitrope
+  context: Option(InformedExecution),            -- ← Aitesis
+  perspective: Option(FramedInquiry),            -- ← Prothesis
+  audit: Option(AuditedDecision),               -- ← Syneidesis
+  comprehension: Option(VerifiedUnderstanding)   -- ← Katalepsis
+}
+merge(c₁, c₂) → c where ∀f: c.f = c₂.f ?? c₁.f  -- monotonic: no information loss
+
 Λ = {
   phase: Phase,
   R: Result,
@@ -67,6 +78,7 @@ Categorize  → Internal analysis (Read for context if needed)
   current: TaskId,
   phantasia: Understanding,
   probed: Map<TaskId, Set<GapType>>,
+  cell: EpistemicCell,                           -- reads cell.*; writes cell.comprehension
   active: Bool
 }
 ```

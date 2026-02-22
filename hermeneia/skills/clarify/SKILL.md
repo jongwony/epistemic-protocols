@@ -65,8 +65,20 @@ suggest_only → no tool call (passive suggestion; Λ.active = false)
 integrate    → Internal state update (no external tool)
 
 ── MODE STATE ──
+EpistemicCell = {                                 -- cross-protocol monotonic accumulator
+  intent: Option(ClarifiedIntent),               -- ← Hermeneia
+  goal: Option(DefinedEndState),                 -- ← Telos
+  delegation: Option(CalibratedDelegation),      -- ← Epitrope
+  context: Option(InformedExecution),            -- ← Aitesis
+  perspective: Option(FramedInquiry),            -- ← Prothesis
+  audit: Option(AuditedDecision),               -- ← Syneidesis
+  comprehension: Option(VerifiedUnderstanding)   -- ← Katalepsis
+}
+merge(c₁, c₂) → c where ∀f: c.f = c₂.f ?? c₁.f  -- monotonic: no information loss
+
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, gaps: Set(Gap),
-      clarified: Set(Gap), immune: Set(Expression), history: List<(E, Gₛ, A)>, active: Bool }
+      clarified: Set(Gap), immune: Set(Expression), history: List<(E, Gₛ, A)>,
+      cell: EpistemicCell, active: Bool }        -- writes cell.intent
 ```
 
 ## Core Principle

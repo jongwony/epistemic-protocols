@@ -580,6 +580,105 @@ function checkVersionStaleness() {
 }
 
 // ============================================================
+// Check 8: Precedence Chain Consistency
+// ============================================================
+function checkPrecedenceChain() {
+  // Canonical precedence chain from CLAUDE.md
+  const PRECEDENCE_CHAIN = ['Hermeneia', 'Telos', 'Epitrope', 'Aitesis', 'Prothesis', 'Syneidesis'];
+  const STRUCTURAL_LAST = 'Katalepsis';
+
+  const protocolFiles = [
+    'prothesis/skills/frame/SKILL.md',
+    'syneidesis/skills/gap/SKILL.md',
+    'hermeneia/skills/clarify/SKILL.md',
+    'katalepsis/skills/grasp/SKILL.md',
+    'telos/skills/goal/SKILL.md',
+    'aitesis/skills/inquire/SKILL.md',
+    'epitrope/skills/calibrate/SKILL.md',
+  ];
+
+  for (const relPath of protocolFiles) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+
+    // Find precedence description
+    const precedenceMatch = content.match(/\*\*Protocol precedence\*\*:([^\n]+)/);
+    if (!precedenceMatch) {
+      results.warn.push({
+        check: 'precedence-chain',
+        file: relPath,
+        message: 'Missing **Protocol precedence** description'
+      });
+      continue;
+    }
+
+    const precedenceText = precedenceMatch[1];
+
+    // Check that all chain members are mentioned
+    const missingProtocols = PRECEDENCE_CHAIN.filter(p => !precedenceText.includes(p));
+    if (missingProtocols.length > 0) {
+      results.warn.push({
+        check: 'precedence-chain',
+        file: relPath,
+        message: `Precedence description missing protocol(s): ${missingProtocols.join(', ')}`
+      });
+    }
+
+    // Check Katalepsis structural constraint is mentioned
+    if (!precedenceText.includes(STRUCTURAL_LAST) && !precedenceText.toLowerCase().includes('structurally last')) {
+      results.warn.push({
+        check: 'precedence-chain',
+        file: relPath,
+        message: `Precedence description should mention ${STRUCTURAL_LAST} structural constraint`
+      });
+    }
+  }
+
+  // Check CLAUDE.md contains the canonical chain (Greek or skill names)
+  const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
+  if (fs.existsSync(claudeMdPath)) {
+    const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
+    const SKILL_NAMES = ['Clarify', 'Goal', 'Calibrate', 'Inquire', 'Frame', 'Gap'];
+    const greekChain = PRECEDENCE_CHAIN.join(' → ');
+    const skillChain = SKILL_NAMES.join(' → ');
+    const hasGreekChain = claudeMd.includes(greekChain);
+    const hasSkillChain = claudeMd.includes(skillChain);
+    // Also check workflow diagram format (protocol names on separate positions)
+    const hasWorkflowDiagram = PRECEDENCE_CHAIN.every(p => claudeMd.includes(p));
+    if (!hasGreekChain && !hasSkillChain && !hasWorkflowDiagram) {
+      results.warn.push({
+        check: 'precedence-chain',
+        file: 'CLAUDE.md',
+        message: `Canonical precedence chain not found in CLAUDE.md (checked Greek names, skill names, and workflow diagram)`
+      });
+    }
+  }
+
+  // Check EpistemicCell consistency: each protocol SKILL.md should define EpistemicCell
+  for (const relPath of protocolFiles) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+    if (!content.includes('EpistemicCell')) {
+      results.warn.push({
+        check: 'precedence-chain',
+        file: relPath,
+        message: 'Missing EpistemicCell type in MODE STATE (cross-protocol state accumulator)'
+      });
+    }
+  }
+
+  results.pass.push({
+    check: 'precedence-chain',
+    file: 'all protocols',
+    message: 'Precedence chain consistency check completed'
+  });
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -590,6 +689,7 @@ try {
   checkRequiredSections();
   checkToolGrounding();
   checkVersionStaleness();
+  checkPrecedenceChain();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));

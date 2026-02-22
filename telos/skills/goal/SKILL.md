@@ -67,8 +67,20 @@ Phase 3    (state)   → Internal GoalContract update (no external tool)
 Phase 4 Q  (extern)  → AskUserQuestion (GoalContract review + approval)
 
 ── MODE STATE ──
+EpistemicCell = {                                 -- cross-protocol monotonic accumulator
+  intent: Option(ClarifiedIntent),               -- ← Hermeneia
+  goal: Option(DefinedEndState),                 -- ← Telos
+  delegation: Option(CalibratedDelegation),      -- ← Epitrope
+  context: Option(InformedExecution),            -- ← Aitesis
+  perspective: Option(FramedInquiry),            -- ← Prothesis
+  audit: Option(AuditedDecision),               -- ← Syneidesis
+  comprehension: Option(VerifiedUnderstanding)   -- ← Katalepsis
+}
+merge(c₁, c₂) → c where ∀f: c.f = c₂.f ?? c₁.f  -- monotonic: no information loss
+
 Λ = { phase: Phase, G: Goal, Gᵥ: Goal, applicable: Set(Dim),
-      contract: GoalContract, history: List<(Dₛ, P, A)>, active: Bool }
+      contract: GoalContract, history: List<(Dₛ, P, A)>,
+      cell: EpistemicCell, active: Bool }        -- reads cell.intent; writes cell.goal
 ```
 
 ## Core Principle

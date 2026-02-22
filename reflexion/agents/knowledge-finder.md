@@ -72,12 +72,35 @@ For each insight, identify:
 | **Complementary** | New insight extends existing |
 | **Novel** | No related content found |
 
-### Step 5: Generate Recommendations
+### Step 5: Generate Recommendations (Monotonic Merge Semantics)
 
-- **Redundant** → Skip
-- **Conflicting** → Flag for user resolution
-- **Complementary** → Merge with target
-- **Novel** → Create new entry
+Apply monotonic merge rules — information accumulates, never decreases:
+
+- **Redundant** → Skip (existing ⊇ new; no information loss)
+- **Conflicting** → Flag for user resolution (cannot auto-merge; user decides which version prevails)
+- **Complementary** → Merge with target (existing ∪ new; monotonic union)
+- **Novel** → Create new entry (∅ → Some(insight); monotonic addition)
+
+**Merge rules** (for Complementary classification):
+
+| Field | Merge operation | Invariant |
+|-------|----------------|-----------|
+| `tags` | Set union: existing ∪ new | `\|result\| ≥ \|existing\|` |
+| `keywords` | Set union: existing ∪ new | `\|result\| ≥ \|existing\|` |
+| `session` | Append: existing ++ [current] | `\|result\| = \|existing\| + 1` |
+| `sections` | Append new sections; never delete existing | `existing ⊆ result` |
+| `summary` | Revise to cover union of content | Coverage monotonic |
+| `date` | Update to current | — |
+
+**Conflict detection**: When the new insight's core claim contradicts an existing entry (not merely extends it), classify as **Conflicting** — never silently overwrite. Present both versions to user in Phase 3 (Q4).
+
+### Step 6: Domain Tagging
+
+For each insight, identify and tag:
+- `source_domain`: Domain where the insight originated (e.g., "react", "system-design", "git-workflow")
+- `target_domains`: Domains where this insight may apply (e.g., `["vue", "angular"]` for a React pattern)
+
+Domain tags enable cross-domain knowledge transfer — an insight from domain A may resolve a gap in domain B. When searching for related knowledge (Step 3), also search across `target_domains` of existing insights.
 
 ## Output
 
@@ -93,6 +116,12 @@ Write to `/tmp/.reflexion/{session-id}/related-knowledge.md`:
 
 **Relationship**:
 - [x] Redundant | Conflicting | Complementary | Novel
+
+**Merge Rule**: [monotonic union / skip / flag for user / create new]
+
+**Domain**:
+- Source: [domain]
+- Target: [domain1, domain2, ...]
 
 **Recommendation**: [Merge with X / Create new / Skip / Flag]
 

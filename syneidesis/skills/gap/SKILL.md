@@ -61,7 +61,18 @@ Scan (detect)  → Read, Grep (context for gap identification)
 A (adjust)     → Internal state update (no external tool)
 
 ── MODE STATE ──
-Λ = { phase: Phase, state: Σ, active: Bool }
+EpistemicCell = {                                 -- cross-protocol monotonic accumulator
+  intent: Option(ClarifiedIntent),               -- ← Hermeneia
+  goal: Option(DefinedEndState),                 -- ← Telos
+  delegation: Option(CalibratedDelegation),      -- ← Epitrope
+  context: Option(InformedExecution),            -- ← Aitesis
+  perspective: Option(FramedInquiry),            -- ← Prothesis
+  audit: Option(AuditedDecision),               -- ← Syneidesis
+  comprehension: Option(VerifiedUnderstanding)   -- ← Katalepsis
+}
+merge(c₁, c₂) → c where ∀f: c.f = c₂.f ?? c₁.f  -- monotonic: no information loss
+
+Λ = { phase: Phase, state: Σ, cell: EpistemicCell, active: Bool }  -- reads cell.*; writes cell.audit
 ```
 
 ## Core Principle

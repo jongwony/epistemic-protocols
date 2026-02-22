@@ -144,12 +144,24 @@ apply_authority (state) → Internal state transition (MissionBrief authority �
 inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.json)  -- TeamAugment
 
 ── MODE STATE ──
+EpistemicCell = {                                 -- cross-protocol monotonic accumulator
+  intent: Option(ClarifiedIntent),               -- ← Hermeneia
+  goal: Option(DefinedEndState),                 -- ← Telos
+  delegation: Option(CalibratedDelegation),      -- ← Epitrope
+  context: Option(InformedExecution),            -- ← Aitesis
+  perspective: Option(FramedInquiry),            -- ← Prothesis
+  audit: Option(AuditedDecision),               -- ← Syneidesis
+  comprehension: Option(VerifiedUnderstanding)   -- ← Katalepsis
+}
+merge(c₁, c₂) → c where ∀f: c.f = c₂.f ?? c₁.f  -- monotonic: no information loss
+
 Λ = { phase: Phase, T: TaskScope, mode: EntryMode,
       ctx: DetectedContext, domains: Set(ActionDomain),
       calibrated: Set(ActionDomain), skipped: Set(ActionDomain),
       contract: DelegationContract, who_confirmed: Bool,
       history: List<(Dᵢ, Sₖ, R)>, active: Bool,
-      team: Option(TeamRef) }
+      team: Option(TeamRef),
+      cell: EpistemicCell }                      -- reads cell.intent, cell.goal; writes cell.delegation
          -- calibrated ∪ skipped ⊆ domains; calibrated ∩ skipped = ∅
          -- who_confirmed: Solo → true (implicit); TeamAugment → set at Phase 1 WHO confirmation; TeamCreate → set at Phase 1 WHO design
          -- team: ctx.team is Phase 0 snapshot; team is live reference (updated at Phase 5 TeamCreate or inherited for TeamAugment)

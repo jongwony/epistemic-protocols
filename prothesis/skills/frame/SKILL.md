@@ -64,6 +64,11 @@ After Phase 5 (routing):
 recommend_protocols(L):
   L.divergence ≠ ∅ → suggest Syneidesis (gap audit) or Epitrope (calibrate delegation — provide task scope T when calling /calibrate)
   L.assessment reveals indeterminate goals → suggest Telos
+  L.assessment reveals context gaps → suggest Aitesis (context verification before action)
+  -- Triangle path: when direct protocol is unclear, route through intermediary
+  -- e.g., Aitesis→Epitrope hard to reach directly → Syneidesis as intermediary
+  --   d(Aitesis,Epitrope) ≤ d(Aitesis,Syneidesis) + d(Syneidesis,Epitrope)
+  L.divergence ≠ ∅ ∧ L.assessment reveals context gaps → suggest Aitesis → Syneidesis chain (verify context, then audit gaps)
 
 Continue until convergence: user satisfied OR user ESC.
 
@@ -95,7 +100,19 @@ D = join (union of distinct findings) where perspectives diverge
 A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
-Λ = { phase: Phase, mission_brief: Option(MBᵥ), lens: Option(L), active: Bool, team: Option(TeamState) }
+EpistemicCell = {                                 -- cross-protocol monotonic accumulator
+  intent: Option(ClarifiedIntent),               -- ← Hermeneia
+  goal: Option(DefinedEndState),                 -- ← Telos
+  delegation: Option(CalibratedDelegation),      -- ← Epitrope
+  context: Option(InformedExecution),            -- ← Aitesis
+  perspective: Option(FramedInquiry),            -- ← Prothesis
+  audit: Option(AuditedDecision),               -- ← Syneidesis
+  comprehension: Option(VerifiedUnderstanding)   -- ← Katalepsis
+}
+merge(c₁, c₂) → c where ∀f: c.f = c₂.f ?? c₁.f  -- monotonic: no information loss
+
+Λ = { phase: Phase, mission_brief: Option(MBᵥ), lens: Option(L), active: Bool,
+      team: Option(TeamState), cell: EpistemicCell }  -- reads cell.intent..cell.context; writes cell.perspective
 TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
 ```
@@ -394,6 +411,10 @@ Options:
 **Post-wrap_up recommendations**: After TeamDelete, suggest follow-up protocols based on L:
 - L.divergence ≠ ∅ → suggest Epitrope (`/calibrate`: act on findings) or Syneidesis (`/gap`: audit gaps)
 - L.assessment reveals indeterminate goals → suggest Telos (`/goal`)
+- L.assessment reveals context gaps → suggest Aitesis (`/inquire`: verify context before action)
+- L.divergence ≠ ∅ ∧ L.assessment reveals context gaps → suggest Aitesis → Syneidesis chain (`/inquire` then `/gap`: verify context, then audit gaps in verified context)
+
+Triangle path rationale: when the direct protocol path is unclear, an intermediary protocol can bridge the gap. The chain Aitesis→Syneidesis resolves both context insufficiency and gap detection, where neither alone would suffice.
 
 Recommendations are informational — user decides whether to call follow-up protocols.
 
