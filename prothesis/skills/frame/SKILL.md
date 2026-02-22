@@ -231,7 +231,7 @@ Optional dimension naming (apply when initial generation seems redundant):
 
 ### Phase 3: Inquiry (Through Selected Lens)
 
-**Plan mode**: When active, `TeamCreate` and `Task` are unavailable — see `references/conceptual-foundations.md` for Phase 3 degradation behavior (`ExitPlanMode` presents inquiry outlines as plan output; actual team execution deferred to a subsequent normal-mode session).
+**Plan mode**: When active, `TeamCreate` and `Task` are unavailable — see `references/conceptual-foundations.md` for Phase 3 degradation behavior (`ExitPlanMode` presents inquiry outlines as plan output; actual Lens L requires a fresh `/frame` session from Phase 0 in normal mode).
 
 **Team Setup**
 

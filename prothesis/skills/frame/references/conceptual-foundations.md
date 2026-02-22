@@ -26,7 +26,7 @@ When Prothesis activates within an active plan mode session, `TeamCreate` and `T
 - Phases 0–2 execute normally (`AskUserQuestion` available in plan mode)
 - Phase 3 degrades: for each selected perspective (Pₛ), the coordinator drafts a structured inquiry outline — epistemic stance, key analysis questions, expected finding shape — without spawning teammates
 - `ExitPlanMode` presents this outline as plan output (inquiry blueprint — not L; actual Lens requires team execution)
-- Phases 4–5 (cross-dialogue, synthesis, routing) require re-invoking `/frame` in a subsequent normal-mode session
+- Phases 4–5 (cross-dialogue, synthesis, routing) are not accessible in plan mode; to obtain actual Lens L, start a fresh `/frame` session from Phase 0 in normal mode — the inquiry blueprint serves as reference context when re-specifying the Mission Brief and selecting perspectives
 
 This degradation preserves Phase 0–2 epistemic value: Mission Brief confirmation and perspective selection complete before analysis begins, maintaining Recognition over Recall even when execution is constrained. The plan output serves as a blueprint for a subsequent active session.
 
