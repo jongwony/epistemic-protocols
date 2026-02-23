@@ -583,6 +583,141 @@ function checkVersionStaleness() {
 }
 
 // ============================================================
+// Check 8: Graph Integrity
+// ============================================================
+function checkGraphIntegrity() {
+  const graphPath = path.join(__dirname, '..', 'graph.json');
+
+  if (!fs.existsSync(graphPath)) {
+    results.warn.push({
+      check: 'graph-integrity',
+      file: 'graph.json',
+      message: 'graph.json not found, skipping graph integrity check'
+    });
+    return;
+  }
+
+  let graph;
+  try {
+    graph = JSON.parse(fs.readFileSync(graphPath, 'utf8'));
+  } catch (e) {
+    results.fail.push({
+      check: 'graph-integrity',
+      file: 'graph.json',
+      message: `Invalid JSON: ${e.message}`
+    });
+    return;
+  }
+
+  const { nodes, edges } = graph;
+  const nodeSet = new Set(nodes);
+  const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression', 'transition']);
+
+  // Sub-check 1: edge-type
+  for (const edge of edges) {
+    if (!VALID_EDGE_TYPES.has(edge.type)) {
+      results.fail.push({
+        check: 'graph-integrity',
+        file: 'graph.json',
+        message: `Invalid edge type "${edge.type}" on ${edge.source}→${edge.target}. Valid: ${[...VALID_EDGE_TYPES].join(', ')}`
+      });
+    }
+  }
+
+  // Sub-check 2: edge-reference
+  for (const edge of edges) {
+    if (edge.source !== '*' && !nodeSet.has(edge.source)) {
+      results.fail.push({
+        check: 'graph-integrity',
+        file: 'graph.json',
+        message: `Edge source "${edge.source}" not in nodes array`
+      });
+    }
+    if (edge.target !== '*' && !nodeSet.has(edge.target)) {
+      results.fail.push({
+        check: 'graph-integrity',
+        file: 'graph.json',
+        message: `Edge target "${edge.target}" not in nodes array`
+      });
+    }
+  }
+
+  // Sub-check 3: node-directory
+  for (const node of nodes) {
+    const dirPath = path.join(projectRoot, node);
+    if (!fs.existsSync(dirPath)) {
+      results.fail.push({
+        check: 'graph-integrity',
+        file: 'graph.json',
+        message: `Node "${node}" has no corresponding directory at ${node}/`
+      });
+    }
+  }
+
+  // Sub-check 4: precondition-dag (Kahn's algorithm)
+  // Expand "*" wildcard: source "*" means all nodes except target
+  const preconditionEdges = [];
+  for (const edge of edges) {
+    if (edge.type !== 'precondition') continue;
+    if (edge.source === '*') {
+      for (const node of nodes) {
+        if (node !== edge.target) {
+          preconditionEdges.push({ source: node, target: edge.target });
+        }
+      }
+    } else {
+      preconditionEdges.push({ source: edge.source, target: edge.target });
+    }
+  }
+
+  // Build adjacency list and in-degree map
+  const adj = new Map();
+  const inDegree = new Map();
+  for (const node of nodes) {
+    adj.set(node, []);
+    inDegree.set(node, 0);
+  }
+  for (const { source, target } of preconditionEdges) {
+    adj.get(source).push(target);
+    inDegree.set(target, inDegree.get(target) + 1);
+  }
+
+  // Kahn's algorithm
+  const queue = [];
+  for (const [node, deg] of inDegree) {
+    if (deg === 0) queue.push(node);
+  }
+
+  let processed = 0;
+  while (queue.length > 0) {
+    const node = queue.shift();
+    processed++;
+    for (const neighbor of adj.get(node)) {
+      const newDeg = inDegree.get(neighbor) - 1;
+      inDegree.set(neighbor, newDeg);
+      if (newDeg === 0) queue.push(neighbor);
+    }
+  }
+
+  if (processed !== nodes.length) {
+    const cycleNodes = [...inDegree.entries()]
+      .filter(([, deg]) => deg > 0)
+      .map(([node]) => node);
+    results.fail.push({
+      check: 'graph-integrity',
+      file: 'graph.json',
+      message: `Precondition edges form a cycle involving: ${cycleNodes.join(', ')}`
+    });
+  }
+
+  results.pass.push({
+    check: 'graph-integrity',
+    file: 'graph.json',
+    message: `Graph integrity verified (${nodes.length} nodes, ${edges.length} edges)`
+  });
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -593,6 +728,7 @@ try {
   checkRequiredSections();
   checkToolGrounding();
   checkVersionStaleness();
+  checkGraphIntegrity();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
