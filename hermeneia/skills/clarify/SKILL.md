@@ -18,7 +18,7 @@ E → recognize(E) → Eᵥ → Gₛ → Q → A → Î' → (loop until converg
 ── TYPES ──
 E  = User's expression (the prompt to clarify)
 Eᵥ = Verified expression (user-confirmed binding)
-Gₛ = User-selected gap types ⊆ {Expression, Precision, Coherence, Context}
+Gₛ = User-selected gap types ⊆ {Expression, Precision, Coherence, Background}
 Q  = Clarification question (via AskUserQuestion)
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
@@ -167,15 +167,24 @@ Clarified expression becomes input to subsequent protocols.
 | **Expression** | Incomplete articulation; missing key elements | "Did you mean X or Y?" |
 | **Precision** | Ambiguous scope, quantity, or degree | "How specifically: [options]?" |
 | **Coherence** | Internal contradiction or tension | "You mentioned X but also Y. Which takes priority?" |
-| **Context** | Missing background for interpretation | "What's the context for this? [options]" |
+| **Background** | Missing interpretive background needed to determine expression meaning | "What background should I know to interpret this correctly? [options]" |
 
 ### Gap Priority
 
 When multiple gaps detected:
 1. **Coherence** (highest): Contradictions block all interpretation
-2. **Context**: Missing background affects all other gaps
+2. **Background**: Missing interpretive background affects all other gaps
 3. **Expression**: Core articulation gaps
 4. **Precision** (lowest): Refinement after core is clear
+
+### Background Gap Boundary
+
+When the Background gap type is selected, verify the gap is about *interpreting the expression*, not about *executing the task*:
+
+- **Hermeneia Background**: Missing background changes what E means (user's intent) → proceed with clarification
+- **Aitesis territory**: Missing background changes how to execute X (execution plan) → suggest `/inquire` and offer to transition
+
+Operational test: "Would knowing this change what the user means, or only how I execute it?"
 
 ## Protocol
 
@@ -238,10 +247,10 @@ Options:
 1. **Expression** — I couldn't fully articulate what I meant
 2. **Precision** — The scope or degree is unclear
 3. **Coherence** — There may be internal contradictions
-4. **Context** — Background information is missing
+4. **Background** — My expression needs interpretive background that I didn't provide
 ```
 
-User selection determines the clarification strategy in Phase 2. If multiple selected, address in priority order (Coherence → Context → Expression → Precision).
+User selection determines the clarification strategy in Phase 2. If multiple selected, address in priority order (Coherence → Background → Expression → Precision).
 
 ### Phase 2: Clarification
 
