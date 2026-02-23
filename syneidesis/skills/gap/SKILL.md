@@ -296,7 +296,7 @@ Note: Esc key → unconditional loop termination (LOOP level). Silence (no respo
 
 ## Rules
 
-1. **Question > Assertion**: Ask "was X considered?", never "you missed X"
+1. **AI-guided, user-judged**: Question > Assertion — ask "was X considered?", never "you missed X"
 2. **Batch registration**: Register ALL detected gaps via TaskCreate before surfacing any
 3. **Observable evidence**: Surface only gaps with concrete indicators
 4. **User authority**: Dismissal is final

@@ -183,7 +183,7 @@ When multiple mismatches are identified, surface in severity order (Critical →
 Evaluate execution result against application context. This phase is **silent** — no user interaction.
 
 1. **Scan execution result** `R` against context `X`: environment state, project conventions, use case scope, temporal validity, user constraints
-2. **Check applicability**: For each aspect, assess whether `correct(R) → warranted(R, X)`
+2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)
 3. If all aspects warranted: execution stands (Epharmoge not activated)
 4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity — proceed to Phase 1
 

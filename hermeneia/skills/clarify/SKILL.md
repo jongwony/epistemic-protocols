@@ -86,7 +86,7 @@ integrate    → Internal state update (no external tool)
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
-**Key differences**: User recognizes intent-expression misalignment (user signal), or AI detects ambiguous expression (AI-detected, requires user confirmation). Both paths help articulate what the user partially knows. Boundary with Aitesis: if the ambiguity is in the user's *expression* of intent (how it was said), use Hermeneia; if the AI lacks *factual execution context* (what information the system needs), use Aitesis.
+**Key differences**: User recognizes intent-expression misalignment (user signal), or AI detects ambiguous expression (AI-detected trigger, requires user confirmation). Both paths help articulate what the user partially knows. Boundary with Aitesis: if the ambiguity is in the user's *expression* of intent (how it was said), use Hermeneia; if the AI lacks *factual execution context* (what information the system needs), use Aitesis.
 
 ## Mode Activation
 
