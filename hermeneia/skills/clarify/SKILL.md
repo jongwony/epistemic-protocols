@@ -167,7 +167,7 @@ Clarified expression becomes input to subsequent protocols.
 | **Expression** | Incomplete articulation; missing key elements | "Did you mean X or Y?" |
 | **Precision** | Ambiguous scope, quantity, or degree | "How specifically: [options]?" |
 | **Coherence** | Internal contradiction or tension | "You mentioned X but also Y. Which takes priority?" |
-| **Background** | Missing interpretive background; expression lacks situational framing | "What background should I know to interpret this correctly? [options]" |
+| **Background** | Missing interpretive background needed to determine expression meaning | "What background should I know to interpret this correctly? [options]" |
 
 ### Gap Priority
 
@@ -181,10 +181,10 @@ When multiple gaps detected:
 
 When the Background gap type is selected, verify the gap is about *interpreting the expression*, not about *executing the task*:
 
-- **Hermeneia Background**: Missing background changes what E means → proceed with clarification
-- **Aitesis territory**: Missing background changes how to execute → suggest `/inquire` and offer to transition
+- **Hermeneia Background**: Missing background changes what E means (user's intent) → proceed with clarification
+- **Aitesis territory**: Missing background changes how to execute X (execution plan) → suggest `/inquire` and offer to transition
 
-Operational test: "Would knowing this change my interpretation of what you said, or only how I carry it out?"
+Operational test: "Would knowing this change what the user means, or only how I execute it?"
 
 ## Protocol
 
@@ -247,7 +247,7 @@ Options:
 1. **Expression** — I couldn't fully articulate what I meant
 2. **Precision** — The scope or degree is unclear
 3. **Coherence** — There may be internal contradictions
-4. **Background** — I didn't share the situational context for this expression
+4. **Background** — My expression needs interpretive background that I didn't provide
 ```
 
 User selection determines the clarification strategy in Phase 2. If multiple selected, address in priority order (Coherence → Background → Expression → Precision).
