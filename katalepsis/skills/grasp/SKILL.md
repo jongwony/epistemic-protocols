@@ -79,10 +79,13 @@ Categorize  → Internal analysis (Read for context if needed)
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
 |----------|-----------|----------------------|-------|
-| **Prothesis** | AI-detected | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-detected | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
+| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-detected | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key difference**: AI work exists but the result remains ungrasped by the user. Katalepsis guides user to firm understanding through structured verification.
@@ -92,6 +95,10 @@ Categorize  → Internal analysis (Read for context if needed)
 ### Activation
 
 Command invocation or trigger phrase activates mode until comprehension is verified for all selected categories.
+
+**Activation layers**:
+- **Layer 1 (User-invocable)**: `/grasp` slash command or description-matching input. Always available.
+- **Layer 2**: No AI-guided activation. User signals awareness of comprehension deficit.
 
 **Comprehension verified** = all selected tasks marked `completed` via TaskUpdate.
 
@@ -112,7 +119,7 @@ At Phase 3, call AskUserQuestion for comprehension verification.
 - Katalepsis provides structured comprehension path
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence**: Non-Katalepsis protocols follow a default ordering (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis) which the user can override. Katalepsis is a structural constraint — it requires completed AI work (`R`), so it always executes last. Do not include Katalepsis as an option in any multi-activation ordering choice.
+**Protocol precedence**: Non-Katalepsis protocols follow a default ordering (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Epharmoge) which the user can override. Katalepsis is a structural constraint — it requires completed AI work (`R`), so it always executes last. Do not include Katalepsis as an option in any multi-activation ordering choice.
 
 ### Triggers
 

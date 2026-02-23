@@ -100,11 +100,30 @@ TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
 ```
 
+## Distinction from Other Protocols
+
+| Protocol | Initiator | Deficit → Resolution | Focus |
+|----------|-----------|----------------------|-------|
+| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
+| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
+| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
+
+**Key difference**: Prothesis operates at the framework-selection level — choosing which analytical lenses to apply — while all other protocols operate within an already-established framework. It is also the only protocol that assembles a multi-agent team for parallel perspective analysis. Syneidesis surfaces gaps in a decision, Aitesis verifies execution context, but both assume the analytical lens is already chosen. Prothesis is the protocol that chooses the lens.
+
 ## Mode Activation
 
 ### Activation
 
 Command invocation activates mode until session end.
+
+**Activation layers**:
+- **Layer 1 (User-invocable)**: `/frame` slash command or description-matching input. Always available.
+- **Layer 2 (AI-guided)**: Purpose present but approach unspecified; multiple valid frameworks detected via in-protocol heuristics.
 
 ### Priority
 
@@ -122,7 +141,7 @@ When Prothesis is active:
 - Prothesis completes before other workflows begin
 - User Memory rules resume after perspective is established
 
-**Protocol precedence**: Default ordering places Prothesis after Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis; established perspective contextualizes gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Prothesis after Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Epharmoge; established perspective contextualizes gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
 
 ### Per-Message Application
 
@@ -181,7 +200,7 @@ Options:
 
 **Pre-fill from explicit text**: `/frame "text"` → pre-fill from provided text, still confirm.
 
-**Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context for agent-teams), not the epistemic layer. Hermeneia resolves intent-expression gaps (user-initiated or AI-detected); Telos co-constructs goals from vague intent. Phase 0 packages confirmed intent into a structured vehicle for teammate consumption — a prerequisite for quality spawn prompts, not a substitute for intent clarification or goal construction.
+**Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context for agent-teams), not the epistemic layer. Hermeneia resolves intent-expression gaps (user-initiated or AI-detected trigger); Telos co-constructs goals from vague intent. Phase 0 packages confirmed intent into a structured vehicle for teammate consumption — a prerequisite for quality spawn prompts, not a substitute for intent clarification or goal construction.
 
 ### Phase 1: Context Gathering
 

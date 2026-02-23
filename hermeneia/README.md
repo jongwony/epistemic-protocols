@@ -20,9 +20,14 @@ Users often recognize their expression is ambiguous (`IntentMisarticulated`) but
 
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
-| Prothesis | AI-detected | `FrameworkAbsent → FramedInquiry` |
-| Syneidesis | AI-detected | `GapUnnoticed → AuditedDecision` |
+| Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
+| Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | **Hermeneia** | **Hybrid** | **`IntentMisarticulated → ClarifiedIntent`** |
+| Telos | AI-guided | `GoalIndeterminate → DefinedEndState` |
+| Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
+| Epitrope | AI-guided | `DelegationAmbiguous → CalibratedDelegation` |
+| Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
+| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
 ## Protocol Flow
 

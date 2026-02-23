@@ -68,11 +68,30 @@ A (adjust)     → Internal state update (no external tool)
 
 **Surfacing over Deciding**: AI makes visible; user judges.
 
+## Distinction from Other Protocols
+
+| Protocol | Initiator | Deficit → Resolution | Focus |
+|----------|-----------|----------------------|-------|
+| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
+| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
+| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
+| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
+
+**Key difference**: Syneidesis audits the user's decision quality at committed action points (metacognitive: "has the user considered all angles?"). This is distinct from Aitesis, which monitors AI's context sufficiency (heterocognitive: "do I have enough context to execute?"), and Epharmoge, which evaluates AI's execution quality post-hoc ("does the result fit the context?"). The operational test: if the gap would be filled by the user reconsidering their decision, it's Syneidesis; if by providing context, it's Aitesis; if by adapting the result, it's Epharmoge.
+
 ## Mode Activation
 
 ### Activation
 
 Command invocation activates mode until session end.
+
+**Activation layers**:
+- **Layer 1 (User-invocable)**: `/gap` slash command or description-matching input. Always available.
+- **Layer 2 (AI-guided)**: Committed action detected with observable, unaddressed gaps via in-protocol heuristics.
 
 **On activation**: Check existing Tasks for deferred gaps (subject prefix `[Gap:`). Resume tracking if found.
 
@@ -93,7 +112,7 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence**: Default ordering places Syneidesis after Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis; gap detection applies within the established, context-verified perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Syneidesis after Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Epharmoge; gap detection applies within the established, context-verified perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
 
 ### Mode Deactivation
 
@@ -277,7 +296,7 @@ Note: Esc key → unconditional loop termination (LOOP level). Silence (no respo
 
 ## Rules
 
-1. **Question > Assertion**: Ask "was X considered?", never "you missed X"
+1. **AI-guided, user-judged**: Question > Assertion — ask "was X considered?", never "you missed X"
 2. **Batch registration**: Register ALL detected gaps via TaskCreate before surfacing any
 3. **Observable evidence**: Surface only gaps with concrete indicators
 4. **User authority**: Dismissal is final

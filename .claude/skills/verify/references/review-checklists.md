@@ -147,13 +147,17 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 
 #### Epistemological Soundness
 - [ ] Correct epistemic type signature declared:
-  - Prothesis: FrameworkAbsent → FramedInquiry (AI-detected, SELECT)
-  - Syneidesis: GapUnnoticed → AuditedDecision (AI-detected, SURFACE)
+  - Prothesis: FrameworkAbsent → FramedInquiry (AI-guided, SELECT)
+  - Syneidesis: GapUnnoticed → AuditedDecision (AI-guided, SURFACE)
   - Hermeneia: IntentMisarticulated → ClarifiedIntent (Hybrid, EXTRACT)
+  - Telos: GoalIndeterminate → DefinedEndState (AI-guided, CO-CONSTRUCT)
+  - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INQUIRE)
+  - Epitrope: DelegationAmbiguous → CalibratedDelegation (AI-guided, CALIBRATE)
+  - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
   - Reflexion: KnowledgeTacit → PersistedKnowledge (User-invoked, CRYSTALLIZE)
   - Write: InsightInternal → ExternalizedKnowledge (User-invoked, EXTERNALIZE)
-- [ ] Initiator correctly specified (AI-detected vs Hybrid vs User-initiated vs User-invoked)
+- [ ] Initiator correctly specified (AI-guided vs Hybrid vs User-initiated vs User-invoked)
 - [ ] Gap taxonomy matches protocol purpose
 
 #### False Positive Filtering

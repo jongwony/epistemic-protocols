@@ -15,6 +15,7 @@
 | **[Telos](./telos)** (τέλος) — /goal | 모호한 의도에서 정의된 목표 공동 구성 | 실행 전 |
 | **[Aitesis](./aitesis)** (αἴτησις) — /inquire | 실행 전 맥락 부족 감지 | 실행 전 |
 | **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | 시나리오 기반 인터뷰로 컨텍스트 적응형 위임 캘리브레이션 | 실행 전 |
+| **[Epharmoge](./epharmoge)** (ἐφαρμογή) — /contextualize | 실행 후 적용-맥락 불일치 감지 | 실행 후 |
 
 ## 핵심 아이디어
 
@@ -26,13 +27,14 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 
 | 프로토콜 | 결핍 | 개시자 | 연산 | 타입 시그니처 |
 |----------|------|--------|------|---------------|
-| **Prothesis** | FrameworkAbsent | AI-detected | SELECT | `FrameworkAbsent → FramedInquiry` |
-| **Syneidesis** | GapUnnoticed | AI-detected | SURFACE | `GapUnnoticed → AuditedDecision` |
+| **Prothesis** | FrameworkAbsent | AI-guided | SELECT | `FrameworkAbsent → FramedInquiry` |
+| **Syneidesis** | GapUnnoticed | AI-guided | SURFACE | `GapUnnoticed → AuditedDecision` |
 | **Hermeneia** | IntentMisarticulated | Hybrid | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
 | **Katalepsis** | ResultUngrasped | User-initiated | VERIFY | `ResultUngrasped → VerifiedUnderstanding` |
-| **Telos** | GoalIndeterminate | AI-detected | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
-| **Aitesis** | ContextInsufficient | AI-detected | INQUIRE | `ContextInsufficient → InformedExecution` |
-| **Epitrope** | DelegationAmbiguous | AI-detected | CALIBRATE | `DelegationAmbiguous → CalibratedDelegation` |
+| **Telos** | GoalIndeterminate | AI-guided | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
+| **Aitesis** | ContextInsufficient | AI-guided | INQUIRE | `ContextInsufficient → InformedExecution` |
+| **Epitrope** | DelegationAmbiguous | AI-guided | CALIBRATE | `DelegationAmbiguous → CalibratedDelegation` |
+| **Epharmoge** | ApplicationDecontextualized | AI-guided | CONTEXTUALIZE | `ApplicationDecontextualized → ContextualizedExecution` |
 
 <img src="./assets/epistemic-matrix-ko.svg" alt="인식론적 타입 변환" width="560">
 
@@ -43,6 +45,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Telos**: "내가 진짜 원하는 게 뭐지?" → AI가 목표를 제안, 사용자가 형성하고 승인 (`GoalIndeterminate → DefinedEndState`)
 - **Aitesis**: "뭔가 빠진 건 아닐까?" → AI가 자체 맥락 부족을 감지하고, 실행 전 빠진 정보를 사용자에게 질의 (`ContextInsufficient → InformedExecution`)
 - **Epitrope**: "어디까지 맡길까?" → AI가 컨텍스트를 탐지하고 진입 모드를 선택, 위임(WHO/WHAT/HOW MUCH) 캘리브레이션 (`DelegationAmbiguous → CalibratedDelegation`)
+- **Epharmoge**: "이게 실제로 맞나?" → AI가 정확한 출력이 실제 컨텍스트에 맞는지 평가하고, 불일치를 사용자 판단에 표면화 (`ApplicationDecontextualized → ContextualizedExecution`)
 
 핵심 통찰: **Recall(회상)보다 Recognition(인지)**. 빈칸을 채우는 것보다 선택지에서 고르는 게 쉽습니다.
 
@@ -60,6 +63,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 /plugin install telos
 /plugin install aitesis
 /plugin install epitrope
+/plugin install epharmoge
 ```
 
 ## Codex 호환
@@ -69,7 +73,7 @@ Epistemic protocols를 [Codex](https://github.com/openai/codex) 스킬로도 사
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo jongwony/epistemic-protocols \
-  --path aitesis/skills/inquire epitrope/skills/calibrate \
+  --path aitesis/skills/inquire epitrope/skills/calibrate epharmoge/skills/contextualize \
         hermeneia/skills/clarify katalepsis/skills/grasp syneidesis/skills/gap \
         telos/skills/goal
 ```
@@ -88,6 +92,7 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 /goal [모호한 아이디어]   # 의도에서 정의된 목표 공동 구성
 /inquire [작업]          # 실행 전 맥락 부족 감지 및 해결
 /calibrate [작업]        # 시나리오 기반 인터뷰로 컨텍스트 적응형 위임 캘리브레이션
+/contextualize [작업]    # 실행 후 적용-맥락 불일치 감지
 ```
 
 ## 라이선스
