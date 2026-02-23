@@ -586,7 +586,7 @@ function checkVersionStaleness() {
 // Check 8: Graph Integrity
 // ============================================================
 function checkGraphIntegrity() {
-  const graphPath = path.join(__dirname, '..', 'graph.json');
+  const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
 
   if (!fs.existsSync(graphPath)) {
     results.warn.push({
@@ -609,29 +609,53 @@ function checkGraphIntegrity() {
     return;
   }
 
+  // Structural validation: nodes and edges must be arrays
+  if (!Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) {
+    results.fail.push({
+      check: 'graph-integrity',
+      file: 'graph.json',
+      message: `graph.json requires "nodes" (array) and "edges" (array), got nodes=${typeof graph.nodes}, edges=${typeof graph.edges}`
+    });
+    return;
+  }
+
   const { nodes, edges } = graph;
   const nodeSet = new Set(nodes);
   const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression', 'transition']);
+  let subCheckFailed = false;
 
   // Sub-check 1: edge-type
-  for (const edge of edges) {
+  for (let i = 0; i < edges.length; i++) {
+    const edge = edges[i];
+    if (!edge || typeof edge !== 'object') {
+      results.fail.push({
+        check: 'graph-integrity',
+        file: 'graph.json',
+        message: `edges[${i}] is not a valid object: ${JSON.stringify(edge)}`
+      });
+      subCheckFailed = true;
+      continue;
+    }
     if (!VALID_EDGE_TYPES.has(edge.type)) {
       results.fail.push({
         check: 'graph-integrity',
         file: 'graph.json',
         message: `Invalid edge type "${edge.type}" on ${edge.source}→${edge.target}. Valid: ${[...VALID_EDGE_TYPES].join(', ')}`
       });
+      subCheckFailed = true;
     }
   }
 
-  // Sub-check 2: edge-reference
+  // Sub-check 2: edge-reference (wildcard "*" exempt from node lookup)
   for (const edge of edges) {
+    if (!edge || typeof edge !== 'object') continue; // already reported in sub-check 1
     if (edge.source !== '*' && !nodeSet.has(edge.source)) {
       results.fail.push({
         check: 'graph-integrity',
         file: 'graph.json',
         message: `Edge source "${edge.source}" not in nodes array`
       });
+      subCheckFailed = true;
     }
     if (edge.target !== '*' && !nodeSet.has(edge.target)) {
       results.fail.push({
@@ -639,6 +663,7 @@ function checkGraphIntegrity() {
         file: 'graph.json',
         message: `Edge target "${edge.target}" not in nodes array`
       });
+      subCheckFailed = true;
     }
   }
 
@@ -651,14 +676,25 @@ function checkGraphIntegrity() {
         file: 'graph.json',
         message: `Node "${node}" has no corresponding directory at ${node}/`
       });
+      subCheckFailed = true;
     }
   }
 
-  // Sub-check 4: precondition-dag (Kahn's algorithm)
-  // Expand "*" wildcard: source "*" means all nodes except target
+  // Sub-check 4: precondition-dag — verify precondition edges form a DAG (no cycles) via Kahn's topological sort
+  // Expand "*" wildcard: source "*" means all nodes except target; target "*" is rejected
   const preconditionEdges = [];
   for (const edge of edges) {
+    if (!edge || typeof edge !== 'object') continue;
     if (edge.type !== 'precondition') continue;
+    if (edge.target === '*') {
+      results.fail.push({
+        check: 'graph-integrity',
+        file: 'graph.json',
+        message: `Precondition edge target cannot be "*" (source: "${edge.source}")`
+      });
+      subCheckFailed = true;
+      continue;
+    }
     if (edge.source === '*') {
       for (const node of nodes) {
         if (node !== edge.target) {
@@ -670,7 +706,7 @@ function checkGraphIntegrity() {
     }
   }
 
-  // Build adjacency list and in-degree map
+  // Adjacency: source → target (source is precondition for target; in-degree counts preconditions)
   const adj = new Map();
   const inDegree = new Map();
   for (const node of nodes) {
@@ -708,13 +744,16 @@ function checkGraphIntegrity() {
       file: 'graph.json',
       message: `Precondition edges form a cycle involving: ${cycleNodes.join(', ')}`
     });
+    subCheckFailed = true;
   }
 
-  results.pass.push({
-    check: 'graph-integrity',
-    file: 'graph.json',
-    message: `Graph integrity verified (${nodes.length} nodes, ${edges.length} edges)`
-  });
+  if (!subCheckFailed) {
+    results.pass.push({
+      check: 'graph-integrity',
+      file: 'graph.json',
+      message: `Graph integrity verified (${nodes.length} nodes, ${edges.length} edges)`
+    });
+  }
 }
 
 // ============================================================
