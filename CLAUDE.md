@@ -171,6 +171,36 @@ This diagram shows logical progression, not strict execution order.
   - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Reflexion, Write)
 
+## Development
+
+- **Node.js 22+** required (`zlib.crc32` used in packaging; CI pins Node 22)
+- Static checks: `node .claude/skills/verify/scripts/static-checks.js .`
+- Packaging: `node scripts/package.js [--dry-run]` — produces `dist/*.zip` + `dist/release-notes.md`
+
+### Packaging Transformations
+
+`scripts/package.js` applies non-trivial transforms when building release ZIPs:
+- Renames `SKILL.md` → `Skill.md` (marketplace case convention)
+- Strips frontmatter fields: `allowed-tools`, `license`, `compatibility`, `metadata`
+- Overrides descriptions exceeding 200 chars (`frame`, `calibrate`, `reflexion`)
+- Excludes `agents/`, `commands/`, README files from ZIPs
+- 500-line guideline per SKILL.md (warns if exceeded)
+
+### graph.json
+
+Protocol dependency graph at `.claude/skills/verify/graph.json`. Validated by static check `graph-integrity`.
+
+```
+Edge types (allowlist):
+  precondition  — must complete before target (DAG-checked for cycles)
+  advisory      — provides useful context but not required
+  transition    — mode switch between protocols
+  suppression   — prevents stacking of similar protocols
+
+Wildcard: "source": "*" = all nodes except target
+Descriptions: "satisfies" field in Korean
+```
+
 ## Verification
 
 Run `/verify` before commits. Static checks via:
