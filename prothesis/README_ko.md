@@ -1,12 +1,12 @@
 # Prothesis — /frame (πρόθεσις)
 
-다관점 조사를 위한 팀 기반 분석 (πρόθεσις: 앞에 놓기)
+다관점 조사 — 렌즈 추천 또는 팀 분석 (πρόθεσις: 앞에 놓기)
 
 > [English](./README.md)
 
 ## Prothesis란?
 
-그리스어 πρόθεσις(앞에 놓기)의 현대적 재해석으로, **다관점 조사를 위한 팀을 구성하여 프레임된 탐구를 생성**하는 프로토콜이다.
+그리스어 πρόθεσις(앞에 놓기)의 현대적 재해석으로, **분석 렌즈를 추천하거나 다관점 조사를 위한 팀을 구성하여 프레임된 탐구를 생성**하는 프로토콜이다.
 
 ### 핵심 문제
 
@@ -14,7 +14,9 @@
 
 ### 해법
 
-**Recognition over Recall + 팀 조사**: AI가 관점 옵션을 제시하고, 사용자가 선택하면, 에이전트 팀이 병렬로 조사하고, 발견 사항을 렌즈로 종합한다. 생애주기: 팀 구성 → 병렬 조사 → 교차 대화 → 종합 → 라우팅.
+**Recognition over Recall + Two Modes**:
+- **Recommend** (Mode 1): AI가 관점 옵션을 제시하고, 사용자가 선택하면, 관점 + 후속 프로토콜 추천을 출력한다. 경량 경로 — 팀 생성 없음. `/frame --recommend` 사용.
+- **Inquire** (Mode 2): 전체 조사 — AI가 관점을 제시하고, 사용자가 선택하면, 에이전트 팀이 병렬로 조사하고, 발견 사항을 렌즈로 종합한다. 생애주기: 팀 구성 → 병렬 조사 → 교차 대화 → 종합 → 라우팅.
 
 ### 소크라테스 방식과의 차이
 
@@ -28,9 +30,10 @@
 ## 프로토콜 흐름
 
 ```
-Phase 0: Mission Brief → 탐구 의도 및 범위 확인 (call AskUserQuestion)
+Phase 0: Mission Brief → 탐구 의도, 범위, 모드 확인 (call AskUserQuestion)
 Phase 1: Gather        → 관점 형성을 위한 대상 맥락 수집
 Phase 2: Prothesis     → 관점 2-4개 제시 (call AskUserQuestion)
+--- Mode 1 (recommend) 여기서 종료: Pₛ + 합성 추천 출력 ---
 Phase 3: Inquiry       → 선택된 관점별 에이전트 팀 분석 (TeamCreate + teammates)
 Phase 4: Synthesis     → 교차 대화 확인 → 수렴점/발산점 정리 → 통합 답변
 Phase 5: Routing       → 사용자 다음 행동 선택: calibrate / extend / wrap up
@@ -49,7 +52,8 @@ Phase 5: Routing       → 사용자 다음 행동 선택: calibrate / extend / 
 ## 사용법
 
 ```
-/frame [질문]
+/frame [질문]                        # 모드 선택 프롬프트
+/frame --recommend [질문]            # 경량 렌즈 추천 (Mode 1)
 ```
 
 ## 저자

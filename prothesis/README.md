@@ -1,12 +1,12 @@
 # Prothesis — /frame (πρόθεσις)
 
-Team-based multi-perspective investigation (πρόθεσις: placing before)
+Multi-perspective investigation — lens recommendation or team analysis (πρόθεσις: placing before)
 
 > [한국어](./README_ko.md)
 
 ## What is Prothesis?
 
-A modern reinterpretation of Greek πρόθεσις (placing before) — a protocol that **assembles a team to investigate from multiple perspectives**, producing a framed inquiry.
+A modern reinterpretation of Greek πρόθεσις (placing before) — a protocol that **recommends analytical lenses or assembles a team to investigate from multiple perspectives**, producing a framed inquiry.
 
 ### The Core Problem
 
@@ -14,7 +14,9 @@ Users often lack the analytical framework for their question (`FrameworkAbsent`)
 
 ### The Solution
 
-**Recognition over Recall + Team Investigation**: AI presents perspective options; user selects; an agent team investigates in parallel; findings are synthesized into a Lens. The lifecycle: team assembly → parallel investigation → cross-dialogue → synthesis → routing.
+**Recognition over Recall + Two Modes**:
+- **Recommend** (Mode 1): AI presents perspective options; user selects; perspectives + downstream protocol suggestions are output. Lightweight — no team created. Use `/frame --recommend`.
+- **Inquire** (Mode 2): Full investigation — AI presents perspectives; user selects; an agent team investigates in parallel; findings are synthesized into a Lens. Lifecycle: team assembly → parallel investigation → cross-dialogue → synthesis → routing.
 
 ### Difference from Socratic Method
 
@@ -28,9 +30,10 @@ Users often lack the analytical framework for their question (`FrameworkAbsent`)
 ## Protocol Flow
 
 ```
-Phase 0: Mission Brief → Confirm inquiry intent and scope (call AskUserQuestion)
+Phase 0: Mission Brief → Confirm inquiry intent, scope, and mode (call AskUserQuestion)
 Phase 1: Gather        → Targeted context acquisition for perspective formulation
 Phase 2: Prothesis     → Present 2-4 perspectives (call AskUserQuestion)
+--- Mode 1 (recommend) terminates here with Pₛ + composition recommendations ---
 Phase 3: Inquiry       → Agent team analysis per selected perspective (TeamCreate + teammates)
 Phase 4: Synthesis     → Cross-dialogue check → Convergence/divergence → Integrated answer
 Phase 5: Routing       → User selects next action: calibrate / extend / wrap up
@@ -49,7 +52,8 @@ Phase 5: Routing       → User selects next action: calibrate / extend / wrap u
 ## Usage
 
 ```
-/frame [your question]
+/frame [your question]               # mode selection prompt
+/frame --recommend [your question]   # lightweight lens recommendation (Mode 1)
 ```
 
 ## Author

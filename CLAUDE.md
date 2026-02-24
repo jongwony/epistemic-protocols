@@ -58,14 +58,16 @@ epistemic-protocols/
 
 **SKILL.md Formal Block Anatomy** (all protocols share this structure within `Definition` code block):
 ```
-── FLOW ──              One-line formula: full protocol path with symbols
+── FLOW ──              Protocol path formula (multi-line for multi-mode protocols)
 ── TYPES ──             Symbol definitions with type signatures and comments
 ── ENTRY TYPES ──       (if applicable) Extended types for entry modes (e.g., Epitrope)
 ── DELEGATION TYPES ──  (if applicable) Extended types for delegation structure (e.g., Epitrope)
+── *-BINDING ──         (if applicable) Input binding resolution rules (U-BINDING, E-BINDING, G-BINDING)
 ── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
 ── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping
+── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ```
 Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.

@@ -23,7 +23,7 @@ MB     = MissionBrief(U): { inquiry_intent, expected_deliverable, scope_constrai
 Q(MB)  = Confirm: MB → MBᵥ                     -- extern (user confirmation/modification)
 MBᵥ    = Verified MissionBrief (user-confirmed)
 M      = ModeSelection: MBᵥ → m                  -- extern (user choice or --recommend binding)
-m      = Mode ∈ {recommend, inquire}              -- lens recommendation vs. framed inquiry
+m      = Mode ∈ {recommend, inquire}              -- lens recommendation vs. framed inquiry; m=pending before M resolves (transient, not a Mode value)
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
 C      = Context (information for perspective formulation)
 Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in Pₛ)
@@ -43,6 +43,7 @@ L      = Lens { convergence: ∩, divergence: D, assessment: A }
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc  -- Mode 2 only; Mode 1 terminates with Pₛ (deficit remains open)
 user_wrap_up  = (J = wrap_up) at Phase 5   -- user selects wrap_up routing option
 user_esc      = J = ESC at any phase        -- user selects ESC (Escape)
+J_mb   = MissionBriefRouting ∈ {confirm, modify(field), ESC}  -- Phase 0 routing decision
 
 ── U-BINDING ──
 bind(U) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_request
@@ -80,14 +81,12 @@ After Phase 0 (Mission Brief + Mode Selection):
   J_mb = ESC           → terminate (no team exists)
 
 Mode 1 termination (after Phase 2, m=recommend):
-  Output Pₛ with compose recommendations:
-    recommend_compose(Pₛ) = suggest downstream protocol composition
+  recommend_compose(Pₛ) = characterize Pₛ + recommend downstream protocols:
     Pₛ.count = 1 → lightweight context modifier for downstream protocol
     Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
-  recommend_protocols(Pₛ):
-    Default → suggest composing with the protocol best suited to MBᵥ.inquiry_intent
-    Context insufficient → suggest Aitesis (/inquire)
-    Pₛ contradictory + deep analysis needed → suggest escalation to Mode 2 (/frame)
+    recommend_protocols(Pₛ):                              -- sub-operation of recommend_compose
+      Map MBᵥ.inquiry_intent → downstream protocol (Aitesis, Syneidesis, Telos, Katalepsis, Epitrope)
+      Pₛ contradictory + deep analysis needed → suggest escalation to Mode 2 (/frame)
 
 After Phase 5 (routing):
   J = calibrate  → Activate[Skill]("calibrate") | fail → inform user; team retained; offer {extend, wrap_up}  -- fail ≡ Skill load error (plugin absent or malformed)
@@ -134,7 +133,7 @@ A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
 Λ = { phase: Phase, mode: Mode, mission_brief: Option(MBᵥ), perspectives: Option(Pₛ), lens: Option(L), active: Bool, team: Option(TeamState) }
-Mode ∈ {recommend, inquire}
+Mode ∈ {recommend, inquire}                       -- Λ.mode unset until Phase 0 M resolves
 TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
 ```
