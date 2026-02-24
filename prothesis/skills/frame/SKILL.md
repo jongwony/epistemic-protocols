@@ -1,6 +1,6 @@
 ---
 name: frame
-description: "Multi-perspective investigation. Assembles a team to analyze from selected viewpoints when the right framework is absent, producing a framed inquiry. Alias: Prothesis(πρόθεσις)."
+description: "Multi-perspective investigation. Recommends analytical lenses or assembles a team to analyze from selected viewpoints when the right framework is absent, producing a framed inquiry. Alias: Prothesis(πρόθεσις)."
 ---
 
 # Prothesis Protocol
@@ -29,7 +29,7 @@ C      = Context (information for perspective formulation)
 Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in Pₛ)
 {P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
-Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2)
+Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
 ∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → R
 Ω      = Collection: R → R', retain(T)               -- finalize results; team lifecycle deferred to loop
@@ -40,7 +40,7 @@ R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue respons
 D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → user review; Δ = ∅ → skip dialogue (synthesis + user review still proceed)
 Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
-FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc
+FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc  -- Mode 2 only; Mode 1 terminates with Pₛ (deficit remains open)
 user_wrap_up  = (J = wrap_up) at Phase 5   -- user selects wrap_up routing option
 user_esc      = J = ESC at any phase        -- user selects ESC (Escape)
 
@@ -124,6 +124,8 @@ J=calibrate (extern)     → Skill tool (protocol transition: Activate[Skill]("c
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
+recommend_compose (internal) → Internal operation (perspective characterization + downstream composition suggestion)
+recommend_protocols (internal) → Internal operation (protocol suggestion based on Pₛ or L; overloaded: Pₛ after Mode 1, L after Mode 2 wrap_up)
 
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs
@@ -150,7 +152,7 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
-**Key difference**: Prothesis operates at the framework-selection level — choosing which analytical lenses to apply — while all other protocols operate within an already-established framework. It is also the only protocol that assembles a multi-agent team for parallel perspective analysis. Syneidesis surfaces gaps in a decision, Aitesis verifies execution context, but both assume the analytical lens is already chosen. Prothesis is the protocol that chooses the lens.
+**Key difference**: Prothesis operates at the framework-selection level — choosing which analytical lenses to apply — while all other protocols operate within an already-established framework. It is also the only protocol that can assemble a multi-agent team for parallel perspective analysis (Mode 2) or provide lightweight lens recommendations (Mode 1). Syneidesis surfaces gaps in a decision, Aitesis verifies execution context, but both assume the analytical lens is already chosen. Prothesis is the protocol that chooses the lens.
 
 ## Mode Activation
 
@@ -382,6 +384,8 @@ Collect inquiry results into R'. Team remains active — shutdown/retain decisio
 
 #### Isolated Context Requirement
 
+**Mode 2 (inquire) only.** Mode 1 (recommend) terminates before Phase 3 — see Rule 3.
+
 Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 - Cross-perspective contamination from shared conversation history
 - Confirmation bias from main agent's prior reasoning
@@ -518,5 +522,5 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
 9. **Team persistence**: Mode 2 only: Team persists across Phase 5 loop iterations; TeamDelete only at terminal states (wrap_up/ESC from Phase 5). J=calibrate retains team for Epitrope reuse. Mode 1 creates no team.
 10. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion
-11. **Mode binding**: --recommend flag binds m=recommend before Phase 0 completes. Mode selection AskUserQuestion is mandatory when m=pending. Mode 1 terminates at Phase 2 with Pₛ; Pₛ transfers as Pᵦ on re-invocation.
+11. **Mode binding**: --recommend flag binds m=recommend after MB confirmation, skipping mode selection AskUserQuestion. Mode selection is mandatory when m=pending. Mode 1 terminates at Phase 2 with Pₛ; Pₛ transfers as Pᵦ on re-invocation.
 
