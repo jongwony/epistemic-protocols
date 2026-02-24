@@ -1,6 +1,6 @@
 ---
 name: frame
-description: "Multi-perspective investigation. Assembles a team to analyze from selected viewpoints when the right framework is absent, producing a framed inquiry. Alias: Prothesis(πρόθεσις)."
+description: "Multi-perspective investigation. Recommends analytical lenses or assembles a team to analyze from selected viewpoints when the right framework is absent, producing a framed inquiry. Alias: Prothesis(πρόθεσις)."
 ---
 
 # Prothesis Protocol
@@ -13,19 +13,23 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → Q(Syn) → L
+Prothesis(U) → Q(MB(U)) → MBᵥ → M(MBᵥ) → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ →
+  m=recommend: recommend_compose(Pₛ) → terminate
+  m=inquire:   T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → Q(Syn) → L
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
 MB     = MissionBrief(U): { inquiry_intent, expected_deliverable, scope_constraint }  -- AI-inferred from U
 Q(MB)  = Confirm: MB → MBᵥ                     -- extern (user confirmation/modification)
 MBᵥ    = Verified MissionBrief (user-confirmed)
+M      = ModeSelection: MBᵥ → m                  -- extern (user choice or --recommend binding)
+m      = Mode ∈ {recommend, inquire}              -- lens recommendation vs. framed inquiry; m=pending before M resolves (transient, not a Mode value)
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
 C      = Context (information for perspective formulation)
 Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in Pₛ)
 {P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
-Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2)
+Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
 ∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → R
 Ω      = Collection: R → R', retain(T)               -- finalize results; team lifecycle deferred to loop
@@ -36,23 +40,53 @@ R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue respons
 D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → user review; Δ = ∅ → skip dialogue (synthesis + user review still proceed)
 Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
-FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc
+FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc  -- Mode 2 only; Mode 1 terminates with Pₛ (deficit remains open)
 user_wrap_up  = (J = wrap_up) at Phase 5   -- user selects wrap_up routing option
 user_esc      = J = ESC at any phase        -- user selects ESC (Escape)
+J_mb   = MissionBriefRouting ∈ {confirm, modify(field), ESC}  -- Phase 0 routing decision
+
+── U-BINDING ──
+bind(U) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_request
+Priority: explicit_arg > colocated_expr > prev_user_turn > ai_identified_request
+
+/frame "text"                → U = "text", m = pending (mode selection required)
+/frame --recommend "text"    → U = "text", m = recommend (skip mode selection)
+/frame --recommend           → U = previous user message, m = recommend
+/frame (alone)               → U = previous user message, m = pending
+"investigate... frame"       → U = text before trigger, m = pending
+AI-detected trigger           → U = request AI identified, m = pending
+
+Edge cases:
+- --recommend + escalation: Pₛ becomes Pᵦ in subsequent /frame (Mode 2)
+- Re-invoke: If Pₛ exists in context, offer as Pᵦ for new invocation
 
 ── PHASE TRANSITIONS ──
-Phase 0:  U → MB(U) → Q[AskUserQuestion](MB) → await → MBᵥ     -- Mission Brief confirmation [Tool]
+Phase 0:  U → MB(U) → Q[AskUserQuestion](MB) → await → MBᵥ → M[AskUserQuestion](mode) → await → m  -- Mission Brief + mode selection [Tool]
+            m=pending: present mode options via AskUserQuestion
+            --recommend binding: m = recommend (skip M)
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → present[S]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ  -- S: AskUserQuestion [Tool]
+            m=recommend: Pₛ → recommend_compose(Pₛ) → terminate      -- Mode 1 termination
 Phase 3:  Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R'  -- inquiry + collection [Tool]
 Phase 4:  R' → Δ(R') → D?[SendMessage](T) → R'' → Syn(R'') → Q[AskUserQuestion](Syn) → L  -- cross-dialogue, synthesis & review [Tool]
 Phase 5:  L → Q[AskUserQuestion](routing) → await → J                          -- routing decision [Tool]
 
 ── LOOP ──
-After Phase 0 (Mission Brief):
-  J_mb = confirm       → Phase 1
-  J_mb = modify(field) → re-present Q(MB') → await → MBᵥ → Phase 1
+After Phase 0 (Mission Brief + Mode Selection):
+  J_mb = confirm       → M[AskUserQuestion](mode) → m
+    --recommend binding → m = recommend (skip M)
+    m = recommend → Phase 1 → Phase 2 → terminate with Pₛ
+    m = inquire   → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
+  J_mb = modify(field) → re-present Q(MB') → await → MBᵥ → M
   J_mb = ESC           → terminate (no team exists)
+
+Mode 1 termination (after Phase 2, m=recommend):
+  recommend_compose(Pₛ) = characterize Pₛ + recommend downstream protocols:
+    Pₛ.count = 1 → lightweight context modifier for downstream protocol
+    Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
+    recommend_protocols(Pₛ):                              -- sub-operation of recommend_compose
+      Map MBᵥ.inquiry_intent → downstream protocol (Aitesis, Syneidesis, Telos, Katalepsis, Epitrope)
+      Pₛ contradictory + deep analysis needed → suggest escalation to Mode 2 (/frame)
 
 After Phase 5 (routing):
   J = calibrate  → Activate[Skill]("calibrate") | fail → inform user; team retained; offer {extend, wrap_up}  -- fail ≡ Skill load error (plugin absent or malformed)
@@ -75,6 +109,7 @@ I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
 Phase 0 Q (extern)       → AskUserQuestion (Mission Brief confirmation; Esc → terminate)
+M (extern)               → AskUserQuestion (mode selection: recommend/inquire; --recommend binding skips; after MB confirmation)
 S (extern)               → AskUserQuestion tool (mandatory; multiSelect: true; Esc → terminate with current L or no lens)
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
@@ -88,6 +123,8 @@ J=calibrate (extern)     → Skill tool (protocol transition: Activate[Skill]("c
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
+recommend_compose (internal) → Internal operation (perspective characterization + downstream composition suggestion)
+recommend_protocols (internal) → Internal operation (protocol suggestion based on Pₛ or L; overloaded: Pₛ after Mode 1, L after Mode 2 wrap_up)
 
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs
@@ -95,7 +132,8 @@ D = join (union of distinct findings) where perspectives diverge
 A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
-Λ = { phase: Phase, mission_brief: Option(MBᵥ), lens: Option(L), active: Bool, team: Option(TeamState) }
+Λ = { phase: Phase, mode: Mode, mission_brief: Option(MBᵥ), perspectives: Option(Pₛ), lens: Option(L), active: Bool, team: Option(TeamState) }
+Mode ∈ {recommend, inquire}                       -- Λ.mode unset until Phase 0 M resolves
 TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
 ```
@@ -113,7 +151,7 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
-**Key difference**: Prothesis operates at the framework-selection level — choosing which analytical lenses to apply — while all other protocols operate within an already-established framework. It is also the only protocol that assembles a multi-agent team for parallel perspective analysis. Syneidesis surfaces gaps in a decision, Aitesis verifies execution context, but both assume the analytical lens is already chosen. Prothesis is the protocol that chooses the lens.
+**Key difference**: Prothesis operates at the framework-selection level — choosing which analytical lenses to apply — while all other protocols operate within an already-established framework. It is also the only protocol that can assemble a multi-agent team for parallel perspective analysis (Mode 2) or provide lightweight lens recommendations (Mode 1). Syneidesis surfaces gaps in a decision, Aitesis verifies execution context, but both assume the analytical lens is already chosen. Prothesis is the protocol that chooses the lens.
 
 ## Mode Activation
 
@@ -200,6 +238,20 @@ Options:
 
 **Pre-fill from explicit text**: `/frame "text"` → pre-fill from provided text, still confirm.
 
+**Mode selection**: After Mission Brief confirmation, **call AskUserQuestion** to select mode:
+
+```
+Options:
+1. **Recommend** — lightweight lens recommendation (Pₛ only, no team inquiry)
+2. **Inquire** — full multi-perspective inquiry with team (existing behavior)
+```
+
+`/frame --recommend` argument → skip mode selection, enter Mode 1 directly. This is the first `--flag` style argument in the protocol ecosystem.
+
+**Mode 1 (Recommend)**: Executes Phase 0 → Phase 1 → Phase 2, then terminates with Pₛ and composition recommendations. No team is created. Pₛ is an intermediate output (not a resolution) — the deficit `FrameworkAbsent` remains open until a downstream protocol completes its own resolution using Pₛ as context.
+
+**Mode 2 (Inquire)**: Existing behavior unchanged — Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → L.
+
 **Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context for agent-teams), not the epistemic layer. Hermeneia resolves intent-expression gaps (user-initiated or AI-detected trigger); Telos co-constructs goals from vague intent. Phase 0 packages confirmed intent into a structured vehicle for teammate consumption — a prerequisite for quality spawn prompts, not a substitute for intent clarification or goal construction.
 
 ### Phase 1: Context Gathering
@@ -247,6 +299,22 @@ Optional dimension naming (apply when initial generation seems redundant):
 - AskUserQuestion presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
 - State Pᵦ in the question text as context (e.g., "Base: [Pᵦ names]. Which additional lens(es)?")
 - AI must propose at least 1 novel perspective when Pᵦ ≠ ∅ — re-presenting known perspectives as options saturates the finite option space and structurally conceals unknown unknowns
+
+**Mode 1 termination**: When `m=recommend`, Phase 2 is the terminal phase. After Pₛ selection:
+
+1. Output selected perspectives with brief characterization
+2. Recommend downstream protocol composition based on MBᵥ.inquiry_intent:
+   - Context verification needed → suggest Aitesis (`/inquire`)
+   - Gap surfacing → suggest Syneidesis (`/gap`)
+   - Goal construction → suggest Telos (`/goal`)
+   - Comprehension verification → suggest Katalepsis (`/grasp`)
+   - Delegation calibration → suggest Epitrope (`/calibrate`)
+3. Note escalation path: "For deeper isolated analysis, re-invoke `/frame` — Pₛ will transfer as Pᵦ"
+
+**Pₛ count guidance** (Mode 1):
+- |Pₛ| = 1: Genuine lightweight context modifier — narrows downstream protocol's domain
+- |Pₛ| ≥ 2 complementary: Domain-narrowing (Tier 1) — integrated execution without isolation is sufficient
+- |Pₛ| ≥ 2 contradictory: Recommend escalation to Mode 2 for isolated analysis (Tier 2)
 
 ### Phase 3: Inquiry (Through Selected Lens)
 
@@ -314,6 +382,8 @@ Teammates analyze independently. Results arrive via idle notifications.
 Collect inquiry results into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 5, where the user's sufficiency judgment determines team lifecycle.
 
 #### Isolated Context Requirement
+
+**Mode 2 (inquire) only.** Mode 1 (recommend) terminates before Phase 3 — see Rule 3.
 
 Each perspective MUST be analyzed in **isolated teammate context** to prevent:
 - Cross-perspective contamination from shared conversation history
@@ -441,14 +511,15 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 
 ## Rules
 
-1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation. Modify loops re-present until confirmed.
+1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation. `--recommend` flag sets mode directly (skip mode selection AskUserQuestion). Modify loops re-present until confirmed.
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Phase topology per Rule 11
+3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 10
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
 7. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
 8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
-9. **Team persistence**: Team persists across Phase 5 loop iterations; TeamDelete only at terminal states (wrap_up/ESC from Phase 5). J=calibrate retains team for Epitrope reuse
+9. **Team persistence**: Mode 2 only: Team persists across Phase 5 loop iterations; TeamDelete only at terminal states (wrap_up/ESC from Phase 5). J=calibrate retains team for Epitrope reuse. Mode 1 creates no team.
 10. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion
+11. **Mode binding**: --recommend flag binds m=recommend after MB confirmation, skipping mode selection AskUserQuestion. Mode selection is mandatory when m=pending. Mode 1 terminates at Phase 2 with Pₛ; Pₛ transfers as Pᵦ on re-invocation.
 

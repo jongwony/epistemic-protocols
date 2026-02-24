@@ -58,14 +58,16 @@ epistemic-protocols/
 
 **SKILL.md Formal Block Anatomy** (all protocols share this structure within `Definition` code block):
 ```
-── FLOW ──              One-line formula: full protocol path with symbols
+── FLOW ──              Protocol path formula (multi-line for multi-mode protocols)
 ── TYPES ──             Symbol definitions with type signatures and comments
 ── ENTRY TYPES ──       (if applicable) Extended types for entry modes (e.g., Epitrope)
 ── DELEGATION TYPES ──  (if applicable) Extended types for delegation structure (e.g., Epitrope)
+── *-BINDING ──         (if applicable) Input binding resolution rules (U-BINDING, E-BINDING, G-BINDING)
 ── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
 ── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping
+── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ```
 Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.
@@ -73,10 +75,10 @@ Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases 
 ## Plugins
 
 ### Frame (πρόθεσις) — Prothesis
-Resolve absent frameworks by assembling a team to analyze from selected viewpoints.
+Resolve absent frameworks by recommending analytical lenses (Mode 1) or assembling a team for multi-perspective inquiry (Mode 2).
 - **Deficit**: FrameworkAbsent → FramedInquiry
 - **Triggers**: Purpose present but approach unspecified; multiple valid frameworks exist
-- **Invocation**: `/frame` or use "frame" in conversation
+- **Invocation**: `/frame` or use "frame" in conversation; `/frame --recommend` for lightweight lens recommendation
 
 ### Gap (συνείδησις) — Syneidesis
 Surface unnoticed gaps at decision points as questions.
@@ -170,6 +172,36 @@ This diagram shows logical progression, not strict execution order.
   - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia)
   - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Reflexion, Write)
+
+## Development
+
+- **Node.js 22+** required (`zlib.crc32` used in packaging; CI pins Node 22)
+- Static checks: `node .claude/skills/verify/scripts/static-checks.js .`
+- Packaging: `node scripts/package.js [--dry-run]` — produces `dist/*.zip` + `dist/release-notes.md`
+
+### Packaging Transformations
+
+`scripts/package.js` applies non-trivial transforms when building release ZIPs:
+- Renames `SKILL.md` → `Skill.md` (marketplace case convention)
+- Strips frontmatter fields: `allowed-tools`, `license`, `compatibility`, `metadata`
+- Overrides descriptions exceeding 200 chars (`frame`, `calibrate`, `reflexion`)
+- Excludes `agents/`, `commands/`, README files from ZIPs
+- 500-line guideline per SKILL.md (warns if exceeded)
+
+### graph.json
+
+Protocol dependency graph at `.claude/skills/verify/graph.json`. Validated by static check `graph-integrity`.
+
+```
+Edge types (allowlist):
+  precondition  — must complete before target (DAG-checked for cycles)
+  advisory      — provides useful context but not required
+  transition    — mode switch between protocols
+  suppression   — prevents stacking of similar protocols
+
+Wildcard: "source": "*" = all nodes except target
+Descriptions: "satisfies" field in Korean
+```
 
 ## Verification
 
