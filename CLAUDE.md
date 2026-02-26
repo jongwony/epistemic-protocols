@@ -235,8 +235,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Epitrope**: Solo mode: no Task delegation—must run in main agent to call AskUserQuestion. Team modes: Phase 5 uses Task/TeamCreate/SendMessage for team application
-- **Prosoche**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Epitrope**: Solo mode: no Task delegation—must run in main agent to call AskUserQuestion. Team modes: Phase 5 uses Task/TeamCreate/SendMessage for team application (TeamRestructure spawns new roles only)
 - **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
 
 ## Git Conventions

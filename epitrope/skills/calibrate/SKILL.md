@@ -1,6 +1,6 @@
 ---
 name: calibrate
-description: "Context-adaptive delegation calibration through scenario-based interview. Detects execution context to select entry mode (Solo/TeamAugment/TeamCreate) and produces a DelegationContract. Alias: Epitrope(ἐπιτροπή)."
+description: "Context-adaptive delegation calibration through scenario-based interview. Detects execution context to select entry mode (Solo/TeamAugment/TeamRestructure/TeamCreate) and produces a DelegationContract. Alias: Epitrope(ἐπιτροπή)."
 ---
 
 # Epitrope Protocol
@@ -9,13 +9,14 @@ Context-adaptive delegation calibration through scenario-based interview, detect
 
 ## Definition
 
-**Epitrope** (ἐπιτροπή): A dialogical act of calibrating delegation boundaries through concrete scenario-based questions, where AI detects ambiguous delegation scope, identifies execution context (active team, solo, or new team needed), and produces a DelegationContract covering structure (WHO), scope (WHAT), and autonomy (HOW MUCH).
+**Epitrope** (ἐπιτροπή): A dialogical act of calibrating delegation boundaries through concrete scenario-based questions, where AI detects ambiguous delegation scope, identifies execution context (active team, team requiring restructure, solo, or new team needed), and produces a DelegationContract covering structure (WHO), scope (WHAT), and autonomy (HOW MUCH).
 
 ```
 ── FLOW ──
 Epitrope(T) → Ctx(T) → Q(propose_mode) → EntryMode →
   Solo:         Decompose(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integrate(R) → DC → Q(DC) → approve
   TeamAugment:  inherit(T) → WHO?(T) → {Dᵢ} → Scenario(Dᵢ, T) → Q → R → integrate(R) → DC → Q(DC) → apply(DC, T)
+  TeamRestructure: restructure(T) → {Dᵢ} → Scenario(Dᵢ, T') → Q → R → integrate(R) → DC → Q(DC) → apply(DC, T')
   TeamCreate:   Decompose(T) → WHO(T) → {Dᵢ} → Scenario(Dᵢ) → Q → R → integrate(R) → DC → Q(DC) → create(DC) → apply(DC, T)
   → (loop until calibrated)
 
@@ -30,11 +31,12 @@ R    = Response ∈ {Autonomous, ReportThenAct, AskBefore, Halt}
          -- Domain-specific refinements (⊆ base R):
          --   Minimal ⊆ Autonomous, ProposeThenChoose ⊆ ReportThenAct,
          --   SwitchAutonomously ⊆ Autonomous, AlwaysAsk ⊆ AskBefore
+T'   = TaskScope (post-restructure: T with updated team membership)
 
 ── ENTRY TYPES ──
 Phase ∈ {0, 1, 2, 3, 4, 5}
-EntryMode ∈ {TeamAugment, TeamCreate, Solo}
-         -- TeamAugment requires team(Ctx)
+EntryMode ∈ {TeamAugment, TeamRestructure, TeamCreate, Solo}
+         -- TeamAugment/TeamRestructure require team(Ctx); TeamRestructure ∧ TeamCreate = ∅
 Ctx   = DetectedContext { team: Option(TeamRef), lens: Option(L), complexity: Complexity }
 L      = Lens { convergence: Set, divergence: Set, assessment: Any }  -- from Prothesis; Option(L) = None when standalone
 TeamRef = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
@@ -54,8 +56,8 @@ DC    = DelegationContract {
         }
          -- Subagent inheritance: spawned agents inherit parent DC unless explicitly overridden
          -- invariant: dom(how_much) ⊇ what (uncalibrated domains filled by defaults in Phase 4)
-TeamStructure ∈ {Solo, Augmented(TeamRef, Set(AgentRole)), Created(Set(AgentRole), Topology)}
-         -- |roles| ≥ 1 for Augmented/Created; |roles| ≤ 6 (WHO cap)
+TeamStructure ∈ {Solo, Augmented(TeamRef, Set(AgentRole)), Restructured(TeamRef, Set(AgentRole), Set(AgentRef)), Created(Set(AgentRole), Topology)}
+         -- |roles| ≥ 1 for Augmented/Created/Restructured; |roles| ≤ 6 (WHO cap); Restructured: |TeamRef.members \ removed| ≥ 1
 AgentRole = { name: String, type: String, focus: String }
 Topology ∈ {HubSpoke, PeerReview, Pipeline}
 ExplorationScope = { depth: N, breadth: N, drift_action: report | halt }
@@ -77,13 +79,14 @@ ScopeCreep:        "When agent discovers work outside its focus?" → {Autonomou
 Phase 0:  T → detect(T) → Ctx → Q[AskUserQuestion](propose_mode(Ctx)) → EntryMode  -- mode selection [Tool]
   Single(Ctx) ∧ ¬team(Ctx) → skip (delegation unambiguous; no DC produced)
   propose_mode(Ctx):
-    team_active(Ctx)            → propose TeamAugment (Solo alternative)   -- independent of Lens presence
-    ¬team(Ctx) ∧ Multi(Ctx)    → propose Solo (TeamCreate alternative)    -- user may opt for team operation
+    team_active(Ctx)            → present(TeamAugment, TeamRestructure, Solo)  -- situation-dependent; no fixed default
+    ¬team(Ctx) ∧ Multi(Ctx)    → propose Solo (TeamCreate alternative)
 
 Phase 1:  (mode-dependent)                                         -- structure + decomposition
   Solo:         T → decompose[Tool](T) → {Dᵢ}                      -- decomposition via Read/Grep
   TeamAugment:  T → inherit(Ctx.team) → WHO[AskUserQuestion](adjust?) → TeamStructure
                   → decompose(T) → {Dᵢ}                            [Tool]
+  TeamRestructure: T → restructure[AskUserQuestion](Ctx.team, T) → T' → decompose(T') → {Dᵢ}  [Tool]
   TeamCreate:   T → decompose(T) → {Dᵢ}
                   → WHO[AskUserQuestion](design, Dᵢ) → TeamStructure  [Tool]
 
@@ -95,6 +98,7 @@ Phase 4:  DC' → Q[AskUserQuestion](DC', progress) → approve        -- contra
 
 Phase 5:  (team modes only)                                        -- team application [Tool]
   TeamAugment: DC[SendMessage](team, DC) → apply_authority(DC, Ctx.team)             [Tool]  -- SendMessage=extern; apply_authority=state
+  TeamRestructure: ∥S[Task](DC.who.new_roles) → DC[SendMessage](retained ∪ new, DC) → apply_authority(DC, T'.team)  [Tool]
   TeamCreate:  T[TeamCreate](DC.who) → ∥S[Task](DC.who.roles) → DC[SendMessage](team, DC)  [Tool]
 
 ── LOOP ──
@@ -108,12 +112,12 @@ If all calibrated or user ESC: proceed to Phase 4.
 
 After Phase 4 (contract review):
   approve        → Phase 5 (team modes) or terminate (Solo)
-  adjust(who)    → return to Phase 1 (TeamAugment/TeamCreate only; unavailable in Solo)
+  adjust(who)    → return to Phase 1 (TeamAugment/TeamRestructure/TeamCreate only; unavailable in Solo)
   adjust(domain) → return to Phase 2
   ESC            → terminate; partial DC applies to calibrated domains
 
 After Phase 5 (team application):
-  TeamAugment: authority applied → terminate with active DC
+  TeamAugment/TeamRestructure: authority applied → terminate with active DC
   TeamCreate:  team created + authority applied → terminate with active DC
   TeamCreate fail     → inform user; offer retry or terminate
   Task (spawn) partial fail → inform user; partial team active; offer continue-with-partial or cleanup
@@ -131,14 +135,15 @@ variance_detected(h) ≡ ∃(Dᵢ, Sₖ, R₁), (Dᵢ, Sₖ', R₂) ∈ h : R₁
 |questions| ≤ 12 (Solo: 9, Team: 12)
 
 ── TOOL GROUNDING ──
-Phase 0 Q   (extern)    → AskUserQuestion (mode selection: TeamAugment/TeamCreate/Solo)
+Phase 0 Q   (extern)    → AskUserQuestion (mode selection: TeamAugment/TeamRestructure/TeamCreate/Solo)
 Phase 1 WHO (extern)    → AskUserQuestion (team structure: adjust or design)  -- TeamAugment/TeamCreate
+Phase 1 restructure (extern) → AskUserQuestion (team restructure: retain/remove/add + WHO confirmation)  -- TeamRestructure only
 Phase 1     (detect)    → Read, Grep (task analysis for decomposition)
 Phase 2 Q   (extern)    → AskUserQuestion (scenario with autonomy options)
 Phase 3     (state)     → Internal DelegationContract update
 Phase 4 Q   (extern)    → AskUserQuestion (contract review + approval)
 Phase 5 T   (parallel)  → TeamCreate tool (create team from DC.who)           -- TeamCreate only
-Phase 5 ∥S  (parallel)  → Task tool (spawn team members)                      -- TeamCreate only
+Phase 5 ∥S  (parallel)  → Task tool (spawn team members)                      -- TeamCreate/TeamRestructure (new roles only)
 Phase 5 DC  (extern)    → SendMessage tool (distribute DC to team)            -- team modes
 apply_authority (state) → Internal state transition (MissionBrief authority → DelegationContract authority; no external tool)  -- TeamAugment
 inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.json)  -- TeamAugment
@@ -151,7 +156,7 @@ inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.jso
       history: List<(Dᵢ, Sₖ, R)>, active: Bool,
       team: Option(TeamRef) }
          -- calibrated ∪ skipped ⊆ domains; calibrated ∩ skipped = ∅
-         -- who_confirmed: Solo → true (implicit); TeamAugment → set at Phase 1 WHO confirmation; TeamCreate → set at Phase 1 WHO design
+         -- who_confirmed: Solo → true (implicit); TeamAugment/TeamRestructure → set at Phase 1; TeamCreate → set at Phase 1 WHO design
          -- team: ctx.team is Phase 0 snapshot; team is live reference (updated at Phase 5 TeamCreate or inherited for TeamAugment)
 ```
 
@@ -264,8 +269,8 @@ Detect execution context and propose an entry mode. **Call the AskUserQuestion t
 
 1. **Detect context**: Check for active team (`~/.claude/teams/{name}/config.json`), existing Lens (from Prothesis), and task complexity
 2. **Propose mode** based on detected context:
-   - **team_active**: Propose TeamAugment (existing team can be reused with new authority); Solo as alternative
-   - **no team**: Propose Solo (single-agent execution); TeamCreate as alternative if complexity warrants it
+   - **team_active**: Present three options equally — TeamAugment, TeamRestructure, Solo — with situation-based descriptions
+   - **no team**: Propose Solo (single-agent execution); TeamCreate as alternative
 3. If only one domain with clear scope and no team: skip Epitrope (delegation unambiguous)
 
 ```
@@ -274,8 +279,9 @@ Execution context detected:
 [Context summary: active team / no team, lens presence, complexity]
 
 Options:
-1. **[Proposed mode]** — [what this means]
-2. **[Alternative mode]** — [what this means]
+1. **TeamAugment** — keep current team, calibrate delegation (extend discussion, long Phase 4)
+2. **TeamRestructure** — adjust team membership, then calibrate (peer review, role change, additional perspectives)
+3. **Solo** — single-agent execution (protocol composition, different approach)
 ```
 
 **TeamAugment independence from Lens**: TeamAugment is proposed whenever a team is active, regardless of whether a Lens exists. The Lens enriches context (available findings inform scenarios) but is not a gating condition — a team created for any purpose can benefit from delegation calibration.
@@ -295,6 +301,8 @@ Options:
 2. **Adjust roles** — modify member focus areas for the new task
 ```
 Then decompose task into applicable ActionDomains.
+
+**TeamRestructure**: Inherit existing team, then restructure. **Call AskUserQuestion** presenting current members alongside task scope — user selects retain/remove per member and optionally proposes new roles. Constraint: `|retain| ≥ 1` (full removal redirects to wrap_up + TeamCreate). Produces TeamStructure (Restructured variant), then decompose T' into applicable ActionDomains. Post-restructure flow mirrors TeamAugment from Phase 2 onward.
 
 **TeamCreate**: Decompose task into applicable ActionDomains first. Then **call AskUserQuestion** to design WHO:
 ```
@@ -406,7 +414,7 @@ Options:
 2. **Adjust** — I'd like to change something
 ```
 
-If user selects "Adjust": present sub-options — "Adjust team structure" (→ Phase 1, TeamAugment/TeamCreate only) or "Adjust domain calibration" (→ Phase 2). Solo mode only offers "Adjust domain calibration". If approved: Solo terminates; team modes proceed to Phase 5.
+If user selects "Adjust": present sub-options — "Adjust team structure" (→ Phase 1, TeamAugment/TeamRestructure/TeamCreate only) or "Adjust domain calibration" (→ Phase 2). Solo mode only offers "Adjust domain calibration". If approved: Solo terminates; team modes proceed to Phase 5.
 
 **Authority confirmation**: TeamAugment requires explicit approval before DC distribution — the user must confirm before the team's operating contract changes.
 
@@ -415,6 +423,8 @@ If user selects "Adjust": present sub-options — "Adjust team structure" (→ P
 Team modes only. After contract approval:
 
 **TeamAugment**: Apply authority layer replacement to existing team. The team's operating contract transitions from its previous context (e.g., MissionBrief from Prothesis) to the DelegationContract. Call SendMessage to distribute DC to team members. Agents themselves are retained; the coordinator relationship shifts from "perspective collection" to "delegated execution within DC scope."
+
+**TeamRestructure**: Spawn new roles via Task tool, then distribute DC to retained + new members via SendMessage. Removed members are excluded from DC distribution.
 
 **TeamCreate**: Create team from DC.who specification. Call TeamCreate tool, then spawn team members via Task tool with appropriate roles and focus areas. Call SendMessage to distribute DC to all members.
 
@@ -439,6 +449,7 @@ Both modes terminate with active DC after distribution.
 | Prothesis mode-switch | `ctx.team ≠ ∅ ∧ ctx.lens ≠ ∅` → skip domains with unanimous Lens convergence | Confirmed |
 | WHO cap | `\|roles\| ≤ 6` for any team structure | Confirmed |
 | Team mode fallback | `TeamCreate + \|Dᵢ\| ≤ 2` → suggest Solo | Confirmed |
+| Full restructure guard | `TeamRestructure + \|retain\| = 0` → redirect to wrap_up + TeamCreate | Confirmed |
 | Blanket escape | "Just do it" → immediate ESC, default autonomy | Confirmed |
 
 ## Rules
@@ -463,7 +474,7 @@ Both modes terminate with active DC after distribution.
 When Prothesis Phase 5 routing selects `J=calibrate`:
 
 1. Coordinator calls `Skill("calibrate")` — Epitrope SKILL.md loads into conversation context
-2. Epitrope Phase 0 detects `team_active` → proposes TeamAugment mode
+2. Epitrope Phase 0 detects `team_active` → presents TeamAugment, TeamRestructure, Solo options
 3. Handoff via session context: `T = TaskScope` derived from conversation (original request U, verified MissionBrief MBᵥ, and Lens L are all available in session context; no explicit transfer type needed)
 
 **Context availability** (present in session without explicit transfer):

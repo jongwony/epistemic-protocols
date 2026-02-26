@@ -6,7 +6,7 @@
 
 ## Epitrope란?
 
-그리스어 ἐπιτροπή(맡김)의 현대적 재해석 — **실행 컨텍스트를 탐지하고 적절한 진입 모드(Solo/TeamAugment/TeamCreate)를 선택한 후, 3차원(WHO/WHAT/HOW MUCH)으로 위임을 캘리브레이션하는** 프로토콜.
+그리스어 ἐπιτροπή(맡김)의 현대적 재해석 — **실행 컨텍스트를 탐지하고 적절한 진입 모드(Solo/TeamAugment/TeamRestructure/TeamCreate)를 선택한 후, 3차원(WHO/WHAT/HOW MUCH)으로 위임을 캘리브레이션하는** 프로토콜.
 
 ### 핵심 문제
 
