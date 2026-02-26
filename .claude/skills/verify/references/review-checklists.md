@@ -154,6 +154,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INQUIRE)
   - Epitrope: DelegationAmbiguous → CalibratedDelegation (AI-guided, CALIBRATE)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
+  - Prosoche: ExecutionBlind → SituatedExecution (AI-guided, EVALUATE)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
   - Reflexion: KnowledgeTacit → PersistedKnowledge (User-invoked, CRYSTALLIZE)
   - Write: InsightInternal → ExternalizedKnowledge (User-invoked, EXTERNALIZE)

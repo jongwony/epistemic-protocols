@@ -27,6 +27,7 @@ const PLUGINS = [
   { dir: 'telos', skill: 'goal' },
   { dir: 'aitesis', skill: 'inquire' },
   { dir: 'epitrope', skill: 'calibrate' },
+  { dir: 'prosoche', skill: 'attend' },
   { dir: 'reflexion', skill: 'reflexion' },
   { dir: 'write', skill: 'write' },
 ];

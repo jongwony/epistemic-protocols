@@ -1,0 +1,9 @@
+{
+  "name": "prosoche",
+  "description": "Evaluate execution-time risks during AI operations — /attend (προσοχή: attention)",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  }
+}

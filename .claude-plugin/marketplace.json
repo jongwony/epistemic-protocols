@@ -50,6 +50,11 @@
       "description": "Context-adaptive delegation calibration through scenario-based interview — /calibrate (ἐπιτροπή: a turning over to)"
     },
     {
+      "name": "prosoche",
+      "source": "./prosoche",
+      "description": "Evaluate execution-time risks during AI operations — /attend (προσοχή: attention)"
+    },
+    {
       "name": "epharmoge",
       "source": "./epharmoge",
       "description": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)"

@@ -77,6 +77,7 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Prosoche** | AI-guided | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -129,7 +130,7 @@ When Epharmoge is active:
 - Epharmoge completes before proceeding to next task
 - User Memory rules resume after applicability is verified or dismissed
 
-**Protocol precedence**: Default ordering places Epharmoge after Syneidesis (decision quality before execution quality) and before Katalepsis (applicability before comprehension). Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices. The user can override this default by explicitly requesting a different protocol first.
+**Protocol precedence**: Default ordering places Epharmoge after Prosoche (execution-time attention before post-execution applicability) and before Katalepsis (applicability before comprehension). Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices. The user can override this default by explicitly requesting a different protocol first.
 
 ### Trigger Signals
 

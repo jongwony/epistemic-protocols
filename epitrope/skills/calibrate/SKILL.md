@@ -169,6 +169,7 @@ inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.jso
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Prosoche** | AI-guided | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -207,7 +208,7 @@ When Epitrope is active:
 - Epitrope completes before multi-domain execution proceeds
 - User Memory rules resume after DelegationContract is approved or ESC
 
-**Protocol precedence**: Default ordering places Epitrope after Telos and before Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Epharmoge; defined goals before delegation calibration, calibrated delegation before context verification). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Epitrope after Telos and before Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge; defined goals before delegation calibration, calibrated delegation before context verification). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 ### Triggers
 

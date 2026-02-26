@@ -148,6 +148,7 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Prosoche** | AI-guided | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -179,7 +180,7 @@ When Prothesis is active:
 - Prothesis completes before other workflows begin
 - User Memory rules resume after perspective is established
 
-**Protocol precedence**: Default ordering places Prothesis after Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Epharmoge; established perspective contextualizes gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Prothesis after Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge; established perspective contextualizes gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
 
 ### Per-Message Application
 

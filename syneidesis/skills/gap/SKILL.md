@@ -78,6 +78,7 @@ A (adjust)     → Internal state update (no external tool)
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Prosoche** | AI-guided | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -112,7 +113,7 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - User Memory rules resume after mode deactivation
 
-**Protocol precedence**: Default ordering places Syneidesis after Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Epharmoge; gap detection applies within the established, context-verified perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Syneidesis after Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge; gap detection applies within the established, context-verified perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed result (`R`), so it is not subject to ordering choices.
 
 ### Mode Deactivation
 

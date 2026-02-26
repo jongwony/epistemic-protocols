@@ -224,6 +224,7 @@ function checkCrossReference() {
     'inquire': 'aitesis/skills/inquire/SKILL.md',
     'calibrate': 'epitrope/skills/calibrate/SKILL.md',
     'contextualize': 'epharmoge/skills/contextualize/SKILL.md',
+    'attend': 'prosoche/skills/attend/SKILL.md',
   };
 
   // Flow-formula comparison removed (GH #36): CLAUDE.md no longer contains flow formulas.
@@ -269,6 +270,7 @@ function checkRequiredSections() {
     'aitesis/skills/inquire/SKILL.md',
     'epitrope/skills/calibrate/SKILL.md',
     'epharmoge/skills/contextualize/SKILL.md',
+    'prosoche/skills/attend/SKILL.md',
   ];
 
   const requiredSections = [
@@ -317,6 +319,7 @@ function checkToolGrounding() {
     'aitesis/skills/inquire/SKILL.md',
     'epitrope/skills/calibrate/SKILL.md',
     'epharmoge/skills/contextualize/SKILL.md',
+    'prosoche/skills/attend/SKILL.md',
   ];
 
   // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS

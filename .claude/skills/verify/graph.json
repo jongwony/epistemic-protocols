@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "nodes": [
     "hermeneia", "telos", "epitrope", "aitesis",
-    "prothesis", "syneidesis", "epharmoge", "katalepsis"
+    "prothesis", "syneidesis", "prosoche", "epharmoge", "katalepsis"
   ],
   "edges": [
     { "source": "hermeneia", "target": "telos", "type": "precondition", "satisfies": "표현 명확화 → 목표가 더 정확" },
@@ -15,6 +15,9 @@
     { "source": "epitrope", "target": "aitesis", "type": "advisory", "satisfies": "위임 범위가 컨텍스트 검증 초점을 좁힘" },
     { "source": "syneidesis", "target": "aitesis", "type": "suppression", "satisfies": "동일 작업 범위 Aitesis 억제 (비대칭)" },
     { "source": "aitesis", "target": "epharmoge", "type": "suppression", "satisfies": "동일 범위 pre+post 스태킹 방지" },
-    { "source": "prothesis", "target": "epitrope", "type": "transition", "satisfies": "J=calibrate: 관점→위임 직접 모드 전환 (팀 유지)" }
+    { "source": "prothesis", "target": "epitrope", "type": "transition", "satisfies": "J=calibrate: 관점→위임 직접 모드 전환 (팀 유지)" },
+    { "source": "aitesis", "target": "prosoche", "type": "advisory", "satisfies": "검증된 컨텍스트가 실행 시 위험 평가 초점을 좁힘" },
+    { "source": "epitrope", "target": "prosoche", "type": "advisory", "satisfies": "위임 범위가 실행 시 감시 수준을 결정" },
+    { "source": "prosoche", "target": "epharmoge", "type": "advisory", "satisfies": "실행 시 주의가 사후 적용성 검증 컨텍스트를 제공" }
   ]
 }
