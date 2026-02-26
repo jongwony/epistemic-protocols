@@ -15,6 +15,18 @@ const projectRoot = process.argv[2] || process.cwd();
 
 const results = { pass: [], fail: [], warn: [] };
 
+const PROTOCOL_FILES = [
+  'prothesis/skills/frame/SKILL.md',
+  'syneidesis/skills/gap/SKILL.md',
+  'hermeneia/skills/clarify/SKILL.md',
+  'katalepsis/skills/grasp/SKILL.md',
+  'telos/skills/goal/SKILL.md',
+  'aitesis/skills/inquire/SKILL.md',
+  'epitrope/skills/calibrate/SKILL.md',
+  'epharmoge/skills/contextualize/SKILL.md',
+  'prosoche/skills/attend/SKILL.md',
+];
+
 // ============================================================
 // Check 1: JSON Schema Validation
 // ============================================================
@@ -33,7 +45,11 @@ function checkJsonSchema() {
           pluginJsonPaths.push(fullPath);
         }
       }
-    } catch (e) { /* ignore permission errors */ }
+    } catch (e) {
+      if (e.code !== 'EACCES' && e.code !== 'ENOENT') {
+        results.warn.push({ check: 'json-schema', file: path.relative(projectRoot, dir), message: `Directory walk error: ${e.code || e.message}` });
+      }
+    }
   }
 
   findPluginJson(projectRoot);
@@ -118,7 +134,11 @@ function checkNotation() {
           mdFiles.push(fullPath);
         }
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      if (e.code !== 'EACCES' && e.code !== 'ENOENT') {
+        results.warn.push({ check: 'notation', file: path.relative(projectRoot, dir), message: `Directory walk error: ${e.code || e.message}` });
+      }
+    }
   }
 
   findMdFiles(projectRoot);
@@ -166,7 +186,11 @@ function checkDirectiveVerb() {
           mdFiles.push(fullPath);
         }
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      if (e.code !== 'EACCES' && e.code !== 'ENOENT') {
+        results.warn.push({ check: 'directive-verb', file: path.relative(projectRoot, dir), message: `Directory walk error: ${e.code || e.message}` });
+      }
+    }
   }
 
   findMdFiles(projectRoot);
@@ -224,6 +248,7 @@ function checkCrossReference() {
     'inquire': 'aitesis/skills/inquire/SKILL.md',
     'calibrate': 'epitrope/skills/calibrate/SKILL.md',
     'contextualize': 'epharmoge/skills/contextualize/SKILL.md',
+    'attend': 'prosoche/skills/attend/SKILL.md',
   };
 
   // Flow-formula comparison removed (GH #36): CLAUDE.md no longer contains flow formulas.
@@ -260,16 +285,6 @@ function checkCrossReference() {
 // Check 5: Required Sections in Protocols
 // ============================================================
 function checkRequiredSections() {
-  const protocolFiles = [
-    'prothesis/skills/frame/SKILL.md',
-    'syneidesis/skills/gap/SKILL.md',
-    'hermeneia/skills/clarify/SKILL.md',
-    'katalepsis/skills/grasp/SKILL.md',
-    'telos/skills/goal/SKILL.md',
-    'aitesis/skills/inquire/SKILL.md',
-    'epitrope/skills/calibrate/SKILL.md',
-    'epharmoge/skills/contextualize/SKILL.md',
-  ];
 
   const requiredSections = [
     '## Definition',
@@ -280,9 +295,16 @@ function checkRequiredSections() {
     '── MODE STATE ──',
   ];
 
-  for (const relPath of protocolFiles) {
+  for (const relPath of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) continue;
+    if (!fs.existsSync(fullPath)) {
+      results.warn.push({
+        check: 'structure',
+        file: relPath,
+        message: `Protocol file not found: ${relPath}`
+      });
+      continue;
+    }
 
     const content = fs.readFileSync(fullPath, 'utf8');
 
@@ -308,16 +330,6 @@ function checkRequiredSections() {
 // Check 6: Tool Grounding Consistency
 // ============================================================
 function checkToolGrounding() {
-  const protocolFiles = [
-    'prothesis/skills/frame/SKILL.md',
-    'syneidesis/skills/gap/SKILL.md',
-    'hermeneia/skills/clarify/SKILL.md',
-    'katalepsis/skills/grasp/SKILL.md',
-    'telos/skills/goal/SKILL.md',
-    'aitesis/skills/inquire/SKILL.md',
-    'epitrope/skills/calibrate/SKILL.md',
-    'epharmoge/skills/contextualize/SKILL.md',
-  ];
 
   // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS
   const MANDATORY_CLASSIFICATIONS = new Set(['extern', 'parallel']);
@@ -350,9 +362,16 @@ function checkToolGrounding() {
     return false;
   }
 
-  for (const relPath of protocolFiles) {
+  for (const relPath of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) continue;
+    if (!fs.existsSync(fullPath)) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: `Protocol file not found: ${relPath}`
+      });
+      continue;
+    }
 
     const content = fs.readFileSync(fullPath, 'utf8');
 
@@ -425,7 +444,8 @@ function checkVersionStaleness() {
   try {
     execSync('git rev-parse --is-inside-work-tree', { cwd: projectRoot, stdio: 'pipe' });
   } catch {
-    // Not a git repo — silent return
+    // Not a git repo — check not applicable
+    results.pass.push({ check: 'version-staleness', file: 'working tree', message: 'Not a git repository — skipping' });
     return;
   }
 
@@ -453,6 +473,7 @@ function checkVersionStaleness() {
         ...(untrackedOutput ? untrackedOutput.split('\n') : []),
       ];
     } catch {
+      results.warn.push({ check: 'version-staleness', file: 'working tree', message: 'Git commands failed — version staleness check skipped' });
       return;
     }
   }
@@ -498,7 +519,11 @@ function checkVersionStaleness() {
           findPluginDirs(fullPath, depth + 1);
         }
       }
-    } catch { /* ignore */ }
+    } catch (e) {
+      if (e.code !== 'EACCES' && e.code !== 'ENOENT') {
+        results.warn.push({ check: 'version-staleness', file: path.relative(projectRoot, dir), message: `Directory walk error: ${e.code || e.message}` });
+      }
+    }
   }
   findPluginDirs(projectRoot);
 

@@ -92,6 +92,7 @@ Telos is not simplified requirements gathering. Three differentiators:
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Prosoche** | AI-guided | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -125,7 +126,7 @@ When Telos is active:
 - Telos completes before implementation workflows begin
 - User Memory rules resume after GoalContract is approved
 
-**Protocol precedence**: Default ordering places Telos after Hermeneia and before Epitrope (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Epharmoge; clarified intent before goal construction, defined goals before delegation calibration). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Telos after Hermeneia and before Epitrope (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge; clarified intent before goal construction, defined goals before delegation calibration). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 Approved GoalContract becomes input to subsequent protocols.
 

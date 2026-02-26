@@ -15,6 +15,7 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 | **[Telos](./telos)** (τέλος) — /goal | Co-construct defined goals from vague intent | Pre-action |
 | **[Aitesis](./aitesis)** (αἴτησις) — /inquire | Detect context insufficiency before execution | Pre-execution |
 | **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | Context-adaptive delegation calibration through scenario-based interview | Pre-execution |
+| **[Prosoche](./prosoche)** (προσοχή) — /attend | Evaluate execution-time risks during AI operations | During execution |
 | **[Epharmoge](./epharmoge)** (ἐφαρμογή) — /contextualize | Detect application-context mismatch after execution | Post-execution |
 
 ## Core Idea
@@ -34,6 +35,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 | **Telos** | GoalIndeterminate | AI-guided | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
 | **Aitesis** | ContextInsufficient | AI-guided | INQUIRE | `ContextInsufficient → InformedExecution` |
 | **Epitrope** | DelegationAmbiguous | AI-guided | CALIBRATE | `DelegationAmbiguous → CalibratedDelegation` |
+| **Prosoche** | ExecutionBlind | AI-guided | EVALUATE | `ExecutionBlind → SituatedExecution` |
 | **Epharmoge** | ApplicationDecontextualized | AI-guided | CONTEXTUALIZE | `ApplicationDecontextualized → ContextualizedExecution` |
 
 <img src="./assets/epistemic-matrix.svg" alt="Epistemic Type Transformations" width="560">
@@ -45,6 +47,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Telos**: "What do I actually want?" → AI proposes goals, you shape and approve (`GoalIndeterminate → DefinedEndState`)
 - **Aitesis**: "Am I missing something?" → AI detects its own context insufficiency and inquires for missing information before proceeding (`ContextInsufficient → InformedExecution`)
 - **Epitrope**: "How much should I handle?" → AI detects context, selects entry mode, calibrates delegation (WHO/WHAT/HOW MUCH) through scenarios (`DelegationAmbiguous → CalibratedDelegation`)
+- **Prosoche**: "Is this safe to execute?" → AI continuously evaluates pending actions for irreversibility, security boundaries, and external mutations, surfacing findings at risk boundaries (`ExecutionBlind → SituatedExecution`)
 - **Epharmoge**: "Does this actually fit?" → AI evaluates whether correct output fits the actual context, surfaces mismatches for user judgment (`ApplicationDecontextualized → ContextualizedExecution`)
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
@@ -63,6 +66,7 @@ The key insight: **Recognition over Recall**. It's easier to select from present
 /plugin install telos
 /plugin install aitesis
 /plugin install epitrope
+/plugin install prosoche
 /plugin install epharmoge
 ```
 
@@ -73,9 +77,9 @@ Epistemic protocols can also be used as [Codex](https://github.com/openai/codex)
 ```bash
 python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo jongwony/epistemic-protocols \
-  --path aitesis/skills/inquire epitrope/skills/calibrate epharmoge/skills/contextualize \
-        hermeneia/skills/clarify katalepsis/skills/grasp syneidesis/skills/gap \
-        telos/skills/goal
+  --path aitesis/skills/inquire epitrope/skills/calibrate prosoche/skills/attend \
+        epharmoge/skills/contextualize hermeneia/skills/clarify katalepsis/skills/grasp \
+        syneidesis/skills/gap telos/skills/goal
 ```
 
 Run in **plan mode** for interactive protocol workflows that require user decisions at each phase.
@@ -92,6 +96,7 @@ Run in **plan mode** for interactive protocol workflows that require user decisi
 /goal [your vague idea]      # Co-construct defined goals from intent
 /inquire [your task]          # Detect and resolve context insufficiency before execution
 /calibrate [your task]        # Context-adaptive delegation calibration through scenario-based interview
+/attend [your task]            # Evaluate execution-time risks during AI operations
 /contextualize [your task]    # Detect application-context mismatch after execution
 ```
 
