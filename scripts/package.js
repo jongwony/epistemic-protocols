@@ -36,6 +36,7 @@ const PLUGINS = [
 const DESCRIPTION_OVERRIDES = {
   frame: 'Assemble a team to analyze from multiple perspectives when the right framework is absent. Produces a framed inquiry from selected viewpoints.',
   calibrate: 'Calibrate delegation autonomy through scenario-based interview. Produces a DelegationContract when delegation scope is ambiguous.',
+  attend: 'Evaluate execution-time risks during AI operations. Monitors pending actions for risk signals, surfacing findings for user judgment.',
   reflexion: 'Extract session insights into persistent memory through guided dialogue. Reconstructs learnings from conversation history.',
 };
 

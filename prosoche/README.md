@@ -38,6 +38,11 @@ When you approve an action, the pattern `(tool_name, target, env_context)` is ca
 
 Environment-aware: `("pulumi up", "auth-stack", "dev")` approved does NOT cache-hit for `("pulumi up", "auth-stack", "prod")`.
 
+## Known Limitations
+
+- **Subagent blind spot**: Prosoche monitors the main agent's execution stream only. Actions executed by Task subagents are not monitored. Use `boundaries.md` rules and subagent permission restrictions as complementary controls.
+- **Single-pass detection**: Phase 0 risk signal scan is single-pass. False negatives (especially PromptInjection) are not retried.
+
 ## Installation
 
 ```bash
