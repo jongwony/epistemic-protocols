@@ -58,6 +58,7 @@ DC    = DelegationContract {
          -- invariant: dom(how_much) ⊇ what (uncalibrated domains filled by defaults in Phase 4)
 TeamStructure ∈ {Solo, Augmented(TeamRef, Set(AgentRole)), Restructured(TeamRef, Set(AgentRole), Set(AgentRef)), Created(Set(AgentRole), Topology)}
          -- |roles| ≥ 1 for Augmented/Created/Restructured; |roles| ≤ 6 (WHO cap); Restructured: |TeamRef.members \ removed| ≥ 1
+         -- guard: Phase 1 restructure redirects |retain|=0 before construction
 AgentRole = { name: String, type: String, focus: String }
 Topology ∈ {HubSpoke, PeerReview, Pipeline}
 ExplorationScope = { depth: N, breadth: N, drift_action: report | halt }
@@ -86,6 +87,8 @@ Phase 1:  (mode-dependent)                                         -- structure 
   Solo:         T → decompose[Tool](T) → {Dᵢ}                      -- decomposition via Read/Grep
   TeamAugment:  T → inherit(Ctx.team) → WHO[AskUserQuestion](adjust?) → TeamStructure
                   → decompose(T) → {Dᵢ}                            [Tool]
+  TeamRestructure: restructure[AskUserQuestion](T, Ctx.team) → |retain|=0 → wrap_up[SendMessage](Ctx.team) → reset(mode=TeamCreate) → Phase 1 TeamCreate  [Tool]
+  TeamRestructure: restructure[AskUserQuestion](T, Ctx.team) → |retain|=|team| ∧ |new|=0 → reset(mode=TeamAugment) → Phase 1 TeamAugment  [Tool]
   TeamRestructure: T → restructure[AskUserQuestion](Ctx.team, T) → T' → decompose(T') → {Dᵢ}  [Tool]
   TeamCreate:   T → decompose(T) → {Dᵢ}
                   → WHO[AskUserQuestion](design, Dᵢ) → TeamStructure  [Tool]
@@ -119,8 +122,9 @@ After Phase 4 (contract review):
 After Phase 5 (team application):
   TeamAugment/TeamRestructure: authority applied → terminate with active DC
   TeamCreate:  team created + authority applied → terminate with active DC
-  TeamCreate fail     → inform user; offer retry or terminate
-  Task (spawn) partial fail → inform user; partial team active; offer continue-with-partial or cleanup
+  TeamRestructure |retain|=0 → wrap_up[SendMessage](Ctx.team) → reset(mode=TeamCreate) → Phase 1 TeamCreate
+  TeamCreate/TeamRestructure fail → inform user; offer retry or terminate
+  Task (spawn) partial fail → inform user; partial team active; offer continue-with-partial or cleanup  -- TeamCreate/TeamRestructure new role spawning
   SendMessage fail    → team exists; DC not distributed; retry or inform user
 
 ── RECALIBRATION ──
@@ -145,7 +149,8 @@ Phase 4 Q   (extern)    → AskUserQuestion (contract review + approval)
 Phase 5 T   (parallel)  → TeamCreate tool (create team from DC.who)           -- TeamCreate only
 Phase 5 ∥S  (parallel)  → Task tool (spawn team members)                      -- TeamCreate/TeamRestructure (new roles only)
 Phase 5 DC  (extern)    → SendMessage tool (distribute DC to team)            -- team modes
-apply_authority (state) → Internal state transition (MissionBrief authority → DelegationContract authority; no external tool)  -- TeamAugment
+apply_authority (state) → Internal state transition (MissionBrief authority → DelegationContract authority; no external tool)  -- TeamAugment/TeamRestructure
+wrap_up     (extern)    → SendMessage tool (type: "shutdown_request", graceful termination of removed members)  -- TeamRestructure |retain|=0 redirect
 inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.json)  -- TeamAugment
 
 ── MODE STATE ──
@@ -157,7 +162,7 @@ inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.jso
       team: Option(TeamRef) }
          -- calibrated ∪ skipped ⊆ domains; calibrated ∩ skipped = ∅
          -- who_confirmed: Solo → true (implicit); TeamAugment/TeamRestructure → set at Phase 1; TeamCreate → set at Phase 1 WHO design
-         -- team: ctx.team is Phase 0 snapshot; team is live reference (updated at Phase 5 TeamCreate or inherited for TeamAugment)
+         -- team: ctx.team is Phase 0 snapshot; team is live reference (updated at Phase 5 TeamCreate/TeamRestructure or inherited for TeamAugment)
 ```
 
 ## Core Principle
@@ -450,6 +455,7 @@ Both modes terminate with active DC after distribution.
 | WHO cap | `\|roles\| ≤ 6` for any team structure | Confirmed |
 | Team mode fallback | `TeamCreate + \|Dᵢ\| ≤ 2` → suggest Solo | Confirmed |
 | Full restructure guard | `TeamRestructure + \|retain\| = 0` → redirect to wrap_up + TeamCreate | Confirmed |
+| No-change guard | `TeamRestructure + \|retain\| = \|team\| ∧ \|new\| = 0` → redirect to TeamAugment | Confirmed |
 | Blanket escape | "Just do it" → immediate ESC, default autonomy | Confirmed |
 
 ## Rules
