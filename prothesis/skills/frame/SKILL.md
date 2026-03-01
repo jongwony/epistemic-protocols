@@ -13,17 +13,19 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q(MB(U)) → MBᵥ → M(MBᵥ) → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ →
+Prothesis(U) → Q(MB(U), M) → (MBᵥ, m) → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ →
   m=recommend: recommend_compose(Pₛ) → terminate
   m=inquire:   T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → Q(Syn) → L
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
 MB     = MissionBrief(U): { inquiry_intent, expected_deliverable, scope_constraint }  -- AI-inferred from U
-Q(MB)  = Confirm: MB → MBᵥ                     -- extern (user confirmation/modification)
+Q(MB, M) = ConfirmAndSelect: (MB, ModeOptions) → (MBᵥ, m)  -- extern (combined AskUserQuestion)
+Q1(MB)   = Confirm: MB → MBᵥ                                -- Mission Brief confirmation component of Q
+Q2(M)    = Select: ModeOptions → m                           -- Mode selection component of Q
+           Q = Q1 × Q2 (composed in single AskUserQuestion; Modify loop re-presents Q1 only)
 MBᵥ    = Verified MissionBrief (user-confirmed)
-M      = ModeSelection: MBᵥ → m                  -- extern (user choice or --recommend binding)
-m      = Mode ∈ {recommend, inquire}              -- lens recommendation vs. framed inquiry; m=pending before M resolves (transient, not a Mode value)
+m      = Mode ∈ {recommend, inquire}              -- lens recommendation vs. framed inquiry
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
 C      = Context (information for perspective formulation)
 Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in Pₛ)
@@ -49,21 +51,16 @@ J_mb   = MissionBriefRouting ∈ {confirm, modify(field), ESC}  -- Phase 0 routi
 bind(U) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_request
 Priority: explicit_arg > colocated_expr > prev_user_turn > ai_identified_request
 
-/frame "text"                → U = "text", m = pending (mode selection required)
-/frame --recommend "text"    → U = "text", m = recommend (skip mode selection)
-/frame --recommend           → U = previous user message, m = recommend
-/frame (alone)               → U = previous user message, m = pending
-"investigate... frame"       → U = text before trigger, m = pending
-AI-detected trigger           → U = request AI identified, m = pending
+/frame "text"                → U = "text"
+/frame (alone)               → U = previous user message
+"investigate... frame"       → U = text before trigger
+AI-detected trigger           → U = request AI identified
 
 Edge cases:
-- --recommend + escalation: Pₛ becomes Pᵦ in subsequent /frame (Mode 2)
 - Re-invoke: If Pₛ exists in context, offer as Pᵦ for new invocation
 
 ── PHASE TRANSITIONS ──
-Phase 0:  U → MB(U) → Q[AskUserQuestion](MB) → await → MBᵥ → M[AskUserQuestion](mode) → await → m  -- Mission Brief + mode selection [Tool]
-            m=pending: present mode options via AskUserQuestion
-            --recommend binding: m = recommend (skip M)
+Phase 0:  U → MB(U) → Q[AskUserQuestion](MB, M) → await → (MBᵥ, m)  -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → present[S]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ  -- S: AskUserQuestion [Tool]
             m=recommend: Pₛ → recommend_compose(Pₛ) → terminate      -- Mode 1 termination
@@ -73,11 +70,11 @@ Phase 5:  L → Q[AskUserQuestion](routing) → await → J                     
 
 ── LOOP ──
 After Phase 0 (Mission Brief + Mode Selection):
-  J_mb = confirm       → M[AskUserQuestion](mode) → m
-    --recommend binding → m = recommend (skip M)
+  (MBᵥ, m) = Q result:
     m = recommend → Phase 1 → Phase 2 → terminate with Pₛ
     m = inquire   → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
-  J_mb = modify(field) → re-present Q(MB') → await → MBᵥ → M
+  J_mb = confirm       → proceed to Phase 1 with (MBᵥ, m)
+  J_mb = modify(field) → re-present Q1(MB') → await → MBᵥ (m retained from initial selection)
   J_mb = ESC           → terminate (no team exists)
 
 Mode 1 termination (after Phase 2, m=recommend):
@@ -102,14 +99,13 @@ recommend_protocols(L):
 Continue until convergence: user satisfied OR user ESC.
 
 ── BOUNDARY ──
-Q(MB) (confirm) = extern: Mission Brief confirmation boundary
+Q(MB, M) (confirm+select) = extern: Mission Brief confirmation + mode selection boundary
 G (gather)  = purpose: targeted context acquisition (guided by MBᵥ)
 S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
-Phase 0 Q (extern)       → AskUserQuestion (Mission Brief confirmation; Esc → terminate)
-M (extern)               → AskUserQuestion (mode selection: recommend/inquire; --recommend binding skips; after MB confirmation)
+Phase 0 Q (extern)       → AskUserQuestion (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc → terminate)
 S (extern)               → AskUserQuestion tool (mandatory; multiSelect: true; Esc → terminate with current L or no lens)
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
@@ -133,7 +129,7 @@ A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
 Λ = { phase: Phase, mode: Mode, mission_brief: Option(MBᵥ), perspectives: Option(Pₛ), lens: Option(L), active: Bool, team: Option(TeamState) }
-Mode ∈ {recommend, inquire}                       -- Λ.mode unset until Phase 0 M resolves
+Mode ∈ {recommend, inquire}                       -- Λ.mode resolved in Phase 0 Q
 TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
 ```
@@ -221,7 +217,7 @@ The coordinator infers the Mission Brief from U (the user's request):
 - **Expected Deliverable**: What form the output should take (e.g., code review, risk analysis, decision recommendation)
 - **Scope Constraint**: What is included and excluded from analysis
 
-**Call AskUserQuestion** with the inferred Mission Brief:
+**Call AskUserQuestion** with the inferred Mission Brief and Mode selection (combined Q1+Q2):
 
 ```
 Mission Brief for this inquiry:
@@ -230,28 +226,29 @@ Mission Brief for this inquiry:
 - **Deliverable**: [inferred expected deliverable]
 - **Scope**: [inferred scope constraint]
 
-Options:
+Q1. Mission Brief:
 1. **Confirm** — proceed with this Mission Brief
 2. **Modify intent** — adjust what is being investigated
 3. **Modify deliverable** — adjust the expected output form
 4. **Modify scope** — adjust inclusions/exclusions
+
+Q2. Mode:
+1. **Recommend** (Recommended) — lightweight lens recommendation (no team assembly)
+2. **Inquire** — full multi-perspective investigation with agent team
 ```
 
 **Pre-fill from explicit text**: `/frame "text"` → pre-fill from provided text, still confirm.
 
-**Mode selection**: After Mission Brief confirmation, **call AskUserQuestion** to select mode:
+**Combined question**: Mission Brief confirmation and Mode selection are combined into a single AskUserQuestion call:
+- Q1 (Mission Brief): MB confirmation/modification (4 options)
+- Q2 (Mode): Recommend / Inquire (2 options)
+AI places the recommended Mode as Q2's first option with "(Recommended)" suffix based on inquiry characteristics:
+- Simple / binary comparison / debugging → Recommend recommended
+- Complex / multi-perspective / deep analysis → Inquire recommended
 
-```
-Options:
-1. **Recommend** — lightweight lens recommendation (Pₛ only, no team inquiry)
-2. **Inquire** — full multi-perspective inquiry with team (existing behavior)
-```
+**Mode 1 (Recommend)**: When Recommend is selected in Q2, executes Phase 0 → Phase 1 → Phase 2, then terminates with Pₛ and composition recommendations. No team is created. Pₛ is an intermediate output (not a resolution) — the deficit `FrameworkAbsent` remains open until a downstream protocol completes its own resolution using Pₛ as context.
 
-`/frame --recommend` argument → skip mode selection, enter Mode 1 directly. This is the first `--flag` style argument in the protocol ecosystem.
-
-**Mode 1 (Recommend)**: Executes Phase 0 → Phase 1 → Phase 2, then terminates with Pₛ and composition recommendations. No team is created. Pₛ is an intermediate output (not a resolution) — the deficit `FrameworkAbsent` remains open until a downstream protocol completes its own resolution using Pₛ as context.
-
-**Mode 2 (Inquire)**: Existing behavior unchanged — Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → L.
+**Mode 2 (Inquire)**: When Inquire is selected in Q2, existing behavior — Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → L.
 
 **Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context for agent-teams), not the epistemic layer. Hermeneia resolves intent-expression gaps (user-initiated or AI-detected trigger); Telos co-constructs goals from vague intent. Phase 0 packages confirmed intent into a structured vehicle for teammate consumption — a prerequisite for quality spawn prompts, not a substitute for intent clarification or goal construction.
 
@@ -301,7 +298,7 @@ Optional dimension naming (apply when initial generation seems redundant):
 - State Pᵦ in the question text as context (e.g., "Base: [Pᵦ names]. Which additional lens(es)?")
 - AI must propose at least 1 novel perspective when Pᵦ ≠ ∅ — re-presenting known perspectives as options saturates the finite option space and structurally conceals unknown unknowns
 
-**Mode 1 termination**: When `m=recommend`, Phase 2 is the terminal phase. After Pₛ selection:
+**Mode 1 termination**: When Recommend was selected in Phase 0, Phase 2 is the terminal phase. After Pₛ selection:
 
 1. Output selected perspectives with brief characterization
 2. Recommend downstream protocol composition based on MBᵥ.inquiry_intent:
@@ -512,7 +509,7 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 
 ## Rules
 
-1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation. `--recommend` flag sets mode directly (skip mode selection AskUserQuestion). Modify loops re-present until confirmed.
+1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation. Modify loops re-present Q1(MB) only; Q2(Mode) retains previous selection.
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
 3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 10
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
@@ -522,5 +519,5 @@ Consult `references/conceptual-foundations.md` for Parametric Nature and Special
 8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
 9. **Team persistence**: Mode 2 only: Team persists across Phase 5 loop iterations; TeamDelete only at terminal states (wrap_up/ESC from Phase 5). J=calibrate retains team for Epitrope reuse. Mode 1 creates no team.
 10. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion
-11. **Mode binding**: --recommend flag binds m=recommend after MB confirmation, skipping mode selection AskUserQuestion. Mode selection is mandatory when m=pending. Mode 1 terminates at Phase 2 with Pₛ; Pₛ transfers as Pᵦ on re-invocation.
+11. **Combined Phase 0**: MB confirmation (Q1) and mode selection (Q2) are presented in a single AskUserQuestion call. AI recommends mode based on inquiry characteristics. Mode 1 terminates at Phase 2 with Pₛ; Pₛ transfers as Pᵦ on re-invocation.
 

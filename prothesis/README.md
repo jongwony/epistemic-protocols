@@ -15,7 +15,7 @@ Users often lack the analytical framework for their question (`FrameworkAbsent`)
 ### The Solution
 
 **Recognition over Recall + Two Modes**:
-- **Recommend** (Mode 1): AI presents perspective options; user selects; perspectives + downstream protocol suggestions are output. Lightweight — no team created. Use `/frame --recommend`.
+- **Recommend** (Mode 1): AI presents perspective options; user selects; perspectives + downstream protocol suggestions are output. Lightweight — no team created. Selected via Mode choice in Phase 0.
 - **Inquire** (Mode 2): Full investigation — AI presents perspectives; user selects; an agent team investigates in parallel; findings are synthesized into a Lens. Lifecycle: team assembly → parallel investigation → cross-dialogue → synthesis → routing.
 
 ### Difference from Socratic Method
@@ -52,8 +52,7 @@ Phase 5: Routing       → User selects next action: calibrate / extend / wrap u
 ## Usage
 
 ```
-/frame [your question]               # mode selection prompt
-/frame --recommend [your question]   # lightweight lens recommendation (Mode 1)
+/frame [your question]               # multi-perspective investigation
 ```
 
 ## Author

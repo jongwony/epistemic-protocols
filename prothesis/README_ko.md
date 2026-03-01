@@ -15,7 +15,7 @@
 ### 해법
 
 **Recognition over Recall + Two Modes**:
-- **Recommend** (Mode 1): AI가 관점 옵션을 제시하고, 사용자가 선택하면, 관점 + 후속 프로토콜 추천을 출력한다. 경량 경로 — 팀 생성 없음. `/frame --recommend` 사용.
+- **Recommend** (Mode 1): AI가 관점 옵션을 제시하고, 사용자가 선택하면, 관점 + 후속 프로토콜 추천을 출력한다. 경량 경로 — 팀 생성 없음. Phase 0에서 Mode 선택으로 진입.
 - **Inquire** (Mode 2): 전체 조사 — AI가 관점을 제시하고, 사용자가 선택하면, 에이전트 팀이 병렬로 조사하고, 발견 사항을 렌즈로 종합한다. 생애주기: 팀 구성 → 병렬 조사 → 교차 대화 → 종합 → 라우팅.
 
 ### 소크라테스 방식과의 차이
@@ -52,8 +52,7 @@ Phase 5: Routing       → 사용자 다음 행동 선택: calibrate / extend / 
 ## 사용법
 
 ```
-/frame [질문]                        # 모드 선택 프롬프트
-/frame --recommend [질문]            # 경량 렌즈 추천 (Mode 1)
+/frame [질문]                        # 다관점 조사
 ```
 
 ## 저자

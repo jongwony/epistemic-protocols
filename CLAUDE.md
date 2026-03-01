@@ -82,7 +82,7 @@ Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases 
 Resolve absent frameworks by recommending analytical lenses (Mode 1) or assembling a team for multi-perspective inquiry (Mode 2).
 - **Deficit**: FrameworkAbsent → FramedInquiry
 - **Triggers**: Purpose present but approach unspecified; multiple valid frameworks exist
-- **Invocation**: `/frame` or use "frame" in conversation; `/frame --recommend` for lightweight lens recommendation
+- **Invocation**: `/frame` or use "frame" in conversation
 
 ### Gap (συνείδησις) — Syneidesis
 Surface unnoticed gaps at decision points as questions.
