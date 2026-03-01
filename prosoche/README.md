@@ -7,7 +7,7 @@ Evaluate execution-time risks during AI operations through continuous risk asses
 ## Type Signature
 
 ```
-(ExecutionBlind, AI-guided, EVALUATE, ExecutionAction) → SituatedExecution
+(ExecutionBlind, User, EVALUATE, ExecutionAction) → SituatedExecution
 ```
 
 ## What It Does

@@ -27,6 +27,7 @@ Users often recognize their expression is ambiguous (`IntentMisarticulated`) but
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | Epitrope | AI-guided | `DelegationAmbiguous → CalibratedDelegation` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
+| Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
 ## Protocol Flow
@@ -45,7 +46,7 @@ Phase 3: Integration   → Proceed with clarified expression
 | Expression | "Did you mean X or Y?" |
 | Precision | "How specifically: [options]?" |
 | Coherence | "You mentioned X but also Y..." |
-| Context | "What's the context for this?" |
+| Background | "What's the context for this?" |
 
 ## When to Use
 

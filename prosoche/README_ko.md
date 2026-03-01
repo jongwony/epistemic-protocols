@@ -7,7 +7,7 @@
 ## 타입 시그니처
 
 ```
-(ExecutionBlind, AI-guided, EVALUATE, ExecutionAction) → SituatedExecution
+(ExecutionBlind, User, EVALUATE, ExecutionAction) → SituatedExecution
 ```
 
 ## 기능

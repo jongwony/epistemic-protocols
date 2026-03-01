@@ -20,9 +20,15 @@
 
 | 프로토콜 | 주도자 | 타입 시그니처 |
 |----------|--------|---------------|
-| Prothesis | AI 감지 | `FrameworkAbsent → FramedInquiry` |
-| Syneidesis | AI 감지 | `GapUnnoticed → AuditedDecision` |
+| Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
+| Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | **Hermeneia** | **Hybrid** | **`IntentMisarticulated → ClarifiedIntent`** |
+| Telos | AI-guided | `GoalIndeterminate → DefinedEndState` |
+| Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
+| Epitrope | AI-guided | `DelegationAmbiguous → CalibratedDelegation` |
+| Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
+| Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
+| Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
 ## 프로토콜 흐름
 
@@ -40,7 +46,7 @@ Phase 3: Integration   → 명확화된 표현으로 진행
 | Expression | "X를 의미하셨나요, Y를 의미하셨나요?" |
 | Precision | "구체적으로 어느 정도: [옵션]?" |
 | Coherence | "X를 언급하셨지만 Y도..." |
-| Context | "이것의 맥락이 무엇인가요?" |
+| Background | "이것의 맥락이 무엇인가요?" |
 
 ## 사용 시기
 
