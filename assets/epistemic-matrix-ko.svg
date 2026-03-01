@@ -12,9 +12,9 @@
   <text x="280" y="30" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="700" fill="#2d3748">인식론적 타입 변환</text>
 
   <!-- Group labels -->
-  <text x="44" y="253" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">AI 안내</text>
-  <text x="44" y="507" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">하이브리드</text>
-  <text x="44" y="587" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">사용자 개시</text>
+  <text x="44" y="223" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">AI 안내</text>
+  <text x="44" y="447" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">하이브리드</text>
+  <text x="44" y="542" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">사용자 개시</text>
   <text x="44" y="692" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#718096">사용자 호출</text>
 
   <!-- Row 1: AI-guided -->
@@ -104,55 +104,55 @@
 
   <text x="500" y="373" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Epharmoge</text>
 
-  <!-- Prosoche -->
-  <rect x="88" y="408" width="145" height="50" rx="8" fill="#d1ecf1"/>
-  <text x="160" y="430" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">ExecutionBlind</text>
-  <text x="160" y="446" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">실행 무감시</text>
-
-  <line x1="233" y1="433" x2="293" y2="433" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="263" y="426" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">EVALUATE</text>
-
-  <rect x="295" y="408" width="145" height="50" rx="8" fill="#d4edda"/>
-  <text x="367" y="430" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">SituatedExecution</text>
-  <text x="367" y="446" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">위험 인지 실행</text>
-
-  <text x="500" y="433" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Prosoche</text>
-
   <!-- Separator: AI-guided → Hybrid -->
-  <line x1="88" y1="472" x2="440" y2="472" stroke="#cbd5e0" stroke-width="0.5" stroke-dasharray="4,3"/>
+  <line x1="88" y1="412" x2="440" y2="412" stroke="#cbd5e0" stroke-width="0.5" stroke-dasharray="4,3"/>
 
   <!-- Row: Hybrid -->
   <!-- Hermeneia -->
-  <rect x="88" y="482" width="145" height="50" rx="8" fill="#e8d5f0"/>
-  <text x="160" y="504" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">IntentMisarticulated</text>
-  <text x="160" y="520" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">표현-의도 불일치</text>
+  <rect x="88" y="422" width="145" height="50" rx="8" fill="#e8d5f0"/>
+  <text x="160" y="444" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">IntentMisarticulated</text>
+  <text x="160" y="460" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">표현-의도 불일치</text>
 
-  <line x1="233" y1="507" x2="293" y2="507" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="263" y="500" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">EXTRACT</text>
+  <line x1="233" y1="447" x2="293" y2="447" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="263" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">EXTRACT</text>
 
-  <rect x="295" y="482" width="145" height="50" rx="8" fill="#d4edda"/>
-  <text x="367" y="504" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">ClarifiedIntent</text>
-  <text x="367" y="520" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">의도 명시화 완료</text>
+  <rect x="295" y="422" width="145" height="50" rx="8" fill="#d4edda"/>
+  <text x="367" y="444" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">ClarifiedIntent</text>
+  <text x="367" y="460" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">의도 명시화 완료</text>
 
-  <text x="500" y="507" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Hermeneia</text>
+  <text x="500" y="447" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Hermeneia</text>
 
   <!-- Separator: Hybrid → User-initiated -->
-  <line x1="88" y1="547" x2="440" y2="547" stroke="#cbd5e0" stroke-width="0.5" stroke-dasharray="4,3"/>
+  <line x1="88" y1="487" x2="440" y2="487" stroke="#cbd5e0" stroke-width="0.5" stroke-dasharray="4,3"/>
 
   <!-- Row: User-initiated -->
   <!-- Katalepsis -->
+  <rect x="88" y="502" width="145" height="50" rx="8" fill="#fce8dc"/>
+  <text x="160" y="524" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">ResultUngrasped</text>
+  <text x="160" y="540" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">AI 작업 미파악</text>
+
+  <line x1="233" y1="527" x2="293" y2="527" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="263" y="520" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">VERIFY</text>
+
+  <rect x="295" y="502" width="145" height="50" rx="8" fill="#d4edda"/>
+  <text x="367" y="524" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">VerifiedUnderstanding</text>
+  <text x="367" y="540" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">이해 검증 완료</text>
+
+  <text x="500" y="527" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Katalepsis</text>
+
+  <!-- Prosoche -->
   <rect x="88" y="562" width="145" height="50" rx="8" fill="#fce8dc"/>
-  <text x="160" y="584" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">ResultUngrasped</text>
-  <text x="160" y="600" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">AI 작업 미파악</text>
+  <text x="160" y="584" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">ExecutionBlind</text>
+  <text x="160" y="600" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">실행 무감시</text>
 
   <line x1="233" y1="587" x2="293" y2="587" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="263" y="580" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">VERIFY</text>
+  <text x="263" y="580" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#4a5568">EVALUATE</text>
 
   <rect x="295" y="562" width="145" height="50" rx="8" fill="#d4edda"/>
-  <text x="367" y="584" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">VerifiedUnderstanding</text>
-  <text x="367" y="600" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">이해 검증 완료</text>
+  <text x="367" y="584" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#4a5568">SituatedExecution</text>
+  <text x="367" y="600" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8" fill="#718096">위험 인지 실행</text>
 
-  <text x="500" y="587" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Katalepsis</text>
+  <text x="500" y="587" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-style="italic" fill="#805ad5">Prosoche</text>
 
   <!-- Separator: User-initiated → User-invoked -->
   <line x1="88" y1="627" x2="440" y2="627" stroke="#cbd5e0" stroke-width="0.5" stroke-dasharray="4,3"/>

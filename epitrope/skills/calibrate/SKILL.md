@@ -179,7 +179,7 @@ inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.jso
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
-| **Prosoche** | AI-guided | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
+| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -433,7 +433,7 @@ Team modes only. After contract approval:
 
 **TeamCreate**: Create team from DC.who specification. Call TeamCreate tool, then spawn team members via Task tool with appropriate roles and focus areas. Call SendMessage to distribute DC to all members.
 
-Both modes terminate with active DC after distribution.
+All team modes terminate with active DC after distribution.
 
 ## Intensity
 

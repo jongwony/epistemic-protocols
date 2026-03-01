@@ -35,7 +35,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 | **Telos** | GoalIndeterminate | AI-guided | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
 | **Aitesis** | ContextInsufficient | AI-guided | INQUIRE | `ContextInsufficient → InformedExecution` |
 | **Epitrope** | DelegationAmbiguous | AI-guided | CALIBRATE | `DelegationAmbiguous → CalibratedDelegation` |
-| **Prosoche** | ExecutionBlind | AI-guided | EVALUATE | `ExecutionBlind → SituatedExecution` |
+| **Prosoche** | ExecutionBlind | User-initiated | EVALUATE | `ExecutionBlind → SituatedExecution` |
 | **Epharmoge** | ApplicationDecontextualized | AI-guided | CONTEXTUALIZE | `ApplicationDecontextualized → ContextualizedExecution` |
 
 <img src="./assets/epistemic-matrix.svg" alt="Epistemic Type Transformations" width="560">
@@ -47,7 +47,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Telos**: "What do I actually want?" → AI proposes goals, you shape and approve (`GoalIndeterminate → DefinedEndState`)
 - **Aitesis**: "Am I missing something?" → AI detects its own context insufficiency and inquires for missing information before proceeding (`ContextInsufficient → InformedExecution`)
 - **Epitrope**: "How much should I handle?" → AI detects context, selects entry mode, calibrates delegation (WHO/WHAT/HOW MUCH) through scenarios (`DelegationAmbiguous → CalibratedDelegation`)
-- **Prosoche**: "Is this safe to execute?" → AI continuously evaluates pending actions for irreversibility, security boundaries, and external mutations, surfacing findings at risk boundaries (`ExecutionBlind → SituatedExecution`)
+- **Prosoche**: "Is this safe to execute?" → User declares risk-aware intent, AI materializes task with risk assessment and delegates to subagent with calibrated boundaries (`ExecutionBlind → SituatedExecution`)
 - **Epharmoge**: "Does this actually fit?" → AI evaluates whether correct output fits the actual context, surfaces mismatches for user judgment (`ApplicationDecontextualized → ContextualizedExecution`)
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
