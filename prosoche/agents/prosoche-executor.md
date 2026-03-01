@@ -31,6 +31,7 @@ tools:
   - Bash
   - Grep
   - Glob
+  - TaskGet
   - TaskUpdate
   - TaskList
 ---
