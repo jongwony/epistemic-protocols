@@ -20,7 +20,10 @@ Prothesis(U) → Q(MB(U), M) → (MBᵥ, m) → G(MBᵥ) → C → {P₁...Pₙ}
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
 MB     = MissionBrief(U): { inquiry_intent, expected_deliverable, scope_constraint }  -- AI-inferred from U
-Q(MB, M) = ConfirmAndSelect: (MB, ModeOptions) → (MBᵥ, m)  -- extern (combined AskUserQuestion: Q1=MB confirmation, Q2=mode selection)
+Q(MB, M) = ConfirmAndSelect: (MB, ModeOptions) → (MBᵥ, m)  -- extern (combined AskUserQuestion)
+Q1(MB)   = Confirm: MB → MBᵥ                                -- Mission Brief confirmation component of Q
+Q2(M)    = Select: ModeOptions → m                           -- Mode selection component of Q
+           Q = Q1 × Q2 (composed in single AskUserQuestion; Modify loop re-presents Q1 only)
 MBᵥ    = Verified MissionBrief (user-confirmed)
 m      = Mode ∈ {recommend, inquire}              -- lens recommendation vs. framed inquiry
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
@@ -70,7 +73,8 @@ After Phase 0 (Mission Brief + Mode Selection):
   (MBᵥ, m) = Q result:
     m = recommend → Phase 1 → Phase 2 → terminate with Pₛ
     m = inquire   → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
-  J_mb = modify(field) → re-present Q(MB') → await → MBᵥ (m retained from initial selection)
+  J_mb = confirm       → proceed to Phase 1 with (MBᵥ, m)
+  J_mb = modify(field) → re-present Q1(MB') → await → MBᵥ (m retained from initial selection)
   J_mb = ESC           → terminate (no team exists)
 
 Mode 1 termination (after Phase 2, m=recommend):
@@ -213,7 +217,7 @@ The coordinator infers the Mission Brief from U (the user's request):
 - **Expected Deliverable**: What form the output should take (e.g., code review, risk analysis, decision recommendation)
 - **Scope Constraint**: What is included and excluded from analysis
 
-**Call AskUserQuestion** with the inferred Mission Brief:
+**Call AskUserQuestion** with the inferred Mission Brief and Mode selection (combined Q1+Q2):
 
 ```
 Mission Brief for this inquiry:
@@ -222,11 +226,15 @@ Mission Brief for this inquiry:
 - **Deliverable**: [inferred expected deliverable]
 - **Scope**: [inferred scope constraint]
 
-Options:
+Q1. Mission Brief:
 1. **Confirm** — proceed with this Mission Brief
 2. **Modify intent** — adjust what is being investigated
 3. **Modify deliverable** — adjust the expected output form
 4. **Modify scope** — adjust inclusions/exclusions
+
+Q2. Mode:
+1. **Recommend** (Recommended) — lightweight lens recommendation (no team assembly)
+2. **Inquire** — full multi-perspective investigation with agent team
 ```
 
 **Pre-fill from explicit text**: `/frame "text"` → pre-fill from provided text, still confirm.
