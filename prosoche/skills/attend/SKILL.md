@@ -1,11 +1,11 @@
 ---
 name: attend
-description: "Evaluate execution-time risks during AI operations. Monitors pending actions for irreversibility, security boundaries, and external mutations, surfacing findings for user judgment. Alias: Prosoche(προσοχή)."
+description: "Evaluate execution-time risks during AI operations. Materializes intent into tasks, assesses each for risk signals, delegates low-risk to subagents, and gates elevated-risk for user judgment. Alias: Prosoche(προσοχή)."
 ---
 
 # Prosoche Protocol
 
-Evaluate execution-time risks during AI operations through continuous risk assessment. Type: `(ExecutionBlind, AI, EVALUATE, ExecutionAction) → SituatedExecution`.
+Evaluate execution-time risks during AI operations through task-materialized risk assessment. Type: `(ExecutionBlind, User, EVALUATE, ExecutionAction) → SituatedExecution`.
 
 ## Definition
 
@@ -48,6 +48,7 @@ Pattern  = (tool_name, target, env_context)
            -- env_context: environment qualifier inferred from arguments/config (e.g., "dev", "prod")
            -- env_context inference failure → env_context = "unknown"; "unknown" never matches cached patterns
            -- match: all 3 components must match for cache hit
+Phase    ∈ {-1, 0, 1, 2, 3}
 SituatedExecution = Σ' where p = Low ∨ (all Fi resolved) ∨ user_esc
 
 ── MATERIALIZATION ROUTING ──
@@ -108,11 +109,11 @@ ScopeEscalation:      files outside task scope, cross-repo                 → A
 Compound:             |{f ∈ Fi : f.severity = Advisory}| ≥ 2              → promote all Advisory in Fi to Gate
 
 ── ADAPTATION RULES ──
-A(Approve, E, s)      = record session_approval(pattern(E)), proceed
-A(Modify(d), E, s)    = adjust E per direction d, proceed (no blanket approval)
-A(Dismiss, E, s)      = proceed with E (no session_approval recorded — one-time pass)
-A(Halt, E, s)         = block E, record halted(E), continue to next
-A(ESC, _, s)          = deactivate Prosoche for session
+A(Approve, t, Σ)      = record session_approval(pattern(t.E)), proceed
+A(Modify(d), t, Σ)    = adjust t.E per direction d, proceed (no blanket approval)
+A(Dismiss, t, Σ)      = proceed with t.E (no session_approval recorded — one-time pass)
+A(Halt, t, Σ)         = block t.E, record halted(t.E), continue to next
+A(ESC, _, Σ)          = deactivate Prosoche for session
 
 ── CONVERGENCE ──
 situated(E, Σ) = (p(E) = Low) ∨ (all f ∈ Fi: approved ∨ adapted) ∨ user_esc
@@ -135,11 +136,10 @@ Task completion     (state)    → TaskUpdate (status tracking) [Tool]
 ── MODE STATE ──
 Λ = { phase: Phase, E: ExecutionAction,
        granularity: Granularity, state: Σ,
-       current_chain: List(ExecutionAction),
        tasks: List(Task),
-       materialization_route: Route,
+       materialization_route: MaterializationRoute,
        active: Bool, cause_tag: String }
-Route ∈ {resume, auto_proceed, confirm}
+MaterializationRoute ∈ {resume, auto_proceed, confirm}
 ```
 
 ## Core Principle
@@ -185,6 +185,7 @@ blind(E) ≡ ∃ signal(s, E) : risk(s) ∧ ¬acknowledged(s, Σ)
 
 **Activation layer**:
 - **Layer 1 (User-invocable)**: `/attend` slash command or description-matching input. Always available.
+- **Layer 2**: Not applicable (user-initiated — no AI-guided activation heuristics).
 
 ### Priority
 
@@ -386,7 +387,7 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 
 ## Known Limitations
 
-**Subagent Gate compliance**: prosoche-executor has the `attend` skill preloaded and follows the Stop-as-Gate protocol deterministically. For non-prosoche team agents (Epitrope DC path), Gate awareness is injected via prompt — this is a conversational instruction, not a system constraint. Compliance is non-guaranteed; this serves as a defense-in-depth auxiliary layer, not the sole safeguard.
+**Subagent Gate compliance**: prosoche-executor has the `attend` skill preloaded and follows the Stop-as-Gate protocol via skill and agent body instructions. While compliance is higher than prompt-injected agents (skill-level context vs. conversation-level context), the primary risk remains risk classification error — a misclassified p=Low action bypasses Gate entirely. For non-prosoche team agents (Epitrope DC path), Gate awareness is injected via prompt — this is a conversational instruction, not a system constraint. Compliance is non-guaranteed; this serves as a defense-in-depth auxiliary layer, not the sole safeguard.
 
 **Pre-existing team member path**: When delegating to team agents that existed before `/attend` activation, Gate prompt is injected via SendMessage (conversation context) rather than Agent spawn (system context). Conversation-context injection has lower compliance reliability than system-context injection.
 
