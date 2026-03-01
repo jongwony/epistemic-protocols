@@ -122,7 +122,7 @@ Context-adaptive delegation calibration through scenario-based interview.
 ### Attend (προσοχή) — Prosoche
 Evaluate execution-time risks during AI operations through continuous risk assessment.
 - **Deficit**: ExecutionBlind → SituatedExecution
-- **Triggers**: Bypass permissions, multi-step chains, external targets, destructive patterns
+- **Triggers**: User declares execution intent via `/attend`
 - **Invocation**: `/attend` or use "attend" in conversation
 
 ### Contextualize (ἐφαρμογή) — Epharmoge
@@ -177,9 +177,9 @@ This diagram shows logical progression, not strict execution order.
 **Initiator taxonomy** (2-layer model):
 - **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.
 - **Layer 2** (in-protocol heuristics): Behavior varies by initiator type:
-  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Aitesis, Epitrope, Prosoche, Epharmoge)
+  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Aitesis, Epitrope, Epharmoge)
   - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia)
-  - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis)
+  - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Reflexion, Write)
 
 ## Development
@@ -237,6 +237,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Epitrope**: Solo mode: no Task delegation—must run in main agent to call AskUserQuestion. Team modes: Phase 5 uses Task/TeamCreate/SendMessage for team application (TeamRestructure spawns new roles only)
 - **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Prosoche**: IntentDeclaration: main agent orchestrates; p=Low tasks delegated to prosoche-executor subagent
 
 ## Git Conventions
 
