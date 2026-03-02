@@ -8,7 +8,7 @@ description: |
   user: "/onboard"
   assistant: "I'll scan your projects first. Delegating project discovery to a subagent."
   <commentary>
-  Phase 1 requires 5+ Bash calls (ls, stat, wc, cat), always exceeding the 3-call delegation threshold. Pre-planned delegation avoids reactive interruption and work duplication.
+  Phase 1 requires 5+ Bash calls (ls, stat, python3, file reads), always exceeding the 3-call delegation threshold. Pre-planned delegation avoids reactive interruption and work duplication.
   </commentary>
   assistant: "I'll call the project-scanner agent to collect project metadata."
   </example>
@@ -80,7 +80,7 @@ For each session ID extracted in Step 3, construct the absolute JSONL file path:
 {project_dir}/sessions/{session_id}/session.jsonl
 ```
 
-Verify file existence with Glob before including in output. Only include paths where the file actually exists. Phase 2 session-analyzer subagents require these absolute paths as input.
+Batch-verify with a single Glob per project: `{project_dir}/sessions/*/session.jsonl`. Intersect results with constructed paths — only include confirmed paths in output. Phase 2 session-analyzer subagents require these absolute paths as input.
 
 ### Step 4: Scan Secondary Sources
 

@@ -81,21 +81,21 @@ The subagent:
 Main agent receives structured output and proceeds to Phase 2.
 
 **Edge cases**:
-- If `~/.claude/projects/` does not exist or is empty: subagent reports absence, main agent skips to Phase 2 step 4 (secondary sources only), set Tier 3
+- If `~/.claude/projects/` does not exist or is empty: subagent reports absence (secondary sources still scanned), main agent skips Phase 2 extraction (steps 1-3), proceeds to Phase 2 step 5 (secondary sources from Phase 1 output) and Phase 3, set Tier 3
 - If `sessions-index.json` cannot be parsed (corrupted JSON): subagent skips that project, continues with remaining
 - Project path reconstruction: directory names encode absolute paths with `/` and `.` replaced by `-`. Subagent uses heuristics (home directory prefix, known directory structure) to reconstruct readable `~/...` paths
 
-If no `sessions-index.json` found in any project, skip to Phase 2 step 4 (secondary sources only) and set fallback tier to Tier 3.
+If no `sessions-index.json` found in any project, skip Phase 2 extraction (steps 1-3), proceed to Phase 2 step 5 (secondary sources from Phase 1 output) and Phase 3, set fallback tier to Tier 3.
 
 ### Phase 2: Extract (Pattern Extraction) — Dual-Path
 
-1. From each project's `sessions-index.json`, select the 3 most recently modified sessions (by `modified` field). Maximum 9 sessions total.
-2. **Facets availability check**: For each selected session ID, check if `~/.claude/usage-data/facets/{session_id}.json` exists (Glob). Determine path per project:
+1. Use session JSONL paths from Phase 1 project-scanner output (3 most recently modified sessions per project, maximum 9 total).
+2. **Facets availability check**: Glob `~/.claude/usage-data/facets/*.json` once, intersect returned filenames (stem = session_id) with selected session IDs. Determine path per project:
    - **Path A**: 2+ sessions in the project have facets files → facets-accelerated extraction
    - **Path B**: 0-1 sessions have facets → full subagent extraction (baseline)
 3. **Path A** (facets-available, per project):
-   a. Main agent reads facets JSON directly → aggregate friction_counts, collect non-empty friction_detail (max 3), aggregate goal_categories/session_type/outcome
-   b. If session-meta exists: read → sum tool_counts, git_commits/git_pushes, languages (replaces behavioral pattern extraction)
+   a. Read all facets + session-meta JSON files for the project in parallel (up to 6 reads per project, independent; across multiple Path A projects, reads also run in parallel) → aggregate friction_counts, collect non-empty friction_detail (max 3), aggregate goal_categories/session_type/outcome
+   b. From session-meta: sum tool_counts, git_commits/git_pushes, languages (replaces behavioral pattern extraction)
    c. For top 2-3 friction keys with friction_detail: call session-analyzer in **targeted mode** (friction_pointers) for snippet extraction only
    d. Co-occurrence facts: derive situations from goal_categories + check firstPrompt for slash command history
    **Path B** (facets-absent, per project):
@@ -216,6 +216,7 @@ Applied only when facets data is available (Path A). Complements Primary and Sec
 
 **Signal Type**: Primary = directly maps to protocol deficit. Environmental = reported only (no mapping).
 **Interaction**: friction Primary signals are additive with existing Primary/Secondary signals. Same-protocol evidence escalates strength (Weak+friction=Strong).
+**Co-change**: friction keys must be synchronized with `agents/session-analyzer.md` Targeted Step Tier 2 behavioral proxies.
 
 Composition rules (protocol chaining based on pattern combinations) are deferred to a future version.
 
@@ -234,12 +235,11 @@ Selection rationale: covers the three most common entry points — intent clarif
 
 ## Also Available
 
-These protocols are not pattern-matched in the current version but remain available for manual invocation:
+Aitesis is pattern-matched via the Tertiary Mapping Table (`context_loss` friction key, Path A only). The following protocol is not yet pattern-matched and remains available for manual invocation:
 
-- **Aitesis** `/inquire` — Detect context insufficiency before execution. Use when you suspect missing context that could affect outcomes.
 - **Epharmoge** `/contextualize` — Detect application-context mismatch after execution. Use when correct output may not fit the actual deployment context.
 
-Both protocols will be integrated into pattern-based detection in future versions as reliable detection heuristics are developed.
+Epharmoge will be integrated into pattern-based detection in a future version as reliable detection heuristics are developed.
 
 ## HTML Artifact Guidelines
 
@@ -254,4 +254,4 @@ Refer to `references/html-template.md` for the full HTML skeleton, CSS classes, 
 5. **Idempotent**: Running `/onboard` multiple times produces updated results based on latest data. Previous artifacts are overwritten.
 6. **Session file access**: Access session JSONL files via Grep pattern matching or targeted Read with offset/limit (for efficiency). Never Read entire JSONL files — they can be very large.
 7. **Subagent delegation**: Phase 1 project scanning MUST be delegated to project-scanner subagent (single). Phase 2 session analysis: Path A (facets-available) delegates to session-analyzer in targeted mode; Path B (facets-absent) delegates in full mode. Maximum 3 parallel subagents across both paths.
-8. **Facets as accelerator**: Facets data is a pure accelerator — its absence must not degrade output quality. Path B produces identical output to the pre-enhancement baseline.
+8. **Facets as accelerator**: Facets data is a pure accelerator — its absence must not degrade output quality. Path B produces output quality at least equal to the pre-enhancement baseline; new capabilities (co-occurrence detection, quality signals) are available in both paths.

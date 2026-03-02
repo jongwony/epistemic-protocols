@@ -151,7 +151,7 @@ Cross-reference pattern data from Step 2 with slash command data to report co-oc
 
 The main agent (Phase 3) determines protocol mapping and coverage status (covered/missed/n/a) from these co-occurrence facts.
 
-**Note**: firstPrompt-based situations (vague starts → Telos, verification keywords → Katalepsis) are detected by the main agent (Phase 2 step 3), not by this subagent. Subagent detects situations from tool usage patterns only.
+**Note**: firstPrompt-based situations (vague starts → Telos, verification keywords → Katalepsis) are detected by the main agent (Phase 2 step 4), not by this subagent. Subagent detects situations from tool usage patterns only.
 
 ### Step 2.7: Conversation Quality Signals
 
@@ -190,7 +190,7 @@ When `friction_pointers` are provided, skip Steps 1-2 and extract snippets targe
    - **Tier 3**: Last `"role":"user"` message in the session — generic fallback
 3. **Snippet extraction**: Apply Step 2.5 quality gate to extract (user message, AI response) pair from the located region
 
-**Mode 2 output format**: Return friction snippets only — omit Tool Frequency, Rework Indicators, Execution Patterns, and Summary Metrics sections (already available from facets/session-meta).
+**Mode 2 output format**: Return friction snippets only — omit Tool Frequency, Rework Indicators, Execution Patterns, Summary Metrics, Situation Co-occurrence, and Conversation Quality Signals sections (already available from facets/session-meta or not applicable in targeted mode).
 
 ```
 ## Friction Snippets: {project_name}
