@@ -6,7 +6,7 @@ Context-adaptive delegation calibration through scenario-based interview (ἐπ�
 
 ## What is Epitrope?
 
-A modern reinterpretation of Greek ἐπιτροπή (a turning over to) — a protocol that **detects execution context, selects an appropriate entry mode (Solo/TeamAugment/TeamRestructure/TeamCreate), and calibrates delegation across three dimensions (WHO/WHAT/HOW MUCH) through scenario-based questions**.
+A modern reinterpretation of Greek ἐπιτροπή (a turning over to) — a protocol that **detects execution context, selects an appropriate entry mode (Solo/TeamAugment/TeamRestructure), and calibrates delegation across three dimensions (WHO/WHAT/HOW MUCH) through scenario-based questions**.
 
 ### The Core Problem
 
@@ -33,7 +33,6 @@ Phase 1: Structure         → WHO: team structure + task decomposition (mode-de
 Phase 2: Interview         → Scenario-based delegation questions (call AskUserQuestion)
 Phase 3: Integration       → Update DelegationContract with responses
 Phase 4: Review            → Present contract for approval (call AskUserQuestion)
-Phase 5: Application       → Apply DC to team (team modes only)
 ```
 
 ## Action Domains

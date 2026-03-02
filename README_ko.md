@@ -47,7 +47,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Telos**: "내가 진짜 원하는 게 뭐지?" → AI가 목표를 제안, 사용자가 형성하고 승인 (`GoalIndeterminate → DefinedEndState`)
 - **Aitesis**: "뭔가 빠진 건 아닐까?" → AI가 자체 맥락 부족을 감지하고, 실행 전 빠진 정보를 사용자에게 질의 (`ContextInsufficient → InformedExecution`)
 - **Epitrope**: "어디까지 맡길까?" → AI가 컨텍스트를 탐지하고 진입 모드를 선택, 위임(WHO/WHAT/HOW MUCH) 캘리브레이션 (`DelegationAmbiguous → CalibratedDelegation`)
-- **Prosoche**: "이거 실행해도 안전한가?" → 사용자가 위험 인지 의도를 선언하면, AI가 위험 평가와 함께 작업을 구체화하고 캘리브레이션된 경계 내에서 서브에이전트에 위임 (`ExecutionBlind → SituatedExecution`)
+- **Prosoche**: "이거 실행해도 안전한가?" → 사용자가 위험 인지 의도를 선언하면, AI가 기존 작업을 읽고 각 작업의 위험 신호를 분류하여 위험이 높은 항목을 사용자 판단에 표면화 (`ExecutionBlind → SituatedExecution`)
 - **Epharmoge**: "이게 실제로 맞나?" → AI가 정확한 출력이 실제 컨텍스트에 맞는지 평가하고, 불일치를 사용자 판단에 표면화 (`ApplicationDecontextualized → ContextualizedExecution`)
 
 핵심 통찰: **Recall(회상)보다 Recognition(인지)**. 빈칸을 채우는 것보다 선택지에서 고르는 게 쉽습니다.

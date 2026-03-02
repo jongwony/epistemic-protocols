@@ -35,7 +35,6 @@ epistemic-protocols/
 │   └── skills/calibrate/SKILL.md     # Full protocol definition (user-invocable)
 ├── prosoche/                          # Protocol: execution-time risk evaluation
 │   ├── .claude-plugin/plugin.json
-│   ├── agents/                        # Subagent executor (prosoche-executor)
 │   └── skills/attend/SKILL.md        # Full protocol definition (user-invocable)
 ├── epharmoge/                         # Protocol: application-context mismatch detection (conditional)
 │   ├── .claude-plugin/plugin.json
@@ -53,7 +52,7 @@ epistemic-protocols/
 **Component Types**:
 - **Skills** (`skills/*/SKILL.md`): Full protocol/workflow definitions with YAML frontmatter; user-invocable by default (v2.1.0+)
 - **Commands** (`commands/*.md`): Lightweight invokers (reflexion only—prothesis/syneidesis use skills directly)
-- **Agents** (`agents/*.md`): Subagents for parallel task execution (reflexion, prosoche)
+- **Agents** (`agents/*.md`): Subagents for parallel task execution (reflexion)
 
 **Conventions**:
 - Subagent naming: `plugin-name:agent-name` (e.g., `reflexion:session-summarizer`)
@@ -121,7 +120,7 @@ Context-adaptive delegation calibration through scenario-based interview.
 - **Invocation**: `/calibrate` or use "calibrate" in conversation
 
 ### Attend (προσοχή) — Prosoche
-Evaluate execution-time risks during AI operations through task-materialized risk assessment.
+Evaluate execution-time risks by classifying existing tasks for risk signals and surfacing elevated-risk findings.
 - **Deficit**: ExecutionBlind → SituatedExecution
 - **Triggers**: User declares execution intent via `/attend`
 - **Invocation**: `/attend` or use "attend" in conversation
@@ -252,9 +251,9 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Epitrope**: Solo mode: no Task delegation—must run in main agent to call AskUserQuestion. Team modes: Phase 5 uses Task/TeamCreate/SendMessage for team application (TeamRestructure spawns new roles only)
+- **Epitrope**: Solo mode: no Task delegation—must run in main agent to call AskUserQuestion. Team modes: Phase 4 produces DC; authority transitions at approval. Team application is execution-layer concern.
 - **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Prosoche**: IntentDeclaration: main agent orchestrates; p=Low tasks delegated to prosoche-executor (or team agents when Epitrope DC exists); p=Elevated tasks gated through main agent
+- **Prosoche**: Produces risk classification (p=Low pass-through, p=Elevated surface to user). No delegation—pure classification runs in main agent.
 
 ## Git Conventions
 

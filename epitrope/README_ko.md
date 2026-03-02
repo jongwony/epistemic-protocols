@@ -6,7 +6,7 @@
 
 ## Epitrope란?
 
-그리스어 ἐπιτροπή(맡김)의 현대적 재해석 — **실행 컨텍스트를 탐지하고 적절한 진입 모드(Solo/TeamAugment/TeamRestructure/TeamCreate)를 선택한 후, 3차원(WHO/WHAT/HOW MUCH)으로 위임을 캘리브레이션하는** 프로토콜.
+그리스어 ἐπιτροπή(맡김)의 현대적 재해석 — **실행 컨텍스트를 탐지하고 적절한 진입 모드(Solo/TeamAugment/TeamRestructure)를 선택한 후, 3차원(WHO/WHAT/HOW MUCH)으로 위임을 캘리브레이션하는** 프로토콜.
 
 ### 핵심 문제
 
@@ -33,7 +33,6 @@ Phase 1: Structure         → WHO: 팀 구조 + 작업 분해 (모드별)
 Phase 2: Interview         → 시나리오 기반 위임 질문 (AskUserQuestion 호출)
 Phase 3: Integration       → DelegationContract 갱신
 Phase 4: Review            → 계약 승인 요청 (AskUserQuestion 호출)
-Phase 5: Application       → DC를 팀에 적용 (팀 모드만)
 ```
 
 ## 행동 도메인
