@@ -52,6 +52,28 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
 
+## Design Philosophy
+
+**Unix Philosophy Homomorphism**: Each protocol is a single-purpose tool that does one thing well. Composition is bottom-up — users invoke protocols for recognized deficits, not follow a prescribed pipeline.
+
+```bash
+# These are possible compositions, not fixed pipelines
+/clarify → /goal → /inquire → /batch → /grasp    # Mechanical change with epistemic pre-work
+/inquire → /gap → /attend → /contextualize        # Epistemic scaffolding only
+/clarify → /goal                                   # Just orientation
+/batch → /grasp                                    # Just execution + verification
+```
+
+**Coexistence over Mirroring**: Protocols coexist with built-in execution tools (`/simplify`, `/batch`) rather than absorbing their capabilities. Each system handles its own concern:
+
+| Layer | Concern | Tools |
+|-------|---------|-------|
+| Epistemic | "Are we doing the right thing?" | Protocols (`/clarify`, `/goal`, `/inquire`, `/gap`, ...) |
+| Execution | "Are we doing it correctly?" | Built-ins (`/batch`, `/simplify`) |
+| Verification | "Did we understand?" | Protocol (`/grasp`) |
+
+Protocols don't know about `/batch`'s worktrees. `/batch` doesn't know about GoalContracts. They exchange results at boundaries — like Unix pipes.
+
 ## Installation
 
 ```bash

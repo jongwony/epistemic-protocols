@@ -52,6 +52,28 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 
 핵심 통찰: **Recall(회상)보다 Recognition(인지)**. 빈칸을 채우는 것보다 선택지에서 고르는 게 쉽습니다.
 
+## 설계 철학
+
+**Unix Philosophy Homomorphism**: 각 프로토콜은 하나의 일을 잘 수행하는 단일 목적 도구입니다. 조합은 bottom-up — 사용자가 인식한 결핍에 따라 필요한 도구만 호출하며, 정해진 파이프라인을 따르지 않습니다.
+
+```bash
+# 가능한 조합의 예시이며, 고정된 파이프라인이 아닙니다
+/clarify → /goal → /inquire → /batch → /grasp    # 인식론적 사전 작업 + 기계적 실행
+/inquire → /gap → /attend → /contextualize        # 인식론적 scaffolding만
+/clarify → /goal                                   # 방향 설정만
+/batch → /grasp                                    # 실행 + 이해 확인만
+```
+
+**미러링이 아닌 공존(Coexistence over Mirroring)**: 프로토콜은 빌트인 실행 도구(`/simplify`, `/batch`)의 기능을 흡수하지 않고, 각자의 관심사를 다루는 직교 도구로 공존합니다.
+
+| 레이어 | 관심사 | 도구 |
+|--------|--------|------|
+| 인식론적 | "올바른 것을 하고 있는가?" | 프로토콜 (`/clarify`, `/goal`, `/inquire`, `/gap`, ...) |
+| 실행 | "올바르게 실행하고 있는가?" | 빌트인 (`/batch`, `/simplify`) |
+| 검증 | "이해했는가?" | 프로토콜 (`/grasp`) |
+
+프로토콜은 `/batch`의 worktree를 모릅니다. `/batch`는 GoalContract를 모릅니다. 경계에서 결과만 교환합니다 — Unix pipe처럼.
+
 ## 설치
 
 ```bash
