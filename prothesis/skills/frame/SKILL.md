@@ -471,7 +471,7 @@ Options:
 **v4.0.0 scope note**: Prothesis is pure theoria (analysis only). Prior to v4.0.0, Phase 5 included classification (Fₐ/Fᵤ/Fᵈ) and execution (plan → praxis → verify). These phases have been extracted to Epitrope. Users seeking end-to-end execution should select "Calibrate" to transition to Epitrope, which establishes a DelegationContract covering WHO/WHAT/HOW MUCH for the implementation team. The Lens L persists in conversation context for Epitrope to reference.
 
 **Loop behavior** (team lifecycle aware):
-- **Calibrate**: Call Skill("calibrate") to activate Epitrope. Team retained — Epitrope detects the active team and presents TeamAugment, TeamRestructure, Solo options. Coordinator transitions from perspective analysis to delegation calibration
+- **Calibrate**: Call Skill("calibrate") to activate Epitrope. Team retained — Epitrope detects the active team and presents TeamAugment, TeamRestructure, Solo options. Coordinator transitions to delegation calibration. Epitrope produces DC; team application is execution-layer concern.
 - **Extend**: Follow-up AskUserQuestion — "Add new perspective" → Phase 2 (spawn new teammate into T) or "Deepen existing" → Phase 3 (SendMessage re-inquiry to target teammate). Team retained in both cases
 - **Wrap up**: shutdown_request → TeamDelete → terminate with L → recommend_protocols(L). Findings persist in L (conversation context); individual finding granularity (previously TaskCreate-persisted per finding) is intentionally consolidated into L.convergence / L.divergence / L.assessment. For multi-session durable retention, manually TaskCreate from L.divergence entries before wrapping up.
 - **ESC**: shutdown_request → TeamDelete → terminate with current Lens L

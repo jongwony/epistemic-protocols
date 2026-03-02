@@ -10,8 +10,8 @@
 프로토콜 시스템이 성숙해지면서, 빌트인 실행 도구(`/simplify`, `/batch`)의 기능을 프로토콜 내부로 흡수하려는 유혹이 반복적으로 발생했다.
 
 대표적 사례:
-- **Epitrope Phase 5**: DelegationContract에 worktree 격리, worker 수, PR 생성 등 실행 세부를 포함하는 제안
-- **Prosoche Phase -1**: 태스크 분해(materialization)를 `/batch`의 task decomposition과 유사하게 확장하는 제안
+- **Epitrope Phase 5**: DelegationContract에 worktree 격리, worker 수, PR 생성 등 실행 세부를 포함했으나 trim됨
+- **Prosoche Phase -1**: 태스크 분해(materialization)를 `/batch`의 task decomposition과 유사하게 확장했으나 trim됨
 
 이러한 제안들은 기술적으로 정확했다. 그러나 **정확성과 적합성은 다른 문제**였다.
 
@@ -112,13 +112,13 @@ Mirroring(실행 기능의 프로토콜 내부 흡수)이 기술적으로 가능
 
 ## Trim의 의미 (미래 방향)
 
-> 아래는 Coexistence 원칙에서 도출되는 **잠재적 개선 방향**이다.
-> 현재 코드베이스에는 반영되지 않은 상태이며, 구현 여부는 별도 검토가 필요하다.
+> 아래는 Coexistence 원칙에서 도출된 trim 내역이다.
+> `refactor/coexistence-trim`에서 구현 완료.
 
 이 원칙을 끝까지 적용하면, 프로토콜에서 **실행 꼬리(execution tail)**를 제거하는 방향이 자연스럽다:
 
-| 대상 | 현재 구현 | 잠재적 Trim |
-|------|-----------|-------------|
+| 대상 | 이전 구현 | Trim (구현 완료) |
+|------|-----------|-----------------|
 | Epitrope Phase 5 | DC → TeamCreate → Task spawn → SendMessage | DC 산출 → "실행은 `/batch` 또는 수동" |
 
 Trim의 본질: 프로토콜에서 실행 꼬리를 제거하여, Unix 도구처럼 "하나의 일만 잘 하는" 형태로 순화하는 것.

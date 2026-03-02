@@ -47,7 +47,7 @@ Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
 - **Telos**: "What do I actually want?" → AI proposes goals, you shape and approve (`GoalIndeterminate → DefinedEndState`)
 - **Aitesis**: "Am I missing something?" → AI detects its own context insufficiency and inquires for missing information before proceeding (`ContextInsufficient → InformedExecution`)
 - **Epitrope**: "How much should I handle?" → AI detects context, selects entry mode, calibrates delegation (WHO/WHAT/HOW MUCH) through scenarios (`DelegationAmbiguous → CalibratedDelegation`)
-- **Prosoche**: "Is this safe to execute?" → User declares risk-aware intent, AI materializes task with risk assessment and delegates to subagent with calibrated boundaries (`ExecutionBlind → SituatedExecution`)
+- **Prosoche**: "Is this safe to execute?" → User declares risk-aware intent, AI reads existing tasks, classifies each for risk signals, and surfaces elevated-risk findings for user judgment (`ExecutionBlind → SituatedExecution`)
 - **Epharmoge**: "Does this actually fit?" → AI evaluates whether correct output fits the actual context, surfaces mismatches for user judgment (`ApplicationDecontextualized → ContextualizedExecution`)
 
 The key insight: **Recognition over Recall**. It's easier to select from presented options than to generate questions from scratch.
