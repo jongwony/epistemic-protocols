@@ -95,9 +95,9 @@ Update status at each phase transition. This externalizes working memory and pre
      "sessionId": "<session-id>",
      "sessionPath": "<detected-session-path>",
      "projectPath": "<project-root>",
-     "memoryMode": "project | user",
-     "userMemoryPath": "~/.claude",
-     "projectMemoryPath": "<project-root>/.claude"
+     "memoryMode": "project-level | user-level",
+     "userLevelPath": "~/.claude",
+     "projectLevelPath": "<project-root>/.claude"
    }
    ```
 
