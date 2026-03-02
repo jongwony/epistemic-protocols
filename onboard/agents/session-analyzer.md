@@ -122,6 +122,26 @@ For each detected pattern, extract one representative (user message, AI response
 
 **Output format**: Report extracted message text (first 200 chars), not raw JSONL. If truncated, append `...`. Always include the session ID (UUID from JSONL file name).
 
+### Step 2.6: Situation & Anti-pattern Detection
+
+Cross-reference pattern data from Step 2 with slash command data to identify protocol-relevant situations and anti-patterns.
+
+**Situation indicators** (detect from existing Step 2 data):
+
+| Situation | Detection | Mapped Protocol |
+|-----------|-----------|-----------------|
+| Rework (3+ edits same file) | Step 2 rework indicators | Hermeneia `/clarify` or Syneidesis `/gap` |
+| High exploration ratio (≥3:1) | Step 2 summary metrics | Prothesis `/frame` |
+| Deploy/push without risk check | Bash keywords present, no `/attend` in slash commands | Prosoche `/attend` |
+| Delegation without calibration | Agent calls present, no `/calibrate` in slash commands | Epitrope `/calibrate` |
+
+**Protocol usage check**: Cross-reference each detected situation against slash command history from Step 2:
+- If situation detected AND corresponding protocol used → `covered`
+- If situation detected AND corresponding protocol NOT used → `missed` (anti-pattern candidate)
+- If situation not detected → `n/a`
+
+**Note**: firstPrompt-based situations (vague starts → Telos, verification keywords → Katalepsis) are detected by the main agent (Phase 2 step 3), not by this subagent. Subagent detects situations from tool usage patterns only.
+
 ### Step 3: Compile Results
 
 Structure output as a plain-text report:
@@ -167,6 +187,14 @@ Pattern: {pattern_type} ({detail})
   AI: "{message text, max 200 chars}..." | (AI response not extractable — tool_use only)
 
 (No quality snippet found for: {pattern_type})
+
+### Situation Indicators
+| Situation | Detected | Protocol Used | Status |
+|-----------|----------|---------------|--------|
+| Rework    | yes/no   | yes/no        | covered/missed/n/a |
+| Exploration | yes/no | yes/no        | covered/missed/n/a |
+| Execution risk | yes/no | yes/no    | covered/missed/n/a |
+| Delegation | yes/no  | yes/no        | covered/missed/n/a |
 ```
 
 ## Quality Standards
