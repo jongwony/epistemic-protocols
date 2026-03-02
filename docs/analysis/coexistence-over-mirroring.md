@@ -85,7 +85,7 @@ ls | grep pattern | sort
 Protocol output          →  Execution input
 ─────────────────────────────────────────────
 GoalContract.outcome     →  <instruction>
-Aitesis.gathered_context →  (research supplement)
+Aitesis.X' (InformedExecution) →  (execution context)
 DelegationContract       →  (autonomy boundary)
 
                          ↓
@@ -110,14 +110,16 @@ Mirroring(실행 기능의 프로토콜 내부 흡수)이 기술적으로 가능
 
 ---
 
-## Trim의 의미
+## Trim의 의미 (미래 방향)
 
-이 원칙에서 자연스럽게 도출되는 작업 — **실행 꼬리(execution tail)의 제거**:
+> 아래는 Coexistence 원칙에서 도출되는 **잠재적 개선 방향**이다.
+> 현재 코드베이스에는 반영되지 않은 상태이며, 구현 여부는 별도 검토가 필요하다.
 
-| 대상 | 현재 | Trim 후 |
-|------|------|---------|
+이 원칙을 끝까지 적용하면, 프로토콜에서 **실행 꼬리(execution tail)**를 제거하는 방향이 자연스럽다:
+
+| 대상 | 현재 구현 | 잠재적 Trim |
+|------|-----------|-------------|
 | Epitrope Phase 5 | DC → TeamCreate → Task spawn → SendMessage | DC 산출 → "실행은 `/batch` 또는 수동" |
-| Prosoche Phase -1 | Intent → TaskCreate(materialization) → 위험 평가 → agent delegation | 외부 태스크 수신 → 위험 평가 → 결과 표면화 |
 
 Trim의 본질: 프로토콜에서 실행 꼬리를 제거하여, Unix 도구처럼 "하나의 일만 잘 하는" 형태로 순화하는 것.
 

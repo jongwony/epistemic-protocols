@@ -29,6 +29,9 @@ Question → [Phase 1: Perspective A]
 
 ## 진화 타임라인
 
+> 아래 버전 번호(v1.0~v5.0+)는 구조적 전환점을 기준으로 한 **회고적 재구성**이며,
+> 실제 git tag나 plugin.json 버전과 일치하지 않는다. 현재 plugin.json 버전은 `5.2.0`.
+
 ```
 /simplify (bundled)           Prothesis
 ──────────────────           ─────────────────────────────────────
@@ -39,7 +42,7 @@ Question → [Phase 1: Perspective A]
                               v5.0+ (Feb 21~): /frame 리네이밍, two-mode
 ```
 
-**v3.0이 질적 분기점**인 이유: Task 기반 위임에서 Agent Teams(TeamCreate + SendMessage)로 전환하면서, `/simplify`의 "고정 3-agent" 패턴과 구조적으로 달라졌다. 67일, 71개 커밋에 걸쳐 "같은 패턴의 다른 구현"에서 "근본적으로 다른 아키텍처"로 전환.
+**v3.0이 질적 분기점**인 이유: Task 기반 위임에서 Agent Teams(TeamCreate + SendMessage)로 전환하면서, `/simplify`의 "고정 3-agent" 패턴과 구조적으로 달라졌다. 45일, 43개 커밋에 걸쳐 "같은 패턴의 다른 구현"에서 "근본적으로 다른 아키텍처"로 전환.
 
 ---
 
