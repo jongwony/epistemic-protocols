@@ -48,6 +48,9 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 - Required sections in protocols (Definition, Mode Activation, Protocol, Rules)
 - Tool grounding consistency (TOOL GROUNDING ↔ PHASE TRANSITIONS)
 - Version staleness detection (content changes without version bump)
+- Graph integrity (node/edge validation, orphaned nodes, isolated nodes, DAG acyclicity)
+- Spec-vs-impl drift (TYPES definitions ↔ PHASE TRANSITIONS/prose usage, resolution type consistency)
+- Cross-reference scan (protocol name consistency, deficit → resolution pairs, distinction table completeness, edge type allowlist)
 
 ### Phase 2: Expert Review
 

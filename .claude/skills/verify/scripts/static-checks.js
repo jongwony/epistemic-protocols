@@ -238,22 +238,6 @@ function checkCrossReference() {
 
   const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
 
-  // Map CLAUDE.md heading alias → SKILL.md path (canonical source of truth)
-  const aliasToSkill = {
-    'frame': 'prothesis/skills/frame/SKILL.md',
-    'gap': 'syneidesis/skills/gap/SKILL.md',
-    'clarify': 'hermeneia/skills/clarify/SKILL.md',
-    'grasp': 'katalepsis/skills/grasp/SKILL.md',
-    'goal': 'telos/skills/goal/SKILL.md',
-    'inquire': 'aitesis/skills/inquire/SKILL.md',
-    'calibrate': 'epitrope/skills/calibrate/SKILL.md',
-    'contextualize': 'epharmoge/skills/contextualize/SKILL.md',
-    'attend': 'prosoche/skills/attend/SKILL.md',
-  };
-
-  // Flow-formula comparison removed (GH #36): CLAUDE.md no longer contains flow formulas.
-  // Flow formulas live exclusively in each SKILL.md's formal definition block.
-
   // Check referenced files exist
   const fileRefs = claudeMd.matchAll(/`(references\/[^`]+)`/g);
   for (const ref of fileRefs) {
@@ -705,7 +689,66 @@ function checkGraphIntegrity() {
     }
   }
 
-  // Sub-check 4: precondition-dag — verify precondition edges form a DAG (no cycles) via Kahn's topological sort
+  // Sub-check 4: orphaned-node — nodes must have a valid SKILL.md (not just a directory)
+  for (const node of nodes) {
+    const skillPaths = [
+      path.join(projectRoot, node, 'skills'),
+    ];
+    let hasSkill = false;
+    for (const sp of skillPaths) {
+      if (fs.existsSync(sp)) {
+        try {
+          const entries = fs.readdirSync(sp, { withFileTypes: true });
+          for (const entry of entries) {
+            if (entry.isDirectory()) {
+              const skillMd = path.join(sp, entry.name, 'SKILL.md');
+              if (fs.existsSync(skillMd)) {
+                hasSkill = true;
+                break;
+              }
+            }
+          }
+        } catch (e) {
+          // ignore read errors
+        }
+      }
+      if (hasSkill) break;
+    }
+    if (!hasSkill) {
+      results.warn.push({
+        check: 'graph-integrity',
+        file: 'graph.json',
+        message: `Node "${node}" has a directory but no SKILL.md — may be orphaned`
+      });
+    }
+  }
+
+  // Sub-check 5: isolated-node — every node should participate in at least one edge
+  const connectedNodes = new Set();
+  for (const edge of edges) {
+    if (!edge || typeof edge !== 'object') continue;
+    if (edge.source === '*') {
+      // Wildcard connects all nodes except target
+      for (const n of nodes) {
+        if (n !== edge.target) connectedNodes.add(n);
+      }
+      connectedNodes.add(edge.target);
+    } else {
+      connectedNodes.add(edge.source);
+      connectedNodes.add(edge.target);
+    }
+  }
+  for (const node of nodes) {
+    if (!connectedNodes.has(node)) {
+      results.warn.push({
+        check: 'graph-integrity',
+        file: 'graph.json',
+        message: `Node "${node}" is isolated — no edges connect to or from it`
+      });
+    }
+  }
+
+  // Sub-check 6: precondition-dag — verify precondition edges form a DAG (no cycles) via Kahn's topological sort
   // Expand "*" wildcard: source "*" means all nodes except target; target "*" is rejected
   const preconditionEdges = [];
   for (const edge of edges) {
@@ -782,6 +825,270 @@ function checkGraphIntegrity() {
 }
 
 // ============================================================
+// Check 9: Spec vs Impl Drift Detection
+// ============================================================
+function checkSpecVsImpl() {
+  // Extract type definitions from ── TYPES ── section of a formal block
+  function extractTypeNames(content) {
+    const typesMatch = content.match(/── TYPES ──([\s\S]*?)(?=──|```)/);
+    if (!typesMatch) return [];
+
+    const typesSection = typesMatch[1];
+    const typeNames = [];
+
+    // Match lines like: "TypeName = ..." or "TypeName ∈ ..."
+    // Type names can include subscripts (Gₛ), primes (Î'), Greek letters (Σ, Λ, Δ, Ω)
+    const typePattern = /^([A-ZΑ-Ωa-z][A-Za-zΑ-Ωα-ω₀-₉ₐ-ₜ']*)\s+[=∈]/gm;
+    let match;
+    while ((match = typePattern.exec(typesSection)) !== null) {
+      const name = match[1].trim();
+      // Skip very short names that would cause false positives in prose search (single chars)
+      // but include Greek letters and multi-char names
+      if (name.length >= 2 || /[Α-Ωα-ω]/.test(name)) {
+        typeNames.push(name);
+      }
+    }
+
+    return typeNames;
+  }
+
+  // Extract type names from PHASE TRANSITIONS section
+  function extractPhaseTypeRefs(content) {
+    const phaseMatch = content.match(/── PHASE TRANSITIONS ──([\s\S]*?)(?=──|```)/);
+    if (!phaseMatch) return '';
+    return phaseMatch[1];
+  }
+
+  for (const relPath of PROTOCOL_FILES) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+
+    const typeNames = extractTypeNames(content);
+    if (typeNames.length === 0) {
+      results.warn.push({
+        check: 'spec-vs-impl',
+        file: relPath,
+        message: 'No type definitions found in ── TYPES ── section'
+      });
+      continue;
+    }
+
+    const phaseSection = extractPhaseTypeRefs(content);
+
+    // Extract the formal block (inside ```) and prose sections (outside ```)
+    const formalBlockMatch = content.match(/```[\s\S]*?```/);
+    const formalBlock = formalBlockMatch ? formalBlockMatch[0] : '';
+    const proseContent = content.replace(/```[\s\S]*?```/g, '');
+
+    // Check: Type names defined in TYPES should appear in PHASE TRANSITIONS
+    // Only check "important" types (skip pure enum values, comments, etc.)
+    // Important = types that represent operations or data flows (appear as function calls or data references)
+    const operationTypes = typeNames.filter(name => {
+      // Skip common enum-like short names and status types
+      if (['Phase', 'Mode', 'Stakes'].includes(name)) return false;
+      return true;
+    });
+
+    for (const typeName of operationTypes) {
+      // Escape special regex chars in type name
+      const escaped = typeName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Check if type appears in PHASE TRANSITIONS
+      const inPhase = new RegExp(escaped).test(phaseSection);
+      // Check if type appears in prose
+      const inProse = new RegExp(escaped).test(proseContent);
+
+      // A type defined in TYPES but absent from both PHASE TRANSITIONS and prose
+      // suggests potential rename drift or dead type
+      if (!inPhase && !inProse) {
+        results.warn.push({
+          check: 'spec-vs-impl',
+          file: relPath,
+          message: `Type "${typeName}" defined in TYPES but not referenced in PHASE TRANSITIONS or prose — possible rename drift or dead type`
+        });
+      }
+    }
+
+    // Check: Resolution type (terminal type) should appear in the formal block
+    // Extract the resolution type from the Type: line at the top
+    const typeLineMatch = content.match(/Type:\s*`[^`]*→\s*(\w+)`/);
+    if (typeLineMatch) {
+      const resolutionType = typeLineMatch[1];
+      if (!formalBlock.includes(resolutionType)) {
+        results.warn.push({
+          check: 'spec-vs-impl',
+          file: relPath,
+          message: `Resolution type "${resolutionType}" in Type signature but not defined in formal block — possible rename drift`
+        });
+      }
+    }
+
+    results.pass.push({
+      check: 'spec-vs-impl',
+      file: relPath,
+      message: `Spec-vs-impl check completed (${typeNames.length} types analyzed)`
+    });
+  }
+}
+
+// ============================================================
+// Check 10: Cross-Reference Scan (Protocol Name & Deficit Consistency)
+// ============================================================
+function checkCrossRefScan() {
+  // Canonical protocol names and their deficit → resolution pairs (from CLAUDE.md)
+  const CANONICAL_PROTOCOLS = {
+    'Prothesis':  { deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
+    'Syneidesis': { deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
+    'Hermeneia':  { deficit: 'IntentMisarticulated', resolution: 'ClarifiedIntent' },
+    'Katalepsis': { deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
+    'Telos':      { deficit: 'GoalIndeterminate', resolution: 'DefinedEndState' },
+    'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
+    'Epitrope':   { deficit: 'DelegationAmbiguous', resolution: 'CalibratedDelegation' },
+    'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
+    'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
+  };
+
+  // Edge type allowlist from CLAUDE.md graph.json documentation
+  const EDGE_TYPE_ALLOWLIST = new Set(['precondition', 'advisory', 'transition', 'suppression']);
+
+  const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
+  if (!fs.existsSync(claudeMdPath)) {
+    results.warn.push({
+      check: 'cross-ref-scan',
+      file: 'CLAUDE.md',
+      message: 'CLAUDE.md not found, skipping cross-reference scan'
+    });
+    return;
+  }
+
+  const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
+  let subCheckFailed = false;
+
+  // Sub-check 1: Verify each canonical deficit → resolution pair appears in CLAUDE.md
+  for (const [name, { deficit, resolution }] of Object.entries(CANONICAL_PROTOCOLS)) {
+    const deficitPattern = `${deficit} → ${resolution}`;
+    if (!claudeMd.includes(deficitPattern)) {
+      results.fail.push({
+        check: 'cross-ref-scan',
+        file: 'CLAUDE.md',
+        message: `Missing canonical deficit pair "${deficitPattern}" for ${name}`
+      });
+      subCheckFailed = true;
+    }
+  }
+
+  // Sub-check 2: Verify each protocol SKILL.md contains its own correct deficit → resolution pair
+  for (const relPath of PROTOCOL_FILES) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+
+    // Determine which protocol this SKILL.md belongs to
+    const dirName = relPath.split('/')[0];
+    const protocolEntry = Object.entries(CANONICAL_PROTOCOLS).find(([name]) =>
+      name.toLowerCase() === dirName
+    );
+
+    if (!protocolEntry) continue;
+
+    const [protocolName, { deficit, resolution }] = protocolEntry;
+
+    // Check that the deficit type appears in the SKILL.md
+    if (!content.includes(deficit)) {
+      results.fail.push({
+        check: 'cross-ref-scan',
+        file: relPath,
+        message: `Missing deficit type "${deficit}" in ${protocolName} SKILL.md`
+      });
+      subCheckFailed = true;
+    }
+
+    // Check that the resolution type appears in the SKILL.md
+    if (!content.includes(resolution)) {
+      results.fail.push({
+        check: 'cross-ref-scan',
+        file: relPath,
+        message: `Missing resolution type "${resolution}" in ${protocolName} SKILL.md`
+      });
+      subCheckFailed = true;
+    }
+  }
+
+  // Sub-check 3: Verify distinction table consistency across SKILL.md files
+  // Each protocol SKILL.md should reference all canonical protocol names in its distinction table
+  for (const relPath of PROTOCOL_FILES) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+
+    // Check if file has a distinction table (look for the section)
+    if (!content.includes('Distinction from Other Protocols')) continue;
+
+    // Extract the table section
+    const tableMatch = content.match(/\| Protocol.*\|[\s\S]*?(?=\n\n|\n\*\*Key|\n##)/);
+    if (!tableMatch) continue;
+
+    const tableSection = tableMatch[0];
+
+    for (const protocolName of Object.keys(CANONICAL_PROTOCOLS)) {
+      if (!tableSection.includes(protocolName)) {
+        results.warn.push({
+          check: 'cross-ref-scan',
+          file: relPath,
+          message: `Distinction table missing protocol "${protocolName}"`
+        });
+      }
+    }
+  }
+
+  // Sub-check 4: Verify edge types in graph.json match CLAUDE.md allowlist
+  const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
+  if (fs.existsSync(graphPath)) {
+    try {
+      const graph = JSON.parse(fs.readFileSync(graphPath, 'utf8'));
+      if (Array.isArray(graph.edges)) {
+        const usedEdgeTypes = new Set(graph.edges.map(e => e.type).filter(Boolean));
+        for (const edgeType of usedEdgeTypes) {
+          if (!EDGE_TYPE_ALLOWLIST.has(edgeType)) {
+            results.fail.push({
+              check: 'cross-ref-scan',
+              file: 'graph.json',
+              message: `Edge type "${edgeType}" not in CLAUDE.md allowlist: ${[...EDGE_TYPE_ALLOWLIST].join(', ')}`
+            });
+            subCheckFailed = true;
+          }
+        }
+
+        // Also check CLAUDE.md documents all edge types actually used
+        for (const edgeType of usedEdgeTypes) {
+          if (!claudeMd.includes(edgeType)) {
+            results.warn.push({
+              check: 'cross-ref-scan',
+              file: 'CLAUDE.md',
+              message: `Edge type "${edgeType}" used in graph.json but not documented in CLAUDE.md`
+            });
+          }
+        }
+      }
+    } catch (e) {
+      // JSON parse errors already reported by checkGraphIntegrity
+    }
+  }
+
+  if (!subCheckFailed) {
+    results.pass.push({
+      check: 'cross-ref-scan',
+      file: 'all protocols',
+      message: 'Cross-reference scan completed — protocol names and deficit pairs consistent'
+    });
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -793,6 +1100,8 @@ try {
   checkToolGrounding();
   checkVersionStaleness();
   checkGraphIntegrity();
+  checkSpecVsImpl();
+  checkCrossRefScan();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
