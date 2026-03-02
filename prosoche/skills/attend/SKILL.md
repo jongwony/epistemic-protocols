@@ -156,7 +156,7 @@ When Prosoche is active:
 </system-reminder>
 
 - Prosoche runs alongside other protocols (non-interfering) for the duration of its task list
-- User Memory rules and other protocol behaviors are retained
+- Persistent instructions and other protocol behaviors are retained
 - Prosoche adds a risk assessment layer, does not modify protocol logic
 
 **Protocol precedence**: Default ordering places Prosoche after Syneidesis (decision quality established before execution monitoring) and before Epharmoge (execution-time attention before post-execution applicability). Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices. The user can override this default by explicitly requesting a different protocol first.

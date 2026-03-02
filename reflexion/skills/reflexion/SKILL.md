@@ -76,7 +76,7 @@ Update status at each phase transition. This externalizes working memory and pre
    ```bash
    # Session files location pattern:
    ~/.claude/projects/-{encoded-project-path}/sessions/{session-id}.jsonl
-   # or for User Memory mode:
+   # or for user-level mode:
    ~/.claude/sessions/{session-id}.jsonl
    ```
    - Use Glob to find recent session: `~/.claude/**/sessions/*.jsonl`
@@ -84,8 +84,8 @@ Update status at each phase transition. This externalizes working memory and pre
    - Or use `/tasks` command to see active session ID
 
 2. **Determine Memory Mode**:
-   - Session path contains `/projects/-` → **Project Memory mode**
-   - Session path is `~/.claude/sessions/` → **User Memory mode**
+   - Session path contains `/projects/-` → **project-level mode**
+   - Session path is `~/.claude/sessions/` → **user-level mode**
 
 3. **Create handoff state directory**: `/tmp/.reflexion/{session-id}/`
 
@@ -182,15 +182,15 @@ NOT already in extracted list. Present as options, not open-ended questions.
 
 **Q5: Storage Tier** (per selected insight)
 
-Project Memory mode:
+Project-level mode:
 ```
 ├── "Tier A — MEMORY.md (always loaded, concise entry)"
 └── "Tier B — .insights/ (reference-on-demand, detailed archive)"
 ```
 
-User Memory mode (sessions under `~/.claude/sessions/`):
+User-level mode (sessions under `~/.claude/sessions/`):
 ```
-└── "Tier B — .insights/ only (no project MEMORY.md in User mode)"
+└── "Tier B — .insights/ only (no project MEMORY.md in user-level mode)"
 ```
 
 Tier A guidance: suitable for recurring patterns, architecture decisions, project conventions — content read every session.
@@ -198,12 +198,12 @@ Tier B guidance: suitable for archival knowledge, domain references, project-ind
 
 If Tier B selected → **Q5b: .insights/ Scope**:
 ```
-Project Memory mode:
+Project-level mode:
 ├── "Project .insights/ (project-specific archival)"
 ├── "User .insights/ ~/.claude/.insights/ (cross-project reference)"
 └── "Domain .insights/ (tech-stack specific)"
 
-User Memory mode:
+User-level mode:
 ├── "User .insights/ ~/.claude/.insights/ (cross-project reference)"
 └── "Domain .insights/ (tech-stack specific)"
 ```
@@ -214,9 +214,9 @@ User Memory mode:
 
 Based on user selections:
 - **Tier A (MEMORY.md)**: Append compact entry to project auto-memory MEMORY.md
-  - **Project mode only**: path derived from session path by replacing `sessions/{session-id}.jsonl` → `memory/MEMORY.md`
+  - **Project-level mode only**: path derived from session path by replacing `sessions/{session-id}.jsonl` → `memory/MEMORY.md`
   - Path: `~/.claude/projects/{encoded}/memory/MEMORY.md`
-  - **User mode**: Tier A unavailable — `~/.claude/memory/` does not exist; Q5 must show Tier B only
+  - **User-level mode**: Tier A unavailable — `~/.claude/memory/` does not exist; Q5 must show Tier B only
   - Format: concise markdown under existing topic header or new `## {Topic}` section
   - Language: English (Korean blocked by hook); no YAML frontmatter
   - Constraint: keep MEMORY.md ≤200 lines (only first 200 lines loaded); consolidate or move to .insights/ if near limit

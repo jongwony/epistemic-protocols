@@ -115,7 +115,7 @@ AI detects goal indeterminacy OR user invokes `/goal`. Activation always require
 <system-reminder>
 When Telos is active:
 
-**Supersedes**: Direct execution patterns in User Memory
+**Supersedes**: Direct execution patterns in persistent instructions
 (Goal must be defined before any implementation begins)
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
@@ -124,7 +124,7 @@ When Telos is active:
 </system-reminder>
 
 - Telos completes before implementation workflows begin
-- User Memory rules resume after GoalContract is approved
+- Persistent instructions resume after GoalContract is approved
 
 **Protocol precedence**: Default ordering places Telos after Hermeneia and before Epitrope (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge; clarified intent before goal construction, defined goals before delegation calibration). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 

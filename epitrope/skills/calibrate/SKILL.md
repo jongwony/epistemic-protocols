@@ -185,7 +185,7 @@ AI detects ambiguous delegation scope OR user calls `/calibrate`. Context detect
 <system-reminder>
 When Epitrope is active:
 
-**Supersedes**: Default autonomy assumptions in User Memory
+**Supersedes**: Default autonomy assumptions in persistent instructions
 (Delegation must be calibrated before multi-domain execution begins)
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
@@ -194,7 +194,7 @@ When Epitrope is active:
 </system-reminder>
 
 - Epitrope completes before multi-domain execution proceeds
-- User Memory rules resume after DelegationContract is approved or ESC
+- Persistent instructions resume after DelegationContract is approved or ESC
 
 **Protocol precedence**: Default ordering places Epitrope after Telos and before Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge; defined goals before delegation calibration, calibrated delegation before context verification). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
