@@ -101,7 +101,7 @@ Command invocation activates mode until session end.
 <system-reminder>
 When Syneidesis is active:
 
-**Supersedes**: Risk assessment and decision gating rules in persistent instructions
+**Supersedes**: Risk assessment and decision gating rules in loaded instructions
 (e.g., verification tiers, reversibility checks, approval requirements)
 
 **Retained**: Safety boundaries, secrets handling, deny-paths, user explicit instructions
@@ -111,7 +111,7 @@ When Syneidesis is active:
 
 - Stakes Assessment replaces tier-based gating
 - All decision points become candidates for interactive confirmation
-- Persistent instructions resume after mode deactivation
+- Loaded instructions resume after mode deactivation
 
 **Protocol precedence**: Default ordering places Syneidesis after Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge; gap detection applies within the established, context-verified perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 

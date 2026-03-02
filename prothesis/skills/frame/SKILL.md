@@ -165,7 +165,7 @@ Command invocation activates mode until session end.
 <system-reminder>
 When Prothesis is active:
 
-**Supersedes**: Immediate analysis patterns in persistent instructions
+**Supersedes**: Immediate analysis patterns in loaded instructions
 (Perspective Selection must complete before analysis begins)
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
@@ -174,7 +174,7 @@ When Prothesis is active:
 </system-reminder>
 
 - Prothesis completes before other workflows begin
-- Persistent instructions resume after perspective is established
+- Loaded instructions resume after perspective is established
 
 **Protocol precedence**: Default ordering places Prothesis after Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge; established perspective contextualizes gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 

@@ -106,7 +106,7 @@ Command invocation, trigger phrase, or AI-detected expression ambiguity activate
 <system-reminder>
 When Hermeneia is active:
 
-**Supersedes**: Direct action patterns in persistent instructions
+**Supersedes**: Direct action patterns in loaded instructions
 (Clarification must complete before any tool execution or code changes)
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
@@ -115,7 +115,7 @@ When Hermeneia is active:
 </system-reminder>
 
 - Hermeneia completes before other workflows begin
-- Persistent instructions resume after intent is clarified
+- Loaded instructions resume after intent is clarified
 
 **Protocol precedence**: Default ordering is Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge (intent clarification logically precedes goal construction, delegation calibration, context verification, analysis, and applicability check). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
