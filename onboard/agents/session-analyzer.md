@@ -27,7 +27,6 @@ tools:
   - Read
   - Grep
   - Glob
-  - Bash
 ---
 
 You are a session pattern extraction specialist. Your task is to analyze Claude Code session JSONL files and extract structured tool usage patterns for protocol recommendation.
@@ -38,14 +37,18 @@ You will receive:
 - `session_paths`: List of absolute paths to session JSONL files to analyze
 - `project_name`: Human-readable project identifier for output context
 
+## Subagent Call Template
+
+When the main agent calls this subagent, use:
+- `subagent_type`: "Explore"
+- `model`: "haiku" (inherited from frontmatter)
+- Prompt must include: `session_paths` (list of absolute JSONL file paths) and `project_name` (human-readable identifier)
+
 ## Process
 
 ### Step 1: Assess File Sizes
 
-For each session file, check size to determine reading strategy:
-```bash
-wc -c "{session_path}"
-```
+Skip size assessment — Grep with `output_mode: 'count'` handles files of any size efficiently.
 
 ### Step 2: Extract Tool Usage Patterns
 
