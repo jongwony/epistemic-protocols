@@ -1,7 +1,7 @@
 ---
 name: project-scanner
 description: |
-  Use this agent during Phase 1 of Onboard workflow to scan project directories, read sessions-index.json, and aggregate project metadata. Triggers at the start of /onboard to avoid reactive Bash delegation.
+  Call this agent during Phase 1 of Onboard workflow to scan project directories, read sessions-index.json, and aggregate project metadata. Triggers at the start of /onboard to avoid reactive Bash delegation.
 
   <example>
   Context: User invokes /onboard, main agent immediately delegates Phase 1
@@ -10,7 +10,7 @@ description: |
   <commentary>
   Phase 1 requires 5+ Bash calls (ls, stat, wc, cat), always exceeding the 3-call delegation threshold. Pre-planned delegation avoids reactive interruption and work duplication.
   </commentary>
-  assistant: "I'll use the project-scanner agent to collect project metadata."
+  assistant: "I'll call the project-scanner agent to collect project metadata."
   </example>
 model: haiku
 color: blue
@@ -73,11 +73,21 @@ print(f'total={len(data)}')
 
 If `sessions-index.json` does not exist or fails to parse, report the project as `(no sessions data)`.
 
+### Step 3.5: Construct Session JSONL Paths
+
+For each session ID extracted in Step 3, construct the absolute JSONL file path:
+```
+{project_dir}/sessions/{session_id}/session.jsonl
+```
+
+Verify file existence with Glob before including in output. Only include paths where the file actually exists. Phase 2 session-analyzer subagents require these absolute paths as input.
+
 ### Step 4: Scan Secondary Sources
 
 1. Read `~/.claude/CLAUDE.md` (if exists) — extract first 50 lines for keyword scanning
 2. Glob `~/.claude/rules/*` — list rule file names
 3. Read `~/.claude/settings.json` (if exists) — extract hook configurations only
+4. Read MEMORY.md from the project directory (if exists) — extract existing insights and recurring patterns
 
 ### Step 5: Compile Output
 

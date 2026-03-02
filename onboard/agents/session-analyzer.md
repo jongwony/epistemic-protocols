@@ -1,7 +1,7 @@
 ---
 name: session-analyzer
 description: |
-  Use this agent during Phase 2 of Onboard workflow to extract tool usage patterns from session JSONL files. Triggers when session files have been identified and need pattern extraction for protocol recommendation.
+  Call this agent during Phase 2 of Onboard workflow to extract tool usage patterns from session JSONL files. Triggers when session files have been identified and need pattern extraction for protocol recommendation.
 
   <example>
   Context: Main agent has identified recent session files for a project
@@ -10,7 +10,7 @@ description: |
   <commentary>
   Phase 2 requires extracting tool usage patterns from session JSONL files. The main agent delegates this to preserve context while the subagent performs Grep-heavy analysis.
   </commentary>
-  assistant: "I'll use the session-analyzer agent to extract patterns from the session files."
+  assistant: "I'll call the session-analyzer agent to extract patterns from the session files."
   </example>
 
   <example>
@@ -122,25 +122,44 @@ For each detected pattern, extract one representative (user message, AI response
 
 **Output format**: Report extracted message text (first 200 chars), not raw JSONL. If truncated, append `...`. Always include the session ID (UUID from JSONL file name).
 
-### Step 2.6: Situation & Anti-pattern Detection
+### Step 2.6: Situation Co-occurrence Detection
 
-Cross-reference pattern data from Step 2 with slash command data to identify protocol-relevant situations and anti-patterns.
+Cross-reference pattern data from Step 2 with slash command data to report co-occurrence facts. Do not classify coverage status — the main agent determines protocol mapping and status.
 
 **Situation indicators** (detect from existing Step 2 data):
 
-| Situation | Detection | Mapped Protocol |
-|-----------|-----------|-----------------|
-| Rework (3+ edits same file) | Step 2 rework indicators | Hermeneia `/clarify` or Syneidesis `/gap` |
-| High exploration ratio (≥3:1) | Step 2 summary metrics | Prothesis `/frame` |
-| Deploy/push without risk check | Bash keywords present, no `/attend` in slash commands | Prosoche `/attend` |
-| Delegation without calibration | Agent calls present, no `/calibrate` in slash commands | Epitrope `/calibrate` |
+| Situation | Detection |
+|-----------|-----------|
+| Rework (3+ edits same file) | Step 2 rework indicators |
+| High exploration ratio (≥3:1) | Step 2 summary metrics |
+| Deploy/push keywords present | Bash keyword match |
+| Delegation (Agent calls) present | Agent call count > 0 |
 
-**Protocol usage check**: Cross-reference each detected situation against slash command history from Step 2:
-- If situation detected AND corresponding protocol used → `covered`
-- If situation detected AND corresponding protocol NOT used → `missed` (anti-pattern candidate)
-- If situation not detected → `n/a`
+**Co-occurrence report**: For each detected situation, report the factual co-occurrence with slash command data:
+- Situation detected: yes/no
+- Related slash commands found: list of relevant commands (e.g., `/clarify`, `/gap`, `/frame`, `/attend`, `/calibrate`)
+
+The main agent (Phase 3) determines protocol mapping and coverage status (covered/missed/n/a) from these co-occurrence facts.
 
 **Note**: firstPrompt-based situations (vague starts → Telos, verification keywords → Katalepsis) are detected by the main agent (Phase 2 step 3), not by this subagent. Subagent detects situations from tool usage patterns only.
+
+### Step 2.7: Conversation Quality Signals
+
+Detect user correction and backtracking patterns from session JSONL. These serve as direct evidence for anti-pattern detection.
+
+**Detection patterns** (Grep on session JSONL):
+
+| Signal | Grep Pattern | Notes |
+|--------|-------------|-------|
+| Explicit correction | `"role":"user"` lines containing: "no,", "that's wrong", "not what I", "undo", "revert", "아니", "그게 아니라", "되돌려" | Require ≥20 chars context around keyword |
+| Backtracking | `"role":"user"` lines containing: "go back", "actually,", "wait,", "잠깐", "다시" followed by task keyword | "actually" alone too common; require co-occurrence with task-relevant keyword |
+
+**Process**:
+1. Grep for correction/backtracking patterns with `output_mode: "count"` for each session
+2. If count > 0: extract one representative snippet per Step 2.5 methodology (user message + preceding AI response pair)
+3. Report: correction count per session, representative snippet (if found)
+
+**Quality gate**: Only report corrections where the user message is ≥20 characters and clearly a correction (not ambiguous). Report `(no quality correction snippet)` if criteria not met.
 
 ### Step 3: Compile Results
 
@@ -188,13 +207,22 @@ Pattern: {pattern_type} ({detail})
 
 (No quality snippet found for: {pattern_type})
 
-### Situation Indicators
-| Situation | Detected | Protocol Used | Status |
-|-----------|----------|---------------|--------|
-| Rework    | yes/no   | yes/no        | covered/missed/n/a |
-| Exploration | yes/no | yes/no        | covered/missed/n/a |
-| Execution risk | yes/no | yes/no    | covered/missed/n/a |
-| Delegation | yes/no  | yes/no        | covered/missed/n/a |
+### Situation Co-occurrence
+| Situation | Detected | Related Slash Commands |
+|-----------|----------|-----------------------|
+| Rework    | yes/no   | (list or none)        |
+| Exploration | yes/no | (list or none)        |
+| Execution keywords | yes/no | (list or none) |
+| Delegation | yes/no  | (list or none)        |
+
+### Conversation Quality Signals
+- Correction patterns detected: {count} across {N} sessions
+- Backtracking patterns detected: {count}
+- Representative snippet:
+  Session: {session_id}
+  User: "{correction message, max 200 chars}"
+  AI (preceding): "{preceding AI message, max 200 chars}..."
+  (no quality correction snippet)
 ```
 
 ## Quality Standards
@@ -202,7 +230,7 @@ Pattern: {pattern_type} ({detail})
 - **Accuracy**: Use exact Grep counts, not estimates
 - **Completeness**: Report zero counts explicitly (important for absence-based patterns)
 - **Efficiency**: Use `output_mode: "count"` for frequency data, `"content"` only when extracting specific values
-- **No interpretation**: Report raw data only. Pattern-to-protocol mapping is the main agent's responsibility.
+- **No interpretation**: Report raw data and co-occurrence facts only. Situation-to-protocol mapping and coverage status classification are the main agent's responsibility.
 
 ## Completion
 
