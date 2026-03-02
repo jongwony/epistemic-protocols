@@ -44,6 +44,10 @@ epistemic-protocols/
 │   ├── agents/                        # Parallel extraction agents
 │   ├── commands/                      # /reflect, /quick-reflect
 │   └── skills/reflexion/SKILL.md
+├── onboard/                            # Skill: epistemic protocol onboarding
+│   ├── .claude-plugin/plugin.json
+│   ├── agents/                        # project-scanner, session-analyzer
+│   └── skills/onboard/SKILL.md
 └── write/                             # Skill: multi-perspective blog drafting
     ├── .claude-plugin/plugin.json
     └── skills/write/SKILL.md
@@ -52,7 +56,7 @@ epistemic-protocols/
 **Component Types**:
 - **Skills** (`skills/*/SKILL.md`): Full protocol/workflow definitions with YAML frontmatter; user-invocable by default (v2.1.0+)
 - **Commands** (`commands/*.md`): Lightweight invokers (reflexion only—prothesis/syneidesis use skills directly)
-- **Agents** (`agents/*.md`): Subagents for parallel task execution (reflexion)
+- **Agents** (`agents/*.md`): Subagents for parallel task execution (reflexion, onboard)
 
 **Conventions**:
 - Subagent naming: `plugin-name:agent-name` (e.g., `reflexion:session-summarizer`)
@@ -131,6 +135,12 @@ Detect application-context mismatch after execution when correct output may not 
 - **Triggers**: Post-execution applicability heuristics (environment assumption, convention mismatch, scope overflow)
 - **Invocation**: `/contextualize` or use "contextualize" in conversation
 - **Status**: Conditional — requires Aitesis operational experience
+
+### Onboard
+Analyze Claude Code usage patterns and recommend epistemic protocols for onboarding.
+- **Flow**: Scan → Extract → Map → Present → Guide
+- **Key**: Phase 1 uses `project-scanner` subagent, Phase 2 uses parallel `session-analyzer` subagents
+- **Invocation**: `/onboard`
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
@@ -254,6 +264,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Epitrope**: Solo mode: no Task delegation—must run in main agent to call AskUserQuestion. Team modes: Phase 4 produces DC; authority transitions at approval. Team application is execution-layer concern.
 - **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Prosoche**: Produces risk classification (p=Low pass-through, p=Elevated surface to user). No delegation—pure classification runs in main agent.
+- **Onboard**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 
 ## Git Conventions
 
