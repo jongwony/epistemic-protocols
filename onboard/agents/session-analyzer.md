@@ -37,6 +37,16 @@ You will receive:
 - `session_paths`: List of absolute paths to session JSONL files to analyze
 - `project_name`: Human-readable project identifier for output context
 
+## Extraction Modes
+
+**Mode 1 (Full)**: Default mode. Receives `session_paths` + `project_name` → executes Steps 1-3 (all extraction steps).
+
+**Mode 2 (Targeted)**: Accelerated mode when facets data is available. Receives `session_paths` + `project_name` + `friction_pointers` → executes Targeted Step + Step 3 only.
+
+`friction_pointers` format: `[{session_id, friction_detail, friction_keys: [string]}]`
+
+**Mode detection**: If prompt contains `friction_pointers` parameter → Mode 2. Otherwise → Mode 1.
+
 ## Subagent Call Template
 
 When the main agent calls this subagent, use:
@@ -160,6 +170,39 @@ Detect user correction and backtracking patterns from session JSONL. These serve
 3. Report: correction count per session, representative snippet (if found)
 
 **Quality gate**: Only report corrections where the user message is ≥20 characters and clearly a correction (not ambiguous). Report `(no quality correction snippet)` if criteria not met.
+
+### Targeted Step (Mode 2 Only)
+
+When `friction_pointers` are provided, skip Steps 1-2 and extract snippets targeted to specific friction points.
+
+**Process per friction pointer**:
+
+1. **Keyword extraction**: From `friction_detail` text, extract 2-3 identifying terms (file names, function names, error messages, domain-specific vocabulary)
+2. **JSONL location search** (tiered):
+   - **Tier 1**: Grep for extracted keywords in the session JSONL — highest precision
+   - **Tier 2**: Grep for friction-key behavioral proxies if Tier 1 yields no results:
+     - `wrong_approach` → `"name":"Edit"` clusters (repeated edits)
+     - `misunderstood_request` → correction language patterns ("no,", "that's wrong", "not what I", "아니", "그게 아니라")
+     - `user_rejected_action` → `"name":"AskUserQuestion"` near rejection context
+     - `excessive_changes` → `"name":"Edit"` high-frequency regions
+     - `context_loss` → `"name":"Read"` clusters (re-reading attempts)
+     - `wrong_file_edited` → `"name":"Edit"` with file path changes
+   - **Tier 3**: Last `"role":"user"` message in the session — generic fallback
+3. **Snippet extraction**: Apply Step 2.5 quality gate to extract (user message, AI response) pair from the located region
+
+**Mode 2 output format**: Return friction snippets only — omit Tool Frequency, Rework Indicators, Execution Patterns, and Summary Metrics sections (already available from facets/session-meta).
+
+```
+## Friction Snippets: {project_name}
+
+### Friction: {friction_key}
+Detail: "{friction_detail}"
+Session: {session_id}
+User: "{message text, max 200 chars}"
+AI: "{message text, max 200 chars}..." | (AI response not extractable — tool_use only)
+
+(No quality snippet found for: {friction_key})
+```
 
 ### Step 3: Compile Results
 

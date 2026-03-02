@@ -54,6 +54,16 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 | `~/.claude/settings.json` | Read (hooks only) | Hook usage patterns |
 | MEMORY.md (if exists) | Read | Existing insights, recurring patterns |
 
+### Tertiary: Usage Data Cache (Accelerator — Optional)
+
+| Source | Method | Extracts |
+|--------|--------|----------|
+| `~/.claude/usage-data/facets/{session_id}.json` | Read | friction_counts, friction_detail, goal_categories, session_type, outcome, user_satisfaction_counts, brief_summary |
+| `~/.claude/usage-data/session-meta/{session_id}.json` | Read | tool_counts, git_commits, git_pushes, languages, uses_task_agent, duration_minutes, first_prompt |
+
+**Join key**: session_id from sessions-index.json matches filename in both directories.
+**Availability**: Only exists if user has run `/insights`. Read-only consumption — never write to these caches.
+
 ## Phase Execution
 
 ### Phase 1: Scan (Project Discovery) — Subagent Delegated
@@ -77,18 +87,27 @@ Main agent receives structured output and proceeds to Phase 2.
 
 If no `sessions-index.json` found in any project, skip to Phase 2 step 4 (secondary sources only) and set fallback tier to Tier 3.
 
-### Phase 2: Extract (Pattern Extraction) — Subagent Delegated
+### Phase 2: Extract (Pattern Extraction) — Dual-Path
 
 1. From each project's `sessions-index.json`, select the 3 most recently modified sessions (by `modified` field). Maximum 9 sessions total.
-2. **Call session-analyzer subagent** (one per project, up to 3 in parallel):
-   - Each subagent receives its project's session JSONL file paths
-   - Subagent extracts: tool frequencies, rework indicators (same file 3+ edits), slash command history, Bash keywords, AskUserQuestion presence, context snippets (user message + AI response pairs near pattern evidence), situation co-occurrence facts (detected situations + related slash commands), conversation quality signals (correction/backtracking patterns)
-   - Subagent returns structured analysis (raw data only, no interpretation)
-3. Main agent analyzes `firstPrompt` text from `sessions-index.json` for ambiguity/exploration keywords:
+2. **Facets availability check**: For each selected session ID, check if `~/.claude/usage-data/facets/{session_id}.json` exists (Glob). Determine path per project:
+   - **Path A**: 2+ sessions in the project have facets files → facets-accelerated extraction
+   - **Path B**: 0-1 sessions have facets → full subagent extraction (baseline)
+3. **Path A** (facets-available, per project):
+   a. Main agent reads facets JSON directly → aggregate friction_counts, collect non-empty friction_detail (max 3), aggregate goal_categories/session_type/outcome
+   b. If session-meta exists: read → sum tool_counts, git_commits/git_pushes, languages (replaces behavioral pattern extraction)
+   c. For top 2-3 friction keys with friction_detail: call session-analyzer in **targeted mode** (friction_pointers) for snippet extraction only
+   d. Co-occurrence facts: derive situations from goal_categories + check firstPrompt for slash command history
+   **Path B** (facets-absent, per project):
+   a. **Call session-analyzer subagent** in **full mode** (one per project):
+      - Subagent receives session JSONL file paths
+      - Subagent extracts: tool frequencies, rework indicators (same file 3+ edits), slash command history, Bash keywords, AskUserQuestion presence, context snippets, situation co-occurrence facts, conversation quality signals
+      - Subagent returns structured analysis (raw data only, no interpretation)
+4. Main agent analyzes `firstPrompt` text from `sessions-index.json` for ambiguity/exploration keywords:
    - Vague starts: `improve`, `optimize`, `ideas for`, `something like`
    - Vague starts (Korean equivalents): expressions meaning "I want to~", "how do I~", "a bit more", "enhance"
    - Exploratory framing: `explore`, `investigate`, `look into` and Korean equivalents
-4. Main agent uses secondary sources from Phase 1 project-scanner output:
+5. Main agent uses secondary sources from Phase 1 project-scanner output:
    - `~/.claude/CLAUDE.md`: keywords indicating team work, delegation preferences, safety focus
    - `~/.claude/rules/`: which domains have explicit rules (communication, boundaries, etc.)
    - `~/.claude/settings.json`: hook configurations (safety consciousness indicator)
@@ -104,6 +123,10 @@ Apply the mapping tables below to match observed patterns to protocols.
    - **Weak**: Pattern observed in 1-2 sessions
    - **None**: Pattern not observed
 3. Match environmental patterns against the Secondary Mapping Table
+3.5. Match friction patterns against the Tertiary Mapping Table (Path A projects only)
+   - Aggregate friction_counts across sessions per project
+   - Map Primary-type keys to protocols
+   - Combine with Primary/Secondary match strengths (additive, Weak+friction=Strong)
 4. Determine Fallback Tier:
    - **Tier 1**: 3+ strong patterns found — map precisely to observed patterns
    - **Tier 2**: 1-2 weak patterns found — map + supplementary recommendations
@@ -129,7 +152,10 @@ Apply the mapping tables below to match observed patterns to protocols.
      - Header: "Your Epistemic Profile" + analysis statistics
      - Epistemic Coverage: radar chart (inline SVG) showing situation coverage per protocol + progress bars per protocol with situation_used/situation_occurred ratio. N/A protocols (no situations detected) shown separately. Graceful degradation: if insufficient data (Tier 3), show placeholder with "Run more sessions for coverage data"
      - Session Diagnostics: anti-pattern cards — each with context snippet (user message + AI response pair) → protocol CTA describing expected behavior → `cd ~/project-path && claude --resume <session-id>`. Graceful degradation: if no anti-patterns detected, omit section entirely
-     - Discovered Patterns: pattern cards with narrative structure — context snippet → protocol CTA → `cd ~/project-path && claude --resume <session-id>`. Graceful degradation: if no quality snippet, show statistical evidence only
+     - Discovered Patterns: pattern cards with narrative structure — two narrative sources (use whichever available, prefer friction when both exist):
+       - **Friction narrative** (Path A): friction_detail text → targeted snippet (user, AI pair) → protocol CTA → resume command
+       - **Snippet narrative** (Path B): context snippet (user, AI pair) → protocol CTA → resume command
+       Graceful degradation: if neither quality snippet nor friction_detail, show statistical evidence only
      - Recommended Protocols: each protocol with mapping rationale + cross-reference to relevant pattern/diagnostic snippet + `/command` CTA + install command (`claude plugin add epistemic-protocols/<name>`) if not installed
      - Quick Start: snippet-based concrete scenario for top recommendation — reference actual session context, show what protocol invocation would do, include `cd ~/project-path && claude --resume <id>` for immediate action + install command if needed
    - Style: clean card layout, protocol-specific color coding, dark theme, responsive design
@@ -173,6 +199,24 @@ Apply the mapping tables below to match observed patterns to protocols.
 | Many hook configurations | settings.json hooks | **Prosoche** `/attend` (reinforcing) | User already values safety mechanisms |
 | Communication-related rule files | Glob rules/ | **Hermeneia** `/clarify` (reinforcing) | Explicit communication rule management |
 
+### Tertiary Mapping Table (Friction Patterns — from Facets)
+
+Applied only when facets data is available (Path A). Complements Primary and Secondary — does not replace them.
+
+| Friction Key | Protocol | Rationale | Signal Type |
+|---|---|---|---|
+| `wrong_approach` | **Telos** `/goal` | Wrong direction due to undefined goal | Primary |
+| `wrong_approach` + rework situation | **Syneidesis** `/gap` | Approach gap undetected, accompanied by rework | Primary |
+| `misunderstood_request` | **Hermeneia** `/clarify` | Intent-expression mismatch | Primary |
+| `user_rejected_action` | **Epitrope** `/calibrate` | Ambiguous delegation scope — AI acted outside intent | Primary |
+| `excessive_changes` | **Syneidesis** `/gap` | Scope boundary gap undetected | Primary |
+| `context_loss` | **Aitesis** `/inquire` | Information loss due to insufficient context | Primary |
+| `wrong_file_edited` | **Prosoche** `/attend` | Execution risk not assessed | Primary |
+| `buggy_code`, `api_errors`/`api_error`, `tool_errors`/`tool_error`/`tool_failure`/`tool_limitation`, `external_blocker`/`external_dependency`, `merge_conflict`, `minor_correction`, `excessive_verification`/`excessive_tool_calls`, `unrelated_environment_issue`/`deployment_gap`, `agent_*` | — | Infrastructure/environment friction — not epistemic deficit | Environmental |
+
+**Signal Type**: Primary = directly maps to protocol deficit. Environmental = reported only (no mapping).
+**Interaction**: friction Primary signals are additive with existing Primary/Secondary signals. Same-protocol evidence escalates strength (Weak+friction=Strong).
+
 Composition rules (protocol chaining based on pattern combinations) are deferred to a future version.
 
 ## Fallback Strategy
@@ -209,4 +253,5 @@ Refer to `references/html-template.md` for the full HTML skeleton, CSS classes, 
 4. **No auto-install**: Guide installation but never install plugins automatically. CTA = user action.
 5. **Idempotent**: Running `/onboard` multiple times produces updated results based on latest data. Previous artifacts are overwritten.
 6. **Session file access**: Access session JSONL files via Grep pattern matching or targeted Read with offset/limit (for efficiency). Never Read entire JSONL files — they can be very large.
-7. **Subagent delegation**: Phase 1 project scanning MUST be delegated to project-scanner subagent (single). Phase 2 session analysis MUST be delegated to session-analyzer subagents (one per project, up to 3 parallel). Main agent handles phases 3, 4, 5.
+7. **Subagent delegation**: Phase 1 project scanning MUST be delegated to project-scanner subagent (single). Phase 2 session analysis: Path A (facets-available) delegates to session-analyzer in targeted mode; Path B (facets-absent) delegates in full mode. Maximum 3 parallel subagents across both paths.
+8. **Facets as accelerator**: Facets data is a pure accelerator — its absence must not degrade output quality. Path B produces identical output to the pre-enhancement baseline.

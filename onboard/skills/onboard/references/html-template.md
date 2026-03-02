@@ -35,6 +35,7 @@ HTML skeleton and guidelines for the `epistemic-profile.html` artifact generated
   .coverage-bar-fill { height: 100%; border-radius: 4px; }
   .coverage-bar-value { width: 60px; font-size: 0.85rem; color: #9ca3af; }
   .na-protocol { color: #64748b; font-style: italic; }
+  .friction-narrative { color: #fbbf24; font-style: italic; margin-bottom: 0.75rem; }
 </style>
 </head>
 <body>
@@ -65,10 +66,11 @@ HTML skeleton and guidelines for the `epistemic-profile.html` artifact generated
   -->
   <h2>Discovered Patterns</h2>
   <!-- .pattern-card per pattern: narrative structure
-    1. .snippet: (user message, AI response) pair from session
-    2. .protocol-cta: "In this situation, calling /command would: ..."
-    3. .resume-cmd: cd ~/project-path && claude --resume <session-id>
-    Graceful degradation: if no quality snippet, show statistical evidence only
+    1. .friction-narrative: friction_detail text as situation description (Path A, if available)
+    2. .snippet: (user message, AI response) pair
+    3. .protocol-cta: "In this situation, calling /command would: ..."
+    4. .resume-cmd: cd ~/project-path && claude --resume <session-id>
+    Graceful degradation chain: friction_detail+snippet → snippet only → statistical evidence
   -->
   <h2>Recommended Protocols</h2>
   <!-- .recommendation-card per protocol:
@@ -99,6 +101,7 @@ The HTML artifact should:
 - **Epistemic Coverage**: radar chart (inline SVG) + progress bars showing situation coverage per protocol. Minimum 3 protocols with detected situations for radar; otherwise use bar chart only. Tier 3 fallback: "Run more sessions for coverage data"
 - **Session Diagnostics**: anti-pattern cards with context snippets + protocol CTA. Omit section if no anti-patterns detected
 - Show context snippets in pattern cards: (user message, AI response) pair → protocol CTA → resume command
+- When friction_detail is available: use it as lead paragraph in pattern card, snippet as supporting evidence
 - Graceful degradation: if no quality snippet available, show statistical evidence (e.g., "5 sessions, 12 Edit calls on same file")
 - Cross-reference pattern/diagnostic snippets in recommendation cards where available
 - Use snippet-based concrete scenario in Quick Start section
