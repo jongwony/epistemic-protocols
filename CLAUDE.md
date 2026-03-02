@@ -277,7 +277,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 |--------|----------------|
 | New/modified phase | SKILL.md (formal block + prose) |
 | New tool usage | SKILL.md (PHASE TRANSITIONS `[Tool]` + TOOL GROUNDING entry) |
-| New loop option | SKILL.md (LOOP + Phase 5 prose + Rules) |
+| New loop option | SKILL.md (LOOP + terminal phase prose + Rules) |
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |

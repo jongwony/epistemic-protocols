@@ -22,6 +22,7 @@ Prosoche(C) → Scan(T[]) →
 ── TYPES ──
 C        = ExecutionContext { tasks: List(Task) }
 Task     = { id: TaskId, E: ExecutionAction, status: ∈ {pending, in_progress, completed, halted} }
+                                                        -- in_progress: inherited from TaskList source, not set by Prosoche
 E        = ExecutionAction (pending tool call or action chain)
 Classify = Risk classification: E → p (silent signal detection; failure → p = Elevated)
 p        = RiskLevel ∈ {Low, Elevated}
@@ -30,7 +31,7 @@ Finding  = { signal: Signal, evidence: String, severity: ∈ {Advisory, Gate}, a
 Signal   ∈ {Irreversibility, HumanCommunication, ExternalMutation, SecurityBoundary, PromptInjection, ScopeEscalation}
 Q        = Checkpoint question (via AskUserQuestion)
 J        = Judgment ∈ {Approve, Modify(direction), Dismiss, Halt, ESC}
-A        = Adaptation: J × Task × Σ → Σ'                   -- execution adaptation function
+A        = Adaptation: J × Task × Σ → Σ'                   -- judgment integration function
 Σ        = { assessed: N, surfaced: N, halted: Set(String),             -- action identifier (e.g., "git push origin/main")
              granularity: Granularity, session_approvals: Map(Pattern, Unit) }  -- Unit presence = approved for session
 Granularity ∈ {Meso, Micro}                                 -- Meso: per task; Micro: per tool call within task
@@ -50,7 +51,7 @@ Phase 0:  TaskList → T[] → ∀t∈T: Classify(t.E) → p             -- read
 Phase 1:  t.E → Eval(t.E) → Fi: Set(Finding)                   -- risk evaluation [Tool]
            escalate?(Fi) → adjust_granularity(Σ)
 Phase 2:  Fi → Q[AskUserQuestion](Fi, evidence, t.E) → J      -- checkpoint surfacing [Tool]
-Phase 3:  J → A(J, t, Σ) → Σ'                                 -- execution adaptation (internal)
+Phase 3:  J → A(J, t, Σ) → Σ'                                 -- judgment integration (internal)
 
 ── LOOP ──
 Granularity levels:
@@ -80,8 +81,8 @@ A(ESC, _, Σ)          = deactivate Prosoche for session
 
 ── CONVERGENCE ──
 situated(E, Σ) = (p(E) = Low) ∨ (all f ∈ Fi: approved ∨ adapted) ∨ user_esc
-active(Λ) = Λ.active ∧ (∃ t ∈ Λ.tasks: t.status ∉ {completed, halted})
--- Task-bounded convergence: mode terminates when all tasks resolve
+active(Λ) = Λ.active ∧ (∃ t ∈ Λ.tasks: ¬situated(t.E, Σ))
+-- Classification-bounded convergence: mode terminates when all tasks classified and elevated tasks resolved
 
 ── TOOL GROUNDING ──
 Phase 0 Scan        (read)     → TaskList (read existing tasks) [Tool]
@@ -262,7 +263,7 @@ Proceeding.
 - **Pattern approval**: Approve grants session-wide cache for matching patterns
 - **ESC respected**: Full deactivation available at every checkpoint
 
-### Phase 3: Execution Adaptation
+### Phase 3: Judgment Integration
 
 After user response:
 

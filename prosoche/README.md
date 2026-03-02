@@ -2,7 +2,7 @@
 
 > [한국어](./README_ko.md)
 
-Evaluate execution-time risks during AI operations through continuous risk assessment.
+Evaluate execution-time risks by classifying existing tasks for risk signals and surfacing elevated-risk findings.
 
 ## Type Signature
 
@@ -12,14 +12,13 @@ Evaluate execution-time risks during AI operations through continuous risk asses
 
 ## What It Does
 
-Prosoche continuously monitors pending AI actions for risk signals — irreversibility, human communication, security boundaries, prompt injection, external mutations, and scope escalation. Most actions pass silently (p=Low); only elevated-risk actions are surfaced for user judgment.
+Prosoche reads existing tasks and classifies each for risk signals — irreversibility, human communication, security boundaries, prompt injection, external mutations, and scope escalation. Most tasks pass silently (p=Low); only elevated-risk tasks are surfaced for user judgment.
 
 **Core principle**: Attention over Automation — autonomy is preserved by default, interrupted only at genuine risk boundaries.
 
 ## When It Activates
 
-- User calls `/attend`
-- AI detects high-autonomy execution context (e.g., bypass permissions, multi-step chains)
+- User calls `/attend` (user-initiated only)
 
 ## Risk Signal Taxonomy
 
@@ -40,8 +39,9 @@ Environment-aware: `("pulumi up", "auth-stack", "dev")` approved does NOT cache-
 
 ## Known Limitations
 
-- **Subagent blind spot**: Prosoche monitors the main agent's execution stream only. Actions executed by Task subagents are not monitored. Use `boundaries.md` rules and subagent permission restrictions as complementary controls.
-- **Single-pass detection**: Phase 0 risk signal scan is single-pass. False negatives (especially PromptInjection) are not retried.
+- **Single-pass classification**: Risk signal classification (Phase 0) is single-pass. A false negative (especially PromptInjection) results in the task passing without re-evaluation.
+- **Classification accuracy**: A misclassified p=Low task bypasses Gate entirely. Prosoche classifies risk but does not execute; execution remains the caller's responsibility.
+- **TaskList dependency**: Prosoche reads existing tasks at invocation time. If no tasks exist, there is nothing to classify.
 
 ## Installation
 
@@ -52,7 +52,7 @@ Environment-aware: `("pulumi up", "auth-stack", "dev")` approved does NOT cache-
 ## Usage
 
 ```
-/attend [your task]    # Enable execution-time risk monitoring
+/attend [your task]    # Enable execution-time risk classification
 ```
 
 ## License
