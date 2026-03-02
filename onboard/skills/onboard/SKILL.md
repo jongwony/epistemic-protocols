@@ -129,12 +129,12 @@ Apply the mapping tables below to match observed patterns to protocols.
      .card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
      .pattern-card { border-left: 4px solid #6366f1; }
      .recommendation-card { border-left: 4px solid #22c55e; }
-     .snippet { background: #f8f9fa; border-radius: 4px; padding: 1rem; margin: 0.75rem 0; font-size: 0.9rem; }
-     .snippet .user-msg { margin-bottom: 0.5rem; }
-     .snippet .ai-msg { margin-bottom: 0.5rem; }
-     .snippet .session-ref { color: #6b7280; font-size: 0.8rem; }
-     .protocol-cta { background: #f0fdf4; border-radius: 4px; padding: 1rem; margin: 0.75rem 0; }
-     .resume-cmd { font-family: monospace; background: #1e293b; color: #e2e8f0; padding: 0.5rem 1rem; border-radius: 4px; display: inline-block; margin-top: 0.5rem; }
+     .snippet { background: #1e293b; border-radius: 4px; padding: 1rem; margin: 0.75rem 0; font-size: 0.9rem; }
+     .snippet .user-msg { color: #93c5fd; margin-bottom: 0.5rem; }
+     .snippet .ai-msg { color: #86efac; margin-bottom: 0.5rem; }
+     .snippet .session-ref { color: #9ca3af; font-size: 0.8rem; }
+     .protocol-cta { background: #1a2e1a; border-radius: 4px; padding: 1rem; margin: 0.75rem 0; }
+     .resume-cmd { font-family: monospace; background: #0f172a; color: #e2e8f0; padding: 0.5rem 1rem; border-radius: 4px; display: inline-block; margin-top: 0.5rem; }
      .cta { display: inline-block; background: #6366f1; color: white; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-family: monospace; }
      .stats { display: flex; gap: 2rem; margin: 1rem 0; }
      .stat { text-align: center; }
@@ -253,5 +253,5 @@ Refer to the HTML skeleton in Phase 4 for the baseline structure. Adapt card con
 3. **Evidence-based recommendations**: Every protocol recommendation must cite at least one observable pattern with data. Tier 3 fallback explicitly states "insufficient data for personalized recommendation."
 4. **No auto-install**: Guide installation but never install plugins automatically. CTA = user action.
 5. **Idempotent**: Running `/onboard` multiple times produces updated results based on latest data. Previous artifacts are overwritten.
-6. **Session file access**: Read session JSONL files via Grep pattern matching only (for efficiency). Never Read entire JSONL files — they can be very large.
+6. **Session file access**: Access session JSONL files via Grep pattern matching or targeted Read with offset/limit (for efficiency). Never Read entire JSONL files — they can be very large.
 7. **Subagent delegation**: Phase 2 session analysis MUST be delegated to session-analyzer subagents (one per project, up to 3 parallel). Main agent handles phases 1, 3, 4, 5.

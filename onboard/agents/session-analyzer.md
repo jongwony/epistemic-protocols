@@ -114,7 +114,13 @@ For each detected pattern, extract one representative (user message, AI response
    - Read the first 5 lines of the session JSONL (`offset: 1, limit: 5`)
    - Identify the first `"role":"user"` and following `"role":"assistant"` pair
 
-**Output format**: Report raw JSONL lines (truncated by Read tool at 2000 chars). The main agent will extract clean text content. Always include the session ID (UUID from JSONL file name).
+**AI response extraction**: Assistant JSONL lines often exceed 2000 chars (tool_use content), causing Read truncation. Use a two-tier strategy:
+1. **Primary**: Grep for `"role":"assistant"` with `"text":"` in the same line near the evidence area — extracts text-bearing responses directly
+2. **Fallback**: If Read-truncated line contains partial content, report with `...` suffix to indicate truncation. If no usable text found, report `(AI response not extractable — tool_use only)`
+
+**User message** extraction is required; **AI response** is optional (best-effort). The main agent will handle missing AI responses gracefully.
+
+**Output format**: Report extracted message text (first 200 chars), not raw JSONL. If truncated, append `...`. Always include the session ID (UUID from JSONL file name).
 
 ### Step 3: Compile Results
 
@@ -157,13 +163,8 @@ Files with 3+ edits:
 ### Context Snippets
 Pattern: {pattern_type} ({detail})
   Session: {session_id}
-  User: {raw JSONL line, truncated}
-  AI: {raw JSONL line, truncated}
-
-Pattern: {pattern_type} ({detail})
-  Session: {session_id}
-  User: {raw JSONL line, truncated}
-  AI: {raw JSONL line, truncated}
+  User: "{message text, max 200 chars}"
+  AI: "{message text, max 200 chars}..." | (AI response not extractable — tool_use only)
 
 (No quality snippet found for: {pattern_type})
 ```
