@@ -157,6 +157,20 @@ Pre-commit protocol verification via static checks and expert review.
 - **Convergence Persistence**: Modes active until convergence
 - **Priority Override**: Active protocols supersede default behaviors
 
+## Design Philosophy
+
+**Unix Philosophy Homomorphism**: Each protocol is a single-purpose epistemic tool. Composition is bottom-up — users invoke protocols for recognized deficits, not follow a prescribed pipeline. The precedence order below is a logical default for multi-activation, not a mandatory sequence.
+
+**Coexistence over Mirroring**: Protocols coexist with Claude Code built-in commands (`/simplify`, `/batch`) as orthogonal tools occupying different layers:
+
+| Layer | Concern | Tools |
+|-------|---------|-------|
+| Epistemic | "Are we doing the right thing?" | Protocols (`/clarify`, `/goal`, `/inquire`, `/gap`, ...) |
+| Execution | "Are we doing it correctly?" | Built-ins (`/batch`, `/simplify`) |
+| Verification | "Did we understand?" | Protocol (`/grasp`) |
+
+Do not mirror built-in execution capabilities (e.g., worktree isolation, PR creation) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results at handoff points only.
+
 ## Protocol Precedence
 
 Multi-activation order: **Clarify → Goal → Calibrate → Inquire → Frame → Gap → Attend → Contextualize → Grasp**
