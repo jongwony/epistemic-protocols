@@ -128,7 +128,7 @@ When Epharmoge is active:
 </system-reminder>
 
 - Epharmoge completes before proceeding to next task
-- User Memory rules resume after applicability is verified or dismissed
+- Loaded instructions resume after applicability is verified or dismissed
 
 **Protocol precedence**: Default ordering places Epharmoge after Prosoche (execution-time attention before post-execution applicability) and before Katalepsis (applicability before comprehension). Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices. The user can override this default by explicitly requesting a different protocol first.
 

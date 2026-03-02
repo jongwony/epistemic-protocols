@@ -118,7 +118,7 @@ uncertain(sufficiency(X)) ≡ ∃ requirement(r, X) : ¬available(r, context) �
 <system-reminder>
 When Aitesis is active:
 
-**Supersedes**: Direct execution patterns in User Memory
+**Supersedes**: Direct execution patterns in loaded instructions
 (Context must be verified before any execution begins)
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
@@ -127,7 +127,7 @@ When Aitesis is active:
 </system-reminder>
 
 - Aitesis completes before execution proceeds
-- User Memory rules resume after context is resolved or dismissed
+- Loaded instructions resume after context is resolved or dismissed
 
 **Protocol precedence**: Default ordering places Aitesis after Epitrope (calibrated delegation before context verification) and before Prothesis (verified context before perspective selection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 

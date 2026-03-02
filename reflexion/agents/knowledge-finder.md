@@ -34,12 +34,12 @@ You are a knowledge retrieval specialist for the Reflexion workflow. Find existi
 
 ## Memory Paths to Search
 
-**User Memory** (always):
+**User-level** (always):
 - `~/.claude/CLAUDE.md`
 - `~/.claude/rules/*.md`
 - `~/.claude/.insights/**/*.md`
 
-**Project Memory** (if applicable):
+**Project-level** (if applicable):
 - `{project}/CLAUDE.md`
 - `{project}/.claude/rules/*.md`
 - `{project}/.claude/.insights/**/*.md`

@@ -17,28 +17,28 @@ Priority: Local > Project > User > Enterprise
 
 | Layer | Role | Example |
 |-------|------|---------|
-| User Memory | Foundation (all projects) | ~/.claude/CLAUDE.md |
-| Project Memory | Override (project-specific) | /project/.claude/CLAUDE.md |
+| User-level | Foundation (all projects) | ~/.claude/CLAUDE.md |
+| Project-level | Override (project-specific) | /project/.claude/CLAUDE.md |
 
 ## Storage Strategy
 
 | Insight Type | Store In | Reason |
 |--------------|----------|--------|
-| Universal (applies everywhere) | User Memory | Foundation layer |
-| Project-specific | Project Memory | Override layer |
+| Universal (applies everywhere) | User-level | Foundation layer |
+| Project-specific | Project-level | Override layer |
 | Domain/tech-stack | .insights/domain/ | Reference only |
 
 ## Detection
 
 ```
 Session path contains project root?
-├── Yes → Project Memory mode (can store to Project or User)
-└── No (~/.claude session) → User Memory mode (User only)
+├── Yes → Project-level mode (can store to project or user)
+└── No (~/.claude session) → User-level mode (user only)
 ```
 
 ## Two-Tier Storage
 
-Within the Project memory layer, insights are stored in one of two tiers based on access frequency. In User Memory mode, only Tier B (.insights/) is available.
+Within the project-level layer, insights are stored in one of two tiers based on access frequency. In user-level mode, only Tier B (.insights/) is available.
 
 | Tier | File | Load Behavior | Content |
 |------|------|--------------|---------|
@@ -48,7 +48,7 @@ Within the Project memory layer, insights are stored in one of two tiers based o
 **Tier A path derivation** (from session path):
 ```
 ~/.claude/projects/{encoded}/sessions/{id}.jsonl
-→ ~/.claude/projects/{encoded}/memory/MEMORY.md   (Project mode only)
+→ ~/.claude/projects/{encoded}/memory/MEMORY.md   (project-level mode only)
 
 ~/.claude/sessions/{id}.jsonl
 → Tier A unavailable — ~/.claude/memory/ does not exist
