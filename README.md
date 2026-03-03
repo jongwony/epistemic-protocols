@@ -6,9 +6,16 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 
 ## Quick Start
 
-1. Install the [Epistemic Cooperative](./epistemic-cooperative) plugin in Claude Code
-2. Run `/onboard` — analyzes your sessions and recommends protocols
-3. Or pick individual protocols from the tables below
+1. Add the marketplace in Claude Code:
+   ```
+   /plugin marketplace add jongwony/epistemic-protocols
+   ```
+2. Install the [Epistemic Cooperative](./epistemic-cooperative) plugin:
+   ```
+   /plugin install epistemic-cooperative@epistemic-protocols
+   ```
+3. Run `/onboard` — analyzes your sessions and recommends protocols
+4. Or pick individual protocols from the tables below
 
 ## Full Installation
 
