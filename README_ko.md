@@ -2,13 +2,21 @@
 
 > [English](./README.md)
 
-AI-인간 대화를 위한 Claude Code 플러그인 마켓플레이스.
+AI-인간 대화를 위한 Claude Code 플러그인 — 각 프로토콜은 구조화된 인간-AI 상호작용을 통해 특정 인지적 결핍을 해소합니다.
 
 ## 빠른 시작
 
-1. 설치: `git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/install.sh`
+1. Claude Code에서 [Epistemic Cooperative](./epistemic-cooperative) 플러그인을 설치하세요
 2. `/onboard` 실행 — 세션을 분석하고 프로토콜을 추천합니다
-3. 또는 아래 테이블에서 직접 선택하세요
+3. 또는 아래 테이블에서 개별 프로토콜을 선택하세요
+
+## 전체 설치
+
+모든 프로토콜과 유틸리티를 한 번에 설치하려면:
+
+```bash
+git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/install.sh
+```
 
 ## 프로토콜
 
