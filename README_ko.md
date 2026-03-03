@@ -2,125 +2,58 @@
 
 > [English](./README.md)
 
-각 프로토콜이 고유한 인지적 결핍을 해소하는 Claude Code 플러그인.
+AI-인간 대화를 위한 Claude Code 플러그인 마켓플레이스.
+
+## 빠른 시작
+
+1. 설치: `git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/install.sh`
+2. `/onboard` 실행 — 세션을 분석하고 프로토콜을 추천합니다
+3. 또는 아래 테이블에서 직접 선택하세요
 
 ## 프로토콜
 
-| 프로토콜 | 목적 | 적용 시점 |
-|----------|------|----------|
-| **[Prothesis](./prothesis)** (πρόθεσις) — /frame | 다관점 조사를 위한 팀 기반 분석 | 분석 시작 전 |
-| **[Syneidesis](./syneidesis)** (συνείδησις) — /gap | 결정 지점에서 잠재적 갭 표면화 | 의사결정 시점 |
-| **[Hermeneia](./hermeneia)** (ἑρμηνεία) — /clarify | 의도-표현 갭을 대화로 명확화 | 실행 전 |
-| **[Katalepsis](./katalepsis)** (κατάληψις) — /grasp | AI 작업에 대한 확실한 이해 달성 | AI 작업 완료 후 |
-| **[Telos](./telos)** (τέλος) — /goal | 모호한 의도에서 정의된 목표 공동 구성 | 실행 전 |
-| **[Aitesis](./aitesis)** (αἴτησις) — /inquire | 실행 전 맥락 부족 감지 | 실행 전 |
-| **[Epitrope](./epitrope)** (ἐπιτροπή) — /calibrate | 시나리오 기반 인터뷰로 컨텍스트 적응형 위임 캘리브레이션 | 실행 전 |
-| **[Prosoche](./prosoche)** (προσοχή) — /attend | 실행 중 AI 작업의 위험 평가 | 실행 중 |
-| **[Epharmoge](./epharmoge)** (ἐφαρμογή) — /contextualize | 실행 후 적용-맥락 불일치 감지 | 실행 후 |
+| 프로토콜 | 명령어 | 사용 시점 |
+|----------|--------|----------|
+| [Hermeneia](./hermeneia) | `/clarify` | 의도-표현 갭이 감지될 때 |
+| [Telos](./telos) | `/goal` | 목표가 모호하거나 불확정적일 때 |
+| [Epitrope](./epitrope) | `/calibrate` | 위임 범위가 불분명할 때 |
+| [Aitesis](./aitesis) | `/inquire` | 실행 전 맥락이 부족할 때 |
+| [Prothesis](./prothesis) | `/frame` | 프레임워크 부재, 다관점 분석이 필요할 때 |
+| [Syneidesis](./syneidesis) | `/gap` | 의사결정 시 놓친 갭이 있을 때 |
+| [Prosoche](./prosoche) | `/attend` | 실행 시점 위험 평가가 필요할 때 |
+| [Epharmoge](./epharmoge) | `/contextualize` | 실행 후 맥락 불일치가 의심될 때 |
+| [Katalepsis](./katalepsis) | `/grasp` | AI 결과를 이해하지 못했을 때 |
 
-## 핵심 아이디어
+순서는 인식론적 워크플로우를 따릅니다: Clarify → Goal → Calibrate → Inquire → Frame → Gap → Attend → Contextualize → Grasp
 
-각 프로토콜은 고유한 인지적 결핍을 해소합니다:
+## 유틸리티
 
-```
-Protocol = (Deficit, Initiator, Operation, Operand) → Resolution
-```
+| 플러그인 | 명령어 | 용도 |
+|----------|--------|------|
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/insights` | 세션 분석 및 프로토콜 추천 |
+| [Reflexion](./reflexion) | `/reflect` | 크로스 세션 학습 |
+| [Write](./write) | `/write` | 다관점 블로그 작성 |
 
-| 프로토콜 | 결핍 | 개시자 | 연산 | 타입 시그니처 |
-|----------|------|--------|------|---------------|
-| **Prothesis** | FrameworkAbsent | AI-guided | SELECT | `FrameworkAbsent → FramedInquiry` |
-| **Syneidesis** | GapUnnoticed | AI-guided | SURFACE | `GapUnnoticed → AuditedDecision` |
-| **Hermeneia** | IntentMisarticulated | Hybrid | EXTRACT | `IntentMisarticulated → ClarifiedIntent` |
-| **Katalepsis** | ResultUngrasped | User-initiated | VERIFY | `ResultUngrasped → VerifiedUnderstanding` |
-| **Telos** | GoalIndeterminate | AI-guided | CO-CONSTRUCT | `GoalIndeterminate → DefinedEndState` |
-| **Aitesis** | ContextInsufficient | AI-guided | INQUIRE | `ContextInsufficient → InformedExecution` |
-| **Epitrope** | DelegationAmbiguous | AI-guided | CALIBRATE | `DelegationAmbiguous → CalibratedDelegation` |
-| **Prosoche** | ExecutionBlind | User-initiated | EVALUATE | `ExecutionBlind → SituatedExecution` |
-| **Epharmoge** | ApplicationDecontextualized | AI-guided | CONTEXTUALIZE | `ApplicationDecontextualized → ContextualizedExecution` |
+## 설계
 
-<img src="./assets/epistemic-matrix-ko.svg" alt="인식론적 타입 변환" width="560">
+각 프로토콜은 AI-인간 상호작용 중 특정 인지적 결핍을 해소합니다. 아키텍처와 설계 철학에 대한 상세 내용은 [CLAUDE.md](./CLAUDE.md)를 참조하세요.
 
-- **Prothesis**: "어떻게 접근할까?" → AI가 팀을 구성해 다관점으로 조사하고, 프레임된 탐구를 생성 (`FrameworkAbsent → FramedInquiry`)
-- **Syneidesis**: "뭘 놓쳤지?" → AI가 갭을 질문으로 표면화, 사용자가 판단 (`GapUnnoticed → AuditedDecision`)
-- **Hermeneia**: "내가 뭘 말하려는 거지?" → AI가 해석 선택지 제시, 사용자가 의도 인식; 또는 AI가 모호성 감지 시 사용자 확인 후 명확화 (`IntentMisarticulated → ClarifiedIntent`)
-- **Katalepsis**: "뭘 한 거야?" → AI가 질문으로 사용자의 이해를 검증 (`ResultUngrasped → VerifiedUnderstanding`)
-- **Telos**: "내가 진짜 원하는 게 뭐지?" → AI가 목표를 제안, 사용자가 형성하고 승인 (`GoalIndeterminate → DefinedEndState`)
-- **Aitesis**: "뭔가 빠진 건 아닐까?" → AI가 자체 맥락 부족을 감지하고, 실행 전 빠진 정보를 사용자에게 질의 (`ContextInsufficient → InformedExecution`)
-- **Epitrope**: "어디까지 맡길까?" → AI가 컨텍스트를 탐지하고 진입 모드를 선택, 위임(WHO/WHAT/HOW MUCH) 캘리브레이션 (`DelegationAmbiguous → CalibratedDelegation`)
-- **Prosoche**: "이거 실행해도 안전한가?" → 사용자가 위험 인지 의도를 선언하면, AI가 기존 작업을 읽고 각 작업의 위험 신호를 분류하여 위험이 높은 항목을 사용자 판단에 표면화 (`ExecutionBlind → SituatedExecution`)
-- **Epharmoge**: "이게 실제로 맞나?" → AI가 정확한 출력이 실제 컨텍스트에 맞는지 평가하고, 불일치를 사용자 판단에 표면화 (`ApplicationDecontextualized → ContextualizedExecution`)
+<details>
+<summary>Greek Codex</summary>
 
-핵심 통찰: **Recall(회상)보다 Recognition(인지)**. 빈칸을 채우는 것보다 선택지에서 고르는 게 쉽습니다.
+| 프로토콜 | 그리스어 | 의미 |
+|----------|---------|------|
+| Prothesis | πρόθεσις | 앞에 놓음 (제시) |
+| Syneidesis | συνείδησις | 함께 앎 (공동 인식) |
+| Hermeneia | ἑρμηνεία | 해석 |
+| Katalepsis | κατάληψις | 움켜잡음 (이해) |
+| Telos | τέλος | 끝, 목적 |
+| Aitesis | αἴτησις | 요청, 질의 |
+| Epitrope | ἐπιτροπή | 위탁, 위임 |
+| Prosoche | προσοχή | 주의 집중 |
+| Epharmoge | ἐφαρμογή | 적용, 맞춤 |
 
-## 설계 철학
-
-**Unix Philosophy Homomorphism**: 각 프로토콜은 하나의 일을 잘 수행하는 단일 목적 도구입니다. 조합은 bottom-up — 사용자가 인식한 결핍에 따라 필요한 도구만 호출하며, 정해진 파이프라인을 따르지 않습니다.
-
-```bash
-# 가능한 조합의 예시이며, 고정된 파이프라인이 아닙니다
-/clarify → /goal → /inquire → /batch → /grasp    # 인식론적 사전 작업 + 기계적 실행
-/inquire → /gap → /attend → /contextualize        # 인식론적 scaffolding만
-/clarify → /goal                                   # 방향 설정만
-/batch → /grasp                                    # 실행 + 이해 확인만
-```
-
-**미러링이 아닌 공존(Coexistence over Mirroring)**: 프로토콜은 빌트인 실행 도구(`/simplify`, `/batch`)의 기능을 흡수하지 않고, 각자의 관심사를 다루는 직교 도구로 공존합니다.
-
-| 레이어 | 관심사 | 도구 |
-|--------|--------|------|
-| 인식론적 | "올바른 것을 하고 있는가?" | 프로토콜 (`/clarify`, `/goal`, `/inquire`, `/gap`, ...) |
-| 실행 | "올바르게 실행하고 있는가?" | 빌트인 (`/batch`, `/simplify`) |
-| 검증 | "이해했는가?" | 프로토콜 (`/grasp`) |
-
-프로토콜은 `/batch`의 worktree를 모릅니다. `/batch`는 GoalContract를 모릅니다. 경계에서 결과만 교환합니다 — Unix pipe처럼.
-
-## 설치
-
-```bash
-# 마켓플레이스 등록
-/plugin marketplace add https://github.com/jongwony/epistemic-protocols
-
-# 필요한 것만 설치
-/plugin install prothesis
-/plugin install syneidesis
-/plugin install hermeneia
-/plugin install katalepsis
-/plugin install telos
-/plugin install aitesis
-/plugin install epitrope
-/plugin install prosoche
-/plugin install epharmoge
-```
-
-## Codex 호환
-
-Epistemic protocols를 [Codex](https://github.com/openai/codex) 스킬로도 사용할 수 있습니다:
-
-```bash
-python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo jongwony/epistemic-protocols \
-  --path aitesis/skills/inquire epitrope/skills/calibrate prosoche/skills/attend \
-        epharmoge/skills/contextualize hermeneia/skills/clarify katalepsis/skills/grasp \
-        syneidesis/skills/gap telos/skills/goal
-```
-
-각 프로토콜의 대화형 워크플로우를 위해 **plan mode**로 실행하세요.
-
-> **Codex 미지원**: Prothesis (`/frame`), Reflexion (`/reflect`), Write (`/write`) — 에이전트 팀과 병렬 서브에이전트가 필요합니다.
-
-## 사용법
-
-```
-/frame [질문]       # 다관점 팀 조사
-/gap [작업]          # 실행 중 갭 표면화 활성화
-/clarify [표현]      # 모호한 의도 명확화
-/grasp               # AI 작업에 대한 이해 검증
-/goal [모호한 아이디어]   # 의도에서 정의된 목표 공동 구성
-/inquire [작업]          # 실행 전 맥락 부족 감지 및 해결
-/calibrate [작업]        # 시나리오 기반 인터뷰로 컨텍스트 적응형 위임 캘리브레이션
-/attend [작업]            # 실행 중 AI 작업의 위험 평가
-/contextualize [작업]    # 실행 후 적용-맥락 불일치 감지
-```
+</details>
 
 ## 라이선스
 
