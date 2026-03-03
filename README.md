@@ -2,13 +2,21 @@
 
 > [한국어](./README_ko.md)
 
-Claude Code plugin marketplace for epistemic dialogue.
+Claude Code plugins for epistemic dialogue — each protocol resolves a specific cognitive deficit through structured human-AI interaction.
 
 ## Quick Start
 
-1. Install: `git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/install.sh`
+1. Install the [Epistemic Cooperative](./epistemic-cooperative) plugin in Claude Code
 2. Run `/onboard` — analyzes your sessions and recommends protocols
-3. Or pick from the table below
+3. Or pick individual protocols from the tables below
+
+## Full Installation
+
+Install all protocols and utilities at once:
+
+```bash
+git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/install.sh
+```
 
 ## Protocols
 
