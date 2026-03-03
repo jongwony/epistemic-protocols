@@ -8,7 +8,7 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 
 1. Add the marketplace in Claude Code:
    ```
-   /plugin marketplace add jongwony/epistemic-protocols
+   /plugin marketplace add https://github.com/jongwony/epistemic-protocols
    ```
 2. Install the [Epistemic Cooperative](./epistemic-cooperative) plugin:
    ```
