@@ -29,7 +29,7 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 | Phase | Owner | Tool | Decision Point |
 |-------|-------|------|----------------|
 | 1. Collect | Main | Glob | Inventory + path decision |
-| 2. Aggregate | Subagent (coverage-scanner) | Bash, Grep | Batch data collection |
+| 2. Aggregate | Subagent (coverage-scanner) | Bash, Read, Grep, Glob | Batch data collection |
 | 3. Analyze | Main | — | 7 computations |
 | 4. Present | Main | Write | HTML dashboard + console summary |
 
@@ -90,6 +90,7 @@ For each protocol, determine:
 | Prosoche | friction `wrong_file_edited` | deploy/push keywords |
 | Prothesis | — | exploration ratio ≥ 3:1 |
 | Katalepsis | — | verification firstPrompt |
+| Epharmoge | — | N/A (conditional protocol) |
 
 situation_used detection: Grep `command-name` results mapped to protocol slash commands:
 - `/frame` → Prothesis
@@ -100,6 +101,7 @@ situation_used detection: Grep `command-name` results mapped to protocol slash c
 - `/inquire` → Aitesis
 - `/calibrate` → Epitrope
 - `/attend` → Prosoche
+- `/contextualize` → Epharmoge
 
 Coverage ratio per protocol: situation_used / situation_occurred. Protocols with no detected situations = N/A.
 
