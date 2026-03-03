@@ -60,9 +60,9 @@
       "description": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)"
     },
     {
-      "name": "onboard",
-      "source": "./onboard",
-      "description": "Analyze Claude Code usage patterns and recommend epistemic protocols — /onboard"
+      "name": "epistemic-cooperative",
+      "source": "./epistemic-cooperative",
+      "description": "Session analytics: /onboard for protocol recommendations, /insights for coverage dashboard"
     }
   ]
 }

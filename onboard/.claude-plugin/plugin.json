@@ -1,9 +1,0 @@
-{
-  "name": "onboard",
-  "description": "Analyze Claude Code usage patterns and recommend epistemic protocols — /onboard",
-  "version": "0.5.0",
-  "author": {
-    "name": "Jongwon Choi",
-    "url": "https://github.com/jongwony"
-  }
-}

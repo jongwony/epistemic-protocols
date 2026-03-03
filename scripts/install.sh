@@ -3,11 +3,11 @@
 # Zero external dependencies: requires only `claude` CLI
 #
 # Usage:
-#   bash scripts/install.sh          # Install 9 protocols + onboard
+#   bash scripts/install.sh          # Install 9 protocols + epistemic-cooperative
 #   bash scripts/install.sh --all    # Include reflexion, write
 
 PROTOCOLS=(prothesis syneidesis hermeneia katalepsis telos aitesis epitrope prosoche epharmoge)
-TOOLS=(onboard)
+TOOLS=(epistemic-cooperative)
 OPTIONAL=(reflexion write)
 
 plugins=("${PROTOCOLS[@]}" "${TOOLS[@]}")
@@ -20,7 +20,7 @@ installed=0
 failed=0
 
 for p in "${plugins[@]}"; do
-  if claude plugin add "epistemic-protocols/$p"; then
+  if claude plugin install "epistemic-protocols/$p"; then
     ((installed++))
   else
     ((failed++))
