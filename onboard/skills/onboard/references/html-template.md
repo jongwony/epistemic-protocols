@@ -21,6 +21,7 @@ HTML skeleton and guidelines for the `epistemic-profile.html` artifact generated
   .protocol-cta { background: #1a2e1a; border-radius: 4px; padding: 1rem; margin: 0.75rem 0; }
   .resume-cmd { font-family: monospace; background: #020617; color: #e2e8f0; padding: 0.5rem 1rem; border-radius: 4px; display: inline-block; margin-top: 0.5rem; user-select: all; }
   .install-cmd { font-family: monospace; background: #020617; color: #a5b4fc; padding: 0.5rem 1rem; border-radius: 4px; display: inline-block; margin-top: 0.5rem; user-select: all; }
+  .batch-install { background: #0a1a0a; border: 1px solid #22c55e; border-radius: 8px; padding: 1rem; margin: 1.5rem 0; }
   .cta { display: inline-block; background: #6366f1; color: white; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-family: monospace; }
   .cta:hover { background: #4f46e5; }
   .stats { display: flex; gap: 2rem; margin: 1rem 0; }
@@ -78,6 +79,12 @@ HTML skeleton and guidelines for the `epistemic-profile.html` artifact generated
     - Cross-reference to relevant pattern/diagnostic snippet
     - /command .cta badge
     - .install-cmd: claude plugin add epistemic-protocols/<name> (if not installed)
+  -->
+  <!-- Batch Install (conditional: shown when 2+ protocols not installed):
+    - .batch-install: green-tinted background (#0a1a0a)
+    - Heading: "Install All Recommended"
+    - .install-cmd: one-line batch install command (user-select: all)
+    - Brief note: "Or clone the repo and run: bash scripts/install.sh"
   -->
   <h2>Quick Start</h2>
   <!-- Top recommendation with snippet-based scenario:

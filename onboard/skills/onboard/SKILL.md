@@ -157,6 +157,10 @@ Apply the mapping tables below to match observed patterns to protocols.
        - **Snippet narrative** (Path B): context snippet (user, AI pair) → protocol CTA → resume command
        Graceful degradation: if neither quality snippet nor friction_detail, show statistical evidence only
      - Recommended Protocols: each protocol with mapping rationale + cross-reference to relevant pattern/diagnostic snippet + `/command` CTA + install command (`claude plugin add epistemic-protocols/<name>`) if not installed
+     - Batch Install: if 2+ recommended protocols are not installed, show a batch install section with:
+       - One-line command: `bash <(curl -sL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh)`
+       - Or local: `bash scripts/install.sh` (if repo is cloned)
+       - Use `.batch-install` CSS class (green-tinted background, distinct from individual `.install-cmd`)
      - Quick Start: snippet-based concrete scenario for top recommendation — reference actual session context, show what protocol invocation would do, include `cd ~/project-path && claude --resume <id>` for immediate action + install command if needed
    - Style: clean card layout, protocol-specific color coding, dark theme, responsive design
 
@@ -172,6 +176,7 @@ Apply the mapping tables below to match observed patterns to protocols.
    - If not installed: guide marketplace installation:
      - `claude plugin add epistemic-protocols/{plugin-name}` or marketplace URL
      - Brief installation steps
+     - If 2+ protocols not installed: also mention batch install script (`scripts/install.sh`)
 
 2. Present a **concrete usage scenario** for the top recommendation:
    - Based on the user's actual work context (derived from session analysis)
