@@ -22,7 +22,7 @@ Claude Code plugins for epistemic dialogue — each protocol resolves a specific
 Install all protocols and utilities at once:
 
 ```bash
-git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/install.sh
+git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/scripts/install.sh
 ```
 
 ## Protocols
