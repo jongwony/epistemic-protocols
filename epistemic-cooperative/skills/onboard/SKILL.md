@@ -62,7 +62,7 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 | `~/.claude/usage-data/session-meta/{session_id}.json` | Read | tool_counts, git_commits, git_pushes, languages, uses_task_agent, duration_minutes, first_prompt |
 
 **Join key**: session_id from sessions-index.json matches filename in both directories.
-**Availability**: Only exists if user has run `/insights`. Read-only consumption — never write to these caches.
+**Availability**: Only exists if user has run `/insights`. Read-only consumption — never write to these caches. For full coverage analysis across all sessions, run `/insights`.
 
 ## Phase Execution
 
@@ -136,7 +136,6 @@ Apply the mapping tables below to match observed patterns to protocols.
    - Situations where a protocol was applicable but not used → anti-pattern candidates
    - Conversation quality signals (user corrections, backtracking) from Phase 2 subagent Step 2.7 → conversation anti-patterns
    - Each anti-pattern: describe the situation, reference the snippet, suggest the protocol
-7. **Coverage computation**: For each protocol, compute situation_used / situation_occurred ratio from Phase 2 situation indicators. Protocols with no detected situations = N/A (not included in coverage)
 
 ### Phase 4: Present (Results & Artifact)
 
@@ -150,13 +149,13 @@ Apply the mapping tables below to match observed patterns to protocols.
    - Save to `~/.claude/.onboard/epistemic-profile.html`
    - Structure:
      - Header: "Your Epistemic Profile" + analysis statistics
-     - Epistemic Coverage: radar chart (inline SVG) showing situation coverage per protocol + progress bars per protocol with situation_used/situation_occurred ratio. N/A protocols (no situations detected) shown separately. Graceful degradation: if insufficient data (Tier 3), show placeholder with "Run more sessions for coverage data"
+     - Insights CTA: card with "Run /insights for full coverage analysis across all sessions" message + `/insights` command badge
      - Session Diagnostics: anti-pattern cards — each with context snippet (user message + AI response pair) → protocol CTA describing expected behavior → `cd ~/project-path && claude --resume <session-id>`. Graceful degradation: if no anti-patterns detected, omit section entirely
      - Discovered Patterns: pattern cards with narrative structure — two narrative sources (use whichever available, prefer friction when both exist):
        - **Friction narrative** (Path A): friction_detail text → targeted snippet (user, AI pair) → protocol CTA → resume command
        - **Snippet narrative** (Path B): context snippet (user, AI pair) → protocol CTA → resume command
        Graceful degradation: if neither quality snippet nor friction_detail, show statistical evidence only
-     - Recommended Protocols: each protocol with mapping rationale + cross-reference to relevant pattern/diagnostic snippet + `/command` CTA + install command (`claude plugin add epistemic-protocols/<name>`) if not installed
+     - Recommended Protocols: each protocol with mapping rationale + cross-reference to relevant pattern/diagnostic snippet + `/command` CTA + install command (`claude plugin install epistemic-protocols/<name>`) if not installed
      - Batch Install: if 2+ recommended protocols are not installed, show a batch install section with:
        - One-line command: `bash <(curl -sL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh)`
        - Or local: `bash scripts/install.sh` (if repo is cloned)
@@ -174,7 +173,7 @@ Apply the mapping tables below to match observed patterns to protocols.
    - Check plugin installation via file existence: Glob for `~/.claude/plugins/cache/epistemic-protocols/{plugin-name}/*/skills/*/SKILL.md`. If found, the protocol is installed.
    - If installed: provide direct CTA (e.g., "Try `/clarify` right now in your current session")
    - If not installed: guide marketplace installation:
-     - `claude plugin add epistemic-protocols/{plugin-name}` or marketplace URL
+     - `claude plugin install epistemic-protocols/{plugin-name}` or marketplace URL
      - Brief installation steps
      - If 2+ protocols not installed: also mention batch install script (`scripts/install.sh`)
 
@@ -253,7 +252,7 @@ Refer to `references/html-template.md` for the full HTML skeleton, CSS classes, 
 ## Rules
 
 1. **Privacy**: Never transmit session data externally. All analysis runs locally.
-2. **Raw data and co-occurrence facts in subagents**: session-analyzer subagents return raw counts, co-occurrence facts, and conversation quality signals — situation-to-protocol mapping and coverage status classification happen in the main agent only.
+2. **Raw data and co-occurrence facts in subagents**: session-analyzer subagents return raw counts, co-occurrence facts, and conversation quality signals — situation-to-protocol mapping happens in the main agent only.
 3. **Evidence-based recommendations**: Every protocol recommendation must cite at least one observable pattern with data. Tier 3 fallback explicitly states "insufficient data for personalized recommendation."
 4. **No auto-install**: Guide installation but never install plugins automatically. CTA = user action.
 5. **Idempotent**: Running `/onboard` multiple times produces updated results based on latest data. Previous artifacts are overwritten.

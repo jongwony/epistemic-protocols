@@ -20,7 +20,7 @@ installed=0
 failed=0
 
 for p in "${plugins[@]}"; do
-  if claude plugin add "epistemic-protocols/$p"; then
+  if claude plugin install "epistemic-protocols/$p"; then
     ((installed++))
   else
     ((failed++))
