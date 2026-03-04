@@ -54,7 +54,7 @@ early_exit = user_declares_sufficient
 Phase 1 Ctx  (collect)  → Read, Grep (context collection)
 Phase 2 Q    (extern)   → AskUserQuestion (uncertainty surfacing + progress)
 Phase 3      (state)    → Internal state update
-Phase 0 Scan (detect)   → Internal analysis (no external tool)
+Phase 0 Scan (infer)    → Internal analysis (no external tool)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: ExecutionPlan, uncertainties: Set(Uncertainty),
