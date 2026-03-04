@@ -62,7 +62,7 @@
     {
       "name": "epistemic-cooperative",
       "source": "./epistemic-cooperative",
-      "description": "Session analytics: /onboard for protocol recommendations, /insights for coverage dashboard"
+      "description": "Session analytics: /onboard for protocol recommendations, /dashboard for coverage dashboard"
     }
   ]
 }

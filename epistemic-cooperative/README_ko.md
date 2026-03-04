@@ -13,7 +13,7 @@ Claude Code 사용 패턴을 분석하여 인식론적 프로토콜을 추천하
 | 스킬 | 목적 | 출력 |
 |------|------|------|
 | `/onboard` | 세션 분석 및 프로토콜 추천 | HTML 프로필 (`~/.claude/.onboard/epistemic-profile.html`) |
-| `/insights` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.insights/dashboard.html`) |
+| `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.insights/dashboard.html`) |
 
 ## 스킬
 
@@ -37,9 +37,9 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 - 패턴 기반 프로토콜 매칭 (행동, 환경, 마찰 패턴)
 - 3단계 폴백: 정밀 매핑 (3+ 패턴) → 보충 추천 (1-2) → Starter Trio
 - Starter Trio: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
-- Facets 데이터 가속화 (이전 `/insights` 실행 데이터 활용)
+- Facets 데이터 가속화 (이전 `/dashboard` 실행 데이터 활용)
 
-### /insights — 커버리지 대시보드
+### /dashboard — 커버리지 대시보드
 
 모든 Claude Code 세션 데이터를 분석하여 커버리지 지표, 마찰 분석, 성장 타임라인, 품질 점수를 포함하는 종합 사용 분석 대시보드를 제공한다.
 
@@ -69,7 +69,7 @@ epistemic-cooperative/
 ├── .claude-plugin/plugin.json
 ├── skills/
 │   ├── onboard/SKILL.md          # /onboard 프로토콜 추천
-│   └── insights/SKILL.md         # /insights 커버리지 대시보드
+│   └── dashboard/SKILL.md        # /dashboard 커버리지 대시보드
 └── agents/
     ├── project-scanner.md         # Phase 1: 프로젝트 탐색
     ├── session-analyzer.md        # Phase 2: 패턴 추출 (프로젝트별 병렬)
@@ -80,24 +80,24 @@ epistemic-cooperative/
 |----------|--------|------|
 | project-scanner | `/onboard` Phase 1 | `~/.claude/projects/` 스캔, 최근 프로젝트 선택, 세션 인덱스 읽기 |
 | session-analyzer | `/onboard` Phase 2 | JSONL에서 도구 빈도, 재작업 지표, 슬래시 커맨드 이력 추출 |
-| coverage-scanner | `/insights` Phase 2 | 전체 세션의 facets, session-meta, 슬래시 커맨드 데이터 집계 |
+| coverage-scanner | `/dashboard` Phase 2 | 전체 세션의 facets, session-meta, 슬래시 커맨드 데이터 집계 |
 
 ## 사용 시기
 
 | 상황 | 스킬 |
 |------|------|
 | 인식론적 프로토콜이 처음일 때 | `/onboard` |
-| 사용 분석을 보고 싶을 때 | `/insights` |
+| 사용 분석을 보고 싶을 때 | `/dashboard` |
 | 프로토콜 추천이 필요할 때 | `/onboard` |
 | 워크플로우 변경 후 재평가할 때 | `/onboard` |
-| `/onboard` 이후 더 깊은 분석이 필요할 때 | `/insights` |
-| 시간 경과에 따른 프로토콜 채택 추적 | `/insights` |
+| `/onboard` 이후 더 깊은 분석이 필요할 때 | `/dashboard` |
+| 시간 경과에 따른 프로토콜 채택 추적 | `/dashboard` |
 
 ## 사용법
 
 ```
 /onboard
-/insights
+/dashboard
 ```
 
 ## 저자

@@ -45,7 +45,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 
 | 플러그인 | 명령어 | 용도 |
 |----------|--------|------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/insights` | 세션 분석 및 프로토콜 추천 |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/dashboard` | 세션 분석 및 프로토콜 추천 |
 | [Reflexion](./reflexion) | `/reflect` | 크로스 세션 학습 |
 | [Write](./write) | `/write` | 다관점 블로그 작성 |
 
