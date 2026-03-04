@@ -27,12 +27,13 @@ A  = User's answer
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
+GT = Relevant gap types per category ⊆ {Expectation, Causality, Scope, Sequence} ∪ Emergent(C)
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Categorize(R) → C                         -- analysis (silent)
 Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point selection [Tool]
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
-Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check [Tool]
+Phase 3: Tᵣ → TaskUpdate(current) → detect(C) → GT → P → Δ  -- comprehension check [Tool]
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection [Tool]
        → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
@@ -168,12 +169,13 @@ Categories are extracted from AI work results. Common categories:
 
 Comprehension gaps within each category:
 
-| Type | Detection | Question Form |
-|------|-----------|---------------|
-| **Expectation** | User's assumed behavior differs from actual | "Did you expect this to return X?" |
-| **Causality** | User doesn't understand why something happens | "Do you understand why this value comes from here?" |
-| **Scope** | User doesn't see full impact | "Did you notice this also affects Y?" |
-| **Sequence** | User doesn't understand execution order | "Do you see that A happens before B?" |
+| Type | Detection | Question Form | Relevance |
+|------|-----------|---------------|-----------|
+| **Expectation** | User's assumed behavior differs from actual | "Did you expect this to return X?" | Behavior changes (new code, bug fix, modification) |
+| **Causality** | User doesn't understand why something happens | "Do you understand why this value comes from here?" | Non-obvious causal chains (architecture, dependency) |
+| **Scope** | User doesn't see full impact | "Did you notice this also affects Y?" | Cross-cutting impact (architecture, refactoring) |
+| **Sequence** | User doesn't understand execution order | "Do you see that A happens before B?" | Order-sensitive changes (initialization, dependency) |
+| **Emergent** | Gap outside canonical types | Adapted to specific comprehension deficit | Must satisfy morphism `ResultUngrasped → VerifiedUnderstanding`; boundary: comprehension verification (in-scope) vs. intent expression (→ `/clarify`) or decision gaps (→ `/gap`) |
 
 ## Protocol
 
@@ -294,7 +296,7 @@ For each task (category):
 
    When step 3c evaluates as Correct for the current gap type:
 
-   1. Compare probed vs. unprobed gap types relevant to this category
+   1. Compare probed vs. unprobed detected relevant gap types (canonical + Emergent) for this category
    2. If unprobed aspects exist, **call AskUserQuestion**:
 
    ```
@@ -308,13 +310,13 @@ For each task (category):
        description: "If verification sparked an improvement idea, select this — it will be recorded and verification continues"
    ```
 
-   **Option budget**: 4 slots max (Sufficient + up to 2 unprobed gap types + Proposal). If >2 unprobed gap types remain, prioritize by relevance to current category.
+   **Option budget**: 4 slots max (Sufficient + up to 2 unprobed gap types + Proposal). If >2 unprobed gap types remain, prioritize by detected relevance (see Gap Taxonomy Relevance column).
 
    3. User selects "Sufficient" → proceed to step 4
    4. User selects gap type → return to step 3 with selected gap type as Δ
    5. User selects "proposal" → Eject via Step 3b, return to aspect coverage check
 
-   Skip if all relevant gap types already probed during the verification loop.
+   Skip if all detected relevant gap types already probed during the verification loop.
 
 4. **On confirmed comprehension**:
    - TaskUpdate to `completed`
