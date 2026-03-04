@@ -228,7 +228,12 @@ Options:
 3. **Remove dimension** — [type] doesn't apply (Outcome cannot be removed)
 ```
 
+- "Add" and "Remove" options include brief rationale showing why the dimension was/wasn't detected
+- Emergent dimensions include boundary annotation: "This is a goal definition gap (Telos scope). Not: expression gap (→ `/clarify`) or execution context (→ `/inquire`)"
+
 **Add/Remove sub-steps**: On "Add" or "Remove" selection, call AskUserQuestion to specify which dimension to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1 completes when user selects "Proceed with these." Outcome removal is rejected with explanation (protocol constraint: `Dₐ ⊇ {Outcome}`).
+
+**Soft guard**: If user removes all detected dimensions (leaving only Outcome by protocol constraint), confirm: "Only Outcome will be defined. Continue with minimal GoalContract?" If confirmed, `Dₐ = {Outcome}` → proceed to Phase 2. If declined, re-present detection for reconsideration.
 
 On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only undefined dimensions. Include "Sufficient — approve current GoalContract" option for early exit.
 

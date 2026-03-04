@@ -18,7 +18,7 @@ E → recognize(E) → Eᵥ → detect(Eᵥ) → Gd → confirm(Gd) → Gₛ →
 ── TYPES ──
 E  = User's expression (the prompt to clarify)
 Eᵥ = Verified expression (user-confirmed binding)
-Gd = AI-detected gap types ⊆ {Expression, Precision, Coherence, Background} ∪ Emergent(E)
+Gd = AI-detected gap types ⊆ {Expression, Precision, Coherence, Background} ∪ Emergent(Eᵥ)
 Gₛ = User-confirmed gap types (Gd after confirm/add/remove)
 Q  = Clarification question (via AskUserQuestion)
 A  = User's answer
@@ -54,7 +54,7 @@ Phase 3:  A → integrate(A, Î) → Î'                       -- intent update 
 
 ── LOOP ──
 After Phase 3: return to Phase 1b for newly surfaced gaps.
-On re-entry, detect(Eᵥ) re-analyzes the expression in the context of prior clarifications; gaps in Λ.clarified are filtered from Gd before confirmation.
+On re-entry, detect(Eᵥ) re-analyzes the expression in the context of prior clarifications; gaps in Λ.clarified are filtered from Gd by type before confirmation (type-level filtering ensures convergence; new instances of a clarified type are excluded).
 If |Gₛ| = 0 after confirmation (all gaps removed): skip Phase 2, evaluate convergence (|G| = 0).
 Continue until converge: |G| = 0, cycle detected, or user exits.
 Mode remains active until convergence.

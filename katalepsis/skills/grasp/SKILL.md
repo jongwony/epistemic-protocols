@@ -41,6 +41,7 @@ Phase 3: Tᵣ → TaskUpdate(current) → detect(C) → GT → P → Δ  -- comp
 
 ── LOOP ──
 After Phase 3 verification: Evaluate comprehension per gap type.
+If |GT| = 0 for current category: mark task completed (category is self-evident), proceed to next task.
 If gap detected: Continue questioning within current category.
 If correct: Aspect summary — show probed vs unprobed gap types.
   User selects "sufficient" → TaskUpdate completed, next pending task.
@@ -233,7 +234,19 @@ For each task (category):
 
 1. **TaskUpdate** to `in_progress`
 
-2. **Present overview**: Brief summary of the category
+2. **Present overview**: Brief summary of the category, then show detected gap types (GT) and let user select starting aspect:
+
+   ```
+   Detected relevant aspects for [Category]: [GT list]
+   Which aspect to start with?
+   options:
+     - label: "[Gap type A]"
+       description: "[Why relevant to this category]"
+     - label: "[Gap type B]"
+       description: "[Why relevant to this category]"
+   ```
+
+   This lightweight `select_start` prevents AI-imposed framing on the first probe without requiring full pre-authorization of the detection set. User picks starting direction; remaining aspects surface in step 3d.
 
 3. **Verify comprehension** by **calling the AskUserQuestion tool** with a Socratic probe:
 
@@ -308,11 +321,13 @@ For each task (category):
        description: "Proceed to next category with current understanding"
      - label: "[Unprobed gap type]"
        description: "[Why this gap type is relevant to this category]"
+     - label: "Other aspect"
+       description: "I notice a comprehension gap not listed above"
      - label: "Record an improvement idea"
        description: "If verification sparked an improvement idea, select this — it will be recorded and verification continues"
    ```
 
-   **Option budget**: 4 slots max (Sufficient + up to 2 unprobed gap types + Proposal). If >2 unprobed gap types remain, prioritize by detected relevance (see Gap Taxonomy Relevance column).
+   **Option budget**: 4 slots max (Sufficient + up to 2 unprobed gap types + Other/Proposal). If >2 unprobed gap types remain, prioritize by detected relevance (see Gap Taxonomy Relevance column). "Other aspect" shares a slot with Proposal — present whichever is more contextually relevant, or alternate across coverage checks.
 
    3. User selects "Sufficient" → proceed to step 4
    4. User selects gap type → return to step 3 with selected gap type as Δ
