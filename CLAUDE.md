@@ -162,7 +162,7 @@ Pre-commit protocol verification via static checks and expert review.
 ## Core Principles
 
 - **Recognition over Recall**: Options to select, not blanks to fill
-- **Selection over Detection**: User selects gap types; AI does not auto-diagnose
+- **Detection with user authority**: AI detects and presents with evidence; user retains decision authority (confirm/add/remove)
 - **Surfacing over Deciding**: AI illuminates, user judges
 - **Convergence Persistence**: Modes active until convergence
 - **Priority Override**: Active protocols supersede default behaviors

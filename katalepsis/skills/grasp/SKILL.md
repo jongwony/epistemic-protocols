@@ -13,7 +13,7 @@ Achieve certain comprehension of AI work through structured verification, enabli
 
 ```
 ── FLOW ──
-R → C → Sₑ → Tᵣ → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
+R → C → Sₑ → Tᵣ → detect(C) → GT → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
 
 ── TYPES ──
 R  = AI's result (the work output)
@@ -27,12 +27,13 @@ A  = User's answer
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
+GT = Relevant gap types per category ⊆ {Expectation, Causality, Scope, Sequence} ∪ Emergent(C)
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Categorize(R) → C                         -- analysis (silent)
 Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point selection [Tool]
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
-Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check [Tool]
+Phase 3: Tᵣ → TaskUpdate(current) → detect(C) → GT → P → Δ  -- comprehension check [Tool]
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection [Tool]
        → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
@@ -40,6 +41,7 @@ Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension
 
 ── LOOP ──
 After Phase 3 verification: Evaluate comprehension per gap type.
+If |GT| = 0 for current category: mark task completed (category is self-evident), proceed to next task.
 If gap detected: Continue questioning within current category.
 If correct: Aspect summary — show probed vs unprobed gap types.
   User selects "sufficient" → TaskUpdate completed, next pending task.
@@ -55,6 +57,7 @@ VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P'
 ── TOOL GROUNDING ──
 Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
+Phase 3 detect (detect) → Internal analysis (gap type relevance detection per category)
 Phase 3 Q   → AskUserQuestion (comprehension verification, aspect coverage)
 Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
@@ -70,6 +73,7 @@ Categorize  → Internal analysis (Read for context if needed)
   tasks: Map<TaskId, Task>,
   current: TaskId,
   phantasia: Understanding,
+  detected: Map<TaskId, Set<GapType>>,
   probed: Map<TaskId, Set<GapType>>,
   active: Bool
 }
@@ -168,12 +172,13 @@ Categories are extracted from AI work results. Common categories:
 
 Comprehension gaps within each category:
 
-| Type | Detection | Question Form |
-|------|-----------|---------------|
-| **Expectation** | User's assumed behavior differs from actual | "Did you expect this to return X?" |
-| **Causality** | User doesn't understand why something happens | "Do you understand why this value comes from here?" |
-| **Scope** | User doesn't see full impact | "Did you notice this also affects Y?" |
-| **Sequence** | User doesn't understand execution order | "Do you see that A happens before B?" |
+| Type | Detection | Question Form | Relevance |
+|------|-----------|---------------|-----------|
+| **Expectation** | User's assumed behavior differs from actual | "Did you expect this to return X?" | Behavior changes (new code, bug fix, modification) |
+| **Causality** | User doesn't understand why something happens | "Do you understand why this value comes from here?" | Non-obvious causal chains (architecture, dependency) |
+| **Scope** | User doesn't see full impact | "Did you notice this also affects Y?" | Cross-cutting impact (architecture, refactoring) |
+| **Sequence** | User doesn't understand execution order | "Do you see that A happens before B?" | Order-sensitive changes (initialization, dependency) |
+| **Emergent** | Gap outside canonical types | Adapted to specific comprehension deficit | Must satisfy morphism `ResultUngrasped → VerifiedUnderstanding`; boundary: comprehension verification (in-scope) vs. intent expression (→ `/clarify`) or decision gaps (→ `/gap`) |
 
 ## Protocol
 
@@ -229,7 +234,19 @@ For each task (category):
 
 1. **TaskUpdate** to `in_progress`
 
-2. **Present overview**: Brief summary of the category
+2. **Present overview**: Brief summary of the category, then show detected gap types (GT) and let user select starting aspect:
+
+   ```
+   Detected relevant aspects for [Category]: [GT list]
+   Which aspect to start with?
+   options:
+     - label: "[Gap type A]"
+       description: "[Why relevant to this category]"
+     - label: "[Gap type B]"
+       description: "[Why relevant to this category]"
+   ```
+
+   This lightweight `select_start` prevents AI-imposed framing on the first probe without requiring full pre-authorization of the detection set. User picks starting direction; remaining aspects surface in step 3d.
 
 3. **Verify comprehension** by **calling the AskUserQuestion tool** with a Socratic probe:
 
@@ -294,7 +311,7 @@ For each task (category):
 
    When step 3c evaluates as Correct for the current gap type:
 
-   1. Compare probed vs. unprobed gap types relevant to this category
+   1. Compare probed vs. unprobed detected relevant gap types (canonical + Emergent) for this category
    2. If unprobed aspects exist, **call AskUserQuestion**:
 
    ```
@@ -304,17 +321,19 @@ For each task (category):
        description: "Proceed to next category with current understanding"
      - label: "[Unprobed gap type]"
        description: "[Why this gap type is relevant to this category]"
+     - label: "Other aspect"
+       description: "I notice a comprehension gap not listed above"
      - label: "Record an improvement idea"
        description: "If verification sparked an improvement idea, select this — it will be recorded and verification continues"
    ```
 
-   **Option budget**: 4 slots max (Sufficient + up to 2 unprobed gap types + Proposal). If >2 unprobed gap types remain, prioritize by relevance to current category.
+   **Option budget**: 4 slots max (Sufficient + up to 2 unprobed gap types + Other/Proposal). If >2 unprobed gap types remain, prioritize by detected relevance (see Gap Taxonomy Relevance column). "Other aspect" shares a slot with Proposal — present whichever is more contextually relevant, or alternate across coverage checks.
 
    3. User selects "Sufficient" → proceed to step 4
    4. User selects gap type → return to step 3 with selected gap type as Δ
    5. User selects "proposal" → Eject via Step 3b, return to aspect coverage check
 
-   Skip if all relevant gap types already probed during the verification loop.
+   Skip if all detected relevant gap types already probed during the verification loop.
 
 4. **On confirmed comprehension**:
    - TaskUpdate to `completed`

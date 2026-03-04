@@ -13,13 +13,14 @@ Co-construct defined end states from vague goals through AI-proposed, user-shape
 
 ```
 ── FLOW ──
-G → Gᵥ → Dₛ → P → A → C' → (loop until sufficient)
+G → Gᵥ → detect(Gᵥ) → Dd → confirm(Dd) → Dₐ → Dₛ → P → A → C' → (loop until sufficient)
 
 ── TYPES ──
 G   = User's vague goal (the goal to define)
 Gᵥ  = Verified vague goal (user-confirmed)
+Dd  = AI-detected dimensions ⊆ {Outcome, Metric, Boundary, Priority} ∪ Emergent(G)
 Dₛ  = Selected dimension ∈ {Outcome, Metric, Boundary, Priority}
-Dₐ  = Applicable dimensions (user-selected subset, |Dₐ| ≥ 1)
+Dₐ  = Applicable dimensions (user-confirmed subset of Dd, Dₐ ⊇ {Outcome})
 P   = Proposal (AI-generated concrete candidate)
 A   = User's response ∈ {Accept, Modify(aspect, direction), Reject, Extend(aspect)}
 C   = GoalContract { outcome: ?, metric: ?, boundary: ?, priority: ? }
@@ -40,7 +41,7 @@ Edge cases:
 
 ── PHASE TRANSITIONS ──
 Phase 0:  G → recognize(G) → Q[AskUserQuestion](confirm) → Gᵥ  -- trigger + confirm [Tool]
-Phase 1:  Gᵥ → Q[AskUserQuestion](dimensions) → Dₐ, Dₛ         -- dimension selection [Tool]
+Phase 1:  Gᵥ → detect(Gᵥ) → Dd → Q[AskUserQuestion](Dd, evidence) → Dₐ, Dₛ  -- dimension detection + confirm [Tool]
 Phase 2:  Dₛ → propose(Dₛ, context) → P                        -- AI proposal (internal)
         → Q[AskUserQuestion](P) → await → A                     -- co-construction [Tool]
 Phase 3:  A → integrate(A, C) → C'                             -- contract update (internal)
@@ -49,6 +50,7 @@ Phase 4:  C' → Q[AskUserQuestion](C', progress) → approve       -- sufficien
 ── LOOP ──
 After Phase 3: compute progress(C', Dₐ).
 If undefined dimensions remain in Dₐ: return to Phase 1 (next dimension).
+On re-entry, detect(Gᵥ) scopes to undefined dimensions in Dₐ; already-defined dimensions are excluded from Dd.
 If all Dₐ defined: proceed to Phase 4.
 User can trigger Phase 4 early at any Phase 1 (early_exit).
 Continue until: user approves GoalContract OR user ESC.
@@ -60,14 +62,15 @@ early_exit = user_declares_sufficient (any progress level)
 
 ── TOOL GROUNDING ──
 Phase 0 Q  (extern)  → AskUserQuestion (goal confirmation + activation approval)
-Phase 1 Q  (extern)  → AskUserQuestion (dimension selection + progress display)
+Phase 1 detect (detect) → Internal analysis (dimension detection from Gᵥ)
+Phase 1 Q  (extern)  → AskUserQuestion (detection confirmation + progress display)
 Phase 2 P  (detect)  → Read, Grep (context for proposal generation; fallback: template)
 Phase 2 Q  (extern)  → AskUserQuestion (proposal with structured response options)
 Phase 3    (state)   → Internal GoalContract update (no external tool)
 Phase 4 Q  (extern)  → AskUserQuestion (GoalContract review + approval)
 
 ── MODE STATE ──
-Λ = { phase: Phase, G: Goal, Gᵥ: Goal, applicable: Set(Dim),
+Λ = { phase: Phase, G: Goal, Gᵥ: Goal, detected: Set(Dim), applicable: Set(Dim),
       contract: GoalContract, history: List<(Dₛ, P, A)>, active: Bool }
 ```
 
@@ -78,7 +81,7 @@ Phase 4 Q  (extern)  → AskUserQuestion (GoalContract review + approval)
 ## Epistemic Distinction from Requirements Engineering
 
 Telos is not simplified requirements gathering. Three differentiators:
-1. **Selection over Detection**: User selects which dimensions are indeterminate (not elicited by checklist)
+1. **Detection with user authority**: AI detects indeterminate dimensions with evidence; user confirms, adds, or removes (not elicited by checklist)
 2. **Morphism firing**: Activates only when `GoalIndeterminate` precondition is recognized — not a mandatory pipeline stage
 3. **Falsifiable proposals**: AI proposes specific candidates that can be directly accepted or rejected, surfacing value conflicts and trade-offs (epistemic function) rather than collecting specifications (engineering function)
 
@@ -195,23 +198,44 @@ Options:
 
 **Skip condition**: If G was explicitly provided via `/goal "text"`, proceed directly to Phase 1.
 
-### Phase 1: Dimension Selection
+### Phase 1: Dimension Detection and Confirmation
 
-**Call the AskUserQuestion tool** with `multiSelect: true` to let user select applicable dimensions.
+Analyze Gᵥ to detect indeterminate dimensions, then **call the AskUserQuestion tool** for user confirmation.
 
-Present dimensions with current GoalContract progress:
+**Detection heuristics**:
+
+| Type | Heuristic | Signal |
+|------|-----------|--------|
+| **Outcome** | No concrete end state | Missing deliverable, vague result description, "improve" without target |
+| **Metric** | No success/failure criteria | No measurable thresholds, "better" without baseline |
+| **Boundary** | Scope unbounded | "everything", "wherever needed", no explicit exclusions |
+| **Priority** | Trade-offs unstated | Multiple competing values without ranking, no "when X conflicts with Y" |
+| **Emergent** | Dimension outside canonical types | Must satisfy morphism `GoalIndeterminate → DefinedEndState`; boundary: goal definition (in-scope) vs. expression gap (→ `/clarify`) or execution context (→ `/inquire`) |
+
+**Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be removed** via the "Remove" option.
+
+Present detection results with evidence, then confirm:
 
 ```
-Which aspects of the goal need definition? (select all that apply)
+I detected these dimensions as needing definition:
+
+- **Outcome** [protocol constraint]: [evidence or "required by protocol"]
+- **[Type]**: [specific evidence from Gᵥ]
 
 Options:
-1. **Outcome** — what the end state looks like [required]
-2. **Boundary** — what's included and excluded
-3. **Priority** — what matters most in trade-offs
-4. **Metric** — how to judge success
+1. **Proceed with these** — start co-construction with detected dimensions
+2. **Add dimension** — I also see [type] gaps
+3. **Remove dimension** — [type] doesn't apply (Outcome cannot be removed)
 ```
 
-On loop re-entry: show progress (`[defined]` / `[undefined]`) and present only remaining undefined dimensions. Include "Sufficient — approve current GoalContract" option for early exit.
+- "Add" and "Remove" options include brief rationale showing why the dimension was/wasn't detected
+- Emergent dimensions include boundary annotation: "This is a goal definition gap (Telos scope). Not: expression gap (→ `/clarify`) or execution context (→ `/inquire`)"
+
+**Add/Remove sub-steps**: On "Add" or "Remove" selection, call AskUserQuestion to specify which dimension to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1 completes when user selects "Proceed with these." Outcome removal is rejected with explanation (protocol constraint: `Dₐ ⊇ {Outcome}`).
+
+**Soft guard**: If user removes all detected dimensions (leaving only Outcome by protocol constraint), confirm: "Only Outcome will be defined. Continue with minimal GoalContract?" If confirmed, `Dₐ = {Outcome}` → proceed to Phase 2. If declined, re-present detection for reconsideration.
+
+On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only undefined dimensions. Include "Sufficient — approve current GoalContract" option for early exit.
 
 ### Phase 2: Co-Construction
 
@@ -293,7 +317,7 @@ Options:
 
 1. **AI-guided, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via AskUserQuestion (Phase 0)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation). Modify options use structured sub-choices, not free text
-3. **Selection over Detection**: User selects applicable dimensions in Phase 1; AI does not auto-sequence or force all 4
+3. **Detection with user authority**: AI detects indeterminate dimensions with evidence; user confirms, adds, or removes (no blind multiSelect, no auto-proceed). Outcome always included (protocol constraint)
 4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions
 5. **Concrete proposals**: Every proposal must be specific enough to accept or reject
 6. **User authority**: User shapes, accepts, or rejects; AI does not override

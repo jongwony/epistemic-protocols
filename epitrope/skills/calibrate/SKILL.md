@@ -413,7 +413,7 @@ If user selects "Adjust": present sub-options — "Adjust team structure" (→ P
 
 1. **AI-guided, user-calibrated**: AI detects ambiguous delegation; calibration requires user choice via AskUserQuestion (Phase 0/2/4)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present concrete scenarios (text presentation = protocol violation)
-3. **Selection over Detection**: User selects autonomy level from presented options; AI does not auto-calibrate
+3. **Detection with user authority**: AI detects applicable domains; user selects autonomy level from presented options per domain. AI does not auto-calibrate
 4. **Calibration over Declaration**: Concrete scenarios over abstract policy statements — "When X happens, should I..." beats "What's your general preference for..."
 5. **Session-scoped**: DelegationContract applies for current session only; does not persist across sessions
 6. **Domain priority**: Calibrate External first (highest impact), then FileModification, Strategy, Exploration
