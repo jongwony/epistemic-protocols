@@ -7,7 +7,7 @@ HTML skeleton and guidelines for the `dashboard.html` artifact generated in Phas
 ```html
 <!-- Minimal structure reference -->
 <html lang="en">
-<head><meta charset="utf-8"><title>Epistemic Insights Dashboard</title>
+<head><meta charset="utf-8"><title>Epistemic Coverage Dashboard</title>
 <style>
   :root {
     --bg-primary: #0f172a; --bg-card: #1e293b; --bg-deep: #020617;
@@ -117,7 +117,7 @@ HTML skeleton and guidelines for the `dashboard.html` artifact generated in Phas
 </style>
 </head>
 <body>
-  <h1>Epistemic Insights Dashboard</h1>
+  <h1>Epistemic Coverage Dashboard</h1>
   <p class="subtitle">Comprehensive usage analytics across all sessions</p>
   <div class="stats">
     <!-- stat: total sessions, protocols used, quality score, streak -->
