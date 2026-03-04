@@ -1,11 +1,6 @@
 ---
 name: reflexion
-description: >-
-  This skill should be used when the user asks to "reflect on session",
-  "extract insights", "analyze this conversation", "save learnings to memory",
-  "run /reflect", "what did we learn?", "capture this for future sessions",
-  "session wrap-up", or wants to persist session knowledge to User/Project memory.
-  Conversational memory reconstruction through guided dialogue.
+description: "Cross-session learning through guided dialogue. Extracts session insights and integrates into persistent memory when session knowledge should be preserved. Alias: Reflexion."
 ---
 
 # Reflexion v3
