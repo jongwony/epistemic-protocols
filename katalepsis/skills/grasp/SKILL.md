@@ -44,7 +44,7 @@ If gap detected: Continue questioning within current category.
 If correct: Aspect summary — show probed vs unprobed gap types.
   User selects "sufficient" → TaskUpdate completed, next pending task.
   User selects additional aspect → Resume with selected gap type.
-  User selects "proposal" → Eject via TaskCreate, resume current loop position.
+  User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, resume current loop position.
 Continue until: all selected tasks completed OR user ESC.
 
 ── CONVERGENCE ──
@@ -281,21 +281,14 @@ For each task (category):
 
    Resume comprehension verification by calling AskUserQuestion again for the same aspect.
 
-   **Post-correction Proposal surfacing**: When resuming verification after a Misconception correction, include an additional option in the re-probe AskUserQuestion:
-
-   ```
-   - label: "Record an improvement idea"
-     description: "If the correction sparked an improvement idea, select this — verification continues after recording"
-   ```
-
-   This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User selection triggers Step 3b Proposal ejection workflow, then resumes the verification loop.
+   **Post-correction Proposal surfacing**: When resuming verification after a Misconception correction, output a brief text nudge before calling AskUserQuestion — remind the user they can share improvement ideas via the "Other" option. Adapt wording to fit the current context (no fixed template). This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User input via Other triggers Step 3b Proposal ejection workflow, then resumes the verification loop.
 
 3d. **Aspect coverage check** (before marking category complete):
 
    When step 3c evaluates as Correct for the current gap type:
 
    1. Compare probed vs. unprobed gap types relevant to this category
-   2. If unprobed aspects exist, **call AskUserQuestion**:
+   2. If unprobed aspects exist, output a brief text nudge reminding the user they can share improvement ideas via the "Other" option (adapt wording to context, no fixed template), then **call AskUserQuestion**:
 
    ```
    question: "Verified [probed aspects] in [Category]. Any other aspects to explore?"
@@ -304,15 +297,12 @@ For each task (category):
        description: "Proceed to next category with current understanding"
      - label: "[Unprobed gap type]"
        description: "[Why this gap type is relevant to this category]"
-     - label: "Record an improvement idea"
-       description: "If verification sparked an improvement idea, select this — it will be recorded and verification continues"
    ```
 
-   **Option budget**: 4 slots max (Sufficient + up to 2 unprobed gap types + Proposal). If >2 unprobed gap types remain, prioritize by relevance to current category.
+   **Option budget**: 4 slots max (Sufficient + up to 3 unprobed gap types). If >3 unprobed gap types remain, prioritize by relevance to current category.
 
    3. User selects "Sufficient" → proceed to step 4
    4. User selects gap type → return to step 3 with selected gap type as Δ
-   5. User selects "proposal" → Eject via Step 3b, return to aspect coverage check
 
    Skip if all relevant gap types already probed during the verification loop.
 
