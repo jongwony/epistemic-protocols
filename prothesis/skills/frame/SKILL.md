@@ -47,7 +47,7 @@ user_wrap_up  = (J = wrap_up) at Phase 4   -- user selects wrap_up routing optio
 user_esc      = J = ESC at any phase        -- user selects ESC (Escape)
 J      = Routing ∈ {calibrate, extend, add_input, wrap_up, ESC}  -- Phase 4 routing decision (post-merge)
 J_mb   = MissionBriefRouting ∈ {confirm, modify(field), ESC}  -- Phase 0 routing decision
-PF     = preserve_findings: (T, L) → Q[AskUserQuestion](select categories) → void  -- TaskCreate deferred to post-TeamDelete
+PF     = preserve_findings: (T, L) → Q[AskUserQuestion](select categories)          -- returns selected; TaskCreate is post-TeamDelete step
 
 ── U-BINDING ──
 bind(U) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_request
@@ -122,7 +122,7 @@ Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions,
 Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke → independent synthesis; skip if Δ = ∅)
 Phase 4 Q (extern)       → AskUserQuestion (synthesis + routing: present Lens L with calibrate/extend/add_input/wrap_up options; Escape → terminate)
 PF Q (extern)            → AskUserQuestion (multiSelect: preservation scope; in LOOP wrap_up path only)
-PF (state)               → TaskCreate (session-scoped: selected findings migrated from L after TeamDelete clears team context)
+wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 J=calibrate (extern)     → Skill tool (protocol transition: Activate[Skill]("calibrate") → activate Epitrope; in LOOP after Phase 4)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
@@ -436,7 +436,7 @@ After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if
 - **Calibrate**: Call Skill("calibrate") to activate Epitrope. Team retained — Epitrope detects the active team and presents TeamAugment, TeamRestructure, Solo options. Coordinator transitions to delegation calibration. Epitrope produces DC; after DC approval, routing re-presents so user can /batch then "Extend" to feed execution results back to the review team.
 - **Extend**: Follow-up AskUserQuestion — "Add new perspective" → Phase 2 (spawn new teammate into T), "Deepen existing" → Phase 3 (SendMessage re-inquiry to target teammate), or "Review execution results" → Phase 3 (SendMessage /batch output to team). Team retained in all cases.
 - **Add input**: User provides additional context → revise synthesis with new input → re-present Lens L' with routing options.
-- **Wrap up**: preserve_findings (PF) → shutdown_request → TeamDelete → TaskCreate → terminate with L → recommend_protocols(L). PF presents L categories (convergence, divergence, assessment highlights) via multiSelect AskUserQuestion; after TeamDelete clears team context, selected items are migrated to session-scoped TaskCreate (ensuring tasks survive team cleanup).
+- **Wrap up**: preserve_findings (PF) → shutdown_request → TeamDelete → TaskCreate → terminate with L → recommend_protocols(L). PF presents L categories (convergence, divergence, assessment highlights) via multiSelect AskUserQuestion; selected items migrate to session TaskCreate after TeamDelete.
 - **ESC**: shutdown_request → TeamDelete → terminate with current Lens L (fast exit — preserve_findings skipped)
 
 **Convergence**: Mode terminates when user selects wrap_up or explicitly exits (ESC). Team is deleted only at terminal states.
