@@ -42,6 +42,7 @@ If gap detected: Continue questioning within current category.
 If correct: Aspect summary — show probed vs unprobed gap types.
   User selects "sufficient" → TaskUpdate completed, next pending task.
   User selects additional aspect → Resume with selected gap type.
+  User selects "proposal" → Eject via TaskCreate, resume current loop position.
 Continue until: all selected tasks completed OR user ESC.
 
 ── CONVERGENCE ──
@@ -67,6 +68,7 @@ Categorize  → Internal analysis (Read for context if needed)
   current: TaskId,
   phantasia: Understanding,
   probed: Map<TaskId, Set<GapType>>,
+  corrected: Map<TaskId, Bool>,
   active: Bool
 }
 ```
@@ -277,6 +279,15 @@ For each task (category):
 
    Resume comprehension verification by calling AskUserQuestion again for the same aspect.
 
+   **Post-correction Proposal surfacing**: When resuming verification after a Misconception correction, include an additional option in the re-probe AskUserQuestion:
+
+   ```
+   - label: "I have a suggestion about this"
+     description: "If the correction sparked an improvement idea, select this — verification continues after recording"
+   ```
+
+   This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User selection triggers Step 3b Proposal ejection workflow, then resumes the verification loop. Set `corrected[current] = true`.
+
 3d. **Aspect coverage check** (before marking category complete):
 
    When step 3c evaluates as Correct for the current gap type:
@@ -291,10 +302,13 @@ For each task (category):
        description: "Proceed to next category with current understanding"
      - label: "[Unprobed gap type]"
        description: "[Why this gap type is relevant to this category]"
+     - label: "I have a suggestion from this process"    # conditional: corrected[current] = true
+       description: "If the verification process sparked an improvement idea, select this — it will be recorded and verification continues"
    ```
 
    3. User selects "Sufficient" → proceed to step 4
    4. User selects gap type → return to step 3 with selected gap type as Δ
+   5. User selects "proposal" → Eject via Step 3b, return to aspect coverage check
 
    Skip if all relevant gap types already probed during the verification loop.
 
