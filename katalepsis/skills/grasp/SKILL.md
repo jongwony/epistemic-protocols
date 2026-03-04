@@ -35,7 +35,7 @@ Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point sele
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → detect(C) → GT → P → Δ  -- comprehension check [Tool]
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
-       → TaskCreate[Proposal] if proposal(A)             -- proposal ejection [Tool]
+       → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
        → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
        → Q[AskUserQuestion](coverage) if correct(A)     -- aspect summary [Tool]
 
@@ -46,7 +46,7 @@ If gap detected: Continue questioning within current category.
 If correct: Aspect summary — show probed vs unprobed gap types.
   User selects "sufficient" → TaskUpdate completed, next pending task.
   User selects additional aspect → Resume with selected gap type.
-  User selects "proposal" → Eject via TaskCreate, resume current loop position.
+  User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, resume current loop position.
 Continue until: all selected tasks completed OR user ESC.
 
 ── CONVERGENCE ──
@@ -298,21 +298,14 @@ For each task (category):
 
    Resume comprehension verification by calling AskUserQuestion again for the same aspect.
 
-   **Post-correction Proposal surfacing**: When resuming verification after a Misconception correction, include an additional option in the re-probe AskUserQuestion:
-
-   ```
-   - label: "Record an improvement idea"
-     description: "If the correction sparked an improvement idea, select this — verification continues after recording"
-   ```
-
-   This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User selection triggers Step 3b Proposal ejection workflow, then resumes the verification loop.
+   **Post-correction Proposal surfacing**: When resuming verification after a Misconception correction, output a brief text nudge before calling AskUserQuestion — remind the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option. Adapt wording to fit the current context (no fixed template). This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User input via Other triggers Step 3b Proposal ejection workflow, then resumes the verification loop.
 
 3d. **Aspect coverage check** (before marking category complete):
 
    When step 3c evaluates as Correct for the current gap type:
 
    1. Compare probed vs. unprobed detected relevant gap types (canonical + Emergent) for this category
-   2. If unprobed aspects exist, **call AskUserQuestion**:
+   2. If unprobed aspects exist, output a brief text nudge reminding the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option (adapt wording to context, no fixed template), then **call AskUserQuestion**:
 
    ```
    question: "Verified [probed aspects] in [Category]. Any other aspects to explore?"
@@ -321,17 +314,12 @@ For each task (category):
        description: "Proceed to next category with current understanding"
      - label: "[Unprobed gap type]"
        description: "[Why this gap type is relevant to this category]"
-     - label: "Other aspect"
-       description: "I notice a comprehension gap not listed above"
-     - label: "Record an improvement idea"
-       description: "If verification sparked an improvement idea, select this — it will be recorded and verification continues"
    ```
 
-   **Option budget**: 4 slots max (Sufficient + up to 2 unprobed gap types + Other/Proposal). If >2 unprobed gap types remain, prioritize by detected relevance (see Gap Taxonomy Relevance column). "Other aspect" shares a slot with Proposal — present whichever is more contextually relevant, or alternate across coverage checks.
+   **Option budget**: 4 slots max (Sufficient + up to 3 unprobed gap types). If >3 unprobed gap types remain, prioritize by detected relevance (see Gap Taxonomy Relevance column).
 
    3. User selects "Sufficient" → proceed to step 4
    4. User selects gap type → return to step 3 with selected gap type as Δ
-   5. User selects "proposal" → Eject via Step 3b, return to aspect coverage check
 
    Skip if all detected relevant gap types already probed during the verification loop.
 
