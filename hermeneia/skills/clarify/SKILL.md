@@ -54,6 +54,8 @@ Phase 3:  A → integrate(A, Î) → Î'                       -- intent update 
 
 ── LOOP ──
 After Phase 3: return to Phase 1b for newly surfaced gaps.
+On re-entry, detect(Eᵥ) re-analyzes the expression in the context of prior clarifications; gaps in Λ.clarified are filtered from Gd before confirmation.
+If |Gₛ| = 0 after confirmation (all gaps removed): skip Phase 2, evaluate convergence (|G| = 0).
 Continue until converge: |G| = 0, cycle detected, or user exits.
 Mode remains active until convergence.
 
@@ -268,7 +270,9 @@ Options:
 - "Add" and "Remove" options include brief rationale showing why the type was/wasn't detected
 - Emergent gaps include boundary annotation: "This is an intent-expression gap (Hermeneia scope). Not: goal definition (→ `/goal`) or execution context (→ `/inquire`)"
 
-**Soft guard**: If user removes all detected gaps, confirm: "Removing all gaps terminates clarification. Continue?" (no hard constraint — `|Gₛ| = 0` naturally deactivates mode)
+**Add/Remove sub-steps**: On "Add" or "Remove" selection, call AskUserQuestion to specify which type to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1b completes when user selects "Proceed with these."
+
+**Soft guard**: If user removes all detected gaps, confirm: "Removing all gaps terminates clarification. Continue?" If confirmed, `|Gₛ| = 0` → skip Phase 2, evaluate convergence (`|G| = 0` in LOOP).
 
 User confirmation determines Gₛ and the clarification strategy in Phase 2. If multiple confirmed, address in priority order (Coherence → Background → Expression → Precision).
 

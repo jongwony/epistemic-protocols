@@ -20,7 +20,7 @@ G   = User's vague goal (the goal to define)
 Gᵥ  = Verified vague goal (user-confirmed)
 Dd  = AI-detected dimensions ⊆ {Outcome, Metric, Boundary, Priority} ∪ Emergent(G)
 Dₛ  = Selected dimension ∈ {Outcome, Metric, Boundary, Priority}
-Dₐ  = Applicable dimensions (user-confirmed subset of Dd, |Dₐ| ≥ 1)
+Dₐ  = Applicable dimensions (user-confirmed subset of Dd, Dₐ ⊇ {Outcome})
 P   = Proposal (AI-generated concrete candidate)
 A   = User's response ∈ {Accept, Modify(aspect, direction), Reject, Extend(aspect)}
 C   = GoalContract { outcome: ?, metric: ?, boundary: ?, priority: ? }
@@ -50,6 +50,7 @@ Phase 4:  C' → Q[AskUserQuestion](C', progress) → approve       -- sufficien
 ── LOOP ──
 After Phase 3: compute progress(C', Dₐ).
 If undefined dimensions remain in Dₐ: return to Phase 1 (next dimension).
+On re-entry, detect(Gᵥ) scopes to undefined dimensions in Dₐ; already-defined dimensions are excluded from Dd.
 If all Dₐ defined: proceed to Phase 4.
 User can trigger Phase 4 early at any Phase 1 (early_exit).
 Continue until: user approves GoalContract OR user ESC.
@@ -226,6 +227,8 @@ Options:
 2. **Add dimension** — I also see [type] gaps
 3. **Remove dimension** — [type] doesn't apply (Outcome cannot be removed)
 ```
+
+**Add/Remove sub-steps**: On "Add" or "Remove" selection, call AskUserQuestion to specify which dimension to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1 completes when user selects "Proceed with these." Outcome removal is rejected with explanation (protocol constraint: `Dₐ ⊇ {Outcome}`).
 
 On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only undefined dimensions. Include "Sufficient — approve current GoalContract" option for early exit.
 

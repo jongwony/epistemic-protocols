@@ -13,7 +13,7 @@ Achieve certain comprehension of AI work through structured verification, enabli
 
 ```
 ── FLOW ──
-R → C → Sₑ → Tᵣ → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
+R → C → Sₑ → Tᵣ → detect(C) → GT → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
 
 ── TYPES ──
 R  = AI's result (the work output)
@@ -56,6 +56,7 @@ VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P'
 ── TOOL GROUNDING ──
 Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
+Phase 3 detect (detect) → Internal analysis (gap type relevance detection per category)
 Phase 3 Q   → AskUserQuestion (comprehension verification, aspect coverage)
 Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
@@ -71,6 +72,7 @@ Categorize  → Internal analysis (Read for context if needed)
   tasks: Map<TaskId, Task>,
   current: TaskId,
   phantasia: Understanding,
+  detected: Map<TaskId, Set<GapType>>,
   probed: Map<TaskId, Set<GapType>>,
   active: Bool
 }
