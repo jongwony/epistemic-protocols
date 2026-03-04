@@ -75,18 +75,18 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
-- **Aitesis** inquires about context the AI lacks *before* execution (User→AI direction) — Epharmoge evaluates whether the completed result *fits* the context (AI→User direction). Same axis (context fitness), opposite timing and information flow.
+- **Aitesis** infers context the AI lacks *before* execution (User→AI direction) — Epharmoge evaluates whether the completed result *fits* the context (AI→User direction). Same axis (context fitness), opposite timing and information flow.
 - **Katalepsis** verifies the user's *comprehension* of correct results (`P'≅R`) — Epharmoge verifies the result's *applicability* to context (`R≅X`). Convergence conditions are structurally incompatible.
 - **Syneidesis** surfaces gaps in the user's *decision quality* — Epharmoge surfaces gaps in the AI's *execution quality*. Different audit targets even when addressing the same domain.
 
-**Context fitness axis**: Aitesis and Epharmoge form a pre/post pair on the context fitness axis. Aitesis asks "do I have enough context to execute well?" (factual gaps, User→AI). Epharmoge asks "does my execution actually fit the context?" (evaluative mismatches, AI→User). They are complementary, not redundant — Aitesis may gather sufficient context, yet the resulting execution may still not fit contextual constraints that only become visible post-execution.
+**Context fitness axis**: Aitesis and Epharmoge form a pre/post pair on the context fitness axis. Aitesis asks "do I have enough context to execute well?" (factual uncertainties, User→AI). Epharmoge asks "does my execution actually fit the context?" (evaluative mismatches, AI→User). They are complementary, not redundant — Aitesis may gather sufficient context, yet the resulting execution may still not fit contextual constraints that only become visible post-execution.
 
 **Independence from Aitesis**: Epharmoge's information source is the execution result itself (`R`) compared against observed context (`X`), not a re-scan of pre-execution context. This ensures non-circularity — even when Aitesis has fully resolved context gaps, Epharmoge can detect mismatches that emerge only from the actual output.
 
@@ -96,7 +96,7 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 
 > **This protocol is conditional.** AI-guided activation (Layer 2) requires operational experience with Aitesis (④) to validate the pre/post context fitness axis. Until this gate is satisfied, Epharmoge exists as a formal specification only and must not auto-activate via Layer 2.
 >
-> Activation criteria: Observed pattern of "context gathered but application mismatched" in Aitesis operational data.
+> Activation criteria: Observed pattern of "context gathered but application mismatched" in Aitesis inference operational data.
 >
 > User-invocable activation (Layer 1 / `/contextualize`) is always available regardless of this gate.
 

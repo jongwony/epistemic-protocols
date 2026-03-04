@@ -112,14 +112,14 @@ Priority ordering: autonomy > transparency > noise-minimization > speed > simpli
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
-- **Aitesis** inquires about context the AI lacks *before* execution (factual gaps, User→AI) — Prosoche evaluates risk signals *during* execution (action assessment, AI→User). Aitesis asks "do I have enough context?" while Prosoche asks "is this action safe to execute?"
+- **Aitesis** infers context the AI lacks *before* execution (factual gaps, User→AI) — Prosoche evaluates risk signals *during* execution (action assessment, AI→User). Aitesis asks "do I have enough context?" while Prosoche asks "is this action safe to execute?"
 - **Syneidesis** surfaces gaps in *decision quality* for user judgment — Prosoche surfaces risks in *execution actions* for user approval. Syneidesis operates at the decision layer; Prosoche operates at the execution layer.
 - **Epharmoge** evaluates *applicability* of completed results after execution — Prosoche evaluates *risk* of pending actions before they execute. Both are AI→User, but at different temporal points: Prosoche is pre-action, Epharmoge is post-completion.
 - **Epitrope** calibrates *delegation scope* before work begins (WHO/WHAT/HOW MUCH) — Prosoche classifies *individual action risk* within that scope during execution.

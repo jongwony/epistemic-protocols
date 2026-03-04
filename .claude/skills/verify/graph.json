@@ -7,19 +7,19 @@
   "edges": [
     { "source": "hermeneia", "target": "telos", "type": "precondition", "satisfies": "표현 명확화 → 목표가 더 정확" },
     { "source": "telos", "target": "epitrope", "type": "precondition", "satisfies": "목표 정의됨 → 위임 범위 설정 가능" },
-    { "source": "epitrope", "target": "aitesis", "type": "precondition", "satisfies": "위임 범위 확립 → 컨텍스트 검증 가능" },
+    { "source": "epitrope", "target": "aitesis", "type": "precondition", "satisfies": "위임 범위 확립 → 컨텍스트 추론 가능" },
     { "source": "*", "target": "katalepsis", "type": "precondition", "satisfies": "작업 완료 → 이해 검증 가능" },
     { "source": "prothesis", "target": "syneidesis", "type": "advisory", "satisfies": "관점 시뮬레이션이 갭 감지 컨텍스트를 제공" },
     { "source": "prothesis", "target": "telos", "type": "advisory", "satisfies": "관점 시뮬레이션이 목표 정의를 개선" },
     { "source": "epitrope", "target": "syneidesis", "type": "advisory", "satisfies": "AskBefore 도메인이 위임 범위 변경을 갭으로 표면화" },
-    { "source": "epitrope", "target": "aitesis", "type": "advisory", "satisfies": "위임 범위가 컨텍스트 검증 초점을 좁힘" },
+    { "source": "epitrope", "target": "aitesis", "type": "advisory", "satisfies": "위임 범위가 컨텍스트 추론 초점을 좁힘" },
     { "source": "syneidesis", "target": "aitesis", "type": "suppression", "satisfies": "동일 작업 범위 Aitesis 억제 (비대칭)" },
     { "source": "aitesis", "target": "epharmoge", "type": "suppression", "satisfies": "동일 범위 pre+post 스태킹 방지" },
     { "source": "prothesis", "target": "epitrope", "type": "transition", "satisfies": "J=calibrate: 관점→위임 직접 모드 전환 (팀 유지)" },
-    { "source": "aitesis", "target": "prosoche", "type": "advisory", "satisfies": "검증된 컨텍스트가 실행 시 위험 평가 초점을 좁힘" },
+    { "source": "aitesis", "target": "prosoche", "type": "advisory", "satisfies": "추론된 컨텍스트가 실행 시 위험 평가 초점을 좁힘" },
     { "source": "epitrope", "target": "prosoche", "type": "advisory", "satisfies": "위임 범위가 실행 시 감시 수준을 결정" },
     { "source": "prosoche", "target": "epharmoge", "type": "advisory", "satisfies": "실행 시 주의가 사후 적용성 검증 컨텍스트를 제공" },
-    { "source": "prothesis", "target": "aitesis", "type": "advisory", "satisfies": "관점 시뮬레이션이 컨텍스트 검증 추천을 제공" },
+    { "source": "prothesis", "target": "aitesis", "type": "advisory", "satisfies": "관점 시뮬레이션이 컨텍스트 추론 추천을 제공" },
     { "source": "hermeneia", "target": "aitesis", "type": "advisory", "satisfies": "배경 갭이 실행 컨텍스트 영역이면 Aitesis 전환 제안" }
   ]
 }
