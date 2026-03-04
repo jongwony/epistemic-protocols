@@ -13,12 +13,13 @@ Resolve intent-expression misalignment through hybrid-initiated dialogue, enabli
 
 ```
 ── FLOW ──
-E → recognize(E) → Eᵥ → Gₛ → Q → A → Î' → (loop until converge)
+E → recognize(E) → Eᵥ → detect(Eᵥ) → Gd → confirm(Gd) → Gₛ → Q → A → Î' → (loop until converge)
 
 ── TYPES ──
 E  = User's expression (the prompt to clarify)
 Eᵥ = Verified expression (user-confirmed binding)
-Gₛ = User-selected gap types ⊆ {Expression, Precision, Coherence, Background}
+Gd = AI-detected gap types ⊆ {Expression, Precision, Coherence, Background} ∪ Emergent(E)
+Gₛ = User-confirmed gap types (Gd after confirm/add/remove)
 Q  = Clarification question (via AskUserQuestion)
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
@@ -47,7 +48,7 @@ Phase 0:  E → recognize(E) → T                           -- trigger recognit
           T = ai_strong   → Q[AskUserQuestion](confirm) → {yes: Phase 1a | no: immune(E)}  -- AI-detected confirm [Tool]
           T = ai_soft     → suggest_only                  -- suggest, do not activate
 Phase 1a: E → Q[AskUserQuestion](E) → Eᵥ                 -- E confirmation [Tool]
-Phase 1b: Eᵥ → Q[AskUserQuestion](gap_types) → Gₛ        -- gap type selection [Tool]
+Phase 1b: Eᵥ → detect(Eᵥ) → Gd → Q[AskUserQuestion](Gd, evidence) → Gₛ  -- gap detection + confirm [Tool]
 Phase 2:  Gₛ → Q[AskUserQuestion](Gₛ) → await → A        -- clarification [Tool]
 Phase 3:  A → integrate(A, Î) → Î'                       -- intent update (internal)
 
@@ -59,13 +60,14 @@ Mode remains active until convergence.
 ── TOOL GROUNDING ──
 Phase 0 Q    → AskUserQuestion (AI-detected activation confirmation; ai_strong only)
 Phase 1a Q   → AskUserQuestion (E confirmation)
-Phase 1b Q   → AskUserQuestion (gap type selection)
+Phase 1b detect (detect) → Internal analysis (gap detection from Eᵥ)
+Phase 1b Q   → AskUserQuestion (detection confirmation: confirm/add/remove)
 Phase 2 Q    → AskUserQuestion (clarification options)
 suggest_only → no tool call (passive suggestion; Λ.active = false)
 integrate    → Internal state update (no external tool)
 
 ── MODE STATE ──
-Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, gaps: Set(Gap),
+Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, detected: Set(Gap), gaps: Set(Gap),
       clarified: Set(Gap), immune: Set(Expression), history: List<(E, Gₛ, A)>, active: Bool }
 ```
 
@@ -235,23 +237,40 @@ Options:
 
 **Note (AI-detected path)**: If triggered via `T = ai_strong`, E is already identified by AI — Phase 1a confirmation verifies the AI's identification; user may still select Option 2 to redirect to a different expression.
 
-### Phase 1b: Gap Type Selection
+### Phase 1b: Gap Detection and Confirmation
 
-**Call the AskUserQuestion tool** with `multiSelect: true` to let user select gap types.
+Analyze Eᵥ to detect applicable gap types, then **call the AskUserQuestion tool** for user confirmation.
 
-**Do NOT auto-diagnose.** Present gap types for user selection (multiple selection allowed):
+**Detection heuristics**:
+
+| Type | Heuristic | Signal |
+|------|-----------|--------|
+| **Expression** | Incomplete articulation | Missing key elements, trailing off, placeholder words |
+| **Precision** | Ambiguous scope or degree | "some", "a few", "that part", unquantified references |
+| **Coherence** | Internal contradiction | Conflicting requirements, tension between stated goals |
+| **Background** | Interpretive context needed | Domain-specific terms, implicit assumptions, unstated prior decisions |
+| **Emergent** | Gap outside canonical types | Must satisfy morphism `IntentMisarticulated → ClarifiedIntent`; boundary: intent-expression gap (in-scope) vs. goal definition (→ `/goal`) or execution context (→ `/inquire`) |
+
+Present detection results with evidence, then confirm:
 
 ```
-What kinds of difficulty are you experiencing with this expression?
+I detected these gap types in your expression:
+
+- **[Type]**: [specific evidence from Eᵥ]
+- **[Type]**: [specific evidence from Eᵥ]
 
 Options:
-1. **Expression** — I couldn't fully articulate what I meant
-2. **Precision** — The scope or degree is unclear
-3. **Coherence** — There may be internal contradictions
-4. **Background** — My expression needs interpretive background that I didn't provide
+1. **Proceed with these** — start clarification with detected gaps
+2. **Add gap type** — I also notice [type] issues
+3. **Remove gap type** — [type] doesn't apply here
 ```
 
-User selection determines the clarification strategy in Phase 2. If multiple selected, address in priority order (Coherence → Background → Expression → Precision).
+- "Add" and "Remove" options include brief rationale showing why the type was/wasn't detected
+- Emergent gaps include boundary annotation: "This is an intent-expression gap (Hermeneia scope). Not: goal definition (→ `/goal`) or execution context (→ `/inquire`)"
+
+**Soft guard**: If user removes all detected gaps, confirm: "Removing all gaps terminates clarification. Continue?" (no hard constraint — `|Gₛ| = 0` naturally deactivates mode)
+
+User confirmation determines Gₛ and the clarification strategy in Phase 2. If multiple confirmed, address in priority order (Coherence → Background → Expression → Precision).
 
 ### Phase 2: Clarification
 
@@ -339,7 +358,7 @@ When multiple gaps detected:
 
 1. **Hybrid-initiated, user-confirmed**: Activate on user signal, or with user confirmation when AI detects ambiguous expression
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-3. **Selection over Detection**: Present options for user to select, not auto-diagnose internally
+3. **Detection with user authority**: AI detects gap types with evidence; user confirms, adds, or removes (no blind multiSelect, no auto-proceed)
 4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
 5. **Articulation support**: Help user express what they know, don't guess what they mean
 6. **Minimal questioning**: Surface only gaps that affect execution
