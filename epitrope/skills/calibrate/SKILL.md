@@ -163,7 +163,7 @@ inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.jso
 
 **Key differences**:
 - **Telos** co-constructs goals when intent is indeterminate — Epitrope calibrates how much autonomy the AI should have for an already-defined goal
-- **Aitesis** detects insufficient context for execution — Epitrope addresses ambiguous delegation scope (not missing context, but undefined authority)
+- **Aitesis** infers insufficient context for execution — Epitrope addresses ambiguous delegation scope (not missing context, but undefined authority)
 - **Syneidesis** surfaces gaps in the user's decision — Epitrope surfaces gaps in the AI's mandate
 
 **Delegation distinction**: Epitrope operates on an independent axis from the 6-stage epistemic workflow. Context insufficiency (Aitesis) asks "do I know enough?"; delegation ambiguity (Epitrope) asks "am I allowed to?". A task can have sufficient context but ambiguous delegation, or clear delegation but insufficient context.

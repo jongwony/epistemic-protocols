@@ -88,7 +88,7 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 
 **Context fitness axis**: Aitesis and Epharmoge form a pre/post pair on the context fitness axis. Aitesis asks "do I have enough context to execute well?" (factual uncertainties, User→AI). Epharmoge asks "does my execution actually fit the context?" (evaluative mismatches, AI→User). They are complementary, not redundant — Aitesis may gather sufficient context, yet the resulting execution may still not fit contextual constraints that only become visible post-execution.
 
-**Independence from Aitesis**: Epharmoge's information source is the execution result itself (`R`) compared against observed context (`X`), not a re-scan of pre-execution context. This ensures non-circularity — even when Aitesis has fully resolved context gaps, Epharmoge can detect mismatches that emerge only from the actual output.
+**Independence from Aitesis**: Epharmoge's information source is the execution result itself (`R`) compared against observed context (`X`), not a re-scan of pre-execution context. This ensures non-circularity — even when Aitesis has fully resolved context uncertainties, Epharmoge can detect mismatches that emerge only from the actual output.
 
 ## Mode Activation
 
