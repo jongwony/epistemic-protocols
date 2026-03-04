@@ -34,7 +34,7 @@ Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point sele
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check [Tool]
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
-       → TaskCreate[Proposal] if proposal(A)             -- proposal ejection [Tool]
+       → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
        → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
        → Q[AskUserQuestion](coverage) if correct(A)     -- aspect summary [Tool]
 
