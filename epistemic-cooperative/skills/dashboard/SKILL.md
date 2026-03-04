@@ -31,7 +31,7 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 | 1. Collect | Main | Glob | Inventory + path decision |
 | 2. Aggregate | Subagent (coverage-scanner) | Bash, Read, Grep, Glob | Batch data collection |
 | 3. Analyze | Main | — | 7 computations |
-| 4. Present | Main | Write | HTML dashboard + console summary |
+| 4. Present | Main | Write, Bash | HTML dashboard + console summary |
 
 ## Data Sources
 
@@ -165,6 +165,8 @@ Composite score (0-100):
    - Top friction areas
    - Quality score (if available)
    - File path: `~/.claude/.insights/dashboard.html`
+
+3. **Open in browser**: Call Bash `open ~/.claude/.insights/dashboard.html` to launch the dashboard in the default browser
 
 ## HTML Artifact Guidelines
 

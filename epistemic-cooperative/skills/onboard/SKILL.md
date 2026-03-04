@@ -30,7 +30,7 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 | 1. Scan | Subagent (project-scanner) | Bash, Read, Glob | Project discovery + secondary sources |
 | 2. Extract | Subagent (session-analyzer) | Grep, Read | Pattern extraction from JSONL |
 | 3. Map | Main | — | Pattern → Protocol matching |
-| 4. Present | Main | AskUserQuestion, Write | User confirmation + HTML artifact |
+| 4. Present | Main | AskUserQuestion, Write, Bash | User confirmation + HTML artifact |
 | 5. Guide | Main | AskUserQuestion | Protocol trial CTA |
 
 ## Data Sources
@@ -62,7 +62,7 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 | `~/.claude/usage-data/session-meta/{session_id}.json` | Read | tool_counts, git_commits, git_pushes, languages, uses_task_agent, duration_minutes, first_prompt |
 
 **Join key**: session_id from sessions-index.json matches filename in both directories.
-**Availability**: Only exists if user has run `/dashboard`. Read-only consumption — never write to these caches. For full coverage analysis across all sessions, run `/dashboard`.
+**Availability**: Only exists if user has run `/insights` (built-in command). Read-only consumption — never write to these caches. For full coverage analysis across all sessions, run `/dashboard`.
 
 ## Phase Execution
 
@@ -165,7 +165,7 @@ Apply the mapping tables below to match observed patterns to protocols.
 
    Refer to `references/html-template.md` for the HTML skeleton and CSS class reference.
 
-3. Provide artifact file path to user
+3. Open HTML artifact in default browser via Bash: `open ~/.claude/.onboard/epistemic-profile.html`
 
 ### Phase 5: Guide (Trial CTA + Install Helper)
 
