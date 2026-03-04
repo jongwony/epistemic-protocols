@@ -33,9 +33,9 @@ HTML skeleton and guidelines for the `epistemic-profile.html` artifact generated
 <body>
   <h1>Your Epistemic Profile</h1>
   <div class="stats"><!-- analysis statistics --></div>
-  <!-- Insights CTA: link to /insights for full coverage dashboard
-    .card with message: "Run /insights for full coverage analysis across all sessions"
-    .cta badge: /insights
+  <!-- Dashboard CTA: link to /dashboard for full coverage dashboard
+    .card with message: "Run /dashboard for full coverage analysis across all sessions"
+    .cta badge: /dashboard
   -->
   <h2>Session Diagnostics</h2>
   <!-- .diagnostic-card per anti-pattern:
@@ -85,7 +85,7 @@ The HTML artifact should:
 - Use a dark theme card-based layout with clear visual hierarchy
 - Assign distinct colors per protocol for quick scanning (diagnostic=amber, pattern=indigo, recommendation=green)
 - Include `/command` CTAs (displayed as styled badges)
-- **Insights CTA**: card linking to `/insights` for full coverage analysis. Simple card with command badge, no chart rendering
+- **Dashboard CTA**: card linking to `/dashboard` for full coverage analysis. Simple card with command badge, no chart rendering
 - **Session Diagnostics**: anti-pattern cards with context snippets + protocol CTA. Omit section if no anti-patterns detected
 - Show context snippets in pattern cards: (user message, AI response) pair → protocol CTA → resume command
 - When friction_detail is available: use it as lead paragraph in pattern card, snippet as supporting evidence

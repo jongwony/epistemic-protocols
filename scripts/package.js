@@ -31,7 +31,7 @@ const PLUGINS = [
   { dir: 'reflexion', skill: 'reflexion' },
   { dir: 'write', skill: 'write' },
   { dir: 'epistemic-cooperative', skill: 'onboard' },
-  { dir: 'epistemic-cooperative', skill: 'insights' },
+  { dir: 'epistemic-cooperative', skill: 'dashboard' },
 ];
 
 // claude.ai description overrides (originals exceed 200 chars)

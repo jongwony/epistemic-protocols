@@ -62,7 +62,7 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 | `~/.claude/usage-data/session-meta/{session_id}.json` | Read | tool_counts, git_commits, git_pushes, languages, uses_task_agent, duration_minutes, first_prompt |
 
 **Join key**: session_id from sessions-index.json matches filename in both directories.
-**Availability**: Only exists if user has run `/insights`. Read-only consumption — never write to these caches. For full coverage analysis across all sessions, run `/insights`.
+**Availability**: Only exists if user has run `/dashboard`. Read-only consumption — never write to these caches. For full coverage analysis across all sessions, run `/dashboard`.
 
 ## Phase Execution
 
@@ -149,7 +149,7 @@ Apply the mapping tables below to match observed patterns to protocols.
    - Save to `~/.claude/.onboard/epistemic-profile.html`
    - Structure:
      - Header: "Your Epistemic Profile" + analysis statistics
-     - Insights CTA: card with "Run /insights for full coverage analysis across all sessions" message + `/insights` command badge
+     - Dashboard CTA: card with "Run /dashboard for full coverage analysis across all sessions" message + `/dashboard` command badge
      - Session Diagnostics: anti-pattern cards — each with context snippet (user message + AI response pair) → protocol CTA describing expected behavior → `cd ~/project-path && claude --resume <session-id>`. Graceful degradation: if no anti-patterns detected, omit section entirely
      - Discovered Patterns: pattern cards with narrative structure — two narrative sources (use whichever available, prefer friction when both exist):
        - **Friction narrative** (Path A): friction_detail text → targeted snippet (user, AI pair) → protocol CTA → resume command

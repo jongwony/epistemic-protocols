@@ -13,7 +13,7 @@ A utility plugin that analyzes Claude Code usage patterns to recommend epistemic
 | Skill | Purpose | Output |
 |-------|---------|--------|
 | `/onboard` | Analyze sessions and recommend protocols | HTML profile (`~/.claude/.onboard/epistemic-profile.html`) |
-| `/insights` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
+| `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
 
 ## Skills
 
@@ -37,9 +37,9 @@ Key features:
 - Pattern-based protocol matching (behavioral, environmental, friction patterns)
 - Three-tier fallback: precise mapping (3+ patterns) → supplementary (1-2) → Starter Trio
 - Starter Trio: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
-- Facets data acceleration (when available from prior `/insights` runs)
+- Facets data acceleration (when available from prior `/dashboard` runs)
 
-### /insights — Coverage Dashboard
+### /dashboard — Coverage Dashboard
 
 Analyzes all Claude Code session data to produce a comprehensive usage analytics dashboard with coverage metrics, friction analysis, growth timeline, and quality scoring.
 
@@ -69,7 +69,7 @@ epistemic-cooperative/
 ├── .claude-plugin/plugin.json
 ├── skills/
 │   ├── onboard/SKILL.md          # /onboard protocol recommendations
-│   └── insights/SKILL.md         # /insights coverage dashboard
+│   └── dashboard/SKILL.md        # /dashboard coverage dashboard
 └── agents/
     ├── project-scanner.md         # Phase 1: project discovery
     ├── session-analyzer.md        # Phase 2: pattern extraction (parallel per project)
@@ -80,24 +80,24 @@ epistemic-cooperative/
 |-------|---------|------|
 | project-scanner | `/onboard` Phase 1 | Scan `~/.claude/projects/`, select recent projects, read session indices |
 | session-analyzer | `/onboard` Phase 2 | Extract tool frequencies, rework indicators, slash command history from JSONL |
-| coverage-scanner | `/insights` Phase 2 | Aggregate facets, session-meta, and slash command data across all sessions |
+| coverage-scanner | `/dashboard` Phase 2 | Aggregate facets, session-meta, and slash command data across all sessions |
 
 ## When to Use
 
 | Situation | Skill |
 |-----------|-------|
 | New to epistemic protocols | `/onboard` |
-| Want to see usage analytics | `/insights` |
+| Want to see usage analytics | `/dashboard` |
 | Need protocol recommendations | `/onboard` |
 | Re-evaluating protocol fit after workflow changes | `/onboard` |
-| After running `/onboard` for deeper analysis | `/insights` |
-| Tracking protocol adoption over time | `/insights` |
+| After running `/onboard` for deeper analysis | `/dashboard` |
+| Tracking protocol adoption over time | `/dashboard` |
 
 ## Usage
 
 ```
 /onboard
-/insights
+/dashboard
 ```
 
 ## Author

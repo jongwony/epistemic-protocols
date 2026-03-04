@@ -1,9 +1,9 @@
 ---
-name: insights
+name: dashboard
 description: "Comprehensive usage analytics and epistemic coverage dashboard across all sessions."
 ---
 
-# Insights Skill
+# Dashboard Skill
 
 Analyze all Claude Code session data to produce a comprehensive usage analytics dashboard with epistemic protocol coverage metrics, friction analysis, growth timeline, and actionable improvement recommendations.
 
@@ -60,7 +60,7 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 5. Construct session JSONL paths from sessions-index data for slash command scanning
 6. **Path decision**: facets ∩ session-meta ≥ 10 → Path A, else Path B
 
-If no facets or session-meta data found: report "No usage data available. Run some Claude Code sessions first, then try `/insights` again." and stop.
+If no facets or session-meta data found: report "No usage data available. Run some Claude Code sessions first, then try `/dashboard` again." and stop.
 
 ### Phase 2: Aggregate (Subagent: coverage-scanner)
 
@@ -176,6 +176,6 @@ Refer to `references/html-template.md` for the full HTML skeleton, CSS classes, 
 2. **Raw data in subagent**: coverage-scanner subagent returns raw aggregated data only — all computation, mapping, and scoring happen in the main agent.
 3. **Evidence-based metrics**: Every metric must be derived from actual data. No estimated or interpolated values.
 4. **Graceful degradation**: Path B produces useful output without facets data. Sections requiring facets show clear guidance to obtain richer data.
-5. **Idempotent**: Running `/insights` multiple times produces updated results. Previous dashboard is overwritten.
+5. **Idempotent**: Running `/dashboard` multiple times produces updated results. Previous dashboard is overwritten.
 6. **Subagent delegation**: Phase 2 batch aggregation MUST be delegated to coverage-scanner subagent (single). Main agent handles Phases 1, 3, 4.
-7. **No protocol recommendations**: `/insights` provides analytics only. For protocol recommendations, direct users to `/onboard`.
+7. **No protocol recommendations**: `/dashboard` provides analytics only. For protocol recommendations, direct users to `/onboard`.
