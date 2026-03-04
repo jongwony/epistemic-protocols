@@ -35,8 +35,7 @@ Phase 1: Gather        → Targeted context acquisition for perspective formulat
 Phase 2: Prothesis     → Present 2-4 perspectives (call AskUserQuestion)
 --- Mode 1 (recommend) terminates here with Pₛ + composition recommendations ---
 Phase 3: Inquiry       → Agent team analysis per selected perspective (TeamCreate + teammates)
-Phase 4: Synthesis     → Cross-dialogue check → Convergence/divergence → Integrated answer
-Phase 5: Routing       → User selects next action: calibrate / extend / wrap up
+Phase 4: Synthesis     → Cross-dialogue check → Convergence/divergence → Integrated answer + Routing
 ```
 
 ## When to Use
