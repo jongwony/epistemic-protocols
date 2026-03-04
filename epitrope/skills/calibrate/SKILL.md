@@ -83,7 +83,8 @@ Phase 0:  T → detect(T) → Ctx → Q[AskUserQuestion](propose_mode(Ctx)) → 
 
 Phase 1:  (mode-dependent)                                         -- structure + decomposition
   Solo:         T → decompose[Tool](T) → {Dᵢ}                      -- decomposition via Read/Grep
-  TeamAugment:  T → inherit(Ctx.team) → WHO[AskUserQuestion](adjust?) → TeamStructure
+  TeamAugment:  T → inherit(Ctx.team) → WHO[AskUserQuestion](keep/add?) →
+                  add? → propose_roles(T, epistemic) → Q[AskUserQuestion](confirm/add/remove) → TeamStructure
                   → decompose(T) → {Dᵢ}                            [Tool]
   TeamRestructure: restructure[AskUserQuestion](T, Ctx.team) → |retain|=0 → terminate (full removal = no team to calibrate)  [Tool]
   TeamRestructure: restructure[AskUserQuestion](T, Ctx.team) → |retain|=|team| ∧ |new|=0 → reset(mode=TeamAugment) → Phase 1 TeamAugment  [Tool]
@@ -123,7 +124,7 @@ variance_detected(h) ≡ ∃(Dᵢ, Sₖ, R₁), (Dᵢ, Sₖ', R₂) ∈ h : R₁
 
 ── TOOL GROUNDING ──
 Phase 0 Q   (extern)    → AskUserQuestion (mode selection: TeamAugment/TeamRestructure/Solo)
-Phase 1 WHO (extern)    → AskUserQuestion (team structure: adjust)  -- TeamAugment
+Phase 1 WHO (extern)    → AskUserQuestion (team structure: keep/add; add → propose epistemic roles → confirm/add/remove)  -- TeamAugment
 Phase 1 restructure (extern) → AskUserQuestion (team restructure: retain/remove/add + WHO confirmation)  -- TeamRestructure only
 Phase 1     (detect)    → Read, Grep (task analysis for decomposition)
 Phase 2 Q   (extern)    → AskUserQuestion (scenario with autonomy options)
@@ -262,7 +263,7 @@ Execution context detected:
 [Context summary: active team / no team, lens presence, complexity]
 
 Options:
-1. **TeamAugment** — keep current team, calibrate delegation (extend discussion, long Phase 4)
+1. **TeamAugment** — keep current team, or add analytical/review perspectives (epistemic only)
 2. **TeamRestructure** — adjust team membership, then calibrate (peer review, role change, additional perspectives)
 3. **Solo** — single-agent execution (protocol composition, different approach)
 ```
@@ -275,17 +276,18 @@ Mode-dependent phase:
 
 **Solo**: Decompose task into applicable ActionDomains (silent — no user interaction). Proceed to Phase 2.
 
-**TeamAugment**: Inherit existing team structure. **Call AskUserQuestion** to confirm or adjust WHO:
+**TeamAugment**: Inherit existing team structure. **Call AskUserQuestion** to decide WHO:
 ```
 Current team: {team members and their perspectives}
 
 Options:
-1. **Keep team as-is** — retain current structure for execution
-2. **Adjust roles** — modify member focus areas for the new task
+1. **Keep as-is** — retain current structure for execution
+2. **Add perspective(s)** — AI suggests additional analytical/review roles; you confirm/add/remove
 ```
+If "Add perspective(s)" selected: AI analyzes the task and proposes additional epistemic roles (analytical/review perspectives). **Call AskUserQuestion** to present proposed roles — user can confirm, add via Others, or remove. Spawn confirmed roles (|roles| ≤ 6 cap). **Scope guard**: if user requests implementation agents, inform — "Implementation agents are execution-layer. Use /batch after DC approval."
 Then decompose task into applicable ActionDomains.
 
-**TeamRestructure**: Inherit existing team, then restructure. **Call AskUserQuestion** presenting current members alongside task scope — user selects retain/remove per member and optionally proposes new roles. Constraint: `|retain| ≥ 1` (full removal terminates — no team to calibrate). Produces TeamStructure (Restructured variant), then decompose T' into applicable ActionDomains. Post-restructure flow mirrors TeamAugment from Phase 2 onward.
+**TeamRestructure**: Inherit existing team, then restructure — trim, change roles, and/or add members (composite operation). **Call AskUserQuestion** presenting current members alongside task scope — user selects retain/remove per member, adjusts focus areas, and optionally proposes new roles. Constraint: `|retain| ≥ 1` (full removal terminates — no team to calibrate). If `|retain| = |team| ∧ |new| = 0` (no actual restructuring), redirect to TeamAugment. Produces TeamStructure (Restructured variant), then decompose T' into applicable ActionDomains. Post-restructure flow mirrors TeamAugment from Phase 2 onward.
 
 **WHO cap**: `|roles| ≤ 6` for any team structure.
 
@@ -428,7 +430,7 @@ If user selects "Adjust": present sub-options — "Adjust team structure" (→ P
 
 ### Prothesis → Epitrope Transition
 
-When Prothesis Phase 5 routing selects `J=calibrate`:
+When Prothesis Phase 4 routing selects `J=calibrate`:
 
 1. Coordinator calls `Skill("calibrate")` — Epitrope SKILL.md loads into conversation context
 2. Epitrope Phase 0 detects `team_active` → presents TeamAugment, TeamRestructure, Solo options

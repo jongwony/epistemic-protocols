@@ -258,7 +258,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 
 ## Delegation Constraint
 
-- **Prothesis**: See SKILL.md for phase-specific delegation rules (Phase 0-2 main agent, Phase 3-4 agent team, Phase 5 main agent)
+- **Prothesis**: See SKILL.md for phase-specific delegation rules (Phase 0-2 main agent, Phase 3-4 agent team incl. routing)
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion

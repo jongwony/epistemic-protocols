@@ -35,8 +35,7 @@ Phase 1: Gather        → 관점 형성을 위한 대상 맥락 수집
 Phase 2: Prothesis     → 관점 2-4개 제시 (call AskUserQuestion)
 --- Mode 1 (recommend) 여기서 종료: Pₛ + 합성 추천 출력 ---
 Phase 3: Inquiry       → 선택된 관점별 에이전트 팀 분석 (TeamCreate + teammates)
-Phase 4: Synthesis     → 교차 대화 확인 → 수렴점/발산점 정리 → 통합 답변
-Phase 5: Routing       → 사용자 다음 행동 선택: calibrate / extend / wrap up
+Phase 4: Synthesis     → 교차 대화 확인 → 수렴점/발산점 정리 → 통합 답변 + 라우팅
 ```
 
 ## 사용 시점
