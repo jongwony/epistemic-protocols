@@ -1,72 +1,73 @@
 ---
 name: inquire
-description: "Detect context insufficiency before execution. Inquires about missing context when AI detects indicators of context gaps, producing informed execution. Alias: Aitesis(αἴτησις)."
+description: "Infer context insufficiency before execution. Surfaces uncertainties through information-gain prioritized inquiry when AI infers context gaps, producing informed execution. Alias: Aitesis(αἴτησις)."
 ---
 
 # Aitesis Protocol
 
-Detect context insufficiency before execution through AI-guided inquiry. Type: `(ContextInsufficient, AI, INQUIRE, ExecutionPlan) → InformedExecution`.
+Infer context insufficiency before execution through AI-guided inquiry. Type: `(ContextInsufficient, AI, INQUIRE, ExecutionPlan) → InformedExecution`.
 
 ## Definition
 
-**Aitesis** (αἴτησις): A dialogical act of proactively scanning context sufficiency before execution, where AI identifies information gaps, self-investigates via codebase exploration when possible, and inquires about remaining gaps through structured mini-choices for user resolution.
+**Aitesis** (αἴτησις): A dialogical act of proactively inferring context sufficiency before execution, where AI identifies uncertainties, collects contextual evidence via codebase exploration to enrich question quality, and inquires about remaining uncertainties through information-gain prioritized mini-choices for user resolution.
 
 ```
 ── FLOW ──
-Aitesis(X) → Scan(X) → Gᵢ → Inv(Gᵢ) → Gᵣ → Q → A → X' → (loop until informed)
+Aitesis(X) → Scan(X) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) → Q(Uᵢ', priority) → A → X' → (loop until informed)
 
 ── TYPES ──
-X     = Execution plan (current task/action about to execute)
-Scan  = Context sufficiency scan: X → Set(Gap)
-Gap   = { domain: String, description: String, severity: Severity }
-Severity ∈ {Blocking, Important, Minor}
-Gᵢ    = Identified gaps from Scan(X)
-Inv   = Self-investigation: Gᵢ → (Gᵣ, Sᵣ)
-Sᵣ    = Set(Gap)                                    -- self-resolved during investigation
-Gᵣ    = Remaining gaps (¬self_resolved)
-Q     = Inquiry (AskUserQuestion)
-A     = User answer ∈ {Provide(context), Point(location), Dismiss, ESC}
-X'    = Updated execution plan
+X        = Execution plan (current task/action about to execute)
+Scan     = Context sufficiency scan: X → Set(Uncertainty)
+Uncertainty = { domain: String, description: String, context: Set(Evidence) }
+Evidence = { source: String, content: String }                -- collected during Ctx
+Priority ∈ {Critical, Significant, Marginal}
+Uᵢ       = Identified uncertainties from Scan(X)
+Ctx      = Context collection: Uᵢ → (Uᵢ', Uᵣ)
+Uᵢ'      = Enriched uncertainties (evidence added, not resolved)
+Uᵣ       = Context-resolved uncertainties (resolved during collection)
+Q        = Inquiry (AskUserQuestion), ordered by information gain
+A        = User answer ∈ {Provide(context), Point(location), Dismiss, ESC}
+X'       = Updated execution plan
 InformedExecution = X' where remaining = ∅ ∨ user_esc
 
 ── PHASE TRANSITIONS ──
-Phase 0: X → Scan(X) → Gᵢ?                               -- context sufficiency gate (silent)
-Phase 1: Gᵢ → Inv(Gᵢ) → Gᵣ                               -- self-investigation [Tool]
-Phase 2: Gᵣ → Q[AskUserQuestion](Gᵣ[0], progress) → A    -- gap surfacing [Tool]
-Phase 3: A → integrate(A, X) → X'                         -- plan update (internal)
+Phase 0: X → Scan(X) → Uᵢ?                                     -- context sufficiency gate (silent)
+Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ)                             -- context collection [Tool]
+Phase 2: Uᵢ' → Q[AskUserQuestion](Uᵢ'[max_gain], progress) → A  -- uncertainty surfacing [Tool]
+Phase 3: A → integrate(A, X) → X'                               -- plan update (internal)
 
 ── LOOP ──
-After Phase 3: re-scan X' for remaining or newly emerged gaps.
-New gaps accumulate into gaps (cumulative, never replace).
-If Gᵣ remains: return to Phase 1 (self-investigate new gaps).
+After Phase 3: re-scan X' for remaining or newly emerged uncertainties.
+New uncertainties accumulate into uncertainties (cumulative, never replace).
+If Uᵢ' remains: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
 User can exit at Phase 2 (early_exit).
 Continue until: informed(X') OR user ESC.
 
 ── CONVERGENCE ──
 informed(X') = remaining = ∅
-progress(Λ) = 1 - |remaining| / |gaps|
-diminishing(Gᵣ) = max(severity(Gᵣ)) < max(severity(Gᵢ))
+progress(Λ) = 1 - |remaining| / |uncertainties|
+narrowing(Q, A) = |remaining(after)| < |remaining(before)| ∨ context(remaining(after)) ⊃ context(remaining(before))
 early_exit = user_declares_sufficient
 
 ── TOOL GROUNDING ──
-Phase 1 Inv  (detect)  → Read, Grep (self-investigation)
-Phase 2 Q    (extern)  → AskUserQuestion (gap surfacing + progress)
-Phase 3      (state)   → Internal state update
-Phase 0 Scan (detect)  → Internal analysis (no external tool)
+Phase 1 Ctx  (collect)  → Read, Grep (context collection)
+Phase 2 Q    (extern)   → AskUserQuestion (uncertainty surfacing + progress)
+Phase 3      (state)    → Internal state update
+Phase 0 Scan (detect)   → Internal analysis (no external tool)
 
 ── MODE STATE ──
-Λ = { phase: Phase, X: ExecutionPlan, gaps: Set(Gap),
-      self_resolved: Set(Gap), user_resolved: Set(Gap),
-      remaining: Set(Gap), dismissed: Set(Gap),
-      history: List<(Gap, A)>, active: Bool,
+Λ = { phase: Phase, X: ExecutionPlan, uncertainties: Set(Uncertainty),
+      context_resolved: Set(Uncertainty), user_resolved: Set(Uncertainty),
+      remaining: Set(Uncertainty), dismissed: Set(Uncertainty),
+      history: List<(Uncertainty, A)>, active: Bool,
       cause_tag: String }
--- Invariant: gaps = self_resolved ∪ user_resolved ∪ remaining ∪ dismissed (pairwise disjoint)
+-- Invariant: uncertainties = context_resolved ∪ user_resolved ∪ remaining ∪ dismissed (pairwise disjoint)
 ```
 
 ## Core Principle
 
-**Inquiry over Assumption**: When AI detects context insufficiency before execution, it first self-investigates via codebase exploration, then inquires about remaining gaps through structured mini-choices rather than assuming defaults or proceeding silently. The user decides whether the gap matters.
+**Inference over Detection**: When AI infers context insufficiency before execution, it first collects contextual evidence via codebase exploration to enrich question quality, then inquires about remaining uncertainties through information-gain prioritized mini-choices rather than assuming defaults or proceeding silently. The purpose of context collection is to ask better questions, not to eliminate them.
 
 ## Distinction from Other Protocols
 
@@ -76,21 +77,21 @@ Phase 0 Scan (detect)  → Internal analysis (no external tool)
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inquiry |
+| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
-- **Syneidesis** surfaces gaps at decision points for the user to judge (information flows AI→user) — Aitesis inquires about context the AI lacks before execution (information flows user→AI)
+- **Syneidesis** surfaces gaps at decision points for the user to judge (information flows AI→user) — Aitesis infers context the AI lacks before execution (information flows user→AI)
 - **Telos** co-constructs goals when intent is indeterminate — Aitesis operates when goals exist but execution context is insufficient
-- **Hermeneia** extracts intent the user already has (user signal) or detects expression ambiguity (AI-detected, requires confirmation) — Aitesis inquires about context the system lacks
+- **Hermeneia** extracts intent the user already has (user signal) or detects expression ambiguity (AI-detected, requires confirmation) — Aitesis infers what context the system lacks
 - **Epitrope** calibrates delegation (structure, scope, autonomy) before work begins — Aitesis verifies execution context after delegation is established
 
 **Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context to execute?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). The operational test: if the information gap would be filled by the user providing context, it's Aitesis; if it would be filled by the user reconsidering their decision, it's Syneidesis.
 
-**Factual vs evaluative**: Aitesis gaps are factual — they have objectively correct answers discoverable from the environment (configs, versions, schemas). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. This is why Phase 1 self-investigation exists: factual gaps may be resolvable from the codebase. Evaluative gaps cannot be self-resolved.
+**Factual vs evaluative**: Aitesis uncertainties are factual — they have objectively correct answers discoverable from the environment (configs, versions, schemas). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. This is why Phase 1 context collection exists: factual uncertainties may be partially resolved or enriched from the codebase. Evaluative gaps cannot be self-resolved.
 
 **Litmus-test examples** (same scenario, different classification):
 - Aitesis: "The codebase has both v1 and v2 API schemas — which version is the current production target?" (AI lacks a fact)
@@ -100,11 +101,11 @@ Phase 0 Scan (detect)  → Internal analysis (no external tool)
 
 ### Activation
 
-AI detects context insufficiency before execution OR user calls `/inquire`. Detection is silent (Phase 0); surfacing always requires user interaction via AskUserQuestion (Phase 2).
+AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0); surfacing always requires user interaction via AskUserQuestion (Phase 2).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Context insufficiency detected before execution via in-protocol heuristics. Detection is silent (Phase 0).
+- **Layer 2 (AI-guided)**: Context insufficiency inferred before execution via in-protocol heuristics. Inference is silent (Phase 0).
 
 **Context insufficient** = the execution plan contains requirements not available in the current context and not trivially inferrable.
 
@@ -123,7 +124,7 @@ When Aitesis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, call AskUserQuestion tool to present remaining gap candidates for user resolution.
+**Action**: At Phase 2, call AskUserQuestion tool to present highest information-gain uncertainty candidate for user resolution.
 </system-reminder>
 
 - Aitesis completes before execution proceeds
@@ -133,9 +134,9 @@ When Aitesis is active:
 
 ### Trigger Signals
 
-Heuristic signals for context insufficiency detection (not hard gates):
+Heuristic signals for context insufficiency inference (not hard gates):
 
-| Signal | Detection |
+| Signal | Inference |
 |--------|-----------|
 | Novel domain | Knowledge area not previously addressed in session |
 | Implicit requirements | Task carries unstated assumptions |
@@ -146,34 +147,38 @@ Heuristic signals for context insufficiency detection (not hard gates):
 - Execution context is fully specified in current message
 - User explicitly says "just do it" or "proceed"
 - Same (domain, description) pair was dismissed in current session (session immunity)
-- Phase 1 self-investigation resolves all identified gaps
+- Phase 1 context collection resolves all identified uncertainties
 - Read-only / exploratory task — no execution plan to verify
 
 ### Mode Deactivation
 
 | Trigger | Effect |
 |---------|--------|
-| All gaps resolved (self or user) | Proceed with updated execution plan |
-| All remaining gaps dismissed | Proceed with original execution plan + defaults |
+| All uncertainties resolved (context or user) | Proceed with updated execution plan |
+| All remaining uncertainties dismissed | Proceed with original execution plan + defaults |
 | User ESC | Return to normal operation |
 
-## Gap Identification
+## Uncertainty Identification
 
-Gaps are identified dynamically per task — no fixed taxonomy. Each gap is characterized by:
+Uncertainties are identified dynamically per task — no fixed taxonomy. Each uncertainty is characterized by:
 
 - **domain**: The knowledge area where context is missing (e.g., "deployment config", "API versioning", "user auth model")
 - **description**: What specifically is missing or uncertain
-- **severity**: Impact on execution quality
+- **context**: Evidence collected during Phase 1 that enriches question quality
 
-### Severity
+### Priority
+
+Priority reflects information gain — how much resolving this uncertainty would narrow the remaining uncertainty space.
 
 | Level | Criterion | Action |
 |-------|-----------|--------|
-| **Blocking** | Execution cannot proceed without resolution | Must resolve before execution |
-| **Important** | Suboptimal outcome likely without resolution | Surface to user for context |
-| **Minor** | Reasonable default exists | Surface with pre-selected Dismiss option |
+| **Critical** | Resolution maximally narrows remaining uncertainty space | Must resolve before execution |
+| **Significant** | Resolution narrows uncertainty but alternatives partially compensate | Surface to user for context |
+| **Marginal** | Reasonable default exists; resolution provides incremental improvement | Surface with pre-selected Dismiss option |
 
-When multiple gaps are identified, surface in severity order (Blocking → Important → Minor). Only one gap surfaced per Phase 2 cycle.
+Priority is relational, not intrinsic: the same uncertainty may be Critical in one context and Marginal in another, depending on what other uncertainties exist and what context is already available.
+
+When multiple uncertainties are identified, surface in priority order (Critical → Significant → Marginal). Only one uncertainty surfaced per Phase 2 cycle.
 
 ## Protocol
 
@@ -184,37 +189,42 @@ Analyze execution plan requirements against available context. This phase is **s
 1. **Scan execution plan** `X` for required context: domain knowledge, environmental state, configuration details, user preferences, constraints
 2. **Check availability**: For each requirement, assess whether it is available in conversation, files, or environment
 3. If all requirements satisfied: proceed with execution (Aitesis not activated)
-4. If gaps identified: record `Gᵢ` with domain, description, severity — proceed to Phase 1
+4. If uncertainties identified: record `Uᵢ` with domain, description — proceed to Phase 1
 
 **Scan scope**: Current execution plan, conversation history, observable environment. Does NOT modify files or call external services.
 
-### Phase 1: Self-Investigation
+### Phase 1: Context Collection
 
-Attempt to resolve identified gaps through codebase exploration before asking the user.
+Collect contextual evidence to enrich uncertainty descriptions and improve question quality before asking the user.
 
-1. For each gap in `Gᵢ` (severity order):
+1. For each uncertainty in `Uᵢ`:
    - **Call Read/Grep** to search for relevant information in codebase, configs, documentation
-   - If found: mark as self-resolved, integrate into execution context
-   - If not found: retain in `Gᵣ`
-   - If ambiguous (conflicting evidence): retain in `Gᵣ`, include findings in Phase 2 surfacing context
-2. If `Gᵣ = ∅`: proceed with execution (all gaps self-resolved, no user interruption)
-3. If `Gᵣ ≠ ∅`: proceed to Phase 2
+   - If definitive answer found: mark as context-resolved (`Uᵣ`), integrate into execution context
+   - If partial evidence found: enrich uncertainty with collected evidence (`Uᵢ'`), retain for Phase 2
+   - If conflicting evidence found: enrich uncertainty with conflicting findings (`Uᵢ'`), retain for Phase 2
+   - If no evidence found: retain in `Uᵢ'` with empty context
+2. If all uncertainties context-resolved (`Uᵢ' = ∅`): proceed with execution (no user interruption)
+3. If enriched uncertainties remain (`Uᵢ' ≠ ∅`): proceed to Phase 2
+
+**Purpose shift**: Context collection aims to ask better questions, not to eliminate them. Evidence enriches the uncertainty description presented in Phase 2, enabling the user to provide more targeted answers.
 
 **Scope restriction**: Read-only investigation only. No API calls, test execution, or file modifications.
 
-### Phase 2: Gap Surfacing
+### Phase 2: Uncertainty Surfacing
 
-**Call the AskUserQuestion tool** to present the highest-severity remaining gap.
+**Call the AskUserQuestion tool** to present the highest-priority remaining uncertainty.
+
+**Selection criterion**: Choose the uncertainty whose resolution would maximally narrow the remaining uncertainty space (information gain). When priority is equal, prefer the uncertainty with richer collected context (more evidence to present).
 
 **Surfacing format**:
 
 ```
 Before proceeding, I need to verify some context:
 
-[Specific gap description with evidence of why it's needed]
-[What I found during self-investigation, if relevant]
+[Specific uncertainty description]
+[Evidence collected during context collection, if any]
 
-Progress: [N resolved / M total gaps]
+Progress: [N resolved / M total uncertainties]
 
 Options:
 1. **[Provide X]** — [what this context enables]
@@ -223,8 +233,8 @@ Options:
 ```
 
 **Design principles**:
-- **Self-investigation transparent**: Show what was already checked and found
-- **Progress visible**: Display resolution progress across all identified gaps
+- **Context collection transparent**: Show what evidence was collected and what remains uncertain
+- **Progress visible**: Display resolution progress across all identified uncertainties
 - **Actionable options**: Each option leads to a concrete next step
 - **Dismiss with default**: Always state what assumption will be used if dismissed
 
@@ -234,47 +244,47 @@ After user response:
 
 1. **Provide(context)**: Integrate user-provided context into execution plan `X'`
 2. **Point(location)**: Record location, resolve via next Phase 1 iteration
-3. **Dismiss**: Mark gap as dismissed, note default assumption used
+3. **Dismiss**: Mark uncertainty as dismissed, note default assumption used
 4. **ESC**: Deactivate Aitesis entirely
 
 After integration:
-- Re-scan `X'` for remaining or newly emerged gaps
-- If gaps remain: return to Phase 1 (self-investigate new gaps first)
+- Re-scan `X'` for remaining or newly emerged uncertainties
+- If uncertainties remain: return to Phase 1 (collect context for new uncertainties first)
 - If all resolved/dismissed: proceed with execution
-- Log `(Gap, A)` to history
+- Log `(Uncertainty, A)` to history
 
 ## Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Minor severity gaps only | AskUserQuestion with Dismiss as default option |
-| Medium | Important severity gaps, self-investigation partially resolved | Structured AskUserQuestion with progress |
-| Heavy | Blocking severity, multiple unresolved gaps | Detailed evidence + investigation results + resolution paths |
+| Light | Marginal priority uncertainties only | AskUserQuestion with Dismiss as default option |
+| Medium | Significant priority uncertainties, context collection partially resolved | Structured AskUserQuestion with progress |
+| Heavy | Critical priority, multiple unresolved uncertainties | Detailed evidence + collection results + resolution paths |
 
 ## UX Safeguards
 
 | Rule | Structure | Effect |
 |------|-----------|--------|
 | Gate specificity | `activate(Aitesis) only if ∃ requirement(r) : ¬available(r) ∧ ¬trivially_inferrable(r)` | Prevents false activation on clear tasks |
-| Self-resolution first | Phase 1 before Phase 2 | Minimizes user interruption |
-| Gap cap | One gap per Phase 2 cycle, severity order | Prevents question overload |
+| Context collection first | Phase 1 before Phase 2 | Enriches question quality before asking |
+| Uncertainty cap | One uncertainty per Phase 2 cycle, priority order | Prevents question overload |
 | Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
 | Progress visibility | `[N resolved / M total]` in Phase 2 | User sees progress toward completion |
-| Diminishing returns | Signal when `max(severity(Gᵣ)) < max(severity(Gᵢ))` | User can exit when remaining gaps are minor |
+| Narrowing signal | Signal when `narrowing(Q, A)` shows diminishing returns | User can exit when remaining uncertainties are marginal |
 | Early exit | User can declare sufficient at any Phase 2 | Full control over inquiry depth |
-| Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context gaps ≠ Syneidesis decision gaps, so reverse suppression not needed) |
+| Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context uncertainties ≠ Syneidesis decision gaps, so reverse suppression not needed) |
 
 ## Rules
 
-1. **AI-guided, user-resolved**: AI detects context insufficiency; resolution requires user choice via AskUserQuestion (Phase 2)
+1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via AskUserQuestion (Phase 2)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present structured options (text presentation = protocol violation)
-3. **Self-investigation first**: Before asking the user, attempt to resolve gaps through Read/Grep codebase exploration (Phase 1)
-4. **Inquiry over Assumption**: When context is insufficient and self-investigation fails, inquire rather than assume — silence is worse than a dismissed question
-5. **Open scan**: No fixed gap taxonomy — identify gaps dynamically based on execution plan requirements
-6. **Evidence-grounded**: Every surfaced gap must cite specific observable evidence or investigation results, not speculation
-7. **One at a time**: Surface one gap per Phase 2 cycle; do not bundle multiple gaps
-8. **Dismiss respected**: User dismissal is final for that gap domain in the current session
-9. **Convergence persistence**: Mode active until all identified gaps are resolved or dismissed
+3. **Context collection first**: Before asking the user, collect contextual evidence through Read/Grep codebase exploration to enrich question quality (Phase 1)
+4. **Inference over Detection**: When context is insufficient and context collection does not fully resolve, infer the highest-gain question rather than assume — silence is worse than a dismissed question
+5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on execution plan requirements
+6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
+7. **One at a time**: Surface one uncertainty per Phase 2 cycle; do not bundle multiple uncertainties
+8. **Dismiss respected**: User dismissal is final for that uncertainty domain in the current session
+9. **Convergence persistence**: Mode active until all identified uncertainties are resolved or dismissed
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N resolved / M total]`
-11. **Early exit honored**: When user declares context sufficient, accept immediately regardless of remaining gaps
+11. **Early exit honored**: When user declares context sufficient, accept immediately regardless of remaining uncertainties
 12. **Cross-protocol awareness**: Defer to Syneidesis when gap surfacing is already active for the same task scope
