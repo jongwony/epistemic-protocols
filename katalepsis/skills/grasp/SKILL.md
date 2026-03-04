@@ -26,6 +26,7 @@ Q  = Verification question (via AskUserQuestion)
 A  = User's answer
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
+J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Categorize(R) → C                         -- analysis (silent)
@@ -33,6 +34,7 @@ Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point sele
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → P → Δ              -- comprehension check [Tool]
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
+       → TaskCreate[Proposal] if proposal(A)             -- proposal ejection [Tool]
        → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
        → Q[AskUserQuestion](coverage) if correct(A)     -- aspect summary [Tool]
 
@@ -46,9 +48,9 @@ If correct: Aspect summary — show probed vs unprobed gap types.
 Continue until: all selected tasks completed OR user ESC.
 
 ── CONVERGENCE ──
-Katalepsis = ∀t ∈ Tasks: t.status = completed
+Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
-VerifiedUnderstanding = P' where (∀t ∈ Tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
+VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
 
 ── TOOL GROUNDING ──
 Phase 1 Q   → AskUserQuestion (entry point selection)
@@ -56,6 +58,7 @@ Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 Q   → AskUserQuestion (comprehension verification, aspect coverage)
 Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
+Phase 3 Prop → TaskCreate (proposal ejection)
 Categorize  → Internal analysis (Read for context if needed)
 
 ── MODE STATE ──
@@ -68,7 +71,6 @@ Categorize  → Internal analysis (Read for context if needed)
   current: TaskId,
   phantasia: Understanding,
   probed: Map<TaskId, Set<GapType>>,
-  corrected: Map<TaskId, Bool>,
   active: Bool
 }
 ```
@@ -282,11 +284,11 @@ For each task (category):
    **Post-correction Proposal surfacing**: When resuming verification after a Misconception correction, include an additional option in the re-probe AskUserQuestion:
 
    ```
-   - label: "I have a suggestion about this"
+   - label: "Record an improvement idea"
      description: "If the correction sparked an improvement idea, select this — verification continues after recording"
    ```
 
-   This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User selection triggers Step 3b Proposal ejection workflow, then resumes the verification loop. Set `corrected[current] = true`.
+   This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User selection triggers Step 3b Proposal ejection workflow, then resumes the verification loop.
 
 3d. **Aspect coverage check** (before marking category complete):
 
@@ -302,9 +304,11 @@ For each task (category):
        description: "Proceed to next category with current understanding"
      - label: "[Unprobed gap type]"
        description: "[Why this gap type is relevant to this category]"
-     - label: "I have a suggestion from this process"    # conditional: corrected[current] = true
-       description: "If the verification process sparked an improvement idea, select this — it will be recorded and verification continues"
+     - label: "Record an improvement idea"
+       description: "If verification sparked an improvement idea, select this — it will be recorded and verification continues"
    ```
+
+   **Option budget**: 4 slots max (Sufficient + up to 2 unprobed gap types + Proposal). If >2 unprobed gap types remain, prioritize by relevance to current category.
 
    3. User selects "Sufficient" → proceed to step 4
    4. User selects gap type → return to step 3 with selected gap type as Δ
