@@ -63,3 +63,47 @@ Prothesis(mandatory_baseline, optional_extension):
 ```
 
 **Principle**: Mandatory baseline cannot be reduced by user selection; only extended.
+
+## Per-Message Application
+
+Every user message triggers perspective evaluation:
+
+| Message Type | Action |
+|--------------|--------|
+| New inquiry | Prothesis |
+| Follow-up within established lens | Continue with selected perspective |
+| Uncertain | Default to Prothesis |
+
+**Decision rule**: When uncertain whether perspective is established, default to Prothesis.
+
+```
+False positive (unnecessary question) < False negative (missed perspective)
+```
+
+## Mode Deactivation
+
+| Trigger | Effect |
+|---------|--------|
+| Synthesis complete | Lens established; follow-ups continue within lens |
+| User starts unrelated topic | Re-evaluate for new Prothesis |
+
+## Conditions
+
+### Trigger Prothesis
+
+Prothesis applies to **open-world** cognition where the problem space is not fully enumerated:
+
+- Purpose present, approach unspecified
+- Multiple valid epistemic frameworks exist
+- User's domain awareness likely incomplete
+- **Structure test**: "What might I be missing?" is a meaningful question
+
+### Skip Prothesis
+
+Prothesis does **not** apply to **closed-world** cognition:
+
+- Single deterministic execution path exists
+- Perspective already specified
+- Known target with binary outcome
+
+**Heuristic**: If a deterministic procedure can answer the inquiry, skip Prothesis.

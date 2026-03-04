@@ -224,26 +224,7 @@ When Epitrope is active:
 | User ESC | Return to default autonomy assumptions |
 | User cancels | Discard partial contract, return to normal |
 
-## Domain Taxonomy
-
-| Domain | Scope | Example Actions |
-|--------|-------|-----------------|
-| **FileModification** | Creating, editing, deleting files | Write new modules, refactor existing code, delete unused files |
-| ↳ *ephemeral* | Temp files, build artifacts, generated code | — (follows FileModification autonomy level) |
-| ↳ *durable* | Source code, config, memory, CLAUDE.md, rules | May require different autonomy than ephemeral |
-| **Exploration** | Reading files, searching codebase, web research | Grep for patterns, read adjacent files, fetch documentation |
-| **Strategy** | Choosing implementation approach | Select architecture pattern, decide refactoring scope, pick library |
-| **External** | Actions visible outside local environment | git push, PR creation, Slack messages, issue comments |
-
-### Domain Priority
-
-When calibrating, interview in this order (highest impact first):
-1. **External** (highest): Hardest to reverse, visible to others
-2. **FileModification**: Changes to codebase, tracked by git
-3. **Strategy**: Approach decisions, affect scope of work
-4. **Exploration** (lowest): Read-only, inherently safe
-
-Only domains applicable to the current task are calibrated. Skip irrelevant domains.
+See references/operational-guide.md for domain taxonomy, priority ordering, intensity levels, and UX safeguards.
 
 ## Protocol
 
@@ -295,30 +276,7 @@ Then decompose task into applicable ActionDomains.
 
 **Call the AskUserQuestion tool** to present the next uncalibrated domain as a concrete scenario. Team modes include team-specific scenarios (TeamCoordination, ScopeCreep) alongside standard domain scenarios.
 
-**Scenario format** (Akinator-style binary/ternary choice):
-
-```
-For this task, I'd like to calibrate how I should handle [domain]:
-
-[Concrete scenario description relevant to the actual task]
-
-Options:
-1. **[Autonomy level A]** — [what this means in practice]
-2. **[Autonomy level B]** — [what this means in practice]
-3. **[Autonomy level C]** — [if applicable]
-```
-
-**Design principles**:
-- **Concrete scenarios**: Use task-specific situations, not abstract policy questions
-- **Binary/ternary**: Maximum 3 options per question (excluding "Other")
-- **Refinement available**: After initial answer, may ask one follow-up for precision
-- **Domain cap**: Maximum 4 domains per calibration session
-
-**Refinement questions** (optional, one per domain):
-- FileModification: "What about persistent files (config, memory, rules) vs. regular code changes?"
-- Exploration: "How far should I look beyond the immediate task scope?"
-- Strategy: "If I find a better approach mid-execution, should I...?"
-- External: "Should I draft PR descriptions for your review or create directly?"
+See references/output-formats.md for scenario and contract templates.
 
 ### Phase 3: Contract Integration
 
@@ -334,82 +292,7 @@ After user response, update the DelegationContract:
 
 **Call the AskUserQuestion tool** to present the assembled DelegationContract for approval.
 
-**Contract format** (Solo mode — WHAT + HOW MUCH):
-
-```
-Here's the delegation contract for this task:
-
-**Autonomous** (I'll proceed without asking):
-- [list of calibrated autonomous actions]
-
-**Report then act** (I'll tell you what I'm doing, then proceed):
-- [list of report-then-act actions]
-
-**Ask before** (I'll ask for permission first):
-- [list of ask-before actions]
-
-**Halt conditions** (I'll stop and escalate):
-- [list of halt conditions]
-
-**Skipped** (not applicable to this task):
-- [list of domains from Λ.skipped, if any]
-
-**Defaults** (uncalibrated domains default):
-- Exploration: autonomous (read-only, inherently safe)
-- Others: ask-before
-
-Options:
-1. **Approve** — apply this contract
-2. **Adjust** — I'd like to change something
-```
-
-**Contract format** (Team modes — WHO + WHAT + HOW MUCH):
-
-```
-Here's the delegation contract for this task:
-
-**Team Structure** (WHO):
-- [role assignments]
-
-**Autonomous** (proceed without asking):
-- [list of calibrated autonomous actions]
-
-**Report then act** / **Ask before** / **Halt conditions**:
-- [as in Solo format]
-
-**Authority transition**:
-Approval replaces the team's prior operating contract with this DelegationContract.
-
-Options:
-1. **Approve** — apply this contract (authority replacement)
-2. **Adjust** — I'd like to change something
-```
-
-If user selects "Adjust": present sub-options — "Adjust team structure" (→ Phase 1, TeamAugment/TeamRestructure only) or "Adjust domain calibration" (→ Phase 2). Solo mode only offers "Adjust domain calibration".
-
-**Authority replacement**: Approval is not advisory — it replaces the team's prior operating contract (e.g., MissionBrief from Prothesis) with the DelegationContract. Execution-layer distribution (SendMessage, Task spawning) is handled by built-in commands after protocol termination.
-
-## Intensity
-
-| Level | When | Format |
-|-------|------|--------|
-| Light | 1-2 domains, familiar task type | Single question covering key domain |
-| Medium | 3+ domains, moderate ambiguity | Sequential domain interviews (1 question each) |
-| Heavy | New project, history of friction, 4 domains | Full interview with refinement questions |
-
-## UX Safeguards
-
-| Rule | Structure | Threshold |
-|------|-----------|-----------|
-| Session immunity | Approved DC → skip recalibration for session | `¬recalibrate(DC, T')`: recalibrate only on `new_domain_activated ∨ stakes_escalated(→High)` |
-| Domain cap | `\|domains\| ≤ 4` | Confirmed (taxonomy is exhaustive) |
-| Question cap | `\|questions\| ≤ 12` (Solo: 9, Team: 12) | Wildcard triggers on response variance within same domain |
-| Cross-protocol fatigue | `prior_protocol_count(session) ≥ 2` → reduce intensity one level | Confirmed |
-| Prothesis mode-switch | `ctx.team ≠ ∅ ∧ ctx.lens ≠ ∅` → skip domains with unanimous Lens convergence | Confirmed |
-| WHO cap | `\|roles\| ≤ 6` for any team structure | Confirmed |
-| Full restructure guard | `TeamRestructure + \|retain\| = 0` → terminate (no team to calibrate) | Confirmed |
-| No-change guard | `TeamRestructure + \|retain\| = \|team\| ∧ \|new\| = 0` → redirect to TeamAugment | Confirmed |
-| Blanket escape | "Just do it" → immediate ESC, default autonomy | Confirmed |
+See references/output-formats.md for scenario and contract templates.
 
 ## Rules
 
@@ -426,37 +309,4 @@ If user selects "Adjust": present sub-options — "Adjust team structure" (→ P
 11. **Authority replacement**: DC approval replaces the team's prior operating contract; execution-layer distribution is outside protocol scope
 12. **Solo backward compatibility**: Solo mode preserves near-identical behavior to v1.1.1 — Phase 0 adds one new user-facing step (mode selection, proposing Solo when no team is active); subsequent phases proceed identically to v1.1.1
 
-## Cross-Protocol Interface
-
-### Prothesis → Epitrope Transition
-
-When Prothesis Phase 4 routing selects `J=calibrate`:
-
-1. Coordinator calls `Skill("calibrate")` — Epitrope SKILL.md loads into conversation context
-2. Epitrope Phase 0 detects `team_active` → presents TeamAugment, TeamRestructure, Solo options
-3. Handoff via session context: `T = TaskScope` derived from conversation (original request U, verified MissionBrief MBᵥ, and Lens L are all available in session context; no explicit transfer type needed)
-
-**Context availability** (present in session without explicit transfer):
-- **Team**: `~/.claude/teams/{name}/config.json` (Read) — {name} from conversation context (mode-switch: coordinator retains team name) or Glob discovery (standalone: `~/.claude/teams/*/config.json`)
-- **Lens L**: Conversation context (presented to user in Prothesis Phase 4)
-- **Findings**: Team task list (TaskList/TaskGet access)
-- **Mission brief**: Conversation context (confirmed in Prothesis Phase 0)
-
-**DC authority transition**: At approval, the team's operating contract transitions from MissionBrief to DelegationContract. This is an epistemic handoff — the protocol produces the DC artifact; execution-layer application (SendMessage, Task spawning) is handled by built-in commands after protocol termination.
-
-**Findings management**:
-
-| Layer | Artifact | Created | Persistence |
-|-------|----------|---------|-------------|
-| Individual findings | Task items | Prothesis Phase 3 TaskCreate | Team task list (until TeamDelete) |
-| Per-perspective results | R (raw results) | Phase 3 SendMessage collection | Conversation context |
-| Convergence/divergence | L (Lens) | Phase 4 Syn | Conversation context |
-
-When `J=calibrate`, TeamDelete is NOT called — task list persists for Epitrope reuse.
-
-### Downstream Protocols
-
-Approved DelegationContract becomes input to subsequent protocols:
-
-- **Syneidesis**: Epitrope (planning layer: "am I allowed to?") and Syneidesis (execution layer: "is this decision sound?") operate on different temporal layers — they complement rather than suppress each other. `DC.how_much[d] = AskBefore` domains surface delegation-scope changes as gaps; autonomous domains do not suppress Syneidesis (execution gaps remain independent of delegation calibration)
-- **Aitesis**: Delegation coverage (Epitrope) and context sufficiency (Aitesis) remain orthogonal axes. Interface deferred to Issue #57 (proactive Aitesis redesign)
+See references/cross-protocol.md for Prothesis transition and downstream protocol interfaces.

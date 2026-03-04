@@ -187,30 +187,7 @@ When Prothesis is active:
 
 **Protocol precedence**: Default ordering places Prothesis after Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Prosoche → Epharmoge; established perspective contextualizes gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
-### Per-Message Application
-
-Every user message triggers perspective evaluation:
-
-| Message Type | Action |
-|--------------|--------|
-| New inquiry | Prothesis |
-| Follow-up within established lens | Continue with selected perspective |
-| Uncertain | Default to Prothesis |
-
-**Decision rule**: When uncertain whether perspective is established, default to Prothesis.
-
-```
-False positive (unnecessary question) < False negative (missed perspective)
-```
-
-### Mode Deactivation
-
-| Trigger | Effect |
-|---------|--------|
-| Synthesis complete | Lens established; follow-ups continue within lens |
-| User starts unrelated topic | Re-evaluate for new Prothesis |
-
-Consult `references/conceptual-foundations.md` for Plan Mode Integration and Distinction from Socratic Method.
+Consult `references/conceptual-foundations.md` for per-message application rules, mode deactivation triggers, Plan Mode Integration, and Distinction from Socratic Method.
 
 ## Protocol
 
@@ -390,18 +367,7 @@ Collect inquiry results into R'. Team remains active — shutdown/retain decisio
 
 #### Isolated Context Requirement
 
-**Mode 2 (inquire) only.** Mode 1 (recommend) terminates before Phase 3 — see Rule 3.
-
-Each perspective MUST be analyzed in **isolated teammate context** to prevent:
-- Cross-perspective contamination from shared conversation history
-- Confirmation bias from main agent's prior reasoning
-- Anchoring on initial assumptions formed during context gathering
-
-**Structural necessity**: Only teammates in an agent team provide fresh context—main agent retains full conversation history. Therefore, perspective analysis MUST be delegated to separate teammates. This is not a stylistic preference; it is architecturally required for epistemically valid multi-perspective analysis. **Phase-dependent isolation**: In Phase 3 (inquiry), perspectives operate in strict isolation — no cross-dialogue occurs. In Phase 4 (cross-dialogue), peers negotiate directly on coordinator-identified tension topics (≤3 exchanges per pair), then submit structured reports. If divergence remains, the coordinator queries each divergent peer once (hub-spoke) before synthesizing independently (see Phase 4 for coordinator role details).
-
-**Isolation trade-off on extend loops**: When `J=extend` deepens an existing perspective via SendMessage, the coordinator's re-inquiry instruction inherently carries synthesis context (what to deepen, why). This introduces controlled cross-pollination — the teammate gains partial awareness of other perspectives' findings. This is acceptable because: (1) the user explicitly requested extension, sanctioning the trade-off; (2) the coordinator controls what information crosses the boundary; (3) fresh initial analysis was already completed in full isolation.
-
-**Isolation trade-off on cross-dialogue phase**: Phase 4 allows peer-to-peer communication. This is acceptable because: (1) Phase 3 already secured independent analysis — isolation has served its epistemic purpose; (2) direct peer exchange produces richer negotiation than coordinator relay, which introduces State-Cognition Gap (information loss at each transfer layer); (3) the coordinator retains structural control — topic signaling, structured report collection, conditional hub-spoke — without acting as message intermediary during peer exchange. Hub-spoke is a controlled reversion to coordinator-mediated interaction, justified by the need for independent synthesis when peers cannot resolve divergence themselves.
+Each perspective MUST be analyzed in isolated teammate context. See `references/isolation-rationale.md` for the full rationale (cross-perspective contamination prevention, structural necessity, and isolation trade-offs).
 
 ### Phase 4: Cross-Dialogue & Synthesis
 
@@ -466,8 +432,6 @@ After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if
 [Synthesized answer with attribution to contributing perspectives]
 ```
 
-**v5.3.0 scope note**: Prothesis is pure theoria (analysis only). Prior to v4.0.0, a separate routing phase included classification (Fₐ/Fᵤ/Fᵈ) and execution (plan → praxis → verify). These have been extracted to Epitrope. Since v5.3.0, synthesis review and routing are combined in Phase 4 — Lens L confirmation and next-action selection happen in a single AskUserQuestion. Users seeking end-to-end execution should select "Calibrate" to transition to Epitrope, which establishes a DelegationContract covering WHO/WHAT/HOW MUCH for the implementation team. The Lens L persists in conversation context for Epitrope to reference.
-
 **Loop behavior** (team lifecycle aware):
 - **Calibrate**: Call Skill("calibrate") to activate Epitrope. Team retained — Epitrope detects the active team and presents TeamAugment, TeamRestructure, Solo options. Coordinator transitions to delegation calibration. Epitrope produces DC; after DC approval, routing re-presents so user can /batch then "Extend" to feed execution results back to the review team.
 - **Extend**: Follow-up AskUserQuestion — "Add new perspective" → Phase 2 (spawn new teammate into T), "Deepen existing" → Phase 3 (SendMessage re-inquiry to target teammate), or "Review execution results" → Phase 3 (SendMessage /batch output to team). Team retained in all cases.
@@ -483,28 +447,7 @@ After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if
 
 Recommendations are informational — user decides whether to call follow-up protocols.
 
-## Conditions
-
-### Trigger Prothesis
-
-Prothesis applies to **open-world** cognition where the problem space is not fully enumerated:
-
-- Purpose present, approach unspecified
-- Multiple valid epistemic frameworks exist
-- User's domain awareness likely incomplete
-- **Structure test**: "What might I be missing?" is a meaningful question
-
-### Skip Prothesis
-
-Prothesis does **not** apply to **closed-world** cognition:
-
-- Single deterministic execution path exists
-- Perspective already specified
-- Known target with binary outcome
-
-**Heuristic**: If a deterministic procedure can answer the inquiry, skip Prothesis.
-
-Consult `references/conceptual-foundations.md` for Parametric Nature and Specialization.
+Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Parametric Nature, and Specialization.
 
 ## Rules
 
