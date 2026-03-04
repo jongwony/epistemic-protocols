@@ -42,7 +42,7 @@
     {
       "name": "aitesis",
       "source": "./aitesis",
-      "description": "Detect context insufficiency before execution — /inquire (αἴτησις: a requesting)"
+      "description": "Infer context insufficiency before execution — /inquire (αἴτησις: a requesting)"
     },
     {
       "name": "epitrope",

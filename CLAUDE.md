@@ -27,7 +27,7 @@ epistemic-protocols/
 ├── telos/                             # Protocol: goal co-construction
 │   ├── .claude-plugin/plugin.json
 │   └── skills/goal/SKILL.md          # Full protocol definition (user-invocable)
-├── aitesis/                           # Protocol: context insufficiency detection
+├── aitesis/                           # Protocol: context insufficiency inference
 │   ├── .claude-plugin/plugin.json
 │   └── skills/inquire/SKILL.md       # Full protocol definition (user-invocable)
 ├── epitrope/                          # Protocol: context-adaptive delegation calibration
@@ -114,7 +114,7 @@ Co-construct defined goals from vague intent through AI-proposed, user-shaped di
 - **Invocation**: `/goal` or use "goal" in conversation
 
 ### Inquire (αἴτησις) — Aitesis
-Detect context insufficiency before execution through AI-guided inquiry.
+Infer context insufficiency before execution through AI-guided inference.
 - **Deficit**: ContextInsufficient → InformedExecution
 - **Triggers**: Context insufficiency heuristics (ambiguous execution scope, external dependency, implicit requirements)
 - **Invocation**: `/inquire` or use "inquire" in conversation
