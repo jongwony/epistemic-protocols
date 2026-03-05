@@ -1,74 +1,9 @@
 {
-  "version": "3.0.0",
+  "version": "2.0.0",
   "nodes": [
     "hermeneia", "telos", "epitrope", "aitesis",
     "prothesis", "syneidesis", "prosoche", "epharmoge", "katalepsis"
   ],
-  "types": {
-    "hermeneia": {
-      "deficit": "IntentMisarticulated",
-      "initiator": "Hybrid",
-      "action": "EXTRACT",
-      "target": "Expression",
-      "resolution": "ClarifiedIntent"
-    },
-    "telos": {
-      "deficit": "GoalIndeterminate",
-      "initiator": "AI",
-      "action": "CO-CONSTRUCT",
-      "target": "VagueGoal",
-      "resolution": "DefinedEndState"
-    },
-    "epitrope": {
-      "deficit": "DelegationAmbiguous",
-      "initiator": "AI",
-      "action": "CALIBRATE",
-      "target": "TaskScope",
-      "resolution": "CalibratedDelegation"
-    },
-    "aitesis": {
-      "deficit": "ContextInsufficient",
-      "initiator": "AI",
-      "action": "INQUIRE",
-      "target": "ExecutionPlan",
-      "resolution": "InformedExecution"
-    },
-    "prothesis": {
-      "deficit": "FrameworkAbsent",
-      "initiator": "AI",
-      "action": "SELECT",
-      "target": "Inquiry",
-      "resolution": "FramedInquiry"
-    },
-    "syneidesis": {
-      "deficit": "GapUnnoticed",
-      "initiator": "AI",
-      "action": "SURFACE",
-      "target": "Decision",
-      "resolution": "AuditedDecision"
-    },
-    "prosoche": {
-      "deficit": "ExecutionBlind",
-      "initiator": "User",
-      "action": "EVALUATE",
-      "target": "ExecutionAction",
-      "resolution": "SituatedExecution"
-    },
-    "epharmoge": {
-      "deficit": "ApplicationDecontextualized",
-      "initiator": "AI",
-      "action": "CONTEXTUALIZE",
-      "target": "ExecutionResult",
-      "resolution": "ContextualizedExecution"
-    },
-    "katalepsis": {
-      "deficit": "ResultUngrasped",
-      "initiator": "User",
-      "action": "VERIFY",
-      "target": "Result",
-      "resolution": "VerifiedUnderstanding"
-    }
-  },
   "edges": [
     { "source": "hermeneia", "target": "telos", "type": "precondition", "satisfies": "표현 명확화 → 목표가 더 정확" },
     { "source": "telos", "target": "epitrope", "type": "precondition", "satisfies": "목표 정의됨 → 위임 범위 설정 가능" },

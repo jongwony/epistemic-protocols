@@ -22,7 +22,9 @@ Decision
   → surface(gap, as_question)         -- present gap as question
   → judge(user_response)              -- collect user judgment
   → AuditedDecision
-preserves: original context and user intent of Decision
+requires: committed(Decision)           -- runtime gate (Phase 0)
+deficit:  GapUnnoticed                  -- activation precondition (Layer 1/2)
+preserves: D                            -- read-only throughout; morphism acts on Σ only
 invariant: AI surfaces, User judges
 
 ── TYPES ──

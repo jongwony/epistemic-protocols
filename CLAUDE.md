@@ -68,6 +68,7 @@ epistemic-protocols/
 **SKILL.md Formal Block Anatomy** (all protocols share this structure within `Definition` code block):
 ```
 ── FLOW ──              Protocol path formula (multi-line for multi-mode protocols)
+── MORPHISM ──          (if applicable) Essential type transition skeleton: requires/deficit/preserves/invariant
 ── TYPES ──             Symbol definitions with type signatures and comments
 ── ENTRY TYPES ──       (if applicable) Extended types for entry modes (e.g., Epitrope)
 ── DELEGATION TYPES ──  (if applicable) Extended types for delegation structure (e.g., Epitrope)
@@ -80,6 +81,8 @@ epistemic-protocols/
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ```
 Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.
+
+**FLOW-MORPHISM relationship**: MORPHISM is the image of FLOW under a forgetful functor that discards computational detail and tool annotations, retaining only the essential type transition skeleton (source object → transformation steps → target object) with structural annotations (requires/deficit/preserves/invariant).
 
 ## Plugins
 
