@@ -349,7 +349,7 @@ When multiple gaps detected:
 3. **Dynamic Discovery**: After each clarification, re-diagnose for newly surfaced gaps
 4. **Merge**: Combine existing queue with newly discovered gaps, re-prioritize
 
-**Termination conditions**: Per LOOP convergence — cycle detection, progress stall (Δ = 0 for 2 rounds), user exit.
+**Termination conditions**: Per LOOP — cycle detection, progress stall (Δ = 0 for 2 rounds), user exit.
 
 **Gap queue limit**: Max 4 gaps queued at any time (drop lowest priority if exceeded)
 

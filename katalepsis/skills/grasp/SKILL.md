@@ -122,8 +122,6 @@ Command invocation or trigger phrase activates mode until comprehension is verif
 - **Layer 1 (User-invocable)**: `/grasp` slash command or description-matching input. Always available.
 - **Layer 2**: No AI-guided activation. User signals awareness of comprehension deficit.
 
-**Comprehension verified** = all selected tasks marked `completed` via TaskUpdate.
-
 ### Priority
 
 <system-reminder>
@@ -163,7 +161,6 @@ At Phase 3, call AskUserQuestion for comprehension verification.
 
 | Trigger | Effect |
 |---------|--------|
-| All selected tasks completed | Katalepsis achieved; proceed |
 | User explicitly cancels | Accept current understanding |
 | User demonstrates full comprehension | Early termination |
 
@@ -331,14 +328,11 @@ For each task (category):
 
    **Option budget**: 4 slots max (Sufficient + up to 3 unprobed gap types). If >3 unprobed gap types remain, prioritize by detected relevance (see Gap Taxonomy Relevance column).
 
-   3. User selects "Sufficient" → proceed to step 4
-   4. User selects gap type → return to step 3 with selected gap type as Δ
+   Per LOOP — "Sufficient" → step 4, gap type → step 3.
 
    Skip if all detected relevant gap types already probed during the verification loop.
 
-4. **On confirmed comprehension**:
-   - TaskUpdate to `completed`
-   - Move to next pending task
+4. **On confirmed comprehension**: Per LOOP — TaskUpdate to `completed`, advance to next pending task.
 
 5. **On gap detected**: Handle per step 3c evaluation table. Do not mark complete until user confirms.
 
@@ -362,17 +356,6 @@ Use:
 
 **Code reference**: When explaining, always reference specific line numbers or file paths.
 
-### Progress Tracking
-
-| Phase | Task Operation |
-|-------|----------------|
-| Phase 2 | TaskCreate for ALL selected categories |
-| Phase 3 start | TaskUpdate current category to `in_progress` |
-| Comprehension verified | TaskUpdate to `completed` |
-| Move to next | TaskUpdate next to `in_progress` |
-
-**Convergence**: Mode terminates when all tasks show `completed` or user explicitly exits.
-
 ## Intensity
 
 | Level | When | Format |
@@ -385,12 +368,8 @@ Use:
 
 1. **User-initiated only**: Activate only when user signals desire to understand
 2. **Recognition over Recall**: Always **call** AskUserQuestion with Socratic probing questions — comprehension-testing options, not meta-selection (text presentation = protocol violation)
-3. **Verify, don't lecture**: Confirm understanding through questions, not explanations
-4. **Chunk complexity**: Break large changes into digestible categories
-5. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
-6. **Code grounding**: Reference specific code locations
-7. **User authority**: User's "I understand" is final
-8. **Convergence persistence**: Mode remains active until all selected tasks completed
-9. **Escape hatch**: User can exit at any time
-10. **Phantasia update**: Each verification updates internal model of user's understanding
-11. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
+3. **Chunk complexity**: Break large changes into digestible categories
+4. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
+5. **Code grounding**: Reference specific code locations
+6. **User authority**: User's "I understand" is final
+7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
