@@ -98,7 +98,7 @@ Phase 0:  T → detect(T) → Ctx → Q[AskUserQuestion](propose_mode(Ctx)) → 
     ¬team(Ctx) ∧ Multi(Ctx)    → propose Solo
 
 Phase 1:  (mode-dependent)                                         -- structure + decomposition
-  Solo:         T → decompose[Tool](T) → {Dᵢ}                      -- decomposition via Read/Grep
+  Solo:         T → decompose(T) → {Dᵢ}                            -- decomposition via Read/Grep
   TeamAugment:  T → inherit(Ctx.team) → WHO[AskUserQuestion](keep/add?) →
                   add? → propose_roles(T, epistemic) → Q[AskUserQuestion](confirm/add/remove) → TeamStructure
                   → decompose(T) → {Dᵢ}                            [Tool]

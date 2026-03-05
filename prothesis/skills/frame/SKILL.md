@@ -82,7 +82,7 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0:  U → MB(U) → Q[AskUserQuestion](MB, M) → await → (MBᵥ, m)  -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
-Phase 2:  (C, MBᵥ) → present[S]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ → LensEstablished  -- S: AskUserQuestion [Tool]
+Phase 2:  (C, MBᵥ) → S[AskUserQuestion]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ → LensEstablished  -- perspective selection [Tool]
 Phase 3:  LensEstablished → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R'  -- inquiry + collection [Tool]
 Phase 4:  R' → Δ(R') → D?[SendMessage](T) → R'' → Syn(R'') → L → Q[AskUserQuestion](L, routing) → J  -- cross-dialogue, synthesis, review & routing [Tool]
           J=wrap_up → PF[AskUserQuestion](select) → Ω → TeamDelete → TaskCreate(selected)  [Tool]
