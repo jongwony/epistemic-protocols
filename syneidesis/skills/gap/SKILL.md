@@ -194,17 +194,11 @@ This cycle repeats per planning phase or domain area.
 
 ### Detection (Silent)
 
-1. **Committed check**: Verify `committed(D)` — if false (read-only, exploratory), skip Gap for this decision point
-
-2. **Gap scan**: Check taxonomy against user's stated plan
-
-3. **Filter**: Surface only gaps with observable evidence (`observable(G)`) and not already addressed (`¬mentioned(G, context)`)
-
-4. **Stakes assessment** (from modulating factors):
-   - Irreversible + High impact → High stakes
-   - Irreversible + Low impact → Medium stakes
-   - Reversible + Any impact → Low stakes
-   - Time pressure → stakes ↑ one level
+Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
+- Irreversible + High impact → High stakes
+- Irreversible + Low impact → Medium stakes
+- Reversible + Any impact → Low stakes
+- Time pressure → stakes ↑ one level
 
 ### Surfacing
 
@@ -218,24 +212,9 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 
 ### Resolution
 
-| Response | Action | Adjustment |
-|----------|--------|------------|
-| Addresses | Proceed | Incorporate into plan/execution |
-| Dismisses | Accept, no follow-up | Mark gap as user-reviewed; skip similar gaps |
-| Silence (Low/Med stakes) | Proceed | Log gap for potential revisit |
-| Silence (High stakes) | Wait | Block until explicit judgment |
+Per ADJUSTMENT RULES. Key operational detail: Silence on High-stakes → block until explicit judgment (not deferral).
 
 ### Gap Tracking
-
-Record all detected gaps using TaskCreate for async tracking with dependencies.
-
-| Phase | Task Operation |
-|-------|----------------|
-| Detection | TaskCreate for ALL detected gaps (status: `pending`) |
-| Surfacing | TaskUpdate current gap to `in_progress` |
-| Addressed | TaskUpdate to `completed` |
-| Dismissed | TaskUpdate to `completed` (user authority) |
-| New gap from response | TaskCreate → add to queue |
 
 **Task format**:
 ```
@@ -246,19 +225,7 @@ TaskCreate({
 })
 ```
 
-**Workflow**:
-1. Detect ALL gaps → TaskCreate for each (batch registration)
-2. TaskUpdate first gap to `in_progress`
-3. Surface via AskUserQuestion
-4. On response:
-   - TaskUpdate to `completed`
-   - Re-scan: if new gaps revealed → TaskCreate
-   - TaskUpdate next pending gap to `in_progress`
-5. Loop until: all tasks `completed` OR user ESC
-
 **Dependencies**: Use `addBlockedBy` when gaps have logical dependencies (e.g., "backup location" blocked by "backup exists?").
-
-**Convergence**: Mode terminates when task list shows all gaps `completed` or user explicitly exits.
 
 ### Interactive Surfacing (AskUserQuestion)
 
@@ -273,19 +240,6 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 | Assumption gap | Always confirm (inference may be wrong) |
 | Interpretive uncertainty | Ask whether gap exists before surfacing |
 | Naming/structure decisions | Offer alternatives with rationale |
-
-#### Batch Registration + Sequential Surfacing
-
-**Workflow**:
-1. Scan → detect ALL gaps at decision point
-2. TaskCreate for each gap (batch registration, all `pending`)
-3. TaskUpdate first gap to `in_progress`
-4. AskUserQuestion for current gap
-5. On response:
-   - TaskUpdate to `completed`
-   - Re-scan for newly revealed gaps → TaskCreate if found
-   - TaskUpdate next `pending` to `in_progress`
-6. Loop until: no `pending` tasks remain OR user ESC
 
 **UX rationale**: Task list renders persistently in UI with progress indicator. User sees total gap count upfront. Dependencies visible via blocking relationships.
 
@@ -310,11 +264,8 @@ Note: Esc key → unconditional loop termination (LOOP level). Silence (no respo
 ## Rules
 
 1. **AI-guided, user-judged**: Question > Assertion — ask "was X considered?", never "you missed X"
-2. **Batch registration**: Register ALL detected gaps via TaskCreate before surfacing any
-3. **Observable evidence**: Surface only gaps with concrete indicators
-4. **User authority**: Dismissal is final
-5. **Minimal intrusion**: Lightest intervention that achieves awareness
-6. **Stakes calibration**: Intensity follows stakes matrix above
-7. **Convergence persistence**: Mode remains active until all gaps resolved or user ESC
-8. **Dynamic discovery**: Re-scan after each response; new gaps → TaskCreate
-9. **Gap dependencies**: Use task blocking when gaps have logical order
+2. **Observable evidence**: Surface only gaps with concrete indicators
+3. **User authority**: Dismissal is final
+4. **Minimal intrusion**: Lightest intervention that achieves awareness
+5. **Stakes calibration**: Intensity follows stakes matrix above
+6. **Gap dependencies**: Use task blocking when gaps have logical order
