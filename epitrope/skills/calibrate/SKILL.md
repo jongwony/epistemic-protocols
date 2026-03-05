@@ -1,6 +1,6 @@
 ---
 name: calibrate
-description: "Context-adaptive delegation calibration through scenario-based interview. Detects execution context to select entry mode (Solo/TeamAugment/TeamRestructure) and produces a DelegationContract. Alias: Epitrope(ἐπιτροπή)."
+description: "Context-adaptive delegation calibration through scenario-based interview. Detects execution context to select entry mode (Solo/TeamAugment/TeamRestructure) and produces a DelegationContract. Type: (DelegationAmbiguous, AI, CALIBRATE, TaskScope) → CalibratedDelegation. Alias: Epitrope(ἐπιτροπή)."
 ---
 
 # Epitrope Protocol

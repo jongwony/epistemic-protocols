@@ -1,6 +1,6 @@
 ---
 name: attend
-description: "Evaluate execution-time risks during AI operations. Reads existing tasks, classifies each for risk signals, and surfaces elevated-risk findings for user judgment. Alias: Prosoche(προσοχή)."
+description: "Evaluate execution-time risks during AI operations. Reads existing tasks, classifies each for risk signals, and surfaces elevated-risk findings for user judgment. Type: (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution. Alias: Prosoche(προσοχή)."
 ---
 
 # Prosoche Protocol

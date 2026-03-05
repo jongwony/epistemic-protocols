@@ -1,6 +1,6 @@
 ---
 name: contextualize
-description: "Detect application-context mismatch after execution. Verifies applicability when correct output may not fit the actual context, producing contextualized execution. Alias: Epharmoge(ἐφαρμογή)."
+description: "Detect application-context mismatch after execution. Verifies applicability when correct output may not fit the actual context, producing contextualized execution. Type: (ApplicationDecontextualized, AI, CONTEXTUALIZE, ExecutionResult) → ContextualizedExecution. Alias: Epharmoge(ἐφαρμογή)."
 ---
 
 # Epharmoge Protocol
