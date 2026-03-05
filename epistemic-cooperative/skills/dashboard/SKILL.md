@@ -55,10 +55,9 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 
 1. Glob `~/.claude/usage-data/facets/*.json` → inventory facets files
 2. Glob `~/.claude/usage-data/session-meta/*.json` → inventory session-meta files
-3. Glob `~/.claude/projects/*/sessions/*.jsonl` → all session JSONL files on disk (bypasses stale sessions-index.json)
+3. Note JSONL glob pattern `~/.claude/projects/*/sessions/*.jsonl` (scanner runs glob internally)
 4. Intersect facets ∩ session-meta by filename stem (session_id)
-5. De-duplicate JSONL paths by session_id (same session may appear across multiple project directories)
-6. **Path decision**: facets ∩ session-meta ≥ 10 → Path A, else Path B
+5. **Path decision**: facets ∩ session-meta ≥ 10 → Path A, else Path B
 
 If no facets or session-meta data found: report "No usage data available. Run some Claude Code sessions first, then try `/dashboard` again." and stop.
 
@@ -67,7 +66,7 @@ If no facets or session-meta data found: report "No usage data available. Run so
 **Call coverage-scanner subagent** with:
 - `facets_dir`: `~/.claude/usage-data/facets/`
 - `session_meta_dir`: `~/.claude/usage-data/session-meta/`
-- `session_jsonl_paths`: all session JSONL paths from Phase 1
+- `session_jsonl_glob`: `~/.claude/projects/*/sessions/*.jsonl` (scanner runs glob + grep internally, avoiding 900+ paths in prompt)
 - `mode`: "path_a" or "path_b" based on Phase 1 decision
 
 The subagent returns aggregated data: friction totals, outcome/satisfaction distributions, tool totals, timeline, protocol usage (slash commands + Skill tool invocations, de-duplicated), code change statistics.
@@ -92,29 +91,7 @@ For each protocol, determine:
 | Katalepsis | — | verification firstPrompt |
 | Epharmoge | — | N/A (conditional protocol) |
 
-situation_used detection: Two sources merged (de-duplicated per session):
-
-**Source 1 — Slash commands** (Grep `command-name`):
-- `/frame`, `/prothesis:frame` → Prothesis
-- `/gap`, `/syneidesis:gap` → Syneidesis
-- `/clarify`, `/hermeneia:clarify` → Hermeneia
-- `/grasp`, `/katalepsis:grasp` → Katalepsis
-- `/goal`, `/telos:goal` → Telos
-- `/inquire`, `/aitesis:inquire` → Aitesis
-- `/calibrate`, `/epitrope:calibrate` → Epitrope
-- `/attend`, `/prosoche:attend` → Prosoche
-- `/contextualize`, `/epharmoge:contextualize` → Epharmoge
-
-**Source 2 — Skill tool invocations** (Grep `"skill":"`):
-- `frame`, `prothesis:frame` → Prothesis
-- `gap`, `syneidesis:gap` → Syneidesis
-- `clarify`, `hermeneia:clarify` → Hermeneia
-- `grasp`, `katalepsis:grasp` → Katalepsis
-- `goal`, `telos:goal` → Telos
-- `inquire`, `aitesis:inquire` → Aitesis
-- `calibrate`, `epitrope:calibrate` → Epitrope
-- `attend`, `prosoche:attend` → Prosoche
-- `contextualize`, `epharmoge:contextualize` → Epharmoge
+situation_used detection: From Phase 2 `Protocol Usage` output (coverage-scanner detects via slash commands and Skill tool invocations in a single pass, de-duplicated per session). The scanner owns the mapping from skill names to protocol names — see `coverage-scanner.md` step 2c for the canonical mapping table.
 
 Coverage ratio per protocol: situation_used / situation_occurred. Protocols with no detected situations = N/A.
 
