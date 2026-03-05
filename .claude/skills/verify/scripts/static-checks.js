@@ -858,14 +858,20 @@ function checkSpecVsImpl() {
       const inPhase = new RegExp(escaped).test(phaseSection);
       // Check if type appears in prose
       const inProse = new RegExp(escaped).test(proseContent);
+      // Check if type is cross-referenced elsewhere in formal block
+      // (FLOW, LOOP, MODE STATE, other TYPES definitions, etc.)
+      // Remove the type's own definition line(s) to avoid self-match
+      const defLinePattern = new RegExp(`^${escaped}\\s+[=∈].*$`, 'gm');
+      const formalWithoutOwnDef = formalBlock.replace(defLinePattern, '');
+      const inFormalCrossRef = new RegExp(escaped).test(formalWithoutOwnDef);
 
-      // A type defined in TYPES but absent from both PHASE TRANSITIONS and prose
-      // suggests potential rename drift or dead type
-      if (!inPhase && !inProse) {
+      // A type defined in TYPES but absent from PHASE TRANSITIONS, prose,
+      // AND all other formal block sections suggests rename drift or dead type
+      if (!inPhase && !inProse && !inFormalCrossRef) {
         results.warn.push({
           check: 'spec-vs-impl',
           file: relPath,
-          message: `Type "${typeName}" defined in TYPES but not referenced in PHASE TRANSITIONS or prose — possible rename drift or dead type`
+          message: `Type "${typeName}" defined in TYPES but not referenced in PHASE TRANSITIONS, prose, or formal block cross-references — possible rename drift or dead type`
         });
       }
     }
