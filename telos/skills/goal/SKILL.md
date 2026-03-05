@@ -15,6 +15,19 @@ Co-construct defined end states from vague goals through AI-proposed, user-shape
 ── FLOW ──
 G → Gᵥ → detect(Gᵥ) → Dd → confirm(Dd) → Dₐ → Dₛ → P → A → C' → (loop until sufficient)
 
+── MORPHISM ──
+VagueGoal
+  → recognize(goal, indeterminacy)     -- confirm goal needs definition
+  → detect(dimensions, evidence)       -- surface indeterminate dimensions
+  → propose(dimension, candidate)      -- generate concrete falsifiable proposal
+  → integrate(response, contract)      -- shape contract from user response
+  → approve(contract)                  -- verify sufficiency of GoalContract
+  → DefinedEndState
+requires: goal_indeterminate(G)                               -- Phase 0 gate (2+ dimensions unspecified)
+deficit:  GoalIndeterminate                                   -- activation precondition (Layer 1/2)
+preserves: G                                                  -- read-only throughout; morphism acts on C only
+invariant: Construction over Extraction
+
 ── TYPES ──
 G   = User's vague goal (the goal to define)
 Gᵥ  = Verified vague goal (user-confirmed)

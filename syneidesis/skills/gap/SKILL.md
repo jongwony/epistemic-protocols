@@ -25,7 +25,7 @@ Decision
 requires: committed(Decision)           -- runtime gate (Phase 0)
 deficit:  GapUnnoticed                  -- activation precondition (Layer 1/2)
 preserves: D                            -- read-only throughout; morphism acts on Σ only
-invariant: AI surfaces, User judges
+invariant: Surfacing over Deciding
 
 ── TYPES ──
 D      = Decision point ∈ Committed × Stakes × Context

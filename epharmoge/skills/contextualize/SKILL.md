@@ -15,6 +15,17 @@ Detect application-context mismatch after execution through AI-guided applicabil
 ── FLOW ──
 Epharmoge(R, X) → Eval(R, X) → Mᵢ? → Q → A → R' → (loop until contextualized)
 
+── MORPHISM ──
+(R, X)
+  → evaluate(result, context)          -- detect applicability mismatch
+  → surface(mismatch, as_inquiry)      -- present mismatch with evidence
+  → adapt(result, direction)           -- adapt result to context
+  → ContextualizedExecution
+requires: mismatch_detected(R, X)       -- runtime gate (Phase 0)
+deficit:  ApplicationDecontextualized    -- activation precondition (Layer 1/2)
+preserves: X                             -- application context is fixed reference; morphism transforms R only
+invariant: Applicability over Correctness
+
 ── TYPES ──
 R     = Execution result (AI's completed work output)
 X     = Application context (environment, constraints, user situation)

@@ -1,9 +1,27 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "nodes": [
     "hermeneia", "telos", "epitrope", "aitesis",
     "prothesis", "syneidesis", "prosoche", "epharmoge", "katalepsis"
   ],
+  "edge_types": {
+    "precondition": {
+      "semantics": "activation partial order",
+      "description": "Partial order on protocol activation. Target's deficit resolution requires source's output. DAG-enforced (acyclicity via Kahn's algorithm)."
+    },
+    "advisory": {
+      "semantics": "digraph",
+      "description": "Non-binding information flow. Source's output enriches target's operation but is not required. Cycles permitted."
+    },
+    "suppression": {
+      "semantics": "constraint",
+      "description": "Prevents co-activation of protocols addressing overlapping deficits on the same scope. Asymmetric — direction determines which protocol yields."
+    },
+    "transition": {
+      "semantics": "functor",
+      "description": "State-preserving protocol switch. Maps source protocol's runtime state into target's entry state, preserving structure (coordinator, team, context)."
+    }
+  },
   "edges": [
     { "source": "hermeneia", "target": "telos", "type": "precondition", "satisfies": "표현 명확화 → 목표가 더 정확" },
     { "source": "telos", "target": "epitrope", "type": "precondition", "satisfies": "목표 정의됨 → 위임 범위 설정 가능" },

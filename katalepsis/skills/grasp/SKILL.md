@@ -15,6 +15,19 @@ Achieve certain comprehension of AI work through structured verification, enabli
 ── FLOW ──
 R → C → Sₑ → Tᵣ → detect(C) → GT → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
 
+── MORPHISM ──
+Result
+  → categorize(result)                 -- extract comprehension categories from AI work
+  → select(entry_points)              -- user chooses categories to verify
+  → register(tasks)                   -- track selected categories as tasks
+  → verify(comprehension)             -- Socratic probing per gap type
+  → confirm(coverage)                 -- aspect coverage check per category
+  → VerifiedUnderstanding
+requires: result_exists(R)              -- AI work output must exist in context
+deficit:  ResultUngrasped               -- activation precondition (Layer 1)
+preserves: R                            -- read-only throughout; morphism acts on user understanding only
+invariant: Comprehension over Explanation
+
 ── TYPES ──
 R  = AI's result (the work output)
 C  = Categories extracted from R
