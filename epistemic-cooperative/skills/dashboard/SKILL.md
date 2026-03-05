@@ -46,8 +46,8 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 
 | Source | Method | Extracts |
 |--------|--------|----------|
-| `~/.claude/projects/*/sessions-index.json` | Glob + Read | Project-session mapping, session IDs |
-| Session JSONL files | Grep `command-name` | Slash command usage history |
+| `~/.claude/projects/*/sessions/*.jsonl` | Glob | All session JSONL files on disk |
+| Session JSONL files | Grep `command-name` + `"skill":"` | Protocol usage history (slash commands + Skill tool invocations) |
 
 ## Phase Execution
 
@@ -55,10 +55,9 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 
 1. Glob `~/.claude/usage-data/facets/*.json` → inventory facets files
 2. Glob `~/.claude/usage-data/session-meta/*.json` → inventory session-meta files
-3. Glob `~/.claude/projects/*/sessions-index.json` → project-session mapping
+3. Note JSONL glob pattern `~/.claude/projects/*/sessions/*.jsonl` (scanner runs glob internally)
 4. Intersect facets ∩ session-meta by filename stem (session_id)
-5. Construct session JSONL paths from sessions-index data for slash command scanning
-6. **Path decision**: facets ∩ session-meta ≥ 10 → Path A, else Path B
+5. **Path decision**: facets ∩ session-meta ≥ 10 → Path A, else Path B
 
 If no facets or session-meta data found: report "No usage data available. Run some Claude Code sessions first, then try `/dashboard` again." and stop.
 
@@ -67,10 +66,10 @@ If no facets or session-meta data found: report "No usage data available. Run so
 **Call coverage-scanner subagent** with:
 - `facets_dir`: `~/.claude/usage-data/facets/`
 - `session_meta_dir`: `~/.claude/usage-data/session-meta/`
-- `session_jsonl_paths`: all session JSONL paths from Phase 1
+- `session_jsonl_glob`: `~/.claude/projects/*/sessions/*.jsonl` (scanner runs glob + grep internally, avoiding 900+ paths in prompt)
 - `mode`: "path_a" or "path_b" based on Phase 1 decision
 
-The subagent returns aggregated data: friction totals, outcome/satisfaction distributions, tool totals, timeline, slash command usage, code change statistics.
+The subagent returns aggregated data: friction totals, outcome/satisfaction distributions, tool totals, timeline, protocol usage (slash commands + Skill tool invocations, de-duplicated), code change statistics.
 
 ### Phase 3: Analyze (Main) — 7 Computations
 
@@ -92,22 +91,13 @@ For each protocol, determine:
 | Katalepsis | — | verification firstPrompt |
 | Epharmoge | — | N/A (conditional protocol) |
 
-situation_used detection: Grep `command-name` results mapped to protocol slash commands:
-- `/frame` → Prothesis
-- `/gap` → Syneidesis
-- `/clarify` → Hermeneia
-- `/grasp` → Katalepsis
-- `/goal` → Telos
-- `/inquire` → Aitesis
-- `/calibrate` → Epitrope
-- `/attend` → Prosoche
-- `/contextualize` → Epharmoge
+situation_used detection: From Phase 2 `Protocol Usage` output (coverage-scanner detects via slash commands and Skill tool invocations in a single pass, de-duplicated per session). The scanner owns the mapping from skill names to protocol names — see `coverage-scanner.md` step 2c for the canonical mapping table.
 
 Coverage ratio per protocol: situation_used / situation_occurred. Protocols with no detected situations = N/A.
 
 #### 3.2 Protocol Usage
 
-Count slash command invocations per protocol from Phase 2 aggregated data. Include first usage date if timeline data available.
+Count protocol invocations per protocol from Phase 2 aggregated data (merged from slash commands + Skill tool). Include first usage date, detection method breakdown (command vs Skill tool), and session count if available.
 
 #### 3.3 Friction Mapping
 
