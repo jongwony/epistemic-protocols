@@ -256,15 +256,7 @@ Options:
 
 Analyze Eᵥ to detect applicable gap types, then **call the AskUserQuestion tool** for user confirmation.
 
-**Detection heuristics**:
-
-| Type | Heuristic | Signal |
-|------|-----------|--------|
-| **Expression** | Incomplete articulation | Missing key elements, trailing off, placeholder words |
-| **Precision** | Ambiguous scope or degree | "some", "a few", "that part", unquantified references |
-| **Coherence** | Internal contradiction | Conflicting requirements, tension between stated goals |
-| **Background** | Interpretive context needed | Domain-specific terms, implicit assumptions, unstated prior decisions |
-| **Emergent** | Gap outside canonical types | Must satisfy morphism `IntentMisarticulated → ClarifiedIntent`; boundary: intent-expression gap (in-scope) vs. goal definition (→ `/goal`) or execution context (→ `/inquire`) |
+Per Gap Taxonomy above. Apply priority order: Coherence → Background → Expression → Precision. Emergent gaps must satisfy morphism `IntentMisarticulated → ClarifiedIntent`; boundary: intent-expression gap (in-scope) vs. goal definition (→ `/goal`) or execution context (→ `/inquire`).
 
 Present detection results with evidence, then confirm:
 
@@ -321,11 +313,9 @@ Consult `references/socratic-style.md` for maieutic framing examples, Socratic e
 After user response:
 
 1. **Incorporate**: Update understanding with user's clarification
-2. **Re-diagnose**: Scan clarified expression for newly surfaced gaps
-3. **Filter**: Exclude gaps already resolved in this session
-4. **Progress check**: Continue only if `progress(Î, Î') = true` (no cycle, Δ > 0)
-5. **Confirm**: When no gaps remain, present clarified intent for verification
-6. **Proceed**: Continue with clarified expression
+2. **Re-diagnose + Filter + Converge**: Per LOOP — re-scan Eᵥ, filter clarified gaps, check convergence
+3. **Confirm**: When no gaps remain, present clarified intent for verification
+4. **Proceed**: Continue with clarified expression
 
 **Discovery triggers**:
 - Clarification reveals new ambiguity ("I mean the API" → "which endpoint?")
@@ -359,10 +349,7 @@ When multiple gaps detected:
 3. **Dynamic Discovery**: After each clarification, re-diagnose for newly surfaced gaps
 4. **Merge**: Combine existing queue with newly discovered gaps, re-prioritize
 
-**Termination conditions** (Hybrid strategy):
-- **Cycle detection**: Same gap signature already in History → terminate
-- **Progress stall**: Δ = 0 for 2 consecutive rounds → offer rephrase
-- **User exit**: Esc/interrupt always available (Claude Code native)
+**Termination conditions**: Per LOOP convergence — cycle detection, progress stall (Δ = 0 for 2 rounds), user exit.
 
 **Gap queue limit**: Max 4 gaps queued at any time (drop lowest priority if exceeded)
 
