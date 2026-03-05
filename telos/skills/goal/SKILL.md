@@ -1,6 +1,6 @@
 ---
 name: goal
-description: "Co-construct defined goals from vague intent. Builds a GoalContract when neither party has a clear end state. Alias: Telos(τέλος)."
+description: "Co-construct defined goals from vague intent. Builds a GoalContract when neither party has a clear end state. Type: (GoalIndeterminate, AI, CO-CONSTRUCT, VagueGoal) → DefinedEndState. Alias: Telos(τέλος)."
 ---
 
 # Telos Protocol
@@ -215,15 +215,7 @@ Options:
 
 Analyze Gᵥ to detect indeterminate dimensions, then **call the AskUserQuestion tool** for user confirmation.
 
-**Detection heuristics**:
-
-| Type | Heuristic | Signal |
-|------|-----------|--------|
-| **Outcome** | No concrete end state | Missing deliverable, vague result description, "improve" without target |
-| **Metric** | No success/failure criteria | No measurable thresholds, "better" without baseline |
-| **Boundary** | Scope unbounded | "everything", "wherever needed", no explicit exclusions |
-| **Priority** | Trade-offs unstated | Multiple competing values without ranking, no "when X conflicts with Y" |
-| **Emergent** | Dimension outside canonical types | Must satisfy morphism `GoalIndeterminate → DefinedEndState`; boundary: goal definition (in-scope) vs. expression gap (→ `/clarify`) or execution context (→ `/inquire`) |
+Per Gap Taxonomy above. Apply priority order: Outcome → Boundary → Priority → Metric. Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState`; boundary: goal definition (in-scope) vs. expression gap (→ `/clarify`) or execution context (→ `/inquire`).
 
 **Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be removed** via the "Remove" option.
 
@@ -294,11 +286,7 @@ After user response:
 3. **Reject**: Discard proposal, generate alternative approach
 4. **Extend(aspect)**: Add user's aspect to existing proposal
 
-After integration:
-- Compute `progress(C', Dₐ)`
-- If undefined dimensions remain: return to Phase 1
-- If all defined: proceed to Phase 4
-- Log `(Dₛ, P, A)` to history for cycle detection
+After integration: Per LOOP — compute progress, route to Phase 1 (undefined remain) or Phase 4 (all defined).
 
 ### Phase 4: Sufficiency Check
 

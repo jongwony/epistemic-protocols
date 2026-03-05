@@ -36,10 +36,17 @@ const PLUGINS = [
 ];
 
 // claude.ai description overrides (originals exceed 200 chars)
+// Protocol overrides: compact Type-only format for Layer 0 reference
 const DESCRIPTION_OVERRIDES = {
-  frame: 'Assemble a team to analyze from multiple perspectives when the right framework is absent. Produces a framed inquiry from selected viewpoints.',
-  calibrate: 'Calibrate delegation autonomy through scenario-based interview. Produces a DelegationContract when delegation scope is ambiguous.',
-  attend: 'Evaluate execution-time risks during AI operations. Monitors pending actions for risk signals, surfacing findings for user judgment.',
+  frame: 'Multi-perspective investigation — (FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry',
+  gap: 'Gap surfacing before decisions — (GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision',
+  clarify: 'Clarify intent-expression gaps — (IntentMisarticulated, Hybrid, EXTRACT, Expression) → ClarifiedIntent',
+  grasp: 'Comprehension verification after AI work — (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding',
+  goal: 'Co-construct goals from vague intent — (GoalIndeterminate, AI, CO-CONSTRUCT, VagueGoal) → DefinedEndState',
+  inquire: 'Infer context insufficiency before execution — (ContextInsufficient, AI, INQUIRE, ExecutionPlan) → InformedExecution',
+  calibrate: 'Context-adaptive delegation calibration — (DelegationAmbiguous, AI, CALIBRATE, TaskScope) → CalibratedDelegation',
+  attend: 'Evaluate execution-time risks — (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution',
+  contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, ExecutionResult) → ContextualizedExecution',
   reflexion: 'Extract session insights into persistent memory through guided dialogue. Reconstructs learnings from conversation history.',
 };
 

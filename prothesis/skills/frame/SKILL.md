@@ -1,6 +1,6 @@
 ---
 name: frame
-description: "Multi-perspective investigation. Recommends analytical lenses or assembles a team to analyze from selected viewpoints when the right framework is absent, producing a framed inquiry. Alias: Prothesis(πρόθεσις)."
+description: "Multi-perspective investigation. Recommends analytical lenses or assembles a team to analyze from selected viewpoints when the right framework is absent, producing a framed inquiry. Type: (FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry. Alias: Prothesis(πρόθεσις)."
 ---
 
 # Prothesis Protocol
@@ -255,9 +255,9 @@ AI places the recommended Mode as Q2's first option with "(Recommended)" suffix 
 - Simple / binary comparison / debugging → Recommend recommended
 - Complex / multi-perspective / deep analysis → Inquire recommended
 
-**Mode 1 (Recommend)**: When Recommend is selected in Q2, executes Phase 0 → Phase 1 → Phase 2, then terminates with Pₛ and composition recommendations. No team is created. Pₛ is an intermediate output (not a resolution) — the deficit `FrameworkAbsent` remains open until a downstream protocol completes its own resolution using Pₛ as context.
+**Mode 1 (Recommend)**: Per LOOP — terminates at Phase 2. No team. Pₛ is an intermediate output (not a resolution) — the deficit `FrameworkAbsent` remains open until a downstream protocol completes its own resolution using Pₛ as context.
 
-**Mode 2 (Inquire)**: When Inquire is selected in Q2, existing behavior — Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → L.
+**Mode 2 (Inquire)**: Per LOOP — full Phase 0 through Phase 4 cycle.
 
 **Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context for agent-teams), not the epistemic layer. Hermeneia resolves intent-expression gaps (user-initiated or AI-detected trigger); Telos co-constructs goals from vague intent. Phase 0 packages confirmed intent into a structured vehicle for teammate consumption — a prerequisite for quality spawn prompts, not a substitute for intent clarification or goal construction.
 
@@ -310,18 +310,10 @@ Optional dimension naming (apply when initial generation seems redundant):
 **Mode 1 termination**: When Recommend was selected in Phase 0, Phase 2 is the terminal phase. After Pₛ selection:
 
 1. Output selected perspectives with brief characterization
-2. Recommend downstream protocol composition based on MBᵥ.inquiry_intent:
-   - Context verification needed → suggest Aitesis (`/inquire`)
-   - Gap surfacing → suggest Syneidesis (`/gap`)
-   - Goal construction → suggest Telos (`/goal`)
-   - Comprehension verification → suggest Katalepsis (`/grasp`)
-   - Delegation calibration → suggest Epitrope (`/calibrate`)
+2. Per LOOP `recommend_compose` — suggest downstream protocols based on MBᵥ.inquiry_intent
 3. Note escalation path: "For deeper isolated analysis, re-invoke `/frame` — Pₛ will transfer as Pᵦ"
 
-**Pₛ count guidance** (Mode 1):
-- |Pₛ| = 1: Genuine lightweight context modifier — narrows downstream protocol's domain
-- |Pₛ| ≥ 2 complementary: Domain-narrowing (Tier 1) — integrated execution without isolation is sufficient
-- |Pₛ| ≥ 2 contradictory: Recommend escalation to Mode 2 for isolated analysis (Tier 2)
+Per LOOP Pₛ count tiers for escalation recommendation.
 
 ### Phase 3: Inquiry (Through Selected Lens)
 
@@ -398,10 +390,7 @@ After collecting all perspective results (R'), the coordinator reviews for cross
 
 **Cross-Dialogue (Peer Negotiation)**
 
-The coordinator explicitly checks R' for cross-dialogue triggers before proceeding to synthesis. Trigger conditions that warrant peer exchange:
-- Contradictory conclusions between perspectives
-- One perspective's horizon limit intersects another's core finding
-- A high-stakes finding supported by a single perspective with no corroboration
+The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`) before proceeding to synthesis.
 
 **If triggers detected**: Coordinator initiates peer negotiation with structured reporting:
 
@@ -455,34 +444,21 @@ After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if
 [Synthesized answer with attribution to contributing perspectives]
 ```
 
-**Loop behavior** (team lifecycle aware):
-- **Calibrate**: Call Skill("calibrate") to activate Epitrope. Team retained — Epitrope detects the active team and presents TeamAugment, TeamRestructure, Solo options. Coordinator transitions to delegation calibration. Epitrope produces DC; after DC approval, routing re-presents so user can /batch then "Extend" to feed execution results back to the review team.
-- **Extend**: Follow-up AskUserQuestion — "Add new perspective" → Phase 2 (spawn new teammate into T), "Deepen existing" → Phase 3 (SendMessage re-inquiry to target teammate), or "Review execution results" → Phase 3 (SendMessage /batch output to team). Team retained in all cases.
-- **Add input**: User provides additional context → revise synthesis with new input → re-present Lens L' with routing options.
-- **Wrap up**: preserve_findings (PF) → shutdown_request → TeamDelete → TaskCreate → terminate with L → recommend_protocols(L). PF presents L categories (convergence, divergence, assessment highlights) via multiSelect AskUserQuestion; selected items migrate to session TaskCreate after TeamDelete.
-- **ESC**: shutdown_request → TeamDelete → terminate with current Lens L (fast exit — preserve_findings skipped)
+**Loop behavior**: Per LOOP. Key operational details:
+- **Calibrate**: Team retained — Epitrope detects the active team and presents TeamAugment, TeamRestructure, Solo options. After DC approval, routing re-presents so user can /batch then "Extend" to feed execution results back to the review team.
+- **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect AskUserQuestion; selected items migrate to session TaskCreate after TeamDelete.
 
-**Convergence**: Mode terminates when user selects wrap_up or explicitly exits (ESC). Team is deleted only at terminal states.
-
-**Post-wrap_up recommendations**: After TeamDelete, suggest follow-up protocols based on L:
-- L.divergence ≠ ∅ → suggest Epitrope (`/calibrate`: act on findings) or Syneidesis (`/gap`: audit gaps)
-- L.assessment reveals indeterminate goals → suggest Telos (`/goal`)
-
-Recommendations are informational — user decides whether to call follow-up protocols.
+All other routing options (Extend, Add input, ESC) and convergence/recommendation behavior Per LOOP.
 
 Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Parametric Nature, and Specialization.
 
 ## Rules
 
-1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation. Modify loops re-present Q1(MB) only; Q2(Mode) retains previous selection.
+1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation.
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
-3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 10
+3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 7
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
-6. **Convergence persistence**: Mode loops until user confirms sufficiency or ESC
-7. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
-8. **Minimum perspectives**: Total perspectives (|Pᵦ| + n) must be ≥ 2; when Pᵦ ≠ ∅, present only novel perspectives (Pᵢ ∉ Pᵦ, n ≥ 1) — re-presenting user-supplied perspectives saturates option space and conceals unknown unknowns
-9. **Team persistence**: Mode 2 only: Team persists across Phase 4 loop iterations; TeamDelete only at terminal states (wrap_up/ESC from Phase 4). J=calibrate retains team for Epitrope reuse. Mode 1 creates no team.
-10. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion
-11. **Combined Phase 0**: MB confirmation (Q1) and mode selection (Q2) are presented in a single AskUserQuestion call. AI recommends mode based on inquiry characteristics. Mode 1 terminates at Phase 2 with Pₛ; Pₛ transfers as Pᵦ on re-invocation.
+6. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
+7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion
 
