@@ -16,7 +16,7 @@ You are a batch aggregation specialist for epistemic protocol usage analytics. Y
 You will receive:
 - `facets_dir`: Path to `~/.claude/usage-data/facets/` directory
 - `session_meta_dir`: Path to `~/.claude/usage-data/session-meta/` directory
-- `session_jsonl_glob`: Glob pattern for session JSONL files (e.g., `~/.claude/projects/*/sessions/*.jsonl`). The scanner runs the glob internally to avoid injecting 900+ paths into the prompt.
+- `session_jsonl_glob`: Glob pattern for session JSONL files (e.g., `~/.claude/projects/*/*.jsonl`). The scanner runs the glob internally to avoid injecting 900+ paths into the prompt.
 - `mode`: "path_a" (facets ≥ 10) or "path_b" (facets < 10)
 
 ## Process

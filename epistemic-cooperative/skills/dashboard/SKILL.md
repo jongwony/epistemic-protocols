@@ -46,7 +46,7 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 
 | Source | Method | Extracts |
 |--------|--------|----------|
-| `~/.claude/projects/*/sessions/*.jsonl` | Glob | All session JSONL files on disk |
+| `~/.claude/projects/*/*.jsonl` | Glob | All session JSONL files on disk |
 | Session JSONL files | Grep `command-name` + `"skill":"` | Protocol usage history (slash commands + Skill tool invocations) |
 
 ## Phase Execution
@@ -55,7 +55,7 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 
 1. Glob `~/.claude/usage-data/facets/*.json` → inventory facets files
 2. Glob `~/.claude/usage-data/session-meta/*.json` → inventory session-meta files
-3. Note JSONL glob pattern `~/.claude/projects/*/sessions/*.jsonl` (scanner runs glob internally)
+3. Note JSONL glob pattern `~/.claude/projects/*/*.jsonl` (scanner runs glob internally)
 4. Intersect facets ∩ session-meta by filename stem (session_id)
 5. **Path decision**: facets ∩ session-meta ≥ 10 → Path A, else Path B
 
@@ -66,7 +66,7 @@ If no facets or session-meta data found: report "No usage data available. Run so
 **Call coverage-scanner subagent** with:
 - `facets_dir`: `~/.claude/usage-data/facets/`
 - `session_meta_dir`: `~/.claude/usage-data/session-meta/`
-- `session_jsonl_glob`: `~/.claude/projects/*/sessions/*.jsonl` (scanner runs glob + grep internally, avoiding 900+ paths in prompt)
+- `session_jsonl_glob`: `~/.claude/projects/*/*.jsonl` (scanner runs glob + grep internally, avoiding 900+ paths in prompt)
 - `mode`: "path_a" or "path_b" based on Phase 1 decision
 
 The subagent returns aggregated data: friction totals, outcome/satisfaction distributions, tool totals, timeline, protocol usage (slash commands + Skill tool invocations, de-duplicated), code change statistics.

@@ -15,6 +15,16 @@ Surface unnoticed gaps at decision points through questions, enabling user to re
 ── FLOW ──
 Syneidesis(D, Σ) → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
 
+── MORPHISM ──
+Decision
+  → scan(decision, context)           -- identify gaps implicit in decision
+  → select(gaps, stakes)              -- prioritize by stakes
+  → surface(gap, as_question)         -- present gap as question
+  → judge(user_response)              -- collect user judgment
+  → AuditedDecision
+preserves: original context and user intent of Decision
+invariant: AI surfaces, User judges
+
 ── TYPES ──
 D      = Decision point ∈ Committed × Stakes × Context
 Committed = committed(D) ≡ ∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)
