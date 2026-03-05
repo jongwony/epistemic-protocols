@@ -19,9 +19,25 @@ Epitrope(T) → Ctx(T) → Q(propose_mode) → EntryMode →
   TeamRestructure: restructure(T) → {Dᵢ} → Scenario(Dᵢ, T') → Q → R → integrate(R) → DC → Q(DC) → approve
   → (loop until calibrated)
 
+── MORPHISM ──
+TaskScope
+  → detect(context)                      -- assess delegation context (team, lens, complexity)
+  → select(entry_mode)                   -- Solo | TeamAugment | TeamRestructure via AskUserQuestion
+  → decompose(domains)                   -- domain decomposition (3 entry modes converge here)
+  → DecomposedDomains                    -- convergence checkpoint; entry-independent from here
+  → interview(scenarios)                 -- scenario-based calibration per domain
+  → integrate(responses)                 -- build DelegationContract from user responses
+  → approve(contract)                    -- user confirms or adjusts DC
+  → CalibratedDelegation
+requires: delegation_ambiguous(T)          -- runtime gate (Phase 0)
+deficit:  DelegationAmbiguous              -- activation precondition (Layer 1/2)
+preserves: T                               -- task scope read-only; morphism produces DC
+invariant: Calibration over Declaration
+
 ── TYPES ──
 T    = TaskScope (task/project to calibrate delegation for)
 Dᵢ   = ActionDomain ∈ {FileModification, Exploration, Strategy, External}
+DecomposedDomains = Set(Dᵢ)                          -- convergence checkpoint; all entry modes produce this
          -- FileModification.persistence ∈ {ephemeral, durable}
          --   ephemeral: temp files, build artifacts, generated code
          --   durable: source code, config, memory writes, CLAUDE.md, rules
@@ -82,7 +98,7 @@ Phase 0:  T → detect(T) → Ctx → Q[AskUserQuestion](propose_mode(Ctx)) → 
     ¬team(Ctx) ∧ Multi(Ctx)    → propose Solo
 
 Phase 1:  (mode-dependent)                                         -- structure + decomposition
-  Solo:         T → decompose[Tool](T) → {Dᵢ}                      -- decomposition via Read/Grep
+  Solo:         T → decompose(T) → {Dᵢ}                            -- decomposition via Read/Grep
   TeamAugment:  T → inherit(Ctx.team) → WHO[AskUserQuestion](keep/add?) →
                   add? → propose_roles(T, epistemic) → Q[AskUserQuestion](confirm/add/remove) → TeamStructure
                   → decompose(T) → {Dᵢ}                            [Tool]

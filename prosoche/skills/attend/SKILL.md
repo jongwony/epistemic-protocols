@@ -5,7 +5,7 @@ description: "Evaluate execution-time risks during AI operations. Reads existing
 
 # Prosoche Protocol
 
-Evaluate execution-time risks during AI operations through task-level risk classification. Type: `(ExecutionBlind, User, EVALUATE, ExecutionAction) → SituatedExecution`.
+Evaluate execution-time risks during AI operations through task-level risk classification. Type: `(ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution`.
 
 ## Definition
 
@@ -19,6 +19,20 @@ Prosoche(C) → Scan(T[]) →
     p=Elevated: Eval(t.E) → Fi → Q[AskUserQuestion] → J → A(J, t, Σ) → Σ'
   → Surface(Σ') → deactivate
 
+── MORPHISM ──
+ExecutionContext
+  → scan(tasks)                        -- read existing tasks at invocation
+  → classify(evidence)                 -- per-task risk signal detection
+  → ClassifiedActions                  -- p=Low: pass-through (no further transformation)
+  → evaluate(elevated_risks)           -- evidence gathering for Gate/Advisory signals
+  → surface(findings)                  -- present risk findings for user judgment
+  → adapt(judgment)                    -- integrate user decision into execution state
+  → SituatedExecution
+requires: user_initiated(C)             -- user declares execution intent via /attend
+deficit:  ExecutionBlind                -- activation precondition (Layer 1)
+preserves: T[]                          -- tasks read-only; morphism produces judgments in Σ
+invariant: Attention over Automation
+
 ── TYPES ──
 C        = ExecutionContext { tasks: List(Task) }
 Task     = { id: TaskId, E: ExecutionAction, status: ∈ {pending, in_progress, completed, halted} }
@@ -26,6 +40,7 @@ Task     = { id: TaskId, E: ExecutionAction, status: ∈ {pending, in_progress, 
 E        = ExecutionAction (pending tool call or action chain)
 Classify = Risk classification: E → p (silent signal detection; failure → p = Elevated)
 p        = RiskLevel ∈ {Low, Elevated}
+ClassifiedActions = { t: Task, p: RiskLevel }[]     -- per-task classification result; intermediate checkpoint
 Eval     = Risk evaluation: E → Set(Finding)
 Finding  = { signal: Signal, evidence: String, severity: ∈ {Advisory, Gate}, action_description: String }
 Signal   ∈ {Irreversibility, HumanCommunication, ExternalMutation, SecurityBoundary, PromptInjection, ScopeEscalation}

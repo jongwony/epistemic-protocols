@@ -15,6 +15,18 @@ Surface unnoticed gaps at decision points through questions, enabling user to re
 ── FLOW ──
 Syneidesis(D, Σ) → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
 
+── MORPHISM ──
+Decision
+  → scan(decision, context)           -- identify gaps implicit in decision
+  → select(gaps, stakes)              -- prioritize by stakes
+  → surface(gap, as_question)         -- present gap as question
+  → judge(user_response)              -- collect user judgment
+  → AuditedDecision
+requires: committed(Decision)           -- runtime gate (Phase 0)
+deficit:  GapUnnoticed                  -- activation precondition (Layer 1/2)
+preserves: D                            -- read-only throughout; morphism acts on Σ only
+invariant: Surfacing over Deciding
+
 ── TYPES ──
 D      = Decision point ∈ Committed × Stakes × Context
 Committed = committed(D) ≡ ∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)

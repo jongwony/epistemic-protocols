@@ -28,6 +28,7 @@ const PLUGINS = [
   { dir: 'aitesis', skill: 'inquire' },
   { dir: 'epitrope', skill: 'calibrate' },
   { dir: 'prosoche', skill: 'attend' },
+  { dir: 'epharmoge', skill: 'contextualize' },
   { dir: 'reflexion', skill: 'reflexion' },
   { dir: 'write', skill: 'write' },
   { dir: 'epistemic-cooperative', skill: 'onboard' },
@@ -149,21 +150,9 @@ function transformSkillMd(content, skillName) {
 // Section 4: ZIP Builder (PKZip format, pure Node.js)
 // ============================================================
 
-// CRC-32: prefer zlib.crc32 (Node >=22.2), fallback to lookup table
-const CRC_TABLE = new Uint32Array(256);
-for (let i = 0; i < 256; i++) {
-  let c = i;
-  for (let j = 0; j < 8; j++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-  CRC_TABLE[i] = c;
-}
-
+// CRC-32 via zlib.crc32 (Node 22+)
 function crc32(buf) {
-  if (typeof zlib.crc32 === 'function') return zlib.crc32(buf) >>> 0;
-  let crc = 0xFFFFFFFF;
-  for (let i = 0; i < buf.length; i++) {
-    crc = CRC_TABLE[(crc ^ buf[i]) & 0xFF] ^ (crc >>> 8);
-  }
-  return (crc ^ 0xFFFFFFFF) >>> 0;
+  return zlib.crc32(buf) >>> 0;
 }
 
 function dosDateTime() {
@@ -383,9 +372,14 @@ function main() {
   console.log(JSON.stringify({ warnings, results: buildResults, dryRun }, null, 2));
 }
 
-try {
-  main();
-} catch (e) {
-  console.error(JSON.stringify({ error: e.message, stack: e.stack }));
-  process.exit(2);
+// Allow importing for tests; skip main() when required as module
+if (require.main === module) {
+  try {
+    main();
+  } catch (e) {
+    console.error(JSON.stringify({ error: e.message, stack: e.stack }));
+    process.exit(2);
+  }
 }
+
+module.exports = { parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip };

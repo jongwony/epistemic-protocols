@@ -15,6 +15,19 @@ Resolve intent-expression misalignment through hybrid-initiated dialogue, enabli
 ── FLOW ──
 E → recognize(E) → Eᵥ → detect(Eᵥ) → Gd → confirm(Gd) → Gₛ → Q → A → Î' → (loop until converge)
 
+── MORPHISM ──
+Expression
+  → recognize(expression, trigger)     -- determine activation path from signal
+  → confirm(expression)                -- verify which expression to clarify
+  → detect(gaps_in_expression)         -- surface gap types with evidence
+  → clarify(gap, as_options)           -- present structured clarification choices
+  → integrate(answer, intent)          -- update intent model from response
+  → ClarifiedIntent
+requires: trigger(E) ∈ {user_signal, ai_strong ∧ confirmed}  -- Phase 0 gate
+deficit:  IntentMisarticulated                                -- activation precondition (Layer 1/2)
+preserves: E                                                  -- read-only throughout; morphism acts on Î only
+invariant: Articulation over Assumption
+
 ── TYPES ──
 E  = User's expression (the prompt to clarify)
 Eᵥ = Verified expression (user-confirmed binding)

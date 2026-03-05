@@ -13,9 +13,26 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q(MB(U), M) → (MBᵥ, m) → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ →
-  m=recommend: recommend_compose(Pₛ) → terminate
-  m=inquire:   T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → L → Q(L, routing) → J
+Prothesis(U) → Q(MB(U), M) → (MBᵥ, m) → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → LensEstablished →
+  T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → L → Q(L, routing) → J → FramedInquiry
+
+── MORPHISM ──
+Inquiry
+  → confirm(mission_brief)              -- validate inquiry framing with user
+  → gather(context)                     -- targeted context acquisition guided by MBᵥ
+  → propose(perspectives)               -- generate distinct analytical lenses from context
+  → select(perspectives)                -- user chooses lenses via AskUserQuestion
+  → LensEstablished                     -- Mode 1 terminus; composable with downstream protocols
+  → spawn(team)                         -- assemble perspective team via TeamCreate
+  → inquire(parallel)                   -- isolated perspective analysis per teammate
+  → collect(results)                    -- finalize inquiry outputs, retain team
+  → dialogue(triggers)                  -- peer negotiation on detected tensions
+  → synthesize(results)                 -- horizon integration into Lens L
+  → FramedInquiry
+requires: framework_absent(U)             -- runtime gate (Phase 0)
+deficit:  FrameworkAbsent                  -- activation precondition (Layer 1/2)
+preserves: U                               -- original request read-only
+invariant: Placement over Prescription
 
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
@@ -32,6 +49,7 @@ Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in
 {P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
+LensEstablished = Pₛ where lens selection complete  -- intermediate checkpoint; Mode 1 terminus (J=recommend), Mode 2 continues
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
 ∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → R
 Ω      = Collection: R → R', retain(T)               -- finalize results; team lifecycle deferred to loop
@@ -42,7 +60,7 @@ R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue respons
 D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → user review; Δ = ∅ → skip dialogue (synthesis + user review still proceed)
 Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
-FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc  -- Mode 2 only; Mode 1 terminates with Pₛ (deficit remains open)
+FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc  -- Mode 2 terminal; Mode 1 terminates at LensEstablished (deficit remains open)
 user_wrap_up  = (J = wrap_up) at Phase 4   -- user selects wrap_up routing option
 user_esc      = J = ESC at any phase        -- user selects ESC (Escape)
 J      = Routing ∈ {calibrate, extend, add_input, wrap_up, ESC}  -- Phase 4 routing decision (post-merge)
@@ -64,28 +82,29 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0:  U → MB(U) → Q[AskUserQuestion](MB, M) → await → (MBᵥ, m)  -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
-Phase 2:  (C, MBᵥ) → present[S]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ  -- S: AskUserQuestion [Tool]
-            m=recommend: Pₛ → recommend_compose(Pₛ) → terminate      -- Mode 1 termination
-Phase 3:  Pₛ → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R'  -- inquiry + collection [Tool]
+Phase 2:  (C, MBᵥ) → S[AskUserQuestion]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ → LensEstablished  -- perspective selection [Tool]
+Phase 3:  LensEstablished → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R'  -- inquiry + collection [Tool]
 Phase 4:  R' → Δ(R') → D?[SendMessage](T) → R'' → Syn(R'') → L → Q[AskUserQuestion](L, routing) → J  -- cross-dialogue, synthesis, review & routing [Tool]
           J=wrap_up → PF[AskUserQuestion](select) → Ω → TeamDelete → TaskCreate(selected)  [Tool]
 
 ── LOOP ──
 After Phase 0 (Mission Brief + Mode Selection):
   (MBᵥ, m) = Q result:
-    m = recommend → Phase 1 → Phase 2 → terminate with Pₛ
-    m = inquire   → Phase 1 → Phase 2 → Phase 3 → Phase 4
+    m = recommend → Phase 1 → Phase 2 → LensEstablished → terminate
+    m = inquire   → Phase 1 → Phase 2 → LensEstablished → Phase 3 → Phase 4
   J_mb = confirm       → proceed to Phase 1 with (MBᵥ, m)
   J_mb = modify(field) → re-present Q1(MB') → await → MBᵥ (m retained from initial selection)
   J_mb = ESC           → terminate (no team exists)
 
-Mode 1 termination (after Phase 2, m=recommend):
-  recommend_compose(Pₛ) = characterize Pₛ + recommend downstream protocols:
-    Pₛ.count = 1 → lightweight context modifier for downstream protocol
-    Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
-    recommend_protocols(Pₛ):                              -- sub-operation of recommend_compose
-      Map MBᵥ.inquiry_intent → downstream protocol (Aitesis, Syneidesis, Telos, Katalepsis, Epitrope)
-      Pₛ contradictory + deep analysis needed → suggest escalation to Mode 2 (/frame)
+After LensEstablished (mode branching):
+  J = recommend → Mode 1 terminus. recommend_compose(Pₛ) and terminate:
+    recommend_compose(Pₛ) = characterize Pₛ + recommend downstream protocols:
+      Pₛ.count = 1 → lightweight context modifier for downstream protocol
+      Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
+      recommend_protocols(Pₛ):                              -- sub-operation of recommend_compose
+        Map MBᵥ.inquiry_intent → downstream protocol (Aitesis, Syneidesis, Telos, Katalepsis, Epitrope)
+        Pₛ contradictory + deep analysis needed → suggest escalation to Mode 2 (/frame)
+  J = inquire → Continue to Phase 3 (team spawn → parallel inquiry → synthesis → FramedInquiry)
 
 After Phase 4 (routing):
   J = calibrate  → Activate[Skill]("calibrate") → DC
@@ -142,6 +161,10 @@ Mode ∈ {recommend, inquire}                       -- Λ.mode resolved in Phase
 TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
 ```
+
+## Core Principle
+
+**Placement over Prescription**: AI places available perspectives before the user without prescribing which to adopt. User selects.
 
 ## Distinction from Other Protocols
 

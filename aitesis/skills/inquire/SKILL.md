@@ -15,6 +15,18 @@ Infer context insufficiency before execution through AI-guided inquiry. Type: `(
 ── FLOW ──
 Aitesis(X) → Scan(X) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) → Q(Uᵢ', priority) → A → X' → (loop until informed)
 
+── MORPHISM ──
+ExecutionPlan
+  → scan(plan, context)                -- infer context insufficiency
+  → collect(uncertainties, codebase)   -- enrich via evidence collection
+  → surface(uncertainty, as_inquiry)   -- present highest-gain uncertainty
+  → integrate(answer, plan)            -- update execution plan
+  → InformedExecution
+requires: uncertain(sufficiency(X))      -- runtime gate (Phase 0)
+deficit:  ContextInsufficient            -- activation precondition (Layer 1/2)
+preserves: task_identity(X)              -- task intent invariant; plan context mutated (X → X')
+invariant: Inference over Detection
+
 ── TYPES ──
 X        = Execution plan (current task/action about to execute)
 Scan     = Context sufficiency scan: X → Set(Uncertainty)

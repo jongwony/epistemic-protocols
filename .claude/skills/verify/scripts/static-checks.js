@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync, execFileSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const projectRoot = process.argv[2] || process.cwd();
 
@@ -27,32 +27,35 @@ const PROTOCOL_FILES = [
   'prosoche/skills/attend/SKILL.md',
 ];
 
-// ============================================================
-// Check 1: JSON Schema Validation
-// ============================================================
-function checkJsonSchema() {
-  const pluginJsonPaths = [];
-
-  // Find all plugin.json files
-  function findPluginJson(dir) {
+// Shared directory walker for file collection
+function walkFiles(dir, predicate, checkName) {
+  const collected = [];
+  function walk(d) {
     try {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      const entries = fs.readdirSync(d, { withFileTypes: true });
       for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
+        const fullPath = path.join(d, entry.name);
         if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
-          findPluginJson(fullPath);
-        } else if (entry.name === 'plugin.json') {
-          pluginJsonPaths.push(fullPath);
+          walk(fullPath);
+        } else if (predicate(entry)) {
+          collected.push(fullPath);
         }
       }
     } catch (e) {
       if (e.code !== 'EACCES' && e.code !== 'ENOENT') {
-        results.warn.push({ check: 'json-schema', file: path.relative(projectRoot, dir), message: `Directory walk error: ${e.code || e.message}` });
+        results.warn.push({ check: checkName, file: path.relative(projectRoot, d), message: `Directory walk error: ${e.code || e.message}` });
       }
     }
   }
+  walk(dir);
+  return collected;
+}
 
-  findPluginJson(projectRoot);
+// ============================================================
+// Check 1: JSON Schema Validation
+// ============================================================
+function checkJsonSchema() {
+  const pluginJsonPaths = walkFiles(projectRoot, e => e.name === 'plugin.json', 'json-schema');
 
   const requiredFields = ['name', 'version', 'description', 'author'];
   const versionPattern = /^\d+\.\d+\.\d+$/;
@@ -121,27 +124,7 @@ function checkNotation() {
     { pattern: /\\neq\b/g, replace: '≠', name: 'not-equal' },
   ];
 
-  const mdFiles = [];
-
-  function findMdFiles(dir) {
-    try {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
-          findMdFiles(fullPath);
-        } else if (entry.name.endsWith('.md')) {
-          mdFiles.push(fullPath);
-        }
-      }
-    } catch (e) {
-      if (e.code !== 'EACCES' && e.code !== 'ENOENT') {
-        results.warn.push({ check: 'notation', file: path.relative(projectRoot, dir), message: `Directory walk error: ${e.code || e.message}` });
-      }
-    }
-  }
-
-  findMdFiles(projectRoot);
+  const mdFiles = walkFiles(projectRoot, e => e.name.endsWith('.md'), 'notation');
 
   for (const mdPath of mdFiles) {
     const content = fs.readFileSync(mdPath, 'utf8');
@@ -173,27 +156,7 @@ function checkNotation() {
 // Check 3: Directive Verb Consistency
 // ============================================================
 function checkDirectiveVerb() {
-  const mdFiles = [];
-
-  function findMdFiles(dir) {
-    try {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
-          findMdFiles(fullPath);
-        } else if (entry.name.endsWith('.md')) {
-          mdFiles.push(fullPath);
-        }
-      }
-    } catch (e) {
-      if (e.code !== 'EACCES' && e.code !== 'ENOENT') {
-        results.warn.push({ check: 'directive-verb', file: path.relative(projectRoot, dir), message: `Directory walk error: ${e.code || e.message}` });
-      }
-    }
-  }
-
-  findMdFiles(projectRoot);
+  const mdFiles = walkFiles(projectRoot, e => e.name.endsWith('.md'), 'directive-verb');
 
   // Pattern: "invoke/use the X tool" should be "call the X tool"
   const wrongPatterns = [
@@ -426,7 +389,7 @@ function checkToolGrounding() {
 function checkVersionStaleness() {
   // Verify git repo
   try {
-    execSync('git rev-parse --is-inside-work-tree', { cwd: projectRoot, stdio: 'pipe' });
+    execFileSync('git', ['rev-parse', '--is-inside-work-tree'], { cwd: projectRoot, stdio: 'pipe' });
   } catch {
     // Not a git repo — check not applicable
     results.pass.push({ check: 'version-staleness', file: 'working tree', message: 'Not a git repository — skipping' });
@@ -438,9 +401,9 @@ function checkVersionStaleness() {
   // to cover staged-only changes (e.g., git add file then revert working tree)
   let changedFiles;
   try {
-    const diffHeadOutput = execSync('git diff HEAD --name-only', { cwd: projectRoot, encoding: 'utf8' }).trim();
-    const diffCachedOutput = execSync('git diff --cached --name-only', { cwd: projectRoot, encoding: 'utf8' }).trim();
-    const untrackedOutput = execSync('git ls-files --others --exclude-standard', { cwd: projectRoot, encoding: 'utf8' }).trim();
+    const diffHeadOutput = execFileSync('git', ['diff', 'HEAD', '--name-only'], { cwd: projectRoot, encoding: 'utf8' }).trim();
+    const diffCachedOutput = execFileSync('git', ['diff', '--cached', '--name-only'], { cwd: projectRoot, encoding: 'utf8' }).trim();
+    const untrackedOutput = execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: projectRoot, encoding: 'utf8' }).trim();
     const fileSet = new Set([
       ...(diffHeadOutput ? diffHeadOutput.split('\n') : []),
       ...(diffCachedOutput ? diffCachedOutput.split('\n') : []),
@@ -450,8 +413,8 @@ function checkVersionStaleness() {
   } catch {
     // git diff HEAD fails on initial commit (no HEAD) — fall back to staged + untracked only
     try {
-      const stagedOutput = execSync('git diff --cached --name-only', { cwd: projectRoot, encoding: 'utf8' }).trim();
-      const untrackedOutput = execSync('git ls-files --others --exclude-standard', { cwd: projectRoot, encoding: 'utf8' }).trim();
+      const stagedOutput = execFileSync('git', ['diff', '--cached', '--name-only'], { cwd: projectRoot, encoding: 'utf8' }).trim();
+      const untrackedOutput = execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: projectRoot, encoding: 'utf8' }).trim();
       changedFiles = [
         ...(stagedOutput ? stagedOutput.split('\n') : []),
         ...(untrackedOutput ? untrackedOutput.split('\n') : []),
@@ -553,7 +516,7 @@ function checkVersionStaleness() {
       } catch {
         // If diff fails (e.g., initial commit with no HEAD), check untracked and staged files
         try {
-          const untrackedOutput = execSync('git ls-files --others --exclude-standard', { cwd: projectRoot, encoding: 'utf8' }).trim();
+          const untrackedOutput = execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: projectRoot, encoding: 'utf8' }).trim();
           if (untrackedOutput.split('\n').includes(pluginJsonRel)) {
             versionBumped = true; // New plugin — initial version is set
           }
@@ -828,27 +791,23 @@ function checkGraphIntegrity() {
 // Check 9: Spec vs Impl Drift Detection
 // ============================================================
 function checkSpecVsImpl() {
-  // Extract type definitions from ── TYPES ── section of a formal block
+  // Extract type definitions from all TYPES sections of a formal block
+  // Matches: ── TYPES ──, ── ENTRY TYPES ──, ── DELEGATION TYPES ──, etc.
   function extractTypeNames(content) {
-    const typesMatch = content.match(/── TYPES ──([\s\S]*?)(?=──|```)/);
-    if (!typesMatch) return [];
-
-    const typesSection = typesMatch[1];
     const typeNames = [];
-
-    // Match lines like: "TypeName = ..." or "TypeName ∈ ..."
-    // Type names can include subscripts (Gₛ), primes (Î'), Greek letters (Σ, Λ, Δ, Ω)
-    const typePattern = /^([A-ZΑ-Ωa-z][A-Za-zΑ-Ωα-ω₀-₉ₐ-ₜ']*)\s+[=∈]/gm;
-    let match;
-    while ((match = typePattern.exec(typesSection)) !== null) {
-      const name = match[1].trim();
-      // Skip very short names that would cause false positives in prose search (single chars)
-      // but include Greek letters and multi-char names
-      if (name.length >= 2 || /[Α-Ωα-ω]/.test(name)) {
-        typeNames.push(name);
+    const sectionPattern = /── (?:\w+ )*TYPES ──([\s\S]*?)(?=──|```)/g;
+    let sectionMatch;
+    while ((sectionMatch = sectionPattern.exec(content)) !== null) {
+      const typesSection = sectionMatch[1];
+      const typePattern = /^([A-ZΑ-Ωa-z][A-Za-zΑ-Ωα-ω₀-₉ₐ-ₜ']*)\s+[=∈]/gm;
+      let match;
+      while ((match = typePattern.exec(typesSection)) !== null) {
+        const name = match[1].trim();
+        if (name.length >= 2 || /[Α-Ωα-ω]/.test(name)) {
+          typeNames.push(name);
+        }
       }
     }
-
     return typeNames;
   }
 
@@ -1045,7 +1004,181 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 4: Verify edge types in graph.json match CLAUDE.md allowlist
+  // Sub-check 4: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
+  // package.js PLUGINS, graph.json nodes, and marketplace.json plugins against filesystem ground truth
+  {
+    // Ground truth: directories containing .claude-plugin/plugin.json
+    const allPluginDirs = new Set();
+    try {
+      const entries = fs.readdirSync(projectRoot, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
+        const pluginJsonPath = path.join(projectRoot, entry.name, '.claude-plugin', 'plugin.json');
+        if (fs.existsSync(pluginJsonPath)) {
+          allPluginDirs.add(entry.name);
+        }
+      }
+    } catch (e) {
+      results.warn.push({
+        check: 'cross-ref-scan',
+        file: projectRoot,
+        message: `Could not scan plugin directories: ${e.message}`
+      });
+    }
+
+    // Protocol-only subset (dirs listed in PROTOCOL_FILES)
+    const protocolDirs = new Set(PROTOCOL_FILES.map(f => f.split('/')[0]));
+
+    // Non-protocol plugin dirs (utility plugins not expected in protocol-only arrays)
+    const utilityDirs = new Set([...allPluginDirs].filter(d => !protocolDirs.has(d)));
+
+    // Source 1: PROTOCOL_FILES dirs
+    for (const dir of allPluginDirs) {
+      if (utilityDirs.has(dir)) continue; // utility plugins not expected in PROTOCOL_FILES
+      if (!protocolDirs.has(dir)) {
+        results.warn.push({
+          check: 'cross-ref-scan',
+          file: 'static-checks.js',
+          message: `Protocol directory "${dir}" exists on filesystem but missing from PROTOCOL_FILES array`
+        });
+      }
+    }
+
+    // Source 2: CANONICAL_PROTOCOLS keys (title-cased protocol names)
+    const canonicalDirs = new Set(
+      Object.keys(CANONICAL_PROTOCOLS).map(name => name.toLowerCase())
+    );
+    for (const dir of allPluginDirs) {
+      if (utilityDirs.has(dir)) continue;
+      if (!canonicalDirs.has(dir)) {
+        results.warn.push({
+          check: 'cross-ref-scan',
+          file: 'static-checks.js',
+          message: `Protocol directory "${dir}" exists on filesystem but missing from CANONICAL_PROTOCOLS`
+        });
+      }
+    }
+
+    // Source 3: package.js PLUGINS (extract dir names by parsing the file)
+    const packageJsPath = path.join(projectRoot, 'scripts', 'package.js');
+    let packagePluginDirs = new Set();
+    if (fs.existsSync(packageJsPath)) {
+      try {
+        const packageContent = fs.readFileSync(packageJsPath, 'utf8');
+        // Extract dir values from PLUGINS array: { dir: 'name', ... }
+        const dirMatches = packageContent.matchAll(/dir:\s*'([^']+)'/g);
+        for (const m of dirMatches) {
+          packagePluginDirs.add(m[1]);
+        }
+      } catch (e) {
+        results.warn.push({
+          check: 'cross-ref-scan',
+          file: 'scripts/package.js',
+          message: `Could not parse package.js PLUGINS: ${e.message}`
+        });
+      }
+
+      // Every filesystem plugin dir should appear in package.js PLUGINS
+      for (const dir of allPluginDirs) {
+        if (!packagePluginDirs.has(dir)) {
+          results.warn.push({
+            check: 'cross-ref-scan',
+            file: 'scripts/package.js',
+            message: `Plugin directory "${dir}" exists on filesystem but missing from PLUGINS array`
+          });
+        }
+      }
+      // Every package.js PLUGINS dir should exist on filesystem
+      for (const dir of packagePluginDirs) {
+        if (!allPluginDirs.has(dir)) {
+          results.warn.push({
+            check: 'cross-ref-scan',
+            file: 'scripts/package.js',
+            message: `PLUGINS entry "${dir}" has no corresponding plugin directory on filesystem`
+          });
+        }
+      }
+    }
+
+    // Source 4: graph.json nodes (protocol-only)
+    const graphPath2 = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
+    if (fs.existsSync(graphPath2)) {
+      try {
+        const graph2 = JSON.parse(fs.readFileSync(graphPath2, 'utf8'));
+        if (Array.isArray(graph2.nodes)) {
+          const graphNodeSet = new Set(graph2.nodes);
+          // Every protocol dir should appear in graph.json nodes
+          for (const dir of allPluginDirs) {
+            if (utilityDirs.has(dir)) continue;
+            if (!graphNodeSet.has(dir)) {
+              results.warn.push({
+                check: 'cross-ref-scan',
+                file: 'graph.json',
+                message: `Protocol directory "${dir}" exists on filesystem but missing from graph.json nodes`
+              });
+            }
+          }
+          // Every graph.json node should have a corresponding directory
+          for (const node of graph2.nodes) {
+            if (!allPluginDirs.has(node)) {
+              results.warn.push({
+                check: 'cross-ref-scan',
+                file: 'graph.json',
+                message: `graph.json node "${node}" has no corresponding plugin directory on filesystem`
+              });
+            }
+          }
+        }
+      } catch (e) {
+        // JSON parse errors already reported by checkGraphIntegrity
+      }
+    }
+
+    // Source 5: marketplace.json plugins
+    const marketplacePath = path.join(projectRoot, '.claude-plugin', 'marketplace.json');
+    if (fs.existsSync(marketplacePath)) {
+      try {
+        const marketplace = JSON.parse(fs.readFileSync(marketplacePath, 'utf8'));
+        if (Array.isArray(marketplace.plugins)) {
+          const marketplaceDirs = new Set(
+            marketplace.plugins.map(p => {
+              // source is like "./prothesis" — extract dir name
+              const src = p.source || '';
+              return src.replace(/^\.\//, '');
+            }).filter(Boolean)
+          );
+          // Every filesystem plugin dir should appear in marketplace.json
+          for (const dir of allPluginDirs) {
+            if (!marketplaceDirs.has(dir)) {
+              results.warn.push({
+                check: 'cross-ref-scan',
+                file: '.claude-plugin/marketplace.json',
+                message: `Plugin directory "${dir}" exists on filesystem but missing from marketplace.json plugins`
+              });
+            }
+          }
+          // Every marketplace.json plugin should have a corresponding directory
+          for (const dir of marketplaceDirs) {
+            if (!allPluginDirs.has(dir)) {
+              results.warn.push({
+                check: 'cross-ref-scan',
+                file: '.claude-plugin/marketplace.json',
+                message: `marketplace.json plugin "${dir}" has no corresponding plugin directory on filesystem`
+              });
+            }
+          }
+        }
+      } catch (e) {
+        results.warn.push({
+          check: 'cross-ref-scan',
+          file: '.claude-plugin/marketplace.json',
+          message: `Could not parse marketplace.json: ${e.message}`
+        });
+      }
+    }
+  }
+
+  // Sub-check 5: Verify edge types in graph.json match CLAUDE.md allowlist
   const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
   if (fs.existsSync(graphPath)) {
     try {
