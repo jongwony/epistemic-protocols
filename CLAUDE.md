@@ -181,7 +181,7 @@ Pre-commit protocol verification via static checks and expert review.
 
 ## Design Philosophy
 
-**Unix Philosophy Homomorphism**: Each protocol is a single-purpose epistemic tool. Composition is bottom-up — users invoke protocols for recognized deficits, not follow a prescribed pipeline. The precedence order below is a logical default for multi-activation, not a mandatory sequence.
+**Unix Philosophy Homomorphism**: Each protocol is a single-purpose epistemic tool. Composition is bottom-up — users invoke protocols for recognized cost situations, not follow a prescribed pipeline. The precedence order below is a logical default for multi-activation, not a mandatory sequence.
 
 **Coexistence over Mirroring**: Protocols coexist with Claude Code built-in commands (`/simplify`, `/batch`) as orthogonal tools occupying different layers:
 
