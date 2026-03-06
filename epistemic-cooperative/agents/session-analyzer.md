@@ -1,11 +1,11 @@
 ---
 name: session-analyzer
 description: |
-  Call this agent during Phase 2 of Report (or Onboard) workflow to extract tool usage patterns from session JSONL files. Triggers when session files have been identified and need pattern extraction for protocol recommendation.
+  Call this agent during Phase 2 of epistemic-cooperative analysis workflow (/report, /onboard) to extract tool usage patterns from session JSONL files. Triggers when session files have been identified and need pattern extraction for protocol recommendation.
 
   <example>
   Context: Main agent has identified recent session files for a project
-  user: "/onboard"
+  user: "/report"
   assistant: "I'll analyze your session patterns. Delegating session analysis to extract tool usage data."
   <commentary>
   Phase 2 requires extracting tool usage patterns from session JSONL files. The main agent delegates this to preserve context while the subagent performs Grep-heavy analysis.
@@ -15,7 +15,7 @@ description: |
 
   <example>
   Context: Multiple projects need parallel session analysis
-  user: "/onboard"
+  user: "/report"
   assistant: "Found 3 active projects. I'll analyze sessions from each in parallel."
   <commentary>
   Each project's sessions can be analyzed independently. Launch one session-analyzer per project for parallel extraction.

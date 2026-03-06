@@ -153,8 +153,8 @@ Detect application-context mismatch after execution when correct output may not 
 
 ### Epistemic Cooperative (Report + Onboard + Dashboard)
 Utility skill group for session analytics.
-- **Report** `/report`: Generate epistemic usage analysis report from session patterns. Flow: Scan → Extract → Map → Present → Guide. Phase 1 uses `project-scanner` subagent, Phase 2 uses parallel `session-analyzer` subagents.
-- **Onboard** `/onboard`: Analyze usage patterns and recommend epistemic protocols. Flow: Scan → Extract → Map → Present → Guide. Phase 1 uses `project-scanner` subagent, Phase 2 uses parallel `session-analyzer` subagents.
+- **Report** `/report`: Generate epistemic usage analysis report with evidence-backed protocol recommendations and HTML artifact. Analytical output — pattern evidence, anti-pattern diagnostics, session snippets.
+- **Onboard** `/onboard`: Guided protocol onboarding from session patterns. Same analysis pipeline as `/report`, with interactive trial CTA. Being redesigned for quest-based experiential learning.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
 
 ### Reflexion
@@ -280,8 +280,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Analogia**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Prosoche**: Produces risk classification (p=Low pass-through, p=Elevated surface to user). No delegation—pure classification runs in main agent.
-- **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
-- **Onboard**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
+- **Report / Onboard**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 
 ## Git Conventions
