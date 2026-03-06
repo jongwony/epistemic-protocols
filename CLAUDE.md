@@ -154,7 +154,7 @@ Detect application-context mismatch after execution when correct output may not 
 ### Epistemic Cooperative (Report + Onboard + Dashboard)
 Utility skill group for session analytics.
 - **Report** `/report`: Generate epistemic usage analysis report with evidence-backed protocol recommendations and HTML artifact. Analytical output — pattern evidence, anti-pattern diagnostics, session snippets.
-- **Onboard** `/onboard`: Quest-based protocol learning through scenario experience, trial execution, and Socratic quiz. Flow: Entry → Scan → Extract → Map → Scenario → Trial → Quiz → Guide. Phases 1-3 share infrastructure with `/report`; Phases 4-7 deliver experiential learning (体験=/onboard, 分析=/report).
+- **Onboard** `/onboard`: Quest-based protocol learning through scenario experience, trial execution, and Socratic quiz. Flow: Entry → Scan → Extract → Map → Scenario → Trial → Quiz → Guide. Phases 1-2 share infrastructure with `/report`; Phase 3 uses simplified mapping; Phases 4-7 deliver experiential learning (体験=/onboard, 分析=/report).
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
 
 ### Reflexion

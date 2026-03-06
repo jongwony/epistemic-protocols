@@ -1,6 +1,6 @@
 # Preset Scenarios
 
-Fallback scenarios for `/onboard` QUIZ phase when session data is insufficient (Tier 2-3).
+Fallback scenarios for `/onboard` SCENARIO and QUIZ phases when session data is insufficient (Tier 2-3).
 Each protocol has a realistic situation, intervention description, and two quiz questions.
 
 ## Hermeneia `/clarify`
@@ -35,7 +35,7 @@ Each protocol has a realistic situation, intervention description, and two quiz 
 
 **Intervention**: `/gap` audits the decision by surfacing procedural gaps (missing review steps), consideration gaps (unexamined dimensions like security), assumption gaps (implicit beliefs about the environment), and alternative gaps (unexplored approaches).
 
-**Quiz Q (situation)**: You've finished implementing a database migration script. Tests pass locally. You're about to run it in production. Something feels off but you can't name it.
+**Quiz Q (situation)**: You've finished implementing a database migration script. Tests pass locally. You're about to approve the PR. Something feels off but you can't name it.
 - A) Prosoche `/attend` — B) Syneidesis `/gap` — C) Epharmoge `/contextualize` — D) Aitesis `/inquire`
 - Answer: B
 
@@ -98,7 +98,7 @@ Each protocol has a realistic situation, intervention description, and two quiz 
 
 **Situation**: You have a plan to restructure the database schema, migrate data, update the ORM, and deploy — all in one go. Each step looks correct individually, but you haven't assessed which steps have cascading risks if they fail.
 
-**Intervention**: `/attend` classifies each task for risk signals (irreversibility, blast radius, dependency chains) and surfaces elevated-risk items for your judgment before execution proceeds.
+**Intervention**: `/attend` classifies each task for risk signals (irreversibility, external mutation, security boundaries) and surfaces elevated-risk items for your judgment before execution proceeds.
 
 **Quiz Q (situation)**: Claude has generated a 15-step deployment plan. Each step passed review. You're about to run it. You want to know which steps could cause cascading failures.
 - A) Syneidesis `/gap` — B) Prosoche `/attend` — C) Epharmoge `/contextualize` — D) Prothesis `/frame`
@@ -124,7 +124,7 @@ Each protocol has a realistic situation, intervention description, and two quiz 
 
 **Situation**: Claude refactored your authentication module across 12 files — added middleware, changed the session model, updated the database schema, and modified 3 API endpoints. You approved each diff, but you don't actually understand the new flow end-to-end.
 
-**Intervention**: `/grasp` structures comprehension verification by having you explain back what changed, testing edge cases in your understanding, and identifying gaps between "I approved it" and "I understand it."
+**Intervention**: `/grasp` structures comprehension verification through Socratic probes — asking targeted questions about the change, testing edge cases in your understanding, and identifying gaps between "I approved it" and "I understand it."
 
 **Quiz Q (situation)**: Claude just completed a complex refactoring. All tests pass. You merged it. A teammate asks "how does the new caching layer work?" and you realize you can't explain it.
 - A) Hermeneia `/clarify` — B) Prothesis `/frame` — C) Katalepsis `/grasp` — D) Syneidesis `/gap`

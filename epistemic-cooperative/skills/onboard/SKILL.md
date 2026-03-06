@@ -84,27 +84,13 @@ State after Phase 0:
 
 ### Phase 1: Scan (Project Discovery) — Subagent Delegated
 
-Identical to `/report` Phase 1. **Call project-scanner subagent**.
+Identical to `/report` Phase 1. Call project-scanner subagent with the same steps (project discovery, session index aggregation, secondary source scan). See `/report` SKILL.md for full subagent specification.
 
-The subagent:
-1. Lists project directories under `~/.claude/projects/`
-2. Selects the 3 most recently modified projects (using `stat` for modification time)
-3. Reconstructs actual project paths from encoded directory names
-4. Reads each project's `sessions-index.json`
-5. Aggregates: total session count, average/max messageCount, last activity date
-6. Scans secondary sources: `~/.claude/CLAUDE.md`, `~/.claude/rules/`, `~/.claude/settings.json`, MEMORY.md
+**Edge case**: If no projects or session indices found, set fallback tier to Tier 3.
 
-**Edge cases**: Same as `/report` — if no projects or session indices found, set fallback tier to Tier 3.
+### Phase 2: Extract (Pattern Extraction) — Dual-Path Subagent Delegated
 
-### Phase 2: Extract (Pattern Extraction) — Subagent Delegated
-
-Identical to `/report` Phase 2. Use the same dual-path (Path A: facets-accelerated, Path B: full subagent) extraction.
-
-1. Determine facets availability per project
-2. Path A: Read facets/session-meta JSON, call session-analyzer in targeted mode
-3. Path B: Call session-analyzer in full mode
-4. Analyze firstPrompt text for ambiguity keywords
-5. Use secondary sources from Phase 1
+Identical to `/report` Phase 2. Use the same dual-path extraction (Path A: facets-accelerated, Path B: full subagent). See `/report` SKILL.md for full subagent specification.
 
 ### Phase 3: Map (Protocol Matching) — Simplified
 
@@ -116,7 +102,7 @@ Apply the compact mapping table (Data Sources section) to match patterns to prot
 4. Determine Fallback Tier:
    - **Tier 1**: 3+ strong patterns → precise matching
    - **Tier 2**: 1-2 weak patterns → matched + supplementary
-   - **Tier 3**: No patterns / new user → Starter Trio
+   - **Tier 3**: No patterns / new user → **Starter Trio**: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
 5. **General path**: Select top 2-3 protocols for scenario and trial
 6. **Targeted path**: Filter to target protocol, note related protocols
 
@@ -213,19 +199,6 @@ Summarize the learning experience and provide actionable next steps.
 
 4. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore. "When you're ready, run `/onboard` again and choose [protocol name]."
 
-## Scenario Sources
-
-Preset scenarios are stored in `references/scenarios.md`. Each protocol entry contains:
-- **Situation**: Realistic 2-3 sentence scenario
-- **Intervention**: What the protocol does (1-2 sentences)
-- **Quiz Q (situation)**: Multiple-choice protocol recognition
-- **Quiz Q (design)**: Open-ended formulation question
-
-These presets serve as:
-- Tier 3 fallback when no session data exists
-- Quiz question source mixed with session-derived questions
-- New user onboarding without any prerequisites
-
 ## Quiz Design
 
 **Difficulty progression**: Start with high-contrast pairs (e.g., `/goal` vs `/attend`), progress to subtle distinctions (e.g., `/clarify` vs `/goal`, `/gap` vs `/attend`).
@@ -234,20 +207,9 @@ These presets serve as:
 - `/clarify` ↔ `/goal`: both about "unclear starting point" but different deficits (expression vs. existence)
 - `/gap` ↔ `/attend`: both about "checking before action" but different targets (decision gaps vs. execution risks)
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
-- `/frame` ↔ `/ground`: both about "abstract → concrete" but different operations (lens selection vs. mapping validation)
+- `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
 
 **Question count**: 3-5 total. General path: mix from multiple protocols. Targeted path: focus on target + most-confused neighbor.
-
-## Fallback Strategy
-
-**Tier 1** (session snippets matched): Full experience — scenario from real sessions, quiz from session + preset mix.
-
-**Tier 2** (weak patterns / partial data): Codebase-grounded scenarios + preset quiz questions. Trial still available.
-
-**Tier 3** (no data / new user): Preset scenarios from `references/scenarios.md`, all quiz from presets. Recommend **Starter Trio**:
-- **Hermeneia** `/clarify` — When what you said doesn't match what you meant
-- **Telos** `/goal` — When what to build is still unclear
-- **Syneidesis** `/gap` — When you might be missing something before deciding
 
 ## AskUserQuestion Budget
 
