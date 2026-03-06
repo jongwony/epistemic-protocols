@@ -47,10 +47,11 @@ epistemic-protocols/
 │   ├── agents/                        # Parallel extraction agents
 │   ├── commands/                      # /reflect, /quick-reflect
 │   └── skills/reflexion/SKILL.md
-├── epistemic-cooperative/               # Utility skills: onboarding + analytics
+├── epistemic-cooperative/               # Utility skills: report + onboarding + analytics
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # project-scanner, session-analyzer, coverage-scanner
 │   └── skills/
+│       ├── report/SKILL.md            # Usage analysis report from session patterns
 │       ├── onboard/SKILL.md           # Protocol recommendations from session patterns
 │       └── dashboard/SKILL.md          # Full-session coverage dashboard
 └── write/                             # Skill: multi-perspective blog drafting
@@ -150,9 +151,10 @@ Detect application-context mismatch after execution when correct output may not 
 - **Invocation**: `/contextualize` or use "contextualize" in conversation
 - **Status**: Conditional — requires Aitesis operational experience
 
-### Epistemic Cooperative (Onboard + Dashboard)
+### Epistemic Cooperative (Report + Onboard + Dashboard)
 Utility skill group for session analytics.
-- **Onboard** `/onboard`: Analyze usage patterns and recommend epistemic protocols. Flow: Scan → Extract → Map → Present → Guide. Phase 1 uses `project-scanner` subagent, Phase 2 uses parallel `session-analyzer` subagents.
+- **Report** `/report`: Generate epistemic usage analysis report with evidence-backed protocol recommendations and HTML artifact. Analytical output — pattern evidence, anti-pattern diagnostics, session snippets.
+- **Onboard** `/onboard`: Guided protocol onboarding from session patterns. Currently shares the same pipeline definition as `/report`; being redesigned for quest-based experiential learning.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
 
 ### Reflexion
@@ -278,7 +280,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Analogia**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Prosoche**: Produces risk classification (p=Low pass-through, p=Elevated surface to user). No delegation—pure classification runs in main agent.
-- **Onboard**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
+- **Report / Onboard**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 
 ## Git Conventions
