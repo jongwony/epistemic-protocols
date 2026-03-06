@@ -60,11 +60,12 @@ R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue respons
 D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → user review; Δ = ∅ → skip dialogue (synthesis + user review still proceed)
 Syn    = Synthesis: R'' → (∩, D, A)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
-FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_esc  -- Mode 2 terminal; Mode 1 terminates at LensEstablished (deficit remains open)
+FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_withdraw ∨ user_esc  -- Mode 2 terminal; Mode 1 terminates at LensEstablished (deficit remains open)
 user_wrap_up  = (J = wrap_up) at Phase 4   -- user selects wrap_up routing option
-user_esc      = J = ESC at any phase        -- user selects ESC (Escape)
-J      = Routing ∈ {calibrate, extend, add_input, wrap_up, ESC}  -- Phase 4 routing decision (post-merge)
-J_mb   = MissionBriefRouting ∈ {confirm, modify(field), ESC}  -- Phase 0 routing decision
+user_withdraw = J = Withdraw at Phase 4    -- user selects graceful exit (team cleanup)
+user_esc      = Esc key at any phase       -- tool-level termination (no cleanup)
+J      = Routing ∈ {calibrate, extend, add_input, wrap_up, Withdraw}  -- Phase 4 routing decision (post-merge)
+J_mb   = MissionBriefRouting ∈ {confirm, modify(field)}  -- Phase 0 routing decision
 PF     = preserve_findings: (T, L) → Q[AskUserQuestion](select categories)          -- returns selected; TaskCreate is post-TeamDelete step
 
 ── U-BINDING ──
@@ -94,7 +95,7 @@ After Phase 0 (Mission Brief + Mode Selection):
     m = inquire   → Phase 1 → Phase 2 → LensEstablished → Phase 3 → Phase 4
   J_mb = confirm       → proceed to Phase 1 with (MBᵥ, m)
   J_mb = modify(field) → re-present Q1(MB') → await → MBᵥ (m retained from initial selection)
-  J_mb = ESC           → terminate (no team exists)
+  -- Esc key → terminate (no team exists)
 
 After LensEstablished (mode branching):
   J = recommend → Mode 1 terminus. recommend_compose(Pₛ) and terminate:
@@ -116,14 +117,14 @@ After Phase 4 (routing):
   J = add_input  → user context → revise Syn(R'' + input) → L' → re-present Q(L', routing)
   J = wrap_up    → PF[AskUserQuestion](select) → Ω(T, shutdown) → TeamDelete → TaskCreate(selected) → terminate with L
                    → recommend_protocols(L)
-  J = ESC        → Ω(T, shutdown) → TeamDelete → terminate with current L
-                   (ESC = fast exit, preserve_findings skipped)
+  J = Withdraw   → Ω(T, shutdown) → TeamDelete → terminate with current L
+                   (Withdraw = graceful exit, preserve_findings skipped)
 
 recommend_protocols(L):
   L.divergence ≠ ∅ → suggest Syneidesis (gap audit) or Epitrope (calibrate delegation — provide task scope T when calling /calibrate)
   L.assessment reveals indeterminate goals → suggest Telos
 
-Continue until convergence: user satisfied OR user ESC.
+Continue until convergence: user satisfied OR user Withdraw OR user Esc key.
 
 ── BOUNDARY ──
 Q(MB, M) (confirm+select) = extern: Mission Brief confirmation + mode selection boundary
@@ -139,7 +140,7 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
 Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke → independent synthesis; skip if Δ = ∅)
-Phase 4 Q (extern)       → AskUserQuestion (synthesis + routing: present Lens L with calibrate/extend/add_input/wrap_up options; Esc key → loop termination at LOOP level)
+Phase 4 Q (extern)       → AskUserQuestion (synthesis + routing: present Lens L with calibrate/extend/add_input/wrap_up/Withdraw options; Esc key → loop termination at LOOP level)
 PF Q (extern)            → AskUserQuestion (multiSelect: preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
@@ -416,6 +417,7 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    2. **Extend** — add new perspective, deepen existing analysis, or review execution results
    3. **Add input** — provide additional context for synthesis revision
    4. **Wrap up** — finalize with current Lens
+   5. **Withdraw** — exit with current Lens (team cleanup, no findings preservation)
    ```
 
    **"Calibrate" availability**: Present when L contains actionable findings (divergence with clear fix directions, or assessment with implementation implications). When L is purely confirmatory or exploratory, omit this option.
@@ -449,7 +451,7 @@ After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if
 - **Calibrate**: Team retained — Epitrope detects the active team and presents TeamAugment, TeamRestructure, Solo options. After DC approval, routing re-presents so user can /batch then "Extend" to feed execution results back to the review team.
 - **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect AskUserQuestion; selected items migrate to session TaskCreate after TeamDelete.
 
-All other routing options (Extend, Add input, ESC) and convergence/recommendation behavior Per LOOP.
+All other routing options (Extend, Add input, Withdraw) and convergence/recommendation behavior Per LOOP.
 
 Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Parametric Nature, and Specialization.
 
