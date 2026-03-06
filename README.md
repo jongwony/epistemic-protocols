@@ -2,7 +2,13 @@
 
 > [한국어](./README_ko.md)
 
-Claude Code plugins for epistemic dialogue — each protocol structures a specific decision point in human-AI interaction, surfacing the right question at the right moment.
+When AI collaboration goes off-track, you redo everything. These protocols catch direction errors early — at the plan level, not the code level. Fix the direction, not the implementation.
+
+## Why
+
+Correcting a wrong direction at the plan level costs one conversation turn.
+At the code level, it costs hours of rework.
+These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, delegation — so you and AI stay aligned before committing to implementation.
 
 ## Quick Start
 
@@ -29,16 +35,16 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 
 | Protocol | Command | When to use |
 |----------|---------|-------------|
-| [Hermeneia](./hermeneia) | `/clarify` | Intent-expression gap detected |
-| [Telos](./telos) | `/goal` | Goal is vague or indeterminate |
-| [Epitrope](./epitrope) | `/calibrate` | Delegation scope is ambiguous |
-| [Aitesis](./aitesis) | `/inquire` | Context insufficient before execution |
-| [Prothesis](./prothesis) | `/frame` | Framework absent, multiple perspectives needed |
-| [Syneidesis](./syneidesis) | `/gap` | Decision gaps unnoticed |
-| [Analogia](./analogia) | `/ground` | Need to see how an abstract framework maps to your case |
-| [Prosoche](./prosoche) | `/attend` | Execution-time risk evaluation needed |
-| [Epharmoge](./epharmoge) | `/contextualize` | Post-execution context mismatch suspected |
-| [Katalepsis](./katalepsis) | `/grasp` | AI result ungrasped |
+| [Hermeneia](./hermeneia) | `/clarify` | AI keeps building what you didn't ask for |
+| [Telos](./telos) | `/goal` | You know you want something but can't define success |
+| [Epitrope](./epitrope) | `/calibrate` | Unsure how much to let AI decide on its own |
+| [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
+| [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
+| [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
+| [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
+| [Prosoche](./prosoche) | `/attend` | Want a risk check before executing a complex plan |
+| [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
+| [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
 
 Order follows the epistemic workflow: Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
 
@@ -52,7 +58,7 @@ Order follows the epistemic workflow: Clarify → Goal → Calibrate → Inquire
 
 ## Design
 
-Each protocol structures a specific decision point in human-AI interaction. For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
+Each protocol targets a specific point where AI collaboration can go wrong. For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
 
 <details>
 <summary>Greek Codex</summary>

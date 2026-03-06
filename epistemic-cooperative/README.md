@@ -6,7 +6,7 @@ Session analytics and protocol recommendations for Claude Code.
 
 ## What is Epistemic Cooperative?
 
-A utility plugin that analyzes Claude Code usage patterns to recommend epistemic protocols and provide coverage analytics. Unlike protocols that resolve specific cognitive deficits, Epistemic Cooperative serves as the **entry point** — helping users discover which protocols fit their workflow and tracking usage across sessions.
+A utility plugin that analyzes Claude Code usage patterns to recommend epistemic protocols and provide coverage analytics. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — helping users discover which protocols fit their workflow and tracking usage across sessions.
 
 ### Two Skills
 

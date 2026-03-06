@@ -2,7 +2,13 @@
 
 > [English](./README.md)
 
-인간-AI 대화를 위한 Claude Code 플러그인 — 각 프로토콜은 인간-AI 상호작용의 특정 결정 지점을 구조화하여, 적시에 올바른 질문을 표면화합니다.
+AI 협업이 방향을 잘못 잡으면, 전부 다시 합니다. 이 프로토콜은 방향 오류를 일찍 잡습니다 — 코드가 아니라 계획 단계에서. 방향을 고치세요, 구현이 아니라.
+
+## 왜 필요한가
+
+잘못된 방향을 계획 단계에서 고치면 대화 한 턴이면 됩니다.
+코드 단계에서 고치면 몇 시간의 재작업이 됩니다.
+이 프로토콜은 의도, 목표, 맥락, 관점, 위임 등 결정 지점에 구조화된 체크포인트를 삽입하여, 구현에 들어가기 전에 AI와 방향을 맞춥니다.
 
 ## 빠른 시작
 
@@ -22,23 +28,23 @@
 모든 프로토콜과 유틸리티를 한 번에 설치하려면:
 
 ```bash
-git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/install.sh
+git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/scripts/install.sh
 ```
 
 ## 프로토콜
 
 | 프로토콜 | 명령어 | 사용 시점 |
 |----------|--------|----------|
-| [Hermeneia](./hermeneia) | `/clarify` | 의도-표현 갭이 감지될 때 |
-| [Telos](./telos) | `/goal` | 목표가 모호하거나 불확정적일 때 |
-| [Epitrope](./epitrope) | `/calibrate` | 위임 범위가 불분명할 때 |
-| [Aitesis](./aitesis) | `/inquire` | 실행 전 맥락이 부족할 때 |
-| [Prothesis](./prothesis) | `/frame` | 프레임워크 부재, 다관점 분석이 필요할 때 |
-| [Syneidesis](./syneidesis) | `/gap` | 의사결정 시 놓친 갭이 있을 때 |
-| [Analogia](./analogia) | `/ground` | 추상 프레임워크가 내 맥락에 어떻게 대응되는지 확인해야 할 때 |
-| [Prosoche](./prosoche) | `/attend` | 실행 시점 위험 평가가 필요할 때 |
-| [Epharmoge](./epharmoge) | `/contextualize` | 실행 후 맥락 불일치가 의심될 때 |
-| [Katalepsis](./katalepsis) | `/grasp` | AI 결과를 이해하지 못했을 때 |
+| [Hermeneia](./hermeneia) | `/clarify` | AI가 요청하지 않은 것을 계속 만들 때 |
+| [Telos](./telos) | `/goal` | 뭔가 원하는데 성공 기준을 못 정할 때 |
+| [Epitrope](./epitrope) | `/calibrate` | AI에게 어디까지 맡길지 감이 안 올 때 |
+| [Aitesis](./aitesis) | `/inquire` | AI가 필요한 걸 묻지 않고 바로 실행할 때 |
+| [Prothesis](./prothesis) | `/frame` | 여러 관점이 필요한데 어떤 것이 맞는지 모를 때 |
+| [Syneidesis](./syneidesis) | `/gap` | 실행하려는데 뭔가 빠뜨린 것 같을 때 |
+| [Analogia](./analogia) | `/ground` | AI 추천이 이론적으론 맞는데 내 상황에 맞는지 모를 때 |
+| [Prosoche](./prosoche) | `/attend` | 복잡한 계획 실행 전 위험 점검이 필요할 때 |
+| [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
+| [Katalepsis](./katalepsis) | `/grasp` | AI가 큰 변경을 했는데 실제로 이해가 필요할 때 |
 
 순서는 인식론적 워크플로우를 따릅니다: Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
 
@@ -52,7 +58,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 
 ## 설계
 
-각 프로토콜은 인간-AI 상호작용의 특정 결정 지점을 구조화합니다. 아키텍처와 설계 철학에 대한 상세 내용은 [CLAUDE.md](./CLAUDE.md)를 참조하세요.
+각 프로토콜은 AI 협업이 잘못될 수 있는 특정 지점을 다룹니다. 아키텍처와 설계 철학에 대한 상세 내용은 [CLAUDE.md](./CLAUDE.md)를 참조하세요.
 
 <details>
 <summary>Greek Codex</summary>
