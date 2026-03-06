@@ -113,14 +113,37 @@ For detailed mapping logic (Primary/Secondary/Tertiary tables, session diagnosti
 Present a concrete scenario showing where the protocol would have helped.
 
 **Scenario construction** (3-tier fallback):
-- **Tier 1** (session snippet available): Use actual session data from MAP results. Show a condensed snippet (user message + AI response pair), then explain: "At this point, `/X` would have [intervention description]."
+- **Tier 1** (session snippet available): Use actual session data from MAP results. **Must include session context summary** — what the session was about, what the user was trying to do — so the scenario is self-contained. Then show the pattern evidence and intervention point.
 - **Tier 2** (no session match, but codebase available): Generate a hypothetical scenario grounded in the user's actual project context (languages, frameworks, file structure from Phase 1).
 - **Tier 3** (no data): Use preset scenarios from `references/scenarios.md`.
 
 For general path, present scenarios for each of the top 2-3 protocols sequentially.
 
+**Tier 1 scenario format** (session-based):
+
+```
+Scenario: /X (Protocol Name)
+
+[Session summary]: In this session you worked on [what user was doing] in [project name].
+
+[Pattern evidence]: [Concrete observation — e.g., same file edited N times, M direction changes]
+
+[Intervention]: If you had called /X early in this session:
+- [what the protocol would have done — step 1]
+- [step 2]
+Expected outcome: [e.g., N corrections reduced to 0-2]
+```
+
+**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a session pattern could plausibly map to multiple protocols (e.g., "exploration" could be `/goal` or `/frame`), do NOT use it as a scenario — reserve it for Phase 6 quiz material instead. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
+
+**Anti-patterns**:
+- Do not reference session IDs or list pattern counts without context. If the user has to wonder "what session was that?", engagement drops. Scenarios must be **self-contained**: session summary first, then pattern, then intervention.
+- Do not present scenarios where the user might reasonably challenge "isn't /Y a better fit?" — that debate belongs in the quiz. If the scenario invites protocol choice debate, it is too ambiguous for Phase 4.
+
+**Session summary source**: `summary` field or `firstPrompt` text from `sessions-index.json`. If neither is available, infer session character from primary tool/file patterns extracted in Phase 2.
+
 **AskUserQuestion #3** (per scenario):
-- Text: Present the scenario and intervention point
+- Text: Present the scenario (with session context) and intervention point
 - Options:
   - "Try it — let me practice this protocol"
   - "Show another example"
@@ -152,14 +175,38 @@ Guide the user through a real, abbreviated protocol experience.
 
 For general path, offer trial for the top-recommended protocol first. If user completes it, optionally offer trial for the second recommendation.
 
+**Post-Trial Insight** (presented after trial completion, before resuming onboard flow):
+
+After each trial, present a brief insight card sourced from the **Philosophy** field in `references/scenarios.md`. Structure:
+
+```
+Protocol Insight: /X (Greek name)
+
+[Core principle — one sentence]
+[Workflow position — where this protocol sits and why]
+[Game feel — the experiential pattern you just went through]
+```
+
+Example for `/contextualize`:
+```
+Protocol Insight: /contextualize (ἐφαρμογή — application, fitting)
+
+Core: Applicability over Correctness — correct code that doesn't fit your context is not useful code.
+Position: Post-execution — after work is done, check if it fits where it's going.
+Game feel: "Done! ...wait, does this actually fit here?" → mismatch detection → evidence → adapt or dismiss.
+```
+
+This bridges the gap between "I used it" and "I understand why it's designed this way." The insight arrives at the moment of peak receptivity — immediately after hands-on experience.
+
 ### Phase 6: Quiz (Socratic Verification)
 
 Test protocol recognition through situation-based questions.
 
 **Question sourcing** (in priority order):
-1. Protocols from TRIAL + MAP results (personalized)
-2. Codebase-derived scenarios (if session data available)
-3. Preset scenarios from `references/scenarios.md`
+1. **Ambiguous scenarios from Phase 4 filtering** — session patterns that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/goal` or `/frame`)
+2. Protocols from TRIAL + MAP results (personalized)
+3. Codebase-derived scenarios (if session data available)
+4. Preset scenarios from `references/scenarios.md`
 
 **Question type 1 — Situation recognition** (3-5 questions):
 
@@ -177,27 +224,53 @@ Call AskUserQuestion:
   - "Skip this question"
 
 **Feedback** (immediate, after each question):
-- **Correct**: Reinforce with the core principle. "Correct — `/gap` is for surfacing blind spots at decision points, not risk assessment (that's `/attend`)."
-- **Incorrect**: Explain the distinction. "The key difference: `/inquire` catches missing context *before* execution, while `/contextualize` checks context fit *after* execution."
+- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` classifies *execution risks* (what could go wrong when you act). Both happen before action, but they audit different things: decision quality vs. execution safety."
+- **Incorrect**: Explain the distinction through the design axis that separates them. "The key difference is *timing and direction*: `/inquire` catches missing context *before* execution (User→AI: 'what do you need to know?'), while `/contextualize` checks context fit *after* execution (AI→User: 'does this actually fit here?'). Same axis — context fitness — but opposite timing."
+
+**Distinction depth**: Quiz feedback should go beyond "A, not B" to explain the *design dimension* that separates confused pairs. Reference the distractor pairs from Quiz Design section. The goal is that even wrong answers teach — the user leaves understanding *why* two protocols that sound similar serve different purposes.
 
 ### Phase 7: Guide (Summary + Next Steps)
 
-Summarize the learning experience and provide actionable next steps.
+Summarize the learning experience, connect it to the broader epistemic workflow, and provide actionable next steps.
 
 1. **Learning summary**:
    - Protocols experienced (trial) and tested (quiz)
    - Quiz accuracy + key distinctions learned
    - Personalized strength: "You naturally recognize [pattern] — `/X` formalizes this"
 
-2. **Report CTA**: "Run `/report` for a comprehensive analysis with evidence-backed recommendations and an HTML profile."
+2. **Epistemic Map** (connect the dots):
 
-3. **Installation check**: Verify whether tried/recommended protocols are installed.
+   Present a simplified workflow showing where the experienced protocols sit:
+
+   ```
+   [Intent] → [Goal] → [Delegation] → [Context] → [Perspective] → [Mapping] → [Decision] → [Execution] → [Application] → [Comprehension]
+      ↑          ↑          ↑              ↑            ↑              ↑            ↑             ↑              ↑               ↑
+   /clarify    /goal    /calibrate     /inquire      /frame        /ground        /gap        /attend     /contextualize     /grasp
+   ```
+
+   Highlight the protocols the user experienced with emphasis (e.g., bold or `★`), and briefly explain the flow:
+   - "You tried `/clarify` (Intent) — this is the starting point. Before goals, context, or perspectives matter, intent must be clear."
+   - "You quizzed on `/gap` (Decision) and `/attend` (Execution) — these are neighbors that sound similar but audit different things."
+
+   This gives the user a mental map: "I'm not learning random tools — each protocol has a specific place in a coherent workflow."
+
+3. **Report CTA**: "Run `/report` for a comprehensive analysis with evidence-backed recommendations and an HTML profile."
+
+4. **Installation check**: Verify whether tried/recommended protocols are installed.
    - Check: Glob `~/.claude/plugins/cache/epistemic-protocols/{plugin-name}/*/skills/*/SKILL.md`
    - Installed → "Try `/X` in your next real session"
    - Not installed → `claude plugin install epistemic-protocols/{plugin-name}`
    - If 2+ not installed → also mention `bash scripts/install.sh`
 
-4. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore. "When you're ready, run `/onboard` again and choose [protocol name]."
+5. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring adjacent protocols in the workflow. "You experienced `/clarify` (Intent). The natural next step is `/goal` (Goal) — defining what success looks like. Run `/onboard` again and choose it when ready."
+
+6. **Advanced Usage** (bonus tips after main guide):
+
+   Present 3-5 tips sourced from `references/advanced-usage.md`. Select tips relevant to the protocols the user experienced during this session.
+
+   Refer to `references/advanced-usage.md` for the full curated pattern tables: protocol chaining, multi-protocol sessions, invocation techniques, AskUserQuestion engagement, non-sequential invocation, and composition with built-in commands.
+
+   **Selection rule**: Prioritize tips related to the protocols from TRIAL and QUIZ. For example, if the user tried `/frame`, highlight the Frame → Calibrate chain. If they quizzed on `/gap` vs `/attend`, show the three-step pre-execution chain (inquire → gap → attend).
 
 ## Quiz Design
 
