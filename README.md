@@ -20,8 +20,8 @@ These protocols insert structured checkpoints at decision points — intent, goa
    ```
    /plugin install epistemic-cooperative@epistemic-protocols
    ```
-3. Run `/onboard` — scans your past conversations and recommends protocols based on what actually went wrong:
-   > *"You edited auth.ts 5 times in one session → `/clarify` catches intent mismatches before implementation"*
+3. Run `/onboard` — learn protocols through hands-on experience: scenarios from your past sessions, real protocol trials, and Socratic quizzes:
+   > *"Here's where `/clarify` would have helped → try it now → quiz: which protocol fits this situation?"*
 4. Or pick individual protocols from the tables below
 
 ## Full Installation
@@ -53,7 +53,7 @@ Order follows the epistemic workflow: Clarify → Goal → Calibrate → Inquire
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/dashboard` | Session analytics and protocol recommendations |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard` | Protocol learning, usage analysis, and coverage dashboard |
 | [Reflexion](./reflexion) | `/reflect` | Cross-session learning |
 | [Write](./write) | `/write` | Multi-perspective blog drafting |
 

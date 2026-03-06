@@ -1,25 +1,52 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-Session analytics and protocol recommendations for Claude Code.
+Protocol learning, usage analysis, and coverage dashboard for Claude Code.
 
 > [한국어](./README_ko.md)
 
 ## What is Epistemic Cooperative?
 
-A utility plugin that analyzes Claude Code usage patterns to recommend epistemic protocols and provide coverage analytics. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — helping users discover which protocols fit their workflow and tracking usage across sessions.
+A utility plugin for epistemic protocol onboarding and analytics. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, and tracking usage across sessions.
 
-### Two Skills
+### Three Skills
 
 | Skill | Purpose | Output |
 |-------|---------|--------|
-| `/onboard` | Analyze sessions and recommend protocols | HTML profile (`~/.claude/.onboard/epistemic-profile.html`) |
+| `/onboard` | Quest-based protocol learning | Terminal-based guided experience |
+| `/report` | Usage analysis with evidence | HTML profile (`~/.claude/.report/epistemic-profile.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
 
 ## Skills
 
-### /onboard — Protocol Recommendations
+### /onboard — Quest-Based Protocol Learning
 
-Analyzes session files to extract tool usage patterns, maps patterns to protocols, and recommends protocols tailored to actual work.
+Learn epistemic protocols through hands-on experience: session-derived scenarios, real protocol trials, and Socratic quizzes.
+
+```
+ENTRY → SCAN → EXTRACT → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+```
+
+| Phase | Description |
+|-------|-------------|
+| 0. Entry | Choose path: general / targeted / browse |
+| 1. Scan | Discover projects and session files (delegated to project-scanner) |
+| 2. Extract | Extract behavioral patterns from session JSONL (delegated to session-analyzer) |
+| 3. Map | Match patterns to protocols via compact mapping |
+| 4. Scenario | Present intervention point with session snippet or preset |
+| 5. Trial | Execute actual protocol with mini practice prompt |
+| 6. Quiz | Socratic protocol recognition questions |
+| 7. Guide | Learning summary + /report CTA + install guidance |
+
+Key features:
+- **Experience over analysis**: learn by doing, not reading reports
+- Three-tier scenario fallback: session snippets → codebase-grounded → preset scenarios
+- Real protocol trial execution (2-3 exchanges per protocol)
+- Immediate quiz feedback with distinction explanations
+- Starter Trio for new users: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
+
+### /report — Usage Analysis Report
+
+Analyzes session files to extract tool usage patterns, maps patterns to protocols, and generates evidence-backed recommendations with HTML artifact.
 
 ```
 SCAN → EXTRACT → MAP → PRESENT → GUIDE
@@ -36,7 +63,7 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 Key features:
 - Pattern-based protocol matching (behavioral, environmental, friction patterns)
 - Three-tier fallback: precise mapping (3+ patterns) → supplementary (1-2) → Starter Trio
-- Starter Trio: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
+- Session diagnostics with anti-pattern detection
 - Facets data acceleration (when available from prior `/dashboard` runs)
 
 ### /dashboard — Coverage Dashboard
@@ -68,7 +95,8 @@ Dashboard sections:
 epistemic-cooperative/
 ├── .claude-plugin/plugin.json
 ├── skills/
-│   ├── onboard/SKILL.md          # /onboard protocol recommendations
+│   ├── onboard/SKILL.md          # /onboard quest-based protocol learning
+│   ├── report/SKILL.md           # /report usage analysis report
 │   └── dashboard/SKILL.md        # /dashboard coverage dashboard
 └── agents/
     ├── project-scanner.md         # Phase 1: project discovery
@@ -78,8 +106,8 @@ epistemic-cooperative/
 
 | Agent | Used By | Role |
 |-------|---------|------|
-| project-scanner | `/onboard` Phase 1 | Scan `~/.claude/projects/`, select recent projects, read session indices |
-| session-analyzer | `/onboard` Phase 2 | Extract tool frequencies, rework indicators, slash command history from JSONL |
+| project-scanner | `/onboard` Phase 1, `/report` Phase 1 | Scan `~/.claude/projects/`, select recent projects, read session indices |
+| session-analyzer | `/onboard` Phase 2, `/report` Phase 2 | Extract tool frequencies, rework indicators, slash command history from JSONL |
 | coverage-scanner | `/dashboard` Phase 2 | Aggregate facets, session-meta, and slash command data across all sessions |
 
 ## When to Use
@@ -87,16 +115,18 @@ epistemic-cooperative/
 | Situation | Skill |
 |-----------|-------|
 | New to epistemic protocols | `/onboard` |
+| Want hands-on protocol learning | `/onboard` |
+| Need evidence-backed analysis report | `/report` |
 | Want to see usage analytics | `/dashboard` |
-| Need protocol recommendations | `/onboard` |
-| Re-evaluating protocol fit after workflow changes | `/onboard` |
-| After running `/onboard` for deeper analysis | `/dashboard` |
+| Re-evaluating protocol fit after workflow changes | `/report` |
+| After running `/onboard` for deeper analysis | `/report` or `/dashboard` |
 | Tracking protocol adoption over time | `/dashboard` |
 
 ## Usage
 
 ```
 /onboard
+/report
 /dashboard
 ```
 

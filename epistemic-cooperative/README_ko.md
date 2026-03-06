@@ -1,25 +1,52 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-Claude Code 세션 분석 및 프로토콜 추천 유틸리티.
+프로토콜 학습, 사용 분석, 커버리지 대시보드 유틸리티.
 
 > [English](./README.md)
 
 ## Epistemic Cooperative란?
 
-Claude Code 사용 패턴을 분석하여 인식론적 프로토콜을 추천하고 커버리지 분석을 제공하는 유틸리티 플러그인이다. 특정 결정 지점을 다루는 프로토콜과 달리, Epistemic Cooperative는 **진입점** 역할을 한다 — 사용자의 워크플로우에 맞는 프로토콜을 발견하고 세션 전반의 사용량을 추적한다.
+인식론적 프로토콜 온보딩과 분석을 위한 유틸리티 플러그인이다. 특정 결정 지점을 다루는 프로토콜과 달리, Epistemic Cooperative는 **진입점** 역할을 한다 — 체험 기반 프로토콜 학습을 안내하고, 근거 기반 분석 리포트를 생성하며, 세션 전반의 사용량을 추적한다.
 
-### 두 개의 스킬
+### 세 개의 스킬
 
 | 스킬 | 목적 | 출력 |
 |------|------|------|
-| `/onboard` | 세션 분석 및 프로토콜 추천 | HTML 프로필 (`~/.claude/.onboard/epistemic-profile.html`) |
+| `/onboard` | 퀘스트 기반 프로토콜 학습 | 터미널 기반 가이드 경험 |
+| `/report` | 사용 분석 리포트 | HTML 프로필 (`~/.claude/.report/epistemic-profile.html`) |
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.insights/dashboard.html`) |
 
 ## 스킬
 
-### /onboard — 프로토콜 추천
+### /onboard — 퀘스트 기반 프로토콜 학습
 
-세션 파일에서 도구 사용 패턴을 추출하고, 패턴을 프로토콜에 매핑하여 실제 작업에 맞는 프로토콜을 추천한다.
+실제 체험을 통해 프로토콜을 학습한다: 세션 기반 시나리오, 실제 프로토콜 실행, 소크라테스식 퀴즈.
+
+```
+ENTRY → SCAN → EXTRACT → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+```
+
+| 단계 | 설명 |
+|------|------|
+| 0. Entry | 경로 선택: 일반 / 특정 프로토콜 / 둘러보기 |
+| 1. Scan | 프로젝트와 세션 파일 탐색 (project-scanner에 위임) |
+| 2. Extract | 세션 JSONL에서 행동 패턴 추출 (session-analyzer에 위임) |
+| 3. Map | 컴팩트 매핑 테이블로 패턴을 프로토콜에 매칭 |
+| 4. Scenario | 세션 snippet 또는 프리셋으로 개입 지점 제시 |
+| 5. Trial | 미니 연습 프롬프트로 실제 프로토콜 실행 |
+| 6. Quiz | 소크라테스식 프로토콜 인식 문제 |
+| 7. Guide | 학습 요약 + /report CTA + 설치 안내 |
+
+주요 특징:
+- **분석보다 체험**: 리포트가 아니라 직접 해보며 학습
+- 3단계 시나리오 폴백: 세션 snippet → 코드베이스 기반 → 프리셋 시나리오
+- 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환)
+- 즉각 퀴즈 피드백 및 구별점 설명
+- 신규 사용자용 Starter Trio: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
+
+### /report — 사용 분석 리포트
+
+세션 파일에서 도구 사용 패턴을 추출하고, 패턴을 프로토콜에 매핑하여 근거 기반 추천과 HTML 아티팩트를 생성한다.
 
 ```
 SCAN → EXTRACT → MAP → PRESENT → GUIDE
@@ -36,7 +63,7 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 주요 특징:
 - 패턴 기반 프로토콜 매칭 (행동, 환경, 마찰 패턴)
 - 3단계 폴백: 정밀 매핑 (3+ 패턴) → 보충 추천 (1-2) → Starter Trio
-- Starter Trio: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
+- 세션 진단 및 안티패턴 탐지
 - Facets 데이터 가속화 (이전 `/dashboard` 실행 데이터 활용)
 
 ### /dashboard — 커버리지 대시보드
@@ -68,7 +95,8 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 epistemic-cooperative/
 ├── .claude-plugin/plugin.json
 ├── skills/
-│   ├── onboard/SKILL.md          # /onboard 프로토콜 추천
+│   ├── onboard/SKILL.md          # /onboard 퀘스트 기반 프로토콜 학습
+│   ├── report/SKILL.md           # /report 사용 분석 리포트
 │   └── dashboard/SKILL.md        # /dashboard 커버리지 대시보드
 └── agents/
     ├── project-scanner.md         # Phase 1: 프로젝트 탐색
@@ -78,8 +106,8 @@ epistemic-cooperative/
 
 | 에이전트 | 사용처 | 역할 |
 |----------|--------|------|
-| project-scanner | `/onboard` Phase 1 | `~/.claude/projects/` 스캔, 최근 프로젝트 선택, 세션 인덱스 읽기 |
-| session-analyzer | `/onboard` Phase 2 | JSONL에서 도구 빈도, 재작업 지표, 슬래시 커맨드 이력 추출 |
+| project-scanner | `/onboard` Phase 1, `/report` Phase 1 | `~/.claude/projects/` 스캔, 최근 프로젝트 선택, 세션 인덱스 읽기 |
+| session-analyzer | `/onboard` Phase 2, `/report` Phase 2 | JSONL에서 도구 빈도, 재작업 지표, 슬래시 커맨드 이력 추출 |
 | coverage-scanner | `/dashboard` Phase 2 | 전체 세션의 facets, session-meta, 슬래시 커맨드 데이터 집계 |
 
 ## 사용 시기
@@ -87,16 +115,18 @@ epistemic-cooperative/
 | 상황 | 스킬 |
 |------|------|
 | 인식론적 프로토콜이 처음일 때 | `/onboard` |
+| 체험을 통한 프로토콜 학습 | `/onboard` |
+| 근거 기반 분석 리포트 필요 | `/report` |
 | 사용 분석을 보고 싶을 때 | `/dashboard` |
-| 프로토콜 추천이 필요할 때 | `/onboard` |
-| 워크플로우 변경 후 재평가할 때 | `/onboard` |
-| `/onboard` 이후 더 깊은 분석이 필요할 때 | `/dashboard` |
+| 워크플로우 변경 후 재평가할 때 | `/report` |
+| `/onboard` 이후 더 깊은 분석이 필요할 때 | `/report` 또는 `/dashboard` |
 | 시간 경과에 따른 프로토콜 채택 추적 | `/dashboard` |
 
 ## 사용법
 
 ```
 /onboard
+/report
 /dashboard
 ```
 
