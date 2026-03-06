@@ -40,6 +40,14 @@ ENTRY → SCAN → EXTRACT → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
 
 Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with detection methods and rationale, refer to `/report` SKILL.md.
 
+### Advanced Usage Data (Phase 7 only)
+
+| Source | Method | Used In |
+|--------|--------|---------|
+| `~/.claude/logs/hooks.log` | Grep for `skill_name`, slash commands | Phase 7 Advanced Usage — personalize tips based on user's actual protocol invocation patterns |
+
+Optional: if hooks.log does not exist or is empty, Phase 7 uses generic advanced tips.
+
 | Protocol | Key Patterns |
 |----------|-------------|
 | Telos `/goal` | Vague first prompts ("improve", "optimize", "ideas for"), `wrong_approach` friction |
@@ -263,6 +271,42 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
    - If 2+ not installed → also mention `bash scripts/install.sh`
 
 5. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring adjacent protocols in the workflow. "You experienced `/clarify` (Intent). The natural next step is `/goal` (Goal) — defining what success looks like. Run `/onboard` again and choose it when ready."
+
+6. **Advanced Usage** (bonus tips after main guide):
+
+   Present 3-5 tips from the categories below. If `~/.claude/logs/hooks.log` exists, scan it (via Grep) for the user's own protocol invocation patterns and personalize tips with their actual examples. If not available, use generic examples.
+
+   **Data source**: Grep `~/.claude/logs/hooks.log` for `"skill_name"` or slash command patterns to detect which advanced patterns the user already uses (skip those) vs. which are new (highlight those).
+
+   **Tip categories**:
+
+   **a) Protocol chaining** — One protocol's output feeds the next:
+   - `/frame` findings → `/calibrate` to delegate fixes (Frame → Calibrate is the most common chain)
+   - `/clarify` intent → `/goal` success criteria (Clarify → Goal follows the workflow order)
+   - `/inquire` context → `/gap` decision audit → `/attend` execution risks (three-step pre-execution chain)
+
+   **b) Multi-protocol sessions** — Use multiple protocols in one session:
+   - No need to use one-at-a-time. Up to 8 protocols can be invoked in a single session.
+   - Protocols are independent tools — invoke them whenever the need arises, not in prescribed order.
+
+   **c) Passing context with invocation** — `/protocol [your context]`:
+   - `/clarify fix the auth flow` — the protocol receives your text as input context
+   - `/frame code review for PR #73` — args are passed directly to the skill
+
+   **d) AskUserQuestion free-text** — "Other" is not just a fallback:
+   - When a protocol presents options, typing a custom response often leads to deeper engagement
+   - Useful for providing nuanced context that predefined options don't capture
+
+   **e) Plan mode compatibility** — Protocols work in plan mode:
+   - Protocols primarily use AskUserQuestion, which is allowed in plan mode
+   - Useful for protocol-guided planning before switching to execution mode
+
+   **f) Non-sequential invocation** — Order follows need, not the workflow diagram:
+   - The epistemic workflow is a logical default, not a mandatory sequence
+   - `/gap` before `/clarify` is valid if you sense blind spots before articulating intent
+   - `/grasp` mid-session (not just at the end) to verify understanding of partial results
+
+   **Personalization rule**: If hooks.log shows the user already chains Frame → Calibrate, skip tip (a) and highlight tips they haven't tried. If no hooks.log exists, present tips (a), (b), (c) as the top 3.
 
 ## Quiz Design
 
