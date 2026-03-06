@@ -113,14 +113,33 @@ For detailed mapping logic (Primary/Secondary/Tertiary tables, session diagnosti
 Present a concrete scenario showing where the protocol would have helped.
 
 **Scenario construction** (3-tier fallback):
-- **Tier 1** (session snippet available): Use actual session data from MAP results. Show a condensed snippet (user message + AI response pair), then explain: "At this point, `/X` would have [intervention description]."
+- **Tier 1** (session snippet available): Use actual session data from MAP results. **Must include session context summary** — what the session was about, what the user was trying to do — so the scenario is self-contained. Then show the pattern evidence and intervention point.
 - **Tier 2** (no session match, but codebase available): Generate a hypothetical scenario grounded in the user's actual project context (languages, frameworks, file structure from Phase 1).
 - **Tier 3** (no data): Use preset scenarios from `references/scenarios.md`.
 
 For general path, present scenarios for each of the top 2-3 protocols sequentially.
 
+**Tier 1 scenario format** (session-based):
+
+```
+Scenario: /X (Protocol Name)
+
+[Session summary]: In this session you worked on [what user was doing] in [project name].
+
+[Pattern evidence]: [Concrete observation — e.g., same file edited N times, M direction changes]
+
+[Intervention]: If you had called /X early in this session:
+- [what the protocol would have done — step 1]
+- [step 2]
+Expected outcome: [e.g., N corrections reduced to 0-2]
+```
+
+**Anti-pattern**: Do not reference session IDs or list pattern counts without context. If the user has to wonder "what session was that?", engagement drops. Scenarios must be **self-contained**: session summary first, then pattern, then intervention.
+
+**Session summary source**: `summary` field or `firstPrompt` text from `sessions-index.json`. If neither is available, infer session character from primary tool/file patterns extracted in Phase 2.
+
 **AskUserQuestion #3** (per scenario):
-- Text: Present the scenario and intervention point
+- Text: Present the scenario (with session context) and intervention point
 - Options:
   - "Try it — let me practice this protocol"
   - "Show another example"
