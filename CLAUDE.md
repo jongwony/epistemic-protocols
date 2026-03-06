@@ -134,7 +134,7 @@ Context-adaptive delegation calibration through scenario-based interview.
 ### Ground (ἀναλογία) — Analogia
 Validate structural mapping between abstract and concrete domains through AI-guided detection.
 - **Deficit**: MappingUncertain → ValidatedMapping
-- **Triggers**: Abstract framework applied without domain-specific validation; cross-domain analogy; grounding probe ("concrete example", "how does this apply")
+- **Triggers**: Abstract framework applied without domain-specific validation; cross-domain analogy; grounding probe ("concrete example", "how does this apply", "show me in my context")
 - **Invocation**: `/ground` or use "ground" in conversation
 
 ### Attend (προσοχή) — Prosoche

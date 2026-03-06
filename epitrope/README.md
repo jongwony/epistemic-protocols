@@ -48,10 +48,10 @@ Phase 4: Review            → Present contract for approval (call AskUserQuesti
 ## Protocol Precedence
 
 ```
-Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Katalepsis
+Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Katalepsis
 ```
 
-Epitrope follows Telos: once goals are defined, calibrate delegation across structure, scope, and autonomy (WHO/WHAT/HOW MUCH). Before context verification (Aitesis), perspective framing (Prothesis), and gap auditing (Syneidesis).
+Epitrope follows Telos: once goals are defined, calibrate delegation across structure, scope, and autonomy (WHO/WHAT/HOW MUCH). Before context verification (Aitesis), perspective framing (Prothesis), mapping validation (Analogia), and gap auditing (Syneidesis).
 
 ## When to Use
 

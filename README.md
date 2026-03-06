@@ -35,12 +35,12 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | [Aitesis](./aitesis) | `/inquire` | Context insufficient before execution |
 | [Prothesis](./prothesis) | `/frame` | Framework absent, multiple perspectives needed |
 | [Syneidesis](./syneidesis) | `/gap` | Decision gaps unnoticed |
-| [Analogia](./analogia) | `/ground` | Structural mapping between domains uncertain |
+| [Analogia](./analogia) | `/ground` | Need to see how an abstract framework maps to your case |
 | [Prosoche](./prosoche) | `/attend` | Execution-time risk evaluation needed |
 | [Epharmoge](./epharmoge) | `/contextualize` | Post-execution context mismatch suspected |
 | [Katalepsis](./katalepsis) | `/grasp` | AI result ungrasped |
 
-Order follows the epistemic workflow: Clarify → Goal → Calibrate → Inquire → Frame → Gap → Attend → Contextualize → Grasp
+Order follows the epistemic workflow: Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
 
 ## Utilities
 

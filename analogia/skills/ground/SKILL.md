@@ -13,7 +13,7 @@ Validate structural mapping between abstract and concrete domains through AI-gui
 
 ```
 ── FLOW ──
-Analogia(R) → Detect(R) → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → I(M, Sₜ) → V → R' → (loop until validated)
+Analogia(R) → Detect(R) → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → I(M, Sₜ) → V → R' → (loop until terminalized)
 
 ── MORPHISM ──
 AIOutput
@@ -22,10 +22,11 @@ AIOutput
   → construct(mapping, Sₐ→Sₜ)          -- build structural correspondences
   → instantiate(mapping, target)       -- generate concrete examples
   → validate(instantiation, user)      -- user verifies mapping adequacy
+  → terminalize(mapping, user)         -- make mapping status explicit in output
   → ValidatedMapping
 requires: uncertain(mapping(Sₐ, Sₜ))    -- runtime gate (Phase 0)
 deficit:  MappingUncertain               -- activation precondition (Layer 1/2)
-preserves: content_identity(R)           -- output content invariant; presentation mutated (R → R')
+preserves: content_identity(R)           -- output content invariant; mapping status recorded in R'
 invariant: Structural Correspondence over Abstract Assertion
 
 ── TYPES ──
@@ -39,9 +40,21 @@ Correspondence = { abstract: Component, concrete: Component, relation: String }
 Component = { name: String, structure: String }
 I        = Concrete instantiation: M × Sₜ → Example
 Example  = { scenario: String, mapping_trace: List<Correspondence> }
-V        = User validation ∈ {Confirm, Adjust(feedback), Reject, ESC}
-R'       = Updated output with validated structural mapping
-ValidatedMapping = R' where all_confirmed ∨ user_esc
+V        = User validation ∈ {Confirm, Adjust(feedback), Dismiss, ESC}
+R'       = Updated output with explicit mapping status
+ValidatedMapping = R' where terminalized(R')
+terminalized(R') = all_addressed(R') ∨ user_esc
+all_addressed(R') = ∀ c ∈ M : confirmed(c) ∨ dismissed(c)
+
+── R-BINDING ──
+bind(R) = explicit_arg ∪ current_ai_output ∪ most_recent_ai_output
+Priority: explicit_arg > current_ai_output > most_recent_ai_output
+
+/ground "text"                → R = "text"
+/ground (alone)               → R = most recent relevant AI output in current session
+"ground this..."              → R = AI output currently under discussion
+
+If no relevant AI output exists: pause activation and request a grounding target before Phase 0.
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → uncertain?                             -- mapping uncertainty gate (silent)
@@ -51,15 +64,15 @@ Phase 3: V → integrate(V, R) → R'                               -- output up
 
 ── LOOP ──
 After Phase 3: evaluate validation result.
-If V = Confirm: mapping validated → terminal.
+If V = Confirm: mark correspondence confirmed; terminalize if all correspondences addressed.
 If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
-If V = Reject: discard mapping, construct alternative → return to Phase 1.
-If V = ESC: proceed with original R → terminal.
+If V = Dismiss: accept this correspondence as unresolved for this session; terminalize if all correspondences addressed.
+If V = ESC: accept current R without further grounding → terminal.
 Max 3 mapping attempts per domain pair.
-Continue until: validated(R') OR user ESC OR attempts exhausted.
+Continue until: terminalized(R') OR attempts exhausted.
 
 ── CONVERGENCE ──
-validated(R') = ∀ c ∈ M : confirmed(c) ∨ dismissed(c)
+terminalized(R') = all_addressed(R') ∨ user_esc
 progress(Λ) = |confirmed ∪ dismissed| / |mappings|
 narrowing(V, M) = |unvalidated(after)| < |unvalidated(before)|
 early_exit = user_declares_mapping_sufficient
@@ -73,10 +86,10 @@ Phase 0 Detect  (infer)     → Internal analysis (no external tool)
 ── MODE STATE ──
 Λ = { phase: Phase, R: AIOutput, Sₐ: Domain, Sₜ: Domain,
       mappings: Set(Correspondence), confirmed: Set(Correspondence),
-      rejected: Set(Correspondence), instantiations: List<Example>,
+      dismissed: Set(Correspondence), instantiations: List<Example>,
       validations: List<(Example, V)>, attempts: Nat, active: Bool,
       cause_tag: String }
--- Invariant: mappings = confirmed ∪ rejected ∪ pending (pairwise disjoint)
+-- Invariant: mappings = confirmed ∪ dismissed ∪ pending (pairwise disjoint)
 ```
 
 ## Core Principle
@@ -111,11 +124,13 @@ Phase 0 Detect  (infer)     → Internal analysis (no external tool)
 - Prothesis: "How should we analyze this migration — from performance, team capacity, or risk perspectives?" (framework absent)
 - Aitesis: "Before implementing the migration, what database version are we running?" (context insufficient)
 
+See `references/best-practices.md` for user-language triggers and grounding scenarios.
+
 ## Mode Activation
 
 ### Activation
 
-AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via AskUserQuestion (Phase 2).
+AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via AskUserQuestion (Phase 2). On direct `/ground`, bind `R` from the current or most recent AI output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/ground` slash command or description-matching input. Always available.
@@ -142,9 +157,9 @@ When Analogia is active:
 </system-reminder>
 
 - Analogia completes before output dependent on mapping validity proceeds
-- Loaded instructions resume after mapping is validated or dismissed
+- Loaded instructions resume after mapping status is made explicit
 
-**Protocol precedence**: Default ordering places Analogia after Prothesis (framework selected before mapping validated) and before Syneidesis (mapping validated before gap analysis). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Analogia after Prothesis and before Syneidesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; framework selected before mapping validated, mapping validated before gap analysis). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 ### Trigger Signals
 
@@ -168,10 +183,9 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 
 | Trigger | Effect |
 |---------|--------|
-| All correspondences confirmed | Proceed with validated mapping |
-| All remaining correspondences dismissed | Proceed with original output |
-| User ESC | Return to normal operation |
-| Attempt cap reached | Surface remaining uncertainty, proceed |
+| All correspondences addressed (confirmed or dismissed) | Proceed with validated mapping |
+| User ESC | Accept current output without further grounding |
+| Attempt cap reached | Surface remaining uncertainty, accept current output with explicit unresolved mapping note |
 
 ## Protocol
 
@@ -179,10 +193,11 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 
 Analyze AI output for mapping uncertainty. This phase is **silent** — no user interaction.
 
-1. **Scan output** `R` for abstract structures: patterns, models, analogies, frameworks applied to user's domain
-2. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
-3. If all mappings trivially established: proceed normally (Analogia not activated)
-4. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
+1. **Bind output** `R`: use explicit argument or the current/most recent AI output under discussion
+2. **Scan output** `R` for abstract structures: patterns, models, analogies, frameworks applied to user's domain
+3. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
+4. If all mappings trivially established: proceed normally (Analogia not activated)
+5. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
 
 **Scan scope**: Current AI output, conversation context, observable domain signals. Does NOT modify files or call external services.
 
@@ -223,7 +238,7 @@ Progress: [N validated / M total correspondences]
 Options:
 1. **Confirm** — this mapping is correct
 2. **Adjust** — the mapping needs refinement (provide feedback)
-3. **Reject** — this doesn't apply to my context
+3. **Dismiss** — this mapping does not need further grounding in my context
 ```
 
 **Design principles**:
@@ -236,15 +251,15 @@ Options:
 
 After user response:
 
-1. **Confirm**: Mark correspondence as validated, update output `R'` to include validated mapping
+1. **Confirm**: Mark correspondence as validated, update output `R'` to include explicit mapping status
 2. **Adjust(feedback)**: Incorporate feedback, reconstruct mapping — return to Phase 1
-3. **Reject**: Mark correspondence as invalid, identify alternative mapping or acknowledge gap — return to Phase 1
+3. **Dismiss**: Mark correspondence as not requiring further grounding in this session, keep current output
 4. **ESC**: Deactivate Analogia entirely
 
 After integration:
 - Check remaining unvalidated correspondences
 - If correspondences remain: return to Phase 2 (present next correspondence)
-- If all validated/rejected: proceed with updated output
+- If all correspondences are addressed (confirmed/dismissed): proceed with updated output
 - Log `(Example, V)` to validations
 
 ## Intensity
@@ -276,8 +291,8 @@ After integration:
 5. **Concrete instantiation required**: Every mapping presented must include at least one concrete example in the user's domain
 6. **Evidence-grounded**: Every correspondence must cite specific structural elements from both abstract and concrete domains
 7. **One at a time**: Present one correspondence per Phase 2 cycle; do not bundle multiple mappings
-8. **Validation respected**: User validation or rejection is final for that correspondence in the current session
-9. **Convergence persistence**: Mode active until all identified correspondences are validated or rejected
+8. **Validation respected**: User validation or dismissal is final for that correspondence in the current session
+9. **Convergence persistence**: Mode active until all identified correspondences are addressed or user ESC
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N validated / M total]`
 11. **Early exit honored**: When user declares mapping sufficient, accept immediately regardless of remaining correspondences
 12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit

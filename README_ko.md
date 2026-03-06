@@ -35,12 +35,12 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | [Aitesis](./aitesis) | `/inquire` | 실행 전 맥락이 부족할 때 |
 | [Prothesis](./prothesis) | `/frame` | 프레임워크 부재, 다관점 분석이 필요할 때 |
 | [Syneidesis](./syneidesis) | `/gap` | 의사결정 시 놓친 갭이 있을 때 |
-| [Analogia](./analogia) | `/ground` | 도메인 간 구조적 매핑이 불확실할 때 |
+| [Analogia](./analogia) | `/ground` | 추상 프레임워크가 내 맥락에 어떻게 대응되는지 확인해야 할 때 |
 | [Prosoche](./prosoche) | `/attend` | 실행 시점 위험 평가가 필요할 때 |
 | [Epharmoge](./epharmoge) | `/contextualize` | 실행 후 맥락 불일치가 의심될 때 |
 | [Katalepsis](./katalepsis) | `/grasp` | AI 결과를 이해하지 못했을 때 |
 
-순서는 인식론적 워크플로우를 따릅니다: Clarify → Goal → Calibrate → Inquire → Frame → Gap → Attend → Contextualize → Grasp
+순서는 인식론적 워크플로우를 따릅니다: Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
 
 ## 유틸리티
 
