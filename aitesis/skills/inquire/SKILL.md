@@ -91,6 +91,7 @@ Phase 0 Scan (infer)    → Internal analysis (no external tool)
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
 | **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
+| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
@@ -142,7 +143,7 @@ When Aitesis is active:
 - Aitesis completes before execution proceeds
 - Loaded instructions resume after context is resolved or dismissed
 
-**Protocol precedence**: Default ordering places Aitesis after Epitrope (calibrated delegation before context verification) and before Prothesis (verified context before perspective selection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Aitesis after Epitrope and before Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; calibrated delegation before context verification, verified context before perspective selection and mapping validation). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 ### Trigger Signals
 

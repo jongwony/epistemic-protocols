@@ -47,10 +47,10 @@ Uncertainties are identified dynamically per task — no fixed taxonomy:
 ## Protocol Precedence
 
 ```
-Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Syneidesis → Katalepsis
+Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Katalepsis
 ```
 
-Aitesis follows Epitrope: once delegation is calibrated, verify execution context is sufficient. Before perspective framing (Prothesis) and gap auditing (Syneidesis), ensure the AI has the context it needs.
+Aitesis follows Epitrope: once delegation is calibrated, verify execution context is sufficient. Before perspective framing (Prothesis), mapping validation (Analogia), and gap auditing (Syneidesis), ensure the AI has the context it needs.
 
 ## When to Use
 

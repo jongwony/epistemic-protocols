@@ -23,8 +23,22 @@ const PROTOCOL_FILES = [
   'telos/skills/goal/SKILL.md',
   'aitesis/skills/inquire/SKILL.md',
   'epitrope/skills/calibrate/SKILL.md',
+  'analogia/skills/ground/SKILL.md',
   'epharmoge/skills/contextualize/SKILL.md',
   'prosoche/skills/attend/SKILL.md',
+];
+
+const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge';
+const CANONICAL_WORKFLOW = 'Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp';
+const PRECEDENCE_FILES = [
+  'hermeneia/skills/clarify/SKILL.md',
+  'telos/skills/goal/SKILL.md',
+  'epitrope/skills/calibrate/SKILL.md',
+  'aitesis/skills/inquire/SKILL.md',
+  'prothesis/skills/frame/SKILL.md',
+  'analogia/skills/ground/SKILL.md',
+  'syneidesis/skills/gap/SKILL.md',
+  'katalepsis/skills/grasp/SKILL.md',
 ];
 
 // Shared directory walker for file collection
@@ -235,6 +249,7 @@ function checkRequiredSections() {
 
   const requiredSections = [
     '## Definition',
+    '## Distinction from Other Protocols',
     '## Mode Activation',
     '## Protocol',
     '## Rules',
@@ -911,6 +926,7 @@ function checkCrossRefScan() {
     'Telos':      { deficit: 'GoalIndeterminate', resolution: 'DefinedEndState' },
     'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
     'Epitrope':   { deficit: 'DelegationAmbiguous', resolution: 'CalibratedDelegation' },
+    'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
     'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
     'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
   };
@@ -982,7 +998,64 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 3: Verify distinction table consistency across SKILL.md files
+  // Sub-check 3: Verify canonical precedence/workflow surfaces include Analogia
+  for (const relPath of PRECEDENCE_FILES) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+    if (!content.includes(CANONICAL_PRECEDENCE)) {
+      results.fail.push({
+        check: 'cross-ref-scan',
+        file: relPath,
+        message: `Missing canonical precedence chain "${CANONICAL_PRECEDENCE}"`
+      });
+      subCheckFailed = true;
+    }
+  }
+
+  for (const relPath of ['README.md', 'README_ko.md']) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+    if (!content.includes(CANONICAL_WORKFLOW)) {
+      results.fail.push({
+        check: 'cross-ref-scan',
+        file: relPath,
+        message: `Missing canonical workflow "${CANONICAL_WORKFLOW}"`
+      });
+      subCheckFailed = true;
+    }
+  }
+
+  const claudeRequirements = [
+    {
+      pattern: /Multi-activation order: \*\*Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp\*\*/,
+      message: 'CLAUDE.md missing canonical workflow ordering with Ground'
+    },
+    {
+      pattern: /Prothesis\s+Analogia\s+Syneidesis/,
+      message: 'CLAUDE.md workflow diagram missing Prothesis → Analogia → Syneidesis sequence'
+    },
+    {
+      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Aitesis, Epitrope, Analogia, Epharmoge\)/,
+      message: 'CLAUDE.md initiator taxonomy missing Analogia in the AI-guided set'
+    },
+  ];
+
+  for (const requirement of claudeRequirements) {
+    if (!requirement.pattern.test(claudeMd)) {
+      results.fail.push({
+        check: 'cross-ref-scan',
+        file: 'CLAUDE.md',
+        message: requirement.message
+      });
+      subCheckFailed = true;
+    }
+  }
+
+  // Sub-check 4: Verify distinction table consistency across SKILL.md files
   // Each protocol SKILL.md should reference all canonical protocol names in its distinction table
   for (const relPath of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, relPath);
@@ -1010,7 +1083,7 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 4: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
+  // Sub-check 5: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
   // package.js PLUGINS, graph.json nodes, and marketplace.json plugins against filesystem ground truth
   {
     // Ground truth: directories containing .claude-plugin/plugin.json
@@ -1184,7 +1257,7 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 5: Verify edge types in graph.json match CLAUDE.md allowlist
+  // Sub-check 6: Verify edge types in graph.json match CLAUDE.md allowlist
   const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
   if (fs.existsSync(graphPath)) {
     try {
