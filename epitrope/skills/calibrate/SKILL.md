@@ -77,7 +77,7 @@ TeamStructure ∈ {Solo, Augmented(TeamRef, Set(AgentRole)), Restructured(TeamRe
 AgentRole = { name: String, type: String, focus: String }
 ExplorationScope = { depth: N, breadth: N, drift_action: report | halt }
 CalibratedDelegation = DC where (∀ d ∈ applicable: calibrated(d)) ∨ user_withdraw ∨ user_esc
-user_withdraw = user selects Withdraw at Phase 4  -- graceful exit (partial DC applies)
+user_withdraw = user selects withdraw at Phase 4  -- graceful exit (partial DC applies)
 user_esc      = Esc key at any phase              -- tool-level termination (no cleanup)
 
 ── SCENARIO TEMPLATES ──
@@ -127,7 +127,7 @@ After Phase 4 (contract review):
   approve        → terminate with active DC (approval = authority replacement: DC replaces prior operating contract)
   adjust(who)    → return to Phase 1 (TeamAugment/TeamRestructure only; unavailable in Solo)
   adjust(domain) → return to Phase 2
-  Withdraw       → terminate; partial DC applies to calibrated domains
+  withdraw       → terminate; partial DC applies to calibrated domains
 
 ── RECALIBRATION ──
 recalibrate(DC, T') = new_domain_activated(T') ∨ stakes_escalated(T') ∨ team_topology_changed(T')
@@ -147,7 +147,7 @@ Phase 1 restructure (extern) → AskUserQuestion (team restructure: retain/remov
 Phase 1     (detect)    → Read, Grep (task analysis for decomposition)
 Phase 2 Q   (extern)    → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3     (state)     → Internal DelegationContract update
-Phase 4 Q   (extern)    → AskUserQuestion (contract review + approval; includes Withdraw option for graceful exit with partial DC)
+Phase 4 Q   (extern)    → AskUserQuestion (contract review + approval; includes withdraw option for graceful exit with partial DC)
 inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.json)  -- TeamAugment
 
 ── MODE STATE ──
@@ -214,7 +214,7 @@ When Epitrope is active:
 </system-reminder>
 
 - Epitrope completes before multi-domain execution proceeds
-- Loaded instructions resume after DelegationContract is approved or Withdraw
+- Loaded instructions resume after DelegationContract is approved or withdraw
 
 **Protocol precedence**: Default ordering places Epitrope after Telos and before Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; defined goals before delegation calibration, calibrated delegation before context verification). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
@@ -240,8 +240,9 @@ When Epitrope is active:
 | Trigger | Effect |
 |---------|--------|
 | DelegationContract approved | Apply contract to subsequent execution |
-| User selects Withdraw | Partial DC applies to calibrated domains; uncalibrated domains use defaults (shown in Phase 4) |
-| User Esc key | Ungraceful exit; no partial DC |
+| User selects withdraw | Partial DC applies to calibrated domains; uncalibrated domains use defaults (shown in Phase 4) |
+| User Esc key (Phase 2/3) | Skip remaining domains → proceed to Phase 4 review (withdraw available there) |
+| User Esc key (Phase 4) | Ungraceful exit; no partial DC |
 | User cancels | Discard partial contract, return to normal |
 
 See references/operational-guide.md for domain taxonomy and priority ordering.
@@ -375,7 +376,7 @@ Here's the delegation contract for this task:
 Options:
 1. **Approve** — apply this contract
 2. **Adjust** — I'd like to change something
-3. **Withdraw** — exit with partial contract (calibrated domains apply, uncalibrated use defaults)
+3. **withdraw** — exit with partial contract (calibrated domains apply, uncalibrated use defaults)
 ```
 
 **Contract format** (Team modes — WHO + WHAT + HOW MUCH):
@@ -398,7 +399,7 @@ Approval replaces the team's prior operating contract with this DelegationContra
 Options:
 1. **Approve** — apply this contract (authority replacement)
 2. **Adjust** — I'd like to change something
-3. **Withdraw** — exit with partial contract (calibrated domains apply, uncalibrated use defaults)
+3. **withdraw** — exit with partial contract (calibrated domains apply, uncalibrated use defaults)
 ```
 
 If user selects "Adjust": present sub-options — "Adjust team structure" (→ Phase 1, TeamAugment/TeamRestructure only) or "Adjust domain calibration" (→ Phase 2). Solo mode only offers "Adjust domain calibration".
@@ -414,8 +415,8 @@ If user selects "Adjust": present sub-options — "Adjust team structure" (→ P
 5. **Session-scoped**: DelegationContract applies for current session only; does not persist across sessions
 6. **Domain priority**: Calibrate External first (highest impact), then FileModification, Strategy, Exploration
 7. **Minimal interruption**: Skip calibration for single-domain clear-scope tasks; use Light intensity when possible
-8. **Withdraw and Esc key**: Withdraw exits gracefully (partial contract applies to calibrated domains). Esc key is ungraceful termination (no partial DC). Uncalibrated defaults: Exploration → autonomous (read-only, inherently safe), others → ask-before. Defaults explicitly shown in Phase 4 contract review
-9. **Convergence persistence**: Mode active until DelegationContract approved or user Withdraw or user Esc key
+8. **withdraw and Esc key**: withdraw exits gracefully (partial contract applies to calibrated domains). Esc key is ungraceful termination (no partial DC). Uncalibrated defaults: Exploration → autonomous (read-only, inherently safe), others → ask-before. Defaults explicitly shown in Phase 4 contract review
+9. **Convergence persistence**: Mode active until DelegationContract approved or user withdraw or user Esc key
 10. **Cross-protocol awareness**: Calibrated DC informs but does not replace Aitesis context verification or Syneidesis gap surfacing
 11. **Authority replacement**: DC approval replaces the team's prior operating contract; execution-layer distribution is outside protocol scope
 12. **Solo backward compatibility**: Solo mode preserves near-identical behavior to v1.1.1 — Phase 0 adds one new user-facing step (mode selection, proposing Solo when no team is active); subsequent phases proceed identically to v1.1.1
