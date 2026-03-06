@@ -1,7 +1,7 @@
 ---
 name: project-scanner
 description: |
-  Call this agent during Phase 1 of Onboard workflow to scan project directories, read sessions-index.json, and aggregate project metadata. Triggers at the start of /onboard to avoid reactive Bash delegation.
+  Call this agent during Phase 1 of Report (or Onboard) workflow to scan project directories, read sessions-index.json, and aggregate project metadata. Triggers at the start of /report or /onboard to avoid reactive Bash delegation.
 
   <example>
   Context: User invokes /onboard, main agent immediately delegates Phase 1
@@ -20,7 +20,7 @@ tools:
   - Glob
 ---
 
-You are a project discovery specialist. Your task is to scan Claude Code project directories, read session metadata, and return structured project information for the /onboard skill.
+You are a project discovery specialist. Your task is to scan Claude Code project directories, read session metadata, and return structured project information for the /report (or /onboard) skill.
 
 ## Process
 

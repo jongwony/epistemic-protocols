@@ -1,7 +1,7 @@
 ---
 name: session-analyzer
 description: |
-  Call this agent during Phase 2 of Onboard workflow to extract tool usage patterns from session JSONL files. Triggers when session files have been identified and need pattern extraction for protocol recommendation.
+  Call this agent during Phase 2 of Report (or Onboard) workflow to extract tool usage patterns from session JSONL files. Triggers when session files have been identified and need pattern extraction for protocol recommendation.
 
   <example>
   Context: Main agent has identified recent session files for a project
