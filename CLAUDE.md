@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **ContextInsufficient → InformedExecution** (Aitesis), **DelegationAmbiguous → CalibratedDelegation** (Epitrope), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge) during AI-human interaction.
+Claude Code plugin marketplace for epistemic dialogue — each protocol resolves a specific cognitive deficit: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **ContextInsufficient → InformedExecution** (Aitesis), **DelegationAmbiguous → CalibratedDelegation** (Epitrope), **MappingUncertain → ValidatedMapping** (Analogia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge) during AI-human interaction.
 
 ## Architecture
 
@@ -33,6 +33,9 @@ epistemic-protocols/
 ├── epitrope/                          # Protocol: context-adaptive delegation calibration
 │   ├── .claude-plugin/plugin.json
 │   └── skills/calibrate/SKILL.md     # Full protocol definition (user-invocable)
+├── analogia/                          # Protocol: structural mapping validation
+│   ├── .claude-plugin/plugin.json
+│   └── skills/ground/SKILL.md       # Full protocol definition (user-invocable)
 ├── prosoche/                          # Protocol: execution-time risk evaluation
 │   ├── .claude-plugin/plugin.json
 │   └── skills/attend/SKILL.md        # Full protocol definition (user-invocable)
@@ -128,6 +131,12 @@ Context-adaptive delegation calibration through scenario-based interview.
 - **Triggers**: Multi-domain task, ambiguous scope keywords, prior autonomy friction, active team without DC
 - **Invocation**: `/calibrate` or use "calibrate" in conversation
 
+### Ground (ἀναλογία) — Analogia
+Validate structural mapping between abstract and concrete domains through AI-guided detection.
+- **Deficit**: MappingUncertain → ValidatedMapping
+- **Triggers**: Abstract framework applied without domain-specific validation; cross-domain analogy; grounding probe ("concrete example", "how does this apply")
+- **Invocation**: `/ground` or use "ground" in conversation
+
 ### Attend (προσοχή) — Prosoche
 Evaluate execution-time risks by classifying existing tasks for risk signals and surfacing elevated-risk findings.
 - **Deficit**: ExecutionBlind → SituatedExecution
@@ -186,18 +195,18 @@ Do not mirror built-in execution capabilities (e.g., worktree isolation, PR crea
 
 ## Protocol Precedence
 
-Multi-activation order: **Clarify → Goal → Calibrate → Inquire → Frame → Gap → Attend → Contextualize → Grasp**
+Multi-activation order: **Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp**
 
-This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → delegation calibration → context verification → perspective → gap audit → execution-time attention → applicability check). Users can override by explicitly requesting a different protocol first.
+This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → delegation calibration → context verification → perspective → validated mapping → gap audit → execution-time attention → applicability check). Users can override by explicitly requesting a different protocol first.
 
 **Katalepsis**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
 
 ### Epistemic Workflow
 
 ```
-[Request] → [Intent] → [Goal] → [Delegation] → [Context] → [Perspective] → [Decision] → [Execution] → [Application] → [Comprehension]
-               ↑          ↑          ↑              ↑             ↑              ↑              ↑              ↑               ↑
-           Hermeneia    Telos    Epitrope        Aitesis      Prothesis      Syneidesis      Prosoche      Epharmoge       Katalepsis
+[Request] → [Intent] → [Goal] → [Delegation] → [Context] → [Perspective] → [Mapping] → [Decision] → [Execution] → [Application] → [Comprehension]
+               ↑          ↑          ↑              ↑             ↑              ↑            ↑              ↑              ↑               ↑
+           Hermeneia    Telos    Epitrope        Aitesis      Prothesis      Analogia    Syneidesis      Prosoche      Epharmoge       Katalepsis
 ```
 
 This diagram shows logical progression, not strict execution order.
@@ -205,7 +214,7 @@ This diagram shows logical progression, not strict execution order.
 **Initiator taxonomy** (2-layer model):
 - **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.
 - **Layer 2** (in-protocol heuristics): Behavior varies by initiator type:
-  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Aitesis, Epitrope, Epharmoge)
+  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Aitesis, Epitrope, Analogia, Epharmoge)
   - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia)
   - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Reflexion, Write)
@@ -267,6 +276,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Epitrope**: Solo mode: no Task delegation—must run in main agent to call AskUserQuestion. Team modes: Phase 4 produces DC; authority transitions at approval. Team application is execution-layer concern.
 - **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Analogia**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Prosoche**: Produces risk classification (p=Low pass-through, p=Elevated surface to user). No delegation—pure classification runs in main agent.
 - **Onboard**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.

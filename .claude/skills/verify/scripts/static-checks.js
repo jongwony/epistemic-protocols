@@ -23,6 +23,7 @@ const PROTOCOL_FILES = [
   'telos/skills/goal/SKILL.md',
   'aitesis/skills/inquire/SKILL.md',
   'epitrope/skills/calibrate/SKILL.md',
+  'analogia/skills/ground/SKILL.md',
   'epharmoge/skills/contextualize/SKILL.md',
   'prosoche/skills/attend/SKILL.md',
 ];
@@ -911,6 +912,7 @@ function checkCrossRefScan() {
     'Telos':      { deficit: 'GoalIndeterminate', resolution: 'DefinedEndState' },
     'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
     'Epitrope':   { deficit: 'DelegationAmbiguous', resolution: 'CalibratedDelegation' },
+    'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
     'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
     'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
   };

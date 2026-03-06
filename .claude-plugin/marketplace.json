@@ -50,6 +50,11 @@
       "description": "Context-adaptive delegation calibration through scenario-based interview — /calibrate (ἐπιτροπή: a turning over to)"
     },
     {
+      "name": "analogia",
+      "source": "./analogia",
+      "description": "Validate structural mapping between domains — /ground (ἀναλογία: a proportion)"
+    },
+    {
       "name": "prosoche",
       "source": "./prosoche",
       "description": "Evaluate execution-time risks during AI operations — /attend (προσοχή: attention)"

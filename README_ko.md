@@ -35,6 +35,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | [Aitesis](./aitesis) | `/inquire` | 실행 전 맥락이 부족할 때 |
 | [Prothesis](./prothesis) | `/frame` | 프레임워크 부재, 다관점 분석이 필요할 때 |
 | [Syneidesis](./syneidesis) | `/gap` | 의사결정 시 놓친 갭이 있을 때 |
+| [Analogia](./analogia) | `/ground` | 도메인 간 구조적 매핑이 불확실할 때 |
 | [Prosoche](./prosoche) | `/attend` | 실행 시점 위험 평가가 필요할 때 |
 | [Epharmoge](./epharmoge) | `/contextualize` | 실행 후 맥락 불일치가 의심될 때 |
 | [Katalepsis](./katalepsis) | `/grasp` | AI 결과를 이해하지 못했을 때 |
@@ -65,6 +66,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | Telos | τέλος | 끝, 목적 |
 | Aitesis | αἴτησις | 요청, 질의 |
 | Epitrope | ἐπιτροπή | 위탁, 위임 |
+| Analogia | ἀναλογία | 비례, 유비 |
 | Prosoche | προσοχή | 주의 집중 |
 | Epharmoge | ἐφαρμογή | 적용, 맞춤 |
 

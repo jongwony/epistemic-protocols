@@ -35,6 +35,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | [Aitesis](./aitesis) | `/inquire` | Context insufficient before execution |
 | [Prothesis](./prothesis) | `/frame` | Framework absent, multiple perspectives needed |
 | [Syneidesis](./syneidesis) | `/gap` | Decision gaps unnoticed |
+| [Analogia](./analogia) | `/ground` | Structural mapping between domains uncertain |
 | [Prosoche](./prosoche) | `/attend` | Execution-time risk evaluation needed |
 | [Epharmoge](./epharmoge) | `/contextualize` | Post-execution context mismatch suspected |
 | [Katalepsis](./katalepsis) | `/grasp` | AI result ungrasped |
@@ -65,6 +66,7 @@ Each protocol resolves a specific cognitive deficit during AI-human interaction.
 | Telos | τέλος | End, purpose |
 | Aitesis | αἴτησις | Request, inquiry |
 | Epitrope | ἐπιτροπή | Entrusting, delegation |
+| Analogia | ἀναλογία | Proportion |
 | Prosoche | προσοχή | Attention |
 | Epharmoge | ἐφαρμογή | Application, fitting |
 
