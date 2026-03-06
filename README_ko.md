@@ -72,7 +72,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | Telos | τέλος | 끝, 목적 |
 | Aitesis | αἴτησις | 요청, 질의 |
 | Epitrope | ἐπιτροπή | 위탁, 위임 |
-| Analogia | ἀναλογία | 비례, 유비 |
+| Analogia | ἀναλογία | 유비, 유추 |
 | Prosoche | προσοχή | 주의 집중 |
 | Epharmoge | ἐφαρμογή | 적용, 맞춤 |
 
