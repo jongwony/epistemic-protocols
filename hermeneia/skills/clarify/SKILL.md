@@ -69,7 +69,7 @@ Phase 3:  A → integrate(A, Î) → Î'                       -- intent update 
 After Phase 3: return to Phase 1b for newly surfaced gaps.
 On re-entry, detect(Eᵥ) re-analyzes the expression in the context of prior clarifications; gaps in Λ.clarified are filtered from Gd by type before confirmation (type-level filtering ensures convergence; new instances of a clarified type are excluded).
 If |Gₛ| = 0 after confirmation (all gaps removed): skip Phase 2, evaluate convergence (|G| = 0).
-Continue until converge: |G| = 0, cycle detected, or user ESC.
+Continue until converge: |G| = 0, cycle detected, or user exits.
 Mode remains active until convergence.
 
 ── TOOL GROUNDING ──

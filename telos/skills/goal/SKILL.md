@@ -71,7 +71,7 @@ Continue until: user approves GoalContract OR user ESC.
 ── CONVERGENCE ──
 sufficient(C, Dₐ) = user_approves(C)
 progress(C, Dₐ) = |{f ∈ Dₐ | defined(f)}| / |Dₐ|
-early_exit = user_declares_sufficient ∨ user_esc
+early_exit = user_declares_sufficient (any progress level)
 
 ── TOOL GROUNDING ──
 Phase 0 Q  (extern)  → AskUserQuestion (goal confirmation + activation approval)
