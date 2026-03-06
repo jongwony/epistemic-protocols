@@ -77,7 +77,7 @@ Phase 0 Q    → AskUserQuestion (AI-detected activation confirmation; ai_strong
 Phase 1a Q   → AskUserQuestion (E confirmation)
 Phase 1b detect (detect) → Internal analysis (gap detection from Eᵥ)
 Phase 1b Q   → AskUserQuestion (detection confirmation: confirm/add/remove)
-Phase 2 Q    → AskUserQuestion (clarification options)
+Phase 2 Q    → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 suggest_only → no tool call (passive suggestion; Λ.active = false)
 integrate    → Internal state update (no external tool)
 

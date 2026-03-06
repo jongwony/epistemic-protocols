@@ -2,7 +2,7 @@
 
 > [English](./README.md)
 
-AI-인간 대화를 위한 Claude Code 플러그인 — 각 프로토콜은 구조화된 인간-AI 상호작용을 통해 특정 인지적 결핍을 해소합니다.
+인간-AI 대화를 위한 Claude Code 플러그인 — 각 프로토콜은 인간-AI 상호작용의 특정 결정 지점을 구조화하여, 적시에 올바른 질문을 표면화합니다.
 
 ## 빠른 시작
 
@@ -52,7 +52,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 
 ## 설계
 
-각 프로토콜은 AI-인간 상호작용 중 특정 인지적 결핍을 해소합니다. 아키텍처와 설계 철학에 대한 상세 내용은 [CLAUDE.md](./CLAUDE.md)를 참조하세요.
+각 프로토콜은 인간-AI 상호작용의 특정 결정 지점을 구조화합니다. 아키텍처와 설계 철학에 대한 상세 내용은 [CLAUDE.md](./CLAUDE.md)를 참조하세요.
 
 <details>
 <summary>Greek Codex</summary>

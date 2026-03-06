@@ -2,7 +2,7 @@
 
 > [한국어](./README_ko.md)
 
-Claude Code plugins for epistemic dialogue — each protocol resolves a specific cognitive deficit through structured human-AI interaction.
+Claude Code plugins for epistemic dialogue — each protocol structures a specific decision point in human-AI interaction, surfacing the right question at the right moment.
 
 ## Quick Start
 
@@ -52,7 +52,7 @@ Order follows the epistemic workflow: Clarify → Goal → Calibrate → Inquire
 
 ## Design
 
-Each protocol resolves a specific cognitive deficit during AI-human interaction. For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
+Each protocol structures a specific decision point in human-AI interaction. For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
 
 <details>
 <summary>Greek Codex</summary>

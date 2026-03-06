@@ -38,7 +38,7 @@ Ctx      = Context collection: Uᵢ → (Uᵢ', Uᵣ)
 Uᵢ'      = Enriched uncertainties (evidence added, not resolved)
 Uᵣ       = Context-resolved uncertainties (resolved during collection)
 Q        = Inquiry (AskUserQuestion), ordered by information gain
-A        = User answer ∈ {Provide(context), Point(location), Dismiss, ESC}
+A        = User answer ∈ {Provide(context), Point(location), Dismiss}
 X'       = Updated execution plan
 InformedExecution = X' where remaining = ∅ ∨ user_esc
 
@@ -64,7 +64,7 @@ early_exit = user_declares_sufficient
 
 ── TOOL GROUNDING ──
 Phase 1 Ctx  (collect)  → Read, Grep (context collection)
-Phase 2 Q    (extern)   → AskUserQuestion (uncertainty surfacing + progress)
+Phase 2 Q    (extern)   → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3      (state)    → Internal state update
 Phase 0 Scan (infer)    → Internal analysis (no external tool)
 
@@ -169,7 +169,7 @@ Heuristic signals for context insufficiency inference (not hard gates):
 |---------|--------|
 | All uncertainties resolved (context or user) | Proceed with updated execution plan |
 | All remaining uncertainties dismissed | Proceed with original execution plan + defaults |
-| User ESC | Return to normal operation |
+| User Esc key | Return to normal operation |
 
 ## Uncertainty Identification
 
@@ -258,7 +258,6 @@ After user response:
 1. **Provide(context)**: Integrate user-provided context into execution plan `X'`
 2. **Point(location)**: Record location, resolve via next Phase 1 iteration
 3. **Dismiss**: Mark uncertainty as dismissed, note default assumption used
-4. **ESC**: Deactivate Aitesis entirely
 
 After integration:
 - Re-scan `X'` for remaining or newly emerged uncertainties

@@ -40,7 +40,7 @@ Correspondence = { abstract: Component, concrete: Component, relation: String }
 Component = { name: String, structure: String }
 I        = Concrete instantiation: M × Sₜ → Example
 Example  = { scenario: String, mapping_trace: List<Correspondence> }
-V        = User validation ∈ {Confirm, Adjust(feedback), Dismiss, ESC}
+V        = User validation ∈ {Confirm, Adjust(feedback), Dismiss}
 R'       = Updated output with explicit mapping status
 ValidatedMapping = R' where terminalized(R')
 terminalized(R') = all_addressed(R') ∨ user_esc
@@ -67,7 +67,6 @@ After Phase 3: evaluate validation result.
 If V = Confirm: mark correspondence confirmed; terminalize if all correspondences addressed.
 If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
 If V = Dismiss: accept this correspondence as unresolved for this session; terminalize if all correspondences addressed.
-If V = ESC: accept current R without further grounding → terminal.
 Max 3 mapping attempts per domain pair.
 Continue until: terminalized(R') OR attempts exhausted.
 
@@ -79,7 +78,7 @@ early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
 Phase 1 Map     (construct) → Read, Grep (domain structure analysis)
-Phase 2 I+V     (extern)    → AskUserQuestion (instantiation presentation + validation)
+Phase 2 I+V     (extern)    → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (state)     → Internal state update
 Phase 0 Detect  (infer)     → Internal analysis (no external tool)
 
@@ -184,7 +183,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Trigger | Effect |
 |---------|--------|
 | All correspondences addressed (confirmed or dismissed) | Proceed with validated mapping |
-| User ESC | Accept current output without further grounding |
+| User Esc key | Accept current output without further grounding |
 | Attempt cap reached | Surface remaining uncertainty, accept current output with explicit unresolved mapping note |
 
 ## Protocol
@@ -254,7 +253,6 @@ After user response:
 1. **Confirm**: Mark correspondence as validated, update output `R'` to include explicit mapping status
 2. **Adjust(feedback)**: Incorporate feedback, reconstruct mapping — return to Phase 1
 3. **Dismiss**: Mark correspondence as not requiring further grounding in this session, keep current output
-4. **ESC**: Deactivate Analogia entirely
 
 After integration:
 - Check remaining unvalidated correspondences
@@ -292,7 +290,7 @@ After integration:
 6. **Evidence-grounded**: Every correspondence must cite specific structural elements from both abstract and concrete domains
 7. **One at a time**: Present one correspondence per Phase 2 cycle; do not bundle multiple mappings
 8. **Validation respected**: User validation or dismissal is final for that correspondence in the current session
-9. **Convergence persistence**: Mode active until all identified correspondences are addressed or user ESC
+9. **Convergence persistence**: Mode active until all identified correspondences are addressed or user Esc key
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N validated / M total]`
 11. **Early exit honored**: When user declares mapping sufficient, accept immediately regardless of remaining correspondences
 12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit

@@ -34,7 +34,7 @@ Mismatch = { aspect: String, description: String, evidence: String, severity: Se
 Severity ∈ {Critical, Significant, Minor}
 Mᵢ    = Identified mismatches from Eval(R, X)
 Q     = Applicability inquiry (AskUserQuestion)
-A     = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss, ESC}
+A     = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}
 R'    = Adapted result (contextualized output)
 ContextualizedExecution = R' where applicable(R', X) ∨ user_esc
 
@@ -58,7 +58,7 @@ progress(Λ) = 1 - |remaining| / |mismatches|
 
 ── TOOL GROUNDING ──
 Phase 0 Eval  (detect)  → Internal analysis (no external tool)
-Phase 1 Q     (extern)  → AskUserQuestion (mismatch surfacing + evidence)
+Phase 1 Q     (extern)  → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 2 adapt (modify)  → Edit, Write (result adaptation based on user direction)
                            -- (modify): tool call that changes existing artifacts (distinct from (extern) user-facing, (detect) read-only, (state) internal)
 
@@ -168,7 +168,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 |---------|--------|
 | All mismatches resolved (adapted or dismissed) | Proceed with contextualized result |
 | No mismatches detected (Phase 0 passes) | Execution stands as-is |
-| User ESC | Accept result without applicability review |
+| User Esc key | Accept result without applicability review |
 
 ## Mismatch Identification
 
@@ -244,7 +244,6 @@ After user response:
 1. **Confirm(mismatch)**: Mark mismatch as confirmed, apply adaptation using Edit/Write tools
 2. **Adapt(direction)**: Apply user-directed adaptation to result `R'` using Edit/Write tools
 3. **Dismiss**: Mark mismatch as dismissed, note fitness assumption accepted
-4. **ESC**: Deactivate Epharmoge entirely
 
 After adaptation:
 - Re-evaluate `R'` against `X` for remaining or newly emerged mismatches

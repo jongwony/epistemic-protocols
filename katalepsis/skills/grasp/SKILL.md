@@ -71,7 +71,7 @@ VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P'
 Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 detect (detect) → Internal analysis (gap type relevance detection per category)
-Phase 3 Q   → AskUserQuestion (comprehension verification, aspect coverage)
+Phase 3 Q   → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Phase 3 Prop → TaskCreate (proposal ejection)
