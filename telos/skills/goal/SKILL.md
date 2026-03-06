@@ -78,7 +78,7 @@ Phase 0 Q  (extern)  → AskUserQuestion (goal confirmation + activation approva
 Phase 1 detect (detect) → Internal analysis (dimension detection from Gᵥ)
 Phase 1 Q  (extern)  → AskUserQuestion (detection confirmation + progress display)
 Phase 2 P  (detect)  → Read, Grep (context for proposal generation; fallback: template)
-Phase 2 Q  (extern)  → AskUserQuestion (proposal with structured response options)
+Phase 2 Q  (extern)  → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3    (state)   → Internal GoalContract update (no external tool)
 Phase 4 Q  (extern)  → AskUserQuestion (GoalContract review + approval)
 

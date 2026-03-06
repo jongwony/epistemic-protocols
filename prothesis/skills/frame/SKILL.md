@@ -132,14 +132,14 @@ S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
-Phase 0 Q (extern)       → AskUserQuestion (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc → terminate)
-S (extern)               → AskUserQuestion tool (mandatory; multiSelect: true; Esc → terminate with current L or no lens)
+Phase 0 Q (extern)       → AskUserQuestion (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
+S (extern)               → AskUserQuestion tool (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
 Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke → independent synthesis; skip if Δ = ∅)
-Phase 4 Q (extern)       → AskUserQuestion (synthesis + routing: present Lens L with calibrate/extend/add_input/wrap_up options; Escape → terminate)
+Phase 4 Q (extern)       → AskUserQuestion (synthesis + routing: present Lens L with calibrate/extend/add_input/wrap_up options; Esc key → loop termination at LOOP level)
 PF Q (extern)            → AskUserQuestion (multiSelect: preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
