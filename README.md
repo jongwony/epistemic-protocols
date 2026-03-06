@@ -20,7 +20,8 @@ These protocols insert structured checkpoints at decision points — intent, goa
    ```
    /plugin install epistemic-cooperative@epistemic-protocols
    ```
-3. Run `/onboard` — analyzes your sessions and recommends protocols
+3. Run `/onboard` — scans your past conversations and recommends protocols based on what actually went wrong:
+   > *"You edited auth.ts 5 times in one session → `/clarify` catches intent mismatches before implementation"*
 4. Or pick individual protocols from the tables below
 
 ## Full Installation
