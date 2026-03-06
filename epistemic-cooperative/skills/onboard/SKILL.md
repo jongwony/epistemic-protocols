@@ -136,11 +136,11 @@ Expected outcome: [e.g., N corrections reduced to 0-2]
 
 **Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a session pattern could plausibly map to multiple protocols (e.g., "exploration" could be `/goal` or `/frame`), do NOT use it as a scenario — reserve it for Phase 6 quiz material instead. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
 
-**Anti-patterns**:
-- Do not reference session IDs or list pattern counts without context. If the user has to wonder "what session was that?", engagement drops. Scenarios must be **self-contained**: session summary first, then pattern, then intervention.
-- Do not present scenarios where the user might reasonably challenge "isn't /Y a better fit?" — that debate belongs in the quiz. If the scenario invites protocol choice debate, it is too ambiguous for Phase 4.
+**Anti-pattern**: Scenarios must be self-contained (session summary + pattern + intervention) with unambiguous protocol fit. Ambiguous patterns belong in Phase 6 quiz.
 
 **Session summary source**: `summary` field or `firstPrompt` text from `sessions-index.json`. If neither is available, infer session character from primary tool/file patterns extracted in Phase 2.
+
+Call AskUserQuestion to present each scenario.
 
 **AskUserQuestion #3** (per scenario):
 - Text: Present the scenario (with session context) and intervention point
@@ -153,23 +153,15 @@ Expected outcome: [e.g., N corrections reduced to 0-2]
 
 Guide the user through a real, abbreviated protocol experience.
 
+Call AskUserQuestion to present the trial prompt.
+
 **AskUserQuestion #4**:
 - Text: Present a mini practice prompt tailored to the protocol
 - Options:
   - "Start trial"
   - "Skip trial"
 
-**Mini practice prompts** (scoped for 2-3 exchanges):
-- `/clarify`: "Let's practice: tell me 'Fix the auth flow' and I'll show how /clarify decomposes it"
-- `/goal`: "Let's practice: say 'Improve the dashboard' and I'll show how /goal co-constructs success criteria"
-- `/gap`: "Let's practice: say 'I'm ready to merge this PR' and I'll show how /gap surfaces blind spots"
-- `/frame`: "Let's practice: say 'Should we use microservices?' and I'll show how /frame recommends analytical lenses"
-- `/inquire`: "Let's practice: say 'Deploy the staging environment' and I'll show how /inquire catches missing context"
-- `/calibrate`: "Let's practice: say 'Handle this refactoring however you think is best' and I'll show how /calibrate sets delegation boundaries"
-- `/ground`: "Let's practice: say 'Apply the strangler fig pattern to our codebase' and I'll show how /ground validates the mapping"
-- `/attend`: "Let's practice: say 'Run the migration script' and I'll show how /attend classifies execution risks"
-- `/contextualize`: "Let's practice: say 'I just deployed the new component' and I'll show how /contextualize checks environment fit"
-- `/grasp`: "Let's practice: I'll describe a complex refactoring, and /grasp will verify your understanding"
+**Mini practice prompts** (scoped for 2-3 exchanges): Use the **Trial prompt** field from `references/scenarios.md` for the target protocol.
 
 **Execution**: When user starts trial, prompt them to invoke the actual protocol (e.g., type `/clarify`). The protocol runs in the same session with the mini prompt as context. After 2-3 exchanges or protocol completion, present: "Trial complete. Type 'continue onboarding' to resume."
 
@@ -186,17 +178,6 @@ Protocol Insight: /X (Greek name)
 [Workflow position — where this protocol sits and why]
 [Game feel — the experiential pattern you just went through]
 ```
-
-Example for `/contextualize`:
-```
-Protocol Insight: /contextualize (ἐφαρμογή — application, fitting)
-
-Core: Applicability over Correctness — correct code that doesn't fit your context is not useful code.
-Position: Post-execution — after work is done, check if it fits where it's going.
-Game feel: "Done! ...wait, does this actually fit here?" → mismatch detection → evidence → adapt or dismiss.
-```
-
-This bridges the gap between "I used it" and "I understand why it's designed this way." The insight arrives at the moment of peak receptivity — immediately after hands-on experience.
 
 ### Phase 6: Quiz (Socratic Verification)
 
@@ -223,6 +204,8 @@ Call AskUserQuestion:
   - "I'll type my answer"
   - "Skip this question"
 
+Design questions are open-ended — no scored "correct" answer. Evaluate based on whether the response demonstrates protocol awareness.
+
 **Feedback** (immediate, after each question):
 - **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` classifies *execution risks* (what could go wrong when you act). Both happen before action, but they audit different things: decision quality vs. execution safety."
 - **Incorrect**: Explain the distinction through the design axis that separates them. "The key difference is *timing and direction*: `/inquire` catches missing context *before* execution (User→AI: 'what do you need to know?'), while `/contextualize` checks context fit *after* execution (AI→User: 'does this actually fit here?'). Same axis — context fitness — but opposite timing."
@@ -240,19 +223,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 2. **Epistemic Map** (connect the dots):
 
-   Present a simplified workflow showing where the experienced protocols sit:
-
-   ```
-   [Intent] → [Goal] → [Delegation] → [Context] → [Perspective] → [Mapping] → [Decision] → [Execution] → [Application] → [Comprehension]
-      ↑          ↑          ↑              ↑            ↑              ↑            ↑             ↑              ↑               ↑
-   /clarify    /goal    /calibrate     /inquire      /frame        /ground        /gap        /attend     /contextualize     /grasp
-   ```
-
-   Highlight the protocols the user experienced with emphasis (e.g., bold or `★`), and briefly explain the flow:
-   - "You tried `/clarify` (Intent) — this is the starting point. Before goals, context, or perspectives matter, intent must be clear."
-   - "You quizzed on `/gap` (Decision) and `/attend` (Execution) — these are neighbors that sound similar but audit different things."
-
-   This gives the user a mental map: "I'm not learning random tools — each protocol has a specific place in a coherent workflow."
+   Present the Epistemic Workflow diagram from `references/workflow.md`. Highlight protocols the user experienced with emphasis (e.g., bold or `★`).
 
 3. **Report CTA**: "Run `/report` for a comprehensive analysis with evidence-backed recommendations and an HTML profile."
 
@@ -262,15 +233,11 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
    - Not installed → `claude plugin install epistemic-protocols/{plugin-name}`
    - If 2+ not installed → also mention `bash scripts/install.sh`
 
-5. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring adjacent protocols in the workflow. "You experienced `/clarify` (Intent). The natural next step is `/goal` (Goal) — defining what success looks like. Run `/onboard` again and choose it when ready."
+5. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring adjacent protocols in the workflow.
 
 6. **Advanced Usage** (bonus tips after main guide):
 
-   Present 3-5 tips sourced from `references/advanced-usage.md`. Select tips relevant to the protocols the user experienced during this session.
-
-   Refer to `references/advanced-usage.md` for the full curated pattern tables: protocol chaining, multi-protocol sessions, invocation techniques, AskUserQuestion engagement, non-sequential invocation, and composition with built-in commands.
-
-   **Selection rule**: Prioritize tips related to the protocols from TRIAL and QUIZ. For example, if the user tried `/frame`, highlight the Frame → Calibrate chain. If they quizzed on `/gap` vs `/attend`, show the three-step pre-execution chain (inquire → gap → attend).
+   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If the user tried `/frame`, highlight the Frame → Calibrate chain. If they quizzed on `/gap` vs `/attend`, show the three-step pre-execution chain (inquire → gap → attend).
 
 ## Quiz Design
 
