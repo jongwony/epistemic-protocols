@@ -32,7 +32,8 @@ ENTRY → SCAN → EXTRACT → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
 | 2. Extract | Subagent (session-analyzer) | Grep, Read | Pattern extraction (shared with /report) |
 | 3. Map | Main | — | Pattern → Protocol matching (compact inline) |
 | 4. Scenario | Main | AskUserQuestion | Session snippet + intervention point |
-| 5. Trial | Main | AskUserQuestion | Real protocol execution via mini prompt |
+| 5. Trial | Main | — | Direct entry from "Try it", real protocol execution |
+| 5→6 LOOP | Main | AskUserQuestion | Post-trial navigation |
 | 6. Quiz | Main | AskUserQuestion | Socratic protocol recognition quiz |
 | 7. Guide | Main | AskUserQuestion | Summary + /report CTA |
 
@@ -57,21 +58,31 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 
 ### Phase 0: Entry (Path Selection)
 
-Call AskUserQuestion to determine the onboarding path.
+Present the protocol catalog as text output FIRST (always), then ask path selection.
+
+**Protocol Catalog** (always rendered as text before asking):
+
+Present the 10 protocols from the Data Sources table as a numbered list with name + one-line description.
 
 **AskUserQuestion #1**:
-- Text: Present three paths with brief descriptions
+- Text: "Which path?"
 - Options:
-  - "General — scan my sessions and recommend protocols to learn"
-  - "Targeted — I want to learn a specific protocol"
-  - "Browse — show me what's available first"
+  - "General — scan my sessions and recommend"
+  - "Targeted — learn a specific protocol (type name in Other)"
 
-**If "Browse"**: List all 10 protocols with one-line descriptions (the table from Data Sources above). Then re-ask #1 with General/Targeted only.
+**If Targeted + Other contains protocol name**: proceed directly to session source question.
 
-**If "Targeted" → AskUserQuestion #2**:
-- Text: List 10 protocols numbered, then ask about session source
+**If Targeted + no protocol specified → AskUserQuestion #2**:
+- Text: "Which protocol? (refer to catalog above, type name or number in Other)"
 - Options:
-  - "Scan my recent sessions for examples"
+  - "Pre-execution — /clarify, /goal, /calibrate, /inquire"
+  - "Analysis — /frame, /ground, /gap"
+  - "Execution — /attend, /contextualize, /grasp"
+
+**AskUserQuestion #3** (Targeted only, session source):
+- Text: "Where should examples come from?"
+- Options:
+  - "Scan my recent sessions"
   - "Use a specific session (I'll provide the path)"
   - "Use standard examples (no session needed)"
 
@@ -140,10 +151,10 @@ Expected outcome: [e.g., N corrections reduced to 0-2]
 
 **Session summary source**: `summary` field or `firstPrompt` text from `sessions-index.json`. If neither is available, infer session character from primary tool/file patterns extracted in Phase 2.
 
-Call AskUserQuestion to present each scenario.
+Present each scenario as regular text output (Tier 1/2/3 format above). Then call AskUserQuestion for navigation only:
 
-**AskUserQuestion #3** (per scenario):
-- Text: Present the scenario (with session context) and intervention point
+**AskUserQuestion** (per scenario):
+- Text: "What would you like to do?"
 - Options:
   - "Try it — let me practice this protocol"
   - "Show another example"
@@ -151,23 +162,15 @@ Call AskUserQuestion to present each scenario.
 
 ### Phase 5: Trial (Protocol Execution)
 
-Guide the user through a real, abbreviated protocol experience.
+Guide the user through a real, abbreviated protocol experience. "Try it" selection from Phase 4 already signals intent — enter trial directly without additional confirmation.
 
-Call AskUserQuestion to present the trial prompt.
+**Mini practice prompts** (scoped for 2-3 exchanges): Use the **Trial prompt** field from `references/scenarios.md` for the target protocol. Present the trial guidance as regular text output.
 
-**AskUserQuestion #4**:
-- Text: Present a mini practice prompt tailored to the protocol
-- Options:
-  - "Start trial"
-  - "Skip trial"
-
-**Mini practice prompts** (scoped for 2-3 exchanges): Use the **Trial prompt** field from `references/scenarios.md` for the target protocol.
-
-**Execution**: When user starts trial, prompt them to invoke the actual protocol (e.g., type `/clarify`). The protocol runs in the same session with the mini prompt as context. After 2-3 exchanges or protocol completion, present: "Trial complete. Type 'continue onboarding' to resume."
+**Execution**: Prompt the user to invoke the actual protocol (e.g., type `/clarify`). The protocol runs in the same session with the mini prompt as context.
 
 For general path, offer trial for the top-recommended protocol first. If user completes it, optionally offer trial for the second recommendation.
 
-**Post-Trial Insight** (presented after trial completion, before resuming onboard flow):
+**Post-Trial Insight** (presented after trial completion):
 
 After each trial, present a brief insight card sourced from the **Philosophy** field in `references/scenarios.md`. Structure:
 
@@ -179,9 +182,21 @@ Protocol Insight: /X (Greek name)
 [Game feel — the experiential pattern you just went through]
 ```
 
+**Post-Trial LOOP**:
+
+After the Post-Trial Insight, call AskUserQuestion:
+- Text: "Trial complete! Where to next?"
+- Options:
+  - "Quiz — test my understanding"
+  - "Another scenario — see more examples"
+  - "Try a different protocol"
+  - "Guide — see my learning summary"
+
+Branch: Quiz → Phase 6, Another scenario → Phase 4, Different protocol → Phase 0 (reuse cached MAP, no rescan), Guide → Phase 7.
+
 ### Phase 6: Quiz (Socratic Verification)
 
-Test protocol recognition through situation-based questions.
+Test protocol recognition through situation-based questions. Question format differs by path.
 
 **Question sourcing** (in priority order):
 1. **Ambiguous scenarios from Phase 4 filtering** — session patterns that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/goal` or `/frame`)
@@ -189,24 +204,44 @@ Test protocol recognition through situation-based questions.
 3. Codebase-derived scenarios (if session data available)
 4. Preset scenarios from `references/scenarios.md`
 
-**Question type 1 — Situation recognition** (3-5 questions):
+#### Targeted Path
+
+**Type 1 — Binary recognition** (2-3 questions):
+
+Call AskUserQuestion for each:
+- Text: Present a situation (2-3 sentences), ask "Is this a `/X` situation?"
+- Options: "Yes" / "No"
+- Mix: 1-2 true positives + 1 true negative (situation that fits a neighbor protocol)
+- On "No" answer for a true negative: briefly introduce the correct protocol as a natural distinction point
+
+**Type 2 — Reverse recognition** (1 question):
+
+Call AskUserQuestion:
+- Text: Present 3 short scenarios numbered 1-3, ask "Which of these are `/X` situations?"
+- Options: "1 and 2" / "2 and 3" / "1 and 3" / "All three"
+
+**Type 3 — Design thinking** (1 question):
+
+Call AskUserQuestion:
+- Text: Present a situation, ask "How would you formulate your request to AI to avoid this problem?"
+- Options: "Show me a hint" / "Show me a model answer"
+- The user's primary input channel is Other (free text). Evaluate based on whether the response demonstrates protocol awareness.
+
+#### General Path
+
+**Type 1 — Situation recognition** (3-4 questions):
 
 Call AskUserQuestion for each:
 - Text: Present a situation (2-3 sentences), ask "Which protocol fits?"
 - Options: 4 protocol choices (correct answer + 3 plausible distractors)
 
-**Question type 2 — Design thinking** (1-2 questions):
+**Type 2 — Design thinking** (1 question):
 
-Call AskUserQuestion:
-- Text: Present a situation, ask "How would you formulate your request to AI to avoid this problem?"
-- Options:
-  - "Show me a hint"
-  - "I'll type my answer"
-  - "Skip this question"
+Same format as Targeted Path Type 3.
 
-Design questions are open-ended — no scored "correct" answer. Evaluate based on whether the response demonstrates protocol awareness.
+#### Feedback (both paths)
 
-**Feedback** (immediate, after each question):
+Immediate feedback after each question:
 - **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` classifies *execution risks* (what could go wrong when you act). Both happen before action, but they audit different things: decision quality vs. execution safety."
 - **Incorrect**: Explain the distinction through the design axis that separates them. "The key difference is *timing and direction*: `/inquire` catches missing context *before* execution (User→AI: 'what do you need to know?'), while `/contextualize` checks context fit *after* execution (AI→User: 'does this actually fit here?'). Same axis — context fitness — but opposite timing."
 
@@ -239,6 +274,14 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
    Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If the user tried `/frame`, highlight the Frame → Calibrate chain. If they quizzed on `/gap` vs `/attend`, show the three-step pre-execution chain (inquire → gap → attend).
 
+7. **Continue exploring** (when MAP results contain unexplored protocols):
+
+   Call AskUserQuestion:
+   - Text: "Want to experience another protocol?"
+   - Options: "Yes — show me another" / "Done — I have enough"
+
+   If "Yes" → return to Phase 4, using the next recommended protocol from MAP results.
+
 ## Quiz Design
 
 **Difficulty progression**: Start with high-contrast pairs (e.g., `/goal` vs `/attend`), progress to subtle distinctions (e.g., `/clarify` vs `/goal`, `/gap` vs `/attend`).
@@ -249,19 +292,22 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
 
-**Question count**: 3-5 total. General path: mix from multiple protocols. Targeted path: focus on target + most-confused neighbor.
+**Path-specific question counts**:
+- **Targeted**: 2-3 binary + 1 reverse + 1 design = 4-5 questions
+- **General**: 3-4 situation + 1 design = 4-5 questions
 
 ## AskUserQuestion Budget
 
 Target 6-10 calls per session:
 
-| Phase | Calls | Purpose |
-|-------|-------|---------|
-| 0. Entry | 1-2 | Path + target selection |
-| 4. Scenario | 1 per protocol (2-3 max) | Scenario confirmation |
-| 5. Trial | 1 | Trial start/skip |
-| 6. Quiz | 3-5 | Quiz questions |
-| 7. Guide | 0-1 | Optional next step |
+| Phase | Calls (General) | Calls (Targeted) | Purpose |
+|-------|-----------------|-------------------|---------|
+| 0. Entry | 1 | 2-3 | Path + protocol + session source |
+| 4. Scenario | 1-3 | 1-2 | Navigation after scenario text |
+| 5. Trial | 0 | 0 | Direct entry from "Try it" |
+| 5→6 LOOP | 1 | 1 | Post-trial navigation |
+| 6. Quiz | 4-5 | 4-5 | MC/design or binary/reverse/design |
+| 7. Guide | 0-1 | 0-1 | Optional continue exploring |
 
 ## Rules
 
