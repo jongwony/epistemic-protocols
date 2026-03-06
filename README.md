@@ -52,7 +52,7 @@ Order follows the epistemic workflow: Clarify → Goal → Calibrate → Inquire
 
 ## Design
 
-Each protocol resolves a specific cognitive deficit during AI-human interaction. For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
+Each protocol structures a specific decision point in human-AI interaction. For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
 
 <details>
 <summary>Greek Codex</summary>
