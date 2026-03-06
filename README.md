@@ -2,7 +2,7 @@
 
 > [한국어](./README_ko.md)
 
-Claude Code plugins for epistemic dialogue — each protocol resolves a specific cognitive deficit through structured human-AI interaction.
+Claude Code plugins for epistemic dialogue — each protocol structures a specific decision point in human-AI interaction, surfacing the right question at the right moment.
 
 ## Quick Start
 

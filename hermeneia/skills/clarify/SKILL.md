@@ -69,7 +69,7 @@ Phase 3:  A → integrate(A, Î) → Î'                       -- intent update 
 After Phase 3: return to Phase 1b for newly surfaced gaps.
 On re-entry, detect(Eᵥ) re-analyzes the expression in the context of prior clarifications; gaps in Λ.clarified are filtered from Gd by type before confirmation (type-level filtering ensures convergence; new instances of a clarified type are excluded).
 If |Gₛ| = 0 after confirmation (all gaps removed): skip Phase 2, evaluate convergence (|G| = 0).
-Continue until converge: |G| = 0, cycle detected, or user exits.
+Continue until converge: |G| = 0, cycle detected, or user ESC.
 Mode remains active until convergence.
 
 ── TOOL GROUNDING ──
@@ -77,7 +77,7 @@ Phase 0 Q    → AskUserQuestion (AI-detected activation confirmation; ai_strong
 Phase 1a Q   → AskUserQuestion (E confirmation)
 Phase 1b detect (detect) → Internal analysis (gap detection from Eᵥ)
 Phase 1b Q   → AskUserQuestion (detection confirmation: confirm/add/remove)
-Phase 2 Q    → AskUserQuestion (clarification options)
+Phase 2 Q    → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 suggest_only → no tool call (passive suggestion; Λ.active = false)
 integrate    → Internal state update (no external tool)
 

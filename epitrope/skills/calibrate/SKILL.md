@@ -143,7 +143,7 @@ Phase 0 Q   (extern)    → AskUserQuestion (mode selection: TeamAugment/TeamRes
 Phase 1 WHO (extern)    → AskUserQuestion (team structure: keep/add; add → propose epistemic roles → confirm/add/remove)  -- TeamAugment
 Phase 1 restructure (extern) → AskUserQuestion (team restructure: retain/remove/add + WHO confirmation)  -- TeamRestructure only
 Phase 1     (detect)    → Read, Grep (task analysis for decomposition)
-Phase 2 Q   (extern)    → AskUserQuestion (scenario with autonomy options)
+Phase 2 Q   (extern)    → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3     (state)     → Internal DelegationContract update
 Phase 4 Q   (extern)    → AskUserQuestion (contract review + approval)
 inherit     (state)     → Read (team config: ~/.claude/teams/{name}/config.json)  -- TeamAugment
@@ -238,7 +238,7 @@ When Epitrope is active:
 | Trigger | Effect |
 |---------|--------|
 | DelegationContract approved | Apply contract to subsequent execution |
-| User ESC | Return to default autonomy assumptions |
+| User Esc key | Partial DC applies to calibrated domains; uncalibrated domains use defaults (shown in Phase 4) |
 | User cancels | Discard partial contract, return to normal |
 
 See references/operational-guide.md for domain taxonomy and priority ordering.
@@ -409,8 +409,8 @@ If user selects "Adjust": present sub-options — "Adjust team structure" (→ P
 5. **Session-scoped**: DelegationContract applies for current session only; does not persist across sessions
 6. **Domain priority**: Calibrate External first (highest impact), then FileModification, Strategy, Exploration
 7. **Minimal interruption**: Skip calibration for single-domain clear-scope tasks; use Light intensity when possible
-8. **ESC respected**: User can exit at any point; partial contract applies to calibrated domains. Uncalibrated defaults: Exploration → autonomous (read-only, inherently safe), others → ask-before. Defaults explicitly shown in Phase 4 contract review
-9. **Convergence persistence**: Mode active until DelegationContract approved or ESC
+8. **Esc key respected**: User can exit at any point; partial contract applies to calibrated domains. Uncalibrated defaults: Exploration → autonomous (read-only, inherently safe), others → ask-before. Defaults explicitly shown in Phase 4 contract review
+9. **Convergence persistence**: Mode active until DelegationContract approved or user Esc key
 10. **Cross-protocol awareness**: Calibrated DC informs but does not replace Aitesis context verification or Syneidesis gap surfacing
 11. **Authority replacement**: DC approval replaces the team's prior operating contract; execution-layer distribution is outside protocol scope
 12. **Solo backward compatibility**: Solo mode preserves near-identical behavior to v1.1.1 — Phase 0 adds one new user-facing step (mode selection, proposing Solo when no team is active); subsequent phases proceed identically to v1.1.1
