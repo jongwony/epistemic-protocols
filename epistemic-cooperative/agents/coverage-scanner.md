@@ -1,5 +1,6 @@
 ---
 name: coverage-scanner
+description: "Aggregate facets, session-meta, and slash command data across all sessions for coverage dashboard."
 model: haiku
 color: green
 tools:

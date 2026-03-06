@@ -1,17 +1,6 @@
 ---
 name: project-scanner
-description: |
-  Call this agent during Phase 1 of epistemic-cooperative analysis workflow (/report, /onboard) to scan project directories, read sessions-index.json, and aggregate project metadata. Pre-planned delegation avoids reactive Bash interruption.
-
-  <example>
-  Context: User invokes /report, main agent immediately delegates Phase 1
-  user: "/report"
-  assistant: "I'll scan your projects first. Delegating project discovery to a subagent."
-  <commentary>
-  Phase 1 requires 5+ Bash calls (ls, stat, python3, file reads), always exceeding the 3-call delegation threshold. Pre-planned delegation avoids reactive interruption and work duplication.
-  </commentary>
-  assistant: "I'll call the project-scanner agent to collect project metadata."
-  </example>
+description: "Scan ~/.claude/projects/, read sessions-index.json, aggregate project metadata and secondary sources."
 model: haiku
 color: blue
 tools:
