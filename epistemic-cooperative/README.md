@@ -19,7 +19,7 @@ A utility plugin that analyzes Claude Code usage patterns to recommend epistemic
 
 ### /onboard — Protocol Recommendations
 
-Analyzes session files to extract tool usage patterns, maps patterns to epistemic deficits, and recommends protocols tailored to actual work.
+Analyzes session files to extract tool usage patterns, maps patterns to protocols, and recommends protocols tailored to actual work.
 
 ```
 SCAN → EXTRACT → MAP → PRESENT → GUIDE
