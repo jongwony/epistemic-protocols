@@ -134,7 +134,11 @@ Scenario: /X (Protocol Name)
 Expected outcome: [e.g., N corrections reduced to 0-2]
 ```
 
-**Anti-pattern**: Do not reference session IDs or list pattern counts without context. If the user has to wonder "what session was that?", engagement drops. Scenarios must be **self-contained**: session summary first, then pattern, then intervention.
+**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a session pattern could plausibly map to multiple protocols (e.g., "exploration" could be `/goal` or `/frame`), do NOT use it as a scenario — reserve it for Phase 6 quiz material instead. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
+
+**Anti-patterns**:
+- Do not reference session IDs or list pattern counts without context. If the user has to wonder "what session was that?", engagement drops. Scenarios must be **self-contained**: session summary first, then pattern, then intervention.
+- Do not present scenarios where the user might reasonably challenge "isn't /Y a better fit?" — that debate belongs in the quiz. If the scenario invites protocol choice debate, it is too ambiguous for Phase 4.
 
 **Session summary source**: `summary` field or `firstPrompt` text from `sessions-index.json`. If neither is available, infer session character from primary tool/file patterns extracted in Phase 2.
 
@@ -199,9 +203,10 @@ This bridges the gap between "I used it" and "I understand why it's designed thi
 Test protocol recognition through situation-based questions.
 
 **Question sourcing** (in priority order):
-1. Protocols from TRIAL + MAP results (personalized)
-2. Codebase-derived scenarios (if session data available)
-3. Preset scenarios from `references/scenarios.md`
+1. **Ambiguous scenarios from Phase 4 filtering** — session patterns that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/goal` or `/frame`)
+2. Protocols from TRIAL + MAP results (personalized)
+3. Codebase-derived scenarios (if session data available)
+4. Preset scenarios from `references/scenarios.md`
 
 **Question type 1 — Situation recognition** (3-5 questions):
 
