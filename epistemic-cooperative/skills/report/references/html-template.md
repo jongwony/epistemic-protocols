@@ -7,7 +7,7 @@ HTML boilerplate for the `epistemic-profile.html` artifact generated in Phase 4.
 Prepare these data structures before rendering:
 
 ```
-stats: { sessions_analyzed, projects_scanned, patterns_found, last_activity }
+stats: { sessions_analyzed, projects_scanned, patterns_found }
 diagnostics: [{ description, snippet: { user_msg, ai_msg, session_ref }, protocol_cta, resume_cmd }]
 patterns: [{ friction_narrative?, snippet?: { user_msg, ai_msg, session_ref }, protocol_cta, resume_cmd, statistical_evidence? }]
 recommendations: [{ name, command, rationale, snippet_ref?, install_cmd?, installed: bool }]
@@ -72,7 +72,7 @@ batch_install: { needed: bool, command }
     padding: 1rem; margin: 0.75rem 0;
     border-left: 2px solid #22c55e;
   }
-  .protocol-cta::before { content: "-> "; color: #22c55e; font-weight: bold; }
+  .protocol-cta::before { content: "→ "; color: #22c55e; font-weight: bold; }
 
   /* -- Friction Narrative -- */
   .friction-narrative { color: #fbbf24; font-style: italic; margin-bottom: 0.75rem; }
