@@ -92,32 +92,32 @@ Present the 10 protocols from the Data Sources table as a numbered list with nam
 State after Phase 0:
 - `path`: general | targeted
 - `target_protocol`: (targeted only) selected protocol name
-- `session_source`: scan | specific | standard
+- `session_source`: (targeted only) scan | specific | standard — General path implies inline quick scan
 
 **Skip rule**: If targeted + standard → skip Phases 1-3, jump to Phase 4 with preset scenarios from `references/scenarios.md`.
 
 ### Phase 1-2: Quick Scan (General path) — Inline
 
-Lightweight pattern detection for the General path. Runs inline with Grep + Read (no subagent delegation).
+Lightweight pattern detection for the General path. Runs inline with Grep + Read (no subagent delegation). Steps 1 and 2 are independent — run in parallel when possible.
 
 **Step 1: Protocol usage signals**
 
-Grep `~/.claude/history.jsonl` for protocol slash commands (`/frame`, `/gap`, `/clarify`, `/goal`, `/inquire`, `/calibrate`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to detect which protocols the user has already tried.
+Grep `~/.claude/history.jsonl` for protocol slash commands matching `"display":"/{command}"` pattern (`/frame`, `/gap`, `/clarify`, `/goal`, `/inquire`, `/calibrate`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to detect which protocols the user has already tried.
 
-If `history.jsonl` does not exist, skip to Step 2.
+If `history.jsonl` does not exist, produce empty usage counts.
 
 **Step 2: Session pattern signals**
 
 Glob `~/.claude/projects/*/sessions-index.json` (exclude directories containing `-worktrees-`). Read the 2-3 most recently modified indexes. For each, parse `entries` and extract the 5 most recent entries' `firstPrompt` and `summary` fields.
 
 Match against Data Sources table:
-- Vague `firstPrompt` patterns ("improve", "optimize", "ideas for") → Telos signal
+- Vague `firstPrompt` patterns ("improve", "optimize", "ideas for", "something like") → Telos signal
 - Verification keywords ("explain", "what did you do") → Katalepsis signal
-- High `messageCount` with short `summary` → possible rework signal
+- High `messageCount` with short `summary` → Hermeneia/Syneidesis rework signal (undifferentiated without session JSONL)
 
 If no `sessions-index.json` files found, set fallback tier to Tier 3.
 
-**Output for Phase 3**: Protocol usage counts + behavioral pattern signals with source references. Quick Scan data supports Tier 1 scenarios via `summary` + `firstPrompt` from sessions-index; full session snippets require the Targeted + scan path.
+**Output for Phase 3**: Protocol usage counts + behavioral pattern signals with source references. Quick Scan provides session-level context (`summary` + `firstPrompt`) sufficient for lite Tier 1 scenarios; concrete behavioral evidence (edit counts, tool frequency) requires the Targeted + scan path.
 
 ### Phase 1: Scan (Project Discovery) — Subagent Delegated (Targeted + scan only)
 
@@ -151,7 +151,7 @@ Present a concrete scenario showing where the protocol would have helped.
 
 **Scenario construction** (3-tier fallback):
 - **Tier 1** (session snippet available): Use actual session data from MAP results. **Must include session context summary** — what the session was about, what the user was trying to do — so the scenario is self-contained. Then show the pattern evidence and intervention point.
-- **Tier 2** (no session match, but codebase available): Generate a hypothetical scenario grounded in the user's actual project context (languages, frameworks, file structure from Phase 1).
+- **Tier 2** (no session match, but codebase available): Generate a hypothetical scenario grounded in the user's actual project context. General path: project context limited to project paths from sessions-index; full project discovery (languages, frameworks, file structure) requires Targeted + scan path.
 - **Tier 3** (no data): Use preset scenarios from `references/scenarios.md`.
 
 For general path, present scenarios for each of the top 2-3 protocols sequentially.
@@ -175,7 +175,7 @@ Expected outcome: [e.g., N corrections reduced to 0-2]
 
 **Anti-pattern**: Scenarios must be self-contained (session summary + pattern + intervention) with unambiguous protocol fit. Ambiguous patterns belong in Phase 6 quiz.
 
-**Session summary source**: `summary` field or `firstPrompt` text from `sessions-index.json`. If neither is available, infer session character from primary tool/file patterns extracted in Phase 2.
+**Session summary source**: `summary` field or `firstPrompt` text from `sessions-index.json`. Targeted + scan fallback: if neither is available, infer session character from primary tool/file patterns extracted in Phase 2.
 
 Present each scenario as regular text output (Tier 1/2/3 format above). Then call AskUserQuestion for navigation only:
 
