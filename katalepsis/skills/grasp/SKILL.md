@@ -333,6 +333,12 @@ For each task (category):
 
    Skip if all detected relevant gap types already probed during the verification loop.
 
+3e. **Emergent aspect handling**: When user selects "Other" and describes a comprehension gap
+   not covered by detected canonical gap types:
+   1. Register user's response as Emergent gap type in `Λ.detected[current]`
+   2. Resume step 3 verification with the Emergent gap type as current aspect
+   3. On subsequent coverage check (3d), the Emergent type appears in probed set
+
 4. **On confirmed comprehension**: Per LOOP — TaskUpdate to `completed`, advance to next pending task.
 
 5. **On gap detected**: Handle per step 3c evaluation table. Do not mark complete until user confirms.
