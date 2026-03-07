@@ -269,6 +269,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 8. **graph-integrity**: graph.json node/edge validation — edge-type allowlist, edge-reference check, node-directory existence, orphaned node detection (SKILL.md presence), isolated node detection (no edges), precondition DAG acyclicity (Kahn's algorithm)
 9. **spec-vs-impl**: TYPES definitions cross-referenced against PHASE TRANSITIONS and prose — detects rename drift, dead types, and resolution type mismatches
 10. **cross-ref-scan**: Protocol name and deficit → resolution pair consistency across CLAUDE.md and all SKILL.md files, distinction table completeness, graph.json edge type allowlist verification
+11. **onboard-sync**: Onboard SKILL.md Data Sources table, protocol count, Phase 0 category groupings, `references/scenarios.md` scenario blocks, `references/workflow.md` slash commands — all cross-checked against `PROTOCOL_FILES`
 
 ## Delegation Constraint
 
@@ -310,6 +311,6 @@ node .claude/skills/verify/scripts/static-checks.js .
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
-| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (3 arrays: `aliasToSkill`, `checkRequiredSections`, `checkToolGrounding`), ALL existing SKILL.md (precedence descriptions + distinction tables), README.md + README_ko.md |
+| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_WORKFLOW`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), README.md + README_ko.md |
 | Precedence change | CLAUDE.md (precedence section + workflow diagram), ALL SKILL.md precedence descriptions |
 | Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
