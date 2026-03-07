@@ -192,7 +192,7 @@ After the Post-Trial Insight, call AskUserQuestion:
   - "Try a different protocol"
   - "Guide — see my learning summary"
 
-Branch: Quiz → Phase 6, Another scenario → Phase 4, Different protocol → Phase 0 (reuse cached MAP, no rescan), Guide → Phase 7.
+Branch: Quiz → Phase 6, Another scenario → Phase 4, Different protocol → Phase 4 with next MAP protocol (General) or Phase 0 with cached MAP (Targeted), Guide → Phase 7.
 
 ### Phase 6: Quiz (Socratic Verification)
 
