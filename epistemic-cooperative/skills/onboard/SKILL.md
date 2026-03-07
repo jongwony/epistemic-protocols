@@ -166,7 +166,7 @@ Guide the user through a real, abbreviated protocol experience. "Try it" selecti
 
 **Mini practice prompts** (scoped for 2-3 exchanges): Use the **Trial prompt** field from `references/scenarios.md` for the target protocol. Present the trial guidance as regular text output.
 
-**Execution**: Prompt the user to invoke the actual protocol (e.g., type `/clarify`). The protocol runs in the same session with the mini prompt as context.
+**Execution**: Prompt the user to invoke the actual protocol (e.g., type `/clarify`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination (convergence or user Esc). After protocol termination, present Post-Trial Insight and LOOP.
 
 For general path, offer trial for the top-recommended protocol first. If user completes it, optionally offer trial for the second recommendation.
 
