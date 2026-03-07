@@ -98,26 +98,26 @@ State after Phase 0:
 
 ### Phase 1-2: Quick Scan (General path) — Inline
 
-Lightweight pattern detection for the General path. Runs inline with Grep + Read (no subagent delegation). Steps 1 and 2 are independent — run in parallel when possible.
+Lightweight user context collection for the General path. Runs inline with Grep + Read (no subagent delegation). Steps 1 and 2 are independent — run in parallel when possible.
 
-**Step 1: Protocol usage signals**
+**Step 1: Protocol usage history**
 
-Grep `~/.claude/history.jsonl` for protocol slash commands matching `"display":"/{command}"` pattern (`/frame`, `/gap`, `/clarify`, `/goal`, `/inquire`, `/calibrate`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to detect which protocols the user has already tried.
+Grep `~/.claude/history.jsonl` for protocol slash commands matching `"display":"/{command}"` pattern (`/frame`, `/gap`, `/clarify`, `/goal`, `/inquire`, `/calibrate`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to identify explored vs. unexplored protocols.
 
 If `history.jsonl` does not exist, produce empty usage counts.
 
-**Step 2: Session pattern signals**
+**Step 2: User context profile**
 
 Glob `~/.claude/projects/*/sessions-index.json` (exclude directories containing `-worktrees-`). Read the 2-3 most recently modified indexes. For each, parse `entries` and extract the 5 most recent entries' `firstPrompt` and `summary` fields.
 
-Match against Data Sources table:
-- Vague `firstPrompt` patterns ("improve", "optimize", "ideas for", "something like") → Telos signal
-- Verification keywords ("explain", "what did you do") → Katalepsis signal
-- High `messageCount` with short `summary` → Hermeneia/Syneidesis rework signal (undifferentiated without session JSONL)
+Extract user context for scenario personalization:
+- Work domains (e.g., API development, infrastructure, data pipeline)
+- Typical task types (feature development, debugging, refactoring)
+- Project characteristics inferred from session summaries
 
 If no `sessions-index.json` files found, set fallback tier to Tier 3.
 
-**Output for Phase 3**: Protocol usage counts + behavioral pattern signals with source references. Quick Scan provides session-level context (`summary` + `firstPrompt`) sufficient for lite Tier 1 scenarios; concrete behavioral evidence (edit counts, tool frequency) requires the Targeted + scan path.
+**Output for Phase 3**: Protocol usage history (explored/unexplored) + user context profile (work domains, task types). Quick Scan does not detect protocol-matching patterns — that is `/report`'s role. Instead, it provides personalization context so scenarios and quizzes resonate with the user's actual work.
 
 ### Phase 1: Scan (Project Discovery) — Subagent Delegated (Targeted + scan only)
 
@@ -133,14 +133,15 @@ Identical to `/report` Phase 2. Use the same dual-path extraction (Path A: facet
 
 Apply the compact mapping table (Data Sources section) to match patterns to protocols.
 
-1. Match behavioral patterns from Quick Scan (General) or Phase 2 (Targeted + scan) against the compact mapping table
-2. Classify: **Strong** (3+ sessions) / **Weak** (1-2 sessions) / **None**
-3. Add environmental and friction pattern matches
+1. **Targeted + scan**: Match behavioral patterns from Phase 2 against the compact mapping table.
+   **General**: Skip pattern matching — protocol selection uses usage history (step 5).
+2. Classify (Targeted + scan only): **Strong** (3+ sessions) / **Weak** (1-2 sessions) / **None**
+3. Add environmental and friction pattern matches (Targeted + scan only)
 4. Determine Fallback Tier:
-   - **Tier 1**: 3+ strong patterns → precise matching
-   - **Tier 2**: 1-2 weak patterns → matched + supplementary
+   - **Tier 1**: 3+ strong patterns → precise matching (Targeted + scan only)
+   - **Tier 2**: 1-2 weak patterns → matched + supplementary (Targeted + scan only)
    - **Tier 3**: No patterns / new user → **Starter Trio**: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
-5. **General path**: Select top 2-3 protocols for scenario and trial
+5. **General path**: Select 2-3 protocols prioritizing unexplored (from Quick Scan usage history), defaulting to Starter Trio. User context profile carries forward to Phase 4 for scenario personalization.
 6. **Targeted path**: Filter to target protocol, note related protocols
 
 For detailed mapping logic (Primary/Secondary/Tertiary tables, session diagnostics, anti-pattern detection), refer to `/report` SKILL.md.
@@ -151,7 +152,7 @@ Present a concrete scenario showing where the protocol would have helped.
 
 **Scenario construction** (3-tier fallback):
 - **Tier 1** (session snippet available): Use actual session data from MAP results. **Must include session context summary** — what the session was about, what the user was trying to do — so the scenario is self-contained. Then show the pattern evidence and intervention point.
-- **Tier 2** (no session match, but codebase available): Generate a hypothetical scenario grounded in the user's actual project context. General path: project context limited to project paths from sessions-index; full project discovery (languages, frameworks, file structure) requires Targeted + scan path.
+- **Tier 2** (no session match, but context available): Generate a hypothetical scenario grounded in the user's work context. General path: user context profile (work domains, task types from Quick Scan) personalizes standard scenarios; full project discovery requires Targeted + scan path.
 - **Tier 3** (no data): Use preset scenarios from `references/scenarios.md`.
 
 For general path, present scenarios for each of the top 2-3 protocols sequentially.
