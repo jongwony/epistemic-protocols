@@ -1301,6 +1301,132 @@ function checkCrossRefScan() {
 }
 
 // ============================================================
+// Check 11: Onboard Sync (Protocol coverage in onboard materials)
+// ============================================================
+function checkOnboardSync() {
+  const onboardSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/SKILL.md');
+  if (!fs.existsSync(onboardSkillPath)) {
+    results.warn.push({
+      check: 'onboard-sync',
+      file: 'epistemic-cooperative/skills/onboard/SKILL.md',
+      message: 'Onboard SKILL.md not found, skipping onboard sync check'
+    });
+    return;
+  }
+
+  const onboardContent = fs.readFileSync(onboardSkillPath, 'utf8');
+  let subCheckFailed = false;
+
+  // Build protocol metadata from PROTOCOL_FILES
+  // e.g., 'prothesis/skills/frame/SKILL.md' → { name: 'Prothesis', command: 'frame' }
+  const protocols = PROTOCOL_FILES.map(relPath => {
+    const parts = relPath.split('/');
+    return {
+      name: parts[0].charAt(0).toUpperCase() + parts[0].slice(1),
+      command: parts[2]
+    };
+  });
+
+  // Sub-check 1: Data Sources table — every protocol must have a row
+  for (const { name, command } of protocols) {
+    const pattern = `${name} \`/${command}\``;
+    if (!onboardContent.includes(pattern)) {
+      results.fail.push({
+        check: 'onboard-sync',
+        file: 'epistemic-cooperative/skills/onboard/SKILL.md',
+        message: `Data Sources table missing protocol row: ${pattern}`
+      });
+      subCheckFailed = true;
+    }
+  }
+
+  // Sub-check 2: Protocol count reference matches actual count
+  const expectedCount = protocols.length;
+  if (!onboardContent.includes(`the ${expectedCount} protocols`)) {
+    results.warn.push({
+      check: 'onboard-sync',
+      file: 'epistemic-cooperative/skills/onboard/SKILL.md',
+      message: `Protocol count may be stale — expected "the ${expectedCount} protocols"`
+    });
+  }
+
+  // Sub-check 3: Phase 0 category groupings cover all slash commands
+  // (assumes Pre-execution/Analysis/Execution on consecutive lines)
+  const categoryLines = onboardContent.match(/Pre-execution[^\n]*\n[^\n]*Analysis[^\n]*\n[^\n]*Execution[^\n]*/);
+  if (categoryLines) {
+    const categoryText = categoryLines[0];
+    for (const { command } of protocols) {
+      if (!categoryText.includes(`/${command}`)) {
+        results.warn.push({
+          check: 'onboard-sync',
+          file: 'epistemic-cooperative/skills/onboard/SKILL.md',
+          message: `Phase 0 category groupings missing "/${command}"`
+        });
+      }
+    }
+  } else {
+    results.warn.push({
+      check: 'onboard-sync',
+      file: 'epistemic-cooperative/skills/onboard/SKILL.md',
+      message: 'Phase 0 category groupings pattern not found — structure may have changed'
+    });
+  }
+
+  // Sub-check 4: scenarios.md — every protocol must have a scenario block
+  const scenariosPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/references/scenarios.md');
+  if (fs.existsSync(scenariosPath)) {
+    const scenariosContent = fs.readFileSync(scenariosPath, 'utf8');
+    for (const { name, command } of protocols) {
+      const heading = `## ${name} \`/${command}\``;
+      if (!scenariosContent.includes(heading)) {
+        results.fail.push({
+          check: 'onboard-sync',
+          file: 'epistemic-cooperative/skills/onboard/references/scenarios.md',
+          message: `Missing scenario block: ${heading}`
+        });
+        subCheckFailed = true;
+      }
+    }
+  } else {
+    results.warn.push({
+      check: 'onboard-sync',
+      file: 'epistemic-cooperative/skills/onboard/references/scenarios.md',
+      message: 'scenarios.md not found'
+    });
+  }
+
+  // Sub-check 5: workflow.md — all slash commands present
+  const workflowPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/references/workflow.md');
+  if (fs.existsSync(workflowPath)) {
+    const workflowContent = fs.readFileSync(workflowPath, 'utf8');
+    for (const { command } of protocols) {
+      if (!workflowContent.includes(`/${command}`)) {
+        results.fail.push({
+          check: 'onboard-sync',
+          file: 'epistemic-cooperative/skills/onboard/references/workflow.md',
+          message: `Missing "/${command}" in workflow diagram`
+        });
+        subCheckFailed = true;
+      }
+    }
+  } else {
+    results.warn.push({
+      check: 'onboard-sync',
+      file: 'epistemic-cooperative/skills/onboard/references/workflow.md',
+      message: 'workflow.md not found'
+    });
+  }
+
+  if (!subCheckFailed) {
+    results.pass.push({
+      check: 'onboard-sync',
+      file: 'epistemic-cooperative/',
+      message: `Onboard sync — Data Sources, scenarios, and workflow verified for ${expectedCount} protocols`
+    });
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -1314,6 +1440,7 @@ try {
   checkGraphIntegrity();
   checkSpecVsImpl();
   checkCrossRefScan();
+  checkOnboardSync();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
