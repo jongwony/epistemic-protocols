@@ -63,7 +63,7 @@ narrowing(Q, A) = |remaining(after)| < |remaining(before)| ∨ context(remaining
 early_exit = user_declares_sufficient
 
 ── TOOL GROUNDING ──
-Phase 1 Ctx  (collect)  → Read, Grep (context collection)
+Phase 1 Ctx  (collect)  → Read, Grep (context collection); WebSearch (conditional: environmental dependency)
 Phase 2 Q    (extern)   → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3      (state)    → Internal state update
 Phase 0 Scan (infer)    → Internal analysis (no external tool)
@@ -221,7 +221,14 @@ Collect contextual evidence to enrich uncertainty descriptions and improve quest
 
 **Purpose shift**: Context collection aims to ask better questions, not to eliminate them. Evidence enriches the uncertainty description presented in Phase 2, enabling the user to provide more targeted answers.
 
-**Scope restriction**: Read-only investigation only. No API calls, test execution, or file modifications.
+**Web context** (conditional): When uncertainty carries an environmental dependency signal
+(external API versions, library maintenance status, breaking changes),
+extend context collection to web search.
+Web evidence is tagged with `source: "web:{url}"` for traceability.
+Activation condition: `environmental(Uᵢ) ∧ ¬resolved(Uᵢ, codebase)`.
+
+**Scope restriction**: Read-only investigation only. No test execution or file modifications.
+Web search is permitted when activation condition is met.
 
 ### Phase 2: Uncertainty Surfacing
 
