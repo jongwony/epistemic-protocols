@@ -281,7 +281,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Analogia**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Prosoche**: Produces risk classification (p=Low pass-through, p=Elevated surface to user). No delegation—pure classification runs in main agent.
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
-- **Onboard**: Phase 1-2 identical to Report (project-scanner, session-analyzer delegation). Main agent handles Phases 0, 3-7. Phase 5 (Trial) triggers actual protocol execution in-session.
+- **Onboard**: General path uses inline Quick Scan (no subagents) for Phase 1-2. Targeted + scan path delegates to project-scanner (Phase 1) and session-analyzer (Phase 2), identical to Report. Main agent handles Phases 0, 3-7. Phase 5 (Trial) triggers actual protocol execution in-session.
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 
 ## Git Conventions

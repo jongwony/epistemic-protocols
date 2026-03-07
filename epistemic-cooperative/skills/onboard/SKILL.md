@@ -22,14 +22,17 @@ Skip when:
 ## Workflow Overview
 
 ```
-ENTRY → SCAN → EXTRACT → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+General:         ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+Targeted + scan: ENTRY → SCAN → EXTRACT → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+Targeted + std:  ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 ```
 
 | Phase | Owner | Tool | Purpose |
 |-------|-------|------|---------|
 | 0. Entry | Main | AskUserQuestion | Path selection: general/targeted |
-| 1. Scan | Subagent (project-scanner) | Bash, Read, Glob | Project discovery (shared with /report) |
-| 2. Extract | Subagent (session-analyzer) | Grep, Read | Pattern extraction (shared with /report) |
+| 1-2. Quick Scan | Main | Grep, Read | Lightweight pattern detection (General) |
+| 1. Scan | Subagent (project-scanner) | Bash, Read, Glob | Project discovery (Targeted + scan) |
+| 2. Extract | Subagent (session-analyzer) | Grep, Read | Pattern extraction (Targeted + scan) |
 | 3. Map | Main | — | Pattern → Protocol matching (compact inline) |
 | 4. Scenario | Main | AskUserQuestion | Session snippet + intervention point |
 | 5. Trial | Main | — | Direct entry from "Try it", real protocol execution |
@@ -93,13 +96,36 @@ State after Phase 0:
 
 **Skip rule**: If targeted + standard → skip Phases 1-3, jump to Phase 4 with preset scenarios from `references/scenarios.md`.
 
-### Phase 1: Scan (Project Discovery) — Subagent Delegated
+### Phase 1-2: Quick Scan (General path) — Inline
+
+Lightweight pattern detection for the General path. Runs inline with Grep + Read (no subagent delegation).
+
+**Step 1: Protocol usage signals**
+
+Grep `~/.claude/history.jsonl` for protocol slash commands (`/frame`, `/gap`, `/clarify`, `/goal`, `/inquire`, `/calibrate`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to detect which protocols the user has already tried.
+
+If `history.jsonl` does not exist, skip to Step 2.
+
+**Step 2: Session pattern signals**
+
+Glob `~/.claude/projects/*/sessions-index.json` (exclude directories containing `-worktrees-`). Read the 2-3 most recently modified indexes. For each, parse `entries` and extract the 5 most recent entries' `firstPrompt` and `summary` fields.
+
+Match against Data Sources table:
+- Vague `firstPrompt` patterns ("improve", "optimize", "ideas for") → Telos signal
+- Verification keywords ("explain", "what did you do") → Katalepsis signal
+- High `messageCount` with short `summary` → possible rework signal
+
+If no `sessions-index.json` files found, set fallback tier to Tier 3.
+
+**Output for Phase 3**: Protocol usage counts + behavioral pattern signals with source references. Quick Scan data supports Tier 1 scenarios via `summary` + `firstPrompt` from sessions-index; full session snippets require the Targeted + scan path.
+
+### Phase 1: Scan (Project Discovery) — Subagent Delegated (Targeted + scan only)
 
 Identical to `/report` Phase 1. Call project-scanner subagent with the same steps (project discovery, session index aggregation, secondary source scan). See `/report` SKILL.md for full subagent specification.
 
 **Edge case**: If no projects or session indices found, set fallback tier to Tier 3.
 
-### Phase 2: Extract (Pattern Extraction) — Dual-Path Subagent Delegated
+### Phase 2: Extract (Pattern Extraction) — Subagent Delegated (Targeted + scan only)
 
 Identical to `/report` Phase 2. Use the same dual-path extraction (Path A: facets-accelerated, Path B: full subagent). See `/report` SKILL.md for full subagent specification.
 
@@ -107,7 +133,7 @@ Identical to `/report` Phase 2. Use the same dual-path extraction (Path A: facet
 
 Apply the compact mapping table (Data Sources section) to match patterns to protocols.
 
-1. Match behavioral patterns from Phase 2 against the compact mapping table
+1. Match behavioral patterns from Quick Scan (General) or Phase 2 (Targeted + scan) against the compact mapping table
 2. Classify: **Strong** (3+ sessions) / **Weak** (1-2 sessions) / **None**
 3. Add environmental and friction pattern matches
 4. Determine Fallback Tier:
@@ -313,7 +339,7 @@ Target 6-10 calls per session:
 
 1. **Experience over analysis**: This skill teaches through doing. Analytical output (HTML reports, pattern evidence tables) belongs in `/report`.
 2. **Privacy**: Never transmit session data externally. All analysis runs locally.
-3. **Subagent delegation**: Phase 1 delegates to project-scanner (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Maximum 3 parallel subagents.
+3. **Subagent delegation**: General path uses inline Quick Scan (no subagents). Targeted + scan path: Phase 1 delegates to project-scanner, Phase 2 delegates session-analyzer. Maximum 3 parallel subagents.
 4. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
 5. **Immediate feedback**: Quiz answers get instant feedback with distinction explanations. Never batch quiz results.
 6. **No auto-install**: Guide installation but never install plugins automatically.
