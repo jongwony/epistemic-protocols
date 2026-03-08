@@ -142,7 +142,7 @@ When Aitesis is active:
 - Aitesis completes before execution proceeds
 - Loaded instructions resume after context is resolved or dismissed
 
-**Protocol precedence**: Default ordering places Aitesis after Telos and before Prothesis (Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; verified context before perspective selection and mapping validation). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Aitesis after Horismos and before Prothesis (Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; verified context before perspective selection and mapping validation). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 ### Trigger Signals
 
