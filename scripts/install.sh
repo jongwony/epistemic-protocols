@@ -3,7 +3,7 @@
 # Zero external dependencies: requires only `claude` CLI
 #
 # Usage:
-#   bash scripts/install.sh          # Install 10 protocols + epistemic-cooperative
+#   bash scripts/install.sh          # Install 9 protocols + epistemic-cooperative
 #   bash scripts/install.sh --all    # Include reflexion, write
 
 PROTOCOLS=(prothesis syneidesis hermeneia katalepsis telos aitesis analogia prosoche epharmoge)

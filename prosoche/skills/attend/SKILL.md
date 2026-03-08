@@ -137,6 +137,7 @@ Priority ordering: autonomy > transparency > noise-minimization > speed > simpli
 - **Aitesis** infers context the AI lacks *before* execution (factual uncertainties, User→AI) — Prosoche evaluates risk signals *during* execution (action assessment, AI→User). Aitesis asks "do I have enough context?" while Prosoche asks "is this action safe to execute?"
 - **Syneidesis** surfaces gaps in *decision quality* for user judgment — Prosoche surfaces risks in *execution actions* for user approval. Syneidesis operates at the decision layer; Prosoche operates at the execution layer.
 - **Epharmoge** evaluates *applicability* of completed results after execution — Prosoche evaluates *risk* of pending actions before they execute. Both are AI→User, but at different temporal points: Prosoche is pre-action, Epharmoge is post-completion.
+
 **Task-bounded execution**: Unlike daemon-model protocols that run continuously throughout a session, Prosoche reads existing tasks at activation, classifies each for risk, and deactivates when all tasks are resolved (classified, surfaced, or halted). This makes Prosoche's scope explicit and its convergence deterministic.
 
 ## Mode Activation

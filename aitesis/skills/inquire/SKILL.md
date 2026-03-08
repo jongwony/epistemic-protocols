@@ -99,6 +99,7 @@ Phase 0 Scan (infer)    → Internal analysis (no external tool)
 - **Syneidesis** surfaces gaps at decision points for the user to judge (information flows AI→user) — Aitesis infers context the AI lacks before execution (information flows user→AI)
 - **Telos** co-constructs goals when intent is indeterminate — Aitesis operates when goals exist but execution context is insufficient
 - **Hermeneia** extracts intent the user already has (user signal) or detects expression ambiguity (AI-detected, requires confirmation) — Aitesis infers what context the system lacks
+
 **Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context to execute?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). The operational test: if the information gap would be filled by the user providing context, it's Aitesis; if it would be filled by the user reconsidering their decision, it's Syneidesis.
 
 **Factual vs evaluative**: Aitesis uncertainties are factual — they have objectively correct answers discoverable from the environment (configs, versions, schemas). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. This is why Phase 1 context collection exists: factual uncertainties may be partially resolved or enriched from the codebase. Evaluative gaps cannot be self-resolved.

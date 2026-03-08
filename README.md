@@ -8,7 +8,7 @@ When AI collaboration goes off-track, you redo everything. These protocols catch
 
 Correcting a wrong direction at the plan level costs one conversation turn.
 At the code level, it costs hours of rework.
-These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, delegation — so you and AI stay aligned before committing to implementation.
+These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, execution — so you and AI stay aligned before committing to implementation.
 
 ## Quick Start
 
