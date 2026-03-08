@@ -44,6 +44,3 @@ claude plugin install horismos@epistemic-protocols
 /bound [task scope to define boundaries for]
 ```
 
-## Author
-
-Jongwon Choi (https://github.com/jongwony)

@@ -26,9 +26,9 @@ skipped=0
 
 for p in $plugins; do
   if claude plugin install "$p@$MARKETPLACE" 2>/dev/null; then
-    ((installed++))
+    installed=$((installed + 1))
   else
-    ((skipped++))
+    skipped=$((skipped + 1))
   fi
 done
 
