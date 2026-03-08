@@ -8,7 +8,7 @@ When AI collaboration goes off-track, you redo everything. These protocols catch
 
 Correcting a wrong direction at the plan level costs one conversation turn.
 At the code level, it costs hours of rework.
-These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, delegation — so you and AI stay aligned before committing to implementation.
+These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, execution — so you and AI stay aligned before committing to implementation.
 
 ## Quick Start
 
@@ -38,7 +38,6 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 |----------|---------|-------------|
 | [Hermeneia](./hermeneia) | `/clarify` | AI keeps building what you didn't ask for |
 | [Telos](./telos) | `/goal` | You know you want something but can't define success |
-| [Epitrope](./epitrope) | `/calibrate` | Unsure how much to let AI decide on its own |
 | [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
@@ -47,7 +46,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
 
-Order follows the epistemic workflow: Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
+Order follows the epistemic workflow: Clarify → Goal → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
 
 ## Utilities
 
@@ -72,7 +71,6 @@ Each protocol targets a specific point where AI collaboration can go wrong. For 
 | Katalepsis | κατάληψις | Grasping, comprehension |
 | Telos | τέλος | End, purpose |
 | Aitesis | αἴτησις | Request, inquiry |
-| Epitrope | ἐπιτροπή | Entrusting, delegation |
 | Analogia | ἀναλογία | Proportion |
 | Prosoche | προσοχή | Attention |
 | Epharmoge | ἐφαρμογή | Application, fitting |

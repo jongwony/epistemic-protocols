@@ -25,7 +25,6 @@ Users often recognize their expression is ambiguous (`IntentMisarticulated`) but
 | **Hermeneia** | **Hybrid** | **`IntentMisarticulated → ClarifiedIntent`** |
 | Telos | AI-guided | `GoalIndeterminate → DefinedEndState` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
-| Epitrope | AI-guided | `DelegationAmbiguous → CalibratedDelegation` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |

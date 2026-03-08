@@ -127,7 +127,7 @@ Cross-reference pattern data from Step 2 with slash command data to report co-oc
 
 **Co-occurrence report**: For each detected situation, report the factual co-occurrence with slash command data:
 - Situation detected: yes/no
-- Related slash commands found: list of relevant commands (e.g., `/clarify`, `/gap`, `/frame`, `/attend`, `/calibrate`)
+- Related slash commands found: list of relevant commands (e.g., `/clarify`, `/gap`, `/frame`, `/attend`)
 
 The main agent (Phase 3) determines protocol mapping and coverage status (covered/missed/n/a) from these co-occurrence facts.
 

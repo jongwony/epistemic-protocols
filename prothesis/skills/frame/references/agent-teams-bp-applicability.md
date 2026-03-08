@@ -16,6 +16,6 @@ Not all agent-teams best practices apply uniformly across Prothesis phases. This
 | BP10: Cross-team communication | — | **Restricted** (isolation required) | — |
 | BP11: Hook integration | Environment-dependent | Environment-dependent | — |
 | BP12: Error handling | — | **Active** | — |
-| BP13: Team lifecycle | — | Team created | Team retained until terminal or J=calibrate (Epitrope mode-switch) |
+| BP13: Team lifecycle | — | Team created | Team retained until terminal |
 
-**Reading this table**: "Restricted" means the BP is intentionally suppressed for epistemic reasons (not a compliance gap). "—" means the BP does not apply at that phase. "Environment-dependent" means the BP is configurable outside the protocol. Praxis phases (formerly Phase 6-7) were extracted to Epitrope in v4.0.0.
+**Reading this table**: "Restricted" means the BP is intentionally suppressed for epistemic reasons (not a compliance gap). "—" means the BP does not apply at that phase. "Environment-dependent" means the BP is configurable outside the protocol.
