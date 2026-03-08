@@ -35,7 +35,7 @@ You will receive:
    a. Glob `session_jsonl_glob` to get all JSONL paths on disk.
    b. **Single grep** with alternation pattern across all JSONL paths:
       ```
-      command-name|"skill":"(frame|gap|clarify|grasp|goal|inquire|calibrate|attend|contextualize|prothesis:|syneidesis:|hermeneia:|katalepsis:|telos:|aitesis:|epitrope:|prosoche:|epharmoge:)
+      command-name|"skill":"(frame|gap|clarify|grasp|goal|inquire|attend|contextualize|prothesis:|syneidesis:|hermeneia:|katalepsis:|telos:|aitesis:|prosoche:|epharmoge:)
       ```
       This captures both slash commands (`<command-name>` tags) and Skill tool invocations (`"skill":"<name>"`) in one pass, pre-filtering to protocol skills only.
    c. **Map** matches to protocol names:
@@ -45,7 +45,6 @@ You will receive:
       - `grasp`, `katalepsis:grasp`, `katalepsis` → Katalepsis
       - `goal`, `telos:goal` → Telos
       - `inquire`, `aitesis:inquire` → Aitesis
-      - `calibrate`, `epitrope:calibrate` → Epitrope
       - `attend`, `prosoche:attend` → Prosoche
       - `contextualize`, `epharmoge:contextualize` → Epharmoge
    d. **De-duplicate**: Group matches by source file path (= session_id), then de-duplicate protocol names within each group. Same session + same protocol = 1 usage event.

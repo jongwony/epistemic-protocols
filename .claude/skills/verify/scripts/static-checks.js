@@ -22,18 +22,16 @@ const PROTOCOL_FILES = [
   'katalepsis/skills/grasp/SKILL.md',
   'telos/skills/goal/SKILL.md',
   'aitesis/skills/inquire/SKILL.md',
-  'epitrope/skills/calibrate/SKILL.md',
   'analogia/skills/ground/SKILL.md',
   'epharmoge/skills/contextualize/SKILL.md',
   'prosoche/skills/attend/SKILL.md',
 ];
 
-const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge';
-const CANONICAL_WORKFLOW = 'Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp';
+const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge';
+const CANONICAL_WORKFLOW = 'Clarify → Goal → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp';
 const PRECEDENCE_FILES = [
   'hermeneia/skills/clarify/SKILL.md',
   'telos/skills/goal/SKILL.md',
-  'epitrope/skills/calibrate/SKILL.md',
   'aitesis/skills/inquire/SKILL.md',
   'prothesis/skills/frame/SKILL.md',
   'analogia/skills/ground/SKILL.md',
@@ -925,7 +923,6 @@ function checkCrossRefScan() {
     'Katalepsis': { deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
     'Telos':      { deficit: 'GoalIndeterminate', resolution: 'DefinedEndState' },
     'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
-    'Epitrope':   { deficit: 'DelegationAmbiguous', resolution: 'CalibratedDelegation' },
     'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
     'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
     'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
@@ -1031,7 +1028,7 @@ function checkCrossRefScan() {
 
   const claudeRequirements = [
     {
-      pattern: /Multi-activation order: \*\*Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp\*\*/,
+      pattern: /Multi-activation order: \*\*Clarify → Goal → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp\*\*/,
       message: 'CLAUDE.md missing canonical workflow ordering with Ground'
     },
     {
@@ -1039,7 +1036,7 @@ function checkCrossRefScan() {
       message: 'CLAUDE.md workflow diagram missing Prothesis → Analogia → Syneidesis sequence'
     },
     {
-      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Aitesis, Epitrope, Analogia, Epharmoge\)/,
+      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Aitesis, Analogia, Epharmoge\)/,
       message: 'CLAUDE.md initiator taxonomy missing Analogia in the AI-guided set'
     },
   ];

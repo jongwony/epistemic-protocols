@@ -40,13 +40,9 @@ This degradation preserves Phase 0–2 epistemic value and Phase 3 analysis isol
 | Role metaphor | Midwife (draws out) | Cartographer (reveals paths) |
 | Question form | Open (Recall burden) | Options (Recognition only) |
 
-## Theoria → Praxis
+## Theoria
 
 Prothesis (Phases 0–4) constitutes pure **theoria** (θεωρία) — contemplative inquiry that produces the Lens L as a theoretical artifact: what different frameworks reveal, without changing anything.
-
-The transition to **praxis** (πρᾶξις) — perspective-informed action — is delegated to Epitrope. When the user selects `J=calibrate` at Phase 4 routing, the coordinator calls `Skill("calibrate")` to activate Epitrope, which detects the active team and presents mode options including TeamRestructure for team composition adjustment. This is a mode switch, not a composition: the same coordinator transitions from perspective analysis to delegation calibration, with the team's analytical context preserved.
-
-This separation reflects a clean epistemic boundary: Prothesis answers "what do different frameworks reveal?" while Epitrope answers "how should we act on these findings?" The `calibrate` option at Phase 4 is the deliberate shift from understanding to changing.
 
 ## Parametric Nature
 

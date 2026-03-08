@@ -52,7 +52,6 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Prothesis `/frame` | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
 | Prosoche `/attend` | Bash deploy/push/apply keywords, `wrong_file_edited` friction |
 | Katalepsis `/grasp` | Verification keywords in firstPrompt ("explain", "what did you do") |
-| Epitrope `/calibrate` | team/delegation keywords in CLAUDE.md, `user_rejected_action` friction |
 | Aitesis `/inquire` | `context_loss` friction |
 | Analogia `/ground` | Abstract pattern application without domain validation |
 | Epharmoge `/contextualize` | Post-execution environment mismatch |
@@ -65,7 +64,7 @@ Present the protocol catalog as text output FIRST (always), then ask path select
 
 **Protocol Catalog** (always rendered as text before asking):
 
-Present the 10 protocols from the Data Sources table as a numbered list with name + one-line description.
+Present the 9 protocols from the Data Sources table as a numbered list with name + one-line description.
 
 **AskUserQuestion #1**:
 - Text: "Which path?"
@@ -78,7 +77,7 @@ Present the 10 protocols from the Data Sources table as a numbered list with nam
 **If Targeted + no protocol specified → AskUserQuestion #2**:
 - Text: "Which protocol? (refer to catalog above, type name or number in Other)"
 - Options:
-  - "Pre-execution — /clarify, /goal, /calibrate, /inquire"
+  - "Pre-execution — /clarify, /goal, /inquire"
   - "Analysis — /frame, /ground, /gap"
   - "Execution — /attend, /contextualize, /grasp"
 
@@ -102,7 +101,7 @@ Lightweight user context collection for the General path. Runs inline with Grep 
 
 **Step 1: Protocol usage history**
 
-Grep `~/.claude/history.jsonl` for protocol slash commands matching `"display":"/{command}"` pattern (`/frame`, `/gap`, `/clarify`, `/goal`, `/inquire`, `/calibrate`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to identify explored vs. unexplored protocols.
+Grep `~/.claude/history.jsonl` for protocol slash commands matching `"display":"/{command}"` pattern (`/frame`, `/gap`, `/clarify`, `/goal`, `/inquire`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to identify explored vs. unexplored protocols.
 
 If `history.jsonl` does not exist, produce empty usage counts.
 
@@ -299,7 +298,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 6. **Advanced Usage** (bonus tips after main guide):
 
-   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If the user tried `/frame`, highlight the Frame → Calibrate chain. If they quizzed on `/gap` vs `/attend`, show the three-step pre-execution chain (inquire → gap → attend).
+   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/attend`, show the three-step pre-execution chain (inquire → gap → attend).
 
 7. **Continue exploring** (when MAP results contain unexplored protocols):
 

@@ -200,7 +200,6 @@ Apply the mapping tables below to match observed patterns to protocols.
 
 | Observable Pattern | Source | Protocol | Rationale |
 |---|---|---|---|
-| team/delegation keywords in CLAUDE.md | CLAUDE.md Read | **Epitrope** `/calibrate` | Delegation structure exists but scope undefined |
 | Many hook configurations | settings.json hooks | **Prosoche** `/attend` (reinforcing) | User already values safety mechanisms |
 | Communication-related rule files | Glob rules/ | **Hermeneia** `/clarify` (reinforcing) | Explicit communication rule management |
 
@@ -213,7 +212,6 @@ Applied only when facets data is available (Path A). Complements Primary and Sec
 | `wrong_approach` | **Telos** `/goal` | Wrong direction due to undefined goal | Primary |
 | `wrong_approach` + rework situation | **Syneidesis** `/gap` | Approach gap undetected, accompanied by rework | Primary |
 | `misunderstood_request` | **Hermeneia** `/clarify` | Intent-expression mismatch | Primary |
-| `user_rejected_action` | **Epitrope** `/calibrate` | Ambiguous delegation scope — AI acted outside intent | Primary |
 | `excessive_changes` | **Syneidesis** `/gap` | Scope boundary gap undetected | Primary |
 | `context_loss` | **Aitesis** `/inquire` | Information loss due to insufficient context | Primary |
 | `wrong_file_edited` | **Prosoche** `/attend` | Execution risk not assessed | Primary |

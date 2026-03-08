@@ -8,7 +8,6 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 
 | Chain | Frequency | Pattern |
 |-------|-----------|---------|
-| `/frame` → `/calibrate` | Most common | Frame produces findings with severity levels → Calibrate sets delegation scope for which findings the user fixes vs. AI fixes |
 | `/clarify` → `/goal` | Common | Clarify resolves expression ambiguity → Goal co-constructs success criteria from the clarified intent |
 | `/inquire` → `/gap` | Common | Inquire gathers missing context → Gap audits the decision now that context is complete |
 | `/clarify` → `/attend` → `/gap` | Observed | Clarify a failed protocol → re-execute it → gap-audit the resulting design |
@@ -29,7 +28,7 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 |-----------|---------|-------|
 | Context passing | `/clarify fix the auth flow` | Protocol receives your text as input args |
 | Fully qualified name | `/aitesis:inquire` | Use `plugin:skill` format to target exact plugin when names overlap |
-| Plan mode | `/calibrate` in plan mode | Protocols work because they primarily use AskUserQuestion, which is allowed in plan mode |
+| Plan mode | `/clarify` in plan mode | Protocols work because they primarily use AskUserQuestion, which is allowed in plan mode |
 
 ## AskUserQuestion Engagement
 

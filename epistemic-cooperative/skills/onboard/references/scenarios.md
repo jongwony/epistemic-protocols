@@ -29,7 +29,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Trial prompt**: "Let's practice: say 'Improve the dashboard' and I'll show how /goal co-constructs success criteria"
 
 **Quiz Q (situation)**: A team member says "Build something for monitoring." No specs, no metrics, no target users defined. You're about to start coding.
-- A) Aitesis `/inquire` — B) Hermeneia `/clarify` — C) Telos `/goal` — D) Epitrope `/calibrate`
+- A) Aitesis `/inquire` — B) Hermeneia `/clarify` — C) Telos `/goal` — D) Prothesis `/frame`
 - Answer: C
 
 **Quiz Q (design)**: You need to "create a notification system" but haven't defined what success looks like. How would you use a protocol to establish clear objectives before implementation?
@@ -63,7 +63,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Trial prompt**: "Let's practice: say 'Should we use microservices?' and I'll show how /frame recommends analytical lenses"
 
 **Quiz Q (situation)**: Your team is debating how to handle technical debt. Some want dedicated sprints, others want continuous improvement, others want to rewrite. Everyone has valid points. No one knows which lens to evaluate through.
-- A) Telos `/goal` — B) Prothesis `/frame` — C) Syneidesis `/gap` — D) Epitrope `/calibrate`
+- A) Telos `/goal` — B) Prothesis `/frame` — C) Syneidesis `/gap` — D) Aitesis `/inquire`
 - Answer: B
 
 **Quiz Q (design)**: You're evaluating three CI/CD tools for your project. Each excels in different dimensions. How would you structure the evaluation to avoid defaulting to the loudest opinion?
@@ -87,23 +87,6 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 - Hint: Your intent is clear and your goal is defined — but the execution context has unknown dependencies.
 
 **Philosophy**: αἴτησις (a requesting, inquiry) — the act of asking what is needed. Core principle: **Inference over Interrogation**. AI infers what context is missing rather than asking a generic checklist. Workflow position: pre-execution — ensure sufficient context before acting. Game feel: "About to execute? Wait — what don't I know?" → AI surfaces ranked uncertainties → you provide answers → informed execution.
-
-## Epitrope `/calibrate`
-
-**Situation**: You have a team of three Claude agents working on a feature. One is handling frontend, one backend, one tests. But you haven't defined who makes architecture decisions, when to escalate, or what requires your approval versus what they can decide autonomously.
-
-**Intervention**: `/calibrate` produces a Delegation Contract (DC) that specifies WHO decides, WHAT decisions they can make, and HOW MUCH autonomy they have — through scenario-based interview rather than abstract policy setting.
-
-**Trial prompt**: "Let's practice: say 'Handle this refactoring however you think is best' and I'll show how /calibrate sets delegation boundaries"
-
-**Quiz Q (situation)**: You delegate a refactoring task to Claude with "refactor the auth module, use your best judgment." Claude makes sweeping changes — renames interfaces, changes the session model, adds a new dependency — and you wish you'd set boundaries.
-- A) Hermeneia `/clarify` — B) Syneidesis `/gap` — C) Epitrope `/calibrate` — D) Aitesis `/inquire`
-- Answer: C
-
-**Quiz Q (design)**: You're setting up a multi-agent workflow. How would you define what each agent can decide independently versus what needs your sign-off?
-- Hint: The problem isn't unclear goals or missing context — it's undefined delegation scope.
-
-**Philosophy**: ἐπιτροπή (entrusting, turning over to) — the act of delegating authority. Core principle: **Calibrated Autonomy**. Not "full control" or "full delegation" but a context-specific contract specifying WHO/WHAT/HOW MUCH. Workflow position: after goal is defined — now decide how much to let AI (or agents) do on their own. Game feel: "How much should I trust AI with this?" → scenario-based interview → Delegation Contract → clear boundaries.
 
 ## Analogia `/ground`
 

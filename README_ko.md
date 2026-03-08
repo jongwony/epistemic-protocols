@@ -38,7 +38,6 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 |----------|--------|----------|
 | [Hermeneia](./hermeneia) | `/clarify` | AI가 요청하지 않은 것을 계속 만들 때 |
 | [Telos](./telos) | `/goal` | 뭔가 원하는데 성공 기준을 못 정할 때 |
-| [Epitrope](./epitrope) | `/calibrate` | AI에게 어디까지 맡길지 감이 안 올 때 |
 | [Aitesis](./aitesis) | `/inquire` | AI가 필요한 걸 묻지 않고 바로 실행할 때 |
 | [Prothesis](./prothesis) | `/frame` | 여러 관점이 필요한데 어떤 것이 맞는지 모를 때 |
 | [Syneidesis](./syneidesis) | `/gap` | 실행하려는데 뭔가 빠뜨린 것 같을 때 |
@@ -47,7 +46,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
 | [Katalepsis](./katalepsis) | `/grasp` | AI가 큰 변경을 했는데 실제로 이해가 필요할 때 |
 
-순서는 인식론적 워크플로우를 따릅니다: Clarify → Goal → Calibrate → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
+순서는 인식론적 워크플로우를 따릅니다: Clarify → Goal → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
 
 ## 유틸리티
 
@@ -72,7 +71,6 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | Katalepsis | κατάληψις | 움켜잡음 (이해) |
 | Telos | τέλος | 끝, 목적 |
 | Aitesis | αἴτησις | 요청, 질의 |
-| Epitrope | ἐπιτροπή | 위탁, 위임 |
 | Analogia | ἀναλογία | 유비, 유추 |
 | Prosoche | προσοχή | 주의 집중 |
 | Epharmoge | ἐφαρμογή | 적용, 맞춤 |

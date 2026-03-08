@@ -152,7 +152,6 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Hermeneia: IntentMisarticulated → ClarifiedIntent (Hybrid, EXTRACT)
   - Telos: GoalIndeterminate → DefinedEndState (AI-guided, CO-CONSTRUCT)
   - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INFER)
-  - Epitrope: DelegationAmbiguous → CalibratedDelegation (AI-guided, CALIBRATE)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
   - Prosoche: ExecutionBlind → SituatedExecution (User-initiated, EVALUATE)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)

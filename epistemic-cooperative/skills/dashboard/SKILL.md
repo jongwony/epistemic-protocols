@@ -84,7 +84,6 @@ For each protocol, determine:
 | Telos | friction `wrong_approach` OR vague firstPrompt | vague firstPrompt |
 | Hermeneia | friction `misunderstood_request` | rework (3+ edits same file) |
 | Syneidesis | friction `excessive_changes` OR (wrong_approach + rework) | rework + high exploration |
-| Epitrope | friction `user_rejected_action` | Agent calls present |
 | Aitesis | friction `context_loss` | N/A |
 | Prosoche | friction `wrong_file_edited` | deploy/push keywords |
 | Prothesis | — | exploration ratio ≥ 3:1 |
@@ -107,7 +106,6 @@ Aggregate friction_counts from Phase 2. Map to protocol groups using the Tertiar
 |---|---|
 | `wrong_approach` | Telos, Syneidesis |
 | `misunderstood_request` | Hermeneia |
-| `user_rejected_action` | Epitrope |
 | `excessive_changes` | Syneidesis |
 | `context_loss` | Aitesis |
 | `wrong_file_edited` | Prosoche |

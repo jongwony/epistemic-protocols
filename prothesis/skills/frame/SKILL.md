@@ -64,7 +64,7 @@ FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_withdraw ∨ us
 user_wrap_up  = (J = wrap_up) at Phase 4   -- user selects wrap_up routing option
 user_withdraw = J = withdraw at Phase 4    -- user selects graceful exit (team cleanup)
 user_esc      = Esc key at any phase       -- tool-level termination (no cleanup)
-J      = Routing ∈ {calibrate, extend, add_input, wrap_up, withdraw}  -- Phase 4 routing decision (post-merge)
+J      = Routing ∈ {extend, add_input, wrap_up, withdraw}  -- Phase 4 routing decision (post-merge)
 J_mb   = MissionBriefRouting ∈ {confirm, modify(field)}  -- Phase 0 routing decision
 PF     = preserve_findings: (T, L) → Q[AskUserQuestion](select categories)          -- returns selected; TaskCreate is post-TeamDelete step
 
@@ -103,15 +103,11 @@ After LensEstablished (mode branching):
       Pₛ.count = 1 → lightweight context modifier for downstream protocol
       Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
       recommend_protocols(Pₛ):                              -- sub-operation of recommend_compose
-        Map MBᵥ.inquiry_intent → downstream protocol (Aitesis, Syneidesis, Telos, Katalepsis, Epitrope)
+        Map MBᵥ.inquiry_intent → downstream protocol (Aitesis, Syneidesis, Telos, Katalepsis)
         Pₛ contradictory + deep analysis needed → suggest escalation to Mode 2 (/frame)
   J = inquire → Continue to Phase 3 (team spawn → parallel inquiry → synthesis → FramedInquiry)
 
 After Phase 4 (routing):
-  J = calibrate  → Activate[Skill]("calibrate") → DC
-                   → return to Phase 4 routing (team retained, L preserved)
-                   | fail → inform; team retained; offer {extend, wrap_up}
-                   -- post-DC routing return: user may run /batch then "Extend" to feed results to review team
   J = extend     → Q[AskUserQuestion](add perspective | deepen existing | review execution results)
                    → Phase 2 (new perspective) or Phase 3 (SendMessage to existing team)
   J = add_input  → user context → revise Syn(R'' + input) → L' → re-present Q(L', routing)
@@ -121,7 +117,7 @@ After Phase 4 (routing):
                    (withdraw = graceful exit, preserve_findings skipped)
 
 recommend_protocols(L):
-  L.divergence ≠ ∅ → suggest Syneidesis (gap audit) or Epitrope (calibrate delegation — provide task scope T when calling /calibrate)
+  L.divergence ≠ ∅ → suggest Syneidesis (gap audit)
   L.assessment reveals indeterminate goals → suggest Telos
 
 Continue until convergence: user satisfied OR user withdraw OR user Esc key.
@@ -140,11 +136,10 @@ T (parallel)             → TeamCreate tool (creates team with shared task list
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
 Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke → independent synthesis; skip if Δ = ∅)
-Phase 4 Q (extern)       → AskUserQuestion (synthesis + routing: present Lens L with calibrate/extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
+Phase 4 Q (extern)       → AskUserQuestion (synthesis + routing: present Lens L with extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
 PF Q (extern)            → AskUserQuestion (multiSelect: preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
-J=calibrate (extern)     → Skill tool (protocol transition: Activate[Skill]("calibrate") → activate Epitrope; in LOOP after Phase 4)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
@@ -176,7 +171,6 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
-| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
@@ -210,7 +204,7 @@ When Prothesis is active:
 - Prothesis completes before other workflows begin
 - Loaded instructions resume after perspective is established
 
-**Protocol precedence**: Default ordering places Prothesis after Aitesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; established perspective contextualizes mapping validation and gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Prothesis after Aitesis (Hermeneia → Telos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; established perspective contextualizes mapping validation and gap detection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 Consult `references/conceptual-foundations.md` for design rationale (Plan Mode Integration, Distinction from Socratic Method, Parametric Nature, Specialization) and activation edge cases (per-message application rules, mode deactivation triggers, trigger/skip heuristics).
 
@@ -405,7 +399,7 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    - **Rationale**: Why this position is held
 4. **Conditional hub-spoke**: If any peer's `remaining_divergence` is non-empty, coordinator initiates hub-spoke reconciliation — one targeted question per divergent peer (e.g., "Peer B argues [X]. Explain the concrete impact of your position on [specific aspect]."). Each peer responds once. Coordinator does not re-engage after receiving responses — synthesis is independent. If `remaining_divergence` is empty for all peers, skip to step 5.
 5. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises independent judgment as Synthesizer: information collection from peers, but the integration decision is the coordinator's own.
-6. **User review**: **Call the AskUserQuestion tool** to present the synthesis result with routing options. The user sees the full cross-dialogue outcome and selects next action (calibrate/extend/add input/wrap up) in a single step.
+6. **User review**: **Call the AskUserQuestion tool** to present the synthesis result with routing options. The user sees the full cross-dialogue outcome and selects next action (extend/add input/wrap up) in a single step.
 
    ```
    Analysis complete. Lens L:
@@ -413,14 +407,11 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    [Synthesis content — convergence, divergence resolution, integrated assessment]
 
    Options:
-   1. **Calibrate** — proceed to delegation calibration (activates Epitrope)
-   2. **Extend** — add new perspective, deepen existing analysis, or review execution results
-   3. **Add input** — provide additional context for synthesis revision
-   4. **Wrap up** — finalize with current Lens
-   5. **withdraw** — exit with current Lens (team cleanup, no findings preservation)
+   1. **Extend** — add new perspective, deepen existing analysis, or review execution results
+   2. **Add input** — provide additional context for synthesis revision
+   3. **Wrap up** — finalize with current Lens
+   4. **withdraw** — exit with current Lens (team cleanup, no findings preservation)
    ```
-
-   **"Calibrate" availability**: Present when L contains actionable findings (divergence with clear fix directions, or assessment with implementation implications). When L is purely confirmatory or exploratory, omit this option.
 
 **If no triggers**: Proceed to synthesis (step 5) with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected"), then user review (step 6).
 
@@ -448,7 +439,6 @@ After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if
 ```
 
 **Loop behavior**: Per LOOP. Key operational details:
-- **Calibrate**: Team retained — Epitrope detects the active team and presents TeamAugment, TeamRestructure, Solo options. After DC approval, routing re-presents so user can /batch then "Extend" to feed execution results back to the review team.
 - **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect AskUserQuestion; selected items migrate to session TaskCreate after TeamDelete.
 
 All other routing options (Extend, Add input, withdraw) and convergence/recommendation behavior Per LOOP.
