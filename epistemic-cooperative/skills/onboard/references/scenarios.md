@@ -37,6 +37,23 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 
 **Philosophy**: τέλος (end, purpose) — Aristotle's final cause. Core principle: **Co-construction over Extraction**. The goal doesn't pre-exist in the user's head waiting to be extracted — it's built through dialogue. Workflow position: second in the workflow — once intent is clear, define what success looks like. Game feel: "I know I want something but can't define it" → AI proposes concrete criteria → user shapes → GoalContract emerges.
 
+## Horismos `/bound`
+
+**Situation**: A user asks Claude to refactor a large authentication module. The task involves multiple decision domains: file structure reorganization, API contract changes, test strategy, and deployment approach. It's unclear which aspects the user wants to control directly vs. delegate to AI.
+
+**Intervention**: `/bound` probes the task for boundary-undefined domains, collects evidence from project configuration (CLAUDE.md rules, existing conventions), and presents each domain for classification via AskUserQuestion: "File structure — should you decide the directory layout, or should I propose one?" Options: UserSpec / AISpec / NeedsCalibration / Dismiss. The resulting BoundaryMap guides all subsequent protocol behavior.
+
+**Trial prompt**: "Let's practice: say 'Refactor the authentication module' and I'll show how /bound defines ownership boundaries"
+
+**Quiz Q (situation)**: You ask Claude to redesign your project's deployment pipeline. Claude starts making decisions about CI provider, container orchestration, and monitoring stack — but you only wanted it to handle the build scripts while you control infrastructure choices.
+- A) Hermeneia `/clarify` — B) Aitesis `/inquire` — C) Horismos `/bound` — D) Telos `/goal`
+- Answer: C
+
+**Quiz Q (design)**: You're about to delegate a multi-domain task to Claude but want to control some aspects yourself. How would you make explicit which decisions are yours vs. AI's?
+- Hint: The problem isn't unclear intent or missing context — it's undefined ownership over decision domains.
+
+**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Without explicit boundary definition, AI either over-assumes autonomy (causing surprise) or under-assumes (causing friction). Workflow position: after goal is defined, before context gathering — the BoundaryMap tells all downstream protocols what the human controls vs. what AI controls. Game feel: "Who decides what here?" → domain-by-domain classification → BoundaryMap emerges → shared understanding of ownership.
+
 ## Syneidesis `/gap`
 
 **Situation**: You're about to merge a PR that adds a new API endpoint. The code looks clean, tests pass, but you haven't considered: rate limiting, authentication for the new route, or how it interacts with the existing caching layer.
