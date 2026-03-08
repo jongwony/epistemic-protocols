@@ -67,6 +67,13 @@ Phase 3: Integrate    → Update output with explicit mapping status
 - You already understand the mapping ("I know how this applies")
 - No abstract framework is being applied (output is purely concrete)
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install analogia@epistemic-protocols
+```
+
 ## Usage
 
 ```

@@ -73,6 +73,13 @@ Phase 2 launches all three agents in parallel (`run_in_background: true`). Each 
 - Trivial sessions with no meaningful insights
 - When insights are already documented elsewhere
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install reflexion@epistemic-protocols
+```
+
 ## Usage
 
 ```

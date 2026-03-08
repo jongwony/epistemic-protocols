@@ -122,6 +122,13 @@ epistemic-cooperative/
 | After running `/onboard` for deeper analysis | `/report` or `/dashboard` |
 | Tracking protocol adoption over time | `/dashboard` |
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install epistemic-cooperative@epistemic-protocols
+```
+
 ## Usage
 
 ```

@@ -75,6 +75,13 @@ Phase 2: Result Adaptation  → Apply user-directed adaptation
 
 **Conditional** — AI-guided activation (Layer 2) requires Aitesis operational experience to validate the pre/post context fitness axis. User invocation via `/contextualize` is always available regardless of this gate.
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install epharmoge@epistemic-protocols
+```
+
 ## Usage
 
 ```

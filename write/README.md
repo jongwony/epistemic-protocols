@@ -60,6 +60,13 @@ Frame → Format → Draft → Refine → Validate → Finalize
 - Documentation updates (direct editing)
 - Single-pass content without review need
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install write@epistemic-protocols
+```
+
 ## Usage
 
 ```

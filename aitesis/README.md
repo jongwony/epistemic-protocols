@@ -65,6 +65,13 @@ Aitesis follows Telos: once goals are defined, verify execution context is suffi
 - When gaps are at decision points, not execution context (use Syneidesis — /gap)
 - When delegation scope is unclear
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install aitesis@epistemic-protocols
+```
+
 ## Usage
 
 ```

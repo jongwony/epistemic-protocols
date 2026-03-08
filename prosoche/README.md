@@ -43,10 +43,11 @@ Environment-aware: `("pulumi up", "auth-stack", "dev")` approved does NOT cache-
 - **Classification accuracy**: A misclassified p=Low task bypasses Gate entirely. Prosoche classifies risk but does not execute; execution remains the caller's responsibility.
 - **TaskList dependency**: Prosoche reads existing tasks at invocation time. If no tasks exist, there is nothing to classify.
 
-## Installation
+## Install
 
-```bash
-/plugin install prosoche
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install prosoche@epistemic-protocols
 ```
 
 ## Usage

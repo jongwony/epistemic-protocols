@@ -12,25 +12,15 @@ These protocols insert structured checkpoints at decision points — intent, goa
 
 ## Quick Start
 
-1. Add the marketplace in Claude Code:
-   ```
-   /plugin marketplace add https://github.com/jongwony/epistemic-protocols
-   ```
-2. Install the [Epistemic Cooperative](./epistemic-cooperative) plugin:
-   ```
-   /plugin install epistemic-cooperative@epistemic-protocols
-   ```
-3. Run `/onboard` — learn protocols through hands-on experience: scenarios from your past sessions, real protocol trials, and Socratic quizzes:
-   > *"Here's where `/clarify` would have helped → try it now → quiz: which protocol fits this situation?"*
-4. Or pick individual protocols from the tables below
-
-## Full Installation
-
-Install all protocols and utilities at once:
+Install all protocols and utilities:
 
 ```bash
-git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-protocols/scripts/install.sh
+curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh | bash
 ```
+
+Then run `/onboard` — learn protocols through hands-on experience: scenarios from your past sessions, real protocol trials, and Socratic quizzes.
+
+For individual plugin installation, see each protocol's README.
 
 ## Protocols
 

@@ -73,6 +73,13 @@ Telos follows Hermeneia: if intent exists but is misarticulated, clarify first. 
 - When your goal is clear but poorly expressed (use Hermeneia — /clarify)
 - When you have a defined goal and need perspective analysis (use Prothesis — /frame)
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install telos@epistemic-protocols
+```
+
 ## Usage
 
 ```

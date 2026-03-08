@@ -46,6 +46,13 @@ Phase 3: Verify Loop  → Confirm understanding progressively (AskUserQuestion +
 - User demonstrates understanding already
 - User explicitly declines explanation
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install katalepsis@epistemic-protocols
+```
+
 ## Usage
 
 ```

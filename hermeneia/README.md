@@ -59,6 +59,13 @@ Phase 3: Integration   → Proceed with clarified expression
 - When your expression is clear
 - When AI should infer from context
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install hermeneia@epistemic-protocols
+```
+
 ## Usage
 
 ```
