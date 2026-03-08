@@ -26,6 +26,7 @@ const PLUGINS = [
   { dir: 'katalepsis', skill: 'grasp' },
   { dir: 'telos', skill: 'goal' },
   { dir: 'aitesis', skill: 'inquire' },
+  { dir: 'horismos', skill: 'bound' },
   { dir: 'analogia', skill: 'ground' },
   { dir: 'prosoche', skill: 'attend' },
   { dir: 'epharmoge', skill: 'contextualize' },
@@ -46,6 +47,7 @@ const DESCRIPTION_OVERRIDES = {
   inquire: 'Infer context insufficiency before execution — (ContextInsufficient, AI, INQUIRE, ExecutionPlan) → InformedExecution',
   attend: 'Evaluate execution-time risks — (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution',
   ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, AIOutput) → ValidatedMapping',
+  bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, ExecutionResult) → ContextualizedExecution',
   reflexion: 'Extract session insights into persistent memory through guided dialogue. Reconstructs learnings from conversation history.',
 };

@@ -1039,8 +1039,8 @@ function checkCrossRefScan() {
       message: 'CLAUDE.md workflow diagram missing Prothesis → Analogia → Syneidesis sequence'
     },
     {
-      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Aitesis, Analogia, Epharmoge\)/,
-      message: 'CLAUDE.md initiator taxonomy missing Analogia in the AI-guided set'
+      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge\)/,
+      message: 'CLAUDE.md initiator taxonomy missing protocol in the AI-guided set'
     },
   ];
 
