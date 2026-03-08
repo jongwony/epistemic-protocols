@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge) during human-AI interaction.
+Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge) during human-AI interaction.
 
 ## Architecture
 
@@ -27,6 +27,9 @@ epistemic-protocols/
 ├── telos/                             # Protocol: goal co-construction
 │   ├── .claude-plugin/plugin.json
 │   └── skills/goal/SKILL.md          # Full protocol definition (user-invocable)
+├── horismos/                          # Protocol: epistemic boundary definition
+│   ├── .claude-plugin/plugin.json
+│   └── skills/bound/SKILL.md         # Full protocol definition (user-invocable)
 ├── aitesis/                           # Protocol: context insufficiency inference
 │   ├── .claude-plugin/plugin.json
 │   └── skills/inquire/SKILL.md       # Full protocol definition (user-invocable)
@@ -117,6 +120,12 @@ Co-construct defined goals from vague intent through AI-proposed, user-shaped di
 - **Triggers**: "not sure what I want", "something like", "ideas for", exploratory framing
 - **Invocation**: `/goal` or use "goal" in conversation
 
+### Bound (ὁρισμός) — Horismos
+Define epistemic boundaries per decision through AI-guided detection.
+- **Deficit**: BoundaryUndefined → DefinedBoundary
+- **Triggers**: Task scope with undefined ownership, "should I decide this or you?", boundary-undefined domains detected
+- **Invocation**: `/bound` or use "bound" in conversation
+
 ### Inquire (αἴτησις) — Aitesis
 Infer context insufficiency before execution through AI-guided inference.
 - **Deficit**: ContextInsufficient → InformedExecution
@@ -130,7 +139,7 @@ Validate structural mapping between abstract and concrete domains through AI-gui
 - **Invocation**: `/ground` or use "ground" in conversation
 
 ### Attend (προσοχή) — Prosoche
-Evaluate execution-time risks by classifying existing tasks for risk signals and surfacing elevated-risk findings.
+Materialize execution intent, classify risk signals, coordinate team delegation, and gate elevated-risk findings for user review.
 - **Deficit**: ExecutionBlind → SituatedExecution
 - **Triggers**: User declares execution intent via `/attend`
 - **Invocation**: `/attend` or use "attend" in conversation
@@ -200,18 +209,18 @@ Principle: side effects require explicit answer types, not tool-level escape. Wh
 
 ## Protocol Precedence
 
-Multi-activation order: **Clarify → Goal → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp**
+Multi-activation order: **Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp**
 
-This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → context verification → perspective → validated mapping → gap audit → execution-time attention → applicability check). Users can override by explicitly requesting a different protocol first.
+This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → boundary definition → context verification → perspective → validated mapping → gap audit → execution-time attention → applicability check). Users can override by explicitly requesting a different protocol first.
 
 **Katalepsis**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
 
 ### Epistemic Workflow
 
 ```
-[Request] → [Intent] → [Goal] → [Context] → [Perspective] → [Mapping] → [Decision] → [Execution] → [Application] → [Comprehension]
-               ↑          ↑        ↑             ↑              ↑            ↑              ↑              ↑               ↑
-           Hermeneia    Telos   Aitesis      Prothesis      Analogia    Syneidesis      Prosoche      Epharmoge       Katalepsis
+[Request] → [Intent] → [Goal] → [Boundary] → [Context] → [Perspective] → [Mapping] → [Decision] → [Execution] → [Application] → [Comprehension]
+               ↑          ↑          ↑          ↑             ↑              ↑            ↑              ↑              ↑               ↑
+           Hermeneia    Telos    Horismos    Aitesis      Prothesis      Analogia    Syneidesis      Prosoche      Epharmoge       Katalepsis
 ```
 
 This diagram shows logical progression, not strict execution order.
@@ -219,7 +228,7 @@ This diagram shows logical progression, not strict execution order.
 **Initiator taxonomy** (2-layer model):
 - **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.
 - **Layer 2** (in-protocol heuristics): Behavior varies by initiator type:
-  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Aitesis, Analogia, Epharmoge)
+  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge)
   - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia)
   - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Reflexion, Write)
@@ -279,6 +288,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Prothesis**: See SKILL.md for phase-specific delegation rules (Phase 0-2 main agent, Phase 3-4 agent team incl. routing)
 - **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
+- **Horismos**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Analogia**: No Task delegation—must run in main agent to call AskUserQuestion
