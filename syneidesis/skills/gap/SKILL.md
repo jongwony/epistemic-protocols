@@ -88,6 +88,7 @@ A (adjust)     → Internal state update (no external tool)
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
@@ -125,7 +126,7 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - Loaded instructions resume after mode deactivation
 
-**Protocol precedence**: Default ordering places Syneidesis after Analogia (Hermeneia → Telos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; gap detection applies within the established, context-verified, mapping-validated perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Syneidesis after Analogia (Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; gap detection applies within the established, context-verified, mapping-validated perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 ### Mode Deactivation
 

@@ -104,6 +104,7 @@ Categorize  → Internal analysis (Read for context if needed)
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
+| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
@@ -139,7 +140,7 @@ At Phase 3, call AskUserQuestion for comprehension verification.
 - Katalepsis provides structured comprehension path
 - Loaded instructions resume after mode deactivation
 
-**Protocol precedence**: Non-Katalepsis protocols follow a default ordering (Hermeneia → Telos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge) which the user can override. Katalepsis is a structural constraint — it requires completed AI work (`R`), so it always executes last. Do not include Katalepsis as an option in any multi-activation ordering choice.
+**Protocol precedence**: Non-Katalepsis protocols follow a default ordering (Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge) which the user can override. Katalepsis is a structural constraint — it requires completed AI work (`R`), so it always executes last. Do not include Katalepsis as an option in any multi-activation ordering choice.
 
 ### Triggers
 
