@@ -1,6 +1,6 @@
 # Preset Scenarios
 
-Fallback scenarios for `/onboard` SCENARIO and QUIZ phases when session data is insufficient (Tier 2-3).
+Fallback scenarios for `/onboard` SCENARIO and QUIZ phases when session data is insufficient (Tier 2).
 Each protocol has a realistic situation, intervention description, trial prompt, and two quiz questions.
 
 ## Hermeneia `/clarify`

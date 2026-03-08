@@ -22,23 +22,21 @@ Skip when:
 ## Workflow Overview
 
 ```
-General:         ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
-Targeted + scan: ENTRY → SCAN → EXTRACT → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
-Targeted + std:  ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
+General:        ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+Targeted:       ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 ```
 
 | Phase | Owner | Tool | Purpose |
 |-------|-------|------|---------|
 | 0. Entry | Main | AskUserQuestion | Path selection: general/targeted |
-| 1-2. Quick Scan | Main | Grep, Read | Lightweight pattern detection (General) |
-| 1. Scan | Subagent (project-scanner) | Bash, Read, Glob | Project discovery (Targeted + scan) |
-| 2. Extract | Subagent (session-analyzer) | Grep, Read | Pattern extraction (Targeted + scan) |
-| 3. Map | Main | — | Pattern → Protocol matching (compact inline) |
-| 4. Scenario | Main | AskUserQuestion | Session snippet + intervention point |
-| 5. Trial | Main | — | Direct entry from "Try it", real protocol execution |
-| 5→6 LOOP | Main | AskUserQuestion | Post-trial navigation |
-| 6. Quiz | Main | AskUserQuestion | Socratic protocol recognition quiz |
-| 7. Guide | Main | AskUserQuestion | Summary + /report CTA |
+| 1. Quick Scan | Main | Glob, Read | User Context Profile extraction |
+| 2. Map | Main | — | Profile → Protocol matching (compact inline) |
+| 3. Scenario | Main | AskUserQuestion | Context-personalized intervention point |
+| 4. Trial | Main | — | Direct entry from "Try it", real protocol execution |
+| 4→5 LOOP | Main | AskUserQuestion | Post-trial navigation |
+| 5. Quiz | Main | AskUserQuestion | Socratic protocol recognition quiz |
+| 6. Guide | Main | AskUserQuestion | Summary + /report CTA |
 
 ## Data Sources
 
@@ -65,7 +63,7 @@ Present the protocol catalog as text output FIRST (always), then ask path select
 
 **Protocol Catalog** (always rendered as text before asking):
 
-Present the 10 protocols from the Data Sources table as a numbered list with name + one-line description.
+Before rendering, check installation status: Glob `~/.claude/plugins/cache/epistemic-protocols/*/` to collect installed plugin directory names. Present the 10 protocols from the Data Sources table as a numbered list with name + one-line description + installation badge (`[installed]` or `[not installed]`).
 
 **AskUserQuestion #1**:
 - Text: "Which path?"
@@ -85,100 +83,73 @@ Present the 10 protocols from the Data Sources table as a numbered list with nam
 **AskUserQuestion #3** (Targeted only, session source):
 - Text: "Where should examples come from?"
 - Options:
-  - "Scan my recent sessions"
-  - "Use a specific session (I'll provide the path)"
+  - "Personalize with my recent sessions"
   - "Use standard examples (no session needed)"
 
 State after Phase 0:
 - `path`: general | targeted
 - `target_protocol`: (targeted only) selected protocol name
-- `session_source`: (targeted only) scan | specific | standard — General path implies inline quick scan
+- `session_source`: (targeted only) scan | standard — General path always runs Quick Scan
 
-**Skip rule**: If targeted + standard → skip Phases 1-3, jump to Phase 4 with preset scenarios from `references/scenarios.md`.
+**Skip rule**: If targeted + standard → skip Phases 1-2, jump to Phase 3 with preset scenarios from `references/scenarios.md`.
 
-### Phase 1-2: Quick Scan (General path) — Inline
+### Phase 1: Quick Scan (User Context Profile) — Inline
 
-Lightweight user context collection for the General path. Runs inline with Grep + Read (no subagent delegation). Steps 1 and 2 are independent — run in parallel when possible.
+Build a User Context Profile from recent session metadata. Runs inline with Glob + Read (no subagent delegation). Both General and Targeted paths share this phase.
 
-**Step 1: Protocol usage history**
-
-Grep `~/.claude/history.jsonl` for protocol slash commands matching `"display":"/{command}"` pattern (`/frame`, `/gap`, `/clarify`, `/goal`, `/bound`, `/inquire`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to identify explored vs. unexplored protocols.
-
-If `history.jsonl` does not exist, produce empty usage counts.
-
-**Step 2: User context profile**
+**Step 1: Collect session metadata**
 
 Glob `~/.claude/projects/*/sessions-index.json` (exclude directories containing `-worktrees-`). Read the 2-3 most recently modified indexes. For each, parse `entries` and extract the 5 most recent entries' `firstPrompt` and `summary` fields.
 
-Extract user context for scenario personalization:
-- Work domains (e.g., API development, infrastructure, data pipeline)
-- Typical task types (feature development, debugging, refactoring)
-- Project characteristics inferred from session summaries
+**Step 2: Infer User Context Profile**
 
-If no `sessions-index.json` files found, set fallback tier to Tier 3.
+From collected metadata, infer:
+- **Work domains**: What areas the user works in (e.g., API development, infrastructure, data pipeline)
+- **Conversation patterns**: Request clarity level, incremental vs. batch requests, question types (how/why/what)
+- **Task types**: Ratio of feature development, debugging, refactoring, documentation
 
-**Output for Phase 3**: Protocol usage history (explored/unexplored) + user context profile (work domains, task types). Quick Scan does not detect protocol-matching patterns — that is `/report`'s role. Instead, it provides personalization context so scenarios and quizzes resonate with the user's actual work.
+If no `sessions-index.json` files found, set fallback tier to Tier 2 (Starter Trio).
 
-### Phase 1: Scan (Project Discovery) — Subagent Delegated (Targeted + scan only)
+**Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization — behavioral pattern extraction and session diagnostics belong in `/report`.
 
-Identical to `/report` Phase 1. Call project-scanner subagent with the same steps (project discovery, session index aggregation, secondary source scan). See `/report` SKILL.md for full subagent specification.
+### Phase 2: Map (Protocol Matching)
 
-**Edge case**: If no projects or session indices found, set fallback tier to Tier 3.
+Apply User Context Profile to match protocols to the user's context.
 
-### Phase 2: Extract (Pattern Extraction) — Subagent Delegated (Targeted + scan only)
-
-Identical to `/report` Phase 2. Use the same dual-path extraction (Path A: facets-accelerated, Path B: full subagent). See `/report` SKILL.md for full subagent specification.
-
-### Phase 3: Map (Protocol Matching) — Simplified
-
-Apply the compact mapping table (Data Sources section) to match patterns to protocols.
-
-1. **Targeted + scan**: Match behavioral patterns from Phase 2 against the compact mapping table.
-   **General**: Skip pattern matching — protocol selection uses usage history (step 5).
-2. Classify (Targeted + scan only): **Strong** (3+ sessions) / **Weak** (1-2 sessions) / **None**
-3. Add environmental and friction pattern matches (Targeted + scan only)
-4. Determine Fallback Tier:
-   - **Tier 1**: 3+ strong patterns → precise matching (Targeted + scan only)
-   - **Tier 2**: 1-2 weak patterns → matched + supplementary (Targeted + scan only)
-   - **Tier 3**: No patterns / new user → **Starter Trio**: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
-5. **General path**: Select 2-3 protocols prioritizing unexplored (from Quick Scan usage history), defaulting to Starter Trio. User context profile carries forward to Phase 4 for scenario personalization.
-6. **Targeted path**: Filter to target protocol, note related protocols
+1. **General path**: Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Starter Trio.
+2. **Targeted path**: Filter to target protocol, use Profile for scenario personalization. Note related protocols from the compact mapping table.
+3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → **Starter Trio**: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`. Proceed immediately without blocking the onboarding flow.
 
 For detailed mapping logic (Primary/Secondary/Tertiary tables, session diagnostics, anti-pattern detection), refer to `/report` SKILL.md.
 
-### Phase 4: Scenario (Intervention Point)
+### Phase 3: Scenario (Intervention Point)
 
 Present a concrete scenario showing where the protocol would have helped.
 
-**Scenario construction** (3-tier fallback):
-- **Tier 1** (session snippet available): Use actual session data from MAP results. **Must include session context summary** — what the session was about, what the user was trying to do — so the scenario is self-contained. Then show the pattern evidence and intervention point.
-- **Tier 2** (no session match, but context available): Generate a hypothetical scenario grounded in the user's work context. General path: user context profile (work domains, task types from Quick Scan) personalizes standard scenarios; full project discovery requires Targeted + scan path.
-- **Tier 3** (no data): Use preset scenarios from `references/scenarios.md`.
+**Scenario construction** (2-tier fallback):
+- **Tier 1** (User Context Profile available): Generate a hypothetical scenario grounded in the user's work context (domains, task types, conversation patterns from Quick Scan). Personalize standard scenarios from `references/scenarios.md` using Profile data.
+- **Tier 2** (no data / Starter Trio fallback): Use preset scenarios directly from `references/scenarios.md`.
 
 For general path, present scenarios for each of the top 2-3 protocols sequentially.
 
-**Tier 1 scenario format** (session-based):
+**Scenario format**:
 
 ```
 Scenario: /X (Protocol Name)
 
-[Session summary]: In this session you worked on [what user was doing] in [project name].
+[Situation]: [Concrete situation grounded in user's work context — or preset from scenarios.md]
 
-[Pattern evidence]: [Concrete observation — e.g., same file edited N times, M direction changes]
-
-[Intervention]: If you had called /X early in this session:
+[Intervention]: If you had called /X at this point:
 - [what the protocol would have done — step 1]
 - [step 2]
-Expected outcome: [e.g., N corrections reduced to 0-2]
+Expected outcome: [e.g., reduced rework, clearer direction]
 ```
 
-**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a session pattern could plausibly map to multiple protocols (e.g., "exploration" could be `/goal` or `/frame`), do NOT use it as a scenario — reserve it for Phase 6 quiz material instead. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
+**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a situation could plausibly map to multiple protocols (e.g., "exploration" could be `/goal` or `/frame`), do NOT use it as a scenario — reserve it for Phase 5 quiz material instead. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
 
-**Anti-pattern**: Scenarios must be self-contained (session summary + pattern + intervention) with unambiguous protocol fit. Ambiguous patterns belong in Phase 6 quiz.
+**Anti-pattern**: Scenarios must be self-contained (situation + intervention) with unambiguous protocol fit. Ambiguous patterns belong in Phase 5 quiz.
 
-**Session summary source**: `summary` field or `firstPrompt` text from `sessions-index.json`. Targeted + scan fallback: if neither is available, infer session character from primary tool/file patterns extracted in Phase 2.
-
-Present each scenario as regular text output (Tier 1/2/3 format above). Then call AskUserQuestion for navigation only:
+Present each scenario as regular text output (Tier 1/2 format above). Then call AskUserQuestion for navigation only:
 
 **AskUserQuestion** (per scenario):
 - Text: "What would you like to do?"
@@ -187,9 +158,9 @@ Present each scenario as regular text output (Tier 1/2/3 format above). Then cal
   - "Show another example"
   - "Skip to quiz"
 
-### Phase 5: Trial (Protocol Execution)
+### Phase 4: Trial (Protocol Execution)
 
-Guide the user through a real, abbreviated protocol experience. "Try it" selection from Phase 4 already signals intent — enter trial directly without additional confirmation.
+Guide the user through a real, abbreviated protocol experience. "Try it" selection from Phase 3 already signals intent — enter trial directly without additional confirmation.
 
 **Mini practice prompts** (scoped for 2-3 exchanges): Use the **Trial prompt** field from `references/scenarios.md` for the target protocol. Present the trial guidance as regular text output.
 
@@ -219,16 +190,16 @@ After the Post-Trial Insight, call AskUserQuestion:
   - "Try a different protocol"
   - "Guide — see my learning summary"
 
-Branch: Quiz → Phase 6, Another scenario → Phase 4, Different protocol → Phase 4 with next MAP protocol (General) or Phase 0 with cached MAP (Targeted), Guide → Phase 7.
+Branch: Quiz → Phase 5, Another scenario → Phase 3, Different protocol → Phase 3 with next MAP protocol (General) or Phase 0 with cached MAP (Targeted), Guide → Phase 6.
 
-### Phase 6: Quiz (Socratic Verification)
+### Phase 5: Quiz (Socratic Verification)
 
 Test protocol recognition through situation-based questions. Question format differs by path.
 
 **Question sourcing** (in priority order):
-1. **Ambiguous scenarios from Phase 4 filtering** — session patterns that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/goal` or `/frame`)
+1. **Ambiguous scenarios from Phase 3 filtering** — situations that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/goal` or `/frame`)
 2. Protocols from TRIAL + MAP results (personalized)
-3. Codebase-derived scenarios (if session data available)
+3. Profile-personalized variants of preset scenarios (if User Context Profile available)
 4. Preset scenarios from `references/scenarios.md`
 
 #### Targeted Path
@@ -274,7 +245,7 @@ Immediate feedback after each question:
 
 **Distinction depth**: Quiz feedback should go beyond "A, not B" to explain the *design dimension* that separates confused pairs. Reference the distractor pairs from Quiz Design section. The goal is that even wrong answers teach — the user leaves understanding *why* two protocols that sound similar serve different purposes.
 
-### Phase 7: Guide (Summary + Next Steps)
+### Phase 6: Guide (Summary + Next Steps)
 
 Summarize the learning experience, connect it to the broader epistemic workflow, and provide actionable next steps.
 
@@ -289,25 +260,19 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 3. **Report CTA**: "Run `/report` for a comprehensive analysis with evidence-backed recommendations and an HTML profile."
 
-4. **Installation check**: Verify whether tried/recommended protocols are installed.
-   - Check: Glob `~/.claude/plugins/cache/epistemic-protocols/{plugin-name}/*/skills/*/SKILL.md`
-   - Installed → "Try `/X` in your next real session"
-   - Not installed → `claude plugin install epistemic-protocols/{plugin-name}`
-   - If 2+ not installed → also mention `bash scripts/install.sh`
+4. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring adjacent protocols in the workflow.
 
-5. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring adjacent protocols in the workflow.
-
-6. **Advanced Usage** (bonus tips after main guide):
+5. **Advanced Usage** (bonus tips after main guide):
 
    Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/attend`, show the three-step pre-execution chain (inquire → gap → attend).
 
-7. **Continue exploring** (when MAP results contain unexplored protocols):
+6. **Continue exploring** (when MAP results contain unexplored protocols):
 
    Call AskUserQuestion:
    - Text: "Want to experience another protocol?"
    - Options: "Yes — show me another" / "Done — I have enough"
 
-   If "Yes" → return to Phase 4, using the next recommended protocol from MAP results.
+   If "Yes" → return to Phase 3, using the next recommended protocol from MAP results.
 
 ## Quiz Design
 
@@ -331,20 +296,20 @@ Target 6-10 calls per session:
 | Phase | Calls (General) | Calls (Targeted) | Purpose |
 |-------|-----------------|-------------------|---------|
 | 0. Entry | 1 | 2-3 | Path + protocol + session source |
-| 4. Scenario | 1-3 | 1-2 | Navigation after scenario text |
-| 5. Trial | 0 | 0 | Direct entry from "Try it" |
-| 5→6 LOOP | 1 | 1 | Post-trial navigation |
-| 6. Quiz | 4-5 | 4-5 | MC/design or binary/reverse/design |
-| 7. Guide | 0-1 | 0-1 | Optional continue exploring |
+| 3. Scenario | 1-3 | 1-2 | Navigation after scenario text |
+| 4. Trial | 0 | 0 | Direct entry from "Try it" |
+| 4→5 LOOP | 1 | 1 | Post-trial navigation |
+| 5. Quiz | 4-5 | 4-5 | MC/design or binary/reverse/design |
+| 6. Guide | 0-1 | 0-1 | Optional continue exploring |
 
 ## Rules
 
 1. **Experience over analysis**: This skill teaches through doing. Analytical output (HTML reports, pattern evidence tables) belongs in `/report`.
 2. **Privacy**: Never transmit session data externally. All analysis runs locally.
-3. **Subagent delegation**: General path uses inline Quick Scan (no subagents). Targeted + scan path: Phase 1 delegates to project-scanner, Phase 2 delegates session-analyzer. Maximum 3 parallel subagents.
+3. **No subagent delegation**: Both General and Targeted paths use inline Quick Scan. Deep pattern extraction belongs in `/report`.
 4. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
 5. **Immediate feedback**: Quiz answers get instant feedback with distinction explanations. Never batch quiz results.
 6. **No auto-install**: Guide installation but never install plugins automatically.
-7. **Session file access**: Access session JSONL via Grep or targeted Read with offset/limit. Never Read entire JSONL files.
+7. **Session index access**: Access `sessions-index.json` via Glob + Read. Parse `entries` for `firstPrompt` and `summary` fields only. Never Read entire session JSONL files.
 8. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.
 9. **Single session**: The entire onboarding completes in one session. No cross-session state required.
