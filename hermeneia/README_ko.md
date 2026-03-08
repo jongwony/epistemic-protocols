@@ -25,7 +25,6 @@
 | **Hermeneia** | **Hybrid** | **`IntentMisarticulated → ClarifiedIntent`** |
 | Telos | AI-guided | `GoalIndeterminate → DefinedEndState` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
-| Epitrope | AI-guided | `DelegationAmbiguous → CalibratedDelegation` |
 | Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |

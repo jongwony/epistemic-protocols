@@ -90,7 +90,6 @@ Phase 0 Scan (infer)    → Internal analysis (no external tool)
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
-| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
@@ -100,8 +99,6 @@ Phase 0 Scan (infer)    → Internal analysis (no external tool)
 - **Syneidesis** surfaces gaps at decision points for the user to judge (information flows AI→user) — Aitesis infers context the AI lacks before execution (information flows user→AI)
 - **Telos** co-constructs goals when intent is indeterminate — Aitesis operates when goals exist but execution context is insufficient
 - **Hermeneia** extracts intent the user already has (user signal) or detects expression ambiguity (AI-detected, requires confirmation) — Aitesis infers what context the system lacks
-- **Epitrope** calibrates delegation (structure, scope, autonomy) before work begins — Aitesis verifies execution context after delegation is established
-
 **Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context to execute?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). The operational test: if the information gap would be filled by the user providing context, it's Aitesis; if it would be filled by the user reconsidering their decision, it's Syneidesis.
 
 **Factual vs evaluative**: Aitesis uncertainties are factual — they have objectively correct answers discoverable from the environment (configs, versions, schemas). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. This is why Phase 1 context collection exists: factual uncertainties may be partially resolved or enriched from the codebase. Evaluative gaps cannot be self-resolved.
@@ -143,7 +140,7 @@ When Aitesis is active:
 - Aitesis completes before execution proceeds
 - Loaded instructions resume after context is resolved or dismissed
 
-**Protocol precedence**: Default ordering places Aitesis after Epitrope and before Prothesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; calibrated delegation before context verification, verified context before perspective selection and mapping validation). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Aitesis after Telos and before Prothesis (Hermeneia → Telos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; verified context before perspective selection and mapping validation). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 ### Trigger Signals
 

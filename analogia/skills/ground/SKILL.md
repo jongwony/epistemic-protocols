@@ -104,7 +104,6 @@ Phase 0 Detect  (infer)     → Internal analysis (no external tool)
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
-| **Epitrope** | AI-guided | DelegationAmbiguous → CalibratedDelegation | Delegation calibration |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
@@ -158,7 +157,7 @@ When Analogia is active:
 - Analogia completes before output dependent on mapping validity proceeds
 - Loaded instructions resume after mapping status is made explicit
 
-**Protocol precedence**: Default ordering places Analogia after Prothesis and before Syneidesis (Hermeneia → Telos → Epitrope → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; framework selected before mapping validated, mapping validated before gap analysis). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Default ordering places Analogia after Prothesis and before Syneidesis (Hermeneia → Telos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; framework selected before mapping validated, mapping validated before gap analysis). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
 
 ### Trigger Signals
 
