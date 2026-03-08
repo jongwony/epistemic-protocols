@@ -15,17 +15,17 @@ Evaluate execution-time risks during AI operations through task materialization,
 ── FLOW ──
 Prosoche(C) → Materialize(C) → T[] →
   Team?(C) → TeamCoord[AskUserQuestion] → TeamStructure →
-  ∀t∈T: Classify(t.E, B?) → p →
-    p=Low:      delegate(t, TeamStructure?) → complete(t)
+  ∀t∈T: Classify(t.E) → p →
+    p=Low:      delegate(t) → executor(t.E) → { complete(t) | GATE_DETECTED(Fi) → Phase 1 }
     p=Elevated: Eval(t.E) → Fi → Q[AskUserQuestion] → J → A(J, t, Σ) → Σ'
   → |{t : t.status ∉ {completed, halted}}| = 0 →
   withdraw? | deactivate
 
 ── MORPHISM ──
 ExecutionContext
-  → materialize(intent)                  -- task list from context (resume/auto/confirm)
-  → coordinate(team?)                    -- team structure resolution (Solo/Augment/Restructure)
-  → classify(evidence, boundary?)        -- per-task risk signal detection with optional BoundaryMap
+  → materialize(intent)                  -- intent to concrete task list
+  → coordinate(team?)                    -- optional team structure for delegation routing
+  → classify(evidence)                   -- per-task risk signal detection
   → ClassifiedActions                    -- p=Low: delegate (no further transformation)
   → evaluate(elevated_risks)             -- evidence gathering for Gate/Advisory signals
   → surface(findings)                    -- present risk findings for user judgment
@@ -38,17 +38,16 @@ invariant: Attention over Automation
 
 ── TYPES ──
 C              = ExecutionContext { tasks: List(Task), prior: ProtocolOutput?, args: String?,
-                                    team: Option(TeamRef), boundary_map: Option(BoundaryMap) }
+                                    team: Option(TeamRef) }
 Materialize    = C → List(Task) [Tool: TaskCreate, TaskList]
 Task           = { id: TaskId, E: ExecutionAction, status: ∈ {pending, in_progress, completed, halted} }
                                                         -- in_progress: set by executor on start
 E              = ExecutionAction (pending tool call or action chain)
-Route          = p × B? → (delegate | Phase 1)
 ProtocolOutput = prior protocol's converged output in current session
-Classify       = Risk classification: E × B? → p (silent signal detection; failure → p = Elevated)
+Classify       = Risk classification: E → p (silent signal detection; failure → p = Elevated)
 p              = RiskLevel ∈ {Low, Elevated}
 ClassifiedActions = { t: Task, p: RiskLevel }[]     -- per-task classification result; intermediate checkpoint
-delegate       = t → Agent(executor) → complete(t) [Tool: Agent]
+delegate       = t → Agent(executor) → { complete(t) | GATE_DETECTED(Fi) → Phase 1 }
 Eval           = Risk evaluation: E → Set(Finding)
 Finding        = { signal: Signal, evidence: String, severity: ∈ {Advisory, Gate}, action_description: String }
 Signal         ∈ {Irreversibility, HumanCommunication, ExternalMutation, SecurityBoundary, PromptInjection, ScopeEscalation}
@@ -71,48 +70,47 @@ AgentRef       = { name: String, type: String, perspective: Option(String) }
 TeamStructure  ∈ {Solo, Augmented(TeamRef, Set(AgentRole)), Restructured(TeamRef, Set(AgentRole), Set(AgentRef))}
 AgentRole      = { name: String, type: String, focus: String }
 
--- BoundaryMap consumption (from Horismos, read-only in session text):
-BoundaryMap    = Map(Domain, BoundaryClassification)
-BoundaryClassification ∈ {UserSpec, AISpec, NeedsCalibration, Dismissed}
+-- Executor trust model (compliance-proportional delegation):
+ExecutorTrust  = { compliance: Level, delegation: Level, reporting: Level }
+                 -- invariant: compliance ↓ → delegation ↓ ∧ reporting ↑
+                 -- prosoche-executor (attend skill, Stop-as-Gate): high compliance
+                 -- team agent (Gate prompt injection): lower compliance, higher reporting
 
 Phase          ∈ {-1, 0, 1, 2, 3}
-MaterializationRoute ∈ {resume, auto_proceed, confirm}
-SituatedExecution = Σ' where p = Low ∨ (all Fi resolved) ∨ user_esc
+SituatedExecution = Σ' where (∀ t ∈ T: situated(t)) ∨ user_withdraw ∨ user_esc
 
 ── MATERIALIZATION ROUTING ──
 Materialize(C) routes on context richness:
-  C.tasks ≠ ∅             → adopt(C.tasks), resume execution
-  C.tasks = ∅ ∧ C.prior   → create(T[], C.prior), auto-proceed
+  C.tasks ≠ ∅ ∧ ¬C.prior  → adopt(C.tasks), resume execution
+  C.tasks ≠ ∅ ∧ C.prior   → conflict[AskUserQuestion]: resume(C.tasks) | refresh(C.prior) | merge
+  C.tasks = ∅ ∧ C.prior   → create(T[], C.prior), auto_proceed
   C.tasks = ∅ ∧ ¬C.prior  → create(T[], C.args), confirm 1x [Tool]
 
 Context detection:
   C.tasks = TaskList content at invocation time (named persistent list: attend-{context})
   C.prior = protocol chain's accumulated output in current session
            -- longer chains (Telos → Aitesis → Prosoche) = more verified intent
-           -- justifies auto-proceed's reduced confirmation requirements
+           -- justifies auto_proceed's reduced confirmation requirements
   ¬C.prior ≡ no protocol invoked before /attend
 
 Design principles:
-  confirmation count ∝ 1/context richness: tasks→0(adopt), prior→0(auto), neither→1(confirm)
+  confirmation count ∝ 1/context richness: tasks→0(adopt), prior→0(auto), conflict→1(resolve), neither→1(confirm)
   dual safety net: Materialize verifies "what" (intent), Phase 0 Classify verifies "how" (risk) — independent checks
 
 ── PHASE TRANSITIONS ──
 Phase -1: C → Materialize(C) → T[]                                  -- task materialization [Tool]
-           route(C) → {resume | auto-proceed | confirm}
+           route(C) → {resume | auto_proceed | confirm}
            T[] = ∅ → deactivate                                     -- nothing to classify
            Team?(C) → TeamCoord[AskUserQuestion] → TeamStructure    -- team coordination [Tool]
-Phase 0:  t.E → Classify(t.E, B?) → p                               -- risk signal scan (silent, per-task)
-           p = Low:
-             B exists ∧ B(domain(t.E)) = AISpec      → delegate(t, team_or_executor) [Tool]
-             B exists ∧ B(domain(t.E)) = UserSpec     → Phase 1 (force Gate)
-             B exists ∧ B(domain(t.E)) = NeedsCalibration → Phase 1 (force Gate)
-             B absent                                  → delegate(t, prosoche-executor) [Tool]
-           p = Elevated → Phase 1                                    -- Gate path (always prosoche-executor)
+Phase 0:  t.E → Classify(t.E) → p                                    -- risk signal scan (silent, per-task)
+           p = Low → delegate[Agent]                                  -- team agent or prosoche-executor
+           p = Elevated → Phase 1                                     -- Gate path
 Phase 1:  t.E → Eval(t.E) → Fi: Set(Finding)                       -- risk evaluation [Tool]
            escalate?(Fi) → adjust_granularity(Σ)
 Phase 2:  Fi → Q[AskUserQuestion](Fi, evidence, t.E) → J            -- checkpoint surfacing [Tool]
            (or: subagent GATE_DETECTED → main agent Q)
 Phase 3:  J → A(J, t, Σ) → Σ'                                      -- judgment integration (internal)
+           J = Withdraw → Withdraw[SendMessage] → deactivate         -- team shutdown [Tool]
 
 ── LOOP ──
 Granularity levels:
@@ -145,10 +143,21 @@ A(Dismiss, t, Σ)      = proceed with t.E (no session_approval recorded — one-
 A(Halt, t, Σ)         = block t.E, record halted(t.E), continue to next
 A(Withdraw, _, Σ)     = shutdown team (SendMessage shutdown_request), deactivate
 
+── POST-JUDGMENT RESUMPTION ──
+After A(J, t, Σ) → Σ', re-delegate task to executor:
+  J ∈ {Approve, Dismiss, Modify} → delegate(t) → executor(t.E) → { complete(t) | GATE_DETECTED }
+  J = Halt                        → t.status = halted, skip
+  J = Withdraw                    → deactivate, skip
+-- invariant: returns_control(main_agent) — executor completes task or returns GATE_DETECTED
+
 ── CONVERGENCE ──
-situated(E, Σ) = (p(E) = Low) ∨ (all f ∈ Fi: approved ∨ adapted) ∨ user_esc
+-- Per-task epistemic guarantee:
+situated(t) = (p(t) = Low) ∨ (∀ f ∈ Fi(t): approved ∨ adapted) ∨ user_esc
+-- Invariant: task completion requires situated evaluation
+completed(t) ⟹ situated(t)
+-- Per-mode lifecycle:
 active(Λ) = Λ.active ∧ (∃ t ∈ Λ.tasks: t.status ∉ {completed, halted})
--- Task-bounded convergence: mode terminates when all materialized tasks resolve
+-- Layered: situated(t) guarantees per-action epistemic quality; active(Λ) governs mode lifecycle
 
 ── TOOL GROUNDING ──
 Phase -1 Materialize (resume)  → TaskList (read existing tasks) [Tool]
@@ -167,10 +176,8 @@ Withdraw shutdown    (extern)  → SendMessage (shutdown_request to team members
 ── MODE STATE ──
 Λ = { phase: Phase, E: ExecutionAction,
        granularity: Granularity, state: Σ,
-       current_chain: List(ExecutionAction),
        tasks: List(Task),
        team: Option(TeamStructure),
-       materialization_route: MaterializationRoute,
        active: Bool, cause_tag: String }
 ```
 
@@ -188,7 +195,6 @@ Priority ordering: autonomy > transparency > noise-minimization > speed > simpli
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
 | **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
 | **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Pre-execution context inference |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
@@ -199,7 +205,6 @@ Priority ordering: autonomy > transparency > noise-minimization > speed > simpli
 - **Aitesis** infers context the AI lacks *before* execution (factual uncertainties, User→AI) — Prosoche evaluates risk signals *during* execution (action assessment, AI→User). Aitesis asks "do I have enough context?" while Prosoche asks "is this action safe to execute?"
 - **Syneidesis** surfaces gaps in *decision quality* for user judgment — Prosoche surfaces risks in *execution actions* for user approval. Syneidesis operates at the decision layer; Prosoche operates at the execution layer.
 - **Epharmoge** evaluates *applicability* of completed results after execution — Prosoche evaluates *risk* of pending actions before they execute. Both are AI→User, but at different temporal points: Prosoche is pre-action, Epharmoge is post-completion.
-- **Horismos** defines epistemic boundaries (BoundaryMap) — Prosoche consumes BoundaryMap to route delegation. Horismos answers "who knows what?"; Prosoche answers "is this action safe?"
 
 **Task-bounded execution**: Unlike daemon-model protocols that run continuously throughout a session, Prosoche materializes intent into a concrete task list at activation, processes each task through risk classification and delegation, and deactivates when all tasks are resolved (completed or halted). This makes Prosoche's scope explicit and its convergence deterministic.
 
@@ -292,8 +297,9 @@ Materialize execution intent into a concrete task list and resolve team structur
    - Check for prior protocol output in current session (`C.prior`)
    - Fall back to `/attend` arguments (`C.args`)
 2. **Route on context richness**:
-   - **Resume** (`C.tasks ≠ ∅`): Adopt existing tasks, skip confirmation — tasks already user-validated
-   - **Auto-proceed** (`C.prior` exists): Create tasks from prior protocol output, skip confirmation — intent already verified by upstream protocols. Longer protocol chains (e.g., Telos → Aitesis → Prosoche) carry more accumulated verification
+   - **Resume** (`C.tasks ≠ ∅`, no prior): Adopt existing tasks, skip confirmation — tasks already user-validated
+   - **Conflict** (`C.tasks ≠ ∅` + `C.prior`): **Call AskUserQuestion** 1x — resume existing tasks, refresh from prior, or merge
+   - **Auto-proceed** (`C.prior` exists, no tasks): Create tasks from prior protocol output, skip confirmation — intent already verified by upstream protocols. Longer protocol chains (e.g., Telos → Aitesis → Prosoche) carry more accumulated verification
    - **Confirm** (neither): Create tasks from arguments, **call AskUserQuestion** 1x to verify task list — cold start without prior context
 3. **Create tasks** via TaskCreate, establishing the task list that Phase 0 will iterate
 4. If `T[] = ∅` after materialization: deactivate (nothing to classify)
@@ -324,14 +330,9 @@ Classify each task's execution action for risk signals. This phase is **silent**
 
 1. **Classify action** `t.E` against risk signal taxonomy: irreversibility markers, external targets, security patterns, scope boundaries
 2. **Check session cache**: If `pattern(t.E) ∈ session_approvals`, treat as p=Low (except PromptInjection)
-3. **BoundaryMap routing** (when B exists from prior Horismos invocation):
-   - `B(domain(t.E)) = AISpec` → delegate with high autonomy (team agent or prosoche-executor)
-   - `B(domain(t.E)) = UserSpec` → force Phase 1 Gate, regardless of risk signals
-   - `B(domain(t.E)) = NeedsCalibration` → force Phase 1 Gate, regardless of risk signals
-4. **Standard routing** (B absent):
-   - No signals detected: `p=Low` → delegate to prosoche-executor (Stage C behavior)
+3. **Route on risk level**:
+   - No signals detected: `p=Low` → delegate to team agent or prosoche-executor
    - Signals detected: `p=Elevated` → proceed to Phase 1
-5. `p=Elevated` tasks always route through prosoche-executor to Phase 1
 
 **Classify failure**: If Classify cannot parse or classify action (malformed parameters, unknown tool format), default to p=Elevated (fail-closed).
 
@@ -348,9 +349,9 @@ When delegating to team agents without the `attend` skill, inject Gate awareness
 >
 > Output format: `GATE_DETECTED: true`, `Signal: [type]`, `Evidence: [specific action]`
 
-Injection path:
-- Post-`/attend` spawn (Agent) → system context injection (higher compliance)
-- Pre-existing team member (SendMessage) → conversation context injection (lower compliance)
+Injection path (ExecutorTrust model — compliance-proportional delegation):
+- Post-`/attend` spawn (Agent) → system context injection (high compliance, high delegation, low reporting)
+- Pre-existing team member (SendMessage) → conversation context injection (lower compliance, lower delegation, higher reporting)
 
 **Classification scope**: Pending tool call parameters, command strings, target paths/URLs. Does NOT execute the action or modify state.
 
@@ -439,9 +440,8 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 | Classify failure | Unparseable E → p=Elevated (fail-closed) | Unknown actions surfaced, not silently passed |
 | env_context unknown | Inference failure → `env_context="unknown"` (non-matching) | Ambiguous environment → Gate evaluation |
 | Dismiss option | One-time pass without session cache | Avoids forced choice between caching and Withdraw |
-| Materialization routing | Context-based auto-routing (resume/auto-proceed/confirm) | Confirmation count ∝ 1/context richness |
+| Materialization routing | Context-based auto-routing (resume/auto_proceed/confirm) | Confirmation count ∝ 1/context richness |
 | Stop-as-Gate | Subagent stops on Gate, main agent surfaces | Subagent safety without AskUserQuestion access |
-| BoundaryMap override | UserSpec/NeedsCalibration → force Gate | Domain classification overrides risk-only routing |
 
 ## Known Limitations
 
@@ -451,7 +451,8 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 
 **Single-pass classification**: Risk signal classification (Phase 0) is single-pass. A false negative (especially for PromptInjection) results in the action proceeding without re-evaluation. Prosoche is one detection layer in a defense-in-depth approach, not the sole safeguard.
 
-**BoundaryMap availability**: BoundaryMap routing requires a prior Horismos invocation in the current session. When B is absent, Prosoche falls back to Stage C behavior (risk-signal-only classification). BoundaryMap is consumed as read-only session text — no structured data channel.
+**Classification accuracy**: Risk signal detection relies on pattern matching against known markers (command names, flag patterns, target paths). Novel risk patterns not matching the taxonomy may be classified as p=Low (false negative). Mitigation: the Compound rule promotes accumulated Advisory signals to Gate, and Classify failure defaults to p=Elevated (fail-closed).
+
 
 ## Rules
 
@@ -468,6 +469,5 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 11. **Recognition over Recall**: Always **call** AskUserQuestion tool to present findings with options — text presentation without tool = protocol violation
 12. **Withdraw honored**: User can withdraw at any Phase 2 checkpoint. Withdraw triggers graceful shutdown: SendMessage shutdown_request to team members, then deactivate. user_esc is ungraceful (no cleanup)
 13. **Stop-as-Gate**: Subagent returns `GATE_DETECTED` → main agent parses output, surfaces via AskUserQuestion in Phase 2. Subagent must not attempt AskUserQuestion — Gate judgment is channeled through the main agent as a single decision point
-14. **Materialization routing**: Context richness determines confirmation requirements — existing tasks (resume, 0 confirmations), prior protocol output (auto-proceed, 0 confirmations), cold start (confirm, 1 confirmation). This is automatic, not user-configured
-15. **BoundaryMap consumption**: When BoundaryMap exists from prior Horismos invocation, domain classification overrides risk-signal-only routing. UserSpec and NeedsCalibration domains force Gate regardless of risk signals. AISpec domains delegate with high autonomy. B absent → Stage C fallback (risk-signal-only)
-16. **Team coordination**: Team augmentation/restructuring in Phase -1 Sub-B. WHO confirmation via AskUserQuestion. |roles| ≤ 6. |retain| ≥ 1 guard for restructure. No team → Solo (prosoche-executor for all tasks)
+14. **Materialization routing**: Context richness determines confirmation requirements — existing tasks (resume, 0 confirmations), prior protocol output (auto_proceed, 0 confirmations), cold start (confirm, 1 confirmation). This is automatic, not user-configured
+15. **Team coordination**: Team augmentation/restructuring in Phase -1 Sub-B. WHO confirmation via AskUserQuestion. |roles| ≤ 6. |retain| ≥ 1 guard for restructure. No team → Solo (prosoche-executor for all tasks)

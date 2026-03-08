@@ -282,7 +282,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Analogia**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Prosoche**: Produces risk classification (p=Low pass-through, p=Elevated surface to user). No delegation—pure classification runs in main agent.
+- **Prosoche**: Phase -1 (materialization, team coordination) and Phases 1-3 (Gate path) run in main agent (AskUserQuestion). Phase 0 delegates p=Low tasks to prosoche-executor subagent or team agents via Agent tool.
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 - **Onboard**: General path uses inline Quick Scan (no subagents) for Phase 1-2. Targeted + scan path delegates to project-scanner (Phase 1) and session-analyzer (Phase 2), identical to Report. Main agent handles Phases 0, 3-7. Phase 5 (Trial) triggers actual protocol execution in-session.
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
