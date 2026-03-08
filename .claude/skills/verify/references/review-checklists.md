@@ -151,6 +151,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Syneidesis: GapUnnoticed → AuditedDecision (AI-guided, SURFACE)
   - Hermeneia: IntentMisarticulated → ClarifiedIntent (Hybrid, EXTRACT)
   - Telos: GoalIndeterminate → DefinedEndState (AI-guided, CO-CONSTRUCT)
+  - Horismos: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary
   - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INFER)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
   - Prosoche: ExecutionBlind → SituatedExecution (User-initiated, EVALUATE)

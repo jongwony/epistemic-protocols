@@ -38,6 +38,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 |----------|---------|-------------|
 | [Hermeneia](./hermeneia) | `/clarify` | AI keeps building what you didn't ask for |
 | [Telos](./telos) | `/goal` | You know you want something but can't define success |
+| [Horismos](./horismos) | `/bound` | You need to define what you know vs what AI should figure out |
 | [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
@@ -46,7 +47,7 @@ git clone https://github.com/jongwony/epistemic-protocols && bash epistemic-prot
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
 
-Order follows the epistemic workflow: Clarify → Goal → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
+Order follows the epistemic workflow: Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
 
 ## Utilities
 
@@ -70,6 +71,7 @@ Each protocol targets a specific point where AI collaboration can go wrong. For 
 | Hermeneia | ἑρμηνεία | Interpretation |
 | Katalepsis | κατάληψις | Grasping, comprehension |
 | Telos | τέλος | End, purpose |
+| Horismos | ὁρισμός | A bounding |
 | Aitesis | αἴτησις | Request, inquiry |
 | Analogia | ἀναλογία | Proportion |
 | Prosoche | προσοχή | Attention |
