@@ -127,6 +127,16 @@ function checkJsonSchema() {
 // ============================================================
 // Check 2: Unicode Notation Consistency
 // ============================================================
+// Strip fenced code blocks and inline code spans from text
+// Notation conventions apply to prose, not code
+function stripCodeFromText(text) {
+  // Remove fenced code blocks (```...```)
+  let result = text.replace(/```[\s\S]*?```/g, '');
+  // Remove inline code spans (`...`)
+  result = result.replace(/`[^`\n]+`/g, '');
+  return result;
+}
+
 function checkNotation() {
   const notationRules = [
     { pattern: /->(?![a-zA-Z])/g, replace: '→', name: 'arrow' },
@@ -147,8 +157,11 @@ function checkNotation() {
     // Skip README files for notation check (they may have different conventions)
     if (relativePath.includes('README')) continue;
 
+    // Strip code blocks and inline code spans — notation rules apply to prose only
+    const proseContent = stripCodeFromText(content);
+
     for (const rule of notationRules) {
-      const matches = content.match(rule.pattern);
+      const matches = proseContent.match(rule.pattern);
       if (matches) {
         results.warn.push({
           check: 'notation',
@@ -225,7 +238,15 @@ function checkCrossReference() {
       path.join(projectRoot, 'write/skills/write', refPath),
     ];
 
-    const exists = locations.some(loc => fs.existsSync(loc));
+    let exists = locations.some(loc => fs.existsSync(loc));
+
+    // Fallback: search project tree for matching filename
+    if (!exists) {
+      const basename = path.basename(refPath);
+      const fallbackFiles = walkFiles(projectRoot, e => e.name === basename, null);
+      exists = fallbackFiles.some(f => f.endsWith(refPath));
+    }
+
     if (!exists && !refPath.includes('example')) {
       results.warn.push({
         check: 'xref',
