@@ -28,6 +28,7 @@ for p in $plugins; do
   if claude plugin install "$p@$MARKETPLACE" < /dev/null 2>/dev/null; then
     installed=$((installed + 1))
   else
+    echo "  Skipped: $p"
     skipped=$((skipped + 1))
   fi
 done
