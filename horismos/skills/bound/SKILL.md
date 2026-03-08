@@ -15,14 +15,15 @@ Define epistemic boundaries per decision through AI-guided classification. Type:
 ── FLOW ──
 Horismos(T) → Probe(T) → Bᵢ →
   |Bᵢ| = 0: skip → deactivate
-  |Bᵢ| > 0: Ctx(Bᵢ) → Bᵢ' → ∀bᵢ ∈ Bᵢ': Q[AskUserQuestion](bᵢ) → A →
-    Map(A, B) → B' →
+  |Bᵢ| > 0: Ctx(Bᵢ) → (Bᵢ', Bᵣ) → ∀bᵢ ∈ Bᵢ': Q[AskUserQuestion](bᵢ) → A →
+    integrate(A, B) → B' →
     |remaining| = 0: converge(B')
-    |remaining| > 0: re-probe → Phase 1
+    |remaining| > 0: next → Phase 1
 
 ── MORPHISM ──
 TaskScope
   → probe(task, context)               -- detect boundary-undefined domains
+  → enrich(domains, codebase)          -- collect contextual evidence
   → classify(domain, as_inquiry)       -- present domain for user boundary classification
   → integrate(response, map)           -- update BoundaryMap from user classification
   → DefinedBoundary
@@ -33,19 +34,19 @@ invariant: Definition over Assumption
 
 ── TYPES ──
 T              = TaskScope (task/project requiring boundary definition)
-Probe          = T → Set(Domain) [Tool: Read, Grep, Glob]
+Probe          = T → Set(Domain)                              -- boundary-undefined domain detection
 Domain         = { name: String, description: String, evidence: Set(Evidence) }
 Evidence       = { source: String, content: String }
 Bᵢ             = Set(Domain) from Probe(T)                    -- boundary-undefined domains
+Ctx            = Context collection: Bᵢ → (Bᵢ', Bᵣ)          -- enrich + resolve
 Bᵢ'            = Set(Domain) enriched with context evidence    -- after Phase 1
 Bᵣ             = Set(Domain) resolved from context             -- auto-resolved in Phase 1
 Q              = Boundary inquiry ordered by impact [Tool: AskUserQuestion]
 A              = User answer ∈ {UserSpec(scope), AISpec(scope), NeedsCalibration, Dismiss}
 B              = BoundaryMap: Map(Domain, BoundaryClassification)
-BoundaryClassification ∈ {UserSpec, AISpec, NeedsCalibration, Dismissed}
+BoundaryClassification ∈ {UserSpec(scope), AISpec(scope), NeedsCalibration, Dismissed}
 DefinedBoundary = B where |remaining| = 0 ∨ user_esc
 Phase          ∈ {0, 1, 2, 3}
-remaining      = Bᵢ \ (Bᵣ ∪ user_resolved ∪ dismissed)
 
 ── PHASE TRANSITIONS ──
 Phase 0: T → Probe(T) → Bᵢ?                                           -- boundary detection gate (silent)
@@ -62,11 +63,11 @@ Phase 3 → Phase 1:  |remaining| > 0                                    -- re-p
 Phase 3 → converge: |remaining| = 0                                    -- all domains bounded
 
 ── LOOP ──
-J = {continue, dismiss, re_probe, converge}
-  continue:   Phase 2 → Phase 3 → Phase 2 (next domain)
-  dismiss:    Phase 2 → Phase 3 (domain dismissed, not classified)
-  re_probe:   Phase 3 → Phase 1 (integration revealed new boundary-undefined domains)
-  converge:   Phase 3 → deactivate (all domains bounded)
+J = {next, converge}
+  next:      Phase 3 → Phase 1 → Phase 2 (|remaining| > 0: context refresh, classify next domain)
+  converge:  Phase 3 → deactivate (|remaining| = 0: all domains bounded)
+
+Answer types (UserSpec/AISpec/NeedsCalibration/Dismiss) determine BoundaryMap entry, not loop path.
 
 ── CONVERGENCE ──
 converge iff |remaining| = 0 ∨ user_esc
@@ -82,14 +83,14 @@ Phase 3       (state)   → Internal state update
 ── MODE STATE ──
 Λ = { phase: Phase, T: TaskScope,
       domains: Set(Domain),
-      context_resolved: Set(Domain),
-      user_resolved: Set(Domain),
+      context_resolved: Set(Domain),     -- Bᵣ from TYPES
+      user_responded: Set(Domain),
       remaining: Set(Domain),
       dismissed: Set(Domain),
       boundary_map: BoundaryMap,
-      history: List(Domain, A),
+      history: List<(Domain, A)>,
       active: Bool, cause_tag: String }
--- Invariant: domains = context_resolved ∪ user_resolved ∪ remaining ∪ dismissed (pairwise disjoint)
+-- Invariant: domains = context_resolved ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
 ```
 
 ## Core Principle
@@ -298,7 +299,7 @@ After integration:
 
 ## Rules
 
-1. **AI-guided, user-classified**: AI detects boundary-undefined domains; classification requires user choice via AskUserQuestion (Phase 2). AI detection requires implicit confirmation via proceeding.
+1. **AI-guided, user-classified**: AI detects boundary-undefined domains; classification requires user choice via AskUserQuestion (Phase 2). AI detection is implicitly confirmed when the user engages with classification (Phase 2 AskUserQuestion response, not Esc).
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present structured options (text presentation = protocol violation). Options are UserSpec/AISpec/NeedsCalibration/Dismiss — never open-ended.
 3. **Context collection first**: Before asking the user, collect contextual evidence through Read/Grep/Glob codebase exploration to auto-resolve where possible and enrich remaining domains (Phase 1).
 4. **Definition over Assumption**: When boundary ownership is unclear, define explicitly rather than assume — silence is worse than a dismissed classification.

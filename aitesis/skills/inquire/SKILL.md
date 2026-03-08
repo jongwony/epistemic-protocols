@@ -70,11 +70,12 @@ Phase 0 Scan (infer)    → Internal analysis (no external tool)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: ExecutionPlan, uncertainties: Set(Uncertainty),
-      context_resolved: Set(Uncertainty), user_resolved: Set(Uncertainty),
+      context_resolved: Set(Uncertainty),  -- Uᵣ from TYPES
+      user_responded: Set(Uncertainty),
       remaining: Set(Uncertainty), dismissed: Set(Uncertainty),
       history: List<(Uncertainty, A)>, active: Bool,
       cause_tag: String }
--- Invariant: uncertainties = context_resolved ∪ user_resolved ∪ remaining ∪ dismissed (pairwise disjoint)
+-- Invariant: uncertainties = context_resolved ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
 ```
 
 ## Core Principle
