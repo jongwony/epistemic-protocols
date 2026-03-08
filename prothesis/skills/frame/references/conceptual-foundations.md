@@ -42,7 +42,7 @@ This degradation preserves Phase 0–2 epistemic value and Phase 3 analysis isol
 
 ## Design Rationale
 
-Origin: [Don't Ask AI "How Do You Think?"](https://medium.com/delightroom/ai%EC%97%90%EA%B2%8C-%EC%96%B4%EB%96%BB%EA%B2%8C-%EC%83%9D%EA%B0%81%ED%95%B4-%EB%9D%BC%EA%B3%A0-%EB%AC%BB%EC%A7%80-%EB%A7%88%EC%84%B8%EC%9A%94-e33c09646469) (DelightRoom Engineering Blog). The blog describes the motivational narrative; this section documents the design decisions and their epistemological basis.
+Origin: [Don't Ask AI "How Do You Think?"](https://medium.com/delightroom/ai%EC%97%90%EA%B2%8C-%EC%96%B4%EB%96%BB%EA%B2%8C-%EC%83%9D%EA%B0%81%ED%95%B4-%EB%9D%BC%EA%B3%A0-%EB%AC%BB%EC%A7%80-%EB%A7%88%EC%84%B8%EC%9A%94-e33c09646469) (DelightRoom Engineering Blog, 2026-03). The blog describes the motivational narrative; this section documents the design decisions and their epistemological basis.
 
 ### Single-Framework Fixation: Chain Failure Blocking
 
@@ -52,7 +52,7 @@ Three design choices in Prothesis break this failure chain at different stages:
 
 | Failure stage | Design choice | Blocking mechanism |
 |---|---|---|
-| Framework absence → premature closure | Open-world trigger | Detects when problem space is not fully enumerated; activates before AI commits to a single framework |
+| Framework absence → premature closure | Open-world trigger (`framework_absent(U)` gate) | Detects when problem space is not fully enumerated; activates before AI commits to a single framework |
 | Self-diagnosis impossible → meta-ignorance persists | AI-guided initiator | External detection bypasses the user's inability to recognize their own framework blindness |
 | Sequential analysis → anchoring cascade | Isolated teammate context | Physical context separation prevents earlier perspectives from contaminating later ones |
 
@@ -72,7 +72,7 @@ This does not make Prothesis fully AI-autonomous. Layer 2 (AI-guided) detects th
 
 Prothesis Phases 0–4 constitute pure **theoria** (θεωρία) — contemplative inquiry that produces the Lens `L` as a theoretical artifact. The Lens reveals what different frameworks show; it changes nothing.
 
-The transition from theoria to praxis occurs at the LOOP's routing step, when `J=wrap_up` triggers `recommend_protocols(L)` — suggesting downstream protocols (Syneidesis, Telos, Aitesis, etc.) based on what the Lens revealed. This is an **explicit boundary**: the user must choose to act on the Lens by following a downstream recommendation or proceeding with their own plan.
+The transition from theoria to praxis occurs at the LOOP's routing step, when `J=wrap_up` triggers `recommend_protocols(L)` — suggesting downstream protocols (Syneidesis, Telos, etc.) based on what the Lens revealed. This is an **explicit boundary**: the user must choose to act on the Lens by following a downstream recommendation or proceeding with their own plan.
 
 **Design principle** (Placement over Prescription): Prothesis places perspectives before the user; it does not prescribe action. Automatic transition from analysis to execution would violate this principle — the user might want to contemplate the Lens without acting, request additional perspectives, or reject the analysis entirely. Each of these is a valid outcome of theoria.
 
