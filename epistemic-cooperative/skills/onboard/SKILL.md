@@ -108,7 +108,7 @@ From collected metadata, infer:
 - **Conversation patterns**: Request clarity level, incremental vs. batch requests, question types (how/why/what)
 - **Task types**: Ratio of feature development, debugging, refactoring, documentation
 
-If no `sessions-index.json` files found, set fallback tier to Tier 3 (Starter Trio).
+If no `sessions-index.json` files found, set fallback tier to Tier 2 (Starter Trio).
 
 **Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization — behavioral pattern extraction and session diagnostics belong in `/report`.
 
@@ -199,7 +199,7 @@ Test protocol recognition through situation-based questions. Question format dif
 **Question sourcing** (in priority order):
 1. **Ambiguous scenarios from Phase 3 filtering** — situations that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/goal` or `/frame`)
 2. Protocols from TRIAL + MAP results (personalized)
-3. Codebase-derived scenarios (if session data available)
+3. Profile-personalized variants of preset scenarios (if User Context Profile available)
 4. Preset scenarios from `references/scenarios.md`
 
 #### Targeted Path
@@ -260,19 +260,13 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 3. **Report CTA**: "Run `/report` for a comprehensive analysis with evidence-backed recommendations and an HTML profile."
 
-4. **Installation check**: Verify whether tried/recommended protocols are installed.
-   - Check: Glob `~/.claude/plugins/cache/epistemic-protocols/{plugin-name}/*/skills/*/SKILL.md`
-   - Installed → "Try `/X` in your next real session"
-   - Not installed → `claude plugin install epistemic-protocols/{plugin-name}`
-   - If 2+ not installed → also mention `bash scripts/install.sh`
+4. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring adjacent protocols in the workflow.
 
-5. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring adjacent protocols in the workflow.
-
-6. **Advanced Usage** (bonus tips after main guide):
+5. **Advanced Usage** (bonus tips after main guide):
 
    Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/attend`, show the three-step pre-execution chain (inquire → gap → attend).
 
-7. **Continue exploring** (when MAP results contain unexplored protocols):
+6. **Continue exploring** (when MAP results contain unexplored protocols):
 
    Call AskUserQuestion:
    - Text: "Want to experience another protocol?"
@@ -316,6 +310,6 @@ Target 6-10 calls per session:
 4. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
 5. **Immediate feedback**: Quiz answers get instant feedback with distinction explanations. Never batch quiz results.
 6. **No auto-install**: Guide installation but never install plugins automatically.
-7. **Session file access**: Access session JSONL via Grep or targeted Read with offset/limit. Never Read entire JSONL files.
+7. **Session index access**: Access `sessions-index.json` via Glob + Read. Parse `entries` for `firstPrompt` and `summary` fields only. Never Read entire session JSONL files.
 8. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.
 9. **Single session**: The entire onboarding completes in one session. No cross-session state required.

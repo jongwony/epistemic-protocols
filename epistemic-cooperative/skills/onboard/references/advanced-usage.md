@@ -1,6 +1,6 @@
 # Advanced Usage Patterns
 
-Curated protocol usage patterns for Phase 7 Advanced Usage tips. Sourced from operational data across 1,100+ sessions over 15 days.
+Curated protocol usage patterns for Phase 6 Advanced Usage tips. Sourced from operational data across 1,100+ sessions over 15 days.
 
 ## Protocol Chaining
 
