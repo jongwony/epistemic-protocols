@@ -1,7 +1,7 @@
 {
   "version": "2.1.0",
   "nodes": [
-    "hermeneia", "telos", "aitesis", "analogia",
+    "hermeneia", "telos", "horismos", "aitesis", "analogia",
     "prothesis", "syneidesis", "prosoche", "epharmoge", "katalepsis"
   ],
   "edge_types": {
@@ -35,6 +35,10 @@
     { "source": "hermeneia", "target": "aitesis", "type": "advisory", "satisfies": "배경 갭이 실행 컨텍스트 영역이면 Aitesis 전환 제안" },
     { "source": "prothesis", "target": "analogia", "type": "advisory", "satisfies": "관점 시뮬레이션이 매핑 구성 컨텍스트를 제공" },
     { "source": "aitesis", "target": "analogia", "type": "advisory", "satisfies": "추론된 컨텍스트가 매핑 도메인 식별을 좁힘" },
-    { "source": "analogia", "target": "syneidesis", "type": "advisory", "satisfies": "검증된 매핑이 갭 감지 정확성을 높임" }
+    { "source": "analogia", "target": "syneidesis", "type": "advisory", "satisfies": "검증된 매핑이 갭 감지 정확성을 높임" },
+    { "source": "telos", "target": "horismos", "type": "precondition", "satisfies": "목표 정의 → 경계 정의 가능" },
+    { "source": "horismos", "target": "aitesis", "type": "advisory", "satisfies": "경계 맵이 컨텍스트 추론 범위를 좁힘" },
+    { "source": "horismos", "target": "prothesis", "type": "advisory", "satisfies": "경계 맵이 관점 선택 범위를 좁힘" },
+    { "source": "horismos", "target": "prosoche", "type": "advisory", "satisfies": "경계 맵이 위험 평가 임계값을 조정" }
   ]
 }
