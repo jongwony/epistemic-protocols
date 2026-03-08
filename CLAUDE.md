@@ -154,7 +154,7 @@ Detect application-context mismatch after execution when correct output may not 
 ### Epistemic Cooperative (Report + Onboard + Dashboard)
 Utility skill group for session analytics.
 - **Report** `/report`: Generate epistemic usage analysis report with evidence-backed protocol recommendations and HTML artifact. Analytical output — pattern evidence, anti-pattern diagnostics, session snippets.
-- **Onboard** `/onboard`: Quest-based protocol learning through scenario experience, trial execution, and Socratic quiz. Flow: General (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted (Entry → Scan → Extract → Map → Scenario → Trial → Quiz → Guide). Phase 0 selects learning path; General path uses inline Quick Scan, Targeted + scan path shares infrastructure with `/report`; Phases 3-7 deliver experiential learning.
+- **Onboard** `/onboard`: Quest-based protocol learning through scenario experience, trial execution, and Socratic quiz. Flow: General/Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects learning path; all scan paths share inline Quick Scan (User Context Profile extraction); Phases 3-6 deliver experiential learning.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
 
 ### Reflexion
@@ -294,7 +294,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Analogia**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Prosoche**: Phase -1 (materialization, team coordination) and Phases 1-3 (Gate path) run in main agent (AskUserQuestion). Phase 0 delegates p=Low tasks to prosoche-executor subagent or team agents via Agent tool.
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
-- **Onboard**: General path uses inline Quick Scan (no subagents) for Phase 1-2. Targeted + scan path delegates to project-scanner (Phase 1) and session-analyzer (Phase 2), identical to Report. Main agent handles Phases 0, 3-7. Phase 5 (Trial) triggers actual protocol execution in-session.
+- **Onboard**: All scan paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases (0-6). Phase 4 (Trial) triggers actual protocol execution in-session.
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 
 ## Git Conventions
