@@ -15,7 +15,7 @@ command -v claude >/dev/null 2>&1 || { echo "Error: claude CLI not found. Instal
 command -v python3 >/dev/null 2>&1 || { echo "Error: python3 not found." >&2; exit 1; }
 
 echo "Adding marketplace..."
-claude plugin marketplace add "https://github.com/$REPO" 2>/dev/null || true
+claude plugin marketplace add "https://github.com/$REPO" < /dev/null 2>/dev/null || true
 
 echo "Fetching plugin list..."
 plugins=$(curl -fsSL "$MANIFEST_URL" \
@@ -25,7 +25,7 @@ installed=0
 skipped=0
 
 for p in $plugins; do
-  if claude plugin install "$p@$MARKETPLACE" 2>/dev/null; then
+  if claude plugin install "$p@$MARKETPLACE" < /dev/null 2>/dev/null; then
     installed=$((installed + 1))
   else
     skipped=$((skipped + 1))
