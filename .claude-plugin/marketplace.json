@@ -60,6 +60,11 @@
       "description": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)"
     },
     {
+      "name": "horismos",
+      "source": "./horismos",
+      "description": "Define epistemic boundaries per decision — /bound (ὁρισμός: a bounding)"
+    },
+    {
       "name": "epistemic-cooperative",
       "source": "./epistemic-cooperative",
       "description": "Session analytics: /report for usage analysis, /onboard for quest-based protocol learning, /dashboard for coverage dashboard"

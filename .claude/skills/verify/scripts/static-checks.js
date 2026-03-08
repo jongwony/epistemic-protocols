@@ -21,17 +21,19 @@ const PROTOCOL_FILES = [
   'hermeneia/skills/clarify/SKILL.md',
   'katalepsis/skills/grasp/SKILL.md',
   'telos/skills/goal/SKILL.md',
+  'horismos/skills/bound/SKILL.md',
   'aitesis/skills/inquire/SKILL.md',
   'analogia/skills/ground/SKILL.md',
   'epharmoge/skills/contextualize/SKILL.md',
   'prosoche/skills/attend/SKILL.md',
 ];
 
-const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge';
-const CANONICAL_WORKFLOW = 'Clarify → Goal → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp';
+const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge';
+const CANONICAL_WORKFLOW = 'Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp';
 const PRECEDENCE_FILES = [
   'hermeneia/skills/clarify/SKILL.md',
   'telos/skills/goal/SKILL.md',
+  'horismos/skills/bound/SKILL.md',
   'aitesis/skills/inquire/SKILL.md',
   'prothesis/skills/frame/SKILL.md',
   'analogia/skills/ground/SKILL.md',
@@ -922,6 +924,7 @@ function checkCrossRefScan() {
     'Hermeneia':  { deficit: 'IntentMisarticulated', resolution: 'ClarifiedIntent' },
     'Katalepsis': { deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
     'Telos':      { deficit: 'GoalIndeterminate', resolution: 'DefinedEndState' },
+    'Horismos':   { deficit: 'BoundaryUndefined', resolution: 'DefinedBoundary' },
     'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
     'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
     'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
@@ -1028,7 +1031,7 @@ function checkCrossRefScan() {
 
   const claudeRequirements = [
     {
-      pattern: /Multi-activation order: \*\*Clarify → Goal → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp\*\*/,
+      pattern: /Multi-activation order: \*\*Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp\*\*/,
       message: 'CLAUDE.md missing canonical workflow ordering with Ground'
     },
     {
