@@ -48,6 +48,13 @@ Phase 4: Synthesis     → Cross-dialogue check → Convergence/divergence → I
 - Simple factual questions
 - User already specified a perspective
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install prothesis@epistemic-protocols
+```
+
 ## Usage
 
 ```

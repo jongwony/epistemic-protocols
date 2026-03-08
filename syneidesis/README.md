@@ -36,6 +36,13 @@ Phase 2: Adjustment   → Incorporate response into state
 
 **Judgment, not acknowledgment**: When a gap is surfaced, you evaluate its relevance — address it, dismiss it, or defer. The AI surfaces; you judge.
 
+## Install
+
+```
+claude plugin marketplace add https://github.com/jongwony/epistemic-protocols
+claude plugin install syneidesis@epistemic-protocols
+```
+
 ## Usage
 
 ```
