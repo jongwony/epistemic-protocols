@@ -47,6 +47,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Protocol | Key Patterns |
 |----------|-------------|
 | Telos `/goal` | Vague first prompts ("improve", "optimize", "ideas for"), `wrong_approach` friction |
+| Horismos `/bound` | Boundary probe, domain classification, BoundaryMap |
 | Hermeneia `/clarify` | Same file 3+ edits (same intent), `misunderstood_request` friction |
 | Syneidesis `/gap` | Same file 3+ edits (different concerns), `excessive_changes` friction |
 | Prothesis `/frame` | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
@@ -64,7 +65,7 @@ Present the protocol catalog as text output FIRST (always), then ask path select
 
 **Protocol Catalog** (always rendered as text before asking):
 
-Present the 9 protocols from the Data Sources table as a numbered list with name + one-line description.
+Present the 10 protocols from the Data Sources table as a numbered list with name + one-line description.
 
 **AskUserQuestion #1**:
 - Text: "Which path?"
@@ -77,7 +78,7 @@ Present the 9 protocols from the Data Sources table as a numbered list with name
 **If Targeted + no protocol specified → AskUserQuestion #2**:
 - Text: "Which protocol? (refer to catalog above, type name or number in Other)"
 - Options:
-  - "Pre-execution — /clarify, /goal, /inquire"
+  - "Pre-execution — /clarify, /goal, /bound, /inquire"
   - "Analysis — /frame, /ground, /gap"
   - "Execution — /attend, /contextualize, /grasp"
 
@@ -101,7 +102,7 @@ Lightweight user context collection for the General path. Runs inline with Grep 
 
 **Step 1: Protocol usage history**
 
-Grep `~/.claude/history.jsonl` for protocol slash commands matching `"display":"/{command}"` pattern (`/frame`, `/gap`, `/clarify`, `/goal`, `/inquire`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to identify explored vs. unexplored protocols.
+Grep `~/.claude/history.jsonl` for protocol slash commands matching `"display":"/{command}"` pattern (`/frame`, `/gap`, `/clarify`, `/goal`, `/bound`, `/inquire`, `/ground`, `/attend`, `/contextualize`, `/grasp`). Count occurrences per command to identify explored vs. unexplored protocols.
 
 If `history.jsonl` does not exist, produce empty usage counts.
 
@@ -317,6 +318,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 - `/gap` ↔ `/attend`: both about "checking before action" but different targets (decision gaps vs. execution risks)
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
+- `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)
 
 **Path-specific question counts**:
 - **Targeted**: 2-3 binary + 1 reverse + 1 design = 4-5 questions

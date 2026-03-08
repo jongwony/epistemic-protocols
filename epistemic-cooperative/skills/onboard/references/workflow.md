@@ -1,7 +1,7 @@
 # Epistemic Workflow
 
 ```
-[Intent] → [Goal] → [Context] → [Perspective] → [Mapping] → [Decision] → [Execution] → [Application] → [Comprehension]
-   ↑          ↑          ↑            ↑              ↑            ↑             ↑              ↑               ↑
-/clarify    /goal    /inquire      /frame        /ground        /gap        /attend     /contextualize     /grasp
+[Intent] → [Goal] → [Boundary] → [Context] → [Perspective] → [Mapping] → [Decision] → [Execution] → [Application] → [Comprehension]
+   ↑          ↑          ↑            ↑             ↑              ↑            ↑             ↑              ↑               ↑
+/clarify    /goal      /bound      /inquire      /frame        /ground        /gap        /attend     /contextualize     /grasp
 ```
