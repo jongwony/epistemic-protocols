@@ -85,7 +85,8 @@ Phase 0 Detect  (infer)     → Internal analysis (no external tool)
 ── MODE STATE ──
 Λ = { phase: Phase, R: AIOutput, Sₐ: Domain, Sₜ: Domain,
       mappings: Set(Correspondence), confirmed: Set(Correspondence),
-      dismissed: Set(Correspondence), instantiations: List<Example>,
+      dismissed: Set(Correspondence), pending: Set(Correspondence),
+      instantiations: List<Example>,
       validations: List<(Example, V)>, attempts: Nat, active: Bool,
       cause_tag: String }
 -- Invariant: mappings = confirmed ∪ dismissed ∪ pending (pairwise disjoint)
