@@ -1497,11 +1497,12 @@ function checkPrecedenceLinearExtension() {
     return;
   }
 
-  // Expand precondition edges (reuse wildcard logic from checkGraphIntegrity)
+  // Expand precondition edges (mirrors checkGraphIntegrity wildcard logic)
   const preconditionEdges = [];
   for (const edge of edges) {
     if (!edge || typeof edge !== 'object') continue;
     if (edge.type !== 'precondition') continue;
+    if (edge.target === '*') continue; // invalid — checkGraphIntegrity catches this
     if (edge.source === '*') {
       for (const node of nodes) {
         if (node !== edge.target) {
@@ -1600,9 +1601,18 @@ function checkPartitionInvariant() {
 
     const modeStateSection = modeStateMatch[1];
 
-    // Find invariant line
+    // Find invariant line (single-line only; multi-line invariants require regex update)
     const invMatch = modeStateSection.match(invariantPattern);
-    if (!invMatch) continue; // No partition invariant — skip (normal)
+    if (!invMatch) {
+      if (/-- Invariant:/.test(modeStateSection)) {
+        results.warn.push({
+          check: checkName,
+          file: relPath,
+          message: `${protocolName}: MODE STATE contains "-- Invariant:" but failed to parse — may be multi-line or non-standard format`
+        });
+      }
+      continue;
+    }
 
     const universeSet = invMatch[1];
     const rhsRaw = invMatch[2];
@@ -1641,19 +1651,16 @@ function checkPartitionInvariant() {
     }
 
     // Verify each partition member exists in MODE STATE fields
-    for (const member of partitionMembers) {
-      if (!fieldNames.has(member)) {
-        results.warn.push({
-          check: checkName,
-          file: relPath,
-          message: `${protocolName}: partition member "${member}" not found in MODE STATE fields (may be implicit/derived)`
-        });
-        // warn, not fail — some members like Analogia's "pending" are implicit
-      }
+    const missingMembers = partitionMembers.filter(m => !fieldNames.has(m));
+    for (const member of missingMembers) {
+      results.warn.push({
+        check: checkName,
+        file: relPath,
+        message: `${protocolName}: partition member "${member}" not found in MODE STATE fields (may be implicit/derived)`
+      });
     }
 
     if (!subCheckFailed) {
-      const missingMembers = partitionMembers.filter(m => !fieldNames.has(m));
       if (missingMembers.length === 0) {
         results.pass.push({
           check: checkName,
