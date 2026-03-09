@@ -44,8 +44,6 @@ Order follows the epistemic workflow: Clarify → Goal → Bound → Inquire →
 | Plugin | Command | Purpose |
 |--------|---------|---------|
 | [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard` | Protocol learning, usage analysis, and coverage dashboard |
-| [Reflexion](./reflexion) | `/reflect` | Cross-session learning |
-| [Write](./write) | `/write` | Multi-perspective blog drafting |
 
 ## Design
 
