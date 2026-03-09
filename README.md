@@ -33,7 +33,7 @@ For individual plugin installation, see each protocol's README.
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
-| [Prosoche](./prosoche) | `/attend` | Want a risk check before executing a complex plan |
+| [Prosoche](./prosoche) | `/attend` | Executing tasks and want risky actions gated for your judgment |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
 

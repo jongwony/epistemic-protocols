@@ -33,7 +33,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 | [Prothesis](./prothesis) | `/frame` | 여러 관점이 필요한데 어떤 것이 맞는지 모를 때 |
 | [Syneidesis](./syneidesis) | `/gap` | 실행하려는데 뭔가 빠뜨린 것 같을 때 |
 | [Analogia](./analogia) | `/ground` | AI 추천이 이론적으론 맞는데 내 상황에 맞는지 모를 때 |
-| [Prosoche](./prosoche) | `/attend` | 복잡한 계획 실행 전 위험 점검이 필요할 때 |
+| [Prosoche](./prosoche) | `/attend` | 작업 실행 중 위험한 행동만 사용자 판단을 거치고 싶을 때 |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
 | [Katalepsis](./katalepsis) | `/grasp` | AI가 큰 변경을 했는데 실제로 이해가 필요할 때 |
 
