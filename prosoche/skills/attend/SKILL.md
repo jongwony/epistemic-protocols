@@ -345,7 +345,7 @@ When delegating to team agents without the `attend` skill, inject Gate awareness
 > Output format: `GATE_DETECTED: true`, `Signal: [type]`, `Evidence: [specific action]`
 
 Gate awareness injection path:
-- Post-`/attend` spawn (Agent) → system context injection (higher compliance)
+- Post-`/attend` spawn (Agent) → system context injection (higher compliance than conversation-context path)
 - Pre-existing team member (SendMessage) → conversation context injection (see Known Limitations)
 
 **Classification scope**: Pending tool call parameters, command strings, target paths/URLs. Does NOT execute the action or modify state.
