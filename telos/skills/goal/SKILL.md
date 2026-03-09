@@ -318,6 +318,8 @@ Options:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
 
+**Transformation check**: Before suggesting next protocols, briefly assess whether the defined goals changed the implementation scope. State in one sentence what shifted (e.g., "The GoalContract's latency requirement eliminates the batch processing approach") or note that the original scope was confirmed by the defined goals. This is informational text — not an AskUserQuestion call.
+
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
 - Boundary undefined for goal-related decisions → suggest `/bound` (epistemic boundary definition)

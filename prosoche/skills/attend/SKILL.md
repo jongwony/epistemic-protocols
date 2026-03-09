@@ -423,6 +423,8 @@ After adaptation:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
 
+**Transformation check**: Before suggesting next protocols, briefly assess whether the execution outcomes changed the remaining plan. State in one sentence what shifted (e.g., "The halted deployment task requires resolving the staging environment issue before proceeding") or note that all tasks completed as planned. This is informational text — not an AskUserQuestion call.
+
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
 - Post-execution applicability concerns → suggest `/contextualize` (application-context mismatch detection)

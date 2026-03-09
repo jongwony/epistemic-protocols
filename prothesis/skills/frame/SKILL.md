@@ -440,6 +440,8 @@ Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Para
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
 
+**Transformation check**: Before suggesting next protocols, briefly assess whether the selected perspectives changed the analytical approach. State in one sentence what shifted (e.g., "The security perspective revealed attack surface concerns that narrow the implementation options") or note that the original approach was confirmed from all selected viewpoints. This is informational text — not an AskUserQuestion call.
+
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
 - Mode 2: L.divergence reveals unaddressed tensions → suggest `/gap` (gap audit on divergent findings)

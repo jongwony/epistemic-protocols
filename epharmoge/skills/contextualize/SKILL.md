@@ -255,6 +255,8 @@ After adaptation:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
 
+**Transformation check**: Before suggesting next protocols, briefly assess whether the contextualized result changed the follow-up work. State in one sentence what shifted (e.g., "The adapted deployment target requires updating the CI pipeline configuration") or note that the original result was confirmed as contextually appropriate. This is informational text — not an AskUserQuestion call.
+
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
 - Comprehension check needed on contextualized result → suggest `/grasp` (verified understanding)

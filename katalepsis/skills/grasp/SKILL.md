@@ -372,6 +372,8 @@ Use:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
 
+**Transformation check**: Before suggesting next protocols, briefly assess whether the verified understanding changed the user's approach. State in one sentence what shifted (e.g., "The user's revised understanding of the caching layer changes the optimization strategy") or note that the original understanding was confirmed as accurate. This is informational text — not an AskUserQuestion call.
+
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
 - Verified understanding reveals decision gaps → suggest `/gap` (gap audit on understood work)
