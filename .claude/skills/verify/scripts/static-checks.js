@@ -1448,6 +1448,230 @@ function checkOnboardSync() {
 }
 
 // ============================================================
+// Check 12: precedence-linear-extension
+// Verify CANONICAL_PRECEDENCE total order is a valid linear extension
+// of graph.json precondition partial order
+// ============================================================
+function checkPrecedenceLinearExtension() {
+  const checkName = 'precedence-linear-extension';
+
+  // Parse CANONICAL_PRECEDENCE → ordered array (lowercase)
+  const precedenceOrder = CANONICAL_PRECEDENCE
+    .split('→')
+    .map(s => s.trim().toLowerCase());
+
+  // Build index map for O(1) position lookup
+  const positionOf = new Map();
+  precedenceOrder.forEach((name, idx) => positionOf.set(name, idx));
+
+  // Load graph.json
+  const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
+  if (!fs.existsSync(graphPath)) {
+    results.warn.push({
+      check: checkName,
+      file: 'graph.json',
+      message: 'graph.json not found, skipping linear extension check'
+    });
+    return;
+  }
+
+  let graph;
+  try {
+    graph = JSON.parse(fs.readFileSync(graphPath, 'utf8'));
+  } catch (e) {
+    results.fail.push({
+      check: checkName,
+      file: 'graph.json',
+      message: `Invalid JSON: ${e.message}`
+    });
+    return;
+  }
+
+  const { nodes, edges } = graph;
+  if (!Array.isArray(nodes) || !Array.isArray(edges)) {
+    results.fail.push({
+      check: checkName,
+      file: 'graph.json',
+      message: 'graph.json requires "nodes" and "edges" arrays'
+    });
+    return;
+  }
+
+  // Expand precondition edges (reuse wildcard logic from checkGraphIntegrity)
+  const preconditionEdges = [];
+  for (const edge of edges) {
+    if (!edge || typeof edge !== 'object') continue;
+    if (edge.type !== 'precondition') continue;
+    if (edge.source === '*') {
+      for (const node of nodes) {
+        if (node !== edge.target) {
+          preconditionEdges.push({ source: node, target: edge.target });
+        }
+      }
+    } else {
+      preconditionEdges.push({ source: edge.source, target: edge.target });
+    }
+  }
+
+  let violated = false;
+  let verifiedCount = 0;
+
+  for (const { source, target } of preconditionEdges) {
+    const srcPos = positionOf.get(source);
+    const tgtPos = positionOf.get(target);
+
+    // katalepsis is not in CANONICAL_PRECEDENCE (structurally last)
+    // Edges involving katalepsis: verify * → katalepsis exists (all-last guarantee)
+    if (target === 'katalepsis') {
+      // katalepsis as target is valid — it's structurally constrained to be last
+      verifiedCount++;
+      continue;
+    }
+    if (source === 'katalepsis') {
+      // katalepsis should not be a precondition source for non-katalepsis targets
+      results.fail.push({
+        check: checkName,
+        file: 'graph.json',
+        message: `katalepsis is precondition source for ${target} — violates structural last constraint`
+      });
+      violated = true;
+      continue;
+    }
+
+    if (srcPos === undefined) {
+      results.fail.push({
+        check: checkName,
+        file: 'graph.json',
+        message: `Precondition source "${source}" not found in CANONICAL_PRECEDENCE`
+      });
+      violated = true;
+      continue;
+    }
+    if (tgtPos === undefined) {
+      results.fail.push({
+        check: checkName,
+        file: 'graph.json',
+        message: `Precondition target "${target}" not found in CANONICAL_PRECEDENCE`
+      });
+      violated = true;
+      continue;
+    }
+
+    if (srcPos >= tgtPos) {
+      results.fail.push({
+        check: checkName,
+        file: 'graph.json',
+        message: `Precondition edge ${source}→${target} violates CANONICAL_PRECEDENCE order (position ${srcPos} >= ${tgtPos})`
+      });
+      violated = true;
+    } else {
+      verifiedCount++;
+    }
+  }
+
+  if (!violated) {
+    results.pass.push({
+      check: checkName,
+      file: 'graph.json',
+      message: `CANONICAL_PRECEDENCE is a valid linear extension of precondition partial order (${verifiedCount} edges verified)`
+    });
+  }
+}
+
+// ============================================================
+// Check 13: partition-invariant
+// Verify MODE STATE pairwise disjoint partition invariants —
+// universe set and partition members exist as MODE STATE fields
+// ============================================================
+function checkPartitionInvariant() {
+  const checkName = 'partition-invariant';
+  const invariantPattern = /-- Invariant:\s*(\w+)\s*=\s*(.+?)\s*\(pairwise disjoint\)/;
+
+  for (const relPath of PROTOCOL_FILES) {
+    const filePath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(filePath)) continue;
+
+    const content = fs.readFileSync(filePath, 'utf8');
+    const protocolName = relPath.split('/')[0];
+
+    // Extract MODE STATE section (from marker to closing ```)
+    const modeStateMatch = content.match(/── MODE STATE ──([\s\S]*?)```/);
+    if (!modeStateMatch) continue;
+
+    const modeStateSection = modeStateMatch[1];
+
+    // Find invariant line
+    const invMatch = modeStateSection.match(invariantPattern);
+    if (!invMatch) continue; // No partition invariant — skip (normal)
+
+    const universeSet = invMatch[1];
+    const rhsRaw = invMatch[2];
+    const partitionMembers = rhsRaw.split('∪').map(s => s.trim());
+
+    // Extract MODE STATE field names from Λ = { ... }
+    const lambdaMatch = modeStateSection.match(/Λ\s*=\s*\{([^}]+)\}/);
+    if (!lambdaMatch) {
+      results.fail.push({
+        check: checkName,
+        file: relPath,
+        message: `${protocolName}: MODE STATE has invariant but no Λ definition found`
+      });
+      continue;
+    }
+
+    const lambdaBody = lambdaMatch[1];
+    // Extract field names: "fieldName:" pattern, handling multi-line with comments
+    const fieldNames = new Set();
+    const fieldPattern = /(\w+)\s*:/g;
+    let fm;
+    while ((fm = fieldPattern.exec(lambdaBody)) !== null) {
+      fieldNames.add(fm[1]);
+    }
+
+    let subCheckFailed = false;
+
+    // Verify universe set exists in MODE STATE fields
+    if (!fieldNames.has(universeSet)) {
+      results.fail.push({
+        check: checkName,
+        file: relPath,
+        message: `${protocolName}: universe set "${universeSet}" not found in MODE STATE fields`
+      });
+      subCheckFailed = true;
+    }
+
+    // Verify each partition member exists in MODE STATE fields
+    for (const member of partitionMembers) {
+      if (!fieldNames.has(member)) {
+        results.warn.push({
+          check: checkName,
+          file: relPath,
+          message: `${protocolName}: partition member "${member}" not found in MODE STATE fields (may be implicit/derived)`
+        });
+        // warn, not fail — some members like Analogia's "pending" are implicit
+      }
+    }
+
+    if (!subCheckFailed) {
+      const missingMembers = partitionMembers.filter(m => !fieldNames.has(m));
+      if (missingMembers.length === 0) {
+        results.pass.push({
+          check: checkName,
+          file: relPath,
+          message: `${protocolName}: partition invariant verified — ${universeSet} = ${partitionMembers.join(' ∪ ')} (${partitionMembers.length}-way partition)`
+        });
+      } else {
+        results.pass.push({
+          check: checkName,
+          file: relPath,
+          message: `${protocolName}: partition invariant structurally valid — ${universeSet} = ${partitionMembers.join(' ∪ ')} (${partitionMembers.length}-way partition, ${missingMembers.length} implicit member(s): ${missingMembers.join(', ')})`
+        });
+      }
+    }
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -1462,6 +1686,8 @@ try {
   checkSpecVsImpl();
   checkCrossRefScan();
   checkOnboardSync();
+  checkPrecedenceLinearExtension();
+  checkPartitionInvariant();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
