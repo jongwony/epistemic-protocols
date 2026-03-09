@@ -16,10 +16,6 @@
     "suppression": {
       "semantics": "constraint",
       "description": "Prevents co-activation of protocols addressing overlapping deficits on the same scope. Asymmetric — direction determines which protocol yields."
-    },
-    "transition": {
-      "semantics": "functor",
-      "description": "State-preserving protocol switch. Maps source protocol's runtime state into target's entry state, preserving structure (coordinator, team, context)."
     }
   },
   "edges": [
@@ -39,6 +35,8 @@
     { "source": "telos", "target": "horismos", "type": "precondition", "satisfies": "목표 정의 → 경계 정의 가능" },
     { "source": "horismos", "target": "aitesis", "type": "advisory", "satisfies": "경계 맵이 컨텍스트 추론 범위를 좁힘" },
     { "source": "horismos", "target": "prothesis", "type": "advisory", "satisfies": "경계 맵이 관점 선택 범위를 좁힘" },
-    { "source": "horismos", "target": "prosoche", "type": "advisory", "satisfies": "경계 맵이 위험 평가 임계값을 조정" }
+    { "source": "horismos", "target": "prosoche", "type": "advisory", "satisfies": "경계 맵이 위험 평가 임계값을 조정" },
+    { "source": "horismos", "target": "analogia", "type": "advisory", "satisfies": "경계 맵이 매핑 도메인 식별을 좁힘" },
+    { "source": "horismos", "target": "syneidesis", "type": "advisory", "satisfies": "경계 맵이 갭 감지 범위를 좁힘" }
   ]
 }

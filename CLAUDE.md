@@ -258,7 +258,6 @@ Protocol dependency graph at `.claude/skills/verify/graph.json`. Validated by st
 Edge types (allowlist):
   precondition  — must complete before target (DAG-checked for cycles)
   advisory      — provides useful context but not required
-  transition    — mode switch between protocols
   suppression   — prevents stacking of similar protocols
 
 Wildcard: "source": "*" = all nodes except target
