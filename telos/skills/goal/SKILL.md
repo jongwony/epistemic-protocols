@@ -180,6 +180,13 @@ Approved GoalContract becomes input to subsequent protocols.
 | **Boundary** | Scope unbounded or implicit | "What's included? What's explicitly excluded?" | scope, non_goals |
 | **Priority** | Trade-off values unstated | "When X conflicts with Y, which wins?" | value_weights |
 
+**Emergent dimension detection**: Named dimensions are working hypotheses, not exhaustive categories. Detect Emergent dimensions when:
+- The goal's indeterminacy spans multiple named dimensions (e.g., outcome and boundary are entangled and cannot be defined independently)
+- User adds a dimension via "Add dimension" that doesn't map to the four named types
+- The goal involves domain-specific concerns that resist decomposition into Outcome/Metric/Boundary/Priority (e.g., stakeholder alignment, phasing/sequencing, risk tolerance)
+
+Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState` and map to a GoalContract field.
+
 ### Dimension Priority
 
 When multiple dimensions are undefined:
@@ -315,14 +322,14 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 - Boundary undefined for goal-related decisions → suggest `/bound` (epistemic boundary definition)
 - Context insufficiency for goal execution → suggest `/inquire` (pre-execution context verification)
-- Goal requires multi-perspective analysis → suggest `/frame` (framework recommendation)
+- Goal construction reveals expression doesn't match intent → suggest `/clarify` (intent-expression gap verification)
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
 - Restate GoalContract as a reference for downstream work
 - Note any deferred goal dimensions accepted for later refinement
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
 
 ## Intensity
 

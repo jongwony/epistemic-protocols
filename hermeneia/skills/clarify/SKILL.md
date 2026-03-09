@@ -188,6 +188,13 @@ Clarified expression becomes input to subsequent protocols.
 | **Coherence** | Internal contradiction or tension | "You mentioned X but also Y. Which takes priority?" |
 | **Background** | Missing interpretive background needed to determine expression meaning | "What background should I know to interpret this correctly? [options]" |
 
+**Emergent gap detection**: Named types are working hypotheses, not exhaustive categories. Detect Emergent gaps when:
+- User's difficulty spans multiple named types (e.g., expression is both imprecise and internally coherent but misaligned with unstated context)
+- User pushes back on all presented gap types ("none of these capture what's wrong")
+- The expression's ambiguity resists decomposition into the four named dimensions
+
+Emergent gaps must satisfy morphism `IntentMisarticulated → ClarifiedIntent` and use adapted question forms.
+
 ### Gap Priority
 
 When multiple gaps detected:
@@ -337,6 +344,8 @@ Proceeding with this understanding.
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
 
+**Transformation check**: Before suggesting next protocols, briefly assess whether the clarification changed the downstream action. State in one sentence what shifted (e.g., "The clarified scope narrows implementation to the auth module only") or note that the original expression was confirmed as adequate. This is informational text — not an AskUserQuestion call.
+
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
 - Clarified intent reveals indeterminate goals → suggest `/goal` (goal co-construction)
@@ -348,7 +357,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Restate clarified intent as a reference for downstream work
 - Note any residual ambiguity that was accepted rather than resolved
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
 
 ## Intensity
 

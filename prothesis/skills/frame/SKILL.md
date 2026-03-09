@@ -99,7 +99,7 @@ After Phase 0 (Mission Brief + Mode Selection):
 
 After LensEstablished (mode branching):
   J = recommend → Mode 1 terminus. characterize(Pₛ) and terminate:
-    characterize(Pₛ) = characterize Pₛ by count tier:
+    characterize(Pₛ) = classify Pₛ by count tier:
       Pₛ.count = 1 → lightweight context modifier for downstream protocol
       Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
   J = inquire → Continue to Phase 3 (team spawn → parallel inquiry → synthesis → FramedInquiry)
@@ -432,7 +432,7 @@ After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if
 **Loop behavior**: Per LOOP. Key operational details:
 - **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect AskUserQuestion; selected items migrate to session TaskCreate after TeamDelete.
 
-All other routing options (Extend, Add input, withdraw) and convergence/recommendation behavior Per LOOP.
+All other routing options (Extend, Add input, withdraw) and convergence behavior Per LOOP.
 
 Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Parametric Nature, and Specialization.
 
@@ -442,16 +442,18 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
-- L.divergence reveals unaddressed tensions → suggest `/gap` (gap audit on divergent findings)
-- L.assessment reveals indeterminate goals → suggest `/goal` (goal co-construction from Lens insights)
-- Context insufficiency surfaced during inquiry → suggest `/inquire` (pre-execution context verification)
+- Mode 2: L.divergence reveals unaddressed tensions → suggest `/gap` (gap audit on divergent findings)
+- Mode 2: L.assessment reveals indeterminate goals → suggest `/goal` (goal co-construction from Lens insights)
+- Mode 1: selected perspectives reveal unexplored domain tensions → suggest `/gap` (gap audit on perspective coverage)
+- Mode 1: inquiry intent suggests indeterminate goals → suggest `/goal` (goal co-construction before deeper analysis)
+- Context insufficiency surfaced during session → suggest `/inquire` (pre-execution context verification)
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
 - Mode 1: note escalation path to Mode 2 for deeper isolated analysis
 - Mode 2: summarize key findings from L (convergence, divergence, assessment highlights)
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
 
 ## Rules
 

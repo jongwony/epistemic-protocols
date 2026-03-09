@@ -434,7 +434,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Summarize halted or gated tasks requiring user follow-up
 - Note any risk signals that were accepted during execution
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
 
 ## Intensity
 

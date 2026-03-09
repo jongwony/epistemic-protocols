@@ -187,6 +187,8 @@ Pre-commit protocol verification via static checks and expert review.
 
 **Session Text Composition**: Inter-protocol data flows as natural language in the session context — no structured data channels between protocols. Each protocol's output becomes part of the conversation that subsequent protocols naturally read. Cell-based structured transport was considered and rejected: structuring context loses information. If structured transport becomes necessary, functor composition is the escalation path.
 
+**Dual Advisory Layer**: Inter-protocol guidance operates through two distinct mechanisms at different abstraction levels: graph.json `advisory` edges (structural, validated by static checks, topology-aware) and Post-Convergence Suggestions (heuristic, session-context-dependent, deficit-condition-driven). These are complementary, not redundant — graph.json edges encode stable architectural relationships, while Post-Convergence suggestions respond to runtime session state. Suggestion targets may overlap with or diverge from graph.json edges; neither system constrains the other.
+
 **Coexistence over Mirroring**: Protocols coexist with Claude Code built-in commands (`/simplify`, `/batch`) as orthogonal tools occupying different layers:
 
 | Layer | Concern | Tools |

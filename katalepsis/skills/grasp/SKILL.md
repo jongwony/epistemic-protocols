@@ -191,6 +191,11 @@ Comprehension gaps within each category:
 | **Sequence** | User doesn't understand execution order | "Do you see that A happens before B?" | Order-sensitive changes (initialization, dependency) |
 | **Emergent** | Gap outside canonical types | Adapted to specific comprehension deficit | Must satisfy morphism `ResultUngrasped → VerifiedUnderstanding`; boundary: comprehension verification (in-scope) vs. intent expression (→ `/clarify`) or decision gaps (→ `/gap`) |
 
+**Emergent gap detection**: Named types are working hypotheses, not exhaustive categories. Detect Emergent gaps when:
+- User's comprehension difficulty spans multiple named types (e.g., understanding both causality and scope simultaneously in a cross-cutting change)
+- User selects "Other" or pushes back on all presented gap types in the coverage check
+- The AI work involves domain-specific patterns where canonical comprehension dimensions are insufficient (e.g., concurrency reasoning, security implications)
+
 ## Protocol
 
 ### Phase 0: Categorization (Silent)
@@ -371,14 +376,14 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 - Verified understanding reveals decision gaps → suggest `/gap` (gap audit on understood work)
 - Abstract explanations accepted without grounding → suggest `/ground` (structural mapping validation)
-- Comprehension reveals scope boundaries need definition → suggest `/bound` (boundary definition)
+- Verified understanding reveals intent was actually misarticulated → suggest `/clarify` (re-examine expression-intent alignment)
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
 - Note any ejected proposals (user-identified areas for future investigation)
 - Summarize verified understanding as reference for subsequent decisions
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
 
 ## Intensity
 
