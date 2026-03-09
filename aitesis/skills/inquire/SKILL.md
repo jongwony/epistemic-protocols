@@ -272,6 +272,23 @@ After integration:
 - If all resolved/dismissed: proceed with execution
 - Log `(Uncertainty, A)` to history
 
+### Post-Convergence Suggestions
+
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+
+**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+
+- Decision gaps in resolved context → suggest `/gap` (gap audit before execution)
+- Framework absent for informed execution → suggest `/frame` (framework recommendation)
+- Mapping uncertain between context and execution → suggest `/ground` (structural mapping validation)
+
+**Next steps**: Based on the converged output, suggest concrete follow-up actions:
+
+- Restate execution plan with resolved context as reference
+- Note any accepted uncertainties carried into execution
+
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
+
 ## Intensity
 
 | Level | When | Format |

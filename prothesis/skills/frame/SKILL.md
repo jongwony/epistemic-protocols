@@ -98,13 +98,10 @@ After Phase 0 (Mission Brief + Mode Selection):
   -- Esc key → terminate (no team exists)
 
 After LensEstablished (mode branching):
-  J = recommend → Mode 1 terminus. recommend_compose(Pₛ) and terminate:
-    recommend_compose(Pₛ) = characterize Pₛ + recommend downstream protocols:
+  J = recommend → Mode 1 terminus. characterize(Pₛ) and terminate:
+    characterize(Pₛ) = characterize Pₛ by count tier:
       Pₛ.count = 1 → lightweight context modifier for downstream protocol
       Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
-      recommend_protocols(Pₛ):                              -- sub-operation of recommend_compose
-        Map MBᵥ.inquiry_intent → downstream protocol (Aitesis, Syneidesis, Telos, Katalepsis)
-        Pₛ contradictory + deep analysis needed → suggest escalation to Mode 2 (/frame)
   J = inquire → Continue to Phase 3 (team spawn → parallel inquiry → synthesis → FramedInquiry)
 
 After Phase 4 (routing):
@@ -112,13 +109,8 @@ After Phase 4 (routing):
                    → Phase 2 (new perspective) or Phase 3 (SendMessage to existing team)
   J = add_input  → user context → revise Syn(R'' + input) → L' → re-present Q(L', routing)
   J = wrap_up    → PF[AskUserQuestion](select) → Ω(T, shutdown) → TeamDelete → TaskCreate(selected) → terminate with L
-                   → recommend_protocols(L)
   J = withdraw   → Ω(T, shutdown) → TeamDelete → terminate with current L
                    (withdraw = graceful exit, preserve_findings skipped)
-
-recommend_protocols(L):
-  L.divergence ≠ ∅ → suggest Syneidesis (gap audit)
-  L.assessment reveals indeterminate goals → suggest Telos
 
 Continue until convergence: user satisfied OR user withdraw OR user Esc key.
 
@@ -143,8 +135,7 @@ wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings,
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
-recommend_compose (internal) → Internal operation (perspective characterization + downstream composition suggestion)
-recommend_protocols (internal) → Internal operation (protocol suggestion based on Pₛ or L; overloaded: Pₛ after Mode 1, L after Mode 2 wrap_up)
+characterize (internal)  → Internal operation (perspective count tier classification)
 
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs
@@ -306,11 +297,10 @@ Optional dimension naming (apply when initial generation seems redundant):
 
 **Mode 1 termination**: When Recommend was selected in Phase 0, Phase 2 is the terminal phase. After Pₛ selection:
 
-1. Output selected perspectives with brief characterization
-2. Per LOOP `recommend_compose` — suggest downstream protocols based on MBᵥ.inquiry_intent
-3. Note escalation path: "For deeper isolated analysis, re-invoke `/frame` — Pₛ will transfer as Pᵦ"
+1. Output selected perspectives with brief characterization per LOOP `characterize`
+2. Note escalation path: "For deeper isolated analysis, re-invoke `/frame` — Pₛ will transfer as Pᵦ"
 
-Per LOOP Pₛ count tiers for escalation recommendation.
+Per LOOP Pₛ count tiers for escalation recommendation. Post-convergence suggestions per `### Post-Convergence Suggestions`.
 
 ### Phase 3: Inquiry (Through Selected Lens)
 
@@ -445,6 +435,23 @@ After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if
 All other routing options (Extend, Add input, withdraw) and convergence/recommendation behavior Per LOOP.
 
 Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Parametric Nature, and Specialization.
+
+### Post-Convergence Suggestions
+
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+
+**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+
+- L.divergence reveals unaddressed tensions → suggest `/gap` (gap audit on divergent findings)
+- L.assessment reveals indeterminate goals → suggest `/goal` (goal co-construction from Lens insights)
+- Context insufficiency surfaced during inquiry → suggest `/inquire` (pre-execution context verification)
+
+**Next steps**: Based on the converged output, suggest concrete follow-up actions:
+
+- Mode 1: note escalation path to Mode 2 for deeper isolated analysis
+- Mode 2: summarize key findings from L (convergence, divergence, assessment highlights)
+
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
 
 ## Rules
 

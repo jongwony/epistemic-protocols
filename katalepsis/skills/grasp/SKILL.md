@@ -363,6 +363,23 @@ Use:
 
 **Code reference**: When explaining, always reference specific line numbers or file paths.
 
+### Post-Convergence Suggestions
+
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+
+**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+
+- Verified understanding reveals decision gaps → suggest `/gap` (gap audit on understood work)
+- Abstract explanations accepted without grounding → suggest `/ground` (structural mapping validation)
+- Comprehension reveals scope boundaries need definition → suggest `/bound` (boundary definition)
+
+**Next steps**: Based on the converged output, suggest concrete follow-up actions:
+
+- Note any ejected proposals (user-identified areas for future investigation)
+- Summarize verified understanding as reference for subsequent decisions
+
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
+
 ## Intensity
 
 | Level | When | Format |

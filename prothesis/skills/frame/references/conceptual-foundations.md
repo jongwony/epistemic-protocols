@@ -72,11 +72,11 @@ This does not make Prothesis fully AI-autonomous. Layer 2 (AI-guided) detects th
 
 Prothesis Phases 0–4 constitute pure **theoria** (θεωρία) — contemplative inquiry that produces the Lens `L` as a theoretical artifact. The Lens reveals what different frameworks show; it changes nothing.
 
-The transition from theoria to praxis occurs at the LOOP's routing step, when `J=wrap_up` triggers `recommend_protocols(L)` — suggesting downstream protocols (Syneidesis, Telos, etc.) based on what the Lens revealed. This is an **explicit boundary**: the user must choose to act on the Lens by following a downstream recommendation or proceeding with their own plan.
+The transition from theoria to praxis occurs at the LOOP's routing step, when `J=wrap_up` completes with the Lens `L`. Post-convergence suggestions (per `### Post-Convergence Suggestions`) may indicate downstream protocols based on what the Lens revealed. This is an **explicit boundary**: the user must choose to act on the Lens by following a suggestion or proceeding with their own plan.
 
 **Design principle** (Placement over Prescription): Prothesis places perspectives before the user; it does not prescribe action. Automatic transition from analysis to execution would violate this principle — the user might want to contemplate the Lens without acting, request additional perspectives, or reject the analysis entirely. Each of these is a valid outcome of theoria.
 
-**Structural enforcement**: The `J` routing enum (`extend`, `add_input`, `wrap_up`, `withdraw`) contains no direct execution option. There is no `J=execute` or `J=implement`. The only path to praxis is through protocol recommendation, which itself requires user consent at the downstream protocol's own activation gate.
+**Structural enforcement**: The `J` routing enum (`extend`, `add_input`, `wrap_up`, `withdraw`) contains no direct execution option. There is no `J=execute` or `J=implement`. The only path to praxis is through post-convergence suggestions, which themselves require user consent at the downstream protocol's own activation gate.
 
 ## Parametric Nature
 

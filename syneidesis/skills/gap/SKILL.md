@@ -254,6 +254,23 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 
 Note: Esc key → unconditional loop termination (LOOP level). Silence (no response) is theoretical; AskUserQuestion blocks until response or Esc.
 
+### Post-Convergence Suggestions
+
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+
+**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+
+- Context insufficiency behind surfaced gaps → suggest `/inquire` (pre-execution context verification)
+- Boundary undefined for gap-related decisions → suggest `/bound` (epistemic boundary definition)
+- Abstract framework applied without validation → suggest `/ground` (structural mapping validation)
+
+**Next steps**: Based on the converged output, suggest concrete follow-up actions:
+
+- Summarize deferred items (gaps accepted but not yet addressed)
+- Highlight high-stakes gaps that warrant re-review before execution
+
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
+
 ## Intensity
 
 | Level | When | Format |

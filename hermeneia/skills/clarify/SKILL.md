@@ -333,6 +333,23 @@ Based on your clarification:
 Proceeding with this understanding.
 ```
 
+### Post-Convergence Suggestions
+
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+
+**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+
+- Clarified intent reveals indeterminate goals → suggest `/goal` (goal co-construction)
+- Boundary undefined for clarified decisions → suggest `/bound` (epistemic boundary definition)
+- Clarified scope requires context verification → suggest `/inquire` (context insufficiency check)
+
+**Next steps**: Based on the converged output, suggest concrete follow-up actions:
+
+- Restate clarified intent as a reference for downstream work
+- Note any residual ambiguity that was accepted rather than resolved
+
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) another protocol is already queued. Suggestions are informational text, not AskUserQuestion calls.
+
 ## Intensity
 
 | Level | When | Format |
