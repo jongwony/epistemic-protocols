@@ -31,7 +31,7 @@ invariant: Surfacing over Deciding
 D      = Decision point ∈ Committed × Stakes × Context
 Committed = committed(D) ≡ ∃ A : mutates_state(A) ∨ externally_visible(A) ∨ consumes_resource(A)
 Stakes = {Low, Med, High}
-G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative}
+G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative} ∪ Emergent(G)
 Scan   = Detection: D → Set(G)                      -- gap identification
 Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
 Gₛ     = Selected gaps (|Gₛ| ≤ 2)

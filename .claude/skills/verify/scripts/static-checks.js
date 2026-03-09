@@ -41,6 +41,9 @@ const PRECEDENCE_FILES = [
   'katalepsis/skills/grasp/SKILL.md',
 ];
 
+// Authoritative edge type allowlist — used by both graph-integrity and cross-ref-scan checks
+const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression']);
+
 // Shared directory walker for file collection
 function walkFiles(dir, predicate, checkName) {
   const collected = [];
@@ -629,7 +632,6 @@ function checkGraphIntegrity() {
 
   const { nodes, edges } = graph;
   const nodeSet = new Set(nodes);
-  const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression', 'transition']);
   let subCheckFailed = false;
 
   // Sub-check 1: edge-type
@@ -952,8 +954,6 @@ function checkCrossRefScan() {
     'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
   };
 
-  // Edge type allowlist from CLAUDE.md graph.json documentation
-  const EDGE_TYPE_ALLOWLIST = new Set(['precondition', 'advisory', 'transition', 'suppression']);
 
   const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
   if (!fs.existsSync(claudeMdPath)) {
@@ -1286,11 +1286,11 @@ function checkCrossRefScan() {
       if (Array.isArray(graph.edges)) {
         const usedEdgeTypes = new Set(graph.edges.map(e => e.type).filter(Boolean));
         for (const edgeType of usedEdgeTypes) {
-          if (!EDGE_TYPE_ALLOWLIST.has(edgeType)) {
+          if (!VALID_EDGE_TYPES.has(edgeType)) {
             results.fail.push({
               check: 'cross-ref-scan',
               file: 'graph.json',
-              message: `Edge type "${edgeType}" not in CLAUDE.md allowlist: ${[...EDGE_TYPE_ALLOWLIST].join(', ')}`
+              message: `Edge type "${edgeType}" not in CLAUDE.md allowlist: ${[...VALID_EDGE_TYPES].join(', ')}`
             });
             subCheckFailed = true;
           }
