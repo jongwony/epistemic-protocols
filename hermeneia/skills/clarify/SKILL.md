@@ -83,7 +83,9 @@ integrate    → Internal state update (no external tool)
 
 ── MODE STATE ──
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, detected: Set(Gap), gaps: Set(Gap),
-      clarified: Set(Gap), immune: Set(Expression), history: List<(E, Gₛ, A)>, active: Bool }
+      clarified: Set(Gap), remaining: Set(Gap),
+      immune: Set(Expression), history: List<(E, Gₛ, A)>, active: Bool }
+-- Invariant: gaps = clarified ∪ remaining (pairwise disjoint)
 ```
 
 ## Core Principle

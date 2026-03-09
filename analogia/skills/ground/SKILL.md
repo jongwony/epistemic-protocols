@@ -72,8 +72,8 @@ Continue until: terminalized(R') OR attempts exhausted.
 
 ── CONVERGENCE ──
 terminalized(R') = all_addressed(R') ∨ user_esc
-progress(Λ) = |confirmed ∪ dismissed| / |mappings|
-narrowing(V, M) = |unvalidated(after)| < |unvalidated(before)|
+progress(Λ) = 1 - |remaining| / |mappings|
+narrowing(V, M) = |remaining(after)| < |remaining(before)|
 early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
@@ -85,10 +85,11 @@ Phase 0 Detect  (infer)     → Internal analysis (no external tool)
 ── MODE STATE ──
 Λ = { phase: Phase, R: AIOutput, Sₐ: Domain, Sₜ: Domain,
       mappings: Set(Correspondence), confirmed: Set(Correspondence),
-      dismissed: Set(Correspondence), instantiations: List<Example>,
+      dismissed: Set(Correspondence), remaining: Set(Correspondence),
+      instantiations: List<Example>,
       validations: List<(Example, V)>, attempts: Nat, active: Bool,
       cause_tag: String }
--- Invariant: mappings = confirmed ∪ dismissed ∪ pending (pairwise disjoint)
+-- Invariant: mappings = confirmed ∪ dismissed ∪ remaining (pairwise disjoint)
 ```
 
 ## Core Principle
