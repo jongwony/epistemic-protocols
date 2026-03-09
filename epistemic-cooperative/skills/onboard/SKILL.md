@@ -240,7 +240,7 @@ Same format as Targeted Path Type 3.
 #### Feedback (both paths)
 
 Immediate feedback after each question:
-- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` classifies *execution risks* (what could go wrong when you act). Both happen before action, but they audit different things: decision quality vs. execution safety."
+- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` classifies *execution risks* (what could go wrong when you act). `/gap` audits before action (decision quality), `/attend` gates during action (execution safety)."
 - **Incorrect**: Explain the distinction through the design axis that separates them. "The key difference is *timing and direction*: `/inquire` catches missing context *before* execution (User→AI: 'what do you need to know?'), while `/contextualize` checks context fit *after* execution (AI→User: 'does this actually fit here?'). Same axis — context fitness — but opposite timing."
 
 **Distinction depth**: Quiz feedback should go beyond "A, not B" to explain the *design dimension* that separates confused pairs. Reference the distractor pairs from Quiz Design section. The goal is that even wrong answers teach — the user leaves understanding *why* two protocols that sound similar serve different purposes.
@@ -264,7 +264,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 5. **Advanced Usage** (bonus tips after main guide):
 
-   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/attend`, show the three-step pre-execution chain (inquire → gap → attend).
+   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/attend`, show the three-step chain: context → decision audit → risk-aware execution (inquire → gap → attend).
 
 6. **Continue exploring** (when MAP results contain unexplored protocols):
 
@@ -280,7 +280,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
 - `/clarify` ↔ `/goal`: both about "unclear starting point" but different deficits (expression vs. existence)
-- `/gap` ↔ `/attend`: both about "checking before action" but different targets (decision gaps vs. execution risks)
+- `/gap` ↔ `/attend`: both about risk awareness but different timing (`/gap` audits before action, `/attend` gates during execution)
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
 - `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)

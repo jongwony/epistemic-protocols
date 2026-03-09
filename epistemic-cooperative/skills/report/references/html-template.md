@@ -199,7 +199,7 @@ batch_install: { needed: bool, command }
     <div class="ai-msg">Deploying now. Running git push origin main...</div>
     <div class="session-ref">project: ~/service · session: i9j0k1l2</div>
   </div>
-  <div class="protocol-cta">Using <span class="cta">/attend</span> before execution would surface deployment risks, preventing blind execution of irreversible operations.</div>
+  <div class="protocol-cta">Using <span class="cta">/attend</span> would gate deployment risks during execution, preventing blind execution of irreversible operations.</div>
   <div class="resume-cmd">cd ~/service && claude --resume i9j0k1l2</div>
 </div>
 

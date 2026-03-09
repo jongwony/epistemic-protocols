@@ -52,5 +52,5 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 | Chain | Pattern |
 |-------|---------|
 | `/simplify` → `/contextualize` | Simplify code, then check if simplified version fits deployment context |
-| `/batch` → `/attend` | Batch operations planned, then risk-classify before execution |
+| `/batch` → `/attend` | Batch operations planned, then execute with risk-aware gating |
 | Any built-in → `/gap` | After any execution, audit for overlooked gaps |

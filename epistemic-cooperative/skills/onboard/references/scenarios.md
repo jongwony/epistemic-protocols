@@ -124,20 +124,20 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 
 ## Prosoche `/attend`
 
-**Situation**: You have a plan to restructure the database schema, migrate data, update the ORM, and deploy — all in one go. Each step looks correct individually, but you haven't assessed which steps have cascading risks if they fail.
+**Situation**: You have a plan to restructure the database schema, migrate data, update the ORM, and deploy — all in one go. Each step looks correct individually, but executing them without risk awareness means a destructive step could fire before you notice.
 
-**Intervention**: `/attend` classifies each task for risk signals (irreversibility, external mutation, security boundaries) and surfaces elevated-risk items for your judgment before execution proceeds.
+**Intervention**: `/attend` materializes the plan into tasks, executes safe ones autonomously, and gates elevated-risk items (irreversibility, external mutation, security boundaries) for your judgment during execution.
 
 **Trial prompt**: "Let's practice: say 'Run the migration script' and I'll show how /attend classifies execution risks"
 
-**Quiz Q (situation)**: Claude has generated a 15-step deployment plan. Each step passed review. You're about to run it. You want to know which steps could cause cascading failures.
+**Quiz Q (situation)**: Claude has generated a 15-step deployment plan. Each step passed review. You want it executed with risky actions gated for your approval.
 - A) Syneidesis `/gap` — B) Prosoche `/attend` — C) Epharmoge `/contextualize` — D) Prothesis `/frame`
 - Answer: B
 
-**Quiz Q (design)**: You're about to execute a multi-step infrastructure change. How would you identify which steps carry the highest risk before starting?
+**Quiz Q (design)**: You're about to execute a multi-step infrastructure change. How would you have risky steps gated while the rest proceeds autonomously?
 - Hint: The plan itself is sound — the concern is execution-time risk, not decision gaps.
 
-**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of present-moment awareness during action. Core principle: **Classification over Prevention**. Not trying to prevent all risks — classifying which steps carry elevated risk so you can attend to them. Workflow position: at execution time — plan is approved, now assess which steps need extra care. Game feel: "Plan looks good, let's go" → risk classification → elevated items surface → you decide how to proceed.
+**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of present-moment awareness during action. Core principle: **Attention over Automation**. Most tasks execute autonomously (p=Low); only elevated-risk actions surface for user judgment. Workflow position: at execution time — plan is approved, now execute with risk-aware gating. Game feel: "Plan looks good, let's go" → tasks execute → risky action detected → you decide → execution resumes.
 
 ## Epharmoge `/contextualize`
 
