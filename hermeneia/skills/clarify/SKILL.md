@@ -37,7 +37,7 @@ Q  = Clarification question (via AskUserQuestion)
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
 Î' = Updated intent after clarification
-ClarifiedIntent = Î' where |G| = 0 ∨ cycle(G) ∨ stall(Δ, 2) ∨ user_esc
+ClarifiedIntent = Î' where |remaining| = 0 ∨ cycle(G) ∨ stall(Δ, 2) ∨ user_esc
 T  = Trigger source ∈ {user_signal, ai_strong, ai_soft}
 suggest_only = ai_soft terminal: passive suggestion without activation (no AskUserQuestion; Λ.active = false)
 
@@ -68,8 +68,8 @@ Phase 3:  A → integrate(A, Î) → Î'                       -- intent update 
 ── LOOP ──
 After Phase 3: return to Phase 1b for newly surfaced gaps.
 On re-entry, detect(Eᵥ) re-analyzes the expression in the context of prior clarifications; gaps in Λ.clarified are filtered from Gd by type before confirmation (type-level filtering ensures convergence; new instances of a clarified type are excluded).
-If |Gₛ| = 0 after confirmation (all gaps removed): skip Phase 2, evaluate convergence (|G| = 0).
-Continue until converge: |G| = 0, cycle detected, or user exits.
+If |Gₛ| = 0 after confirmation (all gaps removed): skip Phase 2, evaluate convergence (|remaining| = 0).
+Continue until converge: |remaining| = 0, cycle detected, or user exits.
 Mode remains active until convergence.
 
 ── TOOL GROUNDING ──
@@ -119,7 +119,7 @@ Command invocation, trigger phrase, or AI-detected expression ambiguity activate
 - **Layer 1 (User-invocable)**: `/clarify` slash command or description-matching input. Always available.
 - **Layer 2 (Hybrid)**: User trigger signals proceed directly; AI-detected expression ambiguity (`ai_strong`) requires user confirmation; minor ambiguity (`ai_soft`) suggests only.
 
-**Clarification complete** = one of: `|G| = 0` (no gaps remain), `cycle(G)` (already clarified), or `Δ = 0` for 2 rounds (progress stall with user consent to proceed).
+**Clarification complete** = one of: `|remaining| = 0` (no gaps remain), `cycle(G)` (already clarified), or `Δ = 0` for 2 rounds (progress stall with user consent to proceed).
 
 ### Priority
 
@@ -287,7 +287,7 @@ Options:
 
 **Add/Remove sub-steps**: On "Add" or "Remove" selection, call AskUserQuestion to specify which type to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1b completes when user selects "Proceed with these."
 
-**Soft guard**: If user removes all detected gaps, confirm: "Removing all gaps terminates clarification. Continue?" If confirmed, `|Gₛ| = 0` → skip Phase 2, evaluate convergence (`|G| = 0` in LOOP).
+**Soft guard**: If user removes all detected gaps, confirm: "Removing all gaps terminates clarification. Continue?" If confirmed, `|Gₛ| = 0` → skip Phase 2, evaluate convergence (`|remaining| = 0` in LOOP).
 
 User confirmation determines Gₛ and the clarification strategy in Phase 2. If multiple confirmed, address in priority order (Coherence → Background → Expression → Precision).
 
@@ -397,7 +397,7 @@ When multiple gaps detected:
 6. **Minimal questioning**: Surface only gaps that affect execution
 7. **Consequential options**: Each option shows interpretation with downstream implications
 8. **User authority**: User's choice is final; no second-guessing selected interpretation
-9. **Convergence persistence**: Mode remains active until convergence (|G| = 0, cycle, or user exit)
+9. **Convergence persistence**: Mode remains active until convergence (|remaining| = 0, cycle, or user exit)
 10. **Reflective pause**: Include "reconsider" option for complex intent clarification
 11. **Escape hatch**: Always allow user to provide their own phrasing
 12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases
