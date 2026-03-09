@@ -191,6 +191,13 @@ This cycle repeats per planning phase or domain area.
 | **Assumption** | Unstated premise inferred from framing | "Are you assuming [X]?" |
 | **Alternative** | Known option not referenced | "Was [alternative] considered?" |
 
+**Emergent gap detection**: Named types are working hypotheses, not exhaustive categories. Detect Emergent gaps when:
+- The unaddressed gap spans multiple named types (e.g., a procedural absence driven by an unstated assumption)
+- User dismisses all named-type gaps but the committed action still exhibits observable risk
+- The decision context involves domain-specific considerations that resist classification into four generic types
+
+Emergent gaps must satisfy morphism `GapUnnoticed → AuditedDecision` and use adapted question forms.
+
 ## Protocol
 
 ### Detection (Silent)
@@ -253,6 +260,25 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 | AskUserQuestion | Selection | Selection | — (N/A) |
 
 Note: Esc key → unconditional loop termination (LOOP level). Silence (no response) is theoretical; AskUserQuestion blocks until response or Esc.
+
+### Post-Convergence Suggestions
+
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+
+**Transformation check**: Before suggesting next protocols, briefly assess whether the gap audit changed the decision. State in one sentence what shifted (e.g., "The backup verification gap led to adding a pre-migration snapshot step") or note that the original plan was confirmed after review. This is informational text — not an AskUserQuestion call.
+
+**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+
+- Context insufficiency behind surfaced gaps → suggest `/inquire` (pre-execution context verification)
+- Boundary undefined for gap-related decisions → suggest `/bound` (epistemic boundary definition)
+- Abstract framework applied without validation → suggest `/ground` (structural mapping validation)
+
+**Next steps**: Based on the converged output, suggest concrete follow-up actions:
+
+- Summarize deferred items (gaps accepted but not yet addressed)
+- Highlight high-stakes gaps that warrant re-review before execution
+
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
 
 ## Intensity
 

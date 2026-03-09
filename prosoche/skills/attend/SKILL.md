@@ -419,6 +419,25 @@ After adaptation:
 - If granularity is Micro and task boundary reached: revert to Meso for next task
 - Continue to next task in list
 
+### Post-Convergence Suggestions
+
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+
+**Transformation check**: Before suggesting next protocols, briefly assess whether the execution outcomes changed the remaining plan. State in one sentence what shifted (e.g., "The halted deployment task requires resolving the staging environment issue before proceeding") or note that all tasks completed as planned. This is informational text — not an AskUserQuestion call.
+
+**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+
+- Post-execution applicability concerns → suggest `/contextualize` (application-context mismatch detection)
+- Scope boundaries shifted during execution → suggest `/bound` (boundary redefinition)
+- Comprehension check needed on execution results → suggest `/grasp` (verified understanding)
+
+**Next steps**: Based on the converged output, suggest concrete follow-up actions:
+
+- Summarize halted or gated tasks requiring user follow-up
+- Note any risk signals that were accepted during execution
+
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+
 ## Intensity
 
 | Level | When | Format |
