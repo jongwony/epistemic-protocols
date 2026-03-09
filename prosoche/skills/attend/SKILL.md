@@ -70,12 +70,6 @@ AgentRef       = { name: String, type: String, perspective: Option(String) }
 TeamStructure  ∈ {Solo, Augmented(TeamRef, Set(AgentRole)), Restructured(TeamRef, Set(AgentRole), Set(AgentRef))}
 AgentRole      = { name: String, type: String, focus: String }
 
--- Executor trust model (compliance-proportional delegation):
-ExecutorTrust  = { compliance: Level, delegation: Level, reporting: Level }
-                 -- invariant: compliance ↓ → delegation ↓ ∧ reporting ↑
-                 -- prosoche-executor (attend skill, Stop-as-Gate): high compliance
-                 -- team agent (Gate prompt injection): lower compliance, higher reporting
-
 Phase          ∈ {-1, 0, 1, 2, 3}
 SituatedExecution = Σ' where (∀ t ∈ T: situated(t)) ∨ user_withdraw ∨ user_esc
 
@@ -350,9 +344,9 @@ When delegating to team agents without the `attend` skill, inject Gate awareness
 >
 > Output format: `GATE_DETECTED: true`, `Signal: [type]`, `Evidence: [specific action]`
 
-Injection path (ExecutorTrust model — compliance-proportional delegation):
-- Post-`/attend` spawn (Agent) → system context injection (high compliance, high delegation, low reporting)
-- Pre-existing team member (SendMessage) → conversation context injection (lower compliance, lower delegation, higher reporting)
+Gate awareness injection path:
+- Post-`/attend` spawn (Agent) → system context injection (higher compliance than conversation-context path)
+- Pre-existing team member (SendMessage) → conversation context injection (see Known Limitations)
 
 **Classification scope**: Pending tool call parameters, command strings, target paths/URLs. Does NOT execute the action or modify state.
 
