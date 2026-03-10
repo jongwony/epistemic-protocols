@@ -319,3 +319,7 @@ Target 6-12 calls per session:
 7. **Session index access**: Access `sessions-index.json` via Glob + Read. Parse `entries` for `firstPrompt` and `summary` fields only. Never Read entire session JSONL files.
 8. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.
 9. **Single session**: The entire onboarding completes in one session. No cross-session state required.
+
+## Acknowledgments
+
+- [@zzsza](https://github.com/zzsza) — Quiz-based participatory UX design inspiration
