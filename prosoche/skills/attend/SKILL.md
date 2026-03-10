@@ -167,6 +167,15 @@ Phase 3 A            (state)   → Internal state update (no external tool)
 Task completion      (state)   → TaskUpdate (status tracking) [Tool]
 Withdraw shutdown    (extern)  → SendMessage (shutdown_request to team members) [Tool]
 
+── ELIDABLE CHECKPOINTS ──
+Phase -1 confirm (cold start)   → elidable when: user_invoked ∧ specific_args(C.args)
+                                   default: accept materialized task list
+                                   regret: bounded (Phase 0 Classify provides independent risk check)
+Phase -1 conflict (tasks+prior) → always_gated (classificatory: resume vs refresh vs merge)
+Phase -1 TeamCoord (team)       → always_gated (classificatory: team structure selection)
+Phase -1 Augment (roles)        → always_gated (classificatory: role confirmation)
+Phase 2 Q (checkpoint)          → always_gated (constitutive: execution risk judgment)
+
 ── MODE STATE ──
 Λ = { phase: Phase, E: ExecutionAction,
        granularity: Granularity, state: Σ,
@@ -296,6 +305,7 @@ Materialize execution intent into a concrete task list and resolve team structur
    - **Conflict** (`C.tasks ≠ ∅` + `C.prior`): **Call AskUserQuestion** 1x — resume existing tasks, refresh from prior, or merge
    - **Auto-proceed** (`C.prior` exists, no tasks): Create tasks from prior protocol output, skip confirmation — intent already verified by upstream protocols. Longer protocol chains (e.g., Telos → Aitesis → Prosoche) carry more accumulated verification
    - **Confirm** (neither): Create tasks from arguments, **call AskUserQuestion** 1x to verify task list — cold start without prior context
+   **Elidable confirmation**: The `confirm` path AskUserQuestion may be elided when `C.args` provides specific execution intent (e.g., `/attend "push changes and deploy"`). Phase 0 Classify provides an independent downstream risk check per task, and Withdraw is available at every Phase 2 checkpoint. Elision does not apply to conflict, TeamCoord, or Augment paths (classificatory).
 3. **Create tasks** via TaskCreate, establishing the task list that Phase 0 will iterate
 4. If `T[] = ∅` after materialization: deactivate (nothing to classify)
 

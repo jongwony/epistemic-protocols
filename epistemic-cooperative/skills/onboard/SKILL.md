@@ -42,18 +42,18 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 
 Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with detection methods and rationale, refer to `/report` SKILL.md.
 
-| Protocol | Key Patterns |
-|----------|-------------|
-| Telos `/goal` | Vague first prompts ("improve", "optimize", "ideas for"), `wrong_approach` friction |
-| Horismos `/bound` | Boundary probe, domain classification, BoundaryMap |
-| Hermeneia `/clarify` | Same file 3+ edits (same intent), `misunderstood_request` friction |
-| Syneidesis `/gap` | Same file 3+ edits (different concerns), `excessive_changes` friction |
-| Prothesis `/frame` | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
-| Prosoche `/attend` | Bash deploy/push/apply keywords, `wrong_file_edited` friction |
-| Katalepsis `/grasp` | Verification keywords in firstPrompt ("explain", "what did you do") |
-| Aitesis `/inquire` | `context_loss` friction |
-| Analogia `/ground` | Abstract pattern application without domain validation |
-| Epharmoge `/contextualize` | Post-execution environment mismatch |
+| Protocol | Phase | When to Use | Key Patterns |
+|----------|-------|-------------|-------------|
+| Hermeneia `/clarify` | Planning | AI keeps misunderstanding your intent | Same file 3+ edits (same intent), `misunderstood_request` friction |
+| Telos `/goal` | Planning | You have a desire but no clear goal | Vague first prompts ("improve", "optimize", "ideas for"), `wrong_approach` friction |
+| Horismos `/bound` | Planning | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
+| Aitesis `/inquire` | Planning | AI is about to execute without enough context | `context_loss` friction |
+| Prothesis `/frame` | Analysis | Unsure which analytical perspective to use | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
+| Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
+| Syneidesis `/gap` | Decision | Right before committing, checking for blind spots | Same file 3+ edits (different concerns), `excessive_changes` friction |
+| Prosoche `/attend` | Execution | Controlling risky actions step by step | Bash deploy/push/apply keywords, `wrong_file_edited` friction |
+| Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the context | Post-execution environment mismatch |
+| Katalepsis `/grasp` | Understanding | You approved AI work but didn't fully understand it | Verification keywords in firstPrompt ("explain", "what did you do") |
 
 ## Phase Execution
 
@@ -63,7 +63,7 @@ Present the protocol catalog as text output FIRST (always), then ask path select
 
 **Protocol Catalog** (always rendered as text before asking):
 
-Before rendering, check installation status: Glob `~/.claude/plugins/cache/epistemic-protocols/*/` to collect installed plugin directory names. Present the 10 protocols from the Data Sources table as a numbered list with name + one-line description + installation badge (`[installed]` or `[not installed]`).
+Before rendering, check installation status: Glob `~/.claude/plugins/cache/epistemic-protocols/*/` to collect installed plugin directory names. Present the 10 protocols from the Data Sources table as a numbered list grouped by Phase, with name + phase label + "When to Use" description + installation badge (`[installed]` or `[not installed]`).
 
 **AskUserQuestion #1**:
 - Text: "Which path?"
@@ -76,9 +76,9 @@ Before rendering, check installation status: Glob `~/.claude/plugins/cache/epist
 **If Targeted + no protocol specified → AskUserQuestion #2**:
 - Text: "Which protocol? (refer to catalog above, type name or number in Other)"
 - Options:
-  - "Pre-execution — /clarify, /goal, /bound, /inquire"
-  - "Analysis — /frame, /ground, /gap"
-  - "Execution — /attend, /contextualize, /grasp"
+  - "Pre-execution (Planning) — /clarify, /goal, /bound, /inquire"
+  - "Analysis/Decision — /frame, /ground, /gap"
+  - "Execution/Verification/Understanding — /attend, /contextualize, /grasp"
 
 **AskUserQuestion #3** (Targeted only, session source):
 - Text: "Where should examples come from?"
@@ -118,7 +118,7 @@ Apply User Context Profile to match protocols to the user's context.
 
 1. **General path**: Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Starter Trio.
 2. **Targeted path**: Filter to target protocol, use Profile for scenario personalization. Note related protocols from the compact mapping table.
-3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → **Starter Trio**: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`. Proceed immediately without blocking the onboarding flow.
+3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → **Starter Trio**: Hermeneia `/clarify` (Planning — expression fix), Telos `/goal` (Planning — goal shaping), Syneidesis `/gap` (Decision — blind spot audit). Proceed immediately without blocking the onboarding flow.
 
 For detailed mapping logic (Primary/Secondary/Tertiary tables, session diagnostics, anti-pattern detection), refer to `/report` SKILL.md.
 
@@ -279,6 +279,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 **Difficulty progression**: Start with high-contrast pairs (e.g., `/goal` vs `/attend`), progress to subtle distinctions (e.g., `/clarify` vs `/goal`, `/gap` vs `/attend`).
 
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
+- `/clarify` ↔ `/gap`: both surface "something wrong" but different targets — `/clarify` fixes expression before work begins (Planning: "I said X but meant Y"), `/gap` audits blind spots at a decision point (Decision: "Am I overlooking something?")
 - `/clarify` ↔ `/goal`: both about "unclear starting point" but different deficits (expression vs. existence)
 - `/gap` ↔ `/attend`: both about risk awareness but different timing (`/gap` audits before action, `/attend` gates during execution)
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
