@@ -47,13 +47,14 @@ epistemic-protocols/
 │   ├── agents/                        # Parallel extraction agents
 │   ├── commands/                      # /reflect, /quick-reflect
 │   └── skills/reflexion/SKILL.md
-├── epistemic-cooperative/               # Utility skills: report + onboarding + analytics
+├── epistemic-cooperative/               # Utility skills: report + onboarding + analytics + configuration
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # project-scanner, session-analyzer, coverage-scanner
 │   └── skills/
 │       ├── report/SKILL.md            # Usage analysis report from session patterns
 │       ├── onboard/SKILL.md           # Quest-based protocol learning (scenario + trial + quiz)
-│       └── dashboard/SKILL.md          # Full-session coverage dashboard
+│       ├── dashboard/SKILL.md          # Full-session coverage dashboard
+│       └── preferences/SKILL.md       # Interactive protocol preference configuration
 └── write/                             # Skill: multi-perspective blog drafting
     ├── .claude-plugin/plugin.json
     └── skills/write/SKILL.md
@@ -151,11 +152,12 @@ Detect application-context mismatch after execution when correct output may not 
 - **Invocation**: `/contextualize` or use "contextualize" in conversation
 - **Status**: Conditional — requires Aitesis operational experience
 
-### Epistemic Cooperative (Report + Onboard + Dashboard)
-Utility skill group for session analytics.
+### Epistemic Cooperative (Report + Onboard + Dashboard + Preferences)
+Utility skill group for session analytics and configuration.
 - **Report** `/report`: Generate epistemic usage analysis report with evidence-backed protocol recommendations and HTML artifact. Analytical output — pattern evidence, anti-pattern diagnostics, session snippets.
 - **Onboard** `/onboard`: Quest-based protocol learning through scenario experience, trial execution, and Socratic quiz. Flow: General/Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects learning path; all scan paths share inline Quick Scan (User Context Profile extraction); Phases 3-6 deliver experiential learning.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
+- **Preferences** `/preferences`: Interactive protocol preference configuration for `~/.claude/CLAUDE.local.md`. Flow: Detect → Select → Configure → Generate → Verify. Quick path (5 global params) or Full path (global + ~32 per-protocol params).
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
@@ -302,6 +304,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 - **Onboard**: All scan paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases (0-6). Phase 4 (Trial) triggers actual protocol execution in-session.
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
+- **Preferences**: No Task delegation—must run in main agent to call AskUserQuestion. Main agent handles all phases (0-4).
 
 ## Git Conventions
 
