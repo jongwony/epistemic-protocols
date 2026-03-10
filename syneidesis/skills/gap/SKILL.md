@@ -126,7 +126,9 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - Loaded instructions resume after mode deactivation
 
-**Protocol precedence**: Default ordering places Syneidesis after Analogia (Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; gap detection applies within the established, context-verified, mapping-validated perspective). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Activation order position 7/9 (graph.json is authoritative source for information flow). Concern cluster: Decision.
+
+**Advisory relationships**: Receives from Prothesis (advisory: perspective simulation provides gap detection context), Analogia (advisory: validated mapping improves gap detection accuracy), Horismos (advisory: BoundaryMap narrows gap detection scope). Provides to Aitesis (suppression: same scope suppression). Katalepsis is structurally last.
 
 ### Mode Deactivation
 

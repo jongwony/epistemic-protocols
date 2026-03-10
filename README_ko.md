@@ -37,7 +37,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 | [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
 | [Katalepsis](./katalepsis) | `/grasp` | AI가 큰 변경을 했는데 실제로 이해가 필요할 때 |
 
-순서는 인식론적 워크플로우를 따릅니다: Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
+활성화 순서: Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
 
 ## 유틸리티
 

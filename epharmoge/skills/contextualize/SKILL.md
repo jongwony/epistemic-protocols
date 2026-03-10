@@ -142,7 +142,9 @@ When Epharmoge is active:
 - Epharmoge completes before proceeding to next task
 - Loaded instructions resume after applicability is verified or dismissed
 
-**Protocol precedence**: Default ordering places Epharmoge after Prosoche (execution-time attention before post-execution applicability) and before Katalepsis (applicability before comprehension). Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices. The user can override this default by explicitly requesting a different protocol first.
+**Protocol precedence**: Activation order position 9/9 (graph.json is authoritative source for information flow). Concern cluster: Verification.
+
+**Advisory relationships**: Receives from Prosoche (advisory: execution-time attention provides post-execution applicability context); Aitesis (suppression: pre+post stacking prevention). Katalepsis is structurally last.
 
 ### Trigger Signals
 

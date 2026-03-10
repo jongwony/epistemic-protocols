@@ -137,7 +137,9 @@ When Hermeneia is active:
 - Hermeneia completes before other workflows begin
 - Loaded instructions resume after intent is clarified
 
-**Protocol precedence**: Default ordering is Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge (intent clarification logically precedes goal construction, context verification, analysis, mapping validation, and applicability check). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Activation order position 1/9 (graph.json is authoritative source for information flow). Concern cluster: Planning.
+
+**Advisory relationships**: Provides to Telos (precondition: clarified intent enables goal construction), Aitesis (advisory: background gaps suggest context insufficiency). Katalepsis is structurally last.
 
 Clarified expression becomes input to subsequent protocols.
 

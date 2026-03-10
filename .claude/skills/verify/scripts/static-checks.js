@@ -38,6 +38,8 @@ const PRECEDENCE_FILES = [
   'prothesis/skills/frame/SKILL.md',
   'analogia/skills/ground/SKILL.md',
   'syneidesis/skills/gap/SKILL.md',
+  'prosoche/skills/attend/SKILL.md',
+  'epharmoge/skills/contextualize/SKILL.md',
   'katalepsis/skills/grasp/SKILL.md',
 ];
 
@@ -1019,17 +1021,22 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 3: Verify canonical precedence/workflow surfaces include Analogia
+  // Sub-check 3: Verify precedence template pattern in SKILL.md files
+  const precedenceCount = CANONICAL_PRECEDENCE.split(' → ').length;
+  const positionPattern = new RegExp(`Activation order position \\d+/${precedenceCount}`);
   for (const relPath of PRECEDENCE_FILES) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;
 
     const content = fs.readFileSync(fullPath, 'utf8');
-    if (!content.includes(CANONICAL_PRECEDENCE)) {
+    const hasPosition = positionPattern.test(content);
+    const hasCrossCutting = content.includes('cross-cutting') || content.includes('structural constraint');
+    const hasGraphRef = content.includes('graph.json');
+    if (!(hasPosition || hasCrossCutting) || !hasGraphRef) {
       results.fail.push({
         check: 'cross-ref-scan',
         file: relPath,
-        message: `Missing canonical precedence chain "${CANONICAL_PRECEDENCE}"`
+        message: `Missing precedence template (expected: position N/9 or cross-cutting/structural constraint + graph.json reference)`
       });
       subCheckFailed = true;
     }
@@ -1056,8 +1063,8 @@ function checkCrossRefScan() {
       message: 'CLAUDE.md missing canonical workflow ordering with Ground'
     },
     {
-      pattern: /Prothesis\s+Analogia\s+Syneidesis/,
-      message: 'CLAUDE.md workflow diagram missing Prothesis → Analogia → Syneidesis sequence'
+      pattern: /\| Concern \| Protocols \|/,
+      message: 'CLAUDE.md missing Epistemic Concern Clusters table'
     },
     {
       pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge\)/,

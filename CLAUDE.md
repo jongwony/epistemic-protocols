@@ -213,19 +213,28 @@ Principle: side effects require explicit answer types, not tool-level escape. Wh
 
 Multi-activation order: **Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp**
 
-This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → boundary definition → context verification → perspective → validated mapping → gap audit → execution-time attention → applicability check). Users can override by explicitly requesting a different protocol first.
+This is an activation sequence for simultaneous protocol activation, not information flow. Users can override by explicitly requesting a different protocol first.
 
-**Katalepsis**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
+**Katalepsis**: Structural constraint — always executes last. Not overridable.
 
-### Epistemic Workflow
+### Epistemic Concern Clusters
 
-```
-[Request] → [Intent] → [Goal] → [Boundary] → [Context] → [Perspective] → [Mapping] → [Decision] → [Execution] → [Application] → [Comprehension]
-               ↑          ↑          ↑          ↑             ↑              ↑            ↑              ↑              ↑               ↑
-           Hermeneia    Telos    Horismos    Aitesis      Prothesis      Analogia    Syneidesis      Prosoche      Epharmoge       Katalepsis
-```
+Protocols grouped by primary concern (non-directional). Information flow: `graph.json` (authoritative source).
 
-This diagram shows logical progression, not strict execution order.
+| Concern | Protocols |
+|---------|-----------|
+| Planning | `/clarify` (Hermeneia), `/goal` (Telos), `/inquire` (Aitesis) |
+| Analysis | `/frame` (Prothesis), `/ground` (Analogia) |
+| Decision | `/gap` (Syneidesis) |
+| Execution | `/attend` (Prosoche) |
+| Verification | `/contextualize` (Epharmoge) |
+
+**Cross-cutting**: `/bound` (Horismos) — BoundaryMap narrows scope for 5 downstream protocols. `/grasp` (Katalepsis) — requires all to complete.
+
+**Key graph relationships**:
+- Preconditions (DAG-enforced): Hermeneia → Telos → Horismos; * → Katalepsis
+- Advisory hubs: Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}
+- Suppression: Syneidesis ⊣ Aitesis (same scope), Aitesis ⊣ Epharmoge (pre+post stacking)
 
 **Initiator taxonomy** (2-layer model):
 - **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.

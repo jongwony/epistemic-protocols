@@ -143,7 +143,9 @@ When Telos is active:
 - Telos completes before implementation workflows begin
 - Loaded instructions resume after GoalContract is approved
 
-**Protocol precedence**: Default ordering places Telos after Hermeneia and before Horismos (Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; clarified intent before goal construction, defined goals before context verification). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Activation order position 2/9 (graph.json is authoritative source for information flow). Concern cluster: Planning.
+
+**Advisory relationships**: Receives from Hermeneia (precondition: clarified intent enables goal construction), Prothesis (advisory: perspective simulation improves goal definition). Provides to Horismos (precondition: defined goals enable boundary definition). Katalepsis is structurally last.
 
 Approved GoalContract becomes input to subsequent protocols.
 

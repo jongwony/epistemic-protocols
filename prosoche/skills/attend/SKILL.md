@@ -245,7 +245,9 @@ When Prosoche is active:
 - Loaded instructions and other protocol behaviors are retained
 - Prosoche adds a risk assessment layer, does not modify protocol logic
 
-**Protocol precedence**: Default ordering places Prosoche after Syneidesis (decision quality established before execution monitoring) and before Epharmoge (execution-time attention before post-execution applicability). Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices. The user can override this default by explicitly requesting a different protocol first.
+**Protocol precedence**: Activation order position 8/9 (graph.json is authoritative source for information flow). Concern cluster: Execution.
+
+**Advisory relationships**: Receives from Aitesis (advisory: inferred context narrows execution risk assessment), Horismos (advisory: BoundaryMap adjusts risk assessment threshold). Provides to Epharmoge (advisory: execution-time attention provides post-execution applicability context). Katalepsis is structurally last.
 
 ### Skip Conditions
 

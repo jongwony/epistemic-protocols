@@ -18,7 +18,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: You want to request "Refactor the API client" but worry Claude might change the interface contracts. How would you use a protocol to prevent scope overflow?
 - Hint: The issue is your expression doesn't capture your actual boundaries.
 
-**Philosophy**: ἑρμηνεία (interpretation) — Aristotle's treatise on language and meaning. Core principle: **Expression ≠ Intent**. Your words are a lossy compression of your intent; `/clarify` decompresses them before execution begins. Workflow position: first in the epistemic workflow (Planning phase) — intent must be clear before goals, context, or perspectives matter. Game feel: "I said X, but I meant Y" → decompose → align → proceed with shared understanding.
+**Philosophy**: ἑρμηνεία (interpretation) — Aristotle's treatise on language and meaning. Core principle: **Expression ≠ Intent**. Your words are a lossy compression of your intent; `/clarify` decompresses them before execution begins. Workflow position: Planning cluster — intent must be clear before goals, context, or perspectives matter. Game feel: "I said X, but I meant Y" → decompose → align → proceed with shared understanding.
 
 ## Telos `/goal`
 
@@ -35,7 +35,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: You need to "create a notification system" but haven't defined what success looks like. How would you use a protocol to establish clear objectives before implementation?
 - Hint: The problem isn't expression mismatch — it's that the goal itself doesn't exist yet.
 
-**Philosophy**: τέλος (end, purpose) — Aristotle's final cause. Core principle: **Co-construction over Extraction**. The goal doesn't pre-exist in the user's head waiting to be extracted — it's built through dialogue. Workflow position: second in the workflow — once intent is clear, define what success looks like. Game feel: "I know I want something but can't define it" → AI proposes concrete criteria → user shapes → GoalContract emerges.
+**Philosophy**: τέλος (end, purpose) — Aristotle's final cause. Core principle: **Co-construction over Extraction**. The goal doesn't pre-exist in the user's head waiting to be extracted — it's built through dialogue. Workflow position: Planning cluster — once intent is clear, define what success looks like. Game feel: "I know I want something but can't define it" → AI proposes concrete criteria → user shapes → GoalContract emerges.
 
 ## Horismos `/bound`
 
@@ -52,7 +52,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: You're about to delegate a multi-domain task to Claude but want to control some aspects yourself. How would you make explicit which decisions are yours vs. AI's?
 - Hint: The problem isn't unclear intent or missing context — it's undefined ownership over decision domains.
 
-**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Without explicit boundary definition, AI either over-assumes autonomy (causing surprise) or under-assumes (causing friction). Workflow position: after goal is defined, before context gathering — the BoundaryMap tells all downstream protocols what the human controls vs. what AI controls. Game feel: "Who decides what here?" → domain-by-domain classification → BoundaryMap emerges → shared understanding of ownership.
+**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Without explicit boundary definition, AI either over-assumes autonomy (causing surprise) or under-assumes (causing friction). Workflow position: cross-cutting — the BoundaryMap tells all downstream protocols what the human controls vs. what AI controls. Game feel: "Who decides what here?" → domain-by-domain classification → BoundaryMap emerges → shared understanding of ownership.
 
 ## Syneidesis `/gap`
 
@@ -69,7 +69,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: You're deciding between three architecture options for a new service. You've picked option B. Before committing, how would you check if you're overlooking something?
 - Hint: The issue isn't risk assessment — it's unnoticed blind spots in your decision process.
 
-**Philosophy**: συνείδησις (shared knowing, conscience) — the Stoic inner witness. Core principle: **Surfacing over Deciding**. AI illuminates what you haven't considered; you judge whether it matters. Workflow position: at the decision point (Decision phase) — after perspectives are set, before committing. Game feel: "About to commit? Let me check your blind spots" → 4 gap types surface → you address or dismiss → decide with awareness.
+**Philosophy**: συνείδησις (shared knowing, conscience) — the Stoic inner witness. Core principle: **Surfacing over Deciding**. AI illuminates what you haven't considered; you judge whether it matters. Workflow position: Decision cluster — after perspectives are set, before committing. Game feel: "About to commit? Let me check your blind spots" → 4 gap types surface → you address or dismiss → decide with awareness.
 
 ## Prothesis `/frame`
 
@@ -86,7 +86,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: You're evaluating three CI/CD tools for your project. Each excels in different dimensions. How would you structure the evaluation to avoid defaulting to the loudest opinion?
 - Hint: The problem isn't missing information or unclear goals — it's not knowing which analytical lens to apply.
 
-**Philosophy**: πρόθεσις (a placing before, setting forth) — the act of laying out options for examination. Core principle: **Recognition over Recall**. You don't need to invent frameworks from scratch — you select from curated lenses. Workflow position: after context is gathered — now choose how to look at the problem. Game feel: "Too many valid angles" → AI recommends lenses → you pick → structured multi-perspective analysis.
+**Philosophy**: πρόθεσις (a placing before, setting forth) — the act of laying out options for examination. Core principle: **Recognition over Recall**. You don't need to invent frameworks from scratch — you select from curated lenses. Workflow position: Analysis cluster — now choose how to look at the problem. Game feel: "Too many valid angles" → AI recommends lenses → you pick → structured multi-perspective analysis.
 
 ## Aitesis `/inquire`
 
@@ -103,7 +103,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: You're about to ask Claude to migrate your database from Postgres to MySQL. What protocol helps ensure Claude asks the right questions before executing?
 - Hint: Your intent is clear and your goal is defined — but the execution context has unknown dependencies.
 
-**Philosophy**: αἴτησις (a requesting, inquiry) — the act of asking what is needed. Core principle: **Inference over Interrogation**. AI infers what context is missing rather than asking a generic checklist. Workflow position: pre-execution — ensure sufficient context before acting. Game feel: "About to execute? Wait — what don't I know?" → AI surfaces ranked uncertainties → you provide answers → informed execution.
+**Philosophy**: αἴτησις (a requesting, inquiry) — the act of asking what is needed. Core principle: **Inference over Interrogation**. AI infers what context is missing rather than asking a generic checklist. Workflow position: Planning cluster — ensure sufficient context before acting. Game feel: "About to execute? Wait — what don't I know?" → AI surfaces ranked uncertainties → you provide answers → informed execution.
 
 ## Analogia `/ground`
 
@@ -120,7 +120,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: Someone says "treat your infrastructure like cattle, not pets." How would you check whether this mental model actually applies to your specific deployment setup?
 - Hint: The advice might be correct in general but structurally mismatched to your context.
 
-**Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Structural Correspondence over Abstract Assertion**. An analogy is only as good as its structural match to your domain. Workflow position: after framework is chosen — now validate that abstract advice maps to concrete reality. Game feel: "Sounds right in theory, but does it fit MY code?" → decompose analogy → check each mapping → instantiate with real components.
+**Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Structural Correspondence over Abstract Assertion**. An analogy is only as good as its structural match to your domain. Workflow position: Analysis cluster — now validate that abstract advice maps to concrete reality. Game feel: "Sounds right in theory, but does it fit MY code?" → decompose analogy → check each mapping → instantiate with real components.
 
 ## Prosoche `/attend`
 
@@ -137,7 +137,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: You're about to execute a multi-step infrastructure change. How would you have risky steps gated while the rest proceeds autonomously?
 - Hint: The plan itself is sound — the concern is execution-time risk, not decision gaps.
 
-**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of present-moment awareness during action. Core principle: **Attention over Automation**. Most tasks execute autonomously (p=Low); only elevated-risk actions surface for user judgment. Workflow position: at execution time — plan is approved, now execute with risk-aware gating. Game feel: "Plan looks good, let's go" → tasks execute → risky action detected → you decide → execution resumes.
+**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of present-moment awareness during action. Core principle: **Attention over Automation**. Most tasks execute autonomously (p=Low); only elevated-risk actions surface for user judgment. Workflow position: Execution cluster — plan is approved, now execute with risk-aware gating. Game feel: "Plan looks good, let's go" → tasks execute → risky action detected → you decide → execution resumes.
 
 ## Epharmoge `/contextualize`
 
@@ -154,7 +154,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: After Claude generates code that works but uses patterns your team doesn't follow, how would you systematically check for environment fit?
 - Hint: The code is correct — the mismatch is between the output and its deployment context.
 
-**Philosophy**: ἐφαρμογή (application, fitting) — Aristotle's practical application. Core principle: **Applicability over Correctness**. Correct code that doesn't fit your context is not useful code. Formal predicate: `correct(R) ∧ ¬warranted(R, X)`. Workflow position: post-execution — after work is done, check if it fits where it's going. Game feel: "Done! ...wait, does this actually fit here?" → mismatch detection → evidence-based surfacing → adapt or dismiss.
+**Philosophy**: ἐφαρμογή (application, fitting) — Aristotle's practical application. Core principle: **Applicability over Correctness**. Correct code that doesn't fit your context is not useful code. Formal predicate: `correct(R) ∧ ¬warranted(R, X)`. Workflow position: Verification cluster — after work is done, check if it fits where it's going. Game feel: "Done! ...wait, does this actually fit here?" → mismatch detection → evidence-based surfacing → adapt or dismiss.
 
 ## Katalepsis `/grasp`
 
@@ -171,4 +171,4 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: After a large AI-driven change, how would you verify that you actually understand what was done, not just that it works?
 - Hint: The problem isn't that the output is wrong — it's that your comprehension hasn't caught up.
 
-**Philosophy**: κατάληψις (grasping firmly, comprehension) — the Stoic criterion of truth through firm cognitive grasp. Core principle: **Comprehension over Approval**. Approving a diff is not understanding it. Workflow position: structurally last — requires completed AI work; without a result, there is nothing to verify. Game feel: "Tests pass, I approved it... but do I actually understand?" → Socratic probes → test your mental model → verified understanding or identified gaps.
+**Philosophy**: κατάληψις (grasping firmly, comprehension) — the Stoic criterion of truth through firm cognitive grasp. Core principle: **Comprehension over Approval**. Approving a diff is not understanding it. Workflow position: cross-cutting, structurally last — requires completed AI work; without a result, there is nothing to verify. Game feel: "Tests pass, I approved it... but do I actually understand?" → Socratic probes → test your mental model → verified understanding or identified gaps.
