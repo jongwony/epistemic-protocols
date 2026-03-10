@@ -29,7 +29,7 @@ const PROTOCOL_FILES = [
 ];
 
 const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge';
-const CANONICAL_WORKFLOW = 'Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp';
+const CANONICAL_CLUSTERS = 'Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/grasp`)';
 const PRECEDENCE_FILES = [
   'hermeneia/skills/clarify/SKILL.md',
   'telos/skills/goal/SKILL.md',
@@ -1085,11 +1085,11 @@ function checkCrossRefScan() {
     if (!fs.existsSync(fullPath)) continue;
 
     const content = fs.readFileSync(fullPath, 'utf8');
-    if (!content.includes(CANONICAL_WORKFLOW)) {
+    if (!content.includes(CANONICAL_CLUSTERS)) {
       results.fail.push({
         check: 'cross-ref-scan',
         file: relPath,
-        message: `Missing canonical workflow "${CANONICAL_WORKFLOW}"`
+        message: `Missing canonical workflow "${CANONICAL_CLUSTERS}"`
       });
       subCheckFailed = true;
     }
@@ -1097,8 +1097,8 @@ function checkCrossRefScan() {
 
   const claudeRequirements = [
     {
-      pattern: /Multi-activation order: \*\*Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp\*\*/,
-      message: 'CLAUDE.md missing canonical workflow ordering with Ground'
+      pattern: /ordered by activation sequence within each cluster/,
+      message: 'CLAUDE.md missing cluster activation sequence description'
     },
     {
       pattern: /\| Concern \| Protocols \|/,

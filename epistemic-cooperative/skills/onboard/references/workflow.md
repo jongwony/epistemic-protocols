@@ -12,4 +12,4 @@ Protocols grouped by primary concern. Clusters are non-directional — they repr
 
 **Cross-cutting**: /bound (boundary — consumed by 5 downstream protocols), /grasp (comprehension — always last)
 
-**Activation order** (multi-activation only): Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
+**Cluster activation sequence** (multi-activation only): Planning → Analysis → Decision → Execution → Verification (cross-cutting protocols interleave per precondition DAG; Katalepsis structurally last)

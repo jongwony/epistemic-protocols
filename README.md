@@ -28,16 +28,16 @@ For individual plugin installation, see each protocol's README.
 |----------|---------|-------------|
 | [Hermeneia](./hermeneia) | `/clarify` | AI keeps building what you didn't ask for |
 | [Telos](./telos) | `/goal` | You know you want something but can't define success |
-| [Horismos](./horismos) | `/bound` | You need to define what you know vs what AI should figure out |
 | [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
-| [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
+| [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
 | [Prosoche](./prosoche) | `/attend` | Executing tasks and want risky actions gated for your judgment |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
+| [Horismos](./horismos) | `/bound` | You need to define what you know vs what AI should figure out |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
 
-Activation order: Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
+Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/grasp`)
 
 ## Utilities
 

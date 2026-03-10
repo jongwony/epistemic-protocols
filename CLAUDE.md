@@ -211,15 +211,9 @@ Principle: side effects require explicit answer types, not tool-level escape. Wh
 
 ## Protocol Precedence
 
-Multi-activation order: **Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp**
-
-This is an activation sequence for simultaneous protocol activation, not information flow. Users can override by explicitly requesting a different protocol first.
-
-**Katalepsis**: Structural constraint — always executes last. Not overridable.
-
 ### Epistemic Concern Clusters
 
-Protocols grouped by primary concern (non-directional). Information flow: `graph.json` (authoritative source).
+Protocols grouped by primary concern, ordered by activation sequence within each cluster. Simultaneous activation follows cluster order; users can override. Information flow: `graph.json` (authoritative source).
 
 | Concern | Protocols |
 |---------|-----------|
@@ -335,7 +329,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
-| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_WORKFLOW`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), README.md + README_ko.md |
+| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_CLUSTERS`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), README.md + README_ko.md |
 | Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions |
 | Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Post-convergence suggestion pattern change | ALL 10 SKILL.md Post-Convergence sections, plugin.json version bumps |
