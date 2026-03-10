@@ -322,4 +322,4 @@ Target 6-12 calls per session:
 
 ## Acknowledgments
 
-- [@zzsza](https://github.com/zzsza) — Quiz-based participatory UX design inspiration
+- [@zzsza](https://github.com/zzsza) — Quiz-based participatory UX design contribution
