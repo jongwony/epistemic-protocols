@@ -1021,22 +1021,60 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 3: Verify precedence template pattern in SKILL.md files
-  const precedenceCount = CANONICAL_PRECEDENCE.split(' → ').length;
-  const positionPattern = new RegExp(`Activation order position \\d+/${precedenceCount}`);
+  // Sub-check 3: Verify precedence template in **Protocol precedence** line
+  const precedenceList = CANONICAL_PRECEDENCE.split(' → ');
+  const precedenceCount = precedenceList.length;
   for (const relPath of PRECEDENCE_FILES) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;
 
     const content = fs.readFileSync(fullPath, 'utf8');
-    const hasPosition = positionPattern.test(content);
-    const hasCrossCutting = content.includes('cross-cutting') || content.includes('structural constraint');
-    const hasGraphRef = content.includes('graph.json');
-    if (!(hasPosition || hasCrossCutting) || !hasGraphRef) {
+    const precedenceMatch = content.match(/\*\*Protocol precedence\*\*:(.+)/);
+    if (!precedenceMatch) {
       results.fail.push({
         check: 'cross-ref-scan',
         file: relPath,
-        message: `Missing precedence template (expected: position N/9 or cross-cutting/structural constraint + graph.json reference)`
+        message: 'Missing **Protocol precedence** line in SKILL.md'
+      });
+      subCheckFailed = true;
+      continue;
+    }
+    const pLine = precedenceMatch[1];
+
+    // Derive expected position from CANONICAL_PRECEDENCE index
+    const dirName = relPath.split('/')[0];
+    const expectedIndex = precedenceList.findIndex(
+      name => name.toLowerCase() === dirName
+    );
+
+    if (expectedIndex >= 0) {
+      const expectedPosition = `position ${expectedIndex + 1}/${precedenceCount}`;
+      if (!pLine.includes(expectedPosition)) {
+        results.fail.push({
+          check: 'cross-ref-scan',
+          file: relPath,
+          message: `Wrong precedence position (expected: "${expectedPosition}")`
+        });
+        subCheckFailed = true;
+      }
+    } else {
+      // Cross-cutting protocol (not in CANONICAL_PRECEDENCE)
+      const hasCrossCutting = pLine.includes('Cross-cutting:') || pLine.includes('Structural constraint');
+      if (!hasCrossCutting) {
+        results.fail.push({
+          check: 'cross-ref-scan',
+          file: relPath,
+          message: 'Protocol not in CANONICAL_PRECEDENCE and missing Cross-cutting/Structural constraint marker'
+        });
+        subCheckFailed = true;
+      }
+    }
+
+    if (!pLine.includes('graph.json')) {
+      results.fail.push({
+        check: 'cross-ref-scan',
+        file: relPath,
+        message: 'Missing graph.json reference in **Protocol precedence** line'
       });
       subCheckFailed = true;
     }
@@ -1432,7 +1470,7 @@ function checkOnboardSync() {
         results.fail.push({
           check: 'onboard-sync',
           file: 'epistemic-cooperative/skills/onboard/references/workflow.md',
-          message: `Missing "/${command}" in workflow diagram`
+          message: `Missing "/${command}" in workflow reference (references/workflow.md)`
         });
         subCheckFailed = true;
       }

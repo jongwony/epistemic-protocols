@@ -145,7 +145,7 @@ When Aitesis is active:
 
 **Protocol precedence**: Activation order position 4/9 (graph.json is authoritative source for information flow). Concern cluster: Planning.
 
-**Advisory relationships**: Receives from Horismos (advisory: BoundaryMap narrows context inference scope), Prothesis (advisory: perspective simulation provides context inference recommendations), Hermeneia (advisory: background gaps suggest context insufficiency). Provides to Prosoche (advisory: inferred context narrows execution risk assessment), Analogia (advisory: inferred context narrows mapping domain identification); Epharmoge (suppression: pre+post stacking prevention). Katalepsis is structurally last.
+**Advisory relationships**: Receives from Horismos (advisory: BoundaryMap narrows context inference scope), Prothesis (advisory: perspective simulation provides context inference recommendations), Hermeneia (advisory: background gaps suggest context insufficiency), Syneidesis (suppression: same scope suppression). Provides to Prosoche (advisory: inferred context narrows execution risk assessment), Analogia (advisory: inferred context narrows mapping domain identification); Epharmoge (suppression: pre+post stacking prevention). Katalepsis is structurally last.
 
 ### Trigger Signals
 

@@ -336,6 +336,6 @@ node .claude/skills/verify/scripts/static-checks.js .
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
 | New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_WORKFLOW`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), README.md + README_ko.md |
-| Precedence change | CLAUDE.md (precedence section + workflow diagram), ALL SKILL.md precedence descriptions |
+| Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions |
 | Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Post-convergence suggestion pattern change | ALL 10 SKILL.md Post-Convergence sections, plugin.json version bumps |

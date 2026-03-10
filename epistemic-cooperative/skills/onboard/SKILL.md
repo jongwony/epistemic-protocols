@@ -63,7 +63,7 @@ Present the protocol catalog as text output FIRST (always), then ask path select
 
 **Protocol Catalog** (always rendered as text before asking):
 
-Before rendering, check installation status: Glob `~/.claude/plugins/cache/epistemic-protocols/*/` to collect installed plugin directory names. Present the 10 protocols from the Data Sources table as a numbered list grouped by Phase, with name + phase label + "When to Use" description + installation badge (`[installed]` or `[not installed]`).
+Before rendering, check installation status: Glob `~/.claude/plugins/cache/epistemic-protocols/*/` to collect installed plugin directory names. Present the 10 protocols from the Data Sources table as a numbered list grouped by Cluster, with name + cluster label + "When to Use" description + installation badge (`[installed]` or `[not installed]`).
 
 **AskUserQuestion #1**:
 - Text: "Which path?"
