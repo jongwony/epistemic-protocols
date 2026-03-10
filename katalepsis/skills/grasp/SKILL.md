@@ -13,7 +13,7 @@ Achieve certain comprehension of AI work through structured verification, enabli
 
 ```
 ── FLOW ──
-R → C → Sₑ → Tᵣ → detect(C) → GT → P → Δ → Q → A → Q(Aᵣ) → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
+R → C → Sₑ → Tᵣ → detect(C) → GT → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
 
 ── MORPHISM ──
 Result
