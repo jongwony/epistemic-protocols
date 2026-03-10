@@ -153,7 +153,9 @@ When Horismos is active:
 - Horismos completes before execution proceeds
 - Loaded instructions resume after all domains are bounded or dismissed
 
-**Protocol precedence**: Default ordering places Horismos after Telos and before Aitesis (Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge; boundaries narrow context inference scope and framework selection). The user can override this default by explicitly requesting a different protocol first. Katalepsis is structurally last — it requires completed AI work (`R`), so it is not subject to ordering choices.
+**Protocol precedence**: Activation order position 3/9 (graph.json is authoritative source for information flow). Cross-cutting: BoundaryMap is consumed by 5 downstream protocols.
+
+**Advisory relationships**: Receives from Telos (precondition: defined goals enable boundary definition). Provides to Aitesis, Prothesis, Prosoche, Analogia, Syneidesis (all advisory: BoundaryMap narrows scope). Katalepsis is structurally last.
 
 ### Trigger Signals
 

@@ -211,21 +211,24 @@ Principle: side effects require explicit answer types, not tool-level escape. Wh
 
 ## Protocol Precedence
 
-Multi-activation order: **Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp**
+### Epistemic Concern Clusters
 
-This is a logical default, not a strict constraint. When multiple protocols activate simultaneously, AI follows this order — each protocol's output feeds into subsequent ones (clarified intent → goal construction → boundary definition → context verification → perspective → validated mapping → gap audit → execution-time attention → applicability check). Users can override by explicitly requesting a different protocol first.
+Protocols grouped by primary concern, ordered by activation sequence within each cluster. Simultaneous activation follows cluster order; users can override. Information flow: `graph.json` (authoritative source).
 
-**Katalepsis**: Structural constraint — always executes last. Requires completed AI work (`R`); without a result, there is nothing to verify. This is not overridable.
+| Concern | Protocols |
+|---------|-----------|
+| Planning | `/clarify` (Hermeneia), `/goal` (Telos), `/inquire` (Aitesis) |
+| Analysis | `/frame` (Prothesis), `/ground` (Analogia) |
+| Decision | `/gap` (Syneidesis) |
+| Execution | `/attend` (Prosoche) |
+| Verification | `/contextualize` (Epharmoge) |
 
-### Epistemic Workflow
+**Cross-cutting**: `/bound` (Horismos) — BoundaryMap narrows scope for 5 downstream protocols. `/grasp` (Katalepsis) — requires all to complete.
 
-```
-[Request] → [Intent] → [Goal] → [Boundary] → [Context] → [Perspective] → [Mapping] → [Decision] → [Execution] → [Application] → [Comprehension]
-               ↑          ↑          ↑          ↑             ↑              ↑            ↑              ↑              ↑               ↑
-           Hermeneia    Telos    Horismos    Aitesis      Prothesis      Analogia    Syneidesis      Prosoche      Epharmoge       Katalepsis
-```
-
-This diagram shows logical progression, not strict execution order.
+**Key graph relationships**:
+- Preconditions (DAG-enforced): Hermeneia → Telos → Horismos; * → Katalepsis
+- Advisory hubs: Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}
+- Suppression: Syneidesis ⊣ Aitesis (same scope), Aitesis ⊣ Epharmoge (pre+post stacking)
 
 **Initiator taxonomy** (2-layer model):
 - **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.
@@ -326,7 +329,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
-| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_WORKFLOW`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), README.md + README_ko.md |
-| Precedence change | CLAUDE.md (precedence section + workflow diagram), ALL SKILL.md precedence descriptions |
+| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_CLUSTERS`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), README.md + README_ko.md |
+| Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions |
 | Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Post-convergence suggestion pattern change | ALL 10 SKILL.md Post-Convergence sections, plugin.json version bumps |

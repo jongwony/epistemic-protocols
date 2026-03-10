@@ -42,18 +42,18 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 
 Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with detection methods and rationale, refer to `/report` SKILL.md.
 
-| Protocol | Phase | When to Use | Key Patterns |
-|----------|-------|-------------|-------------|
+| Protocol | Cluster | When to Use | Key Patterns |
+|----------|---------|-------------|-------------|
 | Hermeneia `/clarify` | Planning | AI keeps misunderstanding your intent | Same file 3+ edits (same intent), `misunderstood_request` friction |
 | Telos `/goal` | Planning | You have a desire but no clear goal | Vague first prompts ("improve", "optimize", "ideas for"), `wrong_approach` friction |
-| Horismos `/bound` | Planning | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
 | Aitesis `/inquire` | Planning | AI is about to execute without enough context | `context_loss` friction |
 | Prothesis `/frame` | Analysis | Unsure which analytical perspective to use | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
 | Syneidesis `/gap` | Decision | Right before committing, checking for blind spots | Same file 3+ edits (different concerns), `excessive_changes` friction |
 | Prosoche `/attend` | Execution | Controlling risky actions step by step | Bash deploy/push/apply keywords, `wrong_file_edited` friction |
 | Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the context | Post-execution environment mismatch |
-| Katalepsis `/grasp` | Understanding | You approved AI work but didn't fully understand it | Verification keywords in firstPrompt ("explain", "what did you do") |
+| Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
+| Katalepsis `/grasp` | Cross-cutting | You approved AI work but didn't fully understand it | Verification keywords in firstPrompt ("explain", "what did you do") |
 
 ## Phase Execution
 
@@ -63,7 +63,7 @@ Present the protocol catalog as text output FIRST (always), then ask path select
 
 **Protocol Catalog** (always rendered as text before asking):
 
-Before rendering, check installation status: Glob `~/.claude/plugins/cache/epistemic-protocols/*/` to collect installed plugin directory names. Present the 10 protocols from the Data Sources table as a numbered list grouped by Phase, with name + phase label + "When to Use" description + installation badge (`[installed]` or `[not installed]`).
+Before rendering, check installation status: Glob `~/.claude/plugins/cache/epistemic-protocols/*/` to collect installed plugin directory names. Present the 10 protocols from the Data Sources table as a numbered list grouped by Cluster, with name + cluster label + "When to Use" description + installation badge (`[installed]` or `[not installed]`).
 
 **AskUserQuestion #1**:
 - Text: "Which path?"
@@ -261,11 +261,11 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 2. **Epistemic Map** (connect the dots):
 
-   Present the Epistemic Workflow diagram from `references/workflow.md`. Highlight protocols the user experienced with emphasis (e.g., bold or `★`).
+   Present the Epistemic Concern Clusters from `references/workflow.md`. Highlight protocols the user experienced with emphasis (e.g., bold or `★`).
 
 3. **Report CTA**: "Run `/report` for a comprehensive analysis with evidence-backed recommendations and an HTML profile."
 
-4. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring adjacent protocols in the workflow.
+4. **Next protocol suggestion**: Based on quiz results and MAP data, suggest the next protocol to explore — preferring related protocols in the same cluster.
 
 5. **Advanced Usage** (bonus tips after main guide):
 

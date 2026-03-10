@@ -28,16 +28,16 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 |----------|--------|----------|
 | [Hermeneia](./hermeneia) | `/clarify` | AI가 요청하지 않은 것을 계속 만들 때 |
 | [Telos](./telos) | `/goal` | 뭔가 원하는데 성공 기준을 못 정할 때 |
-| [Horismos](./horismos) | `/bound` | 내가 아는 것과 AI가 판단할 것의 경계를 정해야 할 때 |
 | [Aitesis](./aitesis) | `/inquire` | AI가 필요한 걸 묻지 않고 바로 실행할 때 |
 | [Prothesis](./prothesis) | `/frame` | 여러 관점이 필요한데 어떤 것이 맞는지 모를 때 |
-| [Syneidesis](./syneidesis) | `/gap` | 실행하려는데 뭔가 빠뜨린 것 같을 때 |
 | [Analogia](./analogia) | `/ground` | AI 추천이 이론적으론 맞는데 내 상황에 맞는지 모를 때 |
+| [Syneidesis](./syneidesis) | `/gap` | 실행하려는데 뭔가 빠뜨린 것 같을 때 |
 | [Prosoche](./prosoche) | `/attend` | 작업 실행 중 위험한 행동만 사용자 판단을 거치고 싶을 때 |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI 결과가 정확하지만 내 상황에 안 맞을 때 |
+| [Horismos](./horismos) | `/bound` | 내가 아는 것과 AI가 판단할 것의 경계를 정해야 할 때 |
 | [Katalepsis](./katalepsis) | `/grasp` | AI가 큰 변경을 했는데 실제로 이해가 필요할 때 |
 
-순서는 인식론적 워크플로우를 따릅니다: Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp
+관심사 클러스터: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/grasp`)
 
 ## 유틸리티
 

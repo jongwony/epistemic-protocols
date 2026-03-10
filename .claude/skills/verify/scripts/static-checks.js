@@ -29,7 +29,7 @@ const PROTOCOL_FILES = [
 ];
 
 const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge';
-const CANONICAL_WORKFLOW = 'Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp';
+const CANONICAL_CLUSTERS = 'Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/grasp`)';
 const PRECEDENCE_FILES = [
   'hermeneia/skills/clarify/SKILL.md',
   'telos/skills/goal/SKILL.md',
@@ -38,6 +38,8 @@ const PRECEDENCE_FILES = [
   'prothesis/skills/frame/SKILL.md',
   'analogia/skills/ground/SKILL.md',
   'syneidesis/skills/gap/SKILL.md',
+  'prosoche/skills/attend/SKILL.md',
+  'epharmoge/skills/contextualize/SKILL.md',
   'katalepsis/skills/grasp/SKILL.md',
 ];
 
@@ -1019,17 +1021,60 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 3: Verify canonical precedence/workflow surfaces include Analogia
+  // Sub-check 3: Verify precedence template in **Protocol precedence** line
+  const precedenceList = CANONICAL_PRECEDENCE.split(' → ');
+  const precedenceCount = precedenceList.length;
   for (const relPath of PRECEDENCE_FILES) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;
 
     const content = fs.readFileSync(fullPath, 'utf8');
-    if (!content.includes(CANONICAL_PRECEDENCE)) {
+    const precedenceMatch = content.match(/\*\*Protocol precedence\*\*:(.+)/);
+    if (!precedenceMatch) {
       results.fail.push({
         check: 'cross-ref-scan',
         file: relPath,
-        message: `Missing canonical precedence chain "${CANONICAL_PRECEDENCE}"`
+        message: 'Missing **Protocol precedence** line in SKILL.md'
+      });
+      subCheckFailed = true;
+      continue;
+    }
+    const pLine = precedenceMatch[1];
+
+    // Derive expected position from CANONICAL_PRECEDENCE index
+    const dirName = relPath.split('/')[0];
+    const expectedIndex = precedenceList.findIndex(
+      name => name.toLowerCase() === dirName
+    );
+
+    if (expectedIndex >= 0) {
+      const expectedPosition = `position ${expectedIndex + 1}/${precedenceCount}`;
+      if (!pLine.includes(expectedPosition)) {
+        results.fail.push({
+          check: 'cross-ref-scan',
+          file: relPath,
+          message: `Wrong precedence position (expected: "${expectedPosition}")`
+        });
+        subCheckFailed = true;
+      }
+    } else {
+      // Cross-cutting protocol (not in CANONICAL_PRECEDENCE)
+      const hasCrossCutting = pLine.includes('Cross-cutting:') || pLine.includes('Structural constraint');
+      if (!hasCrossCutting) {
+        results.fail.push({
+          check: 'cross-ref-scan',
+          file: relPath,
+          message: 'Protocol not in CANONICAL_PRECEDENCE and missing Cross-cutting/Structural constraint marker'
+        });
+        subCheckFailed = true;
+      }
+    }
+
+    if (!pLine.includes('graph.json')) {
+      results.fail.push({
+        check: 'cross-ref-scan',
+        file: relPath,
+        message: 'Missing graph.json reference in **Protocol precedence** line'
       });
       subCheckFailed = true;
     }
@@ -1040,11 +1085,11 @@ function checkCrossRefScan() {
     if (!fs.existsSync(fullPath)) continue;
 
     const content = fs.readFileSync(fullPath, 'utf8');
-    if (!content.includes(CANONICAL_WORKFLOW)) {
+    if (!content.includes(CANONICAL_CLUSTERS)) {
       results.fail.push({
         check: 'cross-ref-scan',
         file: relPath,
-        message: `Missing canonical workflow "${CANONICAL_WORKFLOW}"`
+        message: `Missing canonical workflow "${CANONICAL_CLUSTERS}"`
       });
       subCheckFailed = true;
     }
@@ -1052,12 +1097,12 @@ function checkCrossRefScan() {
 
   const claudeRequirements = [
     {
-      pattern: /Multi-activation order: \*\*Clarify → Goal → Bound → Inquire → Frame → Ground → Gap → Attend → Contextualize → Grasp\*\*/,
-      message: 'CLAUDE.md missing canonical workflow ordering with Ground'
+      pattern: /ordered by activation sequence within each cluster/,
+      message: 'CLAUDE.md missing cluster activation sequence description'
     },
     {
-      pattern: /Prothesis\s+Analogia\s+Syneidesis/,
-      message: 'CLAUDE.md workflow diagram missing Prothesis → Analogia → Syneidesis sequence'
+      pattern: /\| Concern \| Protocols \|/,
+      message: 'CLAUDE.md missing Epistemic Concern Clusters table'
     },
     {
       pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge\)/,
@@ -1425,7 +1470,7 @@ function checkOnboardSync() {
         results.fail.push({
           check: 'onboard-sync',
           file: 'epistemic-cooperative/skills/onboard/references/workflow.md',
-          message: `Missing "/${command}" in workflow diagram`
+          message: `Missing "/${command}" in workflow reference (references/workflow.md)`
         });
         subCheckFailed = true;
       }
