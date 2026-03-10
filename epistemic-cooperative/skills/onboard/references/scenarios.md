@@ -18,7 +18,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: You want to request "Refactor the API client" but worry Claude might change the interface contracts. How would you use a protocol to prevent scope overflow?
 - Hint: The issue is your expression doesn't capture your actual boundaries.
 
-**Philosophy**: ἑρμηνεία (interpretation) — Aristotle's treatise on language and meaning. Core principle: **Expression ≠ Intent**. Your words are a lossy compression of your intent; `/clarify` decompresses them before execution begins. Workflow position: first in the epistemic workflow — intent must be clear before goals, context, or perspectives matter. Game feel: "I said X, but I meant Y" → decompose → align → proceed with shared understanding.
+**Philosophy**: ἑρμηνεία (interpretation) — Aristotle's treatise on language and meaning. Core principle: **Expression ≠ Intent**. Your words are a lossy compression of your intent; `/clarify` decompresses them before execution begins. Workflow position: first in the epistemic workflow (Planning phase) — intent must be clear before goals, context, or perspectives matter. Game feel: "I said X, but I meant Y" → decompose → align → proceed with shared understanding.
 
 ## Telos `/goal`
 
@@ -69,7 +69,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 **Quiz Q (design)**: You're deciding between three architecture options for a new service. You've picked option B. Before committing, how would you check if you're overlooking something?
 - Hint: The issue isn't risk assessment — it's unnoticed blind spots in your decision process.
 
-**Philosophy**: συνείδησις (shared knowing, conscience) — the Stoic inner witness. Core principle: **Surfacing over Deciding**. AI illuminates what you haven't considered; you judge whether it matters. Workflow position: at the decision point — after perspectives are set, before committing. Game feel: "About to commit? Let me check your blind spots" → 4 gap types surface → you address or dismiss → decide with awareness.
+**Philosophy**: συνείδησις (shared knowing, conscience) — the Stoic inner witness. Core principle: **Surfacing over Deciding**. AI illuminates what you haven't considered; you judge whether it matters. Workflow position: at the decision point (Decision phase) — after perspectives are set, before committing. Game feel: "About to commit? Let me check your blind spots" → 4 gap types surface → you address or dismiss → decide with awareness.
 
 ## Prothesis `/frame`
 

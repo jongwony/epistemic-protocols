@@ -137,6 +137,14 @@ G (gather)               → Read, Glob, Grep (targeted context acquisition, gui
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
 characterize (internal)  → Internal operation (perspective count tier classification)
 
+── ELIDABLE CHECKPOINTS ──
+Phase 0 Q (MB+mode)     → elidable when: user_invoked ∧ explicit_arg(U)
+                           default: (Q1=confirm, Q2=ai_recommended_mode)
+                           regret: bounded (Phase 2 S always gated; J_mb=modify on re-invoke)
+Phase 2 S (perspective)  → always_gated (classificatory: lens selection is epistemic choice)
+Phase 4 Q (routing)      → always_gated (constitutive: loop path + team lifecycle)
+PF Q (preserve)          → always_gated (constitutive: knowledge preservation scope)
+
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs
 D = join (union of distinct findings) where perspectives diverge
@@ -207,6 +215,8 @@ Consult `references/conceptual-foundations.md` for design rationale (Plan Mode I
 Construct a Mission Brief from the user's request and **call the AskUserQuestion tool** to confirm it.
 
 **Do NOT skip this phase.** The Mission Brief is the primary context vehicle for teammate spawn prompts — it ensures agent-teams best practice ("give teammates enough context") is structurally guaranteed rather than depending on coordinator inference.
+
+**Elidable confirmation**: When the user explicitly invoked `/frame "text"`, the Phase 0 AskUserQuestion (Q) may be elided — the MB is still constructed from U, but proceeds without user confirmation. AI uses `J_mb=confirm` and `m=ai_recommended_mode` as defaults. Phase 2 S (perspective selection) remains always gated, providing a downstream correction opportunity. Elision does not apply to J=extend re-invocations within an active loop.
 
 The coordinator infers the Mission Brief from U (the user's request):
 
