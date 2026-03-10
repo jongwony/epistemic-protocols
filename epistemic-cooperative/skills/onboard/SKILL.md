@@ -241,7 +241,12 @@ Same format as Targeted Path Type 3.
 
 Immediate feedback after each question:
 - **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` classifies *execution risks* (what could go wrong when you act). `/gap` audits before action (decision quality), `/attend` gates during action (execution safety)."
-- **Incorrect**: Explain the distinction through the design axis that separates them. "The key difference is *timing and direction*: `/inquire` catches missing context *before* execution (User→AI: 'what do you need to know?'), while `/contextualize` checks context fit *after* execution (AI→User: 'does this actually fit here?'). Same axis — context fitness — but opposite timing."
+- **Incorrect** (reasoning inquiry → targeted correction):
+  1. **Reasoning inquiry**: Call AskUserQuestion with 2-3 reasoning hypotheses inferred from the user's wrong answer (context-specific, not templates). Do not reveal the correct answer. "Other" always available.
+  2. **Targeted correction**: Using the user's stated reasoning, explain the distinction through the design axis that separates the confused pair. Directly address the reasoning — e.g., "You mentioned timing — that's the right axis. The key difference is *direction*: `/inquire` catches missing context *before* execution (User→AI), while `/contextualize` checks context fit *after* (AI→User)."
+  3. **Resume**: Proceed to next question.
+
+  **Reasoning inquiry cap**: Apply reasoning inquiry for the first 2 incorrect answers per quiz session. Subsequent incorrect answers receive direct targeted correction (step 2 only) without the reasoning inquiry step.
 
 **Distinction depth**: Quiz feedback should go beyond "A, not B" to explain the *design dimension* that separates confused pairs. Reference the distractor pairs from Quiz Design section. The goal is that even wrong answers teach — the user leaves understanding *why* two protocols that sound similar serve different purposes.
 
@@ -292,7 +297,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 ## AskUserQuestion Budget
 
-Target 6-10 calls per session:
+Target 6-12 calls per session:
 
 | Phase | Calls (General) | Calls (Targeted) | Purpose |
 |-------|-----------------|-------------------|---------|
@@ -300,7 +305,7 @@ Target 6-10 calls per session:
 | 3. Scenario | 1-3 | 1-2 | Navigation after scenario text |
 | 4. Trial | 0 | 0 | Direct entry from "Try it" |
 | 4→5 LOOP | 1 | 1 | Post-trial navigation |
-| 5. Quiz | 4-5 | 4-5 | MC/design or binary/reverse/design |
+| 5. Quiz | 4-7 | 4-7 | MC/design or binary/reverse/design + reasoning inquiry on incorrect |
 | 6. Guide | 0-1 | 0-1 | Optional continue exploring |
 
 ## Rules
@@ -309,7 +314,7 @@ Target 6-10 calls per session:
 2. **Privacy**: Never transmit session data externally. All analysis runs locally.
 3. **No subagent delegation**: Both General and Targeted paths use inline Quick Scan. Deep pattern extraction belongs in `/report`.
 4. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
-5. **Immediate feedback**: Quiz answers get instant feedback with distinction explanations. Never batch quiz results.
+5. **Immediate feedback**: Quiz answers get instant feedback. For incorrect answers, reasoning inquiry precedes correction (per Feedback section). Never batch quiz results.
 6. **No auto-install**: Guide installation but never install plugins automatically.
 7. **Session index access**: Access `sessions-index.json` via Glob + Read. Parse `entries` for `firstPrompt` and `summary` fields only. Never Read entire session JSONL files.
 8. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.

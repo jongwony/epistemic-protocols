@@ -13,7 +13,7 @@ Achieve certain comprehension of AI work through structured verification, enabli
 
 ```
 ── FLOW ──
-R → C → Sₑ → Tᵣ → detect(C) → GT → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
+R → C → Sₑ → Tᵣ → detect(C) → GT → P → Δ → Q → A → Q(Aᵣ) → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
 
 ── MORPHISM ──
 Result
@@ -37,6 +37,7 @@ P  = User's phantasia (current representation/understanding)
 Δ  = Detected comprehension gap
 Q  = Verification question (via AskUserQuestion)
 A  = User's answer
+Aᵣ = User's reasoning behind misconception (via AskUserQuestion)
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
@@ -49,7 +50,8 @@ Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registrat
 Phase 3: Tᵣ → TaskUpdate(current) → detect(C) → GT → P → Δ  -- comprehension check [Tool]
        → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
-       → Read(source) if eval(A) requires               -- AI-determined reference [Tool]
+       → Q[AskUserQuestion](Aᵣ) if misconception(A)    -- reasoning inquiry [Tool]
+       → Read(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
        → Q[AskUserQuestion](coverage) if correct(A)     -- aspect summary [Tool]
 
 ── LOOP ──
@@ -72,6 +74,7 @@ Phase 1 Q   → AskUserQuestion (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 detect (detect) → Internal analysis (gap type relevance detection per category)
 Phase 3 Q   → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 Qᵣ → AskUserQuestion (misconception reasoning inquiry)
 Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Phase 3 Prop → TaskCreate (proposal ejection)
@@ -310,11 +313,15 @@ For each task (category):
    |------------|--------|------|
    | Correct (P' ≅ R) | Confirm, proceed to next aspect or category | TaskUpdate |
    | Partial gap | Targeted followup probe on the gap area | AskUserQuestion |
-   | Misconception | Correction + supporting reference if needed | Read (AI-determined) |
+   | Misconception | Reasoning inquiry → targeted correction | AskUserQuestion, Read (AI-determined) |
 
-   Resume comprehension verification by calling AskUserQuestion again for the same aspect.
+   **Misconception handling** (three-step):
 
-   **Post-correction Proposal surfacing**: When resuming verification after a Misconception correction, output a brief text nudge before calling AskUserQuestion — remind the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option. Adapt wording to fit the current context (no fixed template). This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User input via Other triggers Step 3b Proposal ejection workflow, then resumes the verification loop.
+   1. **Reasoning inquiry**: Call AskUserQuestion with AI-generated reasoning hypotheses. Infer 2-3 likely reasoning paths from the specific misconception and present as options. Each option is a context-specific hypothesis derived from the user's actual wrong answer (not a generic template). Do not reveal the correct answer yet. "Other" is always available for unlisted reasoning.
+
+   2. **Targeted correction**: Using both A and Aᵣ, address the root cause of the misconception. If Aᵣ reveals a specific mental model error, correct that model directly. Call Read for supporting reference if eval(A, Aᵣ) requires.
+
+   3. **Resume**: Output a brief text nudge before calling AskUserQuestion — remind the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option. Adapt wording to fit the current context (no fixed template). This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User input via Other triggers Step 3b Proposal ejection workflow, then resumes the verification loop. Call AskUserQuestion again for the same aspect.
 
 3d. **Aspect coverage check** (before marking category complete):
 
@@ -361,7 +368,8 @@ Use:
 ```
 "What do you think this function does?"
 → If correct: "That's right. Ready for the next part?"
-→ If incorrect: "Actually, it does X. Does that make sense now?"
+→ If incorrect: "What made you think it does Y?" → [user selects reasoning] →
+   "I see — [address reasoning]. Actually, it does X because [targeted explanation]."
 ```
 
 **Chunking**: Break complex changes into digestible pieces. Verify each chunk before proceeding.
