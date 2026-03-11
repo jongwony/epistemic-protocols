@@ -67,6 +67,10 @@ Each protocol targets a specific point where AI collaboration can go wrong. For 
 
 </details>
 
+## Acknowledgments
+
+- [@zzsza](https://github.com/zzsza) — Quiz-based participatory UX design contribution for Onboard
+
 ## License
 
 MIT

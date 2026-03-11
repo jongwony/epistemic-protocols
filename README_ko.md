@@ -67,6 +67,10 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 </details>
 
+## 감사의 말
+
+- [@zzsza](https://github.com/zzsza) — Onboard 퀴즈 기반 참여형 UX 설계 기여
+
 ## 라이선스
 
 MIT
