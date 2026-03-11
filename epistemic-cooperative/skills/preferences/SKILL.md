@@ -44,8 +44,8 @@ Parameters applied across protocols. Ordered by impact — early exit still capt
 | 1 | Intensity | auto | light / medium / heavy / auto | 9/10 (Prothesis excluded) |
 | 2 | Post-Convergence Suggestions | on | on / off | 10/10 |
 | 3 | AI-Guided Activation Sensitivity | default | conservative / default / aggressive | AI-guided protocols (7/10) |
-| 4 | Session Immunity Scope | per-session | per-session / per-invocation | 5/10 |
-| 5 | AI-Detection Trigger | confirm | confirm / suggest-only / disable | Hermeneia, Telos, AI-guided |
+| 4 | Session Immunity Scope | per-session | per-session / per-invocation | 6/10 |
+| 5 | AI-Detection Trigger | confirm | confirm / suggest-only / disable | Hermeneia, AI-guided (8/10) |
 
 **Parameter descriptions** (presented to user during configuration):
 
@@ -75,14 +75,6 @@ Grouped by Epistemic Concern Cluster. Users select which clusters to configure; 
 |-----------|---------|---------|-------------|
 | Contract Detail | balanced | sparse / balanced / detailed | GoalContract granularity |
 | Proposal Count | 2 | 1 / 2 / 3 | Number of initial goal proposals |
-
-**Horismos /bound**
-
-| Parameter | Default | Options | Description |
-|-----------|---------|---------|-------------|
-| Calibration Depth | standard | quick / standard / thorough | BoundaryMap detail level |
-| Domain Granularity | coarse | coarse / fine | Domain classification resolution |
-| Recalibration Prompt | auto | auto / ask | Recalibration behavior on scope change |
 
 **Aitesis /inquire**
 
@@ -132,6 +124,8 @@ Grouped by Epistemic Concern Cluster. Users select which clusters to configure; 
 | Team Mode | auto | auto / manual | Team creation approach |
 | Tracking | standard | minimal / standard / verbose | Execution tracking output |
 
+#### Verification
+
 **Epharmoge /contextualize**
 
 | Parameter | Default | Options | Description |
@@ -140,7 +134,15 @@ Grouped by Epistemic Concern Cluster. Users select which clusters to configure; 
 | Check Depth | standard | shallow / standard / deep | Verification thoroughness |
 | Suggestion Format | brief | brief / detailed | Suggestion output verbosity |
 
-#### Understanding
+#### Cross-cutting
+
+**Horismos /bound**
+
+| Parameter | Default | Options | Description |
+|-----------|---------|---------|-------------|
+| Calibration Depth | standard | quick / standard / thorough | BoundaryMap detail level |
+| Domain Granularity | coarse | coarse / fine | Domain classification resolution |
+| Recalibration Prompt | auto | auto / ask | Recalibration behavior on scope change |
 
 **Katalepsis /grasp**
 
@@ -172,7 +174,7 @@ Grouped by Epistemic Concern Cluster. Users select which clusters to configure; 
   - "Keep — exit without changes"
 
 If "Keep" → terminate.
-If "Update" → Phase 2 with existing values as current defaults.
+If "Update" → call AskUserQuestion for Quick/Full path selection (same as new-section flow), then Phase 2 with existing values as current defaults.
 If "Replace" → Phase 2 with standard defaults.
 
 **If section absent** — call AskUserQuestion:
@@ -195,11 +197,12 @@ For each global parameter (ordered 1-5), call AskUserQuestion:
 2. Call AskUserQuestion for cluster selection:
    - Text: "Which protocol groups to customize?"
    - Options:
-     - "Planning — /clarify, /goal, /bound, /inquire"
+     - "Planning — /clarify, /goal, /inquire"
      - "Analysis — /frame, /ground"
      - "Decision — /gap"
-     - "Execution — /attend, /contextualize"
-     - "Understanding — /grasp"
+     - "Execution — /attend"
+     - "Verification — /contextualize"
+     - "Cross-cutting — /bound, /grasp"
      - "All groups"
      - "Done — keep defaults for unselected"
 
@@ -211,7 +214,7 @@ For each global parameter (ordered 1-5), call AskUserQuestion:
 
    If user selects a parameter → call AskUserQuestion with that parameter's options → return to protocol parameter list for remaining params. Repeat until "Keep remaining defaults" or all adjusted.
 
-**Budget**: Quick path completes within 8 calls (5 params + detect/select/verify). Full path completes within 18 calls.
+**Budget**: Quick path completes within 7 calls (5 params + select + verify). Full path completes within 18 calls minimum, increasing with individual parameter modifications.
 
 ### Phase 3: Generate
 
@@ -225,8 +228,8 @@ Construct the preferences section and write to `~/.claude/CLAUDE.local.md`.
 ### Global
 - Intensity: auto
 - Post-Convergence Suggestions: on
-- AI-Guided Activation: default
-- Session Immunity: per-session
+- AI-Guided Activation Sensitivity: default
+- Session Immunity Scope: per-session
 - AI-Detection Trigger: confirm
 
 ### Per-Protocol
@@ -248,8 +251,8 @@ Construct the preferences section and write to `~/.claude/CLAUDE.local.md`.
 
 **File operations**:
 - File absent → Write new file with section
-- File exists, section absent → Read file, append section at end
-- Section exists → Read file, identify section boundaries (`## Epistemic Protocol Preferences` to next `## ` or EOF), Edit to replace section
+- File exists, section absent → Append section at end (file content available from Phase 0)
+- Section exists → Identify section boundaries from Phase 0 content (`## Epistemic Protocol Preferences` to next `## ` or EOF), Edit to replace section
 
 ### Phase 4: Verify
 
@@ -283,7 +286,7 @@ The generated section is human-readable and machine-parseable. Protocols read th
 1. **Recognition over Recall**: All parameters presented via AskUserQuestion with selectable options. Never ask users to type parameter values.
 2. **Minimal noise**: Per-Protocol section records only non-default values. Default behavior requires zero configuration.
 3. **Existing section handling**: Always offer Update/Replace/Keep when preferences already exist. Never silently overwrite.
-4. **AskUserQuestion budget**: Quick path completes within 8 calls. Full path completes within 18 calls.
+4. **AskUserQuestion budget**: Quick path completes within 7 calls. Full path completes within 18 calls minimum.
 5. **No protocol execution**: This skill configures preferences only. It does not call or simulate any protocol.
 6. **File safety**: Read before write. Preserve all content outside the preferences section boundary.
 7. **Reversibility**: All changes are to a local git-untracked file. User can delete the section or file to restore defaults.

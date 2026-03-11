@@ -1,20 +1,21 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-Protocol learning, usage analysis, and coverage dashboard for Claude Code.
+Protocol learning, usage analysis, coverage dashboard, and configuration for Claude Code.
 
 > [한국어](./README_ko.md)
 
 ## What is Epistemic Cooperative?
 
-A utility plugin for epistemic protocol onboarding and analytics. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, and tracking usage across sessions.
+A utility plugin for epistemic protocol onboarding and analytics. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, tracking usage across sessions, and configuring protocol preferences.
 
-### Three Skills
+### Four Skills
 
 | Skill | Purpose | Output |
 |-------|---------|--------|
 | `/onboard` | Quest-based protocol learning | Terminal-based guided experience |
 | `/report` | Usage analysis with evidence | HTML profile (`~/.claude/.report/epistemic-profile.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
+| `/preferences` | Interactive protocol preference configuration | `~/.claude/CLAUDE.local.md` preferences section |
 
 ## Skills
 
@@ -89,6 +90,28 @@ Dashboard sections:
 - **Achievements**: session, protocol, code, and streak milestones
 - **Quality Score**: composite 0-100 (outcome 35%, friction 20%, satisfaction 25%, coverage 20%)
 
+### /preferences — Protocol Preference Configuration
+
+Configure epistemic protocol behavior through interactive dialogue. Generates a preferences section in `~/.claude/CLAUDE.local.md`.
+
+```
+DETECT → SELECT → CONFIGURE → GENERATE → VERIFY
+```
+
+| Phase | Description |
+|-------|-------------|
+| 0. Detect | Check existing preferences in CLAUDE.local.md |
+| 1. Select | Choose Quick (5 global params) or Full (global + per-protocol) path |
+| 2. Configure | Interactive parameter traversal via AskUserQuestion |
+| 3. Generate | Create/update preferences section |
+| 4. Verify | Review and confirm result |
+
+Key features:
+- **Recognition over Recall**: all parameters as selectable options, never free-text
+- Quick path (5 global parameters) or Full path (global + ~32 per-protocol)
+- Non-default values only for per-protocol section (minimal noise)
+- Existing section handling: Update / Replace / Keep
+
 ## Architecture
 
 ```
@@ -97,7 +120,8 @@ epistemic-cooperative/
 ├── skills/
 │   ├── onboard/SKILL.md          # /onboard quest-based protocol learning
 │   ├── report/SKILL.md           # /report usage analysis report
-│   └── dashboard/SKILL.md        # /dashboard coverage dashboard
+│   ├── dashboard/SKILL.md        # /dashboard coverage dashboard
+│   └── preferences/SKILL.md      # /preferences protocol configuration
 └── agents/
     ├── project-scanner.md         # Phase 1: project discovery
     ├── session-analyzer.md        # Phase 2: pattern extraction (parallel per project)
@@ -121,6 +145,8 @@ epistemic-cooperative/
 | Re-evaluating protocol fit after workflow changes | `/report` |
 | After running `/onboard` for deeper analysis | `/report` or `/dashboard` |
 | Tracking protocol adoption over time | `/dashboard` |
+| Want to customize protocol behavior | `/preferences` |
+| Adjusting preferences after `/onboard` | `/preferences` |
 
 ## Install
 
@@ -135,6 +161,7 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /onboard
 /report
 /dashboard
+/preferences
 ```
 
 ## Author

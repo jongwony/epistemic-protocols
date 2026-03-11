@@ -43,7 +43,7 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 | 플러그인 | 명령어 | 용도 |
 |----------|--------|------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard` | 프로토콜 학습, 사용 분석, 커버리지 대시보드 |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard`, `/preferences` | 프로토콜 학습, 사용 분석, 커버리지 대시보드, 설정 |
 
 ## 설계
 

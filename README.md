@@ -43,7 +43,7 @@ Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/fram
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard` | Protocol learning, usage analysis, and coverage dashboard |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard`, `/preferences` | Protocol learning, usage analysis, coverage dashboard, and configuration |
 
 ## Design
 

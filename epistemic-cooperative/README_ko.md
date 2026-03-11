@@ -1,20 +1,21 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-프로토콜 학습, 사용 분석, 커버리지 대시보드 유틸리티.
+프로토콜 학습, 사용 분석, 커버리지 대시보드, 설정 유틸리티.
 
 > [English](./README.md)
 
 ## Epistemic Cooperative란?
 
-인식론적 프로토콜 온보딩과 분석을 위한 유틸리티 플러그인이다. 특정 결정 지점을 다루는 프로토콜과 달리, Epistemic Cooperative는 **진입점** 역할을 한다 — 체험 기반 프로토콜 학습을 안내하고, 근거 기반 분석 리포트를 생성하며, 세션 전반의 사용량을 추적한다.
+인식론적 프로토콜 온보딩과 분석을 위한 유틸리티 플러그인이다. 특정 결정 지점을 다루는 프로토콜과 달리, Epistemic Cooperative는 **진입점** 역할을 한다 — 체험 기반 프로토콜 학습을 안내하고, 근거 기반 분석 리포트를 생성하며, 세션 전반의 사용량을 추적하고, 프로토콜 설정을 관리한다.
 
-### 세 개의 스킬
+### 네 개의 스킬
 
 | 스킬 | 목적 | 출력 |
 |------|------|------|
 | `/onboard` | 퀘스트 기반 프로토콜 학습 | 터미널 기반 가이드 경험 |
 | `/report` | 사용 분석 리포트 | HTML 프로필 (`~/.claude/.report/epistemic-profile.html`) |
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.insights/dashboard.html`) |
+| `/preferences` | 인터랙티브 프로토콜 설정 | `~/.claude/CLAUDE.local.md` 설정 섹션 |
 
 ## 스킬
 
@@ -89,6 +90,28 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 - **Achievements**: 세션, 프로토콜, 코드, 연속 사용 마일스톤
 - **Quality Score**: 복합 점수 0-100 (결과 35%, 마찰 20%, 만족도 25%, 커버리지 20%)
 
+### /preferences — 프로토콜 설정
+
+인터랙티브 대화를 통해 프로토콜 동작을 설정한다. `~/.claude/CLAUDE.local.md`에 설정 섹션을 생성한다.
+
+```
+DETECT → SELECT → CONFIGURE → GENERATE → VERIFY
+```
+
+| 단계 | 설명 |
+|------|------|
+| 0. Detect | CLAUDE.local.md에서 기존 설정 확인 |
+| 1. Select | Quick (글로벌 5개) 또는 Full (글로벌 + 프로토콜별) 경로 선택 |
+| 2. Configure | AskUserQuestion을 통한 인터랙티브 파라미터 순회 |
+| 3. Generate | 설정 섹션 생성/갱신 |
+| 4. Verify | 결과 확인 |
+
+주요 특징:
+- **기억보다 인식**: 모든 파라미터를 선택 옵션으로 제시, 자유 텍스트 없음
+- Quick path (글로벌 5개) 또는 Full path (글로벌 + 프로토콜별 ~32개)
+- 프로토콜별 섹션은 비기본값만 기록 (최소 노이즈)
+- 기존 섹션 처리: Update / Replace / Keep
+
 ## 아키텍처
 
 ```
@@ -97,7 +120,8 @@ epistemic-cooperative/
 ├── skills/
 │   ├── onboard/SKILL.md          # /onboard 퀘스트 기반 프로토콜 학습
 │   ├── report/SKILL.md           # /report 사용 분석 리포트
-│   └── dashboard/SKILL.md        # /dashboard 커버리지 대시보드
+│   ├── dashboard/SKILL.md        # /dashboard 커버리지 대시보드
+│   └── preferences/SKILL.md      # /preferences 프로토콜 설정
 └── agents/
     ├── project-scanner.md         # Phase 1: 프로젝트 탐색
     ├── session-analyzer.md        # Phase 2: 패턴 추출 (프로젝트별 병렬)
@@ -121,6 +145,8 @@ epistemic-cooperative/
 | 워크플로우 변경 후 재평가할 때 | `/report` |
 | `/onboard` 이후 더 깊은 분석이 필요할 때 | `/report` 또는 `/dashboard` |
 | 시간 경과에 따른 프로토콜 채택 추적 | `/dashboard` |
+| 프로토콜 동작을 커스터마이즈하고 싶을 때 | `/preferences` |
+| `/onboard` 이후 설정 조정 | `/preferences` |
 
 ## 사용법
 
@@ -128,6 +154,7 @@ epistemic-cooperative/
 /onboard
 /report
 /dashboard
+/preferences
 ```
 
 ## 저자
