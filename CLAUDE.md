@@ -128,7 +128,7 @@ Define epistemic boundaries per decision through AI-guided detection.
 - **Invocation**: `/bound` or use "bound" in conversation
 
 ### Inquire (αἴτησις) — Aitesis
-Infer context insufficiency before execution through AI-guided inference.
+Context sufficiency sensor + factual resolver + epistemic router. Senses multi-dimensional context insufficiency (factual, coherence, goal-alignment), self-resolves factual dimensions via read-only verification and empirical probes, and routes non-factual dimensions to downstream protocols.
 - **Deficit**: ContextInsufficient → InformedExecution
 - **Triggers**: Context insufficiency heuristics (ambiguous execution scope, external dependency, implicit requirements)
 - **Invocation**: `/inquire` or use "inquire" in conversation
@@ -157,7 +157,7 @@ Utility skill group for session analytics and configuration.
 - **Report** `/report`: Generate epistemic usage analysis report with evidence-backed protocol recommendations and HTML artifact. Analytical output — pattern evidence, anti-pattern diagnostics, session snippets.
 - **Onboard** `/onboard`: Quest-based protocol learning through scenario experience, trial execution, and Socratic quiz. Flow: General/Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects learning path; all scan paths share inline Quick Scan (User Context Profile extraction); Phases 3-6 deliver experiential learning.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
-- **Preferences** `/preferences`: Interactive protocol preference configuration for `~/.claude/CLAUDE.local.md`. Flow: Detect → Select → Configure → Generate → Verify. Quick path (5 global params) or Full path (global + ~32 per-protocol params).
+- **Preferences** `/preferences`: Interactive protocol preference configuration for `~/.claude/CLAUDE.local.md`. Flow: Detect → Select → Configure → Generate → Verify. Quick path (6 global params) or Full path (global + ~32 per-protocol params).
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.

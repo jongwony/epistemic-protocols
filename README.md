@@ -12,6 +12,8 @@ These protocols insert structured checkpoints at decision points — intent, goa
 
 ## Quick Start
 
+### Claude Code
+
 Install all protocols and utilities:
 
 ```bash
@@ -20,7 +22,31 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 Then run `/onboard` — learn protocols through hands-on experience: scenarios from your past sessions, real protocol trials, and Socratic quizzes.
 
-For individual plugin installation, see each protocol's README.
+### Codex
+
+Codex already includes `skill-installer`, so the recommended path is to ask Codex to install the current Codex-supported skill set for you:
+
+```text
+$skill-installer install these skills from jongwony/epistemic-protocols:
+- prothesis/skills/frame
+- syneidesis/skills/gap
+- hermeneia/skills/clarify
+- katalepsis/skills/grasp
+- telos/skills/goal
+- aitesis/skills/inquire
+- horismos/skills/bound
+- analogia/skills/ground
+- prosoche/skills/attend
+- epharmoge/skills/contextualize
+- epistemic-cooperative/skills/onboard
+```
+
+Restart Codex to pick up new skills. Then start with `$onboard`.
+
+This one-shot path currently installs `frame`, `gap`, `clarify`, `grasp`, `goal`, `inquire`, `bound`, `ground`, `attend`, `contextualize`, and `onboard`.
+It does not install `/report`, `/dashboard`, `/preferences`, `reflexion`, or `write`, and the GitHub release `bundle.zip` is not the Codex install path.
+
+For Codex, this README is the source of truth for the supported install set. If you only want one skill, use the same `skill-installer` pattern with a single path from the list above. Advanced users can still call `install-skill-from-github.py` directly, but that is the fallback path, not the quick start.
 
 ## Protocols
 
