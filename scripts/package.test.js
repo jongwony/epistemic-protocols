@@ -8,6 +8,8 @@
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
+const { execFileSync } = require('node:child_process');
+const path = require('node:path');
 const zlib = require('zlib');
 const { parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip } = require('./package');
 
@@ -139,8 +141,8 @@ describe('transformSkillMd', () => {
 
   it('preserves long descriptions when no override defined', () => {
     const longDesc = 'A'.repeat(201);
-    const content = `---\nname: gap\ndescription: ${longDesc}\n---\nBody`;
-    const result = transformSkillMd(content, 'gap');
+    const content = `---\nname: custom\ndescription: ${longDesc}\n---\nBody`;
+    const result = transformSkillMd(content, 'custom');
     const { fields } = parseFrontmatter(result);
     assert.equal(fields.get('description'), longDesc);
   });
@@ -242,5 +244,52 @@ describe('createZip', () => {
       recovered = compressed;
     }
     assert.deepEqual(recovered, original);
+  });
+});
+
+// ============================================================
+// package.js CLI
+// ============================================================
+
+describe('package.js CLI', () => {
+  it('omits excluded skills from dry-run packaging results', () => {
+    const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
+      encoding: 'utf8',
+    });
+    const result = JSON.parse(output);
+    const excludedSkills = new Set([
+      'reflexion/reflexion',
+      'write/write',
+      'epistemic-cooperative/dashboard',
+      'epistemic-cooperative/preferences',
+    ]);
+    const packagedSkills = result.results
+      .filter(entry => entry.plugin !== 'bundle')
+      .map(entry => `${entry.plugin}/${entry.skill}`);
+    const bundle = result.results.find(entry => entry.plugin === 'bundle');
+
+    for (const skill of excludedSkills) {
+      assert.ok(!packagedSkills.includes(skill), `Expected ${skill} to be excluded from dry-run results`);
+    }
+
+    assert.equal(result.results.length, 12);
+    assert.deepEqual(
+      result.results.map(entry => entry.zip).sort(),
+      [
+        'attend.zip',
+        'bound.zip',
+        'clarify.zip',
+        'contextualize.zip',
+        'epistemic-protocols-bundle.zip',
+        'frame.zip',
+        'gap.zip',
+        'goal.zip',
+        'grasp.zip',
+        'ground.zip',
+        'inquire.zip',
+        'onboard.zip',
+      ],
+    );
+    assert.equal(bundle.files, 19);
   });
 });

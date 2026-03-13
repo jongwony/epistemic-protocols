@@ -45,7 +45,8 @@ Parameters applied across protocols. Ordered by impact — early exit still capt
 | 2 | Post-Convergence Suggestions | on | on / off | 10/10 |
 | 3 | AI-Guided Activation Sensitivity | default | conservative / default / aggressive | AI-guided protocols (7/10) |
 | 4 | Session Immunity Scope | per-session | per-session / per-invocation | 6/10 |
-| 5 | AI-Detection Trigger | confirm | confirm / suggest-only / disable | Hermeneia, AI-guided (8/10) |
+| 5 | AI-Detection Trigger | confirm | auto / confirm / suggest-only / disable | Hermeneia, AI-guided (8/10) |
+| 6 | Explanation Level | standard | accessible / standard / technical | 10/10 |
 
 **Parameter descriptions** (presented to user during configuration):
 
@@ -53,7 +54,8 @@ Parameters applied across protocols. Ordered by impact — early exit still capt
 2. **Post-Convergence Suggestions**: Whether protocols suggest related protocols after completing. `off` suppresses the suggestion section.
 3. **AI-Guided Activation Sensitivity**: How eagerly AI-guided protocols detect activation conditions. `conservative` = fewer false triggers. `aggressive` = catches more subtle cases.
 4. **Session Immunity Scope**: After a protocol runs on a topic, how long it avoids re-triggering. `per-session` = immune for entire session. `per-invocation` = only immune for current invocation.
-5. **AI-Detection Trigger**: How AI-detected triggers (vs explicit /slash invocation) are handled. `confirm` = asks before activating. `suggest-only` = mentions without activating. `disable` = only explicit invocation works.
+5. **AI-Detection Trigger**: How AI-detected triggers (vs explicit /slash invocation) are handled. `auto` = activates immediately without confirmation. `confirm` = asks before activating. `suggest-only` = mentions without activating. `disable` = only explicit invocation works.
+6. **Explanation Level**: Controls abstraction level and language complexity of protocol questions and explanations. `accessible` = simple language, concrete examples, minimal jargon. `standard` = balanced explanation. `technical` = conceptual depth, domain terminology allowed.
 
 ### Per-Protocol Parameters (Full Path)
 
@@ -180,14 +182,14 @@ If "Replace" → Phase 2 with standard defaults.
 **If section absent** — call AskUserQuestion:
 - Text: "Configuration path?"
 - Options:
-  - "Quick — 5 global parameters"
+  - "Quick — 6 global parameters"
   - "Full — global + per-protocol parameters (~32)"
 
 ### Phase 2: Configure
 
-#### Quick Path (5 AskUserQuestion calls)
+#### Quick Path (6 AskUserQuestion calls)
 
-For each global parameter (ordered 1-5), call AskUserQuestion:
+For each global parameter (ordered 1-6), call AskUserQuestion:
 - Text: "[Parameter name]: [description]"
 - Options: list of valid values with `(default)` marker on the default value
 
@@ -214,7 +216,7 @@ For each global parameter (ordered 1-5), call AskUserQuestion:
 
    If user selects a parameter → call AskUserQuestion with that parameter's options → return to protocol parameter list for remaining params. Repeat until "Keep remaining defaults" or all adjusted.
 
-**Budget**: Quick path completes within 7 calls (5 params + select + verify). Full path completes within 18 calls minimum, increasing with individual parameter modifications.
+**Budget**: Quick path completes within 8 calls (6 params + select + verify). Full path completes within 19 calls minimum, increasing with individual parameter modifications.
 
 ### Phase 3: Generate
 
@@ -244,7 +246,7 @@ Construct the preferences section and write to `~/.claude/CLAUDE.local.md`.
 ```
 
 **Generation rules**:
-- Global section: always write all 5 parameters (even if all default)
+- Global section: always write all 6 parameters (even if all default)
 - Per-Protocol section: only write parameters that differ from defaults
 - If all per-protocol parameters are default: omit Per-Protocol section entirely
 - Section boundary: `## Epistemic Protocol Preferences` through next `## ` heading or EOF
@@ -286,7 +288,7 @@ The generated section is human-readable and machine-parseable. Protocols read th
 1. **Recognition over Recall**: All parameters presented via AskUserQuestion with selectable options. Never ask users to type parameter values.
 2. **Minimal noise**: Per-Protocol section records only non-default values. Default behavior requires zero configuration.
 3. **Existing section handling**: Always offer Update/Replace/Keep when preferences already exist. Never silently overwrite.
-4. **AskUserQuestion budget**: Quick path completes within 7 calls. Full path completes within 18 calls minimum.
+4. **AskUserQuestion budget**: Quick path completes within 8 calls. Full path completes within 19 calls minimum.
 5. **No protocol execution**: This skill configures preferences only. It does not call or simulate any protocol.
 6. **File safety**: Read before write. Preserve all content outside the preferences section boundary.
 7. **Reversibility**: All changes are to a local git-untracked file. User can delete the section or file to restore defaults.
