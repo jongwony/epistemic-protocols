@@ -24,7 +24,7 @@ Then run `/onboard` — learn protocols through hands-on experience: scenarios f
 
 ### Codex
 
-Codex already includes `skill-installer`, so the recommended path is to ask Codex to install the current Codex-supported skill set for you:
+Paste in Codex and run:
 
 ```text
 $skill-installer install these skills from jongwony/epistemic-protocols:
@@ -41,12 +41,16 @@ $skill-installer install these skills from jongwony/epistemic-protocols:
 - epistemic-cooperative/skills/onboard
 ```
 
-Restart Codex to pick up new skills. Then start with `$onboard`.
+Restart Codex, then start with `$onboard`.
 
-This one-shot path currently installs `frame`, `gap`, `clarify`, `grasp`, `goal`, `inquire`, `bound`, `ground`, `attend`, `contextualize`, and `onboard`.
-It does not install `/report`, `/dashboard`, `/preferences`, `reflexion`, or `write`, and the GitHub release `bundle.zip` is not the Codex install path.
+<details>
+<summary>Notes</summary>
 
-For Codex, this README is the source of truth for the supported install set. If you only want one skill, use the same `skill-installer` pattern with a single path from the list above. Advanced users can still call `install-skill-from-github.py` directly, but that is the fallback path, not the quick start.
+- This installs 10 protocols + `onboard`. `/report`, `/dashboard`, `/preferences`, `reflexion`, `write` are not included.
+- To install a single skill, use the same `skill-installer` pattern with one path.
+- This README is the source of truth for the Codex-supported install set.
+
+</details>
 
 ## Protocols
 
