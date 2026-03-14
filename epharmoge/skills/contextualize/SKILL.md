@@ -13,7 +13,7 @@ Detect application-context mismatch after execution through AI-guided applicabil
 
 ```
 ── FLOW ──
-Epharmoge(R, X) → Eval(R, X) → Mᵢ? → Q → A → R' → (loop until contextualized)
+Epharmoge(R, X) → Eval(R, X) → Mᵢ? → Register(Mᵢ) → Q(Mᵢ[0]) → A → R' → Eval(R', X) → (loop until contextualized)
 
 ── MORPHISM ──
 (R, X)
@@ -27,49 +27,50 @@ preserves: X                             -- application context is fixed referen
 invariant: Applicability over Correctness
 
 ── TYPES ──
-R     = Execution result (AI's completed work output)
-X     = Application context (environment, constraints, user situation)
-Eval  = Applicability evaluation: (R, X) → Set(Mismatch)
-Mismatch = { aspect: String, description: String, evidence: String, severity: Severity }
+R      = Execution result (AI's completed work output)
+X      = Application context (environment, constraints, user situation)
+Eval   = Applicability evaluation: (R, X) → Set(Mismatch)
+Mismatch = { aspect: String, description: String, evidence: String, severity: Severity, origin: Origin }
+Origin ∈ {Initial, Emerged(aspect)}                            -- mismatch provenance: initial scan or spawned by adapting parent aspect
 Severity ∈ {Critical, Significant, Minor}
-Mᵢ    = Identified mismatches from Eval(R, X)
-Q     = Applicability inquiry (AskUserQuestion)
-A     = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}
-R'    = Adapted result (contextualized output)
-ContextualizedExecution = R' where applicable(R', X) ∨ user_esc
+Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial
+Mₑ     = Newly emerged mismatches from Eval(R', X)             -- origin = Emerged(adapted_aspect)
+Q      = Applicability inquiry (AskUserQuestion)
+A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}
+R'     = Adapted result (contextualized output)
+ContextualizedExecution = R' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
-Phase 0: R → Eval(R, X) → Mᵢ?                              -- applicability gate (silent)
-Phase 1: Mᵢ → Q[AskUserQuestion](Mᵢ[0], evidence) → A      -- mismatch surfacing [Tool]
-Phase 2: A → adapt(A, R) → R'                                -- result adaptation [Tool]
+Phase 0: R → Eval(R, X) → Mᵢ? → TaskCreate[all mismatches]    -- gate + detection + registration [Tool]
+Phase 1: Mᵢ → Q[AskUserQuestion](Mᵢ[0], evidence) → A         -- mismatch surfacing [Tool]
+Phase 2: A → adapt(A, R) → R' → TaskUpdate → Eval(R', X) → Mₑ? -- adaptation + update + re-scan [Tool]
 
 ── LOOP ──
-After Phase 2: re-evaluate R' against X for remaining mismatches.
-If Mᵢ remains: return to Phase 1.
-If applicable(R', X): execution complete.
-User can exit at Phase 1 (early_exit).
+After Phase 2: re-scan R' against X for remaining AND newly emerged mismatches.
+If new mismatches from adaptation (Mₑ): TaskCreate → add to queue.
+If remaining non-empty: return to Phase 1 (next by severity).
+If applicable(R', X): all tasks completed → convergence.
+User can exit at Phase 1 (early_exit option or Esc).
 Continue until: contextualized(R') OR user ESC.
+Mode remains active until convergence.
 
 ── CONVERGENCE ──
 applicable(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X)
 warranted(a, R, X) = correct(R) ∧ fits(R, X)                -- correctness AND contextual fit required (not material conditional)
 contextualized(R') = applicable(R', X) ∨ user_esc
-progress(Λ) = 1 - |remaining| / |mismatches|
+progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress when re-scan discovers new mismatches
 
 ── TOOL GROUNDING ──
-Phase 0 Eval  (detect)  → Internal analysis (no external tool)
-Phase 1 Q     (extern)  → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
-Phase 2 adapt (modify)  → Edit, Write (result adaptation based on user direction)
-                           -- (modify): tool call that changes existing artifacts (distinct from (extern) user-facing, (detect) read-only, (state) internal)
+Eval   (detect)  → Internal analysis (no external tool)
+Q      (extern)  → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+adapt  (modify)  → Edit, Write (result adaptation based on user direction)
+                    -- (modify): tool call that changes existing artifacts (distinct from (extern) user-facing, (detect) read-only, (state) internal)
+Mᵢ/Mₑ (state)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
-      mismatches: Set(Mismatch), confirmed: Set(Mismatch),
-      adapted: Set(Mismatch), dismissed: Set(Mismatch),
-      remaining: Set(Mismatch),
-      history: List<(Mismatch, A)>, active: Bool,
-      cause_tag: String }
--- Invariant: mismatches = confirmed ∪ adapted ∪ dismissed ∪ remaining (pairwise disjoint)
+      state: Σ, active: Bool, cause_tag: String }
+Σ = { history: List<(Mismatch, A)>, scan_count: Nat }
 ```
 
 ## Core Principle
@@ -168,7 +169,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 
 | Trigger | Effect |
 |---------|--------|
-| All mismatches resolved (adapted or dismissed) | Proceed with contextualized result |
+| All mismatch tasks completed (adapted or dismissed) | Proceed with contextualized result |
 | No mismatches detected (Phase 0 passes) | Execution stands as-is |
 | User Esc key | Accept result without applicability review |
 
@@ -200,7 +201,17 @@ Evaluate execution result against application context. This phase is **silent** 
 1. **Scan execution result** `R` against context `X`: environment state, project conventions, use case scope, temporal validity, user constraints
 2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)
 3. If all aspects warranted: execution stands (Epharmoge not activated)
-4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity — proceed to Phase 1
+4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity, `origin=Initial`
+5. **Register all mismatches as Tasks** (TaskCreate) — proceed to Phase 1
+
+**Task format**:
+```
+TaskCreate({
+  subject: "[Mismatch:aspect] description",
+  description: "Evidence and context for this mismatch (severity: X)",
+  activeForm: "Surfacing [aspect] mismatch"
+})
+```
 
 **Information source**: The execution result `R` itself compared against observable context `X`. NOT a re-scan of pre-execution context (non-circularity with Aitesis).
 
@@ -220,7 +231,7 @@ Done. One thing to verify about applicability:
 [Specific mismatch description]
 [Evidence: what in the result and what in the context diverge]
 
-Progress: [N addressed / M total mismatches]
+Progress: [N completed / M total tasks] (M may increase on re-scan)
 
 Options:
 1. **Confirm** — yes, this needs adaptation: [brief direction prompt]
@@ -243,15 +254,22 @@ If adaptation direction is evident, include:
 
 After user response:
 
-1. **Confirm(mismatch)**: Mark mismatch as confirmed, apply adaptation using Edit/Write tools
-2. **Adapt(direction)**: Apply user-directed adaptation to result `R'` using Edit/Write tools
-3. **Dismiss**: Mark mismatch as dismissed, note fitness assumption accepted
+1. **Confirm(mismatch)**: Mark mismatch as confirmed, apply adaptation using Edit/Write tools → TaskUpdate (completed)
+2. **Adapt(direction)**: Apply user-directed adaptation to result `R'` using Edit/Write tools → TaskUpdate (completed)
+3. **Dismiss**: Mark mismatch as dismissed, note fitness assumption accepted → TaskUpdate (completed)
 
-After adaptation:
-- Re-evaluate `R'` against `X` for remaining or newly emerged mismatches
-- If mismatches remain: return to Phase 1 (surface next mismatch)
-- If all resolved/dismissed: execution complete with contextualized result
-- Log `(Mismatch, A)` to history
+After adaptation — **re-scan**:
+- Re-evaluate `R'` against `X` for remaining AND **newly emerged** mismatches
+- If new mismatches (`Mₑ`) from adaptation: TaskCreate with `origin=Emerged(adapted_aspect)` → add to queue
+- If remaining tasks non-empty: return to Phase 1 (surface next mismatch by severity)
+- If all tasks completed: execution complete with contextualized result
+- Log `(Mismatch, A)` to `Σ.history`, increment `Σ.scan_count`
+
+**Re-scan trigger**: Adaptation changes `R`, and changed `R'` may exhibit new mismatches not present in the original result. Always re-scan after each adaptation. Example: adapting deployment target → discovers CI pipeline convention mismatch; adapting API version → reveals dependency compatibility issue.
+
+**Chain discovery**: When `Mₑ` emerges from an adaptation, the `origin = Emerged(parent_aspect)` field records the causal chain. This enables:
+- Progress visibility: user sees which adaptations spawned new mismatches
+- Convergence monitoring: chains that grow beyond 3 levels suggest a structural issue worth surfacing explicitly
 
 ### Post-Convergence Suggestions
 
@@ -287,7 +305,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 | Gate specificity | `activate(Epharmoge) only if correct(R) ∧ ∃ ¬warranted(a, R, X)` | Prevents false activation on well-fitting results |
 | Mismatch cap | One mismatch per Phase 1 cycle, severity order | Prevents post-execution question overload |
 | Session immunity | Dismissed (aspect, description) → skip for session | Respects user's dismissal |
-| Progress visibility | `[N addressed / M total]` in Phase 1 | User sees progress toward completion |
+| Progress visibility | Task list renders `[N addressed / M total]` in Phase 1 | User sees progress; total may grow on re-scan |
 | Early exit | User can dismiss all at any Phase 1 | Full control over review depth |
 | Cross-protocol cooldown | `suppress(Epharmoge) if Aitesis.resolved_in_same_scope ∧ overlap(Aitesis.domains, Epharmoge.aspects)` | Prevents same-scope pre+post stacking |
 | Cooldown scope | Cooldown applies within recommendation chains only; direct `/contextualize` invocation is never suppressed | User authority preserved |
@@ -301,7 +319,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
 5. **One at a time**: Surface one mismatch per Phase 1 cycle; do not bundle multiple mismatches
 6. **Dismiss respected**: User dismissal is final for that mismatch aspect in the current session
-7. **Convergence persistence**: Mode active until all identified mismatches are resolved or dismissed
+7. **Convergence persistence**: Mode active until all mismatch tasks are completed (resolved or dismissed)
 8. **Non-circularity**: Information source is the execution result itself compared against context, not pre-execution context scans (independence from Aitesis)
 9. **Early exit honored**: When user accepts result as-is, accept immediately regardless of remaining mismatches
 10. **Cross-protocol awareness**: Suppress when Aitesis resolved overlapping domains in the same execution scope (within recommendation chains only)
