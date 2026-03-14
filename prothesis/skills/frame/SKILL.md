@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 ```
 ── FLOW ──
 Prothesis(U) → Q(MB(U), M) → (MBᵥ, m) → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → LensEstablished →
-  T(Pₛ) → ∥I(T) → R → Ω(T) → R' → Δ(R') → D?(T) → R'' → Syn(R'') → L → Q(L, routing) → J → FramedInquiry
+  T(Pₛ) → ∥I(T) → R → Ω(T) → R' → P(R') → Δ(R') → Δₛ → D?(Δₛ, T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Q(routing) → J → FramedInquiry
 
 ── MORPHISM ──
 Inquiry
@@ -26,8 +26,11 @@ Inquiry
   → spawn(team)                         -- assemble perspective team via TeamCreate
   → inquire(parallel)                   -- isolated perspective analysis per teammate
   → collect(results)                    -- finalize inquiry outputs, retain team
-  → dialogue(triggers)                  -- peer negotiation on detected tensions
+  → preview(results)                    -- surface collected findings before synthesis
+  → dialogue(triggers) → reports        -- peer negotiation → structured dialogue reports
   → synthesize(results)                 -- horizon integration into Lens L
+  → present(lens)                       -- full synthesis output to user
+  → route(selection)                    -- user routing decision
   → FramedInquiry
 requires: framework_absent(U)             -- runtime gate (Phase 0)
 deficit:  FrameworkAbsent                  -- activation precondition (Layer 1/2)
@@ -55,11 +58,15 @@ T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with 
 Ω      = Collection: R → R', retain(T)               -- finalize results; team lifecycle deferred to loop
 R      = Set(Result)                                  -- raw inquiry outputs
 R'     = Set(Result) post-collection                  -- after Phase 3 collection
-R''    = Set(Result) post-cross-dialogue              -- R' ∪ dialogue responses (R'' = R' when Δ = ∅)
-Δ      = Trigger detection: R' → Set(Trigger)         -- contradictions, horizon intersections, uncorroborated high-stakes
-D?     = Conditional dialogue: Δ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → user review; Δ = ∅ → skip dialogue (synthesis + user review still proceed)
-Syn    = Synthesis: R'' → (∩, D, A)
+P      = Preview: R' → UserVisible(R')               -- per-perspective summary output before synthesis (text, not AskUserQuestion)
+Δ      = Trigger detection: R' → Δₛ                  -- produces named trigger set
+Δₛ     = Set(Trigger)                                 -- detected triggers: contradictions, horizon intersections, uncorroborated high-stakes
+D?     = Conditional dialogue: Δₛ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → user review; Δₛ = ∅ → skip dialogue (synthesis + user review still proceed)
+Dᵣ     = Set(DialogueReport)                          -- peer negotiation outputs
+DialogueReport = { perspective, final_position, agreement, divergence, rationale }  -- divergence gates hub-spoke conditional
+Syn    = Synthesis: (R', Dᵣ) → (∩, D, A)             -- dual-input: provenance-preserving (Dᵣ = ∅ when Δₛ = ∅)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
+O      = Output: L → UserVisible(L)                   -- full synthesis presentation as text output before routing question
 FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_withdraw ∨ user_esc  -- Mode 2 terminal; Mode 1 terminates at LensEstablished (deficit remains open)
 user_wrap_up  = (J = wrap_up) at Phase 4   -- user selects wrap_up routing option
 user_withdraw = J = withdraw at Phase 4    -- user selects graceful exit (team cleanup)
@@ -84,8 +91,8 @@ Edge cases:
 Phase 0:  U → MB(U) → Q[AskUserQuestion](MB, M) → await → (MBᵥ, m)  -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → S[AskUserQuestion]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ → LensEstablished  -- perspective selection [Tool]
-Phase 3:  LensEstablished → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R'  -- inquiry + collection [Tool]
-Phase 4:  R' → Δ(R') → D?[SendMessage](T) → R'' → Syn(R'') → L → Q[AskUserQuestion](L, routing) → J  -- cross-dialogue, synthesis, review & routing [Tool]
+Phase 3:  LensEstablished → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R' → P(R')  -- inquiry + collection + preview [Tool]
+Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Q[AskUserQuestion](routing) → J  -- triggers, cross-dialogue, synthesis, presentation & routing [Tool]
           J=wrap_up → PF[AskUserQuestion](select) → Ω → TeamDelete → TaskCreate(selected)  [Tool]
 
 ── LOOP ──
@@ -107,7 +114,7 @@ After LensEstablished (mode branching):
 After Phase 4 (routing):
   J = extend     → Q[AskUserQuestion](add perspective | deepen existing | review execution results)
                    → Phase 2 (new perspective) or Phase 3 (SendMessage to existing team)
-  J = add_input  → user context → revise Syn(R'' + input) → L' → re-present Q(L', routing)
+  J = add_input  → user context → revise Syn(R' + input, Dᵣ) → L' → O(L') → Q(routing)
   J = wrap_up    → PF[AskUserQuestion](select) → Ω(T, shutdown) → TeamDelete → TaskCreate(selected) → terminate with L
   J = withdraw   → Ω(T, shutdown) → TeamDelete → terminate with current L
                    (withdraw = graceful exit, preserve_findings skipped)
@@ -126,9 +133,11 @@ S (extern)               → AskUserQuestion tool (mandatory; multiSelect: true;
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
+Phase 3 P (preview)      → Internal operation (text output: per-perspective epistemic contribution + key finding summaries; no AskUserQuestion)
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
-Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke → independent synthesis; skip if Δ = ∅)
-Phase 4 Q (extern)       → AskUserQuestion (synthesis + routing: present Lens L with extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
+Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
+Phase 4 O (output)       → Internal operation (text output: full synthesis — convergence, divergence, integrated assessment)
+Phase 4 Q (extern)       → AskUserQuestion (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
 PF Q (extern)            → AskUserQuestion (multiSelect: preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
@@ -151,7 +160,7 @@ D = join (union of distinct findings) where perspectives diverge
 A = synthesized assessment (additional computation)
 
 ── MODE STATE ──
-Λ = { phase: Phase, mode: Mode, mission_brief: Option(MBᵥ), perspectives: Option(Pₛ), lens: Option(L), active: Bool, team: Option(TeamState) }
+Λ = { phase: Phase, mode: Mode, mission_brief: Option(MBᵥ), perspectives: Option(Pₛ), triggers: Option(Δₛ), dialogue_reports: Option(Dᵣ), lens: Option(L), active: Bool, team: Option(TeamState) }
 Mode ∈ {recommend, inquire}                       -- Λ.mode resolved in Phase 0 Q
 TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
@@ -375,9 +384,27 @@ Multiple selections → parallel teammates (never sequential).
 
 Teammates analyze independently. Results arrive via idle notifications.
 
-**Collection**
+**Collection and Preview**
 
 Collect inquiry results into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 4 routing, where the user's sufficiency judgment determines team lifecycle.
+
+**Preview P(R')**: After collecting R', output a per-perspective summary as text before proceeding to Phase 4. This is the user's first visibility into isolated inquiry results — enabling evaluation of subsequent synthesis fidelity.
+
+```
+## Perspective Reports
+
+### [Perspective A]: [Epistemic Contribution title]
+[2-3 sentence summary of key findings + assessment]
+**Horizon Limits**: [What this lens missed]
+
+### [Perspective B]: [Epistemic Contribution title]
+[2-3 sentence summary of key findings + assessment]
+**Horizon Limits**: [What this lens missed]
+
+[Cross-dialogue triggers: N detected / None detected]
+```
+
+This is informational text output — not an AskUserQuestion call. The coordinator summarizes each perspective's output (not verbatim teammate content) to control rendering length while preserving epistemic contribution visibility.
 
 #### Isolated Context Requirement
 
@@ -401,45 +428,65 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    - **Remaining divergence**: Specific unresolved disagreements (empty if fully agreed)
    - **Rationale**: Why this position is held
 4. **Conditional hub-spoke**: If any peer's `remaining_divergence` is non-empty, coordinator initiates hub-spoke reconciliation — one targeted question per divergent peer (e.g., "Peer B argues [X]. Explain the concrete impact of your position on [specific aspect]."). Each peer responds once. Coordinator does not re-engage after receiving responses — synthesis is independent. If `remaining_divergence` is empty for all peers, skip to step 5.
-5. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises independent judgment as Synthesizer: information collection from peers, but the integration decision is the coordinator's own.
-6. **User review**: **Call the AskUserQuestion tool** to present the synthesis result with routing options. The user sees the full cross-dialogue outcome and selects next action (extend/add input/wrap up) in a single step.
+5. **Cross-dialogue outcomes** (text output, Dᵣ surfacing): After receiving all structured reports (and hub-spoke responses if applicable), output a summary of dialogue outcomes as text:
 
    ```
-   Analysis complete. Lens L:
+   ## Cross-Dialogue Outcomes
 
-   [Synthesis content — convergence, divergence resolution, integrated assessment]
-
-   Options:
-   1. **Extend** — add new perspective, deepen existing analysis, or review execution results
-   2. **Add input** — provide additional context for synthesis revision
-   3. **Wrap up** — finalize with current Lens
-   4. **withdraw** — exit with current Lens (team cleanup, no findings preservation)
+   ### Tension: [Topic Z]
+   **Peers**: [Perspective A] vs [Perspective B]
+   **Resolution**: [Agreed / Partial agreement / Persistent divergence]
+   - Agreement: [key agreement points]
+   - Divergence: [remaining unresolved points, if any]
    ```
 
-**If no triggers**: Proceed to synthesis (step 5) with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected"), then user review (step 6).
+   This is informational text — not an AskUserQuestion call. Skip this step if Δₛ = ∅ (no triggers detected).
+6. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises independent judgment as Synthesizer: information collection from peers, but the integration decision is the coordinator's own.
+7. **User review**: Output the full synthesis as text (O(L)), then **call the AskUserQuestion tool** with routing options only. The user reads the complete synthesis with scrollback, then selects next action.
+
+   **Step 1** — Text output O(L) (full synthesis, per Synthesis template below):
+   Output the Framed Analysis as markdown text. No truncation risk — text output supports full rendering with scrollback.
+
+   **Step 2** — AskUserQuestion (routing only):
+
+   ```
+   question: "How would you like to proceed?"
+   options:
+     - label: "Extend"
+       description: "Add new perspective, deepen existing analysis, or review execution results"
+     - label: "Add input"
+       description: "Provide additional context for synthesis revision"
+     - label: "Wrap up"
+       description: "Finalize with current Lens"
+     - label: "Withdraw"
+       description: "Exit with current Lens (team cleanup, no findings preservation)"
+   ```
+
+**If no triggers**: Proceed to synthesis (step 6) with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected"), then user review (step 7).
 
 Cross-dialogue precedes synthesis so the coordinator evaluates all perspectives before integration. Trigger detection is an explicit checkpoint — not incidental discovery during synthesis.
 
 **Synthesis (Horizon Integration)**
 
-After cross-dialogue (R'' = R' + any dialogue responses), or directly from R' if no triggers:
+After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅):
 
 ```markdown
 ## Framed Analysis
-
-### Perspective Summaries
-[Each perspective's epistemic contribution + assessment, 2-3 sentences]
 
 ### Convergence (Shared Horizon)
 [Where perspectives agree—indicates robust finding]
 
 ### Divergence (Horizon Conflicts)
 [Where they disagree—different values, evidence standards, or scope]
+[Cross-dialogue resolution status per tension topic, if applicable]
 [If perspectives unexpectedly converged, note why distinct framing was nonetheless valuable]
 
 ### Integrated Assessment
 [Synthesized answer with attribution to contributing perspectives]
+[Distinguish findings from isolated inquiry (R') vs. cross-dialogue refinement (Dᵣ)]
 ```
+
+Note: Perspective Summaries are surfaced earlier via P(R') preview (Phase 3 Collection). The synthesis template focuses on integration — convergence, divergence resolution, and assessment — rather than repeating individual perspective findings.
 
 **Loop behavior**: Per LOOP. Key operational details:
 - **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect AskUserQuestion; selected items migrate to session TaskCreate after TeamDelete.
@@ -458,14 +505,19 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 - Mode 2: L.divergence reveals unaddressed tensions → suggest `/gap` (gap audit on divergent findings)
 - Mode 2: L.assessment reveals indeterminate goals → suggest `/goal` (goal co-construction from Lens insights)
+- Mode 2: L.assessment contains abstract framework without domain-specific validation → suggest `/ground` (structural mapping validation)
+- Mode 2: L.assessment contains actionable execution items with risk dimensions → suggest `/attend` (execution-time risk evaluation before acting on Lens findings)
+- Mode 2: L.divergence reveals undefined epistemic boundaries → suggest `/bound` (epistemic boundary definition before proceeding)
 - Mode 1: selected perspectives reveal unexplored domain tensions → suggest `/gap` (gap audit on perspective coverage)
 - Mode 1: inquiry intent suggests indeterminate goals → suggest `/goal` (goal co-construction before deeper analysis)
+- Mode 1: selected perspectives use abstract frameworks in user's specific domain → suggest `/ground` (structural mapping validation)
 - Context insufficiency surfaced during session → suggest `/inquire` (pre-execution context verification)
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
 - Mode 1: note escalation path to Mode 2 for deeper isolated analysis
 - Mode 2: summarize key findings from L (convergence, divergence, assessment highlights)
+- Mode 2: if findings are execution-ready, note that `/attend` can orchestrate implementation with risk classification
 
 **Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
 
@@ -476,5 +528,5 @@ After convergence, scan session context for continuing epistemic needs and prese
 3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 7
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
-6. **Sufficiency check**: Always call AskUserQuestion after synthesis to confirm or extend analysis
+6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then call AskUserQuestion with routing options only to confirm or extend analysis
 7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion
