@@ -12,38 +12,42 @@ A utility plugin for epistemic protocol onboarding and analytics. Unlike protoco
 
 | Skill | Purpose | Output |
 |-------|---------|--------|
-| `/onboard` | Quest-based protocol learning | Terminal-based guided experience |
+| `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/report` | Usage analysis with evidence | HTML profile (`~/.claude/.report/epistemic-profile.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
 | `/preferences` | Interactive protocol preference configuration | `~/.claude/CLAUDE.local.md` preferences section |
 
 ## Skills
 
-### /onboard — Quest-Based Protocol Learning
+### /onboard — Quick Recommendation + Protocol Learning
 
-Learn epistemic protocols through hands-on experience: session-derived scenarios, real protocol trials, and Socratic quizzes.
+Start with a quick recommendation based on your recent sessions, then optionally continue to guided learning.
 
 ```
-ENTRY → SCAN → EXTRACT → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+Quick Proof:    ENTRY → QUICKSCAN → PICK-1 → EVIDENCE → TRIAL → INSIGHT → NEXT
+Targeted:       ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 ```
 
 | Phase | Description |
 |-------|-------------|
-| 0. Entry | Choose path: general / targeted / browse |
-| 1. Scan | Discover projects and session files (delegated to project-scanner) |
-| 2. Extract | Extract behavioral patterns from session JSONL (delegated to session-analyzer) |
-| 3. Map | Match patterns to protocols via compact mapping |
-| 4. Scenario | Present intervention point with session snippet or preset |
-| 5. Trial | Execute actual protocol with mini practice prompt |
-| 6. Quiz | Socratic protocol recognition questions |
-| 7. Guide | Learning summary + /report CTA + install guidance |
+| 0. Entry | Choose path: quick recommendation / targeted learning / browse all |
+| 1. Quick Scan | Collect recent session metadata inline (Glob + Read) |
+| 2a. Pick-1 | Quick path: select 1 recommendation from `/goal`, `/gap`, `/frame` |
+| 2b. Evidence | Quick path: show 1 evidence card (max 2 lines) |
+| 2. Map | Targeted path: match patterns to protocols via compact mapping |
+| 3. Scenario | Targeted path: present intervention point with preset scenarios |
+| 4. Trial | Execute actual protocol with mini practice prompt |
+| 5. Quiz | Targeted path: Socratic protocol recognition questions |
+| 6. Guide | Targeted path: learning summary + /report CTA |
 
 Key features:
-- **Experience over analysis**: learn by doing, not reading reports
-- Three-tier scenario fallback: session snippets → codebase-grounded → preset scenarios
+- **Value before learning**: quick path proves value in under 3 minutes
+- **One at a time**: 1 recommendation, 1 evidence card, 1 trial — no catalog required
+- **Onboarding Pool**: `/goal`, `/gap`, `/frame` — unified for Quick and Targeted fallback
 - Real protocol trial execution (2-3 exchanges per protocol)
-- Immediate quiz feedback with distinction explanations
-- Starter Trio for new users: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
+- Targeted path preserves full learning experience (scenarios, quizzes, guide)
+- `/report` for evidence-backed analysis; `/onboard` for quick value proof
 
 ### /report — Usage Analysis Report
 
@@ -130,8 +134,8 @@ epistemic-cooperative/
 
 | Agent | Used By | Role |
 |-------|---------|------|
-| project-scanner | `/onboard` Phase 1, `/report` Phase 1 | Scan `~/.claude/projects/`, select recent projects, read session indices |
-| session-analyzer | `/onboard` Phase 2, `/report` Phase 2 | Extract tool frequencies, rework indicators, slash command history from JSONL |
+| project-scanner | `/report` Phase 1 | Scan `~/.claude/projects/`, select recent projects, read session indices |
+| session-analyzer | `/report` Phase 2 | Extract tool frequencies, rework indicators, slash command history from JSONL |
 | coverage-scanner | `/dashboard` Phase 2 | Aggregate facets, session-meta, and slash command data across all sessions |
 
 ## When to Use
