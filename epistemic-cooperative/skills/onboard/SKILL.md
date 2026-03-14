@@ -316,11 +316,10 @@ Call AskUserQuestion:
 - Text: "체험 완료! 다음은?"
 - Options:
   - "오늘은 여기까지"
-  - "예시 하나 더 보기"
+  - "다른 프로토콜 체험하기"
   - "전체 온보딩 계속하기"
-  - "/report로 더 자세히 보기"
 
-Branch: 오늘은 여기까지 → end session with brief closing, 예시 하나 더 보기 → pick next protocol from pool and restart from Phase 2a, 전체 온보딩 계속하기 → set `path = targeted` and go to Phase 2 MAP with Quick Scan results, /report로 더 자세히 보기 → end with `/report` CTA.
+Branch: 오늘은 여기까지 → end session with brief closing (include text mention: "더 자세한 분석이 필요하면 `/report`를 호출해 보세요."), 다른 프로토콜 체험하기 → pick next protocol from pool and restart from Phase 2a, 전체 온보딩 계속하기 → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
 
 #### Targeted Path Trial
 
