@@ -13,7 +13,7 @@ Detect application-context mismatch after execution through AI-guided applicabil
 
 ```
 ── FLOW ──
-Epharmoge(R, X) → Eval(R, X) → Mᵢ? → Register(Mᵢ) → Q(Mᵢ[0]) → A → R' → Eval(R', X) → (loop until contextualized)
+Epharmoge(R, X) → Eval(R, X) → Mᵢ? → Register(Mᵢ) → Q(Mᵢ[0]) → A → R' → Eval(R', X) → Mₑ? → (loop until contextualized)
 
 ── MORPHISM ──
 (R, X)
@@ -35,6 +35,7 @@ Origin ∈ {Initial, Emerged(aspect)}                            -- mismatch pro
 Severity ∈ {Critical, Significant, Minor}
 Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial
 Mₑ     = Newly emerged mismatches from Eval(R', X)             -- origin = Emerged(adapted_aspect)
+Register = Mᵢ → Set(Task) [Tool: TaskCreate]                  -- mismatch registration as tracked tasks
 Q      = Applicability inquiry (AskUserQuestion)
 A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}
 R'     = Adapted result (contextualized output)
@@ -49,7 +50,7 @@ Phase 2: A → adapt(A, R) → R' → TaskUpdate → Eval(R', X) → Mₑ? -- ad
 After Phase 2: re-scan R' against X for remaining AND newly emerged mismatches.
 If new mismatches from adaptation (Mₑ): TaskCreate → add to queue.
 If remaining non-empty: return to Phase 1 (next by severity).
-If applicable(R', X): all tasks completed → convergence.
+If adjudicated(R', X): all tasks completed → convergence.
 User can exit at Phase 1 (early_exit option or Esc).
 Continue until: contextualized(R') OR user ESC.
 Mode remains active until convergence.
@@ -57,7 +58,10 @@ Mode remains active until convergence.
 ── CONVERGENCE ──
 applicable(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X)
 warranted(a, R, X) = correct(R) ∧ fits(R, X)                -- correctness AND contextual fit required (not material conditional)
-contextualized(R') = applicable(R', X) ∨ user_esc
+adjudicated(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X) ∨ dismissed(a)
+contextualized(R') = adjudicated(R', X) ∨ user_esc
+-- stratification: applicable(R', X) ⊆ adjudicated(R', X)
+-- operational proxy: ∀ task completed ⟹ adjudicated(R', X) ⟹ contextualized(R')
 progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress when re-scan discovers new mismatches
 
 ── TOOL GROUNDING ──
