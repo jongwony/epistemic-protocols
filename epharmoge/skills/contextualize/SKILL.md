@@ -41,8 +41,8 @@ R'     = Adapted result (contextualized output)
 ContextualizedExecution = R' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
-Phase 0: R → Eval(R, X) → Mᵢ? → TaskCreate[all mismatches]    -- gate + detection + registration [Tool]
-Phase 1: Mᵢ → Q[AskUserQuestion](Mᵢ[0], evidence) → A         -- mismatch surfacing [Tool]
+Phase 0: R → Eval(R, X) → Mᵢ?                                  -- applicability gate (silent)
+Phase 1: Mᵢ → TaskCreate[all mismatches] → Q[AskUserQuestion](Mᵢ[0], evidence) → A  -- register all, surface first [Tool]
 Phase 2: A → adapt(A, R) → R' → TaskUpdate → Eval(R', X) → Mₑ? -- adaptation + update + re-scan [Tool]
 
 ── LOOP ──
@@ -201,8 +201,15 @@ Evaluate execution result against application context. This phase is **silent** 
 1. **Scan execution result** `R` against context `X`: environment state, project conventions, use case scope, temporal validity, user constraints
 2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)
 3. If all aspects warranted: execution stands (Epharmoge not activated)
-4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity, `origin=Initial`
-5. **Register all mismatches as Tasks** (TaskCreate) — proceed to Phase 1
+4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity, `origin=Initial` — proceed to Phase 1
+
+**Information source**: The execution result `R` itself compared against observable context `X`. NOT a re-scan of pre-execution context (non-circularity with Aitesis).
+
+**Scan scope**: Completed execution output, project structure, observed conventions, session context. Does NOT re-execute or modify files.
+
+### Phase 1: Mismatch Surfacing
+
+**Register all identified mismatches as Tasks** (TaskCreate), then **call the AskUserQuestion tool** to present the highest-severity remaining mismatch.
 
 **Task format**:
 ```
@@ -212,14 +219,6 @@ TaskCreate({
   activeForm: "Surfacing [aspect] mismatch"
 })
 ```
-
-**Information source**: The execution result `R` itself compared against observable context `X`. NOT a re-scan of pre-execution context (non-circularity with Aitesis).
-
-**Scan scope**: Completed execution output, project structure, observed conventions, session context. Does NOT re-execute or modify files.
-
-### Phase 1: Mismatch Surfacing
-
-**Call the AskUserQuestion tool** to present the highest-severity remaining mismatch.
 
 **Do NOT present mismatches as plain text.** The tool call is mandatory — text presentation without tool = protocol violation.
 
