@@ -106,7 +106,7 @@ State after Phase 0:
 
 ### Phase 1: Quick Scan (User Context Profile) — Inline
 
-Build a User Context Profile from recent session metadata. Runs inline with Glob + Read (no subagent delegation). Both General and Targeted paths share this phase.
+Build a User Context Profile from recent session metadata. Runs inline with Glob + Read (no subagent delegation). Both Quick and Targeted paths share this phase.
 
 **Step 1: Collect session metadata**
 
@@ -119,7 +119,7 @@ From collected metadata, infer:
 - **Conversation patterns**: Request clarity level, incremental vs. batch requests, question types (how/why/what)
 - **Task types**: Ratio of feature development, debugging, refactoring, documentation
 
-If no `sessions-index.json` files found, set fallback tier to Tier 2 (Starter Trio).
+If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fallback (`/goal`); Targeted path falls back to Starter Trio.
 
 **Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization — behavioral pattern extraction and session diagnostics belong in `/report`.
 

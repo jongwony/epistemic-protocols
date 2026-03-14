@@ -302,7 +302,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Analogia**: No Task delegation—must run in main agent to call AskUserQuestion
 - **Prosoche**: Phase -1 (materialization, team coordination) and Phases 1-3 (Gate path) run in main agent (AskUserQuestion). Phase 0 delegates p=Low tasks to prosoche-executor subagent or team agents via Agent tool.
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
-- **Onboard**: All scan paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases (0-6). Phase 4 (Trial) triggers actual protocol execution in-session.
+- **Onboard**: All paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases. Quick path: Phases 0-1, 2a-2b, 4 (Trial triggers actual protocol execution in-session). Targeted path: Phases 0-6 (full learning experience).
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 - **Preferences**: No Task delegation—must run in main agent to call AskUserQuestion. Main agent handles all phases (0-4).
 
