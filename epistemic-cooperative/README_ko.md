@@ -19,31 +19,35 @@
 
 ## 스킬
 
-### /onboard — 퀘스트 기반 프로토콜 학습
+### /onboard — 빠른 추천 + 프로토콜 학습
 
-실제 체험을 통해 프로토콜을 학습한다: 세션 기반 시나리오, 실제 프로토콜 실행, 소크라테스식 퀴즈.
+최근 세션 기반 빠른 추천으로 시작하고, 원하면 가이드 학습으로 이어간다.
 
 ```
-ENTRY → SCAN → EXTRACT → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+Quick Proof:    ENTRY → QUICKSCAN → PICK-1 → EVIDENCE → TRIAL → INSIGHT → NEXT
+Targeted:       ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 ```
 
 | 단계 | 설명 |
 |------|------|
-| 0. Entry | 경로 선택: 일반 / 특정 프로토콜 / 둘러보기 |
-| 1. Scan | 프로젝트와 세션 파일 탐색 (project-scanner에 위임) |
-| 2. Extract | 세션 JSONL에서 행동 패턴 추출 (session-analyzer에 위임) |
-| 3. Map | 컴팩트 매핑 테이블로 패턴을 프로토콜에 매칭 |
-| 4. Scenario | 세션 snippet 또는 프리셋으로 개입 지점 제시 |
-| 5. Trial | 미니 연습 프롬프트로 실제 프로토콜 실행 |
-| 6. Quiz | 소크라테스식 프로토콜 인식 문제 |
-| 7. Guide | 학습 요약 + /report CTA + 설치 안내 |
+| 0. Entry | 경로 선택: 빠른 추천 / 특정 프로토콜 학습 / 전체 둘러보기 |
+| 1. Quick Scan | 최근 세션 메타데이터를 인라인으로 수집 (Glob + Read) |
+| 2a. Pick-1 | Quick path: `/goal`, `/gap`, `/frame` 중 1개 추천 선택 |
+| 2b. Evidence | Quick path: 근거 카드 1개 표시 (최대 2줄) |
+| 2. Map | Targeted path: 컴팩트 매핑 테이블로 프로토콜 매칭 |
+| 3. Scenario | Targeted path: 프리셋 시나리오로 개입 지점 제시 |
+| 4. Trial | 미니 연습 프롬프트로 실제 프로토콜 실행 |
+| 5. Quiz | Targeted path: 소크라테스식 프로토콜 인식 문제 |
+| 6. Guide | Targeted path: 학습 요약 + /report CTA |
 
 주요 특징:
-- **분석보다 체험**: 리포트가 아니라 직접 해보며 학습
-- 3단계 시나리오 폴백: 세션 snippet → 코드베이스 기반 → 프리셋 시나리오
+- **학습보다 가치 증명 먼저**: quick path는 3분 이내에 가치를 체감
+- **한 번에 하나만**: 추천 1개, 근거 카드 1개, 체험 1회 — 카탈로그 불필요
+- **보수적 자동 추천 풀**: `/goal`, `/gap`, `/frame`만 자동 추천
 - 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환)
-- 즉각 퀴즈 피드백 및 구별점 설명
-- 신규 사용자용 Starter Trio: Hermeneia `/clarify`, Telos `/goal`, Syneidesis `/gap`
+- Targeted path는 전체 학습 경험 유지 (시나리오, 퀴즈, 가이드)
+- 근거 기반 분석은 `/report`, 빠른 가치 증명은 `/onboard`
 
 ### /report — 사용 분석 리포트
 
@@ -130,8 +134,8 @@ epistemic-cooperative/
 
 | 에이전트 | 사용처 | 역할 |
 |----------|--------|------|
-| project-scanner | `/onboard` Phase 1, `/report` Phase 1 | `~/.claude/projects/` 스캔, 최근 프로젝트 선택, 세션 인덱스 읽기 |
-| session-analyzer | `/onboard` Phase 2, `/report` Phase 2 | JSONL에서 도구 빈도, 재작업 지표, 슬래시 커맨드 이력 추출 |
+| project-scanner | `/report` Phase 1 | `~/.claude/projects/` 스캔, 최근 프로젝트 선택, 세션 인덱스 읽기 |
+| session-analyzer | `/report` Phase 2 | JSONL에서 도구 빈도, 재작업 지표, 슬래시 커맨드 이력 추출 |
 | coverage-scanner | `/dashboard` Phase 2 | 전체 세션의 facets, session-meta, 슬래시 커맨드 데이터 집계 |
 
 ## 사용 시기

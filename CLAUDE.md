@@ -52,7 +52,7 @@ epistemic-protocols/
 │   ├── agents/                        # project-scanner, session-analyzer, coverage-scanner
 │   └── skills/
 │       ├── report/SKILL.md            # Usage analysis report from session patterns
-│       ├── onboard/SKILL.md           # Quest-based protocol learning (scenario + trial + quiz)
+│       ├── onboard/SKILL.md           # Quick recommendation + protocol learning (quick proof + targeted learning)
 │       ├── dashboard/SKILL.md          # Full-session coverage dashboard
 │       └── preferences/SKILL.md       # Interactive protocol preference configuration
 └── write/                             # Skill: multi-perspective blog drafting
@@ -155,7 +155,7 @@ Detect application-context mismatch after execution when correct output may not 
 ### Epistemic Cooperative (Report + Onboard + Dashboard + Preferences)
 Utility skill group for session analytics and configuration.
 - **Report** `/report`: Generate epistemic usage analysis report with evidence-backed protocol recommendations and HTML artifact. Analytical output — pattern evidence, anti-pattern diagnostics, session snippets.
-- **Onboard** `/onboard`: Quest-based protocol learning through scenario experience, trial execution, and Socratic quiz. Flow: General/Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects learning path; all scan paths share inline Quick Scan (User Context Profile extraction); Phases 3-6 deliver experiential learning.
+- **Onboard** `/onboard`: Quick recommendation from recent sessions, or quest-based learning through scenario, trial, and quiz. Flow: Quick Proof (Entry → QuickScan → Pick-1 → Evidence → Trial → Insight → Next), Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects path (quick default); Quick path auto-recommends from `/goal`, `/gap`, `/frame` pool; Targeted path preserves full learning experience.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
 - **Preferences** `/preferences`: Interactive protocol preference configuration for `~/.claude/CLAUDE.local.md`. Flow: Detect → Select → Configure → Generate → Verify. Quick path (6 global params) or Full path (global + ~32 per-protocol params).
 

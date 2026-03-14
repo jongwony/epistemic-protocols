@@ -1,11 +1,11 @@
 ---
 name: onboard
-description: "Quest-based protocol learning through scenario experience, trial execution, and Socratic quiz."
+description: "Quick protocol recommendation from recent sessions, or quest-based learning through scenario, trial, and quiz."
 ---
 
 # Onboard Skill
 
-Guide users through epistemic protocol learning via hands-on experience — session-derived scenarios, real protocol trials, and Socratic quizzes — so users understand "when to use what" through doing, not reading.
+Start with a quick recommendation based on recent sessions, then optionally continue to guided learning — so users experience value first, learn second.
 
 ## When to Use
 
@@ -22,21 +22,25 @@ Skip when:
 ## Workflow Overview
 
 ```
-General:        ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
+Quick Proof:    ENTRY → QUICKSCAN → PICK-1 → EVIDENCE → TRIAL → INSIGHT → NEXT
 Targeted:       ENTRY → QUICKSCAN → MAP → SCENARIO → TRIAL → QUIZ → GUIDE
 Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 ```
 
 | Phase | Owner | Tool | Purpose |
 |-------|-------|------|---------|
-| 0. Entry | Main | AskUserQuestion | Path selection: general/targeted |
+| 0. Entry | Main | AskUserQuestion | Path selection: quick/targeted |
 | 1. Quick Scan | Main | Glob, Read | User Context Profile extraction |
-| 2. Map | Main | — | Profile → Protocol matching (compact inline) |
-| 3. Scenario | Main | AskUserQuestion | Context-personalized intervention point |
-| 4. Trial | Main | — | Direct entry from "Try it", real protocol execution |
-| 4→5 LOOP | Main | AskUserQuestion | Post-trial navigation |
-| 5. Quiz | Main | AskUserQuestion | Socratic protocol recognition quiz |
-| 6. Guide | Main | AskUserQuestion | Summary + /report CTA |
+| 2a. Pick-1 | Main | — | Quick path: select 1 recommendation |
+| 2b. Evidence | Main | — | Quick path: show 1 evidence card |
+| 2. Map | Main | — | Targeted path: Profile → Protocol matching |
+| 3. Scenario | Main | AskUserQuestion | Targeted path: context-personalized intervention point |
+| 4. Trial | Main | AskUserQuestion | Real protocol execution (quick: mini trial, targeted: full trial) |
+| 4→Q. Insight | Main | — | Quick path: post-trial insight card |
+| 4→Q. Next | Main | AskUserQuestion | Quick path: simplified navigation |
+| 4→5 LOOP | Main | AskUserQuestion | Targeted path: post-trial navigation |
+| 5. Quiz | Main | AskUserQuestion | Targeted path: Socratic protocol recognition quiz |
+| 6. Guide | Main | AskUserQuestion | Targeted path: summary + /report CTA |
 
 ## Data Sources
 
@@ -59,22 +63,29 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 
 ### Phase 0: Entry (Path Selection)
 
-Present the protocol catalog as text output FIRST (always), then ask path selection.
-
-**Protocol Catalog** (always rendered as text before asking):
-
-Before rendering, check installation status: Glob `~/.claude/plugins/cache/epistemic-protocols/*/` to collect installed plugin directory names. Present the 10 protocols from the Data Sources table as a numbered list grouped by Cluster, with name + cluster label + "When to Use" description + installation badge (`[installed]` or `[not installed]`).
+Do NOT present the full protocol catalog upfront. Start with a concise welcome and path selection.
 
 **AskUserQuestion #1**:
-- Text: "Which path?"
+- Text: "어떻게 시작할까요?"
 - Options:
-  - "General — scan my sessions and recommend"
-  - "Targeted — learn a specific protocol (type name in Other)"
+  - "Quick recommendation — 최근 작업 기반으로 지금 가장 도움될 1가지를 보여주세요"
+  - "Targeted learning — 특정 프로토콜을 골라서 배워볼게요"
+  - "Browse all — 먼저 전체 프로토콜을 보고 싶어요"
+
+**If Quick recommendation**: set `path = quick`, proceed to Phase 1.
+
+**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 10 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, call AskUserQuestion:
+- Text: "어떻게 진행할까요?"
+- Options:
+  - "Quick recommendation — 추천 1개를 먼저 볼게요"
+  - "Targeted learning — 위 목록에서 골라 배울게요 (Other에 이름 입력)"
+
+Then proceed based on selection.
 
 **If Targeted + Other contains protocol name**: proceed directly to session source question.
 
 **If Targeted + no protocol specified → AskUserQuestion #2**:
-- Text: "Which protocol? (refer to catalog above, type name or number in Other)"
+- Text: "Which protocol? (type name or number in Other)"
 - Options:
   - "Pre-execution (Planning) — /clarify, /goal, /bound, /inquire"
   - "Analysis/Decision — /frame, /ground, /gap"
@@ -87,9 +98,9 @@ Before rendering, check installation status: Glob `~/.claude/plugins/cache/epist
   - "Use standard examples (no session needed)"
 
 State after Phase 0:
-- `path`: general | targeted
+- `path`: quick | targeted
 - `target_protocol`: (targeted only) selected protocol name
-- `session_source`: (targeted only) scan | standard — General path always runs Quick Scan
+- `session_source`: (targeted only) scan | standard — Quick path always runs Quick Scan
 
 **Skip rule**: If targeted + standard → skip Phases 1-2, jump to Phase 3 with preset scenarios from `references/scenarios.md`.
 
@@ -112,25 +123,108 @@ If no `sessions-index.json` files found, set fallback tier to Tier 2 (Starter Tr
 
 **Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization — behavioral pattern extraction and session diagnostics belong in `/report`.
 
-### Phase 2: Map (Protocol Matching)
+### Phase 2a: Pick-1 (Quick Path — Single Recommendation)
 
-Apply User Context Profile to match protocols to the user's context.
+**Quick path only.** Select exactly 1 protocol recommendation from the auto-recommend pool.
 
-1. **General path**: Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Starter Trio.
-2. **Targeted path**: Filter to target protocol, use Profile for scenario personalization. Note related protocols from the compact mapping table.
+**Auto-recommend pool**: `/goal` (Telos), `/gap` (Syneidesis), `/frame` (Prothesis). These three are chosen because users can quickly experience their value. Protocols like `/clarify` and `/grasp` are user-initiated by nature and should not be proactively suggested in the first encounter.
+
+**Recommendation rules** (applied to Quick Scan Profile):
+
+| Protocol | Signal patterns | Priority |
+|----------|----------------|----------|
+| `/goal` | Vague first prompts ("improve", "optimize", "ideas for", "make it better", "help me plan"); desire without success criteria | Highest (also fallback) |
+| `/gap` | Multiple revisions on same topic in summary; finalization language ("wrap up", "ready", "finalize", "ship", "merge") | Medium |
+| `/frame` | Exploration/comparison language ("approach", "options", "tradeoffs", "compare", "architecture", "which way") | Medium |
+
+**Decision logic**:
+1. Score each protocol by signal match count from `firstPrompt` and `summary` fields
+2. Select the single strongest match
+3. Tie-break: `/goal` > `/gap` > `/frame`
+4. **Fallback**: If no signals detected (no sessions, sparse metadata), recommend `/goal`
+
+**Output**: Present recommendation as a single sentence. Do NOT present multiple recommendations or a ranked list.
+
+Format:
+```
+지금은 /goal이 가장 먼저 효과를 낼 가능성이 큽니다.
+```
+
+### Phase 2b: Evidence (Quick Path — Evidence Card)
+
+**Quick path only.** Present exactly 1 evidence card explaining why this recommendation was made.
+
+**Evidence format** (maximum 2 lines):
+```
+Why this recommendation
+- [Observed pattern from sessions — 1 sentence]
+- [Expected benefit — 1 sentence]
+```
+
+**Per-protocol evidence templates**:
+
+For `/goal`:
+```
+Why this recommendation
+- 최근 요청에서 "무엇이 성공인지"보다 "어떻게 개선할지"가 먼저 등장하는 패턴이 보였습니다.
+- 성공 기준을 먼저 정하면 재작업을 줄이기 쉽습니다.
+```
+
+For `/gap`:
+```
+Why this recommendation
+- 최근 세션에서 같은 주제에 대한 반복 수정이나 마감 정황이 보였습니다.
+- 실행 직전에 놓친 부분을 체크하면 후회를 줄일 수 있습니다.
+```
+
+For `/frame`:
+```
+Why this recommendation
+- 최근 요청에서 비교/탐색/방향 선택에 관한 질문이 보였습니다.
+- 분석 렌즈를 먼저 정하면 방향 없는 탐색을 줄일 수 있습니다.
+```
+
+**No-session fallback evidence** (when `/goal` selected by fallback):
+```
+Why this recommendation
+- 세션 데이터가 충분하지 않아 가장 보편적으로 효과가 큰 프로토콜을 추천합니다.
+- 성공 기준을 먼저 정하면 방향을 잡고 시작할 수 있습니다.
+```
+
+**Rules**:
+- Evidence is maximum 2 lines. Never expand into a report-style analysis.
+- Do not show confidence scores or numbers.
+- Do not quote session content verbatim.
+
+After presenting evidence, call AskUserQuestion:
+- Text: "바로 1분짜리 미니 체험을 해볼까요?"
+- Options:
+  - "지금 체험하기"
+  - "왜 이 추천인지 더 보기"
+  - "다른 추천 보기"
+  - "전체 학습으로 가기"
+
+Branch: 지금 체험하기 → Phase 4 (quick trial), 왜 이 추천인지 더 보기 → show Data Sources row for the recommended protocol then re-ask, 다른 추천 보기 → pick next from pool and re-present from Phase 2a, 전체 학습으로 가기 → set `path = targeted` and go to Phase 0 targeted flow.
+
+### Phase 2: Map (Targeted Path — Protocol Matching)
+
+**Targeted path only.** Apply User Context Profile to match protocols to the user's context.
+
+1. Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Starter Trio.
+2. **Targeted sub-path**: Filter to target protocol, use Profile for scenario personalization. Note related protocols from the compact mapping table.
 3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → **Starter Trio**: Hermeneia `/clarify` (Planning — expression fix), Telos `/goal` (Planning — goal shaping), Syneidesis `/gap` (Decision — blind spot audit). Proceed immediately without blocking the onboarding flow.
 
 For detailed mapping logic (Primary/Secondary/Tertiary tables, session diagnostics, anti-pattern detection), refer to `/report` SKILL.md.
 
-### Phase 3: Scenario (Intervention Point)
+### Phase 3: Scenario (Targeted Path — Intervention Point)
 
-Present a concrete scenario showing where the protocol would have helped.
+**Targeted path only.** Present a concrete scenario showing where the protocol would have helped.
 
 **Scenario construction** (2-tier fallback):
 - **Tier 1** (User Context Profile available): Generate a hypothetical scenario grounded in the user's work context (domains, task types, conversation patterns from Quick Scan). Personalize standard scenarios from `references/scenarios.md` using Profile data.
 - **Tier 2** (no data / Starter Trio fallback): Use preset scenarios directly from `references/scenarios.md`.
 
-For general path, present scenarios for each of the top 2-3 protocols sequentially.
+Present scenarios for each of the top 2-3 protocols sequentially.
 
 **Scenario format**:
 
@@ -160,13 +254,83 @@ Present each scenario as regular text output (Tier 1/2 format above). Then call 
 
 ### Phase 4: Trial (Protocol Execution)
 
-Guide the user through a real, abbreviated protocol experience. "Try it" selection from Phase 3 already signals intent — enter trial directly without additional confirmation.
+Guide the user through a real, abbreviated protocol experience.
+
+#### Quick Path Trial
+
+**Mini practice prompts** (scoped for 2-3 exchanges maximum). Per-protocol prompts:
+
+For `/goal`:
+> "데이터 파이프라인을 개선하고 싶다" — 이 요청으로 시작해보세요. `/goal`을 호출하면 성공 기준을 1-2회 왕복으로 잡아봅니다.
+
+For `/gap`:
+> "배포 직전인데 놓친 게 없는지 확인하고 싶다" — 이 상황으로 시작해보세요. `/gap`을 호출하면 blind spot audit을 짧게 체험합니다.
+
+For `/frame`:
+> "이 문제를 어떤 관점으로 봐야 할지 모르겠다" — 이 질문으로 시작해보세요. `/frame`을 호출하면 분석 렌즈 제시를 체험합니다.
+
+Present the mini prompt as text, then call AskUserQuestion:
+- Text: "위 상황으로 미니 체험을 시작할까요? 직접 상황을 정해도 됩니다."
+- Options:
+  - "이 상황으로 시작 — /X 호출"
+  - "내 상황으로 시작 (Other에 입력)"
+
+**Execution**: The user invokes the actual protocol (e.g., type `/goal`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination (convergence or user Esc). After protocol termination, proceed to **Quick Post-Trial** below.
+
+**Quick Post-Trial Insight**:
+
+Present a brief insight card (3 lines max):
+
+```
+Quick insight
+- 방금 체험한 것은 해답 생성보다 방향 정렬에 가까운 프로토콜입니다.
+- 이런 순간에 먼저 쓰면 재작업을 줄이기 쉽습니다.
+```
+
+Per-protocol insight variants:
+
+For `/goal`:
+```
+Quick insight
+- 방금 체험한 것은 "무엇을 만들까"보다 "무엇이 성공인가"를 먼저 정하는 프로토콜입니다.
+- 성공 기준이 먼저 있으면 방향 없는 반복을 줄일 수 있습니다.
+```
+
+For `/gap`:
+```
+Quick insight
+- 방금 체험한 것은 실행 직전에 놓친 부분을 체크하는 프로토콜입니다.
+- 결정 직전에 한 번 돌리면 "아차" 순간을 줄일 수 있습니다.
+```
+
+For `/frame`:
+```
+Quick insight
+- 방금 체험한 것은 여러 관점 중 어떤 렌즈로 볼지 먼저 정하는 프로토콜입니다.
+- 분석 렌즈를 먼저 골라두면 방향 없는 탐색을 줄일 수 있습니다.
+```
+
+**Quick Post-Trial Navigation**:
+
+Call AskUserQuestion:
+- Text: "체험 완료! 다음은?"
+- Options:
+  - "오늘은 여기까지"
+  - "예시 하나 더 보기"
+  - "전체 온보딩 계속하기"
+  - "/report로 더 자세히 보기"
+
+Branch: 오늘은 여기까지 → end session with brief closing, 예시 하나 더 보기 → pick next protocol from pool and restart from Phase 2a, 전체 온보딩 계속하기 → set `path = targeted` and go to Phase 2 MAP with Quick Scan results, /report로 더 자세히 보기 → end with `/report` CTA.
+
+#### Targeted Path Trial
+
+"Try it" selection from Phase 3 already signals intent — enter trial directly without additional confirmation.
 
 **Mini practice prompts** (scoped for 2-3 exchanges): Use the **Trial prompt** field from `references/scenarios.md` for the target protocol. Present the trial guidance as regular text output.
 
 **Execution**: Prompt the user to invoke the actual protocol (e.g., type `/clarify`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination (convergence or user Esc). After protocol termination, present Post-Trial Insight and LOOP.
 
-For general path, offer trial for the top-recommended protocol first. If user completes it, optionally offer trial for the second recommendation.
+Offer trial for the top-recommended protocol first. If user completes it, optionally offer trial for the second recommendation.
 
 **Post-Trial Insight** (presented after trial completion):
 
@@ -190,7 +354,7 @@ After the Post-Trial Insight, call AskUserQuestion:
   - "Try a different protocol"
   - "Guide — see my learning summary"
 
-Branch: Quiz → Phase 5, Another scenario → Phase 3, Different protocol → Phase 3 with next MAP protocol (General) or Phase 0 with cached MAP (Targeted), Guide → Phase 6.
+Branch: Quiz → Phase 5, Another scenario → Phase 3, Different protocol → Phase 3 with next MAP protocol or Phase 0 with cached MAP, Guide → Phase 6.
 
 ### Phase 5: Quiz (Socratic Verification)
 
@@ -297,28 +461,33 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 ## AskUserQuestion Budget
 
-Target 6-12 calls per session:
+Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 
-| Phase | Calls (General) | Calls (Targeted) | Purpose |
-|-------|-----------------|-------------------|---------|
+| Phase | Calls (Quick) | Calls (Targeted) | Purpose |
+|-------|---------------|-------------------|---------|
 | 0. Entry | 1 | 2-3 | Path + protocol + session source |
-| 3. Scenario | 1-3 | 1-2 | Navigation after scenario text |
-| 4. Trial | 0 | 0 | Direct entry from "Try it" |
-| 4→5 LOOP | 1 | 1 | Post-trial navigation |
-| 5. Quiz | 4-7 | 4-7 | MC/design or binary/reverse/design + reasoning inquiry on incorrect |
-| 6. Guide | 0-1 | 0-1 | Optional continue exploring |
+| 2b. Evidence | 1 | — | Trial confirmation |
+| 3. Scenario | — | 1-2 | Navigation after scenario text |
+| 4. Trial | 1 | 0 | Quick: situation choice. Targeted: direct entry |
+| 4→Q. Next | 1 | — | Quick: post-trial navigation |
+| 4→5 LOOP | — | 1 | Targeted: post-trial navigation |
+| 5. Quiz | — | 4-7 | MC/design or binary/reverse/design + reasoning inquiry |
+| 6. Guide | — | 0-1 | Optional continue exploring |
 
 ## Rules
 
-1. **Experience over analysis**: This skill teaches through doing. Analytical output (HTML reports, pattern evidence tables) belongs in `/report`.
-2. **Privacy**: Never transmit session data externally. All analysis runs locally.
-3. **No subagent delegation**: Both General and Targeted paths use inline Quick Scan. Deep pattern extraction belongs in `/report`.
-4. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
-5. **Immediate feedback**: Quiz answers get instant feedback. For incorrect answers, reasoning inquiry precedes correction (per Feedback section). Never batch quiz results.
-6. **No auto-install**: Guide installation but never install plugins automatically.
-7. **Session index access**: Access `sessions-index.json` via Glob + Read. Parse `entries` for `firstPrompt` and `summary` fields only. Never Read entire session JSONL files.
-8. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.
-9. **Single session**: The entire onboarding completes in one session. No cross-session state required.
+1. **Value before learning**: Quick path proves value in under 3 minutes. Learning (scenarios, quizzes) is available but not the default entry.
+2. **One at a time**: Quick path shows 1 recommendation, 1 evidence card, 1 trial. Never present multiple recommendations or ranked lists.
+3. **Conservative auto-recommend pool**: Only `/goal`, `/gap`, `/frame` are auto-recommended. User-initiated protocols (`/clarify`, `/grasp`) and specialized protocols are excluded from proactive suggestion.
+4. **Experience over analysis**: This skill teaches through doing. Analytical output (HTML reports, pattern evidence tables) belongs in `/report`.
+5. **Privacy**: Never transmit session data externally. All analysis runs locally.
+6. **No subagent delegation**: Both Quick and Targeted paths use inline Quick Scan. Deep pattern extraction belongs in `/report`.
+7. **Trial authenticity**: Trial phase must execute the actual protocol, not simulate it. The user invokes the real slash command.
+8. **Immediate feedback**: Quiz answers get instant feedback. For incorrect answers, reasoning inquiry precedes correction (per Feedback section). Never batch quiz results.
+9. **No auto-install**: Guide installation but never install plugins automatically.
+10. **Session index access**: Access `sessions-index.json` via Glob + Read. Parse `entries` for `firstPrompt` and `summary` fields only. Never Read entire session JSONL files.
+11. **Preset as safety net**: `references/scenarios.md` ensures every user gets a complete experience regardless of session history availability.
+12. **Single session**: The entire onboarding completes in one session. No cross-session state required.
 
 ## Acknowledgments
 
