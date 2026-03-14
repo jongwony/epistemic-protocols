@@ -12,7 +12,7 @@
 
 | 스킬 | 목적 | 출력 |
 |------|------|------|
-| `/onboard` | 퀘스트 기반 프로토콜 학습 | 터미널 기반 가이드 경험 |
+| `/onboard` | 빠른 추천 + 프로토콜 학습 | 터미널 기반 가이드 경험 |
 | `/report` | 사용 분석 리포트 | HTML 프로필 (`~/.claude/.report/epistemic-profile.html`) |
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.insights/dashboard.html`) |
 | `/preferences` | 인터랙티브 프로토콜 설정 | `~/.claude/CLAUDE.local.md` 설정 섹션 |
@@ -44,7 +44,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 주요 특징:
 - **학습보다 가치 증명 먼저**: quick path는 3분 이내에 가치를 체감
 - **한 번에 하나만**: 추천 1개, 근거 카드 1개, 체험 1회 — 카탈로그 불필요
-- **보수적 자동 추천 풀**: `/goal`, `/gap`, `/frame`만 자동 추천
+- **Onboarding Pool**: `/goal`, `/gap`, `/frame` — Quick 추천 + Targeted 폴백 통합
 - 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환)
 - Targeted path는 전체 학습 경험 유지 (시나리오, 퀴즈, 가이드)
 - 근거 기반 분석은 `/report`, 빠른 가치 증명은 `/onboard`

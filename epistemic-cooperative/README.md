@@ -12,7 +12,7 @@ A utility plugin for epistemic protocol onboarding and analytics. Unlike protoco
 
 | Skill | Purpose | Output |
 |-------|---------|--------|
-| `/onboard` | Quest-based protocol learning | Terminal-based guided experience |
+| `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/report` | Usage analysis with evidence | HTML profile (`~/.claude/.report/epistemic-profile.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
 | `/preferences` | Interactive protocol preference configuration | `~/.claude/CLAUDE.local.md` preferences section |
@@ -44,7 +44,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 Key features:
 - **Value before learning**: quick path proves value in under 3 minutes
 - **One at a time**: 1 recommendation, 1 evidence card, 1 trial — no catalog required
-- **Conservative auto-recommend pool**: `/goal`, `/gap`, `/frame` only
+- **Onboarding Pool**: `/goal`, `/gap`, `/frame` — unified for Quick and Targeted fallback
 - Real protocol trial execution (2-3 exchanges per protocol)
 - Targeted path preserves full learning experience (scenarios, quizzes, guide)
 - `/report` for evidence-backed analysis; `/onboard` for quick value proof

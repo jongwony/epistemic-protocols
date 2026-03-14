@@ -16,7 +16,7 @@
 
 ### Proposal 2: 재체험 사용자 대상 auto-recommend pool 확장
 
-**상태**: 미구현
+**상태**: 구현 완료 (재정의: Starter Trio → Pool 통합 + pool 소진 시 Targeted 전환)
 
 **현재 상태**: auto-recommend pool이 `/goal`, `/gap`, `/frame` 3개로 고정 (Rule #3). "다른 프로토콜 체험하기" 선택 시에도 이 3개 안에서만 순환.
 
@@ -35,7 +35,7 @@
 
 ### Proposal 3: Phase 0 개인화 안내 scope 축소
 
-**상태**: 미구현
+**상태**: 구현 완료
 
 **현재 상태**: Phase 0 AskUserQuestion #1이 3개 옵션 + 한글 설명 포함:
 ```
@@ -62,7 +62,7 @@
 
 ### Proposal 4: Targeted path AskUserQuestion #2에 카탈로그 정보 전달
 
-**상태**: 미구현
+**상태**: 구현 완료
 
 **현재 상태**: Targeted path에서 프로토콜 미지정 시 AskUserQuestion #2:
 ```

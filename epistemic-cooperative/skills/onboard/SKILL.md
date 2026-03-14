@@ -68,24 +68,46 @@ Do NOT present the full protocol catalog upfront. Start with a concise welcome a
 **AskUserQuestion #1**:
 - Text: "어떻게 시작할까요?"
 - Options:
-  - "Quick recommendation — 최근 작업 기반으로 지금 가장 도움될 1가지를 보여주세요"
-  - "Targeted learning — 특정 프로토콜을 골라서 배워볼게요"
-  - "Browse all — 먼저 전체 프로토콜을 보고 싶어요"
+  - "바로 추천 받기 (Recommended)"
+  - "프로토콜 골라 배우기"
+  - "전체 목록 보기"
 
-**If Quick recommendation**: set `path = quick`, proceed to Phase 1.
+**If 바로 추천 받기**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 10 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, call AskUserQuestion:
+**If 전체 목록 보기**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 10 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, call AskUserQuestion:
 - Text: "어떻게 진행할까요?"
 - Options:
-  - "Quick recommendation — 추천 1개를 먼저 볼게요"
-  - "Targeted learning — 위 목록에서 골라 배울게요 (Other에 이름 입력)"
+  - "바로 추천 받기"
+  - "프로토콜 골라 배우기 (Other에 이름 입력)"
 
 Then proceed based on selection.
 
 **If Targeted + Other contains protocol name**: proceed directly to session source question.
 
-**If Targeted + no protocol specified → AskUserQuestion #2**:
-- Text: "Which protocol? (type name or number in Other)"
+**If Targeted + no protocol specified**:
+
+Present a condensed catalog as text output:
+
+```
+Planning:
+  /clarify — AI가 내 의도를 자꾸 오해할 때
+  /goal — 원하는 건 있는데 목표가 불명확할 때
+  /bound — AI에게 뭘 맡기고 뭘 내가 할지 정할 때
+  /inquire — AI가 맥락 없이 바로 실행하려 할 때
+
+Analysis/Decision:
+  /frame — 어떤 관점으로 분석할지 모를 때
+  /ground — 추상적 조언이 내 상황에 맞는지 확인할 때
+  /gap — 커밋/배포 직전 놓친 게 없는지 점검할 때
+
+Execution/Verification:
+  /attend — 위험한 실행을 단계별로 통제할 때
+  /contextualize — 결과는 맞는데 맥락에 안 맞을 때
+  /grasp — AI 작업을 승인했지만 이해 못 했을 때
+```
+
+Then **AskUserQuestion #2**:
+- Text: "어떤 프로토콜을 배워볼까요? (Other에 이름이나 번호 입력)"
 - Options:
   - "Pre-execution (Planning) — /clarify, /goal, /bound, /inquire"
   - "Analysis/Decision — /frame, /ground, /gap"
@@ -119,7 +141,7 @@ From collected metadata, infer:
 - **Conversation patterns**: Request clarity level, incremental vs. batch requests, question types (how/why/what)
 - **Task types**: Ratio of feature development, debugging, refactoring, documentation
 
-If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fallback (`/goal`); Targeted path falls back to Starter Trio.
+If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fallback (`/goal`); Targeted path falls back to Onboarding Pool (`/goal`, `/gap`, `/frame`).
 
 **Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization — behavioral pattern extraction and session diagnostics belong in `/report`.
 
@@ -197,7 +219,7 @@ Why this recommendation
 - Do not quote session content verbatim.
 
 After presenting evidence, call AskUserQuestion:
-- Text: "바로 1분짜리 미니 체험을 해볼까요?"
+- Text: "바로 짧은 미니 체험을 해볼까요?"
 - Options:
   - "지금 체험하기"
   - "왜 이 추천인지 더 보기"
@@ -210,9 +232,9 @@ Branch: 지금 체험하기 → Phase 4 (quick trial), 왜 이 추천인지 더 
 
 **Targeted path only.** Apply User Context Profile to match protocols to the user's context.
 
-1. Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Starter Trio.
+1. Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Onboarding Pool (`/goal`, `/gap`, `/frame`).
 2. **Targeted sub-path**: Filter to target protocol, use Profile for scenario personalization. Note related protocols from the compact mapping table.
-3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → **Starter Trio**: Hermeneia `/clarify` (Planning — expression fix), Telos `/goal` (Planning — goal shaping), Syneidesis `/gap` (Decision — blind spot audit). Proceed immediately without blocking the onboarding flow.
+3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → use **Onboarding Pool** (`/goal`, `/gap`, `/frame`). Proceed immediately without blocking the onboarding flow.
 
 For detailed mapping logic (Primary/Secondary/Tertiary tables, session diagnostics, anti-pattern detection), refer to `/report` SKILL.md.
 
@@ -319,7 +341,7 @@ Call AskUserQuestion:
   - "다른 프로토콜 체험하기"
   - "전체 온보딩 계속하기"
 
-Branch: 오늘은 여기까지 → end session with brief closing (include text mention: "더 자세한 분석이 필요하면 `/report`를 호출해 보세요."), 다른 프로토콜 체험하기 → pick next protocol from pool and restart from Phase 2a, 전체 온보딩 계속하기 → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
+Branch: 오늘은 여기까지 → end session with brief closing (include text mention: "더 자세한 분석이 필요하면 `/report`를 호출해 보세요."), 다른 프로토콜 체험하기 → check pool exhaustion: if unrecommended protocols remain in Onboarding Pool, pick next and restart from Phase 2a; if pool exhausted (all 3 recommended in session), present "기본 추천을 모두 체험했습니다" and offer Targeted transition, 전체 온보딩 계속하기 → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
 
 #### Targeted Path Trial
 
@@ -464,7 +486,7 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 
 | Phase | Calls (Quick) | Calls (Targeted) | Purpose |
 |-------|---------------|-------------------|---------|
-| 0. Entry | 1 | 2-3 | Path + protocol + session source |
+| 0. Entry | 1-2 | 2-3 | Path + protocol + session source |
 | 2b. Evidence | 1 | — | Trial confirmation |
 | 3. Scenario | — | 1-2 | Navigation after scenario text |
 | 4. Trial | 1 | 0 | Quick: situation choice. Targeted: direct entry |
@@ -477,7 +499,7 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 
 1. **Value before learning**: Quick path proves value in under 3 minutes. Learning (scenarios, quizzes) is available but not the default entry.
 2. **One at a time**: Quick path shows 1 recommendation, 1 evidence card, 1 trial. Never present multiple recommendations or ranked lists.
-3. **Conservative auto-recommend pool**: Only `/goal`, `/gap`, `/frame` are auto-recommended. User-initiated protocols (`/clarify`, `/grasp`) and specialized protocols are excluded from proactive suggestion.
+3. **Onboarding Pool**: `/goal`, `/gap`, `/frame` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/clarify`, `/grasp`, `/attend`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
 4. **Experience over analysis**: This skill teaches through doing. Analytical output (HTML reports, pattern evidence tables) belongs in `/report`.
 5. **Privacy**: Never transmit session data externally. All analysis runs locally.
 6. **No subagent delegation**: Both Quick and Targeted paths use inline Quick Scan. Deep pattern extraction belongs in `/report`.
