@@ -66,19 +66,19 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 Do NOT present the full protocol catalog upfront. Start with a concise welcome and path selection.
 
 **AskUserQuestion #1**:
-- Text: "어떻게 시작할까요?"
+- Text: "How would you like to start?"
 - Options:
-  - "바로 추천 받기 (Recommended)"
-  - "프로토콜 골라 배우기"
-  - "전체 목록 보기"
+  - "Quick recommendation (Recommended)"
+  - "Learn a specific protocol"
+  - "Browse all protocols"
 
-**If 바로 추천 받기**: set `path = quick`, proceed to Phase 1.
+**If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If 전체 목록 보기**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 10 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, call AskUserQuestion:
-- Text: "어떻게 진행할까요?"
+**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 10 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, call AskUserQuestion:
+- Text: "How would you like to proceed?"
 - Options:
-  - "바로 추천 받기"
-  - "프로토콜 골라 배우기 (Other에 이름 입력)"
+  - "Quick recommendation"
+  - "Learn a specific protocol (type name in Other)"
 
 Then proceed based on selection.
 
@@ -90,24 +90,24 @@ Present a condensed catalog as text output:
 
 ```
 Planning:
-  /clarify — AI가 내 의도를 자꾸 오해할 때
-  /goal — 원하는 건 있는데 목표가 불명확할 때
-  /bound — AI에게 뭘 맡기고 뭘 내가 할지 정할 때
-  /inquire — AI가 맥락 없이 바로 실행하려 할 때
+  /clarify — When AI keeps misunderstanding your intent
+  /goal — When you have a desire but no clear goal
+  /bound — When deciding what to delegate to AI
+  /inquire — When AI is about to execute without enough context
 
 Analysis/Decision:
-  /frame — 어떤 관점으로 분석할지 모를 때
-  /ground — 추상적 조언이 내 상황에 맞는지 확인할 때
-  /gap — 커밋/배포 직전 놓친 게 없는지 점검할 때
+  /frame — When unsure which analytical perspective to use
+  /ground — When checking if abstract advice fits your situation
+  /gap — When checking for blind spots before committing
 
 Execution/Verification:
-  /attend — 위험한 실행을 단계별로 통제할 때
-  /contextualize — 결과는 맞는데 맥락에 안 맞을 때
-  /grasp — AI 작업을 승인했지만 이해 못 했을 때
+  /attend — When controlling risky actions step by step
+  /contextualize — When output is correct but doesn't fit the context
+  /grasp — When you approved AI work but didn't fully understand it
 ```
 
 Then **AskUserQuestion #2**:
-- Text: "어떤 프로토콜을 배워볼까요? (Other에 이름이나 번호 입력)"
+- Text: "Which protocol would you like to learn? (type name or number in Other)"
 - Options:
   - "Pre-execution (Planning) — /clarify, /goal, /bound, /inquire"
   - "Analysis/Decision — /frame, /ground, /gap"
@@ -169,7 +169,7 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 
 Format:
 ```
-지금은 /goal이 가장 먼저 효과를 낼 가능성이 큽니다.
+Right now, /goal is most likely to help you first.
 ```
 
 ### Phase 2b: Evidence (Quick Path — Evidence Card)
@@ -188,29 +188,29 @@ Why this recommendation
 For `/goal`:
 ```
 Why this recommendation
-- 최근 요청에서 "무엇이 성공인지"보다 "어떻게 개선할지"가 먼저 등장하는 패턴이 보였습니다.
-- 성공 기준을 먼저 정하면 재작업을 줄이기 쉽습니다.
+- Recent requests show patterns of "how to improve" before defining "what counts as success."
+- Setting success criteria first can reduce rework.
 ```
 
 For `/gap`:
 ```
 Why this recommendation
-- 최근 세션에서 같은 주제에 대한 반복 수정이나 마감 정황이 보였습니다.
-- 실행 직전에 놓친 부분을 체크하면 후회를 줄일 수 있습니다.
+- Recent sessions show repeated revisions on the same topic or finalization signals.
+- Checking for blind spots right before execution can reduce regret.
 ```
 
 For `/frame`:
 ```
 Why this recommendation
-- 최근 요청에서 비교/탐색/방향 선택에 관한 질문이 보였습니다.
-- 분석 렌즈를 먼저 정하면 방향 없는 탐색을 줄일 수 있습니다.
+- Recent requests show comparison, exploration, or direction-selection questions.
+- Choosing an analytical lens first can reduce undirected exploration.
 ```
 
 **No-session fallback evidence** (when `/goal` selected by fallback):
 ```
 Why this recommendation
-- 세션 데이터가 충분하지 않아 가장 보편적으로 효과가 큰 프로토콜을 추천합니다.
-- 성공 기준을 먼저 정하면 방향을 잡고 시작할 수 있습니다.
+- Not enough session data to detect patterns — recommending the most universally effective protocol.
+- Setting success criteria first can help establish direction.
 ```
 
 **Rules**:
@@ -219,14 +219,14 @@ Why this recommendation
 - Do not quote session content verbatim.
 
 After presenting evidence, call AskUserQuestion:
-- Text: "바로 짧은 미니 체험을 해볼까요?"
+- Text: "Want to try a quick mini experience?"
 - Options:
-  - "지금 체험하기"
-  - "왜 이 추천인지 더 보기"
-  - "다른 추천 보기"
-  - "전체 학습으로 가기"
+  - "Try it now"
+  - "Learn more about this recommendation"
+  - "See a different recommendation"
+  - "Go to full learning path"
 
-Branch: 지금 체험하기 → Phase 4 (quick trial), 왜 이 추천인지 더 보기 → show Data Sources row for the recommended protocol then re-ask, 다른 추천 보기 → pick next from pool and re-present from Phase 2a, 전체 학습으로 가기 → set `path = targeted` and go to Phase 0 targeted flow.
+Branch: Try it now → Phase 4 (quick trial), Learn more about this recommendation → show Data Sources row for the recommended protocol then re-ask, See a different recommendation → pick next from pool and re-present from Phase 2a, Go to full learning path → set `path = targeted` and go to Phase 0 targeted flow.
 
 ### Phase 2: Map (Targeted Path — Protocol Matching)
 
@@ -283,19 +283,19 @@ Guide the user through a real, abbreviated protocol experience.
 **Mini practice prompts** (scoped for 2-3 exchanges maximum). Per-protocol prompts:
 
 For `/goal`:
-> "데이터 파이프라인을 개선하고 싶다" — 이 요청으로 시작해보세요. `/goal`을 호출하면 성공 기준을 1-2회 왕복으로 잡아봅니다.
+> "I want to improve my data pipeline" — Start with this request. Calling `/goal` will define success criteria in 1-2 exchanges.
 
 For `/gap`:
-> "배포 직전인데 놓친 게 없는지 확인하고 싶다" — 이 상황으로 시작해보세요. `/gap`을 호출하면 blind spot audit을 짧게 체험합니다.
+> "I'm about to deploy and want to check if I missed anything" — Start with this scenario. Calling `/gap` will give a brief blind spot audit.
 
 For `/frame`:
-> "이 문제를 어떤 관점으로 봐야 할지 모르겠다" — 이 질문으로 시작해보세요. `/frame`을 호출하면 분석 렌즈 제시를 체험합니다.
+> "I'm not sure which perspective to use for this problem" — Start with this question. Calling `/frame` will present analytical lens options.
 
 Present the mini prompt as text, then call AskUserQuestion:
-- Text: "위 상황으로 미니 체험을 시작할까요? 직접 상황을 정해도 됩니다."
+- Text: "Start mini experience with this scenario? You can also define your own."
 - Options:
-  - "이 상황으로 시작 — /X 호출"
-  - "내 상황으로 시작 (Other에 입력)"
+  - "Start with this scenario — call /X"
+  - "Start with my own scenario (type in Other)"
 
 **Execution**: The user invokes the actual protocol (e.g., type `/goal`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination (convergence or user Esc). After protocol termination, proceed to **Quick Post-Trial** below.
 
@@ -305,8 +305,8 @@ Present a brief insight card (3 lines max):
 
 ```
 Quick insight
-- 방금 체험한 것은 해답 생성보다 방향 정렬에 가까운 프로토콜입니다.
-- 이런 순간에 먼저 쓰면 재작업을 줄이기 쉽습니다.
+- What you just experienced is closer to direction alignment than answer generation.
+- Using this before diving in can reduce rework.
 ```
 
 Per-protocol insight variants:
@@ -314,34 +314,34 @@ Per-protocol insight variants:
 For `/goal`:
 ```
 Quick insight
-- 방금 체험한 것은 "무엇을 만들까"보다 "무엇이 성공인가"를 먼저 정하는 프로토콜입니다.
-- 성공 기준이 먼저 있으면 방향 없는 반복을 줄일 수 있습니다.
+- What you just experienced is a protocol that defines "what counts as success" before "what to build."
+- Having success criteria first can reduce directionless iteration.
 ```
 
 For `/gap`:
 ```
 Quick insight
-- 방금 체험한 것은 실행 직전에 놓친 부분을 체크하는 프로토콜입니다.
-- 결정 직전에 한 번 돌리면 "아차" 순간을 줄일 수 있습니다.
+- What you just experienced is a protocol that checks for blind spots right before execution.
+- Running it before a decision can reduce "oops" moments.
 ```
 
 For `/frame`:
 ```
 Quick insight
-- 방금 체험한 것은 여러 관점 중 어떤 렌즈로 볼지 먼저 정하는 프로토콜입니다.
-- 분석 렌즈를 먼저 골라두면 방향 없는 탐색을 줄일 수 있습니다.
+- What you just experienced is a protocol that selects which analytical lens to use first.
+- Choosing a lens upfront can reduce undirected exploration.
 ```
 
 **Quick Post-Trial Navigation**:
 
 Call AskUserQuestion:
-- Text: "체험 완료! 다음은?"
+- Text: "Experience complete! What's next?"
 - Options:
-  - "오늘은 여기까지"
-  - "다른 프로토콜 체험하기"
-  - "전체 온보딩 계속하기"
+  - "That's enough for today"
+  - "Try a different protocol"
+  - "Continue to full onboarding"
 
-Branch: 오늘은 여기까지 → end session with brief closing (include text mention: "더 자세한 분석이 필요하면 `/report`를 호출해 보세요."), 다른 프로토콜 체험하기 → check pool exhaustion: if unrecommended protocols remain in Onboarding Pool, pick next and restart from Phase 2a; if pool exhausted (all 3 recommended in session), present "기본 추천을 모두 체험했습니다" and offer Targeted transition, 전체 온보딩 계속하기 → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
+Branch: That's enough for today → end session with brief closing (include text mention: "For deeper analysis, try `/report`."), Try a different protocol → check pool exhaustion: if unrecommended protocols remain in Onboarding Pool, pick next and restart from Phase 2a; if pool exhausted (all 3 recommended in session), present "You've experienced all core recommendations" and offer Targeted transition, Continue to full onboarding → set `path = targeted` and go to Phase 2 MAP with Quick Scan results.
 
 #### Targeted Path Trial
 
@@ -410,7 +410,7 @@ Call AskUserQuestion:
 - Options: "Show me a hint" / "Show me a model answer"
 - The user's primary input channel is Other (free text). Evaluate based on whether the response demonstrates protocol awareness.
 
-#### General Path
+#### Multi-Protocol Path
 
 **Type 1 — Situation recognition** (3-4 questions):
 
@@ -478,7 +478,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 **Path-specific question counts**:
 - **Targeted**: 2-3 binary + 1 reverse + 1 design = 4-5 questions
-- **General**: 3-4 situation + 1 design = 4-5 questions
+- **Multi-protocol**: 3-4 situation + 1 design = 4-5 questions
 
 ## AskUserQuestion Budget
 
