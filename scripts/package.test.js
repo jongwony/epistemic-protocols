@@ -11,7 +11,7 @@ const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const path = require('node:path');
 const zlib = require('zlib');
-const { parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip } = require('./package');
+const { parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip, generateReleaseNotes } = require('./package');
 
 // ============================================================
 // parseFrontmatter
@@ -248,6 +248,124 @@ describe('createZip', () => {
 });
 
 // ============================================================
+// generateReleaseNotes
+// ============================================================
+
+describe('generateReleaseNotes', () => {
+  const mockResults = [
+    { plugin: 'hermeneia', skill: 'clarify', version: '1.17.2', zip: 'clarify.zip', files: 1, bytes: 100 },
+    { plugin: 'telos', skill: 'goal', version: '1.8.1', zip: 'goal.zip', files: 1, bytes: 100 },
+    { plugin: 'prothesis', skill: 'frame', version: '5.8.1', zip: 'frame.zip', files: 1, bytes: 100 },
+    { plugin: 'bundle', skill: 'epistemic-protocols-bundle', zip: 'epistemic-protocols-bundle.zip', files: 19, bytes: 5000 },
+  ];
+
+  it('generates 4-section structure', () => {
+    const notes = generateReleaseNotes(mockResults);
+    assert.ok(notes.includes('# Epistemic Protocols'));
+    assert.ok(notes.includes('## Highlights'));
+    assert.ok(notes.includes('## Protocols'));
+    assert.ok(notes.includes('## Assets'));
+  });
+
+  it('includes tag in headline when provided', () => {
+    const notes = generateReleaseNotes(mockResults, { tag: 'v2026.03.15' });
+    assert.ok(notes.includes('# Epistemic Protocols v2026.03.15'));
+  });
+
+  it('omits tag from headline when not provided', () => {
+    const notes = generateReleaseNotes(mockResults);
+    assert.ok(notes.startsWith('# Epistemic Protocols\n'));
+    assert.ok(!notes.includes('null'));
+    assert.ok(!notes.includes('undefined'));
+  });
+
+  it('includes deficit → resolution pairs in protocols table', () => {
+    const notes = generateReleaseNotes(mockResults);
+    assert.ok(notes.includes('IntentMisarticulated → ClarifiedIntent'));
+    assert.ok(notes.includes('GoalIndeterminate → DefinedEndState'));
+    assert.ok(notes.includes('FrameworkAbsent → FramedInquiry'));
+  });
+
+  it('shows versions from buildResults in protocols table', () => {
+    const notes = generateReleaseNotes(mockResults);
+    assert.ok(notes.includes('| 1.17.2 |'));
+    assert.ok(notes.includes('| 5.8.1 |'));
+  });
+
+  it('shows dash for protocols not in buildResults', () => {
+    const notes = generateReleaseNotes(mockResults);
+    // syneidesis is not in mockResults, should show —
+    assert.ok(notes.includes('| — |'));
+  });
+
+  it('includes asset table from buildResults', () => {
+    const notes = generateReleaseNotes(mockResults);
+    assert.ok(notes.includes('| hermeneia | 1.17.2 | clarify.zip |'));
+    assert.ok(notes.includes('Bundle: `epistemic-protocols-bundle.zip`'));
+  });
+
+  it('follows CANONICAL_PRECEDENCE order in protocols table', () => {
+    const notes = generateReleaseNotes(mockResults);
+    const hermeneiaPos = notes.indexOf('Hermeneia');
+    const telosPos = notes.indexOf('Telos');
+    const prothesisPos = notes.indexOf('Prothesis');
+    const katalepsisPos = notes.indexOf('Katalepsis');
+    assert.ok(hermeneiaPos < telosPos, 'Hermeneia should precede Telos');
+    assert.ok(telosPos < prothesisPos, 'Telos should precede Prothesis');
+    assert.ok(prothesisPos < katalepsisPos, 'Katalepsis should be last');
+  });
+
+  it('includes all 10 protocols in protocols table', () => {
+    const notes = generateReleaseNotes(mockResults);
+    const protocolNames = [
+      'Hermeneia', 'Telos', 'Horismos', 'Aitesis', 'Prothesis',
+      'Analogia', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Katalepsis',
+    ];
+    for (const name of protocolNames) {
+      assert.ok(notes.includes(name), `Expected ${name} in protocols table`);
+    }
+  });
+
+  it('uses computed highlights when changelog provided', () => {
+    const changelog = {
+      groups: {
+        prothesis: [{ hash: 'abc1234', type: 'feat', message: 'Two-mode redesign' }],
+        syneidesis: [{ hash: 'def5678', type: 'fix', message: 'Phase 2 routing fix' }],
+      },
+      ungrouped: [],
+    };
+    const notes = generateReleaseNotes(mockResults, { changelog });
+    assert.ok(notes.includes('### New'));
+    assert.ok(notes.includes('### Fixed'));
+    assert.ok(notes.includes('**prothesis**: Two-mode redesign'));
+    assert.ok(!notes.includes('### 10 Epistemic Protocols'));
+  });
+
+  it('falls back to curated highlights when changelog groups empty', () => {
+    const changelog = { groups: {}, ungrouped: [] };
+    const notes = generateReleaseNotes(mockResults, { changelog });
+    assert.ok(notes.includes('### 10 Epistemic Protocols'));
+  });
+});
+
+// ============================================================
+// generate-changelog.js CLI
+// ============================================================
+
+describe('generate-changelog.js CLI', () => {
+  it('outputs valid JSON with empty groups when no tags exist', () => {
+    const output = execFileSync(process.execPath, [path.join(__dirname, 'generate-changelog.js')], {
+      encoding: 'utf8',
+      cwd: path.join(__dirname, '..'),
+    });
+    const result = JSON.parse(output);
+    assert.ok(result.range);
+    assert.ok('groups' in result);
+    assert.ok('ungrouped' in result);
+  });
+});
+
+// ============================================================
 // package.js CLI
 // ============================================================
 
@@ -290,6 +408,6 @@ describe('package.js CLI', () => {
         'onboard.zip',
       ],
     );
-    assert.equal(bundle.files, 19);
+    assert.equal(bundle.files, 20);
   });
 });

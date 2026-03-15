@@ -57,6 +57,60 @@ const EXCLUDE_EXTS = new Set(['.zip']);
 const EXCLUDE_DIRS = new Set(['agents', 'commands']);
 const STRIP_FIELDS = new Set(['allowed-tools', 'license', 'compatibility', 'metadata']);
 
+// Protocol metadata for release notes (deficit → resolution pairs)
+const PROTOCOL_METADATA = {
+  prothesis:  { name: 'Prothesis', command: '/frame', deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
+  syneidesis: { name: 'Syneidesis', command: '/gap', deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
+  hermeneia:  { name: 'Hermeneia', command: '/clarify', deficit: 'IntentMisarticulated', resolution: 'ClarifiedIntent' },
+  katalepsis: { name: 'Katalepsis', command: '/grasp', deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
+  telos:      { name: 'Telos', command: '/goal', deficit: 'GoalIndeterminate', resolution: 'DefinedEndState' },
+  horismos:   { name: 'Horismos', command: '/bound', deficit: 'BoundaryUndefined', resolution: 'DefinedBoundary' },
+  aitesis:    { name: 'Aitesis', command: '/inquire', deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
+  analogia:   { name: 'Analogia', command: '/ground', deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
+  prosoche:   { name: 'Prosoche', command: '/attend', deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
+  epharmoge:  { name: 'Epharmoge', command: '/contextualize', deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
+};
+
+// Display order: CANONICAL_PRECEDENCE + Katalepsis (structurally last)
+const PROTOCOL_ORDER = [
+  'hermeneia', 'telos', 'horismos', 'aitesis', 'prothesis',
+  'analogia', 'syneidesis', 'prosoche', 'epharmoge', 'katalepsis',
+];
+
+// Curated first-release highlights (Phase A: no previous tag exists)
+const FIRST_RELEASE_HIGHLIGHTS = `## Highlights
+
+### 10 Epistemic Protocols
+
+Structure human-AI interaction quality at every decision point. Each protocol resolves a typed deficit:
+
+- **Planning**: \`/clarify\` (intent gaps), \`/goal\` (vague goals), \`/inquire\` (context insufficiency)
+- **Analysis**: \`/frame\` (absent frameworks), \`/ground\` (unmapped abstractions)
+- **Decision**: \`/gap\` (unnoticed gaps before action)
+- **Execution**: \`/attend\` (execution-time risk evaluation)
+- **Verification**: \`/contextualize\` (post-execution context mismatch)
+- **Cross-cutting**: \`/bound\` (epistemic boundaries), \`/grasp\` (comprehension verification)
+
+### Typed Deficit-Resolution System
+
+Every protocol carries a type signature \`(Deficit, Initiator, Action, Target) → Resolution\` that makes the epistemic transition explicit. Protocols compose through session text — each protocol's output becomes natural-language context for subsequent protocols.
+
+### Formal Verification
+
+13 static checks validate protocol integrity before every commit:
+json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant.
+
+Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory edges, and suppression rules with cycle detection.
+
+### Utility Skills
+
+- \`/onboard\` — quest-based protocol learning (quick recommendation + targeted scenarios)
+- \`/report\` — epistemic usage analysis from session patterns
+- \`/dashboard\` — full-session coverage analytics
+- \`/preferences\` — interactive protocol configuration
+- \`/reflect\` — cross-session insight extraction into persistent memory
+- \`/write\` — multi-perspective blog drafting from session insights`;
+
 const DESCRIPTION_LIMIT = 200;
 const LINE_GUIDELINE = 500;
 const DIST_DIR = path.join(projectRoot, 'dist');
@@ -268,7 +322,98 @@ function collectFiles(baseDir, prefix) {
 }
 
 // ============================================================
-// Section 6: Main
+// Section 6: Release Notes Generator
+// ============================================================
+
+function generateComputedHighlights(changelog) {
+  const TYPE_LABELS = { feat: 'New', fix: 'Fixed', refactor: 'Improved', style: 'Styled' };
+  const sections = [];
+
+  // Group commits by type across all scopes
+  const byType = {};
+  for (const [scope, commits] of Object.entries(changelog.groups)) {
+    for (const c of commits) {
+      const label = TYPE_LABELS[c.type] || c.type;
+      if (!byType[label]) byType[label] = [];
+      byType[label].push({ scope, message: c.message });
+    }
+  }
+
+  for (const label of Object.values(TYPE_LABELS)) {
+    if (!byType[label]) continue;
+    const bullets = byType[label].map(i => `- **${i.scope}**: ${i.message}`).join('\n');
+    sections.push(`### ${label}\n\n${bullets}`);
+  }
+  // Append any types not in TYPE_LABELS (raw type name as header)
+  for (const [label, items] of Object.entries(byType)) {
+    if (Object.values(TYPE_LABELS).includes(label)) continue;
+    const bullets = items.map(i => `- **${i.scope}**: ${i.message}`).join('\n');
+    sections.push(`### ${label}\n\n${bullets}`);
+  }
+
+  if (changelog.ungrouped.length > 0) {
+    const bullets = changelog.ungrouped
+      .filter(c => c.type && c.type !== 'ci' && c.type !== 'test')
+      .map(c => `- ${c.message}`)
+      .join('\n');
+    if (bullets) sections.push(`### Other\n\n${bullets}`);
+  }
+
+  return `## Highlights\n\n${sections.join('\n\n')}`;
+}
+
+function generateReleaseNotes(buildResults, { tag = null, changelog = null } = {}) {
+  const tagStr = tag ? ` ${tag}` : '';
+
+  // Section 1: Headline
+  const headline = `# Epistemic Protocols${tagStr}`;
+
+  // Section 2: Highlights (Phase B computed from changelog, Phase A curated fallback)
+  const highlights = (changelog && changelog.groups && Object.keys(changelog.groups).length > 0)
+    ? generateComputedHighlights(changelog)
+    : FIRST_RELEASE_HIGHLIGHTS;
+
+  // Section 3: Protocols table (deficit → resolution from PROTOCOL_METADATA)
+  const protocolRows = PROTOCOL_ORDER
+    .filter(key => PROTOCOL_METADATA[key])
+    .map(key => {
+      const m = PROTOCOL_METADATA[key];
+      const ver = buildResults.find(r => r.plugin === key)?.version || '—';
+      return `| ${m.name} | \`${m.command}\` | ${m.deficit} → ${m.resolution} | ${ver} |`;
+    })
+    .join('\n');
+
+  const protocols = [
+    '## Protocols',
+    '',
+    '| Protocol | Command | Deficit → Resolution | Version |',
+    '|----------|---------|---------------------|---------|',
+    protocolRows,
+  ].join('\n');
+
+  // Section 4: Assets table (from buildResults)
+  const assetRows = buildResults
+    .filter(r => r.version)
+    .map(r => `| ${r.plugin} | ${r.version} | ${r.zip} |`)
+    .join('\n');
+
+  const bundleZip = buildResults.find(r => r.plugin === 'bundle')?.zip || 'epistemic-protocols-bundle.zip';
+
+  const assets = [
+    '## Assets',
+    '',
+    '| Plugin | Version | Asset |',
+    '|--------|---------|-------|',
+    assetRows,
+    '',
+    `Bundle: \`${bundleZip}\``,
+  ].join('\n');
+
+  return [headline, '', highlights, '', protocols, '', assets, ''].join('\n');
+}
+
+// ============================================================
+// Section 7: Main
 // ============================================================
 
 function main() {
@@ -356,20 +501,21 @@ function main() {
   });
 
   // Release notes (consumed by CI workflow)
+  const tag = process.env.TAG_NAME || null;
+  let changelog = null;
+  try {
+    const { execFileSync } = require('child_process');
+    const changelogArgs = [path.join(__dirname, 'generate-changelog.js'), ...(tag ? [tag] : [])];
+    const output = execFileSync(process.execPath, changelogArgs, {
+      encoding: 'utf8',
+      cwd: projectRoot,
+    });
+    changelog = JSON.parse(output);
+  } catch {
+    // No previous tag or script error — fall back to Phase A curated content
+  }
+  const notes = generateReleaseNotes(buildResults, { tag, changelog });
   if (!dryRun) {
-    const versionLines = buildResults
-      .filter(r => r.version)
-      .map(r => `| ${r.plugin} | ${r.version} | ${r.zip} |`)
-      .join('\n');
-
-    const notes = [
-      '| Plugin | Version | Asset |',
-      '|--------|---------|-------|',
-      versionLines,
-      '',
-      `Bundle: \`${bundleFile}\``,
-    ].join('\n');
-
     fs.writeFileSync(path.join(DIST_DIR, 'release-notes.md'), notes, 'utf8');
   }
 
@@ -388,4 +534,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip };
+module.exports = { parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip, generateReleaseNotes };
