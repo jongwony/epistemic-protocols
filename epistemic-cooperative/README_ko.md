@@ -13,7 +13,7 @@
 | 스킬 | 목적 | 출력 |
 |------|------|------|
 | `/onboard` | 빠른 추천 + 프로토콜 학습 | 터미널 기반 가이드 경험 |
-| `/report` | 사용 분석 리포트 | HTML 프로필 (`~/.claude/.report/epistemic-profile.html`) |
+| `/report` | Growth Map — 인식론적 분석 | HTML 아티팩트 (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.insights/dashboard.html`) |
 | `/preferences` | 인터랙티브 프로토콜 설정 | `~/.claude/CLAUDE.local.md` 설정 섹션 |
 
@@ -49,9 +49,9 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 - Targeted path는 전체 학습 경험 유지 (시나리오, 퀴즈, 가이드)
 - 근거 기반 분석은 `/report`, 빠른 가치 증명은 `/onboard`
 
-### /report — 사용 분석 리포트
+### /report — Growth Map
 
-세션 파일에서 도구 사용 패턴을 추출하고, 패턴을 프로토콜에 매핑하여 근거 기반 추천과 HTML 아티팩트를 생성한다.
+세션 패턴을 분석하고 `/insights` 데이터를 타게팅 입력으로 통합하여 Growth Map을 생성한다 — 프로토콜 채택 패턴, 커버리지 갭, 안티패턴을 다루는 직교 인식론적 분석.
 
 ```
 SCAN → EXTRACT → MAP → PRESENT → GUIDE
@@ -123,7 +123,7 @@ epistemic-cooperative/
 ├── .claude-plugin/plugin.json
 ├── skills/
 │   ├── onboard/SKILL.md          # /onboard 퀘스트 기반 프로토콜 학습
-│   ├── report/SKILL.md           # /report 사용 분석 리포트
+│   ├── report/SKILL.md           # /report Growth Map
 │   ├── dashboard/SKILL.md        # /dashboard 커버리지 대시보드
 │   └── preferences/SKILL.md      # /preferences 프로토콜 설정
 └── agents/
