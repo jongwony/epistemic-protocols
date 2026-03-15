@@ -1,17 +1,17 @@
 ---
 name: report
-description: "Generate epistemic usage analysis report from session patterns and workflow data."
+description: "Generate Growth Map (epistemic profile + insights integration) from session patterns and workflow data."
 ---
 
 # Report Skill
 
-Generate an epistemic usage analysis report from a user's Claude Code sessions — session logs, configuration, and workflow habits — producing protocol recommendations with supporting evidence.
+Generate a Growth Map from a user's Claude Code sessions — integrating `/insights` data with session analysis for protocol recommendations with dual-layer resolution (execution + epistemic). Falls back to Epistemic Profile when insights data is unavailable.
 
 ## When to Use
 
 Invoke this skill when:
 - Analyzing session patterns to identify protocol recommendation evidence
-- Generating a comprehensive epistemic profile report
+- Generating a Growth Map (integrating insights + session analysis)
 - Re-evaluating protocol adoption based on updated session data
 
 Skip when:
@@ -28,10 +28,10 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 
 | Phase | Owner | Tool | Decision Point |
 |-------|-------|------|----------------|
-| 1. Scan | Subagent (project-scanner) | Bash, Read, Glob | Project discovery + secondary sources |
+| 1. Scan | Subagent + Main | Bash, Read, Glob | Project discovery + insights detection |
 | 2. Extract | Subagent (session-analyzer) | Grep, Read | Pattern extraction from JSONL |
 | 3. Map | Main | — | Pattern → Protocol matching |
-| 4. Present | Main | AskUserQuestion, Write, Bash | User confirmation + HTML artifact |
+| 4. Present | Main | AskUserQuestion, Write, Bash | User confirmation + Growth Map HTML |
 | 5. Guide | Main | AskUserQuestion | Protocol trial CTA |
 
 ## Data Sources
@@ -59,11 +59,20 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 
 | Source | Method | Extracts |
 |--------|--------|----------|
-| `~/.claude/usage-data/facets/{session_id}.json` | Read | friction_counts, friction_detail, goal_categories, session_type, outcome, user_satisfaction_counts, brief_summary |
-| `~/.claude/usage-data/session-meta/{session_id}.json` | Read | tool_counts, git_commits, git_pushes, languages, uses_task_agent, duration_minutes, first_prompt |
+| `~/.claude/usage-data/facets/{session_id}.json` | Read | friction_counts, friction_detail, goal_categories, session_type, outcome, user_satisfaction_counts, brief_summary, underlying_goal, primary_success, claude_helpfulness |
+| `~/.claude/usage-data/session-meta/{session_id}.json` | Read | tool_counts, git_commits, git_pushes, languages, uses_task_agent, duration_minutes, first_prompt, user_response_times, message_hours |
 
 **Join key**: session_id from sessions-index.json matches filename in both directories.
-**Availability**: Only exists if user has run `/insights` (built-in command). Read-only consumption — never write to these caches. For full coverage analysis across all sessions, run `/dashboard`.
+**Availability**: Only exists if user has run `/insights` (built-in command). Read-only consumption — never write to these caches.
+
+### Quaternary: Insights Report (Growth Map Accelerator — Optional)
+
+| Source | Method | Extracts |
+|--------|--------|----------|
+| `~/.claude/usage-data/report.html` | Read + best-effort parsing | at_a_glance, interaction_style, what_works, friction_analysis, suggestions, on_the_horizon, project_areas |
+
+**Availability**: Only exists after `/insights` execution. Enables Growth Map rendering (7-section HTML). Parsing is best-effort — HTML structure changes trigger graceful fallback to Epistemic Profile mode.
+**Independence**: `growth_map_path` (A/B from insights availability) is orthogonal to Phase 2 Path A/B (facets availability per project). Growth Map path controls HTML rendering; facets path controls extraction method.
 
 ## Phase Execution
 
@@ -79,7 +88,14 @@ The subagent:
 5. Aggregates: total session count, average/max messageCount, last activity date
 6. Scans secondary sources: `~/.claude/CLAUDE.md`, `~/.claude/rules/`, `~/.claude/settings.json`, MEMORY.md
 
-Main agent receives structured output and proceeds to Phase 2.
+**Insights detection** (main agent, concurrent with project-scanner — no dependency on subagent output):
+1. Glob `~/.claude/usage-data/report.html` — existence check
+2. If present: Grep report.html for section-identifying patterns (heading text, `id=` attributes), then Read with offset/limit per section. Never Read entire file if >500 lines.
+   - Success → set `growth_map_path = A`, store extracted sections
+   - Parse failure → set `growth_map_path = B` (graceful degradation, no error)
+3. If absent: set `growth_map_path = B`
+
+Main agent awaits both project-scanner output and insights detection, then proceeds to Phase 2.
 
 **Edge cases**:
 - If `~/.claude/projects/` does not exist or is empty: subagent reports absence (secondary sources still scanned), main agent skips Phase 2 extraction (steps 1-3), proceeds to Phase 2 step 5 (secondary sources from Phase 1 output) and Phase 3, set Tier 3
@@ -95,8 +111,8 @@ If no `sessions-index.json` found in any project, skip Phase 2 extraction (steps
    - **Path A**: 2+ sessions in the project have facets files → facets-accelerated extraction
    - **Path B**: 0-1 sessions have facets → full subagent extraction (baseline)
 3. **Path A** (facets-available, per project):
-   a. Read all facets + session-meta JSON files for the project in parallel (up to 6 reads per project, independent; across multiple Path A projects, reads also run in parallel) → aggregate friction_counts, collect non-empty friction_detail (max 3), aggregate goal_categories/session_type/outcome
-   b. From session-meta: sum tool_counts, git_commits/git_pushes, languages (replaces behavioral pattern extraction)
+   a. Read all facets + session-meta JSON files for the project in parallel (up to 6 reads per project, independent; across multiple Path A projects, reads also run in parallel) → aggregate friction_counts, collect non-empty friction_detail (max 3), aggregate goal_categories/session_type/outcome/user_satisfaction_counts, collect underlying_goal/primary_success/claude_helpfulness
+   b. From session-meta: sum tool_counts, git_commits/git_pushes, languages, collect user_response_times/message_hours (replaces behavioral pattern extraction)
    c. For top 2-3 friction keys with friction_detail: call session-analyzer in **targeted mode** (friction_pointers) for snippet extraction only
    d. Co-occurrence facts: derive situations from goal_categories + check firstPrompt for slash command history
    **Path B** (facets-absent, per project):
@@ -138,35 +154,47 @@ Apply the mapping tables below to match observed patterns to protocols.
    - Conversation quality signals (user corrections, backtracking) from Phase 2 subagent Step 2.7 → conversation anti-patterns
    - Each anti-pattern: describe the situation, reference the snippet, suggest the protocol
 
-### Phase 4: Present (Results & Artifact)
+### Phase 4: Present (Growth Map Artifact)
 
 1. Call AskUserQuestion to present analysis summary:
-   - Number of sessions analyzed
+   - Number of sessions analyzed, projects scanned
    - Key patterns discovered (with evidence counts)
    - Proposed protocol recommendations
+   - Growth Map path: **A** (insights available) or **B** (insights absent)
    - Ask user to confirm before generating artifact
 
-2. On confirmation, generate HTML artifact via Write tool:
-   - Save to `~/.claude/.report/epistemic-profile.html`
-   - Structure:
-     - Header: "Your Epistemic Profile" + analysis statistics
-     - Dashboard CTA: card with "Run /dashboard for full coverage analysis across all sessions" message + `/dashboard` command badge
-     - Session Diagnostics: anti-pattern cards — each with context snippet (user message + AI response pair) → protocol CTA describing expected behavior → `cd ~/project-path && claude --resume <session-id>`. Graceful degradation: if no anti-patterns detected, omit section entirely
-     - Discovered Patterns: pattern cards with narrative structure — two narrative sources (use whichever available, prefer friction when both exist):
-       - **Friction narrative** (Path A): friction_detail text → targeted snippet (user, AI pair) → protocol CTA → resume command
-       - **Snippet narrative** (Path B): context snippet (user, AI pair) → protocol CTA → resume command
-       Graceful degradation: if neither quality snippet nor friction_detail, show statistical evidence only
-     - Recommended Protocols: each protocol with mapping rationale + cross-reference to relevant pattern/diagnostic snippet + `/command` CTA + install command (`claude plugin install epistemic-protocols/<name>`) if not installed
-     - Batch Install: if 2+ recommended protocols are not installed, show a batch install section with:
-       - One-line command: `bash <(curl -sL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install.sh)`
-       - Or local: `bash scripts/install.sh` (if repo is cloned)
-       - Use `.batch-install` CSS class (green-tinted background, distinct from individual `.install-cmd`)
-     - Quick Start: snippet-based concrete scenario for top recommendation — reference actual session context, show what protocol invocation would do, include `cd ~/project-path && claude --resume <id>` for immediate action + install command if needed
-   - Style: clean card layout, protocol-specific color coding, dark theme, responsive design
+2. On confirmation, generate Growth Map HTML artifact via Write tool:
+   - Save to `~/.claude/.report/growth-map.html`
+   - Structure varies by `growth_map_path`:
 
-   Refer to `references/html-template.md` for the HTML skeleton and CSS class reference.
+   **Path A — Growth Map (insights + report integrated)**:
 
-3. Open HTML artifact in default browser via Bash: `open ~/.claude/.report/epistemic-profile.html`
+   | # | Section | Data Source |
+   |---|---------|-------------|
+   | ① | At a Glance | insights `at_a_glance` |
+   | ② | Profile | insights `interaction_style` + protocol usage |
+   | ③ | Success Patterns | insights `what_works` + protocol contribution |
+   | ④ | Growth Opportunities | insights `friction_analysis` + `suggestions` + report anti-patterns (dual-layer) |
+   | ⑥ | Recommendations + Install | Report mapping tables + install commands + batch install |
+   | ⑦ | On the Horizon | insights `on_the_horizon` |
+
+   Note: ⑤ Coverage is reserved for Phase 2 (dashboard absorption). Uses `project_areas` from Quaternary + coverage-scanner data.
+
+   **④ Growth Opportunities — dual-layer cards**:
+   Each friction item as a card with two resolution layers:
+   - **Execution layer** (tag: Execution): CLAUDE.md rule or configuration suggestion (behavioral fix)
+   - **Epistemic layer** (tag: Epistemic): Protocol `/command` CTA (structural fix)
+   - **Evidence**: Session snippet or friction_detail narrative + resume command
+   - Source: Tertiary Mapping Table (friction → protocol) + Quaternary Mapping Table (suggestions → execution layer)
+
+   **Path B — Epistemic Profile (report-only fallback)**:
+   - ④ renders with existing anti-pattern cards (diagnostics + patterns)
+   - ⑥ renders with existing recommendation cards + batch install + quick start
+   - ①②③⑦ replaced by CTA card: "Run `/insights` first for a richer Growth Map"
+
+   Refer to `references/html-template.md` for the HTML skeleton, CSS classes, and section templates.
+
+3. Open HTML artifact in default browser via Bash: `open ~/.claude/.report/growth-map.html`
 
 ### Phase 5: Guide (Trial CTA + Install Helper)
 
@@ -223,6 +251,18 @@ Applied only when facets data is available (Path A). Complements Primary and Sec
 
 Composition rules (protocol chaining based on pattern combinations) are deferred to a future version.
 
+### Quaternary Mapping Table (Derived Metrics — from Insights)
+
+Applied only when `growth_map_path = A`. Friction-to-protocol mapping uses the Tertiary table (unchanged). This table maps non-friction insights signals as targeting inputs for Growth Map ④ Growth Opportunities dual-layer cards.
+
+| Metric | Signal | Protocol | Rationale |
+|--------|--------|----------|-----------|
+| `suggestions.usage_patterns` | behavioral recommendation | — (execution layer) | CLAUDE.md / config suggestion |
+| `suggestions.features_to_try` | tool adoption gap | — (execution layer) | Feature utilization improvement |
+| session_type = exploration (high ratio) | framework absence | Prothesis / Telos | Sustained exploration without structure |
+| user_satisfaction low sessions | deep-dive target | — (priority signal) | Protocol absence in dissatisfied sessions |
+| response_time long segments | deliberation point | — (priority signal) | Epistemic deficit candidate |
+
 ## Fallback Strategy
 
 **Tier 1** (3+ strong patterns): Map precisely to observed patterns.
@@ -258,3 +298,5 @@ Refer to `references/html-template.md` for the full HTML skeleton, CSS classes, 
 6. **Session file access**: Access session JSONL files via Grep pattern matching or targeted Read with offset/limit (for efficiency). Never Read entire JSONL files — they can be very large.
 7. **Subagent delegation**: Phase 1 project scanning MUST be delegated to project-scanner subagent (single). Phase 2 session analysis: Path A (facets-available) delegates to session-analyzer in targeted mode; Path B (facets-absent) delegates in full mode. Maximum 3 parallel subagents across both paths.
 8. **Facets as accelerator**: Facets data is a pure accelerator — its absence must not degrade output quality. Path B produces output quality at least equal to the pre-enhancement baseline; new capabilities (co-occurrence detection, quality signals) are available in both paths.
+9. **Best-effort parsing**: report.html parsing is best-effort. Parse failure triggers automatic `growth_map_path = B` fallback, not an error. HTML structure changes are expected — minimize CSS class/ID dependency.
+10. **Insights reuse**: When `growth_map_path = A`, reuse insights' LLM-analyzed data directly. Do not re-analyze raw session data that insights has already processed — token efficiency priority.
