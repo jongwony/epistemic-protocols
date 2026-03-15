@@ -4,7 +4,7 @@
 
 Aitesis Phase 1 (Context Collection) is scoped to read-only investigation. When a definitive answer is not found in existing files, the uncertainty proceeds to Phase 2 where AskUserQuestion presents it to the user.
 
-However, some uncertainties are **empirically enrichable** — the AI can gather evidence by testing the environment before asking the user. Moreover, "sufficient context" is not merely "sufficient facts": context insufficiency spans multiple dimensions — missing facts, incoherent facts, and disconnected goals. Example from session `1856762b`:
+However, some uncertainties are **empirically enrichable** — the AI can gather evidence by testing the environment before asking the user. Moreover, "sufficient context" is not merely "sufficient facts": context insufficiency spans multiple dimensions — missing facts, incoherent facts, and facts not relevant to goals. Example from session `1856762b`:
 
 ```
 Uncertainty: "Does Claude Code process `skills:` frontmatter in SKILL.md?"
@@ -52,7 +52,7 @@ Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) → classify(Uᵢ', dimension) →
   ├─ Factual/Probe        → EmpiricalProbe(Uᵢ') → Uₑ       (enriched, Phase 2 evidence)
   ├─ Factual/UserDep      → Uᵢ''                    (Phase 2 직행)
   ├─ Coherence            → Uₙ → Post-Convergence suggestion (shown in classify summary)
-  └─ Relevance        → Uₙ → Post-Convergence suggestion (shown in classify summary)
+  └─ Relevance            → Uₙ → Post-Convergence suggestion (shown in classify summary)
 ```
 
 New output sets: `Uᵣ'` (read-only verified, resolved). `Uₑ` (probe-enriched, with evidence). `Uₑ` (with evidence) + `Uᵢ''` proceed to Phase 2. Non-factual dimensions are detected and routed via Post-Convergence suggestion.
@@ -87,7 +87,7 @@ Verifiability ∈ {ReadOnlyVerifiable, ProbeEnrichable, UserDependent}
 classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              where Fiber(Factual)       = Verifiability
                    Fiber(Coherence)     = Unit    -- detect only
-                   Fiber(Relevance) = Unit    -- detect only
+                   Fiber(Relevance)     = Unit    -- detect only
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
              -- Layer 2 exists only over Factual fiber (fibration, not functor)
              -- Coherence/Relevance → detect + route (Post-Convergence)

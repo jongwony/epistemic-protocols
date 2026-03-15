@@ -128,7 +128,7 @@ Define epistemic boundaries per decision through AI-guided detection.
 - **Invocation**: `/bound` or use "bound" in conversation
 
 ### Inquire (αἴτησις) — Aitesis
-Context sufficiency sensor + factual resolver + epistemic router. Senses multi-dimensional context insufficiency (factual, coherence, goal-alignment), self-resolves factual dimensions via read-only verification and empirical probes, and routes non-factual dimensions to downstream protocols.
+Context sufficiency sensor + factual resolver + epistemic router. Senses multi-dimensional context insufficiency (factual, coherence, relevance), self-resolves factual dimensions via read-only verification and empirical probes, and routes non-factual dimensions to downstream protocols.
 - **Deficit**: ContextInsufficient → InformedExecution
 - **Triggers**: Context insufficiency heuristics (ambiguous execution scope, external dependency, implicit requirements)
 - **Invocation**: `/inquire` or use "inquire" in conversation
