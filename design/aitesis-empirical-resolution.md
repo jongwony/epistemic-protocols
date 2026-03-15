@@ -4,7 +4,7 @@
 
 Aitesis Phase 1 (Context Collection) is scoped to read-only investigation. When a definitive answer is not found in existing files, the uncertainty proceeds to Phase 2 where AskUserQuestion presents it to the user.
 
-However, some uncertainties are **empirically enrichable** — the AI can gather evidence by testing the environment before asking the user. Moreover, "sufficient context" is not merely "sufficient facts": context insufficiency spans multiple dimensions — missing facts, incoherent facts, and disconnected goals. Example from session `1856762b`:
+However, some uncertainties are **empirically enrichable** — the AI can gather evidence by testing the environment before asking the user. Moreover, "sufficient context" is not merely "sufficient facts": context insufficiency spans multiple dimensions — missing facts, incoherent facts, and facts not relevant to goals. Example from session `1856762b`:
 
 ```
 Uncertainty: "Does Claude Code process `skills:` frontmatter in SKILL.md?"
@@ -52,7 +52,7 @@ Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) → classify(Uᵢ', dimension) →
   ├─ Factual/Probe        → EmpiricalProbe(Uᵢ') → Uₑ       (enriched, Phase 2 evidence)
   ├─ Factual/UserDep      → Uᵢ''                    (Phase 2 직행)
   ├─ Coherence            → Uₙ → Post-Convergence suggestion (shown in classify summary)
-  └─ GoalAlignment        → Uₙ → Post-Convergence suggestion (shown in classify summary)
+  └─ Relevance            → Uₙ → Post-Convergence suggestion (shown in classify summary)
 ```
 
 New output sets: `Uᵣ'` (read-only verified, resolved). `Uₑ` (probe-enriched, with evidence). `Uₑ` (with evidence) + `Uᵢ''` proceed to Phase 2. Non-factual dimensions are detected and routed via Post-Convergence suggestion.
@@ -74,7 +74,7 @@ Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) → classify(Uᵢ', dimension) →
 ```
 ── TYPES (additions, revised) ──
 -- Layer 1 (epistemic)
-Dimension    ∈ {Factual, Coherence, GoalAlignment} ∪ Emergent(Dimension)
+Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
                -- open set; external human communication excluded
 Observability ∈ {StaticObservation, DynamicObservation, BeliefVerification}
                -- exists(fact, env) sub-modes
@@ -87,10 +87,10 @@ Verifiability ∈ {ReadOnlyVerifiable, ProbeEnrichable, UserDependent}
 classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              where Fiber(Factual)       = Verifiability
                    Fiber(Coherence)     = Unit    -- detect only
-                   Fiber(GoalAlignment) = Unit    -- detect only
+                   Fiber(Relevance)     = Unit    -- detect only
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
              -- Layer 2 exists only over Factual fiber (fibration, not functor)
-             -- Coherence/GoalAlignment → detect + route (Post-Convergence)
+             -- Coherence/Relevance → detect + route (Post-Convergence)
 
 ProbeSpec  = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalProbe = (Uᵢ', ProbeSpec) → Uₑ           -- empirical enrichment (distinct from Horismos Probe)
@@ -112,8 +112,8 @@ factual(U) ≡ ∃ fact(F) : missing(F, context) ∧ required(F, execution)
 -- Coherence dimension
 coherence(U) ≡ ∃ facts(F₁, F₂) : collected(F₁) ∧ collected(F₂) ∧ ¬consistent(F₁, F₂)
 
--- GoalAlignment dimension
-goal_alignment(U) ≡ ∃ fact(F) : collected(F) ∧ ¬connected(F, goal(X))
+-- Relevance dimension
+relevance(U) ≡ ∃ fact(F) : collected(F) ∧ ¬relevant(F, goal(X))
 ```
 
 ### Layer 2 (Tool — Factual dimension only)
@@ -148,7 +148,7 @@ probe_enrichable(U) ≡
 | Examples | Spec에 필드 정의 여부, 설정 파일 존재 여부 | Feature 동작 여부, API 호환성, PoC 레벨 검증 | Requirements, priorities, conventions not documented, domain decisions |
 | Resolution | Resolved (Phase 2 스킵) | Enriched (evidence → Phase 2) | Phase 2 직행 |
 | Distinction | 이미 존재하는 정보 확인 | 설치/생성이 필요한 PoC | 사용자 판단 필요 |
-| Dimension | Factual only | Factual only | Factual / Coherence / GoalAlignment |
+| Dimension | Factual only | Factual only | Factual / Coherence / Relevance |
 
 ## Probe Design Constraints
 
@@ -256,11 +256,11 @@ Rule 3 (Context collection first) extended:
 -- Extended:
 3. Context collection first, epistemic classification second: Before asking the user,
    (a) collect contextual evidence through Read/Grep,
-   (b) classify uncertainties by dimension (Factual/Coherence/GoalAlignment) and verifiability,
+   (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability,
    (c) show classification transparently in Phase 2,
    (d) for Factual/ReadOnly: resolve directly,
    (e) for Factual/Probe: run empirical probes to attach evidence,
-   (f) for Coherence/GoalAlignment: detect and route via Post-Convergence suggestion.
+   (f) for Coherence/Relevance: detect and route via Post-Convergence suggestion.
 ```
 
 Rule 13 extended:
@@ -394,7 +394,7 @@ Phase 2: Uₑ = {U2 with evidence "skills: frontmatter 동작 확인됨"}
 
 Aitesis = context sufficiency sensor + factual resolver + epistemic router
 
-- **Sensor**: 다차원 컨텍스트 충분성 감지 (Factual + Coherence + GoalAlignment)
+- **Sensor**: 다차원 컨텍스트 충분성 감지 (Factual + Coherence + Relevance)
 - **Resolver**: Factual dimension의 self-resolution (ReadOnly/Probe)
 - **Router**: Non-factual dimension의 downstream protocol 제안 (Post-Convergence)
 
@@ -411,7 +411,7 @@ Aitesis = context sufficiency sensor + factual resolver + epistemic router
 구조적 성격 — Fibration (Functor가 아님):
 - 2-layer model은 Grothendieck fibration: p: E → B where B = Dimension
 - Fiber(Factual) = {ReadOnlyVerifiable, ProbeEnrichable, UserDependent} — 풍부
-- Fiber(Coherence) = Fiber(GoalAlignment) = Unit — 퇴화 (detect only)
+- Fiber(Coherence) = Fiber(Relevance) = Unit — 퇴화 (detect only)
 - Layer 2의 존재 자체가 Layer 1의 Factual dimension에 의존하는 구조
 - classify 시그니처: Σ-type = Σ(d: Dimension). Fiber(d) (product type이 아님)
 
@@ -430,6 +430,6 @@ Aitesis = context sufficiency sensor + factual resolver + epistemic router
 | D4 | Sub-principle naming | A) "Evidence before Inquiry" / B) "Verification over Inquiry" / C) Fold into existing principle | A — enrichment 패러다임과 정합, B는 대체(resolution) 함의 |
 | D5 | `Uₑ` partition membership | A) Merge into `context_resolved` / B) Separate `probe_enriched` set (Phase 2 input) | B — enriched는 resolved가 아님, Phase 2로 evidence 전달 |
 | D6 | classify 분류 수 | A) 3분류 (ReadOnlyVerifiable / ProbeEnrichable / UserDependent) / B) 2분류 유지 (SelfVerifiable / UserDependent) | A — read-only resolved vs probe-enriched의 의미론 차이가 분기 기준 정당화 |
-| D7 | Context 범위 | A) 사실 부족만 / B) 사실 부족 + 정합성 부족 + 목표 연결 부족 | B — ContextInsufficient = Factual ∪ Coherence ∪ GoalAlignment (확장) |
+| D7 | Context 범위 | A) 사실 부족만 / B) 사실 부족 + 정합성 부족 + 목표 연결 부족 | B — ContextInsufficient = Factual ∪ Coherence ∪ Relevance (확장) |
 | D8 | classify 투명성 | A) Always show — 승인 불필요 / B) 승인 필요 / C) 숨김 | A — 이의 제기 시만 대화 (Horismos D2) |
 | D9 | Dimension 집합 | A) 열린 집합 (3개 기본 + Emergent) / B) 닫힌 집합 (3개 고정) | A — 외부 사람 소통 제외, Emergent 허용 (Syneidesis #12) |

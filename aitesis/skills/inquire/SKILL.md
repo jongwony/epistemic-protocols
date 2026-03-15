@@ -9,7 +9,7 @@ Infer context insufficiency before execution through AI-guided inquiry. Type: `(
 
 ## Definition
 
-**Aitesis** (αἴτησις): A dialogical act of proactively inferring context sufficiency before execution, where AI identifies uncertainties across multiple dimensions (factual, coherence, goal-alignment), collects contextual evidence via codebase exploration, classifies each uncertainty by dimension and verifiability, and inquires about remaining uncertainties through information-gain prioritized mini-choices for user resolution.
+**Aitesis** (αἴτησις): A dialogical act of proactively inferring context sufficiency before execution, where AI identifies uncertainties across multiple dimensions (factual, coherence, relevance), collects contextual evidence via codebase exploration, classifies each uncertainty by dimension and verifiability, and inquires about remaining uncertainties through information-gain prioritized mini-choices for user resolution.
 
 ```
 ── FLOW ──
@@ -48,7 +48,7 @@ A        = User answer ∈ {Provide(context), Point(location), Dismiss}
 X'       = Updated execution plan
 InformedExecution = X' where remaining = ∅ ∨ user_esc
 -- Layer 1 (epistemic)
-Dimension    ∈ {Factual, Coherence, GoalAlignment} ∪ Emergent(Dimension)
+Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
                -- open set; external human communication excluded
 Observability ∈ {StaticObservation, DynamicObservation, BeliefVerification}
                -- exists(fact, env) sub-modes
@@ -57,10 +57,10 @@ Verifiability ∈ {ReadOnlyVerifiable, ProbeEnrichable, UserDependent}
 classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              where Fiber(Factual)       = Verifiability
                    Fiber(Coherence)     = Unit    -- detect only
-                   Fiber(GoalAlignment) = Unit    -- detect only
+                   Fiber(Relevance)     = Unit    -- detect only
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
              -- 2-layer model = Grothendieck fibration: Layer 2 exists only over Factual fiber
-             -- Coherence/GoalAlignment → detect + route (Post-Convergence)
+             -- Coherence/Relevance → detect + route (Post-Convergence)
 ProbeSpec  = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalProbe = (Uᵢ', ProbeSpec) → Uₑ           -- empirical enrichment
 Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2)
@@ -118,7 +118,7 @@ Phase 3         (state)       → Internal state update
 
 ## Core Principle
 
-**Inference over Detection**: When AI infers context insufficiency before execution, it first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and enriches probe-enrichable ones with empirical evidence before asking. For non-factual dimensions (coherence, goal-alignment), the AI detects and routes via Post-Convergence suggestion. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, and routing what belongs to other epistemic concerns.
+**Inference over Detection**: When AI infers context insufficiency before execution, it first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and enriches probe-enrichable ones with empirical evidence before asking. For non-factual dimensions (coherence, relevance), the AI detects and routes via Post-Convergence suggestion. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, and routing what belongs to other epistemic concerns.
 
 ## Distinction from Other Protocols
 
@@ -142,7 +142,7 @@ Phase 3         (state)       → Internal state update
 
 **Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context to execute?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). The operational test: if the information gap would be filled by the user providing context, it's Aitesis; if it would be filled by the user reconsidering their decision, it's Syneidesis.
 
-**Factual vs evaluative**: Aitesis uncertainties span multiple dimensions — factual (objectively correct answers discoverable from the environment), coherence (consistency among collected facts), and goal-alignment (connection between facts and execution goal). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. Phase 1 context collection exists because factual uncertainties may be partially resolved or enriched from the codebase. Coherence and goal-alignment dimensions are detected but routed to downstream protocols. Evaluative gaps cannot be self-resolved.
+**Factual vs evaluative**: Aitesis uncertainties span multiple dimensions — factual (objectively correct answers discoverable from the environment), coherence (consistency among collected facts), and relevance (whether collected facts are relevant to the execution goal). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. Phase 1 context collection exists because factual uncertainties may be partially resolved or enriched from the codebase. Coherence and relevance dimensions are detected but routed to downstream protocols. Evaluative gaps cannot be self-resolved.
 
 **Litmus-test examples** (same scenario, different classification):
 - Aitesis: "The codebase has both v1 and v2 API schemas — which version is the current production target?" (AI lacks a fact)
@@ -158,7 +158,7 @@ AI infers context insufficiency before execution OR user calls `/inquire`. Infer
 - **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
 - **Layer 2 (AI-guided)**: Context insufficiency inferred before execution via in-protocol heuristics. Inference is silent (Phase 0).
 
-**Context insufficient** = the execution plan contains requirements not available in the current context and not trivially inferrable. Context insufficiency spans multiple dimensions: missing facts, incoherent facts, and facts disconnected from execution goals.
+**Context insufficient** = the execution plan contains requirements not available in the current context and not trivially inferrable. Context insufficiency spans multiple dimensions: missing facts, incoherent facts, and facts not relevant to execution goals.
 
 Gate predicate:
 ```
@@ -241,7 +241,7 @@ Analyze execution plan requirements against available context across multiple di
 
 1. **Scan execution plan** `X` for required context: domain knowledge, environmental state, configuration details, user preferences, constraints
 2. **Check availability**: For each requirement, assess whether it is available in conversation, files, or environment
-3. **Dimension assessment**: Identify which dimensions are potentially insufficient — factual (missing information), coherence (conflicting information), goal-alignment (disconnected information)
+3. **Dimension assessment**: Identify which dimensions are potentially insufficient — factual (missing information), coherence (conflicting information), relevance (information not relevant to goal)
 4. If all requirements satisfied: proceed with execution (Aitesis not activated)
 5. If uncertainties identified: record `Uᵢ` with domain, description — proceed to Phase 1
 
@@ -259,15 +259,15 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
 - If no evidence found: retain in `Uᵢ'` with empty context
 
 **Step 2 — Epistemic classification** (core act): For each remaining uncertainty in `Uᵢ'`:
-- **Dimension assessment** (Layer 1): Is this factual, coherence, or goal-alignment?
+- **Dimension assessment** (Layer 1): Is this factual, coherence, or relevance?
   - Factual: a fact is missing from context and required for execution
   - Coherence: collected facts are mutually inconsistent
-  - GoalAlignment: collected facts are disconnected from the execution goal
+  - Relevance: collected facts are not relevant to the execution goal
 - **Verifiability assessment** (Layer 2, Factual dimension only — Observability sub-modes guide classification):
   - ReadOnlyVerifiable: fact exists in environment (StaticObservation or BeliefVerification) and is observable with current tools → resolve directly via extended context lookup
   - ProbeEnrichable: fact requires DynamicObservation — does not exist statically but is creatable, reversible, and bounded (< 30s) → empirical probe
   - UserDependent: neither read-only verifiable nor probe-enrichable → Phase 2 directly
-- **Non-factual dimensions**: Coherence and GoalAlignment → detect and record as `Uₙ` (non_factual_detected); routed via Post-Convergence suggestion, not Phase 2 question
+- **Non-factual dimensions**: Coherence and Relevance → detect and record as `Uₙ` (non_factual_detected); routed via Post-Convergence suggestion, not Phase 2 question
 - Store all results in `Λ.classify_results`
 
 **Step 3 — Read-only verification**: For ReadOnlyVerifiable uncertainties:
@@ -318,7 +318,8 @@ Before proceeding, I need to verify some context:
 [Classification summary — always shown]
   U1: Factual/ReadOnly (basis: evidence summary)       -- Fiber(Factual) → show Verifiability
   U2: Factual/Probe (basis: evidence summary)
-  U3: Coherence (basis: evidence summary)               -- Fiber(non-Factual) = Unit → Dimension only
+  U3: Coherence (basis: evidence summary) → /ground     -- Fiber(non-Factual) = Unit (no Verifiability) → show routing target instead
+  U4: Relevance (basis: evidence summary) → /goal       -- best deficit-matched (candidates: /goal, /gap, /bound, /clarify; no match → omit suggestion)
   ...
   Any classification to revise?
 
@@ -367,8 +368,16 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Decision gaps in resolved context → suggest `/gap` (gap audit before execution)
 - Framework absent for informed execution → suggest `/frame` (framework recommendation)
 - Mapping uncertain between context and execution → suggest `/ground` (structural mapping validation)
-- Coherence dimension detected → suggest `/ground` (structural mapping may reveal inconsistency source)
-- GoalAlignment dimension detected → suggest `/goal` (goal co-construction to reconnect facts to intent)
+**Dimension-specific routing** (non-factual Uₙ detected in classify):
+
+| Dimension | Candidate Protocols | Selection Criterion |
+|-----------|-------------------|---------------------|
+| Coherence | `/ground` | structural mapping may reveal inconsistency source |
+| Relevance | `/goal`, `/gap`, `/bound`, `/clarify` | deficit-matched: GoalIndeterminate→/goal, GapUnnoticed→/gap, BoundaryUndefined→/bound, IntentMisarticulated→/clarify |
+| Emergent(_) | deficit-based matching | per discovered dimension's deficit condition |
+
+Selection: match Uₙ item's observed deficit condition against candidate protocol deficit conditions.
+Phase 2 classify summary shows the best-matched protocol as routing target.
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
@@ -398,6 +407,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 | Early exit | User can declare sufficient at any Phase 2 | Full control over inquiry depth |
 | Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context uncertainties ≠ Syneidesis decision gaps, so reverse suppression not needed) |
 | Classify transparency | Always show classify results (dimension + verifiability) in Phase 2 surfacing format | User sees AI's reasoning and resolution path per uncertainty |
+| Routing transparency | Uₙ items show `→ /protocol` in Phase 2 classify summary | User sees routing destination before Post-Convergence |
 | Probe transparency | Log probe lifecycle in Λ.probe_history | User can audit what was tested |
 | Probe cleanup | All test artifacts removed after observation | No residual files |
 | Probe timeout | 30s limit → fall back to user inquiry | Prevents hanging |
@@ -407,7 +417,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via AskUserQuestion (Phase 2)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present structured options (text presentation = protocol violation)
-3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/GoalAlignment) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/GoalAlignment: detect and route via Post-Convergence suggestion
+3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/Relevance: detect and route via Post-Convergence suggestion
 4. **Inference over Detection**: When context is insufficient and context collection does not fully resolve, infer the highest-gain question rather than assume — silence is worse than a dismissed question
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on execution plan requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
