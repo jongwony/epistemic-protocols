@@ -154,7 +154,7 @@ Detect application-context mismatch after execution when correct output may not 
 
 ### Epistemic Cooperative (Report + Onboard + Dashboard + Preferences)
 Utility skill group for session analytics and configuration.
-- **Report** `/report`: Generate epistemic usage analysis report with evidence-backed protocol recommendations and HTML artifact. Analytical output — pattern evidence, anti-pattern diagnostics, session snippets.
+- **Report** `/report`: Generate Growth Map — orthogonal epistemic analysis (protocol adoption patterns, coverage gaps, anti-patterns) using `/insights` data as targeting input. Output: HTML artifact (`growth-map.html`); falls back to Epistemic Profile when insights unavailable.
 - **Onboard** `/onboard`: Quick recommendation from recent sessions, or quest-based learning through scenario, trial, and quiz. Flow: Quick Proof (Entry → QuickScan → Pick-1 → Evidence → Trial → Insight → Next), Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects path (quick default); Onboarding Pool (`/goal`, `/gap`, `/frame`) serves both Quick auto-recommend and Targeted fallback; pool exhaustion in Quick path transitions to Targeted.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
 - **Preferences** `/preferences`: Interactive protocol preference configuration for `~/.claude/CLAUDE.local.md`. Flow: Detect → Select → Configure → Generate → Verify. Quick path (6 global params) or Full path (global + ~32 per-protocol params).

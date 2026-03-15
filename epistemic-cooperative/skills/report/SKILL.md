@@ -71,8 +71,9 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 |--------|--------|----------|
 | `~/.claude/usage-data/report.html` | Read + best-effort parsing | at_a_glance, interaction_style, what_works, friction_analysis, suggestions, on_the_horizon, project_areas |
 
-**Availability**: Only exists after `/insights` execution. Enables Growth Map rendering (7-section HTML). Parsing is best-effort — HTML structure changes trigger graceful fallback to Epistemic Profile mode.
-**Independence**: `growth_map_path` (A/B from insights availability) is orthogonal to Phase 2 Path A/B (facets availability per project). Growth Map path controls HTML rendering; facets path controls extraction method.
+**Availability**: Only exists after `/insights` execution. Enables Growth Map Path A (epistemic-lens analysis using insights as targeting input). Parsing is best-effort — HTML structure changes trigger graceful fallback to Epistemic Profile mode.
+**Relationship**: insights = 1st pass (behavioral sweep), report = 2nd pass (epistemic resolution). Report consumes insights' analyzed data as input, not output — generates orthogonal epistemic analysis that insights cannot produce.
+**Independence**: `growth_map_path` (A/B from insights availability) is orthogonal to Phase 2 Path A/B (facets availability per project). Growth Map path controls analysis depth; facets path controls extraction method.
 
 ## Phase Execution
 
@@ -91,7 +92,7 @@ The subagent:
 **Insights detection** (main agent, concurrent with project-scanner — no dependency on subagent output):
 1. Glob `~/.claude/usage-data/report.html` — existence check
 2. If present: Grep report.html for section-identifying patterns (heading text, `id=` attributes), then Read with offset/limit per section. Never Read entire file if >500 lines.
-   - Success → set `growth_map_path = A`, store extracted sections
+   - Success → set `growth_map_path = A`, store extracted sections as targeting inputs for epistemic-lens analysis
    - Parse failure → set `growth_map_path = B` (graceful degradation, no error)
 3. If absent: set `growth_map_path = B`
 
@@ -167,23 +168,25 @@ Apply the mapping tables below to match observed patterns to protocols.
    - Save to `~/.claude/.report/growth-map.html`
    - Structure varies by `growth_map_path`:
 
-   **Path A — Growth Map (insights + report integrated)**:
+   **Path A — Growth Map (insights as targeting input, epistemic-lens output)**:
 
-   | # | Section | Data Source |
-   |---|---------|-------------|
-   | ① | At a Glance | insights `at_a_glance` |
-   | ② | Profile | insights `interaction_style` + protocol usage |
-   | ③ | Success Patterns | insights `what_works` + protocol contribution |
-   | ④ | Growth Opportunities | insights `friction_analysis` + `suggestions` + report anti-patterns (dual-layer) |
-   | ⑥ | Recommendations + Install | Report mapping tables + install commands + batch install |
-   | ⑦ | On the Horizon | insights `on_the_horizon` |
+   Architecture: 2-Pass Compiler. insights = 1st pass (behavioral sweep), report = 2nd pass (epistemic resolution). Each section uses insights data as **input** to generate analysis insights **cannot produce** — protocol adoption patterns, epistemic coverage gaps, deficit detection.
+
+   | # | Section | Insights Input (targeting) | Report Output (orthogonal) |
+   |---|---------|---------------------------|---------------------------|
+   | ① | Epistemic Snapshot | `at_a_glance` (context) | Protocol coverage delta: which decision types are structured vs unstructured. Gap between friction frequency and protocol adoption |
+   | ② | Epistemic Profile | `interaction_style` (baseline) | Protocol adoption trajectory: which protocols used when, adoption curve over time, preference patterns (planning vs verification vs execution) |
+   | ③ | Protocol Impact | `what_works` (positive-session targets) | Cases where protocol usage correlated with better outcomes: protocol-present sessions vs protocol-absent sessions with similar goals |
+   | ④ | Growth Opportunities | `friction_analysis` + `suggestions` | Anti-patterns (protocol applicable but absent) + dual-layer resolution cards |
+   | ⑥ | Recommendations + Install | Report mapping tables | Protocol recommendations + install commands + batch install |
+   | ⑦ | Next Protocols | `on_the_horizon` (context) | Protocol adoption path: which protocols to learn next based on work trajectory + epistemic gap analysis |
 
    Note: ⑤ Coverage is reserved for Phase 2 (dashboard absorption). Uses `project_areas` from Quaternary + coverage-scanner data.
 
    **④ Growth Opportunities — dual-layer cards**:
    Each friction item as a card with two resolution layers:
-   - **Execution layer** (tag: Execution): CLAUDE.md rule or configuration suggestion (behavioral fix)
-   - **Epistemic layer** (tag: Epistemic): Protocol `/command` CTA (structural fix)
+   - **Execution layer** (tag: Execution): CLAUDE.md rule or configuration suggestion (behavioral fix) — sourced from insights `suggestions`
+   - **Epistemic layer** (tag: Epistemic): Protocol `/command` CTA (structural fix) — sourced from report anti-pattern analysis
    - **Evidence**: Session snippet or friction_detail narrative + resume command
    - Source: Tertiary Mapping Table (friction → protocol) + Quaternary Mapping Table (suggestions → execution layer)
 
@@ -299,4 +302,4 @@ Refer to `references/html-template.md` for the full HTML skeleton, CSS classes, 
 7. **Subagent delegation**: Phase 1 project scanning MUST be delegated to project-scanner subagent (single). Phase 2 session analysis: Path A (facets-available) delegates to session-analyzer in targeted mode; Path B (facets-absent) delegates in full mode. Maximum 3 parallel subagents across both paths.
 8. **Facets as accelerator**: Facets data is a pure accelerator — its absence must not degrade output quality. Path B produces output quality at least equal to the pre-enhancement baseline; new capabilities (co-occurrence detection, quality signals) are available in both paths.
 9. **Best-effort parsing**: report.html parsing is best-effort. Parse failure triggers automatic `growth_map_path = B` fallback, not an error. HTML structure changes are expected — minimize CSS class/ID dependency.
-10. **Insights reuse**: When `growth_map_path = A`, reuse insights' LLM-analyzed data directly. Do not re-analyze raw session data that insights has already processed — token efficiency priority.
+10. **Insights as targeting input**: When `growth_map_path = A`, use insights' LLM-analyzed data as targeting input — do not re-analyze raw sessions for what insights already processed (token efficiency). Generate orthogonal epistemic analysis: insights identifies WHAT happened (behavioral narrative), report analyzes WHICH epistemic structures were absent (protocol-lens). Never echo insights narrative directly into HTML sections — transform it into protocol adoption analysis, coverage gap detection, and anti-pattern identification.

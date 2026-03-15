@@ -13,7 +13,7 @@ A utility plugin for epistemic protocol onboarding and analytics. Unlike protoco
 | Skill | Purpose | Output |
 |-------|---------|--------|
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
-| `/report` | Usage analysis with evidence | HTML profile (`~/.claude/.report/epistemic-profile.html`) |
+| `/report` | Growth Map with epistemic analysis | HTML artifact (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
 | `/preferences` | Interactive protocol preference configuration | `~/.claude/CLAUDE.local.md` preferences section |
 
@@ -49,9 +49,9 @@ Key features:
 - Targeted path preserves full learning experience (scenarios, quizzes, guide)
 - `/report` for evidence-backed analysis; `/onboard` for quick value proof
 
-### /report — Usage Analysis Report
+### /report — Growth Map
 
-Analyzes session files to extract tool usage patterns, maps patterns to protocols, and generates evidence-backed recommendations with HTML artifact.
+Analyzes session patterns and integrates `/insights` data as targeting input to generate a Growth Map — an orthogonal epistemic analysis covering protocol adoption patterns, coverage gaps, and anti-patterns.
 
 ```
 SCAN → EXTRACT → MAP → PRESENT → GUIDE
@@ -123,7 +123,7 @@ epistemic-cooperative/
 ├── .claude-plugin/plugin.json
 ├── skills/
 │   ├── onboard/SKILL.md          # /onboard quest-based protocol learning
-│   ├── report/SKILL.md           # /report usage analysis report
+│   ├── report/SKILL.md           # /report Growth Map
 │   ├── dashboard/SKILL.md        # /dashboard coverage dashboard
 │   └── preferences/SKILL.md      # /preferences protocol configuration
 └── agents/
