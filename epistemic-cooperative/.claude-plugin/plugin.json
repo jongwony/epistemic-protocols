@@ -1,7 +1,7 @@
 {
   "name": "epistemic-cooperative",
   "description": "Session analytics and configuration: /onboard for quick recommendation + protocol learning, /report for usage analysis, /dashboard for coverage dashboard, /preferences for protocol customization",
-  "version": "1.10.1",
+  "version": "1.10.2",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

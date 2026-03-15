@@ -54,7 +54,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Prothesis `/frame` | Analysis | Unsure which analytical perspective to use | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
 | Syneidesis `/gap` | Decision | Right before committing, checking for blind spots | Same file 3+ edits (different concerns), `excessive_changes` friction |
-| Prosoche `/attend` | Execution | Controlling risky actions step by step | Bash deploy/push/apply keywords, `wrong_file_edited` friction |
+| Prosoche `/attend` | Execution | Checking execution readiness and controlling risky actions | Bash deploy/push/apply keywords, upstream deficit signals, `wrong_file_edited` friction |
 | Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the context | Post-execution environment mismatch |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
 | Katalepsis `/grasp` | Cross-cutting | You approved AI work but didn't fully understand it | Verification keywords in firstPrompt ("explain", "what did you do") |
@@ -335,7 +335,7 @@ Same format as Targeted Path Type 3.
 #### Feedback (both paths)
 
 Immediate feedback after each question:
-- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` classifies *execution risks* (what could go wrong when you act). `/gap` audits before action (decision quality), `/attend` gates during action (execution safety)."
+- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` checks *execution readiness* (Phase -1 upstream scan) and gates *execution risks* (what could go wrong when you act). `/gap` audits before action (decision quality), `/attend` ensures readiness + gates during action (execution safety)."
 - **Incorrect** (reasoning inquiry → targeted correction):
   1. **Reasoning inquiry**: Call AskUserQuestion with 2-3 reasoning hypotheses inferred from the user's wrong answer (context-specific, not templates). Do not reveal the correct answer. "Other" always available.
   2. **Targeted correction**: Using the user's stated reasoning, explain the distinction through the design axis that separates the confused pair. Directly address the reasoning — e.g., "You mentioned timing — that's the right axis. The key difference is *direction*: `/inquire` catches missing context *before* execution (User→AI), while `/contextualize` checks context fit *after* (AI→User)."
@@ -381,7 +381,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
 - `/clarify` ↔ `/gap`: both surface "something wrong" but different targets — `/clarify` fixes expression before work begins (Planning: "I said X but meant Y"), `/gap` audits blind spots at a decision point (Decision: "Am I overlooking something?")
 - `/clarify` ↔ `/goal`: both about "unclear starting point" but different deficits (expression vs. existence)
-- `/gap` ↔ `/attend`: both about risk awareness but different timing (`/gap` audits before action, `/attend` gates during execution)
+- `/gap` ↔ `/attend`: both about risk awareness but `/gap` audits decision quality before committing, `/attend` checks execution readiness (Phase -1 upstream scan) and gates execution-time risks
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
 - `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)

@@ -2,19 +2,21 @@
 
 > [한국어](./README_ko.md)
 
-Evaluate execution-time risks by classifying existing tasks for risk signals and surfacing elevated-risk findings.
+Route upstream epistemic deficits and evaluate execution-time risks during AI operations.
 
 ## Type Signature
 
 ```
-(ExecutionBlind, User, EVALUATE, ExecutionAction) → SituatedExecution
+(ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution
 ```
 
 ## What It Does
 
-Prosoche reads existing tasks and classifies each for risk signals — irreversibility, human communication, security boundaries, prompt injection, external mutations, and scope escalation. Most tasks pass silently (p=Low); only elevated-risk tasks are surfaced for user judgment.
+Prosoche scans for upstream epistemic deficits before task execution, routes to appropriate protocols when readiness gaps are detected, then materializes intent into tasks and classifies each for risk signals — irreversibility, human communication, security boundaries, prompt injection, external mutations, and scope escalation. Most tasks pass silently (p=Low); only elevated-risk tasks are surfaced for user judgment.
 
-**Core principle**: Attention over Automation — autonomy is preserved by default, interrupted only at genuine risk boundaries.
+**Phase -1 (Sub-A0)**: Before materializing tasks, scans execution context against 6 upstream deficit conditions (`/clarify`, `/goal`, `/bound`, `/inquire`, `/frame`, `/ground`). Only execution-blocking deficits are surfaced. When no deficits are detected, passes through transparently.
+
+**Core principle**: Attention over Automation — autonomy is preserved by default, interrupted only at genuine risk boundaries or unresolved upstream deficits.
 
 ## When It Activates
 
@@ -41,7 +43,7 @@ Environment-aware: `("pulumi up", "auth-stack", "dev")` approved does NOT cache-
 
 - **Single-pass classification**: Risk signal classification (Phase 0) is single-pass. A false negative (especially PromptInjection) results in the task passing without re-evaluation.
 - **Classification accuracy**: A misclassified p=Low task bypasses Gate entirely. Prosoche classifies risk but does not execute; execution remains the caller's responsibility.
-- **TaskList dependency**: Prosoche reads existing tasks at invocation time. If no tasks exist, there is nothing to classify.
+- **Subagent Gate compliance**: Non-prosoche team agents receive Gate awareness via prompt injection, not system constraint. Compliance is non-guaranteed.
 
 ## Install
 
@@ -53,7 +55,7 @@ claude plugin install prosoche@epistemic-protocols
 ## Usage
 
 ```
-/attend [your task]    # Enable execution-time risk classification
+/attend [your task]    # Enable upstream readiness check + execution-time risk classification
 ```
 
 ## License

@@ -124,20 +124,20 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 
 ## Prosoche `/attend`
 
-**Situation**: You have a plan to restructure the database schema, migrate data, update the ORM, and deploy — all in one go. Each step looks correct individually, but executing them without risk awareness means a destructive step could fire before you notice.
+**Situation**: You tell the AI "Set up the new API service — handle scaffolding through deployment." The intent is clear enough to act on, but you haven't specified the framework, deployment target, or which parts are your responsibility. You want to execute but aren't sure if you're ready.
 
-**Intervention**: `/attend` materializes the plan into tasks, executes safe ones autonomously, and gates elevated-risk items (irreversibility, external mutation, security boundaries) for your judgment during execution.
+**Intervention**: `/attend` first scans for upstream epistemic deficits (Phase -1) — detecting that your goal lacks a verifiable end-state and context is insufficient for tool selection. After routing you through the appropriate upstream protocols, it materializes the refined plan into tasks, executes safe ones autonomously, and gates elevated-risk items (deployment, infrastructure changes) for your judgment.
 
-**Trial prompt**: "Let's practice: say 'Run the migration script' and I'll show how /attend classifies execution risks"
+**Trial prompt**: "Let's practice: say '/attend set up the new API service' and I'll show how /attend checks upstream readiness before classifying execution risks"
 
-**Quiz Q (situation)**: Claude has generated a 15-step deployment plan. Each step passed review. You want it executed with risky actions gated for your approval.
-- A) Syneidesis `/gap` — B) Prosoche `/attend` — C) Epharmoge `/contextualize` — D) Prothesis `/frame`
-- Answer: B
+**Quiz Q (situation)**: Claude generated a deployment plan from your broad request ("handle everything"). You want execution with risk gating, but suspect some upstream preparation is missing.
+- A) Aitesis `/inquire` — B) Prosoche `/attend` — C) Syneidesis `/gap` — D) Telos `/goal`
+- Answer: B — Phase -1 scans for upstream deficits before execution, then gates risky actions. One command handles both readiness and risk.
 
-**Quiz Q (design)**: You're about to execute a multi-step infrastructure change. How would you have risky steps gated while the rest proceeds autonomously?
-- Hint: The plan itself is sound — the concern is execution-time risk, not decision gaps.
+**Quiz Q (design)**: You want to execute a complex plan but aren't sure all prerequisites are met. How does `/attend` handle this without requiring you to manually invoke upstream protocols?
+- Hint: Phase -1 scans 6 deficit conditions before task materialization — only execution-blocking deficits are surfaced.
 
-**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of present-moment awareness during action. Core principle: **Attention over Automation**. Most tasks execute autonomously (p=Low); only elevated-risk actions surface for user judgment. Workflow position: Execution cluster — plan is approved, now execute with risk-aware gating. Game feel: "Plan looks good, let's go" → tasks execute → risky action detected → you decide → execution resumes.
+**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of present-moment awareness during action. Core principle: **Attention over Automation**. Phase -1 checks upstream readiness (are we prepared?), then Phase 0+ gates execution risks (are we safe?). Most tasks execute autonomously (p=Low); only elevated-risk actions or unresolved upstream deficits surface for user judgment. Workflow position: Execution cluster — ready to act, execute with readiness-aware and risk-aware gating. Game feel: "/attend my plan" → upstream readiness check → protocols if needed → tasks execute → risky action detected → you decide → execution resumes.
 
 ## Epharmoge `/contextualize`
 

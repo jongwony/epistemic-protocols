@@ -1,15 +1,15 @@
 ---
 name: attend
-description: "Evaluate execution-time risks during AI operations. Materializes intent into tasks, classifies each for risk signals, delegates low-risk tasks to executor, and surfaces elevated-risk findings for user judgment. Type: (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution. Alias: Prosoche(προσοχή)."
+description: "Route upstream epistemic deficits and evaluate execution-time risks during AI operations. Scans for unresolved upstream protocol needs, materializes intent into tasks, classifies each for risk signals, delegates low-risk tasks to executor, and surfaces elevated-risk findings for user judgment. Type: (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution. Alias: Prosoche(προσοχή)."
 ---
 
 # Prosoche Protocol
 
-Evaluate execution-time risks during AI operations through task materialization, risk classification, and delegation. Type: `(ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution`.
+Route upstream epistemic deficits and evaluate execution-time risks during AI operations through upstream scanning, task materialization, risk classification, and delegation. Type: `(ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution`.
 
 ## Definition
 
-**Prosoche** (προσοχή): A dialogical act of sustained attention to execution risk — from the Stoic practice of self-aware engagement — resolving execution blindness by materializing intent into tasks, classifying each for risk signals, delegating low-risk tasks to a subagent executor, and gating elevated-risk actions through evidence-grounded checkpoints for user judgment.
+**Prosoche** (προσοχή): A dialogical act of sustained attention to execution risk — from the Stoic practice of self-aware engagement — resolving execution blindness by first scanning for upstream epistemic deficits and routing to appropriate protocols, then materializing intent into tasks, classifying each for risk signals, delegating low-risk tasks to a subagent executor, and gating elevated-risk actions through evidence-grounded checkpoints for user judgment.
 
 ```
 ── FLOW ──
@@ -223,7 +223,7 @@ Phase 2 Q (checkpoint)          → always_gated (constitutive: execution risk j
 
 ## Core Principle
 
-**Attention over Automation**: When AI detects execution-time risk signals — irreversibility, human communication, security boundaries — it surfaces findings with evidence rather than proceeding silently. The silent path (p=Low) is the primary path; surfacing is the exception. Autonomy is preserved by default, interrupted only at genuine risk boundaries.
+**Attention over Automation**: When AI detects upstream epistemic deficits or execution-time risk signals — unresolved intent, missing context, irreversibility, human communication, security boundaries — it surfaces findings with evidence rather than proceeding silently. The silent path (p=Low) is the primary path; surfacing is the exception. Autonomy is preserved by default, interrupted only at genuine risk boundaries.
 
 Priority ordering: autonomy > transparency > noise-minimization > speed > simplicity.
 

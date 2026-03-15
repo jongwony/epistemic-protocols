@@ -62,7 +62,7 @@ Restart Codex, then start with `$onboard`.
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
-| [Prosoche](./prosoche) | `/attend` | Executing tasks and want risky actions gated for your judgment |
+| [Prosoche](./prosoche) | `/attend` | Want execution readiness checked and risky actions gated for your judgment |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
 | [Horismos](./horismos) | `/bound` | You need to define what you know vs what AI should figure out |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
