@@ -505,7 +505,8 @@ function main() {
   let changelog = null;
   try {
     const { execFileSync } = require('child_process');
-    const output = execFileSync(process.execPath, [path.join(__dirname, 'generate-changelog.js')], {
+    const changelogArgs = [path.join(__dirname, 'generate-changelog.js'), ...(tag ? [tag] : [])];
+    const output = execFileSync(process.execPath, changelogArgs, {
       encoding: 'utf8',
       cwd: projectRoot,
     });

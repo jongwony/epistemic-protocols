@@ -4,8 +4,8 @@
  * Zero external dependencies: Node.js standard library only
  *
  * Usage:
- *   node scripts/generate-changelog.js          # prev_tag..HEAD
- *   node scripts/generate-changelog.js v1.0.0   # explicit base tag
+ *   node scripts/generate-changelog.js              # latest_tag..HEAD (local dev)
+ *   node scripts/generate-changelog.js v2026.03.15  # prev_tag..v2026.03.15 (CI: current tag)
  *
  * Output: JSON { range, groups, ungrouped } to stdout
  * Exit 0 with empty groups when no previous tag exists
@@ -15,12 +15,32 @@ const { execFileSync } = require('child_process');
 
 const COMMIT_RE = /^([a-f0-9]+)\s+(feat|fix|refactor|style|docs|test|ci|chore)(?:\(([^)]+)\))?\s*:\s*(.+)$/;
 
-function findPreviousTag(baseTag) {
-  if (baseTag) return baseTag;
+/**
+ * Find the commit range for changelog generation.
+ * @param {string|null} currentTag - The current release tag (CI mode) or null (local mode)
+ * @returns {{ from: string, to: string } | null} - Tag range or null if no tags exist
+ */
+function findRange(currentTag) {
+  if (currentTag) {
+    // CI mode: find the tag before currentTag
+    try {
+      const tags = execFileSync('git', ['tag', '--sort=-v:refname'], {
+        encoding: 'utf8',
+      }).trim().split('\n').filter(Boolean);
+      const currentIdx = tags.indexOf(currentTag);
+      if (currentIdx === -1 || currentIdx >= tags.length - 1) return null;
+      return { from: tags[currentIdx + 1], to: currentTag };
+    } catch {
+      return null;
+    }
+  }
+
+  // Local mode: find latest tag, range to HEAD
   try {
-    return execFileSync('git', ['describe', '--tags', '--abbrev=0', 'HEAD'], {
+    const latestTag = execFileSync('git', ['describe', '--tags', '--abbrev=0', 'HEAD'], {
       encoding: 'utf8',
     }).trim();
+    return { from: latestTag, to: 'HEAD' };
   } catch {
     return null;
   }
@@ -58,20 +78,20 @@ function groupByScope(commits) {
 }
 
 function main() {
-  const baseTag = process.argv[2] || null;
-  const prevTag = findPreviousTag(baseTag);
+  const currentTag = process.argv[2] || null;
+  const range = findRange(currentTag);
 
-  if (!prevTag) {
-    // No previous tag — output empty result (Phase A fallback)
-    console.log(JSON.stringify({ range: { from: null, to: 'HEAD' }, groups: {}, ungrouped: [] }));
+  if (!range) {
+    // No tags or no previous tag — output empty result (Phase A fallback)
+    console.log(JSON.stringify({ range: { from: null, to: currentTag || 'HEAD' }, groups: {}, ungrouped: [] }));
     return;
   }
 
-  const range = `${prevTag}..HEAD`;
-  const commits = parseCommits(range);
+  const rangeStr = `${range.from}..${range.to}`;
+  const commits = parseCommits(rangeStr);
   const { groups, ungrouped } = groupByScope(commits);
 
-  console.log(JSON.stringify({ range: { from: prevTag, to: 'HEAD' }, groups, ungrouped }, null, 2));
+  console.log(JSON.stringify({ range, groups, ungrouped }, null, 2));
 }
 
 main();
