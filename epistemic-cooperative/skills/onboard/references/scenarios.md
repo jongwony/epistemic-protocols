@@ -124,15 +124,15 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 
 ## Prosoche `/attend`
 
-**Situation**: You tell the AI "Set up the new API service — handle scaffolding through deployment." The intent is clear enough to act on, but you haven't specified the framework, deployment target, or which parts are your responsibility. You want to execute but aren't sure if you're ready.
+**Situation**: You tell the AI "Refactor the authentication system — update session handling, migrate the user table, and deploy." The scope is broad, you haven't defined success criteria or which parts are safe to change independently. You want to execute but aren't sure if you're ready.
 
-**Intervention**: `/attend` first scans for upstream epistemic deficits (Phase -1) — detecting that your goal lacks a verifiable end-state and context is insufficient for tool selection. After routing you through the appropriate upstream protocols, it materializes the refined plan into tasks, executes safe ones autonomously, and gates elevated-risk items (deployment, infrastructure changes) for your judgment.
+**Intervention**: `/attend` first scans for upstream epistemic deficits (Phase -1) — detecting that your goal lacks a verifiable end-state and the refactoring scope is insufficiently defined. After routing you through the appropriate upstream protocols, it materializes the refined plan into tasks, executes safe ones (code refactoring) autonomously, and gates elevated-risk items (user table migration, deployment) for your judgment.
 
-**Trial prompt**: "Let's practice: say '/attend set up the new API service' and I'll show how /attend checks upstream readiness before classifying execution risks"
+**Trial prompt**: "Let's practice: say '/attend refactor the authentication system' and I'll show how /attend checks upstream readiness before classifying execution risks"
 
 **Quiz Q (situation)**: Claude generated a deployment plan from your broad request ("handle everything"). You want execution with risk gating, but suspect some upstream preparation is missing.
 - A) Aitesis `/inquire` — B) Prosoche `/attend` — C) Syneidesis `/gap` — D) Telos `/goal`
-- Answer: B — Phase -1 scans for upstream deficits before execution, then gates risky actions. One command handles both readiness and risk.
+- Answer: B
 
 **Quiz Q (design)**: You want to execute a complex plan but aren't sure all prerequisites are met. How does `/attend` handle this without requiring you to manually invoke upstream protocols?
 - Hint: Phase -1 scans 6 deficit conditions before task materialization — only execution-blocking deficits are surfaced.
