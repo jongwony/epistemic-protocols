@@ -90,11 +90,11 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 
 ## Aitesis `/inquire`
 
-**Situation**: You ask Claude to "deploy the staging environment." Claude starts writing Terraform configs, but hasn't asked about: which cloud provider, what region, what instance sizes, whether there's an existing VPC, or what the staging URL convention is.
+**Situation**: You ask Claude to "optimize the database queries." Claude immediately starts rewriting SQL and adding indexes, but hasn't asked about: whether you have read replicas, what the connection pooling configuration is, which queries are actually slow, or what the acceptable latency threshold is.
 
 **Intervention**: `/inquire` detects context insufficiency before execution, prioritizes questions by information gain, and ensures Claude gathers what it needs to know before acting — rather than making assumptions silently.
 
-**Trial prompt**: "Let's practice: say 'Deploy the staging environment' and I'll show how /inquire catches missing context"
+**Trial prompt**: "Let's practice: say 'Optimize the database queries' and I'll show how /inquire catches missing context"
 
 **Quiz Q (situation)**: You ask Claude to "set up the CI pipeline for the new repo." Claude immediately starts writing a GitHub Actions workflow without asking about test frameworks, deployment targets, or required checks.
 - A) Hermeneia `/clarify` — B) Aitesis `/inquire` — C) Telos `/goal` — D) Prosoche `/attend`
