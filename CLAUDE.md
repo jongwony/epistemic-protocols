@@ -140,7 +140,7 @@ Validate structural mapping between abstract and concrete domains through AI-gui
 - **Invocation**: `/ground` or use "ground" in conversation
 
 ### Attend (προσοχή) — Prosoche
-Materialize execution intent, classify risk signals, coordinate team delegation, and gate elevated-risk findings for user review.
+Route upstream epistemic deficits, materialize execution intent, classify risk signals, coordinate team delegation, and gate elevated-risk findings for user review.
 - **Deficit**: ExecutionBlind → SituatedExecution
 - **Triggers**: User declares execution intent via `/attend`
 - **Invocation**: `/attend` or use "attend" in conversation

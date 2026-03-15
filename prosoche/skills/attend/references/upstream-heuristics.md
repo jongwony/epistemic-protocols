@@ -12,14 +12,13 @@ Only deficits whose unresolved state would directly affect execution results are
 | ContextInsufficient | /inquire | Missing facts that would change task decomposition or tool selection | Nice-to-know context |
 | FrameworkAbsent | /frame | Multiple valid approaches exist and choice affects deliverable structure | Aesthetic framework preference |
 | MappingUncertain | /ground | Abstract instruction applied to concrete domain without validation | Analogy is illustrative, not load-bearing |
-| GapUnnoticed | /gap | Committed action has unaddressed consequences affecting execution outcome | Minor gaps with bounded impact |
 
 ## Scan Order
 
-Follows graph.json precondition order: clarify → goal → bound → {inquire, frame, ground} → gap. Higher-precedence deficits are surfaced first — resolving them may eliminate downstream deficits.
+Follows CANONICAL_PRECEDENCE order: clarify → goal → bound → {inquire, frame, ground}. Higher-precedence deficits are surfaced first — resolving them may eliminate downstream deficits.
 
 ## Execution-Blocking Filter
 
 Conservative: when ambiguous whether a deficit is execution-blocking, err toward surfacing. The user can always select Proceed. The filter prevents noise from clearly non-blocking deficits (e.g., aesthetic framework preference when the task is well-defined).
 
-Filter predicate: `blocking(d) ≡ ¬resolved(d) ⟹ ∃ t ∈ T_potential: fails(t) ∨ harms(t)`
+Filter predicate: `blocking(d) ≡ ¬resolved(d) ∧ (∃ t ∈ T_potential: fails(t) ∨ harms(t))`
