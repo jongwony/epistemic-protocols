@@ -13,7 +13,14 @@ Evaluate execution-time risks during AI operations through task materialization,
 
 ```
 ── FLOW ──
-Prosoche(C) → Materialize(C) → T[] →
+Prosoche(C) →
+  UpstreamScan(C, Resolved) → D[] →
+    D[] = ∅ → Sub-A
+    D[] ≠ ∅ → Q[AskUserQuestion](D[]) → RouteDecision →
+      Proceed  → Sub-A
+      Route(P) → suspend(Λ) → execute(P)[Skill] → restore(Λ) → re-scan(Resolved ∪ {P})
+      Other(P) → suspend(Λ) → execute(P)[Skill] → restore(Λ) → re-scan(Resolved ∪ {P})
+  → Materialize(C) → T[] →
   Team?(C) → TeamCoord[AskUserQuestion] → TeamStructure →
   ∀t∈T: Classify(t.E) → p →
     p=Low:      delegate(t) → executor(t.E) → { complete(t) | GATE_DETECTED(Fi) → Phase 1 }
@@ -23,6 +30,7 @@ Prosoche(C) → Materialize(C) → T[] →
 
 ── MORPHISM ──
 ExecutionContext
+  → route_upstream(deficits?)             -- pre-execution upstream protocol routing
   → materialize(intent)                  -- intent to concrete task list
   → coordinate(team?)                    -- optional team structure for delegation routing
   → classify(evidence)                   -- per-task risk signal detection
@@ -73,12 +81,23 @@ AgentRole      = { name: String, type: String, focus: String }
 Phase          ∈ {-1, 0, 1, 2, 3}
 SituatedExecution = Σ' where (∀ t ∈ T: situated(t)) ∨ user_withdraw ∨ user_esc
 
+-- Sub-A0 (Upstream Protocol Router):
+DetectedDeficit  = { protocol: ProtocolId, deficit: DeficitCondition, evidence: String }
+UpstreamScan     = (C, Resolved) → Set(DetectedDeficit) \ Resolved  -- heuristic, execution-blocking filter
+RouteDecision    = Proceed | Route(ProtocolId) | Other(ProtocolId)
+Resolved         = Set(ProtocolId)                    -- protocols already executed in routing loop
+SuspendState     = { resolved: Resolved, iteration: N }
+ProtocolId       ∈ {clarify, goal, bound, inquire, frame, ground, gap}
+DeficitCondition ∈ {IntentMisarticulated, GoalIndeterminate, BoundaryUndefined,
+                    ContextInsufficient, FrameworkAbsent, MappingUncertain, GapUnnoticed}
+
 ── MATERIALIZATION ROUTING ──
 Materialize(C) routes on context richness:
   C.tasks ≠ ∅ ∧ ¬C.prior  → adopt(C.tasks), resume execution
   C.tasks ≠ ∅ ∧ C.prior   → conflict[AskUserQuestion]: resume(C.tasks) | refresh(C.prior) | merge
   C.tasks = ∅ ∧ C.prior   → create(T[], C.prior), auto_proceed
-  C.tasks = ∅ ∧ ¬C.prior  → create(T[], C.args), confirm 1x [Tool]
+  C.tasks = ∅ ∧ ¬C.prior  → create(T[], C.args), auto_proceed
+                              -- Sub-A0 absorbs cold start confirm (upstream scan = context verification)
 
 Context detection:
   C.tasks = TaskList content at invocation time (named persistent list: attend-{context})
@@ -86,16 +105,22 @@ Context detection:
            -- longer chains (Telos → Aitesis → Prosoche) = more verified intent
            -- justifies auto_proceed's reduced confirmation requirements
   ¬C.prior ≡ no protocol invoked before /attend
+  Sub-A0 upstream routing enriches C.prior via Session Text Composition
 
 Design principles:
-  confirmation count ∝ 1/context richness: tasks→0(adopt), prior→0(auto), conflict→1(resolve), neither→1(confirm)
-  dual safety net: Materialize verifies "what" (intent), Phase 0 Classify verifies "how" (risk) — independent checks
+  confirmation count ∝ 1/context richness: tasks→0(adopt), prior→0(auto), conflict→1(resolve), neither→0(Sub-A0 absorbed)
+  triple safety net: Sub-A0 verifies "upstream readiness" (deficits), Materialize verifies "what" (intent), Phase 0 Classify verifies "how" (risk) — independent checks
 
 ── PHASE TRANSITIONS ──
-Phase -1: C → Materialize(C) → T[]                                  -- task materialization [Tool]
-           route(C) → {resume | auto_proceed | confirm}
-           T[] = ∅ → deactivate                                     -- nothing to classify
-           Team?(C) → TeamCoord[AskUserQuestion] → TeamStructure    -- team coordination [Tool]
+Phase -1: Sub-A0: UpstreamScan(C, Resolved) → D[]                     -- upstream deficit scan (silent)
+             D[] = ∅ → Sub-A                                          -- transparent
+             D[] ≠ ∅ → Q[AskUserQuestion](D[]) → RouteDecision        -- deficit routing [Tool]
+               Route(P)|Other(P) → suspend[TaskCreate] → execute(P)[Skill] → restore[TaskGet] → re-scan
+               Proceed → Sub-A
+          Sub-A: C → Materialize(C) → T[]                              -- task materialization [Tool]
+             route(C) → {resume | auto_proceed | conflict}             -- confirm absorbed by Sub-A0
+             T[] = ∅ → deactivate
+          Sub-B: Team?(C) → TeamCoord[AskUserQuestion] → TeamStructure -- team coordination [Tool]
 Phase 0:  t.E → Classify(t.E) → p                                    -- risk signal scan (silent, per-task)
            p = Low → delegate[Agent]                                  -- team agent or prosoche-executor
            p = Elevated → Phase 1                                     -- Gate path
@@ -108,7 +133,8 @@ Phase 3:  J → A(J, t, Σ) → Σ'                                      -- judg
 
 ── LOOP ──
 Granularity levels:
-  Phase -1: set level     — T[] (entire task list materialization + team coordination)
+  Phase -1: set level     — Sub-A0 loop (upstream routing) + Sub-A (materialization) + Sub-B (team coordination)
+  Sub-A0:  loop level    — Resolved accumulates; terminates when D[] = ∅ ∨ Proceed
   Phase 0:  element level — ∀t∈T (individual task risk classification)
   delegate: subset level  — {t : p(t)=Low} (batch delegation of low-risk tasks)
 
@@ -154,9 +180,13 @@ active(Λ) = Λ.active ∧ (∃ t ∈ Λ.tasks: t.status ∉ {completed, halted}
 -- Layered: situated(t) guarantees per-action epistemic quality; active(Λ) governs mode lifecycle
 
 ── TOOL GROUNDING ──
+Phase -1 Sub-A0 scan    (detect)  → Internal analysis (heuristic deficit detection, execution-blocking filter)
+Phase -1 Sub-A0 Q       (extern)  → AskUserQuestion (upstream routing: Route(P)/Other/Proceed) [Tool]
+Phase -1 Sub-A0 suspend (state)   → TaskCreate (persist Λ.upstream: Resolved, iteration) [Tool]
+Phase -1 Sub-A0 restore (state)   → TaskGet (restore Λ.upstream after upstream converges) [Tool]
+Phase -1 Sub-A0 execute (extern)  → Skill (upstream protocol inline execution) [Tool]
 Phase -1 Materialize (resume)  → TaskList (read existing tasks) [Tool]
 Phase -1 Materialize (create)  → TaskCreate (create from context) [Tool]
-Phase -1 Materialize (confirm) → TaskCreate + AskUserQuestion (cold start) [Tool]
 Phase -1 TeamCoord   (extern)  → AskUserQuestion (team structure selection) [Tool]
 Phase 0 delegate     (extern)  → Agent(prosoche:prosoche-executor) [Tool]
 Phase 0 delegate     (extern)  → Agent(team-agent, Gate prompt) or SendMessage(team-agent, Gate prompt) [Tool]
@@ -168,9 +198,10 @@ Task completion      (state)   → TaskUpdate (status tracking) [Tool]
 Withdraw shutdown    (extern)  → SendMessage (shutdown_request to team members) [Tool]
 
 ── ELIDABLE CHECKPOINTS ──
-Phase -1 confirm (cold start)   → elidable when: user_invoked ∧ specific_args(C.args)
-                                   default: accept materialized task list
-                                   regret: bounded (Phase 0 Classify provides independent risk check)
+Phase -1 Sub-A0 Q (routing)     → elidable when: D[] = ∅ (transparent — no AskUserQuestion)
+                                   default: present detected deficits with routing options
+                                   regret: bounded (Materialize + Phase 0 Classify provide independent checks)
+Phase -1 confirm (cold start)   → absorbed by Sub-A0 (context already verified by upstream scan)
 Phase -1 conflict (tasks+prior) → always_gated (classificatory: resume vs refresh vs merge)
 Phase -1 TeamCoord (team)       → always_gated (classificatory: team structure selection)
 Phase -1 Augment (roles)        → always_gated (classificatory: role confirmation)
@@ -181,6 +212,7 @@ Phase 2 Q (checkpoint)          → always_gated (constitutive: execution risk j
        granularity: Granularity, state: Σ,
        tasks: List(Task),
        team: Option(TeamStructure),
+       upstream: Option(SuspendState),
        active: Bool, cause_tag: String }
 ```
 
@@ -292,9 +324,44 @@ Example: `("pulumi up", "auth-stack", "dev")` approved does NOT cache-hit for `(
 
 ## Protocol
 
-### Phase -1: Task Materialization and Team Coordination
+### Phase -1: Upstream Routing, Task Materialization, and Team Coordination
 
-Materialize execution intent into a concrete task list and resolve team structure. This phase resolves "what" (intent verification) and "who" (team structure) independently from Phase 0's "how" (execution risk).
+Resolve upstream epistemic readiness, materialize execution intent into a concrete task list, and resolve team structure. This phase resolves "whether upstream protocols are needed" (Sub-A0), "what" (intent verification, Sub-A), and "who" (team structure, Sub-B) independently from Phase 0's "how" (execution risk).
+
+**Sub-A0: Upstream Protocol Router**
+
+Scan for upstream epistemic deficits that would affect execution quality if unresolved. Sub-A0 runs before task materialization — always executes, transparent when no deficits detected.
+
+1. **Scan** execution context against 7 deficit conditions (see `references/upstream-heuristics.md`), excluding protocols in `Resolved`. Filter: execution-blocking only — surface deficits whose unresolved state would directly affect execution results
+2. **Route on scan result**:
+   - **No deficits** (`D[] = ∅`): Transparent pass-through to Sub-A (no AskUserQuestion)
+   - **Deficits detected** (`D[] ≠ ∅`): **Call AskUserQuestion** with detected deficits:
+
+```
+Upstream scan — {|D[]|} execution-blocking deficit(s) detected:
+
+{for each d in D[]:}
+- /{d.protocol} — {d.evidence} ({d.deficit})
+
+Resolved: {Resolved protocols, if any}
+
+Options:
+1. /{first_protocol} (Recommended)
+2. Other — resolve via different protocol
+3. Proceed — continue to task materialization
+```
+
+3. **On Route(P) or Other(P)**:
+   - Persist `Λ.upstream` (Resolved set, iteration count) via TaskCreate
+   - Call Skill tool to execute protocol P inline in current session
+   - After P converges, restore `Λ.upstream` via TaskGet
+   - Add P to `Resolved`, re-scan — loop until `D[] = ∅` or Proceed
+4. **On Proceed**: Continue to Sub-A with current context
+5. **user_esc during upstream P**: Sub-A0 loop breaks → proceed to Sub-A (upstream Esc = "that supplement is not needed")
+
+**Scan source priority**: `C.prior` (session protocol outputs) → `C.tasks` (existing task list) → `C.args` (/attend arguments) → conversation context (fallback inference).
+
+**Suppression edges**: Not applied within Sub-A0 routing loop. Sequential routing ≠ co-activation — each protocol resolves its own deficit independently.
 
 **Sub-A: Task Materialization**
 
@@ -306,8 +373,7 @@ Materialize execution intent into a concrete task list and resolve team structur
    - **Resume** (`C.tasks ≠ ∅`, no prior): Adopt existing tasks, skip confirmation — tasks already user-validated
    - **Conflict** (`C.tasks ≠ ∅` + `C.prior`): **Call AskUserQuestion** 1x — resume existing tasks, refresh from prior, or merge
    - **Auto-proceed** (`C.prior` exists, no tasks): Create tasks from prior protocol output, skip confirmation — intent already verified by upstream protocols. Longer protocol chains (e.g., Telos → Aitesis → Prosoche) carry more accumulated verification
-   - **Confirm** (neither): Create tasks from arguments, **call AskUserQuestion** 1x to verify task list — cold start without prior context
-   **Elidable confirmation**: The `confirm` path AskUserQuestion may be elided when `C.args` provides specific execution intent (e.g., `/attend "push changes and deploy"`). Phase 0 Classify provides an independent downstream risk check per task, and Withdraw is available at every Phase 2 checkpoint. Elision does not apply to conflict, TeamCoord, or Augment paths (classificatory).
+   - **Auto-proceed** (neither, Sub-A0 absorbed): Create tasks from arguments — Sub-A0's upstream scan already verified context. Phase 0 Classify provides independent downstream risk check.
 3. **Create tasks** via TaskCreate, establishing the task list that Phase 0 will iterate
 4. If `T[] = ∅` after materialization: deactivate (nothing to classify)
 
@@ -495,5 +561,6 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 11. **Recognition over Recall**: Always **call** AskUserQuestion tool to present findings with options — text presentation without tool = protocol violation
 12. **Withdraw honored**: User can withdraw at any Phase 2 checkpoint. Withdraw triggers graceful shutdown: SendMessage shutdown_request to team members, then deactivate. user_esc is ungraceful (no cleanup)
 13. **Stop-as-Gate**: Subagent returns `GATE_DETECTED` → main agent parses output, surfaces via AskUserQuestion in Phase 2. Subagent must not attempt AskUserQuestion — Gate judgment is channeled through the main agent as a single decision point
-14. **Materialization routing**: Context richness determines confirmation requirements — existing tasks (resume, 0 confirmations), prior protocol output (auto_proceed, 0 confirmations), cold start (confirm, 1 confirmation). This is automatic, not user-configured
+14. **Materialization routing**: Context richness determines confirmation requirements — existing tasks (resume, 0 confirmations), prior protocol output (auto_proceed, 0 confirmations), cold start (auto_proceed, Sub-A0 absorbed). This is automatic, not user-configured
 15. **Team coordination**: Team augmentation/restructuring in Phase -1 Sub-B. WHO confirmation via AskUserQuestion. |roles| ≤ 6. |retain| ≥ 1 guard for restructure. No team → Solo (prosoche-executor for all tasks)
+16. **Upstream routing**: Sub-A0 scans 7 deficit conditions before task materialization. Execution-blocking filter: only deficits that would directly affect execution results. No suppression in routing loop (sequential ≠ co-activation). Resolved set prevents re-scanning converged protocols. Transparent when D[] = ∅
