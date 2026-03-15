@@ -325,14 +325,53 @@ function collectFiles(baseDir, prefix) {
 // Section 6: Release Notes Generator
 // ============================================================
 
-function generateReleaseNotes(buildResults, { tag = null } = {}) {
+function generateComputedHighlights(changelog) {
+  const TYPE_LABELS = { feat: 'New', fix: 'Fixed', refactor: 'Improved', style: 'Styled' };
+  const sections = [];
+
+  // Group commits by type across all scopes
+  const byType = {};
+  for (const [scope, commits] of Object.entries(changelog.groups)) {
+    for (const c of commits) {
+      const label = TYPE_LABELS[c.type] || c.type;
+      if (!byType[label]) byType[label] = [];
+      byType[label].push({ scope, message: c.message });
+    }
+  }
+
+  for (const label of Object.values(TYPE_LABELS)) {
+    if (!byType[label]) continue;
+    const bullets = byType[label].map(i => `- **${i.scope}**: ${i.message}`).join('\n');
+    sections.push(`### ${label}\n\n${bullets}`);
+  }
+  // Append any types not in TYPE_LABELS (raw type name as header)
+  for (const [label, items] of Object.entries(byType)) {
+    if (Object.values(TYPE_LABELS).includes(label)) continue;
+    const bullets = items.map(i => `- **${i.scope}**: ${i.message}`).join('\n');
+    sections.push(`### ${label}\n\n${bullets}`);
+  }
+
+  if (changelog.ungrouped.length > 0) {
+    const bullets = changelog.ungrouped
+      .filter(c => c.type && c.type !== 'ci' && c.type !== 'test')
+      .map(c => `- ${c.message}`)
+      .join('\n');
+    if (bullets) sections.push(`### Other\n\n${bullets}`);
+  }
+
+  return `## Highlights\n\n${sections.join('\n\n')}`;
+}
+
+function generateReleaseNotes(buildResults, { tag = null, changelog = null } = {}) {
   const tagStr = tag ? ` ${tag}` : '';
 
   // Section 1: Headline
   const headline = `# Epistemic Protocols${tagStr}`;
 
-  // Section 2: Highlights (curated first-release content)
-  const highlights = FIRST_RELEASE_HIGHLIGHTS;
+  // Section 2: Highlights (Phase B computed from changelog, Phase A curated fallback)
+  const highlights = (changelog && changelog.groups && Object.keys(changelog.groups).length > 0)
+    ? generateComputedHighlights(changelog)
+    : FIRST_RELEASE_HIGHLIGHTS;
 
   // Section 3: Protocols table (deficit → resolution from PROTOCOL_METADATA)
   const protocolRows = PROTOCOL_ORDER
@@ -463,7 +502,18 @@ function main() {
 
   // Release notes (consumed by CI workflow)
   const tag = process.env.TAG_NAME || null;
-  const notes = generateReleaseNotes(buildResults, { tag });
+  let changelog = null;
+  try {
+    const { execFileSync } = require('child_process');
+    const output = execFileSync(process.execPath, [path.join(__dirname, 'generate-changelog.js')], {
+      encoding: 'utf8',
+      cwd: projectRoot,
+    });
+    changelog = JSON.parse(output);
+  } catch {
+    // No previous tag or script error — fall back to Phase A curated content
+  }
+  const notes = generateReleaseNotes(buildResults, { tag, changelog });
   if (!dryRun) {
     fs.writeFileSync(path.join(DIST_DIR, 'release-notes.md'), notes, 'utf8');
   }

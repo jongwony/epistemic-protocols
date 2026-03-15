@@ -325,6 +325,44 @@ describe('generateReleaseNotes', () => {
       assert.ok(notes.includes(name), `Expected ${name} in protocols table`);
     }
   });
+
+  it('uses computed highlights when changelog provided', () => {
+    const changelog = {
+      groups: {
+        prothesis: [{ hash: 'abc1234', type: 'feat', message: 'Two-mode redesign' }],
+        syneidesis: [{ hash: 'def5678', type: 'fix', message: 'Phase 2 routing fix' }],
+      },
+      ungrouped: [],
+    };
+    const notes = generateReleaseNotes(mockResults, { changelog });
+    assert.ok(notes.includes('### New'));
+    assert.ok(notes.includes('### Fixed'));
+    assert.ok(notes.includes('**prothesis**: Two-mode redesign'));
+    assert.ok(!notes.includes('### 10 Epistemic Protocols'));
+  });
+
+  it('falls back to curated highlights when changelog groups empty', () => {
+    const changelog = { groups: {}, ungrouped: [] };
+    const notes = generateReleaseNotes(mockResults, { changelog });
+    assert.ok(notes.includes('### 10 Epistemic Protocols'));
+  });
+});
+
+// ============================================================
+// generate-changelog.js CLI
+// ============================================================
+
+describe('generate-changelog.js CLI', () => {
+  it('outputs valid JSON with empty groups when no tags exist', () => {
+    const output = execFileSync(process.execPath, [path.join(__dirname, 'generate-changelog.js')], {
+      encoding: 'utf8',
+      cwd: path.join(__dirname, '..'),
+    });
+    const result = JSON.parse(output);
+    assert.ok(result.range);
+    assert.ok('groups' in result);
+    assert.ok('ungrouped' in result);
+  });
 });
 
 // ============================================================
