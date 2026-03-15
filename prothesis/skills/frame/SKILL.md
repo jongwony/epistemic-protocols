@@ -61,7 +61,7 @@ R'     = Set(Result) post-collection                  -- after Phase 3 collectio
 P      = Preview: R' → UserVisible(R')               -- per-perspective summary output before synthesis (text, not AskUserQuestion)
 Δ      = Trigger detection: R' → Δₛ                  -- produces named trigger set
 Δₛ     = Set(Trigger)                                 -- detected triggers: contradictions, horizon intersections, uncorroborated high-stakes
-D?     = Conditional dialogue: Δₛ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → user review; Δₛ = ∅ → skip dialogue (synthesis + user review still proceed)
+D?     = Conditional dialogue: Δₛ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → Dᵣ; Δₛ = ∅ → skip dialogue (Dᵣ = ∅)
 Dᵣ     = Set(DialogueReport)                          -- peer negotiation outputs
 DialogueReport = { perspective, final_position, agreement, divergence, rationale }  -- divergence gates hub-spoke conditional
 Syn    = Synthesis: (R', Dᵣ) → (∩, D, A)             -- dual-input: provenance-preserving (Dᵣ = ∅ when Δₛ = ∅)
@@ -400,8 +400,6 @@ Collect inquiry results into R'. Team remains active — shutdown/retain decisio
 ### [Perspective B]: [Epistemic Contribution title]
 [2-3 sentence summary of key findings + assessment]
 **Horizon Limits**: [What this lens missed]
-
-[Cross-dialogue triggers: N detected / None detected]
 ```
 
 This is informational text output — not an AskUserQuestion call. The coordinator summarizes each perspective's output (not verbatim teammate content) to control rendering length while preserving epistemic contribution visibility.
