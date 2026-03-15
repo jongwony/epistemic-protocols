@@ -48,7 +48,7 @@ A        = User answer ∈ {Provide(context), Point(location), Dismiss}
 X'       = Updated execution plan
 InformedExecution = X' where remaining = ∅ ∨ user_esc
 -- Layer 1 (epistemic)
-Dimension    ∈ {Factual, Coherence, GoalAlignment} ∪ Emergent(Dimension)
+Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
                -- open set; external human communication excluded
 Observability ∈ {StaticObservation, DynamicObservation, BeliefVerification}
                -- exists(fact, env) sub-modes
@@ -57,10 +57,10 @@ Verifiability ∈ {ReadOnlyVerifiable, ProbeEnrichable, UserDependent}
 classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              where Fiber(Factual)       = Verifiability
                    Fiber(Coherence)     = Unit    -- detect only
-                   Fiber(GoalAlignment) = Unit    -- detect only
+                   Fiber(Relevance) = Unit    -- detect only
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
              -- 2-layer model = Grothendieck fibration: Layer 2 exists only over Factual fiber
-             -- Coherence/GoalAlignment → detect + route (Post-Convergence)
+             -- Coherence/Relevance → detect + route (Post-Convergence)
 ProbeSpec  = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalProbe = (Uᵢ', ProbeSpec) → Uₑ           -- empirical enrichment
 Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2)
@@ -262,12 +262,12 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
 - **Dimension assessment** (Layer 1): Is this factual, coherence, or goal-alignment?
   - Factual: a fact is missing from context and required for execution
   - Coherence: collected facts are mutually inconsistent
-  - GoalAlignment: collected facts are disconnected from the execution goal
+  - Relevance: collected facts are not relevant to the execution goal
 - **Verifiability assessment** (Layer 2, Factual dimension only — Observability sub-modes guide classification):
   - ReadOnlyVerifiable: fact exists in environment (StaticObservation or BeliefVerification) and is observable with current tools → resolve directly via extended context lookup
   - ProbeEnrichable: fact requires DynamicObservation — does not exist statically but is creatable, reversible, and bounded (< 30s) → empirical probe
   - UserDependent: neither read-only verifiable nor probe-enrichable → Phase 2 directly
-- **Non-factual dimensions**: Coherence and GoalAlignment → detect and record as `Uₙ` (non_factual_detected); routed via Post-Convergence suggestion, not Phase 2 question
+- **Non-factual dimensions**: Coherence and Relevance → detect and record as `Uₙ` (non_factual_detected); routed via Post-Convergence suggestion, not Phase 2 question
 - Store all results in `Λ.classify_results`
 
 **Step 3 — Read-only verification**: For ReadOnlyVerifiable uncertainties:
@@ -318,7 +318,8 @@ Before proceeding, I need to verify some context:
 [Classification summary — always shown]
   U1: Factual/ReadOnly (basis: evidence summary)       -- Fiber(Factual) → show Verifiability
   U2: Factual/Probe (basis: evidence summary)
-  U3: Coherence (basis: evidence summary)               -- Fiber(non-Factual) = Unit → Dimension only
+  U3: Coherence (basis: evidence summary) → /ground     -- Fiber(non-Factual) = Unit → show routing target
+  U4: Relevance (basis: evidence summary) → /goal       -- routing target = deficit-matched protocol
   ...
   Any classification to revise?
 
@@ -367,8 +368,16 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Decision gaps in resolved context → suggest `/gap` (gap audit before execution)
 - Framework absent for informed execution → suggest `/frame` (framework recommendation)
 - Mapping uncertain between context and execution → suggest `/ground` (structural mapping validation)
-- Coherence dimension detected → suggest `/ground` (structural mapping may reveal inconsistency source)
-- GoalAlignment dimension detected → suggest `/goal` (goal co-construction to reconnect facts to intent)
+**Dimension-specific routing** (non-factual Uₙ detected in classify):
+
+| Dimension | Candidate Protocols | Selection Criterion |
+|-----------|-------------------|---------------------|
+| Coherence | `/ground` | structural mapping may reveal inconsistency source |
+| Relevance | `/goal`, `/gap`, `/bound`, `/clarify` | deficit-matched: GoalIndeterminate→/goal, GapUnnoticed→/gap, BoundaryUndefined→/bound, IntentMisarticulated→/clarify |
+| Emergent(_) | deficit-based matching | per discovered dimension's deficit condition |
+
+Selection: match Uₙ item's observed deficit condition against candidate protocol deficit conditions.
+Phase 2 classify summary shows the best-matched protocol as routing target.
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
@@ -398,6 +407,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 | Early exit | User can declare sufficient at any Phase 2 | Full control over inquiry depth |
 | Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context uncertainties ≠ Syneidesis decision gaps, so reverse suppression not needed) |
 | Classify transparency | Always show classify results (dimension + verifiability) in Phase 2 surfacing format | User sees AI's reasoning and resolution path per uncertainty |
+| Routing transparency | Uₙ items show `→ /protocol` in Phase 2 classify summary | User sees routing destination before Post-Convergence |
 | Probe transparency | Log probe lifecycle in Λ.probe_history | User can audit what was tested |
 | Probe cleanup | All test artifacts removed after observation | No residual files |
 | Probe timeout | 30s limit → fall back to user inquiry | Prevents hanging |
@@ -407,7 +417,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via AskUserQuestion (Phase 2)
 2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present structured options (text presentation = protocol violation)
-3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/GoalAlignment) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/GoalAlignment: detect and route via Post-Convergence suggestion
+3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/Relevance: detect and route via Post-Convergence suggestion
 4. **Inference over Detection**: When context is insufficient and context collection does not fully resolve, infer the highest-gain question rather than assume — silence is worse than a dismissed question
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on execution plan requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
