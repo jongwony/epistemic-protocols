@@ -312,21 +312,21 @@ Activation condition: `environmental(Uᵢ) ∧ ¬resolved(Uᵢ, codebase)`.
 
 **Surfacing format**:
 
+Present the classification results, uncertainty description, and evidence as text output:
+- **Classification summary**:
+  - U1: Factual/ReadOnly (basis: evidence summary)
+  - U2: Factual/Probe (basis: evidence summary)
+  - U3: Coherence (basis: evidence summary) → /ground
+  - U4: Relevance (basis: evidence summary) → /goal
+  - Any classification to revise?
+- **[Specific uncertainty description — highest priority]**
+- **Evidence**: [Evidence collected during context collection and probes, if any]
+- **Progress**: [N resolved / M actionable uncertainties] (excludes non-factual routed)
+
+Then **call AskUserQuestion**:
+
 ```
-Before proceeding, I need to verify some context:
-
-[Classification summary — always shown]
-  U1: Factual/ReadOnly (basis: evidence summary)       -- Fiber(Factual) → show Verifiability
-  U2: Factual/Probe (basis: evidence summary)
-  U3: Coherence (basis: evidence summary) → /ground     -- Fiber(non-Factual) = Unit (no Verifiability) → show routing target instead
-  U4: Relevance (basis: evidence summary) → /goal       -- best deficit-matched (candidates: /goal, /gap, /bound, /clarify; no match → omit suggestion)
-  ...
-  Any classification to revise?
-
-[Specific uncertainty description — highest priority]
-[Evidence collected during context collection and probes, if any]
-
-Progress: [N resolved / M actionable uncertainties]  (excludes non-factual routed)
+How would you like to resolve this uncertainty?
 
 Options:
 1. **[Provide X]** — [what this context enables]
@@ -429,3 +429,4 @@ Phase 2 classify summary shows the best-matched protocol as routing target.
 12. **Cross-protocol awareness**: Defer to Syneidesis when gap surfacing is already active for the same task scope
 13. **Evidence before inquiry**: User inquiry is for judgment — not for facts the AI can discover
 14. **Always show**: User can override classification without explicit approval step. Visible by default, ask only on exception
+15. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

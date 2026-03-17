@@ -298,3 +298,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 4. **Minimal intrusion**: Lightest intervention that achieves awareness
 5. **Stakes calibration**: Intensity follows stakes matrix above
 6. **Gap dependencies**: Use task blocking when gaps have logical order
+7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

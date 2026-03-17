@@ -209,10 +209,12 @@ Recognize goal indeterminacy and confirm activation:
 2. **Soft trigger**: User uses vague qualitative ("improve") → suggest only, do not activate
 3. **Explicit invocation**: `/goal` → skip confirmation, proceed to Phase 1
 
-**Call the AskUserQuestion tool** to confirm activation:
+Present the detected indeterminacy as text output (e.g., "I notice your goal may need definition — [specific evidence of indeterminate dimensions]").
+
+Then **call AskUserQuestion** to confirm activation:
 
 ```
-I notice your goal may need definition before we proceed.
+Would you like to define the goal before proceeding?
 
 Options:
 1. **Define goal together** — co-construct what "done" looks like
@@ -229,13 +231,15 @@ Per Gap Taxonomy above. Apply priority order: Outcome → Boundary → Priority 
 
 **Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be removed** via the "Remove" option.
 
-Present detection results with evidence, then confirm:
+Present detection results with evidence as text output:
+- Detected dimensions needing definition:
+  - **Outcome** [protocol constraint]: [evidence or "required by protocol"]
+  - **[Type]**: [specific evidence from Gᵥ]
+
+Then **call AskUserQuestion** to confirm:
 
 ```
-I detected these dimensions as needing definition:
-
-- **Outcome** [protocol constraint]: [evidence or "required by protocol"]
-- **[Type]**: [specific evidence from Gᵥ]
+How would you like to proceed with these detected dimensions?
 
 Options:
 1. **Proceed with these** — start co-construction with detected dimensions
@@ -259,10 +263,15 @@ On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only
 **Do NOT present proposals as plain text.** The tool call is mandatory — text-only presentation is a protocol violation.
 
 **High-context** (codebase/conversation context available via Read/Grep):
-```
-Based on [context analysis], here's a concrete [dimension]:
 
+Present the context analysis and proposal as text output:
+- Based on [context analysis], here is a concrete [dimension]:
   "[specific proposal grounded in codebase/conversation]"
+
+Then **call AskUserQuestion**:
+
+```
+How would you like to proceed with this proposal?
 
 Options:
 1. Accept — proceed with this definition
@@ -271,8 +280,14 @@ Options:
 ```
 
 **Low-context fallback** (no file/codebase context):
+
+Present the dimension context as text output:
+- For [dimension], here are common patterns for this type of goal.
+
+Then **call AskUserQuestion**:
+
 ```
-For [dimension], here are common patterns for this type of goal:
+Which pattern fits your goal?
 
 Options:
 1. "[Template A]" — [brief description]
@@ -302,13 +317,18 @@ After integration: Per LOOP — compute progress, route to Phase 1 (undefined re
 
 **Call the AskUserQuestion tool** to present the assembled GoalContract for approval.
 
-```
-## GoalContract (progress/total)
+Present the assembled GoalContract as text output:
 
+**GoalContract** (progress/total):
 - **Outcome**: [defined value or "—"]
 - **Metric**: [defined value or "—" or "N/A"]
 - **Boundary**: [defined value or "—" or "N/A"]
 - **Priority**: [defined value or "—" or "N/A"]
+
+Then **call AskUserQuestion**:
+
+```
+How would you like to proceed with this GoalContract?
 
 Options:
 1. **Approve** — proceed with this GoalContract
@@ -357,3 +377,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 10. **Context grounding**: Proposals based on Read/Grep when available; template fallback when not
 11. **Small phases**: One dimension per cycle; no bundling unless user requests
 12. **Escape hatch**: User can provide own definition for any field directly
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

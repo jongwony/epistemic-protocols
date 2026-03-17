@@ -232,10 +232,10 @@ Recognize trigger source and determine activation path:
 
 **AI-Detected Path** (`T = ai_strong`):
 
-When AI detects a strong ambiguity trigger (see Triggers: AI-Detected Signals), **call AskUserQuestion** to confirm activation:
+When AI detects a strong ambiguity trigger (see Triggers: AI-Detected Signals), present the detected ambiguity as text output (e.g., "I notice this expression may be ambiguous: [specific ambiguity evidence]"), then **call AskUserQuestion** to confirm activation:
 
 ```
-I notice this expression may be ambiguous — would you like to clarify it?
+Would you like to clarify this expression?
 
 Options:
 1. Yes, help me clarify — start Hermeneia
@@ -270,13 +270,15 @@ Analyze Eᵥ to detect applicable gap types, then **call the AskUserQuestion too
 
 Per Gap Taxonomy above. Apply priority order: Coherence → Background → Expression → Precision. Emergent gaps must satisfy morphism `IntentMisarticulated → ClarifiedIntent`; boundary: intent-expression gap (in-scope) vs. goal definition (→ `/goal`) or execution context (→ `/inquire`).
 
-Present detection results with evidence, then confirm:
+Present detection results with evidence as text output:
+- Detected gap types in your expression:
+  - **[Type]**: [specific evidence from Eᵥ]
+  - **[Type]**: [specific evidence from Eᵥ]
+
+Then **call AskUserQuestion** to confirm:
 
 ```
-I detected these gap types in your expression:
-
-- **[Type]**: [specific evidence from Eᵥ]
-- **[Type]**: [specific evidence from Eᵥ]
+How would you like to proceed with these detected gaps?
 
 Options:
 1. **Proceed with these** — start clarification with detected gaps
@@ -299,17 +301,18 @@ User confirmation determines Gₛ and the clarification strategy in Phase 2. If 
 
 **Do NOT present clarification as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
 
-```
-I notice potential ambiguity in your request:
+Present the detected ambiguity as text output:
+- The potential ambiguity: [gap description]
 
-[Gap description]
+Then **call AskUserQuestion**:
+
+```
+Which best captures your intent?
 
 Options:
 1. **[Option A]**: [interpretation with implications]
 2. **[Option B]**: [interpretation with implications]
 3. **[Option C]**: [interpretation with implications]
-
-Which best captures your intent?
 ```
 
 **Question design principles**:
@@ -403,3 +406,4 @@ When multiple gaps detected:
 10. **Reflective pause**: Include "reconsider" option for complex intent clarification
 11. **Escape hatch**: Always allow user to provide their own phrasing
 12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

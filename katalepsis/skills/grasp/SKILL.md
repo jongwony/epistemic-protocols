@@ -257,8 +257,12 @@ For each task (category):
 
 2. **Present overview**: Brief summary of the category, then show detected gap types (GT) and let user select starting aspect:
 
+   Present the detected aspects as text output:
+   - Detected relevant aspects for [Category]: [GT list]
+
+   Then **call AskUserQuestion**:
+
    ```
-   Detected relevant aspects for [Category]: [GT list]
    Which aspect to start with?
    options:
      - label: "[Gap type A]"
@@ -414,3 +418,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 5. **Code grounding**: Reference specific code locations
 6. **User authority**: User's "I understand" is final
 7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
+8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

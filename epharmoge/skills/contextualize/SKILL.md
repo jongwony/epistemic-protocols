@@ -228,13 +228,16 @@ TaskCreate({
 
 **Surfacing format** (natural integration with execution completion):
 
+Present the mismatch findings as text output:
+- Done. One thing to verify about applicability:
+  - **Mismatch**: [Specific mismatch description]
+  - **Evidence**: [what in the result and what in the context diverge]
+  - **Progress**: [N completed / M total tasks] (M may increase on re-scan)
+
+Then **call AskUserQuestion**:
+
 ```
-Done. One thing to verify about applicability:
-
-[Specific mismatch description]
-[Evidence: what in the result and what in the context diverge]
-
-Progress: [N completed / M total tasks] (M may increase on re-scan)
+How would you like to handle this applicability mismatch?
 
 Options:
 1. **Confirm** — yes, this needs adaptation: [brief direction prompt]
@@ -327,3 +330,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 9. **Early exit honored**: When user accepts result as-is, accept immediately regardless of remaining mismatches
 10. **Cross-protocol awareness**: Suppress when Aitesis resolved overlapping domains in the same execution scope (within recommendation chains only)
 11. **Conditional gate**: AI-guided activation (Layer 2) requires Aitesis operational experience confirmation. User-invocable activation (Layer 1 / `/contextualize`) is always available
+12. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

@@ -235,15 +235,14 @@ The coordinator infers the Mission Brief from U (the user's request):
 - **Expected Deliverable**: What form the output should take (e.g., code review, risk analysis, decision recommendation)
 - **Scope Constraint**: What is included and excluded from analysis
 
-**Call AskUserQuestion** with the inferred Mission Brief and Mode selection (combined Q1+Q2):
-
-```
-Mission Brief for this inquiry:
-
+Present the inferred Mission Brief as text output:
 - **Intent**: [inferred inquiry intent]
 - **Deliverable**: [inferred expected deliverable]
 - **Scope**: [inferred scope constraint]
 
+Then **call AskUserQuestion** with the combined Q1+Q2:
+
+```
 Q1. Mission Brief:
 1. **Confirm** — proceed with this Mission Brief
 2. **Modify intent** — adjust what is being investigated
@@ -528,3 +527,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then call AskUserQuestion with routing options only to confirm or extend analysis
 7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion
+8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
