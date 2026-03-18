@@ -336,4 +336,4 @@ node .claude/skills/verify/scripts/static-checks.js .
 | Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions |
 | Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Post-convergence suggestion pattern change | ALL 10 SKILL.md Post-Convergence sections, plugin.json version bumps |
-| AskUserQuestion pattern change | ALL SKILL.md Rules + plugin.json version bumps |
+| AskUserQuestion pattern change | ALL SKILL.md Rules + phase prose code blocks + plugin.json version bumps |

@@ -406,4 +406,4 @@ When multiple gaps detected:
 10. **Reflective pause**: Include "reconsider" option for complex intent clarification
 11. **Escape hatch**: Always allow user to provide their own phrasing
 12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

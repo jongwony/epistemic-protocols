@@ -330,4 +330,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 9. **Early exit honored**: When user accepts result as-is, accept immediately regardless of remaining mismatches
 10. **Cross-protocol awareness**: Suppress when Aitesis resolved overlapping domains in the same execution scope (within recommendation chains only)
 11. **Conditional gate**: AI-guided activation (Layer 2) requires Aitesis operational experience confirmation. User-invocable activation (Layer 1 / `/contextualize`) is always available
-12. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+12. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

@@ -377,4 +377,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 10. **Context grounding**: Proposals based on Read/Grep when available; template fallback when not
 11. **Small phases**: One dimension per cycle; no bundling unless user requests
 12. **Escape hatch**: User can provide own definition for any field directly
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

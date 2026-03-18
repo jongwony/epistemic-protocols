@@ -429,4 +429,4 @@ Phase 2 classify summary shows the best-matched protocol as routing target.
 12. **Cross-protocol awareness**: Defer to Syneidesis when gap surfacing is already active for the same task scope
 13. **Evidence before inquiry**: User inquiry is for judgment — not for facts the AI can discover
 14. **Always show**: User can override classification without explicit approval step. Visible by default, ask only on exception
-15. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the decision question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+15. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
