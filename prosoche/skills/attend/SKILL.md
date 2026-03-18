@@ -340,15 +340,15 @@ Scan for upstream epistemic deficits that would affect execution quality if unre
 1. **Scan** execution context against 6 deficit conditions (see `references/upstream-heuristics.md`), excluding protocols in `Resolved`. Filter: execution-blocking only — surface deficits whose unresolved state would directly affect execution results
 2. **Route on scan result**:
    - **No deficits** (`D[] = ∅`): Transparent pass-through to Sub-A (no AskUserQuestion)
-   - **Deficits detected** (`D[] ≠ ∅`): **Call AskUserQuestion** with detected deficits:
+   - **Deficits detected** (`D[] ≠ ∅`): Present the upstream scan results as text output:
+     - Upstream scan — {|D[]|} execution-blocking deficit(s) detected:
+       - {for each d in D[]:} /{d.protocol} — {d.evidence} ({d.deficit})
+     - Resolved: {Resolved protocols, if any}
+
+     Then **call AskUserQuestion**:
 
 ```
-Upstream scan — {|D[]|} execution-blocking deficit(s) detected:
-
-{for each d in D[]:}
-- /{d.protocol} — {d.evidence} ({d.deficit})
-
-Resolved: {Resolved protocols, if any}
+How would you like to resolve the detected upstream deficit(s)?
 
 Options:
 1. /{first_protocol} (Recommended)
@@ -394,10 +394,13 @@ Detect team context and resolve team structure for delegation routing.
 
 1. **Detect team** at invocation time:
    - No team exists → Solo execution (prosoche-executor handles all tasks)
-   - Team exists (`C.team`) → **call AskUserQuestion** to select team structure:
+   - Team exists (`C.team`) → Present the team context as text output:
+     - Active team detected: {team name, members}
+
+     Then **call AskUserQuestion** to select team structure:
 
 ```
-Active team detected: {team name, members}
+How should the team be structured for execution?
 
 Options:
 1. **Retain as-is** — keep current team for execution
@@ -459,11 +462,15 @@ Evaluate detected signals with evidence gathering. Optional evidence collection 
 
 **Surfacing format**:
 
-```
-Before executing: [action description]
+Present the risk findings as text output:
+- **Action**: [action description]
+- **Signal**: [specific evidence]
+- [Environment context if relevant]
 
-[Signal]: [specific evidence]
-[Environment context if relevant]
+Then **call AskUserQuestion**:
+
+```
+How would you like to proceed with this action?
 
 Options:
 1. **Approve** — proceed and remember this pattern for the session
@@ -575,3 +582,4 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 14. **Materialization routing**: Context richness determines confirmation requirements — existing tasks (resume, 0 confirmations), prior protocol output (auto_proceed, 0 confirmations), cold start + Fired (auto_proceed, Sub-A0 verified), cold start + ¬Fired (confirm, 1 confirmation). This is automatic, not user-configured
 15. **Team coordination**: Team augmentation/restructuring in Phase -1 Sub-B. WHO confirmation via AskUserQuestion. |roles| ≤ 6. |retain| ≥ 1 guard for restructure. No team → Solo (prosoche-executor for all tasks)
 16. **Upstream routing**: Sub-A0 scans 6 deficit conditions before task materialization. Execution-blocking filter: only deficits that would directly affect execution results. No suppression in routing loop (sequential ≠ co-activation). Resolved tracks ProtocolId ∪ DeficitCondition; Other(P) adds both, preventing re-detection of addressed deficit. Upper bound: |ProtocolId| iterations. Transparent when D[] = ∅
+17. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

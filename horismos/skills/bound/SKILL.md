@@ -243,13 +243,15 @@ Collect contextual evidence to enrich domain descriptions and improve classifica
 
 **Classification format**:
 
+Present the domain context as text output:
+- **Domain**: [Domain name] — [Specific description]
+- **Evidence**: [Evidence collected during context collection, if any]
+- **Progress**: [N bounded / M total domains]
+
+Then **call AskUserQuestion**:
+
 ```
-I need to define boundary ownership for this task:
-
-[Domain name]: [Specific description]
-[Evidence collected during context collection, if any]
-
-Progress: [N bounded / M total domains]
+How should boundary ownership be classified for this domain?
 
 Options:
 1. **User-spec** — I decide: [what this means for scope]
@@ -332,3 +334,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 10. **Circular re-probing is healthy**: Integration may surface new boundary-undefined domains. Re-probe cycles are normal dialogue. `user_esc` guarantees termination at every AskUserQuestion moment.
 11. **Per-decision boundary**: Each invocation produces a fresh BoundaryMap for the current task scope. Do not carry over classifications from prior sessions or invocations.
 12. **Epistemic router**: BoundaryMap is a shared resource consumed by all downstream protocols — Aitesis uses it as gate threshold, Prothesis as framework filter, Telos as goal detail level, Syneidesis as gap relevance filter, Prosoche as risk evaluation threshold. This shared consumption is why Horismos requires independent protocol status rather than absorption into any single consumer.
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

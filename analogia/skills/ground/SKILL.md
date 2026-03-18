@@ -226,16 +226,17 @@ Decompose abstract and concrete domains, then construct structural correspondenc
 
 **Surfacing format**:
 
+Present the mapping details as text output:
+- **Abstract**: [component from Sₐ with structural description]
+- **Concrete**: [proposed correspondence in Sₜ with evidence]
+- **Example**: [concrete scenario demonstrating the mapping]
+- [If structural mismatch detected: flag and explain]
+- **Progress**: [N validated / M total correspondences]
+
+Then **call AskUserQuestion**:
+
 ```
-I'd like to verify how [abstract concept] maps to your context:
-
-**Abstract**: [component from Sₐ with structural description]
-**Concrete**: [proposed correspondence in Sₜ with evidence]
-
-**Example**: [concrete scenario demonstrating the mapping]
-[If structural mismatch detected: flag and explain]
-
-Progress: [N validated / M total correspondences]
+Does [abstract concept] map correctly to your context?
 
 Options:
 1. **Confirm** — this mapping is correct
@@ -316,3 +317,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N validated / M total]`
 11. **Early exit honored**: When user declares mapping sufficient, accept immediately regardless of remaining correspondences
 12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation

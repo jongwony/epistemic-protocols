@@ -257,8 +257,12 @@ For each task (category):
 
 2. **Present overview**: Brief summary of the category, then show detected gap types (GT) and let user select starting aspect:
 
+   Present the detected aspects as text output:
+   - Detected relevant aspects for [Category]: [GT list]
+
+   Then **call AskUserQuestion**:
+
    ```
-   Detected relevant aspects for [Category]: [GT list]
    Which aspect to start with?
    options:
      - label: "[Gap type A]"
@@ -273,6 +277,10 @@ For each task (category):
 
    **Do NOT present verification questions as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
 
+   Present the relevant context as text output:
+   - What the AI work did for this aspect (the component, behavior, or mechanism being tested)
+   - The specific scenario or input being used for the probe
+
    Construct a probe based on the detected gap type. Examples (not exhaustive — adapt freely to context):
 
    | Gap Type | Probe Form (illustrative) | Tests |
@@ -282,11 +290,16 @@ For each task (category):
    | Scope | "What other parts are affected by this change?" | Impact awareness |
    | Sequence | "Which happens first — [A] or [B]?" | Execution order |
 
-   Options represent understanding levels (not action choices):
+   Then **call AskUserQuestion** with the probe question and understanding-level options:
    ```
-   1. [Correct understanding] — confirms katalepsis for this aspect
-   2. [Partial/uncertain response] — reveals specific gap area
-   3. [Misconception] — indicates correction needed
+   question: "[Essential verification question]"
+   options:
+     - label: "[Correct understanding]"
+       description: "Confirms katalepsis for this aspect"
+     - label: "[Partial/uncertain response]"
+       description: "Reveals specific gap area"
+     - label: "[Misconception]"
+       description: "Indicates correction needed"
    Other: (implicit) user explains freely — AI evaluates comprehension level
    ```
 
@@ -319,7 +332,7 @@ For each task (category):
 
    **Misconception handling** (three-step):
 
-   1. **Reasoning inquiry**: Call AskUserQuestion with AI-generated reasoning hypotheses. Infer 2-3 likely reasoning paths from the specific misconception and present as options. Each option is a context-specific hypothesis derived from the user's actual wrong answer (not a generic template). Do not reveal the correct answer yet. "Other" is always available for unlisted reasoning.
+   1. **Reasoning inquiry**: Present the detected misconception context as text output (what the user answered vs. what was expected, without revealing the correct answer). Then **call AskUserQuestion** with AI-generated reasoning hypotheses. Infer 2-3 likely reasoning paths from the specific misconception and present as options. Each option is a context-specific hypothesis derived from the user's actual wrong answer (not a generic template). Do not reveal the correct answer yet. "Other" is always available for unlisted reasoning.
 
    2. **Targeted correction**: Using both A and Aᵣ, address the root cause of the misconception. If Aᵣ reveals a specific mental model error, correct that model directly. Call Read for supporting reference if eval(A, Aᵣ) requires.
 
@@ -330,10 +343,15 @@ For each task (category):
    When step 3c evaluates as Correct for the current gap type:
 
    1. Compare probed vs. unprobed detected relevant gap types (canonical + Emergent) for this category
-   2. If unprobed aspects exist, output a brief text nudge reminding the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option (adapt wording to context, no fixed template), then **call AskUserQuestion**:
+   2. If unprobed aspects exist, output a brief text nudge reminding the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option (adapt wording to context, no fixed template).
+
+   Present progress as text output:
+   - Verified [probed aspects] in [Category]
+
+   Then **call AskUserQuestion**:
 
    ```
-   question: "Verified [probed aspects] in [Category]. Any other aspects to explore?"
+   question: "Any other aspects to explore?"
    options:
      - label: "Sufficient"
        description: "Proceed to next category with current understanding"
@@ -414,3 +432,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 5. **Code grounding**: Reference specific code locations
 6. **User authority**: User's "I understand" is final
 7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
+8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
