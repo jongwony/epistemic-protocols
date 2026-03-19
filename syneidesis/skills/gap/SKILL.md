@@ -52,7 +52,7 @@ After Phase 2: re-scan for newly surfaced gaps from user response.
 If new gaps: TaskCreate → add to queue.
 Continue until: all tasks completed OR user ESC.
 Mode remains active until convergence.
-Convergence evidence: At all-tasks-completed, present audit trace — for each registered gap, show (gap_question → user_judgment → adjustment). Convergence is demonstrated by the complete audit record, not asserted by task status.
+Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
 
 ── ADJUSTMENT RULES ──
 A(Addresses(c), _, σ) = σ { incorporate(c) }        -- extern: modifies plan
@@ -300,5 +300,6 @@ After convergence, scan session context for continuing epistemic needs and prese
 5. **Stakes calibration**: Intensity follows stakes matrix above
 6. **Gap dependencies**: Use task blocking when gaps have logical order
 7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
-8. **No zero-gap shortcut**: If Scan(D) finds no gaps, present the scan methodology and conclusion to the user. Silent zero-gap → proceed = protocol violation (committed decision with stakes deserves explicit "no gaps found" confirmation)
-9. **No gap inflation**: Do not surface gaps that lack observable evidence merely to appear thorough. Each surfaced gap must cite specific context from D
+8. **No premature convergence**: Do not declare all tasks completed without presenting convergence audit trace. "All gaps resolved" as assertion without per-gap evidence = protocol violation
+9. **No zero-gap shortcut**: If Scan(D) finds no gaps, present the scan methodology and conclusion to the user. Silent zero-gap → proceed = protocol violation (committed decision with stakes deserves explicit "no gaps found" confirmation)
+10. **No gap inflation**: Do not surface gaps that lack observable evidence merely to appear thorough. Each surfaced gap must cite specific context from D

@@ -84,7 +84,7 @@ If Uᵢ' remains: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
 User can exit at Phase 2 (early_exit).
 Continue until: informed(X') OR user ESC.
-Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ Λ.resolved, show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
+Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.probe_enriched ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 actionable(Λ) = uncertainties \ non_factual_detected       -- Fiber(Factual) uncertainties only
@@ -243,7 +243,7 @@ Analyze execution plan requirements against available context across multiple di
 1. **Scan execution plan** `X` for required context: domain knowledge, environmental state, configuration details, user preferences, constraints
 2. **Check availability**: For each requirement, assess whether it is available in conversation, files, or environment
 3. **Dimension assessment**: Identify which dimensions are potentially insufficient — factual (missing information), coherence (conflicting information), relevance (information not relevant to goal)
-4. If all requirements satisfied: proceed with execution (Aitesis not activated)
+4. If all requirements satisfied: present sufficiency finding per Rule 17 before proceeding (Aitesis not activated)
 5. If uncertainties identified: record `Uᵢ` with domain, description — proceed to Phase 1
 
 **Scan scope**: Current execution plan, conversation history, observable environment. Does NOT modify files or call external services.

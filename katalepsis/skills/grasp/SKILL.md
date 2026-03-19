@@ -56,7 +56,7 @@ Phase 3: Tᵣ → TaskUpdate(current) → detect(C) → GT → P → Δ  -- comp
 
 ── LOOP ──
 After Phase 3 verification: Evaluate comprehension per gap type.
-If |GT| = 0 for current category: mark task completed (category is self-evident), proceed to next task.
+If |GT| = 0 for current category: present self-evident finding with reasoning per Rule 10, mark task completed upon confirmation, proceed to next task.
 If gap detected: Continue questioning within current category.
 If correct: Aspect summary — show probed vs unprobed gap types.
   User selects "sufficient" → TaskUpdate completed, next pending task.
@@ -435,4 +435,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
 8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **No premature comprehension**: Do not declare all tasks completed without presenting convergence evidence trace. "Understanding verified" as assertion without per-task evidence = protocol violation
-10. **No silent gap elision**: If Phase 1 analysis finds no comprehension gaps for a category, present this finding with reasoning to user for confirmation before marking as self-evident — do not silently skip
+10. **No silent gap elision**: If Phase 3 analysis finds no comprehension gaps for a category, present this finding with reasoning to user for confirmation before marking as self-evident — do not silently skip

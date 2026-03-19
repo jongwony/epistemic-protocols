@@ -67,12 +67,12 @@ On re-entry, detect(Gᵥ) scopes to undefined dimensions in Dₐ; already-define
 If all Dₐ defined: proceed to Phase 4.
 User can trigger Phase 4 early at any Phase 1 (early_exit).
 Continue until: user approves GoalContract OR user ESC.
+Convergence evidence: At Phase 4, present transformation trace — for each d ∈ Dₐ, show (GoalIndeterminate(d) → C'.defined(d)). User approval is the convergence gate; the evidence trace enables informed approval.
 
 ── CONVERGENCE ──
 sufficient(C, Dₐ) = user_approves(C)
 progress(C, Dₐ) = |{f ∈ Dₐ | defined(f)}| / |Dₐ|
 early_exit = user_declares_sufficient (any progress level)
-Convergence evidence: At Phase 4, present transformation trace — for each d ∈ Dₐ, show (Gᵥ.indeterminate(d) → C'.defined(d)). User approval is the convergence gate; the evidence trace enables informed approval.
 
 ── TOOL GROUNDING ──
 Phase 0 Q  (extern)  → AskUserQuestion (goal confirmation + activation approval)

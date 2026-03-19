@@ -69,7 +69,7 @@ If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
 If V = Dismiss: accept this correspondence as unresolved for this session; terminalize if all correspondences addressed.
 Max 3 mapping attempts per domain pair.
 Continue until: terminalized(R') OR attempts exhausted.
-Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.correspondences, show (MappingUncertain(c) → validation_result(c)). Convergence is demonstrated, not asserted.
+Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.mappings, show (MappingUncertain(c) → validation_result(c)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 terminalized(R') = all_addressed(R') ∨ user_esc
@@ -199,7 +199,7 @@ Analyze AI output for mapping uncertainty. This phase is **silent** — no user 
 1. **Bind output** `R`: use explicit argument or the current/most recent AI output under discussion
 2. **Scan output** `R` for abstract structures: patterns, models, analogies, frameworks applied to user's domain
 3. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
-4. If all mappings trivially established: proceed normally (Analogia not activated)
+4. If all mappings trivially established: present finding per Rule 15 before proceeding (Analogia not activated)
 5. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
 
 **Scan scope**: Current AI output, conversation context, observable domain signals. Does NOT modify files or call external services.
