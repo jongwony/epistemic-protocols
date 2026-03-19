@@ -1723,6 +1723,63 @@ function checkPartitionInvariant() {
   }
 }
 
+function checkCatalogSync() {
+  const catalogSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/catalog/SKILL.md');
+  if (!fs.existsSync(catalogSkillPath)) {
+    results.warn.push({
+      check: 'catalog-sync',
+      file: 'epistemic-cooperative/skills/catalog/SKILL.md',
+      message: 'Catalog SKILL.md not found, skipping catalog sync check'
+    });
+    return;
+  }
+
+  const catalogContent = fs.readFileSync(catalogSkillPath, 'utf8');
+
+  // Build protocol metadata from PROTOCOL_FILES
+  const protocols = PROTOCOL_FILES.map(relPath => {
+    const parts = relPath.split('/');
+    return {
+      name: parts[0].charAt(0).toUpperCase() + parts[0].slice(1),
+      command: parts[2]
+    };
+  });
+
+  // Sub-check 1: every /{command} present in catalog SKILL.md
+  for (const { command } of protocols) {
+    if (!catalogContent.includes(`/${command}`)) {
+      results.fail.push({
+        check: 'catalog-sync',
+        file: 'epistemic-cooperative/skills/catalog/SKILL.md',
+        message: `Missing protocol command: /${command}`
+      });
+    }
+  }
+
+  // Sub-check 2: every protocol name present in catalog SKILL.md
+  for (const { name } of protocols) {
+    if (!catalogContent.includes(name)) {
+      results.fail.push({
+        check: 'catalog-sync',
+        file: 'epistemic-cooperative/skills/catalog/SKILL.md',
+        message: `Missing protocol name: ${name}`
+      });
+    }
+  }
+
+  // Sub-check 3: command count matches PROTOCOL_FILES.length
+  const commandMatches = catalogContent.match(/`\/[a-z]+`/g) || [];
+  const uniqueCommands = new Set(commandMatches.map(m => m.replace(/`/g, '')));
+  const expectedCount = protocols.length;
+  if (uniqueCommands.size < expectedCount) {
+    results.warn.push({
+      check: 'catalog-sync',
+      file: 'epistemic-cooperative/skills/catalog/SKILL.md',
+      message: `Command count (${uniqueCommands.size}) less than protocol count (${expectedCount})`
+    });
+  }
+}
+
 // ============================================================
 // Run All Checks
 // ============================================================
@@ -1738,6 +1795,7 @@ try {
   checkSpecVsImpl();
   checkCrossRefScan();
   checkOnboardSync();
+  checkCatalogSync();
   checkPrecedenceLinearExtension();
   checkPartitionInvariant();
 
