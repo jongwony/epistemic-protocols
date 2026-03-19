@@ -54,7 +54,8 @@ epistemic-protocols/
 │       ├── report/SKILL.md            # Usage analysis report from session patterns
 │       ├── onboard/SKILL.md           # Quick recommendation + protocol learning (quick proof + targeted learning)
 │       ├── dashboard/SKILL.md          # Full-session coverage dashboard
-│       └── preferences/SKILL.md       # Interactive protocol preference configuration
+│       ├── preferences/SKILL.md       # Interactive protocol preference configuration
+│       └── catalog/SKILL.md           # Protocol handbook — instant reference
 └── write/                             # Skill: multi-perspective blog drafting
     ├── .claude-plugin/plugin.json
     └── skills/write/SKILL.md
@@ -152,8 +153,9 @@ Detect application-context mismatch after execution when correct output may not 
 - **Invocation**: `/contextualize` or use "contextualize" in conversation
 - **Status**: Conditional — requires Aitesis operational experience
 
-### Epistemic Cooperative (Report + Onboard + Dashboard + Preferences)
-Utility skill group for session analytics and configuration.
+### Epistemic Cooperative (Report + Onboard + Dashboard + Preferences + Catalog)
+Utility skill group for session analytics, configuration, and reference.
+- **Catalog** `/catalog`: Protocol handbook — instant reference for when to use each protocol. No args = cluster-grouped overview, cluster/protocol arg = detail card from scenarios.md. No AskUserQuestion — pure text output.
 - **Report** `/report`: Generate Growth Map — orthogonal epistemic analysis (protocol adoption patterns, coverage gaps, anti-patterns) using `/insights` data as targeting input. Output: HTML artifact (`growth-map.html`); falls back to Epistemic Profile when insights unavailable.
 - **Onboard** `/onboard`: Quick recommendation from recent sessions, or quest-based learning through scenario, trial, and quiz. Flow: Quick Proof (Entry → QuickScan → Pick-1 → Evidence → Trial → Insight → Next), Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects path (quick default); Onboarding Pool (`/goal`, `/gap`, `/frame`) serves both Quick auto-recommend and Targeted fallback; pool exhaustion in Quick path transitions to Targeted.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
@@ -298,6 +300,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 11. **onboard-sync**: Onboard SKILL.md Data Sources table, protocol count, Phase 0 category groupings, `references/scenarios.md` scenario blocks, `references/workflow.md` slash commands — all cross-checked against `PROTOCOL_FILES`
 12. **precedence-linear-extension**: Verifies CANONICAL_PRECEDENCE total order is a valid linear extension of graph.json precondition partial order
 13. **partition-invariant**: Verifies MODE STATE pairwise disjoint partition invariants — universe set and partition members exist as MODE STATE fields
+14. **catalog-sync**: Catalog SKILL.md protocol coverage — all protocol names and commands present, count verified against `PROTOCOL_FILES`
 
 ## Delegation Constraint
 
@@ -313,6 +316,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Onboard**: All paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases. Quick path: Phases 0-1, 2a-2b, 4 (Trial triggers actual protocol execution in-session). Targeted path: Phases 0-6 (full learning experience).
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 - **Preferences**: No Task delegation—must run in main agent to call AskUserQuestion. Main agent handles all phases (0-4).
+- **Catalog**: No delegation—text-only output, main agent handles all. Read tool for scenarios.md detail mode only.
 
 ## Git Conventions
 
@@ -340,7 +344,8 @@ node .claude/skills/verify/scripts/static-checks.js .
 | Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
-| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_CLUSTERS`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), README.md + README_ko.md |
+| New skill added to existing plugin | `SKILL.md`, `plugin.json` (version + description), `marketplace.json` description, `package.js` (PLUGINS + FIRST_RELEASE_HIGHLIGHTS), CLAUDE.md (architecture, plugin section, delegation, static checks if applicable) |
+| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_CLUSTERS`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), catalog SKILL.md, README.md + README_ko.md |
 | Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions |
 | Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Post-convergence suggestion pattern change | ALL 10 SKILL.md Post-Convergence sections, plugin.json version bumps |

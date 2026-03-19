@@ -31,6 +31,7 @@ const PLUGINS = [
   { dir: 'prosoche', skill: 'attend' },
   { dir: 'epharmoge', skill: 'contextualize' },
   { dir: 'epistemic-cooperative', skill: 'onboard' },
+  { dir: 'epistemic-cooperative', skill: 'catalog' },
 ];
 
 // claude.ai description overrides (originals exceed 200 chars)
@@ -104,6 +105,7 @@ Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory e
 
 ### Utility Skills
 
+- \`/catalog\` — instant protocol handbook and reference
 - \`/onboard\` — quest-based protocol learning (quick recommendation + targeted scenarios)
 - \`/report\` — Growth Map with epistemic analysis from session patterns
 - \`/dashboard\` — full-session coverage analytics
