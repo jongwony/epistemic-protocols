@@ -63,6 +63,7 @@ If correct: Aspect summary — show probed vs unprobed gap types.
   User selects additional aspect → Resume with selected gap type.
   User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, resume current loop position.
 Continue until: all selected tasks completed OR user ESC.
+Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
@@ -433,3 +434,5 @@ After convergence, scan session context for continuing epistemic needs and prese
 6. **User authority**: User's "I understand" is final
 7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
 8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+9. **No premature comprehension**: Do not declare all tasks completed without presenting convergence evidence trace. "Understanding verified" as assertion without per-task evidence = protocol violation
+10. **No silent gap elision**: If Phase 1 analysis finds no comprehension gaps for a category, present this finding with reasoning to user for confirmation before marking as self-evident — do not silently skip

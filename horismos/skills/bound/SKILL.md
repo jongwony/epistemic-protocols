@@ -68,6 +68,7 @@ J = {next, converge}
   converge:  Phase 3 → deactivate (|remaining| = 0: all domains bounded)
 
 Answer types (UserSpec/AISpec/NeedsCalibration/Dismiss) determine BoundaryMap entry, not loop path.
+Convergence evidence: At |remaining| = 0, present transformation trace — for each d ∈ Λ.classified, show (BoundaryUndefined(d) → BoundaryClassification(d)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 converge iff |remaining| = 0 ∨ user_esc
@@ -335,3 +336,5 @@ After convergence, scan session context for continuing epistemic needs and prese
 11. **Per-decision boundary**: Each invocation produces a fresh BoundaryMap for the current task scope. Do not carry over classifications from prior sessions or invocations.
 12. **Epistemic router**: BoundaryMap is a shared resource consumed by all downstream protocols — Aitesis uses it as gate threshold, Prothesis as framework filter, Telos as goal detail level, Syneidesis as gap relevance filter, Prosoche as risk evaluation threshold. This shared consumption is why Horismos requires independent protocol status rather than absorption into any single consumer.
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+14. **No premature convergence**: Do not declare |remaining| = 0 without presenting convergence evidence trace. "All domains bounded" as assertion without per-domain evidence = protocol violation
+15. **No silent boundary assumption**: If Phase 1 analysis detects no boundary-undefined domains, present this finding with reasoning to user for confirmation before concluding — do not silently proceed

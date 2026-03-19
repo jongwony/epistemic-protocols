@@ -84,6 +84,7 @@ If Uᵢ' remains: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
 User can exit at Phase 2 (early_exit).
 Continue until: informed(X') OR user ESC.
+Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ Λ.resolved, show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 actionable(Λ) = uncertainties \ non_factual_detected       -- Fiber(Factual) uncertainties only
@@ -430,3 +431,5 @@ Phase 2 classify summary shows the best-matched protocol as routing target.
 13. **Evidence before inquiry**: User inquiry is for judgment — not for facts the AI can discover
 14. **Always show**: User can override classification without explicit approval step. Visible by default, ask only on exception
 15. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+16. **No premature convergence**: Do not declare remaining = ∅ without presenting convergence evidence trace. "All uncertainties resolved" as assertion without per-uncertainty evidence = protocol violation
+17. **No silent sufficiency assumption**: If Phase 0 scan detects no uncertainties, present this finding with reasoning to user for confirmation before proceeding — do not silently declare context sufficient

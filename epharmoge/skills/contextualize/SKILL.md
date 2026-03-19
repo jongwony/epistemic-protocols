@@ -54,6 +54,7 @@ If adjudicated(R', X): all tasks completed → convergence.
 User can exit at Phase 1 (early_exit option or Esc).
 Continue until: contextualized(R') OR user ESC.
 Mode remains active until convergence.
+Convergence evidence: At adjudicated(R', X), present transformation trace — for each m ∈ Λ.mismatches, show (ApplicationDecontextualized(m) → adaptation_result(m)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 applicable(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X)
@@ -331,3 +332,5 @@ After convergence, scan session context for continuing epistemic needs and prese
 10. **Cross-protocol awareness**: Suppress when Aitesis resolved overlapping domains in the same execution scope (within recommendation chains only)
 11. **Conditional gate**: AI-guided activation (Layer 2) requires Aitesis operational experience confirmation. User-invocable activation (Layer 1 / `/contextualize`) is always available
 12. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **No premature convergence**: Do not declare adjudicated(R', X) without presenting convergence evidence trace. "All mismatches resolved" as assertion without per-mismatch evidence = protocol violation
+14. **No silent applicability assumption**: If Phase 0 scan detects no context mismatches, present this finding with reasoning to user for confirmation before concluding — do not silently declare applicable

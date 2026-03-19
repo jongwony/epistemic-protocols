@@ -120,6 +120,7 @@ After Phase 4 (routing):
                    (withdraw = graceful exit, preserve_findings skipped)
 
 Continue until convergence: user satisfied OR user withdraw OR user Esc key.
+Convergence evidence: At wrap_up (Mode 2) or recommend terminus (Mode 1), present transformation trace — for each p ∈ Pₛ, show (FrameworkAbsent → p.contribution to L). Convergence is demonstrated, not asserted.
 
 ── BOUNDARY ──
 Q(MB, M) (confirm+select) = extern: Mission Brief confirmation + mode selection boundary
@@ -528,3 +529,5 @@ After convergence, scan session context for continuing epistemic needs and prese
 6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then call AskUserQuestion with routing options only to confirm or extend analysis
 7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion
 8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+9. **No premature convergence**: Do not declare wrap_up without presenting convergence evidence trace. "User satisfied" as assertion without per-perspective contribution evidence = protocol violation
+10. **No silent framework dismissal**: If Phase 1 analysis yields no candidate frameworks, present this finding with reasoning to user for confirmation before concluding — do not silently terminate

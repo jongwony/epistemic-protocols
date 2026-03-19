@@ -69,6 +69,7 @@ If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
 If V = Dismiss: accept this correspondence as unresolved for this session; terminalize if all correspondences addressed.
 Max 3 mapping attempts per domain pair.
 Continue until: terminalized(R') OR attempts exhausted.
+Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.correspondences, show (MappingUncertain(c) → validation_result(c)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 terminalized(R') = all_addressed(R') ∨ user_esc
@@ -318,3 +319,5 @@ After convergence, scan session context for continuing epistemic needs and prese
 11. **Early exit honored**: When user declares mapping sufficient, accept immediately regardless of remaining correspondences
 12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+14. **No premature convergence**: Do not declare all_addressed(R') without presenting convergence evidence trace. "All correspondences validated" as assertion without per-correspondence evidence = protocol violation
+15. **No silent mapping acceptance**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning to user for confirmation before concluding — do not silently accept
