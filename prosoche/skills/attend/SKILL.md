@@ -147,6 +147,7 @@ For each t in T[]:
 Subagent batch: p=Low tasks may be batched to a single executor invocation.
 Subagent GATE_DETECTED: parse output, surface via Phase 2 in main agent.
 Task-bounded: loop terminates when all T resolved (completed or halted).
+Convergence evidence: At all-T-resolved, present transformation trace — for each t ∈ Λ.tasks, show (ExecutionBlind(t) → situated(t) with risk classification). Convergence is demonstrated, not asserted.
 
 ── RISK SIGNAL TAXONOMY ──
 Irreversibility:      rm, git push, --force, DROP, deploy                  → Gate
@@ -583,3 +584,5 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 15. **Team coordination**: Team augmentation/restructuring in Phase -1 Sub-B. WHO confirmation via AskUserQuestion. |roles| ≤ 6. |retain| ≥ 1 guard for restructure. No team → Solo (prosoche-executor for all tasks)
 16. **Upstream routing**: Sub-A0 scans 6 deficit conditions before task materialization. Execution-blocking filter: only deficits that would directly affect execution results. No suppression in routing loop (sequential ≠ co-activation). Resolved tracks ProtocolId ∪ DeficitCondition; Other(P) adds both, preventing re-detection of addressed deficit. Upper bound: |ProtocolId| iterations. Transparent when D[] = ∅
 17. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+18. **No premature convergence**: Do not declare all T resolved without presenting convergence evidence trace. "All tasks situated" as assertion without per-task evidence = protocol violation
+19. **No silent risk dismissal**: If Phase 0 classifies all tasks as p=Low, present this classification with reasoning as text output before batch delegation — do not silently delegate all

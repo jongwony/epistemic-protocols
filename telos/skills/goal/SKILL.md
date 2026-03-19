@@ -67,6 +67,7 @@ On re-entry, detect(Gᵥ) scopes to undefined dimensions in Dₐ; already-define
 If all Dₐ defined: proceed to Phase 4.
 User can trigger Phase 4 early at any Phase 1 (early_exit).
 Continue until: user approves GoalContract OR user ESC.
+Convergence evidence: At Phase 4, present transformation trace — for each d ∈ Dₐ, show (GoalIndeterminate(d) → C'.defined(d)). User approval is the convergence gate; the evidence trace enables informed approval.
 
 ── CONVERGENCE ──
 sufficient(C, Dₐ) = user_approves(C)
@@ -319,7 +320,9 @@ After integration: Per LOOP — compute progress, route to Phase 1 (undefined re
 
 Present the assembled GoalContract as text output:
 
-**GoalContract** (progress/total):
+**GoalContract — Convergence Evidence** (progress/total):
+
+Transformation trace (each dimension Gᵥ → C'):
 - **Outcome**: [defined value or "—"]
 - **Metric**: [defined value or "—" or "N/A"]
 - **Boundary**: [defined value or "—" or "N/A"]
@@ -378,3 +381,5 @@ After convergence, scan session context for continuing epistemic needs and prese
 11. **Small phases**: One dimension per cycle; no bundling unless user requests
 12. **Escape hatch**: User can provide own definition for any field directly
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+14. **No premature sufficiency**: Do not skip Phase 4 (GoalContract review). Even when all Dₐ appear defined, present the assembled GoalContract with transformation trace for explicit user approval
+15. **No silent dimension skip**: If detect(Gᵥ) finds fewer than expected undefined dimensions, present the detection evidence. Do not silently declare dimensions as "already defined" without showing why

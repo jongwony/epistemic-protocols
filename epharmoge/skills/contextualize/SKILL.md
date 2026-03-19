@@ -54,6 +54,7 @@ If adjudicated(R', X): all tasks completed → convergence.
 User can exit at Phase 1 (early_exit option or Esc).
 Continue until: contextualized(R') OR user ESC.
 Mode remains active until convergence.
+Convergence evidence: At adjudicated(R', X), present transformation trace — for each (m, _) ∈ Λ.state.history, show (ApplicationDecontextualized(m) → adaptation_result(m)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 applicable(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X)
@@ -204,7 +205,7 @@ Evaluate execution result against application context. This phase is **silent** 
 
 1. **Scan execution result** `R` against context `X`: environment state, project conventions, use case scope, temporal validity, user constraints
 2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)
-3. If all aspects warranted: execution stands (Epharmoge not activated)
+3. If all aspects warranted: present finding per Rule 14 before concluding (Epharmoge not activated)
 4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity, `origin=Initial` — proceed to Phase 1
 
 **Information source**: The execution result `R` itself compared against observable context `X`. NOT a re-scan of pre-execution context (non-circularity with Aitesis).
@@ -331,3 +332,5 @@ After convergence, scan session context for continuing epistemic needs and prese
 10. **Cross-protocol awareness**: Suppress when Aitesis resolved overlapping domains in the same execution scope (within recommendation chains only)
 11. **Conditional gate**: AI-guided activation (Layer 2) requires Aitesis operational experience confirmation. User-invocable activation (Layer 1 / `/contextualize`) is always available
 12. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **No premature convergence**: Do not declare adjudicated(R', X) without presenting convergence evidence trace. "All mismatches resolved" as assertion without per-mismatch evidence = protocol violation
+14. **No silent applicability assumption**: If Phase 0 scan detects no context mismatches, present this finding with reasoning to user for confirmation before concluding — do not silently declare applicable

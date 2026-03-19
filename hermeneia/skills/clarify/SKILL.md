@@ -71,6 +71,7 @@ On re-entry, detect(Eᵥ) re-analyzes the expression in the context of prior cla
 If |Gₛ| = 0 after confirmation (all gaps removed): skip Phase 2, evaluate convergence (|remaining| = 0).
 Continue until converge: |remaining| = 0, cycle detected, or user exits.
 Mode remains active until convergence.
+Convergence evidence: At |remaining| = 0, present transformation trace — for each g ∈ Λ.clarified, show (IntentMisarticulated(g) → resolution(g)) from Λ.history. Convergence is demonstrated, not asserted.
 
 ── TOOL GROUNDING ──
 Phase 0 Q    → AskUserQuestion (AI-detected activation confirmation; ai_strong only)
@@ -338,11 +339,11 @@ After user response:
 - Context shift ("for production" → new precision requirements)
 
 ```markdown
-## Clarified Intent
+## Clarified Intent — Convergence Evidence
 
-Based on your clarification:
-- [Original expression element] → [Clarified meaning]
-- [Ambiguous element] → [Resolved interpretation]
+Transformation trace (each clarified gap → resolution):
+- **[Gap type]**: [Eᵥ evidence] → [Clarified meaning from A]
+- **[Gap type]**: [Eᵥ evidence] → [Clarified meaning from A]
 
 Proceeding with this understanding.
 ```
@@ -407,3 +408,5 @@ When multiple gaps detected:
 11. **Escape hatch**: Always allow user to provide their own phrasing
 12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+14. **No premature convergence**: Do not declare |remaining| = 0 without presenting convergence evidence trace. "All gaps resolved" as assertion without per-gap evidence = protocol violation
+15. **No silent gap dismissal**: If detect(Eᵥ) finds no gaps (Gd = ∅), present this finding with reasoning to the user for confirmation before concluding — do not silently proceed
