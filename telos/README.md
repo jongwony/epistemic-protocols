@@ -38,10 +38,10 @@ Users often arrive with vague aspirations (`GoalIndeterminate`) — they know th
 
 ```
 Phase 0: Trigger        → Detect goal indeterminacy + confirm co-construction mode
-Phase 1: Dimension      → Present gap dimensions (call AskUserQuestion)
+Phase 1: Dimension      → Present gap dimensions (gate interaction)
 Phase 2: Co-construction → Build GoalContract through iterative proposals
 Phase 3: Integration    → Synthesize selections into DefinedEndState
-Phase 4: Sufficiency    → Verify completeness (call AskUserQuestion)
+Phase 4: Sufficiency    → Verify completeness (gate interaction)
 ```
 
 ## Gap Types

@@ -24,7 +24,7 @@ A refined implementation of intentional friction. Materializes the `GapUnnoticed
 
 ```
 Phase 0: Detection    → Scan decision point for gaps (silent)
-Phase 1: Surfacing    → Select and present gaps (call AskUserQuestion)
+Phase 1: Surfacing    → Select and present gaps (gate interaction)
 Phase 2: Adjustment   → Incorporate response into state
 ```
 

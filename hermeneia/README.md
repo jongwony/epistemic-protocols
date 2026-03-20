@@ -34,7 +34,7 @@ Users often recognize their expression is ambiguous (`IntentMisarticulated`) but
 ```
 Phase 0: Trigger       → Recognize clarification request (user-initiated or AI-detected ambiguity)
 Phase 1: Diagnosis     → Identify intent-expression gaps (silent)
-Phase 2: Clarification → Present options (call AskUserQuestion)
+Phase 2: Clarification → Present options (gate interaction)
 Phase 3: Integration   → Proceed with clarified expression
 ```
 

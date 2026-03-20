@@ -33,13 +33,13 @@ E  = User's expression (the prompt to clarify)
 Eᵥ = Verified expression (user-confirmed binding)
 Gd = AI-detected gap types ⊆ {Expression, Precision, Coherence, Background} ∪ Emergent(Eᵥ)
 Gₛ = User-confirmed gap types (Gd after confirm/add/remove)
-Q  = Clarification question (via AskUserQuestion)
+Q  = Clarification question (via gate interaction)
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
 Î' = Updated intent after clarification
 ClarifiedIntent = Î' where |remaining| = 0 ∨ cycle(G) ∨ stall(Δ, 2) ∨ user_esc
 T  = Trigger source ∈ {user_signal, ai_strong, ai_soft}
-suggest_only = ai_soft terminal: passive suggestion without activation (no AskUserQuestion; Λ.active = false)
+suggest_only = ai_soft terminal: passive suggestion without activation (no gate interaction; Λ.active = false)
 
 ── E-BINDING ──
 bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_expr
@@ -58,11 +58,11 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0:  E → recognize(E) → T                           -- trigger recognition
           T = user_signal → Phase 1a                      -- user-initiated path
-          T = ai_strong   → Q[AskUserQuestion](confirm) → {yes: Phase 1a | no: immune(E)}  -- AI-detected confirm [Tool]
+          T = ai_strong   → Qc(confirm) → Stop → {yes: Phase 1a | no: immune(E)}  -- AI-detected confirm [Tool]
           T = ai_soft     → suggest_only                  -- suggest, do not activate
-Phase 1a: E → Q[AskUserQuestion](E) → Eᵥ                 -- E confirmation [Tool]
-Phase 1b: Eᵥ → detect(Eᵥ) → Gd → Q[AskUserQuestion](Gd, evidence) → Gₛ  -- gap detection + confirm [Tool]
-Phase 2:  Gₛ → Q[AskUserQuestion](Gₛ) → await → A        -- clarification [Tool]
+Phase 1a: E → Qc(E) → Stop → Eᵥ                          -- E confirmation [Tool]
+Phase 1b: Eᵥ → detect(Eᵥ) → Gd → Qc(Gd, evidence) → Stop → Gₛ  -- gap detection + confirm [Tool]
+Phase 2:  Gₛ → Qs(Gₛ) → Stop → A                         -- clarification [Tool]
 Phase 3:  A → integrate(A, Î) → Î'                       -- intent update (internal)
 
 ── LOOP ──
@@ -74,13 +74,24 @@ Mode remains active until convergence.
 Convergence evidence: At |remaining| = 0, present transformation trace — for each g ∈ Λ.clarified, show (IntentMisarticulated(g) → resolution(g)) from Λ.history. Convergence is demonstrated, not asserted.
 
 ── TOOL GROUNDING ──
-Phase 0 Q    → AskUserQuestion (AI-detected activation confirmation; ai_strong only)
-Phase 1a Q   → AskUserQuestion (E confirmation)
+-- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+Phase 0 Qc   (extern) → present (AI-detected activation confirmation; ai_strong only)
+Phase 1a Qc  (extern) → present (E confirmation)
 Phase 1b detect (detect) → Internal analysis (gap detection from Eᵥ)
-Phase 1b Q   → AskUserQuestion (detection confirmation: confirm/add/remove)
-Phase 2 Q    → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 1b Qc  (extern) → present (detection confirmation: confirm/add/remove)
+Phase 2 Qs   (extern) → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
 suggest_only → no tool call (passive suggestion; Λ.active = false)
 integrate    → Internal state update (no external tool)
+
+── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+Phase 0 Qc (confirm)       → conditional: ai_strong only (user_signal path skips Phase 0)
+                              regret: bounded (Phase 1a Qc always gated; immune(E) on decline)
+Phase 1a Qc (E confirm)    → elidable when: explicit_arg(E) via /clarify "text"
+                              default: proceed with bound E
+                              regret: bounded (Phase 1b Qc provides correction opportunity)
+Phase 1b Qc (gap confirm)  → always_gated (Qc: gap set shapes clarification path)
+Phase 2 Qs (clarify)       → always_gated (Qs: user incorporates intent into clarification)
 
 ── MODE STATE ──
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, detected: Set(Gap), gaps: Set(Gap),
@@ -132,7 +143,7 @@ When Hermeneia is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, call AskUserQuestion tool to present clarification options.
+**Action**: At Phase 2, present clarification options via gate interaction (Qc/Qs) and yield turn.
 </system-reminder>
 
 - Hermeneia completes before other workflows begin
@@ -161,9 +172,9 @@ Clarified expression becomes input to subsequent protocols.
 
 | Strength | Trigger | Action |
 |----------|---------|--------|
-| Strong (`ai_strong`) | Standalone ambiguous expression with multiple valid interpretations | Confirm with AskUserQuestion, then activate |
-| Strong (`ai_strong`) | Request referencing undefined scope or entity | Confirm with AskUserQuestion, then activate |
-| Strong (`ai_strong`) | Scope-reference mismatch (expression scope ≠ referenced context) | Confirm with AskUserQuestion, then activate |
+| Strong (`ai_strong`) | Standalone ambiguous expression with multiple valid interpretations | Confirm via gate interaction, then activate |
+| Strong (`ai_strong`) | Request referencing undefined scope or entity | Confirm via gate interaction, then activate |
+| Strong (`ai_strong`) | Scope-reference mismatch (expression scope ≠ referenced context) | Confirm via gate interaction, then activate |
 | Soft (`ai_soft`) | Minor lexical ambiguity resolvable from context | Suggest only; do not activate |
 
 **Skip** (user-initiated):
@@ -233,7 +244,7 @@ Recognize trigger source and determine activation path:
 
 **AI-Detected Path** (`T = ai_strong`):
 
-When AI detects a strong ambiguity trigger (see Triggers: AI-Detected Signals), present the detected ambiguity as text output (e.g., "I notice this expression may be ambiguous: [specific ambiguity evidence]"), then **call AskUserQuestion** to confirm activation:
+When AI detects a strong ambiguity trigger (see Triggers: AI-Detected Signals), present the detected ambiguity as text output (e.g., "I notice this expression may be ambiguous: [specific ambiguity evidence]"), then **present** to confirm activation:
 
 ```
 Would you like to clarify this expression?
@@ -245,11 +256,11 @@ Options:
 
 User confirmation required before proceeding to Phase 1a. If user selects option 2, mark session immunity and do not re-trigger for this expression.
 
-`T = ai_soft` → suggest only; do not call AskUserQuestion, do not activate.
+`T = ai_soft` → suggest only; do not present via gate interaction, do not activate.
 
 ### Phase 1a: Expression Confirmation
 
-**Call the AskUserQuestion tool** to confirm which expression to clarify.
+**Present** to confirm which expression to clarify.
 
 Present the bound expression E and ask user to confirm or specify:
 
@@ -267,7 +278,7 @@ Options:
 
 ### Phase 1b: Gap Detection and Confirmation
 
-Analyze Eᵥ to detect applicable gap types, then **call the AskUserQuestion tool** for user confirmation.
+Analyze Eᵥ to detect applicable gap types, then **present** for user confirmation.
 
 Per Gap Taxonomy above. Apply priority order: Coherence → Background → Expression → Precision. Emergent gaps must satisfy morphism `IntentMisarticulated → ClarifiedIntent`; boundary: intent-expression gap (in-scope) vs. goal definition (→ `/goal`) or execution context (→ `/inquire`).
 
@@ -276,7 +287,7 @@ Present detection results with evidence as text output:
   - **[Type]**: [specific evidence from Eᵥ]
   - **[Type]**: [specific evidence from Eᵥ]
 
-Then **call AskUserQuestion** to confirm:
+Then **present** to confirm:
 
 ```
 How would you like to proceed with these detected gaps?
@@ -290,7 +301,7 @@ Options:
 - "Add" and "Remove" options include brief rationale showing why the type was/wasn't detected
 - Emergent gaps include boundary annotation: "This is an intent-expression gap (Hermeneia scope). Not: goal definition (→ `/goal`) or execution context (→ `/inquire`)"
 
-**Add/Remove sub-steps**: On "Add" or "Remove" selection, call AskUserQuestion to specify which type to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1b completes when user selects "Proceed with these."
+**Add/Remove sub-steps**: On "Add" or "Remove" selection, present via gate interaction to specify which type to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1b completes when user selects "Proceed with these."
 
 **Soft guard**: If user removes all detected gaps, confirm: "Removing all gaps terminates clarification. Continue?" If confirmed, `|Gₛ| = 0` → skip Phase 2, evaluate convergence (`|remaining| = 0` in LOOP).
 
@@ -298,14 +309,14 @@ User confirmation determines Gₛ and the clarification strategy in Phase 2. If 
 
 ### Phase 2: Clarification
 
-**Call the AskUserQuestion tool** to present clarification options.
+**Present** clarification options via gate interaction.
 
-**Do NOT present clarification as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
+**Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
 Present the detected ambiguity as text output:
 - The potential ambiguity: [gap description]
 
-Then **call AskUserQuestion**:
+Then **present**:
 
 ```
 Which best captures your intent?
@@ -350,9 +361,9 @@ Proceeding with this understanding.
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the clarification changed the downstream action. State in one sentence what shifted (e.g., "The clarified scope narrows implementation to the auth module only") or note that the original expression was confirmed as adequate. This is informational text — not an AskUserQuestion call.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the clarification changed the downstream action. State in one sentence what shifted (e.g., "The clarified scope narrows implementation to the auth module only") or note that the original expression was confirmed as adequate. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
@@ -365,7 +376,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Restate clarified intent as a reference for downstream work
 - Note any residual ambiguity that was accepted rather than resolved
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
@@ -396,7 +407,7 @@ When multiple gaps detected:
 ## Rules
 
 1. **Hybrid-initiated, user-confirmed**: Activate on user signal, or with user confirmation when AI detects ambiguous expression
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
+2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Detection with user authority**: AI detects gap types with evidence; user confirms, adds, or removes (no blind multiSelect, no auto-proceed)
 4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
 5. **Articulation support**: Help user express what they know, don't guess what they mean
@@ -407,6 +418,6 @@ When multiple gaps detected:
 10. **Reflective pause**: Include "reconsider" option for complex intent clarification
 11. **Escape hatch**: Always allow user to provide their own phrasing
 12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **No premature convergence**: Do not declare |remaining| = 0 without presenting convergence evidence trace. "All gaps resolved" as assertion without per-gap evidence = protocol violation
 15. **No silent gap dismissal**: If detect(Eᵥ) finds no gaps (Gd = ∅), present this finding with reasoning to the user for confirmation before concluding — do not silently proceed

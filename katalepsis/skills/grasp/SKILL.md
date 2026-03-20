@@ -35,9 +35,9 @@ Sₑ = User-selected entry points
 Tᵣ = Task registration for tracking
 P  = User's phantasia (current representation/understanding)
 Δ  = Detected comprehension gap
-Q  = Verification question (via AskUserQuestion)
+Q  = Verification question (via gate interaction)
 A  = User's answer
-Aᵣ = User's reasoning behind misconception (via AskUserQuestion)
+Aᵣ = User's reasoning behind misconception (via gate interaction)
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
@@ -45,14 +45,14 @@ GT = Relevant gap types per category ⊆ {Expectation, Causality, Scope, Sequenc
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Categorize(R) → C                         -- analysis (silent)
-Phase 1: C → Q[AskUserQuestion](entry points) → Sₑ     -- entry point selection [Tool]
+Phase 1: C → Qc(entry points) → Stop → Sₑ              -- entry point selection [Tool]
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → detect(C) → GT → P → Δ  -- comprehension check [Tool]
-       → Q[AskUserQuestion](Δ) → A → P' → Tᵤ           -- verification loop [Tool]
+       → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Emergent [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
-       → Q[AskUserQuestion](Aᵣ) if misconception(A)    -- reasoning inquiry [Tool]
+       → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
        → Read(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
-       → Q[AskUserQuestion](coverage) if correct(A)     -- aspect summary [Tool]
+       → Qc(coverage) → Stop if correct(A)               -- aspect summary [Tool]
 
 ── LOOP ──
 After Phase 3 verification: Evaluate comprehension per gap type.
@@ -71,15 +71,24 @@ Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
 VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
 
 ── TOOL GROUNDING ──
-Phase 1 Q   → AskUserQuestion (entry point selection)
+-- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+Phase 1 Qc  (extern) → present (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 detect (detect) → Internal analysis (gap type relevance detection per category)
-Phase 3 Q   → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
-Phase 3 Qᵣ → AskUserQuestion (misconception reasoning inquiry)
+Phase 3 Qs  (extern) → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 Qᵣs (extern) → present (misconception reasoning inquiry)
+Phase 3 Qc  (extern) → present (aspect coverage: sufficient/aspect)
 Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Phase 3 Prop → TaskCreate (proposal ejection)
 Categorize  → Internal analysis (Read for context if needed)
+
+── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+Phase 1 Qc (entry points)  → always_gated (Qc: verification scope selection)
+Phase 3 Qs (verify)        → always_gated (Qs: Socratic probe — user comprehension is the measurement)
+Phase 3 Qᵣs (reasoning)   → always_gated (Qs: misconception reasoning hypothesis)
+Phase 3 Qc (coverage)      → always_gated (Qc: aspect coverage — sufficient vs explore more)
 
 ── MODE STATE ──
 Λ = {
@@ -137,8 +146,8 @@ When Katalepsis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 1, call AskUserQuestion for entry point selection.
-At Phase 3, call AskUserQuestion for comprehension verification.
+**Action**: At Phase 1, present entry point selection via gate interaction (Qc) and yield turn.
+At Phase 3, present comprehension verification via gate interaction (Qs) and yield turn.
 </system-reminder>
 
 - Katalepsis provides structured comprehension path
@@ -215,9 +224,9 @@ Analyze AI work result and extract categories:
 
 ### Phase 1: Entry Point Selection
 
-**Call the AskUserQuestion tool** to let user select where to start.
+**Present** entry points via gate interaction to let user select where to start.
 
-**Do NOT present entry points as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
+**Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
 ```
 question: "What would you like to understand first?"
@@ -261,7 +270,7 @@ For each task (category):
    Present the detected aspects as text output:
    - Detected relevant aspects for [Category]: [GT list]
 
-   Then **call AskUserQuestion**:
+   Then **present**:
 
    ```
    Which aspect to start with?
@@ -274,9 +283,9 @@ For each task (category):
 
    This lightweight `select_start` prevents AI-imposed framing on the first probe without requiring full pre-authorization of the detection set. User picks starting direction; remaining aspects surface in step 3d.
 
-3. **Verify comprehension** by **calling the AskUserQuestion tool** with a Socratic probe:
+3. **Verify comprehension** by **presenting** a Socratic probe via gate interaction:
 
-   **Do NOT present verification questions as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
+   **Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
    Present the relevant context as text output:
    - What the AI work did for this aspect (the component, behavior, or mechanism being tested)
@@ -291,7 +300,19 @@ For each task (category):
    | Scope | "What other parts are affected by this change?" | Impact awareness |
    | Sequence | "Which happens first — [A] or [B]?" | Execution order |
 
-   Then **call AskUserQuestion** with the probe question and understanding-level options:
+   **Gap type → probe kind mapping**: The probe’s gate kind (Qc vs Qs) varies by gap type to match the answer space structure:
+
+   | Gap Type | Probe Kind | Rationale |
+   |----------|------------|-----------|
+   | **Expectation** | Qc (classificatory) | Answer space is enumerable — user selects from finite correct/partial/misconception options representing predicted behaviors |
+   | **Sequence** | Qc (classificatory) | Answer space is enumerable — user selects from finite ordering options |
+   | **Causality** | Qs (constitutive) | Causal reasoning requires model-discriminating options where the user’s own reasoning is diagnostic |
+   | **Scope** | Qs (constitutive) | Impact enumeration requires user-generated content — scope awareness cannot be tested by selection alone |
+   | **Emergent** | Qs (constitutive) | Unknown structure favors open response — no pre-enumerable answer space |
+
+   Estimated split: ~40–50% Type F (Expectation, Sequence → Qc probes), ~50–60% Type M (Causality, Scope, Emergent → Qs probes). The split reflects that comprehension verification often involves causal and scope understanding, which resist reduction to finite option sets.
+
+   Then **present** the probe question with understanding-level options:
    ```
    question: "[Essential verification question]"
    options:
@@ -328,16 +349,16 @@ For each task (category):
    | Evaluation | Action | Tool |
    |------------|--------|------|
    | Correct (P' ≅ R) | Confirm, proceed to next aspect or category | TaskUpdate |
-   | Partial gap | Targeted followup probe on the gap area | AskUserQuestion |
-   | Misconception | Reasoning inquiry → targeted correction | AskUserQuestion, Read (AI-determined) |
+   | Partial gap | Targeted followup probe on the gap area | Gate interaction |
+   | Misconception | Reasoning inquiry → targeted correction | Gate interaction, Read (AI-determined) |
 
    **Misconception handling** (three-step):
 
-   1. **Reasoning inquiry**: Present the detected misconception context as text output (what the user answered vs. what was expected, without revealing the correct answer). Then **call AskUserQuestion** with AI-generated reasoning hypotheses. Infer 2-3 likely reasoning paths from the specific misconception and present as options. Each option is a context-specific hypothesis derived from the user's actual wrong answer (not a generic template). Do not reveal the correct answer yet. "Other" is always available for unlisted reasoning.
+   1. **Reasoning inquiry**: Present the detected misconception context as text output (what the user answered vs. what was expected, without revealing the correct answer). Then **present** AI-generated reasoning hypotheses via gate interaction. Infer 2-3 likely reasoning paths from the specific misconception and present as options. Each option is a context-specific hypothesis derived from the user's actual wrong answer (not a generic template). Do not reveal the correct answer yet. "Other" is always available for unlisted reasoning.
 
    2. **Targeted correction**: Using both A and Aᵣ, address the root cause of the misconception. If Aᵣ reveals a specific mental model error, correct that model directly. Call Read for supporting reference if eval(A, Aᵣ) requires.
 
-   3. **Resume**: Output a brief text nudge before calling AskUserQuestion — remind the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option. Adapt wording to fit the current context (no fixed template). This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User input via Other triggers Step 3b Proposal ejection workflow, then resumes the verification loop. Call AskUserQuestion again for the same aspect.
+   3. **Resume**: Output a brief text nudge before presenting via gate interaction — remind the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option. Adapt wording to fit the current context (no fixed template). This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User input via Other triggers Step 3b Proposal ejection workflow, then resumes the verification loop. Present via gate interaction again for the same aspect.
 
 3d. **Aspect coverage check** (before marking category complete):
 
@@ -349,7 +370,7 @@ For each task (category):
    Present progress as text output:
    - Verified [probed aspects] in [Category]
 
-   Then **call AskUserQuestion**:
+   Then **present**:
 
    ```
    question: "Any other aspects to explore?"
@@ -399,9 +420,9 @@ Use:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the verified understanding changed the user's approach. State in one sentence what shifted (e.g., "The user's revised understanding of the caching layer changes the optimization strategy") or note that the original understanding was confirmed as accurate. This is informational text — not an AskUserQuestion call.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the verified understanding changed the user's approach. State in one sentence what shifted (e.g., "The user's revised understanding of the caching layer changes the optimization strategy") or note that the original understanding was confirmed as accurate. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
@@ -414,7 +435,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Note any ejected proposals (user-identified areas for future investigation)
 - Summarize verified understanding as reference for subsequent decisions
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
@@ -427,12 +448,12 @@ After convergence, scan session context for continuing epistemic needs and prese
 ## Rules
 
 1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Recognition over Recall**: Always **call** AskUserQuestion with Socratic probing questions — comprehension-testing options, not meta-selection (text presentation = protocol violation)
+2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Chunk complexity**: Break large changes into digestible categories
 4. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
 5. **Code grounding**: Reference specific code locations
 6. **User authority**: User's "I understand" is final
 7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
-8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **No premature comprehension**: Do not declare all tasks completed without presenting convergence evidence trace. "Understanding verified" as assertion without per-task evidence = protocol violation
 10. **No silent gap elision**: If Phase 3 analysis finds no comprehension gaps for a category, present this finding with reasoning to user for confirmation before marking as self-evident — do not silently skip

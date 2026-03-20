@@ -28,9 +28,9 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 |-----------|---------|-------|
 | Context passing | `/clarify fix the auth flow` | Protocol receives your text as input args |
 | Fully qualified name | `/aitesis:inquire` | Use `plugin:skill` format to target exact plugin when names overlap |
-| Plan mode | `/clarify` in plan mode | Protocols work because they primarily use AskUserQuestion, which is allowed in plan mode |
+| Plan mode | `/clarify` in plan mode | Protocols work because they primarily use gate interaction, which is allowed in plan mode |
 
-## AskUserQuestion Engagement
+## Gate Interaction Engagement
 
 | Pattern | Description |
 |---------|-------------|

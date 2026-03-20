@@ -140,7 +140,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 **Checklist**:
 
 #### UX Pattern Validation
-- [ ] AskUserQuestion mandates: protocols requiring user input use tool call, not text presentation
+- [ ] Gate mandates: protocols requiring user input use structured interaction (Qc/Qs + turn yield), not unstructured text bypass
 - [ ] User agency preserved: no automatic decisions that should be user choices
 - [ ] Recognition over Recall: options presented, not open questions
 - [ ] Session persistence: mode state managed correctly (active until deactivation trigger)
@@ -163,7 +163,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 
 #### False Positive Filtering
 When other experts flag these as issues, they should be filtered (not actual issues in Claude Code context):
-- [ ] "Automatic intensity reduction" — unnecessary; AskUserQuestion provides user control
+- [ ] "Automatic intensity reduction" — unnecessary; gate interaction provides user control
 - [ ] "Automatic deactivation" — unnecessary; user can interrupt/cancel natively (Esc)
 - [ ] "Decay function" — unnecessary; explicit deactivation triggers sufficient
 - [ ] "Topic boundary detection" — context-dependent; model judgment acceptable
@@ -195,7 +195,7 @@ When other experts flag these as issues, they should be filtered (not actual iss
 
 | Pattern | Expected Behavior | Violation |
 |---------|------------------|-----------|
-| AskUserQuestion mandate | Tool call in Phase 1/2 | Text-only presentation |
+| Gate mandate | Structured presentation + turn yield in Phase 1/2 | Unstructured text bypass |
 | Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
 | Hybrid protocol | Hermeneia activates on user signal or with confirmation when AI-detected | Unconfirmed AI auto-activation |
 | Intent accessibility | Hermeneia uses Î (inferred), not I (actual) | Direct access to user intent |

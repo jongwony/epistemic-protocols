@@ -44,7 +44,7 @@ AuditedDecision = Σ' where (∀ task ∈ registered: task.status = completed) �
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → Scan(D) → G              -- gate + detection (silent)
-Phase 1: G → TaskCreate[all gaps] → Gₛ → Q[AskUserQuestion](Gₛ[0]) → J  -- register all, surface first [Tool]
+Phase 1: G → TaskCreate[all gaps] → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register all, surface first [Tool]
 Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
 
 ── LOOP ──
@@ -68,10 +68,15 @@ Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1)
 proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
-Q (extern)     → AskUserQuestion tool (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
+-- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+Qs (extern)    → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (detect)  → Read, Grep (context for gap identification)
 A (adjust)     → Internal state update (no external tool)
+
+── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+Phase 1 Qs (gap surface)   → always_gated (Qs: user judgment on surfaced gap determines adjustment)
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, active: Bool }
@@ -120,7 +125,7 @@ When Syneidesis is active:
 
 **Retained**: Safety boundaries, secrets handling, deny-paths, user explicit instructions
 
-**Action**: At decision points, call AskUserQuestion tool to surface potential gaps before proceeding.
+**Action**: At decision points, present potential gaps via gate interaction (Qc/Qs) and yield turn.
 </system-reminder>
 
 - Stakes Assessment replaces tier-based gating
@@ -149,7 +154,7 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 
 **Cycle**: [Deliberation → Gap → Revision → Execution]
 1. **Deliberation**: Plan mode analysis generates recommendations (Prothesis provides multi-perspective deliberation when active)
-2. **Gap**: Syneidesis surfaces unconfirmed assumptions via AskUserQuestion
+2. **Gap**: Syneidesis surfaces unconfirmed assumptions via gate interaction
 3. **Revision**: Integrate user response, re-evaluate if needed
 4. **Execution**: Only after explicit scope confirmation
 
@@ -238,11 +243,11 @@ TaskCreate({
 
 **Dependencies**: Use `addBlockedBy` when gaps have logical dependencies (e.g., "backup location" blocked by "backup exists?").
 
-### Interactive Surfacing (AskUserQuestion)
+### Interactive Surfacing (Gate Interaction)
 
-When Syneidesis is active, **call the AskUserQuestion tool** for:
+When Syneidesis is active, **present** via gate interaction for:
 
-**Do NOT surface gaps as plain text questions.** The tool call is mandatory—text-only surfacing is a protocol violation.
+**Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
 | Trigger | Action |
 |---------|--------|
@@ -260,15 +265,15 @@ When Syneidesis is active, **call the AskUserQuestion tool** for:
 
 | Environment | Addresses | Dismisses | Silence |
 |-------------|-----------|-----------|---------|
-| AskUserQuestion | Selection | Selection | — (N/A) |
+| Gate interaction | Selection | Selection | — (N/A) |
 
-Note: Esc key → unconditional loop termination (LOOP level). Silence (no response) is theoretical; AskUserQuestion blocks until response or Esc.
+Note: Esc key → unconditional loop termination (LOOP level). Silence (no response) is theoretical; Gate interaction blocks until response or Esc.
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the gap audit changed the decision. State in one sentence what shifted (e.g., "The backup verification gap led to adding a pre-migration snapshot step") or note that the original plan was confirmed after review. This is informational text — not an AskUserQuestion call.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the gap audit changed the decision. State in one sentence what shifted (e.g., "The backup verification gap led to adding a pre-migration snapshot step") or note that the original plan was confirmed after review. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
@@ -281,7 +286,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Summarize deferred items (gaps accepted but not yet addressed)
 - Highlight high-stakes gaps that warrant re-review before execution
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
@@ -299,7 +304,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 4. **Minimal intrusion**: Lightest intervention that achieves awareness
 5. **Stakes calibration**: Intensity follows stakes matrix above
 6. **Gap dependencies**: Use task blocking when gaps have logical order
-7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 8. **No premature convergence**: Do not declare all tasks completed without presenting convergence audit trace. "All gaps resolved" as assertion without per-gap evidence = protocol violation
 9. **No zero-gap shortcut**: If Scan(D) finds no gaps, present the scan methodology and conclusion to the user. Silent zero-gap → proceed = protocol violation (committed decision with stakes deserves explicit "no gaps found" confirmation)
 10. **No gap inflation**: Do not surface gaps that lack observable evidence merely to appear thorough. Each surfaced gap must cite specific context from D

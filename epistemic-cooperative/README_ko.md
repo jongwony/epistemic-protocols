@@ -106,7 +106,7 @@ DETECT → SELECT → CONFIGURE → GENERATE → VERIFY
 |------|------|
 | 0. Detect | CLAUDE.local.md에서 기존 설정 확인 |
 | 1. Select | Quick (글로벌 5개) 또는 Full (글로벌 + 프로토콜별) 경로 선택 |
-| 2. Configure | AskUserQuestion을 통한 인터랙티브 파라미터 순회 |
+| 2. Configure | Gate Interaction을 통한 인터랙티브 파라미터 순회 |
 | 3. Generate | 설정 섹션 생성/갱신 |
 | 4. Verify | 결과 확인 |
 

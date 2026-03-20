@@ -34,7 +34,7 @@
 ```
 Phase 0: Trigger       → 명확화 요청 인식 (사용자 주도 또는 AI 모호성 감지)
 Phase 1: Diagnosis     → 의도-표현 갭 식별 (비표시)
-Phase 2: Clarification → 옵션 제시 (call AskUserQuestion)
+Phase 2: Clarification → 옵션 제시 (gate interaction)
 Phase 3: Integration   → 명확화된 표현으로 진행
 ```
 

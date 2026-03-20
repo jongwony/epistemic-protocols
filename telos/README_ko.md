@@ -38,10 +38,10 @@
 
 ```
 Phase 0: Trigger        → 목표 불확정성 감지 + 공동 구축 모드 확인
-Phase 1: Dimension      → 갭 차원 제시 (call AskUserQuestion)
+Phase 1: Dimension      → 갭 차원 제시 (gate interaction)
 Phase 2: Co-construction → 반복적 제안을 통한 GoalContract 구축
 Phase 3: Integration    → 선택 결과를 DefinedEndState로 통합
-Phase 4: Sufficiency    → 완전성 검증 (call AskUserQuestion)
+Phase 4: Sufficiency    → 완전성 검증 (gate interaction)
 ```
 
 ## 갭 유형

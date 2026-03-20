@@ -25,7 +25,7 @@ Session → Context → ∥Extract → Select → Integrate → Verify
 ```
 Phase 1: Context Detection  → Identify session path and memory mode
 Phase 2: Parallel Extraction → 3 agents extract concurrently (session-summarizer, insight-extractor, knowledge-finder)
-Phase 3: Guided Selection    → User chooses which insights to keep (call AskUserQuestion)
+Phase 3: Guided Selection    → User chooses which insights to keep (gate interaction)
 Phase 4: Integration         → Write selected insights to memory (Tier A: MEMORY.md, Tier B: .insights/)
 Phase 5: Verification        → Confirm integration and cleanup
 ```

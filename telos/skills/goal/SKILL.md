@@ -53,12 +53,12 @@ Edge cases:
 - Re-invoke: Show prior GoalContract, confirm or restart
 
 ── PHASE TRANSITIONS ──
-Phase 0:  G → recognize(G) → Q[AskUserQuestion](confirm) → Gᵥ  -- trigger + confirm [Tool]
-Phase 1:  Gᵥ → detect(Gᵥ) → Dd → Q[AskUserQuestion](Dd, evidence) → Dₐ, Dₛ  -- dimension detection + confirm [Tool]
+Phase 0:  G → recognize(G) → Qc(confirm) → Stop → Gᵥ           -- trigger + confirm [Tool]
+Phase 1:  Gᵥ → detect(Gᵥ) → Dd → Qc(Dd, evidence) → Stop → Dₐ, Dₛ  -- dimension detection + confirm [Tool]
 Phase 2:  Dₛ → propose(Dₛ, context) → P                        -- AI proposal (internal)
-        → Q[AskUserQuestion](P) → await → A                     -- co-construction [Tool]
+        → Qs(P) → Stop → A                                      -- co-construction [Tool]
 Phase 3:  A → integrate(A, C) → C'                             -- contract update (internal)
-Phase 4:  C' → Q[AskUserQuestion](C', progress) → approve       -- sufficiency check [Tool]
+Phase 4:  C' → Qc(C', progress) → Stop → approve               -- sufficiency check [Tool]
 
 ── LOOP ──
 After Phase 3: compute progress(C', Dₐ).
@@ -75,13 +75,23 @@ progress(C, Dₐ) = |{f ∈ Dₐ | defined(f)}| / |Dₐ|
 early_exit = user_declares_sufficient (any progress level)
 
 ── TOOL GROUNDING ──
-Phase 0 Q  (extern)  → AskUserQuestion (goal confirmation + activation approval)
+-- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+Phase 0 Qc (extern)  → present (goal confirmation + activation approval)
 Phase 1 detect (detect) → Internal analysis (dimension detection from Gᵥ)
-Phase 1 Q  (extern)  → AskUserQuestion (detection confirmation + progress display)
+Phase 1 Qc (extern)  → present (detection confirmation + progress display)
 Phase 2 P  (detect)  → Read, Grep (context for proposal generation; fallback: template)
-Phase 2 Q  (extern)  → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not a Response)
+Phase 2 Qs (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3    (state)   → Internal GoalContract update (no external tool)
-Phase 4 Q  (extern)  → AskUserQuestion (GoalContract review + approval)
+Phase 4 Qc (extern)  → present (GoalContract review + approval)
+
+── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+Phase 0 Qc (confirm)       → elidable when: explicit_arg via /goal "text"
+                              default: proceed with inferred goal seed
+                              regret: bounded (Phase 1 Qc provides correction opportunity)
+Phase 1 Qc (dimensions)    → always_gated (Qc: dimension set shapes goal construction)
+Phase 2 Qs (negotiate)     → always_gated (Qs: Accept/Modify/Reject/Extend — user shapes contract)
+Phase 4 Qc (approve)       → always_gated (Qc: contract approval — final binding decision)
 
 ── MODE STATE ──
 Λ = { phase: Phase, G: Goal, Gᵥ: Goal, detected: Set(Dim), applicable: Set(Dim),
@@ -120,7 +130,7 @@ Telos is not simplified requirements gathering. Three differentiators:
 
 ### Activation
 
-AI detects goal indeterminacy OR user invokes `/goal`. Activation always requires user confirmation via AskUserQuestion (Phase 0).
+AI detects goal indeterminacy OR user invokes `/goal`. Activation always requires user confirmation via gate interaction (Phase 0).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/goal` slash command or description-matching input. Always available.
@@ -138,7 +148,7 @@ When Telos is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, call AskUserQuestion tool to present concrete proposals for goal construction.
+**Action**: At Phase 2, present concrete proposals via gate interaction (Qs) and yield turn.
 </system-reminder>
 
 - Telos completes before implementation workflows begin
@@ -159,7 +169,7 @@ Approved GoalContract becomes input to subsequent protocols.
 | Exploratory framing | Strong | "what could we do about", "ideas for", "how might we" |
 | Vague qualitative | Soft (suggest only) | "improve", "better", "optimize" |
 
-**Soft triggers**: AI may suggest Telos activation via AskUserQuestion but must NOT auto-activate. Only strong triggers or explicit `/goal` invocation activate directly.
+**Soft triggers**: AI may suggest Telos activation via gate interaction but must NOT auto-activate. Only strong triggers or explicit `/goal` invocation activate directly.
 
 **Skip**:
 - User's goal is already verifiable (concrete deliverable + criteria specified)
@@ -212,7 +222,7 @@ Recognize goal indeterminacy and confirm activation:
 
 Present the detected indeterminacy as text output (e.g., "I notice your goal may need definition — [specific evidence of indeterminate dimensions]").
 
-Then **call AskUserQuestion** to confirm activation:
+Then **present** to confirm activation:
 
 ```
 Would you like to define the goal before proceeding?
@@ -226,7 +236,7 @@ Options:
 
 ### Phase 1: Dimension Detection and Confirmation
 
-Analyze Gᵥ to detect indeterminate dimensions, then **call the AskUserQuestion tool** for user confirmation.
+Analyze Gᵥ to detect indeterminate dimensions, then **present** for user confirmation via gate interaction.
 
 Per Gap Taxonomy above. Apply priority order: Outcome → Boundary → Priority → Metric. Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState`; boundary: goal definition (in-scope) vs. expression gap (→ `/clarify`) or execution context (→ `/inquire`).
 
@@ -237,7 +247,7 @@ Present detection results with evidence as text output:
   - **Outcome** [protocol constraint]: [evidence or "required by protocol"]
   - **[Type]**: [specific evidence from Gᵥ]
 
-Then **call AskUserQuestion** to confirm:
+Then **present** to confirm:
 
 ```
 How would you like to proceed with these detected dimensions?
@@ -251,7 +261,7 @@ Options:
 - "Add" and "Remove" options include brief rationale showing why the dimension was/wasn't detected
 - Emergent dimensions include boundary annotation: "This is a goal definition gap (Telos scope). Not: expression gap (→ `/clarify`) or execution context (→ `/inquire`)"
 
-**Add/Remove sub-steps**: On "Add" or "Remove" selection, call AskUserQuestion to specify which dimension to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1 completes when user selects "Proceed with these." Outcome removal is rejected with explanation (protocol constraint: `Dₐ ⊇ {Outcome}`).
+**Add/Remove sub-steps**: On "Add" or "Remove" selection, present via gate interaction to specify which dimension to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1 completes when user selects "Proceed with these." Outcome removal is rejected with explanation (protocol constraint: `Dₐ ⊇ {Outcome}`).
 
 **Soft guard**: If user removes all detected dimensions (leaving only Outcome by protocol constraint), confirm: "Only Outcome will be defined. Continue with minimal GoalContract?" If confirmed, `Dₐ = {Outcome}` → proceed to Phase 2. If declined, re-present detection for reconsideration.
 
@@ -259,9 +269,9 @@ On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only
 
 ### Phase 2: Co-Construction
 
-**Call the AskUserQuestion tool** to present a concrete proposal.
+**Present** a concrete proposal via gate interaction.
 
-**Do NOT present proposals as plain text.** The tool call is mandatory — text-only presentation is a protocol violation.
+**Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
 **High-context** (codebase/conversation context available via Read/Grep):
 
@@ -269,7 +279,7 @@ Present the context analysis and proposal as text output:
 - Based on [context analysis], here is a concrete [dimension]:
   "[specific proposal grounded in codebase/conversation]"
 
-Then **call AskUserQuestion**:
+Then **present**:
 
 ```
 How would you like to proceed with this proposal?
@@ -285,7 +295,7 @@ Options:
 Present the dimension context as text output:
 - For [dimension], here are common patterns for this type of goal.
 
-Then **call AskUserQuestion**:
+Then **present**:
 
 ```
 Which pattern fits your goal?
@@ -316,7 +326,7 @@ After integration: Per LOOP — compute progress, route to Phase 1 (undefined re
 
 ### Phase 4: Sufficiency Check
 
-**Call the AskUserQuestion tool** to present the assembled GoalContract for approval.
+**Present** the assembled GoalContract for approval via gate interaction.
 
 Present the assembled GoalContract as text output:
 
@@ -328,7 +338,7 @@ Transformation trace (each dimension Gᵥ → C'):
 - **Boundary**: [defined value or "—" or "N/A"]
 - **Priority**: [defined value or "—" or "N/A"]
 
-Then **call AskUserQuestion**:
+Then **present**:
 
 ```
 How would you like to proceed with this GoalContract?
@@ -341,9 +351,9 @@ Options:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the defined goals changed the implementation scope. State in one sentence what shifted (e.g., "The GoalContract's latency requirement eliminates the batch processing approach") or note that the original scope was confirmed by the defined goals. This is informational text — not an AskUserQuestion call.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the defined goals changed the implementation scope. State in one sentence what shifted (e.g., "The GoalContract's latency requirement eliminates the batch processing approach") or note that the original scope was confirmed by the defined goals. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
@@ -356,7 +366,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Restate GoalContract as a reference for downstream work
 - Note any deferred goal dimensions accepted for later refinement
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
@@ -368,8 +378,8 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 ## Rules
 
-1. **AI-guided, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via AskUserQuestion (Phase 0)
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation). Modify options use structured sub-choices, not free text
+1. **AI-guided, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via gate interaction (Phase 0)
+2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Modify options use structured sub-choices, not free text
 3. **Detection with user authority**: AI detects indeterminate dimensions with evidence; user confirms, adds, or removes (no blind multiSelect, no auto-proceed). Outcome always included (protocol constraint)
 4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions
 5. **Concrete proposals**: Every proposal must be specific enough to accept or reject
@@ -380,6 +390,6 @@ After convergence, scan session context for continuing epistemic needs and prese
 10. **Context grounding**: Proposals based on Read/Grep when available; template fallback when not
 11. **Small phases**: One dimension per cycle; no bundling unless user requests
 12. **Escape hatch**: User can provide own definition for any field directly
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **No premature sufficiency**: Do not skip Phase 4 (GoalContract review). Even when all Dₐ appear defined, present the assembled GoalContract with transformation trace for explicit user approval
 15. **No silent dimension skip**: If detect(Gᵥ) finds fewer than expected undefined dimensions, present the detection evidence. Do not silently declare dimensions as "already defined" without showing why

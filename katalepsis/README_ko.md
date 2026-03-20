@@ -29,9 +29,9 @@ AI가 복잡한 작업을 완료했을 때, 사용자는 종종 결과를 온전
 
 ```
 Phase 0: 카테고리화  → AI 작업 분석, 변경 카테고리 추출
-Phase 1: 진입점     → 카테고리 제시, 사용자 선택 (AskUserQuestion)
+Phase 1: 진입점     → 카테고리 제시, 사용자 선택 (gate interaction)
 Phase 2: 등록       → 선택된 카테고리에 대한 태스크 생성 (TaskCreate)
-Phase 3: 검증 루프  → 점진적으로 이해 확인 (AskUserQuestion + TaskUpdate)
+Phase 3: 검증 루프  → 점진적으로 이해 확인 (gate interaction + TaskUpdate)
 ```
 
 ## 사용 시점

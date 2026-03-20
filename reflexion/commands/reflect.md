@@ -10,7 +10,7 @@ Call the reflexion skill which will:
 1. Initialize TodoWrite to track all phases
 2. Detect session context and memory mode
 3. Extract session summary and insights (parallel subagents)
-4. Guide you through insight selection (AskUserQuestion)
+4. Guide you through insight selection (gate interaction)
 5. Integrate selected insights into User/Project memory
 6. Verify completion and cleanup
 

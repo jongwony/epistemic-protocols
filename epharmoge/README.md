@@ -45,7 +45,7 @@ Same axis (context fitness), opposite timing, opposite direction. Aitesis asks "
 
 ```
 Phase 0: Applicability Gate → Evaluate result against context (silent)
-Phase 1: Mismatch Surfacing → Present evidence (call AskUserQuestion)
+Phase 1: Mismatch Surfacing → Present evidence (gate interaction)
 Phase 2: Result Adaptation  → Apply user-directed adaptation
 ```
 

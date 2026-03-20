@@ -30,7 +30,7 @@ AI systems often proceed with execution despite insufficient context (`ContextIn
 ```
 Phase 0: Gate               → Scan context sufficiency (silent)
 Phase 1: Context Collection  → Collect contextual signals via Read/Grep to improve question quality
-Phase 2: Surfacing           → Present remaining uncertainties (call AskUserQuestion)
+Phase 2: Surfacing           → Present remaining uncertainties (gate interaction)
 Phase 3: Integration         → Update execution plan with user's resolution
 ```
 

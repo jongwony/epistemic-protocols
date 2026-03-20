@@ -25,7 +25,7 @@ Session → Context → ∥Extract → Select → Integrate → Verify
 ```
 Phase 1: Context Detection  → 세션 경로 및 메모리 모드 식별
 Phase 2: Parallel Extraction → 3개 에이전트가 동시 추출 (session-summarizer, insight-extractor, knowledge-finder)
-Phase 3: Guided Selection    → 사용자가 저장할 인사이트 선택 (call AskUserQuestion)
+Phase 3: Guided Selection    → 사용자가 저장할 인사이트 선택 (gate interaction)
 Phase 4: Integration         → 선택된 인사이트를 메모리에 기록 (Tier A: MEMORY.md, Tier B: .insights/)
 Phase 5: Verification        → 통합 확인 및 정리
 ```

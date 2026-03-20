@@ -306,6 +306,15 @@ function checkRequiredSections() {
       }
     }
 
+    // Check 5b: Optional section - ELIDABLE CHECKPOINTS (warn if missing)
+    if (!content.includes('── ELIDABLE CHECKPOINTS ──')) {
+      results.warn.push({
+        check: 'structure',
+        file: relPath,
+        message: 'Missing optional section: "── ELIDABLE CHECKPOINTS ──" (gate elidability analysis)'
+      });
+    }
+
     results.pass.push({
       check: 'structure',
       file: relPath,
@@ -347,6 +356,15 @@ function checkToolGrounding() {
     const commentPattern = new RegExp(`--\\s*${escapedOp}:`);
     if (commentPattern.test(phaseSection)) return true;
 
+    // Pattern 5: Operation with parenthesized arguments - e.g., Qc(args), Qs(args), Sc(args)
+    // Word boundary prevents substring matches (e.g., "S(" matching inside "Qs(")
+    const gatePattern = new RegExp(`(?:^|\\s)${escapedOp}\\(`, 'm');
+    if (gatePattern.test(phaseSection)) return true;
+
+    // Pattern 6: Operation followed by arrow - handles compound gates without args (e.g., "TeamCoord Qc →")
+    const compoundNoArgsPattern = new RegExp(`(?:^|\\s)${escapedOp}\\s*→`, 'm');
+    if (compoundNoArgsPattern.test(phaseSection)) return true;
+
     return false;
   }
 
@@ -375,27 +393,51 @@ function checkToolGrounding() {
 
     // Check 6b: Extract tool bindings from TOOL GROUNDING section
     const groundingMatch = content.match(/── TOOL GROUNDING ──([\s\S]*?)(?=──|$)/);
-    if (!groundingMatch) continue;
+    if (!groundingMatch) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'TOOL GROUNDING section header found but regex extraction failed — possible encoding issue'
+      });
+      continue;
+    }
 
     const groundingSection = groundingMatch[1];
     const toolBindings = [];
 
     // Parse lines like: "S (extern) → ..." or "Phase 4a Δ (detect) → ..."
-    // Capture: operation, classification, tool
-    // Supports: Phase prefix, qualifier word (e.g., "praxis"), Greek letters, ?'/
-    const bindingPattern = /^(?:Phase\s+\S+\s+)?([∥]?[\w\u0370-\u03FF?'\/]+)(?:\s+\w+)?\s*\((\w+)\)\s*→\s*(\w+)/gm;
+    // Capture: operation, qualifier (optional), classification, tool
+    // Supports: Phase prefix, qualifier word (e.g., "Qc", "Qᵣs"), Greek letters, ?'/
+    const bindingPattern = /^(?:Phase\s+\S+\s+)?([∥]?[\w\u0370-\u03FF?'\/]+)(?:\s+([\w\u0370-\u03FFᵣ]+))?\s*\((\w+)\)\s*→\s*(\w+)/gm;
     let match;
     while ((match = bindingPattern.exec(groundingSection)) !== null) {
       toolBindings.push({
         operation: match[1],
-        classification: match[2],
-        tool: match[3]
+        qualifier: match[2] || null,
+        classification: match[3],
+        tool: match[4]
+      });
+    }
+
+    // Warn if grounding section has binding arrows but no bindings were parsed
+    if (toolBindings.length === 0 && groundingSection.includes('→')) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'TOOL GROUNDING section contains binding arrows (→) but no bindings were parsed — regex may not match current format'
       });
     }
 
     // Check 6c: Verify PHASE TRANSITIONS reference tool bindings
     const phaseMatch = content.match(/── PHASE TRANSITIONS ──([\s\S]*?)(?=──|$)/);
-    if (!phaseMatch) continue;
+    if (!phaseMatch) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'PHASE TRANSITIONS section expected but regex extraction failed — possible encoding issue'
+      });
+      continue;
+    }
 
     const phaseSection = phaseMatch[1];
 
@@ -407,13 +449,28 @@ function checkToolGrounding() {
       if (!MANDATORY_CLASSIFICATIONS.has(binding.classification)) continue;
 
       // Check if operation appears with [Tool] notation in PHASE TRANSITIONS
-      if (!findOperationInPhaseTransitions(phaseSection, binding.operation)) {
+      // For compound operations (e.g., "PF Qc", "TeamCoord Qc"), search for both
+      // the compound form and the base operation
+      const compoundOp = binding.qualifier ? `${binding.operation} ${binding.qualifier}` : null;
+      const found = findOperationInPhaseTransitions(phaseSection, binding.operation) ||
+                    (compoundOp && findOperationInPhaseTransitions(phaseSection, compoundOp));
+      if (!found) {
+        const displayOp = compoundOp || binding.operation;
         results.fail.push({
           check: 'tool-grounding',
           file: relPath,
-          message: `Mandatory binding "${binding.operation} (${binding.classification}) → ${binding.tool}" not found in PHASE TRANSITIONS with [Tool] notation`
+          message: `Mandatory binding "${displayOp} (${binding.classification}) → ${binding.tool}" not found in PHASE TRANSITIONS with [Tool] notation`
         });
       }
+    }
+
+    // Check 6d: Verify TOOL GROUNDING has realization preamble
+    if (!groundingSection.includes('-- Realization:')) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'TOOL GROUNDING section missing "-- Realization:" preamble'
+      });
     }
 
     results.pass.push({

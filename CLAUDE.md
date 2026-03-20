@@ -83,10 +83,11 @@ epistemic-protocols/
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
 ── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping
+── ELIDABLE CHECKPOINTS ──  (if applicable) Per-gate dual-axis analysis (Qc/Qs answer space + regret profile)
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ```
-Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.
+Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping. Gate operations use Qc/Qs kind suffix in operation names (e.g., `Qc (extern)`).
 
 **FLOW-MORPHISM relationship**: MORPHISM is the image of FLOW under a forgetful functor that discards computational detail and tool annotations, retaining only the essential type transition skeleton (source object → transformation steps → target object) with structural annotations (requires/deficit/preserves/invariant).
 
@@ -155,7 +156,7 @@ Detect application-context mismatch after execution when correct output may not 
 
 ### Epistemic Cooperative (Report + Onboard + Dashboard + Preferences + Catalog)
 Utility skill group for session analytics, configuration, and reference.
-- **Catalog** `/catalog`: Protocol handbook — instant reference for when to use each protocol. No args = cluster-grouped overview, cluster/protocol arg = detail card from scenarios.md. No AskUserQuestion — pure text output.
+- **Catalog** `/catalog`: Protocol handbook — instant reference for when to use each protocol. No args = cluster-grouped overview, cluster/protocol arg = detail card from scenarios.md. No gates — pure text output.
 - **Report** `/report`: Generate Growth Map — orthogonal epistemic analysis (protocol adoption patterns, coverage gaps, anti-patterns) using `/insights` data as targeting input. Output: HTML artifact (`growth-map.html`); falls back to Epistemic Profile when insights unavailable.
 - **Onboard** `/onboard`: Quick recommendation from recent sessions, or quest-based learning through scenario, trial, and quiz. Flow: Quick Proof (Entry → QuickScan → Pick-1 → Evidence → Trial → Insight → Next), Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects path (quick default); Onboarding Pool (`/goal`, `/gap`, `/frame`) serves both Quick auto-recommend and Targeted fallback; pool exhaustion in Quick path transitions to Targeted.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
@@ -207,19 +208,25 @@ Do not mirror built-in execution capabilities (e.g., worktree isolation, PR crea
 
 | Tier | Mechanism | Cleanup | Scope |
 |------|-----------|---------|-------|
-| `user_esc` | Esc key at AskUserQuestion | None (ungraceful) | All protocols — universal |
-| `user_withdraw` | Explicit AskUserQuestion option | Yes (team shutdown, partial state) | Protocols with side-effect state only |
+| `user_esc` | Esc key at gate (tool-level or free-response turn) | None (ungraceful) | All protocols — universal |
+| `user_withdraw` | Explicit gate option | Yes (team shutdown, partial state) | Protocols with side-effect state only |
 | Normal convergence | Completion predicate | Full | Per-protocol |
 
 Principle: side effects require explicit answer types, not tool-level escape. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on. Protocols without termination side effects need only `user_esc`. Circular protocol interactions (e.g., boundary redefinition loops) are healthy dialogue — `user_esc` guarantees termination at every moment.
 
 **Audience Reach**: CLAUDE.md principles guide contributors (protocol designers). End users receive only SKILL.md content via the plugin system. For a principle to affect runtime protocol behavior, it must be structurally embedded in SKILL.md — documenting it in CLAUDE.md alone is insufficient.
 
-**Adversarial Protocol Design**: Each protocol must anticipate how an AI agent might shortcut or rationalize away from faithful execution, and include structural guards in Rules and Phase prose. Formal specification guarantees definitional consistency; adversarial design guarantees execution fidelity. Common rationalization paths: premature convergence assertion, silent detection dismissal, text-only presentation bypassing AskUserQuestion. These are orthogonal concerns — a protocol can be formally correct yet routinely circumvented.
+**Adversarial Protocol Design**: Each protocol must anticipate how an AI agent might shortcut or rationalize away from faithful execution, and include structural guards in Rules and Phase prose. Formal specification guarantees definitional consistency; adversarial design guarantees execution fidelity. Common rationalization paths: premature convergence assertion, silent detection dismissal, skipping gate interaction entirely (presenting content without yielding turn for response), collapsing Qs gates to plain acknowledgment. These are orthogonal concerns — a protocol can be formally correct yet routinely circumvented.
 
 **Deficit Empiricism**: Protocol creation must be grounded in observed deficit instances (N≥3) from actual sessions. Theoretical deficit classification alone is insufficient justification — the deficit must have demonstrably caused cost (wasted effort, wrong direction, missed consideration) in practice. This grounds the type system in empirical evidence rather than a priori categorization.
 
 **Convergence Evidence**: Protocol convergence must be demonstrated, not asserted. At convergence, the agent must present a transformation trace mapping each identified deficit instance to its resolution — the MORPHISM instantiated at the concrete level. "All gaps resolved" or "goal defined" as bare assertion without per-item evidence = protocol violation.
+
+**Structural Idempotency**: Same protocol definition must produce the same epistemic outcome regardless of interaction realization (tool call, text+stop, future client). Protocol specifications define gate semantics (what to present, what response constitutes), not tool mechanics. A gate is: present structured content → yield turn → parse response. The realization layer maps this to concrete tools based on client capabilities and user preferences.
+
+**Pattern over Tool**: The Recognition over Recall principle is a content invariant — the protocol function lies in the structured options pattern, not in the specific tool that renders them. Structured numbered text followed by turn yield satisfies the same epistemic function as an AskUserQuestion tool call. The invariant: user receives structured options with differential implications, and their response is parsed into a typed answer.
+
+**Interaction Kind Factorization**: Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts the gate (Ep → Abs) and R(p) realizes it for preferences p (Abs → Cl). Gate operations are classified: Qc (classificatory — projection from finite coproduct; user selects from N options) and Qs (constitutive — pushout; user response incorporates new content). Qc has bounded regret by default when elided (correctable at next gate); Qs has unbounded regret (missed user content). Specific Qc gates may carry unbounded regret from downstream irreversibility — expressed via always_gated annotation in ELIDABLE CHECKPOINTS.
 
 ## Protocol Precedence
 
@@ -305,17 +312,17 @@ node .claude/skills/verify/scripts/static-checks.js .
 ## Delegation Constraint
 
 - **Prothesis**: See SKILL.md for phase-specific delegation rules (Phase 0-2 main agent, Phase 3-4 agent team incl. routing)
-- **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Telos**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Horismos**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Aitesis**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Epharmoge**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Analogia**: No Task delegation—must run in main agent to call AskUserQuestion
-- **Prosoche**: Phase -1 (Sub-A0 upstream routing, Sub-A materialization, Sub-B team coordination) and Phases 1-3 (Gate path) run in main agent (AskUserQuestion, Skill). Phase 0 delegates p=Low tasks to prosoche-executor subagent or team agents via Agent tool.
+- **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Telos**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Horismos**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Aitesis**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Epharmoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Analogia**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Prosoche**: Phase -1 (Sub-A0 upstream routing, Sub-A materialization, Sub-B team coordination) and Phases 1-3 (Gate path) run in main agent (gate interaction, Skill). Phase 0 delegates p=Low tasks to prosoche-executor subagent or team agents via Agent tool.
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 - **Onboard**: All paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases. Quick path: Phases 0-1, 2a-2b, 4 (Trial triggers actual protocol execution in-session). Targeted path: Phases 0-6 (full learning experience).
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
-- **Preferences**: No Task delegation—must run in main agent to call AskUserQuestion. Main agent handles all phases (0-4).
+- **Preferences**: No Task delegation—must run in main agent (user-facing gates require main agent context). Main agent handles all phases (0-4).
 - **Catalog**: No delegation—text-only output, main agent handles all. Read tool for scenarios.md detail mode only.
 
 ## Git Conventions
@@ -331,7 +338,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - Keep README.md and README_ko.md in sync
 - Protocol table maintained in README.md (navigation hub format)
 - Bump version in `.claude-plugin/plugin.json` on changes
-- `call` (not `invoke` or `use`) for tool-calling instructions—strongest binding with zero polysemy
+- `call` for tool references, `present` for gate operations (tool-agnostic verb)
 - Skills frontmatter: `name` (required), `description` (required, quote if contains `:`), `allowed-tools` (optional), `license`, `compatibility`, `metadata`
 
 **Co-change pattern** (protocol modifications require synchronized edits):
@@ -349,4 +356,4 @@ node .claude/skills/verify/scripts/static-checks.js .
 | Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions |
 | Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Post-convergence suggestion pattern change | ALL 10 SKILL.md Post-Convergence sections, plugin.json version bumps |
-| AskUserQuestion pattern change | ALL SKILL.md Rules + phase prose code blocks + plugin.json version bumps |
+| Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |
