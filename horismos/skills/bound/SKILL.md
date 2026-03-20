@@ -76,7 +76,7 @@ converge iff |remaining| = 0 ∨ user_esc
   user_esc:         user exits via Esc key (ungraceful, no cleanup needed)
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+-- Realization: present → TextPresent+Stop (default) | AskUserQuestion (Epistemic Protocol Preferences)
 Phase 0 Probe (detect)  → Internal analysis (no external tool)
 Phase 1 Ctx   (collect) → Read, Grep, Glob (codebase scan for boundary signals: CLAUDE.md, boundaries.md, rules/, prior session context)
 Phase 2 Qc    (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
