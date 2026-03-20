@@ -75,7 +75,7 @@ progress(C, Dₐ) = |{f ∈ Dₐ | defined(f)}| / |Dₐ|
 early_exit = user_declares_sufficient (any progress level)
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+-- Realization: present → TextPresent+Stop (default) | AskUserQuestion (Epistemic Protocol Preferences)
 Phase 0 Qc (extern)  → present (goal confirmation + activation approval)
 Phase 1 detect (detect) → Internal analysis (dimension detection from Gᵥ)
 Phase 1 Qc (extern)  → present (detection confirmation + progress display)

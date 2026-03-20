@@ -94,7 +94,7 @@ narrowing(Q, A) = |remaining(after)| < |remaining(before)| ∨ context(remaining
 early_exit = user_declares_sufficient
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+-- Realization: present → TextPresent+Stop (default) | AskUserQuestion (Epistemic Protocol Preferences)
 Phase 0 Scan    (infer)       → Internal analysis (no external tool)
 Phase 1 Ctx     (collect)     → Read, Grep (context collection); WebSearch (conditional: environmental dependency)
 Phase 1 Classify (assess)     → Internal analysis (multi-dimension assessment); Read, Grep (coherence: multi-file relation analysis)

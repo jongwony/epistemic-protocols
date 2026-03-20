@@ -129,7 +129,7 @@ S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+-- Realization: present → TextPresent+Stop (default) | AskUserQuestion (Epistemic Protocol Preferences)
 Phase 0 Qc (extern)      → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
 Sc (extern)              → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
 T (parallel)             → TeamCreate tool (creates team with shared task list)

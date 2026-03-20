@@ -71,7 +71,7 @@ Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
 VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+-- Realization: present → TextPresent+Stop (default) | AskUserQuestion (Epistemic Protocol Preferences)
 Phase 1 Qc  (extern) → present (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 detect (detect) → Internal analysis (gap type relevance detection per category)

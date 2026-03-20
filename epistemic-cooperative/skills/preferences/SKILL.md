@@ -5,7 +5,7 @@ description: "Initialize epistemic protocol preferences with defaults. Modify vi
 
 # Preferences Skill
 
-Initialize epistemic protocol preferences with defaults for the current project. Individual parameter modifications are done via `/memory` built-in command or natural language requests.
+Initialize epistemic protocol preferences with defaults. Supports user scope (all projects) and project scope (current project only). Individual parameter modifications via `/memory` built-in command or natural language requests.
 
 ## When to Use
 
@@ -25,9 +25,9 @@ DETECT → INITIALIZE → WRITE
 
 | Phase | Owner | Tool | Purpose |
 |-------|-------|------|---------|
-| 0. Detect | Main | Read | Check existing preferences memory file |
-| 1. Initialize | Main | Gate | Present defaults + confirm initialization |
-| 2. Write | Main | Write | Create/reset memory file |
+| 0. Detect | Main | Read | Check existing preferences rules file |
+| 1. Initialize | Main | Gate | Scope selection + present defaults + confirm |
+| 2. Write | Main | Write | Create/reset rules file |
 
 ## Parameter Catalog
 
@@ -37,7 +37,7 @@ Parameters applied across protocols. Ordered by impact.
 
 | # | Parameter | Default | Options | Scope |
 |---|-----------|---------|---------|-------|
-| 1 | Interaction Modality | text-stop | text-stop / ask-user-question | 10/10 |
+| 1 | Interaction Modality | TextPresent+Stop | TextPresent+Stop / AskUserQuestion | 10/10 |
 | 2 | Intensity | auto | light / medium / heavy / auto | 9/10 (Prothesis excluded) |
 | 3 | Post-Convergence Suggestions | on | on / off | 10/10 |
 | 4 | AI-Guided Activation Sensitivity | default | conservative / default / aggressive | AI-guided protocols (7/10) |
@@ -47,7 +47,7 @@ Parameters applied across protocols. Ordered by impact.
 
 **Parameter descriptions**:
 
-1. **Interaction Modality** (`interaction_modality`): Controls how gate interactions (Qc/Qs) are realized. `text-stop` = structured numbered text output + Stop (turn yield), user responds freely. `ask-user-question` = AskUserQuestion tool call with structured options.
+1. **Interaction Modality** (`interaction_modality`): Controls how gate interactions (Qc/Qs) are realized. `TextPresent+Stop` = structured numbered text output + Stop (turn yield), user responds freely. `AskUserQuestion` = AskUserQuestion tool call with structured options.
 2. **Intensity**: Controls protocol thoroughness. `light` = fewer questions, faster convergence. `heavy` = deeper analysis, more questions. `auto` = protocol decides per context.
 3. **Post-Convergence Suggestions**: Whether protocols suggest related protocols after completing. `off` suppresses the suggestion section.
 4. **AI-Guided Activation Sensitivity**: How eagerly AI-guided protocols detect activation conditions. `conservative` = fewer false triggers. `aggressive` = catches more subtle cases.
@@ -157,16 +157,22 @@ Grouped by Epistemic Concern Cluster. Configure via `/memory` — only non-defau
 
 ### Phase 0: Detect
 
-1. Check if project memory file `preferences_epistemic.md` exists in the project's memory directory
-2. If exists: read current values → Phase 1 (reset flow)
-3. If absent: Phase 1 (init flow)
+1. Check for existing preferences rules file in both scopes:
+   - User scope: `~/.claude/rules/preferences-epistemic.md`
+   - Project scope: `{project}/.claude/rules/preferences-epistemic.md`
+2. If found in either scope: read current values → Phase 1 (reset flow)
+3. If absent from both: Phase 1 (init flow)
 
 ### Phase 1: Initialize
 
 Present the Global Parameters default catalog as text output.
 
-**If absent**: Ask whether to initialize with defaults.
-**If exists**: Show current values alongside defaults + ask whether to reset to defaults.
+**Scope selection** (first-time init only):
+- "User scope — applies to all projects" (`~/.claude/rules/preferences-epistemic.md`)
+- "Project scope — this project only" (`{project}/.claude/rules/preferences-epistemic.md`)
+
+**If absent**: Ask scope + whether to initialize with defaults.
+**If exists**: Show current values alongside defaults + ask whether to reset to defaults (scope inherited from existing file).
 
 Present via gate interaction:
 - "Yes — initialize with defaults"
@@ -176,19 +182,15 @@ If "No" → terminate.
 
 ### Phase 2: Write
 
-Write memory file `preferences_epistemic.md` with default values to the project's memory directory. Update MEMORY.md index if entry absent.
+Write preferences file to the selected `.claude/rules/` location.
 
-**Memory file format**:
+**Rules file format**:
 
 ```markdown
----
-name: epistemic-protocol-preferences
-description: "Per-project epistemic protocol settings — Interaction Modality, Intensity, Sensitivity, etc."
-type: user
----
+# Epistemic Protocol Preferences
 
 ## Global
-- Interaction Modality: text-stop
+- Interaction Modality: TextPresent+Stop
 - Intensity: auto
 - Post-Convergence Suggestions: on
 - AI-Guided Activation Sensitivity: default
@@ -197,7 +199,7 @@ type: user
 - Explanation Level: standard
 ```
 
-Present completion message directing user to `/memory` for individual parameter modifications.
+Present completion message with file path and `/memory` for individual parameter modifications.
 
 **Per-Protocol section**: Only added when user modifies individual parameters via `/memory`. Not included in default initialization.
 
@@ -205,9 +207,10 @@ Present completion message directing user to `/memory` for individual parameter 
 
 1. **One-shot initialization**: `/preferences` presents defaults and asks for confirmation. No multi-turn parameter traversal.
 2. **Modification via /memory**: Individual parameter changes are done through `/memory` built-in command or natural language requests to Claude.
-3. **Per-project scope**: Preferences are stored as project memory, scoped to the current project only.
+3. **Scope selection**: User chooses between user scope (`~/.claude/rules/`) and project scope (`{project}/.claude/rules/`). User scope applies across all projects; project scope is git-tracked and project-specific.
 4. **Per-Protocol section**: Only written when non-default values exist. Added via `/memory`, not during initialization.
 5. **Recognition over Recall**: Global parameter catalog with all options is presented for reference during initialization.
 6. **No protocol execution**: This skill configures preferences only. It does not call or simulate any protocol.
-7. **Reversibility**: Delete the memory file to restore defaults.
+7. **Reversibility**: Delete the rules file to restore defaults. File path shown after write.
 8. **Parameter order**: Interaction Modality is #1 — it determines how all subsequent gate interactions are realized.
+9. **Auto-loading guarantee**: `.claude/rules/` files are automatically loaded into conversation context, ensuring all protocols can access preferences without explicit file reads.

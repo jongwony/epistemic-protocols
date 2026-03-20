@@ -160,7 +160,7 @@ Utility skill group for session analytics, configuration, and reference.
 - **Report** `/report`: Generate Growth Map — orthogonal epistemic analysis (protocol adoption patterns, coverage gaps, anti-patterns) using `/insights` data as targeting input. Output: HTML artifact (`growth-map.html`); falls back to Epistemic Profile when insights unavailable.
 - **Onboard** `/onboard`: Quick recommendation from recent sessions, or quest-based learning through scenario, trial, and quiz. Flow: Quick Proof (Entry → QuickScan → Pick-1 → Evidence → Trial → Insight → Next), Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects path (quick default); Onboarding Pool (`/goal`, `/gap`, `/frame`) serves both Quick auto-recommend and Targeted fallback; pool exhaustion in Quick path transitions to Targeted.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
-- **Preferences** `/preferences`: Protocol preference initialization with defaults, stored in project memory. Individual modifications via `/memory`. Flow: Detect → Initialize → Write.
+- **Preferences** `/preferences`: Protocol preference initialization with defaults, stored in `.claude/rules/` with user/project scope selection. Individual modifications via `/memory`. Flow: Detect → Initialize → Write.
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
