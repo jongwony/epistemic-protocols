@@ -40,10 +40,10 @@ invariant: Placement over Prescription
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
 MB     = MissionBrief(U): { inquiry_intent, expected_deliverable, scope_constraint }  -- AI-inferred from U
-Q(MB, M) = ConfirmAndSelect: (MB, ModeOptions) → (MBᵥ, m)  -- extern (combined AskUserQuestion)
+Q(MB, M) = ConfirmAndSelect: (MB, ModeOptions) → (MBᵥ, m)  -- extern (combined gate interaction)
 Q1(MB)   = Confirm: MB → MBᵥ                                -- Mission Brief confirmation component of Q
 Q2(M)    = Select: ModeOptions → m                           -- Mode selection component of Q
-           Q = Q1 × Q2 (composed in single AskUserQuestion; Modify loop re-presents Q1 only)
+           Q = Q1 × Q2 (composed in single gate interaction; Modify loop re-presents Q1 only)
 MBᵥ    = Verified MissionBrief (user-confirmed)
 m      = Mode ∈ {recommend, inquire}              -- lens recommendation vs. framed inquiry
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
@@ -73,7 +73,7 @@ user_withdraw = J = withdraw at Phase 4    -- user selects graceful exit (team c
 user_esc      = Esc key at any phase       -- tool-level termination (no cleanup)
 J      = Routing ∈ {extend, add_input, wrap_up, withdraw}  -- Phase 4 routing decision (post-merge)
 J_mb   = MissionBriefRouting ∈ {confirm, modify(field)}  -- Phase 0 routing decision
-PF     = preserve_findings: (T, L) → Q[AskUserQuestion](select categories)          -- returns selected; TaskCreate is post-TeamDelete step
+PF     = preserve_findings: (T, L) → PF Qc(select categories)                       -- returns selected; TaskCreate is post-TeamDelete step
 
 ── U-BINDING ──
 bind(U) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_request
@@ -88,12 +88,12 @@ Edge cases:
 - Re-invoke: If Pₛ exists in context, offer as Pᵦ for new invocation
 
 ── PHASE TRANSITIONS ──
-Phase 0:  U → MB(U) → Q[AskUserQuestion](MB, M) → await → (MBᵥ, m)  -- combined MB confirmation + mode selection [Tool]
+Phase 0:  U → MB(U) → Qc(MB, M) → Stop → (MBᵥ, m)              -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
-Phase 2:  (C, MBᵥ) → S[AskUserQuestion]({P₁...Pₙ}(C, MBᵥ)) → await → Pₛ → LensEstablished  -- perspective selection [Tool]
+Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]
 Phase 3:  LensEstablished → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R' → P(R')  -- inquiry + collection + preview [Tool]
-Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Q[AskUserQuestion](routing) → J  -- triggers, cross-dialogue, synthesis, presentation & routing [Tool]
-          J=wrap_up → PF[AskUserQuestion](select) → Ω → TeamDelete → TaskCreate(selected)  [Tool]
+Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Qc(routing) → Stop → J  -- triggers, cross-dialogue, synthesis, presentation & routing [Tool]
+          J=wrap_up → PF Qc(select) → Stop → Ω → TeamDelete → TaskCreate(selected)  [Tool]
 
 ── LOOP ──
 After Phase 0 (Mission Brief + Mode Selection):
@@ -101,7 +101,7 @@ After Phase 0 (Mission Brief + Mode Selection):
     m = recommend → Phase 1 → Phase 2 → LensEstablished → terminate
     m = inquire   → Phase 1 → Phase 2 → LensEstablished → Phase 3 → Phase 4
   J_mb = confirm       → proceed to Phase 1 with (MBᵥ, m)
-  J_mb = modify(field) → re-present Q1(MB') → await → MBᵥ (m retained from initial selection)
+  J_mb = modify(field) → re-present Q1(MB') → Stop → MBᵥ (m retained from initial selection)
   -- Esc key → terminate (no team exists)
 
 After LensEstablished (mode branching):
@@ -112,10 +112,10 @@ After LensEstablished (mode branching):
   J = inquire → Continue to Phase 3 (team spawn → parallel inquiry → synthesis → FramedInquiry)
 
 After Phase 4 (routing):
-  J = extend     → Q[AskUserQuestion](add perspective | deepen existing | review execution results)
+  J = extend     → Qc(add perspective | deepen existing | review execution results) → Stop
                    → Phase 2 (new perspective) or Phase 3 (SendMessage to existing team)
-  J = add_input  → user context → revise Syn(R' + input, Dᵣ) → L' → O(L') → Q(routing)
-  J = wrap_up    → PF[AskUserQuestion](select) → Ω(T, shutdown) → TeamDelete → TaskCreate(selected) → terminate with L
+  J = add_input  → user context → revise Syn(R' + input, Dᵣ) → L' → O(L') → Qc(routing) → Stop
+  J = wrap_up    → PF Qc(select) → Stop → Ω(T, shutdown) → TeamDelete → TaskCreate(selected) → terminate with L
   J = withdraw   → Ω(T, shutdown) → TeamDelete → terminate with current L
                    (withdraw = graceful exit, preserve_findings skipped)
 
@@ -129,8 +129,9 @@ S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
-Phase 0 Q (extern)       → AskUserQuestion (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
-S (extern)               → AskUserQuestion tool (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
+-- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
+Phase 0 Qc (extern)      → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
+Sc (extern)              → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
@@ -138,8 +139,8 @@ Phase 3 P (preview)      → Internal operation (text output: per-perspective ep
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
 Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
 Phase 4 O (output)       → Internal operation (text output: full synthesis — convergence, divergence, integrated assessment)
-Phase 4 Q (extern)       → AskUserQuestion (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
-PF Q (extern)            → AskUserQuestion (multiSelect: preservation scope; in LOOP wrap_up path only)
+Phase 4 Qc (extern)      → present (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
+PF Qc (extern)           → present (multiSelect: preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
@@ -208,7 +209,7 @@ When Prothesis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: Before analysis, call AskUserQuestion tool to present perspective options.
+**Action**: Before analysis, present perspective options via gate interaction (Qc/Qs) and yield turn.
 </system-reminder>
 
 - Prothesis completes before other workflows begin
@@ -224,11 +225,11 @@ Consult `references/conceptual-foundations.md` for design rationale (Plan Mode I
 
 ### Phase 0: Intent Confirmation (Mission Brief)
 
-Construct a Mission Brief from the user's request and **call the AskUserQuestion tool** to confirm it.
+Construct a Mission Brief from the user's request and **present** it for confirmation via gate interaction.
 
 **Do NOT skip this phase.** The Mission Brief is the primary context vehicle for teammate spawn prompts — it ensures agent-teams best practice ("give teammates enough context") is structurally guaranteed rather than depending on coordinator inference.
 
-**Elidable confirmation**: When the user explicitly invoked `/frame "text"`, the Phase 0 AskUserQuestion (Q) may be elided — the MB is still constructed from U, but proceeds without user confirmation. AI uses `J_mb=confirm` and `m=ai_recommended_mode` as defaults. Phase 2 S (perspective selection) remains always gated, providing a downstream correction opportunity. Elision does not apply to J=extend re-invocations within an active loop.
+**Elidable confirmation**: When the user explicitly invoked `/frame "text"`, the Phase 0 gate interaction (Q) may be elided — the MB is still constructed from U, but proceeds without user confirmation. AI uses `J_mb=confirm` and `m=ai_recommended_mode` as defaults. Phase 2 S (perspective selection) remains always gated, providing a downstream correction opportunity. Elision does not apply to J=extend re-invocations within an active loop.
 
 The coordinator infers the Mission Brief from U (the user's request):
 
@@ -241,7 +242,7 @@ Present the inferred Mission Brief as text output:
 - **Deliverable**: [inferred expected deliverable]
 - **Scope**: [inferred scope constraint]
 
-Then **call AskUserQuestion** with the combined Q1+Q2:
+Then **present** the combined Q1+Q2:
 
 ```
 Q1. Mission Brief:
@@ -257,7 +258,7 @@ Q2. Mode:
 
 **Pre-fill from explicit text**: `/frame "text"` → pre-fill from provided text, still confirm.
 
-**Combined question**: Mission Brief confirmation and Mode selection are combined into a single AskUserQuestion call:
+**Combined question**: Mission Brief confirmation and Mode selection are combined into a single gate interaction:
 - Q1 (Mission Brief): MB confirmation/modification (4 options)
 - Q2 (Mode): Recommend / Inquire (2 options)
 AI places the recommended Mode as Q2's first option with "(Recommended)" suffix based on inquiry characteristics:
@@ -278,9 +279,9 @@ MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and
 
 ### Phase 2: Prothesis (Perspective Placement)
 
-After context gathering (Phase 1), **call the AskUserQuestion tool** with `multiSelect: true` to present perspectives.
+After context gathering (Phase 1), **present** perspectives via gate interaction with `multiSelect: true`.
 
-**Do NOT present perspectives as plain text.** The tool call is mandatory—text-only presentation is a protocol violation.
+**Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
 Each perspective is an **individual option**. Do not pre-combine perspectives into composite options (e.g., "All three", "1+2 only"). The user selects one or more perspectives directly.
 
@@ -312,7 +313,7 @@ Optional dimension naming (apply when initial generation seems redundant):
 **Pre-suggested perspective handling**: When the user supplies perspectives in U (e.g., naming specific agents, frameworks, or roles), treat these as **pre-confirmed base perspectives** (Pᵦ):
 
 - Pᵦ are **auto-included** in Pₛ — do not re-present them as selectable options
-- AskUserQuestion presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
+- Gate interaction presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
 - State Pᵦ in the question text as context (e.g., "Base: [Pᵦ names]. Which additional lens(es)?")
 - AI must propose at least 1 novel perspective when Pᵦ ≠ ∅ — re-presenting known perspectives as options saturates the finite option space and structurally conceals unknown unknowns
 
@@ -402,7 +403,7 @@ Collect inquiry results into R'. Team remains active — shutdown/retain decisio
 **Horizon Limits**: [What this lens missed]
 ```
 
-This is informational text output — not an AskUserQuestion call. The coordinator summarizes each perspective's output (not verbatim teammate content) to control rendering length while preserving epistemic contribution visibility.
+This is informational text output — not a gate interaction. The coordinator summarizes each perspective's output (not verbatim teammate content) to control rendering length while preserving epistemic contribution visibility.
 
 #### Isolated Context Requirement
 
@@ -438,14 +439,14 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    - Divergence: [remaining unresolved points, if any]
    ```
 
-   This is informational text — not an AskUserQuestion call. Skip this step if Δₛ = ∅ (no triggers detected).
+   This is informational text — not a gate interaction. Skip this step if Δₛ = ∅ (no triggers detected).
 6. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises independent judgment as Synthesizer: information collection from peers, but the integration decision is the coordinator's own.
-7. **User review**: Output the full synthesis as text (O(L)), then **call the AskUserQuestion tool** with routing options only. The user reads the complete synthesis with scrollback, then selects next action.
+7. **User review**: Output the full synthesis as text (O(L)), then **present** routing options via gate interaction. The user reads the complete synthesis with scrollback, then selects next action.
 
    **Step 1** — Text output O(L) (full synthesis, per Synthesis template below):
    Output the Framed Analysis as markdown text. No truncation risk — text output supports full rendering with scrollback.
 
-   **Step 2** — AskUserQuestion (routing only):
+   **Step 2** — Gate interaction (routing only):
 
    ```
    question: "How would you like to proceed?"
@@ -487,7 +488,7 @@ After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅)
 Note: Perspective Summaries are surfaced earlier via P(R') preview (Phase 3 Collection). The synthesis template focuses on integration — convergence, divergence resolution, and assessment — rather than repeating individual perspective findings.
 
 **Loop behavior**: Per LOOP. Key operational details:
-- **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect AskUserQuestion; selected items migrate to session TaskCreate after TeamDelete.
+- **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect gate interaction; selected items migrate to session TaskCreate after TeamDelete.
 
 All other routing options (Extend, Add input, withdraw) and convergence behavior Per LOOP.
 
@@ -495,9 +496,9 @@ Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Para
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the selected perspectives changed the analytical approach. State in one sentence what shifted (e.g., "The security perspective revealed attack surface concerns that narrow the implementation options") or note that the original approach was confirmed from all selected viewpoints. This is informational text — not an AskUserQuestion call.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the selected perspectives changed the analytical approach. State in one sentence what shifted (e.g., "The security perspective revealed attack surface concerns that narrow the implementation options") or note that the original approach was confirmed from all selected viewpoints. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
@@ -517,17 +518,17 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Mode 2: summarize key findings from L (convergence, divergence, assessment highlights)
 - Mode 2: if findings are execution-ready, note that `/attend` can orchestrate implementation with risk classification
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Rules
 
-1. **Mission Brief confirmation**: Always call AskUserQuestion to confirm Mission Brief before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation.
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present options (text presentation = protocol violation)
+1. **Mission Brief confirmation**: Always present Mission Brief for confirmation via gate interaction before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation.
+2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 7
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
-6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then call AskUserQuestion with routing options only to confirm or extend analysis
-7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via AskUserQuestion
-8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then present routing options via gate interaction to confirm or extend analysis
+7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via gate interaction
+8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **No premature convergence**: Do not declare wrap_up (Mode 2) or recommend terminus (Mode 1) without presenting convergence evidence trace. "User satisfied" as assertion without per-perspective contribution evidence = protocol violation
 10. **No silent framework dismissal**: If Phase 2 generation yields no candidate frameworks, present this finding with reasoning to user for confirmation before concluding — do not silently terminate

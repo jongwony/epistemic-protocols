@@ -30,9 +30,9 @@ Users often lack the analytical framework for their question (`FrameworkAbsent`)
 ## Protocol Flow
 
 ```
-Phase 0: Mission Brief → Confirm inquiry intent, scope, and mode (call AskUserQuestion)
+Phase 0: Mission Brief → Confirm inquiry intent, scope, and mode (gate interaction)
 Phase 1: Gather        → Targeted context acquisition for perspective formulation
-Phase 2: Prothesis     → Present 2-4 perspectives (call AskUserQuestion)
+Phase 2: Prothesis     → Present 2-4 perspectives (gate interaction)
 --- Mode 1 (recommend) terminates here with Pₛ + characterization ---
 Phase 3: Inquiry       → Agent team analysis per selected perspective (TeamCreate + teammates)
 Phase 4: Synthesis     → Cross-dialogue check → Convergence/divergence → Integrated answer + Routing

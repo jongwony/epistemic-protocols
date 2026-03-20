@@ -15,7 +15,7 @@ Define epistemic boundaries per decision through AI-guided classification. Type:
 ── FLOW ──
 Horismos(T) → Probe(T) → Bᵢ →
   |Bᵢ| = 0: skip → deactivate
-  |Bᵢ| > 0: Ctx(Bᵢ) → (Bᵢ', Bᵣ) → ∀bᵢ ∈ Bᵢ': Q[AskUserQuestion](bᵢ) → A →
+  |Bᵢ| > 0: Ctx(Bᵢ) → (Bᵢ', Bᵣ) → ∀bᵢ ∈ Bᵢ': Qc(bᵢ) → Stop → A →
     integrate(A, B) → B' →
     |remaining| = 0: converge(B')
     |remaining| > 0: next → Phase 1
@@ -41,7 +41,7 @@ Bᵢ             = Set(Domain) from Probe(T)                    -- boundary-unde
 Ctx            = Context collection: Bᵢ → (Bᵢ', Bᵣ)          -- enrich + resolve
 Bᵢ'            = Set(Domain) enriched with context evidence    -- after Phase 1
 Bᵣ             = Set(Domain) resolved from context             -- auto-resolved in Phase 1
-Q              = Boundary inquiry ordered by impact [Tool: AskUserQuestion]
+Q              = Boundary inquiry ordered by impact [Tool: gate interaction]
 A              = User answer ∈ {UserSpec(scope), AISpec(scope), NeedsCalibration, Dismiss}
 B              = BoundaryMap: Map(Domain, BoundaryClassification)
 BoundaryClassification ∈ {UserSpec(scope), AISpec(scope), NeedsCalibration, Dismissed}
@@ -51,7 +51,7 @@ Phase          ∈ {0, 1, 2, 3}
 ── PHASE TRANSITIONS ──
 Phase 0: T → Probe(T) → Bᵢ?                                           -- boundary detection gate (silent)
 Phase 1: Bᵢ → Ctx(Bᵢ) → (Bᵢ', Bᵣ)                                     -- context collection [Tool]
-Phase 2: Bᵢ' → Q[AskUserQuestion](Bᵢ'[max_impact], progress) → A       -- boundary classification [Tool]
+Phase 2: Bᵢ' → Qc(Bᵢ'[max_impact], progress) → Stop → A               -- boundary classification [Tool]
 Phase 3: A → integrate(A, B) → B'                                      -- map update (internal)
 
 Phase 0 → Phase 1:  boundary_undefined(T) = true                       -- domains detected
@@ -76,10 +76,14 @@ converge iff |remaining| = 0 ∨ user_esc
   user_esc:         user exits via Esc key (ungraceful, no cleanup needed)
 
 ── TOOL GROUNDING ──
+-- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
 Phase 0 Probe (detect)  → Internal analysis (no external tool)
 Phase 1 Ctx   (collect) → Read, Grep, Glob (codebase scan for boundary signals: CLAUDE.md, boundaries.md, rules/, prior session context)
-Phase 2 Q     (extern)  → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 2 Qc    (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3       (state)   → Internal state update
+
+── ELIDABLE CHECKPOINTS ──
+Phase 2 Qc (classify)      → always_gated (Qc: UserSpec/AISpec/NeedsCalibration — boundary ownership)
 
 ── MODE STATE ──
 Λ = { phase: Phase, T: TaskScope,
@@ -125,7 +129,7 @@ Phase 3       (state)   → Internal state update
 
 ### Activation
 
-AI probes for boundary-undefined domains before execution OR user calls `/bound`. Probing is silent (Phase 0); classification always requires user interaction via AskUserQuestion (Phase 2).
+AI probes for boundary-undefined domains before execution OR user calls `/bound`. Probing is silent (Phase 0); classification always requires user interaction via gate interaction (Phase 2).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/bound` slash command or description-matching input. Always available.
@@ -148,7 +152,7 @@ When Horismos is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, call AskUserQuestion tool to present highest-impact boundary-undefined domain for user classification.
+**Action**: At Phase 2, present highest-impact boundary-undefined domain for user classification via gate interaction (Qc) and yield turn.
 </system-reminder>
 
 - Horismos completes before execution proceeds
@@ -238,7 +242,7 @@ Collect contextual evidence to enrich domain descriptions and improve classifica
 
 ### Phase 2: Boundary Classification
 
-**Call the AskUserQuestion tool** to present the highest-impact remaining boundary-undefined domain.
+**Present** the highest-impact remaining boundary-undefined domain via gate interaction.
 
 **Selection criterion**: Choose the domain whose classification would maximally narrow the remaining boundary-undefined space and most affect downstream protocol operation (impact ordering). When impact is equal, prefer the domain with richer collected evidence.
 
@@ -249,7 +253,7 @@ Present the domain context as text output:
 - **Evidence**: [Evidence collected during context collection, if any]
 - **Progress**: [N bounded / M total domains]
 
-Then **call AskUserQuestion**:
+Then **present**:
 
 ```
 How should boundary ownership be classified for this domain?
@@ -284,9 +288,9 @@ After integration:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the defined boundaries changed the collaboration approach. State in one sentence what shifted (e.g., "Architecture decisions are now user-spec, which changes delegation scope for the refactoring task") or note that existing assumptions were confirmed. This is informational text — not an AskUserQuestion call.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the defined boundaries changed the collaboration approach. State in one sentence what shifted (e.g., "Architecture decisions are now user-spec, which changes delegation scope for the refactoring task") or note that existing assumptions were confirmed. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
@@ -299,14 +303,14 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Restate BoundaryMap as a reference for downstream protocols
 - Note any needs-calibration domains deferred for later boundary definition
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | 1-2 domains, single-pass (no re-probe) | AskUserQuestion with Dismiss as default option |
-| Medium | 3-5 domains, may re-probe once | Structured AskUserQuestion with progress |
+| Light | 1-2 domains, single-pass (no re-probe) | Gate interaction with Dismiss as default option |
+| Medium | 3-5 domains, may re-probe once | Structured gate interaction with progress |
 | Heavy | 6+ domains, multiple re-probe cycles | Detailed evidence + collection results + classification paths |
 
 ## UX Safeguards
@@ -323,18 +327,18 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 ## Rules
 
-1. **AI-guided, user-classified**: AI detects boundary-undefined domains; classification requires user choice via AskUserQuestion (Phase 2). AI detection is implicitly confirmed when the user engages with classification (Phase 2 AskUserQuestion response, not Esc).
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present structured options (text presentation = protocol violation). Options are UserSpec/AISpec/NeedsCalibration/Dismiss — never open-ended.
+1. **AI-guided, user-classified**: AI detects boundary-undefined domains; classification requires user choice via gate interaction (Phase 2). AI detection is implicitly confirmed when the user engages with classification (Phase 2 gate interaction response, not Esc).
+2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Options are UserSpec/AISpec/NeedsCalibration/Dismiss — never open-ended.
 3. **Context collection first**: Before asking the user, collect contextual evidence through Read/Grep/Glob codebase exploration to auto-resolve where possible and enrich remaining domains (Phase 1).
 4. **Definition over Assumption**: When boundary ownership is unclear, define explicitly rather than assume — silence is worse than a dismissed classification.
 5. **No fixed taxonomy**: Domains emerge dynamically from task probe, not a predefined list. Do not impose categories.
 6. **Context resolution preferred**: Auto-resolve from existing config, rules, and conventions where possible. Minimize user interaction to what truly requires human judgment.
-7. **One at a time**: Present one domain per Phase 2 cycle; do not batch multiple domains in a single AskUserQuestion.
+7. **One at a time**: Present one domain per Phase 2 cycle; do not batch multiple domains in a single gate interaction.
 8. **Impact ordering**: Present domains in impact order (highest-impact first). Impact is relational — depends on downstream protocol dependencies.
 9. **Session text output**: BoundaryMap is output as session text. No structured data channel. Downstream protocols naturally read it from conversation context.
-10. **Circular re-probing is healthy**: Integration may surface new boundary-undefined domains. Re-probe cycles are normal dialogue. `user_esc` guarantees termination at every AskUserQuestion moment.
+10. **Circular re-probing is healthy**: Integration may surface new boundary-undefined domains. Re-probe cycles are normal dialogue. `user_esc` guarantees termination at every gate interaction moment.
 11. **Per-decision boundary**: Each invocation produces a fresh BoundaryMap for the current task scope. Do not carry over classifications from prior sessions or invocations.
 12. **Epistemic router**: BoundaryMap is a shared resource consumed by all downstream protocols — Aitesis uses it as gate threshold, Prothesis as framework filter, Telos as goal detail level, Syneidesis as gap relevance filter, Prosoche as risk evaluation threshold. This shared consumption is why Horismos requires independent protocol status rather than absorption into any single consumer.
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **No premature convergence**: Do not declare |remaining| = 0 without presenting convergence evidence trace. "All domains bounded" as assertion without per-domain evidence = protocol violation
 15. **No silent boundary assumption**: If Phase 0 probe detects no boundary-undefined domains, present this finding with reasoning to user for confirmation before concluding — do not silently proceed

@@ -43,7 +43,7 @@ Uᵢ       = Identified uncertainties from Scan(X)
 Ctx      = Context collection: Uᵢ → (Uᵢ', Uᵣ)
 Uᵢ'      = Enriched uncertainties (evidence added, not resolved)
 Uᵣ       = Context-resolved uncertainties (resolved during collection)
-Q        = Inquiry (AskUserQuestion), ordered by information gain
+Q        = Inquiry (gate interaction), ordered by information gain
 A        = User answer ∈ {Provide(context), Point(location), Dismiss}
 X'       = Updated execution plan
 InformedExecution = X' where remaining = ∅ ∨ user_esc
@@ -74,7 +74,7 @@ Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context s
 Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                         -- context collection [Tool]
          classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-factual (Post-Convergence)
          [if Uₑ_candidates ≠ ∅] EmpiricalProbe(Uₑ_candidates) → Uₑ  -- empirical enrichment [Tool]
-Phase 2: Q[AskUserQuestion](classify_result + Uₑ + Uᵢ''[max_gain], progress) → A  -- uncertainty surfacing [Tool]
+Phase 2: Qs(classify_result + Uₑ + Uᵢ''[max_gain], progress) → Stop → A           -- uncertainty surfacing [Tool]
 Phase 3: A → integrate(A, X) → X'                               -- plan update (internal)
 
 ── LOOP ──
@@ -94,12 +94,16 @@ narrowing(Q, A) = |remaining(after)| < |remaining(before)| ∨ context(remaining
 early_exit = user_declares_sufficient
 
 ── TOOL GROUNDING ──
+-- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
 Phase 0 Scan    (infer)       → Internal analysis (no external tool)
 Phase 1 Ctx     (collect)     → Read, Grep (context collection); WebSearch (conditional: environmental dependency)
 Phase 1 Classify (assess)     → Internal analysis (multi-dimension assessment); Read, Grep (coherence: multi-file relation analysis)
 Phase 1 Probe   (enrich)      → Write, Bash, Read (empirical enrichment, Factual only); cleanup via Bash
-Phase 2 Q       (transparent) → AskUserQuestion (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
+Phase 2 Qs      (extern)      → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (state)       → Internal state update
+
+── ELIDABLE CHECKPOINTS ──
+Phase 2 Qs (transparent)   → always_gated (Qs: user provides context judgment on insufficiency)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: ExecutionPlan, uncertainties: Set(Uncertainty),
@@ -153,7 +157,7 @@ Phase 3         (state)       → Internal state update
 
 ### Activation
 
-AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0); surfacing always requires user interaction via AskUserQuestion (Phase 2).
+AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0); surfacing always requires user interaction via gate interaction (Phase 2).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
@@ -176,7 +180,7 @@ When Aitesis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, call AskUserQuestion tool to present highest information-gain uncertainty candidate with classify results for user resolution.
+**Action**: At Phase 2, present highest information-gain uncertainty candidate with classify results via gate interaction (Qs) and yield turn.
 </system-reminder>
 
 - Aitesis completes before execution proceeds
@@ -307,7 +311,7 @@ Activation condition: `environmental(Uᵢ) ∧ ¬resolved(Uᵢ, codebase)`.
 
 ### Phase 2: Uncertainty Surfacing
 
-**Call the AskUserQuestion tool** to present the highest-priority remaining uncertainty with classify results.
+**Present** the highest-priority remaining uncertainty with classify results via gate interaction.
 
 **Classification transparency** (Always show): Phase 2 always includes classify results for remaining uncertainties. This is informational — no approval required. Users can override classification by stating objection. When only one uncertainty remains, inline the classification with the uncertainty description rather than showing a separate summary block.
 
@@ -324,7 +328,7 @@ Present the classification results, uncertainty description, and evidence as tex
 - **Evidence**: [Evidence collected during context collection and probes, if any]
 - **Progress**: [N resolved / M actionable uncertainties] (excludes non-factual routed)
 
-Then **call AskUserQuestion**:
+Then **present**:
 
 ```
 How would you like to resolve this uncertainty?
@@ -360,9 +364,9 @@ After integration:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the resolved context changed the execution plan. State in one sentence what shifted (e.g., "Resolved API version targets v2, which changes the migration approach") or note that the original plan proceeds unchanged. This is informational text — not an AskUserQuestion call.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the resolved context changed the execution plan. State in one sentence what shifted (e.g., "Resolved API version targets v2, which changes the migration approach") or note that the original plan proceeds unchanged. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
@@ -385,14 +389,14 @@ Phase 2 classify summary shows the best-matched protocol as routing target.
 - Restate execution plan with resolved context as reference
 - Note any accepted uncertainties carried into execution
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Marginal priority uncertainties only | AskUserQuestion with Dismiss as default option |
-| Medium | Significant priority uncertainties, context collection partially resolved | Structured AskUserQuestion with progress |
+| Light | Marginal priority uncertainties only | Gate interaction with Dismiss as default option |
+| Medium | Significant priority uncertainties, context collection partially resolved | Structured gate interaction with progress |
 | Heavy | Critical priority, multiple unresolved uncertainties | Detailed evidence + collection results + classify results + resolution paths |
 
 ## UX Safeguards
@@ -416,8 +420,8 @@ Phase 2 classify summary shows the best-matched protocol as routing target.
 
 ## Rules
 
-1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via AskUserQuestion (Phase 2)
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present structured options (text presentation = protocol violation)
+1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via gate interaction (Phase 2)
+2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/Relevance: detect and route via Post-Convergence suggestion
 4. **Inference over Detection**: When context is insufficient and context collection does not fully resolve, infer the highest-gain question rather than assume — silence is worse than a dismissed question
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on execution plan requirements
@@ -430,6 +434,6 @@ Phase 2 classify summary shows the best-matched protocol as routing target.
 12. **Cross-protocol awareness**: Defer to Syneidesis when gap surfacing is already active for the same task scope
 13. **Evidence before inquiry**: User inquiry is for judgment — not for facts the AI can discover
 14. **Always show**: User can override classification without explicit approval step. Visible by default, ask only on exception
-15. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+15. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 16. **No premature convergence**: Do not declare remaining = ∅ without presenting convergence evidence trace. "All uncertainties resolved" as assertion without per-uncertainty evidence = protocol violation
 17. **No silent sufficiency assumption**: If Phase 0 scan detects no uncertainties, present this finding with reasoning to user for confirmation before proceeding — do not silently declare context sufficient

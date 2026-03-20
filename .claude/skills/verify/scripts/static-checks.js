@@ -306,6 +306,15 @@ function checkRequiredSections() {
       }
     }
 
+    // Check 5b: Optional section - ELIDABLE CHECKPOINTS (warn if missing)
+    if (!content.includes('── ELIDABLE CHECKPOINTS ──')) {
+      results.warn.push({
+        check: 'structure',
+        file: relPath,
+        message: 'Missing optional section: "── ELIDABLE CHECKPOINTS ──" (gate elidability analysis)'
+      });
+    }
+
     results.pass.push({
       check: 'structure',
       file: relPath,
@@ -347,6 +356,14 @@ function checkToolGrounding() {
     const commentPattern = new RegExp(`--\\s*${escapedOp}:`);
     if (commentPattern.test(phaseSection)) return true;
 
+    // Pattern 5: Gate notation - Qc(args) or Qs(args) or Sc(args)
+    const gatePattern = new RegExp(`${escapedOp}\\(`);
+    if (gatePattern.test(phaseSection)) return true;
+
+    // Pattern 6: Compound gate notation without args - "TeamCoord Qc →" or "TeamCoord Qc → Stop"
+    const compoundNoArgsPattern = new RegExp(`${escapedOp}\\s*→`);
+    if (compoundNoArgsPattern.test(phaseSection)) return true;
+
     return false;
   }
 
@@ -381,15 +398,16 @@ function checkToolGrounding() {
     const toolBindings = [];
 
     // Parse lines like: "S (extern) → ..." or "Phase 4a Δ (detect) → ..."
-    // Capture: operation, classification, tool
-    // Supports: Phase prefix, qualifier word (e.g., "praxis"), Greek letters, ?'/
-    const bindingPattern = /^(?:Phase\s+\S+\s+)?([∥]?[\w\u0370-\u03FF?'\/]+)(?:\s+\w+)?\s*\((\w+)\)\s*→\s*(\w+)/gm;
+    // Capture: operation, qualifier (optional), classification, tool
+    // Supports: Phase prefix, qualifier word (e.g., "Qc", "Qᵣs"), Greek letters, ?'/
+    const bindingPattern = /^(?:Phase\s+\S+\s+)?([∥]?[\w\u0370-\u03FF?'\/]+)(?:\s+([\w\u0370-\u03FFᵣ]+))?\s*\((\w+)\)\s*→\s*(\w+)/gm;
     let match;
     while ((match = bindingPattern.exec(groundingSection)) !== null) {
       toolBindings.push({
         operation: match[1],
-        classification: match[2],
-        tool: match[3]
+        qualifier: match[2] || null,
+        classification: match[3],
+        tool: match[4]
       });
     }
 
@@ -407,13 +425,28 @@ function checkToolGrounding() {
       if (!MANDATORY_CLASSIFICATIONS.has(binding.classification)) continue;
 
       // Check if operation appears with [Tool] notation in PHASE TRANSITIONS
-      if (!findOperationInPhaseTransitions(phaseSection, binding.operation)) {
+      // For compound operations (e.g., "PF Qc", "TeamCoord Qc"), search for both
+      // the compound form and the base operation
+      const compoundOp = binding.qualifier ? `${binding.operation} ${binding.qualifier}` : null;
+      const found = findOperationInPhaseTransitions(phaseSection, binding.operation) ||
+                    (compoundOp && findOperationInPhaseTransitions(phaseSection, compoundOp));
+      if (!found) {
+        const displayOp = compoundOp || binding.operation;
         results.fail.push({
           check: 'tool-grounding',
           file: relPath,
-          message: `Mandatory binding "${binding.operation} (${binding.classification}) → ${binding.tool}" not found in PHASE TRANSITIONS with [Tool] notation`
+          message: `Mandatory binding "${displayOp} (${binding.classification}) → ${binding.tool}" not found in PHASE TRANSITIONS with [Tool] notation`
         });
       }
+    }
+
+    // Check 6d: Verify TOOL GROUNDING has realization preamble
+    if (!groundingSection.includes('Realization:')) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'TOOL GROUNDING section missing "-- Realization:" preamble'
+      });
     }
 
     results.pass.push({

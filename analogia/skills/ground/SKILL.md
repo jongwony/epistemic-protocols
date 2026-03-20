@@ -59,7 +59,7 @@ If no relevant AI output exists: pause activation and request a grounding target
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → uncertain?                             -- mapping uncertainty gate (silent)
 Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M               -- domain decomposition + mapping [Tool]
-Phase 2: M → I(M, Sₜ) → V[AskUserQuestion](I, progress) → V    -- instantiation + validation [Tool]
+Phase 2: M → I(M, Sₜ) → Qs(I, progress) → Stop → V             -- instantiation + validation [Tool]
 Phase 3: V → integrate(V, R) → R'                               -- output update (internal)
 
 ── LOOP ──
@@ -78,10 +78,14 @@ narrowing(V, M) = |remaining(after)| < |remaining(before)|
 early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
+-- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
 Phase 1 Map     (construct) → Read, Grep (domain structure analysis)
-Phase 2 I+V     (extern)    → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not a Validation)
+Phase 2 Qs      (extern)    → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (state)     → Internal state update
 Phase 0 Detect  (infer)     → Internal analysis (no external tool)
+
+── ELIDABLE CHECKPOINTS ──
+Phase 2 Qs (validate)      → always_gated (Qs: user validates structural mapping with examples)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: AIOutput, Sₐ: Domain, Sₜ: Domain,
@@ -131,7 +135,7 @@ See `references/best-practices.md` for user-language triggers and grounding scen
 
 ### Activation
 
-AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via AskUserQuestion (Phase 2). On direct `/ground`, bind `R` from the current or most recent AI output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
+AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via gate interaction (Phase 2). On direct `/ground`, bind `R` from the current or most recent AI output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/ground` slash command or description-matching input. Always available.
@@ -154,7 +158,7 @@ When Analogia is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, call AskUserQuestion tool to present concrete instantiation for user validation of mapping adequacy.
+**Action**: At Phase 2, present concrete instantiation for user validation of mapping adequacy via gate interaction (Qs) and yield turn.
 </system-reminder>
 
 - Analogia completes before output dependent on mapping validity proceeds
@@ -221,7 +225,7 @@ Decompose abstract and concrete domains, then construct structural correspondenc
 
 ### Phase 2: Instantiation + Validation
 
-**Call the AskUserQuestion tool** to present concrete instantiations for user validation.
+**Present** concrete instantiations for user validation via gate interaction.
 
 **Selection criterion**: Choose the correspondence whose validation would maximally narrow the remaining mapping uncertainty. When priority is equal, prefer the correspondence with richer structural evidence.
 
@@ -234,7 +238,7 @@ Present the mapping details as text output:
 - [If structural mismatch detected: flag and explain]
 - **Progress**: [N validated / M total correspondences]
 
-Then **call AskUserQuestion**:
+Then **present**:
 
 ```
 Does [abstract concept] map correctly to your context?
@@ -267,9 +271,9 @@ After integration:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the validated mapping changed the application of the abstract framework. State in one sentence what shifted (e.g., "The Strangler Fig mapping confirmed except for the shared-database component, which requires a different migration strategy") or note that the original mapping was confirmed as structurally sound. This is informational text — not an AskUserQuestion call.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the validated mapping changed the application of the abstract framework. State in one sentence what shifted (e.g., "The Strangler Fig mapping confirmed except for the shared-database component, which requires a different migration strategy") or note that the original mapping was confirmed as structurally sound. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
@@ -282,13 +286,13 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Summarize validated mapping with confirmed/dismissed correspondences
 - Note any structural limits accepted (where analogy breaks down)
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Single obvious correspondence | Brief example + AskUserQuestion with Confirm default |
+| Light | Single obvious correspondence | Brief example + gate interaction with Confirm default |
 | Medium | Multiple correspondences, partial structural match | Mapping table + concrete examples |
 | Heavy | Complex cross-domain mapping, structural mismatches detected | Full domain decomposition + multiple instantiations + gap analysis |
 
@@ -306,8 +310,8 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 ## Rules
 
-1. **AI-guided, user-validated**: AI detects mapping uncertainty; validation requires user choice via AskUserQuestion (Phase 2)
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present structured options (text presentation = protocol violation)
+1. **AI-guided, user-validated**: AI detects mapping uncertainty; validation requires user choice via gate interaction (Phase 2)
+2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Domain decomposition first**: Before presenting instantiations, decompose abstract and concrete domain structures through codebase analysis (Phase 1)
 4. **Structural Correspondence over Abstract Assertion**: When mapping is uncertain, construct explicit correspondences rather than assert mapping validity — silence is worse than a rejected mapping
 5. **Concrete instantiation required**: Every mapping presented must include at least one concrete example in the user's domain
@@ -318,6 +322,6 @@ After convergence, scan session context for continuing epistemic needs and prese
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N validated / M total]`
 11. **Early exit honored**: When user declares mapping sufficient, accept immediately regardless of remaining correspondences
 12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **No premature convergence**: Do not declare all_addressed(R') without presenting convergence evidence trace. "All correspondences validated" as assertion without per-correspondence evidence = protocol violation
 15. **No silent mapping acceptance**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning to user for confirmation before concluding — do not silently accept

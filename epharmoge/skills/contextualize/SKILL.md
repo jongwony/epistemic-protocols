@@ -36,14 +36,14 @@ Severity ∈ {Critical, Significant, Minor}
 Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial
 Mₑ     = Newly emerged mismatches from Eval(R', X)             -- origin = Emerged(adapted_aspect)
 Register = Mᵢ → Set(Task) [Tool: TaskCreate]                  -- mismatch registration as tracked tasks
-Q      = Applicability inquiry (AskUserQuestion)
+Q      = Applicability inquiry (gate interaction)
 A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}
 R'     = Adapted result (contextualized output)
 ContextualizedExecution = R' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Eval(R, X) → Mᵢ?                                  -- applicability gate (silent)
-Phase 1: Mᵢ → TaskCreate[all mismatches] → Q[AskUserQuestion](Mᵢ[0], evidence) → A  -- register all, surface first [Tool]
+Phase 1: Mᵢ → TaskCreate[all mismatches] → Qc(Mᵢ[0], evidence) → Stop → A  -- register all, surface first [Tool]
 Phase 2: A → adapt(A, R) → R' → TaskUpdate → Eval(R', X) → Mₑ? -- adaptation + update + re-scan [Tool]
 
 ── LOOP ──
@@ -66,11 +66,15 @@ contextualized(R') = adjudicated(R', X) ∨ user_esc
 progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress when re-scan discovers new mismatches
 
 ── TOOL GROUNDING ──
+-- Realization: present → TextPresent+Stop | AskUserQuestion (preferences)
 Eval   (detect)  → Internal analysis (no external tool)
-Q      (extern)  → AskUserQuestion (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Qc     (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (modify)  → Edit, Write (result adaptation based on user direction)
                     -- (modify): tool call that changes existing artifacts (distinct from (extern) user-facing, (detect) read-only, (state) internal)
 Mᵢ/Mₑ (state)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
+
+── ELIDABLE CHECKPOINTS ──
+Phase 2 Qc (applicability) → always_gated (Qc: Confirm/Dismiss/Adapt applicability judgment)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
@@ -120,7 +124,7 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 
 ### Activation
 
-AI detects applicability mismatch after execution OR user calls `/contextualize`. Detection is silent (Phase 0); surfacing always requires user interaction via AskUserQuestion (Phase 1).
+AI detects applicability mismatch after execution OR user calls `/contextualize`. Detection is silent (Phase 0); surfacing always requires user interaction via gate interaction (Phase 1).
 
 **Application decontextualized** = the execution result is technically correct but may not fit the actual application context.
 
@@ -142,7 +146,7 @@ When Epharmoge is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 1, call AskUserQuestion tool to present mismatch evidence for user judgment.
+**Action**: At Phase 1, present mismatch evidence via gate interaction (Qc) and yield turn.
 </system-reminder>
 
 - Epharmoge completes before proceeding to next task
@@ -214,7 +218,7 @@ Evaluate execution result against application context. This phase is **silent** 
 
 ### Phase 1: Mismatch Surfacing
 
-**Register all identified mismatches as Tasks** (TaskCreate), then **call the AskUserQuestion tool** to present the highest-severity remaining mismatch.
+**Register all identified mismatches as Tasks** (TaskCreate), then **present** the highest-severity remaining mismatch via gate interaction.
 
 **Task format**:
 ```
@@ -225,7 +229,7 @@ TaskCreate({
 })
 ```
 
-**Do NOT present mismatches as plain text.** The tool call is mandatory — text presentation without tool = protocol violation.
+**Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
 **Surfacing format** (natural integration with execution completion):
 
@@ -235,7 +239,7 @@ Present the mismatch findings as text output:
   - **Evidence**: [what in the result and what in the context diverge]
   - **Progress**: [N completed / M total tasks] (M may increase on re-scan)
 
-Then **call AskUserQuestion**:
+Then **present**:
 
 ```
 How would you like to handle this applicability mismatch?
@@ -280,9 +284,9 @@ After adaptation — **re-scan**:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no AskUserQuestion). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the contextualized result changed the follow-up work. State in one sentence what shifted (e.g., "The adapted deployment target requires updating the CI pipeline configuration") or note that the original result was confirmed as contextually appropriate. This is informational text — not an AskUserQuestion call.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the contextualized result changed the follow-up work. State in one sentence what shifted (e.g., "The adapted deployment target requires updating the CI pipeline configuration") or note that the original result was confirmed as contextually appropriate. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
 
@@ -295,14 +299,14 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Summarize contextualized result with applied adaptations
 - Note any environment assumptions that remain unverified
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not AskUserQuestion calls.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Minor severity mismatches only | AskUserQuestion with Dismiss as default option |
-| Medium | Significant severity, evidence is clear | Structured AskUserQuestion with evidence |
+| Light | Minor severity mismatches only | Gate interaction with Dismiss as default option |
+| Medium | Significant severity, evidence is clear | Structured gate interaction with evidence |
 | Heavy | Critical severity, multiple interacting mismatches | Detailed evidence + adaptation options |
 
 ## UX Safeguards
@@ -320,8 +324,8 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 ## Rules
 
-1. **AI-guided, user-judged**: AI detects applicability mismatch; user judges whether adaptation is needed via AskUserQuestion (Phase 1)
-2. **Recognition over Recall**: Always **call** AskUserQuestion tool to present mismatches with evidence — text presentation without tool = protocol violation
+1. **AI-guided, user-judged**: AI detects applicability mismatch; user judges whether adaptation is needed via gate interaction (Phase 1)
+2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Applicability over Correctness**: When result is correct but contextually mismatched, surface the mismatch — do not assume correctness implies fitness
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
 5. **One at a time**: Surface one mismatch per Phase 1 cycle; do not bundle multiple mismatches
@@ -331,6 +335,6 @@ After convergence, scan session context for continuing epistemic needs and prese
 9. **Early exit honored**: When user accepts result as-is, accept immediately regardless of remaining mismatches
 10. **Cross-protocol awareness**: Suppress when Aitesis resolved overlapping domains in the same execution scope (within recommendation chains only)
 11. **Conditional gate**: AI-guided activation (Layer 2) requires Aitesis operational experience confirmation. User-invocable activation (Layer 1 / `/contextualize`) is always available
-12. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before calling AskUserQuestion. The `question` field contains only the essential question; `option.description` contains only option-specific differential implications. Embedding context in question fields = protocol violation
+12. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 13. **No premature convergence**: Do not declare adjudicated(R', X) without presenting convergence evidence trace. "All mismatches resolved" as assertion without per-mismatch evidence = protocol violation
 14. **No silent applicability assumption**: If Phase 0 scan detects no context mismatches, present this finding with reasoning to user for confirmation before concluding — do not silently declare applicable

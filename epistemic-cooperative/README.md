@@ -106,7 +106,7 @@ DETECT → SELECT → CONFIGURE → GENERATE → VERIFY
 |-------|-------------|
 | 0. Detect | Check existing preferences in CLAUDE.local.md |
 | 1. Select | Choose Quick (5 global params) or Full (global + per-protocol) path |
-| 2. Configure | Interactive parameter traversal via AskUserQuestion |
+| 2. Configure | Interactive parameter traversal via gate interaction |
 | 3. Generate | Create/update preferences section |
 | 4. Verify | Review and confirm result |
 

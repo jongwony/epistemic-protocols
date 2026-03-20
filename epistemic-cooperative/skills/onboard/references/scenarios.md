@@ -41,7 +41,7 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 
 **Situation**: A user asks Claude to refactor a large authentication module. The task involves multiple decision domains: file structure reorganization, API contract changes, test strategy, and deployment approach. It's unclear which aspects the user wants to control directly vs. delegate to AI.
 
-**Intervention**: `/bound` probes the task for boundary-undefined domains, collects evidence from project configuration (CLAUDE.md rules, existing conventions), and presents each domain for classification via AskUserQuestion: "File structure — should you decide the directory layout, or should I propose one?" Options: UserSpec / AISpec / NeedsCalibration / Dismiss. The resulting BoundaryMap guides all subsequent protocol behavior.
+**Intervention**: `/bound` probes the task for boundary-undefined domains, collects evidence from project configuration (CLAUDE.md rules, existing conventions), and presents each domain for classification via gate interaction: "File structure — should you decide the directory layout, or should I propose one?" Options: UserSpec / AISpec / NeedsCalibration / Dismiss. The resulting BoundaryMap guides all subsequent protocol behavior.
 
 **Trial prompt**: "Let's practice: say 'Refactor the authentication module' and I'll show how /bound defines ownership boundaries"
 

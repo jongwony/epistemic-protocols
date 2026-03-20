@@ -118,12 +118,12 @@ Spawn Task subagent with prompt:
 You are a Claude Code Ecosystem Expert.
 
 **Pattern validation**:
-- AskUserQuestion mandates enforced (tool call, not text)
+- Gate mandates enforced (structured presentation + turn yield, not unstructured bypass)
 - Epistemic transitions correctly typed (deficit → resolved type signatures)
 - User agency preserved (no automatic decisions)
 
 **False positive filtering** (dismiss concerns from other perspectives):
-- "Automatic intensity reduction" → not needed (AskUserQuestion provides control)
+- "Automatic intensity reduction" → not needed (gate interaction provides control)
 - "Automatic deactivation" → not needed (user can interrupt via Esc)
 - "Topic boundary detection" → context-dependent (model judgment acceptable)
 - "Type-level cardinality" → prose sufficient (low violation cost, Esc recovery)
@@ -149,9 +149,9 @@ Identify convergence (all perspectives agree) and divergence (perspectives diffe
 
 Apply Claude Code Ecosystem expert's `filtered` array to dismiss false positives from other perspectives.
 
-### Phase 4: Surface via AskUserQuestion
+### Phase 4: Surface via Gate Interaction
 
-Call AskUserQuestion tool to present findings. Format:
+Present findings via gate interaction. Format:
 
 ```
 ## Verification Results

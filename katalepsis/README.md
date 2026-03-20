@@ -29,9 +29,9 @@ When AI completes complex work, users often can't grasp the full result (`Result
 
 ```
 Phase 0: Categorize   → Analyze AI work, extract change categories
-Phase 1: Entry Point  → Present categories, user selects (AskUserQuestion)
+Phase 1: Entry Point  → Present categories, user selects (gate interaction)
 Phase 2: Register     → Create tasks for selected categories (TaskCreate)
-Phase 3: Verify Loop  → Confirm understanding progressively (AskUserQuestion + TaskUpdate)
+Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction + TaskUpdate)
 ```
 
 ## When to Use

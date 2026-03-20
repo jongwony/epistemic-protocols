@@ -28,10 +28,10 @@ DETECT → SELECT → CONFIGURE → GENERATE → VERIFY
 | Phase | Owner | Tool | Purpose |
 |-------|-------|------|---------|
 | 0. Detect | Main | Read | Check existing preferences section |
-| 1. Select | Main | AskUserQuestion | Path selection (Quick/Full) + existing section handling |
-| 2. Configure | Main | AskUserQuestion | Parameter traversal |
+| 1. Select | Main | Gate | Path selection (Quick/Full) + existing section handling |
+| 2. Configure | Main | Gate | Parameter traversal |
 | 3. Generate | Main | Read, Edit/Write | Create/update CLAUDE.local.md section |
-| 4. Verify | Main | Read, AskUserQuestion | Review result |
+| 4. Verify | Main | Read, Gate | Review result |
 
 ## Parameter Catalog
 
@@ -47,6 +47,7 @@ Parameters applied across protocols. Ordered by impact — early exit still capt
 | 4 | Session Immunity Scope | per-session | per-session / per-invocation | 6/10 |
 | 5 | AI-Detection Trigger | confirm | auto / confirm / suggest-only / disable | Hermeneia, AI-guided (8/10) |
 | 6 | Explanation Level | standard | accessible / standard / technical | 10/10 |
+| 7 | Interaction Modality | text-stop | text-stop / ask-user-question | 10/10 |
 
 **Parameter descriptions** (presented to user during configuration):
 
@@ -56,6 +57,7 @@ Parameters applied across protocols. Ordered by impact — early exit still capt
 4. **Session Immunity Scope**: After a protocol runs on a topic, how long it avoids re-triggering. `per-session` = immune for entire session. `per-invocation` = only immune for current invocation.
 5. **AI-Detection Trigger**: How AI-detected triggers (vs explicit /slash invocation) are handled. `auto` = activates immediately without confirmation. `confirm` = asks before activating. `suggest-only` = mentions without activating. `disable` = only explicit invocation works.
 6. **Explanation Level**: Controls abstraction level and language complexity of protocol questions and explanations. `accessible` = simple language, concrete examples, minimal jargon. `standard` = balanced explanation. `technical` = conceptual depth, domain terminology allowed.
+7. **Interaction Modality** (`interaction_modality`): Controls how gate interactions (Qc/Qs) are realized. `text-stop` = structured numbered text output + Stop (turn yield), user responds freely. `ask-user-question` = AskUserQuestion tool call with structured options.
 
 ### Per-Protocol Parameters (Full Path)
 
@@ -168,7 +170,7 @@ Grouped by Epistemic Concern Cluster. Users select which clusters to configure; 
 
 ### Phase 1: Select
 
-**If section exists** — call AskUserQuestion:
+**If section exists** — present:
 - Text: "Existing preferences found. How to proceed?"
 - Options:
   - "Update — modify specific parameters"
@@ -176,27 +178,27 @@ Grouped by Epistemic Concern Cluster. Users select which clusters to configure; 
   - "Keep — exit without changes"
 
 If "Keep" → terminate.
-If "Update" → call AskUserQuestion for Quick/Full path selection (same as new-section flow), then Phase 2 with existing values as current defaults.
+If "Update" → present for Quick/Full path selection (same as new-section flow), then Phase 2 with existing values as current defaults.
 If "Replace" → Phase 2 with standard defaults.
 
-**If section absent** — call AskUserQuestion:
+**If section absent** — present:
 - Text: "Configuration path?"
 - Options:
-  - "Quick — 6 global parameters"
+  - "Quick — 7 global parameters"
   - "Full — global + per-protocol parameters (~32)"
 
 ### Phase 2: Configure
 
-#### Quick Path (6 AskUserQuestion calls)
+#### Quick Path (7 gate interactions)
 
-For each global parameter (ordered 1-6), call AskUserQuestion:
+For each global parameter (ordered 1-7), present:
 - Text: "[Parameter name]: [description]"
 - Options: list of valid values with `(default)` marker on the default value
 
 #### Full Path (Quick + per-protocol)
 
-1. Complete Quick Path (5 calls)
-2. Call AskUserQuestion for cluster selection:
+1. Complete Quick Path (7 calls)
+2. Present for cluster selection:
    - Text: "Which protocol groups to customize?"
    - Options:
      - "Planning — /clarify, /goal, /inquire"
@@ -208,15 +210,15 @@ For each global parameter (ordered 1-6), call AskUserQuestion:
      - "All groups"
      - "Done — keep defaults for unselected"
 
-3. For each selected cluster, for each protocol in cluster, call AskUserQuestion:
+3. For each selected cluster, for each protocol in cluster, present:
    - Text: "[Protocol] /[command] parameters:\n[list all params with current values]"
    - Options:
      - "Keep all defaults"
      - One option per parameter name
 
-   If user selects a parameter → call AskUserQuestion with that parameter's options → return to protocol parameter list for remaining params. Repeat until "Keep remaining defaults" or all adjusted.
+   If user selects a parameter → present via gate interaction with that parameter's options → return to protocol parameter list for remaining params. Repeat until "Keep remaining defaults" or all adjusted.
 
-**Budget**: Quick path completes within 8 calls (6 params + select + verify). Full path completes within 19 calls minimum, increasing with individual parameter modifications.
+**Budget**: Quick path completes within 9 calls (7 params + select + verify). Full path completes within 19 calls minimum, increasing with individual parameter modifications.
 
 ### Phase 3: Generate
 
@@ -233,6 +235,7 @@ Construct the preferences section and write to `~/.claude/CLAUDE.local.md`.
 - AI-Guided Activation Sensitivity: default
 - Session Immunity Scope: per-session
 - AI-Detection Trigger: confirm
+- Interaction Modality: text-stop
 
 ### Per-Protocol
 <!-- Only non-default values recorded below -->
@@ -246,7 +249,7 @@ Construct the preferences section and write to `~/.claude/CLAUDE.local.md`.
 ```
 
 **Generation rules**:
-- Global section: always write all 6 parameters (even if all default)
+- Global section: always write all 7 parameters (even if all default)
 - Per-Protocol section: only write parameters that differ from defaults
 - If all per-protocol parameters are default: omit Per-Protocol section entirely
 - Section boundary: `## Epistemic Protocol Preferences` through next `## ` heading or EOF
@@ -260,7 +263,7 @@ Construct the preferences section and write to `~/.claude/CLAUDE.local.md`.
 
 1. Read the written section from `~/.claude/CLAUDE.local.md`
 2. Present the result as text output
-3. Call AskUserQuestion:
+3. Present via gate interaction:
    - Text: "Preferences saved. Review above."
    - Options:
      - "Looks good"
@@ -285,10 +288,10 @@ The generated section is human-readable and machine-parseable. Protocols read th
 
 ## Rules
 
-1. **Recognition over Recall**: All parameters presented via AskUserQuestion with selectable options. Never ask users to type parameter values.
+1. **Recognition over Recall**: All parameters presented via gate interaction with selectable options. Never ask users to type parameter values.
 2. **Minimal noise**: Per-Protocol section records only non-default values. Default behavior requires zero configuration.
 3. **Existing section handling**: Always offer Update/Replace/Keep when preferences already exist. Never silently overwrite.
-4. **AskUserQuestion budget**: Quick path completes within 8 calls. Full path completes within 19 calls minimum.
+4. **Gate interaction budget**: Quick path completes within 9 calls. Full path completes within 19 calls minimum.
 5. **No protocol execution**: This skill configures preferences only. It does not call or simulate any protocol.
 6. **File safety**: Read before write. Preserve all content outside the preferences section boundary.
 7. **Reversibility**: All changes are to a local git-untracked file. User can delete the section or file to restore defaults.

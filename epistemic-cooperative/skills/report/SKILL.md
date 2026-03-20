@@ -31,8 +31,8 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 | 1. Scan | Subagent + Main | Bash, Read, Glob | Project discovery + insights detection |
 | 2. Extract | Subagent (session-analyzer) | Grep, Read | Pattern extraction from JSONL |
 | 3. Map | Main | — | Pattern → Protocol matching |
-| 4. Present | Main | AskUserQuestion, Write, Bash | User confirmation + Growth Map HTML |
-| 5. Guide | Main | AskUserQuestion | Protocol trial CTA |
+| 4. Present | Main | Gate, Write, Bash | User confirmation + Growth Map HTML |
+| 5. Guide | Main | Gate | Protocol trial CTA |
 
 ## Data Sources
 
@@ -157,7 +157,7 @@ Apply the mapping tables below to match observed patterns to protocols.
 
 ### Phase 4: Present (Growth Map Artifact)
 
-1. Call AskUserQuestion to present analysis summary:
+1. Present analysis summary via gate interaction:
    - Number of sessions analyzed, projects scanned
    - Key patterns discovered (with evidence counts)
    - Proposed protocol recommendations

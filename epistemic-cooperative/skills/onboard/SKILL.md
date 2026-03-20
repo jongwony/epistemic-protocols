@@ -29,18 +29,18 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 
 | Phase | Owner | Tool | Purpose |
 |-------|-------|------|---------|
-| 0. Entry | Main | AskUserQuestion | Path selection: quick/targeted |
+| 0. Entry | Main | Gate | Path selection: quick/targeted |
 | 1. Quick Scan | Main | Glob, Read | User Context Profile extraction |
 | 2a. Pick-1 | Main | — | Quick path: select 1 recommendation |
 | 2b. Evidence | Main | — | Quick path: show 1 evidence card |
 | 2. Map | Main | — | Targeted path: Profile → Protocol matching |
-| 3. Scenario | Main | AskUserQuestion | Targeted path: context-personalized intervention point |
-| 4. Trial | Main | AskUserQuestion | Real protocol execution (quick: mini trial, targeted: full trial) |
+| 3. Scenario | Main | Gate | Targeted path: context-personalized intervention point |
+| 4. Trial | Main | Gate | Real protocol execution (quick: mini trial, targeted: full trial) |
 | 4→Q. Insight | Main | — | Quick path: post-trial insight card |
-| 4→Q. Next | Main | AskUserQuestion | Quick path: simplified navigation |
-| 4→5 LOOP | Main | AskUserQuestion | Targeted path: post-trial navigation |
-| 5. Quiz | Main | AskUserQuestion | Targeted path: Socratic protocol recognition quiz |
-| 6. Guide | Main | AskUserQuestion | Targeted path: summary + /report CTA |
+| 4→Q. Next | Main | Gate | Quick path: simplified navigation |
+| 4→5 LOOP | Main | Gate | Targeted path: post-trial navigation |
+| 5. Quiz | Main | Gate | Targeted path: Socratic protocol recognition quiz |
+| 6. Guide | Main | Gate | Targeted path: summary + /report CTA |
 
 ## Data Sources
 
@@ -65,7 +65,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 
 Do NOT present the full protocol catalog upfront. Start with a concise welcome and path selection.
 
-**AskUserQuestion #1**:
+**Gate #1**:
 - Text: Path selection prompt
 - Options:
   - Quick recommendation (Recommended)
@@ -74,7 +74,7 @@ Do NOT present the full protocol catalog upfront. Start with a concise welcome a
 
 **If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 10 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, call AskUserQuestion:
+**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 10 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
 - Text: Post-catalog path selection
 - Options:
   - Quick recommendation
@@ -88,14 +88,14 @@ Then proceed based on selection.
 
 Present a condensed catalog as text output: render the Data Sources table grouped by Cluster, each protocol as `/command — When to Use description`.
 
-Then **AskUserQuestion #2**:
+Then **Gate #2**:
 - Text: Protocol selection (type name or number in Other)
 - Options:
   - Pre-execution (Planning) — /clarify, /goal, /bound, /inquire
   - Analysis/Decision — /frame, /ground, /gap
   - Execution/Verification/Understanding — /attend, /contextualize, /grasp
 
-**AskUserQuestion #3** (Targeted only, session source):
+**Gate #3** (Targeted only, session source):
 - Text: Session source selection
 - Options:
   - Personalize with my recent sessions
@@ -166,7 +166,7 @@ Fallback (no session data): State that no patterns were detected, then cite the 
 - Do not show confidence scores or numbers.
 - Do not quote session content verbatim.
 
-After presenting evidence, call AskUserQuestion:
+After presenting evidence, present:
 - Text: Trial invitation
 - Options:
   - Try it now
@@ -213,9 +213,9 @@ Expected outcome: [e.g., reduced rework, clearer direction]
 
 **Anti-pattern**: Scenarios must be self-contained (situation + intervention) with unambiguous protocol fit. Ambiguous patterns belong in Phase 5 quiz.
 
-Present each scenario as regular text output (Tier 1/2 format above). Then call AskUserQuestion for navigation only:
+Present each scenario as regular text output (Tier 1/2 format above). Then present for navigation only:
 
-**AskUserQuestion** (per scenario):
+**Gate** (per scenario):
 - Text: Scenario navigation
 - Options:
   - Try it — practice this protocol
@@ -228,7 +228,7 @@ Guide the user through a real, abbreviated protocol experience.
 
 #### Quick Path Trial
 
-**Mini practice prompt**: Present a single realistic request (one sentence) that naturally triggers the selected protocol's deficit. When User Context Profile is available, adapt the domain to match the user's work context. Source from `references/scenarios.md` Trial prompt field, or generate from Data Sources context. Follow with AskUserQuestion:
+**Mini practice prompt**: Present a single realistic request (one sentence) that naturally triggers the selected protocol's deficit. When User Context Profile is available, adapt the domain to match the user's work context. Source from `references/scenarios.md` Trial prompt field, or generate from Data Sources context. Follow with gate interaction:
 - Text: Trial scenario confirmation (user can also define their own)
 - Options:
   - Start with this scenario — call /X
@@ -244,7 +244,7 @@ Generate from the protocol just experienced:
 
 **Quick Post-Trial Navigation**:
 
-Call AskUserQuestion:
+Present via gate interaction:
 - Text: Post-trial navigation
 - Options:
   - That's enough for today
@@ -277,7 +277,7 @@ Protocol Insight: /X (Greek name)
 
 **Post-Trial LOOP**:
 
-After the Post-Trial Insight, call AskUserQuestion:
+After the Post-Trial Insight, present:
 - Text: Post-trial navigation
 - Options:
   - Quiz — test my understanding
@@ -301,7 +301,7 @@ Test protocol recognition through situation-based questions. Question format dif
 
 **Type 1 — Binary recognition** (2-3 questions):
 
-Call AskUserQuestion for each:
+Present via gate interaction for each:
 - Text: Present a situation (2-3 sentences), ask "Is this a `/X` situation?"
 - Options: "Yes" / "No"
 - Mix: 1-2 true positives + 1 true negative (situation that fits a neighbor protocol)
@@ -309,13 +309,13 @@ Call AskUserQuestion for each:
 
 **Type 2 — Reverse recognition** (1 question):
 
-Call AskUserQuestion:
+Present via gate interaction:
 - Text: Present 3 short scenarios numbered 1-3, ask "Which of these are `/X` situations?"
 - Options: "1 and 2" / "2 and 3" / "1 and 3" / "All three"
 
 **Type 3 — Design thinking** (1 question):
 
-Call AskUserQuestion:
+Present via gate interaction:
 - Text: Present a situation, ask "How would you formulate your request to AI to avoid this problem?"
 - Options: "Show me a hint" / "Show me a model answer"
 - The user's primary input channel is Other (free text). Evaluate based on whether the response demonstrates protocol awareness.
@@ -324,7 +324,7 @@ Call AskUserQuestion:
 
 **Type 1 — Situation recognition** (3-4 questions):
 
-Call AskUserQuestion for each:
+Present via gate interaction for each:
 - Text: Present a situation (2-3 sentences), ask "Which protocol fits?"
 - Options: 4 protocol choices (correct answer + 3 plausible distractors)
 
@@ -337,7 +337,7 @@ Same format as Targeted Path Type 3.
 Immediate feedback after each question:
 - **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` checks *execution readiness* (Phase -1 upstream scan) and gates *execution risks* (what could go wrong when you act). `/gap` audits before action (decision quality), `/attend` ensures readiness + gates during action (execution safety)."
 - **Incorrect** (reasoning inquiry → targeted correction):
-  1. **Reasoning inquiry**: Call AskUserQuestion with 2-3 reasoning hypotheses inferred from the user's wrong answer (context-specific, not templates). Do not reveal the correct answer. "Other" always available.
+  1. **Reasoning inquiry**: Present via gate interaction 2-3 reasoning hypotheses inferred from the user's wrong answer (context-specific, not templates). Do not reveal the correct answer. "Other" always available.
   2. **Targeted correction**: Using the user's stated reasoning, explain the distinction through the design axis that separates the confused pair. Directly address the reasoning — e.g., "You mentioned timing — that's the right axis. The key difference is *direction*: `/inquire` catches missing context *before* execution (User→AI), while `/contextualize` checks context fit *after* (AI→User)."
   3. **Resume**: Proceed to next question.
 
@@ -368,7 +368,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 6. **Continue exploring** (when MAP results contain unexplored protocols):
 
-   Call AskUserQuestion:
+   Present via gate interaction:
    - Text: "Want to experience another protocol?"
    - Options: "Yes — show me another" / "Done — I have enough"
 
@@ -390,7 +390,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 - **Targeted**: 2-3 binary + 1 reverse + 1 design = 4-5 questions
 - **Multi-protocol**: 3-4 situation + 1 design = 4-5 questions
 
-## AskUserQuestion Budget
+## Gate Interaction Budget
 
 Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 

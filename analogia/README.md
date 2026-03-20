@@ -42,7 +42,7 @@ AI applies patterns, models, and analogies from one domain to another without ch
 ```
 Phase 0: Gate         → Detect mapping uncertainty in AI output (silent)
 Phase 1: Decompose    → Identify abstract + concrete domains, construct structural correspondences
-Phase 2: Validate     → Present concrete instantiation for user verification (AskUserQuestion)
+Phase 2: Validate     → Present concrete instantiation for user verification (gate interaction)
 Phase 3: Integrate    → Update output with explicit mapping status
 ```
 

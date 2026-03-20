@@ -92,7 +92,7 @@ When a cluster name or protocol command/name is provided as argument:
 
 ## Rules
 
-1. **No AskUserQuestion** — pure text output only. This skill is a passive reference, not an interactive dialogue.
+1. **No gate interaction** — pure text output only. This skill is a passive reference, not an interactive dialogue.
 2. **No delegation** — main agent handles all output directly. Read tool for scenarios.md detail mode only.
 3. **Static overview, dynamic detail** — the Protocol Catalog tables above are embedded and authoritative. Detail mode reads scenarios.md at runtime for richer content.
 4. **Argument normalization** — accept case-insensitive input; strip `/` prefix; match against both protocol names and commands.

@@ -28,7 +28,7 @@ Quality criteria for epistemic protocol verification, organized by severity.
 
 - **Supersession non-conflict**: Different protocols supersede different domains
 - **Activation determinism**: Trigger conditions are unambiguous
-- **Tool call mandate**: `AskUserQuestion` calls are mandatory, not optional
+- **Gate mandate**: User-facing gate interactions (Qc/Qs) use structured presentation + turn yield, not unstructured text bypass
 
 ### Tool Grounding Integrity
 
