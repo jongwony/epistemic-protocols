@@ -1,7 +1,7 @@
 {
   "name": "epistemic-cooperative",
-  "description": "/catalog for protocol handbook, /onboard for quick recommendation + protocol learning, /report for Growth Map (usage analysis + insights integration), /dashboard for coverage dashboard, /preferences for protocol customization",
-  "version": "1.14.0",
+  "description": "/catalog for protocol handbook, /onboard for quick recommendation + protocol learning, /report for Growth Map (usage analysis + insights integration), /dashboard for coverage dashboard, /preferences for preference initialization",
+  "version": "1.15.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

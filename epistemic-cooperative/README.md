@@ -15,7 +15,7 @@ A utility plugin for epistemic protocol onboarding and analytics. Unlike protoco
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/report` | Growth Map with epistemic analysis | HTML artifact (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
-| `/preferences` | Interactive protocol preference configuration | `~/.claude/CLAUDE.local.md` preferences section |
+| `/preferences` | Protocol preference initialization | Project memory `preferences_epistemic.md` |
 
 ## Skills
 
@@ -94,27 +94,25 @@ Dashboard sections:
 - **Achievements**: session, protocol, code, and streak milestones
 - **Quality Score**: composite 0-100 (outcome 35%, friction 20%, satisfaction 25%, coverage 20%)
 
-### /preferences — Protocol Preference Configuration
+### /preferences — Protocol Preference Initialization
 
-Configure epistemic protocol behavior through interactive dialogue. Generates a preferences section in `~/.claude/CLAUDE.local.md`.
+Initialize epistemic protocol preferences with defaults. Individual modifications via `/memory`.
 
 ```
-DETECT → SELECT → CONFIGURE → GENERATE → VERIFY
+DETECT → INITIALIZE → WRITE
 ```
 
 | Phase | Description |
 |-------|-------------|
-| 0. Detect | Check existing preferences in CLAUDE.local.md |
-| 1. Select | Choose Quick (5 global params) or Full (global + per-protocol) path |
-| 2. Configure | Interactive parameter traversal via gate interaction |
-| 3. Generate | Create/update preferences section |
-| 4. Verify | Review and confirm result |
+| 0. Detect | Check existing preferences memory file |
+| 1. Initialize | Present defaults + confirm initialization |
+| 2. Write | Create/reset memory file |
 
 Key features:
-- **Recognition over Recall**: all parameters as selectable options, never free-text
-- Quick path (5 global parameters) or Full path (global + ~32 per-protocol)
-- Non-default values only for per-protocol section (minimal noise)
-- Existing section handling: Update / Replace / Keep
+- **One-shot initialization**: dump defaults and confirm (2 turns)
+- **Per-project scope**: stored as project memory, not global CLAUDE.local.md
+- **Native modification**: individual changes via `/memory` or natural language
+- Per-protocol section: only added when non-default values exist via `/memory`
 
 ## Architecture
 
@@ -149,8 +147,8 @@ epistemic-cooperative/
 | Re-evaluating protocol fit after workflow changes | `/report` |
 | After running `/onboard` for deeper analysis | `/report` or `/dashboard` |
 | Tracking protocol adoption over time | `/dashboard` |
-| Want to customize protocol behavior | `/preferences` |
-| Adjusting preferences after `/onboard` | `/preferences` |
+| Want to initialize protocol preferences | `/preferences` |
+| Modify individual preferences | `/memory` |
 
 ## Install
 
