@@ -204,15 +204,16 @@ Task completion      (state)   → TaskUpdate (status tracking) [Tool]
 Withdraw shutdown    (extern)  → SendMessage (shutdown_request to team members) [Tool]
 
 ── ELIDABLE CHECKPOINTS ──
-Phase -1 Sub-A0 Q (routing)     → conditional: fires only when D[] ≠ ∅
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+Phase -1 Sub-A0 Qc (routing)   → conditional: fires only when D[] ≠ ∅
                                    default: present detected deficits with routing options
                                    regret: bounded (Materialize + Phase 0 Classify provide independent checks)
 Phase -1 confirm (cold start)   → conditional: fires when ¬Fired ∧ ¬C.prior (transparent cold start)
                                    regret: bounded (Phase 0 Classify provides independent risk check)
-Phase -1 conflict (tasks+prior) → always_gated (classificatory: resume vs refresh vs merge)
-Phase -1 TeamCoord (team)       → always_gated (classificatory: team structure selection)
-Phase -1 Augment (roles)        → always_gated (classificatory: role confirmation)
-Phase 2 Q (checkpoint)          → always_gated (constitutive: execution risk judgment)
+Phase -1 conflict (tasks+prior) → always_gated (Qc: resume vs refresh vs merge)
+Phase -1 TeamCoord (team)       → always_gated (Qc: team structure selection)
+Phase -1 Augment (roles)        → always_gated (Qc: role confirmation)
+Phase 2 Qc (checkpoint)         → always_gated (Qc, unbounded-regret: execution risk judgment)
 
 ── MODE STATE ──
 Λ = { phase: Phase, E: ExecutionAction,

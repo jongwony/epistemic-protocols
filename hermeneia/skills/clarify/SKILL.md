@@ -84,6 +84,7 @@ suggest_only → no tool call (passive suggestion; Λ.active = false)
 integrate    → Internal state update (no external tool)
 
 ── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
 Phase 0 Qc (confirm)       → conditional: ai_strong only (user_signal path skips Phase 0)
                               regret: bounded (Phase 1a Qc always gated; immune(E) on decline)
 Phase 1a Qc (E confirm)    → elidable when: explicit_arg(E) via /clarify "text"

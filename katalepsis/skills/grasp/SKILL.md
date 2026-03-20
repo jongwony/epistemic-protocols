@@ -48,7 +48,7 @@ Phase 0: R → Categorize(R) → C                         -- analysis (silent)
 Phase 1: C → Qc(entry points) → Stop → Sₑ              -- entry point selection [Tool]
 Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → detect(C) → GT → P → Δ  -- comprehension check [Tool]
-       → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Type F gaps [Tool]
+       → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Emergent [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
        → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
        → Read(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
@@ -84,6 +84,7 @@ Phase 3 Prop → TaskCreate (proposal ejection)
 Categorize  → Internal analysis (Read for context if needed)
 
 ── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
 Phase 1 Qc (entry points)  → always_gated (Qc: verification scope selection)
 Phase 3 Qs (verify)        → always_gated (Qs: Socratic probe — user comprehension is the measurement)
 Phase 3 Qᵣs (reasoning)   → always_gated (Qs: misconception reasoning hypothesis)

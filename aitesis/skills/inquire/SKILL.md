@@ -103,6 +103,7 @@ Phase 2 Qs      (extern)      → present (mandatory: classify result + uncertai
 Phase 3         (state)       → Internal state update
 
 ── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
 Phase 2 Qs (transparent)   → always_gated (Qs: user provides context judgment on insufficiency)
 
 ── MODE STATE ──

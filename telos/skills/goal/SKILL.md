@@ -85,6 +85,7 @@ Phase 3    (state)   → Internal GoalContract update (no external tool)
 Phase 4 Qc (extern)  → present (GoalContract review + approval)
 
 ── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
 Phase 0 Qc (confirm)       → elidable when: explicit_arg via /goal "text"
                               default: proceed with inferred goal seed
                               regret: bounded (Phase 1 Qc provides correction opportunity)

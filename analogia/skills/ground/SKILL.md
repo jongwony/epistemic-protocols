@@ -85,6 +85,7 @@ Phase 3         (state)     → Internal state update
 Phase 0 Detect  (infer)     → Internal analysis (no external tool)
 
 ── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
 Phase 2 Qs (validate)      → always_gated (Qs: user validates structural mapping with examples)
 
 ── MODE STATE ──

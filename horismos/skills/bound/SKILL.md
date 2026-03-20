@@ -83,6 +83,7 @@ Phase 2 Qc    (extern)  → present (mandatory; Esc key → loop termination at 
 Phase 3       (state)   → Internal state update
 
 ── ELIDABLE CHECKPOINTS ──
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
 Phase 2 Qc (classify)      → always_gated (Qc: UserSpec/AISpec/NeedsCalibration — boundary ownership)
 
 ── MODE STATE ──

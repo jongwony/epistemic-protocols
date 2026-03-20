@@ -235,6 +235,7 @@ Construct the preferences section and write to `~/.claude/CLAUDE.local.md`.
 - AI-Guided Activation Sensitivity: default
 - Session Immunity Scope: per-session
 - AI-Detection Trigger: confirm
+- Explanation Level: standard
 - Interaction Modality: text-stop
 
 ### Per-Protocol

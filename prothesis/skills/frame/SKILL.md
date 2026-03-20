@@ -21,7 +21,7 @@ Inquiry
   → confirm(mission_brief)              -- validate inquiry framing with user
   → gather(context)                     -- targeted context acquisition guided by MBᵥ
   → propose(perspectives)               -- generate distinct analytical lenses from context
-  → select(perspectives)                -- user chooses lenses via AskUserQuestion
+  → select(perspectives)                -- user chooses lenses via gate interaction
   → LensEstablished                     -- Mode 1 terminus; composable with downstream protocols
   → spawn(team)                         -- assemble perspective team via TeamCreate
   → inquire(parallel)                   -- isolated perspective analysis per teammate
@@ -58,7 +58,7 @@ T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with 
 Ω      = Collection: R → R', retain(T)               -- finalize results; team lifecycle deferred to loop
 R      = Set(Result)                                  -- raw inquiry outputs
 R'     = Set(Result) post-collection                  -- after Phase 3 collection
-P      = Preview: R' → UserVisible(R')               -- per-perspective summary output before synthesis (text, not AskUserQuestion)
+P      = Preview: R' → UserVisible(R')               -- per-perspective summary output before synthesis (text, not gate interaction)
 Δ      = Trigger detection: R' → Δₛ                  -- produces named trigger set
 Δₛ     = Set(Trigger)                                 -- detected triggers: contradictions, horizon intersections, uncorroborated high-stakes
 D?     = Conditional dialogue: Δₛ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → Dᵣ; Δₛ = ∅ → skip dialogue (Dᵣ = ∅)
@@ -135,7 +135,7 @@ Sc (extern)              → present (mandatory; multiSelect: true; Esc key → 
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
-Phase 3 P (preview)      → Internal operation (text output: per-perspective epistemic contribution + key finding summaries; no AskUserQuestion)
+Phase 3 P (preview)      → Internal operation (text output: per-perspective epistemic contribution + key finding summaries; no gate interaction)
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
 Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
 Phase 4 O (output)       → Internal operation (text output: full synthesis — convergence, divergence, integrated assessment)
@@ -149,12 +149,13 @@ Phase 4 Syn (synthesis)  → Internal operation (no external tool)
 characterize (internal)  → Internal operation (perspective count tier classification)
 
 ── ELIDABLE CHECKPOINTS ──
-Phase 0 Q (MB+mode)     → elidable when: user_invoked ∧ explicit_arg(U)
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+Phase 0 Qc (MB+mode)    → elidable when: user_invoked ∧ explicit_arg(U)
                            default: (Q1=confirm, Q2=ai_recommended_mode)
-                           regret: bounded (Phase 2 S always gated; J_mb=modify on re-invoke)
-Phase 2 S (perspective)  → always_gated (classificatory: lens selection is epistemic choice)
-Phase 4 Q (routing)      → always_gated (constitutive: loop path + team lifecycle)
-PF Q (preserve)          → always_gated (constitutive: knowledge preservation scope)
+                           regret: bounded (Phase 2 Sc always gated; J_mb=modify on re-invoke)
+Phase 2 Sc (perspective) → always_gated (Qc: lens selection is epistemic choice)
+Phase 4 Qc (routing)     → always_gated (Qc, unbounded-regret: loop path + team lifecycle)
+PF Qc (preserve)         → always_gated (Qc, unbounded-regret: knowledge preservation scope)
 
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs

@@ -356,12 +356,13 @@ function checkToolGrounding() {
     const commentPattern = new RegExp(`--\\s*${escapedOp}:`);
     if (commentPattern.test(phaseSection)) return true;
 
-    // Pattern 5: Gate notation - Qc(args) or Qs(args) or Sc(args)
-    const gatePattern = new RegExp(`${escapedOp}\\(`);
+    // Pattern 5: Operation with parenthesized arguments - e.g., Qc(args), Qs(args), Sc(args)
+    // Word boundary prevents substring matches (e.g., "S(" matching inside "Qs(")
+    const gatePattern = new RegExp(`(?:^|\\s)${escapedOp}\\(`, 'm');
     if (gatePattern.test(phaseSection)) return true;
 
-    // Pattern 6: Compound gate notation without args - "TeamCoord Qc →" or "TeamCoord Qc → Stop"
-    const compoundNoArgsPattern = new RegExp(`${escapedOp}\\s*→`);
+    // Pattern 6: Operation followed by arrow - handles compound gates without args (e.g., "TeamCoord Qc →")
+    const compoundNoArgsPattern = new RegExp(`(?:^|\\s)${escapedOp}\\s*→`, 'm');
     if (compoundNoArgsPattern.test(phaseSection)) return true;
 
     return false;
@@ -392,7 +393,14 @@ function checkToolGrounding() {
 
     // Check 6b: Extract tool bindings from TOOL GROUNDING section
     const groundingMatch = content.match(/── TOOL GROUNDING ──([\s\S]*?)(?=──|$)/);
-    if (!groundingMatch) continue;
+    if (!groundingMatch) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'TOOL GROUNDING section header found but regex extraction failed — possible encoding issue'
+      });
+      continue;
+    }
 
     const groundingSection = groundingMatch[1];
     const toolBindings = [];
@@ -411,9 +419,25 @@ function checkToolGrounding() {
       });
     }
 
+    // Warn if grounding section has binding arrows but no bindings were parsed
+    if (toolBindings.length === 0 && groundingSection.includes('→')) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'TOOL GROUNDING section contains binding arrows (→) but no bindings were parsed — regex may not match current format'
+      });
+    }
+
     // Check 6c: Verify PHASE TRANSITIONS reference tool bindings
     const phaseMatch = content.match(/── PHASE TRANSITIONS ──([\s\S]*?)(?=──|$)/);
-    if (!phaseMatch) continue;
+    if (!phaseMatch) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'PHASE TRANSITIONS section expected but regex extraction failed — possible encoding issue'
+      });
+      continue;
+    }
 
     const phaseSection = phaseMatch[1];
 
@@ -441,7 +465,7 @@ function checkToolGrounding() {
     }
 
     // Check 6d: Verify TOOL GROUNDING has realization preamble
-    if (!groundingSection.includes('Realization:')) {
+    if (!groundingSection.includes('-- Realization:')) {
       results.warn.push({
         check: 'tool-grounding',
         file: relPath,

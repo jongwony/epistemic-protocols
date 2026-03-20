@@ -74,7 +74,8 @@ adapt  (modify)  → Edit, Write (result adaptation based on user direction)
 Mᵢ/Mₑ (state)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
 
 ── ELIDABLE CHECKPOINTS ──
-Phase 2 Qc (applicability) → always_gated (Qc: Confirm/Dismiss/Adapt applicability judgment)
+-- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+Phase 1 Qc (applicability) → always_gated (Qc: Confirm/Dismiss/Adapt applicability judgment)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
