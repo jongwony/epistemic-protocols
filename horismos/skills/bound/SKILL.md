@@ -293,11 +293,11 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the defined boundaries changed the collaboration approach. State in one sentence what shifted (e.g., "Architecture decisions are now user-spec, which changes delegation scope for the refactoring task") or note that existing assumptions were confirmed. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- AI-spec domains with context insufficiency → suggest `/inquire` (context verification before AI execution)
-- Framework absent for bounded domains → suggest `/frame` (framework recommendation)
-- Decision gaps in boundary-defined scope → suggest `/gap` (gap audit)
+- `/inquire` (ContextInsufficient): AI-spec domains with context insufficiency → suggest context verification before AI execution
+- `/frame` (FrameworkAbsent): Framework absent for bounded domains → suggest framework recommendation
+- `/gap` (GapUnnoticed): Decision gaps in boundary-defined scope → suggest gap audit
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 

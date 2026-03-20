@@ -518,11 +518,11 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the execution outcomes changed the remaining plan. State in one sentence what shifted (e.g., "The halted deployment task requires resolving the staging environment issue before proceeding") or note that all tasks completed as planned. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Post-execution applicability concerns → suggest `/contextualize` (application-context mismatch detection)
-- Scope boundaries shifted during execution → suggest `/bound` (boundary redefinition)
-- Comprehension check needed on execution results → suggest `/grasp` (verified understanding)
+- `/contextualize` (ApplicationDecontextualized): Post-execution applicability concerns → suggest application-context mismatch detection
+- `/bound` (BoundaryUndefined): Scope boundaries shifted during execution → suggest boundary redefinition
+- `/grasp` (ResultUngrasped): Comprehension check needed on execution results → suggest verified understanding
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 

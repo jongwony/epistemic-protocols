@@ -275,11 +275,11 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the gap audit changed the decision. State in one sentence what shifted (e.g., "The backup verification gap led to adding a pre-migration snapshot step") or note that the original plan was confirmed after review. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Context insufficiency behind surfaced gaps → suggest `/inquire` (pre-execution context verification)
-- Boundary undefined for gap-related decisions → suggest `/bound` (epistemic boundary definition)
-- Abstract framework applied without validation → suggest `/ground` (structural mapping validation)
+- `/inquire` (ContextInsufficient): Context insufficiency behind surfaced gaps → suggest pre-execution context verification
+- `/bound` (BoundaryUndefined): Boundary undefined for gap-related decisions → suggest epistemic boundary definition
+- `/ground` (MappingUncertain): Abstract framework applied without validation → suggest structural mapping validation
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 

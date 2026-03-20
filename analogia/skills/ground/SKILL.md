@@ -276,11 +276,11 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the validated mapping changed the application of the abstract framework. State in one sentence what shifted (e.g., "The Strangler Fig mapping confirmed except for the shared-database component, which requires a different migration strategy") or note that the original mapping was confirmed as structurally sound. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Decision gaps in validated mapping → suggest `/gap` (gap audit on mapping application)
-- Context insufficiency for mapping execution → suggest `/inquire` (context verification)
-- Mapping reveals indeterminate goals → suggest `/goal` (goal co-construction)
+- `/gap` (GapUnnoticed): Decision gaps in validated mapping → suggest gap audit on mapping application
+- `/inquire` (ContextInsufficient): Context insufficiency for mapping execution → suggest context verification
+- `/goal` (GoalIndeterminate): Mapping reveals indeterminate goals → suggest goal co-construction
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 

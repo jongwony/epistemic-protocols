@@ -424,11 +424,11 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the verified understanding changed the user's approach. State in one sentence what shifted (e.g., "The user's revised understanding of the caching layer changes the optimization strategy") or note that the original understanding was confirmed as accurate. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Verified understanding reveals decision gaps → suggest `/gap` (gap audit on understood work)
-- Abstract explanations accepted without grounding → suggest `/ground` (structural mapping validation)
-- Verified understanding reveals intent was actually misarticulated → suggest `/clarify` (re-examine expression-intent alignment)
+- `/gap` (GapUnnoticed): Verified understanding reveals decision gaps → suggest gap audit on understood work
+- `/ground` (MappingUncertain): Abstract explanations accepted without grounding → suggest structural mapping validation
+- `/clarify` (IntentMisarticulated): Verified understanding reveals intent was actually misarticulated → suggest re-examine expression-intent alignment
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 

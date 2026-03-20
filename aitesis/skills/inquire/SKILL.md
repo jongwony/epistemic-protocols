@@ -369,11 +369,11 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the resolved context changed the execution plan. State in one sentence what shifted (e.g., "Resolved API version targets v2, which changes the migration approach") or note that the original plan proceeds unchanged. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Decision gaps in resolved context → suggest `/gap` (gap audit before execution)
-- Framework absent for informed execution → suggest `/frame` (framework recommendation)
-- Mapping uncertain between context and execution → suggest `/ground` (structural mapping validation)
+- `/gap` (GapUnnoticed): Decision gaps in resolved context → suggest gap audit before execution
+- `/frame` (FrameworkAbsent): Framework absent for informed execution → suggest framework recommendation
+- `/ground` (MappingUncertain): Mapping uncertain between context and execution → suggest structural mapping validation
 **Dimension-specific routing** (non-factual Uₙ detected in classify):
 
 | Dimension | Candidate Protocols | Selection Criterion |

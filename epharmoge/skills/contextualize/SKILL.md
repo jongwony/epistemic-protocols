@@ -289,11 +289,11 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the contextualized result changed the follow-up work. State in one sentence what shifted (e.g., "The adapted deployment target requires updating the CI pipeline configuration") or note that the original result was confirmed as contextually appropriate. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Comprehension check needed on contextualized result → suggest `/grasp` (verified understanding)
-- Decision gaps revealed by context mismatch resolution → suggest `/gap` (gap audit)
-- Contextualized result requires boundary redefinition → suggest `/bound` (boundary definition)
+- `/grasp` (ResultUngrasped): Comprehension check needed on contextualized result → suggest verified understanding
+- `/gap` (GapUnnoticed): Decision gaps revealed by context mismatch resolution → suggest gap audit
+- `/bound` (BoundaryUndefined): Contextualized result requires boundary redefinition → suggest boundary definition
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
