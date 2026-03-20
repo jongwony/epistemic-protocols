@@ -54,7 +54,7 @@ epistemic-protocols/
 │       ├── report/SKILL.md            # Usage analysis report from session patterns
 │       ├── onboard/SKILL.md           # Quick recommendation + protocol learning (quick proof + targeted learning)
 │       ├── dashboard/SKILL.md          # Full-session coverage dashboard
-│       ├── preferences/SKILL.md       # Interactive protocol preference configuration
+│       ├── preferences/SKILL.md       # Protocol preference initialization
 │       └── catalog/SKILL.md           # Protocol handbook — instant reference
 └── write/                             # Skill: multi-perspective blog drafting
     ├── .claude-plugin/plugin.json
@@ -160,7 +160,7 @@ Utility skill group for session analytics, configuration, and reference.
 - **Report** `/report`: Generate Growth Map — orthogonal epistemic analysis (protocol adoption patterns, coverage gaps, anti-patterns) using `/insights` data as targeting input. Output: HTML artifact (`growth-map.html`); falls back to Epistemic Profile when insights unavailable.
 - **Onboard** `/onboard`: Quick recommendation from recent sessions, or quest-based learning through scenario, trial, and quiz. Flow: Quick Proof (Entry → QuickScan → Pick-1 → Evidence → Trial → Insight → Next), Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects path (quick default); Onboarding Pool (`/goal`, `/gap`, `/frame`) serves both Quick auto-recommend and Targeted fallback; pool exhaustion in Quick path transitions to Targeted.
 - **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
-- **Preferences** `/preferences`: Interactive protocol preference configuration for `~/.claude/CLAUDE.local.md`. Flow: Detect → Select → Configure → Generate → Verify. Quick path (6 global params) or Full path (global + ~32 per-protocol params).
+- **Preferences** `/preferences`: Protocol preference initialization with defaults, stored in project memory. Individual modifications via `/memory`. Flow: Detect → Initialize → Write.
 
 ### Reflexion
 Extract insights from Claude Code sessions into persistent memory.
@@ -322,7 +322,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 - **Onboard**: All paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases. Quick path: Phases 0-1, 2a-2b, 4 (Trial triggers actual protocol execution in-session). Targeted path: Phases 0-6 (full learning experience).
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
-- **Preferences**: No Task delegation—must run in main agent (user-facing gates require main agent context). Main agent handles all phases (0-4).
+- **Preferences**: No Task delegation—must run in main agent. Main agent handles all phases (0-2).
 - **Catalog**: No delegation—text-only output, main agent handles all. Read tool for scenarios.md detail mode only.
 
 ## Git Conventions

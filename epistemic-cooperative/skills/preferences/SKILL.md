@@ -1,67 +1,63 @@
 ---
 name: preferences
-description: "Interactive protocol preference configuration for ~/.claude/CLAUDE.local.md."
+description: "Initialize epistemic protocol preferences with defaults. Modify via /memory."
 ---
 
 # Preferences Skill
 
-Configure epistemic protocol behavior through interactive dialogue. Generates a preferences section in `~/.claude/CLAUDE.local.md` that protocols read at runtime.
+Initialize epistemic protocol preferences with defaults for the current project. Individual parameter modifications are done via `/memory` built-in command or natural language requests.
 
 ## When to Use
 
 Invoke when:
-- Customizing protocol behavior (intensity, sensitivity, convergence thresholds)
-- Setting up initial preferences for the first time
-- Adjusting preferences after experiencing protocols via `/onboard`
+- Setting up initial preferences for a new project
+- Resetting all preferences to defaults
 
 Skip when:
+- Want to modify individual preferences (use `/memory` or natural language)
 - Want to learn about protocols first (use `/onboard`)
-- Want session analytics (use `/report`)
-- Need one-time protocol override (state preference inline during invocation)
 
 ## Workflow Overview
 
 ```
-DETECT → SELECT → CONFIGURE → GENERATE → VERIFY
+DETECT → INITIALIZE → WRITE
 ```
 
 | Phase | Owner | Tool | Purpose |
 |-------|-------|------|---------|
-| 0. Detect | Main | Read | Check existing preferences section |
-| 1. Select | Main | Gate | Path selection (Quick/Full) + existing section handling |
-| 2. Configure | Main | Gate | Parameter traversal |
-| 3. Generate | Main | Read, Edit/Write | Create/update CLAUDE.local.md section |
-| 4. Verify | Main | Read, Gate | Review result |
+| 0. Detect | Main | Read | Check existing preferences memory file |
+| 1. Initialize | Main | Gate | Present defaults + confirm initialization |
+| 2. Write | Main | Write | Create/reset memory file |
 
 ## Parameter Catalog
 
-### Global Parameters (Quick Path)
+### Global Parameters
 
-Parameters applied across protocols. Ordered by impact — early exit still captures high-value settings.
+Parameters applied across protocols. Ordered by impact.
 
 | # | Parameter | Default | Options | Scope |
 |---|-----------|---------|---------|-------|
-| 1 | Intensity | auto | light / medium / heavy / auto | 9/10 (Prothesis excluded) |
-| 2 | Post-Convergence Suggestions | on | on / off | 10/10 |
-| 3 | AI-Guided Activation Sensitivity | default | conservative / default / aggressive | AI-guided protocols (7/10) |
-| 4 | Session Immunity Scope | per-session | per-session / per-invocation | 6/10 |
-| 5 | AI-Detection Trigger | confirm | auto / confirm / suggest-only / disable | Hermeneia, AI-guided (8/10) |
-| 6 | Explanation Level | standard | accessible / standard / technical | 10/10 |
-| 7 | Interaction Modality | text-stop | text-stop / ask-user-question | 10/10 |
+| 1 | Interaction Modality | text-stop | text-stop / ask-user-question | 10/10 |
+| 2 | Intensity | auto | light / medium / heavy / auto | 9/10 (Prothesis excluded) |
+| 3 | Post-Convergence Suggestions | on | on / off | 10/10 |
+| 4 | AI-Guided Activation Sensitivity | default | conservative / default / aggressive | AI-guided protocols (7/10) |
+| 5 | Session Immunity Scope | per-session | per-session / per-invocation | 6/10 |
+| 6 | AI-Detection Trigger | confirm | auto / confirm / suggest-only / disable | Hermeneia, AI-guided (8/10) |
+| 7 | Explanation Level | standard | accessible / standard / technical | 10/10 |
 
-**Parameter descriptions** (presented to user during configuration):
+**Parameter descriptions**:
 
-1. **Intensity**: Controls protocol thoroughness. `light` = fewer questions, faster convergence. `heavy` = deeper analysis, more questions. `auto` = protocol decides per context.
-2. **Post-Convergence Suggestions**: Whether protocols suggest related protocols after completing. `off` suppresses the suggestion section.
-3. **AI-Guided Activation Sensitivity**: How eagerly AI-guided protocols detect activation conditions. `conservative` = fewer false triggers. `aggressive` = catches more subtle cases.
-4. **Session Immunity Scope**: After a protocol runs on a topic, how long it avoids re-triggering. `per-session` = immune for entire session. `per-invocation` = only immune for current invocation.
-5. **AI-Detection Trigger**: How AI-detected triggers (vs explicit /slash invocation) are handled. `auto` = activates immediately without confirmation. `confirm` = asks before activating. `suggest-only` = mentions without activating. `disable` = only explicit invocation works.
-6. **Explanation Level**: Controls abstraction level and language complexity of protocol questions and explanations. `accessible` = simple language, concrete examples, minimal jargon. `standard` = balanced explanation. `technical` = conceptual depth, domain terminology allowed.
-7. **Interaction Modality** (`interaction_modality`): Controls how gate interactions (Qc/Qs) are realized. `text-stop` = structured numbered text output + Stop (turn yield), user responds freely. `ask-user-question` = AskUserQuestion tool call with structured options.
+1. **Interaction Modality** (`interaction_modality`): Controls how gate interactions (Qc/Qs) are realized. `text-stop` = structured numbered text output + Stop (turn yield), user responds freely. `ask-user-question` = AskUserQuestion tool call with structured options.
+2. **Intensity**: Controls protocol thoroughness. `light` = fewer questions, faster convergence. `heavy` = deeper analysis, more questions. `auto` = protocol decides per context.
+3. **Post-Convergence Suggestions**: Whether protocols suggest related protocols after completing. `off` suppresses the suggestion section.
+4. **AI-Guided Activation Sensitivity**: How eagerly AI-guided protocols detect activation conditions. `conservative` = fewer false triggers. `aggressive` = catches more subtle cases.
+5. **Session Immunity Scope**: After a protocol runs on a topic, how long it avoids re-triggering. `per-session` = immune for entire session. `per-invocation` = only immune for current invocation.
+6. **AI-Detection Trigger**: How AI-detected triggers (vs explicit /slash invocation) are handled. `auto` = activates immediately without confirmation. `confirm` = asks before activating. `suggest-only` = mentions without activating. `disable` = only explicit invocation works.
+7. **Explanation Level**: Controls abstraction level and language complexity of protocol questions and explanations. `accessible` = simple language, concrete examples, minimal jargon. `standard` = balanced explanation. `technical` = conceptual depth, domain terminology allowed.
 
-### Per-Protocol Parameters (Full Path)
+### Per-Protocol Parameters
 
-Grouped by Epistemic Concern Cluster. Users select which clusters to configure; "Keep defaults" skips entire cluster.
+Grouped by Epistemic Concern Cluster. Configure via `/memory` — only non-default values need to be added.
 
 #### Planning
 
@@ -161,138 +157,57 @@ Grouped by Epistemic Concern Cluster. Users select which clusters to configure; 
 
 ### Phase 0: Detect
 
-1. Read `~/.claude/CLAUDE.local.md`
-2. Search for `## Epistemic Protocol Preferences` section
-3. Determine state:
-   - **File absent**: proceed to Phase 1 (new file)
-   - **File exists, section absent**: proceed to Phase 1 (append section)
-   - **Section exists**: proceed to Phase 1 (update flow)
+1. Check if project memory file `preferences_epistemic.md` exists in the project's memory directory
+2. If exists: read current values → Phase 1 (reset flow)
+3. If absent: Phase 1 (init flow)
 
-### Phase 1: Select
+### Phase 1: Initialize
 
-**If section exists** — present:
-- Text: "Existing preferences found. How to proceed?"
-- Options:
-  - "Update — modify specific parameters"
-  - "Replace — start fresh"
-  - "Keep — exit without changes"
+Present the Global Parameters default catalog as text output.
 
-If "Keep" → terminate.
-If "Update" → present for Quick/Full path selection (same as new-section flow), then Phase 2 with existing values as current defaults.
-If "Replace" → Phase 2 with standard defaults.
+**If absent**: Ask whether to initialize with defaults.
+**If exists**: Show current values alongside defaults + ask whether to reset to defaults.
 
-**If section absent** — present:
-- Text: "Configuration path?"
-- Options:
-  - "Quick — 7 global parameters"
-  - "Full — global + per-protocol parameters (~32)"
+Present via gate interaction:
+- "Yes — initialize with defaults"
+- "No — cancel"
 
-### Phase 2: Configure
+If "No" → terminate.
 
-#### Quick Path (7 gate interactions)
+### Phase 2: Write
 
-For each global parameter (ordered 1-7), present:
-- Text: "[Parameter name]: [description]"
-- Options: list of valid values with `(default)` marker on the default value
+Write memory file `preferences_epistemic.md` with default values to the project's memory directory. Update MEMORY.md index if entry absent.
 
-#### Full Path (Quick + per-protocol)
-
-1. Complete Quick Path (7 calls)
-2. Present for cluster selection:
-   - Text: "Which protocol groups to customize?"
-   - Options:
-     - "Planning — /clarify, /goal, /inquire"
-     - "Analysis — /frame, /ground"
-     - "Decision — /gap"
-     - "Execution — /attend"
-     - "Verification — /contextualize"
-     - "Cross-cutting — /bound, /grasp"
-     - "All groups"
-     - "Done — keep defaults for unselected"
-
-3. For each selected cluster, for each protocol in cluster, present:
-   - Text: "[Protocol] /[command] parameters:\n[list all params with current values]"
-   - Options:
-     - "Keep all defaults"
-     - One option per parameter name
-
-   If user selects a parameter → present via gate interaction with that parameter's options → return to protocol parameter list for remaining params. Repeat until "Keep remaining defaults" or all adjusted.
-
-**Budget**: Quick path completes within 9 calls (7 params + select + verify). Full path completes within 19 calls minimum, increasing with individual parameter modifications.
-
-### Phase 3: Generate
-
-Construct the preferences section and write to `~/.claude/CLAUDE.local.md`.
-
-**Section structure**:
+**Memory file format**:
 
 ```markdown
-## Epistemic Protocol Preferences
+---
+name: epistemic-protocol-preferences
+description: "Per-project epistemic protocol settings — Interaction Modality, Intensity, Sensitivity, etc."
+type: user
+---
 
-### Global
+## Global
+- Interaction Modality: text-stop
 - Intensity: auto
 - Post-Convergence Suggestions: on
 - AI-Guided Activation Sensitivity: default
 - Session Immunity Scope: per-session
 - AI-Detection Trigger: confirm
 - Explanation Level: standard
-- Interaction Modality: text-stop
-
-### Per-Protocol
-<!-- Only non-default values recorded below -->
-
-#### Hermeneia /clarify
-- Gap Queue Limit: 8
-
-#### Prosoche /attend
-- Risk Classification: conservative
-- Auto-Delegate: none
 ```
 
-**Generation rules**:
-- Global section: always write all 7 parameters (even if all default)
-- Per-Protocol section: only write parameters that differ from defaults
-- If all per-protocol parameters are default: omit Per-Protocol section entirely
-- Section boundary: `## Epistemic Protocol Preferences` through next `## ` heading or EOF
+Present completion message directing user to `/memory` for individual parameter modifications.
 
-**File operations**:
-- File absent → Write new file with section
-- File exists, section absent → Append section at end (file content available from Phase 0)
-- Section exists → Identify section boundaries from Phase 0 content (`## Epistemic Protocol Preferences` to next `## ` or EOF), Edit to replace section
-
-### Phase 4: Verify
-
-1. Read the written section from `~/.claude/CLAUDE.local.md`
-2. Present the result as text output
-3. Present via gate interaction:
-   - Text: "Preferences saved. Review above."
-   - Options:
-     - "Looks good"
-     - "Adjust — modify a parameter"
-     - "Redo — start over"
-
-If "Adjust" → return to Phase 2 (targeted parameter modification).
-If "Redo" → return to Phase 1.
-
-## Output Format
-
-Target file: `~/.claude/CLAUDE.local.md`
-Section heading: `## Epistemic Protocol Preferences`
-
-The generated section is human-readable and machine-parseable. Protocols read this section at runtime to adjust behavior.
-
-**Format conventions**:
-- One parameter per line: `- Key: value`
-- Protocol headers: `#### ProtocolName /command`
-- Comments (`<!-- -->`) for metadata only
-- No indentation beyond list item dash
+**Per-Protocol section**: Only added when user modifies individual parameters via `/memory`. Not included in default initialization.
 
 ## Rules
 
-1. **Recognition over Recall**: All parameters presented via gate interaction with selectable options. Never ask users to type parameter values.
-2. **Minimal noise**: Per-Protocol section records only non-default values. Default behavior requires zero configuration.
-3. **Existing section handling**: Always offer Update/Replace/Keep when preferences already exist. Never silently overwrite.
-4. **Gate interaction budget**: Quick path completes within 9 calls. Full path completes within 19 calls minimum.
-5. **No protocol execution**: This skill configures preferences only. It does not call or simulate any protocol.
-6. **File safety**: Read before write. Preserve all content outside the preferences section boundary.
-7. **Reversibility**: All changes are to a local git-untracked file. User can delete the section or file to restore defaults.
+1. **One-shot initialization**: `/preferences` presents defaults and asks for confirmation. No multi-turn parameter traversal.
+2. **Modification via /memory**: Individual parameter changes are done through `/memory` built-in command or natural language requests to Claude.
+3. **Per-project scope**: Preferences are stored as project memory, scoped to the current project only.
+4. **Per-Protocol section**: Only written when non-default values exist. Added via `/memory`, not during initialization.
+5. **Recognition over Recall**: Global parameter catalog with all options is presented for reference during initialization.
+6. **No protocol execution**: This skill configures preferences only. It does not call or simulate any protocol.
+7. **Reversibility**: Delete the memory file to restore defaults.
+8. **Parameter order**: Interaction Modality is #1 — it determines how all subsequent gate interactions are realized.

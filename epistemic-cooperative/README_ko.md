@@ -15,7 +15,7 @@
 | `/onboard` | 빠른 추천 + 프로토콜 학습 | 터미널 기반 가이드 경험 |
 | `/report` | Growth Map — 인식론적 분석 | HTML 아티팩트 (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.insights/dashboard.html`) |
-| `/preferences` | 인터랙티브 프로토콜 설정 | `~/.claude/CLAUDE.local.md` 설정 섹션 |
+| `/preferences` | 프로토콜 설정 초기화 | 프로젝트 메모리 `preferences_epistemic.md` |
 
 ## 스킬
 
@@ -94,27 +94,25 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 - **Achievements**: 세션, 프로토콜, 코드, 연속 사용 마일스톤
 - **Quality Score**: 복합 점수 0-100 (결과 35%, 마찰 20%, 만족도 25%, 커버리지 20%)
 
-### /preferences — 프로토콜 설정
+### /preferences — 프로토콜 설정 초기화
 
-인터랙티브 대화를 통해 프로토콜 동작을 설정한다. `~/.claude/CLAUDE.local.md`에 설정 섹션을 생성한다.
+기본값으로 epistemic protocol 설정을 초기화한다. 개별 수정은 `/memory`를 사용한다.
 
 ```
-DETECT → SELECT → CONFIGURE → GENERATE → VERIFY
+DETECT → INITIALIZE → WRITE
 ```
 
 | 단계 | 설명 |
 |------|------|
-| 0. Detect | CLAUDE.local.md에서 기존 설정 확인 |
-| 1. Select | Quick (글로벌 5개) 또는 Full (글로벌 + 프로토콜별) 경로 선택 |
-| 2. Configure | Gate Interaction을 통한 인터랙티브 파라미터 순회 |
-| 3. Generate | 설정 섹션 생성/갱신 |
-| 4. Verify | 결과 확인 |
+| 0. Detect | 기존 설정 메모리 파일 확인 |
+| 1. Initialize | 기본값 표시 + 초기화 확인 |
+| 2. Write | 메모리 파일 생성/재설정 |
 
 주요 특징:
-- **기억보다 인식**: 모든 파라미터를 선택 옵션으로 제시, 자유 텍스트 없음
-- Quick path (글로벌 5개) 또는 Full path (글로벌 + 프로토콜별 ~32개)
-- 프로토콜별 섹션은 비기본값만 기록 (최소 노이즈)
-- 기존 섹션 처리: Update / Replace / Keep
+- **원샷 초기화**: 기본값 덤프 후 확인 (2턴)
+- **프로젝트별 스코프**: 글로벌 CLAUDE.local.md 대신 프로젝트 메모리에 저장
+- **네이티브 수정**: `/memory` 또는 자연어로 개별 변경
+- 프로토콜별 섹션: `/memory`를 통해 비기본값 추가 시에만 생성
 
 ## 아키텍처
 
@@ -149,8 +147,8 @@ epistemic-cooperative/
 | 워크플로우 변경 후 재평가할 때 | `/report` |
 | `/onboard` 이후 더 깊은 분석이 필요할 때 | `/report` 또는 `/dashboard` |
 | 시간 경과에 따른 프로토콜 채택 추적 | `/dashboard` |
-| 프로토콜 동작을 커스터마이즈하고 싶을 때 | `/preferences` |
-| `/onboard` 이후 설정 조정 | `/preferences` |
+| 프로토콜 설정 초기화 | `/preferences` |
+| 개별 설정 수정 | `/memory` |
 
 ## 사용법
 
