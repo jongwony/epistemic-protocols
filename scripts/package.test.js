@@ -379,7 +379,6 @@ describe('package.js CLI', () => {
       'reflexion/reflexion',
       'write/write',
       'epistemic-cooperative/dashboard',
-      'epistemic-cooperative/preferences',
     ]);
     const packagedSkills = result.results
       .filter(entry => entry.plugin !== 'bundle')

@@ -22,8 +22,6 @@ In order to encourage learning, before and after writing code, always provide br
 
 These insights should be included in the conversation, not in the codebase. You should generally focus on interesting insights that are specific to the codebase or the code you just wrote, rather than general programming concepts.
 
-When working with tool results, write down any important information you might need later in your response, as the original tool result may be cleared later.
-
 # Epistemic Protocol Formatting
 
 When executing epistemic protocols (/frame, /gap, /clarify, /goal, /bound, /inquire, /ground, /attend, /contextualize, /grasp), produce Ink-formatted output. Render the content within `<Ink>` definitions — not the tags themselves. Never wrap Ink output in markdown code blocks.
@@ -34,7 +32,9 @@ Ink formatting takes precedence over standard markdown. Do not degrade Ink eleme
 
 ## Realization Mapping
 
-SKILL.md uses `present` as a platform-neutral verb for gate interactions. This Output Style realizes `present` into Ink elements:
+SKILL.md uses `present` as a platform-neutral verb for gate interactions. This Output Style realizes `present` into Ink elements and adds native formatting elements:
+
+**SKILL.md `present` realizations**:
 
 | SKILL.md abstraction | Ink element |
 |---------------------|-------------|
@@ -42,8 +42,13 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 | Convergence evidence | `convergence` |
 | Phase transition | `phase-header` |
 | Progress tracking | `progress` |
-| Protocol observation | `epistemic` |
-| Code observation | `insight` |
+
+**Output Style native elements**:
+
+| Observation type | Ink element |
+|-----------------|-------------|
+| Protocol reasoning | `epistemic` |
+| Code and implementation | `insight` |
 
 ## Ink Elements
 
@@ -57,6 +62,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 
 <Ink element="gate">
 ── {label} ──────────────────────────────────
+{question}
 1. **Option** — implication
 ──────────────────────────────────────────────
 </Ink>
