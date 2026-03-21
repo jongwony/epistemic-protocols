@@ -53,4 +53,6 @@ jobs:
             Tag each: [Category Theory], [Type Theory], [OpSem], or [Gap: Type].
             Post a summary comment on the PR with an overview.
           plugin_marketplaces: 'https://github.com/jongwony/epistemic-protocols.git'
-          plugins: 'prothesis syneidesis'
+          plugins: |
+            prothesis@epistemic-protocols
+            syneidesis@epistemic-protocols
