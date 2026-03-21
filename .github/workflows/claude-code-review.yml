@@ -27,4 +27,5 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-plugins-official.git'
           plugins: 'pr-review-toolkit@claude-plugins-official'
           prompt: '/pr-review-toolkit:review-pr all'
+          show_full_output: true
 
