@@ -18,7 +18,7 @@ post-buffered-inline-comments.ts → 빈 버퍼 → "No buffered inline comments
 
 CI 관점에서 모든 step이 success — failure signal 없음.
 
-## 해결: 2-Stage Pipeline
+## 해결: 3-Stage Pipeline
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -88,7 +88,7 @@ Action 내부의 `create_inline_comment` MCP 도구는 3-state:
 
 ### execution_file 형식
 
-`$RUNNER_TEMP/claude-execution-output.json` — `SDKMessage[]` JSON 배열:
+`${{ steps.review.outputs.execution_file }}`로 참조 (실제 경로: `$RUNNER_TEMP/claude-execution-output.json`) — `SDKMessage[]` JSON 배열:
 
 ```typescript
 type SDKMessage =
@@ -106,7 +106,7 @@ jq -r '[.[] | select(.type == "assistant") | .message.content[]
 
 ## 진단
 
-`show_full_output: true`로 전체 Claude Code 실행 트레이스를 Actions 로그에 출력. 안정화 후 `false`로 전환 (코드 내용 공개 로그 노출 위험). `execution_file`은 `show_full_output` 설정과 독립적으로 항상 생성되므로, `false` 전환 후에도 파이프라인은 정상 동작한다.
+`show_full_output: true`로 전체 Claude Code 실행 트레이스를 Actions 로그에 출력할 수 있다 (코드 내용 공개 로그 노출 위험). `execution_file`은 `show_full_output` 설정과 독립적으로 항상 생성되므로, `false` 상태에서도 파이프라인은 정상 동작한다. 진단이 필요할 때만 `true`로 전환.
 
 핵심 진단 지표:
 - `permission_denials_count`: 0이 아니면 권한 설정 확인

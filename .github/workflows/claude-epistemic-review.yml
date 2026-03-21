@@ -65,7 +65,7 @@ jobs:
             - File path and line number
             - Tag: [Category Theory], [Type Theory], [OpSem], or [Gap: Type]
             - Severity and evidence-grounded rationale
-          show_full_output: true
+
           plugin_marketplaces: 'https://github.com/jongwony/epistemic-protocols.git'
           plugins: |
             prothesis@epistemic-protocols
@@ -91,7 +91,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: '--model claude-haiku-4-5 --max-turns 10'
           settings: '{"permissions":{"allow":["Bash(gh api:*)","Bash(cat:*)","Read","Write"]}}'
-          show_full_output: true
+
           prompt: |-
             You are a review comment posting agent. Read /tmp/review-output.txt which contains
             an epistemic code review of PR #${{ github.event.pull_request.number }}.
