@@ -3,6 +3,17 @@ name: Epistemic Code Review
 on:
   pull_request:
     types: [opened]
+    paths:
+      - 'prothesis/**'
+      - 'syneidesis/**'
+      - 'hermeneia/**'
+      - 'katalepsis/**'
+      - 'telos/**'
+      - 'horismos/**'
+      - 'aitesis/**'
+      - 'analogia/**'
+      - 'prosoche/**'
+      - 'epharmoge/**'
 
 jobs:
   epistemic-review:
