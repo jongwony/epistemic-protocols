@@ -31,6 +31,7 @@ jobs:
           fetch-depth: 1
 
       - name: Run Epistemic Review
+        id: review
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -60,11 +61,53 @@ jobs:
 
             ## Output
 
-            Post findings as inline review comments on specific code lines.
-            Tag each: [Category Theory], [Type Theory], [OpSem], or [Gap: Type].
-            Post a summary comment on the PR with an overview.
+            For each finding, clearly state:
+            - File path and line number
+            - Tag: [Category Theory], [Type Theory], [OpSem], or [Gap: Type]
+            - Severity and evidence-grounded rationale
           show_full_output: true
           plugin_marketplaces: 'https://github.com/jongwony/epistemic-protocols.git'
           plugins: |
             prothesis@epistemic-protocols
             syneidesis@epistemic-protocols
+
+      - name: Extract review text
+        if: always() && steps.review.outputs.execution_file != ''
+        id: extract
+        run: |
+          jq -r '
+            [.[] | select(.type == "assistant") | .message.content[]
+             | select(.type == "text") | .text] | join("\n\n---\n\n")
+          ' "${{ steps.review.outputs.execution_file }}" > /tmp/review-output.txt
+
+          if [ ! -s /tmp/review-output.txt ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post review comments
+        if: always() && steps.extract.outputs.skip != 'true' && steps.review.outputs.execution_file != ''
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--model claude-haiku-4-5 --max-turns 10'
+          prompt: |-
+            You are a review comment posting agent. Read /tmp/review-output.txt which contains
+            an epistemic code review of PR #${{ github.event.pull_request.number }}.
+
+            For each review finding that references a specific file path and line number,
+            post it as an inline PR review comment using:
+
+            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+              --field body="<comment body>" \
+              --field path="<file path>" \
+              --field commit_id="${{ github.event.pull_request.head.sha }}" \
+              --field line=<line number>
+
+            Rules:
+            - Only post findings with specific file paths and line numbers
+            - Preserve tags: [Category Theory], [Type Theory], [OpSem], [Gap: Type]
+            - Preserve severity: Critical / Important / Suggestion
+            - Skip duplicate or near-duplicate findings
+            - After posting inline comments, post a summary comment on the PR:
+              gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+                --field body="<overview summary>"
