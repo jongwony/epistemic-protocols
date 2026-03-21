@@ -74,7 +74,7 @@ Mode remains active until convergence.
 Convergence evidence: At |remaining| = 0, present transformation trace — for each g ∈ Λ.clarified, show (IntentMisarticulated(g) → resolution(g)) from Λ.history. Convergence is demonstrated, not asserted.
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop (default) | AskUserQuestion (Epistemic Protocol Preferences)
+-- Realization: present → TextPresent+Stop (default)
 Phase 0 Qc   (extern) → present (AI-detected activation confirmation; ai_strong only)
 Phase 1a Qc  (extern) → present (E confirmation)
 Phase 1b detect (detect) → Internal analysis (gap detection from Eᵥ)

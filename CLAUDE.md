@@ -54,7 +54,6 @@ epistemic-protocols/
 │       ├── report/SKILL.md            # Usage analysis report from session patterns
 │       ├── onboard/SKILL.md           # Quick recommendation + protocol learning (quick proof + targeted learning)
 │       ├── dashboard/SKILL.md          # Full-session coverage dashboard
-│       ├── preferences/SKILL.md       # Protocol preference initialization
 │       └── catalog/SKILL.md           # Protocol handbook — instant reference
 └── write/                             # Skill: multi-perspective blog drafting
     ├── .claude-plugin/plugin.json
@@ -88,7 +87,7 @@ epistemic-protocols/
 | Prosoche | `/attend` | ExecutionBlind → SituatedExecution |
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 
-**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/preferences`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
+**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
 
 ## Core Principles
 

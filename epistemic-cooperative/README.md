@@ -6,7 +6,7 @@ Protocol learning, usage analysis, coverage dashboard, and configuration for Cla
 
 ## What is Epistemic Cooperative?
 
-A utility plugin for epistemic protocol onboarding and analytics. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, tracking usage across sessions, and configuring protocol preferences.
+A utility plugin for epistemic protocol onboarding and analytics. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, and tracking usage across sessions.
 
 ### Four Skills
 
@@ -15,7 +15,6 @@ A utility plugin for epistemic protocol onboarding and analytics. Unlike protoco
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/report` | Growth Map with epistemic analysis | HTML artifact (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
-| `/preferences` | Protocol preference initialization | Project memory `preferences_epistemic.md` |
 
 ## Skills
 
@@ -94,26 +93,6 @@ Dashboard sections:
 - **Achievements**: session, protocol, code, and streak milestones
 - **Quality Score**: composite 0-100 (outcome 35%, friction 20%, satisfaction 25%, coverage 20%)
 
-### /preferences — Protocol Preference Initialization
-
-Initialize epistemic protocol preferences with defaults. Individual modifications via `/memory`.
-
-```
-DETECT → INITIALIZE → WRITE
-```
-
-| Phase | Description |
-|-------|-------------|
-| 0. Detect | Check existing preferences memory file |
-| 1. Initialize | Present defaults + confirm initialization |
-| 2. Write | Create/reset memory file |
-
-Key features:
-- **One-shot initialization**: dump defaults and confirm (2 turns)
-- **Per-project scope**: stored as project memory, not global CLAUDE.local.md
-- **Native modification**: individual changes via `/memory` or natural language
-- Per-protocol section: only added when non-default values exist via `/memory`
-
 ## Architecture
 
 ```
@@ -123,7 +102,6 @@ epistemic-cooperative/
 │   ├── onboard/SKILL.md          # /onboard quest-based protocol learning
 │   ├── report/SKILL.md           # /report Growth Map
 │   ├── dashboard/SKILL.md        # /dashboard coverage dashboard
-│   └── preferences/SKILL.md      # /preferences protocol configuration
 └── agents/
     ├── project-scanner.md         # Phase 1: project discovery
     ├── session-analyzer.md        # Phase 2: pattern extraction (parallel per project)
@@ -147,8 +125,6 @@ epistemic-cooperative/
 | Re-evaluating protocol fit after workflow changes | `/report` |
 | After running `/onboard` for deeper analysis | `/report` or `/dashboard` |
 | Tracking protocol adoption over time | `/dashboard` |
-| Want to initialize protocol preferences | `/preferences` |
-| Modify individual preferences | `/memory` |
 
 ## Install
 
@@ -163,7 +139,6 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /onboard
 /report
 /dashboard
-/preferences
 ```
 
 ## Author

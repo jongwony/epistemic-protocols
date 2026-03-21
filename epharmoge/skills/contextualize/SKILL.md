@@ -66,7 +66,7 @@ contextualized(R') = adjudicated(R', X) ∨ user_esc
 progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress when re-scan discovers new mismatches
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop (default) | AskUserQuestion (Epistemic Protocol Preferences)
+-- Realization: present → TextPresent+Stop (default)
 Eval   (detect)  → Internal analysis (no external tool)
 Qc     (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (modify)  → Edit, Write (result adaptation based on user direction)

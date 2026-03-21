@@ -1,6 +1,6 @@
 {
   "name": "epistemic-cooperative",
-  "description": "/catalog for protocol handbook, /onboard for quick recommendation + protocol learning, /report for Growth Map (usage analysis + insights integration), /dashboard for coverage dashboard, /preferences for preference initialization",
+  "description": "/catalog for protocol handbook, /onboard for quick recommendation + protocol learning, /report for Growth Map (usage analysis + insights integration), /dashboard for coverage dashboard",
   "version": "1.20.0",
   "outputStyles": "./styles/",
   "author": {
