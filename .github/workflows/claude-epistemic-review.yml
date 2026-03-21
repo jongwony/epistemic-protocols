@@ -1,0 +1,59 @@
+name: Epistemic Code Review
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  epistemic-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Epistemic Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |-
+            Perform a multi-perspective code review and gap analysis of this PR.
+
+            ## Perspective Analysis
+
+            Analyze changes from each perspective:
+            1. **Category Theory** — morphism coherence, composition laws, functor consistency
+            2. **Type Theory** — type signature soundness, variance, type safety
+            3. **Operational Semantics** — evaluation order, phase transitions, state consistency
+
+            For each finding:
+            - Reference specific file path and line number
+            - Severity: Critical / Important / Suggestion
+            - Evidence-grounded rationale (reference actual code)
+            - Only report findings with confidence >= 80%
+
+            ## Gap Scanning
+
+            Scan decision points for unnoticed gaps:
+            - **Procedural**: missing steps or incomplete workflows
+            - **Consideration**: unaddressed trade-offs
+            - **Assumption**: implicit assumptions needing explicit statement
+            - **Alternative**: unexplored approaches
+
+            ## Output
+
+            Post findings as inline review comments on specific code lines.
+            Tag each: [Category Theory], [Type Theory], [OpSem], or [Gap: Type].
+            Post a summary comment on the PR with an overview.
+          # Optional: load epistemic-protocols for enhanced context
+          # plugin_marketplaces: 'https://github.com/jongwony/epistemic-protocols.git'
+          # plugins: 'prothesis syneidesis'
+          # Optional: team mode for parallel perspective analysis
+          # claude_args: '--model claude-sonnet-4-6'
