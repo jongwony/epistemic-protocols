@@ -46,7 +46,7 @@ Restart Codex, then start with `$onboard`.
 <details>
 <summary>Notes</summary>
 
-- This installs 10 protocols + `onboard`. `/report`, `/dashboard`, `/preferences`, `reflexion`, `write` are not included.
+- This installs 10 protocols + `onboard`. `/report`, `/dashboard`, `reflexion`, `write` are not included.
 - To install a single skill, use the same `skill-installer` pattern with one path.
 - This README is the source of truth for the Codex-supported install set.
 
@@ -73,7 +73,7 @@ Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/fram
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard`, `/preferences` | Protocol learning, usage analysis, coverage dashboard, and configuration |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard` | Protocol learning, usage analysis, and coverage dashboard |
 
 ## Design
 

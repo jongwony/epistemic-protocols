@@ -78,7 +78,7 @@ narrowing(V, M) = |remaining(after)| < |remaining(before)|
 early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop (default) | AskUserQuestion (Epistemic Protocol Preferences)
+-- Realization: present → TextPresent+Stop
 Phase 1 Map     (construct) → Read, Grep (domain structure analysis)
 Phase 2 Qs      (extern)    → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (state)     → Internal state update

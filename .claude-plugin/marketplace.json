@@ -67,7 +67,7 @@
     {
       "name": "epistemic-cooperative",
       "source": "./epistemic-cooperative",
-      "description": "/catalog for protocol handbook, /report for Growth Map (epistemic analysis + insights), /onboard for quest-based protocol learning, /dashboard for coverage dashboard, /preferences for preference initialization"
+      "description": "/catalog for protocol handbook, /report for Growth Map (epistemic analysis + insights), /onboard for quest-based protocol learning, /dashboard for coverage dashboard"
     }
   ]
 }
