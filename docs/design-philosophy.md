@@ -4,7 +4,7 @@ Detailed rationale for each design principle governing epistemic protocols.
 
 ## Unix Philosophy Homomorphism
 
-Each protocol is a single-purpose epistemic tool. Composition is bottom-up — users invoke protocols for recognized cost situations, not follow a prescribed pipeline. The precedence order below is a logical default for multi-activation, not a mandatory sequence.
+Each protocol is a single-purpose epistemic tool. Composition is bottom-up — users invoke protocols for recognized cost situations, not follow a prescribed pipeline. The precedence order (see CLAUDE.md Protocol Precedence) is a logical default for multi-activation, not a mandatory sequence.
 
 ## Session Text Composition
 

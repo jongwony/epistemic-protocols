@@ -420,7 +420,7 @@ Use:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the verified understanding changed the user's approach. State in one sentence what shifted (e.g., "The user's revised understanding of the caching layer changes the optimization strategy") or note that the original understanding was confirmed as accurate. This is informational text — not a gate interaction.
 
@@ -435,7 +435,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Note any ejected proposals (user-identified areas for future investigation)
 - Summarize verified understanding as reference for subsequent decisions
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 

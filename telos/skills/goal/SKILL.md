@@ -33,7 +33,7 @@ G   = User's vague goal (the goal to define)
 Gᵥ  = Verified vague goal (user-confirmed)
 Dd  = AI-detected dimensions ⊆ {Outcome, Metric, Boundary, Priority} ∪ Emergent(G)
 Dₛ  = Selected dimension ∈ {Outcome, Metric, Boundary, Priority}
-Dₐ  = Applicable dimensions (user-confirmed subset of Dd, Dₐ ⊇ {Outcome})
+Dₐ  = Applicable dimensions (user-confirmed from full taxonomy assessment, Dₐ ⊇ {Outcome})
 P   = Proposal (AI-generated concrete candidate)
 A   = User's response ∈ {Accept, Modify(aspect, direction), Reject, Extend(aspect)}
 C   = GoalContract { outcome: ?, metric: ?, boundary: ?, priority: ? }
@@ -240,7 +240,7 @@ Analyze Gᵥ to detect indeterminate dimensions, then **present** for user confi
 
 Per Gap Taxonomy above. Apply priority order: Outcome → Boundary → Priority → Metric. Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState`; boundary: goal definition (in-scope) vs. expression gap (→ `/clarify`) or execution context (→ `/inquire`).
 
-**Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be removed** via the "Remove" option.
+**Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be excluded** via "Revise assessment" toggle.
 
 Present the full taxonomy assessment as text output — every named dimension shown with detection status, evidence, and falsification condition for undetected dimensions:
 
@@ -267,6 +267,8 @@ Options:
 - Evidence parity: each dimension (detected or not) receives comparable analytical depth
 
 **Revise sub-step**: On "Revise assessment" selection, user specifies which dimensions to toggle (include previously unselected, exclude previously detected) or describes an emergent dimension. Multiple revisions in a single response are supported. Outcome exclusion is rejected with explanation (protocol constraint: `Dₐ ⊇ {Outcome}`). After modification, re-present the updated assessment for final confirmation. Phase 1 completes when user selects "Proceed with current assessment."
+
+**Emergent response parsing**: If user provides emergent dimension content alongside "Proceed with current assessment," treat the emergent content as implicit "Revise assessment" — incorporate the emergent dimension and re-present the updated assessment. If the content is ambiguous (could be a comment on an existing dimension rather than a new emergent), ask the user to clarify before proceeding.
 
 **Soft guard**: If user excludes all dimensions except Outcome (by protocol constraint), confirm: "Only Outcome will be defined. Continue with minimal GoalContract?" If confirmed, `Dₐ = {Outcome}` → proceed to Phase 2. If declined, re-present assessment for reconsideration.
 
@@ -355,7 +357,7 @@ Options:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the defined goals changed the implementation scope. State in one sentence what shifted (e.g., "The GoalContract's latency requirement eliminates the batch processing approach") or note that the original scope was confirmed by the defined goals. This is informational text — not a gate interaction.
 
@@ -370,7 +372,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Restate GoalContract as a reference for downstream work
 - Note any deferred goal dimensions accepted for later refinement
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 

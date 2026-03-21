@@ -365,7 +365,7 @@ After integration:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the resolved context changed the execution plan. State in one sentence what shifted (e.g., "Resolved API version targets v2, which changes the migration approach") or note that the original plan proceeds unchanged. This is informational text — not a gate interaction.
 
@@ -374,6 +374,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - `/gap` (GapUnnoticed): Decision gaps in resolved context → suggest gap audit before execution
 - `/frame` (FrameworkAbsent): Framework absent for informed execution → suggest framework recommendation
 - `/ground` (MappingUncertain): Mapping uncertain between context and execution → suggest structural mapping validation
+
 **Dimension-specific routing** (non-factual Uₙ detected in classify):
 
 | Dimension | Candidate Protocols | Selection Criterion |
@@ -390,7 +391,7 @@ Phase 2 classify summary shows the best-matched protocol as routing target.
 - Restate execution plan with resolved context as reference
 - Note any accepted uncertainties carried into execution
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 

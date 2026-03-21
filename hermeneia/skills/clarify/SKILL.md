@@ -308,6 +308,8 @@ Options:
 
 **Revise sub-step**: On "Revise assessment" selection, user specifies which types to toggle (include previously unselected, exclude previously detected) or describes an emergent gap. Multiple revisions in a single response are supported. After modification, re-present the updated assessment for final confirmation. Phase 1b completes when user selects "Proceed with current assessment."
 
+**Emergent response parsing**: If user provides emergent type content alongside "Proceed with current assessment," treat the emergent content as implicit "Revise assessment" — incorporate the emergent type and re-present the updated assessment. If the content is ambiguous (could be a comment on an existing type rather than a new emergent), ask the user to clarify before proceeding.
+
 **Soft guard**: If user excludes all types from assessment, confirm: "Excluding all gaps terminates clarification. Continue?" If confirmed, `|Gₛ| = 0` → skip Phase 2, evaluate convergence (`|remaining| = 0` in LOOP).
 
 User confirmation determines Gₛ and the clarification strategy in Phase 2. If multiple confirmed, address in priority order (Coherence → Background → Expression → Precision).
@@ -366,7 +368,7 @@ Proceeding with this understanding.
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the clarification changed the downstream action. State in one sentence what shifted (e.g., "The clarified scope narrows implementation to the auth module only") or note that the original expression was confirmed as adequate. This is informational text — not a gate interaction.
 
@@ -381,7 +383,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Restate clarified intent as a reference for downstream work
 - Note any residual ambiguity that was accepted rather than resolved
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
