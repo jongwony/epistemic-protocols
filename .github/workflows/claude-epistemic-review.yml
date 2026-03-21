@@ -52,8 +52,5 @@ jobs:
             Post findings as inline review comments on specific code lines.
             Tag each: [Category Theory], [Type Theory], [OpSem], or [Gap: Type].
             Post a summary comment on the PR with an overview.
-          # Optional: load epistemic-protocols for enhanced context
-          # plugin_marketplaces: 'https://github.com/jongwony/epistemic-protocols.git'
-          # plugins: 'prothesis syneidesis'
-          # Optional: team mode for parallel perspective analysis
-          # claude_args: '--model claude-sonnet-4-6'
+          plugin_marketplaces: 'https://github.com/jongwony/epistemic-protocols.git'
+          plugins: 'prothesis syneidesis'
