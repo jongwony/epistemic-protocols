@@ -68,7 +68,7 @@ Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1)
 proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop (default)
+-- Realization: present → TextPresent+Stop
 Qs (extern)    → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (detect)  → Read, Grep (context for gap identification)

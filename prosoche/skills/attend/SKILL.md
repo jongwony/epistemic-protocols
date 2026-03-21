@@ -183,7 +183,7 @@ active(Λ) = Λ.active ∧ (∃ t ∈ Λ.tasks: t.status ∉ {completed, halted}
 -- Layered: situated(t) guarantees per-action epistemic quality; active(Λ) governs mode lifecycle
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop (default)
+-- Realization: present → TextPresent+Stop
 Phase -1 Sub-A0 scan    (detect)  → Internal analysis (heuristic deficit detection, execution-blocking filter)
 Phase -1 Sub-A0 Qc      (extern)  → present (upstream routing: Route(P)/Other/Proceed) [Tool]
 Phase -1 Sub-A0 suspend (state)   → TaskCreate (persist Λ.upstream: Resolved, iteration) [Tool]
