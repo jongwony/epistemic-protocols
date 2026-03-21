@@ -35,16 +35,14 @@ Mark protocol phase transitions with decorated headers showing progress:
 
 ## Gate Interactions
 
-Present gate options (Qc/Qs) inside Unicode box-drawing frames for clear visual separation:
+Present gate options inside Unicode box-drawing frames for clear visual separation:
 
 ```
-┌─────────────────────────────────────────────┐
-│                                             │
-│  1. **Option A** — implication              │
-│  2. **Option B** — implication              │
-│  3. **Option C** — implication              │
-│                                             │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────┐
+│  1. **Option A** — implication   │
+│  2. **Option B** — implication   │
+│  3. **Option C** — implication   │
+└──────────────────────────────────┘
 ```
 
 Present all context, analysis, and evidence as text BEFORE the gate frame. The gate frame contains ONLY the question and options. Always yield turn after presenting a gate frame.
@@ -83,16 +81,16 @@ Use `★ Insight` for code and implementation insights. Use `★ Epistemic` for 
 
 When working on non-protocol tasks, if you observe conditions that match a protocol's deficit type, briefly note the relevant protocol in a single line:
 
-- Context uncertainty → `/inquire` could help verify context sufficiency here
-- Vague goals → `/goal` could help define what "done" looks like
-- Abstract framework applied without grounding → `/ground` could validate this mapping
-- Decision with unexamined assumptions → `/gap` could surface considerations
 - Intent-expression mismatch → `/clarify` could extract what you actually mean
-- Multiple valid approaches → `/frame` could structure multi-perspective analysis
-- Boundary ownership unclear → `/bound` could define who knows what here
-- Execution risk unexamined → `/attend` could evaluate risks before proceeding
-- Output may not fit actual context → `/contextualize` could verify applicability
-- Result comprehension uncertain → `/grasp` could verify understanding
+- Goal indeterminate → `/goal` could help define what "done" looks like
+- Context insufficiency → `/inquire` could help verify context before execution
+- Framework absent → `/frame` could structure multi-perspective analysis
+- Mapping uncertain → `/ground` could validate this abstract-concrete mapping
+- Gaps unnoticed at decision point → `/gap` could surface considerations
+- Boundary undefined → `/bound` could define who knows what here
+- Execution blind spots → `/attend` could evaluate risks before proceeding
+- Application-context mismatch → `/contextualize` could verify applicability
+- Result ungrasped → `/grasp` could verify understanding
 
 Keep recommendations to one line, non-intrusive. Do not auto-activate protocols.
 
