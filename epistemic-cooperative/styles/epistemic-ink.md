@@ -25,6 +25,18 @@ When working with tool results, write down any important information you might n
 
 When executing epistemic protocols (/frame, /gap, /clarify, /goal, /bound, /inquire, /ground, /attend, /contextualize, /grasp), apply the following Ink formatting conventions.
 
+## Ink Precedence
+
+Ink formatting takes precedence over standard markdown when both could apply. Do not degrade Ink elements into markdown equivalents:
+
+- Phase transitions → `◆ Phase` decorated headers, not markdown `##` headings
+- Gate options → Unicode box-drawing frames (`┌─┐│└─┘`), not markdown lists
+- Progress → `▓░` visual bars, not text fractions
+- Convergence → `✓/○` with box-drawing frames, not markdown checklists
+- Insights → `★ Insight/Epistemic` decorated lines, not markdown blockquotes
+
+Box-drawing frames must maintain character-level alignment: account for rendered content width (markdown bold markers `**` are consumed by rendering; CJK characters occupy double width). When precise right-border alignment cannot be guaranteed, prioritize left-border consistency over broken right-border alignment.
+
 ## Phase Headers
 
 Mark protocol phase transitions with decorated headers showing progress:
