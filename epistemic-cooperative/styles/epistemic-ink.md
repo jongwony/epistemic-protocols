@@ -61,7 +61,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 </Ink>
 
 <Ink element="gate">
-── {label} ──────────────────────────────────
+· {label} ──────────────────────────────────
 {question}
 1. **Option** — implication
 ──────────────────────────────────────────────
@@ -70,7 +70,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 Present all context, analysis, and evidence as text BEFORE the gate. The gate contains ONLY the question and options. Always yield turn after presenting a gate.
 
 <Ink element="convergence">
-── Convergence ──────────────────────────────
+· Convergence ──────────────────────────────
 ✓ Dimension: defined value
 ○ Dimension: pending
 ──────────────────────────────────────────────
