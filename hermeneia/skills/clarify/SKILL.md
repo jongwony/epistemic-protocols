@@ -32,7 +32,7 @@ invariant: Articulation over Assumption
 E  = User's expression (the prompt to clarify)
 Eᵥ = Verified expression (user-confirmed binding)
 Gd = AI-detected gap types ⊆ {Expression, Precision, Coherence, Background} ∪ Emergent(Eᵥ)
-Gₛ = User-confirmed gap types (Gd after confirm/add/remove)
+Gₛ = User-confirmed gap types (from full taxonomy assessment after proceed/revise)
 Q  = Clarification question (via gate interaction)
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
@@ -78,7 +78,7 @@ Convergence evidence: At |remaining| = 0, present transformation trace — for e
 Phase 0 Qc   (extern) → present (AI-detected activation confirmation; ai_strong only)
 Phase 1a Qc  (extern) → present (E confirmation)
 Phase 1b detect (detect) → Internal analysis (gap detection from Eᵥ)
-Phase 1b Qc  (extern) → present (detection confirmation: confirm/add/remove)
+Phase 1b Qc  (extern) → present (full taxonomy assessment: proceed/revise)
 Phase 2 Qs   (extern) → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
 suggest_only → no tool call (passive suggestion; Λ.active = false)
 integrate    → Internal state update (no external tool)
@@ -278,32 +278,39 @@ Options:
 
 ### Phase 1b: Gap Detection and Confirmation
 
-Analyze Eᵥ to detect applicable gap types, then **present** for user confirmation.
+Analyze Eᵥ to detect applicable gap types, then **present** full taxonomy assessment for user confirmation.
 
 Per Gap Taxonomy above. Apply priority order: Coherence → Background → Expression → Precision. Emergent gaps must satisfy morphism `IntentMisarticulated → ClarifiedIntent`; boundary: intent-expression gap (in-scope) vs. goal definition (→ `/goal`) or execution context (→ `/inquire`).
 
-Present detection results with evidence as text output:
-- Detected gap types in your expression:
-  - **[Type]**: [specific evidence from Eᵥ]
-  - **[Type]**: [specific evidence from Eᵥ]
+Present the full taxonomy assessment as text output — every named type shown with detection status, evidence, and falsification condition for undetected types:
 
-Then **present** to confirm:
+- **Coherence** ✓ detected: [specific evidence from Eᵥ]
+- **Background** — not currently detected: [evidence considered]. Would apply if [falsification condition].
+- **Expression** ✓ detected: [specific evidence from Eᵥ]
+- **Precision** — not currently detected: [evidence considered]. Would apply if [falsification condition].
+- **Emergent**: [If AI detects a potential emergent type: present as named hypothesis with evidence and boundary annotation. Otherwise: "Is there an aspect of your expression that doesn't fit the above categories?"]
+
+Emergent gaps include boundary annotation: "This is an intent-expression gap (Hermeneia scope). Not: goal definition (→ `/goal`) or execution context (→ `/inquire`)"
+
+Then **present**:
 
 ```
-How would you like to proceed with these detected gaps?
+How would you like to proceed?
 
 Options:
-1. **Proceed with these** — start clarification with detected gaps
-2. **Add gap type** — I also notice [type] issues
-3. **Remove gap type** — [type] doesn't apply here
+1. **Proceed with current assessment** — start clarification with detected gaps
+2. **Revise assessment** — toggle any items or describe an emergent gap
 ```
 
-- "Add" and "Remove" options include brief rationale showing why the type was/wasn't detected
-- Emergent gaps include boundary annotation: "This is an intent-expression gap (Hermeneia scope). Not: goal definition (→ `/goal`) or execution context (→ `/inquire`)"
+- Detected types: evidence for why the gap was identified
+- Not-currently-detected types: evidence considered + falsification condition ("would apply if [specific condition]")
+- Evidence parity: each type (detected or not) receives comparable analytical depth
 
-**Add/Remove sub-steps**: On "Add" or "Remove" selection, present via gate interaction to specify which type to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1b completes when user selects "Proceed with these."
+**Revise sub-step**: On "Revise assessment" selection, user specifies which types to toggle (include previously unselected, exclude previously detected) or describes an emergent gap. Multiple revisions in a single response are supported. After modification, re-present the updated assessment for final confirmation. Phase 1b completes when user selects "Proceed with current assessment."
 
-**Soft guard**: If user removes all detected gaps, confirm: "Removing all gaps terminates clarification. Continue?" If confirmed, `|Gₛ| = 0` → skip Phase 2, evaluate convergence (`|remaining| = 0` in LOOP).
+**Emergent response parsing**: If user provides emergent type content alongside "Proceed with current assessment," treat the emergent content as implicit "Revise assessment" — incorporate the emergent type and re-present the updated assessment. If the content is ambiguous (could be a comment on an existing type rather than a new emergent), ask the user to clarify before proceeding.
+
+**Soft guard**: If user excludes all types from assessment, confirm: "Excluding all gaps terminates clarification. Continue?" If confirmed, `|Gₛ| = 0` → skip Phase 2, evaluate convergence (`|remaining| = 0` in LOOP).
 
 User confirmation determines Gₛ and the clarification strategy in Phase 2. If multiple confirmed, address in priority order (Coherence → Background → Expression → Precision).
 
@@ -361,22 +368,22 @@ Proceeding with this understanding.
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the clarification changed the downstream action. State in one sentence what shifted (e.g., "The clarified scope narrows implementation to the auth module only") or note that the original expression was confirmed as adequate. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Clarified intent reveals indeterminate goals → suggest `/goal` (goal co-construction)
-- Boundary undefined for clarified decisions → suggest `/bound` (epistemic boundary definition)
-- Clarified scope requires context verification → suggest `/inquire` (context insufficiency check)
+- `/goal` (GoalIndeterminate): Clarified intent reveals indeterminate goals → suggest goal co-construction
+- `/bound` (BoundaryUndefined): Boundary undefined for clarified decisions → suggest epistemic boundary definition
+- `/inquire` (ContextInsufficient): Clarified scope requires context verification → suggest pre-execution context check
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
 - Restate clarified intent as a reference for downstream work
 - Note any residual ambiguity that was accepted rather than resolved
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
@@ -408,7 +415,7 @@ When multiple gaps detected:
 
 1. **Hybrid-initiated, user-confirmed**: Activate on user signal, or with user confirmation when AI detects ambiguous expression
 2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
-3. **Detection with user authority**: AI detects gap types with evidence; user confirms, adds, or removes (no blind multiSelect, no auto-proceed)
+3. **Detection with user authority**: AI presents full taxonomy assessment — every named type with detection status, evidence, and falsification condition; user confirms or revises (no selective presentation, no auto-proceed)
 4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
 5. **Articulation support**: Help user express what they know, don't guess what they mean
 6. **Minimal questioning**: Surface only gaps that affect execution
@@ -421,3 +428,6 @@ When multiple gaps detected:
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **No premature convergence**: Do not declare |remaining| = 0 without presenting convergence evidence trace. "All gaps resolved" as assertion without per-gap evidence = protocol violation
 15. **No silent gap dismissal**: If detect(Eᵥ) finds no gaps (Gd = ∅), present this finding with reasoning to the user for confirmation before concluding — do not silently proceed
+16. **Full taxonomy assessment**: Phase 1b must present ALL named gap types with detection status and evidence. Presenting only detected types with a generic "Add" option = protocol violation (Recognition over Recall applied to gate content)
+17. **Falsification condition**: Each not-currently-detected type must include "would apply if [specific condition]" — exclusion rationale without falsification condition = protocol violation
+18. **Emergent probe**: Emergent slot must include an active probe question or AI-detected hypothesis with evidence. "No emergent gaps detected" as bare statement without probe = protocol violation

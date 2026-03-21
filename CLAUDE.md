@@ -71,162 +71,50 @@ epistemic-protocols/
 - References directory: `skills/*/references/` for detailed documentation (optional per plugin)
 - No external dependencies; Node.js standard library only
 
-**SKILL.md Formal Block Anatomy** (all protocols share this structure within `Definition` code block):
-```
-── FLOW ──              Protocol path formula (multi-line for multi-mode protocols)
-── MORPHISM ──          (if applicable) Essential type transition skeleton: requires/deficit/preserves/invariant
-── TYPES ──             Symbol definitions with type signatures and comments
-── ENTRY TYPES ──       (if applicable) Extended types for entry modes
-── DELEGATION TYPES ──  (if applicable) Extended types for delegation structure
-── *-BINDING ──         (if applicable) Input binding resolution rules (U-BINDING, E-BINDING, G-BINDING)
-── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
-── LOOP ──              Post-phase control flow (J values → next phase or terminal)
-── BOUNDARY ──          (if applicable) Purpose annotations for key operations
-── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping
-── ELIDABLE CHECKPOINTS ──  (if applicable) Per-gate dual-axis analysis (Qc/Qs answer space + regret profile)
-── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
-── MODE STATE ──        Runtime state type (Λ) with nested state types
-```
-Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping. Gate operations use Qc/Qs kind suffix in operation names (e.g., `Qc (extern)`).
-
-**FLOW-MORPHISM relationship**: MORPHISM is the image of FLOW under a forgetful functor that discards computational detail and tool annotations, retaining only the essential type transition skeleton (source object → transformation steps → target object) with structural annotations (requires/deficit/preserves/invariant).
+**SKILL.md Formal Block Anatomy**: FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, ELIDABLE CHECKPOINTS, MODE STATE (and optional blocks). Details: [docs/design-philosophy.md](docs/design-philosophy.md#skillmd-formal-block-anatomy)
 
 ## Plugins
 
-### Frame (πρόθεσις) — Prothesis
-Resolve absent frameworks by recommending analytical lenses (Mode 1) or assembling a team for multi-perspective inquiry (Mode 2).
-- **Deficit**: FrameworkAbsent → FramedInquiry
-- **Triggers**: Purpose present but approach unspecified; multiple valid frameworks exist
-- **Invocation**: `/frame` or use "frame" in conversation
+| Protocol | Slash | Deficit → Resolution |
+|----------|-------|----------------------|
+| Prothesis | `/frame` | FrameworkAbsent → FramedInquiry |
+| Syneidesis | `/gap` | GapUnnoticed → AuditedDecision |
+| Hermeneia | `/clarify` | IntentMisarticulated → ClarifiedIntent |
+| Katalepsis | `/grasp` | ResultUngrasped → VerifiedUnderstanding |
+| Telos | `/goal` | GoalIndeterminate → DefinedEndState |
+| Horismos | `/bound` | BoundaryUndefined → DefinedBoundary |
+| Aitesis | `/inquire` | ContextInsufficient → InformedExecution |
+| Analogia | `/ground` | MappingUncertain → ValidatedMapping |
+| Prosoche | `/attend` | ExecutionBlind → SituatedExecution |
+| Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 
-### Gap (συνείδησις) — Syneidesis
-Surface unnoticed gaps at decision points as questions.
-- **Deficit**: GapUnnoticed → AuditedDecision
-- **Triggers**: Committed action detected with observable, unaddressed gaps
-- **Invocation**: `/gap` or use "gap" in conversation
-
-### Clarify (ἑρμηνεία) — Hermeneia
-Clarify intent-expression gaps through hybrid-initiated dialogue.
-- **Deficit**: IntentMisarticulated → ClarifiedIntent
-- **Triggers**: "clarify", "what I mean", "did I express this right"; also AI-detected trigger for expression ambiguity (requires user confirmation)
-- **Invocation**: `/clarify` or use "clarify" in conversation
-
-### Grasp (κατάληψις) — Katalepsis
-Achieve certain comprehension of AI work through structured verification.
-- **Deficit**: ResultUngrasped → VerifiedUnderstanding
-- **Triggers**: "explain this", "what did you do?", "help me understand"
-- **Invocation**: `/grasp` or use "grasp" in conversation
-
-### Goal (τέλος) — Telos
-Co-construct defined goals from vague intent through AI-proposed, user-shaped dialogue.
-- **Deficit**: GoalIndeterminate → DefinedEndState
-- **Triggers**: "not sure what I want", "something like", "ideas for", exploratory framing
-- **Invocation**: `/goal` or use "goal" in conversation
-
-### Bound (ὁρισμός) — Horismos
-Define epistemic boundaries per decision through AI-guided detection.
-- **Deficit**: BoundaryUndefined → DefinedBoundary
-- **Triggers**: Task scope with undefined ownership, "should I decide this or you?", boundary-undefined domains detected
-- **Invocation**: `/bound` or use "bound" in conversation
-
-### Inquire (αἴτησις) — Aitesis
-Context sufficiency sensor + factual resolver + epistemic router. Senses multi-dimensional context insufficiency (factual, coherence, relevance), self-resolves factual dimensions via read-only verification and empirical probes, and routes non-factual dimensions to downstream protocols.
-- **Deficit**: ContextInsufficient → InformedExecution
-- **Triggers**: Context insufficiency heuristics (ambiguous execution scope, external dependency, implicit requirements)
-- **Invocation**: `/inquire` or use "inquire" in conversation
-
-### Ground (ἀναλογία) — Analogia
-Validate structural mapping between abstract and concrete domains through AI-guided detection.
-- **Deficit**: MappingUncertain → ValidatedMapping
-- **Triggers**: Abstract framework applied without domain-specific validation; cross-domain analogy; grounding probe ("concrete example", "how does this apply", "show me in my context")
-- **Invocation**: `/ground` or use "ground" in conversation
-
-### Attend (προσοχή) — Prosoche
-Route upstream epistemic deficits, materialize execution intent, classify risk signals, coordinate team delegation, and gate elevated-risk findings for user review.
-- **Deficit**: ExecutionBlind → SituatedExecution
-- **Triggers**: User declares execution intent via `/attend`
-- **Invocation**: `/attend` or use "attend" in conversation
-
-### Contextualize (ἐφαρμογή) — Epharmoge
-Detect application-context mismatch after execution when correct output may not fit context.
-- **Deficit**: ApplicationDecontextualized → ContextualizedExecution
-- **Triggers**: Post-execution applicability heuristics (environment assumption, convention mismatch, scope overflow)
-- **Invocation**: `/contextualize` or use "contextualize" in conversation
-- **Status**: Conditional — requires Aitesis operational experience
-
-### Epistemic Cooperative (Report + Onboard + Dashboard + Preferences + Catalog)
-Utility skill group for session analytics, configuration, and reference.
-- **Catalog** `/catalog`: Protocol handbook — instant reference for when to use each protocol. No args = cluster-grouped overview, cluster/protocol arg = detail card from scenarios.md. No gates — pure text output.
-- **Report** `/report`: Generate Growth Map — orthogonal epistemic analysis (protocol adoption patterns, coverage gaps, anti-patterns) using `/insights` data as targeting input. Output: HTML artifact (`growth-map.html`); falls back to Epistemic Profile when insights unavailable.
-- **Onboard** `/onboard`: Quick recommendation from recent sessions, or quest-based learning through scenario, trial, and quiz. Flow: Quick Proof (Entry → QuickScan → Pick-1 → Evidence → Trial → Insight → Next), Targeted (Entry → QuickScan → Map → Scenario → Trial → Quiz → Guide), Targeted + std (Entry → Scenario → Trial → Quiz → Guide). Phase 0 selects path (quick default); Onboarding Pool (`/goal`, `/gap`, `/frame`) serves both Quick auto-recommend and Targeted fallback; pool exhaustion in Quick path transitions to Targeted.
-- **Dashboard** `/dashboard`: Full-session coverage dashboard with friction mapping, growth timeline, achievements, and quality score. Flow: Collect → Aggregate → Analyze → Present. Phase 2 uses `coverage-scanner` subagent for batch aggregation.
-- **Preferences** `/preferences`: Protocol preference initialization with defaults, stored in `.claude/rules/` with user/project scope selection. Individual modifications via `/memory`. Flow: Detect → Initialize → Write.
-
-### Reflexion
-Extract insights from Claude Code sessions into persistent memory.
-- **Flow**: Session → Context → ∥Extract → Select → Integrate → Verify
-- **Key**: Phase 2 uses parallel agents (`session-summarizer`, `insight-extractor`, `knowledge-finder`)
-- **References**: `skills/reflexion/references/` for detailed workflows
-
-### Write
-Transform session insights into blog posts through multi-perspective analysis.
-- **Flow**: `Frame → Format → Write → Refine → Gap → Finalize`
-- **Key**: Integrates both protocols—Prothesis for perspective selection, Syneidesis for gap validation
-
-### Verify (Project-level)
-Pre-commit protocol verification via static checks and expert review.
-- **Location**: `.claude/skills/verify/`
-- **Invocation**: `/verify` before commits
+**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/preferences`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
 
 ## Core Principles
 
 - **Recognition over Recall**: Options to select, not blanks to fill
-- **Detection with user authority**: AI detects and presents with evidence; user retains decision authority (confirm/add/remove)
+- **Detection with user authority**: AI detects and presents with evidence; user retains decision authority (proceed/revise)
 - **Surfacing over Deciding**: AI illuminates, user judges
 - **Convergence Persistence**: Modes active until convergence
 - **Priority Override**: Active protocols supersede default behaviors
 
 ## Design Philosophy
 
-**Unix Philosophy Homomorphism**: Each protocol is a single-purpose epistemic tool. Composition is bottom-up — users invoke protocols for recognized cost situations, not follow a prescribed pipeline. The precedence order below is a logical default for multi-activation, not a mandatory sequence.
+Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 
-**Session Text Composition**: Inter-protocol data flows as natural language in the session context — no structured data channels between protocols. Each protocol's output becomes part of the conversation that subsequent protocols naturally read. Cell-based structured transport was considered and rejected: structuring context loses information. If structured transport becomes necessary, functor composition is the escalation path.
-
-**Dual Advisory Layer**: Inter-protocol guidance operates through two distinct mechanisms at different abstraction levels: graph.json `advisory` edges (structural, validated by static checks, topology-aware) and Post-Convergence Suggestions (heuristic, session-context-dependent, deficit-condition-driven). These are complementary, not redundant — graph.json edges encode stable architectural relationships, while Post-Convergence suggestions respond to runtime session state. Suggestion targets may overlap with or diverge from graph.json edges; neither system constrains the other.
-
-**Coexistence over Mirroring**: Protocols coexist with Claude Code built-in commands (`/simplify`, `/batch`) as orthogonal tools occupying different layers:
-
-| Layer | Concern | Tools |
-|-------|---------|-------|
-| Epistemic | "Are we doing the right thing?" | Protocols (`/clarify`, `/goal`, `/inquire`, `/gap`, ...) |
-| Execution | "Are we doing it correctly?" | Built-ins (`/batch`, `/simplify`) |
-| Verification | "Did we understand?" | Protocol (`/grasp`) |
-
-Do not mirror built-in execution capabilities (e.g., worktree isolation, PR creation) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results at handoff points only.
-
-**Three-Tier Termination**: Protocol exit follows a graduated taxonomy based on side-effect presence:
-
-| Tier | Mechanism | Cleanup | Scope |
-|------|-----------|---------|-------|
-| `user_esc` | Esc key at gate (tool-level or free-response turn) | None (ungraceful) | All protocols — universal |
-| `user_withdraw` | Explicit gate option | Yes (team shutdown, partial state) | Protocols with side-effect state only |
-| Normal convergence | Completion predicate | Full | Per-protocol |
-
-Principle: side effects require explicit answer types, not tool-level escape. When termination has consequences (team cleanup, partial contract), the exit path must be a selectable option the agent can act on. Protocols without termination side effects need only `user_esc`. Circular protocol interactions (e.g., boundary redefinition loops) are healthy dialogue — `user_esc` guarantees termination at every moment.
-
-**Audience Reach**: CLAUDE.md principles guide contributors (protocol designers). End users receive only SKILL.md content via the plugin system. For a principle to affect runtime protocol behavior, it must be structurally embedded in SKILL.md — documenting it in CLAUDE.md alone is insufficient.
-
-**Adversarial Protocol Design**: Each protocol must anticipate how an AI agent might shortcut or rationalize away from faithful execution, and include structural guards in Rules and Phase prose. Formal specification guarantees definitional consistency; adversarial design guarantees execution fidelity. Common rationalization paths: premature convergence assertion, silent detection dismissal, skipping gate interaction entirely (presenting content without yielding turn for response), collapsing Qs gates to plain acknowledgment. These are orthogonal concerns — a protocol can be formally correct yet routinely circumvented.
-
-**Deficit Empiricism**: Protocol creation must be grounded in observed deficit instances (N≥3) from actual sessions. Theoretical deficit classification alone is insufficient justification — the deficit must have demonstrably caused cost (wasted effort, wrong direction, missed consideration) in practice. This grounds the type system in empirical evidence rather than a priori categorization.
-
-**Convergence Evidence**: Protocol convergence must be demonstrated, not asserted. At convergence, the agent must present a transformation trace mapping each identified deficit instance to its resolution — the MORPHISM instantiated at the concrete level. "All gaps resolved" or "goal defined" as bare assertion without per-item evidence = protocol violation.
-
-**Structural Idempotency**: Same protocol definition must produce the same epistemic outcome regardless of interaction realization (tool call, text+stop, future client). Protocol specifications define gate semantics (what to present, what response constitutes), not tool mechanics. A gate is: present structured content → yield turn → parse response. The realization layer maps this to concrete tools based on client capabilities and user preferences.
-
-**Pattern over Tool**: The Recognition over Recall principle is a content invariant — the protocol function lies in the structured options pattern, not in the specific tool that renders them. Structured numbered text followed by turn yield satisfies the same epistemic function as an AskUserQuestion tool call. The invariant: user receives structured options with differential implications, and their response is parsed into a typed answer.
-
-**Interaction Kind Factorization**: Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts the gate (Ep → Abs) and R(p) realizes it for preferences p (Abs → Cl). Gate operations are classified: Qc (classificatory — projection from finite coproduct; user selects from N options) and Qs (constitutive — pushout; user response incorporates new content). Qc has bounded regret by default when elided (correctable at next gate); Qs has unbounded regret (missed user content). Specific Qc gates may carry unbounded regret from downstream irreversibility — expressed via always_gated annotation in ELIDABLE CHECKPOINTS.
+- **Unix Philosophy Homomorphism**: Single-purpose epistemic tools; bottom-up composition
+- **Session Text Composition**: Inter-protocol data flows as natural language in session context
+- **Dual Advisory Layer**: graph.json (structural) + Post-Convergence Suggestions (heuristic)
+- **Coexistence over Mirroring**: Protocols occupy epistemic layer; built-ins occupy execution layer
+- **Three-Tier Termination**: user_esc (ungraceful) / user_withdraw (graceful) / normal convergence
+- **Audience Reach**: CLAUDE.md guides contributors; SKILL.md guides runtime
+- **Adversarial Protocol Design**: Anticipate AI shortcut paths; structural guards in Rules
+- **Deficit Empiricism**: Protocol creation requires N≥3 observed deficit instances
+- **Convergence Evidence**: Demonstrated transformation trace, not bare assertion
+- **Structural Idempotency**: Same definition → same outcome regardless of realization
+- **Pattern over Tool**: Recognition over Recall is content invariant, not tool-dependent
+- **Interaction Kind Factorization**: G = R(p) ∘ A; Qc (classificatory, bounded regret) / Qs (constitutive, unbounded regret)
+- **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence; Post-Convergence traverses ALL conditions
 
 ## Protocol Precedence
 
@@ -263,15 +151,6 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 - Static checks: `node .claude/skills/verify/scripts/static-checks.js .`
 - Packaging: `node scripts/package.js [--dry-run]` — produces `dist/*.zip` + `dist/release-notes.md`
 
-### Packaging Transformations
-
-`scripts/package.js` applies non-trivial transforms when building release ZIPs:
-- Renames `SKILL.md` → `Skill.md` (marketplace case convention)
-- Strips frontmatter fields: `allowed-tools`, `license`, `compatibility`, `metadata`
-- Overrides descriptions exceeding 200 chars (`frame`, `reflexion`)
-- Excludes `agents/`, `commands/`, README files from ZIPs
-- 500-line guideline per SKILL.md (warns if exceeded)
-
 ### graph.json
 
 Protocol dependency graph at `.claude/skills/verify/graph.json`. Validated by static check `graph-integrity`.
@@ -293,21 +172,7 @@ Run `/verify` before commits. Static checks via:
 node .claude/skills/verify/scripts/static-checks.js .
 ```
 
-**Static checks performed**:
-1. **json-schema**: plugin.json required fields (name, version, description, author), semver format, name format (`/^[a-z][a-z0-9-]*$/`)
-2. **notation**: Unicode consistency (→, ∥, ∩, ∪, ⊆, ∈, ≠ over ASCII fallbacks)
-3. **directive-verb**: `call` (not `invoke`/`use`) for tool instructions
-4. **xref**: Referenced file paths exist in expected locations
-5. **structure**: Required sections in protocol SKILL.md (Definition, Mode Activation, Protocol, Rules, PHASE TRANSITIONS, MODE STATE)
-6. **tool-grounding**: TOOL GROUNDING section present, external operations have `[Tool]` notation in PHASE TRANSITIONS
-7. **version-staleness**: plugin content changed without plugin.json version bump (git-aware, warn level; skips during merge/rebase conflicts; ignores README, LICENSE, .gitignore)
-8. **graph-integrity**: graph.json node/edge validation — edge-type allowlist, edge-reference check, node-directory existence, orphaned node detection (SKILL.md presence), isolated node detection (no edges), precondition DAG acyclicity (Kahn's algorithm)
-9. **spec-vs-impl**: TYPES definitions cross-referenced against PHASE TRANSITIONS and prose — detects rename drift, dead types, and resolution type mismatches
-10. **cross-ref-scan**: Protocol name and deficit → resolution pair consistency across CLAUDE.md and all SKILL.md files, distinction table completeness, graph.json edge type allowlist verification
-11. **onboard-sync**: Onboard SKILL.md Data Sources table, protocol count, Phase 0 category groupings, `references/scenarios.md` scenario blocks, `references/workflow.md` slash commands — all cross-checked against `PROTOCOL_FILES`
-12. **precedence-linear-extension**: Verifies CANONICAL_PRECEDENCE total order is a valid linear extension of graph.json precondition partial order
-13. **partition-invariant**: Verifies MODE STATE pairwise disjoint partition invariants — universe set and partition members exist as MODE STATE fields
-14. **catalog-sync**: Catalog SKILL.md protocol coverage — all protocol names and commands present, count verified against `PROTOCOL_FILES`
+14 static checks: json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync. Details: [docs/verification.md](docs/verification.md)
 
 ## Delegation Constraint
 
@@ -341,19 +206,4 @@ node .claude/skills/verify/scripts/static-checks.js .
 - `call` for tool references, `present` for gate operations (tool-agnostic verb)
 - Skills frontmatter: `name` (required), `description` (required, quote if contains `:`), `allowed-tools` (optional), `license`, `compatibility`, `metadata`
 
-**Co-change pattern** (protocol modifications require synchronized edits):
-
-| Change | Files to update |
-|--------|----------------|
-| New/modified phase | SKILL.md (formal block + prose) |
-| New tool usage | SKILL.md (PHASE TRANSITIONS `[Tool]` + TOOL GROUNDING entry) |
-| New loop option | SKILL.md (LOOP + terminal phase prose + Rules) |
-| Delegation change | SKILL.md (isolation section), CLAUDE.md (delegation constraint) |
-| Any protocol change | `plugin.json` version bump, then `/verify` |
-| New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
-| New skill added to existing plugin | `SKILL.md`, `plugin.json` (version + description), `marketplace.json` description, `package.js` (PLUGINS + FIRST_RELEASE_HIGHLIGHTS), CLAUDE.md (architecture, plugin section, delegation, static checks if applicable) |
-| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_CLUSTERS`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), catalog SKILL.md, README.md + README_ko.md |
-| Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions |
-| Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
-| Post-convergence suggestion pattern change | ALL 10 SKILL.md Post-Convergence sections, plugin.json version bumps |
-| Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |
+Co-change patterns tracked in [docs/co-change.md](docs/co-change.md). Key: any protocol change requires plugin.json version bump + `/verify`.

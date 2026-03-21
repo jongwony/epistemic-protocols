@@ -33,7 +33,7 @@ G   = User's vague goal (the goal to define)
 Gᵥ  = Verified vague goal (user-confirmed)
 Dd  = AI-detected dimensions ⊆ {Outcome, Metric, Boundary, Priority} ∪ Emergent(G)
 Dₛ  = Selected dimension ∈ {Outcome, Metric, Boundary, Priority}
-Dₐ  = Applicable dimensions (user-confirmed subset of Dd, Dₐ ⊇ {Outcome})
+Dₐ  = Applicable dimensions (user-confirmed from full taxonomy assessment, Dₐ ⊇ {Outcome})
 P   = Proposal (AI-generated concrete candidate)
 A   = User's response ∈ {Accept, Modify(aspect, direction), Reject, Extend(aspect)}
 C   = GoalContract { outcome: ?, metric: ?, boundary: ?, priority: ? }
@@ -78,7 +78,7 @@ early_exit = user_declares_sufficient (any progress level)
 -- Realization: present → TextPresent+Stop (default) | AskUserQuestion (Epistemic Protocol Preferences)
 Phase 0 Qc (extern)  → present (goal confirmation + activation approval)
 Phase 1 detect (detect) → Internal analysis (dimension detection from Gᵥ)
-Phase 1 Qc (extern)  → present (detection confirmation + progress display)
+Phase 1 Qc (extern)  → present (full taxonomy assessment + progress display)
 Phase 2 P  (detect)  → Read, Grep (context for proposal generation; fallback: template)
 Phase 2 Qs (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3    (state)   → Internal GoalContract update (no external tool)
@@ -105,7 +105,7 @@ Phase 4 Qc (approve)       → always_gated (Qc: contract approval — final bin
 ## Epistemic Distinction from Requirements Engineering
 
 Telos is not simplified requirements gathering. Three differentiators:
-1. **Detection with user authority**: AI detects indeterminate dimensions with evidence; user confirms, adds, or removes (not elicited by checklist)
+1. **Detection with user authority**: AI presents full taxonomy assessment with evidence and falsification conditions; user confirms or revises (not elicited by checklist)
 2. **Morphism firing**: Activates only when `GoalIndeterminate` precondition is recognized — not a mandatory pipeline stage
 3. **Falsifiable proposals**: AI proposes specific candidates that can be directly accepted or rejected, surfacing value conflicts and trade-offs (epistemic function) rather than collecting specifications (engineering function)
 
@@ -195,7 +195,7 @@ Approved GoalContract becomes input to subsequent protocols.
 
 **Emergent dimension detection**: Named dimensions are working hypotheses, not exhaustive categories. Detect Emergent dimensions when:
 - The goal's indeterminacy spans multiple named dimensions (e.g., outcome and boundary are entangled and cannot be defined independently)
-- User adds a dimension via "Add dimension" that doesn't map to the four named types
+- User includes a dimension via "Revise assessment" that doesn't map to the four named types
 - The goal involves domain-specific concerns that resist decomposition into Outcome/Metric/Boundary/Priority (e.g., stakeholder alignment, phasing/sequencing, risk tolerance)
 
 Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState` and map to a GoalContract field.
@@ -240,30 +240,37 @@ Analyze Gᵥ to detect indeterminate dimensions, then **present** for user confi
 
 Per Gap Taxonomy above. Apply priority order: Outcome → Boundary → Priority → Metric. Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState`; boundary: goal definition (in-scope) vs. expression gap (→ `/clarify`) or execution context (→ `/inquire`).
 
-**Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be removed** via the "Remove" option.
+**Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be excluded** via "Revise assessment" toggle.
 
-Present detection results with evidence as text output:
-- Detected dimensions needing definition:
-  - **Outcome** [protocol constraint]: [evidence or "required by protocol"]
-  - **[Type]**: [specific evidence from Gᵥ]
+Present the full taxonomy assessment as text output — every named dimension shown with detection status, evidence, and falsification condition for undetected dimensions:
 
-Then **present** to confirm:
+- **Outcome** ✓ detected [protocol constraint]: [specific evidence from Gᵥ, or "required by protocol — always included"]
+- **Boundary** ✓ detected: [specific evidence from Gᵥ]
+- **Priority** — not currently detected: [evidence considered]. Would apply if [falsification condition].
+- **Metric** — not currently detected: [evidence considered]. Would apply if [falsification condition].
+- **Emergent**: [If AI detects a potential emergent dimension: present as named hypothesis with evidence and boundary annotation. Otherwise: "Is there an aspect of your goal that doesn't fit the above categories?"]
+
+Emergent dimensions include boundary annotation: "This is a goal definition gap (Telos scope). Not: expression gap (→ `/clarify`) or execution context (→ `/inquire`)"
+
+Then **present**:
 
 ```
-How would you like to proceed with these detected dimensions?
+How would you like to proceed?
 
 Options:
-1. **Proceed with these** — start co-construction with detected dimensions
-2. **Add dimension** — I also see [type] gaps
-3. **Remove dimension** — [type] doesn't apply (Outcome cannot be removed)
+1. **Proceed with current assessment** — start co-construction with detected dimensions
+2. **Revise assessment** — toggle any dimensions or describe an emergent dimension (Outcome cannot be excluded)
 ```
 
-- "Add" and "Remove" options include brief rationale showing why the dimension was/wasn't detected
-- Emergent dimensions include boundary annotation: "This is a goal definition gap (Telos scope). Not: expression gap (→ `/clarify`) or execution context (→ `/inquire`)"
+- Detected dimensions: evidence for why the dimension needs definition
+- Not-currently-detected dimensions: evidence considered + falsification condition ("would apply if [specific condition]")
+- Evidence parity: each dimension (detected or not) receives comparable analytical depth
 
-**Add/Remove sub-steps**: On "Add" or "Remove" selection, present via gate interaction to specify which dimension to add/remove with rationale. After modification, re-present the updated detection result for final confirmation. Phase 1 completes when user selects "Proceed with these." Outcome removal is rejected with explanation (protocol constraint: `Dₐ ⊇ {Outcome}`).
+**Revise sub-step**: On "Revise assessment" selection, user specifies which dimensions to toggle (include previously unselected, exclude previously detected) or describes an emergent dimension. Multiple revisions in a single response are supported. Outcome exclusion is rejected with explanation (protocol constraint: `Dₐ ⊇ {Outcome}`). After modification, re-present the updated assessment for final confirmation. Phase 1 completes when user selects "Proceed with current assessment."
 
-**Soft guard**: If user removes all detected dimensions (leaving only Outcome by protocol constraint), confirm: "Only Outcome will be defined. Continue with minimal GoalContract?" If confirmed, `Dₐ = {Outcome}` → proceed to Phase 2. If declined, re-present detection for reconsideration.
+**Emergent response parsing**: If user provides emergent dimension content alongside "Proceed with current assessment," treat the emergent content as implicit "Revise assessment" — incorporate the emergent dimension and re-present the updated assessment. If the content is ambiguous (could be a comment on an existing dimension rather than a new emergent), ask the user to clarify before proceeding.
+
+**Soft guard**: If user excludes all dimensions except Outcome (by protocol constraint), confirm: "Only Outcome will be defined. Continue with minimal GoalContract?" If confirmed, `Dₐ = {Outcome}` → proceed to Phase 2. If declined, re-present assessment for reconsideration.
 
 On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only undefined dimensions. Include "Sufficient — approve current GoalContract" option for early exit.
 
@@ -345,28 +352,27 @@ How would you like to proceed with this GoalContract?
 
 Options:
 1. **Approve** — proceed with this GoalContract
-2. **Revise [dimension]** — return to refine a specific field
-3. **Add dimension** — define an additional field
+2. **Revise [dimension]** — return to refine a specific field or include a previously unselected dimension
 ```
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the defined goals changed the implementation scope. State in one sentence what shifted (e.g., "The GoalContract's latency requirement eliminates the batch processing approach") or note that the original scope was confirmed by the defined goals. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Boundary undefined for goal-related decisions → suggest `/bound` (epistemic boundary definition)
-- Context insufficiency for goal execution → suggest `/inquire` (pre-execution context verification)
-- Goal construction reveals expression doesn't match intent → suggest `/clarify` (intent-expression gap verification)
+- `/bound` (BoundaryUndefined): Boundary undefined for goal-related decisions → suggest epistemic boundary definition
+- `/inquire` (ContextInsufficient): Context insufficiency for goal execution → suggest pre-execution context verification
+- `/clarify` (IntentMisarticulated): Goal construction reveals expression doesn't match intent → suggest intent-expression gap verification
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
 - Restate GoalContract as a reference for downstream work
 - Note any deferred goal dimensions accepted for later refinement
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 
@@ -380,7 +386,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 1. **AI-guided, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via gate interaction (Phase 0)
 2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Modify options use structured sub-choices, not free text
-3. **Detection with user authority**: AI detects indeterminate dimensions with evidence; user confirms, adds, or removes (no blind multiSelect, no auto-proceed). Outcome always included (protocol constraint)
+3. **Detection with user authority**: AI presents full taxonomy assessment — every named dimension with detection status, evidence, and falsification condition; user confirms or revises (no selective presentation, no auto-proceed). Outcome always included (protocol constraint)
 4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions
 5. **Concrete proposals**: Every proposal must be specific enough to accept or reject
 6. **User authority**: User shapes, accepts, or rejects; AI does not override
@@ -393,3 +399,6 @@ After convergence, scan session context for continuing epistemic needs and prese
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **No premature sufficiency**: Do not skip Phase 4 (GoalContract review). Even when all Dₐ appear defined, present the assembled GoalContract with transformation trace for explicit user approval
 15. **No silent dimension skip**: If detect(Gᵥ) finds fewer than expected undefined dimensions, present the detection evidence. Do not silently declare dimensions as "already defined" without showing why
+16. **Full taxonomy assessment**: Phase 1 must present ALL named dimension types with detection status and evidence. Presenting only detected dimensions with a generic "Add" option = protocol violation (Recognition over Recall applied to gate content)
+17. **Falsification condition**: Each not-currently-detected dimension must include "would apply if [specific condition]" — exclusion rationale without falsification condition = protocol violation
+18. **Emergent probe**: Emergent slot must include an active probe question or AI-detected hypothesis with evidence. "No emergent dimensions detected" as bare statement without probe = protocol violation

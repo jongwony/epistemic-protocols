@@ -420,22 +420,22 @@ Use:
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the verified understanding changed the user's approach. State in one sentence what shifted (e.g., "The user's revised understanding of the caching layer changes the optimization strategy") or note that the original understanding was confirmed as accurate. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Verified understanding reveals decision gaps → suggest `/gap` (gap audit on understood work)
-- Abstract explanations accepted without grounding → suggest `/ground` (structural mapping validation)
-- Verified understanding reveals intent was actually misarticulated → suggest `/clarify` (re-examine expression-intent alignment)
+- `/gap` (GapUnnoticed): Verified understanding reveals decision gaps → suggest gap audit on understood work
+- `/ground` (MappingUncertain): Abstract explanations accepted without grounding → suggest structural mapping validation
+- `/clarify` (IntentMisarticulated): Verified understanding reveals intent was actually misarticulated → suggest re-examine expression-intent alignment
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
 - Note any ejected proposals (user-identified areas for future investigation)
 - Summarize verified understanding as reference for subsequent decisions
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Intensity
 

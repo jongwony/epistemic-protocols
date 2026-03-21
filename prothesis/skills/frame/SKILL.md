@@ -453,14 +453,16 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    question: "How would you like to proceed?"
    options:
      - label: "Extend"
-       description: "Add new perspective, deepen existing analysis, or review execution results"
+       description: "[specific proposal grounded in L: which perspective to add or deepen, with rationale from Lens findings]"
      - label: "Add input"
-       description: "Provide additional context for synthesis revision"
+       description: "[specific context gap identified from L that would change synthesis]"
      - label: "Wrap up"
-       description: "Finalize with current Lens"
+       description: "[what the current Lens enables as concrete next steps]"
      - label: "Withdraw"
        description: "Exit with current Lens (team cleanup, no findings preservation)"
    ```
+
+**Routing concreteness**: Each routing option must be grounded in the specific Lens output. Generic descriptions without session-specific rationale fail the concreteness requirement (analogical application of Full Taxonomy Confirmation) — the AI has analyzed the Lens but presents generic action labels instead of concrete proposals. Exception: "Withdraw" retains its fixed description (no session-specific content needed for exit).
 
 **If no triggers**: Proceed to synthesis (step 6) with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected"), then user review (step 7).
 
@@ -497,21 +499,20 @@ Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Para
 
 ### Post-Convergence Suggestions
 
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction). Display only when at least one suggestion is actionable.
+After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
 **Transformation check**: Before suggesting next protocols, briefly assess whether the selected perspectives changed the analytical approach. State in one sentence what shifted (e.g., "The security perspective revealed attack surface concerns that narrow the implementation options") or note that the original approach was confirmed from all selected viewpoints. This is informational text — not a gate interaction.
 
-**Protocol suggestions**: Based on session context, suggest protocols whose deficit conditions are observable:
+**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
-- Mode 2: L.divergence reveals unaddressed tensions → suggest `/gap` (gap audit on divergent findings)
-- Mode 2: L.assessment reveals indeterminate goals → suggest `/goal` (goal co-construction from Lens insights)
-- Mode 2: L.assessment contains abstract framework without domain-specific validation → suggest `/ground` (structural mapping validation)
-- Mode 2: L.assessment contains actionable execution items with risk dimensions → suggest `/attend` (execution-time risk evaluation before acting on Lens findings)
-- Mode 2: L.divergence reveals undefined epistemic boundaries → suggest `/bound` (epistemic boundary definition before proceeding)
-- Mode 1: selected perspectives reveal unexplored domain tensions → suggest `/gap` (gap audit on perspective coverage)
-- Mode 1: inquiry intent suggests indeterminate goals → suggest `/goal` (goal co-construction before deeper analysis)
-- Mode 1: selected perspectives use abstract frameworks in user's specific domain → suggest `/ground` (structural mapping validation)
-- Context insufficiency surfaced during session → suggest `/inquire` (pre-execution context verification)
+Evaluate all conditions regardless of current mode. For inactive-mode conditions, mark as 'not applicable (mode not active)' rather than skipping.
+
+- `/gap` (GapUnnoticed): Mode 2: L.divergence reveals unaddressed tensions; Mode 1: selected perspectives reveal unexplored domain tensions → suggest gap audit
+- `/goal` (GoalIndeterminate): Mode 2: L.assessment reveals indeterminate goals; Mode 1: inquiry intent suggests indeterminate goals → suggest goal co-construction
+- `/ground` (MappingUncertain): Mode 2: L.assessment contains abstract framework without domain-specific validation; Mode 1: selected perspectives use abstract frameworks in user's specific domain → suggest structural mapping validation
+- `/attend` (ExecutionBlind): Mode 2: L.assessment contains actionable execution items with risk dimensions → suggest execution-time risk evaluation before acting on Lens findings
+- `/bound` (BoundaryUndefined): Mode 2: L.divergence reveals undefined epistemic boundaries → suggest epistemic boundary definition before proceeding
+- `/inquire` (ContextInsufficient): Context insufficiency surfaced during session → suggest pre-execution context verification
 
 **Next steps**: Based on the converged output, suggest concrete follow-up actions:
 
@@ -519,7 +520,7 @@ After convergence, scan session context for continuing epistemic needs and prese
 - Mode 2: summarize key findings from L (convergence, divergence, assessment highlights)
 - Mode 2: if findings are execution-ready, note that `/attend` can orchestrate implementation with risk classification
 
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) no observable deficit conditions exist in session context, or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
+**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Rules
 
@@ -533,3 +534,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **No premature convergence**: Do not declare wrap_up (Mode 2) or recommend terminus (Mode 1) without presenting convergence evidence trace. "User satisfied" as assertion without per-perspective contribution evidence = protocol violation
 10. **No silent framework dismissal**: If Phase 2 generation yields no candidate frameworks, present this finding with reasoning to user for confirmation before concluding — do not silently terminate
+11. **Concrete routing**: Phase 4 routing options must include session-specific rationale derived from L. Generic labels without Lens-grounded content = protocol violation (analogical application of Full Taxonomy Confirmation — session-grounded concreteness over generic labels)
