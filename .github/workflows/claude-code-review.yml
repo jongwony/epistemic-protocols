@@ -48,7 +48,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: '--model claude-haiku-4-5 --max-turns 10'
-          settings: '{"permissions":{"allow":["Bash(gh api:*)","Bash(cat:*)","Read"]}}'
+          settings: '{"permissions":{"allow":["Bash(gh api:*)","Bash(cat:*)","Read","Write"]}}'
           show_full_output: true
           prompt: |-
             You are a review comment posting agent. Read /tmp/review-output.txt which contains
@@ -68,5 +68,5 @@ jobs:
             - Preserve severity tags (Critical / Important / Suggestion)
             - Skip duplicate or near-duplicate findings
             - If no actionable findings exist, post a single summary comment instead using:
-              gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+              gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
                 --field body="<summary>"
