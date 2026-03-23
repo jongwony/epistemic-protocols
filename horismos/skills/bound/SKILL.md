@@ -291,7 +291,7 @@ After integration:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the defined boundaries changed the collaboration approach. State in one sentence what shifted (e.g., "Architecture decisions are now user-spec, which changes delegation scope for the refactoring task") or note that existing assumptions were confirmed. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the defined boundaries changed the collaboration approach. State in one sentence what shifted, or note that existing assumptions were confirmed. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 

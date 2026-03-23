@@ -162,12 +162,12 @@ Approved GoalContract becomes input to subsequent protocols.
 
 ### Triggers
 
-| Signal | Strength | Examples |
-|--------|----------|----------|
-| Acknowledged uncertainty | Strong | "not sure what I want", "something like", "kind of" |
-| Scope absence | Strong | "the whole thing", "everything", "wherever needed" |
-| Exploratory framing | Strong | "what could we do about", "ideas for", "how might we" |
-| Vague qualitative | Soft (suggest only) | "improve", "better", "optimize" |
+| Signal | Strength | Pattern |
+|--------|----------|---------|
+| Acknowledged uncertainty | Strong | Explicit hedging or approximation language about desired outcome |
+| Scope absence | Strong | Universal quantifiers or unbounded scope references |
+| Exploratory framing | Strong | Open-ended interrogative or brainstorming framing |
+| Vague qualitative | Soft (suggest only) | Comparative or superlative adjectives without measurable criteria |
 
 **Soft triggers**: AI may suggest Telos activation via gate interaction but must NOT auto-activate. Only strong triggers or explicit `/goal` invocation activate directly.
 
@@ -359,7 +359,7 @@ Options:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the defined goals changed the implementation scope. State in one sentence what shifted (e.g., "The GoalContract's latency requirement eliminates the batch processing approach") or note that the original scope was confirmed by the defined goals. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the defined goals changed the implementation scope. State in one sentence what shifted, or note that the original scope was confirmed by the defined goals. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
@@ -378,9 +378,9 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Minor scope vagueness, single dimension | "Quick check: the goal is [X]?" |
-| Medium | Multiple undefined dimensions | "[Dimension]. Proposal: [X]. Accept/Modify?" |
-| Heavy | Core outcome undefined, high stakes | "Before proceeding: [detailed proposal with trade-offs]" |
+| Light | Minor scope vagueness, single dimension | Gate interaction with Confirm as default option |
+| Medium | Multiple undefined dimensions | Structured gate interaction with dimension-by-dimension proposal |
+| Heavy | Core outcome undefined, high stakes | Detailed proposal with trade-offs + structured gate interaction |
 
 ## Rules
 

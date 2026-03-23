@@ -291,14 +291,7 @@ For each task (category):
    - What the AI work did for this aspect (the component, behavior, or mechanism being tested)
    - The specific scenario or input being used for the probe
 
-   Construct a probe based on the detected gap type. Examples (not exhaustive — adapt freely to context):
-
-   | Gap Type | Probe Form (illustrative) | Tests |
-   |----------|---------------------------|-------|
-   | Expectation | "If [specific input], what result would you expect?" | Predicted vs actual behavior |
-   | Causality | "Why does [this component] behave this way?" | Causal chain understanding |
-   | Scope | "What other parts are affected by this change?" | Impact awareness |
-   | Sequence | "Which happens first — [A] or [B]?" | Execution order |
+   Construct a probe based on the detected gap type — the probe should test whether the user can demonstrate the specific knowledge that gap type targets (prediction for Expectation, explanation for Causality, impact awareness for Scope, ordering for Sequence).
 
    **Gap type → probe kind mapping**: The probe’s gate kind (Qc vs Qs) varies by gap type to match the answer space structure:
 
@@ -401,19 +394,6 @@ For each task (category):
 
 **Socratic verification**: Ask rather than tell.
 
-Instead of:
-```
-"This function does X because of Y."
-```
-
-Use:
-```
-"What do you think this function does?"
-→ If correct: "That's right. Ready for the next part?"
-→ If incorrect: "What made you think it does Y?" → [user selects reasoning] →
-   "I see — [address reasoning]. Actually, it does X because [targeted explanation]."
-```
-
 **Chunking**: Break complex changes into digestible pieces. Verify each chunk before proceeding.
 
 **Code reference**: When explaining, always reference specific line numbers or file paths.
@@ -422,7 +402,7 @@ Use:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the verified understanding changed the user's approach. State in one sentence what shifted (e.g., "The user's revised understanding of the caching layer changes the optimization strategy") or note that the original understanding was confirmed as accurate. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the verified understanding changed the user's approach. State in one sentence what shifted, or note that the original understanding was confirmed as accurate. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
@@ -441,9 +421,9 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Simple change, user seems familiar | "What does this new function do?" |
-| Medium | Moderate complexity | "If [input], what would you expect this to return?" |
-| Heavy | Complex architecture or unfamiliar pattern | "Let's take this step by step. Why does [A] call [B] here?" |
+| Light | Simple change, user seems familiar | Single-probe gate interaction targeting core understanding |
+| Medium | Moderate complexity | Scenario-based gate interaction targeting prediction |
+| Heavy | Complex architecture or unfamiliar pattern | Multi-step decomposed gate interaction targeting causal reasoning |
 
 ## Rules
 

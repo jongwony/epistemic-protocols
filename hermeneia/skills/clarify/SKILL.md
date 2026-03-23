@@ -370,7 +370,7 @@ Proceeding with this understanding.
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the clarification changed the downstream action. State in one sentence what shifted (e.g., "The clarified scope narrows implementation to the auth module only") or note that the original expression was confirmed as adequate. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the clarification changed the downstream action. State in one sentence what shifted, or note that the original expression was confirmed as adequate. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
@@ -389,9 +389,9 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Minor ambiguity, low stakes | "Quick check: [A] or [B]?" |
-| Medium | Significant ambiguity, moderate stakes | "[Gap]. Options: [A], [B], [C]?" |
-| Heavy | Core intent unclear, high stakes | "Before proceeding: [detailed options with implications]" |
+| Light | Minor ambiguity, low stakes | Gate interaction with binary disambiguation |
+| Medium | Significant ambiguity, moderate stakes | Gap statement + structured gate interaction with multiple options |
+| Heavy | Core intent unclear, high stakes | Detailed options with implications + structured gate interaction |
 
 ## Multi-Gap Handling
 
