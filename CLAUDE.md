@@ -114,6 +114,7 @@ Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 - **Pattern over Tool**: Recognition over Recall is content invariant, not tool-dependent
 - **Interaction Kind Factorization**: G = R(p) ∘ A; Qc (classificatory, bounded regret) / Qs (constitutive, unbounded regret)
 - **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence; Post-Convergence traverses ALL conditions
+- **Zero-Shot Instruction Preference**: LLM-facing instructions state principles, not few-shot examples; fix underspecified principles rather than patching with examples
 
 ## Protocol Precedence
 

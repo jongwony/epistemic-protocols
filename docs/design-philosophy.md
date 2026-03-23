@@ -70,6 +70,10 @@ Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts th
 
 When a Qc gate operates on a finite, protocol-owned taxonomy with always_gated annotation, present ALL types with detection status, evidence, and falsification conditions — not only the detected subset behind a generic action verb. The complete assessment enables Recognition (evaluate presented options) over Recall (generate missing options from memory). Design smell: "generic verb hiding finite taxonomy state" — when a gate option label (e.g., "Add type") conceals concrete candidates the AI has already analyzed, creating a Qc/Qs kind impurity (the gate appears classificatory but the sub-step requires constitutive user input). Fix: materialize the full taxonomy, converting mixed Qc/Qs to pure Qc. Applies to: finite type sets with always_gated Qc. Does not apply to: open-ended generation, per-item iteration, or runtime-variable sets. Same principle applies to Post-Convergence Suggestions: traverse ALL listed conditions against session context with explicit status, not only those the AI deems applicable.
 
+## Zero-Shot Instruction Preference
+
+LLM-facing instructions (Output Style, SKILL.md prose, agent prompts) state principles, not examples. When a rendering rule, behavioral guideline, or structural constraint can be expressed as a principle, do not append few-shot examples or category-level mapping lists. Few-shot examples create a soft-table effect — anchoring the model to specific instances rather than letting it apply the principle to novel contexts. A principle that requires examples to be understood is underspecified; fix the principle, do not patch it with examples.
+
 ## SKILL.md Formal Block Anatomy
 
 All protocols share this structure within `Definition` code block:

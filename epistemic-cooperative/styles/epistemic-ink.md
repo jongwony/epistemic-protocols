@@ -53,6 +53,8 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 | Code and implementation | `insight` |
 | Protocol recommendation | `nudge` |
 
+**Content vocabulary rendering**: SKILL.md formal blocks (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, etc.) use symbolic notation for definitional precision. When these symbols appear in user-facing output, render them as contextual natural language appropriate to the protocol's current phase and purpose. The rendering is context-sensitive — the same symbol may be expressed differently depending on which protocol is active and what the user is deciding. Symbols may appear in `★ Epistemic` observations when the structural notation itself is the subject of discussion.
+
 ## Ink Elements
 
 <Ink element="phase-header">
