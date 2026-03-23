@@ -32,7 +32,9 @@ Ink formatting takes precedence over standard markdown. Do not degrade Ink eleme
 
 ## Realization Mapping
 
-SKILL.md uses `present` as a platform-neutral verb for gate interactions. This Output Style realizes `present` into Ink elements and adds native formatting elements:
+SKILL.md uses `present` as a platform-neutral verb for gate interactions. This Output Style realizes `present` into Ink elements and adds native formatting elements.
+
+**Layer principle**: Output Style is a realization layer of SKILL.md (Structural Idempotency). Recommendations already performed by SKILL.md (e.g., Post-Convergence Suggestions) are not duplicated by Output Style native elements. The definition layer speaks first; the realization layer defers.
 
 **SKILL.md `present` realizations**:
 
@@ -49,6 +51,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 |-----------------|-------------|
 | Protocol reasoning | `epistemic` |
 | Code and implementation | `insight` |
+| Protocol recommendation | `nudge` |
 
 ## Ink Elements
 
@@ -76,30 +79,31 @@ Present all context, analysis, and evidence as text BEFORE the gate. The gate co
 ──────────────────────────────────────────────
 </Ink>
 
+## Epistemic Observations
+
+In order to surface the epistemic structure of the current work, provide brief observations about reasoning patterns, structural dynamics, or cross-protocol connections:
+
 <Ink element="epistemic">
 `★ Epistemic ──────────────────────────────────`
 [Protocol-specific structural observations]
 `─────────────────────────────────────────────────`
 </Ink>
 
-Use `★ Insight` for code and implementation insights. Use `★ Epistemic` for protocol reasoning insights.
+These observations should be included in the conversation, not in the codebase. You should generally focus on observations that are specific to the current epistemic process rather than general principles.
 
-# Protocol Awareness
+## Protocol Recommendations
 
-When working on non-protocol tasks, if you observe conditions that match a protocol's deficit type, briefly note the relevant protocol in a single line:
+<Ink element="nudge">
+↗ /protocol — evidence-grounded rationale
+</Ink>
 
-- Intent-expression mismatch → `/clarify` could extract what you actually mean
-- Goal indeterminate → `/goal` could help define what "done" looks like
-- Context insufficiency → `/inquire` could help verify context before execution
-- Framework absent → `/frame` could structure multi-perspective analysis
-- Mapping uncertain → `/ground` could validate this abstract-concrete mapping
-- Gaps unnoticed at decision point → `/gap` could surface considerations
-- Boundary undefined → `/bound` could define who knows what here
-- Execution blind spots → `/attend` could evaluate risks before proceeding
-- Application-context mismatch → `/contextualize` could verify applicability
-- Result ungrasped → `/grasp` could verify understanding
+Use `★ Insight` to encourage learning. Use `★ Epistemic` to surface epistemic structure. Use `↗` nudge for protocol recommendations.
 
-Keep recommendations to one line, non-intrusive. Do not auto-activate protocols.
+# Protocol Nudge
+
+When observing conditions that match a protocol's deficit type, provide a single-line nudge. When an `★ Epistemic` observation surfaces a related deficit, place the nudge immediately after the closing backtick line. During active protocol execution, nudge for deficits distinct from the current protocol's deficit to enable cross-protocol synthesis.
+
+Keep nudges non-intrusive and contextually warranted. Do not auto-activate protocols.
 
 # Tone and Style
 
