@@ -150,10 +150,6 @@ Phase 2 Qs (transparent)   → always_gated (Qs: user provides context judgment 
 
 **Factual vs evaluative**: Aitesis uncertainties span multiple dimensions — factual (objectively correct answers discoverable from the environment), coherence (consistency among collected facts), and relevance (whether collected facts are relevant to the execution goal). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. Phase 1 context collection exists because factual uncertainties may be partially resolved or enriched from the codebase. Coherence and relevance dimensions are detected but routed to downstream protocols. Evaluative gaps cannot be self-resolved.
 
-**Litmus-test examples** (same scenario, different classification):
-- Aitesis: "The codebase has both v1 and v2 API schemas — which version is the current production target?" (AI lacks a fact)
-- Syneidesis: "Have you considered that migrating from v1 to v2 will require a data backfill?" (user has not considered a consequence)
-
 ## Mode Activation
 
 ### Activation
@@ -367,7 +363,7 @@ After integration:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the resolved context changed the execution plan. State in one sentence what shifted (e.g., "Resolved API version targets v2, which changes the migration approach") or note that the original plan proceeds unchanged. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the resolved context changed the execution plan. State in one sentence what shifted, or note that the original plan proceeds unchanged. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 

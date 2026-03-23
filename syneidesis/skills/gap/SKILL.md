@@ -273,7 +273,7 @@ Note: Esc key → unconditional loop termination (LOOP level). Silence (no respo
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the gap audit changed the decision. State in one sentence what shifted (e.g., "The backup verification gap led to adding a pre-migration snapshot step") or note that the original plan was confirmed after review. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the gap audit changed the decision. State in one sentence what shifted, or note that the original plan was confirmed after review. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
@@ -292,9 +292,9 @@ After convergence, scan session context for continuing epistemic needs and prese
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Reversible, low impact | "[X] confirmed?" |
-| Medium | Reversible + high impact, OR Irreversible + low impact | "[X] reviewed? (rationale)" |
-| Heavy | Irreversible + high impact | "Before proceeding, [X]? (rationale)" |
+| Light | Reversible, low impact | Gate interaction with Confirm as default option |
+| Medium | Reversible + high impact, OR Irreversible + low impact | Gate interaction with rationale context |
+| Heavy | Irreversible + high impact | Detailed rationale + gate interaction with explicit options |
 
 ## Rules
 

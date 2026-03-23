@@ -187,7 +187,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 
 Mismatches are identified dynamically per execution result — no fixed taxonomy. Each mismatch is characterized by:
 
-- **aspect**: The dimension where result and context diverge (e.g., "deployment target", "API version", "team convention")
+- **aspect**: The dimension where result and context diverge
 - **description**: What specifically doesn't fit
 - **evidence**: Observable indicator from the execution result or context
 - **severity**: Impact on applicability
@@ -277,7 +277,7 @@ After adaptation — **re-scan**:
 - If all tasks completed: execution complete with contextualized result
 - Log `(Mismatch, A)` to `Σ.history`, increment `Σ.scan_count`
 
-**Re-scan trigger**: Adaptation changes `R`, and changed `R'` may exhibit new mismatches not present in the original result. Always re-scan after each adaptation. Example: adapting deployment target → discovers CI pipeline convention mismatch; adapting API version → reveals dependency compatibility issue.
+**Re-scan trigger**: Adaptation changes `R`, and changed `R'` may exhibit new mismatches not present in the original result. Always re-scan after each adaptation — any adaptation may introduce mismatches in dimensions unrelated to the original aspect.
 
 **Chain discovery**: When `Mₑ` emerges from an adaptation, the `origin = Emerged(parent_aspect)` field records the causal chain. This enables:
 - Progress visibility: user sees which adaptations spawned new mismatches
@@ -287,7 +287,7 @@ After adaptation — **re-scan**:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the contextualized result changed the follow-up work. State in one sentence what shifted (e.g., "The adapted deployment target requires updating the CI pipeline configuration") or note that the original result was confirmed as contextually appropriate. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the contextualized result changed the follow-up work. State in one sentence what shifted, or note that the original result was confirmed as contextually appropriate. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 

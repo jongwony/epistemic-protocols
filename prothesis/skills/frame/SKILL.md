@@ -263,8 +263,7 @@ Q2. Mode:
 - Q1 (Mission Brief): MB confirmation/modification (4 options)
 - Q2 (Mode): Recommend / Inquire (2 options)
 AI places the recommended Mode as Q2's first option with "(Recommended)" suffix based on inquiry characteristics:
-- Simple / binary comparison / debugging → Recommend recommended
-- Complex / multi-perspective / deep analysis → Inquire recommended
+The recommendation matches mode to analytical demand — Recommend when the inquiry can be resolved from a single analytical direction, Inquire when multiple distinct perspectives are structurally necessary.
 
 **Mode 1 (Recommend)**: Per LOOP — terminates at Phase 2. No team. Pₛ is an intermediate output (not a resolution) — the deficit `FrameworkAbsent` remains open until a downstream protocol completes its own resolution using Pₛ as context.
 
@@ -501,7 +500,7 @@ Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Para
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the selected perspectives changed the analytical approach. State in one sentence what shifted (e.g., "The security perspective revealed attack surface concerns that narrow the implementation options") or note that the original approach was confirmed from all selected viewpoints. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the selected perspectives changed the analytical approach. State in one sentence what shifted, or note that the original approach was confirmed from all selected viewpoints. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 

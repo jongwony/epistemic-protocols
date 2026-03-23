@@ -326,9 +326,7 @@ Signals are categorized by their default severity. Context (especially environme
 
 ### Environment Awareness
 
-Pattern matching is environment-aware: `pattern(E) = (tool_name, target, env_context)`. All three components must match for a session cache hit.
-
-Example: `("pulumi up", "auth-stack", "dev")` approved does NOT cache-hit for `("pulumi up", "auth-stack", "prod")`.
+Pattern matching is environment-aware: `pattern(E) = (tool_name, target, env_context)`. All three components must match for a session cache hit — a difference in any single component means no cache hit.
 
 ## Protocol
 
@@ -516,7 +514,7 @@ After adaptation:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the execution outcomes changed the remaining plan. State in one sentence what shifted (e.g., "The halted deployment task requires resolving the staging environment issue before proceeding") or note that all tasks completed as planned. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the execution outcomes changed the remaining plan. State in one sentence what shifted, or note that all tasks completed as planned. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 

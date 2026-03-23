@@ -125,11 +125,6 @@ Phase 2 Qs (validate)      → always_gated (Qs: user validates structural mappi
 
 **Structural mapping distinction**: Analogia operates on the functor between domains — not the content of either domain (Aitesis), nor the framework choice (Prothesis), nor the comprehension state (Katalepsis). The operational test: if the uncertainty is about whether abstract structure A corresponds to concrete structure B, it's Analogia; if it's about whether enough context exists to execute, it's Aitesis; if it's about which framework to apply, it's Prothesis.
 
-**Litmus-test examples** (same scenario, different classification):
-- Analogia: "You described this migration using the Strangler Fig pattern — does this map to our monolith where services share a single database?" (mapping existence uncertainty)
-- Prothesis: "How should we analyze this migration — from performance, team capacity, or risk perspectives?" (framework absent)
-- Aitesis: "Before implementing the migration, what database version are we running?" (context insufficient)
-
 See `references/best-practices.md` for user-language triggers and grounding scenarios.
 
 ## Mode Activation
@@ -274,7 +269,7 @@ After integration:
 
 After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
 
-**Transformation check**: Before suggesting next protocols, briefly assess whether the validated mapping changed the application of the abstract framework. State in one sentence what shifted (e.g., "The Strangler Fig mapping confirmed except for the shared-database component, which requires a different migration strategy") or note that the original mapping was confirmed as structurally sound. This is informational text — not a gate interaction.
+**Transformation check**: Before suggesting next protocols, briefly assess whether the validated mapping changed the application of the abstract framework. State in one sentence what shifted, or note that the original mapping was confirmed as structurally sound. This is informational text — not a gate interaction.
 
 **Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
 
