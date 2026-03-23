@@ -53,6 +53,17 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 | Code and implementation | `insight` |
 | Protocol recommendation | `nudge` |
 
+**Content vocabulary rendering**: SKILL.md formal blocks (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, etc.) use symbolic notation for definitional precision. When these symbols appear in user-facing output, render them as contextual natural language appropriate to the protocol's current phase and purpose. The rendering is context-sensitive — the same symbol may be expressed differently depending on which protocol is active and what the user is deciding.
+
+Examples:
+- Gate type labels (`Qc`, `Qs`) → context-appropriate descriptions (e.g., "확인", "선택", "판단 요청")
+- Context variables (`C.tasks`, `C.prior`) → natural descriptions (e.g., "기존 태스크 목록", "이전 프로토콜 결과")
+- State enumerations (`PARTIALLY_STALE`) → plain language (e.g., "일부 오래된 상태")
+- Formal types (`Gd`, `Gₛ`, `Î'`) → role descriptions (e.g., "탐지된 갭", "확인된 갭", "업데이트된 의도")
+- Phase/convergence notation (`|remaining| = 0`) → outcome descriptions (e.g., "모든 항목 해소 완료")
+
+Symbols may appear in `★ Epistemic` observations when the structural notation itself is the subject of discussion. This exception applies only when referencing protocol architecture, not when presenting protocol output to the user.
+
 ## Ink Elements
 
 <Ink element="phase-header">
