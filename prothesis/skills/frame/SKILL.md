@@ -366,6 +366,8 @@ over specificity.
 
 Cross-dialogue: The coordinator may signal a tension topic and connect you
 with another perspective for direct exchange (≤3 messages per pair).
+The coordinator will provide the exact peer agent name — use it as-is for
+the SendMessage `to` field. Do not infer or abbreviate agent names.
 Exchange directly — present your position, engage with the other's reasoning.
 After exchange, submit a structured report to the coordinator:
 - Final position: your concluded stance
@@ -419,7 +421,12 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
 
 **If triggers detected**: Coordinator initiates peer negotiation with structured reporting:
 
-1. **Topic signal**: Coordinator identifies the tension topic and sends it to the involved peer pair via SendMessage, including the structured report format (e.g., "Tension detected on [topic Z] between your perspectives. Exchange directly (≤3 messages), then each submit a structured report: final position / agreement points / remaining divergence / rationale.")
+1. **Topic signal**: Coordinator identifies the tension topic and sends it to each involved peer via SendMessage, including (a) the exact peer agent name, (b) a trigger-appropriate external label, and (c) the structured report format. The coordinator MUST use the peer's exact `name` from `Λ.team.members` for the SendMessage `to` field — do not paraphrase or abbreviate agent names.
+
+   **External labels** (internal Δₛ trigger types are coordinator-only; peers receive neutral task framing):
+   - Contradiction: "You reached materially different conclusions on [topic Z]. Exchange reasons and report agreement/divergence."
+   - Uncorroborated high-stakes: "A consequential claim on [topic Z] needs independent validation. Assess support, uncertainty, and failure impact."
+   - Horizon intersection: "Topic [topic Z] warrants additional scrutiny. State your current position, key uncertainty, and one question for the peer."
 2. **Peer exchange**: Peers communicate directly (≤3 exchanges per pair; e.g., A→B, B→A, A→B). Each peer presents their position, responds to the other's reasoning, and works toward common ground. Peers may stop early if agreement is reached. The coordinator does not relay or frame — peers engage with each other's actual arguments.
 3. **Structured report**: Each peer submits a 4-field report to the coordinator:
    - **Final position**: Peer's concluded stance after exchange
