@@ -19,6 +19,17 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Get changed files
+        id: changed
+        run: |
+          gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' > /tmp/changed-files.txt
+          if [ ! -s /tmp/changed-files.txt ]; then
+            echo "::error::No changed files found for PR #${{ github.event.pull_request.number }}"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Run Claude Code Review
         id: review
         uses: anthropics/claude-code-action@v1
@@ -26,7 +37,10 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-plugins-official.git'
           plugins: 'pr-review-toolkit@claude-plugins-official'
-          prompt: '/pr-review-toolkit:review-pr all'
+          prompt: |
+            Review ONLY the files changed in this PR.
+            Changed files are listed in /tmp/changed-files.txt — read that file for the list.
+            Use /pr-review-toolkit:review-pr to review these changed files only.
 
 
       - name: Extract review text
@@ -43,7 +57,11 @@ jobs:
           fi
 
       - name: Post review comments
-        if: always() && steps.extract.outputs.skip != 'true' && steps.review.outputs.execution_file != ''
+        if: >-
+          always()
+          && steps.extract.outcome == 'success'
+          && steps.extract.outputs.skip != 'true'
+          && steps.review.outputs.execution_file != ''
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
