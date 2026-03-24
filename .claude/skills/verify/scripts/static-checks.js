@@ -156,7 +156,13 @@ function checkNotation() {
   const mdFiles = walkFiles(projectRoot, e => e.name.endsWith('.md'), 'notation');
 
   for (const mdPath of mdFiles) {
-    const content = fs.readFileSync(mdPath, 'utf8');
+    let content;
+    try {
+      content = fs.readFileSync(mdPath, 'utf8');
+    } catch (e) {
+      results.warn.push({ check: 'notation', file: path.relative(projectRoot, mdPath), message: `Read error: ${e.message}` });
+      continue;
+    }
     const relativePath = path.relative(projectRoot, mdPath);
 
     // Skip README files for notation check (they may have different conventions)
@@ -197,7 +203,13 @@ function checkDirectiveVerb() {
   ];
 
   for (const mdPath of mdFiles) {
-    const content = fs.readFileSync(mdPath, 'utf8');
+    let content;
+    try {
+      content = fs.readFileSync(mdPath, 'utf8');
+    } catch (e) {
+      results.warn.push({ check: 'directive-verb', file: path.relative(projectRoot, mdPath), message: `Read error: ${e.message}` });
+      continue;
+    }
     const relativePath = path.relative(projectRoot, mdPath);
     const lines = content.split('\n');
 
@@ -625,8 +637,9 @@ function checkVersionStaleness() {
               versionBumped = true;
             }
           }
-        } catch {
+        } catch (e) {
           // Git commands failed (e.g., index.lock, permissions) — conservative: assume no bump
+          results.warn.push({ check: 'version-staleness', file: pluginJsonRel, message: `Git command failed: ${e.message}` });
           versionBumped = false;
         }
       }
@@ -769,7 +782,7 @@ function checkGraphIntegrity() {
             }
           }
         } catch (e) {
-          // ignore read errors
+          // Auxiliary check: filesystem errors mean "could not confirm SKILL.md exists" → hasSkill stays false
         }
       }
       if (hasSkill) break;
@@ -1223,7 +1236,7 @@ function checkCrossRefScan() {
     } catch (e) {
       results.warn.push({
         check: 'cross-ref-scan',
-        file: projectRoot,
+        file: '.',
         message: `Could not scan plugin directories: ${e.message}`
       });
     }
@@ -1410,7 +1423,7 @@ function checkCrossRefScan() {
         }
       }
     } catch (e) {
-      // JSON parse errors already reported by checkGraphIntegrity
+      // Ordering dependency: checkGraphIntegrity runs first and reports JSON parse errors
     }
   }
 
@@ -1780,6 +1793,9 @@ function checkPartitionInvariant() {
   }
 }
 
+// ============================================================
+// Check 14: Catalog Sync (Protocol coverage in catalog SKILL.md)
+// ============================================================
 function checkCatalogSync() {
   const catalogSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/catalog/SKILL.md');
   if (!fs.existsSync(catalogSkillPath)) {
@@ -1835,6 +1851,12 @@ function checkCatalogSync() {
       message: `Command count (${uniqueCommands.size}) less than protocol count (${expectedCount})`
     });
   }
+
+  results.pass.push({
+    check: 'catalog-sync',
+    file: 'epistemic-cooperative/skills/catalog/SKILL.md',
+    message: 'Catalog sync check completed'
+  });
 }
 
 // ============================================================

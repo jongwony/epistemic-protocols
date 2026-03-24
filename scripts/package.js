@@ -47,7 +47,8 @@ const DESCRIPTION_OVERRIDES = {
   ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, AIOutput) → ValidatedMapping',
   bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, ExecutionResult) → ContextualizedExecution',
-  reflexion: 'Extract session insights into persistent memory through guided dialogue. Reconstructs learnings from conversation history.',
+  onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
+  catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
 };
 
 const EXCLUDE_NAMES = new Set([
@@ -98,8 +99,8 @@ Every protocol carries a type signature \`(Deficit, Initiator, Action, Target) �
 
 ### Formal Verification
 
-13 static checks validate protocol integrity before every commit:
-json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant.
+14 static checks validate protocol integrity before every commit:
+json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync.
 
 Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory edges, and suppression rules with cycle detection.
 
@@ -443,7 +444,13 @@ function main() {
       warnings.push(`${plugin.dir}: failed to read plugin.json: ${e.message}`);
       continue;
     }
-    const files = collectFiles(skillDir, plugin.skill);
+    let files;
+    try {
+      files = collectFiles(skillDir, plugin.skill);
+    } catch (e) {
+      warnings.push(`${plugin.dir}: collectFiles failed: ${e.message}`);
+      continue;
+    }
     const zipEntries = [];
 
     for (const file of files) {
@@ -512,8 +519,9 @@ function main() {
       cwd: projectRoot,
     });
     changelog = JSON.parse(output);
-  } catch {
-    // No previous tag or script error — fall back to Phase A curated content
+  } catch (e) {
+    // No previous tag or script error — fall back to curated first-release content
+    warnings.push(`changelog generation failed, using curated fallback: ${e.message}`);
   }
   const notes = generateReleaseNotes(buildResults, { tag, changelog });
   if (!dryRun) {
