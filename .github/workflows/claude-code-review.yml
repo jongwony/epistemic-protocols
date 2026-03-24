@@ -17,7 +17,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        run: |
+          gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' > /tmp/changed-files.txt
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          cat /tmp/changed-files.txt >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Run Claude Code Review
         id: review
@@ -26,7 +36,14 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-plugins-official.git'
           plugins: 'pr-review-toolkit@claude-plugins-official'
-          prompt: '/pr-review-toolkit:review-pr all'
+          prompt: |
+            Review ONLY the files changed in this PR. Do NOT review files outside the diff.
+
+            Changed files:
+            ${{ steps.changed.outputs.files }}
+
+            Use /pr-review-toolkit:review-pr to review these changed files only.
+            Focus your analysis strictly on the diff — do not scan or report on unchanged files.
 
 
       - name: Extract review text

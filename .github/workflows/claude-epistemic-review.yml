@@ -28,7 +28,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        run: |
+          gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' > /tmp/changed-files.txt
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          cat /tmp/changed-files.txt >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} > /tmp/pr-diff.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Run Epistemic Review
         id: review
@@ -37,23 +54,29 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |-
             Perform a multi-perspective code review and gap analysis of this PR.
+            Review ONLY the changed files listed below — do NOT analyze unchanged files.
+
+            Changed files:
+            ${{ steps.changed.outputs.files }}
+
+            The full diff is available at /tmp/pr-diff.txt. Read it to understand the exact changes.
 
             ## Perspective Analysis
 
-            Analyze changes from each perspective:
+            Analyze the changes from each perspective:
             1. **Category Theory** — morphism coherence, composition laws, functor consistency
             2. **Type Theory** — type signature soundness, variance, type safety
             3. **Operational Semantics** — evaluation order, phase transitions, state consistency
 
             For each finding:
-            - Reference specific file path and line number
+            - Reference specific file path and line number from the diff
             - Severity: Critical / Important / Suggestion
-            - Evidence-grounded rationale (reference actual code)
+            - Evidence-grounded rationale (reference actual changed code)
             - Only report findings with confidence >= 80%
 
             ## Gap Scanning
 
-            Scan decision points for unnoticed gaps:
+            Scan decision points in the diff for unnoticed gaps:
             - **Procedural**: missing steps or incomplete workflows
             - **Consideration**: unaddressed trade-offs
             - **Assumption**: implicit assumptions needing explicit statement
@@ -65,6 +88,8 @@ jobs:
             - File path and line number
             - Tag: [Category Theory], [Type Theory], [OpSem], or [Gap: Type]
             - Severity and evidence-grounded rationale
+
+            If the changes are trivial (e.g., version bumps only), state that explicitly and keep the review brief.
 
           plugin_marketplaces: 'https://github.com/jongwony/epistemic-protocols.git'
           plugins: |
