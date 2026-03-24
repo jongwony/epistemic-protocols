@@ -782,8 +782,7 @@ function checkGraphIntegrity() {
             }
           }
         } catch (e) {
-          if (e.code !== 'ENOENT' && e.code !== 'EACCES') throw e;
-          // ignore missing/permission errors
+          // Auxiliary check: filesystem errors mean "could not confirm SKILL.md exists" → hasSkill stays false
         }
       }
       if (hasSkill) break;
