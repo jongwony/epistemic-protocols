@@ -28,15 +28,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Get changed files
         id: changed
         run: |
           gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' > /tmp/changed-files.txt
-          echo "files<<EOF" >> "$GITHUB_OUTPUT"
-          cat /tmp/changed-files.txt >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          if [ ! -s /tmp/changed-files.txt ]; then
+            echo "::error::No changed files found for PR #${{ github.event.pull_request.number }}"
+            exit 1
+          fi
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -54,10 +55,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |-
             Perform a multi-perspective code review and gap analysis of this PR.
-            Review ONLY the changed files listed below — do NOT analyze unchanged files.
-
-            Changed files:
-            ${{ steps.changed.outputs.files }}
+            Review ONLY the changed files — read /tmp/changed-files.txt for the list.
 
             The full diff is available at /tmp/pr-diff.txt. Read it to understand the exact changes.
 
@@ -110,7 +108,11 @@ jobs:
           fi
 
       - name: Post review comments
-        if: always() && steps.extract.outputs.skip != 'true' && steps.review.outputs.execution_file != ''
+        if: >-
+          always()
+          && steps.extract.outcome == 'success'
+          && steps.extract.outputs.skip != 'true'
+          && steps.review.outputs.execution_file != ''
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
