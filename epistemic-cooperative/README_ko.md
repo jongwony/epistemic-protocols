@@ -8,13 +8,15 @@
 
 인식론적 프로토콜 온보딩과 분석을 위한 유틸리티 플러그인이다. 특정 결정 지점을 다루는 프로토콜과 달리, Epistemic Cooperative는 **진입점** 역할을 한다 — 체험 기반 프로토콜 학습을 안내하고, 근거 기반 분석 리포트를 생성하며, 세션 전반의 사용량을 추적한다.
 
-### 네 개의 스킬
+### 스킬
 
 | 스킬 | 목적 | 출력 |
 |------|------|------|
 | `/onboard` | 빠른 추천 + 프로토콜 학습 | 터미널 기반 가이드 경험 |
 | `/report` | Growth Map — 인식론적 분석 | HTML 아티팩트 (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.insights/dashboard.html`) |
+| `/catalog` | 프로토콜 핸드북 — 즉시 참조 | 터미널 기반 프로토콜 브라우저 |
+| `/compose` | 프로토콜 합성 저작 | 합성 SKILL.md 파일 생성 |
 
 ## 스킬
 
@@ -93,6 +95,33 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 - **Achievements**: 세션, 프로토콜, 코드, 연속 사용 마일스톤
 - **Quality Score**: 복합 점수 0-100 (결과 35%, 마찰 20%, 만족도 25%, 커버리지 20%)
 
+### /catalog — 프로토콜 핸드북
+
+모든 프로토콜을 탐색하고, 관심 클러스터별로 비교하며, 상세 시나리오를 확인한다. 텍스트 출력 전용, 프로토콜별 시나리오 상세 모드 제공.
+
+### /compose — 프로토콜 합성 저작
+
+프로토콜 체인에서 합성 SKILL.md 파일을 생성한다. 그래프 제약 조건을 검증하고, 게이트를 카탈로그화하고, 배치를 제안하고, 파이프라인 템플릿을 생성한다.
+
+```
+SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
+```
+
+| 단계 | 설명 |
+|------|------|
+| 0. Specify | 체인 명세 입력 및 정규화 |
+| 1. Validate | graph.json precondition/suppression 검증 |
+| 2. Catalog | 프로토콜별 ELIDABLE CHECKPOINTS 추출 |
+| 3. Disposition | 3축 모델 게이트 배치 분석 |
+| 4. Generate | 합성 SKILL.md 템플릿 생성 |
+
+주요 특징:
+- 그래프 인식 체인 검증 (precondition, suppression)
+- ELIDABLE CHECKPOINTS에서 자동 게이트 인벤토리
+- 3축 배치 모델 (Qc/Qs × regret × epistemic access)
+- Catch-chain 불변량 검증
+- `/review` 패턴 템플릿 출력 (pipeline context rules 포함)
+
 ## 아키텍처
 
 ```
@@ -102,6 +131,8 @@ epistemic-cooperative/
 │   ├── onboard/SKILL.md          # /onboard 퀘스트 기반 프로토콜 학습
 │   ├── report/SKILL.md           # /report Growth Map
 │   ├── dashboard/SKILL.md        # /dashboard 커버리지 대시보드
+│   ├── catalog/SKILL.md          # /catalog 프로토콜 핸드북
+│   └── compose/SKILL.md          # /compose 프로토콜 합성 저작
 └── agents/
     ├── project-scanner.md         # Phase 1: 프로젝트 탐색
     ├── session-analyzer.md        # Phase 2: 패턴 추출 (프로젝트별 병렬)
@@ -125,12 +156,16 @@ epistemic-cooperative/
 | 워크플로우 변경 후 재평가할 때 | `/report` |
 | `/onboard` 이후 더 깊은 분석이 필요할 때 | `/report` 또는 `/dashboard` |
 | 시간 경과에 따른 프로토콜 채택 추적 | `/dashboard` |
+| 빠른 프로토콜 참조 | `/catalog` |
+| 다중 프로토콜 합성 워크플로우 구축 | `/compose` |
 ## 사용법
 
 ```
 /onboard
 /report
 /dashboard
+/catalog
+/compose clarify → goal → bound → inquire
 ```
 
 ## 저자

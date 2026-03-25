@@ -8,13 +8,15 @@ Protocol learning, usage analysis, coverage dashboard, and configuration for Cla
 
 A utility plugin for epistemic protocol onboarding and analytics. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, and tracking usage across sessions.
 
-### Four Skills
+### Skills
 
 | Skill | Purpose | Output |
 |-------|---------|--------|
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/report` | Growth Map with epistemic analysis | HTML artifact (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
+| `/catalog` | Protocol handbook — instant reference | Terminal-based protocol browser |
+| `/compose` | Protocol composition authoring | Generated composition SKILL.md file |
 
 ## Skills
 
@@ -93,6 +95,33 @@ Dashboard sections:
 - **Achievements**: session, protocol, code, and streak milestones
 - **Quality Score**: composite 0-100 (outcome 35%, friction 20%, satisfaction 25%, coverage 20%)
 
+### /catalog — Protocol Handbook
+
+Browse all protocols, compare by concern cluster, and view detailed scenarios. Text-only output with optional detail mode for per-protocol scenarios.
+
+### /compose — Protocol Composition Authoring
+
+Build composition SKILL.md files from protocol chains. Validates graph constraints, catalogs gates, proposes dispositions, and generates a pipeline template.
+
+```
+SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
+```
+
+| Phase | Description |
+|-------|-------------|
+| 0. Specify | Chain specification input and normalization |
+| 1. Validate | graph.json precondition/suppression validation |
+| 2. Catalog | ELIDABLE CHECKPOINTS extraction per protocol |
+| 3. Disposition | 3-axis model gate disposition analysis |
+| 4. Generate | Composition SKILL.md template generation |
+
+Key features:
+- Graph-aware chain validation (preconditions, suppressions)
+- Automated gate inventory from ELIDABLE CHECKPOINTS
+- 3-axis disposition model (Qc/Qs × regret × epistemic access)
+- Catch-chain invariant verification
+- `/review`-pattern template output with pipeline context rules
+
 ## Architecture
 
 ```
@@ -102,6 +131,8 @@ epistemic-cooperative/
 │   ├── onboard/SKILL.md          # /onboard quest-based protocol learning
 │   ├── report/SKILL.md           # /report Growth Map
 │   ├── dashboard/SKILL.md        # /dashboard coverage dashboard
+│   ├── catalog/SKILL.md          # /catalog protocol handbook
+│   └── compose/SKILL.md          # /compose protocol composition authoring
 └── agents/
     ├── project-scanner.md         # Phase 1: project discovery
     ├── session-analyzer.md        # Phase 2: pattern extraction (parallel per project)
@@ -125,6 +156,8 @@ epistemic-cooperative/
 | Re-evaluating protocol fit after workflow changes | `/report` |
 | After running `/onboard` for deeper analysis | `/report` or `/dashboard` |
 | Tracking protocol adoption over time | `/dashboard` |
+| Quick protocol reference | `/catalog` |
+| Building a multi-protocol composition workflow | `/compose` |
 
 ## Install
 
@@ -139,6 +172,8 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /onboard
 /report
 /dashboard
+/catalog
+/compose clarify → goal → bound → inquire
 ```
 
 ## Author

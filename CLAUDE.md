@@ -54,7 +54,8 @@ epistemic-protocols/
 │       ├── report/SKILL.md            # Usage analysis report from session patterns
 │       ├── onboard/SKILL.md           # Quick recommendation + protocol learning (quick proof + targeted learning)
 │       ├── dashboard/SKILL.md          # Full-session coverage dashboard
-│       └── catalog/SKILL.md           # Protocol handbook — instant reference
+│       ├── catalog/SKILL.md           # Protocol handbook — instant reference
+│       └── compose/SKILL.md           # Protocol composition authoring assistant
 └── write/                             # Skill: multi-perspective blog drafting
     ├── .claude-plugin/plugin.json
     └── skills/write/SKILL.md
@@ -87,7 +88,7 @@ epistemic-protocols/
 | Prosoche | `/attend` | ExecutionBlind → SituatedExecution |
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 
-**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
+**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/compose`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
 
 ## Core Principles
 
@@ -188,6 +189,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Onboard**: All paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases. Quick path: Phases 0-1, 2a-2b, 4 (Trial triggers actual protocol execution in-session). Targeted path: Phases 0-6 (full learning experience).
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 - **Catalog**: No delegation—text-only output, main agent handles all. Read tool for scenarios.md detail mode only.
+- **Compose**: No delegation—main agent handles all phases. Read/Grep for graph.json and ELIDABLE CHECKPOINTS extraction, Write for template generation.
 
 ## Git Conventions
 
