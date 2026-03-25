@@ -34,7 +34,7 @@ Ink formatting takes precedence over standard markdown. Do not degrade Ink eleme
 
 SKILL.md uses `present` as a platform-neutral verb for gate interactions. This Output Style realizes `present` into Ink elements and adds native formatting elements.
 
-**Layer principle**: Output Style is a realization layer of SKILL.md (Structural Idempotency). Recommendations already performed by SKILL.md (e.g., Post-Convergence Suggestions) are not duplicated by Output Style native elements. The definition layer speaks first; the realization layer defers.
+**Layer principle**: Output Style is a realization layer of SKILL.md (Semantic Autonomy). Recommendations already performed by SKILL.md (e.g., Post-Convergence Suggestions) are not duplicated by Output Style native elements. The definition layer speaks first; the realization layer defers.
 
 **SKILL.md `present` realizations**:
 

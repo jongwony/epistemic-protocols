@@ -250,10 +250,11 @@ Options:
 2. **Dismiss** — acceptable as-is: [stated assumption about context fit]
 ```
 
-If adaptation direction is evident, include:
+If adaptation direction is evident, materialize Adapt(direction) as a concrete option:
 ```
 3. **[Specific adaptation]** — [what would change and why]
 ```
+This is a contextual materialization of `Adapt(direction)` — the formal answer type remains `Adapt`, with the direction pre-populated from AI analysis.
 
 **Design principles**:
 - **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both `R` and `X`

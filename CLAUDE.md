@@ -111,7 +111,7 @@ Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 - **Adversarial Protocol Design**: Anticipate AI shortcut paths; structural guards in Rules
 - **Deficit Empiricism**: Protocol creation requires N≥3 observed deficit instances
 - **Convergence Evidence**: Demonstrated transformation trace, not bare assertion
-- **Structural Idempotency**: Same definition → same outcome regardless of realization
+- **Semantic Autonomy**: Inscribed definition achieves meaning-autonomy from any specific platform
 - **Pattern over Tool**: Recognition over Recall is content invariant, not tool-dependent
 - **Interaction Kind Factorization**: G = R(p) ∘ A; Qc (classificatory, bounded regret) / Qs (constitutive, unbounded regret)
 - **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence; Post-Convergence traverses ALL conditions

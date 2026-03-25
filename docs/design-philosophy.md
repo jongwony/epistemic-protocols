@@ -44,7 +44,7 @@ CLAUDE.md principles guide contributors (protocol designers). End users receive 
 
 ## Adversarial Protocol Design
 
-Each protocol must anticipate how an AI agent might shortcut or rationalize away from faithful execution, and include structural guards in Rules and Phase prose. Formal specification guarantees definitional consistency; adversarial design guarantees execution fidelity. Common rationalization paths: premature convergence assertion, silent detection dismissal, skipping gate interaction entirely (presenting content without yielding turn for response), collapsing Qs gates to plain acknowledgment. These are orthogonal concerns — a protocol can be formally correct yet routinely circumvented.
+Each protocol must anticipate how an AI agent might shortcut or rationalize away from faithful execution, and include structural guards in Rules and Phase prose. Formal specification guarantees definitional consistency; adversarial design guarantees execution fidelity. Common rationalization paths: premature convergence assertion, silent detection dismissal, skipping gate interaction entirely (presenting content without yielding turn for response), collapsing Qs gates to plain acknowledgment, gate mutation (option injection — adding options not in definition, option deletion — removing defined options, option substitution — replacing defined options with different ones). These are orthogonal concerns — a protocol can be formally correct yet routinely circumvented.
 
 ## Deficit Empiricism
 
@@ -54,9 +54,11 @@ Protocol creation must be grounded in observed deficit instances (N≥3) from ac
 
 Protocol convergence must be demonstrated, not asserted. At convergence, the agent must present a transformation trace mapping each identified deficit instance to its resolution — the MORPHISM instantiated at the concrete level. "All gaps resolved" or "goal defined" as bare assertion without per-item evidence = protocol violation.
 
-## Structural Idempotency
+## Semantic Autonomy
 
-Same protocol definition must produce the same epistemic outcome regardless of interaction realization (tool call, text+stop, future client). Protocol specifications define gate semantics (what to present, what response constitutes), not tool mechanics. A gate is: present structured content → yield turn → parse response. The realization layer maps this to concrete tools based on client capabilities and user preferences.
+Once a protocol definition is inscribed in SKILL.md, its epistemic meaning achieves autonomy from any specific platform or tool ecosystem — it depends only on what any language model can do (generate text, yield turn), not on platform-specific features. Protocol specifications define gate semantics (what to present, what response constitutes), not tool mechanics. A gate is: present structured content → yield turn → parse response. The realization layer maps this to concrete tools based on client capabilities and user preferences.
+
+Category-theoretic interpretation: TOOL GROUNDING acts as a natural transformation from abstract epistemic operations (the "protocol functor") to platform-specific tool calls (the "realization functor"). Semantic Autonomy requires this transformation to preserve the MORPHISM chain's structure regardless of target platform.
 
 ## Pattern over Tool
 
