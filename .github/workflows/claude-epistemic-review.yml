@@ -1,6 +1,7 @@
 name: Epistemic Code Review
 
 on:
+  workflow_dispatch:
   pull_request:
     types: [opened]
     paths:
