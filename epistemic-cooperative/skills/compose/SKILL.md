@@ -65,7 +65,7 @@ On missing precondition: suggest inserting the missing protocol at the correct p
 
 ## Phase 2: Catalog (Gate Inventory)
 
-For each protocol in the validated chain:
+Read all protocol SKILL.md files in parallel (paths are deterministic after Phase 1 validation). For each protocol:
 
 1. **Locate SKILL.md**: Read `{protocol}/skills/{skill}/SKILL.md`
 2. **Extract ELIDABLE CHECKPOINTS**: Grep for `ELIDABLE CHECKPOINTS` section
@@ -252,7 +252,6 @@ Predefined chain patterns based on Epistemic Concern Clusters (CLAUDE.md):
 | `planning` | clarify → goal → bound → inquire | Planning cluster + boundary definition |
 | `analysis` | frame → ground | Analysis cluster |
 | `decision` | gap → attend | Decision + execution |
-
 
 Shortcuts are convenience aliases — the user can always specify a custom chain. Shortcuts resolve to their chain at Phase 0 and proceed through normal validation.
 
