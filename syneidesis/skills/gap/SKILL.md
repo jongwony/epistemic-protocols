@@ -36,7 +36,7 @@ Scan   = Detection: D → Set(G)                      -- gap identification
 Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
 Gₛ     = Selected gaps (|Gₛ| ≤ 2)
 Q      = Question formation (assertion-free)
-J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
+J      = Judgment ∈ {Address(c), Dismiss, Probe}
 c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
@@ -55,11 +55,9 @@ Mode remains active until convergence.
 Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
 
 ── ADJUSTMENT RULES ──
-A(Addresses(c), _, σ) = σ { incorporate(c) }        -- extern: modifies plan
-A(Dismisses, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
-A(Silence, d, σ)      = match stakes(d):
-                          Low|Med → σ { deferred ← Gₛ :: deferred }
-                          High    → σ { blocked ← true }
+A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
+A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
+A(Probe, _, σ)      = σ { re-scan(expanded) }        -- high-stakes: additional verification round
 
 ── SELECTION RULE ──
 Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
@@ -230,16 +228,19 @@ How would you like to address this gap?
 Options:
 1. **Address** — [what resolving this gap enables or changes in the decision]
 2. **Dismiss** — [what assumption holds if this gap is accepted as-is]
+3. **Probe** — request additional verification before deciding (high-stakes only)
 ```
 
-High-stakes: append "Anything else to verify?" as additional option.
+Option 3 (Probe) is conditional: present only when `stakes(D) = High`.
+
+Other is always available — user can respond freely beyond the listed options.
 
 One gap per decision point.
 Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irreversibility.
 
 ### Resolution
 
-Per ADJUSTMENT RULES. Key operational detail: Silence on High-stakes → block until explicit judgment (not deferral).
+Per ADJUSTMENT RULES. Key operational detail: Probe triggers a re-scan with expanded scope, surfacing additional gaps the user wants verified before committing.
 
 ### Gap Tracking
 
@@ -274,11 +275,11 @@ When Syneidesis is active, **present** via gate interaction for:
 
 ### UI Mapping
 
-| Environment | Addresses | Dismisses | Silence |
-|-------------|-----------|-----------|---------|
-| Gate interaction | Selection | Selection | — (N/A) |
+| Environment | Address | Dismiss | Probe |
+|-------------|---------|---------|-------|
+| Gate interaction | Selection | Selection | Selection (high-stakes only) |
 
-Note: Esc key → unconditional loop termination (LOOP level). Silence (no response) is theoretical; Gate interaction blocks until response or Esc.
+Note: Esc key → unconditional loop termination (LOOP level). Gate interaction blocks until response or Esc.
 
 ### Post-Convergence Suggestions
 

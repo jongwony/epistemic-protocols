@@ -52,6 +52,8 @@ Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts th
 
 **Epistemic scope trajectory**: Qs gates are EP's core epistemic contribution — they encode the irreducibly human act of constituting new meaning through dialogue. Qc gates (finite option selection) converge toward platform-native capabilities as models improve. EP's mission alignment concentrates on the Qs axis where human participation cannot be automated.
 
+Composition scope: The factorization G = R(p) ∘ A applies to individual gate operations within a single protocol activation. Inter-protocol composition (sequential activation of multiple protocols) operates through Session Text Composition — natural language in session context, not formal gate composition. Associativity of gate operations across protocol boundaries is not claimed; each protocol's gates are independently factored.
+
 ### A6. Context-Question Separation
 
 Gate interactions structurally separate context (analysis, evidence, rationale) from questions (the essential choice and its options). All analytical content is presented as text output before the gate; the gate contains only the question and option-specific differential implications.
@@ -59,6 +61,8 @@ Gate interactions structurally separate context (analysis, evidence, rationale) 
 When context is embedded within question fields, the user must parse analytical content and decision options simultaneously — this degrades Recognition (A1) by burying differential implications within explanatory text. Separation ensures the question arrives with maximum clarity: the user has already absorbed the context and can focus entirely on the differential futures of each option.
 
 Formal boundary: if removing a sentence from the gate would cause loss of an option's differential implication, it belongs in the gate; if removing it would cause loss of analytical context, it belongs in the pre-gate text output.
+
+Non-derivability from A1: Recognition over Recall (A1) constrains what is presented (options with differential futures); Context-Question Separation constrains where content is positioned (context as pre-gate text, question in gate). A1-compliant gates can still embed analytical context within question fields — the user receives options with differential futures, but must parse them amid explanatory text. A6 addresses this orthogonal failure mode: position-dependent Recognition degradation that A1's content requirement does not capture.
 
 ### A7. Adversarial Anticipation
 

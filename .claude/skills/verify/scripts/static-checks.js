@@ -1865,11 +1865,17 @@ function stemMatch(a, b) {
   const normA = a.replace(/-/g, '');
   const normB = b.replace(/-/g, '');
   if (normA === normB) return true;
-  if (normA.startsWith(normB) || normB.startsWith(normA)) return true;
+  // Prefix match requires short side >= 70% of long side length
+  const minRatio = 0.7;
+  if (normA.startsWith(normB) && normB.length >= normA.length * minRatio) return true;
+  if (normB.startsWith(normA) && normA.length >= normB.length * minRatio) return true;
   // Handle verb inflection: X/Xes, X/Xed
   const stemA = normA.replace(/(es|ed|s)$/, '');
   const stemB = normB.replace(/(es|ed|s)$/, '');
-  return stemA === stemB || stemA.startsWith(stemB) || stemB.startsWith(stemA);
+  if (stemA === stemB) return true;
+  if (stemA.startsWith(stemB) && stemB.length >= stemA.length * minRatio) return true;
+  if (stemB.startsWith(stemA) && stemA.length >= stemB.length * minRatio) return true;
+  return false;
 }
 
 // ============================================================
@@ -1959,7 +1965,7 @@ function checkGateTypeSoundness() {
       }
 
       // Require ≥40% constructor match to consider it a paired block
-      if (!bestBlock || bestScore < Math.ceil(cNames.length * 0.4)) continue;
+      if (!bestBlock || bestScore < Math.max(2, Math.ceil(cNames.length * 0.4))) continue;
       analysed++;
 
       const lLower = bestBlock.map(l => l.toLowerCase());
