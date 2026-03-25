@@ -124,7 +124,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: '--model claude-haiku-4-5 --max-turns 10'
-          settings: '{"permissions":{"allow":["Bash(gh api:*)"]}}'
+          settings: '{"permissions":{"allow":["Bash(jq:*)","Bash(gh api:*)"]}}'
           show_full_output: 'true'
 
           prompt: |-
