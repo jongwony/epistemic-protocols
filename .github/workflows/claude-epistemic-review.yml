@@ -136,13 +136,14 @@ jobs:
             </review>
 
             For each review finding that references a specific file path and line number,
-            post it as an inline PR review comment using:
+            post it as an inline PR review comment. Use jq to construct JSON and pipe via --input -
+            to avoid shell escaping issues:
 
-            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
-              --field body="<comment body>" \
-              --field path="<file path>" \
-              --field commit_id="${{ github.event.pull_request.head.sha }}" \
-              --field line=<line number>
+            jq -n --arg body "<comment body>" --arg path "<file path>" \
+              --arg commit_id "${{ github.event.pull_request.head.sha }}" \
+              --argjson line <line number> \
+              '{body: $body, path: $path, commit_id: $commit_id, line: $line}' \
+            | gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments --input -
 
             Rules:
             - Only post findings with specific file paths and line numbers
@@ -150,5 +151,5 @@ jobs:
             - Preserve severity: Critical / Important / Suggestion
             - Skip duplicate or near-duplicate findings
             - After posting inline comments, post a summary comment on the PR:
-              gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
-                --field body="<overview summary>"
+              jq -n --arg body "<overview summary>" '{body: $body}' \
+              | gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments --input -
