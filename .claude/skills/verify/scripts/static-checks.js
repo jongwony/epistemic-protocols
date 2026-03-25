@@ -1859,6 +1859,19 @@ function checkCatalogSync() {
   });
 }
 
+// Stem matching: handles Dismiss/Dismisses, Address/Addresses, UserSpec/User-spec
+function stemMatch(a, b) {
+  // Normalize: remove hyphens, case-insensitive
+  const normA = a.replace(/-/g, '');
+  const normB = b.replace(/-/g, '');
+  if (normA === normB) return true;
+  if (normA.startsWith(normB) || normB.startsWith(normA)) return true;
+  // Handle verb inflection: X/Xes, X/Xed
+  const stemA = normA.replace(/(es|ed|s)$/, '');
+  const stemB = normB.replace(/(es|ed|s)$/, '');
+  return stemA === stemB || stemA.startsWith(stemB) || stemB.startsWith(stemA);
+}
+
 // ============================================================
 // Check 15: Gate Type Soundness (Safeguard — warning only)
 // Verifies TYPES answer coproducts match Phase prose option enumerations.
@@ -1895,7 +1908,14 @@ function checkGateTypeSoundness() {
 
     // 3. Extract Options blocks from prose (outside Definition code block)
     const proseStart = content.indexOf('## Core Principle');
-    if (proseStart === -1) continue;
+    if (proseStart === -1) {
+      results.warn.push({
+        check: 'gate-type-soundness',
+        file,
+        message: 'No "## Core Principle" header found — gate prose extraction skipped'
+      });
+      continue;
+    }
     const prose = content.substring(proseStart);
 
     const optionsBlocks = [];
@@ -1910,7 +1930,7 @@ function checkGateTypeSoundness() {
         const raw = lm[1].trim();
         // Extract first word as canonical label; skip pure template placeholders
         const firstWord = raw.split(/[\s,—]/)[0];
-        if (firstWord && !/^[A-Z][a-z]+\s/.test(raw) || /^[A-Z][a-z]+$/.test(firstWord)) {
+        if (firstWord && (!/^[A-Z][a-z]+\s/.test(raw) || /^[A-Z][a-z]+$/.test(firstWord))) {
           labels.push(firstWord);
         }
       }
@@ -1971,19 +1991,6 @@ function checkGateTypeSoundness() {
       file,
       message: `Gate type soundness check completed (${coproducts.length} coproducts, ${analysed} matched to prose)`
     });
-  }
-
-  // Stem matching: handles Dismiss/Dismisses, Address/Addresses, UserSpec/User-spec
-  function stemMatch(a, b) {
-    // Normalize: remove hyphens, case-insensitive
-    const normA = a.replace(/-/g, '');
-    const normB = b.replace(/-/g, '');
-    if (normA === normB) return true;
-    if (normA.startsWith(normB) || normB.startsWith(normA)) return true;
-    // Handle verb inflection: X/Xes, X/Xed
-    const stemA = normA.replace(/(es|ed|s)$/, '');
-    const stemB = normB.replace(/(es|ed|s)$/, '');
-    return stemA === stemB || stemA.startsWith(stemB) || stemB.startsWith(stemA);
   }
 }
 
