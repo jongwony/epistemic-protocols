@@ -33,18 +33,20 @@ jobs:
       - name: Get changed files
         id: changed
         run: |
-          gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' > /tmp/changed-files.txt
-          if [ ! -s /tmp/changed-files.txt ]; then
+          FILES=$(gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path')
+          if [ -z "$FILES" ]; then
             echo "::error::No changed files found for PR #${{ github.event.pull_request.number }}"
             exit 1
           fi
+          echo "files<<CHANGED_FILES_EOF" >> "$GITHUB_OUTPUT"
+          echo "$FILES" >> "$GITHUB_OUTPUT"
+          echo "CHANGED_FILES_EOF" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
 
       - name: Get PR diff
-        id: diff
         run: |
-          gh pr diff ${{ github.event.pull_request.number }} > /tmp/pr-diff.txt
+          gh pr diff ${{ github.event.pull_request.number }} > .pr-diff.txt
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -55,9 +57,10 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |-
             Perform a multi-perspective code review and gap analysis of this PR.
-            Review ONLY the changed files — read /tmp/changed-files.txt for the list.
+            Review ONLY the following changed files:
+            ${{ steps.changed.outputs.files }}
 
-            The full diff is available at /tmp/pr-diff.txt. Read it to understand the exact changes.
+            The full diff is available at .pr-diff.txt. Read it to understand the exact changes.
 
             ## Perspective Analysis
 
@@ -98,13 +101,17 @@ jobs:
         if: always() && steps.review.outputs.execution_file != ''
         id: extract
         run: |
-          jq -r '
+          REVIEW_TEXT=$(jq -r '
             [.[] | select(.type == "assistant") | .message.content[]
              | select(.type == "text") | .text] | join("\n\n---\n\n")
-          ' "${{ steps.review.outputs.execution_file }}" > /tmp/review-output.txt
+          ' "${{ steps.review.outputs.execution_file }}")
 
-          if [ ! -s /tmp/review-output.txt ]; then
+          if [ -z "$REVIEW_TEXT" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "review_text<<REVIEW_TEXT_EOF" >> "$GITHUB_OUTPUT"
+            echo "$REVIEW_TEXT" >> "$GITHUB_OUTPUT"
+            echo "REVIEW_TEXT_EOF" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Post review comments
@@ -117,12 +124,16 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: '--model claude-haiku-4-5 --max-turns 10'
-          settings: '{"permissions":{"allow":["Bash(gh api:*)","Bash(cat:*)","Read","Write"]}}'
+          settings: '{"permissions":{"allow":["Bash(gh api:*)"]}}'
           show_full_output: 'true'
 
           prompt: |-
-            You are a review comment posting agent. Read /tmp/review-output.txt which contains
+            You are a review comment posting agent. The following is
             an epistemic code review of PR #${{ github.event.pull_request.number }}.
+
+            <review>
+            ${{ steps.extract.outputs.review_text }}
+            </review>
 
             For each review finding that references a specific file path and line number,
             post it as an inline PR review comment using:
