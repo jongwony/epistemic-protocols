@@ -334,10 +334,12 @@ Options:
 3. **[Option C]**: [interpretation with implications]
 ```
 
+Other is always available — user can provide their own phrasing or a different interpretation not listed.
+
 **Question design principles**:
 - **Recognition over Recall**: Present options, don't ask open questions
 - **Concrete implications**: Show what each choice means for execution
-- **Escape hatch**: Include "something else" option when appropriate
+- **Free response preserved**: Other/free phrasing is structurally available, not conditionally included
 - **Minimal options**: 2-4 choices maximum per gap
 
 Consult `references/socratic-style.md` for maieutic framing examples, Socratic elements, and example transformation.
@@ -431,3 +433,4 @@ When multiple gaps detected:
 16. **Full taxonomy assessment**: Phase 1b must present ALL named gap types with detection status and evidence. Presenting only detected types with a generic "Add" option = protocol violation (Recognition over Recall applied to gate content)
 17. **Falsification condition**: Each not-currently-detected type must include "would apply if [specific condition]" — exclusion rationale without falsification condition = protocol violation
 18. **Emergent probe**: Emergent slot must include an active probe question or AI-detected hypothesis with evidence. "No emergent gaps detected" as bare statement without probe = protocol violation
+19. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation

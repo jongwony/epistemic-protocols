@@ -73,7 +73,7 @@ Analyze the protocol instructions for consistency and completeness.
 - syneidesis/skills/gap/SKILL.md (Mode Activation, Priority sections)
 - hermeneia/skills/clarify/SKILL.md (Mode Activation, Priority sections)
 - katalepsis/skills/grasp/SKILL.md (Mode Activation, Priority sections)
-- CLAUDE.md (Core Principles)
+- CLAUDE.md (Axioms)
 
 **Checklist**:
 
@@ -135,7 +135,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 - syneidesis/skills/gap/SKILL.md (Mode Activation, Rules sections)
 - hermeneia/skills/clarify/SKILL.md (Mode Activation, Rules sections)
 - katalepsis/skills/grasp/SKILL.md (Mode Activation, Rules sections)
-- CLAUDE.md (Project Overview, Core Principles)
+- CLAUDE.md (Project Overview, Axioms)
 
 **Checklist**:
 

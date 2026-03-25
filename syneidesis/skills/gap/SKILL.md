@@ -218,10 +218,21 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 
 ### Surfacing
 
+Present the gap as text output:
+- **Gap**: [Specific gap description with evidence]
+- (rationale: [1-line why this gap matters for this decision])
+
+Then **present**:
+
 ```
-Format: "[Question]" (rationale: [1-line])
-High-stakes: append "Anything else to verify?"
+How would you like to address this gap?
+
+Options:
+1. **Address** — [what resolving this gap enables or changes in the decision]
+2. **Dismiss** — [what assumption holds if this gap is accepted as-is]
 ```
+
+High-stakes: append "Anything else to verify?" as additional option.
 
 One gap per decision point.
 Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irreversibility.
@@ -308,3 +319,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 8. **No premature convergence**: Do not declare all tasks completed without presenting convergence audit trace. "All gaps resolved" as assertion without per-gap evidence = protocol violation
 9. **No zero-gap shortcut**: If Scan(D) finds no gaps, present the scan methodology and conclusion to the user. Silent zero-gap → proceed = protocol violation (committed decision with stakes deserves explicit "no gaps found" confirmation)
 10. **No gap inflation**: Do not surface gaps that lack observable evidence merely to appear thorough. Each surfaced gap must cite specific context from D
+11. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation

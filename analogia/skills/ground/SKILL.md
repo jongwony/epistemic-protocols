@@ -240,10 +240,12 @@ Then **present**:
 Does [abstract concept] map correctly to your context?
 
 Options:
-1. **Confirm** — this mapping is correct
-2. **Adjust** — the mapping needs refinement (provide feedback)
-3. **Dismiss** — this mapping does not need further grounding in my context
+1. **Confirm** — [what this validated mapping enables for downstream work]
+2. **Adjust** — [what aspect of the mapping diverges and how refinement would change the correspondence]
+3. **Dismiss** — [what assumption about contextual fit is accepted without grounding]
 ```
+
+Other is always available — user can propose an alternative mapping or describe a structural correspondence not captured by the presented options.
 
 **Design principles**:
 - **Structural evidence**: Show what abstract structures are being mapped and why
@@ -321,3 +323,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **No premature convergence**: Do not declare all_addressed(R') without presenting convergence evidence trace. "All correspondences validated" as assertion without per-correspondence evidence = protocol violation
 15. **No silent mapping acceptance**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning to user for confirmation before concluding — do not silently accept
+16. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
