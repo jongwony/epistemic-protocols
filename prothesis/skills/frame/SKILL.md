@@ -184,7 +184,7 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Execution-time risk evaluation |
+| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -516,7 +516,7 @@ Evaluate all conditions regardless of current mode. For inactive-mode conditions
 - `/gap` (GapUnnoticed): Mode 2: L.divergence reveals unaddressed tensions; Mode 1: selected perspectives reveal unexplored domain tensions → suggest gap audit
 - `/goal` (GoalIndeterminate): Mode 2: L.assessment reveals indeterminate goals; Mode 1: inquiry intent suggests indeterminate goals → suggest goal co-construction
 - `/ground` (MappingUncertain): Mode 2: L.assessment contains abstract framework without domain-specific validation; Mode 1: selected perspectives use abstract frameworks in user's specific domain → suggest structural mapping validation
-- `/attend` (ExecutionBlind): Mode 2: L.assessment contains actionable execution items with risk dimensions → suggest execution-time risk evaluation before acting on Lens findings
+- `/attend` (ExecutionBlind): Mode 2: L.assessment contains actionable execution items with risk dimensions → suggest risk-assessed execution of Lens findings
 - `/bound` (BoundaryUndefined): Mode 2: L.divergence reveals undefined epistemic boundaries → suggest epistemic boundary definition before proceeding
 - `/inquire` (ContextInsufficient): Context insufficiency surfaced during session → suggest pre-execution context verification
 
