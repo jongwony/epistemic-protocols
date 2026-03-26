@@ -75,6 +75,8 @@ A (adjust)     → Internal state update (no external tool)
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
 Phase 1 Qs (gap surface)   → always_gated (Qs: user judgment on surfaced gap determines adjustment)
+Phase 1 Qs option 3 (Probe) → conditional: present only when stakes(D) = High
+                                regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, active: Bool }
