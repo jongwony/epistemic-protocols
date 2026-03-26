@@ -158,8 +158,24 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 ## Development
 
 - **Node.js 22+** required (`zlib.crc32` used in packaging; CI pins Node 22)
+- **No package.json** — Node.js standard library only
 - Static checks: `node .claude/skills/verify/scripts/static-checks.js .`
+- Tests: `node --test scripts/package.test.js`
 - Packaging: `node scripts/package.js [--dry-run]` — produces `dist/*.zip` + `dist/release-notes.md`
+- Changelog: `node scripts/generate-changelog.js` — git conventional commit parser between tags
+- Installer: `scripts/install.sh` — curl-based marketplace installer (README.md is source of truth for install set)
+
+## CI/CD
+
+Three GitHub Actions workflows (`.github/workflows/`):
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `release.yml` | Tag push (`v*`) | Package → ZIP integrity → `gh release create --draft` |
+| `claude-code-review.yml` | PR opened/ready | 3-stage pipeline: Sonnet review → jq extraction → Haiku comment |
+| `claude-epistemic-review.yml` | PR with protocol changes | Multi-perspective analysis (Category Theory, Type Theory, Operational Semantics) + gap scan |
+
+Details: [docs/ci-review-pipeline.md](docs/ci-review-pipeline.md)
 
 ### graph.json
 
