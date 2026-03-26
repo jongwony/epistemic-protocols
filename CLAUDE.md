@@ -90,32 +90,41 @@ epistemic-protocols/
 
 **Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/compose`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
 
-## Core Principles
+## Axioms
 
-- **Recognition over Recall**: Options to select, not blanks to fill
-- **Detection with user authority**: AI detects and presents with evidence; user retains decision authority (proceed/revise)
-- **Surfacing over Deciding**: AI illuminates, user judges
-- **Convergence Persistence**: Modes active until convergence
-- **Priority Override**: Active protocols supersede default behaviors
+- **A1. Recognition over Recall**: Options with differential futures, not blanks to fill; post-selection state must be anticipatable
+- **A2. Detection with Authority**: AI detects and presents with evidence; user retains decision authority
+- **A3. Convergence Persistence**: Modes active until convergence; active protocols supersede default behaviors
+- **A4. Semantic Autonomy**: Inscribed definition achieves meaning-autonomy from any specific platform
+- **A5. Interaction Kind Factorization**: G = R(p) ∘ A; Qc (classificatory, bounded regret) / Qs (constitutive, unbounded regret)
+- **A6. Context-Question Separation**: Context (analysis, evidence) as text before gate; gate contains only question + option-specific differential implications
+- **A7. Adversarial Anticipation**: Anticipate AI shortcut paths; structural guards in Rules + gate mutation detection
 
 ## Design Philosophy
 
 Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 
+### Derived Principles
+- **Surfacing over Deciding**: AI illuminates, user judges (A2)
+- **Priority Override**: Active protocols supersede default behaviors (A3)
+- **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence; Post-Convergence traverses ALL conditions (A1 + A5)
+- **Convergence Evidence**: Demonstrated transformation trace, not bare assertion (A3)
+- **Pattern over Tool**: Recognition over Recall is content invariant, not tool-dependent (A1 + A4)
+- **Zero-Shot Instruction Preference**: LLM-facing instructions state principles, not few-shot examples; fix underspecified principles rather than patching with examples (A4)
+
+### Architectural Principles
 - **Unix Philosophy Homomorphism**: Single-purpose epistemic tools; bottom-up composition
 - **Session Text Composition**: Inter-protocol data flows as natural language in session context
 - **Dual Advisory Layer**: graph.json (structural) + Post-Convergence Suggestions (heuristic)
 - **Coexistence over Mirroring**: Protocols occupy epistemic layer; built-ins occupy execution layer
 - **Three-Tier Termination**: user_esc (ungraceful) / user_withdraw (graceful) / normal convergence
 - **Audience Reach**: CLAUDE.md guides contributors; SKILL.md guides runtime
-- **Adversarial Protocol Design**: Anticipate AI shortcut paths; structural guards in Rules
+
+### Safeguard
+- **Gate Type Soundness**: TYPES coproduct must match Phase prose options; becomes less critical as models improve (warning-level static check)
+
+### Meta-Principle
 - **Deficit Empiricism**: Protocol creation requires N≥3 observed deficit instances
-- **Convergence Evidence**: Demonstrated transformation trace, not bare assertion
-- **Semantic Autonomy**: Inscribed definition achieves meaning-autonomy from any specific platform
-- **Pattern over Tool**: Recognition over Recall is content invariant, not tool-dependent
-- **Interaction Kind Factorization**: G = R(p) ∘ A; Qc (classificatory, bounded regret) / Qs (constitutive, unbounded regret)
-- **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence; Post-Convergence traverses ALL conditions
-- **Zero-Shot Instruction Preference**: LLM-facing instructions state principles, not few-shot examples; fix underspecified principles rather than patching with examples
 
 ## Protocol Precedence
 
@@ -173,7 +182,7 @@ Run `/verify` before commits. Static checks via:
 node .claude/skills/verify/scripts/static-checks.js .
 ```
 
-14 static checks: json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync. Details: [docs/verification.md](docs/verification.md)
+15 static checks: json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync, gate-type-soundness. Details: [docs/verification.md](docs/verification.md)
 
 ## Delegation Constraint
 

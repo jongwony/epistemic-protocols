@@ -36,7 +36,7 @@ Scan   = Detection: D → Set(G)                      -- gap identification
 Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
 Gₛ     = Selected gaps (|Gₛ| ≤ 2)
 Q      = Question formation (assertion-free)
-J      = Judgment ∈ {Addresses(c), Dismisses, Silence}
+J      = Judgment ∈ {Address(c), Dismiss, Probe}
 c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
@@ -55,11 +55,9 @@ Mode remains active until convergence.
 Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
 
 ── ADJUSTMENT RULES ──
-A(Addresses(c), _, σ) = σ { incorporate(c) }        -- extern: modifies plan
-A(Dismisses, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
-A(Silence, d, σ)      = match stakes(d):
-                          Low|Med → σ { deferred ← Gₛ :: deferred }
-                          High    → σ { blocked ← true }
+A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
+A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
+A(Probe, _, σ)      = σ { re-scan(expanded) }        -- high-stakes: additional verification round
 
 ── SELECTION RULE ──
 Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
@@ -77,6 +75,8 @@ A (adjust)     → Internal state update (no external tool)
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
 Phase 1 Qs (gap surface)   → always_gated (Qs: user judgment on surfaced gap determines adjustment)
+Phase 1 Qs option 3 (Probe) → conditional: present only when stakes(D) = High
+                                regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, active: Bool }
@@ -218,17 +218,31 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 
 ### Surfacing
 
+Present the gap as text output:
+- **Gap**: [Specific gap description with evidence]
+- (rationale: [1-line why this gap matters for this decision])
+
+Then **present**:
+
 ```
-Format: "[Question]" (rationale: [1-line])
-High-stakes: append "Anything else to verify?"
+How would you like to address this gap?
+
+Options:
+1. **Address** — [what resolving this gap enables or changes in the decision]
+2. **Dismiss** — [what assumption holds if this gap is accepted as-is]
+3. **Probe** — request additional verification before deciding (high-stakes only)
 ```
+
+Option 3 (Probe) is conditional: present only when `stakes(D) = High`.
+
+Other is always available — user can respond freely beyond the listed options.
 
 One gap per decision point.
 Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irreversibility.
 
 ### Resolution
 
-Per ADJUSTMENT RULES. Key operational detail: Silence on High-stakes → block until explicit judgment (not deferral).
+Per ADJUSTMENT RULES. Key operational detail: Probe triggers a re-scan with expanded scope, surfacing additional gaps the user wants verified before committing.
 
 ### Gap Tracking
 
@@ -263,11 +277,11 @@ When Syneidesis is active, **present** via gate interaction for:
 
 ### UI Mapping
 
-| Environment | Addresses | Dismisses | Silence |
-|-------------|-----------|-----------|---------|
-| Gate interaction | Selection | Selection | — (N/A) |
+| Environment | Address | Dismiss | Probe |
+|-------------|---------|---------|-------|
+| Gate interaction | Selection | Selection | Selection (high-stakes only) |
 
-Note: Esc key → unconditional loop termination (LOOP level). Silence (no response) is theoretical; Gate interaction blocks until response or Esc.
+Note: Esc key → unconditional loop termination (LOOP level). Gate interaction blocks until response or Esc.
 
 ### Post-Convergence Suggestions
 
@@ -308,3 +322,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 8. **No premature convergence**: Do not declare all tasks completed without presenting convergence audit trace. "All gaps resolved" as assertion without per-gap evidence = protocol violation
 9. **No zero-gap shortcut**: If Scan(D) finds no gaps, present the scan methodology and conclusion to the user. Silent zero-gap → proceed = protocol violation (committed decision with stakes deserves explicit "no gaps found" confirmation)
 10. **No gap inflation**: Do not surface gaps that lack observable evidence merely to appear thorough. Each surfaced gap must cite specific context from D
+11. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation

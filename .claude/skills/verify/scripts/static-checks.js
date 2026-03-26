@@ -1859,6 +1859,147 @@ function checkCatalogSync() {
   });
 }
 
+// Stem matching: handles Dismiss/Dismisses, Address/Addresses, UserSpec/User-spec
+function stemMatch(a, b) {
+  // Normalize: remove hyphens, case-insensitive
+  const normA = a.replace(/-/g, '');
+  const normB = b.replace(/-/g, '');
+  if (normA === normB) return true;
+  // Prefix match requires short side >= 70% of long side length
+  const minRatio = 0.7;
+  if (normA.startsWith(normB) && normB.length >= normA.length * minRatio) return true;
+  if (normB.startsWith(normA) && normA.length >= normB.length * minRatio) return true;
+  // Handle verb inflection: X/Xes, X/Xed
+  const stemA = normA.replace(/(es|ed|s)$/, '');
+  const stemB = normB.replace(/(es|ed|s)$/, '');
+  if (stemA === stemB) return true;
+  if (stemA.startsWith(stemB) && stemB.length >= stemA.length * minRatio) return true;
+  if (stemB.startsWith(stemA) && stemA.length >= stemB.length * minRatio) return true;
+  return false;
+}
+
+// ============================================================
+// Check 15: Gate Type Soundness (Safeguard — warning only)
+// Verifies TYPES answer coproducts match Phase prose option enumerations.
+// Type-preserving materialization is permitted; gate mutation is flagged.
+// ============================================================
+function checkGateTypeSoundness() {
+  for (const file of PROTOCOL_FILES) {
+    const fullPath = path.join(projectRoot, file);
+    let content;
+    try {
+      content = fs.readFileSync(fullPath, 'utf-8');
+    } catch { continue; }
+
+    // 1. Extract TYPES section from Definition code block
+    const typesMatch = content.match(/── TYPES ──\n([\s\S]*?)(?=\n── [A-Z])/);
+    if (!typesMatch) continue;
+    const typesSection = typesMatch[1];
+
+    // 2. Parse coproducts: lines with ∈ {X, Y, Z} pattern
+    const coproducts = [];
+    const coprodRegex = /^(\w+)\s.*?∈\s*\{([^}]+)\}/gm;
+    let m;
+    while ((m = coprodRegex.exec(typesSection)) !== null) {
+      const typeName = m[1];
+      const constructors = m[2].split(',').map(c => {
+        const trimmed = c.trim();
+        const name = trimmed.replace(/\([^)]*\)/g, '').trim();
+        return { raw: trimmed, name };
+      }).filter(c => c.name.length > 0);
+      if (constructors.length >= 2) {
+        coproducts.push({ typeName, constructors });
+      }
+    }
+
+    // 3. Extract Options blocks from prose (outside Definition code block)
+    const proseStart = content.indexOf('## Core Principle');
+    if (proseStart === -1) {
+      results.warn.push({
+        check: 'gate-type-soundness',
+        file,
+        message: 'No "## Core Principle" header found — gate prose extraction skipped'
+      });
+      continue;
+    }
+    const prose = content.substring(proseStart);
+
+    const optionsBlocks = [];
+    // Match Options: followed by numbered bold items until block end
+    const optBlockRegex = /Options:\n((?:\s*\d+\.\s+\*\*[^\n]+\n?)+)/g;
+    while ((m = optBlockRegex.exec(prose)) !== null) {
+      const block = m[1];
+      const labels = [];
+      const labelRegex = /^\s*\d+\.\s+\*\*\[?([^\]*\n]+?)\]?\*\*/gm;
+      let lm;
+      while ((lm = labelRegex.exec(block)) !== null) {
+        const raw = lm[1].trim();
+        // Extract first word as canonical label; skip pure template placeholders
+        const firstWord = raw.split(/[\s,—]/)[0];
+        if (firstWord && (!/^[A-Z][a-z]+\s/.test(raw) || /^[A-Z][a-z]+$/.test(firstWord))) {
+          labels.push(firstWord);
+        }
+      }
+      if (labels.length >= 2) {
+        optionsBlocks.push(labels);
+      }
+    }
+
+    // 4. Match coproducts to Options blocks and compare
+    let analysed = 0;
+    for (const cp of coproducts) {
+      const cNames = cp.constructors.map(c => c.name.toLowerCase());
+
+      // Find best matching Options block by stem overlap
+      let bestBlock = null;
+      let bestScore = 0;
+      for (const labels of optionsBlocks) {
+        const lLower = labels.map(l => l.toLowerCase());
+        const score = cNames.filter(cn =>
+          lLower.some(ln => stemMatch(cn, ln))
+        ).length;
+        if (score > bestScore) {
+          bestScore = score;
+          bestBlock = labels;
+        }
+      }
+
+      // Require ≥40% constructor match to consider it a paired block
+      if (!bestBlock || bestScore < Math.max(2, Math.ceil(cNames.length * 0.4))) continue;
+      analysed++;
+
+      const lLower = bestBlock.map(l => l.toLowerCase());
+
+      // Check for constructors missing from prose options (potential deletion)
+      const missing = cp.constructors.filter(c =>
+        !lLower.some(ln => stemMatch(c.name.toLowerCase(), ln))
+      );
+
+      // Check for prose options missing from constructors (potential injection)
+      const extra = bestBlock.filter(l =>
+        !cNames.some(cn => stemMatch(cn, l.toLowerCase()))
+      );
+
+      if (missing.length > 0 || extra.length > 0) {
+        const parts = [];
+        if (missing.length > 0) parts.push(`TYPES constructors not in prose: ${missing.map(c => c.raw).join(', ')}`);
+        if (extra.length > 0) parts.push(`prose options not in TYPES: ${extra.join(', ')}`);
+        results.warn.push({
+          check: 'gate-type-soundness',
+          file,
+          message: `${cp.typeName} ∈ {${cp.constructors.map(c => c.raw).join(', ')}} — ${parts.join('; ')}. Verify: type-preserving materialization or gate mutation?`
+        });
+      }
+    }
+
+    results.pass.push({
+      check: 'gate-type-soundness',
+      file,
+      message: `Gate type soundness check completed (${coproducts.length} coproducts, ${analysed} matched to prose)`
+    });
+  }
+}
+
 // ============================================================
 // Run All Checks
 // ============================================================
@@ -1877,6 +2018,7 @@ try {
   checkCatalogSync();
   checkPrecedenceLinearExtension();
   checkPartitionInvariant();
+  checkGateTypeSoundness();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));

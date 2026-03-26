@@ -310,13 +310,15 @@ For each task (category):
    question: "[Essential verification question]"
    options:
      - label: "[Correct understanding]"
-       description: "Confirms katalepsis for this aspect"
+       description: "[domain-specific rationale: what this understanding enables or predicts]"
      - label: "[Partial/uncertain response]"
-       description: "Reveals specific gap area"
+       description: "[domain-specific rationale: what aspect remains unclear and why it matters]"
      - label: "[Misconception]"
-       description: "Indicates correction needed"
-   Other: (implicit) user explains freely — AI evaluates comprehension level
+       description: "[domain-specific rationale: what this misunderstanding would cause in practice]"
+   Other: user explains freely — AI evaluates comprehension level
    ```
+
+   Option descriptions must be domain-specific rationale grounded in the current probe context, not meta-labels about what the selection signals. Each description answers "why does this understanding matter?" rather than "what does this selection indicate?"
 
 3b. **On proposal detected** (user answer suggests changes or improvements to the discussed system, AND meets at least one auxiliary signal):
    - Acknowledge briefly: "Noted — recorded as a task. Continuing verification."
@@ -437,3 +439,4 @@ After convergence, scan session context for continuing epistemic needs and prese
 8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **No premature comprehension**: Do not declare all tasks completed without presenting convergence evidence trace. "Understanding verified" as assertion without per-task evidence = protocol violation
 10. **No silent gap elision**: If Phase 3 analysis finds no comprehension gaps for a category, present this finding with reasoning to user for confirmation before marking as self-evident — do not silently skip
+11. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
