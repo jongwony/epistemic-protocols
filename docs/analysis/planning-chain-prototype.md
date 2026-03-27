@@ -3,6 +3,10 @@
 > 이 문서는 Hermeneia → Telos → Horismos → Aitesis 체인을 단일 `/planning-chain` 스킬로
 > 조합할 때의 게이트 배치(gate disposition), 상호작용 절감, 아키텍처를 분석한다.
 > 실제 SKILL.md가 아닌 **설계 분석 문서**이다.
+>
+> **Note (2026-03)**: 이 문서는 Post-Convergence Suggestions가 존재하던 시점에 작성됨.
+> Post-Convergence는 이후 제거되고 Output Style nudge로 대체됨 (PR #197).
+> 문서 내 Post-Convergence 참조는 당시 아키텍처를 반영한 역사적 기록임.
 
 ---
 

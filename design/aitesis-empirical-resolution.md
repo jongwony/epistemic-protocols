@@ -51,11 +51,11 @@ Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) → classify(Uᵢ', dimension) →
   ├─ Factual/ReadOnly     → Ctx+(Uᵢ') → Uᵣ'      (resolved, Phase 2 스킵)
   ├─ Factual/Probe        → EmpiricalProbe(Uᵢ') → Uₑ       (enriched, Phase 2 evidence)
   ├─ Factual/UserDep      → Uᵢ''                    (Phase 2 직행)
-  ├─ Coherence            → Uₙ → Post-Convergence suggestion (shown in classify summary)
-  └─ Relevance            → Uₙ → Post-Convergence suggestion (shown in classify summary)
+  ├─ Coherence            → Uₙ → classify summary with routing target
+  └─ Relevance            → Uₙ → classify summary with routing target
 ```
 
-New output sets: `Uᵣ'` (read-only verified, resolved). `Uₑ` (probe-enriched, with evidence). `Uₑ` (with evidence) + `Uᵢ''` proceed to Phase 2. Non-factual dimensions are detected and routed via Post-Convergence suggestion.
+New output sets: `Uᵣ'` (read-only verified, resolved). `Uₑ` (probe-enriched, with evidence). `Uₑ` (with evidence) + `Uᵢ''` proceed to Phase 2. Non-factual dimensions are detected and shown with routing target in classify summary.
 
 ### Phase structure preservation
 
@@ -90,14 +90,14 @@ classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
                    Fiber(Relevance)     = Unit    -- detect only
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
              -- Layer 2 exists only over Factual fiber (fibration, not functor)
-             -- Coherence/Relevance → detect + route (Post-Convergence)
+             -- Coherence/Relevance → detect + show routing target in classify summary
 
 ProbeSpec  = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalProbe = (Uᵢ', ProbeSpec) → Uₑ           -- empirical enrichment (distinct from Horismos Probe)
 Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2)
 Uₑ         = Probe-enriched uncertainties        -- evidence attached, proceeds to Phase 2
 Uᵢ''       = Remaining user-dependent uncertainties  -- Fiber(Factual) = UserDependent; Phase 2 question
-Uₙ         = Non-factual detected uncertainties     -- Fiber(d) = Unit; shown in classify summary, Post-Convergence routing
+Uₙ         = Non-factual detected uncertainties     -- Fiber(d) = Unit; shown in classify summary with routing target
 Action     = Tool call sequence (Write, Bash)
 ```
 
@@ -193,7 +193,7 @@ Phase 2 Q       (transparent) → AskUserQuestion (mandatory: classify result + 
 Λ = { phase, X, uncertainties,
       classify_results: Map(Uncertainty, Σ(d: Dimension). Fiber(d)),  -- 분류 결과 (fibration)
       context_resolved, read_only_resolved, probe_enriched,
-      non_factual_detected,                                          -- Uₙ: Fiber(d) = Unit, Post-Convergence routing
+      non_factual_detected,                                          -- Uₙ: Fiber(d) = Unit, classify summary routing
       user_responded, remaining, dismissed,
       history, probe_history, active, cause_tag }
 
@@ -218,7 +218,7 @@ Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
   -- Phase 2 AskUserQuestion에 classify 결과 통합 (Always show = Phase 2 형식 확장)
   -- show()는 별도 단계가 아닌 Phase 2 내부 형식
 
--- Uₙ (non-factual): shown in classify summary, routed via Post-Convergence suggestion
+-- Uₙ (non-factual): shown in classify summary with routing target
 -- Uᵢ'' (factual/user-dependent): Phase 2 question candidates
 ```
 
@@ -260,7 +260,7 @@ Rule 3 (Context collection first) extended:
    (c) show classification transparently in Phase 2,
    (d) for Factual/ReadOnly: resolve directly,
    (e) for Factual/Probe: run empirical probes to attach evidence,
-   (f) for Coherence/Relevance: detect and route via Post-Convergence suggestion.
+   (f) for Coherence/Relevance: detect and show routing target in classify summary.
 ```
 
 Rule 13 extended:
@@ -383,7 +383,7 @@ Phase 2: Uₑ = {U2 with evidence "skills: frontmatter 동작 확인됨"}
 - Phase 2 (AskUserQuestion) — receives enriched uncertainties with probe evidence attached (format extended with classify results)
 - Phase 3 (Plan Update) — unchanged
 - Other protocols — no interface changes
-- graph.json — no new edges or nodes (routing is Post-Convergence suggestion)
+- graph.json — no new edges or nodes (routing shown in classify summary)
 - Initiator taxonomy — still AI-guided
 
 ### Core Principle Preservation
@@ -396,7 +396,7 @@ Aitesis = context sufficiency sensor + factual resolver + epistemic router
 
 - **Sensor**: 다차원 컨텍스트 충분성 감지 (Factual + Coherence + Relevance)
 - **Resolver**: Factual dimension의 self-resolution (ReadOnly/Probe)
-- **Router**: Non-factual dimension의 downstream protocol 제안 (Post-Convergence)
+- **Router**: Non-factual dimension의 downstream protocol 제안 (classify summary routing)
 
 이 정체성이 Explore subagent, 모델 향상과 직교하는 인식론적 영역:
 - 도구가 강력해져도 "이 컨텍스트가 실행에 충분한가?"라는 다차원 판단은 인간-AI 공동 작업
