@@ -93,10 +93,10 @@ epistemic-protocols/
 ## Axioms
 
 - **A1. Recognition over Recall**: Options with differential futures, not blanks to fill; post-selection state must be anticipatable
-- **A2. Detection with Authority**: AI detects and presents with evidence; user retains decision authority
+- **A2. Detection with Authority**: AI detects and presents with evidence; user retains decision authority. Operational boundary: relay (zero epistemic authority, auto-resolve) vs constitution (epistemic authority exercised, user confirmation)
 - **A3. Convergence Persistence**: Modes active until convergence; active protocols supersede default behaviors
 - **A4. Semantic Autonomy**: Inscribed definition achieves meaning-autonomy from any specific platform
-- **A5. Interaction Kind Factorization**: G = R(p) ∘ A; Qc (classificatory, bounded regret) / Qs (constitutive, unbounded regret)
+- **A5. Interaction Kind Factorization**: G = R(p) ∘ A; relay (auto-resolve) / gated (inherently Qs — user judgment constitutes meaning). Regret annotations: elidable / always_gated
 - **A6. Context-Question Separation**: Context (analysis, evidence) as text before gate; gate contains only question + option-specific differential implications
 - **A7. Adversarial Anticipation**: Anticipate AI shortcut paths; structural guards in Rules + gate mutation detection
 
@@ -107,7 +107,7 @@ Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 ### Derived Principles
 - **Surfacing over Deciding**: AI illuminates, user judges (A2)
 - **Priority Override**: Active protocols supersede default behaviors (A3)
-- **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence (A1 + A5)
+- **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence (A1 + A5). Scope: applies when taxonomy is user's decision target; AI detection tools show results only + Emergent required
 - **Convergence Evidence**: Demonstrated transformation trace, not bare assertion (A3)
 - **Pattern over Tool**: Recognition over Recall is content invariant, not tool-dependent (A1 + A4)
 - **Zero-Shot Instruction Preference**: LLM-facing instructions state principles, not few-shot examples; fix underspecified principles rather than patching with examples (A4)
@@ -118,7 +118,7 @@ Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 - **Dual Advisory Layer**: graph.json (structural) + Output Style nudge (runtime heuristic)
 - **Coexistence over Mirroring**: Protocols occupy epistemic layer; built-ins occupy execution layer
 - **Three-Tier Termination**: user_esc (ungraceful) / user_withdraw (graceful) / normal convergence
-- **Audience Reach**: CLAUDE.md guides contributors; SKILL.md guides runtime
+- **Audience Reach**: CLAUDE.md guides contributors; SKILL.md guides runtime. Exception: session-level cross-cutting observer (Output Style nudge) per Dual Advisory Layer
 
 ### Safeguard
 - **Gate Type Soundness**: TYPES coproduct must match Phase prose options; becomes less critical as models improve (warning-level static check)

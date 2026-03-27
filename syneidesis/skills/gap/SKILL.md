@@ -75,7 +75,7 @@ A (adjust)     → Internal state update (no external tool)
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
 Phase 1 Qs (gap surface)   → always_gated (Qs: user judgment on surfaced gap determines adjustment)
-Phase 1 Qs option 3 (Probe) → conditional: present only when stakes(D) = High
+Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes level)
                                 regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
 
 ── MODE STATE ──
@@ -233,7 +233,7 @@ Options:
 3. **Probe** — request additional verification before deciding (high-stakes only)
 ```
 
-Option 3 (Probe) is conditional: present only when `stakes(D) = High`.
+Option 3 (Probe) is always visible. When `stakes(D) = High`, present with expanded verification rationale; otherwise, present with brief rationale. Recognition over Recall: hiding Probe forces the user to recall that deeper verification is available.
 
 Other is always available — user can respond freely beyond the listed options.
 

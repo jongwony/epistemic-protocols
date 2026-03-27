@@ -30,7 +30,8 @@ invariant: Applicability over Correctness
 R      = Execution result (AI's completed work output)
 X      = Application context (environment, constraints, user situation)
 Eval   = Applicability evaluation: (R, X) → Set(Mismatch)
-Mismatch = { aspect: String, description: String, evidence: String, severity: Severity, origin: Origin }
+Mismatch = { aspect: String, dimension: Dimension, description: String, evidence: String, severity: Severity, origin: Origin }
+Dimension ∈ {Convention, Environment, Audience, Dependency} ∪ Emergent(Dimension)
 Origin ∈ {Initial, Emerged(aspect)}                            -- mismatch provenance: initial scan or spawned by adapting parent aspect
 Severity ∈ {Critical, Significant, Minor}
 Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial
@@ -185,7 +186,25 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 
 ## Mismatch Identification
 
-Mismatches are identified dynamically per execution result — no fixed taxonomy. Each mismatch is characterized by:
+Mismatches are identified across named dimensions — working hypotheses for systematic detection, not exhaustive categories.
+
+### Mismatch Dimension Taxonomy
+
+| Dimension | Detection | Question Form |
+|-----------|-----------|---------------|
+| **Convention** | Result follows general patterns but project has local conventions | "This follows best practices, but your project uses [local pattern]" |
+| **Environment** | Result assumes environment state that differs from actual deployment context | "This assumes [env state], but your context has [actual state]" |
+| **Audience** | Result targets a different audience than the actual consumers | "This is written for [assumed audience], but [actual audience] will use it" |
+| **Dependency** | Result interacts with components whose constraints weren't considered | "This depends on [component] which has [constraint not considered]" |
+
+**Emergent mismatch detection**: Named dimensions are working hypotheses, not exhaustive categories. Detect Emergent mismatches when:
+- The applicability gap spans multiple named dimensions
+- User dismisses all named-dimension mismatches but the result still exhibits contextual misfit
+- The execution context involves domain-specific fitness criteria that resist classification into the four named dimensions
+
+Emergent mismatches must satisfy morphism `ApplicationDecontextualized → ContextualizedExecution`; boundary: contextual fit (in-scope) vs. intent expression (→ `/clarify`) or decision gaps (→ `/gap`).
+
+Each mismatch is characterized by:
 
 - **aspect**: The dimension where result and context diverge
 - **description**: What specifically doesn't fit

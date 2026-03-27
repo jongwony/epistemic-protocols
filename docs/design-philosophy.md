@@ -30,6 +30,27 @@ AI detects conditions (gaps, uncertainties, mismatches, risks) and presents them
 
 This separation preserves human agency in epistemic dialogue: the AI's role is to illuminate the decision space, not to occupy it. When detection and judgment collapse into a single agent act, the user loses the opportunity to exercise informed choice.
 
+#### Operational Refinement: Relay/Constitution Boundary
+
+A2's detection/authority distinction operationalizes through a relay/constitution boundary at the action level:
+
+- **Relay**: AI exercises zero epistemic authority — mechanically transmits environmental facts with cited basis. Auto-resolution is legitimate when the action is relay.
+- **Constitution**: AI exercises epistemic authority through selection, interpretation, scope expansion, or environment mutation. User confirmation required.
+
+Single test: "Is the AI acting as a relay or exercising authority?" Five verification indicators derive from this test — all are natural consequences of zero epistemic authority:
+
+| Indicator | Relay | Constitution |
+|-----------|-------|-------------|
+| Deterministic | Result uniquely determined by environment | Multiple valid results |
+| Citable | External source is the basis | AI inference is the basis |
+| Within boundary | Action stays within protocol scope | Action crosses protocol boundary |
+| Entropy → 0 | Single possible action | Selection among alternatives |
+| Basis cited | Relay source is visible at point of visibility | Resolution basis is opaque |
+
+**Probe scope**: Non-destructive observation (including test execution with cleanup) is relay. Environment mutation (installation, persistent state change) is constitution. Aitesis ProbeSpec constraints ("must not modify existing project files, cleanup after observation") formalize this boundary.
+
+**Visibility principle**: `basis_cited(resolution)` determines sufficiency — timing (immediate or deferred) is immaterial. Convergence trace, classify summary, and post-hoc reporting all satisfy visibility when basis is cited. Progress-count-only display without basis forces Recall (A1 tension).
+
 ### A3. Convergence Persistence
 
 Protocol modes remain active until convergence conditions are met or the user explicitly exits. A protocol that deactivates before convergence abandons its epistemic commitment — the deficit it was created to address remains unresolved.
@@ -53,6 +74,8 @@ Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts th
 **Epistemic scope trajectory**: Qs gates are EP's core epistemic contribution — they encode the irreducibly human act of constituting new meaning through dialogue. Qc gates (finite option selection) converge toward platform-native capabilities as models improve. EP's mission alignment concentrates on the Qs axis where human participation cannot be automated.
 
 Composition scope: The factorization G = R(p) ∘ A applies to individual gate operations within a single protocol activation. Inter-protocol composition (sequential activation of multiple protocols) operates through Session Text Composition — natural language in session context, not formal gate composition. Associativity of gate operations across protocol boundaries is not claimed; each protocol's gates are independently factored.
+
+**Gate classification refinement**: The Qc/Qs distinction, originally a gate-level binary classification, resolves into a relay/gated distinction that aligns with A2's relay/constitution boundary. Relay territory (deterministic, citable, within-boundary, entropy→0) corresponds to former elidable Qc — these should be auto-resolved, not gated. All remaining gated interactions are inherently constitutive (Qs): the user's informed selection among options with differential futures constitutes a judgment, regardless of whether the answer space is finite. The operational test: accepting a proposal as-is may appear classificatory, but the act of informed acceptance after recognizing differential futures is itself constitutive. Regret annotations (elidable/always_gated) are retained as the operational mechanism; the Qc/Qs terminology persists in SKILL.md formal blocks as implementation-level notation pending full propagation.
 
 ### A6. Context-Question Separation
 
@@ -154,6 +177,8 @@ Derived from A1 (Recognition over Recall) + A5 (Interaction Kind Factorization).
 
 When a Qc gate operates on a finite, protocol-owned taxonomy with always_gated annotation, present ALL types with detection status, evidence, and falsification conditions — not only the detected subset behind a generic action verb. The complete assessment enables Recognition (evaluate presented options) over Recall (generate missing options from memory). Design smell: "generic verb hiding finite taxonomy state" — when a gate option label (e.g., "Add type") conceals concrete candidates the AI has already analyzed, creating a Qc/Qs kind impurity (the gate appears classificatory but the sub-step requires constitutive user input). Fix: materialize the full taxonomy, converting mixed Qc/Qs to pure Qc. Applies to: finite type sets with always_gated Qc. Does not apply to: open-ended generation, per-item iteration, or runtime-variable sets. Same principle applies to protocol nudges: when deficit conditions are observed, surface them with explicit evidence rather than silently omitting.
 
+**Scope boundary**: Full Taxonomy applies when the taxonomy is the *user's decision target* — the user confirms, revises, or selects from the taxonomy (e.g., Hermeneia Phase 1b gap type assessment, Telos Phase 1 dimension assessment). When the taxonomy is an *AI detection tool* — the AI uses it internally for scanning and presents only results (e.g., Syneidesis gap surfacing, Katalepsis probe construction, Prosoche risk classification) — presenting only detected items is appropriate. Detection-tool taxonomies must include an Emergent dimension to ensure comprehensiveness; the named types are working hypotheses, not exhaustive categories.
+
 ### Convergence Evidence
 
 Derived from A3 (Convergence Persistence).
@@ -217,6 +242,8 @@ Principle: side effects require explicit answer types, not tool-level escape. Wh
 ### Audience Reach
 
 CLAUDE.md principles guide contributors (protocol designers). End users receive only SKILL.md content via the plugin system. For a principle to affect runtime protocol behavior, it must be structurally embedded in SKILL.md — documenting it in CLAUDE.md alone is insufficient.
+
+**Session-level observer exception**: The Dual Advisory Layer principle establishes Output Style nudge as a legitimate runtime mechanism complementary to graph.json. Nudge operates as a session-level cross-cutting observer — it belongs to no single SKILL.md because it observes across all protocols. Audience Reach applies to protocol-specific runtime behavior (which must be embedded in that protocol's SKILL.md), not to session-level observation patterns that are architecturally cross-cutting. Each SKILL.md governs its own protocol's detection (e.g., Post-Convergence conditions); Output Style governs the session-level observation layer.
 
 ---
 

@@ -230,11 +230,11 @@ Collect contextual evidence to enrich domain descriptions and improve classifica
 
 1. For each domain in `Bᵢ`:
    - **Call Read/Grep/Glob** to search for relevant boundary signals in CLAUDE.md, rules/, boundaries.md, project configuration
-   - If definitive boundary assignment found: mark as context-resolved (`Bᵣ`), integrate into BoundaryMap
+   - If definitive boundary assignment found: mark as context-resolved (`Bᵣ`), integrate into BoundaryMap with cited basis (source file/rule and specific evidence)
    - If partial evidence found: enrich domain with collected evidence (`Bᵢ'`), retain for Phase 2
    - If conflicting signals found: enrich domain with conflicting findings (`Bᵢ'`), retain for Phase 2
    - If no evidence found: retain in `Bᵢ'` with empty evidence
-2. If all domains context-resolved (`Bᵢ' = ∅`): output BoundaryMap as session text (no user interruption)
+2. If all domains context-resolved (`Bᵢ' = ∅`): output BoundaryMap as session text with per-domain basis citation (no user interruption). Each entry shows: domain → classification (source: [file/rule], evidence: [specific text])
 3. If enriched domains remain (`Bᵢ' ≠ ∅`): proceed to Phase 2
 
 **Purpose**: Context collection aims to auto-resolve where possible and enrich remaining domains with evidence, reducing user interaction to what truly requires human judgment.
@@ -252,7 +252,7 @@ Collect contextual evidence to enrich domain descriptions and improve classifica
 Present the domain context as text output:
 - **Domain**: [Domain name] — [Specific description]
 - **Evidence**: [Evidence collected during context collection, if any]
-- **Progress**: [N bounded / M total domains]
+- **Progress**: [N bounded / M total domains] (context-resolved entries shown with basis: e.g., "[1 context-resolved (source: boundaries.md — 'git push = irreversible') / 3 total]")
 
 Then **present**:
 
