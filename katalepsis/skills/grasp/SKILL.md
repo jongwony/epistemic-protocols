@@ -71,7 +71,7 @@ Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
 VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop
+-- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 1 Qc  (gate)   → present (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 detect (detect) → Internal analysis (gap type relevance detection per category)
@@ -82,6 +82,7 @@ Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Phase 3 Prop → TaskCreate (proposal ejection)
 Categorize  → Internal analysis (Read for context if needed)
+converge    (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile

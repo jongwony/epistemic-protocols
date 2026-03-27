@@ -187,7 +187,7 @@ active(Λ) = Λ.active ∧ (∃ t ∈ Λ.tasks: t.status ∉ {completed, halted}
 -- Layered: situated(t) guarantees per-action epistemic quality; active(Λ) governs mode lifecycle
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop
+-- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase -1 Sub-A0 scan    (detect)  → Internal analysis (heuristic deficit detection, execution-blocking filter)
 Phase -1 Sub-A0 Qc      (gate)    → present (upstream routing: Route(P)/Other/Proceed) [Tool]
 Phase -1 Sub-A0 suspend (state)   → TaskCreate (persist Λ.upstream: Resolved, iteration) [Tool]
@@ -206,6 +206,7 @@ Phase 2 Qc           (gate)    → present (checkpoint with evidence)
 Phase 3 A            (state)   → Internal state update (no external tool)
 Task completion      (state)   → TaskUpdate (status tracking) [Tool]
 Withdraw shutdown    (extern)  → SendMessage (shutdown_request to team members) [Tool]
+converge             (relay)    → TextPresent+Proceed (convergence evidence trace; proceed with situated execution)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile

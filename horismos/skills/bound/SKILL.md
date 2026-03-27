@@ -76,11 +76,12 @@ converge iff |remaining| = 0 ∨ user_esc
   user_esc:         user exits via Esc key (ungraceful, no cleanup needed)
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop
+-- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Probe (detect)  → Internal analysis (no external tool)
 Phase 1 Ctx   (collect) → Read, Grep, Glob (codebase scan for boundary signals: CLAUDE.md, boundaries.md, rules/, prior session context)
 Phase 2 Qc    (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3       (state)   → Internal state update
+converge  (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with defined boundary)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
