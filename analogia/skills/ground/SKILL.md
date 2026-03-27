@@ -267,25 +267,6 @@ After integration:
 - If all correspondences are addressed (confirmed/dismissed): proceed with updated output
 - Log `(Example, V)` to validations
 
-### Post-Convergence Suggestions
-
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
-
-**Transformation check**: Before suggesting next protocols, briefly assess whether the validated mapping changed the application of the abstract framework. State in one sentence what shifted, or note that the original mapping was confirmed as structurally sound. This is informational text — not a gate interaction.
-
-**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
-
-- `/gap` (GapUnnoticed): Decision gaps in validated mapping → suggest gap audit on mapping application
-- `/inquire` (ContextInsufficient): Context insufficiency for mapping execution → suggest context verification
-- `/goal` (GoalIndeterminate): Mapping reveals indeterminate goals → suggest goal co-construction
-
-**Next steps**: Based on the converged output, suggest concrete follow-up actions:
-
-- Summarize validated mapping with confirmed/dismissed correspondences
-- Note any structural limits accepted (where analogy breaks down)
-
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
-
 ## Intensity
 
 | Level | When | Format |

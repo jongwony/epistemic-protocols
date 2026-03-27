@@ -283,25 +283,6 @@ When Syneidesis is active, **present** via gate interaction for:
 
 Note: Esc key → unconditional loop termination (LOOP level). Gate interaction blocks until response or Esc.
 
-### Post-Convergence Suggestions
-
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
-
-**Transformation check**: Before suggesting next protocols, briefly assess whether the gap audit changed the decision. State in one sentence what shifted, or note that the original plan was confirmed after review. This is informational text — not a gate interaction.
-
-**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
-
-- `/inquire` (ContextInsufficient): Context insufficiency behind surfaced gaps → suggest pre-execution context verification
-- `/bound` (BoundaryUndefined): Boundary undefined for gap-related decisions → suggest epistemic boundary definition
-- `/ground` (MappingUncertain): Abstract framework applied without validation → suggest structural mapping validation
-
-**Next steps**: Based on the converged output, suggest concrete follow-up actions:
-
-- Summarize deferred items (gaps accepted but not yet addressed)
-- Highlight high-stakes gaps that warrant re-review before execution
-
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
-
 ## Intensity
 
 | Level | When | Format |

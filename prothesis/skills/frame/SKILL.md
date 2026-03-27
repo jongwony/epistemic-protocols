@@ -322,7 +322,7 @@ Optional dimension naming (apply when initial generation seems redundant):
 1. Output selected perspectives with brief characterization per LOOP `characterize`
 2. Note escalation path: "For deeper isolated analysis, re-invoke `/frame` — Pₛ will transfer as Pᵦ"
 
-Per LOOP Pₛ count tiers for escalation recommendation. Post-convergence suggestions per `### Post-Convergence Suggestions`.
+Per LOOP Pₛ count tiers for escalation recommendation.
 
 ### Phase 3: Inquiry (Through Selected Lens)
 
@@ -502,31 +502,6 @@ Note: Perspective Summaries are surfaced earlier via P(R') preview (Phase 3 Coll
 All other routing options (Extend, Add input, withdraw) and convergence behavior Per LOOP.
 
 Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Parametric Nature, and Specialization.
-
-### Post-Convergence Suggestions
-
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
-
-**Transformation check**: Before suggesting next protocols, briefly assess whether the selected perspectives changed the analytical approach. State in one sentence what shifted, or note that the original approach was confirmed from all selected viewpoints. This is informational text — not a gate interaction.
-
-**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
-
-Evaluate all conditions regardless of current mode. For inactive-mode conditions, mark as 'not applicable (mode not active)' rather than skipping.
-
-- `/gap` (GapUnnoticed): Mode 2: L.divergence reveals unaddressed tensions; Mode 1: selected perspectives reveal unexplored domain tensions → suggest gap audit
-- `/goal` (GoalIndeterminate): Mode 2: L.assessment reveals indeterminate goals; Mode 1: inquiry intent suggests indeterminate goals → suggest goal co-construction
-- `/ground` (MappingUncertain): Mode 2: L.assessment contains abstract framework without domain-specific validation; Mode 1: selected perspectives use abstract frameworks in user's specific domain → suggest structural mapping validation
-- `/attend` (ExecutionBlind): Mode 2: L.assessment contains actionable execution items with risk dimensions → suggest risk-assessed execution of Lens findings
-- `/bound` (BoundaryUndefined): Mode 2: L.divergence reveals undefined epistemic boundaries → suggest epistemic boundary definition before proceeding
-- `/inquire` (ContextInsufficient): Context insufficiency surfaced during session → suggest pre-execution context verification
-
-**Next steps**: Based on the converged output, suggest concrete follow-up actions:
-
-- Mode 1: note escalation path to Mode 2 for deeper isolated analysis
-- Mode 2: summarize key findings from L (convergence, divergence, assessment highlights)
-- Mode 2: if findings are execution-ready, note that `/attend` can orchestrate implementation with risk classification
-
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
 
 ## Rules
 

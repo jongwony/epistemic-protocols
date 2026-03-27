@@ -20,7 +20,7 @@ Detailed rationale for the axiom hierarchy and design principles governing epist
 
 Present structured options for user selection rather than requiring recall from memory. Each option must make the post-selection state anticipatable — differential implications visible before choice, not discovered after.
 
-The invariant: user receives structured options with differential futures, and their response is parsed into a typed answer. This applies to gate interactions (Qc/Qs), Post-Convergence suggestions, and any protocol output that shapes user decisions.
+The invariant: user receives structured options with differential futures, and their response is parsed into a typed answer. This applies to gate interactions (Qc/Qs), protocol nudges, and any protocol output that shapes user decisions.
 
 Future-state recognizability: Recognition extends beyond "options not blanks" to "each option makes the post-selection state anticipatable." Gate options that present labels without differential futures reduce to recall-in-disguise — the user must mentally simulate consequences rather than recognize them from the presented structure.
 
@@ -152,7 +152,7 @@ Active protocols supersede default behaviors. If a protocol mode is active and h
 
 Derived from A1 (Recognition over Recall) + A5 (Interaction Kind Factorization).
 
-When a Qc gate operates on a finite, protocol-owned taxonomy with always_gated annotation, present ALL types with detection status, evidence, and falsification conditions — not only the detected subset behind a generic action verb. The complete assessment enables Recognition (evaluate presented options) over Recall (generate missing options from memory). Design smell: "generic verb hiding finite taxonomy state" — when a gate option label (e.g., "Add type") conceals concrete candidates the AI has already analyzed, creating a Qc/Qs kind impurity (the gate appears classificatory but the sub-step requires constitutive user input). Fix: materialize the full taxonomy, converting mixed Qc/Qs to pure Qc. Applies to: finite type sets with always_gated Qc. Does not apply to: open-ended generation, per-item iteration, or runtime-variable sets. Same principle applies to Post-Convergence Suggestions: traverse ALL listed conditions against session context with explicit status, not only those the AI deems applicable.
+When a Qc gate operates on a finite, protocol-owned taxonomy with always_gated annotation, present ALL types with detection status, evidence, and falsification conditions — not only the detected subset behind a generic action verb. The complete assessment enables Recognition (evaluate presented options) over Recall (generate missing options from memory). Design smell: "generic verb hiding finite taxonomy state" — when a gate option label (e.g., "Add type") conceals concrete candidates the AI has already analyzed, creating a Qc/Qs kind impurity (the gate appears classificatory but the sub-step requires constitutive user input). Fix: materialize the full taxonomy, converting mixed Qc/Qs to pure Qc. Applies to: finite type sets with always_gated Qc. Does not apply to: open-ended generation, per-item iteration, or runtime-variable sets. Same principle applies to protocol nudges at convergence: when deficit conditions are observed, surface them with explicit evidence rather than silently omitting.
 
 ### Convergence Evidence
 
@@ -188,7 +188,7 @@ Inter-protocol data flows as natural language in the session context — no stru
 
 ### Dual Advisory Layer
 
-Inter-protocol guidance operates through two distinct mechanisms at different abstraction levels: graph.json `advisory` edges (structural, validated by static checks, topology-aware) and Post-Convergence Suggestions (heuristic, session-context-dependent, deficit-condition-driven). These are complementary, not redundant — graph.json edges encode stable architectural relationships, while Post-Convergence suggestions respond to runtime session state. Suggestion targets may overlap with or diverge from graph.json edges; neither system constrains the other.
+Inter-protocol guidance operates through two distinct mechanisms at different abstraction levels: graph.json `advisory` edges (structural, validated by static checks, topology-aware) and Output Style nudge (runtime, session-context-dependent, deficit-type matching). These are complementary — graph.json edges encode stable architectural relationships, while nudges respond to observed session conditions. Protocol convergence moments are high-signal observation points for cross-protocol needs, but nudges are not position-constrained and fire whenever contextual evidence warrants.
 
 ### Coexistence over Mirroring
 
@@ -283,4 +283,4 @@ The hermeneutic circle pattern is already structurally encoded in formal blocks 
 
 **Primary circle** (intra-protocol): Each protocol's LOOP section encodes backward flow where partial resolution triggers whole re-interpretation, conditioned by `preserves:` (the text being interpreted remains fixed; only the interpretation evolves).
 
-**Secondary pattern** (inter-protocol): Four complementary pairs form Pre/Post cycles on the context fitness axis — Hermeneia↔Katalepsis (intent), Telos↔Syneidesis (goal), Aitesis↔Epharmoge (context), Prothesis↔Analogia (structure). These cycles operate heuristically via Post-Convergence suggestions, driven by session context rather than graph.json structural edges.
+**Secondary pattern** (inter-protocol): Four complementary pairs form Pre/Post cycles on the context fitness axis — Hermeneia↔Katalepsis (intent), Telos↔Syneidesis (goal), Aitesis↔Epharmoge (context), Prothesis↔Analogia (structure). These cycles operate heuristically via Output Style nudge, driven by observed session conditions rather than graph.json structural edges.
