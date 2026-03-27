@@ -76,7 +76,7 @@ The transition from theoria to praxis occurs at the LOOP's routing step, when `J
 
 **Design principle** (Placement over Prescription): Prothesis places perspectives before the user; it does not prescribe action. Automatic transition from analysis to execution would violate this principle — the user might want to contemplate the Lens without acting, request additional perspectives, or reject the analysis entirely. Each of these is a valid outcome of theoria.
 
-**Structural enforcement**: The `J` routing enum (`extend`, `add_input`, `wrap_up`, `withdraw`) contains no direct execution option. There is no `J=execute` or `J=implement`. The only path to praxis is through Output Style nudges at convergence, which themselves require user consent at the downstream protocol's own activation gate.
+**Structural enforcement**: The `J` routing enum (`extend`, `add_input`, `wrap_up`, `withdraw`) contains no direct execution option. There is no `J=execute` or `J=implement`. The primary structural path to praxis is through Output Style nudges, which themselves require user consent at the downstream protocol's own activation gate.
 
 ## Parametric Nature
 
