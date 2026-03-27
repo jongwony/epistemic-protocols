@@ -287,25 +287,6 @@ After integration:
 - If all bounded/dismissed: output BoundaryMap as session text
 - Log `(Domain, A)` to history
 
-### Post-Convergence Suggestions
-
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
-
-**Transformation check**: Before suggesting next protocols, briefly assess whether the defined boundaries changed the collaboration approach. State in one sentence what shifted, or note that existing assumptions were confirmed. This is informational text — not a gate interaction.
-
-**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
-
-- `/inquire` (ContextInsufficient): AI-spec domains with context insufficiency → suggest context verification before AI execution
-- `/frame` (FrameworkAbsent): Framework absent for bounded domains → suggest framework recommendation
-- `/gap` (GapUnnoticed): Decision gaps in boundary-defined scope → suggest gap audit
-
-**Next steps**: Based on the converged output, suggest concrete follow-up actions:
-
-- Restate BoundaryMap as a reference for downstream protocols
-- Note any needs-calibration domains deferred for later boundary definition
-
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
-
 ## Intensity
 
 | Level | When | Format |

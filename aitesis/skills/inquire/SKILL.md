@@ -16,7 +16,7 @@ Infer context insufficiency before execution through AI-guided inquiry. Type: `(
 Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
   classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →
   Q(classify_result + Uₑ + Uᵢ'', priority) → A → X' → (loop until informed)
--- Uₙ (non-factual): shown in classify summary, routed via Post-Convergence suggestion
+-- Uₙ (non-factual): shown in classify summary with routing target
 -- Uᵢ'' (factual/user-dependent): Phase 2 question candidates
 
 ── MORPHISM ──
@@ -60,19 +60,19 @@ classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
                    Fiber(Relevance)     = Unit    -- detect only
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
              -- 2-layer model = Grothendieck fibration: Layer 2 exists only over Factual fiber
-             -- Coherence/Relevance → detect + route (Post-Convergence)
+             -- Coherence/Relevance → detect + show routing target in classify summary
 ProbeSpec  = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalProbe = (Uᵢ', ProbeSpec) → Uₑ           -- empirical enrichment
 Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2)
 Uₑ         = Probe-enriched uncertainties        -- evidence attached, proceeds to Phase 2
 Uᵢ''       = Remaining user-dependent uncertainties  -- Fiber(Factual) = UserDependent; Phase 2 question
-Uₙ         = Non-factual detected uncertainties     -- Fiber(d) = Unit; shown in classify summary, Post-Convergence routing
+Uₙ         = Non-factual detected uncertainties     -- Fiber(d) = Unit; shown in classify summary with routing target
 Action     = Tool call sequence (Write, Bash)
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency gate (silent)
 Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                         -- context collection [Tool]
-         classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-factual (Post-Convergence)
+         classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-factual (classify summary routing)
          [if Uₑ_candidates ≠ ∅] EmpiricalProbe(Uₑ_candidates) → Uₑ  -- empirical enrichment [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[max_gain], progress) → Stop → A           -- uncertainty surfacing [Tool]
 Phase 3: A → integrate(A, X) → X'                               -- plan update (internal)
@@ -113,7 +113,7 @@ Phase 2 Qs (transparent)   → always_gated (Qs: user provides context judgment 
       context_resolved: Set(Uncertainty),  -- Uᵣ from TYPES
       read_only_resolved: Set(Uncertainty), -- Uᵣ' from TYPES
       probe_enriched: Set(Uncertainty),    -- Uₑ from TYPES
-      non_factual_detected: Set(Uncertainty), -- Uₙ from TYPES; Fiber(d) = Unit, Post-Convergence routing
+      non_factual_detected: Set(Uncertainty), -- Uₙ from TYPES; Fiber(d) = Unit, classify summary routing
       user_responded: Set(Uncertainty),
       remaining: Set(Uncertainty), dismissed: Set(Uncertainty),
       history: List<(Uncertainty, A)>, probe_history: List<(ProbeSpec, Result, Evidence)>,
@@ -124,7 +124,7 @@ Phase 2 Qs (transparent)   → always_gated (Qs: user provides context judgment 
 
 ## Core Principle
 
-**Inference over Detection**: When AI infers context insufficiency before execution, it first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and enriches probe-enrichable ones with empirical evidence before asking. For non-factual dimensions (coherence, relevance), the AI detects and routes via Post-Convergence suggestion. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, and routing what belongs to other epistemic concerns.
+**Inference over Detection**: When AI infers context insufficiency before execution, it first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and enriches probe-enrichable ones with empirical evidence before asking. For non-factual dimensions (coherence, relevance), the AI detects and shows routing targets in the classify summary. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, and routing what belongs to other epistemic concerns.
 
 ## Distinction from Other Protocols
 
@@ -269,7 +269,10 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
   - ReadOnlyVerifiable: fact exists in environment (StaticObservation or BeliefVerification) and is observable with current tools → resolve directly via extended context lookup
   - ProbeEnrichable: fact requires DynamicObservation — does not exist statically but is creatable, reversible, and bounded (< 30s) → empirical probe
   - UserDependent: neither read-only verifiable nor probe-enrichable → Phase 2 directly
-- **Non-factual dimensions**: Coherence and Relevance → detect and record as `Uₙ` (non_factual_detected); routed via Post-Convergence suggestion, not Phase 2 question
+- **Non-factual dimensions**: Coherence and Relevance → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
+  - Coherence → `/ground` (structural mapping may reveal inconsistency source)
+  - Relevance → deficit-matched: GoalIndeterminate→`/goal`, GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`, IntentMisarticulated→`/clarify`
+  - Emergent(_) → match observed deficit condition against candidate protocol deficit conditions
 - Store all results in `Λ.classify_results`
 
 **Step 3 — Read-only verification**: For ReadOnlyVerifiable uncertainties:
@@ -359,36 +362,6 @@ After integration:
 - If all resolved/dismissed: proceed with execution
 - Log `(Uncertainty, A)` to history
 
-### Post-Convergence Suggestions
-
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
-
-**Transformation check**: Before suggesting next protocols, briefly assess whether the resolved context changed the execution plan. State in one sentence what shifted, or note that the original plan proceeds unchanged. This is informational text — not a gate interaction.
-
-**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
-
-- `/gap` (GapUnnoticed): Decision gaps in resolved context → suggest gap audit before execution
-- `/frame` (FrameworkAbsent): Framework absent for informed execution → suggest framework recommendation
-- `/ground` (MappingUncertain): Mapping uncertain between context and execution → suggest structural mapping validation
-
-**Dimension-specific routing** (non-factual Uₙ detected in classify):
-
-| Dimension | Candidate Protocols | Selection Criterion |
-|-----------|-------------------|---------------------|
-| Coherence | `/ground` | structural mapping may reveal inconsistency source |
-| Relevance | `/goal`, `/gap`, `/bound`, `/clarify` | deficit-matched: GoalIndeterminate→/goal, GapUnnoticed→/gap, BoundaryUndefined→/bound, IntentMisarticulated→/clarify |
-| Emergent(_) | deficit-based matching | per discovered dimension's deficit condition |
-
-Selection: match Uₙ item's observed deficit condition against candidate protocol deficit conditions.
-Phase 2 classify summary shows the best-matched protocol as routing target.
-
-**Next steps**: Based on the converged output, suggest concrete follow-up actions:
-
-- Restate execution plan with resolved context as reference
-- Note any accepted uncertainties carried into execution
-
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
-
 ## Intensity
 
 | Level | When | Format |
@@ -410,7 +383,7 @@ Phase 2 classify summary shows the best-matched protocol as routing target.
 | Early exit | User can declare sufficient at any Phase 2 | Full control over inquiry depth |
 | Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context uncertainties ≠ Syneidesis decision gaps, so reverse suppression not needed) |
 | Classify transparency | Always show classify results (dimension + verifiability) in Phase 2 surfacing format | User sees AI's reasoning and resolution path per uncertainty |
-| Routing transparency | Uₙ items show `→ /protocol` in Phase 2 classify summary | User sees routing destination before Post-Convergence |
+| Routing transparency | Uₙ items show `→ /protocol` in Phase 2 classify summary | User sees routing destination at detection time |
 | Probe transparency | Log probe lifecycle in Λ.probe_history | User can audit what was tested |
 | Probe cleanup | All test artifacts removed after observation | No residual files |
 | Probe timeout | 30s limit → fall back to user inquiry | Prevents hanging |
@@ -420,7 +393,7 @@ Phase 2 classify summary shows the best-matched protocol as routing target.
 
 1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via gate interaction (Phase 2)
 2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
-3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/Relevance: detect and route via Post-Convergence suggestion
+3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/Relevance: detect and show routing target in classify summary
 4. **Inference over Detection**: When context is insufficient and context collection does not fully resolve, infer the highest-gain question rather than assume — silence is worse than a dismissed question
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on execution plan requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation

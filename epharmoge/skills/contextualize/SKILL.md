@@ -284,25 +284,6 @@ After adaptation — **re-scan**:
 - Progress visibility: user sees which adaptations spawned new mismatches
 - Convergence monitoring: chains that grow beyond 3 levels suggest a structural issue worth surfacing explicitly
 
-### Post-Convergence Suggestions
-
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
-
-**Transformation check**: Before suggesting next protocols, briefly assess whether the contextualized result changed the follow-up work. State in one sentence what shifted, or note that the original result was confirmed as contextually appropriate. This is informational text — not a gate interaction.
-
-**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
-
-- `/grasp` (ResultUngrasped): Comprehension check needed on contextualized result → suggest verified understanding
-- `/gap` (GapUnnoticed): Decision gaps revealed by context mismatch resolution → suggest gap audit
-- `/bound` (BoundaryUndefined): Contextualized result requires boundary redefinition → suggest boundary definition
-
-**Next steps**: Based on the converged output, suggest concrete follow-up actions:
-
-- Summarize contextualized result with applied adaptations
-- Note any environment assumptions that remain unverified
-
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
-
 ## Intensity
 
 | Level | When | Format |

@@ -107,7 +107,7 @@ Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 ### Derived Principles
 - **Surfacing over Deciding**: AI illuminates, user judges (A2)
 - **Priority Override**: Active protocols supersede default behaviors (A3)
-- **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence; Post-Convergence traverses ALL conditions (A1 + A5)
+- **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence (A1 + A5)
 - **Convergence Evidence**: Demonstrated transformation trace, not bare assertion (A3)
 - **Pattern over Tool**: Recognition over Recall is content invariant, not tool-dependent (A1 + A4)
 - **Zero-Shot Instruction Preference**: LLM-facing instructions state principles, not few-shot examples; fix underspecified principles rather than patching with examples (A4)
@@ -115,7 +115,7 @@ Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 ### Architectural Principles
 - **Unix Philosophy Homomorphism**: Single-purpose epistemic tools; bottom-up composition
 - **Session Text Composition**: Inter-protocol data flows as natural language in session context
-- **Dual Advisory Layer**: graph.json (structural) + Post-Convergence Suggestions (heuristic)
+- **Dual Advisory Layer**: graph.json (structural) + Output Style nudge (runtime heuristic)
 - **Coexistence over Mirroring**: Protocols occupy epistemic layer; built-ins occupy execution layer
 - **Three-Tier Termination**: user_esc (ungraceful) / user_withdraw (graceful) / normal convergence
 - **Audience Reach**: CLAUDE.md guides contributors; SKILL.md guides runtime

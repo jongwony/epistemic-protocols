@@ -368,25 +368,6 @@ Transformation trace (each clarified gap → resolution):
 Proceeding with this understanding.
 ```
 
-### Post-Convergence Suggestions
-
-After convergence, scan session context for continuing epistemic needs and present suggestions as natural-language text (no gate interaction).
-
-**Transformation check**: Before suggesting next protocols, briefly assess whether the clarification changed the downstream action. State in one sentence what shifted, or note that the original expression was confirmed as adequate. This is informational text — not a gate interaction.
-
-**Protocol suggestions**: Traverse each condition below against current session context. Present status (applicable/not applicable) with brief evidence for each. Omitting a condition without evaluation = protocol violation.
-
-- `/goal` (GoalIndeterminate): Clarified intent reveals indeterminate goals → suggest goal co-construction
-- `/bound` (BoundaryUndefined): Boundary undefined for clarified decisions → suggest epistemic boundary definition
-- `/inquire` (ContextInsufficient): Clarified scope requires context verification → suggest pre-execution context check
-
-**Next steps**: Based on the converged output, suggest concrete follow-up actions:
-
-- Restate clarified intent as a reference for downstream work
-- Note any residual ambiguity that was accepted rather than resolved
-
-**Display rule**: Omit this section entirely when (a) user explicitly moved to next task, (b) all conditions evaluate to not applicable (after full traversal — the traversal itself cannot be skipped), or (c) the user has already invoked another protocol in the current or immediately preceding message. Suggestions are informational text, not gate interactions.
-
 ## Intensity
 
 | Level | When | Format |

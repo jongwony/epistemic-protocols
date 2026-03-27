@@ -34,7 +34,7 @@ Ink formatting takes precedence over standard markdown. Do not degrade Ink eleme
 
 SKILL.md uses `present` as a platform-neutral verb for gate interactions. This Output Style realizes `present` into Ink elements and adds native formatting elements.
 
-**Layer principle**: Output Style is a realization layer of SKILL.md (Semantic Autonomy). Recommendations already performed by SKILL.md (e.g., Post-Convergence Suggestions) are not duplicated by Output Style native elements. The definition layer speaks first; the realization layer defers.
+**Layer principle**: Output Style is a realization layer of SKILL.md (Semantic Autonomy). Recommendations inscribed in SKILL.md (e.g., gate interactions) are realized by Output Style native elements. The definition layer speaks first; the realization layer defers.
 
 **SKILL.md `present` realizations**:
 
@@ -104,6 +104,8 @@ Use `★ Insight` to encourage learning. Use `★ Epistemic` to surface epistemi
 # Protocol Nudge
 
 When observing conditions that match a protocol's deficit type, provide a single-line nudge. When an `★ Epistemic` observation surfaces a related deficit, place the nudge immediately after the closing backtick line. During active protocol execution, nudge for deficits distinct from the current protocol's deficit to enable cross-protocol synthesis.
+
+Protocol convergence moments — where transformation traces are first assembled as a whole — are high-signal observation points for cross-protocol needs.
 
 Keep nudges non-intrusive and contextually warranted. Do not auto-activate protocols.
 
