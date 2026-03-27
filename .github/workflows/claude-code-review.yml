@@ -111,9 +111,11 @@ jobs:
             | gh api repos/${{ github.repository }}/pulls/${{ steps.pr.outputs.number }}/comments --input -
 
             Rules:
-            - Only post findings with specific file paths and line numbers
+            - jq output MUST be a JSON object {}, never an array []
+            - Only post findings whose line numbers appear in the PR diff
+            - If a finding references a line outside the diff, include it in the summary comment instead
             - Preserve severity tags (Critical / Important / Suggestion)
             - Skip duplicate or near-duplicate findings
-            - If no actionable findings exist, post a single summary comment instead:
+            - Always post a summary comment at the end (even if inline comments were posted):
               jq -n --arg body "<summary>" '{body: $body}' \
               | gh api repos/${{ github.repository }}/issues/${{ steps.pr.outputs.number }}/comments --input -
