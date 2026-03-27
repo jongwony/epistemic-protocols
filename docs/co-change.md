@@ -17,4 +17,4 @@ Protocol modifications require synchronized edits across multiple files. Any pro
 | Protocol nudge pattern change | Output Style nudge section, plugin.json version bumps |
 | Convergence-awareness nudge wording | epistemic-ink.md (Protocol Nudge), design-philosophy.md (Dual Advisory Layer + Full Taxonomy) |
 | Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |
-| Relay interaction pattern change | SKILL.md TOOL GROUNDING + design-philosophy.md (Convergence Evidence) + plugin.json version bumps |
+| Relay interaction pattern change | SKILL.md TOOL GROUNDING + design-philosophy.md (Convergence Evidence) + criteria.md + static-checks.js + plugin.json version bumps |

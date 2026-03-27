@@ -83,7 +83,7 @@ Phase 2 P  (detect)  → Read, Grep (context for proposal generation; fallback: 
 Phase 2 Qs (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3    (state)   → Internal GoalContract update (no external tool)
 Phase 4 Qc (gate)    → present (GoalContract review + approval)
-converge             → via Phase 4 Qc (gate) — convergence evidence is context for GoalContract approval
+converge (relay)     → TextPresent+Proceed (convergence evidence trace; context for Phase 4 Qc GoalContract approval)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile

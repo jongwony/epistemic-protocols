@@ -206,7 +206,7 @@ Phase 2 Qc           (gate)    → present (checkpoint with evidence)
 Phase 3 A            (state)   → Internal state update (no external tool)
 Task completion      (state)   → TaskUpdate (status tracking) [Tool]
 Withdraw shutdown    (extern)  → SendMessage (shutdown_request to team members) [Tool]
-converge             (relay)    → TextPresent+Proceed (convergence evidence trace; proceed with situated execution)
+converge             (relay)    → TextPresent+Proceed (coordinator convergence evidence trace; proceed with situated execution)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile

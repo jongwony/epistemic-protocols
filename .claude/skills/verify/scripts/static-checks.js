@@ -498,8 +498,8 @@ function checkToolGrounding() {
       }
     }
 
-    // Check 6f: Verify convergence behavior is explicitly classified
-    if (!/\bconverge\b/i.test(groundingSection)) {
+    // Check 6f: Verify convergence behavior is explicitly classified with interaction kind
+    if (!/\bconverge\s*\((relay|gate)\)/i.test(groundingSection)) {
       results.warn.push({
         check: 'tool-grounding',
         file: relPath,

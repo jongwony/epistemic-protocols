@@ -181,7 +181,7 @@ When a Qc gate operates on a finite, protocol-owned taxonomy with always_gated a
 
 Derived from A3 (Convergence Persistence).
 
-Protocol convergence must be demonstrated, not asserted. At convergence, the agent must present a transformation trace mapping each identified deficit instance to its resolution — the MORPHISM instantiated at the concrete level. "All gaps resolved" or "goal defined" as bare assertion without per-item evidence = protocol violation. Convergence evidence is a relay presentation (A5): it demonstrates the completed morphism without gating — the agent presents the trace and proceeds automatically with the target type. Convergence evidence that stops and waits for user response = interaction kind misclassification.
+Protocol convergence must be demonstrated, not asserted. At convergence, the agent must present a transformation trace mapping each identified deficit instance to its resolution — the MORPHISM instantiated at the concrete level. "All gaps resolved" or "goal defined" as bare assertion without per-item evidence = protocol violation. Convergence evidence (the transformation trace) is a relay presentation (A5): it demonstrates the completed morphism without gating — the agent presents the trace and proceeds automatically. Distinction: convergence *evidence* is always relay; convergence *conditions* may involve gates when user commitment is constitutive (e.g., Telos GoalContract approval). In such cases, the relay trace provides context for the binding gate — they are separate operations, not conflated.
 
 ### Pattern over Tool
 
