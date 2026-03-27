@@ -72,23 +72,23 @@ VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P'
 
 ── TOOL GROUNDING ──
 -- Realization: present → TextPresent+Stop
-Phase 1 Qc  (extern) → present (entry point selection)
+Phase 1 Qc  (gate)   → present (entry point selection)
 Phase 2 Tᵣ  → TaskCreate (category tracking)
 Phase 3 detect (detect) → Internal analysis (gap type relevance detection per category)
-Phase 3 Qs  (extern) → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
-Phase 3 Qᵣs (extern) → present (misconception reasoning inquiry)
-Phase 3 Qc  (extern) → present (aspect coverage: sufficient/aspect)
+Phase 3 Qs  (gate)   → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 Qᵣs (gate)  → present (misconception reasoning inquiry)
+Phase 3 Qc  (gate)   → present (aspect coverage: sufficient/aspect)
 Phase 3 Ref → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  → TaskUpdate (progress tracking)
 Phase 3 Prop → TaskCreate (proposal ejection)
 Categorize  → Internal analysis (Read for context if needed)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
-Phase 1 Qc (entry points)  → always_gated (Qc: verification scope selection)
-Phase 3 Qs (verify)        → always_gated (Qs: Socratic probe — user comprehension is the measurement)
-Phase 3 Qᵣs (reasoning)   → always_gated (Qs: misconception reasoning hypothesis)
-Phase 3 Qc (coverage)      → always_gated (Qc: aspect coverage — sufficient vs explore more)
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 1 Qc (entry points)  → always_gated (gated: verification scope selection)
+Phase 3 Qs (verify)        → always_gated (gated: Socratic probe — user comprehension is the measurement)
+Phase 3 Qᵣs (reasoning)   → always_gated (gated: misconception reasoning hypothesis)
+Phase 3 Qc (coverage)      → always_gated (gated: aspect coverage — sufficient vs explore more)
 
 ── MODE STATE ──
 Λ = {
@@ -146,8 +146,8 @@ When Katalepsis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 1, present entry point selection via gate interaction (Qc) and yield turn.
-At Phase 3, present comprehension verification via gate interaction (Qs) and yield turn.
+**Action**: At Phase 1, present entry point selection via gate interaction and yield turn.
+At Phase 3, present comprehension verification via gate interaction and yield turn.
 </system-reminder>
 
 - Katalepsis provides structured comprehension path
@@ -411,7 +411,7 @@ For each task (category):
 ## Rules
 
 1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Chunk complexity**: Break large changes into digestible categories
 4. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
 5. **Code grounding**: Reference specific code locations

@@ -76,22 +76,22 @@ early_exit = user_declares_sufficient (any progress level)
 
 ── TOOL GROUNDING ──
 -- Realization: present → TextPresent+Stop
-Phase 0 Qc (extern)  → present (goal confirmation + activation approval)
+Phase 0 Qc (gate)    → present (goal confirmation + activation approval)
 Phase 1 detect (detect) → Internal analysis (dimension detection from Gᵥ)
-Phase 1 Qc (extern)  → present (full taxonomy assessment + progress display)
+Phase 1 Qc (gate)    → present (full taxonomy assessment + progress display)
 Phase 2 P  (detect)  → Read, Grep (context for proposal generation; fallback: template)
-Phase 2 Qs (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
+Phase 2 Qs (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3    (state)   → Internal GoalContract update (no external tool)
-Phase 4 Qc (extern)  → present (GoalContract review + approval)
+Phase 4 Qc (gate)    → present (GoalContract review + approval)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
 Phase 0 Qc (confirm)       → elidable when: explicit_arg via /goal "text"
                               default: proceed with inferred goal seed
                               regret: bounded (Phase 1 Qc provides correction opportunity)
-Phase 1 Qc (dimensions)    → always_gated (Qc: dimension set shapes goal construction)
-Phase 2 Qs (negotiate)     → always_gated (Qs: Accept/Modify/Reject/Extend — user shapes contract)
-Phase 4 Qc (approve)       → always_gated (Qc: contract approval — final binding decision)
+Phase 1 Qc (dimensions)    → always_gated (gated: dimension set shapes goal construction)
+Phase 2 Qs (negotiate)     → always_gated (gated: Accept/Modify/Reject/Extend — user shapes contract)
+Phase 4 Qc (approve)       → always_gated (gated: contract approval — final binding decision)
 
 ── MODE STATE ──
 Λ = { phase: Phase, G: Goal, Gᵥ: Goal, detected: Set(Dim), applicable: Set(Dim),
@@ -148,7 +148,7 @@ When Telos is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present concrete proposals via gate interaction (Qs) and yield turn.
+**Action**: At Phase 2, present concrete proposals via gate interaction and yield turn.
 </system-reminder>
 
 - Telos completes before implementation workflows begin
@@ -366,7 +366,7 @@ Options:
 ## Rules
 
 1. **AI-guided, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via gate interaction (Phase 0)
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Modify options use structured sub-choices, not free text
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Modify options use structured sub-choices, not free text
 3. **Detection with user authority**: AI presents full taxonomy assessment — every named dimension with detection status, evidence, and falsification condition; user confirms or revises (no selective presentation, no auto-proceed). Outcome always included (protocol constraint)
 4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions
 5. **Concrete proposals**: Every proposal must be specific enough to accept or reject

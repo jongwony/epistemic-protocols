@@ -20,7 +20,7 @@ Detailed rationale for the axiom hierarchy and design principles governing epist
 
 Present structured options for user selection rather than requiring recall from memory. Each option must make the post-selection state anticipatable — differential implications visible before choice, not discovered after.
 
-The invariant: user receives structured options with differential futures, and their response is parsed into a typed answer. This applies to gate interactions (Qc/Qs), protocol nudges, and any protocol output that shapes user decisions.
+The invariant: user receives structured options with differential futures, and their response is parsed into a typed answer. This applies to gate interactions (relay/gated), protocol nudges, and any protocol output that shapes user decisions.
 
 Future-state recognizability: Recognition extends beyond "options not blanks" to "each option makes the post-selection state anticipatable." Gate options that present labels without differential futures reduce to recall-in-disguise — the user must mentally simulate consequences rather than recognize them from the presented structure.
 
@@ -29,6 +29,27 @@ Future-state recognizability: Recognition extends beyond "options not blanks" to
 AI detects conditions (gaps, uncertainties, mismatches, risks) and presents them with evidence; the user retains decision authority. Detection is the AI's responsibility; judgment is the user's right. The agent surfaces findings — it does not resolve them unilaterally.
 
 This separation preserves human agency in epistemic dialogue: the AI's role is to illuminate the decision space, not to occupy it. When detection and judgment collapse into a single agent act, the user loses the opportunity to exercise informed choice.
+
+#### Operational Refinement: Relay/Constitution Boundary
+
+A2's detection/authority distinction operationalizes through a relay/constitution boundary at the action level:
+
+- **Relay**: AI exercises zero epistemic authority — mechanically transmits environmental facts with cited basis. Auto-resolution is legitimate when the action is relay.
+- **Constitution**: AI exercises epistemic authority through selection, interpretation, scope expansion, or environment mutation. User confirmation required.
+
+Single test: "Is the AI acting as a relay or exercising authority?" Five verification indicators derive from this test — all are natural consequences of zero epistemic authority:
+
+| Indicator | Relay | Constitution |
+|-----------|-------|-------------|
+| Deterministic | Result uniquely determined by environment | Multiple valid results |
+| Citable | External source is the basis | AI inference is the basis |
+| Within boundary | Action stays within protocol scope | Action crosses protocol boundary |
+| Entropy → 0 | Single possible action | Selection among alternatives |
+| Basis cited | Relay source is visible at point of visibility | Resolution basis is opaque |
+
+**Probe scope**: Non-destructive observation (including test execution with cleanup) is relay. Environment mutation (installation, persistent state change) is constitution. Aitesis ProbeSpec constraints ("must not modify existing project files, cleanup after observation") formalize this boundary.
+
+**Visibility principle**: `basis_cited(resolution)` determines sufficiency — timing (immediate or deferred) is immaterial. Convergence trace, classify summary, and post-hoc reporting all satisfy visibility when basis is cited. Progress-count-only display without basis forces Recall (A1 tension).
 
 ### A3. Convergence Persistence
 
@@ -46,11 +67,11 @@ Category-theoretic interpretation (informal): TOOL GROUNDING can be understood a
 
 ### A5. Interaction Kind Factorization
 
-Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts the gate (Ep → Abs) and R(p) realizes it for preferences p (Abs → Cl). Gate operations are classified: Qc (classificatory — projection from finite coproduct; user selects from N options) and Qs (constitutive — pushout; user response incorporates new content). Qc has bounded regret by default when elided (correctable at next gate); Qs has unbounded regret (missed user content). Specific Qc gates may carry unbounded regret from downstream irreversibility — expressed via always_gated annotation in ELIDABLE CHECKPOINTS.
+Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts the gate (Ep → Abs) and R(p) realizes it for preferences p (Abs → Cl). Gate interactions classify as relay (auto-resolve: deterministic, citable, within-boundary, entropy→0) or gated (user judgment constitutes meaning: informed selection among options with differential futures). Relay interactions have bounded regret when elided (correctable at next gate); gated interactions have unbounded regret (missed user judgment). The operational test: accepting a proposal as-is may appear mechanical, but informed acceptance after recognizing differential futures is itself constitutive. Regret annotations (elidable/always_gated) are the operational mechanism in ELIDABLE CHECKPOINTS; TYPES and FLOW retain Q/Qc/Qs as formal type variables, while TOOL GROUNDING uses (gate)/(extern) for operation classification.
 
-**Qs realization principle**: Constitutive does not mean unstructured. Qs gates present AI-inferred rationale options (2-3 reasoning hypotheses grounded in context) that the user can evaluate, extend, or replace. The constitutive property lies in the user's implicit freedom to respond beyond presented options — this freedom is inherent in conversation turn structure, not an explicit escape hatch. A blank canvas forces Recall; structured rationale enables Recognition of reasoning paths. This extends A1 (Recognition over Recall) to constitutive gates.
+**Gated interaction realization**: Gated does not mean unstructured. Gated interactions present AI-inferred rationale options (2-3 reasoning hypotheses grounded in context) that the user can evaluate, extend, or replace. The constitutive property lies in the user's implicit freedom to respond beyond presented options — this freedom is inherent in conversation turn structure, not an explicit escape hatch. A blank canvas forces Recall; structured rationale enables Recognition of reasoning paths. This extends A1 (Recognition over Recall) to gated interactions.
 
-**Epistemic scope trajectory**: Qs gates are EP's core epistemic contribution — they encode the irreducibly human act of constituting new meaning through dialogue. Qc gates (finite option selection) converge toward platform-native capabilities as models improve. EP's mission alignment concentrates on the Qs axis where human participation cannot be automated.
+**Epistemic scope trajectory**: Gated interactions are EP's core epistemic contribution — they encode the irreducibly human act of constituting new meaning through dialogue. Relay interactions (auto-resolvable selections) converge toward platform-native capabilities as models improve. EP's mission alignment concentrates on the gated axis where human participation cannot be automated.
 
 Composition scope: The factorization G = R(p) ∘ A applies to individual gate operations within a single protocol activation. Inter-protocol composition (sequential activation of multiple protocols) operates through Session Text Composition — natural language in session context, not formal gate composition. Associativity of gate operations across protocol boundaries is not claimed; each protocol's gates are independently factored.
 
@@ -122,7 +143,7 @@ The promotion/demotion decision follows a hermeneutic circle pattern:
 
 **Promotions (Derived → Axiom)**:
 - **A4. Semantic Autonomy** (formerly Structural Idempotency): Type-preserving materialization boundary and platform autonomy became critical as models advanced; realized in Outcome Equivalence corollary.
-- **A5. Interaction Kind Factorization**: Qc/Qs distinction prevents unbounded regret in constitutive gates; becomes more important as models gain capability to silently collapse gate kinds.
+- **A5. Interaction Kind Factorization**: relay/gated distinction prevents unbounded regret in gated interactions; becomes more important as models gain capability to silently auto-resolve gated interactions.
 - **A7. Adversarial Anticipation**: As model reasoning improved, subtle shortcutting (gate mutation, premature convergence assertion, silent detection dismissal) emerged. Requires explicit structural guards beyond formal protocol definition.
 
 **New Axiom (Elevated from Rules)**:
@@ -152,7 +173,9 @@ Active protocols supersede default behaviors. If a protocol mode is active and h
 
 Derived from A1 (Recognition over Recall) + A5 (Interaction Kind Factorization).
 
-When a Qc gate operates on a finite, protocol-owned taxonomy with always_gated annotation, present ALL types with detection status, evidence, and falsification conditions — not only the detected subset behind a generic action verb. The complete assessment enables Recognition (evaluate presented options) over Recall (generate missing options from memory). Design smell: "generic verb hiding finite taxonomy state" — when a gate option label (e.g., "Add type") conceals concrete candidates the AI has already analyzed, creating a Qc/Qs kind impurity (the gate appears classificatory but the sub-step requires constitutive user input). Fix: materialize the full taxonomy, converting mixed Qc/Qs to pure Qc. Applies to: finite type sets with always_gated Qc. Does not apply to: open-ended generation, per-item iteration, or runtime-variable sets. Same principle applies to protocol nudges: when deficit conditions are observed, surface them with explicit evidence rather than silently omitting.
+When a Qc gate operates on a finite, protocol-owned taxonomy with always_gated annotation, present ALL types with detection status, evidence, and falsification conditions — not only the detected subset behind a generic action verb. The complete assessment enables Recognition (evaluate presented options) over Recall (generate missing options from memory). Design smell: "generic verb hiding finite taxonomy state" — when a gate option label (e.g., "Add type") conceals concrete candidates the AI has already analyzed, creating a relay/gated kind impurity (the gate appears relay-eligible but the sub-step requires gated user judgment). Fix: materialize the full taxonomy, converting mixed to pure relay. Applies to: finite type sets with always_gated Qc. Does not apply to: open-ended generation, per-item iteration, or runtime-variable sets. Same principle applies to protocol nudges: when deficit conditions are observed, surface them with explicit evidence rather than silently omitting.
+
+**Scope boundary**: Full Taxonomy applies when the taxonomy is the *user's decision target* — the user confirms, revises, or selects from the taxonomy (e.g., Hermeneia Phase 1b gap type assessment, Telos Phase 1 dimension assessment). When the taxonomy is an *AI detection tool* — the AI uses it internally for scanning and presents only results (e.g., Syneidesis gap surfacing, Katalepsis probe construction, Prosoche risk classification) — presenting only detected items is appropriate. Detection-tool taxonomies must include an Emergent dimension to ensure comprehensiveness; the named types are working hypotheses, not exhaustive categories.
 
 ### Convergence Evidence
 
@@ -218,6 +241,8 @@ Principle: side effects require explicit answer types, not tool-level escape. Wh
 
 CLAUDE.md principles guide contributors (protocol designers). End users receive only SKILL.md content via the plugin system. For a principle to affect runtime protocol behavior, it must be structurally embedded in SKILL.md — documenting it in CLAUDE.md alone is insufficient.
 
+**Session-level observer exception**: The Dual Advisory Layer principle establishes Output Style nudge as a legitimate runtime mechanism complementary to graph.json. Nudge operates as a session-level cross-cutting observer — it belongs to no single SKILL.md because it observes across all protocols. Audience Reach applies to protocol-specific runtime behavior (which must be embedded in that protocol's SKILL.md), not to session-level observation patterns that are architecturally cross-cutting. Each SKILL.md governs its own protocol's detection (e.g., Post-Convergence conditions); Output Style governs the session-level observation layer.
+
 ---
 
 ## Meta-Principle
@@ -257,12 +282,12 @@ All protocols share this structure within `Definition` code block:
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
 ── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping
-── ELIDABLE CHECKPOINTS ──  (if applicable) Per-gate dual-axis analysis (Qc/Qs answer space + regret profile)
+── ELIDABLE CHECKPOINTS ──  (if applicable) Per-gate dual-axis analysis (relay/gated interaction kind + regret profile)
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ```
 
-Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping. Gate operations use Qc/Qs kind suffix in operation names (e.g., `Qc (extern)`).
+Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping. Gate operations use `(gate)` annotation for user-facing gate interactions (e.g., `Qc (gate)`); non-gate external operations retain `(extern)`.
 
 #### FLOW-MORPHISM Relationship
 

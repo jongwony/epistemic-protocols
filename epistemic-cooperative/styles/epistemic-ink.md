@@ -40,7 +40,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 
 | SKILL.md abstraction | Ink element |
 |---------------------|-------------|
-| `present` (Qc/Qs gate) | `gate` |
+| `present` (gate interaction) | `gate` |
 | Convergence evidence | `convergence` |
 | Phase transition | `phase-header` |
 | Progress tracking | `progress` |

@@ -79,12 +79,12 @@ converge iff |remaining| = 0 ∨ user_esc
 -- Realization: present → TextPresent+Stop
 Phase 0 Probe (detect)  → Internal analysis (no external tool)
 Phase 1 Ctx   (collect) → Read, Grep, Glob (codebase scan for boundary signals: CLAUDE.md, boundaries.md, rules/, prior session context)
-Phase 2 Qc    (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 2 Qc    (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3       (state)   → Internal state update
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
-Phase 2 Qc (classify)      → always_gated (Qc: UserSpec/AISpec/NeedsCalibration — boundary ownership)
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 2 Qc (classify)      → always_gated (gated: UserSpec/AISpec/NeedsCalibration — boundary ownership)
 
 ── MODE STATE ──
 Λ = { phase: Phase, T: TaskScope,
@@ -153,7 +153,7 @@ When Horismos is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present highest-impact boundary-undefined domain for user classification via gate interaction (Qc) and yield turn.
+**Action**: At Phase 2, present highest-impact boundary-undefined domain for user classification via gate interaction and yield turn.
 </system-reminder>
 
 - Horismos completes before execution proceeds
@@ -230,11 +230,11 @@ Collect contextual evidence to enrich domain descriptions and improve classifica
 
 1. For each domain in `Bᵢ`:
    - **Call Read/Grep/Glob** to search for relevant boundary signals in CLAUDE.md, rules/, boundaries.md, project configuration
-   - If definitive boundary assignment found: mark as context-resolved (`Bᵣ`), integrate into BoundaryMap
+   - If definitive boundary assignment found: mark as context-resolved (`Bᵣ`), integrate into BoundaryMap with cited basis (source file/rule and specific evidence)
    - If partial evidence found: enrich domain with collected evidence (`Bᵢ'`), retain for Phase 2
    - If conflicting signals found: enrich domain with conflicting findings (`Bᵢ'`), retain for Phase 2
    - If no evidence found: retain in `Bᵢ'` with empty evidence
-2. If all domains context-resolved (`Bᵢ' = ∅`): output BoundaryMap as session text (no user interruption)
+2. If all domains context-resolved (`Bᵢ' = ∅`): output BoundaryMap as session text with per-domain basis citation (no user interruption). Each entry shows: domain → classification (source: [file/rule], evidence: [specific text])
 3. If enriched domains remain (`Bᵢ' ≠ ∅`): proceed to Phase 2
 
 **Purpose**: Context collection aims to auto-resolve where possible and enrich remaining domains with evidence, reducing user interaction to what truly requires human judgment.
@@ -252,7 +252,7 @@ Collect contextual evidence to enrich domain descriptions and improve classifica
 Present the domain context as text output:
 - **Domain**: [Domain name] — [Specific description]
 - **Evidence**: [Evidence collected during context collection, if any]
-- **Progress**: [N bounded / M total domains]
+- **Progress**: [N bounded / M total domains] (context-resolved entries shown with basis: e.g., "[1 context-resolved (source: boundaries.md — 'git push = irreversible') / 3 total]")
 
 Then **present**:
 
@@ -310,7 +310,7 @@ After integration:
 ## Rules
 
 1. **AI-guided, user-classified**: AI detects boundary-undefined domains; classification requires user choice via gate interaction (Phase 2). AI detection is implicitly confirmed when the user engages with classification (Phase 2 gate interaction response, not Esc).
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Options are UserSpec/AISpec/NeedsCalibration/Dismiss — never open-ended.
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Options are UserSpec/AISpec/NeedsCalibration/Dismiss — never open-ended.
 3. **Context collection first**: Before asking the user, collect contextual evidence through Read/Grep/Glob codebase exploration to auto-resolve where possible and enrich remaining domains (Phase 1).
 4. **Definition over Assumption**: When boundary ownership is unclear, define explicitly rather than assume — silence is worse than a dismissed classification.
 5. **No fixed taxonomy**: Domains emerge dynamically from task probe, not a predefined list. Do not impose categories.

@@ -30,7 +30,8 @@ invariant: Applicability over Correctness
 R      = Execution result (AI's completed work output)
 X      = Application context (environment, constraints, user situation)
 Eval   = Applicability evaluation: (R, X) → Set(Mismatch)
-Mismatch = { aspect: String, description: String, evidence: String, severity: Severity, origin: Origin }
+Mismatch = { aspect: String, dimension: Dimension, description: String, evidence: String, severity: Severity, origin: Origin }
+Dimension ∈ {Convention, Environment, Audience, Dependency} ∪ Emergent(Dimension)
 Origin ∈ {Initial, Emerged(aspect)}                            -- mismatch provenance: initial scan or spawned by adapting parent aspect
 Severity ∈ {Critical, Significant, Minor}
 Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial
@@ -68,14 +69,14 @@ progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress whe
 ── TOOL GROUNDING ──
 -- Realization: present → TextPresent+Stop
 Eval   (detect)  → Internal analysis (no external tool)
-Qc     (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Qc     (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (modify)  → Edit, Write (result adaptation based on user direction)
                     -- (modify): tool call that changes existing artifacts (distinct from (extern) user-facing, (detect) read-only, (state) internal)
 Mᵢ/Mₑ (state)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
-Phase 1 Qc (applicability) → always_gated (Qc: Confirm/Dismiss/Adapt applicability judgment)
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 1 Qc (applicability) → always_gated (gated: Confirm/Dismiss/Adapt applicability judgment)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
@@ -147,7 +148,7 @@ When Epharmoge is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 1, present mismatch evidence via gate interaction (Qc) and yield turn.
+**Action**: At Phase 1, present mismatch evidence via gate interaction and yield turn.
 </system-reminder>
 
 - Epharmoge completes before proceeding to next task
@@ -185,7 +186,25 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 
 ## Mismatch Identification
 
-Mismatches are identified dynamically per execution result — no fixed taxonomy. Each mismatch is characterized by:
+Mismatches are identified across named dimensions — working hypotheses for systematic detection, not exhaustive categories.
+
+### Mismatch Dimension Taxonomy
+
+| Dimension | Detection | Question Form |
+|-----------|-----------|---------------|
+| **Convention** | Result follows general patterns but project has local conventions | "This follows best practices, but your project uses [local pattern]" |
+| **Environment** | Result assumes environment state that differs from actual deployment context | "This assumes [env state], but your context has [actual state]" |
+| **Audience** | Result targets a different audience than the actual consumers | "This is written for [assumed audience], but [actual audience] will use it" |
+| **Dependency** | Result interacts with components whose constraints weren't considered | "This depends on [component] which has [constraint not considered]" |
+
+**Emergent mismatch detection**: Named dimensions are working hypotheses, not exhaustive categories. Detect Emergent mismatches when:
+- The applicability gap spans multiple named dimensions
+- User dismisses all named-dimension mismatches but the result still exhibits contextual misfit
+- The execution context involves domain-specific fitness criteria that resist classification into the four named dimensions
+
+Emergent mismatches must satisfy morphism `ApplicationDecontextualized → ContextualizedExecution`; boundary: contextual fit (in-scope) vs. intent expression (→ `/clarify`) or decision gaps (→ `/gap`).
+
+Each mismatch is characterized by:
 
 - **aspect**: The dimension where result and context diverge
 - **description**: What specifically doesn't fit
@@ -308,7 +327,7 @@ After adaptation — **re-scan**:
 ## Rules
 
 1. **AI-guided, user-judged**: AI detects applicability mismatch; user judges whether adaptation is needed via gate interaction (Phase 1)
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Applicability over Correctness**: When result is correct but contextually mismatched, surface the mismatch — do not assume correctness implies fitness
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
 5. **One at a time**: Surface one mismatch per Phase 1 cycle; do not bundle multiple mismatches

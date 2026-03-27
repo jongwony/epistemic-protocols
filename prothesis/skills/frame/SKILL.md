@@ -130,8 +130,8 @@ I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
 -- Realization: present → TextPresent+Stop
-Phase 0 Qc (extern)      → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
-Sc (extern)              → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
+Phase 0 Qc (gate)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
+Sc (gate)                → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
@@ -139,8 +139,8 @@ Phase 3 P (preview)      → Internal operation (text output: per-perspective ep
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
 Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
 Phase 4 O (output)       → Internal operation (text output: full synthesis — convergence, divergence, integrated assessment)
-Phase 4 Qc (extern)      → present (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
-PF Qc (extern)           → present (multiSelect: preservation scope; in LOOP wrap_up path only)
+Phase 4 Qc (gate)        → present (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
+PF Qc (gate)             → present (multiSelect: preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
@@ -149,13 +149,13 @@ Phase 4 Syn (synthesis)  → Internal operation (no external tool)
 characterize (internal)  → Internal operation (perspective count tier classification)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
 Phase 0 Qc (MB+mode)    → elidable when: user_invoked ∧ explicit_arg(U)
                            default: (Q1=confirm, Q2=ai_recommended_mode)
                            regret: bounded (Phase 2 Sc always gated; J_mb=modify on re-invoke)
-Phase 2 Sc (perspective) → always_gated (Qc: lens selection is epistemic choice)
-Phase 4 Qc (routing)     → always_gated (Qc, unbounded-regret: loop path + team lifecycle)
-PF Qc (preserve)         → always_gated (Qc, unbounded-regret: knowledge preservation scope)
+Phase 2 Sc (perspective) → always_gated (gated: lens selection is epistemic choice)
+Phase 4 Qc (routing)     → always_gated (gated: loop path + team lifecycle)
+PF Qc (preserve)         → always_gated (gated: knowledge preservation scope)
 
 ── CATEGORICAL NOTE ──
 ∩ = meet (intersection) over comparison morphisms between perspective outputs
@@ -210,7 +210,7 @@ When Prothesis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: Before analysis, present perspective options via gate interaction (Qc/Qs) and yield turn.
+**Action**: Before analysis, present perspective options via gate interaction and yield turn.
 </system-reminder>
 
 - Prothesis completes before other workflows begin
@@ -506,7 +506,7 @@ Consult `references/conceptual-foundations.md` for trigger/skip heuristics, Para
 ## Rules
 
 1. **Mission Brief confirmation**: Always present Mission Brief for confirmation via gate interaction before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation.
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 7
 4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective

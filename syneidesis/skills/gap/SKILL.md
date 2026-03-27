@@ -57,7 +57,7 @@ Convergence evidence: At all-tasks-completed, present audit trace — for each g
 ── ADJUSTMENT RULES ──
 A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
 A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
-A(Probe, _, σ)      = σ { re-scan(expanded) }        -- high-stakes: additional verification round
+A(Probe, _, σ)      = σ { re-scan(expanded) }        -- additional verification round (depth varies by stakes)
 
 ── SELECTION RULE ──
 Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
@@ -67,15 +67,15 @@ proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
 -- Realization: present → TextPresent+Stop
-Qs (extern)    → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
+Qs (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (detect)  → Read, Grep (context for gap identification)
 A (adjust)     → Internal state update (no external tool)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
-Phase 1 Qs (gap surface)   → always_gated (Qs: user judgment on surfaced gap determines adjustment)
-Phase 1 Qs option 3 (Probe) → conditional: present only when stakes(D) = High
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 1 Qs (gap surface)   → always_gated (gated: user judgment on surfaced gap determines adjustment)
+Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes level)
                                 regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
 
 ── MODE STATE ──
@@ -125,7 +125,7 @@ When Syneidesis is active:
 
 **Retained**: Safety boundaries, secrets handling, deny-paths, user explicit instructions
 
-**Action**: At decision points, present potential gaps via gate interaction (Qc/Qs) and yield turn.
+**Action**: At decision points, present potential gaps via gate interaction and yield turn.
 </system-reminder>
 
 - Stakes Assessment replaces tier-based gating
@@ -230,10 +230,10 @@ How would you like to address this gap?
 Options:
 1. **Address** — [what resolving this gap enables or changes in the decision]
 2. **Dismiss** — [what assumption holds if this gap is accepted as-is]
-3. **Probe** — request additional verification before deciding (high-stakes only)
+3. **Probe** — request additional verification before deciding (rationale depth varies by stakes)
 ```
 
-Option 3 (Probe) is conditional: present only when `stakes(D) = High`.
+Option 3 (Probe) is always visible. When `stakes(D) = High`, present with expanded verification rationale; otherwise, present with brief rationale. Recognition over Recall: hiding Probe forces the user to recall that deeper verification is available.
 
 Other is always available — user can respond freely beyond the listed options.
 
@@ -279,7 +279,7 @@ When Syneidesis is active, **present** via gate interaction for:
 
 | Environment | Address | Dismiss | Probe |
 |-------------|---------|---------|-------|
-| Gate interaction | Selection | Selection | Selection (high-stakes only) |
+| Gate interaction | Selection | Selection | Selection |
 
 Note: Esc key → unconditional loop termination (LOOP level). Gate interaction blocks until response or Esc.
 

@@ -118,7 +118,7 @@ SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
 Key features:
 - Graph-aware chain validation (preconditions, suppressions)
 - Automated gate inventory from ELIDABLE CHECKPOINTS
-- 3-axis disposition model (Qc/Qs × regret × epistemic access)
+- 3-axis disposition model (relay/gated × regret × epistemic access)
 - Catch-chain invariant verification
 - `/review`-pattern template output with pipeline context rules
 
