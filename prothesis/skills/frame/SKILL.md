@@ -129,16 +129,16 @@ S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop
+-- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Qc (gate)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
 Sc (gate)                → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
 T (parallel)             → TeamCreate tool (creates team with shared task list)
 ∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
-Phase 3 P (preview)      → Internal operation (text output: per-perspective epistemic contribution + key finding summaries; no gate interaction)
+Phase 3 P (relay)        → TextPresent+Proceed (per-perspective epistemic contribution + key finding summaries)
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
 Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
-Phase 4 O (output)       → Internal operation (text output: full synthesis — convergence, divergence, integrated assessment)
+Phase 4 O (relay)        → TextPresent+Proceed (full synthesis — convergence, divergence, integrated assessment)
 Phase 4 Qc (gate)        → present (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
 PF Qc (gate)             → present (multiSelect: preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
@@ -147,6 +147,7 @@ wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings,
 G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
 characterize (internal)  → Internal operation (perspective count tier classification)
+converge (relay)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile

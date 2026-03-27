@@ -67,12 +67,13 @@ contextualized(R') = adjudicated(R', X) ∨ user_esc
 progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress when re-scan discovers new mismatches
 
 ── TOOL GROUNDING ──
--- Realization: present → TextPresent+Stop
+-- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Eval   (detect)  → Internal analysis (no external tool)
 Qc     (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (modify)  → Edit, Write (result adaptation based on user direction)
                     -- (modify): tool call that changes existing artifacts (distinct from (extern) user-facing, (detect) read-only, (state) internal)
 Mᵢ/Mₑ (state)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
+converge (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile

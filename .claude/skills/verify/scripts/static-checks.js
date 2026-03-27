@@ -485,6 +485,28 @@ function checkToolGrounding() {
       });
     }
 
+    // Check 6e: Verify Realization header distinguishes gate and relay
+    const realizationLine = groundingSection.match(/-- Realization:.*$/m);
+    if (realizationLine) {
+      const header = realizationLine[0];
+      if (!header.includes('gate') || !header.includes('relay')) {
+        results.warn.push({
+          check: 'tool-grounding',
+          file: relPath,
+          message: 'Realization header should distinguish gate and relay interaction kinds (e.g., "gate → TextPresent+Stop; relay → TextPresent+Proceed")'
+        });
+      }
+    }
+
+    // Check 6f: Verify convergence behavior is explicitly classified with interaction kind
+    if (!/\bconverge\s*\((relay|gate)\)/i.test(groundingSection)) {
+      results.warn.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'Convergence behavior not explicitly classified in TOOL GROUNDING — add converge entry with (relay) or (gate) annotation'
+      });
+    }
+
     results.pass.push({
       check: 'tool-grounding',
       file: relPath,
