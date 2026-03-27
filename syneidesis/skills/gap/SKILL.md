@@ -67,14 +67,14 @@ proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
 -- Realization: present → TextPresent+Stop
-Qs (extern)    → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
+Qs (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (detect)  → Read, Grep (context for gap identification)
 A (adjust)     → Internal state update (no external tool)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
-Phase 1 Qs (gap surface)   → always_gated (Qs: user judgment on surfaced gap determines adjustment)
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 1 Qs (gap surface)   → always_gated (gated: user judgment on surfaced gap determines adjustment)
 Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes level)
                                 regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
 
@@ -125,7 +125,7 @@ When Syneidesis is active:
 
 **Retained**: Safety boundaries, secrets handling, deny-paths, user explicit instructions
 
-**Action**: At decision points, present potential gaps via gate interaction (Qc/Qs) and yield turn.
+**Action**: At decision points, present potential gaps via gate interaction and yield turn.
 </system-reminder>
 
 - Stakes Assessment replaces tier-based gating

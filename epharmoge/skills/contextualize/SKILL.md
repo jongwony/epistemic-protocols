@@ -69,14 +69,14 @@ progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress whe
 ── TOOL GROUNDING ──
 -- Realization: present → TextPresent+Stop
 Eval   (detect)  → Internal analysis (no external tool)
-Qc     (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Qc     (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (modify)  → Edit, Write (result adaptation based on user direction)
                     -- (modify): tool call that changes existing artifacts (distinct from (extern) user-facing, (detect) read-only, (state) internal)
 Mᵢ/Mₑ (state)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
-Phase 1 Qc (applicability) → always_gated (Qc: Confirm/Dismiss/Adapt applicability judgment)
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 1 Qc (applicability) → always_gated (gated: Confirm/Dismiss/Adapt applicability judgment)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
@@ -148,7 +148,7 @@ When Epharmoge is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 1, present mismatch evidence via gate interaction (Qc) and yield turn.
+**Action**: At Phase 1, present mismatch evidence via gate interaction and yield turn.
 </system-reminder>
 
 - Epharmoge completes before proceeding to next task
@@ -327,7 +327,7 @@ After adaptation — **re-scan**:
 ## Rules
 
 1. **AI-guided, user-judged**: AI detects applicability mismatch; user judges whether adaptation is needed via gate interaction (Phase 1)
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Applicability over Correctness**: When result is correct but contextually mismatched, surface the mismatch — do not assume correctness implies fitness
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
 5. **One at a time**: Surface one mismatch per Phase 1 cycle; do not bundle multiple mismatches

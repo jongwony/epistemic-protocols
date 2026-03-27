@@ -13,7 +13,7 @@ Build composition SKILL.md files from protocol chains. Validates graph constrain
 
 ```
 SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
-  (Qc)                           (Qc)          (Qs)
+  (gated)                        (gated)       (gated)
 ```
 
 3 user gates across 5 phases. Phases 1-2 are autonomous (validation and collection).
@@ -69,7 +69,7 @@ Read all protocol SKILL.md files in parallel (paths are deterministic after Phas
 
 1. **Locate SKILL.md**: Read `{protocol}/skills/{skill}/SKILL.md`
 2. **Extract ELIDABLE CHECKPOINTS**: Grep for `ELIDABLE CHECKPOINTS` section
-3. **Parse each gate entry**: Extract Phase number, Kind (Qc/Qs), label, condition (always_gated/elidable/conditional), regret profile (bounded/unbounded), and safety net reference (if stated)
+3. **Parse each gate entry**: Extract Phase number, Kind (relay/gated), label, condition (always_gated/elidable/conditional), regret profile (bounded/unbounded), and safety net reference (if stated)
 
 Build the gate inventory:
 

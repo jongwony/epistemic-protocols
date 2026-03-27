@@ -79,12 +79,12 @@ converge iff |remaining| = 0 ∨ user_esc
 -- Realization: present → TextPresent+Stop
 Phase 0 Probe (detect)  → Internal analysis (no external tool)
 Phase 1 Ctx   (collect) → Read, Grep, Glob (codebase scan for boundary signals: CLAUDE.md, boundaries.md, rules/, prior session context)
-Phase 2 Qc    (extern)  → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 2 Qc    (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3       (state)   → Internal state update
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
-Phase 2 Qc (classify)      → always_gated (Qc: UserSpec/AISpec/NeedsCalibration — boundary ownership)
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 2 Qc (classify)      → always_gated (gated: UserSpec/AISpec/NeedsCalibration — boundary ownership)
 
 ── MODE STATE ──
 Λ = { phase: Phase, T: TaskScope,
@@ -153,7 +153,7 @@ When Horismos is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present highest-impact boundary-undefined domain for user classification via gate interaction (Qc) and yield turn.
+**Action**: At Phase 2, present highest-impact boundary-undefined domain for user classification via gate interaction and yield turn.
 </system-reminder>
 
 - Horismos completes before execution proceeds
@@ -310,7 +310,7 @@ After integration:
 ## Rules
 
 1. **AI-guided, user-classified**: AI detects boundary-undefined domains; classification requires user choice via gate interaction (Phase 2). AI detection is implicitly confirmed when the user engages with classification (Phase 2 gate interaction response, not Esc).
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Options are UserSpec/AISpec/NeedsCalibration/Dismiss — never open-ended.
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Options are UserSpec/AISpec/NeedsCalibration/Dismiss — never open-ended.
 3. **Context collection first**: Before asking the user, collect contextual evidence through Read/Grep/Glob codebase exploration to auto-resolve where possible and enrich remaining domains (Phase 1).
 4. **Definition over Assumption**: When boundary ownership is unclear, define explicitly rather than assume — silence is worse than a dismissed classification.
 5. **No fixed taxonomy**: Domains emerge dynamically from task probe, not a predefined list. Do not impose categories.

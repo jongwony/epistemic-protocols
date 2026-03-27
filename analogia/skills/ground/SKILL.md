@@ -80,13 +80,13 @@ early_exit = user_declares_mapping_sufficient
 ── TOOL GROUNDING ──
 -- Realization: present → TextPresent+Stop
 Phase 1 Map     (construct) → Read, Grep (domain structure analysis)
-Phase 2 Qs      (extern)    → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
+Phase 2 Qs      (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (state)     → Internal state update
 Phase 0 Detect  (infer)     → Internal analysis (no external tool)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
-Phase 2 Qs (validate)      → always_gated (Qs: user validates structural mapping with examples)
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 2 Qs (validate)      → always_gated (gated: user validates structural mapping with examples)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: AIOutput, Sₐ: Domain, Sₜ: Domain,
@@ -154,7 +154,7 @@ When Analogia is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present concrete instantiation for user validation of mapping adequacy via gate interaction (Qs) and yield turn.
+**Action**: At Phase 2, present concrete instantiation for user validation of mapping adequacy via gate interaction and yield turn.
 </system-reminder>
 
 - Analogia completes before output dependent on mapping validity proceeds
@@ -290,7 +290,7 @@ After integration:
 ## Rules
 
 1. **AI-guided, user-validated**: AI detects mapping uncertainty; validation requires user choice via gate interaction (Phase 2)
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Domain decomposition first**: Before presenting instantiations, decompose abstract and concrete domain structures through codebase analysis (Phase 1)
 4. **Structural Correspondence over Abstract Assertion**: When mapping is uncertain, construct explicit correspondences rather than assert mapping validity — silence is worse than a rejected mapping
 5. **Concrete instantiation required**: Every mapping presented must include at least one concrete example in the user's domain

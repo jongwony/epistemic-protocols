@@ -118,7 +118,7 @@ SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
 주요 특징:
 - 그래프 인식 체인 검증 (precondition, suppression)
 - ELIDABLE CHECKPOINTS에서 자동 게이트 인벤토리
-- 3축 배치 모델 (Qc/Qs × regret × epistemic access)
+- 3축 배치 모델 (relay/gated × regret × epistemic access)
 - Catch-chain 불변량 검증
 - `/review` 패턴 템플릿 출력 (pipeline context rules 포함)
 

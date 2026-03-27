@@ -75,23 +75,23 @@ Convergence evidence: At |remaining| = 0, present transformation trace — for e
 
 ── TOOL GROUNDING ──
 -- Realization: present → TextPresent+Stop
-Phase 0 Qc   (extern) → present (AI-detected activation confirmation; ai_strong only)
-Phase 1a Qc  (extern) → present (E confirmation)
+Phase 0 Qc   (gate)   → present (AI-detected activation confirmation; ai_strong only)
+Phase 1a Qc  (gate)   → present (E confirmation)
 Phase 1b detect (detect) → Internal analysis (gap detection from Eᵥ)
-Phase 1b Qc  (extern) → present (full taxonomy assessment: proceed/revise)
-Phase 2 Qs   (extern) → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
+Phase 1b Qc  (gate)   → present (full taxonomy assessment: proceed/revise)
+Phase 2 Qs   (gate)   → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
 suggest_only → no tool call (passive suggestion; Λ.active = false)
 integrate    → Internal state update (no external tool)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
 Phase 0 Qc (confirm)       → conditional: ai_strong only (user_signal path skips Phase 0)
                               regret: bounded (Phase 1a Qc always gated; immune(E) on decline)
 Phase 1a Qc (E confirm)    → elidable when: explicit_arg(E) via /clarify "text"
                               default: proceed with bound E
                               regret: bounded (Phase 1b Qc provides correction opportunity)
-Phase 1b Qc (gap confirm)  → always_gated (Qc: gap set shapes clarification path)
-Phase 2 Qs (clarify)       → always_gated (Qs: user incorporates intent into clarification)
+Phase 1b Qc (gap confirm)  → always_gated (gated: gap set shapes clarification path)
+Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent into clarification)
 
 ── MODE STATE ──
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, detected: Set(Gap), gaps: Set(Gap),
@@ -143,7 +143,7 @@ When Hermeneia is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present clarification options via gate interaction (Qc/Qs) and yield turn.
+**Action**: At Phase 2, present clarification options via gate interaction and yield turn.
 </system-reminder>
 
 - Hermeneia completes before other workflows begin
@@ -397,7 +397,7 @@ When multiple gaps detected:
 ## Rules
 
 1. **Hybrid-initiated, user-confirmed**: Activate on user signal, or with user confirmation when AI detects ambiguous expression
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Detection with user authority**: AI presents full taxonomy assessment — every named type with detection status, evidence, and falsification condition; user confirms or revises (no selective presentation, no auto-proceed)
 4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
 5. **Articulation support**: Help user express what they know, don't guess what they mean

@@ -99,12 +99,12 @@ Phase 0 Scan    (infer)       → Internal analysis (no external tool)
 Phase 1 Ctx     (collect)     → Read, Grep (context collection); WebSearch (conditional: environmental dependency)
 Phase 1 Classify (assess)     → Internal analysis (multi-dimension assessment); Read, Grep (coherence: multi-file relation analysis)
 Phase 1 Probe   (enrich)      → Write, Bash, Read (empirical enrichment, Factual only); cleanup via Bash
-Phase 2 Qs      (extern)      → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
+Phase 2 Qs      (gate)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (state)       → Internal state update
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Qc/Qs = answer space; always_gated/elidable = regret profile
-Phase 2 Qs (transparent)   → always_gated (Qs: user provides context judgment on insufficiency)
+-- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgment on insufficiency)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: ExecutionPlan, uncertainties: Set(Uncertainty),
@@ -177,7 +177,7 @@ When Aitesis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present highest information-gain uncertainty candidate with classify results via gate interaction (Qs) and yield turn.
+**Action**: At Phase 2, present highest information-gain uncertainty candidate with classify results via gate interaction and yield turn.
 </system-reminder>
 
 - Aitesis completes before execution proceeds
@@ -392,7 +392,7 @@ After integration:
 ## Rules
 
 1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via gate interaction (Phase 2)
-2. **Recognition over Recall**: Present structured options via gate interaction (Qc/Qs) and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/Relevance: detect and show routing target in classify summary
 4. **Inference over Detection**: When context is insufficient and context collection does not fully resolve, infer the highest-gain question rather than assume — silence is worse than a dismissed question
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on execution plan requirements
