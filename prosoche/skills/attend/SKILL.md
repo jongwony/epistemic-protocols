@@ -212,6 +212,8 @@ Withdraw shutdown    (extern)  → SendMessage (shutdown_request to team members
 Phase -1 Sub-A0 Qc (routing)   → conditional: fires only when D[] ≠ ∅
                                    default: present detected deficits with routing options
                                    regret: bounded (Materialize + Phase 0 Classify provide independent checks)
+Phase -1 confirm_boundary (prior) → always_gated (constitution: cross-protocol boundary crossing)
+                                   regret: bounded (Phase 0 Classify provides independent risk check)
 Phase -1 confirm (cold start)   → conditional: fires when ¬Fired ∧ ¬C.prior (transparent cold start)
                                    regret: bounded (Phase 0 Classify provides independent risk check)
 Phase -1 conflict (tasks+prior) → always_gated (Qc: resume vs refresh vs merge)

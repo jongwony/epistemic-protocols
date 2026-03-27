@@ -57,7 +57,7 @@ Convergence evidence: At all-tasks-completed, present audit trace — for each g
 ── ADJUSTMENT RULES ──
 A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
 A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
-A(Probe, _, σ)      = σ { re-scan(expanded) }        -- high-stakes: additional verification round
+A(Probe, _, σ)      = σ { re-scan(expanded) }        -- additional verification round (depth varies by stakes)
 
 ── SELECTION RULE ──
 Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
@@ -230,7 +230,7 @@ How would you like to address this gap?
 Options:
 1. **Address** — [what resolving this gap enables or changes in the decision]
 2. **Dismiss** — [what assumption holds if this gap is accepted as-is]
-3. **Probe** — request additional verification before deciding (high-stakes only)
+3. **Probe** — request additional verification before deciding (rationale depth varies by stakes)
 ```
 
 Option 3 (Probe) is always visible. When `stakes(D) = High`, present with expanded verification rationale; otherwise, present with brief rationale. Recognition over Recall: hiding Probe forces the user to recall that deeper verification is available.
@@ -279,7 +279,7 @@ When Syneidesis is active, **present** via gate interaction for:
 
 | Environment | Address | Dismiss | Probe |
 |-------------|---------|---------|-------|
-| Gate interaction | Selection | Selection | Selection (high-stakes only) |
+| Gate interaction | Selection | Selection | Selection |
 
 Note: Esc key → unconditional loop termination (LOOP level). Gate interaction blocks until response or Esc.
 
