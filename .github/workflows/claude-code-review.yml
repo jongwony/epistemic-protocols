@@ -23,8 +23,8 @@ jobs:
       - name: Resolve PR context
         id: pr
         run: |
-          if [ -n "${{ steps.pr.outputs.number }}" ]; then
-            echo "number=${{ steps.pr.outputs.number }}" >> "$GITHUB_OUTPUT"
+          if [ -n "${{ github.event.pull_request.number }}" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
             echo "sha=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
           else
             PR_JSON=$(gh pr view --json number,headRefOid)
