@@ -242,6 +242,8 @@ Generate from the protocol just experienced:
 - Line 1: Name the epistemic operation performed (source: protocol's deficit → resolution type, or `references/scenarios.md` Philosophy field)
 - Line 2: Connect to a concrete workflow benefit
 
+**Epistemic Ink Tip** (1 line, after Post-Trial Insight): "Tip: Run `/config` to enable Epistemic Ink — an Output Style that enhances protocol interactions with structured formatting."
+
 **Quick Post-Trial Navigation**:
 
 Present via gate interaction:

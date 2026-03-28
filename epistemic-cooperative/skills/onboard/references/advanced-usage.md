@@ -47,6 +47,13 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 | `/contextualize` after built-in `/simplify` | Chain epistemic protocol after built-in command |
 | Skip the workflow | Jump directly to the protocol that matches your current deficit |
 
+## Experience Enhancement
+
+| Enhancement | How | Notes |
+|-------------|-----|-------|
+| Epistemic Ink Output Style | Run `/config` to enable | Structured formatting for protocol interactions — richer gate presentation, visual phase markers |
+| Output Style stacking | Enable multiple styles in `/config` | Epistemic Ink composes with other Output Styles without conflict |
+
 ## Composition with Built-in Commands
 
 | Chain | Pattern |
