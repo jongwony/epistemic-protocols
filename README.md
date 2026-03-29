@@ -41,6 +41,12 @@ $hermeneia:clarify
 $analogia:ground
 ```
 
+If you want a one-time installer that sets up a personal Codex marketplace outside the repo:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install-codex-plugins.sh | bash
+```
+
 <details>
 <summary>Notes</summary>
 
@@ -48,6 +54,7 @@ $analogia:ground
 - Each Codex plugin points directly at the original source directory such as `./prothesis` or `./epistemic-cooperative`.
 - The current Codex marketplace exposes 10 protocol plugins plus `epistemic-cooperative`, and also includes experimental `reflexion` and `write` entries.
 - Claude and Codex now share the same source directories; only the plugin metadata entrypoints differ.
+- The optional installer script clones this repository into `~/.agents/plugins/epistemic-protocols-src` and merges its entries into `~/.agents/plugins/marketplace.json`.
 
 </details>
 

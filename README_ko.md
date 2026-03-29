@@ -41,6 +41,12 @@ $hermeneia:clarify
 $analogia:ground
 ```
 
+저장소 밖에서도 한 번에 개인 Codex marketplace를 구성하려면:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install-codex-plugins.sh | bash
+```
+
 <details>
 <summary>참고</summary>
 
@@ -48,6 +54,7 @@ $analogia:ground
 - 각 Codex plugin은 `./prothesis`, `./epistemic-cooperative` 같은 원본 디렉터리를 직접 가리킵니다.
 - 현재 Codex marketplace에는 10개 프로토콜 plugin과 `epistemic-cooperative`, 그리고 실험용 `reflexion`, `write`가 포함되어 있습니다.
 - Claude와 Codex는 이제 같은 소스 디렉터리를 공유하고, plugin metadata 진입점만 다릅니다.
+- 선택적 설치 스크립트는 이 저장소를 `~/.agents/plugins/epistemic-protocols-src` 아래로 clone하고, 엔트리를 `~/.agents/plugins/marketplace.json`에 병합합니다.
 
 </details>
 
