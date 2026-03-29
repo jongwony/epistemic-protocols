@@ -1,0 +1,38 @@
+{
+  "name": "aitesis",
+  "version": "3.9.7",
+  "description": "Use $aitesis:inquire to find the context missing before execution begins.",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "epistemic-protocols",
+    "aitesis"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Aitesis",
+    "shortDescription": "Use $aitesis:inquire to find the context missing before execution begins.",
+    "longDescription": "Use $aitesis:inquire to find the context missing before execution begins.",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use $aitesis:inquire to identify what context is missing.",
+      "Use $aitesis:inquire before we execute with weak assumptions.",
+      "Use $aitesis:inquire to ask the highest-value clarifying questions."
+    ],
+    "brandColor": "#1F6B75"
+  }
+}

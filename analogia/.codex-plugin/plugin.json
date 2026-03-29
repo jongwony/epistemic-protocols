@@ -1,0 +1,38 @@
+{
+  "name": "analogia",
+  "version": "1.5.7",
+  "description": "Use $analogia:ground when abstract advice needs grounding in your concrete context.",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "epistemic-protocols",
+    "analogia"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Analogia",
+    "shortDescription": "Use $analogia:ground when abstract advice needs grounding in your concrete context.",
+    "longDescription": "Use $analogia:ground when abstract advice needs grounding in your concrete context.",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use $analogia:ground to map this advice onto my actual situation.",
+      "Use $analogia:ground when a framework sounds right but feels abstract.",
+      "Use $analogia:ground to validate whether this analogy really fits."
+    ],
+    "brandColor": "#1F6B75"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "hermeneia",
+  "version": "1.21.6",
+  "description": "Use $hermeneia:clarify when the request is underspecified or easy to misread.",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "epistemic-protocols",
+    "hermeneia"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Hermeneia",
+    "shortDescription": "Use $hermeneia:clarify when the request is underspecified or easy to misread.",
+    "longDescription": "Use $hermeneia:clarify when the request is underspecified or easy to misread.",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use $hermeneia:clarify to pin down what I actually want.",
+      "Use $hermeneia:clarify before we implement the wrong thing.",
+      "Use $hermeneia:clarify to resolve ambiguity in this request."
+    ],
+    "brandColor": "#1F6B75"
+  }
+}

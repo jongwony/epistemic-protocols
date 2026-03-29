@@ -1,0 +1,38 @@
+{
+  "name": "prothesis",
+  "version": "5.13.6",
+  "description": "Use $prothesis:frame to examine a problem from multiple perspectives before deciding.",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "epistemic-protocols",
+    "prothesis"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Prothesis",
+    "shortDescription": "Use $prothesis:frame to examine a problem from multiple perspectives before deciding.",
+    "longDescription": "Use $prothesis:frame to examine a problem from multiple perspectives before deciding.",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use $prothesis:frame to compare the best perspectives for this task.",
+      "Use $prothesis:frame before we lock in an approach.",
+      "Use $prothesis:frame to surface competing frames for this problem."
+    ],
+    "brandColor": "#1F6B75"
+  }
+}

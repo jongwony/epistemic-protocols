@@ -1,0 +1,38 @@
+{
+  "name": "katalepsis",
+  "version": "1.23.8",
+  "description": "Use $katalepsis:grasp to verify understanding of substantial AI work or changes.",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "epistemic-protocols",
+    "katalepsis"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Katalepsis",
+    "shortDescription": "Use $katalepsis:grasp to verify understanding of substantial AI work or changes.",
+    "longDescription": "Use $katalepsis:grasp to verify understanding of substantial AI work or changes.",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use $katalepsis:grasp to help me understand these changes.",
+      "Use $katalepsis:grasp to verify I really understand this result.",
+      "Use $katalepsis:grasp after a large AI-generated change."
+    ],
+    "brandColor": "#1F6B75"
+  }
+}

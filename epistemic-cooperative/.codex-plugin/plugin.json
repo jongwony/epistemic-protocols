@@ -1,0 +1,38 @@
+{
+  "name": "epistemic-cooperative",
+  "version": "1.24.0",
+  "description": "Use $epistemic-cooperative:onboard and related utilities for protocol learning and analysis.",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "epistemic-protocols",
+    "epistemic-cooperative"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Epistemic Cooperative",
+    "shortDescription": "Use $epistemic-cooperative:onboard and related utilities for protocol learning and analysis.",
+    "longDescription": "Use $epistemic-cooperative:onboard and related utilities for protocol learning and analysis.",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use $epistemic-cooperative:onboard to recommend the right protocol for me.",
+      "Use $epistemic-cooperative:catalog to compare protocols by use case.",
+      "Use $epistemic-cooperative:report to analyze recent session patterns."
+    ],
+    "brandColor": "#1F6B75"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "telos",
+  "version": "1.12.6",
+  "description": "Use $telos:goal to turn a vague intent into a concrete end state.",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "epistemic-protocols",
+    "telos"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Telos",
+    "shortDescription": "Use $telos:goal to turn a vague intent into a concrete end state.",
+    "longDescription": "Use $telos:goal to turn a vague intent into a concrete end state.",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use $telos:goal to define success for this task.",
+      "Use $telos:goal when I know the direction but not the target.",
+      "Use $telos:goal to sharpen this vague objective."
+    ],
+    "brandColor": "#1F6B75"
+  }
+}

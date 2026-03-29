@@ -1,0 +1,38 @@
+{
+  "name": "reflexion",
+  "version": "3.2.3",
+  "description": "Use $reflexion:reflexion for cross-session learning and reusable insights.",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "epistemic-protocols",
+    "reflexion"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Reflexion",
+    "shortDescription": "Use $reflexion:reflexion for cross-session learning and reusable insights.",
+    "longDescription": "Use $reflexion:reflexion for cross-session learning and reusable insights.",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use $reflexion:reflexion to extract lessons from recent sessions.",
+      "Use $reflexion:reflexion to turn this work into reusable insight.",
+      "Use $reflexion:reflexion to capture patterns we should remember."
+    ],
+    "brandColor": "#1F6B75"
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "name": "epistemic-protocols-local",
+  "interface": {
+    "displayName": "Epistemic Protocols"
+  },
+  "plugins": [
+    {
+      "name": "prothesis",
+      "source": {
+        "source": "local",
+        "path": "./prothesis"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "syneidesis",
+      "source": {
+        "source": "local",
+        "path": "./syneidesis"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "reflexion",
+      "source": {
+        "source": "local",
+        "path": "./reflexion"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "write",
+      "source": {
+        "source": "local",
+        "path": "./write"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "hermeneia",
+      "source": {
+        "source": "local",
+        "path": "./hermeneia"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "katalepsis",
+      "source": {
+        "source": "local",
+        "path": "./katalepsis"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "telos",
+      "source": {
+        "source": "local",
+        "path": "./telos"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "aitesis",
+      "source": {
+        "source": "local",
+        "path": "./aitesis"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "analogia",
+      "source": {
+        "source": "local",
+        "path": "./analogia"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "prosoche",
+      "source": {
+        "source": "local",
+        "path": "./prosoche"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "epharmoge",
+      "source": {
+        "source": "local",
+        "path": "./epharmoge"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "horismos",
+      "source": {
+        "source": "local",
+        "path": "./horismos"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "epistemic-cooperative",
+      "source": {
+        "source": "local",
+        "path": "./epistemic-cooperative"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

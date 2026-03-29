@@ -1,0 +1,38 @@
+{
+  "name": "prosoche",
+  "version": "1.6.8",
+  "description": "Use $prosoche:attend to assess execution-time risk before taking action.",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "epistemic-protocols",
+    "prosoche"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Prosoche",
+    "shortDescription": "Use $prosoche:attend to assess execution-time risk before taking action.",
+    "longDescription": "Use $prosoche:attend to assess execution-time risk before taking action.",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use $prosoche:attend before a risky command or change.",
+      "Use $prosoche:attend to review execution readiness.",
+      "Use $prosoche:attend to gate high-impact actions."
+    ],
+    "brandColor": "#1F6B75"
+  }
+}

@@ -24,31 +24,30 @@ Then run `/onboard` — start with a quick recommendation based on your recent s
 
 ### Codex
 
-Paste in Codex and run:
+Open this repository in Codex, then open the plugin directory:
 
-```text
-$skill-installer install these skills from jongwony/epistemic-protocols:
-- prothesis/skills/frame
-- syneidesis/skills/gap
-- hermeneia/skills/clarify
-- katalepsis/skills/grasp
-- telos/skills/goal
-- aitesis/skills/inquire
-- horismos/skills/bound
-- analogia/skills/ground
-- prosoche/skills/attend
-- epharmoge/skills/contextualize
-- epistemic-cooperative/skills/onboard
+```bash
+codex
+/plugins
 ```
 
-Restart Codex, then start with `$onboard`.
+Install the plugins you want from the `Epistemic Protocols` marketplace, then invoke them with `$plugin:skill`.
+
+Examples:
+
+```text
+$epistemic-cooperative:onboard
+$hermeneia:clarify
+$analogia:ground
+```
 
 <details>
 <summary>Notes</summary>
 
-- This installs 10 protocols + `onboard`. `/report`, `/dashboard`, `reflexion`, `write` are not included.
-- To install a single skill, use the same `skill-installer` pattern with one path.
-- This README is the source of truth for the Codex-supported install set.
+- Codex reads the local marketplace from `.agents/plugins/marketplace.json`.
+- Each Codex plugin points directly at the original source directory such as `./prothesis` or `./epistemic-cooperative`.
+- The current Codex marketplace exposes 10 protocol plugins plus `epistemic-cooperative`, and also includes experimental `reflexion` and `write` entries.
+- Claude and Codex now share the same source directories; only the plugin metadata entrypoints differ.
 
 </details>
 
@@ -74,6 +73,8 @@ Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/fram
 | Plugin | Command | Purpose |
 |--------|---------|---------|
 | [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard` | Protocol learning, usage analysis, and coverage dashboard |
+
+For Codex, use the plugin-qualified form such as `$epistemic-cooperative:onboard`.
 
 ## Design
 
