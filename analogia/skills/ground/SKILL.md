@@ -90,7 +90,7 @@ converge     (relay)       → TextPresent+Proceed (convergence evidence trace; 
 Phase 2 Qs (validate)      → always_gated (gated: user validates structural mapping with examples)
 
 ── MODE STATE ──
-Λ = { phase: Phase, R: AIOutput, Sₐ: Domain, Sₜ: Domain,
+Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,
       mappings: Set(Correspondence), confirmed: Set(Correspondence),
       dismissed: Set(Correspondence), remaining: Set(Correspondence),
       instantiations: List<Example>,
@@ -101,7 +101,7 @@ Phase 2 Qs (validate)      → always_gated (gated: user validates structural ma
 
 ## Core Principle
 
-**Structural Correspondence over Abstract Assertion**: When AI output contains abstract frameworks applied to a user's domain, validate that structure-preserving mappings exist between the abstract and concrete domains through explicit correspondences and concrete instantiations, rather than asserting that the abstraction applies. The purpose is to verify mapping adequacy, not to simplify the abstraction.
+**Structural Correspondence over Abstract Assertion**: When text contains abstract frameworks applied to a user's domain, validate that structure-preserving mappings exist between the abstract and concrete domains through explicit correspondences and concrete instantiations, rather than asserting that the abstraction applies. The purpose is to verify mapping adequacy, not to simplify the abstraction.
 
 ## Distinction from Other Protocols
 
@@ -132,13 +132,13 @@ See `references/best-practices.md` for user-language triggers and grounding scen
 
 ### Activation
 
-AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via gate interaction (Phase 2). On direct `/ground`, bind `R` from the current or most recent AI output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
+AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via gate interaction (Phase 2). On direct `/ground`, bind `R` from the current or most recent output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/ground` slash command or description-matching input. Always available.
 - **Layer 2 (AI-guided)**: Mapping uncertainty detected via in-protocol heuristics. Detection is silent (Phase 0).
 
-**Mapping uncertain** = AI output applies abstract structures to a domain where structural correspondence has not been established.
+**Mapping uncertain** = text applies abstract structures to a domain where structural correspondence has not been established.
 
 Gate predicate:
 ```
@@ -195,21 +195,21 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 
 ### Phase 0: Mapping Uncertainty Gate (Silent)
 
-Analyze AI output for mapping uncertainty. This phase is **silent** — no user interaction.
+Analyze text for mapping uncertainty. This phase is **silent** — no user interaction.
 
-1. **Bind output** `R`: use explicit argument or the current/most recent AI output under discussion
+1. **Bind output** `R`: use explicit argument or the current/most recent output under discussion
 2. **Scan output** `R` for abstract structures: patterns, models, analogies, frameworks applied to user's domain
 3. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
 4. If all mappings trivially established: present finding per Rule 15 before proceeding (Analogia not activated)
 5. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
 
-**Scan scope**: Current AI output, conversation context, observable domain signals. Does NOT modify files or call external services.
+**Scan scope**: Bound text R, conversation context, observable domain signals. Does NOT modify files or call external services.
 
 ### Phase 1: Domain Decomposition + Mapping Construction
 
 Decompose abstract and concrete domains, then construct structural correspondences.
 
-1. **Identify source domain** `Sₐ`: Extract abstract structures from AI output — components, relationships, constraints, assumptions
+1. **Identify source domain** `Sₐ`: Extract abstract structures from R — components, relationships, constraints, assumptions
 2. **Identify target domain** `Sₜ`: Determine user's concrete application context — environment, constraints, existing structures
    - **Call Read/Grep** to collect evidence about target domain from codebase, configs, documentation
 3. **Construct mapping** `M`: For each abstract component, identify the candidate concrete correspondent
