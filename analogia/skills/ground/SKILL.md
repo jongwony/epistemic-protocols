@@ -17,7 +17,7 @@ Analogia(R) → Detect(R) → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → I(M, Sₜ) �
 
 ── MORPHISM ──
 R
-  → detect(output, context)            -- infer mapping uncertainty
+  → detect(R, context)                 -- infer mapping uncertainty
   → decompose(abstract, concrete)      -- identify source and target domains
   → construct(mapping, Sₐ→Sₜ)          -- build structural correspondences
   → instantiate(mapping, target)       -- generate concrete examples
@@ -47,8 +47,8 @@ terminalized(R') = all_addressed(R') ∨ user_esc
 all_addressed(R') = ∀ c ∈ M : confirmed(c) ∨ dismissed(c)
 
 ── R-BINDING ──
-bind(R) = explicit_arg ∪ current_ai_output ∪ most_recent_ai_output
-Priority: explicit_arg > current_ai_output > most_recent_ai_output
+bind(R) = explicit_arg ∪ current_output ∪ most_recent_output
+Priority: explicit_arg > current_output > most_recent_output
 
 /ground "text"                → R = "text"
 /ground (alone)               → R = most recent relevant output in current session (AI or user)
