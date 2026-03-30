@@ -115,6 +115,7 @@ Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 ### Architectural Principles
 - **Unix Philosophy Homomorphism**: Single-purpose epistemic tools; bottom-up composition
 - **Session Text Composition**: Inter-protocol data flows as natural language in session context
+- **Cross-Session Knowledge Composition**: Reflexion-stored knowledge (MEMORY.md, .insights/) enriches protocol Phase 0/1 detection in subsequent sessions (Tertiary hermeneutic circle)
 - **Dual Advisory Layer**: graph.json (structural) + Output Style nudge (runtime heuristic)
 - **Coexistence over Mirroring**: Protocols occupy epistemic layer; built-ins occupy execution layer
 - **Three-Tier Termination**: user_esc (ungraceful) / user_withdraw (graceful) / normal convergence
@@ -144,7 +145,7 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 
 **Key graph relationships**:
 - Preconditions (DAG-enforced): Hermeneia → Telos → Horismos; * → Katalepsis
-- Advisory hubs: Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}
+- Advisory hubs: Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}, Telos → {Prothesis}
 - Suppression: Syneidesis ⊣ Aitesis (same scope), Aitesis ⊣ Epharmoge (pre+post stacking)
 
 **Initiator taxonomy** (2-layer model):

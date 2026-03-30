@@ -23,6 +23,7 @@
     { "source": "*", "target": "katalepsis", "type": "precondition", "satisfies": "작업 완료 → 이해 검증 가능" },
     { "source": "prothesis", "target": "syneidesis", "type": "advisory", "satisfies": "관점 시뮬레이션이 갭 감지 컨텍스트를 제공" },
     { "source": "prothesis", "target": "telos", "type": "advisory", "satisfies": "관점 시뮬레이션이 목표 정의를 개선" },
+    { "source": "telos", "target": "prothesis", "type": "advisory", "satisfies": "정의된 목표가 프레임워크 선택과 렌즈 구성을 개선" },
     { "source": "syneidesis", "target": "aitesis", "type": "suppression", "satisfies": "동일 작업 범위 Aitesis 억제 (비대칭)" },
     { "source": "aitesis", "target": "epharmoge", "type": "suppression", "satisfies": "동일 범위 pre+post 스태킹 방지" },
     { "source": "aitesis", "target": "prosoche", "type": "advisory", "satisfies": "추론된 컨텍스트가 실행 시 위험 평가 초점을 좁힘" },
