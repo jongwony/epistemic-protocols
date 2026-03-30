@@ -1,11 +1,11 @@
 ---
 name: ground
-description: "Validate structural mapping between abstract and concrete domains. Constructs domain correspondences and presents concrete instantiations when mapping uncertainty is detected, producing validated mapping. Type: (MappingUncertain, AI, GROUND, AIOutput) → ValidatedMapping. Alias: Analogia(ἀναλογία)."
+description: "Validate structural mapping between abstract and concrete domains. Constructs domain correspondences and presents concrete instantiations when mapping uncertainty is detected, producing validated mapping. Type: (MappingUncertain, AI, GROUND, R) → ValidatedMapping. Alias: Analogia(ἀναλογία)."
 ---
 
 # Analogia Protocol
 
-Validate structural mapping between abstract and concrete domains through AI-guided detection and user-validated instantiation. Type: `(MappingUncertain, AI, GROUND, AIOutput) → ValidatedMapping`.
+Validate structural mapping between abstract and concrete domains through AI-guided detection and user-validated instantiation. Type: `(MappingUncertain, AI, GROUND, R) → ValidatedMapping`.
 
 ## Definition
 
@@ -16,7 +16,7 @@ Validate structural mapping between abstract and concrete domains through AI-gui
 Analogia(R) → Detect(R) → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → I(M, Sₜ) → V → R' → (loop until terminalized)
 
 ── MORPHISM ──
-AIOutput
+R
   → detect(output, context)            -- infer mapping uncertainty
   → decompose(abstract, concrete)      -- identify source and target domains
   → construct(mapping, Sₐ→Sₜ)          -- build structural correspondences
@@ -30,9 +30,9 @@ preserves: content_identity(R)           -- output content invariant; mapping st
 invariant: Structural Correspondence over Abstract Assertion
 
 ── TYPES ──
-R        = AI output containing abstract structures
+R        = Text containing abstract structures (source-agnostic: AI output, user analysis, or external reference)
 Detect   = Mapping uncertainty detection: R → Bool
-Sₐ       = Source domain (abstract structure in AI output)
+Sₐ       = Source domain (abstract structure in R)
 Sₜ       = Target domain (user's concrete application context)
 Map      = Structure-preserving mapping construction: (Sₐ, Sₜ) → Set(Correspondence)
 M        = Set(Correspondence)                                   -- mapping result
@@ -51,10 +51,10 @@ bind(R) = explicit_arg ∪ current_ai_output ∪ most_recent_ai_output
 Priority: explicit_arg > current_ai_output > most_recent_ai_output
 
 /ground "text"                → R = "text"
-/ground (alone)               → R = most recent relevant AI output in current session
-"ground this..."              → R = AI output currently under discussion
+/ground (alone)               → R = most recent relevant output in current session (AI or user)
+"ground this..."              → R = text currently under discussion
 
-If no relevant AI output exists: pause activation and request a grounding target before Phase 0.
+If no relevant text exists: pause activation and request a grounding target before Phase 0.
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → uncertain?                             -- mapping uncertainty gate (silent)

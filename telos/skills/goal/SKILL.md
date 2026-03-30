@@ -157,7 +157,7 @@ When Telos is active:
 
 **Protocol precedence**: Activation order position 2/9 (graph.json is authoritative source for information flow). Concern cluster: Planning.
 
-**Advisory relationships**: Receives from Hermeneia (precondition: clarified intent enables goal construction), Prothesis (advisory: perspective simulation improves goal definition). Provides to Horismos (precondition: defined goals enable boundary definition). Katalepsis is structurally last.
+**Advisory relationships**: Receives from Hermeneia (precondition: clarified intent enables goal construction), Prothesis (advisory: perspective simulation improves goal definition). Provides to Horismos (precondition: defined goals enable boundary definition), Prothesis (advisory: defined goals improve framework selection and lens configuration). Katalepsis is structurally last.
 
 Approved GoalContract becomes input to subsequent protocols.
 
