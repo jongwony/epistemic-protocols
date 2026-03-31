@@ -215,6 +215,8 @@ Reflexion-stored knowledge enriches protocol detection in subsequent sessions. T
 
 **Formal layer boundary**: Cross-session enrichment operates as a runtime heuristic inscribed in Mode Activation prose, not as a formal phase step. PHASE TRANSITIONS and TOOL GROUNDING blocks remain unchanged — enrichment does not introduce new phase transitions or tool calls. This boundary is intentional: heuristic inputs influence detection sensitivity but do not alter the protocol's formal specification.
 
+**Staleness caveat**: Accumulated knowledge reflects the context in which it was stored. When the operating domain, project, or environment has shifted, prior patterns may misdirect rather than help — cross-session enrichment is an initial hypothesis subject to the protocol's gate, not an established fact carried forward unconditionally. Fresh-start protocols (Katalepsis: current comprehension, Telos: current goals) and per-decision protocols (Horismos: Rule 11) are especially sensitive to this risk.
+
 ### Dual Advisory Layer
 
 Inter-protocol guidance operates through two distinct mechanisms at different abstraction levels: graph.json `advisory` edges (structural, validated by static checks, topology-aware) and Output Style nudge (runtime, session-context-dependent, deficit-type matching). These are complementary — graph.json edges encode stable architectural relationships, while nudges respond to observed session conditions. Protocol convergence moments are high-signal observation points for cross-protocol needs, but nudges are not position-constrained and fire whenever contextual evidence warrants.
@@ -302,6 +304,16 @@ Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases 
 #### FLOW-MORPHISM Relationship
 
 MORPHISM is the image of FLOW under a forgetful functor that discards computational detail and tool annotations, retaining only the essential type transition skeleton (source object → transformation steps → target object) with structural annotations (requires/deficit/preserves/invariant).
+
+#### Type Category Convention
+
+TYPES blocks use three distinct type categories, each with its own definitional style:
+
+- **Input types** (morphism domain: X, R, D, G): Natural language definition with source-agnostic enumeration. The morphism treats inputs uniformly — protocol behavior does not branch on subtypes. Subtypes enumerate conceptual scope for readers, not dispatching targets. Coproduct structure is inappropriate because it implies behavioral branching that does not exist in PHASE TRANSITIONS.
+- **Classification types** (processing taxonomy: Dimension, Gap, Severity): Open set ∪ Emergent(T). Used for categorization during detection/assessment. Open because new categories can emerge from context.
+- **Answer types** (gate response: A, J, V): Closed coproduct. Each constructor leads to a distinct processing path in the subsequent phase. Closed because the protocol must handle all cases.
+
+The test: if PHASE TRANSITIONS handle each case differently, use coproduct. If the protocol processes uniformly regardless of input category, use natural language definition.
 
 ### Pattern over Vocabulary
 
