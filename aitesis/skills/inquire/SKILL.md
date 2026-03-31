@@ -352,7 +352,7 @@ Options:
 
 **Selection criterion**: Choose the uncertainty whose resolution would maximally narrow the remaining uncertainty space (information gain). When priority is equal, prefer the uncertainty with richer collected context (more evidence to present).
 
-### Phase 3: Plan Update
+### Phase 3: Prospect Update
 
 After user response:
 
