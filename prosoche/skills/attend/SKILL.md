@@ -303,7 +303,7 @@ When Prosoche is active:
 - User explicitly says "just do it" or "proceed without checks"
 - pattern(E) already in session_approvals (cached approval)
 
-**Cross-session enrichment**: Repeated risk patterns accumulated through prior Reflexion cycles may serve as Phase 0 classification heuristics — known risk signatures from prior executions improve risk level estimation. This is a heuristic input that may not reflect current context; gate judgment remains with the user.
+**Cross-session enrichment**: Repeated risk patterns accumulated through prior Reflexion cycles may serve as Phase 0 classification heuristics — known risk signatures from prior executions improve risk level estimation. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 ### Mode Deactivation
 

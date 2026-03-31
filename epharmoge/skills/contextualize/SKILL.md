@@ -171,7 +171,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 | Scope overflow | Result addresses more or less than the observed use case requires |
 | Temporal context | Result applies to a version, state, or phase that may have shifted |
 
-**Cross-session enrichment**: Repeated mismatch patterns accumulated through prior Reflexion cycles may adjust Phase 0 scan priority — known mismatch types are checked first. This is a heuristic input that may not reflect current context; gate judgment remains with the user.
+**Cross-session enrichment**: Repeated mismatch patterns accumulated through prior Reflexion cycles may adjust Phase 0 scan priority — known mismatch types are checked first. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Skip**:
 - User provided explicit, detailed specification and result follows it exactly

@@ -213,9 +213,9 @@ Inter-protocol data flows as natural language in the session context — no stru
 
 Reflexion-stored knowledge enriches protocol detection in subsequent sessions. This is the session-boundary extension of Session Text Composition — where intra-session data flows through conversation context, cross-session data flows through persistent memory. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision (Tertiary hermeneutic circle; see Pattern over Vocabulary).
 
-**Formal layer boundary**: Cross-session enrichment operates as a runtime heuristic inscribed in Mode Activation prose, not as a formal phase step. PHASE TRANSITIONS and TOOL GROUNDING blocks remain unchanged — enrichment does not introduce new phase transitions or tool calls. This boundary is intentional: heuristic inputs influence detection sensitivity but do not alter the protocol's formal specification.
+**Formal layer boundary**: Cross-session enrichment operates as a runtime heuristic inscribed in protocol operational prose, not as a formal phase step. PHASE TRANSITIONS and TOOL GROUNDING blocks remain unchanged — enrichment does not introduce new phase transitions or tool calls. This boundary is intentional: heuristic inputs influence detection sensitivity but do not alter the protocol's formal specification.
 
-**Staleness caveat**: Accumulated knowledge reflects the context in which it was stored. When the operating domain, project, or environment has shifted, prior patterns may misdirect rather than help — cross-session enrichment is an initial hypothesis subject to the protocol's gate, not an established fact carried forward unconditionally. Fresh-start protocols (Katalepsis: current comprehension, Telos: current goals) and per-decision protocols (Horismos: Rule 11) are especially sensitive to this risk.
+**Pollution caveat**: Prior patterns loaded per-session may bias detection toward previously observed patterns, suppressing novel signals. The risk is not staleness (information becoming outdated) but pollution (loading itself contaminating judgment). Protocols with halt characteristics (Horismos: Rule 11 per-decision freshness, Prosoche: risk gate) naturally resist pollution; others rely on gate judgment to override prior-pattern bias.
 
 ### Dual Advisory Layer
 
@@ -309,9 +309,9 @@ MORPHISM is the image of FLOW under a forgetful functor that discards computatio
 
 TYPES blocks use three distinct type categories, each with its own definitional style:
 
-- **Input types** (morphism domain: X, R, D, G): Natural language definition with source-agnostic enumeration. The morphism treats inputs uniformly — protocol behavior does not branch on subtypes. Subtypes enumerate conceptual scope for readers, not dispatching targets. Coproduct structure is inappropriate because it implies behavioral branching that does not exist in PHASE TRANSITIONS.
-- **Classification types** (processing taxonomy: Dimension, Gap, Severity): Open set ∪ Emergent(T). Used for categorization during detection/assessment. Open because new categories can emerge from context.
-- **Answer types** (gate response: A, J, V): Closed coproduct. Each constructor leads to a distinct processing path in the subsequent phase. Closed because the protocol must handle all cases.
+- **Input types** (morphism domain): Natural language definition with source-agnostic enumeration. The morphism treats inputs uniformly — protocol behavior does not branch on subtypes. Subtypes enumerate conceptual scope for readers, not dispatching targets. Coproduct structure is inappropriate because it implies behavioral branching that does not exist in PHASE TRANSITIONS.
+- **Classification types** (processing taxonomy): Open set ∪ Emergent(T). Used for categorization during detection/assessment. Open because new categories can emerge from context.
+- **Answer types** (gate response): Closed coproduct. Each constructor leads to a distinct processing path in the subsequent phase. Closed because the protocol must handle all cases.
 
 The test: if PHASE TRANSITIONS handle each case differently, use coproduct. If the protocol processes uniformly regardless of input category, use natural language definition.
 

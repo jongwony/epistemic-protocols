@@ -200,7 +200,7 @@ Heuristic signals for context insufficiency inference (not hard gates):
 | Ambiguous scope | Multiple valid interpretations exist and AI cannot determine intended approach from available context |
 | Environmental dependency | Relies on external state (configs, APIs, versions) |
 
-**Cross-session enrichment**: Domain knowledge accumulated through prior Reflexion cycles may narrow the Phase 0 uncertainty scan — known domain patterns reduce the scope of novel-domain signals. This is a heuristic input that may not reflect current context; gate judgment remains with the user.
+**Cross-session enrichment**: Domain knowledge accumulated through prior Reflexion cycles may narrow the Phase 0 uncertainty scan — known domain patterns reduce the scope of novel-domain signals. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Skip**:
 - Execution context is fully specified in current message
