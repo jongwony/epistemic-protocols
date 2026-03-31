@@ -183,7 +183,7 @@ Clarified expression becomes input to subsequent protocols.
 - User explicitly declines clarification
 - Expression already clarified in current session
 
-**Cross-session enrichment**: Accumulated clarification patterns from prior Reflexion cycles may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. This is a heuristic input; gate judgment remains with the user.
+**Cross-session enrichment**: Accumulated clarification patterns from prior Reflexion cycles may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. This is a heuristic input that may not reflect current context; gate judgment remains with the user.
 
 **Skip** (AI-detected):
 - User says "just do it", "proceed as-is", or equivalent

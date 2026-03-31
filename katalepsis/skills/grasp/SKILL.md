@@ -223,7 +223,7 @@ Analyze AI work result and extract categories:
 3. **Prioritize**: Order by importance (architecture > new code > modification > ...)
 4. **Summarize**: Prepare concise category descriptions
 
-**Cross-session enrichment**: Verified understanding domains accumulated through prior Reflexion cycles may adjust Phase 0 category prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. This is a heuristic input; gate judgment remains with the user.
+**Cross-session enrichment**: Verified understanding domains accumulated through prior Reflexion cycles may adjust Phase 0 category prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. This is a heuristic input that may not reflect current context; gate judgment remains with the user.
 
 ### Phase 1: Entry Point Selection
 

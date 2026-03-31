@@ -28,6 +28,7 @@ invariant: Applicability over Correctness
 
 ── TYPES ──
 R      = Result to be evaluated (source-agnostic: AI output, analysis conclusion, decision outcome, or any completed work product)
+           -- Input type: morphism processes R uniformly; enumeration scopes the definition, not behavioral dispatch
 X      = Application context (environment, constraints, user situation)
 Eval   = Applicability evaluation: (R, X) → Set(Mismatch)
 Mismatch = { aspect: String, dimension: Dimension, description: String, evidence: String, severity: Severity, origin: Origin }
@@ -170,7 +171,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 | Scope overflow | Result addresses more or less than the observed use case requires |
 | Temporal context | Result applies to a version, state, or phase that may have shifted |
 
-**Cross-session enrichment**: Repeated mismatch patterns accumulated through prior Reflexion cycles may adjust Phase 0 scan priority — known mismatch types are checked first. This is a heuristic input; gate judgment remains with the user.
+**Cross-session enrichment**: Repeated mismatch patterns accumulated through prior Reflexion cycles may adjust Phase 0 scan priority — known mismatch types are checked first. This is a heuristic input that may not reflect current context; gate judgment remains with the user.
 
 **Skip**:
 - User provided explicit, detailed specification and result follows it exactly

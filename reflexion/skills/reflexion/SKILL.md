@@ -63,7 +63,7 @@ Update status at each phase transition. This externalizes working memory and pre
 
 **When Syneidesis is active**: Gap detection applies at Phase 3 decision points (Q2-Q5). Syneidesis may surface additional considerations before each AskUserQuestion.
 
-**Cross-session enrichment pathway** (Tertiary hermeneutic circle): Knowledge stored by Reflexion feeds into subsequent sessions' protocol Phase 0/1 detection as heuristic context. Each protocol defines its own consumption pattern — Reflexion provides the storage half; consumption is inscribed in each protocol's SKILL.md. This completes the cross-session knowledge circulation: experience → Reflexion storage → Phase 0/1 enrichment → deeper experience → spiral deepening.
+**Cross-session enrichment pathway** (Tertiary hermeneutic circle): Knowledge stored by Reflexion feeds into subsequent sessions' protocol Phase 0/1 detection as heuristic context. Each protocol defines its own consumption pattern — Reflexion provides the storage half; consumption is inscribed in each protocol's SKILL.md. This completes the cross-session knowledge circulation: experience → Reflexion storage → Phase 0/1 enrichment → deeper experience → spiral deepening. Stored knowledge may become stale when domain or context shifts — each consuming protocol's gate ensures user judgment prevails.
 
 ## Workflow
 
