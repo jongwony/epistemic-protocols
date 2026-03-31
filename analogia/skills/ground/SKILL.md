@@ -176,7 +176,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Grounding probe | User requests "concrete example", "how does this apply to my case", "show me in my context" |
 | Structural mismatch indicators | Abstract assumptions that may not hold in the concrete domain |
 
-**Cross-session enrichment**: Accumulated mapping validation history (MEMORY.md, .insights/) from prior Reflexion cycles provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. This is a heuristic input; gate judgment remains with the user.
+**Cross-session enrichment**: Accumulated mapping validation history from prior Reflexion cycles provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. This is a heuristic input; gate judgment remains with the user.
 
 **Skip**:
 - Output is already domain-specific with concrete instantiations

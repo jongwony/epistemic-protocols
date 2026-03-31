@@ -217,7 +217,7 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 - Reversible + Any impact → Low stakes
 - Time pressure → stakes ↑ one level
 
-**Cross-session enrichment**: Repeated gap patterns accumulated in MEMORY.md or .insights/ through prior Reflexion cycles may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. This is a heuristic input; gate judgment remains with the user.
+**Cross-session enrichment**: Repeated gap patterns accumulated through prior Reflexion cycles may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. This is a heuristic input; gate judgment remains with the user.
 
 ### Surfacing
 

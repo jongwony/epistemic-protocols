@@ -239,7 +239,7 @@ Options:
 
 Analyze Gᵥ to detect indeterminate dimensions, then **present** for user confirmation via gate interaction.
 
-**Cross-session enrichment**: Prior GoalContract patterns accumulated in MEMORY.md or .insights/ through prior Reflexion cycles may adjust Phase 1 dimension weighting — dimensions that were consistently important in similar goal constructions receive initial emphasis. This is a heuristic input; gate judgment remains with the user.
+**Cross-session enrichment**: Prior GoalContract patterns accumulated through prior Reflexion cycles may adjust Phase 1 dimension weighting — dimensions that were consistently important in similar goal constructions receive initial emphasis. This is a heuristic input; gate judgment remains with the user.
 
 Per Gap Taxonomy above. Apply priority order: Outcome → Boundary → Priority → Metric. Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState`; boundary: goal definition (in-scope) vs. expression gap (→ `/clarify`) or execution context (→ `/inquire`).
 
