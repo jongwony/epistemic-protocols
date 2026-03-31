@@ -224,6 +224,8 @@ Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
 
 ## MORPHISM Update
 
+> **Note**: This section documents the design evolution. For the canonical current MORPHISM, see `aitesis/skills/inquire/SKILL.md`.
+
 ```
 -- Current (historical — type name since updated to Activity):
 Activity
