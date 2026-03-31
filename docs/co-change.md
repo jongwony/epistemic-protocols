@@ -18,4 +18,4 @@ Protocol modifications require synchronized edits across multiple files. Any pro
 | Convergence-awareness nudge wording | epistemic-ink.md (Protocol Nudge), design-philosophy.md (Dual Advisory Layer + Full Taxonomy) |
 | Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |
 | Relay interaction pattern change | SKILL.md TOOL GROUNDING + design-philosophy.md (Convergence Evidence) + criteria.md + static-checks.js + plugin.json version bumps |
-| SKILL.md frontmatter description change | `scripts/package.js` DESCRIPTION_OVERRIDES (type signature 동기화) |
+| SKILL.md frontmatter description change (type signature 포함) | `scripts/package.js` DESCRIPTION_OVERRIDES (morphism notation 동기화) |

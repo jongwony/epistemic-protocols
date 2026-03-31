@@ -224,7 +224,7 @@ Decompose abstract and concrete domains, then construct structural correspondenc
 **Web context** (conditional): When source or target domain knowledge exists primarily outside the codebase (external APIs, academic domains, industry standards), extend context collection to web search.
 Web evidence is tagged with `source: "web:{url}"` for traceability.
 
-**Scope restriction**: Read-only investigation only. No test execution or file modifications.
+**Scope restriction**: Read-only investigation only (Read, Grep, WebSearch). No test execution or file modifications.
 
 ### Phase 2: Instantiation + Validation
 
