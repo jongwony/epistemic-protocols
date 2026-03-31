@@ -69,7 +69,7 @@ proceed(Σ) = ¬blocked(Σ)
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Qs (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
-Scan (detect)  → Read, Grep (context for gap identification)
+Scan (detect)  → Read, Grep (stored knowledge extraction: context for gap identification)
 A (adjust)     → Internal state update (no external tool)
 converge (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
 
@@ -216,6 +216,8 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 - Irreversible + Low impact → Medium stakes
 - Reversible + Any impact → Low stakes
 - Time pressure → stakes ↑ one level
+
+**Cross-session enrichment**: Repeated gap patterns accumulated through prior Reflexion cycles may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 ### Surfacing
 

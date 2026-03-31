@@ -282,6 +282,8 @@ MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and
 
 After context gathering (Phase 1), **present** perspectives via gate interaction with `multiSelect: true`.
 
+**Cross-session enrichment**: Prior framing experiences accumulated through prior Reflexion cycles may guide Phase 2 perspective generation — previously effective analytical lenses for similar domains provide starting hypotheses. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+
 **Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
 Each perspective is an **individual option**. Do not pre-combine perspectives into composite options (e.g., "All three", "1+2 only"). The user selects one or more perspectives directly.

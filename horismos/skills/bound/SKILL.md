@@ -326,3 +326,5 @@ After integration:
 14. **No premature convergence**: Do not declare |remaining| = 0 without presenting convergence evidence trace. "All domains bounded" as assertion without per-domain evidence = protocol violation
 15. **No silent boundary assumption**: If Phase 0 probe detects no boundary-undefined domains, present this finding with reasoning to user for confirmation before concluding — do not silently proceed
 16. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
+
+**Cross-session enrichment**: Accumulated boundary preferences from prior Reflexion cycles may serve as heuristic input for Phase 1 calibration proposals — but per-decision freshness (Rule 11) takes precedence. Prior preferences inform, they do not predetermine. Gate judgment remains with the user.

@@ -183,6 +183,8 @@ Clarified expression becomes input to subsequent protocols.
 - User explicitly declines clarification
 - Expression already clarified in current session
 
+**Cross-session enrichment**: Accumulated clarification patterns from prior Reflexion cycles may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+
 **Skip** (AI-detected):
 - User says "just do it", "proceed as-is", or equivalent
 - Session immunity: user declined AI-detected clarification for this expression already
@@ -225,7 +227,7 @@ When multiple gaps detected:
 When the Background gap type is selected, verify the gap is about *interpreting the expression*, not about *executing the task*:
 
 - **Hermeneia Background**: Missing background changes what E means (user's intent) → proceed with clarification
-- **Aitesis territory**: Missing background changes how to execute X (execution plan) → suggest `/inquire` and offer to transition
+- **Aitesis territory**: Missing background changes how to perform X (prospect) → suggest `/inquire` and offer to transition
 
 Operational test: "Would knowing this change what the user means, or only how I execute it?"
 

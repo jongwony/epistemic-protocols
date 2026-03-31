@@ -211,7 +211,11 @@ Inter-protocol data flows as natural language in the session context — no stru
 
 ### Cross-Session Knowledge Composition
 
-Reflexion-stored knowledge (MEMORY.md, .insights/) enriches protocol detection in subsequent sessions. This is the session-boundary extension of Session Text Composition — where intra-session data flows through conversation context, cross-session data flows through persistent memory. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision (Tertiary hermeneutic circle; see Pattern over Vocabulary).
+Reflexion-stored knowledge enriches protocol detection in subsequent sessions. This is the session-boundary extension of Session Text Composition — where intra-session data flows through conversation context, cross-session data flows through persistent memory. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision (Tertiary hermeneutic circle; see Pattern over Vocabulary).
+
+**Formal layer boundary**: Cross-session enrichment operates as a runtime heuristic inscribed in protocol operational prose, not as a formal phase step. PHASE TRANSITIONS and TOOL GROUNDING blocks remain unchanged — enrichment does not introduce new phase transitions or tool calls. This boundary is intentional: heuristic inputs influence detection sensitivity but do not alter the protocol's formal specification.
+
+**Pollution caveat**: Prior patterns loaded per-session may bias detection toward previously observed patterns, suppressing novel signals. The risk is not staleness (information becoming outdated) but pollution (loading itself contaminating judgment). Protocols with halt characteristics (Horismos: Rule 11 per-decision freshness, Prosoche: risk gate) naturally resist pollution; others rely on gate judgment to override prior-pattern bias.
 
 ### Dual Advisory Layer
 
@@ -301,6 +305,16 @@ Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases 
 
 MORPHISM is the image of FLOW under a forgetful functor that discards computational detail and tool annotations, retaining only the essential type transition skeleton (source object → transformation steps → target object) with structural annotations (requires/deficit/preserves/invariant).
 
+#### Type Category Convention
+
+TYPES blocks use three distinct type categories, each with its own definitional style:
+
+- **Input types** (morphism domain): Natural language definition with source-agnostic enumeration. The morphism treats inputs uniformly — protocol behavior does not branch on subtypes. Subtypes enumerate conceptual scope for readers, not dispatching targets. Coproduct structure is inappropriate because it implies behavioral branching that does not exist in PHASE TRANSITIONS.
+- **Classification types** (processing taxonomy): Open set ∪ Emergent(T). Used for categorization during detection/assessment. Open because new categories can emerge from context.
+- **Answer types** (gate response): Closed coproduct. Each constructor leads to a distinct processing path in the subsequent phase. Closed because the protocol must handle all cases.
+
+The test: if PHASE TRANSITIONS handle each case differently, use coproduct. If the protocol processes uniformly regardless of input category, use natural language definition.
+
 ### Pattern over Vocabulary
 
 The hermeneutic circle pattern is already structurally encoded in formal blocks — renaming blocks to philosophical terminology adds no structural value. Pattern recognition takes precedence over vocabulary transition.
@@ -318,4 +332,11 @@ The hermeneutic circle pattern is already structurally encoded in formal blocks 
 
 **Secondary pattern** (inter-protocol): Four complementary pairs form Pre/Post cycles on the context fitness axis — Hermeneia↔Katalepsis (intent), Telos↔Syneidesis (goal), Aitesis↔Epharmoge (context), Prothesis↔Analogia (structure). These cycles operate heuristically via Output Style nudge, driven by observed session conditions rather than graph.json structural edges.
 
-**Tertiary pattern** (cross-session, aspirational — storage half operative, consumption half pending protocol grounding): Reflexion stores session knowledge (MEMORY.md, .insights/) → next session's protocol Phase 0/1 detection is enriched by accumulated domain knowledge → better protocol execution produces richer insights → Reflexion stores deeper knowledge → spiral deepening. The storage half (Reflexion) and the consumption half (each protocol's Phase 0/1 reading stored knowledge) together complete the cross-session hermeneutic circle. Unlike Primary/Secondary which operate within a single session, Tertiary operates across session boundaries with MEMORY.md as the persistence medium. Consumption grounding requires protocol SKILL.md updates specifying how Phase 0/1 reads stored knowledge — contingent on prior Reflexion output.
+**Artifact-observability boundary** (type naming principle): Protocol input type names encode their temporal relationship to observable artifacts — the dividing line being Read/Grep observability:
+- **Aitesis** (Prospect): Pre-artifact. Context sufficiency is assessed before artifacts are produced. X cannot yet be Read/Grep'd.
+- **Epharmoge** (Result): Post-artifact. Applicability is evaluated after artifacts exist. R is Read/Grep-observable.
+- **Analogia** (Text): Time-independent. Structural mapping validation operates on abstract structures regardless of artifact existence.
+
+This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Result` (completed work product), `Text` (abstract structure carrier). The temporal encoding in type names provides protocol discrimination signal at SKILL.md load time, per A4 Semantic Autonomy.
+
+**Tertiary pattern** (cross-session, aspirational — storage half operative, consumption half pending protocol grounding): Reflexion stores session knowledge → next session's protocol Phase 0/1 detection is enriched by accumulated domain knowledge → better protocol execution produces richer insights → Reflexion stores deeper knowledge → spiral deepening. The storage half (Reflexion) and the consumption half (each protocol's Phase 0/1 reading stored knowledge) together complete the cross-session hermeneutic circle. Unlike Primary/Secondary which operate within a single session, Tertiary operates across session boundaries with persistent knowledge as the medium. Consumption grounding requires protocol SKILL.md updates specifying how Phase 0/1 reads stored knowledge — contingent on prior Reflexion output.

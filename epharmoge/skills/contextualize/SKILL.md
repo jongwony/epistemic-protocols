@@ -1,15 +1,15 @@
 ---
 name: contextualize
-description: "Detect application-context mismatch after execution. Verifies applicability when correct output may not fit the actual context, producing contextualized execution. Type: (ApplicationDecontextualized, AI, CONTEXTUALIZE, ExecutionResult) → ContextualizedExecution. Alias: Epharmoge(ἐφαρμογή)."
+description: "Detect application-context mismatch after execution. Verifies applicability when correct output may not fit the actual context, producing contextualized execution. Type: (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution. Alias: Epharmoge(ἐφαρμογή)."
 ---
 
 # Epharmoge Protocol
 
-Detect application-context mismatch after execution through AI-guided applicability verification, where correct results that may not fit the actual context are surfaced for user judgment. Type: `(ApplicationDecontextualized, AI, CONTEXTUALIZE, ExecutionResult) → ContextualizedExecution`.
+Detect application-context mismatch after execution through AI-guided applicability verification, where correct results that may not fit the actual context are surfaced for user judgment. Type: `(ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution`.
 
 ## Definition
 
-**Epharmoge** (ἐφαρμογή): A dialogical act of verifying that AI-produced results fit the actual application context — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness through structured mismatch surfacing and user-directed adaptation.
+**Epharmoge** (ἐφαρμογή): A dialogical act of verifying that results fit the actual application context — from Aristotle's notion of practical application — resolving the gap between technical correctness and contextual appropriateness through structured mismatch surfacing and user-directed adaptation.
 
 ```
 ── FLOW ──
@@ -27,7 +27,8 @@ preserves: X                             -- application context is fixed referen
 invariant: Applicability over Correctness
 
 ── TYPES ──
-R      = Execution result (AI's completed work output)
+R      = Result to be evaluated (source-agnostic: AI output, analysis conclusion, decision outcome, or any completed work product)
+           -- Input type: morphism processes R uniformly; enumeration scopes the definition, not behavioral dispatch
 X      = Application context (environment, constraints, user situation)
 Eval   = Applicability evaluation: (R, X) → Set(Mismatch)
 Mismatch = { aspect: String, dimension: Dimension, description: String, evidence: String, severity: Severity, origin: Origin }
@@ -71,7 +72,7 @@ progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress whe
 Eval   (detect)  → Internal analysis (no external tool)
 Qc     (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (modify)  → Edit, Write (result adaptation based on user direction)
-                    -- (modify): tool call that changes existing artifacts (distinct from (extern) user-facing, (detect) read-only, (state) internal)
+                    -- (modify): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
 Mᵢ/Mₑ (state)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
 converge (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
@@ -113,7 +114,7 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 
 **Context fitness axis**: Aitesis and Epharmoge form a pre/post pair on the context fitness axis. Aitesis asks "do I have enough context to execute well?" (factual uncertainties, User→AI). Epharmoge asks "does my execution actually fit the context?" (evaluative mismatches, AI→User). They are complementary, not redundant — Aitesis may gather sufficient context, yet the resulting execution may still not fit contextual constraints that only become visible post-execution.
 
-**Independence from Aitesis**: Epharmoge's information source is the execution result itself (`R`) compared against observed context (`X`), not a re-scan of pre-execution context. This ensures non-circularity — even when Aitesis has fully resolved context uncertainties, Epharmoge can detect mismatches that emerge only from the actual output.
+**Independence from Aitesis**: Epharmoge's information source is the result itself (`R`) compared against observed context (`X`), not a re-scan of pre-execution context. This ensures non-circularity — even when Aitesis has fully resolved context uncertainties, Epharmoge can detect mismatches that emerge only from the actual output.
 
 ## Mode Activation
 
@@ -129,7 +130,7 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 
 AI detects applicability mismatch after execution OR user calls `/contextualize`. Detection is silent (Phase 0); surfacing always requires user interaction via gate interaction (Phase 1).
 
-**Application decontextualized** = the execution result is technically correct but may not fit the actual application context.
+**Application decontextualized** = the result is technically correct but may not fit the actual application context.
 
 Gate predicate:
 ```
@@ -170,11 +171,13 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 | Scope overflow | Result addresses more or less than the observed use case requires |
 | Temporal context | Result applies to a version, state, or phase that may have shifted |
 
+**Cross-session enrichment**: Repeated mismatch patterns accumulated through prior Reflexion cycles may adjust Phase 0 scan priority — known mismatch types are checked first. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+
 **Skip**:
 - User provided explicit, detailed specification and result follows it exactly
 - User explicitly says "looks good" or "proceed" after execution
 - Trivial or mechanical execution (formatting, typo fixes, rename)
-- Read-only / exploratory task — no execution result to evaluate
+- Read-only / exploratory task — no result to evaluate
 - Same (aspect, description) pair was dismissed in current session (session immunity)
 
 ### Mode Deactivation
@@ -194,7 +197,7 @@ Mismatches are identified across named dimensions — working hypotheses for sys
 | Dimension | Detection | Question Form |
 |-----------|-----------|---------------|
 | **Convention** | Result follows general patterns but project has local conventions | "This follows best practices, but your project uses [local pattern]" |
-| **Environment** | Result assumes environment state that differs from actual deployment context | "This assumes [env state], but your context has [actual state]" |
+| **Environment** | Result assumes environment state that differs from actual operating context | "This assumes [env state], but your context has [actual state]" |
 | **Audience** | Result targets a different audience than the actual consumers | "This is written for [assumed audience], but [actual audience] will use it" |
 | **Dependency** | Result interacts with components whose constraints weren't considered | "This depends on [component] which has [constraint not considered]" |
 
@@ -209,7 +212,7 @@ Each mismatch is characterized by:
 
 - **aspect**: The dimension where result and context diverge
 - **description**: What specifically doesn't fit
-- **evidence**: Observable indicator from the execution result or context
+- **evidence**: Observable indicator from the result or context
 - **severity**: Impact on applicability
 
 ### Severity
@@ -226,16 +229,16 @@ When multiple mismatches are identified, surface in severity order (Critical →
 
 ### Phase 0: Applicability Gate (Silent)
 
-Evaluate execution result against application context. This phase is **silent** — no user interaction.
+Evaluate result against application context. This phase is **silent** — no user interaction.
 
-1. **Scan execution result** `R` against context `X`: environment state, project conventions, use case scope, temporal validity, user constraints
+1. **Scan result** `R` against context `X`: environment state, conventions, use case scope, temporal validity, user constraints
 2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)
 3. If all aspects warranted: present finding per Rule 14 before concluding (Epharmoge not activated)
 4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity, `origin=Initial` — proceed to Phase 1
 
-**Information source**: The execution result `R` itself compared against observable context `X`. NOT a re-scan of pre-execution context (non-circularity with Aitesis).
+**Information source**: The result `R` itself compared against observable context `X`. NOT a re-scan of pre-execution context (non-circularity with Aitesis).
 
-**Scan scope**: Completed execution output, project structure, observed conventions, session context. Does NOT re-execute or modify files.
+**Scan scope**: Completed result, observable context (structure, conventions, constraints), session context. Does NOT re-execute or modify files.
 
 ### Phase 1: Mismatch Surfacing
 
@@ -334,7 +337,7 @@ After adaptation — **re-scan**:
 5. **One at a time**: Surface one mismatch per Phase 1 cycle; do not bundle multiple mismatches
 6. **Dismiss respected**: User dismissal is final for that mismatch aspect in the current session
 7. **Convergence persistence**: Mode active until all mismatch tasks are completed (resolved or dismissed)
-8. **Non-circularity**: Information source is the execution result itself compared against context, not pre-execution context scans (independence from Aitesis)
+8. **Non-circularity**: Information source is the result itself compared against context, not pre-execution context scans (independence from Aitesis)
 9. **Early exit honored**: When user accepts result as-is, accept immediately regardless of remaining mismatches
 10. **Cross-protocol awareness**: Suppress when Aitesis resolved overlapping domains in the same execution scope (within recommendation chains only)
 11. **Conditional gate**: AI-guided activation (Layer 2) requires Aitesis operational experience confirmation. User-invocable activation (Layer 1 / `/contextualize`) is always available

@@ -31,6 +31,7 @@ invariant: Structural Correspondence over Abstract Assertion
 
 ── TYPES ──
 R        = Text containing abstract structures (source-agnostic: AI output, user analysis, or external reference)
+             -- Input type: morphism processes R uniformly; enumeration scopes the definition, not behavioral dispatch
 Detect   = Mapping uncertainty detection: R → Bool
 Sₐ       = Source domain (abstract structure in R)
 Sₜ       = Target domain (user's concrete application context)
@@ -79,7 +80,7 @@ early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase 1 Map     (construct) → Read, Grep (domain structure analysis)
+Phase 1 Map     (construct) → Read, Grep (stored knowledge extraction: domain structure analysis); WebSearch (conditional: external domain knowledge)
 Phase 2 Qs      (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (state)     → Internal state update
 Phase 0 Detect  (infer)     → Internal analysis (no external tool)
@@ -175,6 +176,8 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Cross-domain transfer | Concept from one domain applied to a structurally different domain |
 | Grounding probe | User requests "concrete example", "how does this apply to my case", "show me in my context" |
 | Structural mismatch indicators | Abstract assumptions that may not hold in the concrete domain |
+
+**Cross-session enrichment**: Accumulated mapping validation history from prior Reflexion cycles provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Skip**:
 - Output is already domain-specific with concrete instantiations
