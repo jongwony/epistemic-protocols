@@ -1,11 +1,11 @@
 ---
 name: inquire
-description: "Infer context insufficiency before execution. Surfaces uncertainties through information-gain prioritized inquiry when AI infers areas of context insufficiency, producing informed execution. Type: (ContextInsufficient, AI, INQUIRE, ExecutionPlan) → InformedExecution. Alias: Aitesis(αἴτησις)."
+description: "Infer context insufficiency before execution. Surfaces uncertainties through information-gain prioritized inquiry when AI infers areas of context insufficiency, producing informed execution. Type: (ContextInsufficient, AI, INQUIRE, Activity) → InformedExecution. Alias: Aitesis(αἴτησις)."
 ---
 
 # Aitesis Protocol
 
-Infer context insufficiency before execution through AI-guided inquiry. Type: `(ContextInsufficient, AI, INQUIRE, ExecutionPlan) → InformedExecution`.
+Infer context insufficiency before execution through AI-guided inquiry. Type: `(ContextInsufficient, AI, INQUIRE, Activity) → InformedExecution`.
 
 ## Definition
 
@@ -20,21 +20,21 @@ Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
 -- Uᵢ'' (factual/user-dependent): Phase 2 question candidates
 
 ── MORPHISM ──
-ExecutionPlan
-  → scan(plan, context, dimensions)      -- infer context insufficiency (multi-dimension)
+Activity
+  → scan(activity, context, dimensions)  -- infer context insufficiency (multi-dimension)
   → collect(uncertainties, codebase)     -- enrich via evidence collection
   → classify(enrichable, dimension)      -- epistemic classification (core act)
   → enrich(factual_enrichable, environment) -- empirical probe (factual only)
   → surface(classify_result + enriched + remaining, as_inquiry)
-  → integrate(answer, plan)
+  → integrate(answer, activity)
   → InformedExecution
 requires: uncertain(sufficiency(X))      -- runtime gate (Phase 0)
 deficit:  ContextInsufficient            -- activation precondition (Layer 1/2)
-preserves: task_identity(X)              -- task intent invariant; plan context mutated (X → X')
+preserves: task_identity(X)              -- task intent invariant; activity context mutated (X → X')
 invariant: Inference over Detection
 
 ── TYPES ──
-X        = Execution plan (current task/action about to execute)
+X        = Activity to be performed (source-agnostic: task execution, analysis, investigation, or any purposeful action requiring context)
 Scan     = Context sufficiency scan: X → Set(Uncertainty)
 Uncertainty = { domain: String, description: String, context: Set(Evidence) }
 Evidence = { source: String, content: String }                -- collected during Ctx
@@ -45,7 +45,7 @@ Uᵢ'      = Enriched uncertainties (evidence added, not resolved)
 Uᵣ       = Context-resolved uncertainties (resolved during collection)
 Q        = Inquiry (gate interaction), ordered by information gain
 A        = User answer ∈ {Provide(context), Point(location), Dismiss}
-X'       = Updated execution plan
+X'       = Updated activity (context-enriched)
 InformedExecution = X' where remaining = ∅ ∨ user_esc
 -- Layer 1 (epistemic)
 Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
@@ -75,7 +75,7 @@ Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                         -- con
          classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-factual (classify summary routing)
          [if Uₑ_candidates ≠ ∅] EmpiricalProbe(Uₑ_candidates) → Uₑ  -- empirical enrichment [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[max_gain], progress) → Stop → A           -- uncertainty surfacing [Tool]
-Phase 3: A → integrate(A, X) → X'                               -- plan update (internal)
+Phase 3: A → integrate(A, X) → X'                               -- activity update (internal)
 
 ── LOOP ──
 After Phase 3: re-scan X' for remaining or newly emerged uncertainties.
@@ -96,8 +96,8 @@ early_exit = user_declares_sufficient
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Scan    (infer)       → Internal analysis (no external tool)
-Phase 1 Ctx     (collect)     → Read, Grep (context collection); WebSearch (conditional: environmental dependency)
-Phase 1 Classify (assess)     → Internal analysis (multi-dimension assessment); Read, Grep (coherence: multi-file relation analysis)
+Phase 1 Ctx     (collect)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch (conditional: environmental dependency)
+Phase 1 Classify (assess)     → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
 Phase 1 Probe   (enrich)      → Write, Bash, Read (empirical enrichment, Factual only); cleanup via Bash
 Phase 2 Qs      (gate)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (state)       → Internal state update
@@ -108,7 +108,7 @@ converge     (relay)       → TextPresent+Proceed (convergence evidence trace; 
 Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgment on insufficiency)
 
 ── MODE STATE ──
-Λ = { phase: Phase, X: ExecutionPlan, uncertainties: Set(Uncertainty),
+Λ = { phase: Phase, X: Activity, uncertainties: Set(Uncertainty),
       dimensions_detected: Set(Dimension),                           -- π₁ image of classify_results
       classify_results: Map(Uncertainty, Σ(d: Dimension). Fiber(d)), -- fibration-typed classification
       context_resolved: Set(Uncertainty),  -- Uᵣ from TYPES
@@ -161,7 +161,7 @@ AI infers context insufficiency before execution OR user calls `/inquire`. Infer
 - **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
 - **Layer 2 (AI-guided)**: Context insufficiency inferred before execution via in-protocol heuristics. Inference is silent (Phase 0).
 
-**Context insufficient** = the execution plan contains requirements not available in the current context and not trivially inferrable. Context insufficiency spans multiple dimensions: missing facts, incoherent facts, and facts not relevant to execution goals.
+**Context insufficient** = the activity contains requirements not available in the current context and not trivially inferrable. Context insufficiency spans multiple dimensions: missing facts, incoherent facts, and facts not relevant to the activity's goals. Sufficiency encompasses both executability (can the action proceed?) and analysis confidence (is the context adequate for reliable judgment?).
 
 Gate predicate:
 ```
@@ -199,19 +199,21 @@ Heuristic signals for context insufficiency inference (not hard gates):
 | Ambiguous scope | Multiple valid interpretations exist and AI cannot determine intended approach from available context |
 | Environmental dependency | Relies on external state (configs, APIs, versions) |
 
+**Cross-session enrichment**: Domain knowledge accumulated in MEMORY.md or .insights/ through prior Reflexion cycles may narrow the Phase 0 uncertainty scan — known domain patterns reduce the scope of novel-domain signals. This is a heuristic input; gate judgment remains with the user.
+
 **Skip**:
 - Execution context is fully specified in current message
 - User explicitly says "just do it" or "proceed"
 - Same (domain, description) pair was dismissed in current session (session immunity)
 - Phase 1 context collection resolves all identified uncertainties
-- Read-only / exploratory task — no execution plan to verify
+- Read-only / exploratory task — no activity to verify
 
 ### Mode Deactivation
 
 | Trigger | Effect |
 |---------|--------|
-| All uncertainties resolved (context, read-only, probe, or user) | Proceed with updated execution plan |
-| All remaining uncertainties dismissed | Proceed with original execution plan + defaults |
+| All uncertainties resolved (context, read-only, probe, or user) | Proceed with updated activity |
+| All remaining uncertainties dismissed | Proceed with original activity + defaults |
 | User Esc key | Return to normal operation |
 
 ## Uncertainty Identification
@@ -240,15 +242,15 @@ When multiple uncertainties are identified, surface in priority order (Critical 
 
 ### Phase 0: Context Sufficiency Gate (Silent)
 
-Analyze execution plan requirements against available context across multiple dimensions. This phase is **silent** — no user interaction.
+Analyze activity requirements against available context across multiple dimensions. This phase is **silent** — no user interaction.
 
-1. **Scan execution plan** `X` for required context: domain knowledge, environmental state, configuration details, user preferences, constraints
+1. **Scan activity** `X` for required context: domain knowledge, environmental state, configuration details, user preferences, constraints
 2. **Check availability**: For each requirement, assess whether it is available in conversation, files, or environment
 3. **Dimension assessment**: Identify which dimensions are potentially insufficient — factual (missing information), coherence (conflicting information), relevance (information not relevant to goal)
 4. If all requirements satisfied: present sufficiency finding per Rule 17 before proceeding (Aitesis not activated)
 5. If uncertainties identified: record `Uᵢ` with domain, description — proceed to Phase 1
 
-**Scan scope**: Current execution plan, conversation history, observable environment. Does NOT modify files or call external services.
+**Scan scope**: Current activity context, conversation history, observable environment. Does NOT modify files or call external services.
 
 ### Phase 1: Context Collection + Classification + Empirical Enrichment
 
@@ -353,7 +355,7 @@ Options:
 
 After user response:
 
-1. **Provide(context)**: Integrate user-provided context into execution plan `X'`
+1. **Provide(context)**: Integrate user-provided context into activity `X'`
 2. **Point(location)**: Record location, resolve via next Phase 1 iteration
 3. **Dismiss**: Mark uncertainty as dismissed, note default assumption used
 
@@ -396,7 +398,7 @@ After integration:
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/Relevance: detect and show routing target in classify summary
 4. **Inference over Detection**: When context is insufficient and context collection does not fully resolve, infer the highest-gain question rather than assume — silence is worse than a dismissed question
-5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on execution plan requirements
+5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on activity requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
 7. **One at a time**: Surface one uncertainty per Phase 2 cycle; do not bundle multiple uncertainties
 8. **Dismiss respected**: User dismissal is final for that uncertainty domain in the current session

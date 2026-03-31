@@ -225,22 +225,22 @@ Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
 ## MORPHISM Update
 
 ```
--- Current:
-ExecutionPlan
-  → scan(plan, context)                -- infer context insufficiency
+-- Current (historical — type name since updated to Activity):
+Activity
+  → scan(activity, context)            -- infer context insufficiency
   → collect(uncertainties, codebase)   -- enrich via evidence collection
   → surface(uncertainty, as_inquiry)   -- present highest-gain uncertainty
-  → integrate(answer, plan)            -- update execution plan
+  → integrate(answer, activity)        -- update activity
   → InformedExecution
 
 -- Extended:
-ExecutionPlan
-  → scan(plan, context, dimensions)      -- infer context insufficiency (multi-dimension)
+Activity
+  → scan(activity, context, dimensions)  -- infer context insufficiency (multi-dimension)
   → collect(uncertainties, codebase)     -- enrich via evidence collection
   → classify(enrichable, dimension)      -- epistemic classification (core act)
   → enrich(factual_enrichable, environment) -- empirical probe (factual only)
   → surface(classify_result + enriched + remaining, as_inquiry)
-  → integrate(answer, plan)
+  → integrate(answer, activity)
   → InformedExecution
 ```
 

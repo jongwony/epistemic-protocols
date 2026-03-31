@@ -321,6 +321,8 @@ After integration:
 9. **Session text output**: BoundaryMap is output as session text. No structured data channel. Downstream protocols naturally read it from conversation context.
 10. **Circular re-probing is healthy**: Integration may surface new boundary-undefined domains. Re-probe cycles are normal dialogue. `user_esc` guarantees termination at every gate interaction moment.
 11. **Per-decision boundary**: Each invocation produces a fresh BoundaryMap for the current task scope. Do not carry over classifications from prior sessions or invocations.
+
+**Cross-session enrichment**: Accumulated boundary preferences (MEMORY.md, .insights/) from prior Reflexion cycles may serve as heuristic input for Phase 1 calibration proposals — but per-decision freshness (Rule 11) takes precedence. Prior preferences inform, they do not predetermine. Gate judgment remains with the user.
 12. **Epistemic router**: BoundaryMap is a shared resource consumed by all downstream protocols — Aitesis uses it as gate threshold, Prothesis as framework filter, Telos as goal detail level, Syneidesis as gap relevance filter, Prosoche as risk evaluation threshold. This shared consumption is why Horismos requires independent protocol status rather than absorption into any single consumer.
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **No premature convergence**: Do not declare |remaining| = 0 without presenting convergence evidence trace. "All domains bounded" as assertion without per-domain evidence = protocol violation
