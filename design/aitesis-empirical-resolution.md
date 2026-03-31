@@ -227,22 +227,22 @@ Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
 > **Note**: This section documents the design evolution. For the canonical current MORPHISM, see `aitesis/skills/inquire/SKILL.md`.
 
 ```
--- Current (historical — type name since updated to Activity):
-Activity
-  → scan(activity, context)            -- infer context insufficiency
+-- Current (historical — type name evolution: ExecutionPlan → Activity → Prospect):
+Prospect
+  → scan(prospect, context)            -- infer context insufficiency
   → collect(uncertainties, codebase)   -- enrich via evidence collection
   → surface(uncertainty, as_inquiry)   -- present highest-gain uncertainty
-  → integrate(answer, activity)        -- update activity
+  → integrate(answer, prospect)        -- update prospect
   → InformedExecution
 
 -- Extended:
-Activity
-  → scan(activity, context, dimensions)  -- infer context insufficiency (multi-dimension)
+Prospect
+  → scan(prospect, context, dimensions)  -- infer context insufficiency (multi-dimension)
   → collect(uncertainties, codebase)     -- enrich via evidence collection
   → classify(enrichable, dimension)      -- epistemic classification (core act)
   → enrich(factual_enrichable, environment) -- empirical probe (factual only)
   → surface(classify_result + enriched + remaining, as_inquiry)
-  → integrate(answer, activity)
+  → integrate(answer, prospect)
   → InformedExecution
 ```
 

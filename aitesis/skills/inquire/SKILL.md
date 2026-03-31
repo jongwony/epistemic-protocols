@@ -1,11 +1,11 @@
 ---
 name: inquire
-description: "Infer context insufficiency before execution. Surfaces uncertainties through information-gain prioritized inquiry when AI infers areas of context insufficiency, producing informed execution. Type: (ContextInsufficient, AI, INQUIRE, Activity) → InformedExecution. Alias: Aitesis(αἴτησις)."
+description: "Infer context insufficiency before execution. Surfaces uncertainties through information-gain prioritized inquiry when AI infers areas of context insufficiency, producing informed execution. Type: (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution. Alias: Aitesis(αἴτησις)."
 ---
 
 # Aitesis Protocol
 
-Infer context insufficiency before execution through AI-guided inquiry. Type: `(ContextInsufficient, AI, INQUIRE, Activity) → InformedExecution`.
+Infer context insufficiency before execution through AI-guided inquiry. Type: `(ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution`.
 
 ## Definition
 
@@ -20,21 +20,21 @@ Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
 -- Uᵢ'' (factual/user-dependent): Phase 2 question candidates
 
 ── MORPHISM ──
-Activity
-  → scan(activity, context, dimensions)  -- infer context insufficiency (multi-dimension)
+Prospect
+  → scan(prospect, context, dimensions)  -- infer context insufficiency (multi-dimension)
   → collect(uncertainties, codebase)     -- enrich via evidence collection
   → classify(enrichable, dimension)      -- epistemic classification (core act)
   → enrich(factual_enrichable, environment) -- empirical probe (factual only)
   → surface(classify_result + enriched + remaining, as_inquiry)
-  → integrate(answer, activity)
+  → integrate(answer, prospect)
   → InformedExecution
 requires: uncertain(sufficiency(X))      -- runtime gate (Phase 0)
 deficit:  ContextInsufficient            -- activation precondition (Layer 1/2)
-preserves: task_identity(X)              -- task intent invariant; activity context mutated (X → X')
+preserves: task_identity(X)              -- task intent invariant; prospect context mutated (X → X')
 invariant: Inference over Detection
 
 ── TYPES ──
-X        = Activity to be performed (source-agnostic: task execution, analysis, investigation, or any purposeful action requiring context)
+X        = Prospect for action (source-agnostic: task execution, analysis, investigation, or any purposeful action requiring context)
              -- Input type: morphism processes X uniformly; enumeration scopes the definition, not behavioral dispatch
 Scan     = Context sufficiency scan: X → Set(Uncertainty)
 Uncertainty = { domain: String, description: String, context: Set(Evidence) }
@@ -46,7 +46,7 @@ Uᵢ'      = Enriched uncertainties (evidence added, not resolved)
 Uᵣ       = Context-resolved uncertainties (resolved during collection)
 Q        = Inquiry (gate interaction), ordered by information gain
 A        = User answer ∈ {Provide(context), Point(location), Dismiss}
-X'       = Updated activity (context-enriched)
+X'       = Updated prospect (context-enriched)
 InformedExecution = X' where remaining = ∅ ∨ user_esc
 -- Layer 1 (epistemic)
 Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
@@ -76,7 +76,7 @@ Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                         -- con
          classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-factual (classify summary routing)
          [if Uₑ_candidates ≠ ∅] EmpiricalProbe(Uₑ_candidates) → Uₑ  -- empirical enrichment [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[max_gain], progress) → Stop → A           -- uncertainty surfacing [Tool]
-Phase 3: A → integrate(A, X) → X'                               -- activity update (internal)
+Phase 3: A → integrate(A, X) → X'                               -- prospect update (internal)
 
 ── LOOP ──
 After Phase 3: re-scan X' for remaining or newly emerged uncertainties.
@@ -109,7 +109,7 @@ converge     (relay)       → TextPresent+Proceed (convergence evidence trace; 
 Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgment on insufficiency)
 
 ── MODE STATE ──
-Λ = { phase: Phase, X: Activity, uncertainties: Set(Uncertainty),
+Λ = { phase: Phase, X: Prospect, uncertainties: Set(Uncertainty),
       dimensions_detected: Set(Dimension),                           -- π₁ image of classify_results
       classify_results: Map(Uncertainty, Σ(d: Dimension). Fiber(d)), -- fibration-typed classification
       context_resolved: Set(Uncertainty),  -- Uᵣ from TYPES
@@ -162,7 +162,7 @@ AI infers context insufficiency before execution OR user calls `/inquire`. Infer
 - **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
 - **Layer 2 (AI-guided)**: Context insufficiency inferred before execution via in-protocol heuristics. Inference is silent (Phase 0).
 
-**Context insufficient** = the activity contains requirements not available in the current context and not trivially inferrable. Context insufficiency spans multiple dimensions: missing facts, incoherent facts, and facts not relevant to the activity's goals. Sufficiency encompasses both executability (can the action proceed?) and analysis confidence (is the context adequate for reliable judgment?).
+**Context insufficient** = the prospect contains requirements not available in the current context and not trivially inferrable. Context insufficiency spans multiple dimensions: missing facts, incoherent facts, and facts not relevant to the prospect's goals. Sufficiency encompasses both executability (can the action proceed?) and analysis confidence (is the context adequate for reliable judgment?).
 
 Gate predicate:
 ```
@@ -207,14 +207,14 @@ Heuristic signals for context insufficiency inference (not hard gates):
 - User explicitly says "just do it" or "proceed"
 - Same (domain, description) pair was dismissed in current session (session immunity)
 - Phase 1 context collection resolves all identified uncertainties
-- Read-only / exploratory task — no activity to verify
+- Read-only / exploratory task — no prospect to verify
 
 ### Mode Deactivation
 
 | Trigger | Effect |
 |---------|--------|
-| All uncertainties resolved (context, read-only, probe, or user) | Proceed with updated activity |
-| All remaining uncertainties dismissed | Proceed with original activity + defaults |
+| All uncertainties resolved (context, read-only, probe, or user) | Proceed with updated prospect |
+| All remaining uncertainties dismissed | Proceed with original prospect + defaults |
 | User Esc key | Return to normal operation |
 
 ## Uncertainty Identification
@@ -243,15 +243,15 @@ When multiple uncertainties are identified, surface in priority order (Critical 
 
 ### Phase 0: Context Sufficiency Gate (Silent)
 
-Analyze activity requirements against available context across multiple dimensions. This phase is **silent** — no user interaction.
+Analyze prospect requirements against available context across multiple dimensions. This phase is **silent** — no user interaction.
 
-1. **Scan activity** `X` for required context: domain knowledge, environmental state, configuration details, user preferences, constraints
+1. **Scan prospect** `X` for required context: domain knowledge, environmental state, configuration details, user preferences, constraints
 2. **Check availability**: For each requirement, assess whether it is available in conversation, files, or environment
 3. **Dimension assessment**: Identify which dimensions are potentially insufficient — factual (missing information), coherence (conflicting information), relevance (information not relevant to goal)
 4. If all requirements satisfied: present sufficiency finding per Rule 17 before proceeding (Aitesis not activated)
 5. If uncertainties identified: record `Uᵢ` with domain, description — proceed to Phase 1
 
-**Scan scope**: Current activity context, conversation history, observable environment. Does NOT modify files or call external services.
+**Scan scope**: Current prospect context, conversation history, observable environment. Does NOT modify files or call external services.
 
 ### Phase 1: Context Collection + Classification + Empirical Enrichment
 
@@ -356,7 +356,7 @@ Options:
 
 After user response:
 
-1. **Provide(context)**: Integrate user-provided context into activity `X'`
+1. **Provide(context)**: Integrate user-provided context into prospect `X'`
 2. **Point(location)**: Record location, resolve via next Phase 1 iteration
 3. **Dismiss**: Mark uncertainty as dismissed, note default assumption used
 
@@ -399,7 +399,7 @@ After integration:
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/Relevance: detect and show routing target in classify summary
 4. **Inference over Detection**: When context is insufficient and context collection does not fully resolve, infer the highest-gain question rather than assume — silence is worse than a dismissed question
-5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on activity requirements
+5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on prospect requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
 7. **One at a time**: Surface one uncertainty per Phase 2 cycle; do not bundle multiple uncertainties
 8. **Dismiss respected**: User dismissal is final for that uncertainty domain in the current session

@@ -227,7 +227,7 @@ When multiple gaps detected:
 When the Background gap type is selected, verify the gap is about *interpreting the expression*, not about *executing the task*:
 
 - **Hermeneia Background**: Missing background changes what E means (user's intent) → proceed with clarification
-- **Aitesis territory**: Missing background changes how to perform X (activity) → suggest `/inquire` and offer to transition
+- **Aitesis territory**: Missing background changes how to perform X (prospect) → suggest `/inquire` and offer to transition
 
 Operational test: "Would knowing this change what the user means, or only how I execute it?"
 
