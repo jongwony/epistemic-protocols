@@ -292,10 +292,9 @@ If all uncertainties context-resolved or read-only-resolved (no enriched or user
 If enriched or user-dependent uncertainties remain: proceed to Phase 2.
 
 **Web context** (conditional): When uncertainty carries an environmental dependency signal
-(external API versions, library maintenance status, breaking changes),
-extend context collection to web search.
+(external API versions, library maintenance status, breaking changes)
+and the information is not available in the codebase, extend context collection to web search.
 Web evidence is tagged with `source: "web:{url}"` for traceability.
-Activation condition: `environmental(Uᵢ) ∧ ¬resolved(Uᵢ, codebase)`.
 
 **Scope restriction**:
 - Context collection: Read-only investigation (Read, Grep, WebSearch). — core preserved

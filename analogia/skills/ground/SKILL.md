@@ -221,7 +221,10 @@ Decompose abstract and concrete domains, then construct structural correspondenc
    - If no correspondent exists: flag as gap — the abstract structure may not apply
 4. Proceed to Phase 2 with mapping candidates
 
-**Scope restriction**: Read-only investigation only. No API calls, test execution, or file modifications.
+**Web context** (conditional): When source or target domain knowledge exists primarily outside the codebase (external APIs, academic domains, industry standards), extend context collection to web search.
+Web evidence is tagged with `source: "web:{url}"` for traceability.
+
+**Scope restriction**: Read-only investigation only (Read, Grep, WebSearch). No test execution or file modifications.
 
 ### Phase 2: Instantiation + Validation
 

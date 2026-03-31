@@ -115,7 +115,7 @@ Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
 ### Architectural Principles
 - **Unix Philosophy Homomorphism**: Single-purpose epistemic tools; bottom-up composition
 - **Session Text Composition**: Inter-protocol data flows as natural language in session context
-- **Cross-Session Knowledge Composition**: Reflexion-stored knowledge enriches protocol Phase 0/1 detection in subsequent sessions (Tertiary hermeneutic circle)
+- **Cross-Session Knowledge Composition**: Reflexion-stored knowledge enriches protocol Phase 0/1 detection in subsequent sessions (Tertiary hermeneutic circle); per-session loading may bias detection — gate judgment prevails
 - **Dual Advisory Layer**: graph.json (structural) + Output Style nudge (runtime heuristic)
 - **Coexistence over Mirroring**: Protocols occupy epistemic layer; built-ins occupy execution layer
 - **Three-Tier Termination**: user_esc (ungraceful) / user_withdraw (graceful) / normal convergence
