@@ -71,6 +71,8 @@ epistemic-protocols/
 - References directory: `skills/*/references/` for detailed documentation (optional per plugin)
 - No external dependencies; Node.js standard library only
 
+**Plugin Encapsulation**: Users interact only with SKILL.md (loaded via plugin system). `.claude/rules/` prescriptive changes affecting protocol behavior must be compiled into SKILL.md Rules sections. SKILL.md must be self-contained — no external references (axiom identifiers, rule file paths, design-philosophy concepts) that require reading contributor documentation.
+
 **SKILL.md Formal Block Anatomy**: FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, ELIDABLE CHECKPOINTS, MODE STATE (and optional blocks). Details: [docs/structural-specs.md](docs/structural-specs.md#skillmd-formal-block-anatomy)
 
 ## Plugins
