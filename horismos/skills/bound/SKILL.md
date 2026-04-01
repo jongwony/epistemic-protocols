@@ -104,7 +104,7 @@ Phase 2 Qc (classify)      → always_gated (gated: UserSupplies/AIPropose/AIAut
 
 **Definition over Assumption**: When epistemic ownership is unclear, explicitly define boundaries rather than assuming defaults. Each decision point deserves its own boundary definition. The purpose of boundary probing is to produce a shared BoundaryMap — a Transactive Memory directory that makes explicit who knows what, who decides what, and where calibration is needed.
 
-**Stigmergy signal principle**: BoundaryMap is a signal (TMS directory pointer), not a payload. It carries classification only — downstream protocols read the signal and autonomously modify their own Phase 1 behavior. User-supplies signals standard context collection; AI-proposes signals ENRICH-AND-PRESENT (expanded context collection with candidate generation); AI-autonomous signals RESOLVE-OR-PRESENT (expanded context collection with resolution attempt). The behavior lives in each downstream protocol, not in BoundaryMap.
+**Stigmergy signal principle**: BoundaryMap is a signal (TMS directory pointer), not a payload. It carries classification only — the signal exists in session context via Session Text Composition (Rule 9), and downstream behavior emerges from LLM reading the classification in conversation context. User-supplies signals standard context collection; AI-proposes signals ENRICH-AND-PRESENT (expanded context collection with candidate generation); AI-autonomous signals RESOLVE-OR-PRESENT (expanded context collection with resolution attempt). No explicit receiver implementation is needed in downstream protocol definitions — the session context is the environment, and behavioral adjustment is the emergent response.
 
 ## Distinction from Other Protocols
 
