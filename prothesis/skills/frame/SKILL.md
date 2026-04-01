@@ -132,8 +132,8 @@ I (inquiry) = purpose: perspective-informed interpretation
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Qc (gate)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
 Sc (gate)                → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
-T (parallel)             → TeamCreate tool (creates team with shared task list)
-∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates)
+T (parallel)             → TeamCreate tool (creates team with shared task list); agent-aware realization: match available agents to selected perspectives before spawn — 0 matches: proceed with AI-generated teammates; 1 match: relay (auto-assign); 2+ matches: ELIDABLE gate (user confirms agent-perspective mapping, each option genuinely viable under different value weightings per A5)
+∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates — each receives MBᵥ + perspective only; no Phase 1 context G passed)
 ∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
 Phase 3 P (relay)        → TextPresent+Proceed (per-perspective epistemic contribution + key finding summaries)
 Phase 4 Δ (detect)       → Internal operation (trigger check: contradictions, horizon intersections, uncorroborated high-stakes)
@@ -144,7 +144,8 @@ PF Qc (gate)             → present (multiSelect: preservation scope; in LOOP w
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
-G (gather)               → Read, Glob, Grep (targeted context acquisition, guided by MBᵥ)
+G (gather)               → Read, Glob, Grep (meta context acquisition: broad scope guided by MBᵥ to identify relevant perspectives — not passed to teammates)
+∥I (inquiry-context)     → Read, Grep (object context acquisition: each perspective independently collects evidence through its own lens — MBᵥ + perspective only, no inherited G context)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
 characterize (internal)  → Internal operation (perspective count tier classification)
 converge (relay)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
@@ -331,14 +332,24 @@ Per LOOP Pₛ count tiers for escalation recommendation.
 
 **Plan mode**: When active, `TeamCreate` is unavailable — `Plan` subagents (per perspective) and `Explore` subagent (context) remain available. See `references/conceptual-foundations.md` for Phase 3 degradation behavior (`ExitPlanMode` presents Plan subagent analyses as plan output; actual Lens L requires a fresh `/frame` session from Phase 0 in normal mode).
 
+**Agent-Perspective Mapping** (before team spawn)
+
+For each selected perspective in Pₛ, check whether available agents match the perspective's analytical focus:
+
+- **0 matches**: Proceed with AI-generated teammate (default behavior — no agent mapping step)
+- **1 match**: Relay — auto-assign the agent to the perspective (entropy→0, single viable option)
+- **2+ matches**: ELIDABLE gate — present agent-perspective mapping for user confirmation. Each option must be genuinely viable under different value weightings (A5 option-set relay test). If all options collapse to one dominant choice, present as relay instead
+
+Agent matching is heuristic: compare perspective focus description against agent `description` and `when to use` fields. Matching does not affect perspective selection (theoria) — it only determines execution assignment (praxis). "Placement over Prescription" invariant: /frame places perspectives; agent mapping realizes execution.
+
 **Team Setup**
 
 Create an agent team and spawn perspective teammates:
 
 1. Call TeamCreate to create a team (e.g., `prothesis-inquiry`)
-2. For each selected perspective, call Task with `team_name` and `name` to spawn a teammate
+2. For each selected perspective, call Task with `team_name` and `name` to spawn a teammate (agent-mapped or AI-generated)
 
-Teammates do not inherit the lead's conversation history. Each spawn prompt MUST include the Mission Brief and Phase 1 context (gathered information, key constraints, domain specifics) alongside the question — without this, teammates lack the context needed for informed analysis.
+Teammates do not inherit the lead's conversation history. Each spawn prompt includes the Mission Brief and the perspective assignment — teammates independently collect evidence through their own lens via Read/Grep. Phase 1 context (G) is NOT passed to teammates: G serves meta-level perspective identification; each teammate's independent object-level investigation produces perspective-specific evidence that G's broad sweep would filter out.
 
 Each teammate receives the perspective prompt template:
 
@@ -352,7 +363,7 @@ You are a **[Perspective] Expert**.
 
 Analyze from this epistemic standpoint:
 
-**Context**: {Phase 1 gathered context — key constraints, domain, relevant facts}
+**Your Task**: Independently investigate the codebase through your lens. Use Read/Grep to collect perspective-specific evidence.
 **Question**: {original question verbatim}
 
 Provide:
