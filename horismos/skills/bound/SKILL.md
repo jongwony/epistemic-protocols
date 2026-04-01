@@ -1,6 +1,6 @@
 ---
 name: bound
-description: "Define epistemic boundaries per decision. Produces BoundaryMap classifying domains as user-spec, AI-spec, or needs-calibration when boundary ownership is undefined. Type: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary. Alias: Horismos(ὁρισμός)."
+description: "Define epistemic boundaries per decision. Produces BoundaryMap classifying domains as user-supplies, AI-proposes, or AI-autonomous when boundary ownership is undefined. Type: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary. Alias: Horismos(ὁρισμός)."
 ---
 
 # Horismos Protocol
@@ -42,9 +42,9 @@ Ctx            = Context collection: Bᵢ → (Bᵢ', Bᵣ)          -- enrich +
 Bᵢ'            = Set(Domain) enriched with context evidence    -- after Phase 1
 Bᵣ             = Set(Domain) resolved from context             -- auto-resolved in Phase 1
 Q              = Boundary inquiry ordered by impact [Tool: gate interaction]
-A              = User answer ∈ {UserSpec(scope), AISpec(scope), NeedsCalibration, Dismiss}
+A              = User answer ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismiss}
 B              = BoundaryMap: Map(Domain, BoundaryClassification)
-BoundaryClassification ∈ {UserSpec(scope), AISpec(scope), NeedsCalibration, Dismissed}
+BoundaryClassification ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismissed}
 DefinedBoundary = B where |remaining| = 0 ∨ user_esc
 Phase          ∈ {0, 1, 2, 3}
 
@@ -67,7 +67,7 @@ J = {next, converge}
   next:      Phase 3 → Phase 1 → Phase 2 (|remaining| > 0: context refresh, classify next domain)
   converge:  Phase 3 → deactivate (|remaining| = 0: all domains bounded)
 
-Answer types (UserSpec/AISpec/NeedsCalibration/Dismiss) determine BoundaryMap entry, not loop path.
+Answer types (UserSupplies/AIPropose/AIAutonomous/Dismiss) determine BoundaryMap entry, not loop path.
 Convergence evidence: At |remaining| = 0, present transformation trace — for each d ∈ (Λ.context_resolved ∪ Λ.user_responded), show (BoundaryUndefined(d) → BoundaryClassification(d)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
@@ -85,7 +85,7 @@ converge  (relay)       → TextPresent+Proceed (convergence evidence trace; pro
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
-Phase 2 Qc (classify)      → always_gated (gated: UserSpec/AISpec/NeedsCalibration — boundary ownership)
+Phase 2 Qc (classify)      → always_gated (gated: UserSupplies/AIPropose/AIAutonomous — boundary ownership)
 
 ── MODE STATE ──
 Λ = { phase: Phase, T: TaskScope,
@@ -103,6 +103,8 @@ Phase 2 Qc (classify)      → always_gated (gated: UserSpec/AISpec/NeedsCalibra
 ## Core Principle
 
 **Definition over Assumption**: When epistemic ownership is unclear, explicitly define boundaries rather than assuming defaults. Each decision point deserves its own boundary definition. The purpose of boundary probing is to produce a shared BoundaryMap — a Transactive Memory directory that makes explicit who knows what, who decides what, and where calibration is needed.
+
+**Stigmergy signal principle**: BoundaryMap is a signal (TMS directory pointer), not a payload. It carries classification only — the signal exists in session context via Session Text Composition (Rule 9), and downstream behavior emerges from LLM reading the classification in conversation context. User-supplies signals standard context collection; AI-proposes signals ENRICH-AND-PRESENT (expanded context collection with candidate generation); AI-autonomous signals RESOLVE-OR-PRESENT (expanded context collection with resolution attempt). No explicit receiver implementation is needed in downstream protocol definitions — the session context is the environment, and behavioral adjustment is the emergent response.
 
 ## Distinction from Other Protocols
 
@@ -261,9 +263,9 @@ Then **present**:
 How should boundary ownership be classified for this domain?
 
 Options:
-1. **User-spec** — I decide: [what this means for scope]
-2. **AI-spec** — AI decides: [what AI would determine]
-3. **Needs calibration** — Discuss further before classifying
+1. **User-supplies** — I already have the answer: [what user would provide]
+2. **AI-proposes** — AI drafts options, I select/steer: [what AI would propose]
+3. **AI-autonomous** — AI decides within scope: [what AI would determine]
 4. **Dismiss** — Proceed with [stated default assumption]
 ```
 
@@ -277,9 +279,9 @@ Options:
 
 After user response:
 
-1. **UserSpec(scope)**: Record domain as user-owned with specified scope in BoundaryMap
-2. **AISpec(scope)**: Record domain as AI-owned with specified scope in BoundaryMap
-3. **NeedsCalibration**: Retain domain as needs-calibration in BoundaryMap (downstream protocols treat as unresolved)
+1. **UserSupplies(scope)**: Record domain as user-supplied with specified scope in BoundaryMap — downstream gates present open questions for user-provided values
+2. **AIPropose(scope)**: Record domain as AI-proposes with specified scope in BoundaryMap — downstream protocols read this signal and autonomously expand Phase 1 to generate candidates (ENRICH-AND-PRESENT)
+3. **AIAutonomous(scope)**: Record domain as AI-autonomous with specified scope in BoundaryMap — downstream protocols may elide gates per RESOLVE-OR-PRESENT pattern
 4. **Dismiss**: Mark domain as dismissed, note default assumption used
 
 After integration:
@@ -306,12 +308,12 @@ After integration:
 | Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
 | Progress visibility | `[N bounded / M total]` in Phase 2 | User sees progress toward completion |
 | Auto-resolve preferred | Context-resolved domains skip Phase 2 | Minimizes user interaction |
-| Recognition over recall | Present options (UserSpec/AISpec/NeedsCalibration/Dismiss) | Never ask open-ended boundary questions |
+| Recognition over recall | Present options (UserSupplies/AIPropose/AIAutonomous/Dismiss) | Never ask open-ended boundary questions |
 
 ## Rules
 
 1. **AI-guided, user-classified**: AI detects boundary-undefined domains; classification requires user choice via gate interaction (Phase 2). AI detection is implicitly confirmed when the user engages with classification (Phase 2 gate interaction response, not Esc).
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Options are UserSpec/AISpec/NeedsCalibration/Dismiss — never open-ended.
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Options are UserSupplies/AIPropose/AIAutonomous/Dismiss — never open-ended.
 3. **Context collection first**: Before asking the user, collect contextual evidence through Read/Grep/Glob codebase exploration to auto-resolve where possible and enrich remaining domains (Phase 1).
 4. **Definition over Assumption**: When boundary ownership is unclear, define explicitly rather than assume — silence is worse than a dismissed classification.
 5. **No fixed taxonomy**: Domains emerge dynamically from task probe, not a predefined list. Do not impose categories.
