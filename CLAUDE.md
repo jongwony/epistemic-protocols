@@ -92,13 +92,7 @@ epistemic-protocols/
 
 ## Axioms
 
-- **A1. Recognition over Recall**: Options with differential futures, not blanks to fill; post-selection state must be anticipatable
-- **A2. Detection with Authority**: AI detects and presents with evidence; user retains decision authority. Operational boundary: relay (zero epistemic authority, auto-resolve) vs constitution (epistemic authority exercised, user confirmation)
-- **A3. Convergence Persistence**: Modes active until convergence; active protocols supersede default behaviors
-- **A4. Semantic Autonomy**: Inscribed definition achieves meaning-autonomy from any specific platform
-- **A5. Interaction Kind Factorization**: G = R(p) ∘ A; relay (auto-resolve) / gated (inherently Qs — user judgment constitutes meaning). Regret annotations: elidable / always_gated
-- **A6. Context-Question Separation**: Context (analysis, evidence) as text before gate; gate contains only question + option-specific differential implications
-- **A7. Adversarial Anticipation**: Anticipate AI shortcut paths; structural guards in Rules + gate mutation detection
+A1-A7 operational summaries auto-loaded via `.claude/rules/axioms.md`. Full definitions: [docs/design-philosophy.md](docs/design-philosophy.md)
 
 ## Design Philosophy
 
@@ -217,20 +211,8 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Catalog**: No delegation—text-only output, main agent handles all. Read tool for scenarios.md detail mode only.
 - **Compose**: No delegation—main agent handles all phases. Read/Grep for graph.json and ELIDABLE CHECKPOINTS extraction, Write for template generation.
 
-## Git Conventions
+## Conventions
 
-- **Commit message**: `type(scope): Korean description` — type ∈ {feat, fix, refactor, style}, scope = plugin name
-- **Branch naming**: `feat/name-protocol`, `refactor/description`, `fix/description`
-- **PR body language**: Korean (hook-enforced)
-- **Release tag**: CalVer `v{YYYY}.{MM}.{DD}[.{N}]` — tag push triggers CI release (`gh release create --draft`)
-
-## Editing Guidelines
-
-- **Notation**: `→` (function), `∥` (parallel), `[Tool]` suffix for external operations in PHASE TRANSITIONS
-- Keep README.md and README_ko.md in sync
-- Protocol table maintained in README.md (navigation hub format)
-- Bump version in `.claude-plugin/plugin.json` on changes
-- `call` for tool references, `present` for gate operations (tool-agnostic verb)
-- Skills frontmatter: `name` (required), `description` (required, quote if contains `:`), `allowed-tools` (optional), `license`, `compatibility`, `metadata`
+Git and editing rules auto-loaded via `.claude/rules/editing-conventions.md`.
 
 Co-change patterns tracked in [docs/co-change.md](docs/co-change.md). Key: any protocol change requires plugin.json version bump + `/verify`.

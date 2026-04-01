@@ -1,6 +1,6 @@
 # Design Philosophy
 
-Detailed rationale for the axiom hierarchy and design principles governing epistemic protocols. See CLAUDE.md for the principle summary; this document provides full definitions.
+Prescriptive source: full axiom definitions, derived principles, and architectural decisions. Operational axiom summaries are auto-loaded per-session via `.claude/rules/axioms.md`. See CLAUDE.md for project overview and descriptive conventions.
 
 ## Axiom Hierarchy
 

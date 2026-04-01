@@ -19,3 +19,5 @@ Protocol modifications require synchronized edits across multiple files. Any pro
 | Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |
 | Relay interaction pattern change | SKILL.md TOOL GROUNDING + design-philosophy.md (Convergence Evidence) + criteria.md + static-checks.js + plugin.json version bumps |
 | SKILL.md frontmatter description change (type signature 포함) | `scripts/package.js` DESCRIPTION_OVERRIDES (morphism notation 동기화) |
+| Axiom change (A1-A7 definition or summary) | `docs/design-philosophy.md` (source) → `.claude/rules/axioms.md` (operational summary) → `CLAUDE.md` (reference) |
+| Editing/Git convention change | `.claude/rules/editing-conventions.md` (primary) → `CLAUDE.md` (reference) |
