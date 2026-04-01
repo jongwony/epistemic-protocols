@@ -15,7 +15,9 @@ Protocol modifications require synchronized edits across multiple files. Any pro
 | Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions, `graph.json` |
 | Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Protocol nudge pattern change | Output Style nudge section, plugin.json version bumps |
-| Convergence-awareness nudge wording | epistemic-ink.md (Protocol Nudge), design-philosophy.md (Dual Advisory Layer + Full Taxonomy) |
+| Convergence-awareness nudge wording | epistemic-ink.md (Protocol Nudge), `.claude/rules/architectural-principles.md` (Dual Advisory Layer), `.claude/rules/derived-principles.md` (Full Taxonomy) |
 | Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |
-| Relay interaction pattern change | SKILL.md TOOL GROUNDING + design-philosophy.md (Convergence Evidence) + criteria.md + static-checks.js + plugin.json version bumps |
+| Relay interaction pattern change | SKILL.md TOOL GROUNDING + `.claude/rules/derived-principles.md` (Convergence Evidence) + criteria.md + static-checks.js + plugin.json version bumps |
 | SKILL.md frontmatter description change (type signature 포함) | `scripts/package.js` DESCRIPTION_OVERRIDES (morphism notation 동기화) |
+| Axiom change (A1-A7 definition or summary) | `.claude/rules/axioms.md` (source of truth) → `CLAUDE.md` (reference) |
+| Editing/Git convention change | `.claude/rules/editing-conventions.md` (primary) → `CLAUDE.md` (reference) |
