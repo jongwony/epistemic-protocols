@@ -153,7 +153,7 @@ Options:
 | | | | | AI-autonomous 도메인 → Phase 1에서 context-resolved(entropy→0)이면 **Uᵣ(미도달)**, 미해소(entropy>0)이면 **PRESENT** | Qs 원칙 보존: 게이트 자체를 엘리전하지 않고 상위 단계에서 해소. 투명성: Materialized View에 자동 해결 기록 |
 | | | | | User-supplies 도메인 → **PRESENT** | 사용자 판단 필요 |
 | | | | | Dismissed 도메인 → **PRUNE** | 범위 제외 |
-| | | | | AI-proposes → **PRESENT** | 미확정 경계 — Qs 원칙에 따라 사용자 판단 |
+| | | | | AI-proposes → **PRESENT** | AI 초안 제시, 사용자 조향 — ENRICH-AND-PRESENT |
 
 **Aitesis 요약**: 불확실성 수(M)개 → Phase 1 해소 수에 따라 **0~M개 사용자 상호작용**. AI-autonomous 도메인은 Phase 1 자율 해결 범위 확대(probe latitude), Qs 게이트 엘리전 아님
 
