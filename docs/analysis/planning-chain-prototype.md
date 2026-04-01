@@ -95,8 +95,8 @@ Options:
 |------|------|------|
 | Qs 게이트 | **BATCH** | 사용자가 새로운 내용을 구성해야 함 (unbounded regret) |
 | Qc + unbounded regret | **PRESENT** | 사용자가 inline 판단해야 함 |
-| Qc + bounded + BoundaryMap.UserSpec | **PRESENT** | 사용자가 결정 권한을 보유한 도메인 |
-| Qc + bounded + BoundaryMap.AISpec | **ELIDE** | AI 자율 판단 가능 + 로그 기록 |
+| Qc + bounded + BoundaryMap.UserSupplies | **PRESENT** | 사용자가 결정 권한을 보유한 도메인 |
+| Qc + bounded + BoundaryMap.AIAutonomous | **ELIDE** | AI 자율 판단 가능 + 로그 기록 |
 | Qc + bounded + answer ⊆ output(prior) | **ELIDE** | 이전 프로토콜 산출물에서 답이 이미 도출 가능 (entailment) |
 | BoundaryMap.Dismissed 도메인 | **PRUNE** | 사용자가 이미 범위에서 제외 |
 
@@ -134,13 +134,13 @@ Options:
 |-------|--------|------|-------------|-------------|------|
 | 0 | (silent) | 내부 분석 | 표시 없음 | (silent) | 변경 없음 — 내부 probe |
 | 1 | (context collection) | 내부 | 표시 없음 | (내부) | 변경 없음 — 자동 해결 가능 도메인 처리 |
-| 2 | Qc(classify) | always_gated | PRESENT | **PRESENT** | 경계 소유권 분류. Qc 형식이지만 constitutive 성격 — UserSpec/AISpec 선택은 단순 분류가 아닌 권한 할당. 도메인별 1회씩 |
+| 2 | Qc(classify) | always_gated | PRESENT | **PRESENT** | 경계 소유권 분류. Qc 형식이지만 constitutive 성격 — User-supplies/AI-autonomous 선택은 단순 분류가 아닌 권한 할당. 도메인별 1회씩 |
 
 **Horismos 요약**: 도메인 수(N)개 게이트 → **N개 사용자 상호작용** (각 PRESENT)
 
 **BoundaryMap 하류 영향**: Horismos 수렴 후 BoundaryMap이 Aitesis 게이트 배치를 변조:
-- AISpec 도메인의 불확실성 → Aitesis에서 ELIDE 가능 (AI 자율 판단)
-- UserSpec 도메인의 불확실성 → Aitesis에서 반드시 PRESENT
+- AI-autonomous 도메인의 불확실성 → Aitesis에서 ELIDE 가능 (AI 자율 판단)
+- User-supplies 도메인의 불확실성 → Aitesis에서 반드시 PRESENT
 - Dismissed 도메인 → Aitesis에서 PRUNE (범위에서 제거)
 
 ### Aitesis 게이트
@@ -150,12 +150,12 @@ Options:
 | 0 | (silent) | 내부 분석 | 표시 없음 | (silent) | 변경 없음 — 내부 scan |
 | 1 | (context collection + classify) | 내부 | 표시 없음 | (내부) | 변경 없음. BoundaryMap이 scan 범위를 좁힘 |
 | 2 | Qs(uncertainty surfacing) | always_gated, Qs | PRESENT | **RESOLVE-OR-PRESENT** | BoundaryMap이 Phase 1 해결 범위를 변조: |
-| | | | | AISpec 도메인 → Phase 1에서 context-resolved(entropy→0)이면 **Uᵣ(미도달)**, 미해소(entropy>0)이면 **PRESENT** | Qs 원칙 보존: 게이트 자체를 엘리전하지 않고 상위 단계에서 해소. 투명성: Materialized View에 자동 해결 기록 |
-| | | | | UserSpec 도메인 → **PRESENT** | 사용자 판단 필요 |
+| | | | | AI-autonomous 도메인 → Phase 1에서 context-resolved(entropy→0)이면 **Uᵣ(미도달)**, 미해소(entropy>0)이면 **PRESENT** | Qs 원칙 보존: 게이트 자체를 엘리전하지 않고 상위 단계에서 해소. 투명성: Materialized View에 자동 해결 기록 |
+| | | | | User-supplies 도메인 → **PRESENT** | 사용자 판단 필요 |
 | | | | | Dismissed 도메인 → **PRUNE** | 범위 제외 |
-| | | | | NeedsCalibration → **PRESENT** | 미확정 경계 — Qs 원칙에 따라 사용자 판단 |
+| | | | | AI-proposes → **PRESENT** | 미확정 경계 — Qs 원칙에 따라 사용자 판단 |
 
-**Aitesis 요약**: 불확실성 수(M)개 → Phase 1 해소 수에 따라 **0~M개 사용자 상호작용**. AISpec 도메인은 Phase 1 자율 해결 범위 확대(probe latitude), Qs 게이트 엘리전 아님
+**Aitesis 요약**: 불확실성 수(M)개 → Phase 1 해소 수에 따라 **0~M개 사용자 상호작용**. AI-autonomous 도메인은 Phase 1 자율 해결 범위 확대(probe latitude), Qs 게이트 엘리전 아님
 
 ---
 
@@ -202,9 +202,9 @@ Options:
                               ↓ BoundaryMap
 ┌─ Aitesis ────────────────────────────────────────────────────────┐
 │ Phase 0: scan(X) → Uᵢ (silent, BoundaryMap이 범위 좁힘)           │
-│ Phase 1: Ctx + classify (AISpec → auto, UserSpec → surface)       │
+│ Phase 1: Ctx + classify (AI-autonomous → auto, User-supplies → surface) │
 │ Phase 2: (BoundaryMap 변조)                                       │
-│ [Qs] UserSpec 불확실성만 표면화 → ⑨⑩... 사용자 응답                 │
+│ [Qs] User-supplies 불확실성만 표면화 → ⑨⑩... 사용자 응답            │
 │ Phase 3: integrate → InformedExecution                            │
 └──────────────────────────────────────────────────────────────────┘
                               ↓
@@ -273,23 +273,23 @@ Horismos가 체인 3번째에 위치하여 BoundaryMap을 산출하면, 체인 4
 ```
 BoundaryMap 산출
     ↓
-Aitesis Phase 0 scan: BoundaryMap.AISpec 도메인 → scan 범위에서 제외하지 않되,
+Aitesis Phase 0 scan: BoundaryMap.AIAutonomous 도메인 → scan 범위에서 제외하지 않되,
                        해당 도메인의 불확실성은 AI가 자율 해결 가능으로 분류
     ↓
 Aitesis Phase 1 classify:
-  - AISpec 도메인 불확실성 → ReadOnlyVerifiable 또는 ProbeEnrichable로 재분류 시도
+  - AI-autonomous 도메인 불확실성 → ReadOnlyVerifiable 또는 ProbeEnrichable로 재분류 시도
   - 재분류 성공 (entropy → 0): Uᵣ (context-resolved) — Phase 2 미도달. Materialized View에 기록
   - 재분류 실패 (entropy > 0): Phase 2 Qs 발화 — PRESENT (Qs 원칙 보존)
     ↓
 Aitesis Phase 2 (Qs — RESOLVE-OR-PRESENT):
-  - AISpec + Phase 1 해소 (entropy → 0): Uᵣ — Phase 2 미도달 + Materialized View 기록
-  - AISpec + Phase 1 미해소 (entropy > 0): PRESENT (Qs 게이트 발화, 사용자 판단)
-  - UserSpec 불확실성: PRESENT (사용자 판단)
+  - AI-autonomous + Phase 1 해소 (entropy → 0): Uᵣ — Phase 2 미도달 + Materialized View 기록
+  - AI-autonomous + Phase 1 미해소 (entropy > 0): PRESENT (Qs 게이트 발화, 사용자 판단)
+  - User-supplies 불확실성: PRESENT (사용자 판단)
   - Dismissed: PRUNE
-  - NeedsCalibration: PRESENT (미확정 경계, Qs 원칙)
+  - AI-proposes: PRESENT (미확정 경계, Qs 원칙)
 ```
 
-핵심: BoundaryMap은 Aitesis Phase 1의 **자율 해결 범위(probe latitude)를 변조**하되, Phase 2 Qs 게이트를 엘리전하지 않는다. AISpec 도메인에서 Phase 1이 불확실성을 해소하면(entropy → 0) Phase 2에 도달하지 않고, 해소하지 못하면(entropy > 0) Qs 원칙에 따라 사용자에게 제시한다. 이는 **실행 후 투명 보고** vs **실행 전 상태 투명 전달**의 entropy 기반 판정이다.
+핵심: BoundaryMap은 Aitesis Phase 1의 **자율 해결 범위(probe latitude)를 변조**하되, Phase 2 Qs 게이트를 엘리전하지 않는다. AI-autonomous 도메인에서 Phase 1이 불확실성을 해소하면(entropy → 0) Phase 2에 도달하지 않고, 해소하지 못하면(entropy > 0) Qs 원칙에 따라 사용자에게 제시한다. 이는 **실행 후 투명 보고** vs **실행 전 상태 투명 전달**의 entropy 기반 판정이다.
 
 ---
 
@@ -357,15 +357,15 @@ Options:
 | Phase 0 elision (Hermeneia, Telos) | 2 turns | entailment — prior output이 확인을 대체 |
 | Phase 1a elision (Hermeneia) | 0~1 turns | explicit_arg 경로 활성화 |
 | Post-Convergence skip | 3 turns | 체인이 다음 프로토콜을 자동 연결 |
-| Aitesis AISpec ELIDE | 0~M turns | BoundaryMap 변조로 AI 자율 해결 |
+| Aitesis AI-autonomous ELIDE | 0~M turns | BoundaryMap 변조로 AI 자율 해결 |
 
-**전형적 시나리오** (D=3, N=2(1 context-resolved), M=3(1 AISpec, 1 Dismissed)):
+**전형적 시나리오** (D=3, N=2(1 context-resolved), M=3(1 AI-autonomous, 1 Dismissed)):
 
 - 독립 실행: ~3 + 1 + ~5 + 1 + 2 + 1 + 3 = **~16 turns**
 - Planning Chain: 1 + 2 + 5 + 1 + 1 = **~10 turns**
 - **절감: ~37%** (6 turns)
 
-최대 절감은 BoundaryMap이 많은 AISpec 도메인을 생성하여 Aitesis 게이트를 대량 ELIDE할 때 발생.
+최대 절감은 BoundaryMap이 많은 AI-autonomous 도메인을 생성하여 Aitesis 게이트를 대량 ELIDE할 때 발생.
 
 ---
 

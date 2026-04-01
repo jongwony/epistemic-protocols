@@ -1881,7 +1881,7 @@ function checkCatalogSync() {
   });
 }
 
-// Stem matching: handles Dismiss/Dismisses, Address/Addresses, UserSpec/User-spec
+// Stem matching: handles Dismiss/Dismisses, Address/Addresses, UserSupplies/User-supplies
 function stemMatch(a, b) {
   // Normalize: remove hyphens, case-insensitive
   const normA = a.replace(/-/g, '');
