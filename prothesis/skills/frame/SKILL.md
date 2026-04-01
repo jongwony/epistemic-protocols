@@ -91,7 +91,7 @@ Edge cases:
 Phase 0:  U → MB(U) → Qc(MB, M) → Stop → (MBᵥ, m)              -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]
-Phase 3:  LensEstablished → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R' → P(R')  -- inquiry + collection + preview [Tool]
+Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: relay | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + inquiry + collection + preview [Tool]
 Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Qc(routing) → Stop → J  -- triggers, cross-dialogue, synthesis, presentation & routing [Tool]
           J=wrap_up → PF Qc(select) → Stop → Ω → TeamDelete → TaskCreate(selected)  [Tool]
 
@@ -144,8 +144,7 @@ PF Qc (gate)             → present (multiSelect: preservation scope; in LOOP w
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
-G (gather)               → Read, Glob, Grep (meta context acquisition: broad scope guided by MBᵥ to identify relevant perspectives — not passed to teammates)
-∥I (inquiry-context)     → Read, Grep (object context acquisition: each perspective independently collects evidence through its own lens — MBᵥ + perspective only, no inherited G context)
+G (gather)               → Read, Glob, Grep (meta-scope context acquisition: guided by MBᵥ to identify relevant perspectives — not passed to teammates; teammates independently collect object-scope evidence through their own lens)
 Phase 4 Syn (synthesis)  → Internal operation (no external tool)
 characterize (internal)  → Internal operation (perspective count tier classification)
 converge (relay)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
@@ -156,6 +155,9 @@ Phase 0 Qc (MB+mode)    → elidable when: user_invoked ∧ explicit_arg(U)
                            default: (Q1=confirm, Q2=ai_recommended_mode)
                            regret: bounded (Phase 2 Sc always gated; J_mb=modify on re-invoke)
 Phase 2 Sc (perspective) → always_gated (gated: lens selection is epistemic choice)
+Phase 3 AgentMap? (map)  → elidable when: agent_count(perspective) ≤ 1
+                           default: auto-assign (1 match) or AI-generated (0 matches)
+                           regret: bounded (execution assignment correctable by team restructuring)
 Phase 4 Qc (routing)     → always_gated (gated: loop path + team lifecycle)
 PF Qc (preserve)         → always_gated (gated: knowledge preservation scope)
 
@@ -342,6 +344,8 @@ For each selected perspective in Pₛ, check whether available agents match the 
 
 Agent matching is heuristic: compare perspective focus description against agent `description` and `when to use` fields. Matching does not affect perspective selection (theoria) — it only determines execution assignment (praxis). "Placement over Prescription" invariant: /frame places perspectives; agent mapping realizes execution.
 
+**Operational cost**: Independent context collection multiplies tool calls by |Pₛ| compared to shared-context distribution. This is the cost of epistemic independence — each perspective's unique evidence discovery justifies the amplification. For Tier 2 (|Pₛ| ≥ 4), consider the trade-off explicitly.
+
 **Team Setup**
 
 Create an agent team and spawn perspective teammates:
@@ -364,6 +368,7 @@ You are a **[Perspective] Expert**.
 Analyze from this epistemic standpoint:
 
 **Your Task**: Independently investigate the codebase through your lens. Use Read/Grep to collect perspective-specific evidence.
+**Orientation** (from Mission Brief): {MBᵥ-derived key terms, relevant directories, or domain anchors — minimal orientation without full Phase 1 context}
 **Question**: {original question verbatim}
 
 Provide:
