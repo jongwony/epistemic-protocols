@@ -71,7 +71,7 @@ epistemic-protocols/
 - References directory: `skills/*/references/` for detailed documentation (optional per plugin)
 - No external dependencies; Node.js standard library only
 
-**SKILL.md Formal Block Anatomy**: FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, ELIDABLE CHECKPOINTS, MODE STATE (and optional blocks). Details: [docs/design-philosophy.md](docs/design-philosophy.md#skillmd-formal-block-anatomy)
+**SKILL.md Formal Block Anatomy**: FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, ELIDABLE CHECKPOINTS, MODE STATE (and optional blocks). Details: [docs/structural-specs.md](docs/structural-specs.md#skillmd-formal-block-anatomy)
 
 ## Plugins
 
@@ -92,34 +92,18 @@ epistemic-protocols/
 
 ## Axioms
 
-A1-A7 operational summaries auto-loaded via `.claude/rules/axioms.md`. Full definitions: [docs/design-philosophy.md](docs/design-philosophy.md)
+A1-A7 operational summaries auto-loaded via `.claude/rules/axioms.md`. Full definitions with rationale in the same file.
 
 ## Design Philosophy
 
-Detailed rationale: [docs/design-philosophy.md](docs/design-philosophy.md)
-
-### Derived Principles
-- **Surfacing over Deciding**: AI illuminates, user judges (A2)
-- **Priority Override**: Active protocols supersede default behaviors (A3)
-- **Full Taxonomy Confirmation**: Finite taxonomy Qc gates present ALL types with status + evidence (A1 + A5). Scope: applies when taxonomy is user's decision target; AI detection tools show results only + Emergent required
-- **Convergence Evidence**: Demonstrated transformation trace, not bare assertion (A3)
-- **Pattern over Tool**: Recognition over Recall is content invariant, not tool-dependent (A1 + A4)
-- **Zero-Shot Instruction Preference**: LLM-facing instructions state principles, not few-shot examples; fix underspecified principles rather than patching with examples (A4)
-
-### Architectural Principles
-- **Unix Philosophy Homomorphism**: Single-purpose epistemic tools; bottom-up composition
-- **Session Text Composition**: Inter-protocol data flows as natural language in session context
-- **Cross-Session Knowledge Composition**: Reflexion-stored knowledge enriches protocol Phase 0/1 detection in subsequent sessions (Tertiary hermeneutic circle); per-session loading may bias detection — gate judgment prevails
-- **Dual Advisory Layer**: graph.json (structural) + Output Style nudge (runtime heuristic)
-- **Coexistence over Mirroring**: Protocols occupy epistemic layer; built-ins occupy execution layer
-- **Three-Tier Termination**: user_esc (ungraceful) / user_withdraw (graceful) / normal convergence
-- **Audience Reach**: CLAUDE.md guides contributors; SKILL.md guides runtime. Exception: session-level cross-cutting observer (Output Style nudge) per Dual Advisory Layer
+Prescriptive principles are modularized into `.claude/rules/` by Axiom Hierarchy tier and auto-loaded per-session:
+- `.claude/rules/axioms.md` — A1-A7 foundational principles (MORE important as models improve)
+- `.claude/rules/derived-principles.md` — 6 principles derived from axiom combinations
+- `.claude/rules/architectural-principles.md` — 6 project structure decisions (axiom-independent)
+- `.claude/rules/meta-principle.md` — Deficit Empiricism + Axiomatization Judgment Framework
 
 ### Safeguard
 - **Gate Type Soundness**: TYPES coproduct must match Phase prose options; becomes less critical as models improve (warning-level static check)
-
-### Meta-Principle
-- **Deficit Empiricism**: Protocol creation requires N≥3 observed deficit instances
 
 ## Protocol Precedence
 
