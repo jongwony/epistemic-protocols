@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Resolve PR context
         id: pr
@@ -49,6 +49,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: Get PR diff
+        run: |
+          gh pr diff ${{ steps.pr.outputs.number }} > .pr-diff.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Run Claude Code Review
         id: review
         uses: anthropics/claude-code-action@v1
@@ -60,6 +66,12 @@ jobs:
             Review ONLY the files changed in this PR.
             Changed files:
             ${{ steps.changed.outputs.files }}
+
+            The full unified diff is available at .pr-diff.txt. Read it to understand the exact changes.
+            In unified diff format: lines starting with `+` are ADDITIONS (new code in this PR),
+            lines starting with `-` are DELETIONS (code removed by this PR),
+            lines starting with a space are unchanged context.
+            Base your review strictly on what the diff adds and removes — do not invert the direction.
 
             Use /pr-review-toolkit:review-pr to review these changed files only.
 

@@ -30,7 +30,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Resolve PR context
         id: pr
@@ -76,7 +76,11 @@ jobs:
             Review ONLY the following changed files:
             ${{ steps.changed.outputs.files }}
 
-            The full diff is available at .pr-diff.txt. Read it to understand the exact changes.
+            The full unified diff is available at .pr-diff.txt. Read it to understand the exact changes.
+            In unified diff format: lines starting with `+` are ADDITIONS (new code in this PR),
+            lines starting with `-` are DELETIONS (code removed by this PR),
+            lines starting with a space are unchanged context.
+            Base your review strictly on what the diff adds and removes — do not invert the direction.
 
             ## Perspective Analysis
 

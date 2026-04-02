@@ -22,6 +22,8 @@ When a Qc gate operates on a finite, protocol-owned taxonomy with always_gated a
 
 **Scope boundary**: Full Taxonomy applies when the taxonomy is the *user's decision target* — the user confirms, revises, or selects from the taxonomy (e.g., Hermeneia Phase 1b gap type assessment, Telos Phase 1 dimension assessment). When the taxonomy is an *AI detection tool* — the AI uses it internally for scanning and presents only results (e.g., Syneidesis gap surfacing, Katalepsis probe construction, Prosoche risk classification) — presenting only detected items is appropriate. Detection-tool taxonomies must include an Emergent dimension to ensure comprehensiveness; the named types are working hypotheses, not exhaustive categories.
 
+**Dead Signal Test**: When designing classification taxonomies for stigmergy artifacts, every value must carry a distinct downstream behavioral signal. If a proposed value's behavior is always resolvable to an existing value, it is a dead signal — handle via runtime interpretation (e.g., free input followed by routing) rather than taxonomy expansion. Derived from the same A1+A5 basis: a dead signal offers no Recognition value, as it presents a distinction without a differential future.
+
 ## Convergence Evidence
 
 Derived from A3 (Convergence Persistence).

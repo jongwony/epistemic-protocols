@@ -4,13 +4,13 @@ Foundational principles that become MORE important as models improve; foundation
 
 ## Axiom Hierarchy
 
-| Tier | Count | Criterion |
-|------|-------|-----------|
-| Axiom | 7 | Principles that become MORE important as models improve; foundations from which other principles derive |
-| Derived | 6 | Logically derived from axiom combinations; derivation source annotated |
-| Architectural | 6 | Project structure decisions; independent of the axiom system |
-| Safeguard | 1 | Principles that become LESS important as models improve; temporary guards against current model limitations |
-| Meta-Principle | 1 | Governs evolution of the principle system itself |
+| Tier | Criterion |
+|------|-----------|
+| Axiom | Principles that become MORE important as models improve; foundations from which other principles derive |
+| Derived | Logically derived from axiom combinations; derivation source annotated |
+| Architectural | Project structure decisions; independent of the axiom system |
+| Safeguard | Principles that become LESS important as models improve; temporary guards against current model limitations |
+| Meta-Principle | Governs evolution of the principle system itself |
 
 ---
 
@@ -88,3 +88,5 @@ Non-derivability from A1: Recognition over Recall (A1) constrains what is presen
 ## A7. Adversarial Anticipation
 
 Each protocol must anticipate how an AI agent might shortcut or rationalize away from faithful execution, and include structural guards in Rules and Phase prose. Formal specification guarantees definitional consistency; adversarial design guarantees execution fidelity. Common rationalization paths: premature convergence assertion, silent detection dismissal, skipping gate interaction entirely (presenting content without yielding turn for response), collapsing Qs gates to plain acknowledgment, gate mutation (option injection — adding options not in definition, option deletion — removing defined options, option substitution — replacing defined options with different ones). Distinct from gate mutation: **type-preserving materialization** — specializing a generic option into a concrete term while preserving the answer type constructor. The boundary: if the TYPES coproduct classifies the user's response identically before and after specialization, the transformation is materialization; if it requires a new constructor or alters the coproduct structure, it is mutation. These are orthogonal concerns — a protocol can be formally correct yet routinely circumvented.
+
+**Guard consistency**: Adversarial guards (prescriptive Rules + adversarial Rules) must be internally consistent. Contradictory guards lower AI confidence, causing the agent to skip the entire signal rather than navigate the contradiction. A single clear guard is stronger than two contradictory guards. When fixing contradictions, removing the conflict strengthens the remaining guard rather than weakening adversarial coverage.
