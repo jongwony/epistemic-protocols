@@ -10,6 +10,8 @@ Each protocol is a single-purpose epistemic tool. Composition is bottom-up — u
 
 Inter-protocol data flows as natural language in the session context — no structured data channels between protocols. Each protocol's output becomes part of the conversation that subsequent protocols naturally read. Cell-based structured transport was considered and rejected: structuring context loses information. If structured transport becomes necessary, functor composition is the escalation path.
 
+**Stigmergy signal constraint**: Classification artifacts that flow between protocols (e.g., BoundaryMap) carry signal only, not payload. Downstream protocols read the classification and autonomously modify their own behavior — this is behavioral stigmergy, not central prescription. Loading candidates or behavioral directives into classification entries converts the signal into payload, breaking the stigmergy pattern. Test: "Is the downstream protocol reading a signal and choosing its behavior, or following a central prescription?" Former is correct.
+
 ## Cross-Session Knowledge Composition
 
 Reflexion-stored knowledge enriches protocol detection in subsequent sessions. This is the session-boundary extension of Session Text Composition — where intra-session data flows through conversation context, cross-session data flows through persistent memory. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision (Tertiary hermeneutic circle).
@@ -37,6 +39,10 @@ Protocols coexist with Claude Code built-in commands (`/simplify`, `/batch`) as 
 | Verification | "Did we understand?" | Protocol (`/grasp`) |
 
 Do not mirror built-in execution capabilities (e.g., worktree isolation, PR creation) into protocol definitions. Do not absorb protocol epistemic concerns into built-in command wrappers. Each system maintains its own responsibility boundary, exchanging results at handoff points only.
+
+## Epistemic Cost Topology
+
+The epistemic meta-layer has a fundamentally different cost topology from the execution layer. In the execution layer (code, tests, docs), AI drives the marginal cost of completeness toward zero — pursuing completeness is correct. In the epistemic meta-layer (protocols, axioms, formal systems), unused protocols pollute cognitive space — the cost of an unused protocol exceeds the cost of a missing one. This asymmetry grounds Deficit Empiricism: empirical restraint is the correct posture for protocol creation, even when execution-layer intuitions suggest "why not create more?" Attempts to apply execution-domain completeness principles directly to the epistemic domain should be identified and the cost function difference surfaced.
 
 ## Three-Tier Termination
 
