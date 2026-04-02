@@ -100,8 +100,8 @@ A1-A7 operational summaries auto-loaded via `.claude/rules/axioms.md`. Full defi
 
 Prescriptive principles are modularized into `.claude/rules/` by Axiom Hierarchy tier and auto-loaded per-session:
 - `.claude/rules/axioms.md` — A1-A7 foundational principles (MORE important as models improve)
-- `.claude/rules/derived-principles.md` — 6 principles derived from axiom combinations
-- `.claude/rules/architectural-principles.md` — 6 project structure decisions (axiom-independent)
+- `.claude/rules/derived-principles.md` — principles derived from axiom combinations
+- `.claude/rules/architectural-principles.md` — project structure decisions (axiom-independent)
 - `.claude/rules/meta-principle.md` — Deficit Empiricism + Axiomatization Judgment Framework
 
 ### Safeguard
