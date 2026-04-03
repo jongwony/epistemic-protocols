@@ -80,8 +80,8 @@ Phase 1a Qc  (gate)   → present (E confirmation)
 Phase 1b detect (detect) → Internal analysis (gap detection from Eᵥ)
 Phase 1b Qc  (gate)   → present (full taxonomy assessment: proceed/revise)
 Phase 2 Qs   (gate)   → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
-suggest_only → no tool call (passive suggestion; Λ.active = false)
-integrate    → Internal state update (no external tool)
+suggest_only (detect)  → no tool call (passive suggestion; Λ.active = false)
+integrate    (state)   → Internal state update (no external tool)
 converge     (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with clarified expression)
 
 ── ELIDABLE CHECKPOINTS ──
