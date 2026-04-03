@@ -63,8 +63,8 @@ P      = Preview: R' → UserVisible(R')               -- per-perspective summar
 Δₛ     = Set(Trigger)                                 -- detected triggers per Trigger Detection Criteria; cite evidence per trigger
 D?     = Conditional dialogue: Δₛ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → Dᵣ; Δₛ = ∅ → skip dialogue (Dᵣ = ∅)
 Dᵣ     = Set(DialogueReport)                          -- peer negotiation outputs
-DialogueReport = { perspective, final_position, agreement, agreement_strength, divergence, rationale }  -- divergence gates hub-spoke conditional; agreement_strength gates synthesis confidence attribution
-AgreementStrength ∈ {strong, moderate, weak}  -- strong: shared evidence + shared conclusion; moderate: shared conclusion, different evidence paths; weak: partial overlap, significant residual divergence
+DialogueReport = { perspective, final_position, agreement, divergence, rationale }  -- divergence gates hub-spoke conditional
+AgreementStrength ∈ {strong, moderate, weak}  -- coordinator-assessed in Cross-Dialogue Outcomes (horizons fusion); strong: shared evidence + shared conclusion; moderate: shared conclusion, different evidence paths; weak: partial overlap, significant residual divergence
 Syn    = Synthesis: (R', Dᵣ) → (∩, D, A)             -- dual-input: provenance-preserving (Dᵣ = ∅ when Δₛ = ∅)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
 O      = Output: L → UserVisible(L)                   -- full synthesis presentation as text output before routing question
@@ -163,7 +163,7 @@ Phase 4 Qc (routing)     → always_gated (gated: loop path + team lifecycle)
 PF Qc (preserve)         → always_gated (gated: knowledge preservation scope)
 
 ── CATEGORICAL NOTE ──
-∩ = meet (intersection) over comparison morphisms between perspective outputs
+∩ = graded meet (intersection with coordinator-assessed agreement strength) over comparison morphisms between perspective outputs
 D = join (union of distinct findings) where perspectives diverge
 A = synthesized assessment (additional computation)
 
@@ -286,7 +286,7 @@ MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and
 
 After context gathering (Phase 1), **present** perspectives via gate interaction with `multiSelect: true`.
 
-**Cross-session enrichment**: Prior framing experiences accumulated through prior Reflexion cycles may guide Phase 2 perspective formulation — previously effective analytical lenses for similar domains provide starting hypotheses. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Prior framing experiences accumulated through prior Reflexion cycles guide Phase 2 perspective formulation bidirectionally — previously effective analytical lenses for similar domains provide starting hypotheses (exploitation), while prior coverage gaps (unaddressed horizon limits) signal domains where novel perspectives should be prioritized (exploration). This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
@@ -333,7 +333,7 @@ Per LOOP Pₛ count tiers for escalation recommendation.
 
 ### Phase 3: Inquiry (Through Selected Lens)
 
-**Plan mode**: When active, `TeamCreate` is unavailable — `Plan` subagents (per perspective) and `Explore` subagent (context) remain available. Phase 3 collects R' from Plan subagent outputs. Phase 4 partially executes: Δ(R') trigger detection and Syn(R', ∅) synthesis (both internal operations) produce a partial Lens L without cross-dialogue refinement. D? (peer negotiation) is skipped — requires persistent agent identity via SendMessage. See `references/conceptual-foundations.md` for quality trade-off.
+**Plan mode**: When active, Phase 3 uses available subagents (Plan, Explore) for per-perspective analysis with isolation preserved. Phase 4 produces a partial Lens via internal operations: Δ(R') trigger detection and Syn(R', ∅) synthesis. See `references/conceptual-foundations.md` for quality trade-off.
 
 **Agent-Perspective Mapping** (before team spawn)
 
@@ -345,7 +345,7 @@ For each selected perspective in Pₛ, check whether available agents match the 
 
 Agent matching is heuristic: compare perspective focus description against agent `description` and `when to use` fields. Matching does not affect perspective selection (theoria) — it only determines execution assignment (praxis). "Placement over Prescription" invariant: /frame places perspectives; agent mapping realizes execution.
 
-**Operational cost**: Independent context collection multiplies tool calls by |Pₛ| compared to shared-context distribution. This is the cost of epistemic independence — each perspective's unique evidence discovery justifies the amplification. For Tier 2 (|Pₛ| ≥ 4): scope-partition each perspective's investigation to MBᵥ-relevant subdomain — full-codebase sweep per perspective is unnecessary when scope_constraint narrows the evidence space. The coordinator's spawn prompt Orientation field directs each perspective's initial investigation target.
+**Operational cost**: Independent context collection multiplies tool calls by |Pₛ| compared to shared-context distribution. This is the cost of epistemic independence — each perspective's unique evidence discovery justifies the amplification. For Tier 2 (|Pₛ| ≥ 4): direct each perspective's initial investigation toward MBᵥ-relevant subdomain — full-codebase sweep per perspective is unnecessary when scope_constraint narrows the evidence space. The coordinator's spawn prompt Orientation field directs each perspective's initial investigation target.
 
 **Team Setup**
 
@@ -433,21 +433,20 @@ After collecting all perspective results (R'), the coordinator reviews for cross
 
 **Cross-Dialogue (Peer Negotiation)**
 
-The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ` and Trigger Detection Criteria) before proceeding to synthesis. For each detected trigger, cite the specific evidence: which perspectives, which claims, and the heuristic criterion met.
+The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ` and Trigger Detection Criteria) before proceeding to synthesis. For each detected trigger, cite evidence per Trigger Detection Criteria.
 
 **If triggers detected**: Coordinator initiates peer negotiation with structured reporting:
 
-1. **Topic signal**: Coordinator identifies the tension topic and sends it to each involved peer via SendMessage, including (a) the exact peer agent name, (b) a trigger-appropriate external label, and (c) the structured report format (5-field: Final position, Agreement points, Agreement strength [strong/moderate/weak per AgreementStrength definition], Remaining divergence, Rationale). Report format is introduced at dialogue time, not at spawn — Phase 3 isolation preservation. The coordinator MUST use the peer's exact `name` from `Λ.team.members` for the SendMessage `to` field — do not paraphrase or abbreviate agent names.
+1. **Topic signal**: Coordinator identifies the tension topic and sends it to each involved peer via SendMessage, including (a) the exact peer agent name, (b) a trigger-appropriate external label, and (c) the structured report format (4-field: Final position, Agreement points, Remaining divergence, Rationale). Report format is introduced at dialogue time, not at spawn — Phase 3 isolation preservation. The coordinator MUST use the peer's exact `name` from `Λ.team.members` for the SendMessage `to` field — do not paraphrase or abbreviate agent names.
 
    **External labels** (internal Δₛ trigger types are coordinator-only; peers receive neutral task framing):
    - Contradiction: "You reached materially different conclusions on [topic Z]. Exchange reasons and report agreement/divergence."
    - Uncorroborated high-stakes: "A consequential claim on [topic Z] needs independent validation. Assess support, uncertainty, and failure impact."
    - Horizon intersection: "Topic [topic Z] warrants additional scrutiny. State your current position, key uncertainty, and one question for the peer."
 2. **Peer exchange**: Peers communicate directly (≤3 exchanges per pair; e.g., A→B, B→A, A→B). Each peer presents their position, responds to the other's reasoning, and works toward common ground. Peers may stop early if agreement is reached. The coordinator does not relay or frame — peers engage with each other's actual arguments.
-3. **Structured report**: Each peer submits a 5-field report to the coordinator:
+3. **Structured report**: Each peer submits a 4-field report to the coordinator:
    - **Final position**: Peer's concluded stance after exchange
    - **Agreement points**: What the peers agreed on
-   - **Agreement strength**: strong (shared evidence + shared conclusion), moderate (shared conclusion, different evidence paths), or weak (partial overlap, significant residual divergence)
    - **Remaining divergence**: Specific unresolved disagreements (empty if fully agreed)
    - **Rationale**: Why this position is held
 4. **Conditional hub-spoke**: If any peer's `remaining_divergence` is non-empty, coordinator initiates hub-spoke reconciliation — one targeted question per divergent peer (e.g., "Peer B argues [X]. Explain the concrete impact of your position on [specific aspect]."). Each peer responds once. Coordinator does not re-engage after receiving responses — synthesis is independent. If `remaining_divergence` is empty for all peers, skip to step 5.
@@ -459,7 +458,7 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    ### Tension: [Topic Z]
    **Peers**: [Perspective A] vs [Perspective B]
    **Resolution**: [Agreed / Partial agreement / Persistent divergence]
-   **Agreement Strength**: [strong / moderate / weak — with one-line basis]
+   **Agreement Strength**: [strong / moderate / weak — coordinator assessment with one-line basis from Dᵣ]
    - Agreement: [key agreement points]
    - Divergence: [remaining unresolved points, if any]
    ```
@@ -501,7 +500,7 @@ After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅)
 
 ### Convergence (Shared Horizon)
 [Where perspectives agree—indicates robust finding]
-[Per convergence point: agreement strength (strong/moderate/weak) with basis from Dᵣ; when Dᵣ = ∅, label as "independent convergence" — strength not assessable without cross-dialogue]
+[Per convergence point: coordinator-assessed agreement strength (strong/moderate/weak) with basis from Dᵣ; when Dᵣ = ∅, label as "independent convergence" — strength not assessable without cross-dialogue]
 
 ### Divergence (Horizon Conflicts)
 [Where they disagree—different values, evidence standards, or scope]
@@ -520,7 +519,7 @@ After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅)
 Note: Perspective Summaries are surfaced earlier via P(R') preview (Phase 3 Collection). The synthesis template focuses on integration — convergence, divergence resolution, and assessment — rather than repeating individual perspective findings.
 
 **Loop behavior**: Per LOOP. Key operational details:
-- **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect gate interaction; selected items migrate to session TaskCreate after TeamDelete. When presenting convergence evidence, annotate each perspective's contribution with which Lens section(s) (∩, D, A) the perspective influenced and whether unique findings survived synthesis. This annotation serves as Reflexion extraction input for cross-session perspective enrichment.
+- **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect gate interaction; selected items migrate to session TaskCreate after TeamDelete. When presenting convergence evidence, annotate each perspective's contribution with which Lens section(s) (∩, D, A) the perspective influenced, whether unique findings survived synthesis, and each perspective's horizon limits that remained unaddressed. Coverage gaps (union of unaddressed horizon limits across all perspectives) are recorded alongside survival signals — enabling cross-session enrichment that balances exploitation (proven perspectives) with exploration (perspectives addressing prior blind spots).
 
 All other routing options (Extend, Add input, withdraw) and convergence behavior Per LOOP.
 
@@ -535,13 +534,14 @@ Heuristic criteria for Phase 4 trigger detection (Δ). Coordinator cites evidenc
 | **Contradiction** | R'[pᵢ].assessment ≠ R'[pⱼ].assessment on shared referent | Which perspectives, which claims, on what topic |
 | **Horizon Intersection** | R'[pᵢ].horizon_limits ∩ R'[pⱼ].epistemic_contribution ≠ ∅ | Which horizon limit overlaps which contribution |
 | **Uncorroborated High-Stakes** | ∃ claim ∈ R'[p] : stakes(claim) = high ∧ ¬∃ q≠p confirming claim | The claim, the perspective, why high-stakes |
+| **Emergent** | Coherence tension outside named trigger types (e.g., non-overlapping coverage masking disagreement) | The tension, involved perspectives, why named triggers do not capture it |
 
 ## Rules
 
 1. **Mission Brief confirmation**: Always present Mission Brief for confirmation via gate interaction before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation.
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 7
-4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis. Synthesis constitution (horizons fusion) is integration, not analysis — explicitly marked in Synthesis Basis for verification
+4. **Synthesis Constraint**: Integration derives only from what perspectives provided; no new analysis. Synthesis constitution (horizons fusion) is integration, not analysis — explicitly marked in Synthesis Basis for verification
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then present routing options via gate interaction to confirm or extend analysis
 7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via gate interaction
