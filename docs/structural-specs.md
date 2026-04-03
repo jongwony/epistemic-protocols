@@ -22,7 +22,35 @@ All protocols share this structure within `Definition` code block:
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ```
 
-Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping. Gate operations use `(gate)` annotation for user-facing gate interactions (e.g., `Qc (gate)`); relay operations use `(relay)` annotation for non-stopping text presentations that proceed automatically (e.g., `converge (relay)`); non-gate external operations retain `(extern)`.
+Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.
+
+### TOOL GROUNDING Annotation Vocabulary
+
+Every TOOL GROUNDING line carries a parenthetical annotation classifying the operation type. Annotations are exhaustive — every entry must have one.
+
+**Interaction annotations** (user-facing):
+
+| Annotation | Meaning | Tool Pattern |
+|------------|---------|--------------|
+| `(gate)` | User-facing interaction; stops execution, awaits response | TextPresent+Stop → present |
+| `(relay)` | Non-stopping text presentation; proceeds automatically | TextPresent+Proceed |
+
+**Operation annotations** (tool-facing):
+
+| Annotation | Meaning | Tool Pattern |
+|------------|---------|--------------|
+| `(detect)` | Pattern recognition, signal scanning, classification | Internal analysis; or Read, Grep for evidence |
+| `(collect)` | Codebase/environment evidence gathering | Read, Grep, Glob; WebSearch (conditional) |
+| `(state)` | Protocol state tracking or persistence | TaskCreate, TaskUpdate, TaskGet; or internal state update |
+| `(extern)` | External system interaction crossing agent boundary | SendMessage, Agent, Skill |
+| `(modify)` | Changes existing artifacts | Edit, Write |
+| `(enrich)` | Empirical probe with temporary artifacts and cleanup | Write + Bash + Read + cleanup |
+
+**Consistency rules**:
+- `(detect)` subsumes former `(infer)`, `(assess)`, `(internal)`, `(synthesis)` — use `(detect)` for all scanning/classification operations
+- `(collect)` subsumes former `(gather)`, `(construct)` — use `(collect)` for all evidence gathering
+- `(state)` subsumes former `(adjust)` — use `(state)` for all state tracking
+- `(parallel)` and `(conditional)` describe execution topology, not operation type — use the underlying operation annotation (e.g., `(extern)` for TeamCreate) with topology noted in the description
 
 ### FLOW-MORPHISM Relationship
 
