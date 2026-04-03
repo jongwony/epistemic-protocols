@@ -389,11 +389,7 @@ with another perspective for direct exchange (≤3 messages per pair).
 The coordinator will provide the exact peer agent name — use it as-is for
 the SendMessage `to` field. Do not infer or abbreviate agent names.
 Exchange directly — present your position, engage with the other's reasoning.
-After exchange, submit a structured report to the coordinator:
-- Final position: your concluded stance
-- Agreement points: what you agreed on
-- Remaining divergence: unresolved disagreements (empty if fully agreed)
-- Rationale: why you hold this position
+The coordinator will provide the structured report format at dialogue time.
 If divergence remains, the coordinator may ask one follow-up question —
 respond with specific evidence or impact analysis.
 Do not initiate cross-dialogue unprompted.
@@ -441,7 +437,7 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
 
 **If triggers detected**: Coordinator initiates peer negotiation with structured reporting:
 
-1. **Topic signal**: Coordinator identifies the tension topic and sends it to each involved peer via SendMessage, including (a) the exact peer agent name, (b) a trigger-appropriate external label, and (c) the structured report format. The coordinator MUST use the peer's exact `name` from `Λ.team.members` for the SendMessage `to` field — do not paraphrase or abbreviate agent names.
+1. **Topic signal**: Coordinator identifies the tension topic and sends it to each involved peer via SendMessage, including (a) the exact peer agent name, (b) a trigger-appropriate external label, and (c) the structured report format (5-field: Final position, Agreement points, Agreement strength [strong/moderate/weak per AgreementStrength definition], Remaining divergence, Rationale). Report format is introduced at dialogue time, not at spawn — Phase 3 isolation preservation. The coordinator MUST use the peer's exact `name` from `Λ.team.members` for the SendMessage `to` field — do not paraphrase or abbreviate agent names.
 
    **External labels** (internal Δₛ trigger types are coordinator-only; peers receive neutral task framing):
    - Contradiction: "You reached materially different conclusions on [topic Z]. Exchange reasons and report agreement/divergence."
@@ -469,7 +465,7 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    ```
 
    This is informational text — not a gate interaction. Skip this step if Δₛ = ∅ (no triggers detected).
-6. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises independent judgment as Synthesizer: information collection from peers, but the integration decision is the coordinator's own.
+6. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises synthesis constitution as Synthesizer: horizons fusion from peer inputs, not new analysis. Information collection from peers; the integration (Horizontverschmelzung) is the coordinator's own.
 7. **User review**: Output the full synthesis as text (O(L)), then **present** routing options via gate interaction. The user reads the complete synthesis with scrollback, then selects next action.
 
    **Step 1** — Text output O(L) (full synthesis, per Synthesis template below):
@@ -505,7 +501,7 @@ After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅)
 
 ### Convergence (Shared Horizon)
 [Where perspectives agree—indicates robust finding]
-[Per convergence point: agreement strength (strong/moderate/weak) with basis from Dᵣ]
+[Per convergence point: agreement strength (strong/moderate/weak) with basis from Dᵣ; when Dᵣ = ∅, label as "independent convergence" — strength not assessable without cross-dialogue]
 
 ### Divergence (Horizon Conflicts)
 [Where they disagree—different values, evidence standards, or scope]
@@ -517,8 +513,8 @@ After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅)
 [Distinguish findings from isolated inquiry (R') vs. cross-dialogue refinement (Dᵣ)]
 
 ### Synthesis Basis
-[Per assessment claim: source perspective(s), evidence type (R' finding / Dᵣ agreement / Dᵣ divergence / coordinator judgment), and whether claim combines multiple sources]
-[Claims based on coordinator independent judgment explicitly marked as such]
+[Per assessment claim: source perspective(s), evidence type (R' finding / Dᵣ agreement / Dᵣ divergence / synthesis constitution; omit Dᵣ types when Dᵣ = ∅), and whether claim combines multiple sources]
+[Claims based on synthesis constitution (coordinator's horizons fusion beyond direct perspective output) explicitly marked as such]
 ```
 
 Note: Perspective Summaries are surfaced earlier via P(R') preview (Phase 3 Collection). The synthesis template focuses on integration — convergence, divergence resolution, and assessment — rather than repeating individual perspective findings.
@@ -545,7 +541,7 @@ Heuristic criteria for Phase 4 trigger detection (Δ). Coordinator cites evidenc
 1. **Mission Brief confirmation**: Always present Mission Brief for confirmation via gate interaction before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation.
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 7
-4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis. Synthesis Basis section enables verification of this constraint — coordinator-judgment claims are explicitly marked
+4. **Synthesis Constraint**: Integration only combines what perspectives provided; no new analysis. Synthesis constitution (horizons fusion) is integration, not analysis — explicitly marked in Synthesis Basis for verification
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then present routing options via gate interaction to confirm or extend analysis
 7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via gate interaction
