@@ -39,8 +39,8 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 
 | Annotation | Meaning | Tool Pattern |
 |------------|---------|--------------|
-| `(detect)` | Pattern recognition, signal scanning, classification | Internal analysis; or Read, Grep for evidence |
-| `(collect)` | Codebase/environment evidence gathering | Read, Grep, Glob; WebSearch (conditional) |
+| `(detect)` | Pattern recognition, signal scanning, classification | Internal analysis; Read, Grep when incidental to classification |
+| `(collect)` | Codebase/environment evidence gathering | Read, Grep, Glob as primary activity; WebSearch (conditional) |
 | `(state)` | Protocol state tracking or persistence | TaskCreate, TaskUpdate, TaskGet; or internal state update |
 | `(extern)` | External system interaction crossing agent boundary | SendMessage, Agent, Skill |
 | `(modify)` | Changes existing artifacts | Edit, Write |

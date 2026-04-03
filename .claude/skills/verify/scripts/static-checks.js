@@ -341,7 +341,7 @@ function checkRequiredSections() {
 function checkToolGrounding() {
 
   // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS
-  const MANDATORY_CLASSIFICATIONS = new Set(['extern', 'parallel']);
+  const MANDATORY_CLASSIFICATIONS = new Set(['extern']);
 
   // Escape special regex characters
   function escapeRegex(str) {
