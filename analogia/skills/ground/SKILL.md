@@ -80,10 +80,10 @@ early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase 1 Map     (construct) → Read, Grep (stored knowledge extraction: domain structure analysis); WebSearch (conditional: external domain knowledge)
+Phase 1 Map     (collect)   → Read, Grep (stored knowledge extraction: domain structure analysis); WebSearch (conditional: external domain knowledge)
 Phase 2 Qs      (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (state)     → Internal state update
-Phase 0 Detect  (infer)     → Internal analysis (no external tool)
+Phase 0 Detect  (detect)    → Internal analysis (no external tool)
 converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with validated mapping)
 
 ── ELIDABLE CHECKPOINTS ──
