@@ -21,15 +21,21 @@ When combined with Plan mode, Prothesis provides the **Deliberation** phase:
 When multiple perspectives converge on the same recommendation, present as unanimous recommendation to indicate high confidence.
 
 **Phase 3 Degradation**:
-When Prothesis activates within an active plan mode session, `TeamCreate` is unavailable (no persistent team state). The protocol adapts with available tools:
+When Prothesis activates within an active plan mode session, the protocol adapts with available tools:
 
 - Phases 0–2: Execute normally (`AskUserQuestion` available in plan mode)
 - Phase 1: `Explore` subagent available for context collection (`Task(subagent_type="Explore")`)
 - Phase 3: `Plan` subagent available per perspective (`Task(subagent_type="Plan")`); analysis isolation preserved — each perspective analyzed in a separate subagent context (no persistent identity or cross-dialogue capability; coordinator collects results and incorporates into plan output)
-- `ExitPlanMode` presents the coordinator's plan output (incorporating Plan subagent analyses) as inquiry blueprint — not L; actual Lens requires `TeamCreate` + normal-mode execution
-- Phases 4–5 (cross-dialogue, synthesis, routing) are not accessible in plan mode; to obtain actual Lens L, start a fresh `/frame` session from Phase 0 in normal mode — the inquiry blueprint serves as reference context when re-specifying the Mission Brief and selecting perspectives
+- Phase 4: Coordinator performs Δ(R') trigger detection and Syn(R', ∅) synthesis — both internal operations. O(L) presents the partial Lens.
+- ExitPlanMode presents the partial Lens L: convergence from independent analysis, divergence as unresolved hypotheses, assessment from coordinator synthesis.
 
-This degradation preserves Phase 0–2 epistemic value and Phase 3 analysis isolation (per-perspective context separation; cross-dialogue and persistent agent identity require normal mode): Mission Brief confirmation, perspective selection, and per-perspective subagent isolation all complete before ExitPlanMode fires. The plan output serves as a blueprint for a subsequent active session.
+**Quality trade-off (partial Lens)**: Without cross-dialogue:
+- Convergence claims are based on independent convergence only (perspectives agree without knowing each other's positions)
+- Divergence claims are unresolved hypotheses — peers have not had the opportunity to narrow disagreement or identify shared ground
+- Assessment lacks Dᵣ refinement — the coordinator synthesizes from isolated outputs only
+- Trigger Detection Criteria still apply — the coordinator can identify contradictions and horizon intersections, but cannot initiate peer resolution
+
+This preserves Phase 0–2 epistemic value, Phase 3 analysis isolation, and Phase 4 synthesis capability via internal operations.
 
 ## Distinction from Socratic Method
 
