@@ -52,6 +52,15 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 - `(state)` subsumes former `(adjust)` — use `(state)` for all state tracking
 - `(parallel)` and `(conditional)` describe execution topology, not operation type — use the underlying operation annotation (e.g., `(extern)` for TeamCreate) with topology noted in the description
 
+**Topology modifiers**:
+
+| Modifier | Meaning | Execution effect |
+|----------|---------|-----------------|
+| `parallel` | Concurrent execution of multiple instances | Agent/Task spawn with independent contexts |
+| `conditional` | Execution gated on runtime predicate | Operation skipped when predicate is false |
+
+**Topology notation convention**: Topology is encoded in the TOOL GROUNDING description text, not in the annotation parenthetical. Pattern: `(operation_type) → Tool (topology_modifier topology: description...)`. This keeps the annotation slot reserved for the 8 standard operation types while preserving topology information for runtime orchestration and static analysis (Grep-searchable via `topology:`).
+
 ### FLOW-MORPHISM Relationship
 
 MORPHISM is the image of FLOW under a forgetful functor that discards computational detail and tool annotations, retaining only the essential type transition skeleton (source object → transformation steps → target object) with structural annotations (requires/deficit/preserves/invariant).
