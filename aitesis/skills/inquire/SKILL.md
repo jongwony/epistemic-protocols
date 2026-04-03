@@ -96,9 +96,9 @@ early_exit = user_declares_sufficient
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase 0 Scan    (infer)       → Internal analysis (no external tool)
+Phase 0 Scan    (detect)      → Internal analysis (no external tool)
 Phase 1 Ctx     (collect)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch (conditional: environmental dependency)
-Phase 1 Classify (assess)     → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
+Phase 1 Classify (detect)     → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
 Phase 1 Probe   (enrich)      → Write, Bash, Read (empirical enrichment, Factual only); cleanup via Bash
 Phase 2 Qs      (gate)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (state)       → Internal state update

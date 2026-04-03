@@ -145,9 +145,9 @@ PF Qc (gate)             → present (multiSelect: preservation scope; in LOOP w
 wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
-G (gather)               → Read, Glob, Grep (meta-scope context acquisition: guided by MBᵥ to identify relevant perspectives — not passed to teammates; teammates independently collect object-scope evidence through their own lens)
-Phase 4 Syn (synthesis)  → Internal operation (no external tool; basis_cited in O(L) Synthesis Basis section)
-characterize (internal)  → Internal operation (perspective count tier classification)
+G (collect)              → Read, Glob, Grep (meta-scope context acquisition: guided by MBᵥ to identify relevant perspectives — not passed to teammates; teammates independently collect object-scope evidence through their own lens)
+Phase 4 Syn (detect)     → Internal operation (no external tool; basis_cited in O(L) Synthesis Basis section)
+characterize (detect)    → Internal operation (perspective count tier classification)
 converge (relay)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
 
 ── ELIDABLE CHECKPOINTS ──
