@@ -70,6 +70,8 @@ Uₑ         = Empirically observed uncertainties    -- evidence attached, proce
 Uᵢ''       = Remaining user-dependent uncertainties  -- Fiber(Factual) = UserDependent; Phase 2 question
 Uₙ         = Non-factual detected uncertainties     -- Fiber(d) = Unit; shown in classify summary with routing target
 Action     = Tool call sequence (Write, Bash)
+EscapeCondition ∈ {EnvironmentMutation, BoundExceeded, RiskElevated, StructuralUncertainty}
+                    -- maps to Rule 20 (a)-(d) escape hatches; logged in observation_skips
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency gate (silent)
@@ -120,9 +122,11 @@ Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgme
       user_responded: Set(Uncertainty),
       remaining: Set(Uncertainty), dismissed: Set(Uncertainty),
       history: List<(Uncertainty, A)>, observation_history: List<(ObservationSpec, Result, Evidence)>,
+      observation_skips: List<(Uncertainty, EscapeCondition, String)>,  -- audit trail for Rule 20 escape hatches
       active: Bool,
       cause_tag: String }
 -- Invariant: uncertainties = context_resolved ∪ read_only_resolved ∪ empirically_observed ∪ non_factual_detected ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
+-- Note: observation_skips is an audit log orthogonal to the partition — logged when EmpiricallyObservable is reclassified to UserDependent via Rule 20 (a)-(d)
 ```
 
 ## Core Principle
@@ -292,6 +296,7 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
 - Construct ObservationSpec: { setup, execute, observe, cleanup }
 - Execute observation lifecycle (setup → execute → observe → cleanup → record)
 - Observation evidence attached to `Uₑ` → proceeds to Phase 2 with evidence
+- **Escape hatch**: If Rule 20 (a)-(d) applies, reclassify as UserDependent and log `(uncertainty, condition, rationale)` to `Λ.observation_skips` — the skip rationale must be specific enough to audit (e.g., "StructuralUncertainty: naming preference, no observable state differentiates options")
 
 If all uncertainties context-resolved or read-only-resolved (no observed or user-dependent remaining): proceed with execution (no user interruption).
 If observed or user-dependent uncertainties remain: proceed to Phase 2.
@@ -329,6 +334,7 @@ Present the classification results, uncertainty description, and evidence as tex
 - **Classification summary**:
   - U1: Factual/ReadOnly (basis: evidence summary)
   - U2: Factual/EmpiricallyObservable (basis: evidence summary)
+  - U2b: Factual/EmpiricallyObservable → UserDependent (escape: [condition] — "[rationale]")
   - U3: Coherence (basis: evidence summary) → /ground
   - U4: Relevance (basis: evidence summary) → /goal
   - Any classification to revise?
@@ -393,6 +399,7 @@ After integration:
 | Classify transparency | Always show classify results (dimension + verifiability) in Phase 2 surfacing format | User sees AI's reasoning and resolution path per uncertainty |
 | Routing transparency | Uₙ items show `→ /protocol` in Phase 2 classify summary | User sees routing destination at detection time |
 | Observation transparency | Log observation lifecycle in Λ.observation_history | User can audit what was tested |
+| Skip transparency | Log escape hatch usage in Λ.observation_skips with condition + rationale | User can audit why observation was skipped |
 | Observation cleanup | All test artifacts removed after observation | No residual files |
 | Observation timeout | 30s limit → fall back to user inquiry | Prevents hanging |
 | Observation risk gate | Elevated-risk observation → reclassify as UserDependent | Safety preserved |
