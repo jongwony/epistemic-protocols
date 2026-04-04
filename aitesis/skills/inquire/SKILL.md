@@ -24,14 +24,14 @@ Prospect
   → scan(prospect, context, dimensions)  -- infer context insufficiency (multi-dimension)
   → collect(uncertainties, codebase)     -- enrich via evidence collection
   → classify(enrichable, dimension)      -- epistemic classification (core act)
-  → enrich(factual_enrichable, environment) -- empirical probe (factual only)
-  → surface(classify_result + enriched + remaining, as_inquiry)
+  → verify(dynamically_verifiable, environment) -- dynamic verification (factual only)
+  → surface(classify_result + verified + remaining, as_inquiry)
   → integrate(answer, prospect)
   → InformedExecution
 requires: uncertain(sufficiency(X))      -- runtime gate (Phase 0)
 deficit:  ContextInsufficient            -- activation precondition (Layer 1/2)
 preserves: task_identity(X)              -- task intent invariant; prospect context mutated (X → X')
-invariant: Inference over Detection
+invariant: Evidence over Inference over Detection
 
 ── TYPES ──
 X        = Prospect for action (source-agnostic: task execution, analysis, investigation, or any purposeful action requiring context)
@@ -54,7 +54,7 @@ Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
 Observability ∈ {StaticObservation, DynamicObservation, BeliefVerification}
                -- exists(fact, env) sub-modes
 -- Layer 2 (tool implementation, Factual fiber only — fibration structure)
-Verifiability ∈ {ReadOnlyVerifiable, ProbeEnrichable, UserDependent}
+Verifiability ∈ {ReadOnlyVerifiable, DynamicallyVerifiable, UserDependent}
 classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              where Fiber(Factual)       = Verifiability
                    Fiber(Coherence)     = Unit    -- detect only
@@ -62,10 +62,10 @@ classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
              -- 2-layer model = Grothendieck fibration: Layer 2 exists only over Factual fiber
              -- Coherence/Relevance → detect + show routing target in classify summary
-ProbeSpec  = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
-EmpiricalProbe = (Uᵢ', ProbeSpec) → Uₑ           -- empirical enrichment
+VerificationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
+DynamicVerification = (Uᵢ', VerificationSpec) → Uₑ  -- dynamic verification
 Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2)
-Uₑ         = Probe-enriched uncertainties        -- evidence attached, proceeds to Phase 2
+Uₑ         = Dynamically verified uncertainties   -- evidence attached, proceeds to Phase 2
 Uᵢ''       = Remaining user-dependent uncertainties  -- Fiber(Factual) = UserDependent; Phase 2 question
 Uₙ         = Non-factual detected uncertainties     -- Fiber(d) = Unit; shown in classify summary with routing target
 Action     = Tool call sequence (Write, Bash)
@@ -74,7 +74,7 @@ Action     = Tool call sequence (Write, Bash)
 Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency gate (silent)
 Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                         -- context collection [Tool]
          classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-factual (classify summary routing)
-         [if Uₑ_candidates ≠ ∅] EmpiricalProbe(Uₑ_candidates) → Uₑ  -- empirical enrichment [Tool]
+         [if Uₑ_candidates ≠ ∅] DynamicVerification(Uₑ_candidates) → Uₑ  -- dynamic verification [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[max_gain], progress) → Stop → A           -- uncertainty surfacing [Tool]
 Phase 3: A → integrate(A, X) → X'                               -- prospect update (sense)
 
@@ -85,7 +85,7 @@ If Uᵢ' remains: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
 User can exit at Phase 2 (early_exit).
 Continue until: informed(X') OR user ESC.
-Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.probe_enriched ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
+Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.dynamically_verified ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 actionable(Λ) = uncertainties \ non_factual_detected       -- Fiber(Factual) uncertainties only
@@ -99,7 +99,7 @@ early_exit = user_declares_sufficient
 Phase 0 Scan    (sense)       → Internal analysis (no external tool)
 Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch (conditional: environmental dependency)
 Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
-Phase 1 Probe   (transform)   → Write, Bash, Read (empirical enrichment, Factual only); cleanup via Bash
+Phase 1 Verify  (transform)   → Write, Bash, Read (dynamic verification, Factual only); cleanup via Bash
 Phase 2 Qs      (gate)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
 converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
@@ -114,19 +114,23 @@ Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgme
       classify_results: Map(Uncertainty, Σ(d: Dimension). Fiber(d)), -- fibration-typed classification
       context_resolved: Set(Uncertainty),  -- Uᵣ from TYPES
       read_only_resolved: Set(Uncertainty), -- Uᵣ' from TYPES
-      probe_enriched: Set(Uncertainty),    -- Uₑ from TYPES
+      dynamically_verified: Set(Uncertainty), -- Uₑ from TYPES
       non_factual_detected: Set(Uncertainty), -- Uₙ from TYPES; Fiber(d) = Unit, classify summary routing
       user_responded: Set(Uncertainty),
       remaining: Set(Uncertainty), dismissed: Set(Uncertainty),
-      history: List<(Uncertainty, A)>, probe_history: List<(ProbeSpec, Result, Evidence)>,
+      history: List<(Uncertainty, A)>, verification_history: List<(VerificationSpec, Result, Evidence)>,
       active: Bool,
       cause_tag: String }
--- Invariant: uncertainties = context_resolved ∪ read_only_resolved ∪ probe_enriched ∪ non_factual_detected ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
+-- Invariant: uncertainties = context_resolved ∪ read_only_resolved ∪ dynamically_verified ∪ non_factual_detected ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
 ```
 
 ## Core Principle
 
-**Inference over Detection**: When AI infers context insufficiency before execution, it first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and enriches probe-enrichable ones with empirical evidence before asking. For non-factual dimensions (coherence, relevance), the AI detects and shows routing targets in the classify summary. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, and routing what belongs to other epistemic concerns.
+**Evidence over Inference over Detection**: Aitesis operates on an epistemic hierarchy with two boundaries. The lower boundary (Inference > Detection): infer context insufficiency from requirements rather than detecting via fixed taxonomy — the protocol dynamically identifies what context is missing, not mechanically checking against a preset list. The upper boundary (Evidence > Inference): verify dynamically observable facts through environmental observation rather than substituting inference from reasoning alone — when a fact is observable, observe it.
+
+Within this hierarchy, the AI first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and dynamically verifies observable ones with empirical evidence before asking. For non-factual dimensions (coherence, relevance), the AI detects and shows routing targets in the classify summary. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, and routing what belongs to other epistemic concerns.
+
+Write is authorized for observation instrument setup (temporary test artifacts with mandatory cleanup). Rule 20 is the structural expression of the upper boundary �� the adversarial guard against stopping at Inference when Evidence is achievable.
 
 ## Distinction from Other Protocols
 
@@ -213,7 +217,7 @@ Heuristic signals for context insufficiency inference (not hard gates):
 
 | Trigger | Effect |
 |---------|--------|
-| All uncertainties resolved (context, read-only, probe, or user) | Proceed with updated prospect |
+| All uncertainties resolved (context, read-only, verified, or user) | Proceed with updated prospect |
 | All remaining uncertainties dismissed | Proceed with original prospect + defaults |
 | User Esc key | Return to normal operation |
 
@@ -253,9 +257,9 @@ Analyze prospect requirements against available context across multiple dimensio
 
 **Scan scope**: Current prospect context, conversation history, observable environment. Does NOT modify files or call external services.
 
-### Phase 1: Context Collection + Classification + Empirical Enrichment
+### Phase 1: Context Collection + Classification + Dynamic Verification
 
-Collect contextual evidence, classify each uncertainty by dimension and verifiability, and enrich probe-eligible uncertainties with empirical evidence.
+Collect contextual evidence, classify each uncertainty by dimension and verifiability, and dynamically verify observable uncertainties with empirical evidence.
 
 **Step 1 — Context collection**: For each uncertainty in `Uᵢ`:
 - **Call Read/Grep** to search for relevant information in codebase, configs, documentation
@@ -271,8 +275,8 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
   - Relevance: collected facts are not relevant to the execution goal
 - **Verifiability assessment** (Layer 2, Factual dimension only — Observability sub-modes guide classification):
   - ReadOnlyVerifiable: fact exists in environment (StaticObservation or BeliefVerification) and is observable with current tools → resolve directly via extended context lookup
-  - ProbeEnrichable: fact requires DynamicObservation — does not exist statically but is creatable, reversible, and bounded (< 30s) → empirical probe
-  - UserDependent: neither read-only verifiable nor probe-enrichable → Phase 2 directly
+  - DynamicallyVerifiable: fact requires DynamicObservation — does not exist statically but is observable through non-destructive execution, reversible, and bounded (< 30s) → dynamic verification
+  - UserDependent: neither read-only verifiable nor dynamically verifiable → Phase 2 directly
 - **Non-factual dimensions**: Coherence and Relevance → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
   - Coherence → `/ground` (structural mapping may reveal inconsistency source)
   - Relevance → deficit-matched: GoalIndeterminate→`/goal`, GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`, IntentMisarticulated→`/clarify`
@@ -283,13 +287,13 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
 - Targeted context lookup via Read/Grep — classification narrows search scope to specific files/locations that Step 1's broad sweep did not cover (e.g., spec files, config schemas identified by classify)
 - Resolved: mark as `Uᵣ'` (read_only_resolved), skip Phase 2
 
-**Step 4 — Empirical enrichment**: For ProbeEnrichable uncertainties:
-- Construct ProbeSpec: { setup, execute, observe, cleanup }
-- Execute probe lifecycle (setup → execute → observe → cleanup → record)
-- Probe evidence attached to `Uₑ` → proceeds to Phase 2 with evidence
+**Step 4 — Dynamic verification**: For DynamicallyVerifiable uncertainties:
+- Construct VerificationSpec: { setup, execute, observe, cleanup }
+- Execute verification lifecycle (setup → execute → observe → cleanup → record)
+- Verification evidence attached to `Uₑ` → proceeds to Phase 2 with evidence
 
-If all uncertainties context-resolved or read-only-resolved (no enriched or user-dependent remaining): proceed with execution (no user interruption).
-If enriched or user-dependent uncertainties remain: proceed to Phase 2.
+If all uncertainties context-resolved or read-only-resolved (no verified or user-dependent remaining): proceed with execution (no user interruption).
+If verified or user-dependent uncertainties remain: proceed to Phase 2.
 
 **Web context** (conditional): When uncertainty carries an environmental dependency signal
 (external API versions, library maintenance status, breaking changes)
@@ -299,18 +303,18 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 **Scope restriction**:
 - Context collection: Read-only investigation (Read, Grep, WebSearch). — core preserved
 - Read-only verification: Extended context lookup for verifiable facts (Read, Grep). — resolves directly
-- Empirical enrichment: Minimal, reversible test execution (Write to temp, Bash, Read, cleanup).
-  Probe artifacts must be created in temp locations and cleaned up after observation.
-  Probes must not modify existing project files.
-  Probe results are evidence for Phase 2, not resolution — enrichment, not replacement.
+- Dynamic verification: Non-destructive observation via Bash execution, with optional Write for observation instrument setup (temp test artifacts).
+  Verification artifacts must be created in temp locations and cleaned up after observation.
+  Verification must not modify existing project files.
+  Verification results are evidence for Phase 2, not resolution — observation, not replacement.
 
-**Probe design constraints**:
-1. **Minimal**: Create the smallest possible test artifact
-2. **Reversible**: All probe artifacts must be cleaned up after observation
-3. **Sandboxed**: Probes must not modify existing project files
-4. **Transparent**: Log probe lifecycle in `Λ.probe_history`
+**Verification design constraints**:
+1. **Minimal**: Create the smallest possible observation instrument
+2. **Reversible**: All verification artifacts must be cleaned up after observation
+3. **Sandboxed**: Verification must not modify existing project files
+4. **Transparent**: Log verification lifecycle in `Λ.verification_history`
 5. **Bounded**: 30-second timeout → fall back to user inquiry
-6. **Risk-aware**: Elevated-risk probes → reclassify as UserDependent
+6. **Risk-aware**: Elevated-risk verification → reclassify as UserDependent
 
 ### Phase 2: Uncertainty Surfacing
 
@@ -323,12 +327,12 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 Present the classification results, uncertainty description, and evidence as text output:
 - **Classification summary**:
   - U1: Factual/ReadOnly (basis: evidence summary)
-  - U2: Factual/Probe (basis: evidence summary)
+  - U2: Factual/DynamicallyVerifiable (basis: evidence summary)
   - U3: Coherence (basis: evidence summary) → /ground
   - U4: Relevance (basis: evidence summary) → /goal
   - Any classification to revise?
 - **[Specific uncertainty description — highest priority]**
-- **Evidence**: [Evidence collected during context collection and probes, if any]
+- **Evidence**: [Evidence collected during context collection and verification, if any]
 - **Progress**: [N resolved / M actionable uncertainties] (excludes non-factual routed)
 
 Then **present**:
@@ -387,17 +391,17 @@ After integration:
 | Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context uncertainties ≠ Syneidesis decision gaps, so reverse suppression not needed) |
 | Classify transparency | Always show classify results (dimension + verifiability) in Phase 2 surfacing format | User sees AI's reasoning and resolution path per uncertainty |
 | Routing transparency | Uₙ items show `→ /protocol` in Phase 2 classify summary | User sees routing destination at detection time |
-| Probe transparency | Log probe lifecycle in Λ.probe_history | User can audit what was tested |
-| Probe cleanup | All test artifacts removed after observation | No residual files |
-| Probe timeout | 30s limit → fall back to user inquiry | Prevents hanging |
-| Probe risk gate | Elevated-risk probes → reclassify as UserDependent | Safety preserved |
+| Verification transparency | Log verification lifecycle in Λ.verification_history | User can audit what was tested |
+| Verification cleanup | All test artifacts removed after observation | No residual files |
+| Verification timeout | 30s limit → fall back to user inquiry | Prevents hanging |
+| Verification risk gate | Elevated-risk verification → reclassify as UserDependent | Safety preserved |
 
 ## Rules
 
 1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via gate interaction (Phase 2)
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
-3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/Probe: run empirical probes to attach evidence, (f) for Coherence/Relevance: detect and show routing target in classify summary
-4. **Inference over Detection**: When context is insufficient and context collection does not fully resolve, infer the highest-gain question rather than assume — silence is worse than a dismissed question
+3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/DynamicallyVerifiable: run dynamic verification to attach evidence, (f) for Coherence/Relevance: detect and show routing target in classify summary
+4. **Evidence over Inference over Detection**: When context is insufficient, infer the highest-gain question rather than detect via fixed checklist (lower boundary). When a factual uncertainty is dynamically verifiable, verify through observation rather than infer from reasoning alone (upper boundary — Rule 20 is the structural guard)
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on prospect requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
 7. **One at a time**: Surface one uncertainty per Phase 2 cycle; do not bundle multiple uncertainties
@@ -413,3 +417,4 @@ After integration:
 17. **No silent sufficiency assumption**: If Phase 0 scan detects no uncertainties, present this finding with reasoning to user for confirmation before proceeding — do not silently declare context sufficient
 18. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
 19. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
+20. **No verification avoidance**: When a Factual uncertainty is classifiable as DynamicallyVerifiable (observable through bounded, non-destructive Bash execution), classifying it as UserDependent to avoid dynamic observation = protocol violation. The AI must attempt dynamic verification before falling back to user inquiry. Reclassification to UserDependent is legitimate only when: (a) dynamic observation requires persistent environment mutation beyond observation instrument setup, (b) execution exceeds 30s bound, (c) risk gate triggers (elevated-risk verification), or (d) verification result would not narrow the uncertainty
