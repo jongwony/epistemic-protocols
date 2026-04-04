@@ -55,7 +55,7 @@ A2's authority extends to a second order: not only WHO exercises judgment (1st o
 
 Gate authority decomposes into two modes:
 
-- **Standing authority**: User's constitutive judgment crystallized into deterministic rules — system prompts, compose automation, CI/CD configurations. Operates in the relay domain (entropy→0). Informally: "proxy authority."
+- **Standing authority**: User's constitutive judgment crystallized into deterministic rules — system prompts, compose automation, CI/CD configurations. Operates in the relay domain (entropy→0).
 - **Active authority**: User's live constitutive judgment exercised at protocol gates. Operates in the constitution domain (entropy>0).
 
 The act of creating Standing authority — writing a system prompt rule, configuring a CI/CD gate, defining compose elision — is itself an Active authority exercise: User's conscious choice to delegate specific gate decisions to pre-committed rules. This self-referential grounding (2nd order → 1st order) ensures Standing authority is always traceable to a constitutive act.
@@ -63,6 +63,8 @@ The act of creating Standing authority — writing a system prompt rule, configu
 **A2 boundary protection at 2nd order**: A2 protects authority allocation visibility, not gate exclusivity. Standing authority operating within its explicitly delegated scope is A2-compatible — the delegation was User's conscious choice. Standing authority exceeding delegated scope into constitution territory is A2 violation. The operational test: "Was this Standing authority scope explicitly established by User's constitutive act?"
 
 **Configurable relay/constitution boundary**: The relay/constitution boundary is not fixed at protocol definition time — User can shift it by creating or revoking Standing authority. ELIDABLE CHECKPOINTS map to this model: `elidable` annotations mark gates delegatable to Standing authority; `always_gated` annotations mark gates requiring Active authority.
+
+**A5 coordination**: Standing/Active is an authority-source dimension orthogonal to A5's regret dimension (bounded/unbounded). A5 classifies gates by *what happens if elided* (regret); Standing/Active classifies by *who authorized the elision* (authority source). The same gate carries both annotations independently: `elidable` (A5: bounded regret) AND delegatable to Standing authority (A2: User pre-committed). Neither dimension subsumes the other.
 
 **Scope boundary**: EP protocols govern authority boundary definition and protection (epistemic scope). Standing authority implementation — system prompts, CI/CD rules, compose automation — belongs to the operational scope outside EP protocols. EP defines where the boundary is; the operational layer realizes the delegation.
 
