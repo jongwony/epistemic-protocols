@@ -49,6 +49,23 @@ Single test: "Is the AI acting as a relay or exercising authority?" Five verific
 
 **Visibility principle**: `basis_cited(resolution)` determines sufficiency — timing (immediate or deferred) is immaterial. Convergence trace, classify summary, and post-hoc reporting all satisfy visibility when basis is cited. Progress-count-only display without basis forces Recall (A1 tension).
 
+### Authority Mode: Standing/Active
+
+A2's authority extends to a second order: not only WHO exercises judgment (1st order — AI detects, User judges), but HOW authority is allocated between pre-committed rules and live judgment (2nd order).
+
+Gate authority decomposes into two modes:
+
+- **Standing authority**: User's constitutive judgment crystallized into deterministic rules — system prompts, compose automation, CI/CD configurations. Operates in the relay domain (entropy→0). Informally: "proxy authority."
+- **Active authority**: User's live constitutive judgment exercised at protocol gates. Operates in the constitution domain (entropy>0).
+
+The act of creating Standing authority — writing a system prompt rule, configuring a CI/CD gate, defining compose elision — is itself an Active authority exercise: User's conscious choice to delegate specific gate decisions to pre-committed rules. This self-referential grounding (2nd order → 1st order) ensures Standing authority is always traceable to a constitutive act.
+
+**A2 boundary protection at 2nd order**: A2 protects authority allocation visibility, not gate exclusivity. Standing authority operating within its explicitly delegated scope is A2-compatible — the delegation was User's conscious choice. Standing authority exceeding delegated scope into constitution territory is A2 violation. The operational test: "Was this Standing authority scope explicitly established by User's constitutive act?"
+
+**Configurable relay/constitution boundary**: The relay/constitution boundary is not fixed at protocol definition time — User can shift it by creating or revoking Standing authority. ELIDABLE CHECKPOINTS map to this model: `elidable` annotations mark gates delegatable to Standing authority; `always_gated` annotations mark gates requiring Active authority.
+
+**Scope boundary**: EP protocols govern authority boundary definition and protection (epistemic scope). Standing authority implementation — system prompts, CI/CD rules, compose automation — belongs to the operational scope outside EP protocols. EP defines where the boundary is; the operational layer realizes the delegation.
+
 ## A3. Convergence Persistence
 
 Protocol modes remain active until convergence conditions are met or the user explicitly exits. A protocol that deactivates before convergence abandons its epistemic commitment — the deficit it was created to address remains unresolved.
