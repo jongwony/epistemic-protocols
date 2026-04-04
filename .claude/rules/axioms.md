@@ -45,7 +45,7 @@ Single test: "Is the AI acting as a relay or exercising authority?" Five verific
 | Entropy → 0 | Single possible action | Selection among alternatives |
 | Basis cited | Relay source is visible at point of visibility | Resolution basis is opaque |
 
-**Observation scope**: Non-destructive observation (including test execution with cleanup) is relay. Environment mutation (installation, persistent state change) is constitution. Operational constraints: observation artifacts must not modify existing project files; all artifacts must be cleaned up after observation.
+**Dynamic observation scope**: Non-destructive dynamic observation (including test execution with cleanup) is relay. Environment mutation (installation, persistent state change) is constitution. Operational constraints: observation artifacts must not modify existing project files; all artifacts must be cleaned up after observation.
 
 **Visibility principle**: `basis_cited(resolution)` determines sufficiency — timing (immediate or deferred) is immaterial. Convergence trace, classify summary, and post-hoc reporting all satisfy visibility when basis is cited. Progress-count-only display without basis forces Recall (A1 tension).
 
