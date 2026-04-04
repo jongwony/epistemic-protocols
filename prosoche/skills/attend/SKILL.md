@@ -132,7 +132,7 @@ Phase 1:  t.E → Eval(t.E) → Fi: Set(Finding)                       -- risk e
            escalate?(Fi) → adjust_granularity(Σ)
 Phase 2:  Fi → Qc(Fi, evidence, t.E) → Stop → J                     -- checkpoint surfacing [Tool]
            (or: subagent GATE_DETECTED → main agent Qc)
-Phase 3:  J → A(J, t, Σ) → Σ'                                      -- judgment integration (internal)
+Phase 3:  J → A(J, t, Σ) → Σ'                                      -- judgment integration (sense)
            J = Withdraw → Withdraw[SendMessage] → deactivate         -- team shutdown [Tool]
 
 ── LOOP ──
@@ -188,24 +188,24 @@ active(Λ) = Λ.active ∧ (∃ t ∈ Λ.tasks: t.status ∉ {completed, halted}
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase -1 Sub-A0 scan    (detect)  → Internal analysis (heuristic deficit detection, execution-blocking filter)
+Phase -1 Sub-A0 scan    (sense)    → Internal analysis (heuristic deficit detection, execution-blocking filter)
 Phase -1 Sub-A0 Qc      (gate)    → present (upstream routing: Route(P)/Other/Proceed) [Tool]
-Phase -1 Sub-A0 suspend (state)   → TaskCreate (persist Λ.upstream: Resolved, iteration) [Tool]
-Phase -1 Sub-A0 restore (state)   → TaskGet (restore Λ.upstream after upstream converges) [Tool]
-Phase -1 Sub-A0 execute (extern)  → Skill (upstream protocol inline execution) [Tool]
+Phase -1 Sub-A0 suspend (track)   → TaskCreate (persist Λ.upstream: Resolved, iteration) [Tool]
+Phase -1 Sub-A0 restore (track)   → TaskGet (restore Λ.upstream after upstream converges) [Tool]
+Phase -1 Sub-A0 execute (dispatch) → Skill (upstream protocol inline execution) [Tool]
 Phase -1 Sub-A0 resolve Qc (gate)   → present (Other: user selects protocol P) [Tool]
-Phase -1 Materialize (resume)  → TaskList (read existing tasks) [Tool]
-Phase -1 Materialize (create)  → TaskCreate (create from context) [Tool]
+Phase -1 Materialize (track)   → TaskList (read existing tasks) [Tool]
+Phase -1 Materialize (track)   → TaskCreate (create from context) [Tool]
 Phase -1 Materialize confirm Qc (gate)   → TaskCreate + present (transparent cold start) [Tool]
 Phase -1 TeamCoord Qc  (gate)    → present (team structure selection) [Tool]
-Phase 0 delegate     (extern)  → Agent(prosoche:prosoche-executor) [Tool]
-Phase 0 delegate     (extern)  → Agent(team-agent, Gate prompt) or SendMessage(team-agent, Gate prompt) [Tool]
-Phase 0 Classify     (detect)  → Internal analysis (no external tool)
-Phase 1 Eval         (detect)  → Read, Grep (evidence gathering; optional)
+Phase 0 delegate     (dispatch) → Agent(prosoche:prosoche-executor) [Tool]
+Phase 0 delegate     (dispatch) → Agent(team-agent, Gate prompt) or SendMessage(team-agent, Gate prompt) [Tool]
+Phase 0 Classify     (sense)   → Internal analysis (no external tool)
+Phase 1 Eval         (observe) → Read, Grep (evidence gathering; optional)
 Phase 2 Qc           (gate)    → present (checkpoint with evidence)
-Phase 3 A            (state)   → Internal state update (no external tool)
-Task completion      (state)   → TaskUpdate (status tracking) [Tool]
-Withdraw shutdown    (extern)  → SendMessage (shutdown_request to team members) [Tool]
+Phase 3 A            (track)   → Internal state update (no external tool)
+Task completion      (track)   → TaskUpdate (status tracking) [Tool]
+Withdraw shutdown    (dispatch) → SendMessage (shutdown_request to team members) [Tool]
 converge             (relay)    → TextPresent+Proceed (coordinator convergence evidence trace; proceed with situated execution)
 
 ── ELIDABLE CHECKPOINTS ──

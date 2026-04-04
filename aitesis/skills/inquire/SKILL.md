@@ -76,7 +76,7 @@ Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                         -- con
          classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-factual (classify summary routing)
          [if Uₑ_candidates ≠ ∅] EmpiricalProbe(Uₑ_candidates) → Uₑ  -- empirical enrichment [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[max_gain], progress) → Stop → A           -- uncertainty surfacing [Tool]
-Phase 3: A → integrate(A, X) → X'                               -- prospect update (internal)
+Phase 3: A → integrate(A, X) → X'                               -- prospect update (sense)
 
 ── LOOP ──
 After Phase 3: re-scan X' for remaining or newly emerged uncertainties.
@@ -96,12 +96,12 @@ early_exit = user_declares_sufficient
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase 0 Scan    (infer)       → Internal analysis (no external tool)
-Phase 1 Ctx     (collect)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch (conditional: environmental dependency)
-Phase 1 Classify (assess)     → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
-Phase 1 Probe   (enrich)      → Write, Bash, Read (empirical enrichment, Factual only); cleanup via Bash
+Phase 0 Scan    (sense)       → Internal analysis (no external tool)
+Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch (conditional: environmental dependency)
+Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
+Phase 1 Probe   (transform)   → Write, Bash, Read (empirical enrichment, Factual only); cleanup via Bash
 Phase 2 Qs      (gate)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
-Phase 3         (state)       → Internal state update
+Phase 3         (track)       → Internal state update
 converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
 
 ── ELIDABLE CHECKPOINTS ──

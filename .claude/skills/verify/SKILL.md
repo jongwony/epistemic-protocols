@@ -70,7 +70,7 @@ You are a Type Theory Expert analyzing protocol type design.
 - Tool grounding: TOOL GROUNDING ↔ PHASE TRANSITIONS consistency
 
 **Tool Grounding check**:
-- External operations (extern) have corresponding [Tool] notation in PHASE TRANSITIONS
+- External operations (dispatch) have corresponding [Tool] notation in PHASE TRANSITIONS
 - Internal operations marked with "no external tool"
 - Escape behavior semantics match protocol context (fallback/Silence/cancel)
 

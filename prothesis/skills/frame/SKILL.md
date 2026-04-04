@@ -125,7 +125,7 @@ Convergence evidence: At wrap_up (Mode 2), present transformation trace — for 
 
 ── BOUNDARY ──
 Q(MB, M) (confirm+select) = extern: Mission Brief confirmation + mode selection boundary
-G (gather)  = purpose: targeted context acquisition (guided by MBᵥ)
+G (observe)  = purpose: targeted context acquisition (guided by MBᵥ)
 S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
@@ -133,21 +133,21 @@ I (inquiry) = purpose: perspective-informed interpretation
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Qc (gate)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
 Sc (gate)                → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
-T (parallel)             → TeamCreate tool (creates team with shared task list); agent-aware realization: match available agents to selected perspectives before spawn — 0 matches: proceed with AI-generated teammates; 1 match: relay (auto-assign); 2+ matches: ELIDABLE gate (user confirms agent-perspective mapping, each option genuinely viable under different value weightings per A5)
-∥Spawn (parallel)        → Task tool (team_name, name: spawn perspective teammates — each receives MBᵥ + perspective only; no Phase 1 context G passed)
-∥I (parallel)            → TaskCreate/TaskUpdate (shared task list for inquiry coordination)
+T (dispatch)             → TeamCreate tool (parallel topology: creates team with shared task list); agent-aware realization: match available agents to selected perspectives before spawn — 0 matches: proceed with AI-generated teammates; 1 match: relay (auto-assign); 2+ matches: ELIDABLE gate (user confirms agent-perspective mapping, each option genuinely viable under different value weightings per A5)
+∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates — each receives MBᵥ + perspective only; no Phase 1 context G passed)
+∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination)
 Phase 3 P (relay)        → TextPresent+Proceed (per-perspective epistemic contribution + key finding summaries)
-Phase 4 Δ (detect)       → Internal operation (trigger check per Trigger Detection Criteria; cite evidence per detected trigger)
-Phase 4 D? (conditional) → SendMessage tool (type: "message", coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
+Phase 4 Δ (sense)        → Internal operation (trigger check per Trigger Detection Criteria; cite evidence per detected trigger)
+Phase 4 D? (dispatch)    → SendMessage tool (conditional topology: coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
 Phase 4 O (relay)        → TextPresent+Proceed (full synthesis — convergence, divergence, integrated assessment)
 Phase 4 Qc (gate)        → present (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
 PF Qc (gate)             → present (multiSelect: preservation scope; in LOOP wrap_up path only)
-wrap_up TaskCreate (state) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
-Ω (extern)               → SendMessage tool (type: "shutdown_request", graceful teammate termination)
-Λ (state)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
-G (gather)               → Read, Glob, Grep (meta-scope context acquisition: guided by MBᵥ to identify relevant perspectives — not passed to teammates; teammates independently collect object-scope evidence through their own lens)
-Phase 4 Syn (synthesis)  → Internal operation (no external tool; basis_cited in O(L) Synthesis Basis section)
-characterize (internal)  → Internal operation (perspective count tier classification)
+wrap_up TaskCreate (track) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
+Ω (dispatch)             → SendMessage tool (type: "shutdown_request", graceful teammate termination)
+Λ (track)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
+G (observe)              → Read, Glob, Grep (meta-scope context acquisition: guided by MBᵥ to identify relevant perspectives — not passed to teammates; teammates independently collect object-scope evidence through their own lens)
+Phase 4 Syn (sense)      → Internal operation (no external tool; basis_cited in O(L) Synthesis Basis section)
+characterize (sense)     → Internal operation (perspective count tier classification)
 converge (relay)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
 
 ── ELIDABLE CHECKPOINTS ──
