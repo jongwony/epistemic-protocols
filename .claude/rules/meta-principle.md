@@ -56,7 +56,7 @@ The promotion/demotion decision follows a hermeneutic circle pattern:
 
 **Note on the circle's stability**: Unlike philosophical hermeneutics (where understanding is open-ended), axiomatization seeks closure — a stable set of non-derivable foundational principles. The circle terminates when new observations no longer prompt principle revisions; this is evidence that the axiom set has reached productive stability (though it remains revisable).
 
-### Context-Accumulation Decay
+### Tension-Accumulation Threshold
 
 Rückkehr's trigger is not calendar-based but tension-accumulative. The decision criterion: act when the accumulated cost of maintaining current state (axiom tension, guard contradiction, classification ambiguity) exceeds the immediate cost of revision (diff scope, review burden, downstream adjustment). The independent variable is context accumulation — not elapsed time. The Axiom Hierarchy's tier dynamics apply: Safeguard-tier tensions self-resolve; Axiom-tier tensions compound.
 
