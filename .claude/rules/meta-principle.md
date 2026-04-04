@@ -61,5 +61,3 @@ The promotion/demotion decision follows a hermeneutic circle pattern:
 Rückkehr's trigger is not calendar-based but tension-accumulative. The decision criterion: act when the accumulated cost of maintaining current state (axiom tension, guard contradiction, classification ambiguity) exceeds the immediate cost of revision (diff scope, review burden, downstream adjustment). The independent variable is context accumulation — not elapsed time. The Axiom Hierarchy's tier dynamics apply: Safeguard-tier tensions self-resolve; Axiom-tier tensions compound.
 
 **Protocol-level manifestation**: The trigger extends beyond axiom evolution. Each protocol's decision dimensions inherit the same criterion as domain-specific instances. Definition lives here (meta-principle); manifestation is inscribed in individual SKILL.md operational prose.
-
-**Empirical grounding (N=8)**: The formalization names an existing implicit practice, not a new invention. Instance evidence is maintained in project memory for Deficit Empiricism traceability.
