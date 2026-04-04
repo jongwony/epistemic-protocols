@@ -61,7 +61,7 @@ If no relevant text exists: pause activation and request a grounding target befo
 Phase 0: R → Detect(R) → uncertain?                             -- mapping uncertainty gate (silent)
 Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M               -- domain decomposition + mapping [Tool]
 Phase 2: M → I(M, Sₜ) → Qs(I, progress) → Stop → V             -- instantiation + validation [Tool]
-Phase 3: V → integrate(V, R) → R'                               -- output update (internal)
+Phase 3: V → integrate(V, R) → R'                               -- output update (sense)
 
 ── LOOP ──
 After Phase 3: evaluate validation result.
@@ -80,10 +80,10 @@ early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase 1 Map     (collect)   → Read, Grep (stored knowledge extraction: domain structure analysis); WebSearch (conditional: external domain knowledge)
+Phase 1 Map     (observe)   → Read, Grep (stored knowledge extraction: domain structure analysis); WebSearch (conditional: external domain knowledge)
 Phase 2 Qs      (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
-Phase 3         (state)     → Internal state update
-Phase 0 Detect  (detect)    → Internal analysis (no external tool)
+Phase 3         (track)     → Internal state update
+Phase 0 Detect  (sense)     → Internal analysis (no external tool)
 converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with validated mapping)
 
 ── ELIDABLE CHECKPOINTS ──

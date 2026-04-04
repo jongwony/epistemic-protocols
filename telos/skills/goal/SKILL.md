@@ -55,9 +55,9 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0:  G → recognize(G) → Qc(confirm) → Stop → Gᵥ           -- trigger + confirm [Tool]
 Phase 1:  Gᵥ → detect(Gᵥ) → Dd → Qc(Dd, evidence) → Stop → Dₐ, Dₛ  -- dimension detection + confirm [Tool]
-Phase 2:  Dₛ → propose(Dₛ, context) → P                        -- AI proposal (internal)
+Phase 2:  Dₛ → propose(Dₛ, context) → P                        -- AI proposal (sense)
         → Qs(P) → Stop → A                                      -- co-construction [Tool]
-Phase 3:  A → integrate(A, C) → C'                             -- contract update (internal)
+Phase 3:  A → integrate(A, C) → C'                             -- contract update (sense)
 Phase 4:  C' → Qc(C', progress) → Stop → approve               -- sufficiency check [Tool]
 
 ── LOOP ──
@@ -77,11 +77,11 @@ early_exit = user_declares_sufficient (any progress level)
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Qc (gate)    → present (goal confirmation + activation approval)
-Phase 1 detect (detect) → Internal analysis (dimension detection from Gᵥ)
+Phase 1 detect (sense) → Internal analysis (dimension detection from Gᵥ)
 Phase 1 Qc (gate)    → present (full taxonomy assessment + progress display)
-Phase 2 P  (detect)  → Read, Grep (context for proposal generation; fallback: template)
+Phase 2 P  (observe) → Read, Grep (context for proposal generation; fallback: template)
 Phase 2 Qs (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
-Phase 3    (state)   → Internal GoalContract update (no external tool)
+Phase 3    (track)   → Internal GoalContract update (no external tool)
 Phase 4 Qc (gate)    → present (GoalContract review + approval)
 converge (relay)     → TextPresent+Proceed (convergence evidence trace; context for Phase 4 Qc GoalContract approval)
 

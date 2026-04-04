@@ -52,7 +52,7 @@ Phase          ∈ {0, 1, 2, 3}
 Phase 0: T → Probe(T) → Bᵢ?                                           -- boundary detection gate (silent)
 Phase 1: Bᵢ → Ctx(Bᵢ) → (Bᵢ', Bᵣ)                                     -- context collection [Tool]
 Phase 2: Bᵢ' → Qc(Bᵢ'[max_impact], progress) → Stop → A               -- boundary classification [Tool]
-Phase 3: A → integrate(A, B) → B'                                      -- map update (internal)
+Phase 3: A → integrate(A, B) → B'                                      -- map update (sense)
 
 Phase 0 → Phase 1:  boundary_undefined(T) = true                       -- domains detected
 Phase 0 → deactivate: boundary_undefined(T) = false                    -- no undefined boundaries
@@ -77,10 +77,10 @@ converge iff |remaining| = 0 ∨ user_esc
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase 0 Probe (detect)  → Internal analysis (no external tool)
-Phase 1 Ctx   (collect) → Read, Grep, Glob (codebase scan for boundary signals: CLAUDE.md, boundaries.md, rules/, prior session context)
+Phase 0 Probe (sense)   → Internal analysis (no external tool)
+Phase 1 Ctx   (observe) → Read, Grep, Glob (codebase scan for boundary signals: CLAUDE.md, boundaries.md, rules/, prior session context)
 Phase 2 Qc    (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
-Phase 3       (state)   → Internal state update
+Phase 3       (track)   → Internal state update
 converge  (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with defined boundary)
 
 ── ELIDABLE CHECKPOINTS ──

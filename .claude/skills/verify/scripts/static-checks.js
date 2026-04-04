@@ -341,7 +341,10 @@ function checkRequiredSections() {
 function checkToolGrounding() {
 
   // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS
-  const MANDATORY_CLASSIFICATIONS = new Set(['extern']);
+  const MANDATORY_CLASSIFICATIONS = new Set(['dispatch']);
+
+  // Valid annotation vocabulary (7-label MECE set)
+  const VALID_ANNOTATIONS = new Set(['sense', 'observe', 'track', 'transform', 'dispatch', 'gate', 'relay']);
 
   // Escape special regex characters
   function escapeRegex(str) {
@@ -431,6 +434,17 @@ function checkToolGrounding() {
       });
     }
 
+    // Check 6g: Validate annotation vocabulary
+    for (const binding of toolBindings) {
+      if (!VALID_ANNOTATIONS.has(binding.classification)) {
+        results.fail.push({
+          check: 'tool-grounding',
+          file: relPath,
+          message: `Non-standard annotation "(${binding.classification})" on operation "${binding.operation}". Valid annotations: ${[...VALID_ANNOTATIONS].join(', ')}`
+        });
+      }
+    }
+
     // Warn if grounding section has binding arrows but no bindings were parsed
     if (toolBindings.length === 0 && groundingSection.includes('→')) {
       results.warn.push({
@@ -457,7 +471,7 @@ function checkToolGrounding() {
       // Skip internal operations
       if (binding.tool === 'Internal') continue;
 
-      // Skip non-mandatory classifications (state, gather, detect, etc.)
+      // Skip non-mandatory classifications (track, sense, observe, etc.)
       if (!MANDATORY_CLASSIFICATIONS.has(binding.classification)) continue;
 
       // Check if operation appears with [Tool] notation in PHASE TRANSITIONS

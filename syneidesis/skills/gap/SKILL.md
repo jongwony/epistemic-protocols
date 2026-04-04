@@ -68,9 +68,9 @@ proceed(Σ) = ¬blocked(Σ)
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Qs (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
-Σ (state)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
-Scan (detect)  → Read, Grep (stored knowledge extraction: context for gap identification)
-A (state)      → Internal state update (no external tool)
+Σ (track)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
+Scan (observe) → Read, Grep (stored knowledge extraction: context for gap identification)
+A (track)      → Internal state update (no external tool)
 converge (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
 
 ── ELIDABLE CHECKPOINTS ──

@@ -69,11 +69,11 @@ progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress whe
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Eval   (detect)  → Internal analysis (no external tool)
+Eval   (sense)   → Internal analysis (no external tool)
 Qc     (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
-adapt  (modify)  → Edit, Write (result adaptation based on user direction)
-                    -- (modify): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
-Mᵢ/Mₑ (state)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
+adapt  (transform) → Edit, Write (result adaptation based on user direction)
+                    -- (transform): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
+Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
 converge (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
 ── ELIDABLE CHECKPOINTS ──

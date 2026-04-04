@@ -37,20 +37,27 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 
 **Operation annotations** (tool-facing):
 
-| Annotation | Meaning | Tool Pattern |
-|------------|---------|--------------|
-| `(detect)` | Pattern recognition, signal scanning, classification | Internal analysis; Read, Grep when incidental to classification |
-| `(collect)` | Codebase/environment evidence gathering | Read, Grep, Glob as primary activity; WebSearch (conditional) |
-| `(state)` | Protocol state tracking or persistence | TaskCreate, TaskUpdate, TaskGet; or internal state update |
-| `(extern)` | External system interaction crossing agent boundary | SendMessage, Agent, Skill |
-| `(modify)` | Changes existing artifacts | Edit, Write |
-| `(enrich)` | Empirical probe with temporary artifacts and cleanup | Write + Bash + Read + cleanup |
+| Annotation | Meaning | Boundary criterion | Tool Pattern |
+|------------|---------|-------------------|--------------|
+| `(sense)` | Internal epistemic operation without tool dispatch | tool dispatch = false ∧ no Λ mutation | Internal analysis/operation (no external tool) |
+| `(observe)` | Read-only tool operation for evidence or context | tool dispatch = true ∧ isReadOnly | Read, Grep, Glob; WebSearch (conditional) |
+| `(track)` | Protocol state tracking or persistence | Λ(mode state) mutation | TaskCreate, TaskUpdate, TaskGet; or internal state update |
+| `(dispatch)` | External system interaction crossing agent boundary | agent/protocol boundary crossing | SendMessage, Agent, Skill |
+| `(transform)` | Changes existing artifacts | isReadOnly = false, file tools | Edit, Write |
+
+**Boundary criteria**: Each annotation has a verifiable boundary test that determines classification:
+- `(sense)` vs `(observe)`: "Does tool dispatch occur?" Strict rule: if tool dispatch is possible (even conditional), classify as `(observe)`
+- `(sense)` vs `(track)`: "Does the operation mutate Λ (mode state)?" State updates → `(track)`, pure analysis → `(sense)`
+- `(observe)` vs `(transform)`: "Is the operation read-only?" Read-only → `(observe)`, file mutation → `(transform)`
 
 **Consistency rules**:
-- `(detect)` subsumes former `(infer)`, `(assess)`, `(internal)`, `(synthesis)` — use `(detect)` for all scanning/classification operations
-- `(collect)` subsumes former `(gather)`, `(construct)` — use `(collect)` for all evidence gathering
-- `(state)` subsumes former `(adjust)` — use `(state)` for all state tracking
-- `(parallel)` and `(conditional)` describe execution topology, not operation type — use the underlying operation annotation (e.g., `(extern)` for TeamCreate) with topology noted in the description
+- `(sense)` subsumes former `(detect)`, `(infer)`, `(assess)`, `(internal)`, `(synthesis)` — use `(sense)` for all internal operations without tool dispatch
+- `(observe)` subsumes former `(collect)`, `(gather)`, `(construct)` and `(detect)` entries with tool dispatch — use `(observe)` for all read-only tool operations
+- `(track)` subsumes former `(state)`, `(adjust)` — use `(track)` for all state management
+- `(dispatch)` subsumes former `(extern)` — use `(dispatch)` for all boundary-crossing operations
+- `(transform)` subsumes former `(modify)` — use `(transform)` for all artifact mutations
+- `(enrich)` removed — compound pattern decomposed as `(transform)` with cleanup noted in description
+- `(parallel)` and `(conditional)` describe execution topology, not operation type — use the underlying operation annotation (e.g., `(dispatch)` for TeamCreate) with topology noted in the description
 
 **Topology modifiers**:
 
@@ -59,7 +66,7 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 | `parallel` | Concurrent execution of multiple instances | Agent/Task spawn with independent contexts |
 | `conditional` | Execution gated on runtime predicate | Operation skipped when predicate is false |
 
-**Topology notation convention**: Topology is encoded in the TOOL GROUNDING description text, not in the annotation parenthetical. Pattern: `(operation_type) → Tool (topology_modifier topology: description...)`. This keeps the annotation slot reserved for the 8 standard operation types while preserving topology information for runtime orchestration and static analysis (Grep-searchable via `topology:`).
+**Topology notation convention**: Topology is encoded in the TOOL GROUNDING description text, not in the annotation parenthetical. Pattern: `(operation_type) → Tool (topology_modifier topology: description...)`. This keeps the annotation slot reserved for the 7 standard operation types while preserving topology information for runtime orchestration and static analysis (Grep-searchable via `topology:`).
 
 ### FLOW-MORPHISM Relationship
 

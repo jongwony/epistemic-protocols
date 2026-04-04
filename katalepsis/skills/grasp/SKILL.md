@@ -73,15 +73,15 @@ VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P'
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 1 Qc  (gate)   → present (entry point selection)
-Phase 2 Tᵣ  (state)   → TaskCreate (category tracking)
-Phase 3 detect (detect) → Internal analysis (gap type relevance detection per category)
+Phase 2 Tᵣ  (track)   → TaskCreate (category tracking)
+Phase 3 detect (sense) → Internal analysis (gap type relevance detection per category)
 Phase 3 Qs  (gate)   → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3 Qᵣs (gate)  → present (misconception reasoning inquiry)
 Phase 3 Qc  (gate)   → present (aspect coverage: sufficient/aspect)
-Phase 3 Ref (collect) → Read (source artifact, AI-determined)
-Phase 3 Tᵤ  (state)  → TaskUpdate (progress tracking)
-Phase 3 Prop (state)  → TaskCreate (proposal ejection)
-Categorize  (detect)  → Internal analysis (Read for context if needed)
+Phase 3 Ref (observe) → Read (source artifact, AI-determined)
+Phase 3 Tᵤ  (track)  → TaskUpdate (progress tracking)
+Phase 3 Prop (track)  → TaskCreate (proposal ejection)
+Categorize  (observe) → Internal analysis (Read for context if needed)
 converge    (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
 
 ── ELIDABLE CHECKPOINTS ──

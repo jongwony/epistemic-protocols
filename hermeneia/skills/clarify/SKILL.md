@@ -63,7 +63,7 @@ Phase 0:  E → recognize(E) → T                           -- trigger recognit
 Phase 1a: E → Qc(E) → Stop → Eᵥ                          -- E confirmation [Tool]
 Phase 1b: Eᵥ → detect(Eᵥ) → Gd → Qc(Gd, evidence) → Stop → Gₛ  -- gap detection + confirm [Tool]
 Phase 2:  Gₛ → Qs(Gₛ) → Stop → A                         -- clarification [Tool]
-Phase 3:  A → integrate(A, Î) → Î'                       -- intent update (internal)
+Phase 3:  A → integrate(A, Î) → Î'                       -- intent update (sense)
 
 ── LOOP ──
 After Phase 3: return to Phase 1b for newly surfaced gaps.
@@ -77,11 +77,11 @@ Convergence evidence: At |remaining| = 0, present transformation trace — for e
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Qc   (gate)   → present (AI-detected activation confirmation; ai_strong only)
 Phase 1a Qc  (gate)   → present (E confirmation)
-Phase 1b detect (detect) → Internal analysis (gap detection from Eᵥ)
+Phase 1b detect (sense)  → Internal analysis (gap detection from Eᵥ)
 Phase 1b Qc  (gate)   → present (full taxonomy assessment: proceed/revise)
 Phase 2 Qs   (gate)   → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
-suggest_only (detect)  → no tool call (passive suggestion; Λ.active = false)
-integrate    (state)   → Internal state update (no external tool)
+suggest_only (sense)   → no tool call (passive suggestion; Λ.active = false)
+integrate    (track)   → Internal state update (no external tool)
 converge     (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with clarified expression)
 
 ── ELIDABLE CHECKPOINTS ──
