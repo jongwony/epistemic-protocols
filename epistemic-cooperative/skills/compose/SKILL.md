@@ -61,6 +61,8 @@ For each protocol in the chain: check if any precondition source is missing. The
 
 On missing precondition: suggest inserting the missing protocol at the correct position.
 
+**Design note — chain-position × regret interaction**: The A5 concern (unbounded-regret gates positioned late in a chain degrade user judgment quality) is valid but not yet addressed. Phase 3 disposition operates per-gate without chain-position awareness. A future revision will introduce a decision load model that quantifies remaining gate cost (loop depth × regret weight) per disposition choice, replacing the removed position-ratio advisory with a structurally sound, Phase 2-integrated mechanism.
+
 **On all validations passing**: proceed to Phase 2 with the validated chain.
 
 ## Phase 2: Catalog (Gate Inventory)
