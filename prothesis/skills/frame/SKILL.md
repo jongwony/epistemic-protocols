@@ -154,8 +154,10 @@ converge (relay)          → TextPresent+Proceed (convergence evidence trace; p
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
 Phase 0 Qc (MB+mode)    → elidable when: user_invoked ∧ explicit_arg(U)
                            default: (Q1=confirm, Q2=ai_recommended_mode)
-                           regret: bounded (Phase 2 Sc always gated; J_mb=modify on re-invoke)
-Phase 2 Sc (perspective) → always_gated (gated: lens selection is epistemic choice)
+                           regret: bounded (Phase 4 Qc always gated; J_mb=modify on re-invoke)
+Phase 2 Sc (perspective) → elidable when: explicit_arg(select_all_perspectives)
+                           default: auto-select all AI-proposed perspectives (Pₛ = {P_all})
+                           regret: bounded (Phase 4 Qc always gated; team restructuring in Phase 3)
 Phase 3 AgentMap? (map)  → elidable when: agent_count(perspective) ≤ 1
                            default: auto-assign (1 match) or AI-generated (0 matches)
                            regret: bounded (execution assignment correctable by team restructuring)
@@ -288,7 +290,9 @@ After context gathering (Phase 1), **present** perspectives via gate interaction
 
 **Cross-session enrichment**: Prior framing experiences accumulated through prior Reflexion cycles guide Phase 2 perspective formulation bidirectionally — previously effective analytical lenses for similar domains provide starting hypotheses (exploitation), while prior coverage gaps (unaddressed horizon limits) signal domains where novel perspectives should be prioritized (exploration). This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
-**Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
+**Do NOT bypass the gate** unless elidable condition is met. Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
+
+**Elidable (select_all_perspectives)**: When `select_all_perspectives` is signaled in the invocation argument, auto-select all AI-proposed perspectives without gate interaction. Log selected perspectives (Pₛ) in output for traceability, then proceed directly to Phase 3.
 
 Each perspective is an **individual option**. Do not pre-combine perspectives into composite options (e.g., "All three", "1+2 only"). The user selects one or more perspectives directly.
 
