@@ -22,8 +22,9 @@ You will receive:
   - `claude_md`: Path to ~/.claude/CLAUDE.md
   - `settings_json`: Path to ~/.claude/settings.json (optional)
   - `report_html`: Path to usage-data/report.html (optional)
-- `coverage_data`: Pre-aggregated coverage-scanner output (optional). When provided, skip raw facets/session-meta reading and derive dimensions from aggregate data. This avoids duplicating coverage-scanner's work.
+- `coverage_data`: Pre-aggregated coverage-scanner output (optional). When provided, skip raw facets/session-meta reading and derive dimensions from aggregate data. Ignore `sample_size` when present.
 - `sample_size`: Number of facets/session-meta files to sample when `coverage_data` is absent (default: 20)
+- `data_context`: One of `session-enriched` or `data-only` (required). Callers set this based on whether the invocation occurs within a protocol-rich session or a cold-start. Include in output header.
 
 ## Dimensions
 
@@ -40,15 +41,23 @@ Each dimension has a **human-readable explanation** (included in output) for use
 | D5 | Attention Scope | Where you focus — consolidating what's known or exploring the unknown |
 | D6 | Delegation Pattern | How you use AI — doing it yourself or distributing thinking across agents |
 
+### Shared signals (used by multiple dimensions)
+
+These signals are extracted once and referenced by D1 and D5:
+
+- **exploration_ratio**: Facets `session_type` "exploration" count / total sessions. Literal value in facets data.
+- **goal_category_balance**: Facets `goal_categories` — Grep for exploration-related keywords (analysis, investigation, planning, design) vs implementation-related keywords (implementation, bug, fix, maintenance). Use keyword matching, not exact string comparison, since vocabulary varies. Express as exploration_keywords / total_keywords ratio.
+- **protocol_counts**: Coverage slash command counts (if `coverage_data` provided).
+
 ### D1: Inquiry Mode (Deductive <-> Abductive)
 
 **Low (Deductive)**: Step-by-step, systematic approach. Top-down reasoning.
 **High (Abductive)**: Hypothesis-first, creative leaps. Bottom-up pattern discovery.
 
 **Signals**:
-- Facets: `session_type` "exploration" ratio (literal value in facets data) -> higher = more abductive
-- Facets: `goal_categories` — Grep for exploration-related category names (e.g., names containing "analysis", "investigation", "planning", "design") vs implementation-related names (e.g., "implementation", "bug", "fix", "maintenance"). Use keyword matching, not exact string comparison, since category vocabulary varies across sessions.
-- Coverage: protocol slash command counts (if `coverage_data` provided) -> `/frame`, `/inquire` = abductive; `/bound`, `/attend` = deductive
+- **exploration_ratio** (shared) -> higher = more abductive
+- **goal_category_balance** (shared) -> higher exploration ratio = more abductive
+- **protocol_counts** (shared) -> `/frame`, `/inquire` = abductive; `/bound`, `/attend` = deductive
 - rules/ file count and structure complexity -> more rules = more deductive
 
 ### D2: Verification Depth (Trust <-> Doubt)
@@ -89,9 +98,9 @@ Each dimension has a **human-readable explanation** (included in output) for use
 **High (Unknown/UU)**: Focus on exploration, discovery, new patterns.
 
 **Signals**:
-- Session-meta/facets: `session_type` "exploration" vs "single_task" ratio
-- Facets: `goal_categories` — Grep for KK-related keywords (e.g., "implementation", "bug", "fix", "maintenance", "refactor") vs UU-related keywords (e.g., "investigation", "planning", "design", "analysis", "exploration"). Use keyword matching since category vocabulary varies.
-- Coverage: protocol diversity count (if available) -> more protocols used = more UU
+- **exploration_ratio** (shared) -> higher = more UU
+- **goal_category_balance** (shared) -> higher exploration ratio = more UU
+- **protocol_counts** (shared) -> diversity count (5+ distinct protocols) = more UU
 - Session-meta: `project_path` diversity across sampled sessions -> more distinct projects = more UU
 
 ### D6: Delegation Pattern (Self-reliant <-> Extended Mind)
@@ -119,9 +128,7 @@ Each dimension has a **human-readable explanation** (included in output) for use
 
 ## Output Format
 
-Include `Data Context` to indicate the richness of the analysis source:
-- **session-enriched**: Analysis was run within a session that included protocol chaining, prior /sophia or /curses results, or manual coverage interpretation. Scores may reflect richer context.
-- **data-only**: Analysis was run from raw session data without prior protocol context. This is the default for cold-start invocations.
+Include `Data Context` from the `data_context` input parameter (passed by caller).
 
 ```
 ## Dimension Profile

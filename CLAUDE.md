@@ -202,8 +202,8 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 - **Catalog**: No delegation—text-only output, main agent handles all. Read tool for scenarios.md detail mode only.
 - **Compose**: No delegation—main agent handles all phases. Read/Grep for graph.json and ELIDABLE CHECKPOINTS extraction, Write for template generation.
-- **Sophia**: Phase 1 delegates to dimension-profiler subagent (single). Main agent handles Phases 2-4 (matching, presentation, report).
-- **Curses**: Phase 1 delegates to dimension-profiler subagent (single). Main agent handles Phases 2-4 (analysis, recommendations, report).
+- **Sophia**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (matching, presentation, report).
+- **Curses**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (analysis, recommendations, report).
 
 ## Conventions
 

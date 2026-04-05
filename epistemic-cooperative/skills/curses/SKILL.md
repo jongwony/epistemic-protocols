@@ -40,6 +40,10 @@ orient the analysis toward that question.
 
 ## Phase 1: Data Collection
 
+**Same-session reuse**: If dimension-profiler output is already available in this
+conversation (from a prior `/sophia` or `/curses` run), skip Phase 1 entirely and
+reuse that output. Both skills produce identical profiler results.
+
 Two-step delegation (same pipeline as `/sophia`):
 
 **Step 1**: Run `coverage-scanner` agent (see `agents/coverage-scanner.md`) to get
@@ -56,10 +60,13 @@ data_sources:
   claude_md: ~/.claude/CLAUDE.md
   settings_json: ~/.claude/settings.json
 
-sample_size: 20
+data_context: session-enriched
 
 Return the dimension profile table with scores, confidence, and raw signals.
 ```
+
+When `coverage_data` is provided, omit `sample_size` — the profiler derives
+dimensions from aggregate data and does not sample raw files.
 
 If a dimension's confidence is "low", include it in the analysis but mark it
 as provisional and note this in the report.
@@ -130,7 +137,7 @@ so users unfamiliar with the framework understand what each dimension measures.
 Present the top 3-4 strength-shadow pairs and ask the user to validate.
 The user may:
 - Confirm a finding
-- Reframe it (as we saw: "curse" to "strategy")
+- Reframe it (e.g., re-categorize a "curse" as a deliberate "strategy")
 - Dismiss it as not applicable
 - Add context that changes the analysis
 

@@ -35,6 +35,10 @@ Skip when:
 
 ## Phase 1: Data Collection
 
+**Same-session reuse**: If dimension-profiler output is already available in this
+conversation (from a prior `/sophia` or `/curses` run), skip Phase 1 entirely and
+reuse that output. Both skills produce identical profiler results.
+
 Two-step delegation: first run `coverage-scanner` for pre-aggregated data, then pass
 the result to `dimension-profiler` for dimension scoring. This avoids duplicate file
 reading and gives the profiler access to protocol usage counts.
@@ -57,10 +61,13 @@ data_sources:
   claude_md: ~/.claude/CLAUDE.md
   settings_json: ~/.claude/settings.json
 
-sample_size: 20
+data_context: session-enriched
 
 Return the dimension profile table with scores, confidence, and raw signals.
 ```
+
+When `coverage_data` is provided, omit `sample_size` — the profiler derives
+dimensions from aggregate data and does not sample raw files.
 
 If coverage-scanner returns no data (new user with no sessions), skip Step 1 and
 run dimension-profiler with `data_sources` only (rules + CLAUDE.md). Note reduced
@@ -157,9 +164,8 @@ use the design tokens from the cooperative's dashboard/report templates.
 3. **Radar chart**: 6-dimension profile as visual (CSS-only, no JS library)
 4. **Match analysis**: Why this philosopher, in 3-4 bullet points
 5. **Dimension breakdown**: Each dimension with score bar, human-readable explanation, measurement basis, and meaning. Use the explanation column from dimension-profiler output (e.g., "How you approach problems") as subtitle for each bar.
-5. **Protocol affinity**: Recommended protocols with one-line rationale
-6. **Runner-up**: Brief comparison showing where profiles diverge
-
+6. **Protocol affinity**: Recommended protocols with one-line rationale
+7. **Runner-up**: Brief comparison showing where profiles diverge
 **File**: Save to `~/.claude/usage-data/sophia-profile.html`
 Open in browser: `open <filepath>`
 
