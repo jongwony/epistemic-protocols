@@ -104,7 +104,28 @@ Look for patterns that emerge from dimension COMBINATIONS:
 - **D1 high + D2 high**: "Bold conjecture + rigorous refutation" — Popperian pattern,
   strong if balanced
 
+### Dual-interpretation guidance (cold-start awareness)
+
+When presenting strength-shadow pairs, some combinations may be either a curse OR
+a deliberate strategy. In context-rich sessions, the user may have already articulated
+this distinction. In cold-start sessions, the AI must proactively surface both
+interpretations before the user validates.
+
+Patterns that require dual-interpretation:
+- **D5 high + D6 high**: Could be "KK neglect via over-delegation" OR "deliberate
+  Extended Mind strategy with quality bridges"
+- **D2 high + D4 high**: Could be "cure-as-disease accumulation" OR "systematic
+  verification infrastructure that scales"
+
+When presenting these, frame as: "This pattern admits two readings — [curse
+interpretation] or [strategy interpretation]. Which better describes your
+experience?" The user's response determines downstream recommendations.
+
 ### User dialogue
+
+When presenting dimensions to the user, always include the human-readable explanation
+from the dimension-profiler output (e.g., "D4 Rule Orientation — how you govern work")
+so users unfamiliar with the framework understand what each dimension measures.
 
 Present the top 3-4 strength-shadow pairs and ask the user to validate.
 The user may:
@@ -161,10 +182,22 @@ Read one of:
 - Cooperative's `skills/report/references/html-template.md` — use as template basis
 - `skills/curses/references/report-template.md` — curses-specific components
 
+### Context awareness
+
+Check the dimension-profiler's `Data Context` field:
+- **session-enriched**: Report may reference protocol chaining results, prior
+  /sophia output, or session-specific observations. Include these in relevant sections.
+- **data-only**: Report is generated purely from behavioral data. Do not reference
+  protocol interactions or session-specific context that doesn't exist. Keep
+  analysis grounded in the dimension scores and raw signals.
+
+Mark the report subtitle with the context tier (e.g., "708 sessions | data-only"
+or "708 sessions | session-enriched").
+
 ### Required sections
 
 1. **At a Glance** — 3-4 bullet summary with section links
-2. **Dimension Profile** — 6 horizontal bars with scores and labels
+2. **Dimension Profile** — 6 horizontal bars with scores and human-readable explanation per dimension
 3. **Strengths** — Green cards with evidence and dimension tag
 4. **Structural Costs** — White cards with severity badge and mitigation
 5. **Attitude Recommendations** — Gradient cards ranked by ROI

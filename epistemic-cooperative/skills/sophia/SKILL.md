@@ -93,36 +93,47 @@ Read `references/philosophers.md` for the full philosopher database.
 
 ## Phase 3: Presentation
 
-Present the match as dual-layer (philosopher name as hero, archetype as subtitle).
+Present the match progressively — start with an accessible introduction, then build
+to detailed analysis. Users may not know the philosopher; the opening should stand
+on its own without assumed knowledge.
 
-### Format
+### Step 1: Introduction (always show first)
+
+A warm, 2-3 sentence introduction that explains the match in plain language:
 
 ```
-◆ [Philosopher Name] ([Tradition])
+Your thinking patterns most resemble the tradition of [Philosopher Name]
+([dates], [tradition in one phrase]).
 
-  [2-sentence description of the match — what behavioral patterns align
-  and why this tradition fits]
+[1-2 sentences: what this philosopher is known for, in terms a non-philosopher
+would understand. Connect to the user's actual behavior — not abstract philosophy.]
 
+Similarity: 0.XX | Runner-up: [Name] (0.XX)
+```
+
+### Step 2: Dimension profile with explanations
+
+Show dimensions with human-readable explanations (from dimension-profiler output)
+so users understand what each bar means:
+
+```
   ──────────────────────────────────────
-  Dimensions:
-  D1 Inquiry:       ████████░░ 78  (abductive)
-  D2 Verification:  █████████░ 85  (doubt-oriented)
-  D3 Communication: ██████░░░░ 62  (moderate)
-  D4 Rule:          █████████░ 91  (systematic)
-  D5 Attention:     ████████░░ 78  (UU-leaning)
-  D6 Delegation:    █████████░ 88  (extended mind)
+  D1 How you approach problems:    ████████░░ 78  (hypothesis-first)
+  D2 How much you check:          █████████░ 85  (thorough)
+  D3 How you interact:            ██████░░░░ 62  (moderate)
+  D4 How you govern work:         █████████░ 91  (systematic)
+  D5 Where you focus:             ████████░░ 78  (exploring unknowns)
+  D6 How you use AI:              █████████░ 88  (distributed thinking)
   ──────────────────────────────────────
   
   Protocol affinity: /[command] ([protocol name] — [Greek])
-  
-  Runner-up: [Name] ([tradition]) — similarity: 0.XX
 ```
 
-Then offer the user a choice:
+### Step 3: User choice
 
 ```
 What would you like to explore?
-1. **Deep dive** — Detailed analysis of why this tradition fits your patterns
+1. **Deep dive** — Why this tradition fits your patterns, and what it reveals
 2. **Compare** — Side-by-side with the runner-up
 3. **Protocol** — Try the suggested protocol now
 4. **Report** — Generate HTML profile card
@@ -141,10 +152,11 @@ use the design tokens from the cooperative's dashboard/report templates.
 
 **Sections**:
 
-1. **Hero**: Philosopher name + tradition + archetype subtitle
-2. **Radar chart**: 6-dimension profile as visual (CSS-only, no JS library)
-3. **Match analysis**: Why this philosopher, in 3-4 bullet points
-4. **Dimension breakdown**: Each dimension with score bar, measurement basis, and meaning
+1. **Introduction**: 2-3 sentence accessible summary (who is this philosopher, why you match) before the hero card
+2. **Hero**: Philosopher name + tradition + archetype subtitle
+3. **Radar chart**: 6-dimension profile as visual (CSS-only, no JS library)
+4. **Match analysis**: Why this philosopher, in 3-4 bullet points
+5. **Dimension breakdown**: Each dimension with score bar, human-readable explanation, measurement basis, and meaning. Use the explanation column from dimension-profiler output (e.g., "How you approach problems") as subtitle for each bar.
 5. **Protocol affinity**: Recommended protocols with one-line rationale
 6. **Runner-up**: Brief comparison showing where profiles diverge
 

@@ -29,6 +29,17 @@ You will receive:
 
 Compute a score for each dimension on a 0-100 scale. Higher scores indicate stronger alignment with the "high end" of each spectrum.
 
+Each dimension has a **human-readable explanation** (included in output) for users unfamiliar with the framework:
+
+| Dim | Label | Explanation |
+|-----|-------|-------------|
+| D1 | Inquiry Mode | How you approach problems — systematic step-by-step or hypothesis-first |
+| D2 | Verification Depth | How much you check before accepting — quick trust or thorough doubt |
+| D3 | Communication Style | How you interact — brief commands or extended dialogue |
+| D4 | Rule Orientation | How you govern work — case-by-case judgment or explicit rule systems |
+| D5 | Attention Scope | Where you focus — consolidating what's known or exploring the unknown |
+| D6 | Delegation Pattern | How you use AI — doing it yourself or distributing thinking across agents |
+
 ### D1: Inquiry Mode (Deductive <-> Abductive)
 
 **Low (Deductive)**: Step-by-step, systematic approach. Top-down reasoning.
@@ -108,17 +119,23 @@ Compute a score for each dimension on a 0-100 scale. Higher scores indicate stro
 
 ## Output Format
 
+Include `Data Context` to indicate the richness of the analysis source:
+- **session-enriched**: Analysis was run within a session that included protocol chaining, prior /sophia or /curses results, or manual coverage interpretation. Scores may reflect richer context.
+- **data-only**: Analysis was run from raw session data without prior protocol context. This is the default for cold-start invocations.
+
 ```
 ## Dimension Profile
 
-| Dimension | Score | Confidence | Primary Signal |
-|-----------|-------|------------|----------------|
-| D1: Inquiry Mode | 72 | high | exploration_ratio=0.35 |
-| D2: Verification Depth | 85 | high | rejection_rate=0.12 |
-| D3: Communication Style | 68 | medium | median_response_time=75s |
-| D4: Rule Orientation | 91 | high | rule_count=23 |
-| D5: Attention Scope | 78 | medium | exploration_sessions=30% |
-| D6: Delegation Pattern | 88 | high | task_create_count=1153 |
+Data Context: data-only | session-enriched
+
+| Dimension | Score | Confidence | Explanation | Primary Signal |
+|-----------|-------|------------|-------------|----------------|
+| D1: Inquiry Mode | 72 | high | How you approach problems | exploration_ratio=0.35 |
+| D2: Verification Depth | 85 | high | How much you check | rejection_rate=0.12 |
+| D3: Communication Style | 68 | medium | How you interact | median_response_time=75s |
+| D4: Rule Orientation | 91 | high | How you govern work | rule_count=23 |
+| D5: Attention Scope | 78 | medium | Where you focus | exploration_sessions=30% |
+| D6: Delegation Pattern | 88 | high | How you use AI | task_create_count=1153 |
 
 ## Raw Signals
 
