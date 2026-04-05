@@ -219,6 +219,8 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 
 **Cross-session enrichment**: Repeated gap patterns accumulated through prior Reflexion cycles may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
+**Revision threshold**: When accumulated Emergent gap detections across sessions cluster around a recognizable pattern that the named gap types fail to capture, the cost of maintaining the current taxonomy exceeds the cost of adding a named type — promote the Emergent cluster. Conversely, when a named type consistently yields zero detections across sessions, consider whether it remains a genuine gap category or has become a dead signal.
+
 ### Surfacing
 
 Present the gap as text output:

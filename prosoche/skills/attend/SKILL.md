@@ -305,6 +305,8 @@ When Prosoche is active:
 
 **Cross-session enrichment**: Repeated risk patterns accumulated through prior Reflexion cycles may serve as Phase 0 classification heuristics — known risk signatures from prior executions improve risk level estimation. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
+**Revision threshold**: When accumulated Emergent risk signal detections across sessions cluster into a recognizable pattern outside the named types, the Risk Signal Taxonomy warrants a new named type. When accumulated classification false negatives cluster around a specific pattern, the severity boundary for that pattern warrants revision. The within-session Compound rule is a micro-instance of this threshold applied at session scope.
+
 ### Mode Deactivation
 
 | Trigger | Effect |
