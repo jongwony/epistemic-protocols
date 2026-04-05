@@ -49,13 +49,15 @@ epistemic-protocols/
 │   └── skills/reflexion/SKILL.md
 ├── epistemic-cooperative/               # Utility skills: report + onboarding + analytics + configuration
 │   ├── .claude-plugin/plugin.json
-│   ├── agents/                        # project-scanner, session-analyzer, coverage-scanner
+│   ├── agents/                        # project-scanner, session-analyzer, coverage-scanner, dimension-profiler
 │   └── skills/
 │       ├── report/SKILL.md            # Usage analysis report from session patterns
 │       ├── onboard/SKILL.md           # Quick recommendation + protocol learning (quick proof + targeted learning)
 │       ├── dashboard/SKILL.md          # Full-session coverage dashboard
 │       ├── catalog/SKILL.md           # Protocol handbook — instant reference
-│       └── compose/SKILL.md           # Protocol composition authoring assistant
+│       ├── compose/SKILL.md           # Protocol composition authoring assistant
+│       ├── sophia/SKILL.md            # Philosopher match via behavioral dimensions
+│       └── curses/SKILL.md            # Strength-shadow analysis and attitude recommendations
 ├── write/                             # Skill: multi-perspective blog drafting
 │   ├── .claude-plugin/plugin.json
 │   └── skills/write/SKILL.md
@@ -94,7 +96,7 @@ epistemic-protocols/
 | Prosoche | `/attend` | ExecutionBlind → SituatedExecution |
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 
-**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/compose`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
+**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/compose`, `/sophia`, `/curses`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
 
 ## Axioms
 
@@ -200,6 +202,8 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 - **Catalog**: No delegation—text-only output, main agent handles all. Read tool for scenarios.md detail mode only.
 - **Compose**: No delegation—main agent handles all phases. Read/Grep for graph.json and ELIDABLE CHECKPOINTS extraction, Write for template generation.
+- **Sophia**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (matching, presentation, report).
+- **Curses**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (analysis, recommendations, report).
 
 ## Conventions
 
