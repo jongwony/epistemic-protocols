@@ -192,7 +192,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const changeLocale = useCallback((newLocale: Locale) => {
     setLocale(newLocale);
-    localStorage.setItem("locale", newLocale);
+    try {
+      localStorage.setItem("locale", newLocale);
+    } catch {
+      // Private Browsing — locale changes in-memory only
+    }
   }, []);
 
   const t = useCallback(
