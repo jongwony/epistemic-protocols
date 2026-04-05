@@ -241,6 +241,8 @@ Analyze Gᵥ to detect indeterminate dimensions, then **present** for user confi
 
 **Cross-session enrichment**: Prior GoalContract patterns accumulated through prior Reflexion cycles may adjust Phase 1 dimension weighting — dimensions that were consistently important in similar goal constructions receive initial emphasis. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
+**Revision threshold**: When accumulated Emergent dimension appearances across 3+ sessions cluster around a recognizable goal construct not captured by the named dimensions, the dimension taxonomy warrants revision — promote the cluster. When a named dimension (other than Outcome, which is protocol-constrained) consistently receives trivial or vacuous detection across 3+ sessions, evaluate whether the dimension's detection criteria need sharpening or the dimension has become redundant.
+
 Per Gap Taxonomy above. Apply priority order: Outcome → Boundary → Priority → Metric. Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState`; boundary: goal definition (in-scope) vs. expression gap (→ `/clarify`) or execution context (→ `/inquire`).
 
 **Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be excluded** via "Revise assessment" toggle.
