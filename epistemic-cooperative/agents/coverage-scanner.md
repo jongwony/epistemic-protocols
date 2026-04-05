@@ -52,6 +52,7 @@ You will receive:
 3. **Gate interaction scan**: From session JSONL paths (same as step 2a), grep for gate interaction patterns:
    - `AskUserQuestion` tool calls within protocol activation context = gated interaction proxy
    - Count per-protocol gated interactions using protocol activation boundaries from step 2
+   - Derive relay count: `total_gates - gated_count` (relay interactions produce no AskUserQuestion calls, so relay count is inferred from static ELIDABLE CHECKPOINTS baseline per protocol, not directly observed)
 
 4. **Code change statistics**: From session-meta aggregation, report total git_commits, git_pushes, and lines-changed if available.
 
