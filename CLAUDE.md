@@ -56,9 +56,13 @@ epistemic-protocols/
 │       ├── dashboard/SKILL.md          # Full-session coverage dashboard
 │       ├── catalog/SKILL.md           # Protocol handbook — instant reference
 │       └── compose/SKILL.md           # Protocol composition authoring assistant
-└── write/                             # Skill: multi-perspective blog drafting
-    ├── .claude-plugin/plugin.json
-    └── skills/write/SKILL.md
+├── write/                             # Skill: multi-perspective blog drafting
+│   ├── .claude-plugin/plugin.json
+│   └── skills/write/SKILL.md
+└── src/                               # Landing page (independent sub-project)
+    ├── package.json                   # React + Vite + Tailwind (isolated deps)
+    ├── vite.config.ts
+    └── App.tsx, ProtocolDemo.tsx, i18n.tsx  # EN/KO SPA
 ```
 
 **Component Types**:
@@ -69,7 +73,7 @@ epistemic-protocols/
 **Conventions**:
 - Subagent naming: `plugin-name:agent-name` (e.g., `reflexion:session-summarizer`)
 - References directory: `skills/*/references/` for detailed documentation (optional per plugin)
-- No external dependencies; Node.js standard library only
+- No external dependencies; Node.js standard library only (plugin code). `src/` landing page is an independent sub-project with its own `package.json`
 
 **Plugin Encapsulation**: Users interact only with SKILL.md (loaded via plugin system). `.claude/rules/` prescriptive changes affecting protocol behavior must be compiled into SKILL.md Rules sections. SKILL.md must be self-contained — no external references (axiom identifiers, rule file paths, design-philosophy concepts) that require reading contributor documentation.
 
@@ -139,7 +143,7 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 ## Development
 
 - **Node.js 22+** required (`zlib.crc32` used in packaging; CI pins Node 22)
-- **No package.json** — Node.js standard library only
+- **No package.json** — Node.js standard library only (exception: `src/package.json` for landing page)
 - Static checks: `node .claude/skills/verify/scripts/static-checks.js .`
 - Tests: `node --test scripts/package.test.js`
 - Packaging: `node scripts/package.js [--dry-run]` — produces `dist/*.zip` + `dist/release-notes.md`

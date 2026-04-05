@@ -181,9 +181,13 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>(() => {
-    const saved = localStorage.getItem("locale");
-    if (saved === "ko" || saved === "en") return saved;
-    return navigator.language.startsWith("ko") ? "ko" : "en";
+    try {
+      const saved = localStorage.getItem("locale");
+      if (saved === "ko" || saved === "en") return saved;
+      return navigator.language.startsWith("ko") ? "ko" : "en";
+    } catch {
+      return "en";
+    }
   });
 
   const changeLocale = useCallback((newLocale: Locale) => {
