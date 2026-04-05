@@ -211,7 +211,7 @@ Heuristic signals for context insufficiency inference (not hard gates):
 
 **Cross-session enrichment**: Domain knowledge accumulated through prior Reflexion cycles may narrow the Phase 0 uncertainty scan — known domain patterns reduce the scope of novel-domain signals. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
-**Revision threshold**: When accumulated observation_skips entries across sessions cluster around a specific EscapeCondition with consistent rationale, the Verifiability classification boundary warrants revision — the escape is systematic, not exceptional. When accumulated Emergent dimension detections across sessions reveal a recurring non-factual uncertainty pattern, the Layer 1 dimension set warrants a new fiber in the fibration structure.
+**Revision threshold**: When accumulated observation_skips entries across 3+ sessions cluster around a specific EscapeCondition with consistent rationale, the Verifiability classification boundary warrants revision — the escape is systematic, not exceptional. When accumulated Emergent dimension detections across 3+ sessions reveal a recurring non-factual uncertainty pattern, the Layer 1 dimension set warrants a new fiber in the fibration structure — promoted fibers default to Unit (detect-only) unless the pattern exhibits internal classification structure requiring a structured fiber type.
 
 **Skip**:
 - Execution context is fully specified in current message

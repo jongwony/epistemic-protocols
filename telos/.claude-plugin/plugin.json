@@ -1,7 +1,7 @@
 {
   "name": "telos",
   "description": "Co-construct defined goals from vague intent — /goal (τέλος: end, purpose)",
-  "version": "1.12.11",
+  "version": "1.12.12",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
