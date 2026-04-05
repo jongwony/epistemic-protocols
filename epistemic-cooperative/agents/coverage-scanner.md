@@ -49,7 +49,12 @@ You will receive:
       - `contextualize`, `epharmoge:contextualize` → Epharmoge
    d. **De-duplicate**: Group matches by source file path (= session_id), then de-duplicate protocol names within each group. Same session + same protocol = 1 usage event.
 
-3. **Code change statistics**: From session-meta aggregation, report total git_commits, git_pushes, and lines-changed if available.
+3. **Gate interaction scan**: From session JSONL paths (same as step 2a), grep for gate interaction patterns:
+   - `AskUserQuestion` tool calls within protocol activation context = gated interaction proxy
+   - Count per-protocol gated interactions using protocol activation boundaries from step 2
+   - Derive relay count: `total_gates - gated_count` (relay interactions produce no AskUserQuestion calls, so relay count is inferred from static ELIDABLE CHECKPOINTS baseline per protocol, not directly observed)
+
+4. **Code change statistics**: From session-meta aggregation, report total git_commits, git_pushes, and lines-changed if available.
 
 ### Path B (facets < 10 sessions)
 
@@ -60,7 +65,9 @@ You will receive:
 
 2. **Protocol usage scan**: Same as Path A step 2.
 
-3. **Behavioral proxies**: Detect from tool counts:
+3. **Gate interaction scan**: Same as Path A step 3.
+
+4. **Behavioral proxies**: Detect from tool counts:
    - Exploration ratio: (Read+Grep+Glob) / (Edit+Write)
    - Deploy/push keywords in Bash calls
    - Agent delegation presence
@@ -102,6 +109,11 @@ You will receive:
 | Protocol | Command Count | Skill Tool Count | Total (de-duped) | Sessions | First Used |
 |----------|---------------|-------------------|------------------|----------|------------|
 | {Protocol} | {cmd_count} | {skill_count} | {total} | {sessions} | {date} |
+
+### Gate Interaction Data
+| Protocol | Session | Gated Count | Relay Count | Gate Efficiency |
+|----------|---------|-------------|-------------|-----------------|
+| {Protocol} | {session_id} | {gated} | {relay} | {gated/(gated+relay)} |
 
 ### Code Change Statistics
 - Git commits: {total}

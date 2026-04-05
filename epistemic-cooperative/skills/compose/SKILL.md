@@ -158,6 +158,32 @@ Elided: {elided} | Pruned: {pruned} | Presented: {presented}
 Interaction reduction: ~{percent}%
 ```
 
+### Cost Profile
+
+After Chain Summary, present cost visibility sub-section:
+
+**Gate density**: `{total_gates} / {protocol_count}` = `{density}` gates/protocol
+**Always-gated ratio**: `{always_gated_count} / {presented_gates}`
+
+**System 2 load** — ASCII timeline per protocol:
+
+```
+{Protocol1}  {Protocol2}  ...  {ProtocolN}
+  ■ Qs         ■ Qc            ■ Qs
+  ■ Qc         · (elided)      ■ Qc
+```
+
+Legend: ■ = presented, · = elided, × = pruned
+
+**Conditional entropy**: `Σ log₂(|options_i|)` bits over presented gates — quantifies total user decision load.
+
+**O_support visibility** — each elided gate's justification:
+
+| Elided Gate | Supporting Output | Basis |
+|-------------|-------------------|-------|
+
+The `Basis` column connects to the 3-axis elidability model (`docs/analysis/protocol-composition-gate-elision.md`) — Axis 2 (O_support) is the primary justification source.
+
 **Gate #2** (Qc, bounded regret — Phase 4 allows regeneration):
 
 Options:

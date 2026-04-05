@@ -69,9 +69,9 @@ If no facets or session-meta data found: report "No usage data available. Run so
 - `session_jsonl_glob`: `~/.claude/projects/*/*.jsonl` (scanner runs glob + grep internally, avoiding 900+ paths in prompt)
 - `mode`: "path_a" or "path_b" based on Phase 1 decision
 
-The subagent returns aggregated data: friction totals, outcome/satisfaction distributions, tool totals, timeline, protocol usage (slash commands + Skill tool invocations, de-duplicated), code change statistics.
+The subagent returns aggregated data: friction totals, outcome/satisfaction distributions, tool totals, timeline, protocol usage (slash commands + Skill tool invocations, de-duplicated), gate interaction data (per-protocol gated/relay counts), code change statistics.
 
-### Phase 3: Analyze (Main) — 7 Computations
+### Phase 3: Analyze (Main) — 9 Computations
 
 #### 3.1 Coverage Computation
 
@@ -140,12 +140,30 @@ Composite score (0-100):
 - **Satisfaction** (25%): weighted satisfaction score
 - **Coverage** (20%): average coverage ratio across applicable protocols
 
+#### 3.8 Gate Efficiency
+
+From Phase 2 gate interaction scan:
+- Per-protocol: `gated_interactions / total_gates` ratio
+- Cross-session average gate efficiency
+
+| Protocol | Avg Gate Efficiency | Relay Gates | Gated Gates | Total Sessions |
+|----------|--------------------:|------------:|------------:|---------------:|
+
+Gate efficiency = 1.0 means all gates user-facing. Lower values indicate more automation via relay classification.
+
+#### 3.9 Relay Erosion
+
+For protocols with 3+ session history:
+- Track relay→gated transitions (erosion: gates that were auto-resolved becoming user-gated)
+- Track gated→relay transitions (stabilization: gates becoming auto-resolvable with experience)
+- If insufficient data (protocol used < 3 sessions): report "Insufficient data for erosion tracking."
+
 ### Phase 4: Present (Main)
 
 1. **HTML Dashboard**: Write to `~/.claude/.insights/dashboard.html` via Write tool
    - Refer to `references/html-template.md` for the full HTML skeleton
-   - 9 sections: Coverage, Protocol Usage, Friction→Protocol, Improvement Opportunities, Growth Timeline, Achievements, Satisfaction Trends, Quality Score, Quick Actions
-   - Path B degradation: Sections 3 (Friction), 7 (Satisfaction), 8 (Quality Score) show "Facets data enables richer analysis" guidance
+   - 11 sections: Coverage, Protocol Usage, Friction→Protocol, Improvement Opportunities, Growth Timeline, Achievements, Satisfaction Trends, Quality Score, Gate Efficiency, Relay Erosion, Quick Actions
+   - Path B degradation: Sections 3 (Friction), 7 (Satisfaction), 8 (Quality Score), 9 (Gate Efficiency), 10 (Relay Erosion) show "Facets data enables richer analysis" guidance. Sections 9-10 additionally show "Insufficient data for erosion tracking" when protocol session count < 3
 
 2. **Console Summary**: Output key metrics:
    - Total sessions analyzed

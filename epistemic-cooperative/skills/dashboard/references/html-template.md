@@ -96,7 +96,20 @@ HTML skeleton and guidelines for the `dashboard.html` artifact generated in Phas
   .component-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; }
   .component-fill { height: 100%; border-radius: 4px; }
 
-  /* Section 9: Quick Actions */
+  /* Section 9: Gate Efficiency */
+  .gate-efficiency-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  .gate-efficiency-table th, .gate-efficiency-table td { padding: 0.5rem; border-bottom: 1px solid var(--border); text-align: right; }
+  .gate-efficiency-table th:first-child, .gate-efficiency-table td:first-child { text-align: left; }
+
+  /* Section 10: Relay Erosion */
+  .erosion-summary { margin: 1rem 0; }
+  .erosion-event { display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0; padding: 0.5rem; border-radius: 4px; background: var(--bg-deep); }
+  .erosion-label { font-size: 0.85rem; color: var(--text-muted); }
+  .erosion-badge-stable { color: var(--accent-green); }
+  .erosion-badge-eroded { color: var(--accent-amber); }
+  .erosion-badge-stabilized { color: var(--accent-cyan); }
+
+  /* Section 11: Quick Actions */
   .action-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin: 1rem 0; }
   .action-card { border-left: 4px solid var(--accent-green); }
   .action-card .action-title { font-weight: bold; margin-bottom: 0.5rem; }
@@ -189,7 +202,22 @@ HTML skeleton and guidelines for the `dashboard.html` artifact generated in Phas
     Path B degradation: .degraded-notice (only Outcome + Coverage available)
   -->
 
-  <h2>9. Quick Actions</h2>
+  <h2>9. Gate Efficiency</h2>
+  <!-- .gate-efficiency-table: per-protocol gate interaction ratio
+    Columns: Protocol | Avg Gate Efficiency | Relay Gates | Gated Gates | Total Sessions
+    Gate efficiency = gated_interactions / total_gates (1.0 = all user-facing)
+  -->
+
+  <h2>10. Relay Erosion</h2>
+  <!-- .erosion-summary: relay stability tracking for protocols with 3+ sessions
+    .erosion-event items with .erosion-badge-{stable|eroded|stabilized}
+    - Stable: gate consistently auto-resolved across sessions
+    - Eroded: gate was relay, became gated in later sessions
+    - Stabilized: gate was gated, became relay with experience
+    If < 3 sessions: .degraded-notice "Insufficient data for erosion tracking"
+  -->
+
+  <h2>11. Quick Actions</h2>
   <!-- .action-grid: top 3 CTAs based on analysis
     Each .action-card:
     - Action title (e.g., "Start using /clarify")
@@ -207,7 +235,7 @@ HTML skeleton and guidelines for the `dashboard.html` artifact generated in Phas
 The HTML artifact should:
 - Be self-contained (inline CSS, inline SVG for charts, no external dependencies)
 - Use a dark theme with CSS custom properties for consistent theming
-- Support 9 distinct sections with clear visual hierarchy
+- Support 11 distinct sections with clear visual hierarchy
 - **Section 1 (Coverage)**: Radar chart (inline SVG) + progress bars. Minimum 3 protocols for radar; otherwise bars only
 - **Section 2 (Protocol Usage)**: Badge grid + horizontal bar chart for relative comparison
 - **Section 3 (Friction Mapping)**: Table with friction keys color-coded by type (Primary=amber, Environmental=dim)
@@ -216,7 +244,9 @@ The HTML artifact should:
 - **Section 6 (Achievements)**: Badge grid with locked/unlocked states
 - **Section 7 (Satisfaction)**: Score gauge + distribution bar + trend indicator
 - **Section 8 (Quality Score)**: Large score display + 4 component breakdown bars with weights
-- **Section 9 (Quick Actions)**: Top 3 actionable CTAs with resume commands
+- **Section 9 (Gate Efficiency)**: Table with per-protocol gate efficiency ratio + relay/gated counts
+- **Section 10 (Relay Erosion)**: Erosion/stabilization events with color-coded badges (green=stable, amber=eroded, cyan=stabilized)
+- **Section 11 (Quick Actions)**: Top 3 actionable CTAs with resume commands
 - Path B degradation: Sections 3, 7, 8 show `.degraded-notice` with hint text "Facets data enables richer analysis"
 - Use `user-select: all` on command blocks for copy convenience
 - Be responsive for different viewport sizes

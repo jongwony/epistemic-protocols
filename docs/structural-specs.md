@@ -109,3 +109,21 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 **Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. In Prothesis: `gather(context)` (Phase 1, meta) collects broad context to identify relevant perspectives; `inquire(parallel)` (Phase 3, object) collects perspective-specific evidence through each lens independently. The semantic separation exists in MORPHISM; TOOL GROUNDING realizes it operationally by specifying different collection targets per phase. Passing meta-context to object-level agents biases their investigation toward the lead agent's framing, undermining the epistemic value of independent perspective analysis.
 
 **Tertiary pattern** (cross-session, aspirational — storage half operative, consumption half pending protocol grounding): Reflexion stores session knowledge → next session's protocol Phase 0/1 detection is enriched by accumulated domain knowledge → better protocol execution produces richer insights → Reflexion stores deeper knowledge → spiral deepening. The storage half (Reflexion) and the consumption half (each protocol's Phase 0/1 reading stored knowledge) together complete the cross-session hermeneutic circle. Unlike Primary/Secondary which operate within a single session, Tertiary operates across session boundaries with persistent knowledge as the medium. Consumption grounding requires protocol SKILL.md updates specifying how Phase 0/1 reads stored knowledge — contingent on prior Reflexion output.
+
+## Relay Classification Audit Trail
+
+When an ELIDABLE CHECKPOINT is classified as relay and auto-resolved, the justification should be traceable to the five relay indicators defined in A2 Relay/Constitution Boundary (`axioms.md` table: deterministic, citable, within-boundary, entropy→0, basis-cited). This is not a new principle but an audit format surfacing existing A2 indicators.
+
+### Relay Justification Format
+
+```
+[relay] {Protocol} Phase {N} {Gate Label}
+  ├─ deterministic:    {yes/no} — {evidence}
+  ├─ citable:          {yes/no} — {source}
+  ├─ within-boundary:  {yes/no} — {scope}
+  ├─ entropy→0:        {yes/no} — {evidence}
+  └─ basis-cited:      {yes/no} — {mechanism}
+  verdict: relay ({N}/5)
+```
+
+Relationship to the 3-axis elidability model (`docs/analysis/protocol-composition-gate-elision.md`): the 3-axis model determines whether a gate CAN be elided; relay justification documents HOW the elision is justified at the A2 level.
