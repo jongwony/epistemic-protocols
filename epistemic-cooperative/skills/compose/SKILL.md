@@ -61,19 +61,7 @@ For each protocol in the chain: check if any precondition source is missing. The
 
 On missing precondition: suggest inserting the missing protocol at the correct position.
 
-### 1.4 Fatigue-Regret Advisory
-
-For each gate with `regret: unbounded` in the trailing 40% of chain gate positions (position > ⌈0.6 × total_gates⌉): emit an advisory note.
-
-Rationale: unbounded-regret gates require high-quality user judgment (A5). User attention degrades across sequential gate interactions — positioning these gates late in a chain increases the probability of low-quality acceptance. This advisory does not block the chain; it surfaces the risk so the user can reorder if desired.
-
-Advisory format (informational, non-blocking):
-```
-⚠ Fatigue risk: {protocol} Phase {N} {gate_label} (unbounded regret) at position {pos}/{total}
-  Consider moving earlier in the chain or grouping with related gates.
-```
-
-Note: This advisory operates on the chain order from Phase 1, not the disposition output from Phase 3. Position is calculated from the chain's protocol sequence × gate ordering within each protocol. If Phase 3 disposition produces a different gate order, the advisory may become stale — this is accepted because the advisory informs pre-disposition judgment. To act on this advisory: reorder protocols in the chain input to move unbounded-regret gates earlier, then re-run Phase 1 validation.
+**Design note — chain-position × regret interaction**: The A5 concern (unbounded-regret gates positioned late in a chain degrade user judgment quality) is valid but not yet addressed. Phase 3 disposition operates per-gate without chain-position awareness. A future revision will introduce a decision load model that quantifies remaining gate cost (loop depth × regret weight) per disposition choice, replacing the removed position-ratio advisory with a structurally sound, Phase 2-integrated mechanism.
 
 **On all validations passing**: proceed to Phase 2 with the validated chain.
 
