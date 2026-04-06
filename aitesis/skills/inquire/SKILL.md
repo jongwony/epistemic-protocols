@@ -337,7 +337,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - U1: Factual/ReadOnly (basis: evidence summary)
   - U2: Factual/EmpiricallyObservable (basis: evidence summary)
   - U2b: Factual/EmpiricallyObservable → UserDependent (escape: [condition] — "[rationale]")
-  - U2c: Factual/ReadOnlyVerifiable → [reclassified] (coverage gap: evidence covers [scope A], claim requires [scope B])
+  - U2c: Factual/EmpiricallyObservable|UserDependent (coverage gap: evidence covers [scope A], claim requires [scope B])
   - U3: Coherence (basis: evidence summary) → /ground
   - U4: Relevance (basis: evidence summary) → /goal
   - Any classification to revise?
