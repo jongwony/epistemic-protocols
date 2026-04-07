@@ -20,6 +20,7 @@ All protocols share this structure within `Definition` code block:
 ── ELIDABLE CHECKPOINTS ──  (if applicable) Per-gate dual-axis analysis (relay/gated interaction kind + regret profile)
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
+── COMPOSITION ──       (if applicable) Protocol composition operator definitions (product: D₁ × D₂ → R₁ × R₂)
 ```
 
 Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.

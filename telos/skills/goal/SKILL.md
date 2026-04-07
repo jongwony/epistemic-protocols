@@ -97,6 +97,9 @@ Phase 4 Qc (approve)       → always_gated (gated: contract approval — final 
 ── MODE STATE ──
 Λ = { phase: Phase, G: Goal, Gᵥ: Goal, detected: Set(Dim), applicable: Set(Dim),
       contract: GoalContract, history: List<(Dₛ, P, A)>, active: Bool }
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
 ```
 
 ## Core Principle

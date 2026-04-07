@@ -84,6 +84,9 @@ Phase 1 Qc (applicability) → always_gated (gated: Confirm/Dismiss/Adapt applic
 Λ = { phase: Phase, R: Result, X: Context,
       state: Σ, active: Bool, cause_tag: String }
 Σ = { history: List<(Mismatch, A)>, scan_count: Nat }
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
 ```
 
 ## Core Principle

@@ -98,6 +98,9 @@ Phase 2 Qc (classify)      → always_gated (gated: UserSupplies/AIPropose/AIAut
       history: List<(Domain, A)>,
       active: Bool, cause_tag: String }
 -- Invariant: domains = context_resolved ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
 ```
 
 ## Core Principle

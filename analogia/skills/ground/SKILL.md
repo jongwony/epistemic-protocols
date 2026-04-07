@@ -98,6 +98,9 @@ Phase 2 Qs (validate)      → always_gated (gated: user validates structural ma
       validations: List<(Example, V)>, attempts: Nat, active: Bool,
       cause_tag: String }
 -- Invariant: mappings = confirmed ∪ dismissed ∪ remaining (pairwise disjoint)
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
 ```
 
 ## Core Principle

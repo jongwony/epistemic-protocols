@@ -140,6 +140,9 @@ Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgme
       cause_tag: String }
 -- Invariant: uncertainties = context_resolved ∪ read_only_resolved ∪ empirically_observed ∪ non_factual_detected ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
 -- Note: observation_skips is an audit log orthogonal to the partition — logged when EmpiricallyObservable is reclassified to UserDependent via Rule 20 (a)-(d)
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
 ```
 
 ## Core Principle
