@@ -9,15 +9,15 @@ Infer context insufficiency before execution through AI-guided inquiry. Type: `(
 
 ## Definition
 
-**Aitesis** (αἴτησις): A dialogical act of proactively inferring context sufficiency before execution, where AI identifies uncertainties across multiple dimensions (factual, coherence, relevance), collects contextual evidence via codebase exploration, classifies each uncertainty by dimension and verifiability, and inquires about remaining uncertainties through information-gain prioritized mini-choices for user resolution.
+**Aitesis** (αἴτησις): A dialogical act of proactively inferring context sufficiency before execution, where AI identifies uncertainties across multiple dimensions (factual, coherence, relevance), collects contextual evidence via codebase exploration, classifies each uncertainty by dimension and verifiability, resolves memory-internal contradictions through evidence, routes cross-domain concerns to other epistemic protocols, and inquires about remaining uncertainties through information-gain prioritized mini-choices for user resolution.
 
 ```
 ── FLOW ──
 Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
   classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →
   Q(classify_result + Uₑ + Uᵢ'', priority) → A → X' → (loop until informed)
--- Uₙ (non-factual): shown in classify summary with routing target
--- Uᵢ'' (factual/user-dependent): Phase 2 question candidates
+-- Uₙ (non-actionable: CrossDomain coherence + detect-only dimensions): shown in classify summary with routing target
+-- Uᵢ'' (factual/user-dependent or coherence/MemoryInternal/user-dependent): Phase 2 question candidates
 
 ── MORPHISM ──
 Prospect
@@ -53,22 +53,24 @@ Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
                -- open set; external human communication excluded
 Observability ∈ {StaticObservation, DynamicObservation, BeliefVerification}
                -- exists(fact, env) sub-modes
--- Layer 2 (tool implementation, Factual fiber only — fibration structure)
+-- Layer 2 (tool implementation, Factual and Coherence/MemoryInternal fibers — fibration structure)
 Verifiability ∈ {ReadOnlyVerifiable, EmpiricallyObservable, UserDependent}
+CoherenceType ∈ {MemoryInternal, CrossDomain}
+               -- 2D: Scope(Same/Cross) × Resolution(Evidence/Structure); off-diagonal → Gate
 classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              where Fiber(Factual)       = Verifiability
-                   Fiber(Coherence)     = Unit    -- detect only
+                   Fiber(Coherence)     = CoherenceType
                    Fiber(Relevance)     = Unit    -- detect only
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
-             -- 2-layer model = Grothendieck fibration: Layer 2 exists only over Factual fiber
-             -- Coherence/Relevance → detect + show routing target in classify summary
+             -- 2-layer model = Grothendieck fibration: Layer 2 exists over Factual and Coherence/MemoryInternal fibers
+             -- CrossDomain/Relevance/Emergent → detect + show routing target in classify summary
 ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalObservation = (Uᵢ', ObservationSpec) → Uₑ  -- dynamic evidence gathering
 Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2)
 Uₑ_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, EmpiricallyObservable) }  -- Phase 1 observation gate
 Uₑ         = Empirically observed uncertainties    -- evidence attached, proceeds to Phase 2
-Uᵢ''       = Remaining user-dependent uncertainties  -- Fiber(Factual) = UserDependent; Phase 2 question
-Uₙ         = Non-factual detected uncertainties     -- Fiber(d) = Unit; shown in classify summary with routing target
+Uᵢ''       = Remaining user-dependent uncertainties  -- Fiber(Factual) = UserDependent or Fiber(Coherence) = MemoryInternal/UserDependent; Phase 2 question
+Uₙ         = Non-actionable detected uncertainties  -- Fiber(Coherence) = CrossDomain or Fiber(d) = Unit; shown in classify summary with routing target
 Action     = Tool call sequence (Write, Bash)
 EscapeCondition ∈ {EnvironmentMutation, BoundExceeded, RiskElevated, StructuralUncertainty}
                     -- maps to Rule 20 (a)-(d) escape hatches; logged in observation_skips
@@ -76,7 +78,8 @@ EscapeCondition ∈ {EnvironmentMutation, BoundExceeded, RiskElevated, Structura
 ── PHASE TRANSITIONS ──
 Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency gate (silent)
 Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                         -- context collection [Tool]
-         classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-factual (classify summary routing)
+         classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-actionable (classify summary routing)
+         [if off-diagonal(scope, resolution)] Qc(scope_assessment, resolution_assessment) → Stop → user_classification  -- Coherence 2D gate [Tool]
          [if Uₑ_candidates ≠ ∅] EmpiricalObservation(Uₑ_candidates) → Uₑ  -- dynamic evidence gathering [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[max_gain], progress) → Stop → A           -- uncertainty surfacing [Tool]
 Phase 3: A → integrate(A, X) → X'                               -- prospect update (sense)
@@ -91,9 +94,9 @@ Continue until: informed(X') OR user ESC.
 Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.empirically_observed ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-actionable(Λ) = uncertainties \ non_factual_detected       -- Fiber(Factual) uncertainties only
+actionable(Λ) = uncertainties \ non_factual_detected       -- Fiber(Factual) + Fiber(Coherence)=MemoryInternal uncertainties
 informed(X') = remaining = ∅                                -- non_factual_detected does not block convergence
-progress(Λ) = 1 - |remaining| / |actionable(Λ)|            -- denominator excludes routed non-factual
+progress(Λ) = 1 - |remaining| / |actionable(Λ)|            -- denominator excludes non-actionable (CrossDomain + detect-only dimensions)
 narrowing(Q, A) = |remaining(after)| < |remaining(before)| ∨ context(remaining(after)) ⊃ context(remaining(before))
 early_exit = user_declares_sufficient
 
@@ -102,6 +105,7 @@ early_exit = user_declares_sufficient
 Phase 0 Scan    (sense)       → Internal analysis (no external tool)
 Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch (conditional: environmental dependency)
 Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
+Phase 1 Qc      (gate)        → present (conditional: Coherence 2D off-diagonal gate; fires only when scope ≠ resolution assessment)
 Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering, Factual only); cleanup via Bash
 Phase 2 Qs      (gate)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
@@ -109,6 +113,8 @@ converge     (relay)       → TextPresent+Proceed (convergence evidence trace; 
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+Phase 1 Qc (coherence 2D)  → conditional: fires only when scope ≠ resolution assessment
+                              always_gated when fired (gated: user classifies coherence type as MemoryInternal or CrossDomain)
 Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgment on insufficiency)
 
 ── MODE STATE ──
@@ -118,7 +124,7 @@ Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgme
       context_resolved: Set(Uncertainty),  -- Uᵣ from TYPES
       read_only_resolved: Set(Uncertainty), -- Uᵣ' from TYPES
       empirically_observed: Set(Uncertainty), -- Uₑ from TYPES
-      non_factual_detected: Set(Uncertainty), -- Uₙ from TYPES; Fiber(d) = Unit, classify summary routing
+      non_factual_detected: Set(Uncertainty), -- Uₙ from TYPES; Fiber(Coherence) = CrossDomain or Fiber(d) = Unit, classify summary routing
       user_responded: Set(Uncertainty),
       remaining: Set(Uncertainty), dismissed: Set(Uncertainty),
       history: List<(Uncertainty, A)>, observation_history: List<(ObservationSpec, Result, Evidence)>,
@@ -133,7 +139,7 @@ Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgme
 
 **Evidence over Inference over Detection**: Aitesis operates on an epistemic hierarchy with two boundaries. The lower boundary (Inference > Detection): infer context insufficiency from requirements rather than detecting via fixed taxonomy — the protocol dynamically identifies what context is missing, not mechanically checking against a preset list. The upper boundary (Evidence > Inference): gather evidence through direct environmental observation rather than substituting inference from reasoning alone — when a fact is observable, observe it. Corollary: partial evidence covering a subset of the claim scope is inference for the uncovered portion — evidence-claim alignment must be verified before treating evidence as resolution.
 
-Within this hierarchy, the AI first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and empirically observes dynamically accessible ones with direct evidence before asking. For non-factual dimensions (coherence, relevance), the AI detects and shows routing targets in the classify summary. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, and routing what belongs to other epistemic concerns.
+Within this hierarchy, the AI first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and empirically observes dynamically accessible ones with direct evidence before asking. For coherence, the AI classifies by scope and resolution method — memory-internal contradictions are resolved through factual reclassification, while cross-domain contradictions are routed to downstream protocols via deficit-matched routing. For relevance, the AI detects and shows routing targets in the classify summary. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, resolving memory-internal contradictions through evidence, and routing cross-domain concerns to other epistemic protocols.
 
 Write is authorized for observation instrument setup (temporary test artifacts with mandatory cleanup). Rule 20 is the structural expression of the upper boundary — the adversarial guard against stopping at Inference when Evidence is achievable.
 
@@ -159,7 +165,7 @@ Write is authorized for observation instrument setup (temporary test artifacts w
 
 **Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context to execute?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). The operational test: if the information gap would be filled by the user providing context, it's Aitesis; if it would be filled by the user reconsidering their decision, it's Syneidesis.
 
-**Factual vs evaluative**: Aitesis uncertainties span multiple dimensions — factual (objectively correct answers discoverable from the environment), coherence (consistency among collected facts), and relevance (whether collected facts are relevant to the execution goal). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. Phase 1 context collection exists because factual uncertainties may be partially resolved or enriched from the codebase. Coherence and relevance dimensions are detected but routed to downstream protocols. Evaluative gaps cannot be self-resolved.
+**Factual vs evaluative**: Aitesis uncertainties span multiple dimensions — factual (objectively correct answers discoverable from the environment), coherence (consistency among collected facts), and relevance (whether collected facts are relevant to the execution goal). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. Phase 1 context collection exists because factual uncertainties may be partially resolved or enriched from the codebase. Coherence/CrossDomain and relevance dimensions are detected but routed to downstream protocols. Coherence/MemoryInternal contradictions are evidence-resolvable and follow the factual resolution path. Evaluative gaps cannot be self-resolved.
 
 ## Mode Activation
 
@@ -280,13 +286,18 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
   - Factual: a fact is missing from context and required for execution
   - Coherence: collected facts are mutually inconsistent
   - Relevance: collected facts are not relevant to the execution goal
-- **Verifiability assessment** (Layer 2, Factual dimension only — Observability sub-modes guide classification):
+- **Verifiability assessment** (Layer 2, Factual dimension — Observability sub-modes guide classification):
   - ReadOnlyVerifiable: fact exists in environment (StaticObservation or BeliefVerification) and is observable with current tools, AND evidence scope ⊇ claim scope → resolve directly via extended context lookup
     - When evidence scope ⊊ claim scope: split — covered portion proceeds to Step 3 (ReadOnly resolution), uncovered portion is classified separately and enters the appropriate verifiability path
   - EmpiricallyObservable: fact requires DynamicObservation — does not exist statically but is observable through non-destructive execution, reversible, and bounded (< 30s) → empirical observation
   - UserDependent: neither read-only verifiable nor empirically observable → Phase 2 directly
-- **Non-factual dimensions**: Coherence and Relevance → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
-  - Coherence → `/ground` (structural mapping may reveal inconsistency source)
+- **Coherence classification** (Layer 2, 2D model: Scope × Resolution):
+  - Pre-filter: cross-scope + rule-resolvable (existing scope hierarchy, established precedence) → coexistence (exit Coherence; not a contradiction)
+  - Same scope + evidence-resolvable → MemoryInternal → factual reclassification (ReadOnlyVerifiable / UserDependent) → follows Factual resolution path (Step 3 or Phase 2)
+  - Cross scope + structure-requiring → CrossDomain → deficit-matched routing: MappingUncertain→`/ground`, BoundaryUndefined→`/bound`, GoalIndeterminate→`/goal`, FrameworkAbsent→`/frame`, GapUnnoticed→`/gap`, IntentMisarticulated→`/clarify`
+  - Off-diagonal (Scope ≠ Resolution): present both assessments with evidence via conditional gate; user classifies as MemoryInternal or CrossDomain
+  - MemoryInternal → actionable (proceeds to resolution); CrossDomain → record as `Uₙ` (non_factual_detected) with deficit-matched routing target
+- **Other non-actionable dimensions**: Relevance and Emergent → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
   - Relevance → deficit-matched: GoalIndeterminate→`/goal`, GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`, IntentMisarticulated→`/clarify`
   - Emergent(_) → match observed deficit condition against candidate protocol deficit conditions
 - Store all results in `Λ.classify_results`
@@ -340,12 +351,13 @@ Present the classification results, uncertainty description, and evidence as tex
   - U2: Factual/EmpiricallyObservable (basis: evidence summary)
   - U2b: Factual/EmpiricallyObservable → UserDependent (escape: [condition] — "[rationale]")
   - U2c: Factual/partial (evidence scope ⊊ claim scope: covers [scope A], claim requires [scope B] — uncovered portion classified separately)
-  - U3: Coherence (basis: evidence summary) → /ground
+  - U3a: Coherence/MemoryInternal (basis: evidence summary — same-scope, evidence-resolvable) → factual reclassification
+  - U3b: Coherence/CrossDomain (basis: evidence summary — structure-requiring) → deficit-matched routing
   - U4: Relevance (basis: evidence summary) → /goal
   - Any classification to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]
-- **Progress**: [N resolved / M actionable uncertainties] (excludes non-factual routed)
+- **Progress**: [N resolved / M actionable uncertainties] (excludes non-actionable routed)
 
 Then **present**:
 
@@ -397,7 +409,7 @@ After integration:
 | Context collection first | Phase 1 before Phase 2 | Enriches question quality before asking |
 | Uncertainty cap | One uncertainty per Phase 2 cycle, priority order | Prevents question overload |
 | Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
-| Progress visibility | `[N resolved / M actionable]` in Phase 2 | User sees progress on actionable (Factual) uncertainties |
+| Progress visibility | `[N resolved / M actionable]` in Phase 2 | User sees progress on actionable (Factual + Coherence/MemoryInternal) uncertainties |
 | Narrowing signal | Signal when `narrowing(Q, A)` shows diminishing returns | User can exit when remaining uncertainties are marginal |
 | Early exit | User can declare sufficient at any Phase 2 | Full control over inquiry depth |
 | Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context uncertainties ≠ Syneidesis decision gaps, so reverse suppression not needed) |
@@ -413,14 +425,14 @@ After integration:
 
 1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via gate interaction (Phase 2)
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
-3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/EmpiricallyObservable: run empirical observation to attach evidence, (f) for Coherence/Relevance: detect and show routing target in classify summary
+3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/EmpiricallyObservable: run empirical observation to attach evidence, (f) for Coherence/MemoryInternal: resolve through factual reclassification (ReadOnlyVerifiable / UserDependent), (g) for Coherence/CrossDomain and Relevance: detect and show routing target in classify summary
 4. **Evidence over Inference over Detection**: When context is insufficient, infer the highest-gain question rather than detect via fixed checklist (lower boundary). When a factual uncertainty is empirically observable, observe directly rather than infer from reasoning alone (upper boundary — Rule 20 is the structural guard). Evidence-claim alignment: partial evidence covering a subset of the claim scope is inference for the uncovered portion, not evidence — verify evidence scope ⊇ claim scope before treating as resolved, and classify the uncovered portion separately
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on prospect requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
 7. **One at a time**: Surface one uncertainty per Phase 2 cycle; do not bundle multiple uncertainties
 8. **Dismiss respected**: User dismissal is final for that uncertainty domain in the current session
 9. **Convergence persistence**: Mode active until all identified uncertainties are resolved or dismissed
-10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N resolved / M actionable]` — actionable excludes non_factual_detected (routed, not resolved)
+10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N resolved / M actionable]` — actionable excludes non_factual_detected (non-actionable: CrossDomain coherence + detect-only dimensions, routed not resolved)
 11. **Early exit honored**: When user declares context sufficient, accept immediately regardless of remaining uncertainties
 12. **Cross-protocol awareness**: Defer to Syneidesis when gap surfacing is already active for the same task scope
 13. **Evidence before inquiry**: User inquiry is for judgment — not for facts the AI can discover
