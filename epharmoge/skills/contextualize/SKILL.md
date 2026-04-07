@@ -173,6 +173,8 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 
 **Cross-session enrichment**: Repeated mismatch patterns accumulated through prior Reflexion cycles may adjust Phase 0 scan priority — known mismatch types are checked first. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
+**Revision threshold**: When accumulated Emergent dimension detections across 3+ sessions cluster around a recognizable pattern outside the named dimensions {Convention, Environment, Audience, Dependency}, the Mismatch Dimension Taxonomy warrants promotion to a new named dimension. When accumulated classification false negatives across 3+ sessions cluster around a specific dimension, that dimension's detection boundary warrants revision or demotion to Emergent.
+
 **Skip**:
 - User provided explicit, detailed specification and result follows it exactly
 - User explicitly says "looks good" or "proceed" after execution

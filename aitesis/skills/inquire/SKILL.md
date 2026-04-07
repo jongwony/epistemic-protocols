@@ -131,7 +131,7 @@ Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgme
 
 ## Core Principle
 
-**Evidence over Inference over Detection**: Aitesis operates on an epistemic hierarchy with two boundaries. The lower boundary (Inference > Detection): infer context insufficiency from requirements rather than detecting via fixed taxonomy — the protocol dynamically identifies what context is missing, not mechanically checking against a preset list. The upper boundary (Evidence > Inference): gather evidence through direct environmental observation rather than substituting inference from reasoning alone — when a fact is observable, observe it.
+**Evidence over Inference over Detection**: Aitesis operates on an epistemic hierarchy with two boundaries. The lower boundary (Inference > Detection): infer context insufficiency from requirements rather than detecting via fixed taxonomy — the protocol dynamically identifies what context is missing, not mechanically checking against a preset list. The upper boundary (Evidence > Inference): gather evidence through direct environmental observation rather than substituting inference from reasoning alone — when a fact is observable, observe it. Corollary: partial evidence covering a subset of the claim scope is inference for the uncovered portion — evidence-claim alignment must be verified before treating evidence as resolution.
 
 Within this hierarchy, the AI first collects contextual evidence via codebase exploration to enrich question quality, then classifies each uncertainty by dimension and verifiability — classification is the protocol's core epistemic act, not a routing sub-step. For factual uncertainties, the AI resolves read-only verifiable facts directly and empirically observes dynamically accessible ones with direct evidence before asking. For non-factual dimensions (coherence, relevance), the AI detects and shows routing targets in the classify summary. The purpose is multi-dimensional context sufficiency sensing — asking better questions for what requires human judgment, self-resolving what can be observed, and routing what belongs to other epistemic concerns.
 
@@ -281,7 +281,8 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
   - Coherence: collected facts are mutually inconsistent
   - Relevance: collected facts are not relevant to the execution goal
 - **Verifiability assessment** (Layer 2, Factual dimension only — Observability sub-modes guide classification):
-  - ReadOnlyVerifiable: fact exists in environment (StaticObservation or BeliefVerification) and is observable with current tools → resolve directly via extended context lookup
+  - ReadOnlyVerifiable: fact exists in environment (StaticObservation or BeliefVerification) and is observable with current tools, AND evidence scope ⊇ claim scope → resolve directly via extended context lookup
+    - When evidence scope ⊊ claim scope: split — covered portion proceeds to Step 3 (ReadOnly resolution), uncovered portion is classified separately and enters the appropriate verifiability path
   - EmpiricallyObservable: fact requires DynamicObservation — does not exist statically but is observable through non-destructive execution, reversible, and bounded (< 30s) → empirical observation
   - UserDependent: neither read-only verifiable nor empirically observable → Phase 2 directly
 - **Non-factual dimensions**: Coherence and Relevance → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
@@ -292,6 +293,7 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
 
 **Step 3 — Read-only verification**: For ReadOnlyVerifiable uncertainties:
 - Targeted context lookup via Read/Grep — classification narrows search scope to specific files/locations that Step 1's broad sweep did not cover (e.g., spec files, config schemas identified by classify)
+- Scope re-verification: if targeted lookup reveals evidence scope ⊊ claim scope not detected at Step 2 (subtle gap), apply the same split — covered portion resolved, uncovered portion reclassified separately
 - Resolved: mark as `Uᵣ'` (read_only_resolved), skip Phase 2
 
 **Step 4 — Empirical observation**: For EmpiricallyObservable uncertainties:
@@ -337,6 +339,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - U1: Factual/ReadOnly (basis: evidence summary)
   - U2: Factual/EmpiricallyObservable (basis: evidence summary)
   - U2b: Factual/EmpiricallyObservable → UserDependent (escape: [condition] — "[rationale]")
+  - U2c: Factual/partial (evidence scope ⊊ claim scope: covers [scope A], claim requires [scope B] — uncovered portion classified separately)
   - U3: Coherence (basis: evidence summary) → /ground
   - U4: Relevance (basis: evidence summary) → /goal
   - Any classification to revise?
@@ -411,7 +414,7 @@ After integration:
 1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via gate interaction (Phase 2)
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
 3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/EmpiricallyObservable: run empirical observation to attach evidence, (f) for Coherence/Relevance: detect and show routing target in classify summary
-4. **Evidence over Inference over Detection**: When context is insufficient, infer the highest-gain question rather than detect via fixed checklist (lower boundary). When a factual uncertainty is empirically observable, observe directly rather than infer from reasoning alone (upper boundary — Rule 20 is the structural guard)
+4. **Evidence over Inference over Detection**: When context is insufficient, infer the highest-gain question rather than detect via fixed checklist (lower boundary). When a factual uncertainty is empirically observable, observe directly rather than infer from reasoning alone (upper boundary — Rule 20 is the structural guard). Evidence-claim alignment: partial evidence covering a subset of the claim scope is inference for the uncovered portion, not evidence — verify evidence scope ⊇ claim scope before treating as resolved, and classify the uncovered portion separately
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on prospect requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
 7. **One at a time**: Surface one uncertainty per Phase 2 cycle; do not bundle multiple uncertainties

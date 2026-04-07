@@ -185,6 +185,8 @@ Clarified expression becomes input to subsequent protocols.
 
 **Cross-session enrichment**: Accumulated clarification patterns from prior Reflexion cycles may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
+**Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expression, Precision, Coherence, Background}, the Gap Taxonomy warrants promotion to a new named type. When accumulated classification false positives across 3+ sessions cluster around a specific named type, that type's detection boundary warrants revision or demotion to Emergent.
+
 **Skip** (AI-detected):
 - User says "just do it", "proceed as-is", or equivalent
 - Session immunity: user declined AI-detected clarification for this expression already
