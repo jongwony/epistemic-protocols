@@ -293,6 +293,7 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
 
 **Step 3 — Read-only verification**: For ReadOnlyVerifiable uncertainties:
 - Targeted context lookup via Read/Grep — classification narrows search scope to specific files/locations that Step 1's broad sweep did not cover (e.g., spec files, config schemas identified by classify)
+- Scope re-verification: if targeted lookup reveals evidence scope ⊊ claim scope not detected at Step 2 (subtle gap), apply the same split — covered portion resolved, uncovered portion reclassified separately
 - Resolved: mark as `Uᵣ'` (read_only_resolved), skip Phase 2
 
 **Step 4 — Empirical observation**: For EmpiricallyObservable uncertainties:
