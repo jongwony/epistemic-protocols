@@ -282,6 +282,7 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
   - Relevance: collected facts are not relevant to the execution goal
 - **Verifiability assessment** (Layer 2, Factual dimension only — Observability sub-modes guide classification):
   - ReadOnlyVerifiable: fact exists in environment (StaticObservation or BeliefVerification) and is observable with current tools, AND evidence scope ⊇ claim scope → resolve directly via extended context lookup
+    - When evidence scope ⊊ claim scope: split — covered portion proceeds to Step 3 (ReadOnly resolution), uncovered portion is classified separately and enters the appropriate verifiability path
   - EmpiricallyObservable: fact requires DynamicObservation — does not exist statically but is observable through non-destructive execution, reversible, and bounded (< 30s) → empirical observation
   - UserDependent: neither read-only verifiable nor empirically observable → Phase 2 directly
 - **Non-factual dimensions**: Coherence and Relevance → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
@@ -337,7 +338,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - U1: Factual/ReadOnly (basis: evidence summary)
   - U2: Factual/EmpiricallyObservable (basis: evidence summary)
   - U2b: Factual/EmpiricallyObservable → UserDependent (escape: [condition] — "[rationale]")
-  - U2c: Factual/EmpiricallyObservable|UserDependent (coverage gap: evidence covers [scope A], claim requires [scope B])
+  - U2c: Factual/partial (evidence scope ⊊ claim scope: covers [scope A], claim requires [scope B] — uncovered portion classified separately)
   - U3: Coherence (basis: evidence summary) → /ground
   - U4: Relevance (basis: evidence summary) → /goal
   - Any classification to revise?
