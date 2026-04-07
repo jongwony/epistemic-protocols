@@ -174,7 +174,7 @@ TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

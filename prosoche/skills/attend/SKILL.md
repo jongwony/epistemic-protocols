@@ -231,7 +231,7 @@ Phase 2 Qc (checkpoint)         → always_gated (gated: execution risk judgment
        active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

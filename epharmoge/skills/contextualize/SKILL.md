@@ -86,7 +86,7 @@ Phase 1 Qc (applicability) → always_gated (gated: Confirm/Dismiss/Adapt applic
 Σ = { history: List<(Mismatch, A)>, scan_count: Nat }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

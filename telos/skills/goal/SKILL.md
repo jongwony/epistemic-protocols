@@ -99,7 +99,7 @@ Phase 4 Qc (approve)       → always_gated (gated: contract approval — final 
       contract: GoalContract, history: List<(Dₛ, P, A)>, active: Bool }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

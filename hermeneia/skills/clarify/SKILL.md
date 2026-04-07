@@ -101,7 +101,7 @@ Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent int
 -- Invariant: gaps = clarified ∪ remaining (pairwise disjoint)
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

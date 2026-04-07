@@ -142,7 +142,7 @@ Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgme
 -- Note: observation_skips is an audit log orthogonal to the partition — logged when EmpiricallyObservable is reclassified to UserDependent via Rule 20 (a)-(d)
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

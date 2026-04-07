@@ -106,7 +106,7 @@ Phase 3 Qc (coverage)      → always_gated (gated: aspect coverage — sufficie
 }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

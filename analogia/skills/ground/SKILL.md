@@ -100,7 +100,7 @@ Phase 2 Qs (validate)      → always_gated (gated: user validates structural ma
 -- Invariant: mappings = confirmed ∪ dismissed ∪ remaining (pairwise disjoint)
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Dimension resolution is emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle
