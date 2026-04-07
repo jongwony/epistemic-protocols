@@ -14,7 +14,7 @@ Infer context insufficiency before execution through AI-guided inquiry. Type: `(
 ```
 ── FLOW ──
 Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
-  classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →
+  classify(Uᵢ', dimension) → [if off-diagonal] Qc → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →
   Q(classify_result + Uₑ + Uᵢ'', priority) → A → X' → (loop until informed)
 -- Uₙ (non-actionable: CrossDomain coherence + detect-only dimensions): shown in classify summary with routing target
 -- Uᵢ'' (factual/user-dependent or coherence/MemoryInternal/user-dependent): Phase 2 question candidates
@@ -24,6 +24,7 @@ Prospect
   → scan(prospect, context, dimensions)  -- infer context insufficiency (multi-dimension)
   → collect(uncertainties, codebase)     -- enrich via evidence collection
   → classify(enrichable, dimension)      -- epistemic classification (core act)
+  → reclassify(MemoryInternal → Factual)  -- Coherence/MemoryInternal enters Factual resolution path
   → observe(empirically_observable, environment) -- dynamic evidence gathering (factual only)
   → surface(classify_result + observed + remaining, as_inquiry)
   → integrate(answer, prospect)
@@ -46,6 +47,7 @@ Uᵢ'      = Enriched uncertainties (evidence added, not resolved)
 Uᵣ       = Context-resolved uncertainties (resolved during collection)
 Q        = Inquiry (gate interaction), ordered by information gain
 A        = User answer ∈ {Provide(context), Point(location), Dismiss}
+Ac         = User coherence classification ∈ CoherenceType     -- Phase 1 Qc gate answer type
 X'       = Updated prospect (context-enriched)
 InformedExecution = X' where remaining = ∅ ∨ user_esc
 -- Layer 1 (epistemic)
@@ -57,19 +59,23 @@ Observability ∈ {StaticObservation, DynamicObservation, BeliefVerification}
 Verifiability ∈ {ReadOnlyVerifiable, EmpiricallyObservable, UserDependent}
 CoherenceType ∈ {MemoryInternal, CrossDomain}
                -- 2D: Scope(Same/Cross) × Resolution(Evidence/Structure); off-diagonal → Gate
+Scope      ∈ {Same, Cross}
+Resolution ∈ {Evidence, Structure}
+off_diagonal(s, r) = ¬((s = Same ∧ r = Evidence) ∨ (s = Cross ∧ r = Structure))
 classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              where Fiber(Factual)       = Verifiability
                    Fiber(Coherence)     = CoherenceType
                    Fiber(Relevance)     = Unit    -- detect only
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
-             -- 2-layer model = Grothendieck fibration: Layer 2 exists over Factual and Coherence/MemoryInternal fibers
+             -- 2-layer model = Grothendieck fibration: Layer 2 exists over Factual fiber;
+             -- Coherence fiber classifies into CoherenceType, where MemoryInternal instances enter the Factual resolution path
              -- CrossDomain/Relevance/Emergent → detect + show routing target in classify summary
 ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalObservation = (Uᵢ', ObservationSpec) → Uₑ  -- dynamic evidence gathering
 Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2)
 Uₑ_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, EmpiricallyObservable) }  -- Phase 1 observation gate
 Uₑ         = Empirically observed uncertainties    -- evidence attached, proceeds to Phase 2
-Uᵢ''       = Remaining user-dependent uncertainties  -- Fiber(Factual) = UserDependent or Fiber(Coherence) = MemoryInternal/UserDependent; Phase 2 question
+Uᵢ''       = Remaining user-dependent uncertainties  -- Fiber(Factual) = UserDependent [includes reclassified Coherence/MemoryInternal]; Phase 2 question
 Uₙ         = Non-actionable detected uncertainties  -- Fiber(Coherence) = CrossDomain or Fiber(d) = Unit; shown in classify summary with routing target
 Action     = Tool call sequence (Write, Bash)
 EscapeCondition ∈ {EnvironmentMutation, BoundExceeded, RiskElevated, StructuralUncertainty}
@@ -80,6 +86,7 @@ Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context s
 Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                         -- context collection [Tool]
          classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →     -- epistemic classification (core act); Uₙ = non-actionable (classify summary routing)
          [if off-diagonal(scope, resolution)] Qc(scope_assessment, resolution_assessment) → Stop → user_classification  -- Coherence 2D gate [Tool]
+         -- evaluation order: Qc resolves before Uₑ_candidates computation; reclassified MemoryInternal/EmpiricallyObservable enters Uₑ_candidates
          [if Uₑ_candidates ≠ ∅] EmpiricalObservation(Uₑ_candidates) → Uₑ  -- dynamic evidence gathering [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[max_gain], progress) → Stop → A           -- uncertainty surfacing [Tool]
 Phase 3: A → integrate(A, X) → X'                               -- prospect update (sense)
@@ -296,6 +303,8 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
   - Same scope + evidence-resolvable → MemoryInternal → factual reclassification (ReadOnlyVerifiable / UserDependent) → follows Factual resolution path (Step 3 or Phase 2)
   - Cross scope + structure-requiring → CrossDomain → deficit-matched routing: MappingUncertain→`/ground`, BoundaryUndefined→`/bound`, GoalIndeterminate→`/goal`, FrameworkAbsent→`/frame`, GapUnnoticed→`/gap`, IntentMisarticulated→`/clarify`
   - Off-diagonal (Scope ≠ Resolution): present both assessments with evidence via conditional gate; user classifies as MemoryInternal or CrossDomain
+    - (Same, Structure): same-scope contradiction where factual verification is insufficient — resolution requires understanding structural relationships within the scope
+    - (Cross, Evidence): cross-scope contradiction where evidence comparison can determine which scope's claim is current — despite scope difference, factual verification suffices
   - MemoryInternal → actionable (proceeds to resolution); CrossDomain → record as `Uₙ` (non_factual_detected) with deficit-matched routing target
 - **Other non-actionable dimensions**: Relevance and Emergent → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
   - Relevance → deficit-matched: GoalIndeterminate→`/goal`, GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`, IntentMisarticulated→`/clarify`
@@ -443,3 +452,4 @@ After integration:
 18. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
 19. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
 20. **No observation avoidance**: When a Factual uncertainty is classifiable as EmpiricallyObservable (observable through bounded, non-destructive Bash execution), classifying it as UserDependent to avoid empirical observation = protocol violation. The AI must attempt observation before falling back to user inquiry. Reclassification to UserDependent is legitimate only when: (a) observation requires persistent environment mutation beyond instrument setup, (b) execution exceeds 30s bound, (c) risk gate triggers (elevated-risk observation), or (d) the uncertainty is structural rather than empirical — no observable state change would differentiate between possible answers (e.g., design trade-offs, naming choices, preference questions)
+21. **No pre-filter rationalization**: Pre-filter (coexistence exit) applies only when an explicit, named scope hierarchy rule or documented precedence ordering resolves the apparent contradiction without epistemic protocol intervention. Classifying a genuine cross-domain structural contradiction as "rule-resolvable" to avoid routing = pre-filter misuse (analogous to Rule 20's observation avoidance guard)
