@@ -133,7 +133,6 @@ Phase 1:  t.E → Eval(t.E) → Fi: Set(Finding)                       -- risk e
 Phase 2:  Fi → Qc(Fi, evidence, t.E) → Stop → J                     -- checkpoint surfacing [Tool]
            (or: subagent GATE_DETECTED → main agent Qc)
 Phase 3:  J → A(J, t, Σ) → Σ'                                      -- judgment integration (sense)
-          [if augmentation] integrate-echo(Σ') → echo                -- augmentation relay (relay)
            J = Withdraw → Withdraw[SendMessage] → deactivate         -- team shutdown [Tool]
 
 ── LOOP ──
@@ -150,7 +149,6 @@ For each t in T[]:
 Subagent batch: p=Low tasks may be batched to a single executor invocation.
 Subagent GATE_DETECTED: parse output, surface via Phase 2 in main agent.
 Task-bounded: loop terminates when all T resolved (completed or halted).
-Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At all-T-resolved, present transformation trace — for each t ∈ Λ.tasks, show (ExecutionBlind(t) → situated(t) with risk classification). Convergence is demonstrated, not asserted.
 
 ── RISK SIGNAL TAXONOMY ──
@@ -206,7 +204,6 @@ Phase 0 Classify     (sense)   → Internal analysis (no external tool)
 Phase 1 Eval         (observe) → Read, Grep (evidence gathering; optional)
 Phase 2 Qc           (gate)    → present (checkpoint with evidence)
 Phase 3 A            (track)   → Internal state update (no external tool)
-integrate-echo       (relay)   → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 Task completion      (track)   → TaskUpdate (status tracking) [Tool]
 Withdraw shutdown    (dispatch) → SendMessage (shutdown_request to team members) [Tool]
 converge             (relay)    → TextPresent+Proceed (coordinator convergence evidence trace; proceed with situated execution)
@@ -224,9 +221,6 @@ Phase -1 conflict (tasks+prior) → always_gated (gated: resume vs refresh vs me
 Phase -1 TeamCoord (team)       → always_gated (gated: team structure selection)
 Phase -1 Augment (roles)        → always_gated (gated: role confirmation)
 Phase 2 Qc (checkpoint)         → always_gated (gated: execution risk judgment)
-Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
-                                relay when fired (relay: augmentation echo is deterministic restatement)
-                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, E: ExecutionAction,
@@ -517,8 +511,6 @@ Proceeding.
 
 ### Phase 3: Judgment Integration
 
-integrate(sense) performs the deducibility judgment (constitutive); integrate-echo(relay) presents the result as deterministic restatement. Echo fires only when non-deducible augmentation exists.
-
 After user response:
 
 1. **Approve**: Record `session_approval(pattern(E))`, allow `E` to proceed
@@ -591,3 +583,4 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 19. **No silent risk dismissal**: If Phase 0 classifies all tasks as p=Low, present this classification with reasoning as text output before batch delegation — do not silently delegate all
 20. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
 21. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
+22. **No bounded-regret loop interruption**: Within the LOOP, before each Stop, verify the finding represents unbounded regret — genuinely viable alternative paths whose wrong choice creates irreversible divergence. If the action is bounded-regret (deterministic, single viable path, correctable at next gate), present the resolution as relay and continue to the next task. Self-check: "Is this finding something the user needs to judge, or something I can proceed with and show at convergence?" Stopping on bounded-regret items within LOOP is the false-positive dual of Rule 19 (No silent risk dismissal). Plan-level threshold: when `count(severity ≥ Elevated ∩ signal_type = Irreversibility) > 1` in T[], surface the compound effect as a plan-direction question before individual task processing (Irreversibility per RISK SIGNAL TAXONOMY: rm, git push, --force, DROP, deploy)

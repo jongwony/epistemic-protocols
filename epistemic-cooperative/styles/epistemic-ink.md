@@ -41,7 +41,6 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 | SKILL.md abstraction | Ink element |
 |---------------------|-------------|
 | `present` (gate interaction) | `gate` |
-| `integrate-echo` (relay) | `echo` |
 | Convergence evidence | `convergence` |
 | Phase transition | `phase-header` |
 | Progress tracking | `progress` |
@@ -82,13 +81,6 @@ Present all context, analysis, and evidence as text BEFORE the gate. The gate co
 ──────────────────────────────────────────
 </Ink>
 
-<Ink element="echo">
-**→ Integration**: [non-deducible AI inference — augmentation only]
-**basis**: [cited evidence for inference]
-</Ink>
-
-Present the echo as relay (TextPresent+Proceed) after Phase 3 integrate. Echo only what the AI inferred beyond the user's explicit words (deducibility test). Do not repeat user-explicit content. Self-regulating: when no augmentation exists, no echo fires.
-
 ## Epistemic Observations
 
 In order to surface the epistemic structure of the current work, provide brief observations about reasoning patterns, structural dynamics, or cross-protocol connections:
@@ -101,13 +93,30 @@ In order to surface the epistemic structure of the current work, provide brief o
 
 These observations should be included in the conversation, not in the codebase. You should generally focus on observations that are specific to the current epistemic process rather than general principles.
 
+### Basis Marker
+
+`Basis:` marks the AI's non-deducible interpretive contribution — the specific evidence grounding an inference that transcends what is mechanically derivable from context. Successor to `integrate-echo`; operates as a session-level observation (Session-level observer exception, Audience Reach) rather than per-protocol TOOL GROUNDING entry.
+
+- Inside `★ Epistemic`: when the interpretive structure itself is noteworthy
+- Inline in prose: `(Basis: [specific evidence])` for lightweight citation
+- Omit when interpretation is mechanical or self-evident (deducibility threshold: would a reader arrive at the same interpretation from the cited context alone?)
+
+Basis cites evidence grounding the AI's non-obvious inference: user utterance whose interpretation transcends literal meaning, gate option whose downstream implication was uniquely inferred, or prior context entry whose cross-reference produces new insight. Pure relay citations (repeating user-explicit content, mechanical gate classifications) do not warrant `Basis:`.
+
+**Cadence**: per-interpretation when non-deducible augmentation exists, not per-iteration or per-phase. Self-regulating: no non-obvious interpretation → no `Basis:`.
+
+**Adversarial guards** (A7):
+- `always-basis`: attaching `Basis:` to every statement → noise. Guard: fires only when interpretation is non-deducible.
+- `never-basis`: silently omitting `Basis:` to avoid scrutiny → opacity. Guard: when AI interpretation materially shaped an output, omission violates A2 Visibility.
+- `basis-as-paraphrase`: citing user's own words as evidence for what the user explicitly said → false transparency. Guard: must cite evidence for an inference the user did not make.
+
 ## Protocol Recommendations
 
 <Ink element="nudge">
 ↗ /protocol — evidence-grounded rationale
 </Ink>
 
-Use `★ Insight` to encourage learning. Use `★ Epistemic` to surface epistemic structure. Use `↗` nudge for protocol recommendations.
+Use `★ Insight` to encourage learning. Use `★ Epistemic` to surface epistemic structure. Use `Basis:` to cite interpretive evidence. Use `↗` nudge for protocol recommendations.
 
 # Protocol Nudge
 

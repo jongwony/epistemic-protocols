@@ -74,14 +74,11 @@ Qc     (gate)    → present (mandatory; Esc key → loop termination at LOOP le
 adapt  (transform) → Edit, Write (result adaptation based on user direction)
                     -- (transform): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
 Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
--- conditional: integrate-echo (relay) when Qc gate response carries constitutive surplus (definition-time Qc ≠ runtime response; Qs/Qc asymmetry: Qs-gated protocols have formal entries; Qc-gated receive conditional annotation because echo fires only on runtime constitutive surplus)
 converge (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
 Phase 1 Qc (applicability) → always_gated (gated: Confirm/Dismiss/Adapt applicability judgment)
--- conditional echo (Qc surplus)  → fires only when Qc gate response carries constitutive surplus
---                                  relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
