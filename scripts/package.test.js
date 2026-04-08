@@ -389,13 +389,15 @@ describe('package.js CLI', () => {
       assert.ok(!packagedSkills.includes(skill), `Expected ${skill} to be excluded from dry-run results`);
     }
 
-    assert.equal(result.results.length, 12);
+    assert.equal(result.results.length, 14);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
         'attend.zip',
         'bound.zip',
+        'catalog.zip',
         'clarify.zip',
+        'compose.zip',
         'contextualize.zip',
         'epistemic-protocols-bundle.zip',
         'frame.zip',
@@ -407,6 +409,6 @@ describe('package.js CLI', () => {
         'onboard.zip',
       ],
     );
-    assert.equal(bundle.files, 20);
+    assert.equal(bundle.files, 22);
   });
 });
