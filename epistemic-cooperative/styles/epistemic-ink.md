@@ -95,13 +95,20 @@ These observations should be included in the conversation, not in the codebase. 
 
 ### Basis Marker
 
-`Basis:` marks the AI's interpretive evidence trail — the specific observation grounding a non-obvious interpretation. Realized from A2 Visibility (`basis_cited(resolution)` determines sufficiency).
+`Basis:` marks the AI's non-deducible interpretive contribution — the specific evidence grounding an inference that transcends what is mechanically derivable from context. Successor to `integrate-echo`; operates as a session-level observation (Session-level observer exception, Audience Reach) rather than per-protocol TOOL GROUNDING entry.
 
 - Inside `★ Epistemic`: when the interpretive structure itself is noteworthy
 - Inline in prose: `(Basis: [specific evidence])` for lightweight citation
-- Omit when interpretation is mechanical or self-evident
+- Omit when interpretation is mechanical or self-evident (deducibility threshold: would a reader arrive at the same interpretation from the cited context alone?)
 
-Basis must cite observable evidence: exact user utterance, exact gate option selected, or exact prior context entry.
+Basis cites evidence grounding the AI's non-obvious inference: user utterance whose interpretation transcends literal meaning, gate option whose downstream implication was uniquely inferred, or prior context entry whose cross-reference produces new insight. Pure relay citations (repeating user-explicit content, mechanical gate classifications) do not warrant `Basis:`.
+
+**Cadence**: per-interpretation when non-deducible augmentation exists, not per-iteration or per-phase. Self-regulating: no non-obvious interpretation → no `Basis:`.
+
+**Adversarial guards** (A7):
+- `always-basis`: attaching `Basis:` to every statement → noise. Guard: fires only when interpretation is non-deducible.
+- `never-basis`: silently omitting `Basis:` to avoid scrutiny → opacity. Guard: when AI interpretation materially shaped an output, omission violates A2 Visibility.
+- `basis-as-paraphrase`: citing user's own words as evidence for what the user explicitly said → false transparency. Guard: must cite evidence for an inference the user did not make.
 
 ## Protocol Recommendations
 

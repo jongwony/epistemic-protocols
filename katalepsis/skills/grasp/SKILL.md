@@ -83,6 +83,7 @@ Phase 3 Tᵤ  (track)  → TaskUpdate (progress tracking)
 Phase 3 Prop (track)  → TaskCreate (proposal ejection)
 Categorize  (observe) → Internal analysis (Read for context if needed)
 converge    (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
+-- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
