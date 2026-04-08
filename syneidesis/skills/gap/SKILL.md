@@ -81,7 +81,7 @@ converge (relay)   → TextPresent+Proceed (convergence evidence trace; proceed 
 Phase 1 Qs (gap surface)   → always_gated (gated: user judgment on surfaced gap determines adjustment)
 Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes level)
                                 regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
-Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+Phase 2 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
                                 relay when fired (relay: augmentation echo is deterministic restatement)
                                 guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
