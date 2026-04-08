@@ -90,6 +90,7 @@ Phase 1: Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                         -- con
          [if Uₑ_candidates ≠ ∅] EmpiricalObservation(Uₑ_candidates) → Uₑ  -- dynamic evidence gathering [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[max_gain], progress) → Stop → A           -- uncertainty surfacing [Tool]
 Phase 3: A → integrate(A, X) → X'                               -- prospect update (sense)
+         [if augmentation] integrate-echo(X') → echo                  -- augmentation relay (relay)
 
 ── LOOP ──
 After Phase 3: re-scan X' for remaining or newly emerged uncertainties.
@@ -98,6 +99,7 @@ If Uᵢ' remains: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
 User can exit at Phase 2 (early_exit).
 Continue until: informed(X') OR user ESC.
+Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.empirically_observed ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
@@ -116,6 +118,7 @@ Phase 1 Qc      (gate)        → present (conditional: Coherence 2D off-diagona
 Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering, Factual only); cleanup via Bash
 Phase 2 Qs      (gate)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
+integrate-echo  (relay)       → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
 
 ── ELIDABLE CHECKPOINTS ──
@@ -123,6 +126,9 @@ converge     (relay)       → TextPresent+Proceed (convergence evidence trace; 
 Phase 1 Qc (coherence 2D)  → conditional: fires only when scope ≠ resolution assessment
                               always_gated when fired (gated: user classifies coherence type as MemoryInternal or CrossDomain)
 Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgment on insufficiency)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
+                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: Prospect, uncertainties: Set(Uncertainty),
@@ -392,6 +398,8 @@ Options:
 **Selection criterion**: Choose the uncertainty whose resolution would maximally narrow the remaining uncertainty space (information gain). When priority is equal, prefer the uncertainty with richer collected context (more evidence to present).
 
 ### Phase 3: Prospect Update
+
+integrate(sense) performs the deducibility judgment (constitutive); integrate-echo(relay) presents the result as deterministic restatement. Echo fires only when non-deducible augmentation exists.
 
 After user response:
 

@@ -81,11 +81,14 @@ Phase 0 Probe (sense)   → Internal analysis (no external tool)
 Phase 1 Ctx   (observe) → Read, Grep, Glob (codebase scan for boundary signals: CLAUDE.md, boundaries.md, rules/, prior session context)
 Phase 2 Qc    (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3       (track)   → Internal state update
+-- conditional: integrate-echo (relay) when Qc gate response carries constitutive surplus (definition-time Qc ≠ runtime response; Qs/Qc asymmetry: Qs-gated protocols have formal entries; Qc-gated receive conditional annotation because echo fires only on runtime constitutive surplus)
 converge  (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with defined boundary)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
 Phase 2 Qc (classify)      → always_gated (gated: UserSupplies/AIPropose/AIAutonomous — boundary ownership)
+-- conditional echo (Qc surplus)  → fires only when Qc gate response carries constitutive surplus
+--                                  relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── MODE STATE ──
 Λ = { phase: Phase, T: TaskScope,

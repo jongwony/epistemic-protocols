@@ -133,6 +133,7 @@ Phase 1:  t.E → Eval(t.E) → Fi: Set(Finding)                       -- risk e
 Phase 2:  Fi → Qc(Fi, evidence, t.E) → Stop → J                     -- checkpoint surfacing [Tool]
            (or: subagent GATE_DETECTED → main agent Qc)
 Phase 3:  J → A(J, t, Σ) → Σ'                                      -- judgment integration (sense)
+          [if augmentation] integrate-echo(Σ') → echo                -- augmentation relay (relay)
            J = Withdraw → Withdraw[SendMessage] → deactivate         -- team shutdown [Tool]
 
 ── LOOP ──
@@ -149,6 +150,7 @@ For each t in T[]:
 Subagent batch: p=Low tasks may be batched to a single executor invocation.
 Subagent GATE_DETECTED: parse output, surface via Phase 2 in main agent.
 Task-bounded: loop terminates when all T resolved (completed or halted).
+Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At all-T-resolved, present transformation trace — for each t ∈ Λ.tasks, show (ExecutionBlind(t) → situated(t) with risk classification). Convergence is demonstrated, not asserted.
 
 ── RISK SIGNAL TAXONOMY ──
@@ -204,6 +206,7 @@ Phase 0 Classify     (sense)   → Internal analysis (no external tool)
 Phase 1 Eval         (observe) → Read, Grep (evidence gathering; optional)
 Phase 2 Qc           (gate)    → present (checkpoint with evidence)
 Phase 3 A            (track)   → Internal state update (no external tool)
+integrate-echo       (relay)   → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 Task completion      (track)   → TaskUpdate (status tracking) [Tool]
 Withdraw shutdown    (dispatch) → SendMessage (shutdown_request to team members) [Tool]
 converge             (relay)    → TextPresent+Proceed (coordinator convergence evidence trace; proceed with situated execution)
@@ -221,6 +224,9 @@ Phase -1 conflict (tasks+prior) → always_gated (gated: resume vs refresh vs me
 Phase -1 TeamCoord (team)       → always_gated (gated: team structure selection)
 Phase -1 Augment (roles)        → always_gated (gated: role confirmation)
 Phase 2 Qc (checkpoint)         → always_gated (gated: execution risk judgment)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
+                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, E: ExecutionAction,
@@ -510,6 +516,8 @@ Proceeding.
 - **Withdraw available**: Graceful exit with team shutdown at every checkpoint
 
 ### Phase 3: Judgment Integration
+
+integrate(sense) performs the deducibility judgment (constitutive); integrate-echo(relay) presents the result as deterministic restatement. Echo fires only when non-deducible augmentation exists.
 
 After user response:
 

@@ -103,6 +103,17 @@ The hermeneutic circle pattern is already structurally encoded in formal blocks 
 | `Qs` gate | Horizon Fusion Point | Constitutive gate — user contributes new meaning, fusing horizons |
 | `Qc` gate | Horizon Navigation | Classificatory gate — path selection within existing understanding space |
 
+**Qc/Qs runtime distinction**: The Qc/Qs classification is a definition-time property of the gate — Qs expects constitutive response, Qc expects classificatory response. At runtime with Text+Stop realization, this distinction blurs: Qc gate responses can carry constitutive surplus (new meaning beyond the classification). The formal answer type (closed coproduct) captures the classification; the constitutive surplus is captured by Phase 3 `integrate` but has been opaque (sense operation, no external verification).
+
+**Augmentation-only relay echo**: To make Phase 3 integration transparent, an `integrate-echo` relay step follows the `integrate` sense operation. The two operations are structurally distinct: `integrate` (sense) performs the deducibility judgment — a constitutive act determining which portions of the integration are non-deducible from user input. `integrate-echo` (relay) presents the judgment result as a deterministic restatement. This separation resolves the constitution/relay boundary: the constitutive judgment lives in the existing sense operation, not in the echo. The echo surfaces only the AI's **non-deducible interpretive contribution** (augmentation) — content that cannot be mechanically derived from {user's explicit words + existing context structure (gate options, types, prior conversation)}. User-explicit content is not echoed (repetition = noise). This corresponds structurally to Gadamer's Vorverständnis-Exposition: the interpreter makes visible only their own interpretive contribution, not the text itself.
+
+Augmentation boundary (deducibility test + separation principle):
+- **Augmentation** = `integrate(A, state)` result that is not deducible from `{A, context_structure}`
+- **Repetition** = meaning deducible from `{A, context_structure}` (mechanical transformation)
+- **Mixed case** = separate deducible and non-deducible portions; echo only non-deducible
+
+The echo is relay (TextPresent+Proceed): deterministic restatement of integration result, entropy→0. No new gate — user corrects in next turn if misinterpreted, which LOOP re-scan captures. Self-regulating activation: when no augmentation exists (user provided everything explicitly), no echo fires.
+
 **Primary circle** (intra-protocol): Each protocol's LOOP section encodes backward flow where partial resolution triggers whole re-interpretation, conditioned by `preserves:` (the text being interpreted remains fixed; only the interpretation evolves).
 
 **Secondary pattern** (inter-protocol): Four complementary pairs form Pre/Post cycles on the context fitness axis — Hermeneia↔Katalepsis (intent), Telos↔Syneidesis (goal), Aitesis↔Epharmoge (context), Prothesis↔Analogia (structure). These cycles operate heuristically via Output Style nudge, driven by observed session conditions rather than graph.json structural edges.

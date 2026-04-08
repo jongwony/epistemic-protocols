@@ -58,6 +58,7 @@ Phase 1:  Gᵥ → detect(Gᵥ) → Dd → Qc(Dd, evidence) → Stop → Dₐ, D
 Phase 2:  Dₛ → propose(Dₛ, context) → P                        -- AI proposal (sense)
         → Qs(P) → Stop → A                                      -- co-construction [Tool]
 Phase 3:  A → integrate(A, C) → C'                             -- contract update (sense)
+          [if augmentation] integrate-echo(C') → echo                -- augmentation relay (relay)
 Phase 4:  C' → Qc(C', progress) → Stop → approve               -- sufficiency check [Tool]
 
 ── LOOP ──
@@ -67,6 +68,7 @@ On re-entry, detect(Gᵥ) scopes to undefined dimensions in Dₐ; already-define
 If all Dₐ defined: proceed to Phase 4.
 User can trigger Phase 4 early at any Phase 1 (early_exit).
 Continue until: user approves GoalContract OR user ESC.
+Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At Phase 4, present transformation trace — for each d ∈ Dₐ, show (GoalIndeterminate(d) → C'.defined(d)). User approval is the convergence gate; the evidence trace enables informed approval.
 
 ── CONVERGENCE ──
@@ -82,6 +84,7 @@ Phase 1 Qc (gate)    → present (full taxonomy assessment + progress display)
 Phase 2 P  (observe) → Read, Grep (context for proposal generation; fallback: template)
 Phase 2 Qs (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3    (track)   → Internal GoalContract update (no external tool)
+integrate-echo (relay) → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 Phase 4 Qc (gate)    → present (GoalContract review + approval)
 converge (relay)     → TextPresent+Proceed (convergence evidence trace; context for Phase 4 Qc GoalContract approval)
 
@@ -93,6 +96,9 @@ Phase 0 Qc (confirm)       → elidable when: explicit_arg via /goal "text"
 Phase 1 Qc (dimensions)    → always_gated (gated: dimension set shapes goal construction)
 Phase 2 Qs (negotiate)     → always_gated (gated: Accept/Modify/Reject/Extend — user shapes contract)
 Phase 4 Qc (approve)       → always_gated (gated: contract approval — final binding decision)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
+                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, G: Goal, Gᵥ: Goal, detected: Set(Dim), applicable: Set(Dim),
@@ -329,6 +335,8 @@ Options:
 - **Trade-off visible**: Show implications of accepting this proposal
 
 ### Phase 3: Integration
+
+integrate(sense) performs the deducibility judgment (constitutive); integrate-echo(relay) presents the result as deterministic restatement. Echo fires only when non-deducible augmentation exists.
 
 After user response:
 

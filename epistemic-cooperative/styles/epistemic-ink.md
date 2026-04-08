@@ -41,6 +41,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 | SKILL.md abstraction | Ink element |
 |---------------------|-------------|
 | `present` (gate interaction) | `gate` |
+| `integrate-echo` (relay) | `echo` |
 | Convergence evidence | `convergence` |
 | Phase transition | `phase-header` |
 | Progress tracking | `progress` |
@@ -80,6 +81,13 @@ Present all context, analysis, and evidence as text BEFORE the gate. The gate co
 ○ Dimension: pending
 ──────────────────────────────────────────
 </Ink>
+
+<Ink element="echo">
+**→ Integration**: [non-deducible AI inference — augmentation only]
+**basis**: [cited evidence for inference]
+</Ink>
+
+Present the echo as relay (TextPresent+Proceed) after Phase 3 integrate. Echo only what the AI inferred beyond the user's explicit words (deducibility test). Do not repeat user-explicit content. Self-regulating: when no augmentation exists, no echo fires.
 
 ## Epistemic Observations
 

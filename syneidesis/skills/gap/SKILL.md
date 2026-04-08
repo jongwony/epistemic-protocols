@@ -46,12 +46,14 @@ AuditedDecision = Σ' where (∀ task ∈ registered: task.status = completed) �
 Phase 0: D → committed?(D) → Scan(D) → G              -- gate + detection (silent)
 Phase 1: G → TaskCreate[all gaps] → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register all, surface first [Tool]
 Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
+         [if augmentation] integrate-echo(Σ') → echo  -- augmentation relay (relay)
 
 ── LOOP ──
 After Phase 2: re-scan for newly surfaced gaps from user response.
 If new gaps: TaskCreate → add to queue.
 Continue until: all tasks completed OR user ESC.
 Mode remains active until convergence.
+Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
 
 ── ADJUSTMENT RULES ──
@@ -71,6 +73,7 @@ Qs (gate)      → present (mandatory; Esc key → loop termination at LOOP leve
 Σ (track)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (observe) → Read, Grep (stored knowledge extraction: context for gap identification)
 A (track)      → Internal state update (no external tool)
+integrate-echo (relay) → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 converge (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
 
 ── ELIDABLE CHECKPOINTS ──
@@ -78,6 +81,9 @@ converge (relay)   → TextPresent+Proceed (convergence evidence trace; proceed 
 Phase 1 Qs (gap surface)   → always_gated (gated: user judgment on surfaced gap determines adjustment)
 Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes level)
                                 regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
+Phase 2 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
+                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, active: Bool }
@@ -249,6 +255,8 @@ One gap per decision point.
 Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irreversibility.
 
 ### Resolution
+
+integrate(sense) performs the deducibility judgment (constitutive); integrate-echo(relay) presents the result as deterministic restatement. Echo fires only when non-deducible augmentation exists.
 
 Per ADJUSTMENT RULES. Key operational detail: Probe triggers a re-scan with expanded scope, surfacing additional gaps the user wants verified before committing.
 
