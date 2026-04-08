@@ -82,6 +82,7 @@ Phase 1b Qc  (gate)   → present (full taxonomy assessment: proceed/revise)
 Phase 2 Qs   (gate)   → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
 suggest_only (sense)   → no tool call (passive suggestion; Λ.active = false)
 integrate    (track)   → Internal state update (no external tool)
+integrate-echo (relay) → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 converge     (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with clarified expression)
 
 ── ELIDABLE CHECKPOINTS ──
@@ -93,6 +94,8 @@ Phase 1a Qc (E confirm)    → elidable when: explicit_arg(E) via /clarify "text
                               regret: bounded (Phase 1b Qc provides correction opportunity)
 Phase 1b Qc (gap confirm)  → always_gated (gated: gap set shapes clarification path)
 Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent into clarification)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── MODE STATE ──
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, detected: Set(Gap), gaps: Set(Gap),

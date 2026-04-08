@@ -81,6 +81,7 @@ Phase 3 Qc  (gate)   → present (aspect coverage: sufficient/aspect)
 Phase 3 Ref (observe) → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  (track)  → TaskUpdate (progress tracking)
 Phase 3 Prop (track)  → TaskCreate (proposal ejection)
+integrate-echo (relay) → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 Categorize  (observe) → Internal analysis (Read for context if needed)
 converge    (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
 
@@ -90,6 +91,8 @@ Phase 1 Qc (entry points)  → always_gated (gated: verification scope selection
 Phase 3 Qs (verify)        → always_gated (gated: Socratic probe — user comprehension is the measurement)
 Phase 3 Qᵣs (reasoning)   → always_gated (gated: misconception reasoning hypothesis)
 Phase 3 Qc (coverage)      → always_gated (gated: aspect coverage — sufficient vs explore more)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── MODE STATE ──
 Λ = {

@@ -145,6 +145,7 @@ PF Qc (gate)             → present (multiSelect: preservation scope; in LOOP w
 wrap_up TaskCreate (track) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (dispatch)             → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Λ (track)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
+-- conditional: integrate-echo (relay) when Qc gate response carries constitutive surplus (definition-time Qc ≠ runtime response)
 G (observe)              → Read, Glob, Grep (meta-scope context acquisition: guided by MBᵥ to identify relevant perspectives — not passed to teammates; teammates independently collect object-scope evidence through their own lens)
 Phase 4 Syn (sense)      → Internal operation (no external tool; basis_cited in O(L) Synthesis Basis section)
 characterize (sense)     → Internal operation (perspective count tier classification)

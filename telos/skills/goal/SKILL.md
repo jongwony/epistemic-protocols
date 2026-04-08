@@ -82,6 +82,7 @@ Phase 1 Qc (gate)    → present (full taxonomy assessment + progress display)
 Phase 2 P  (observe) → Read, Grep (context for proposal generation; fallback: template)
 Phase 2 Qs (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3    (track)   → Internal GoalContract update (no external tool)
+integrate-echo (relay) → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 Phase 4 Qc (gate)    → present (GoalContract review + approval)
 converge (relay)     → TextPresent+Proceed (convergence evidence trace; context for Phase 4 Qc GoalContract approval)
 
@@ -93,6 +94,8 @@ Phase 0 Qc (confirm)       → elidable when: explicit_arg via /goal "text"
 Phase 1 Qc (dimensions)    → always_gated (gated: dimension set shapes goal construction)
 Phase 2 Qs (negotiate)     → always_gated (gated: Accept/Modify/Reject/Extend — user shapes contract)
 Phase 4 Qc (approve)       → always_gated (gated: contract approval — final binding decision)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── MODE STATE ──
 Λ = { phase: Phase, G: Goal, Gᵥ: Goal, detected: Set(Dim), applicable: Set(Dim),

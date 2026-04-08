@@ -204,6 +204,7 @@ Phase 0 Classify     (sense)   → Internal analysis (no external tool)
 Phase 1 Eval         (observe) → Read, Grep (evidence gathering; optional)
 Phase 2 Qc           (gate)    → present (checkpoint with evidence)
 Phase 3 A            (track)   → Internal state update (no external tool)
+integrate-echo       (relay)   → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 Task completion      (track)   → TaskUpdate (status tracking) [Tool]
 Withdraw shutdown    (dispatch) → SendMessage (shutdown_request to team members) [Tool]
 converge             (relay)    → TextPresent+Proceed (coordinator convergence evidence trace; proceed with situated execution)
@@ -221,6 +222,8 @@ Phase -1 conflict (tasks+prior) → always_gated (gated: resume vs refresh vs me
 Phase -1 TeamCoord (team)       → always_gated (gated: team structure selection)
 Phase -1 Augment (roles)        → always_gated (gated: role confirmation)
 Phase 2 Qc (checkpoint)         → always_gated (gated: execution risk judgment)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── MODE STATE ──
 Λ = { phase: Phase, E: ExecutionAction,

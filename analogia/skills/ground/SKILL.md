@@ -83,12 +83,15 @@ early_exit = user_declares_mapping_sufficient
 Phase 1 Map     (observe)   → Read, Grep (stored knowledge extraction: domain structure analysis); WebSearch (conditional: external domain knowledge)
 Phase 2 Qs      (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (track)     → Internal state update
+integrate-echo  (relay)     → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 Phase 0 Detect  (sense)     → Internal analysis (no external tool)
 converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with validated mapping)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
 Phase 2 Qs (validate)      → always_gated (gated: user validates structural mapping with examples)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,

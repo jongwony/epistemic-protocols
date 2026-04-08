@@ -71,6 +71,7 @@ Qs (gate)      → present (mandatory; Esc key → loop termination at LOOP leve
 Σ (track)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (observe) → Read, Grep (stored knowledge extraction: context for gap identification)
 A (track)      → Internal state update (no external tool)
+integrate-echo (relay) → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 converge (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
 
 ── ELIDABLE CHECKPOINTS ──
@@ -78,6 +79,8 @@ converge (relay)   → TextPresent+Proceed (convergence evidence trace; proceed 
 Phase 1 Qs (gap surface)   → always_gated (gated: user judgment on surfaced gap determines adjustment)
 Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes level)
                                 regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, active: Bool }

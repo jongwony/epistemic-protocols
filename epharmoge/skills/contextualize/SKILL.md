@@ -74,6 +74,7 @@ Qc     (gate)    → present (mandatory; Esc key → loop termination at LOOP le
 adapt  (transform) → Edit, Write (result adaptation based on user direction)
                     -- (transform): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
 Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
+-- conditional: integrate-echo (relay) when Qc gate response carries constitutive surplus (definition-time Qc ≠ runtime response)
 converge (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
 ── ELIDABLE CHECKPOINTS ──

@@ -116,6 +116,7 @@ Phase 1 Qc      (gate)        → present (conditional: Coherence 2D off-diagona
 Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering, Factual only); cleanup via Bash
 Phase 2 Qs      (gate)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
+integrate-echo  (relay)       → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
 converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
 
 ── ELIDABLE CHECKPOINTS ──
@@ -123,6 +124,8 @@ converge     (relay)       → TextPresent+Proceed (convergence evidence trace; 
 Phase 1 Qc (coherence 2D)  → conditional: fires only when scope ≠ resolution assessment
                               always_gated when fired (gated: user classifies coherence type as MemoryInternal or CrossDomain)
 Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgment on insufficiency)
+Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
+                                relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: Prospect, uncertainties: Set(Uncertainty),
