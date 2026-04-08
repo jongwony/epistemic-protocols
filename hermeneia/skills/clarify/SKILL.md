@@ -99,6 +99,9 @@ Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent int
       clarified: Set(Gap), remaining: Set(Gap),
       immune: Set(Expression), history: List<(E, Gₛ, A)>, active: Bool }
 -- Invariant: gaps = clarified ∪ remaining (pairwise disjoint)
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

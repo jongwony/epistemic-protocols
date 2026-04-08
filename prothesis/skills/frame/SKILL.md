@@ -172,6 +172,9 @@ A = synthesized assessment (additional computation)
 Mode ∈ {recommend, inquire}                       -- Λ.mode resolved in Phase 0 Q
 TeamState = { name: String, members: Set(AgentRef), tasks: Set(TaskId) }
 AgentRef  = { name: String, type: String, perspective: Option(String) }
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

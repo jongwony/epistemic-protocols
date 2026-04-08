@@ -104,6 +104,9 @@ Phase 3 Qc (coverage)      → always_gated (gated: aspect coverage — sufficie
   probed: Map<TaskId, Set<GapType>>,
   active: Bool
 }
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

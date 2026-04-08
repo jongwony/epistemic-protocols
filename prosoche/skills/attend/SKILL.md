@@ -229,6 +229,9 @@ Phase 2 Qc (checkpoint)         → always_gated (gated: execution risk judgment
        team: Option(TeamStructure),
        upstream: Option(SuspendState),
        active: Bool, cause_tag: String }
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

@@ -81,6 +81,9 @@ Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, active: Bool }
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle

@@ -20,7 +20,15 @@ All protocols share this structure within `Definition` code block:
 ── ELIDABLE CHECKPOINTS ──  (if applicable) Per-gate dual-axis analysis (relay/gated interaction kind + regret profile)
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
+── COMPOSITION ──       Protocol composition operator definitions (product: D₁ × D₂ → R₁ × R₂)
 ```
+
+**COMPOSITION block details**:
+- Universal: present in all protocol SKILL.md files with identical text
+- `*` denotes the composition operator (categorical product on deficit/resolution). Distinct from graph.json `"source": "*"` wildcard (precondition scope)
+- `graph.json edges preserved`: precondition, advisory, and suppression edges remain enforced within composite execution. DAG ordering governs dimension detection sequence; suppression prevents co-activation of overlapping pairs
+- `Dimension resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition, not prescribed by the operator
+- Relationship to /compose skill: /compose is a gate-chain authoring tool (Standing authority, pre-committed pipeline); `*` is a runtime deficit product (Active authority, session-level)
 
 Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.
 
