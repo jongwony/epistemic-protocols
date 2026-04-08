@@ -256,6 +256,8 @@ Exception: Multiple high-stakes gaps → surface up to 2, prioritized by irrever
 
 ### Resolution
 
+integrate(sense) performs the deducibility judgment (constitutive); integrate-echo(relay) presents the result as deterministic restatement. Echo fires only when non-deducible augmentation exists.
+
 Per ADJUSTMENT RULES. Key operational detail: Probe triggers a re-scan with expanded scope, surfacing additional gaps the user wants verified before committing.
 
 ### Gap Tracking

@@ -336,6 +336,8 @@ Options:
 
 ### Phase 3: Integration
 
+integrate(sense) performs the deducibility judgment (constitutive); integrate-echo(relay) presents the result as deterministic restatement. Echo fires only when non-deducible augmentation exists.
+
 After user response:
 
 1. **Accept**: Set GoalContract field to proposal value

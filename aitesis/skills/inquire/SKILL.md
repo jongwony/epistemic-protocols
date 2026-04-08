@@ -399,6 +399,8 @@ Options:
 
 ### Phase 3: Prospect Update
 
+integrate(sense) performs the deducibility judgment (constitutive); integrate-echo(relay) presents the result as deterministic restatement. Echo fires only when non-deducible augmentation exists.
+
 After user response:
 
 1. **Provide(context)**: Integrate user-provided context into prospect `X'`

@@ -517,6 +517,8 @@ Proceeding.
 
 ### Phase 3: Judgment Integration
 
+integrate(sense) performs the deducibility judgment (constitutive); integrate-echo(relay) presents the result as deterministic restatement. Echo fires only when non-deducible augmentation exists.
+
 After user response:
 
 1. **Approve**: Record `session_approval(pattern(E))`, allow `E` to proceed
