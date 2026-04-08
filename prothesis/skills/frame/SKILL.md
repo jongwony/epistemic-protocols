@@ -145,7 +145,7 @@ PF Qc (gate)             → present (multiSelect: preservation scope; in LOOP w
 wrap_up TaskCreate (track) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (dispatch)             → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Λ (track)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
--- conditional: integrate-echo (relay) when Qc gate response carries constitutive surplus (definition-time Qc ≠ runtime response)
+-- conditional: integrate-echo (relay) when Qc gate response carries constitutive surplus (definition-time Qc ≠ runtime response; Qs/Qc asymmetry: Qs-gated protocols have formal entries; Qc-gated receive conditional annotation because echo fires only on runtime constitutive surplus)
 G (observe)              → Read, Glob, Grep (meta-scope context acquisition: guided by MBᵥ to identify relevant perspectives — not passed to teammates; teammates independently collect object-scope evidence through their own lens)
 Phase 4 Syn (sense)      → Internal operation (no external tool; basis_cited in O(L) Synthesis Basis section)
 characterize (sense)     → Internal operation (perspective count tier classification)
@@ -162,6 +162,8 @@ Phase 3 AgentMap? (map)  → elidable when: agent_count(perspective) ≤ 1
                            regret: bounded (execution assignment correctable by team restructuring)
 Phase 4 Qc (routing)     → always_gated (gated: loop path + team lifecycle)
 PF Qc (preserve)         → always_gated (gated: knowledge preservation scope)
+-- conditional echo (Qc surplus)  → fires only when Qc gate response carries constitutive surplus
+--                                  relay when fired (relay: augmentation echo is deterministic restatement)
 
 ── CATEGORICAL NOTE ──
 ∩ = graded meet (intersection with coordinator-assessed agreement strength) over comparison morphisms between perspective outputs

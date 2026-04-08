@@ -133,6 +133,7 @@ Phase 1:  t.E → Eval(t.E) → Fi: Set(Finding)                       -- risk e
 Phase 2:  Fi → Qc(Fi, evidence, t.E) → Stop → J                     -- checkpoint surfacing [Tool]
            (or: subagent GATE_DETECTED → main agent Qc)
 Phase 3:  J → A(J, t, Σ) → Σ'                                      -- judgment integration (sense)
+          [if augmentation] integrate-echo(Σ') → echo                -- augmentation relay (relay)
            J = Withdraw → Withdraw[SendMessage] → deactivate         -- team shutdown [Tool]
 
 ── LOOP ──
@@ -149,6 +150,7 @@ For each t in T[]:
 Subagent batch: p=Low tasks may be batched to a single executor invocation.
 Subagent GATE_DETECTED: parse output, surface via Phase 2 in main agent.
 Task-bounded: loop terminates when all T resolved (completed or halted).
+Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At all-T-resolved, present transformation trace — for each t ∈ Λ.tasks, show (ExecutionBlind(t) → situated(t) with risk classification). Convergence is demonstrated, not asserted.
 
 ── RISK SIGNAL TAXONOMY ──
@@ -224,6 +226,7 @@ Phase -1 Augment (roles)        → always_gated (gated: role confirmation)
 Phase 2 Qc (checkpoint)         → always_gated (gated: execution risk judgment)
 Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
                                 relay when fired (relay: augmentation echo is deterministic restatement)
+                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, E: ExecutionAction,

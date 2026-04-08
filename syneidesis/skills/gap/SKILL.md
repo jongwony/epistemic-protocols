@@ -46,12 +46,14 @@ AuditedDecision = Σ' where (∀ task ∈ registered: task.status = completed) �
 Phase 0: D → committed?(D) → Scan(D) → G              -- gate + detection (silent)
 Phase 1: G → TaskCreate[all gaps] → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register all, surface first [Tool]
 Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
+         [if augmentation] integrate-echo(Σ') → echo  -- augmentation relay (relay)
 
 ── LOOP ──
 After Phase 2: re-scan for newly surfaced gaps from user response.
 If new gaps: TaskCreate → add to queue.
 Continue until: all tasks completed OR user ESC.
 Mode remains active until convergence.
+Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
 
 ── ADJUSTMENT RULES ──
@@ -81,6 +83,7 @@ Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes
                                 regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
 Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
                                 relay when fired (relay: augmentation echo is deterministic restatement)
+                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, active: Bool }

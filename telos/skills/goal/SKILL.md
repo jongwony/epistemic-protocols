@@ -58,6 +58,7 @@ Phase 1:  Gᵥ → detect(Gᵥ) → Dd → Qc(Dd, evidence) → Stop → Dₐ, D
 Phase 2:  Dₛ → propose(Dₛ, context) → P                        -- AI proposal (sense)
         → Qs(P) → Stop → A                                      -- co-construction [Tool]
 Phase 3:  A → integrate(A, C) → C'                             -- contract update (sense)
+          [if augmentation] integrate-echo(C') → echo                -- augmentation relay (relay)
 Phase 4:  C' → Qc(C', progress) → Stop → approve               -- sufficiency check [Tool]
 
 ── LOOP ──
@@ -67,6 +68,7 @@ On re-entry, detect(Gᵥ) scopes to undefined dimensions in Dₐ; already-define
 If all Dₐ defined: proceed to Phase 4.
 User can trigger Phase 4 early at any Phase 1 (early_exit).
 Continue until: user approves GoalContract OR user ESC.
+Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At Phase 4, present transformation trace — for each d ∈ Dₐ, show (GoalIndeterminate(d) → C'.defined(d)). User approval is the convergence gate; the evidence trace enables informed approval.
 
 ── CONVERGENCE ──
@@ -96,6 +98,7 @@ Phase 2 Qs (negotiate)     → always_gated (gated: Accept/Modify/Reject/Extend 
 Phase 4 Qc (approve)       → always_gated (gated: contract approval — final binding decision)
 Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
                                 relay when fired (relay: augmentation echo is deterministic restatement)
+                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, G: Goal, Gᵥ: Goal, detected: Set(Dim), applicable: Set(Dim),

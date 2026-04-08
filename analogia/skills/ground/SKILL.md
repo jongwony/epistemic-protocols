@@ -62,6 +62,7 @@ Phase 0: R → Detect(R) → uncertain?                             -- mapping u
 Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M               -- domain decomposition + mapping [Tool]
 Phase 2: M → I(M, Sₜ) → Qs(I, progress) → Stop → V             -- instantiation + validation [Tool]
 Phase 3: V → integrate(V, R) → R'                               -- output update (sense)
+         [if augmentation] integrate-echo(R') → echo                  -- augmentation relay (relay)
 
 ── LOOP ──
 After Phase 3: evaluate validation result.
@@ -70,6 +71,7 @@ If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
 If V = Dismiss: accept this correspondence as unresolved for this session; terminalize if all correspondences addressed.
 Max 3 mapping attempts per domain pair.
 Continue until: terminalized(R') OR attempts exhausted.
+Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.mappings, show (MappingUncertain(c) → validation_result(c)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
@@ -80,11 +82,11 @@ early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
+Phase 0 Detect  (sense)     → Internal analysis (no external tool)
 Phase 1 Map     (observe)   → Read, Grep (stored knowledge extraction: domain structure analysis); WebSearch (conditional: external domain knowledge)
 Phase 2 Qs      (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (track)     → Internal state update
 integrate-echo  (relay)     → TextPresent+Proceed (augmentation-only: non-deducible AI inference with cited inference basis)
-Phase 0 Detect  (sense)     → Internal analysis (no external tool)
 converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with validated mapping)
 
 ── ELIDABLE CHECKPOINTS ──
@@ -92,6 +94,7 @@ converge     (relay)       → TextPresent+Proceed (convergence evidence trace; 
 Phase 2 Qs (validate)      → always_gated (gated: user validates structural mapping with examples)
 Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
                                 relay when fired (relay: augmentation echo is deterministic restatement)
+                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,

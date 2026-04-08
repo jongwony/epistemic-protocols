@@ -64,6 +64,7 @@ Phase 1a: E → Qc(E) → Stop → Eᵥ                          -- E confirmati
 Phase 1b: Eᵥ → detect(Eᵥ) → Gd → Qc(Gd, evidence) → Stop → Gₛ  -- gap detection + confirm [Tool]
 Phase 2:  Gₛ → Qs(Gₛ) → Stop → A                         -- clarification [Tool]
 Phase 3:  A → integrate(A, Î) → Î'                       -- intent update (sense)
+          [if augmentation] integrate-echo(Î') → echo                -- augmentation relay (relay)
 
 ── LOOP ──
 After Phase 3: return to Phase 1b for newly surfaced gaps.
@@ -71,6 +72,7 @@ On re-entry, detect(Eᵥ) re-analyzes the expression in the context of prior cla
 If |Gₛ| = 0 after confirmation (all gaps removed): skip Phase 2, evaluate convergence (|remaining| = 0).
 Continue until converge: |remaining| = 0, cycle detected, or user exits.
 Mode remains active until convergence.
+Echo cadence: integrate-echo fires per-iteration when augmentation exists (self-regulating; no augmentation = no echo).
 Convergence evidence: At |remaining| = 0, present transformation trace — for each g ∈ Λ.clarified, show (IntentMisarticulated(g) → resolution(g)) from Λ.history. Convergence is demonstrated, not asserted.
 
 ── TOOL GROUNDING ──
@@ -96,6 +98,7 @@ Phase 1b Qc (gap confirm)  → always_gated (gated: gap set shapes clarification
 Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent into clarification)
 Phase 3 echo (augmentation)  → conditional: fires when integrate produces non-deducible augmentation
                                 relay when fired (relay: augmentation echo is deterministic restatement)
+                                guard: always-echo (treating all inference as augmentation) or never-echo (silent suppression) or echo-as-paraphrase (restating user words as AI contribution) = adversarial rationalization
 
 ── MODE STATE ──
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, detected: Set(Gap), gaps: Set(Gap),
