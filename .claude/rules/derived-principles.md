@@ -43,3 +43,13 @@ Derived from A4 (Semantic Autonomy).
 LLM-facing instructions (Output Style, SKILL.md prose, agent prompts) state principles, not examples. When a rendering rule, behavioral guideline, or structural constraint can be expressed as a principle, do not append few-shot examples or category-level mapping lists. Few-shot examples create a soft-table effect — anchoring the model to specific instances rather than letting it apply the principle to novel contexts. A principle that requires examples to be understood is underspecified; fix the principle, do not patch it with examples.
 
 Scope boundary: this principle applies to instructions the LLM interprets and applies at runtime — not to contributor-facing documentation where examples serve comprehension. The boundary test: "would removing this example increase the LLM's latitude in applying the principle to novel contexts?" If yes, the example is anchoring and should be removed. If the example aids human understanding without constraining LLM application, it is outside scope. SKILL.md formal blocks (Definition code blocks) are LLM-facing by definition; prose outside formal blocks in SKILL.md is hybrid (read by both LLMs and contributors) — err toward principle-only in hybrid contexts.
+
+## Loop Continuity under Bounded Regret
+
+Derived from A2 (Detection with Authority) + A5 (Interaction Kind Factorization).
+
+A2's relay/constitution boundary defines both directions: detect what requires judgment (constitution), and do not gate what does not (relay). A5's bounded/unbounded regret classifies individual gates; this principle extends that classification to execution-level continuity. Within any execution loop, bounded-regret actions must not trigger Stop — the loop continues. Only unbounded-regret actions (genuinely viable alternative paths whose wrong choice creates irreversible divergence) warrant interruption.
+
+**Plan-level aggregation**: Compound unbounded-regret is superadditive — multiple irreversible decisions in one plan interact, and their aggregate regret exceeds the sum of individual gate-level risks. When compound regret crosses the plan-direction threshold, the user should judge the plan shape, not just individual items. The specific threshold is protocol-level implementation.
+
+**Dual failure mode**: False-positive gating — the dual of Surfacing over Deciding. Both corrupt the same detection boundary from opposite directions: Surfacing over Deciding addresses false negatives (silence where surfacing is needed), this principle addresses false positives (gates where continuation is needed).

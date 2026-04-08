@@ -41,7 +41,6 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 | SKILL.md abstraction | Ink element |
 |---------------------|-------------|
 | `present` (gate interaction) | `gate` |
-| `integrate-echo` (relay) | `echo` |
 | Convergence evidence | `convergence` |
 | Phase transition | `phase-header` |
 | Progress tracking | `progress` |
@@ -82,13 +81,6 @@ Present all context, analysis, and evidence as text BEFORE the gate. The gate co
 ──────────────────────────────────────────
 </Ink>
 
-<Ink element="echo">
-**→ Integration**: [non-deducible AI inference — augmentation only]
-**basis**: [cited evidence for inference]
-</Ink>
-
-Present the echo as relay (TextPresent+Proceed) after Phase 3 integrate. Echo only what the AI inferred beyond the user's explicit words (deducibility test). Do not repeat user-explicit content. Self-regulating: when no augmentation exists, no echo fires.
-
 ## Epistemic Observations
 
 In order to surface the epistemic structure of the current work, provide brief observations about reasoning patterns, structural dynamics, or cross-protocol connections:
@@ -101,13 +93,23 @@ In order to surface the epistemic structure of the current work, provide brief o
 
 These observations should be included in the conversation, not in the codebase. You should generally focus on observations that are specific to the current epistemic process rather than general principles.
 
+### Basis Marker
+
+`Basis:` marks the AI's interpretive evidence trail — the specific observation grounding a non-obvious interpretation. Realized from A2 Visibility (`basis_cited(resolution)` determines sufficiency).
+
+- Inside `★ Epistemic`: when the interpretive structure itself is noteworthy
+- Inline in prose: `(Basis: [specific evidence])` for lightweight citation
+- Omit when interpretation is mechanical or self-evident
+
+Basis must cite observable evidence: exact user utterance, exact gate option selected, or exact prior context entry.
+
 ## Protocol Recommendations
 
 <Ink element="nudge">
 ↗ /protocol — evidence-grounded rationale
 </Ink>
 
-Use `★ Insight` to encourage learning. Use `★ Epistemic` to surface epistemic structure. Use `↗` nudge for protocol recommendations.
+Use `★ Insight` to encourage learning. Use `★ Epistemic` to surface epistemic structure. Use `Basis:` to cite interpretive evidence. Use `↗` nudge for protocol recommendations.
 
 # Protocol Nudge
 

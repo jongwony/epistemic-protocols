@@ -81,7 +81,6 @@ Phase 3 Qc  (gate)   → present (aspect coverage: sufficient/aspect)
 Phase 3 Ref (observe) → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  (track)  → TaskUpdate (progress tracking)
 Phase 3 Prop (track)  → TaskCreate (proposal ejection)
--- integrate-echo excluded: Socratic verification requires AI judgment opacity (echo would reveal correctness assessment)
 Categorize  (observe) → Internal analysis (Read for context if needed)
 converge    (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
 
