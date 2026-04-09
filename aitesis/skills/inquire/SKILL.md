@@ -78,8 +78,8 @@ Uₑ         = Empirically observed uncertainties    -- evidence attached, proce
 Uᵢ''       = Remaining user-dependent uncertainties  -- Fiber(Factual) = UserDependent [includes reclassified Coherence/MemoryInternal]; Phase 2 question
 Uₙ         = Non-actionable detected uncertainties  -- Fiber(Coherence) = CrossDomain or Fiber(d) = Unit; shown in classify summary with routing target
 Action     = Tool call sequence (Write, Bash)
-EscapeCondition ∈ {EnvironmentMutation, BoundExceeded, RiskElevated, StructuralUncertainty}
-                    -- maps to Rule 20 (a)-(d) escape hatches; logged in observation_skips
+EscapeCondition ∈ {EnvironmentMutation, BoundExceeded, RiskElevated}
+                    -- maps to Rule 20 (a)-(c) escape hatches; logged in observation_skips
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency gate (silent)
@@ -139,7 +139,7 @@ Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgme
       active: Bool,
       cause_tag: String }
 -- Invariant: uncertainties = context_resolved ∪ read_only_resolved ∪ empirically_observed ∪ non_factual_detected ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
--- Note: observation_skips is an audit log orthogonal to the partition — logged when EmpiricallyObservable is reclassified to UserDependent via Rule 20 (a)-(d)
+-- Note: observation_skips is an audit log orthogonal to the partition — logged when EmpiricallyObservable is reclassified to UserDependent via Rule 20 (a)-(c)
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
@@ -323,7 +323,7 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
 - Construct ObservationSpec: { setup, execute, observe, cleanup }
 - Execute observation lifecycle (setup → execute → observe → cleanup → record)
 - Observation evidence attached to `Uₑ` → proceeds to Phase 2 with evidence
-- **Escape hatch**: If Rule 20 (a)-(d) applies, reclassify as UserDependent and log `(uncertainty, condition, rationale)` to `Λ.observation_skips` — the skip rationale must be specific enough to audit (e.g., "StructuralUncertainty: naming preference, no observable state differentiates options")
+- **Escape hatch**: If Rule 20 (a)-(c) applies, reclassify as UserDependent and log `(uncertainty, condition, rationale)` to `Λ.observation_skips` — the skip rationale must be specific enough to audit (e.g., "BoundExceeded: initial probe measured 45s, exceeded 30s bound")
 
 If all uncertainties context-resolved or read-only-resolved (no observed or user-dependent remaining): proceed with execution (no user interruption).
 If observed or user-dependent uncertainties remain: proceed to Phase 2.
@@ -454,5 +454,5 @@ After integration:
 17. **No silent sufficiency assumption**: If Phase 0 scan detects no uncertainties, present this finding with reasoning to user for confirmation before proceeding — do not silently declare context sufficient
 18. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
 19. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
-20. **No observation avoidance**: When a Factual uncertainty is classifiable as EmpiricallyObservable (observable through bounded, non-destructive Bash execution), classifying it as UserDependent to avoid empirical observation = protocol violation. The AI must attempt observation before falling back to user inquiry. Reclassification to UserDependent is legitimate only when: (a) observation requires persistent environment mutation beyond instrument setup, (b) execution exceeds 30s bound, (c) risk gate triggers (elevated-risk observation), or (d) the uncertainty is structural rather than empirical — no observable state change would differentiate between possible answers (e.g., design trade-offs, naming choices, preference questions)
+20. **No observation avoidance**: When a Factual uncertainty is classifiable as EmpiricallyObservable (observable through bounded, non-destructive Bash execution), classifying it as UserDependent to avoid empirical observation = protocol violation. The AI must execute observation; the finding "no observable state change differentiates candidate answers" must be the output of an executed observation, not a pre-observation classification. Reclassification to UserDependent is legitimate only under empirically verifiable escape conditions: (a) observation requires persistent environment mutation beyond instrument setup, (b) execution exceeds 30s bound, (c) risk gate triggers (elevated-risk observation). Declaring an uncertainty "structural" or a "design trade-off" without executing observation reinstates the inference-before-observation shortcut this rule guards against — such classification must arise from observation output, not substitute for it.
 21. **No pre-filter rationalization**: Pre-filter (coexistence exit) applies only when an explicit, named scope hierarchy rule or documented precedence ordering resolves the apparent contradiction without epistemic protocol intervention. Classifying a genuine cross-domain structural contradiction as "rule-resolvable" to avoid routing = pre-filter misuse (analogous to Rule 20's observation avoidance guard)
