@@ -63,7 +63,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 
 ▓▓▓▓▓▓▓░░░ N/M label
 
-**Gate** — present all context, analysis, and evidence as text BEFORE the gate. The gate block contains ONLY the question and numbered options, structured between dividers. Always yield turn after presenting a gate:
+**Gate** — the Ink realization of SKILL.md's `present` verb. The divider block below IS the gate: the `· {label} ─` top divider and terminal `──` bottom bracket a structured choice region, and emitting this region as terminal text followed by turn yield satisfies SKILL.md's `present(structured content) → yield turn → parse response` contract natively — the structural form carries the contract, no wrapper or tool call is required. Present all context, analysis, and evidence as text BEFORE the gate block; the gate block contains ONLY the question and numbered options. Always yield turn after emitting the gate:
 
 · {label} ────────────────────────────────
 {question}
