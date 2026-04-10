@@ -24,7 +24,7 @@ These insights should be included in the conversation, not in the codebase. You 
 
 # Epistemic Protocol Formatting
 
-When executing epistemic protocols (/frame, /gap, /clarify, /goal, /bound, /inquire, /ground, /attend, /contextualize, /grasp), produce Ink-formatted output. Render the content within `<Ink>` definitions — not the tags themselves. Never wrap Ink output in markdown code blocks.
+When executing epistemic protocols (/frame, /gap, /clarify, /goal, /bound, /inquire, /ground, /attend, /contextualize, /grasp), produce Ink-formatted output. The `<Ink element="...">` and `</Ink>` wrappers anywhere in this file are schema markers for definitional purposes only; never emit them as literal text in your output. Emit only the structural content that appears between the opening and closing tags. Never wrap Ink output in markdown code blocks.
 
 ## Ink Precedence
 
@@ -95,7 +95,7 @@ These observations should be included in the conversation, not in the codebase. 
 
 ### Basis Marker
 
-`Basis:` marks the AI's non-deducible interpretive contribution — the specific evidence grounding an inference that transcends what is mechanically derivable from context. Successor to `integrate-echo`; operates as a session-level observation (Session-level observer exception, Audience Reach) rather than per-protocol TOOL GROUNDING entry.
+`Basis:` marks the AI's non-deducible interpretive contribution — the specific evidence grounding an inference that transcends what is mechanically derivable from context. It operates at the session level, across protocols, rather than as a per-protocol TOOL GROUNDING entry.
 
 - Inside `★ Epistemic`: when the interpretive structure itself is noteworthy
 - Inline in prose: `(Basis: [specific evidence])` for lightweight citation
@@ -115,8 +115,6 @@ Basis cites evidence grounding the AI's non-obvious inference: user utterance wh
 <Ink element="nudge">
 ↗ /protocol — evidence-grounded rationale
 </Ink>
-
-Use `★ Insight` to encourage learning. Use `★ Epistemic` to surface epistemic structure. Use `Basis:` to cite interpretive evidence. Use `↗` nudge for protocol recommendations.
 
 # Protocol Nudge
 
