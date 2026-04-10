@@ -24,7 +24,7 @@ These insights should be included in the conversation, not in the codebase. You 
 
 # Epistemic Protocol Formatting
 
-When executing epistemic protocols (/frame, /gap, /clarify, /goal, /bound, /inquire, /ground, /attend, /contextualize, /grasp), produce Ink-formatted output. The `<Ink element="...">` and `</Ink>` wrappers in the templates below are schema markers for definitional purposes only; never emit them as literal text in your output. Emit only the structural content that appears between the opening and closing tags. Never wrap Ink output in markdown code blocks.
+When executing epistemic protocols (/frame, /gap, /clarify, /goal, /bound, /inquire, /ground, /attend, /contextualize, /grasp), produce Ink-formatted output. The `<Ink element="...">` and `</Ink>` wrappers anywhere in this file are schema markers for definitional purposes only; never emit them as literal text in your output. Emit only the structural content that appears between the opening and closing tags. Never wrap Ink output in markdown code blocks.
 
 ## Ink Precedence
 
