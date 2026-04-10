@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 ```
 ── FLOW ──
 Prothesis(U) → Q(MB(U), M) → (MBᵥ, m) → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → LensEstablished →
-  T(Pₛ) → ∥I(T) → R → Ω(T) → R' → P(R') → Δ(R') → Δₛ → D?(Δₛ, T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Q(routing) → J → FramedInquiry
+  T(Pₛ) → ∥I(T) → Await(T_running) → R → Ω(T) → R' → P(R') → Δ(R') → Δₛ → D?(Δₛ, T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Q(routing) → J → FramedInquiry
 
 ── MORPHISM ──
 Inquiry
@@ -25,6 +25,7 @@ Inquiry
   → LensEstablished                     -- Mode 1 terminus; composable with downstream protocols
   → spawn(team)                         -- assemble perspective team via TeamCreate
   → inquire(parallel)                   -- isolated perspective analysis per teammate
+  → await(notifications)                -- passive wait for teammate completion signals (see TOOL GROUNDING)
   → collect(results)                    -- finalize inquiry outputs, retain team
   → preview(results)                    -- surface collected findings before synthesis
   → dialogue(triggers) → reports        -- peer negotiation → structured dialogue reports
@@ -54,7 +55,9 @@ S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; P
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
 LensEstablished = Pₛ where lens selection complete  -- intermediate checkpoint; Mode 1 terminus (J=recommend), Mode 2 continues
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
-∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → R
+T_running = Team with inquiries in flight             -- intermediate state between dispatch and completion
+∥I     = Parallel inquiry dispatch: T → T_running    -- per-teammate Inquiry(p) launched
+Await  = Passive completion barrier: T_running → R   -- see TOOL GROUNDING (Await entry) for realization
 Ω      = Collection: R → R', retain(T)               -- finalize results; team lifecycle deferred to loop
 R      = Set(Result)                                  -- raw inquiry outputs
 R'     = Set(Result) post-collection                  -- after Phase 3 collection
@@ -92,7 +95,7 @@ Edge cases:
 Phase 0:  U → MB(U) → Qc(MB, M) → Stop → (MBᵥ, m)              -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]
-Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: relay | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + inquiry + collection + preview [Tool]
+Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: relay | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → Await[IdleNotification](T_running) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + inquiry dispatch + wait + collection + preview [Tool]
 Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Qc(routing) → Stop → J  -- triggers, cross-dialogue, synthesis, presentation & routing [Tool]
           J=wrap_up → PF Qc(select) → Stop → Ω → TeamDelete → TaskCreate(selected)  [Tool]
 
@@ -111,6 +114,11 @@ After LensEstablished (mode branching):
       Pₛ.count = 1 → lightweight context modifier for downstream protocol
       Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
   J = inquire → Continue to Phase 3 (team spawn → parallel inquiry → synthesis → FramedInquiry)
+
+During Phase 3 (Inquiry, including Await):
+  Coordinator is passive during Await: no polling, no status checks, no passive observation per Rule 14 wait discipline
+  Esc key → tool-level termination (no gate tool open; team orphaned per user_esc)
+  -- Recovery from indefinite wait is user-initiated; no timeout or polling fallback
 
 After Phase 4 (routing):
   J = extend     → Qc(add perspective | deepen existing | review execution results) → Stop
@@ -135,7 +143,8 @@ Phase 0 Qc (gate)        → present (combined: Q1=Mission Brief confirmation, Q
 Sc (gate)                → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
 T (dispatch)             → TeamCreate tool (parallel topology: creates team with shared task list); agent-aware realization: match available agents to selected perspectives before spawn — 0 matches: proceed with AI-generated teammates; 1 match: relay (auto-assign); 2+ matches: ELIDABLE gate (user confirms agent-perspective mapping, each option genuinely viable under different value weightings per A5)
 ∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates — each receives MBᵥ + perspective only; no Phase 1 context G passed)
-∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination)
+∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination — dispatch phase)
+Await (sense)            → IdleNotification (passive wait: teammate SubagentStop events surface as coordinator idle notifications; teammate→coordinator message delivery occurs at coordinator turn boundary, not at teammate send time; async message-passing execution model; no coordinator poll per Rule 14)
 Phase 3 P (relay)        → TextPresent+Proceed (per-perspective epistemic contribution + key finding summaries)
 Phase 4 Δ (sense)        → Internal operation (trigger check per Trigger Detection Criteria; cite evidence per detected trigger)
 Phase 4 D? (dispatch)    → SendMessage tool (conditional topology: coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
@@ -406,7 +415,7 @@ Multiple selections → parallel teammates (never sequential).
 
 **Inquiry**
 
-Teammates analyze independently. Results arrive via idle notifications.
+Teammates analyze independently. Coordinator awaits completion signals per Rule 14 wait discipline (passive wait, no polling, no status observation).
 
 **Collection and Preview**
 
@@ -556,3 +565,12 @@ Heuristic criteria for Phase 4 trigger detection (Δ). Coordinator cites evidenc
 11. **Concrete routing**: Phase 4 routing options must include session-specific rationale derived from L. Generic labels without Lens-grounded content = protocol violation (analogical application of Full Taxonomy Confirmation — session-grounded concreteness over generic labels)
 12. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
 13. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
+14. **Wait discipline**: During Phase 3 Await, the coordinator MUST NOT (a) re-prompt teammates regardless of interval duration — any re-prompt risks interrupting teammate mid-composition and inducing content revision rather than resolving apparent silence; (b) observe teammate state passively (TaskList reads, agent memory inspection, filesystem reads under team directories) as a basis for behavioral decisions before the completion signal arrives — passive observation defeats passive-wait semantics and is an A7 rationalization path disguised as "task tracking, not polling"; (c) proceed with partial R — Await converges only when all teammates in T have signaled completion, and partial collection without `user_esc` violates A3 Convergence Persistence. Scope: Phase 3 inquiry wait only; Phase 4 hub-spoke step 4 content-bearing follow-ups are sent after peers have idled and are out of scope. Platform-specific delivery mechanics are documented in TOOL GROUNDING (Await entry); epistemic prose depends only on the existence of a completion signal, not on its platform form. Recovery from indefinite wait is user-initiated via `user_esc` per LOOP; any of (a)/(b)/(c) = protocol violation
+
+## Known Limitations
+
+**SubagentStop signal semantics**: The Await completion signal (IdleNotification) is realized on top of the platform's SubagentStop event. Whether SubagentStop fires on all teammate exits (including crashes, errors, and silent failures) is platform-specific and not guaranteed by the protocol definition. If SubagentStop is unary (fires on all exits), a crashed teammate produces an IdleNotification with empty output — the coordinator observes failure indirectly via the Preview P(R') step. If SubagentStop does not fire on abnormal termination, a crashed teammate produces no signal, and Await must rely on `user_esc` recovery per LOOP.
+
+**Teammate crash vs. composition indistinguishability**: The protocol defines no direct failure signal for teammates. A teammate still mid-composition and a teammate that has crashed are indistinguishable at the protocol layer until a completion signal (or `user_esc`) arrives. The coordinator cannot distinguish these states without violating Rule 14's passive-wait discipline. User experience of the wait is the primary failure-detection surface.
+
+**TaskUpdate vs. IdleNotification release ordering**: Teammates use TaskUpdate to mark task status (observability track); IdleNotification is the Await-release signal (completion track). In the typical path, a teammate's final SendMessage and TaskUpdate precede its SubagentStop, so IdleNotification dominates TaskUpdate in release ordering. Abnormal paths (crash before TaskUpdate; idle without task completion) are not strictly ordered by the protocol and surface as empty or partial output at Preview P(R').
