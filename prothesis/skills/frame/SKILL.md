@@ -408,6 +408,11 @@ Multiple selections → parallel teammates (never sequential).
 
 Teammates analyze independently. Results arrive via idle notifications.
 
+**Coordinator wait behavior during Inquiry**:
+- Teammate→coordinator messages reach the coordinator's context at the *next* coordinator turn start — coordinator Stop events do not drain the inbox. The next tool call or notification opens a turn during which queued messages are read.
+- Do not re-prompt a teammate within 2 minutes of the prior prompt. Shorter intervals risk interrupting mid-composition and inducing content revision rather than resolving silence.
+- When waiting, rely on idle notifications to resume — do not poll or issue ping-style prompts.
+
 **Collection and Preview**
 
 Collect inquiry results into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 4 routing, where the user's sufficiency judgment determines team lifecycle.
