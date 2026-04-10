@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 ```
 ── FLOW ──
 Prothesis(U) → Q(MB(U), M) → (MBᵥ, m) → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → LensEstablished →
-  T(Pₛ) → ∥I(T) → R → Ω(T) → R' → P(R') → Δ(R') → Δₛ → D?(Δₛ, T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Q(routing) → J → FramedInquiry
+  T(Pₛ) → ∥I(T) → Await(T) → R → Ω(T) → R' → P(R') → Δ(R') → Δₛ → D?(Δₛ, T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Q(routing) → J → FramedInquiry
 
 ── MORPHISM ──
 Inquiry
@@ -25,6 +25,7 @@ Inquiry
   → LensEstablished                     -- Mode 1 terminus; composable with downstream protocols
   → spawn(team)                         -- assemble perspective team via TeamCreate
   → inquire(parallel)                   -- isolated perspective analysis per teammate
+  → await(notifications)                -- passive wait for teammate completion signals (see TOOL GROUNDING)
   → collect(results)                    -- finalize inquiry outputs, retain team
   → preview(results)                    -- surface collected findings before synthesis
   → dialogue(triggers) → reports        -- peer negotiation → structured dialogue reports
@@ -54,7 +55,11 @@ S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; P
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
 LensEstablished = Pₛ where lens selection complete  -- intermediate checkpoint; Mode 1 terminus (J=recommend), Mode 2 continues
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
-∥I     = Parallel inquiry: (∥ p∈T. Inquiry(p)) → R
+∥I     = Parallel inquiry dispatch: T → (∥ p∈T. Inquiry(p) running) [side effect]
+         -- followed by Await in FLOW/MORPHISM to produce R
+Await  = Passive completion barrier: T → R
+         -- realized via IdleNotification arrival per TOOL GROUNDING; teammate→coordinator
+         -- delivery occurs at coordinator turn boundary, not at teammate send time
 Ω      = Collection: R → R', retain(T)               -- finalize results; team lifecycle deferred to loop
 R      = Set(Result)                                  -- raw inquiry outputs
 R'     = Set(Result) post-collection                  -- after Phase 3 collection
@@ -92,7 +97,7 @@ Edge cases:
 Phase 0:  U → MB(U) → Qc(MB, M) → Stop → (MBᵥ, m)              -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]
-Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: relay | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + inquiry + collection + preview [Tool]
+Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: relay | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → Await[Notification](T) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + inquiry dispatch + wait + collection + preview [Tool]
 Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Qc(routing) → Stop → J  -- triggers, cross-dialogue, synthesis, presentation & routing [Tool]
           J=wrap_up → PF Qc(select) → Stop → Ω → TeamDelete → TaskCreate(selected)  [Tool]
 
@@ -135,7 +140,8 @@ Phase 0 Qc (gate)        → present (combined: Q1=Mission Brief confirmation, Q
 Sc (gate)                → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
 T (dispatch)             → TeamCreate tool (parallel topology: creates team with shared task list); agent-aware realization: match available agents to selected perspectives before spawn — 0 matches: proceed with AI-generated teammates; 1 match: relay (auto-assign); 2+ matches: ELIDABLE gate (user confirms agent-perspective mapping, each option genuinely viable under different value weightings per A5)
 ∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates — each receives MBᵥ + perspective only; no Phase 1 context G passed)
-∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination)
+∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination — dispatch phase)
+Await (sense)            → IdleNotification (platform realization: teammate SubagentStop events surface as coordinator idle notifications; teammate→coordinator message delivery occurs at coordinator turn boundary, not at teammate send time — passive wait, no coordinator poll; async message-passing execution model)
 Phase 3 P (relay)        → TextPresent+Proceed (per-perspective epistemic contribution + key finding summaries)
 Phase 4 Δ (sense)        → Internal operation (trigger check per Trigger Detection Criteria; cite evidence per detected trigger)
 Phase 4 D? (dispatch)    → SendMessage tool (conditional topology: coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
@@ -408,11 +414,6 @@ Multiple selections → parallel teammates (never sequential).
 
 Teammates analyze independently. Results arrive via idle notifications.
 
-**Coordinator wait behavior during Inquiry**:
-- Teammate→coordinator messages reach the coordinator's context at the *next* coordinator turn start — coordinator Stop events do not drain the inbox. The next tool call or notification opens a turn during which queued messages are read.
-- Do not re-prompt a teammate within 2 minutes of the prior prompt. Shorter intervals risk interrupting mid-composition and inducing content revision rather than resolving silence.
-- When waiting, rely on idle notifications to resume — do not poll or issue ping-style prompts.
-
 **Collection and Preview**
 
 Collect inquiry results into R'. Team remains active — shutdown/retain decisions are deferred to the LOOP section after Phase 4 routing, where the user's sufficiency judgment determines team lifecycle.
@@ -561,3 +562,4 @@ Heuristic criteria for Phase 4 trigger detection (Δ). Coordinator cites evidenc
 11. **Concrete routing**: Phase 4 routing options must include session-specific rationale derived from L. Generic labels without Lens-grounded content = protocol violation (analogical application of Full Taxonomy Confirmation — session-grounded concreteness over generic labels)
 12. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
 13. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
+14. **Wait discipline (A7 guard)**: During Phase 3 Await, the coordinator MUST NOT poll, ping, or re-prompt teammates — short-interval re-prompts interrupt teammate mid-composition and induce content revision rather than resolving apparent silence. Platform-specific delivery mechanics are documented in TOOL GROUNDING (Await realization); epistemic prose depends only on the existence of a completion signal, not on its platform form. Recovery from indefinite wait is user-initiated via `user_esc` per LOOP convergence; coordinator-side polling fallback = protocol violation
