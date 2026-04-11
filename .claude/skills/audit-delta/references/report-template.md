@@ -151,6 +151,8 @@ When SKILL.md Phase 5 substitutes this template:
 2. **Conditional blocks** (`{#if condition}` ... `{/if}`): include the block only if the condition holds. The conditions used in this template are:
    - `emergent-count == 0`
    - `mvc-touched-count == 0`
+
+   The `{#if count == 0}` block and the corresponding `{#each name}` iteration are **independently evaluated but exhaustive in practice**: derive both `count` and the iteration source from the same collection so they remain consistent. When the collection is empty, the `{#each}` loop emits zero copies and the `{#if count == 0}` block emits its inline content; when the collection is non-empty, the loop emits one copy per item and the `{#if}` block is suppressed. The two forms are not structurally mutually exclusive at the template level — a substitution that triggers both (or triggers neither) indicates a count-versus-iteration-source mismatch and is a substitution bug, not valid output.
 3. **Iteration blocks** (`{#each name}` ... `{/each}`): emit the inner block once per item in the named collection. The collections used in this template are:
    - `anchor-issue` — all 5 anchors, ordered by number
    - `anchor-issue-with-changes` — subset that had state, comment, or label deltas
@@ -169,4 +171,4 @@ When SKILL.md Phase 5 substitutes this template:
 - The `notable-change-sentence` placeholder is the user-facing one-line summary of the most significant delta. Heuristic: if any anchor closed, highlight that. Else, if any emergent issue is high-severity, highlight that. Else, if MVC was touched, highlight that. Else, "No significant changes since {baseline-date}."
 - The "User judgment required" prose under each DQ section is intentional reinforcement of the Surfacing over Deciding principle. Do not remove it during substitution; the user re-reading the report later benefits from the reminder.
 - Do not invent commit subjects. If `git log` returns truncated subjects, write them truncated. The skill must not paraphrase tool output.
-- The report file is overwrite-protected at write time (Phase 5 step 4). If a same-day report exists, halt before assembling the substituted output — do not waste work the user will discard.
+- Same-day collision handling: SKILL.md Phase 5 step 5 implements an auto-increment policy — if `docs/audit-delta-{TODAY}.md` already exists, the skill writes to `docs/audit-delta-{TODAY}-2.md`, then `-3.md`, and so on. Substitution and assembly proceed normally; the collision is resolved at write time, not pre-checked. Do not halt before assembling — that would lose work when new commits land between same-day runs.

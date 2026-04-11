@@ -20,12 +20,14 @@ Frozen configuration — scope file lists, anchor issue identifiers, DQ definiti
 
 Execute the five phases in order. Each phase consumes the prior phase's output. Cite all gh and git output verbatim in the report — do not paraphrase tool output.
 
+**Command template substitution**: Several phases use shell command templates containing `{name}` placeholders (for example `{baseline-date}` in Phase 3 and Phase 4, `{target-file}` in Phase 3, `{mvc-file}` in Phase 5). When executing these commands, replace the placeholder with the literal value before invoking the tool — do not pass brace syntax to the shell. The `{baseline-date}` value comes from Phase 1 (extracted from the baseline filename and used verbatim as a `YYYY-MM-DD` string). The `{TODAY}` placeholder is set by Phase 5's `date +%Y-%m-%d` step. Per-iteration placeholders like `{target-file}` and `{mvc-file}` are bound from the surrounding loop context.
+
 ### Phase 1: Locate Baseline
 
 Identify the most recent prior heavy audit report.
 
 1. Glob `docs/audit-*.md` (this pattern matches both `audit-YYYY-MM-DD.md` and `audit-delta-YYYY-MM-DD.md`).
-2. **Filter out** `audit-delta-*.md` entries — those are previous skill outputs, not heavy audit baselines. The valid baseline is the most recent `docs/audit-YYYY-MM-DD.md` whose stem does not start with `audit-delta-`.
+2. **Filter out** `audit-delta-*.md` entries — those are previous skill outputs, not heavy audit baselines. The valid baseline is the most recent `docs/audit-YYYY-MM-DD.md` whose stem does not start with `audit-delta-`. **If after this filter no non-delta baseline file remains** (the directory contains only previous delta reports, or the directory is empty), treat this as the no-baseline case and follow step 4 below — do not select a delta report as a fallback baseline.
 3. Extract the baseline date from the filename (`YYYY-MM-DD`).
 4. Record the baseline path and date — Phases 2 through 5 reference both.
 
@@ -73,8 +75,10 @@ Find new audit-relevant issues opened since baseline.
 1. Run:
 
    ```
-   gh issue list --state all --search "created:>{baseline-date}" --json number,title,state,createdAt,labels --limit 100
+   gh issue list --state all --search "created:>={baseline-date}" --json number,title,state,createdAt,labels --limit 100
    ```
+
+   The `>=` operator is intentional: it includes issues created exactly on the baseline date, matching the inclusive `git log --since={baseline-date}` semantics used in Phase 3 and Phase 5. Using `>` would create an off-by-one gap on the baseline day.
 
 2. Read `references/frozen-config.md` section "Phase 4 Filter Set". That section is the authoritative list of signals used to decide whether an issue is audit-relevant — title prefix (loaded from `audit-issue-prefix.txt`, with trailing whitespace stripped), Track Alpha file paths, Track Beta file paths, **Deterministic Queue target file paths**, and the keyword list. The DQ-target union is critical: some DQ targets (notably DQ2's `epistemic-cooperative/.claude-plugin/plugin.json`) sit slightly outside the strict Track Alpha 10-protocol scope, and without unioning DQ paths into the filter set, commits to such files would silently miss the emergent filter.
 3. For each issue returned by gh, include it in the result set if **any** signal from the Phase 4 Filter Set matches the issue title or body.
@@ -95,13 +99,21 @@ Check whether any Minimal Viable Core file has been touched since baseline, then
 
    Any commits found go to the report's Regression Watch section as candidates — the user judges whether they degraded the MVC.
 
-2. Read `references/report-template.md`.
+2. **Obtain today's date** for the report filename and the `{YYYY-MM-DD}` placeholder. Run:
 
-3. Substitute placeholders. The authoritative substitution rules — placeholder names, conditional blocks (`{#if ...}`), iteration blocks (`{#each ...}`), truncation conventions, and empty-collection handling — are defined in `references/report-template.md` section "Substitution Rules". Read that section before substituting; use the placeholder names exactly as defined there. Do not invent placeholders that the template does not list, and do not paraphrase the existing names — drift between SKILL.md and the template would silently break the substitution.
+   ```
+   date +%Y-%m-%d
+   ```
 
-4. Write the result to `docs/audit-delta-{TODAY}.md`. If a file with that name already exists (same-day re-run), use the next available numeric suffix: `docs/audit-delta-{TODAY}-2.md`, then `-3.md`, and so on. Increment until a non-existent path is found. This preserves prior same-day reports — same-day re-runs are legitimate when new commits land between runs, and silently overwriting the earlier report would lose work.
+   Bind the output as `{TODAY}`. Use this exact value for both the filename and the in-document `{YYYY-MM-DD}` placeholder so they match. Running `date` is the single authoritative substitution source for `{TODAY}` — do not derive it from any other context.
 
-5. After writing, present a one-paragraph summary to the user with:
+3. Read `references/report-template.md`.
+
+4. Substitute placeholders. The authoritative substitution rules — placeholder names, conditional blocks (`{#if ...}`), iteration blocks (`{#each ...}`), truncation conventions, and empty-collection handling — are defined in `references/report-template.md` section "Substitution Rules". Read that section before substituting; use the placeholder names exactly as defined there. Do not invent placeholders that the template does not list, and do not paraphrase the existing names — drift between SKILL.md and the template would silently break the substitution.
+
+5. Write the result to `docs/audit-delta-{TODAY}.md`. If a file with that name already exists (same-day re-run), use the next available numeric suffix: `docs/audit-delta-{TODAY}-2.md`, then `-3.md`, and so on. Increment until a non-existent path is found. This preserves prior same-day reports — same-day re-runs are legitimate when new commits land between runs, and silently overwriting the earlier report would lose work.
+
+6. After writing, present a one-paragraph summary to the user with:
    - The report file path
    - Counts: anchor closed/open, DQ touched/untouched, emergent count, regression candidate count
    - One sentence on the most notable change (if any)

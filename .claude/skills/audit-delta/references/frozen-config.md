@@ -5,7 +5,7 @@ This file is the static configuration source for `audit-delta`. All entries are 
 ## Origin
 
 - **Session ID**: `c059212d-aba4-4665-9b16-616e0420d60e`
-- **Session location**: `~/.claude/projects/-Users-choi-Downloads-github-private-epistemic-protocols/c059212d-aba4-4665-9b16-616e0420d60e.jsonl`
+- **Session location**: stored under each user's local Claude Code projects directory as `c059212d-aba4-4665-9b16-616e0420d60e.jsonl` — the exact parent path varies per machine and per project encoding
 - **Baseline report**: `docs/audit-2026-04-11.md` (337 lines)
 - **Protocol chain**: Hermeneia (5-gap clarification) then Prosoche (10 materialized tasks, 4 Claude general-purpose subagents plus Codex CLI dual-stream) then Entropy Triage (Deterministic Queue plus Design Decision Matrix)
 - **Repository**: `jongwony/epistemic-protocols`
@@ -26,8 +26,8 @@ The prefix is used only for matching during Phase 4 emergent scan. New audit-rel
 Phase 4 emergent scan filters newly created issues by matching against this set of signals. An issue is included in the emergent results if **any** signal matches the issue title or body:
 
 1. **Title prefix** — the byte sequence loaded from `audit-issue-prefix.txt` (after whitespace strip).
-2. **Track Alpha file paths** — every entry from "Scope: Track Alpha (Mission/Vision)" above.
-3. **Track Beta file paths** — every entry from "Scope: Track Beta (Soundness)" above.
+2. **Track Alpha file paths** — every entry from "Scope: Track Alpha (Mission/Vision)" below.
+3. **Track Beta file paths** — every entry from "Scope: Track Beta (Soundness)" below.
 4. **Deterministic Queue target paths** — every target file path enumerated in "Deterministic Queue (DQ1 through DQ8)" below. This union is critical: some DQ targets (notably DQ2's `epistemic-cooperative/.claude-plugin/plugin.json`) sit slightly outside the strict Track Alpha 10-protocol scope. Without this union step, a commit to such a file would silently miss the emergent filter.
 5. **Keywords** — any of the following terms anywhere in the issue title or body:
    - `axiom`
@@ -192,7 +192,7 @@ When MVC2/MVC3/MVC4 watch targets overlap with all 10 SKILL.md files, the skill 
 
 - Baseline report: `docs/audit-2026-04-11.md`
 - GitHub repo: `https://github.com/jongwony/epistemic-protocols`
-- Original session JSONL: `~/.claude/projects/-Users-choi-Downloads-github-private-epistemic-protocols/c059212d-aba4-4665-9b16-616e0420d60e.jsonl`
+- Original session JSONL: `c059212d-aba4-4665-9b16-616e0420d60e.jsonl` under each user's local `~/.claude/projects/<project-encoded>/` directory (exact parent path varies per machine)
 
 ## Statelessness
 
