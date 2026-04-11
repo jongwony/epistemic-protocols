@@ -224,6 +224,7 @@ Heuristic signals for context insufficiency inference (not hard gates):
 | Implicit requirements | Task carries unstated assumptions |
 | Ambiguous scope | Multiple valid interpretations exist and AI cannot determine intended approach from available context |
 | Environmental dependency | Relies on external state (configs, APIs, versions) |
+| Prior-decision implication | Prospect references or rests on a decision made in an earlier session (rationale, commitment, convention) not present in current conversation context |
 
 **Cross-session enrichment**: Domain knowledge accumulated through prior Reflexion cycles may narrow the Phase 0 uncertainty scan — known domain patterns reduce the scope of novel-domain signals. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
@@ -290,6 +291,7 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
 - If partial evidence found: enrich uncertainty with collected evidence (`Uᵢ'`), retain for classification
 - If conflicting evidence found: enrich uncertainty with conflicting findings (`Uᵢ'`), retain for classification
 - If no evidence found: retain in `Uᵢ'` with empty context
+- **Cross-session state consultation is in-scope**: When a prospect implicates prior decisions, rationale, or committed state from earlier sessions, Read/Grep over persistent memory files (MEMORY.md, `.insights/`, prior decision logs) is part of Phase 1 Ctx — not a separate protocol. Consulting past state at the current decision moment is context collection; evidence from memory is treated identically to evidence from the codebase (Evidence source tagged `source: "memory:{path}"` for traceability). This is discovery of what the AI already committed to, not pattern discovery across sessions.
 
 **Step 2 — Epistemic classification** (core act): For each remaining uncertainty in `Uᵢ'`:
 - **Dimension assessment** (Layer 1): Is this factual, coherence, or relevance?
@@ -437,7 +439,7 @@ After integration:
 
 1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via gate interaction (Phase 2)
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
-3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep, (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/EmpiricallyObservable: run empirical observation to attach evidence, (f) for Coherence/MemoryInternal: resolve through factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent), (g) for Coherence/CrossDomain and Relevance: detect and show routing target in classify summary
+3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep over codebase and persistent memory (prior-session decision rationale, committed conventions, source tagged `memory:{path}`), (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly, (e) for Factual/EmpiricallyObservable: run empirical observation to attach evidence, (f) for Coherence/MemoryInternal: resolve through factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent), (g) for Coherence/CrossDomain and Relevance: detect and show routing target in classify summary
 4. **Evidence over Inference over Detection**: When context is insufficient, infer the highest-gain question rather than detect via fixed checklist (lower boundary). When a factual uncertainty is empirically observable, observe directly rather than infer from reasoning alone (upper boundary — Rule 20 is the structural guard). Evidence-claim alignment: partial evidence covering a subset of the claim scope is inference for the uncovered portion, not evidence — verify evidence scope ⊇ claim scope before treating as resolved, and classify the uncovered portion separately
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on prospect requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
