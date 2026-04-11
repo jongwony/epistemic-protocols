@@ -68,6 +68,18 @@ The act of creating Standing authority — writing a system prompt rule, configu
 
 **Scope boundary**: EP protocols govern authority boundary definition and protection (epistemic scope). Standing authority implementation — system prompts, CI/CD rules, compose automation — belongs to the operational scope outside EP protocols. EP defines where the boundary is; the operational layer realizes the delegation.
 
+### Philosophical Lineage
+
+A2's relay/constitution boundary is not a novel design choice but a formalization of pre-existing structure in extended human cognition. Two independent philosophical lineages converge on this distinction:
+
+**Husserl's passive/active synthesis** (*Cartesian Meditations*, §§38-39): Passive synthesis constitutes pre-egoic, pre-reflective givenness — the mechanical transmission of sense-data without egoic judgment. Active synthesis constitutes meaning through egoic acts of attention, selection, and interpretation. Relay corresponds to passive synthesis; constitution corresponds to active synthesis. "Constitution" in A2 is not a generic term but a direct structural reference to Husserl's technical vocabulary — the homomorphism is not merely lexical.
+
+**Clark & Chalmers' active externalism** ("The Extended Mind", *Analysis* 58:7-19, 1998): Cognitive processes can extend beyond the biological brain when tools and environment are coupled reliably enough to function as cognitive workspace. Under this view, A2's relay/constitution boundary marks where AI-as-cognitive-tool operates within the user's extended cognition (relay: AI competent within pre-established trust, delegable) and where the user's constitutive authority resumes (constitution: novel judgment that cannot be delegated to the tool).
+
+The convergence of these lineages — phenomenological (Husserl) and analytic philosophy of mind (Clark & Chalmers) — provides A2 with cross-traditional grounding. A2 is the axiom most robustly supported by external philosophical anchors; the audit of 2026-04-11 (see `docs/audit-2026-04-11.md` §Positive Findings P2) empirically confirmed this via independent dual-stream analysis.
+
+**Operational correspondence to extended-cognition labor division**: The relay/constitution boundary maps directly onto the Known-Knowns → AI / Unknown-Unknowns → Human division of cognitive labor. Relay operations (entropy→0, deterministic, citable) are the domain where AI extends user cognition as competent tool. Constitution operations (entropy>0, novel selection) are the domain where user epistemic authority remains non-delegable. A2 does not *prescribe* this mapping — it *recognizes* a pattern already present in effective extended cognition.
+
 ## A3. Convergence Persistence
 
 Protocol modes remain active until convergence conditions are met or the user explicitly exits. A protocol that deactivates before convergence abandons its epistemic commitment — the deficit it was created to address remains unresolved.
@@ -93,6 +105,8 @@ Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts th
 **Epistemic scope trajectory**: Gated interactions are EP's core epistemic contribution — they encode the irreducibly human act of constituting new meaning through dialogue. Relay interactions (auto-resolvable selections) converge toward platform-native capabilities as models improve. EP's mission alignment concentrates on the gated axis where human participation cannot be automated.
 
 Composition scope: The factorization G = R(p) ∘ A applies to individual gate operations within a single protocol activation. Inter-protocol composition (sequential activation of multiple protocols) operates through Session Text Composition — natural language in session context, not formal gate composition. Associativity of gate operations across protocol boundaries is not claimed; each protocol's gates are independently factored.
+
+**Cross-reference with A2 (Extended Mind ground)**: A5's relay/gated classification, when combined with A2's Standing/Active authority model, realizes the extended-cognition labor division that A2's Philosophical Lineage establishes. Relay operations (bounded regret, delegable) live in the user's extended cognitive workspace under AI competence. Gated operations (unbounded regret, constitutive) mark points where novel judgment cannot be delegated. A5 factors A2's constitution category into its interaction-kind dimension — both flow from the same extended-cognition ground (Husserl *Cartesian Meditations* §§38-39; Clark & Chalmers 1998).
 
 ## A6. Context-Question Separation
 
