@@ -65,7 +65,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/epharmoge:contextualize` — post-execution applicability check against actual project context
 - [ ] `/prosoche:attend` — routes execution-time risks; stops on irreversible actions for approval
 - [ ] `/hermeneia:clarify` — repair intent-expression gaps in commit messages or PR descriptions
-- [ ] `/task-workflow:ship` — one-shot commit + push + PR + task registration
+- [ ] [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) — one-shot commit + push + PR + task registration. Optional convenience; lives in the external `jongwony/ClaudePanel.spoon` plugin, not this repo. Plain `git push` + `gh pr create` also works.
 
 ## Contribution Workflow
 
@@ -75,7 +75,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 4. **Verify** — `/verify` must pass all 15 static checks
 5. **Test** — `node --test scripts/package.test.js`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)
-7. **Ship** — `/task-workflow:ship` for the one-shot flow; PR body language is Korean (hook-enforced)
+7. **Ship** — [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) for the one-shot flow if you have that external plugin installed, or fall back to plain `git push -u origin <branch>` + `gh pr create`; PR body language is Korean (hook-enforced)
 8. **Address review** — `claude-code-review.yml` and `claude-epistemic-review.yml` post automated reviews; use `/gh-address-comments` to respond
 9. **Merge** — the maintainer merges manually via web after final review
 
@@ -142,8 +142,11 @@ message.
 Offer to help with each unchecked item in order, starting with Environment,
 then Repository, then pointing them at the Core Docs to read in the listed
 order. For the Protocols to Use list, explain that these are invoked via
-slash commands in Claude Code and are defined in this very repo — they'll
-use them while editing the protocols themselves.
+slash commands in Claude Code. Most are defined in this very repo, so the
+contributor will use them while editing the same protocols they're
+contributing to. Any entry rendered as an external link lives in a
+separate plugin repo and is optional — contributors can always fall back
+to plain git/gh commands for those steps.
 
 After setup, walk through Contribution Workflow, Conventions, and Prime
 Directives briefly. Offer to open a recent merged PR together to show the
