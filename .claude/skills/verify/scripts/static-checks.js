@@ -1316,6 +1316,25 @@ function checkCrossRefScan() {
     // utilityDirs skip — utility plugin SKILL.md files must also be published.
     // Sources 1, 2, 4 remain protocol-only (utility-skip preserved) — that's the
     // core C7 separation between graph.json (10 protocols) and publication surface.
+    //
+    // IMPORTANT: path.resolve (not path.join) is load-bearing here. When invoked
+    // as `node .claude/skills/verify/scripts/static-checks.js .`, projectRoot is
+    // the relative string ".". path.join(".", "scripts", "package.js") yields
+    // "scripts/package.js", which require() treats as a MODULE IDENTIFIER (not a
+    // file path) and resolves against node_modules → Cannot find module. The
+    // catch then silently swallows and the entire sub-check no-ops. path.resolve
+    // forces cwd-absolute, which require() accepts as a file path. Surrounding
+    // path.join calls (graphPath2, skillMdPath) feed fs.existsSync/fs.readdirSync
+    // which DO accept cwd-relative paths; require() has stricter semantics. Do
+    // NOT "normalize" to path.join for stylistic consistency.
+    //
+    // Meta-dependency note: this require() creates a structural coupling
+    // static-checks.js → scripts/package.js. package.js's top-level code runs
+    // inside the verifier process on require. The existing `require.main ===
+    // module` guard in package.js keeps main() from firing, but any new
+    // top-level side effect (console.log, fs write, network call) would leak
+    // into verify output. package.js contributors must keep all effects behind
+    // function boundaries or the main-module guard.
     const packageJsPath = path.resolve(projectRoot, 'scripts', 'package.js');
     if (fs.existsSync(packageJsPath)) {
       let PLUGINS;
@@ -1333,8 +1352,26 @@ function checkCrossRefScan() {
       }
 
       if (Array.isArray(PLUGINS)) {
+        // Structural guard: filter malformed tuples and emit distinct warnings
+        // for them. Without this, a missing `skill` key produces the string
+        // `"dir/undefined"` which flows into the set-diff as a misleading
+        // `stale-plugins-entry` warning. The filter ensures real shape errors
+        // surface as parse errors, not as phantom filesystem mismatches.
+        const validPlugins = [];
+        for (const p of PLUGINS) {
+          if (p && typeof p.dir === 'string' && typeof p.skill === 'string') {
+            validPlugins.push(p);
+          } else {
+            results.warn.push({
+              check: 'cross-ref-scan',
+              file: 'scripts/package.js',
+              message: `malformed-plugins-entry: expected { dir: string, skill: string } tuple, got ${JSON.stringify(p)}`
+            });
+          }
+        }
+
         const packagePluginTuples = new Set(
-          PLUGINS.map(p => `${p.dir}/${p.skill}`)
+          validPlugins.map(p => `${p.dir}/${p.skill}`)
         );
 
         // Filesystem walk: for each plugin dir, enumerate ${dir}/skills/<sub>/SKILL.md

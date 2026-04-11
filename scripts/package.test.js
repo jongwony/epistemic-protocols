@@ -403,6 +403,14 @@ describe('package.js CLI', () => {
         'write.zip',
       ],
     );
+    // Bundle file count decomposition: the prior 22 reflected 13 plugins × avg
+    // ~1.7 files each (SKILL.md + optional plugin.json + optional references).
+    // The 6 new publication-surface plugins (reflexion, write, and the 4
+    // epistemic-cooperative sub-skills) contribute ~16 additional files
+    // (SKILL.md + plugin.json/frontmatter + sporadic references/agents), giving
+    // the 38 total. This assertion is brittle under any new file addition
+    // anywhere in a packaged dir — a follow-up PR will replace it with a
+    // contract invariant (e.g., zip-set contains bundle, PLUGINS.length + 1).
     assert.equal(bundle.files, 38);
   });
 });

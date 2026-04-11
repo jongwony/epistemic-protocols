@@ -57,7 +57,7 @@ const DESCRIPTION_OVERRIDES = {
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   compose: 'Protocol composition authoring — build composition SKILL.md from protocol chains',
-  reflexion: 'Cross-session learning via guided dialogue — extracts session insights and integrates into persistent memory. Alias: Reflexion.',
+  reflexion: 'Cross-session learning via /reflect — extracts session insights through guided dialogue and integrates into persistent memory.',
 };
 
 const EXCLUDE_NAMES = new Set([
