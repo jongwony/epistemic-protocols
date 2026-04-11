@@ -370,26 +370,14 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('omits excluded skills from dry-run packaging results', () => {
+  it('packages all 19 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
     const result = JSON.parse(output);
-    const excludedSkills = new Set([
-      'reflexion/reflexion',
-      'write/write',
-      'epistemic-cooperative/dashboard',
-    ]);
-    const packagedSkills = result.results
-      .filter(entry => entry.plugin !== 'bundle')
-      .map(entry => `${entry.plugin}/${entry.skill}`);
     const bundle = result.results.find(entry => entry.plugin === 'bundle');
 
-    for (const skill of excludedSkills) {
-      assert.ok(!packagedSkills.includes(skill), `Expected ${skill} to be excluded from dry-run results`);
-    }
-
-    assert.equal(result.results.length, 14);
+    assert.equal(result.results.length, 20);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -399,6 +387,8 @@ describe('package.js CLI', () => {
         'clarify.zip',
         'compose.zip',
         'contextualize.zip',
+        'curses.zip',
+        'dashboard.zip',
         'epistemic-protocols-bundle.zip',
         'frame.zip',
         'gap.zip',
@@ -407,8 +397,20 @@ describe('package.js CLI', () => {
         'ground.zip',
         'inquire.zip',
         'onboard.zip',
+        'reflexion.zip',
+        'report.zip',
+        'sophia.zip',
+        'write.zip',
       ],
     );
-    assert.equal(bundle.files, 22);
+    // Bundle file count decomposition: the prior 22 reflected 13 plugins × avg
+    // ~1.7 files each (SKILL.md + optional plugin.json + optional references).
+    // The 6 new publication-surface plugins (reflexion, write, and the 4
+    // epistemic-cooperative sub-skills) contribute ~16 additional files
+    // (SKILL.md + plugin.json/frontmatter + sporadic references/agents), giving
+    // the 38 total. This assertion is brittle under any new file addition
+    // anywhere in a packaged dir — a follow-up PR will replace it with a
+    // contract invariant (e.g., zip-set contains bundle, PLUGINS.length + 1).
+    assert.equal(bundle.files, 38);
   });
 });
