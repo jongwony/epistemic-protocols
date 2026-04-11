@@ -1310,43 +1310,77 @@ function checkCrossRefScan() {
       }
     }
 
-    // Source 3: package.js PLUGINS (extract dir names by parsing the file)
-    const packageJsPath = path.join(projectRoot, 'scripts', 'package.js');
-    let packagePluginDirs = new Set();
+    // Source 3: package.js PLUGINS at (dir, skill) tuple granularity.
+    // Publication-surface invariant: the set of (dir, skill) SKILL.md files on disk
+    // must match PLUGINS exactly. This sub-check deliberately does NOT apply the
+    // utilityDirs skip — utility plugin SKILL.md files must also be published.
+    // Sources 1, 2, 4 remain protocol-only (utility-skip preserved) — that's the
+    // core C7 separation between graph.json (10 protocols) and publication surface.
+    const packageJsPath = path.resolve(projectRoot, 'scripts', 'package.js');
     if (fs.existsSync(packageJsPath)) {
+      let PLUGINS;
       try {
-        const packageContent = fs.readFileSync(packageJsPath, 'utf8');
-        // Extract dir values from PLUGINS array: { dir: 'name', ... }
-        const dirMatches = packageContent.matchAll(/dir:\s*'([^']+)'/g);
-        for (const m of dirMatches) {
-          packagePluginDirs.add(m[1]);
-        }
+        // Invalidate require cache so repeated static-check runs pick up edits.
+        delete require.cache[require.resolve(packageJsPath)];
+        ({ PLUGINS } = require(packageJsPath));
       } catch (e) {
         results.warn.push({
           check: 'cross-ref-scan',
           file: 'scripts/package.js',
-          message: `Could not parse package.js PLUGINS: ${e.message}`
+          message: `Could not load package.js PLUGINS: ${e.message}`
         });
+        PLUGINS = null;
       }
 
-      // Every filesystem plugin dir should appear in package.js PLUGINS
-      for (const dir of allPluginDirs) {
-        if (!packagePluginDirs.has(dir)) {
-          results.warn.push({
-            check: 'cross-ref-scan',
-            file: 'scripts/package.js',
-            message: `Plugin directory "${dir}" exists on filesystem but missing from PLUGINS array`
-          });
+      if (Array.isArray(PLUGINS)) {
+        const packagePluginTuples = new Set(
+          PLUGINS.map(p => `${p.dir}/${p.skill}`)
+        );
+
+        // Filesystem walk: for each plugin dir, enumerate ${dir}/skills/<sub>/SKILL.md
+        const filesystemTuples = new Set();
+        for (const dir of allPluginDirs) {
+          const skillsDir = path.join(projectRoot, dir, 'skills');
+          if (!fs.existsSync(skillsDir)) continue;
+          let subEntries;
+          try {
+            subEntries = fs.readdirSync(skillsDir, { withFileTypes: true });
+          } catch (e) {
+            results.warn.push({
+              check: 'cross-ref-scan',
+              file: `${dir}/skills`,
+              message: `Could not read skills directory: ${e.message}`
+            });
+            continue;
+          }
+          for (const sub of subEntries) {
+            if (!sub.isDirectory()) continue;
+            const skillMdPath = path.join(skillsDir, sub.name, 'SKILL.md');
+            if (fs.existsSync(skillMdPath)) {
+              filesystemTuples.add(`${dir}/${sub.name}`);
+            }
+          }
         }
-      }
-      // Every package.js PLUGINS dir should exist on filesystem
-      for (const dir of packagePluginDirs) {
-        if (!allPluginDirs.has(dir)) {
-          results.warn.push({
-            check: 'cross-ref-scan',
-            file: 'scripts/package.js',
-            message: `PLUGINS entry "${dir}" has no corresponding plugin directory on filesystem`
-          });
+
+        // Bidirectional diff (tuple-level; warning-only — fail escalation is a
+        // follow-up PR so detector and detected migration land separately).
+        for (const tuple of filesystemTuples) {
+          if (!packagePluginTuples.has(tuple)) {
+            results.warn.push({
+              check: 'cross-ref-scan',
+              file: 'scripts/package.js',
+              message: `publication-gap: ${tuple} has SKILL.md but is missing from scripts/package.js PLUGINS`
+            });
+          }
+        }
+        for (const tuple of packagePluginTuples) {
+          if (!filesystemTuples.has(tuple)) {
+            results.warn.push({
+              check: 'cross-ref-scan',
+              file: 'scripts/package.js',
+              message: `stale-plugins-entry: scripts/package.js PLUGINS contains ${tuple} but SKILL.md does not exist`
+            });
+          }
         }
       }
     }

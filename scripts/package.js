@@ -33,6 +33,12 @@ const PLUGINS = [
   { dir: 'epistemic-cooperative', skill: 'onboard' },
   { dir: 'epistemic-cooperative', skill: 'catalog' },
   { dir: 'epistemic-cooperative', skill: 'compose' },
+  { dir: 'reflexion', skill: 'reflexion' },
+  { dir: 'write', skill: 'write' },
+  { dir: 'epistemic-cooperative', skill: 'report' },
+  { dir: 'epistemic-cooperative', skill: 'dashboard' },
+  { dir: 'epistemic-cooperative', skill: 'sophia' },
+  { dir: 'epistemic-cooperative', skill: 'curses' },
 ];
 
 // claude.ai description overrides (originals exceed 200 chars)
@@ -51,6 +57,7 @@ const DESCRIPTION_OVERRIDES = {
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   compose: 'Protocol composition authoring — build composition SKILL.md from protocol chains',
+  reflexion: 'Cross-session learning via guided dialogue — extracts session insights and integrates into persistent memory. Alias: Reflexion.',
 };
 
 const EXCLUDE_NAMES = new Set([
@@ -545,4 +552,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip, generateReleaseNotes };
+module.exports = { PLUGINS, parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip, generateReleaseNotes };
