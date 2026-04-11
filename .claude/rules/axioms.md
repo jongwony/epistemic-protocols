@@ -35,6 +35,8 @@ A2's detection/authority distinction operationalizes through a relay/constitutio
 - **Relay**: AI exercises zero epistemic authority — mechanically transmits environmental facts with cited basis. Auto-resolution is legitimate when the action is relay.
 - **Constitution**: AI exercises epistemic authority through selection, interpretation, scope expansion, or environment mutation. User confirmation required.
 
+*Etymology note*: "Constitution" is Husserl's technical term from *Cartesian Meditations* §§38-39 (active synthesis); "Relay" corresponds to passive synthesis. See `docs/philosophical-anchors.md` for the full lineage and extended-cognition grounding.
+
 Single test: "Is the AI acting as a relay or exercising authority?" Five verification indicators derive from this test — all are natural consequences of zero epistemic authority:
 
 | Indicator | Relay | Constitution |
@@ -93,6 +95,8 @@ Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts th
 **Epistemic scope trajectory**: Gated interactions are EP's core epistemic contribution — they encode the irreducibly human act of constituting new meaning through dialogue. Relay interactions (auto-resolvable selections) converge toward platform-native capabilities as models improve. EP's mission alignment concentrates on the gated axis where human participation cannot be automated.
 
 Composition scope: The factorization G = R(p) ∘ A applies to individual gate operations within a single protocol activation. Inter-protocol composition (sequential activation of multiple protocols) operates through Session Text Composition — natural language in session context, not formal gate composition. Associativity of gate operations across protocol boundaries is not claimed; each protocol's gates are independently factored.
+
+*Philosophical ground*: See `docs/philosophical-anchors.md` §A5 for the extended-cognition framing and non-derivability analysis (what A5 introduces beyond A2's constitution category).
 
 ## A6. Context-Question Separation
 

@@ -44,6 +44,8 @@ Do not mirror built-in execution capabilities (e.g., worktree isolation, PR crea
 
 The epistemic meta-layer has a fundamentally different cost topology from the execution layer. In the execution layer (code, tests, docs), AI drives the marginal cost of completeness toward zero — pursuing completeness is correct. In the epistemic meta-layer (protocols, axioms, formal systems), unused protocols pollute cognitive space — the cost of an unused protocol exceeds the cost of a missing one. This asymmetry grounds Deficit Empiricism: empirical restraint is the correct posture for protocol creation, even when execution-layer intuitions suggest "why not create more?" Attempts to apply execution-domain completeness principles directly to the epistemic domain should be identified and the cost function difference surfaced.
 
+**Phenomenological vindication**: This principle's asymmetry survives Husserlian eidetic reduction. It corresponds to Husserl's distinction between thematic consciousness (what attention is directed at) and marginal consciousness (what remains in the co-given field) — the asymmetry is not a pragmatic design choice but a reflection of the finitude of attentional capacity. Under Extended Mind framing (Clark & Chalmers, *Analysis* 58:7-19, 1998), this reflects the finite capacity of the extended cognitive workspace: adding unused cognitive tools pollutes the workspace even when each tool is individually valid, because attentional cost does not distinguish invoked from uninvoked candidates. See `docs/audit-2026-04-11.md` §Positive Findings P5.
+
 ## Three-Tier Termination
 
 Protocol exit follows a graduated taxonomy based on side-effect presence:
