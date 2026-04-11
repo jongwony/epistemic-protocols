@@ -9,6 +9,7 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
+const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('zlib');
 const { parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip, generateReleaseNotes } = require('./package');
@@ -403,14 +404,173 @@ describe('package.js CLI', () => {
         'write.zip',
       ],
     );
-    // Bundle file count decomposition: the prior 22 reflected 13 plugins × avg
-    // ~1.7 files each (SKILL.md + optional plugin.json + optional references).
-    // The 6 new publication-surface plugins (reflexion, write, and the 4
-    // epistemic-cooperative sub-skills) contribute ~16 additional files
-    // (SKILL.md + plugin.json/frontmatter + sporadic references/agents), giving
-    // the 38 total. This assertion is brittle under any new file addition
-    // anywhere in a packaged dir — a follow-up PR will replace it with a
-    // contract invariant (e.g., zip-set contains bundle, PLUGINS.length + 1).
-    assert.equal(bundle.files, 38);
+    // Lower-bound invariant: the 38 baseline reflects 13 original + 6
+    // publication-surface plugins × ~2 files each at PR #242 merge time. Any
+    // additive change (new plugin, new reference doc, new agent) only
+    // increases this count. A shrink indicates an unintended regression
+    // (plugin removed or files accidentally excluded from the packager),
+    // which should fail. This replaces the brittle equality assertion from
+    // PR #242 — three independent reviewers flagged the original as
+    // fragile under additive changes (cross-model convergence).
+    assert.ok(
+      bundle.files >= 38,
+      `expected bundle.files >= 38 (regression guard), got ${bundle.files}`
+    );
+  });
+});
+
+// ============================================================
+// cross-ref-scan detector liveness (Task #22 → automated)
+// ============================================================
+//
+// This block MUST stay in package.test.js (not a separate file). Node's test
+// runner parallelizes across files via child processes but runs top-level
+// tests within a single file sequentially. The liveness test mutates
+// scripts/package.js via fs.writeFileSync, and the CLI describe above spawns
+// a subprocess that reads the same file. Placing the two describes in
+// SEPARATE files would cause a cross-file race (confirmed during Stage 2
+// development: liveness.test.js + package.test.js run concurrently → CLI
+// subprocess sees mutated 19-entry PLUGINS → result.results.length !== 20).
+// Keeping both in this single file guarantees sequential execution of
+// top-level describes, eliminating the race by construction.
+//
+// This is the automated form of the Task #22 manual liveness pattern used
+// during PR #242 review. It proves the detector is ALIVE — i.e., it
+// distinguishes "detector ran and found nothing" (correct, warnings empty)
+// from "detector crashed silently" (regression, warnings empty). By
+// injecting a known publication gap and asserting the warning fires, the
+// test would catch the pre-PR-#242 silent-failure bug class if it ever
+// returned. Stage 2 additionally escalates detector-infrastructure failures
+// to fail+subCheckFailed in static-checks.js Source 3; this test covers the
+// warn-level migration-signal path.
+//
+// Recovery: if this test is interrupted (Ctrl+C) mid-execution, the working
+// tree may contain the injected mutation. Restore via `git checkout
+// scripts/package.js`. A test process that completes normally always
+// restores the file via the finally block.
+
+describe('cross-ref-scan detector liveness', () => {
+  // Regex matches the reflexion PLUGINS tuple with tolerance for whitespace,
+  // quote-style, and trailing-comma variations. `m` flag lets `^`/`$` match
+  // line boundaries; capture group 1 preserves leading indent so the
+  // comment-out replacement stays visually aligned with surrounding entries.
+  // If package.js switches to double quotes, adds internal spaces, or drops
+  // the trailing comma, this match still succeeds — replacing the earlier
+  // exact-string match, which was flagged in review for fragility under
+  // non-semantic reformatting.
+  const REFLEXION_TUPLE_RE =
+    /^([ \t]*)(\{\s*dir:\s*['"]reflexion['"],\s*skill:\s*['"]reflexion['"]\s*\},?)\s*$/m;
+  const PACKAGE_JS_PATH = path.join(__dirname, 'package.js');
+  const REPO_ROOT = path.join(__dirname, '..');
+  const STATIC_CHECKS = path.join(
+    REPO_ROOT,
+    '.claude',
+    'skills',
+    'verify',
+    'scripts',
+    'static-checks.js'
+  );
+
+  it('fires publication-gap warning when reflexion entry is removed', () => {
+    const backup = fs.readFileSync(PACKAGE_JS_PATH, 'utf8');
+
+    // Precondition: ensure we know where to inject the mutation.
+    const match = backup.match(REFLEXION_TUPLE_RE);
+    assert.ok(
+      match,
+      'precondition failed: could not find reflexion PLUGINS tuple in scripts/package.js — ' +
+      'update REFLEXION_TUPLE_RE in package.test.js to match the current formatting'
+    );
+
+    try {
+      // Inject: comment out the reflexion entry (preserve leading indent)
+      const [fullMatch, indent, tuple] = match;
+      const mutated = backup.replace(
+        fullMatch,
+        `${indent}// ${tuple} // liveness test — injected`
+      );
+      assert.notEqual(mutated, backup, 'mutation replacement did not change the file content');
+      fs.writeFileSync(PACKAGE_JS_PATH, mutated);
+
+      // Run the verifier as a subprocess (child-process isolation from our
+      // own require cache). The static-checks.js internally deletes its
+      // require cache entry before re-loading package.js, so it sees our
+      // mutation.
+      //
+      // execFileSync throws on non-zero exit, placing stdout in err.stdout.
+      // We treat any parseable result as authoritative — even if an
+      // unrelated check fails and makes static-checks.js exit 1, we still
+      // want to assert against the JSON output. Only truly unparseable
+      // output (runtime crash in static-checks.js, empty stdout) fails the
+      // liveness test at the execFileSync boundary with a diagnostic error.
+      let output;
+      try {
+        output = execFileSync(
+          process.execPath,
+          [STATIC_CHECKS, REPO_ROOT],
+          { encoding: 'utf8' }
+        );
+      } catch (execErr) {
+        if (execErr && typeof execErr.stdout === 'string' && execErr.stdout.length > 0) {
+          output = execErr.stdout;
+        } else {
+          throw new Error(
+            'liveness test: static-checks.js failed without parseable output. ' +
+            `exit=${execErr && execErr.status}, ` +
+            `stdout=${JSON.stringify(execErr && execErr.stdout)}, ` +
+            `stderr=${JSON.stringify(execErr && execErr.stderr)}`
+          );
+        }
+      }
+      const result = JSON.parse(output);
+
+      // Expectation: exactly one publication-gap warning for reflexion/reflexion.
+      const gaps = (result.warn || []).filter(
+        w =>
+          typeof w.message === 'string' &&
+          w.message.includes('publication-gap: reflexion/reflexion')
+      );
+      assert.equal(
+        gaps.length,
+        1,
+        `expected exactly 1 publication-gap warning for reflexion/reflexion, got ${gaps.length}. ` +
+        'If 0: the detector is silently no-op (regression of PR #242 bug class). ' +
+        'If >1: unexpected duplicate detection — investigate cross-ref-scan loop logic.'
+      );
+
+      // Narrow to cross-ref-scan only: the liveness test asserts that
+      // Source 3's warn-level migration signal (publication-gap) fires
+      // WITHOUT escalating to fail. Other checks (notation, gate-type-
+      // soundness, spec-vs-impl, etc.) may independently fail for unrelated
+      // reasons — those are out of scope for this test and should not
+      // break the liveness signal. Filtering to `check === 'cross-ref-scan'`
+      // keeps the assertion semantically scoped to what the test is about.
+      const crossRefFails = (result.fail || []).filter(
+        f => f && f.check === 'cross-ref-scan'
+      );
+      assert.equal(
+        crossRefFails.length,
+        0,
+        `expected 0 cross-ref-scan fails during liveness test, got ${crossRefFails.length}: ` +
+        JSON.stringify(crossRefFails)
+      );
+    } finally {
+      // Always restore, even if assertions above throw. If the restore
+      // itself fails (disk full, permission revoked, EIO), emit a LOUD
+      // stderr recovery message before re-throwing. Without this, the
+      // original assertion error would be clobbered AND the working tree
+      // would be left in the mutated 18-entry state — a double loss.
+      // CI is safe (ephemeral working tree); this protects local dev runs.
+      try {
+        fs.writeFileSync(PACKAGE_JS_PATH, backup);
+      } catch (restoreErr) {
+        process.stderr.write(
+          '\n\n!!! LIVENESS TEST FAILED TO RESTORE scripts/package.js !!!\n' +
+          'Manual recovery required: git checkout scripts/package.js\n' +
+          `Original restore error: ${restoreErr && restoreErr.message}\n\n`
+        );
+        throw restoreErr;
+      }
+    }
   });
 });

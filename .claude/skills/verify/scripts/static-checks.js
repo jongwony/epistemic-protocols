@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 const { execFileSync } = require('child_process');
 
 const projectRoot = process.argv[2] || process.cwd();
@@ -1270,11 +1271,22 @@ function checkCrossRefScan() {
         }
       }
     } catch (e) {
-      results.warn.push({
+      // Stage 2 loud mode (upstream scope): this readdir is the ground-truth
+      // source for cross-ref-scan Sources 1, 2, 3, and 4. If it fails,
+      // allPluginDirs is empty, every downstream source sees an empty
+      // filesystem view, every bidirectional diff collapses to zero findings,
+      // and the entire cross-ref-scan check would silently pass with no
+      // detection. This is the exact silent-failure CLASS Stage 2 closes in
+      // Source 3, at an upstream scope that covers all four sources.
+      // Escalate to fail + subCheckFailed per fail-closed policy —
+      // review-ensemble cross-model agreement (Codex gpt-5.4 high +
+      // silent-failure-hunter) flagged this during PR development.
+      results.fail.push({
         check: 'cross-ref-scan',
         file: '.',
-        message: `Could not scan plugin directories: ${e.message}`
+        message: `Could not scan plugin directories (upstream ground truth): ${e.message}`
       });
+      subCheckFailed = true;
     }
 
     // Protocol-only subset (dirs listed in PROTOCOL_FILES)
@@ -1336,37 +1348,84 @@ function checkCrossRefScan() {
     // into verify output. package.js contributors must keep all effects behind
     // function boundaries or the main-module guard.
     const packageJsPath = path.resolve(projectRoot, 'scripts', 'package.js');
-    if (fs.existsSync(packageJsPath)) {
-      let PLUGINS;
+    if (!fs.existsSync(packageJsPath)) {
+      // Loud failure: package.js is a required input for the publication-surface
+      // check. Missing file is a detector-infrastructure problem, not a migration
+      // signal — escalate to subCheckFailed per Stage 2 loud-mode policy.
+      results.fail.push({
+        check: 'cross-ref-scan',
+        file: 'scripts/package.js',
+        message: 'Required file not found — cross-ref-scan Source 3 cannot verify publication surface'
+      });
+      subCheckFailed = true;
+    } else {
+      let PLUGINS = null;
+      let loadFailed = false;
       try {
         // Invalidate require cache so repeated static-check runs pick up edits.
         delete require.cache[require.resolve(packageJsPath)];
         ({ PLUGINS } = require(packageJsPath));
       } catch (e) {
-        results.warn.push({
+        // Stage 2 loud mode: require() failure is a detector-infrastructure
+        // failure (the detector itself cannot run), not a migration signal.
+        // Escalate to subCheckFailed so the bug class that caused the PR #242
+        // critical path.resolve incident cannot recur as a silent no-op.
+        results.fail.push({
           check: 'cross-ref-scan',
           file: 'scripts/package.js',
           message: `Could not load package.js PLUGINS: ${e.message}`
         });
-        PLUGINS = null;
+        subCheckFailed = true;
+        loadFailed = true;
       }
 
-      if (Array.isArray(PLUGINS)) {
-        // Structural guard: filter malformed tuples and emit distinct warnings
-        // for them. Without this, a missing `skill` key produces the string
-        // `"dir/undefined"` which flows into the set-diff as a misleading
-        // `stale-plugins-entry` warning. The filter ensures real shape errors
-        // surface as parse errors, not as phantom filesystem mismatches.
+      if (!loadFailed && !Array.isArray(PLUGINS)) {
+        // Stage 2 loud mode: require() succeeded but the PLUGINS export is
+        // absent or has a non-Array shape (e.g., hand-edit breakage, typo in
+        // module.exports). Treat as detector-infrastructure failure — without a
+        // valid PLUGINS array we cannot diff against the filesystem.
+        // Shape description handles null specially — `typeof null === 'object'`
+        // would produce the misleading "got object" for a null export.
+        const shapeDesc =
+          PLUGINS === undefined ? 'undefined'
+            : PLUGINS === null ? 'null'
+            : typeof PLUGINS;
+        results.fail.push({
+          check: 'cross-ref-scan',
+          file: 'scripts/package.js',
+          message: `PLUGINS export shape invalid — expected Array, got ${shapeDesc}`
+        });
+        subCheckFailed = true;
+      } else if (!loadFailed && Array.isArray(PLUGINS)) {
+        // Structural guard: filter malformed tuples and escalate each to
+        // fail + subCheckFailed (Stage 2 loud mode). Without this, a missing
+        // `skill` key produces the string `"dir/undefined"` which flows into
+        // the set-diff as a misleading `stale-plugins-entry` warning. Loud
+        // mode ensures real shape errors surface as parse errors that block
+        // CI, not as phantom filesystem mismatches tolerated silently.
+        //
+        // Partial-processing note: valid tuples continue through the
+        // bidirectional diff below even when some entries are malformed.
+        // A malformed entry may ALSO produce a downstream publication-gap
+        // warning for the SKILL.md it would have covered — one root cause,
+        // two diagnostics. This is intentional post-escalation noise; the
+        // malformed-plugins-entry fail is the actionable signal, and
+        // contributors should fix that first.
         const validPlugins = [];
         for (const p of PLUGINS) {
           if (p && typeof p.dir === 'string' && typeof p.skill === 'string') {
             validPlugins.push(p);
           } else {
-            results.warn.push({
+            // util.inspect handles circular references, BigInt, and other
+            // values that would make JSON.stringify throw — we must not
+            // abort the verifier through an unguarded serialization error.
+            const serialized = util.inspect(p, { depth: 2, breakLength: 80 });
+            results.fail.push({
               check: 'cross-ref-scan',
               file: 'scripts/package.js',
-              message: `malformed-plugins-entry: expected { dir: string, skill: string } tuple, got ${JSON.stringify(p)}`
+              message: `malformed-plugins-entry: expected { dir: string, skill: string } tuple, got ${serialized}`
             });
+            subCheckFailed = true;
           }
         }
 
@@ -1399,8 +1458,12 @@ function checkCrossRefScan() {
           }
         }
 
-        // Bidirectional diff (tuple-level; warning-only — fail escalation is a
-        // follow-up PR so detector and detected migration land separately).
+        // Bidirectional diff. publication-gap and stale-plugins-entry remain
+        // warning-only — these are migration signals (code and filesystem out
+        // of sync mid-refactor), not detector-infrastructure failures. Stage 2
+        // escalates only the infrastructure failure modes above (file missing,
+        // load failure, shape invalid, malformed entry). Drift-detection
+        // escalation is a separate downstream PR, gated on clean warnings.
         for (const tuple of filesystemTuples) {
           if (!packagePluginTuples.has(tuple)) {
             results.warn.push({
