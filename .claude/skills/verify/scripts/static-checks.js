@@ -144,7 +144,7 @@ function stripCodeFromText(text) {
 
 function checkNotation() {
   const notationRules = [
-    { pattern: /->(?![a-zA-Z])/g, replace: '→', name: 'arrow' },
+    { pattern: /(?<!-)->(?![a-zA-Z])/g, replace: '→', name: 'arrow' },
     { pattern: /\|\|(?=\s*[A-Z])/g, replace: '∥', name: 'parallel' },
     { pattern: /\\cap\b/g, replace: '∩', name: 'intersection' },
     { pattern: /\\cup\b/g, replace: '∪', name: 'union' },
