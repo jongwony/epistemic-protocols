@@ -19,7 +19,7 @@ Anamnesis(V) → Detect(V) →
   empty_intention(V): Scan(store, trace(V)) → Rank(C[]) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
     |C[]| = 0 ∧ attempts > 0: NullMatch → inform(V, Σ) → deactivate
-    |C[]| > 0: Qc(C[top], progress) → Stop → R →
+    |C[]| > 0: Qc(C[top], evidence, progress) → Stop → R →
       Recognize(c): recall_complete(c) → emit(ClueVector_prose(c)) → converge
       Refine: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
       Reorient(d): rebind(V, d, Σ) → Phase 1                 -- orthogonal dimension shift
@@ -35,7 +35,7 @@ VagueRecall
   → RecalledContext
 requires: empty_intention(V)              -- phenomenological trigger
 deficit:  RecallAmbiguous                 -- activation precondition (Layer 1/2)
-preserves: V                              -- vague recall read-only
+preserves: stores                         -- hypomnesis/ ∪ memory/ are read-only; V is enriched/rebound during protocol
 invariant: Recognition over Retrieval
 
 ── TYPES ──
@@ -43,7 +43,7 @@ V              = VagueRecall { trace: RecallTrace, enrichments: List(Hint) }
 RecallTrace    = { keywords: Set(String), temporal: Optional(String),
                    associations: Set(String) }
 Hint           = String   -- user recall context from Socratic probe
-store          = hypomnesis/ ∪ memory/
+store          = hypomnesis/ ∪ memory/     -- hypomnesis/: ~/.claude/projects/{slug}/hypomnesis/{session-id}/ (recall INDEX, written by SessionEnd hook); memory/: ~/.claude/projects/{slug}/memory/ (curated insights)
 Scan           = (store, RecallTrace) → List(Candidate)
 Candidate      = { session_id: Optional(SessionId),
                    topic: String,
