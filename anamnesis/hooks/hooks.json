@@ -1,0 +1,16 @@
+{
+  "description": "Hypomnesis store writer — indexes session content for /recollect access.",
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs\"",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}
