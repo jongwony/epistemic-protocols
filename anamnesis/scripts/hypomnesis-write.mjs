@@ -15,7 +15,11 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
+
+function logErr(msg) {
+  try { process.stderr.write(`[hypomnesis-write] ${msg}\n`); } catch {}
+}
 
 // --- SIGHUP guard ---
 try { process.on("SIGHUP", () => {}); } catch {}
@@ -29,9 +33,14 @@ const SKIP_REASONS = new Set(["clear"]);
 // --- Helpers ---
 
 function readHookInput() {
-  const raw = fs.readFileSync(0, "utf8").trim();
-  if (!raw) return null;
-  return JSON.parse(raw);
+  try {
+    const raw = fs.readFileSync(0, "utf8").trim();
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    logErr(`failed to parse hook input: ${e.message}`);
+    return null;
+  }
 }
 
 function textFromContent(content) {
@@ -83,7 +92,13 @@ function parseSession(transcriptPath) {
     "/write": "write", "/verify": "verify",
   };
 
-  const raw = fs.readFileSync(transcriptPath, "utf8");
+  let raw;
+  try {
+    raw = fs.readFileSync(transcriptPath, "utf8");
+  } catch (e) {
+    logErr(`failed to read transcript ${transcriptPath}: ${e.message}`);
+    return { userMsgs, allTexts, timestamps, protocols: [] };
+  }
   let totalChars = 0;
 
   for (const line of raw.split("\n")) {
@@ -194,22 +209,20 @@ ${sample}`;
 // --- Haiku Invocation ---
 
 function callHaiku(prompt) {
-  const escaped = prompt.replace(/'/g, "'\\''");
-  const cmd = [
-    "claude", "-p",
+  const output = execFileSync("claude", [
+    "-p",
     "--no-session-persistence",
     "--model", "haiku",
     "--disable-slash-commands",
     "--strict-mcp-config",
     "--dangerously-skip-permissions",
-    '--setting-sources', '""',
-    `'${escaped}'`,
-  ].join(" ");
-
-  const output = execSync(cmd, {
+    "--setting-sources", "",
+    prompt,
+  ], {
     encoding: "utf8",
     timeout: HAIKU_TIMEOUT,
     stdio: ["pipe", "pipe", "pipe"],
+    maxBuffer: 8 * 1024 * 1024,
   });
   return output.trim();
 }
@@ -221,11 +234,16 @@ function extractJson(raw) {
   const braced = raw.match(/\{[\s\S]*\}/);
   if (braced) return braced[0].trim();
 
-  return raw.trim();
+  return null;
 }
 
 function parseHaikuOutput(raw) {
   const jsonStr = extractJson(raw);
+  if (jsonStr === null) {
+    throw new Error(
+      `no JSON payload found in haiku output (first 500 chars): ${raw.slice(0, 500)}`
+    );
+  }
   return JSON.parse(jsonStr);
 }
 
@@ -261,8 +279,8 @@ function buildClueMd(sessionId, date, startedAt, lastTurnAt, data, crossRefs) {
     `date: ${date}`,
     `started_at: ${startedAt}`,
     `last_turn_at: ${lastTurnAt}`,
-    `topics: [${data.topics.join(", ")}]`,
-    `keywords: [${data.keywords.join(", ")}]`,
+    `topics: [${data.topics.map((t) => `"${esc(t)}"`).join(", ")}]`,
+    `keywords: [${data.keywords.map((k) => `"${esc(k)}"`).join(", ")}]`,
     `initial_request: "${esc(data.initial_request)}"`,
     "key_utterances:",
     ...data.key_utterances.map((u) => `  - "${esc(u)}"`),
@@ -285,7 +303,7 @@ function buildVectorMd(sessionId, date, data) {
     "---",
     `session_id: ${sessionId}`,
     `date: ${date}`,
-    `decisions: [${labels.map((l) => esc(l)).join(", ")}]`,
+    `decisions: [${labels.map((l) => `"${esc(l)}"`).join(", ")}]`,
     "---",
     "",
   ];
@@ -363,10 +381,14 @@ function writeStore(targetDir, files) {
   if (fs.existsSync(targetDir)) {
     for (const [name, content] of Object.entries(files)) {
       const dest = path.join(targetDir, name);
-      if (name === "narrative.md" && fs.existsSync(dest)) {
-        fs.appendFileSync(dest, "\n" + content, "utf8");
-      } else {
-        fs.writeFileSync(dest, content, "utf8");
+      try {
+        if (name === "narrative.md" && fs.existsSync(dest)) {
+          fs.appendFileSync(dest, "\n" + content, "utf8");
+        } else {
+          fs.writeFileSync(dest, content, "utf8");
+        }
+      } catch (e) {
+        logErr(`write ${dest} failed: ${e.message}`);
       }
     }
   } else {
@@ -389,13 +411,15 @@ function main() {
   const input = readHookInput();
   if (!input) return;
 
-  const { session_id: sessionId, transcript_path: transcriptPath, reason } = input;
+  const { session_id: sessionId, transcript_path: transcriptPath, cwd, reason } = input;
   if (SKIP_REASONS.has(reason) || !sessionId || !transcriptPath) return;
 
   const stat = fs.statSync(transcriptPath, { throwIfNoEntry: false });
   if (!stat || stat.size < MIN_SESSION_BYTES) return;
 
-  const projectDir = path.dirname(transcriptPath);
+  // Store lives in user's working directory so /recollect can find it,
+  // not in Claude's internal transcript storage (~/.claude/projects/...).
+  const projectDir = cwd || path.dirname(transcriptPath);
   const storeDir = path.join(projectDir, "hypomnesis", sessionId);
 
   const { userMsgs, allTexts, timestamps, protocols } = parseSession(transcriptPath);
@@ -415,8 +439,12 @@ function main() {
     clueData = parseHaikuOutput(clueRaw);
     if (validateClue(clueData)) {
       files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, clueData, crossRefs);
+    } else {
+      logErr(`clue validation failed: invalid schema`);
     }
-  } catch {}
+  } catch (e) {
+    logErr(`clue extraction failed: ${e.message}`);
+  }
 
   // --- Vector: full context ---
   try {
@@ -424,8 +452,12 @@ function main() {
     const vectorData = parseHaikuOutput(vectorRaw);
     if (validateVector(vectorData)) {
       files["vector.md"] = buildVectorMd(sessionId, date, vectorData);
+    } else {
+      logErr(`vector validation failed: invalid schema`);
     }
-  } catch {}
+  } catch (e) {
+    logErr(`vector extraction failed: ${e.message}`);
+  }
 
   // --- Narrative: full context ---
   try {
@@ -437,8 +469,12 @@ function main() {
         sessionId, date, startedAt, lastTurnAt,
         topics, protocols, narrativeData,
       );
+    } else {
+      logErr(`narrative validation failed: invalid schema`);
     }
-  } catch {}
+  } catch (e) {
+    logErr(`narrative extraction failed: ${e.message}`);
+  }
 
   if (Object.keys(files).length > 0) {
     writeStore(storeDir, files);
@@ -447,7 +483,7 @@ function main() {
 
 try {
   main();
-} catch {
-  // fail-open
+} catch (e) {
+  logErr(`top-level: ${e.message}`);
 }
 process.exit(0);
