@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.py\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs\"",
             "async": true
           }
         ]
