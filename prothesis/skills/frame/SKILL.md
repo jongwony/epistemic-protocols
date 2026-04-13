@@ -203,6 +203,7 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key difference**: Prothesis operates at the framework-selection level — choosing which analytical lenses to apply — while all other protocols operate within an already-established framework. It is also the only protocol that can assemble a multi-agent team for parallel perspective analysis (Mode 2) or provide lightweight lens recommendations (Mode 1). Syneidesis surfaces gaps in a decision, Aitesis verifies execution context, but both assume the analytical lens is already chosen. Prothesis is the protocol that chooses the lens.
@@ -298,7 +299,7 @@ MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and
 
 After context gathering (Phase 1), **present** perspectives via gate interaction with `multiSelect: true`.
 
-**Cross-session enrichment**: Prior framing experiences accumulated through prior Reflexion cycles guide Phase 2 perspective formulation bidirectionally — previously effective analytical lenses for similar domains provide starting hypotheses (exploitation), while prior coverage gaps (unaddressed horizon limits) signal domains where novel perspectives should be prioritized (exploration). This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Prior framing experiences accumulated through prior Reflexion cycles guide Phase 2 perspective formulation bidirectionally — previously effective analytical lenses for similar domains provide starting hypotheses (exploitation), while prior coverage gaps (unaddressed horizon limits) signal domains where novel perspectives should be prioritized (exploration). In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior framework or perspective preferences, biasing the Phase 2 framework candidate set toward lenses the user has already found productive in this line of work. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent trigger detections across 3+ sessions cluster around a recognizable pattern outside the named types {Contradiction, Horizon Intersection, Uncorroborated High-Stakes}, the Trigger Detection Criteria warrants promotion to a new named trigger type. When accumulated false positive triggers across 3+ sessions cluster around a specific named type, that type's detection heuristic warrants revision or demotion to Emergent.
 

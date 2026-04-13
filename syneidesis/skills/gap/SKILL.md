@@ -103,6 +103,7 @@ Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key difference**: Syneidesis audits the user's decision quality at committed action points (metacognitive: "has the user considered all angles?"). This is distinct from Aitesis, which monitors AI's context sufficiency (heterocognitive: "do I have enough context to execute?"), and Epharmoge, which evaluates AI's execution quality post-hoc ("does the result fit the context?"). The operational test: if the gap would be filled by the user reconsidering their decision, it's Syneidesis; if by providing context, it's Aitesis; if by adapting the result, it's Epharmoge.
@@ -220,7 +221,7 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 - Reversible + Any impact → Low stakes
 - Time pressure → stakes ↑ one level
 
-**Cross-session enrichment**: Repeated gap patterns accumulated through prior Reflexion cycles may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Repeated gap patterns accumulated through prior Reflexion cycles may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior gap categories the user has frequently overlooked in comparable decisions, further adjusting detection weights toward those blind spots. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern that the named gap types fail to capture, the cost of maintaining the current taxonomy exceeds the cost of adding a named type — promote the Emergent cluster. Conversely, when a named type consistently yields zero detections across 3+ sessions, consider whether it remains a distinct gap category or has become observationally inert — consistently undetected despite applicable contexts.
 

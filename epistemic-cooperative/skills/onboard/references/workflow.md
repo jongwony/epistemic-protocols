@@ -10,6 +10,6 @@ Protocols grouped by primary concern. Clusters are non-directional — they repr
 | Execution | /attend | Are we ready and doing this safely? |
 | Verification | /contextualize | Does this fit where it's going? |
 
-**Cross-cutting**: /bound (boundary — consumed by 5 downstream protocols), /grasp (comprehension — always last)
+**Cross-cutting**: /bound (boundary — consumed by 5 downstream protocols), /recollect (vague recall resolution — surfaces prior context for recognition), /grasp (comprehension — always last)
 
 **Cluster activation sequence** (multi-activation only): Planning → Analysis → Decision → Execution → Verification (cross-cutting protocols interleave per precondition DAG; Katalepsis structurally last)

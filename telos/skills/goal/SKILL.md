@@ -126,6 +126,7 @@ Telos is not simplified requirements gathering. Three differentiators:
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key difference**: Hermeneia EXTRACTS (assumes intent exists inside user). Telos CO-CONSTRUCTS (assumes neither party has the complete answer). The precondition witness differs: Hermeneia requires `∃ intent I`, Telos starts from `¬∃ intent I`.
@@ -242,7 +243,7 @@ Options:
 
 Analyze Gᵥ to detect indeterminate dimensions, then **present** for user confirmation via gate interaction.
 
-**Cross-session enrichment**: Prior GoalContract patterns accumulated through prior Reflexion cycles may adjust Phase 1 dimension weighting — dimensions that were consistently important in similar goal constructions receive initial emphasis. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Prior GoalContract patterns accumulated through prior Reflexion cycles may adjust Phase 1 dimension weighting — dimensions that were consistently important in similar goal constructions receive initial emphasis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces the user's prior goal-dimension preferences for adjacent work, biasing Phase 1 dimension prompts toward the axes they have already treated as constitutive. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent dimension appearances across 3+ sessions cluster around a recognizable goal construct not captured by the named dimensions, the dimension taxonomy warrants revision — promote the cluster. When a named dimension (other than Outcome, which is protocol-constrained) consistently receives trivial or vacuous detection across 3+ sessions, evaluate whether the dimension's detection criteria need sharpening or the dimension has become redundant.
 

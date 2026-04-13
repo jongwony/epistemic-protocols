@@ -164,9 +164,9 @@ Anamnesis is not simplified search. Three differentiators:
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
@@ -216,7 +216,9 @@ When Anamnesis is active:
 
 **Protocol precedence**: Relationship to Aitesis determined by graph.json (precondition or advisory). When active, recognized context narrows Aitesis scope.
 
-**Advisory relationships**: Provides to Aitesis (recognized context as Ctx seed). Receives from Horismos (advisory: BoundaryMap may scope recall domain). Katalepsis is structurally last.
+**Advisory relationships**: Provides to Aitesis (recalled context narrows scan scope), Prothesis (prior perspective preferences), Syneidesis (prior gap patterns), Hermeneia (prior phrasing/terminology), Telos (prior goal preferences), Horismos (prior boundary classifications), Prosoche (prior risk patterns), Analogia (prior domain mappings) — 8 outgoing advisory hub. No incoming advisory edges (source is session JSONL + hypomnesis store). Katalepsis is structurally last.
+
+**Temporal ordering note**: Advisory edges do not enforce activation ordering via graph.json precondition. For the advisory flow to materialize, `/recollect` should be invoked early in the session — typically before Hermeneia–Telos–Horismos precondition chain activates. If Horismos or another downstream protocol activates first, the advisory enrichment is simply unreachable in that session; it is not an error. User awareness of session-start recall is the ordering mechanism.
 
 ### Trigger Signals
 

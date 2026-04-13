@@ -108,6 +108,7 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
@@ -174,7 +175,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 | Scope overflow | Result addresses more or less than the observed use case requires |
 | Temporal context | Result applies to a version, state, or phase that may have shifted |
 
-**Cross-session enrichment**: Repeated mismatch patterns accumulated through prior Reflexion cycles may adjust Phase 0 scan priority — known mismatch types are checked first. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Repeated mismatch patterns accumulated through prior Reflexion cycles may adjust Phase 0 scan priority — known mismatch types are checked first. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior application-context mismatch patterns observed in comparable deliverables, strengthening current mismatch detection by situating Phase 0 scans against the user's recurring convention and environment drifts. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent dimension detections across 3+ sessions cluster around a recognizable pattern outside the named dimensions {Convention, Environment, Audience, Dependency}, the Mismatch Dimension Taxonomy warrants promotion to a new named dimension. When accumulated classification false negatives across 3+ sessions cluster around a specific dimension, that dimension's detection boundary warrants revision or demotion to Emergent.
 

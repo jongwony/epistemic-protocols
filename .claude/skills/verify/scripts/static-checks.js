@@ -27,10 +27,11 @@ const PROTOCOL_FILES = [
   'analogia/skills/ground/SKILL.md',
   'epharmoge/skills/contextualize/SKILL.md',
   'prosoche/skills/attend/SKILL.md',
+  'anamnesis/skills/recollect/SKILL.md',
 ];
 
 const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge';
-const CANONICAL_CLUSTERS = 'Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/grasp`)';
+const CANONICAL_CLUSTERS = 'Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
 const PRECEDENCE_FILES = [
   'hermeneia/skills/clarify/SKILL.md',
   'telos/skills/goal/SKILL.md',
@@ -1061,6 +1062,7 @@ function checkCrossRefScan() {
     'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
     'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
     'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
+    'Anamnesis':  { deficit: 'RecallAmbiguous', resolution: 'RecalledContext' },
   };
 
 
@@ -1212,7 +1214,7 @@ function checkCrossRefScan() {
       message: 'CLAUDE.md missing Epistemic Concern Clusters table'
     },
     {
-      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge\)/,
+      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge, Anamnesis\)/,
       message: 'CLAUDE.md initiator taxonomy missing protocol in the AI-guided set'
     },
   ];

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge) during human-AI interaction.
+Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
 
 ## Architecture
 
@@ -42,6 +42,11 @@ epistemic-protocols/
 ├── epharmoge/                         # Protocol: application-context mismatch detection (conditional)
 │   ├── .claude-plugin/plugin.json
 │   └── skills/contextualize/SKILL.md # Full protocol definition (user-invocable)
+├── anamnesis/                         # Protocol: vague recall → recognized context
+│   ├── .claude-plugin/plugin.json
+│   ├── hooks/hooks.json               # SessionEnd hook: hypomnesis store writer
+│   ├── scripts/hypomnesis-write.mjs   # mjs harness + claude -p haiku extraction
+│   └── skills/recollect/SKILL.md     # Full protocol definition (user-invocable)
 ├── reflexion/                         # Skill: cross-session learning
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # Parallel extraction agents
@@ -95,6 +100,7 @@ epistemic-protocols/
 | Analogia | `/ground` | MappingUncertain → ValidatedMapping |
 | Prosoche | `/attend` | ExecutionBlind → SituatedExecution |
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
+| Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
 
 **Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/compose`, `/sophia`, `/curses`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
 
@@ -126,18 +132,19 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 | Decision | `/gap` (Syneidesis) |
 | Execution | `/attend` (Prosoche) |
 | Verification | `/contextualize` (Epharmoge) |
+| Cross-cutting | `/bound` (Horismos), `/recollect` (Anamnesis), `/grasp` (Katalepsis) |
 
-**Cross-cutting**: `/bound` (Horismos) — BoundaryMap narrows scope for 5 downstream protocols. `/grasp` (Katalepsis) — requires all to complete.
+**Cross-cutting**: `/bound` (Horismos) — BoundaryMap narrows scope for 5 downstream protocols via DAG-downstream advisory. `/recollect` (Anamnesis) — recalled context enriches 9 downstream protocols via advisory-only edges (no precondition weight). **Structural asymmetry**: Horismos sits downstream of the Hermeneia→Telos→Horismos DAG chain, so its 5 edges propagate through committed activation. Anamnesis has 9 advisory-only edges with no precondition enforcement — cardinality is larger but operational weight differs. `/grasp` (Katalepsis) — requires all to complete.
 
 **Key graph relationships**:
-- Preconditions (DAG-enforced): Hermeneia → Telos → Horismos; * → Katalepsis
-- Advisory hubs: Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}, Telos → {Prothesis}
+- Preconditions (DAG-enforced): Hermeneia → Telos → Horismos; * → Katalepsis (includes Anamnesis via wildcard)
+- Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia, Epharmoge}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}, Telos → {Prothesis}
 - Suppression: Syneidesis ⊣ Aitesis (same scope), Aitesis ⊣ Epharmoge (pre+post stacking)
 
 **Initiator taxonomy** (2-layer model):
 - **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.
 - **Layer 2** (in-protocol heuristics): Behavior varies by initiator type:
-  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge)
+  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge, Anamnesis)
   - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia)
   - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Reflexion, Write)
@@ -197,6 +204,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Epharmoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Analogia**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Prosoche**: Phase -1 (Sub-A0 upstream routing, Sub-A materialization, Sub-B team coordination) and Phases 1-3 (Gate path) run in main agent (gate interaction, Skill). Phase 0 delegates p=Low tasks to prosoche-executor subagent or team agents via Agent tool.
+- **Anamnesis**: No Task delegation—must run in main agent (user-facing gates require main agent context). SessionEnd hook (`anamnesis/scripts/hypomnesis-write.mjs`) operates outside protocol flow, extracting session recall index via `claude -p haiku` harness.
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 - **Onboard**: All paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases. Quick path: Phases 0-1, 2a-2b, 4 (Trial triggers actual protocol execution in-session). Targeted path: Phases 0-6 (full learning experience).
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.

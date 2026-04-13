@@ -39,6 +39,7 @@ const PLUGINS = [
   { dir: 'epistemic-cooperative', skill: 'dashboard' },
   { dir: 'epistemic-cooperative', skill: 'sophia' },
   { dir: 'epistemic-cooperative', skill: 'curses' },
+  { dir: 'anamnesis', skill: 'recollect' },
 ];
 
 // claude.ai description overrides (originals exceed 200 chars)
@@ -69,29 +70,52 @@ const EXCLUDE_DIRS = new Set(['agents', 'commands']);
 const STRIP_FIELDS = new Set(['allowed-tools', 'license', 'compatibility', 'metadata']);
 
 // Protocol metadata for release notes (deficit → resolution pairs)
+// Order mirrors PROTOCOL_ORDER: Anamnesis first (recall, session start), then canonical precedence + Katalepsis last.
 const PROTOCOL_METADATA = {
-  prothesis:  { name: 'Prothesis', command: '/frame', deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
-  syneidesis: { name: 'Syneidesis', command: '/gap', deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
+  anamnesis:  { name: 'Anamnesis', command: '/recollect', deficit: 'RecallAmbiguous', resolution: 'RecalledContext' },
   hermeneia:  { name: 'Hermeneia', command: '/clarify', deficit: 'IntentMisarticulated', resolution: 'ClarifiedIntent' },
-  katalepsis: { name: 'Katalepsis', command: '/grasp', deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
   telos:      { name: 'Telos', command: '/goal', deficit: 'GoalIndeterminate', resolution: 'DefinedEndState' },
   horismos:   { name: 'Horismos', command: '/bound', deficit: 'BoundaryUndefined', resolution: 'DefinedBoundary' },
   aitesis:    { name: 'Aitesis', command: '/inquire', deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
+  prothesis:  { name: 'Prothesis', command: '/frame', deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
   analogia:   { name: 'Analogia', command: '/ground', deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
+  syneidesis: { name: 'Syneidesis', command: '/gap', deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
   prosoche:   { name: 'Prosoche', command: '/attend', deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
   epharmoge:  { name: 'Epharmoge', command: '/contextualize', deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
+  katalepsis: { name: 'Katalepsis', command: '/grasp', deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
 };
 
-// Display order: CANONICAL_PRECEDENCE + Katalepsis (structurally last)
+// Display order: Anamnesis (recall, session start) + CANONICAL_PRECEDENCE + Katalepsis (structurally last)
 const PROTOCOL_ORDER = [
+  'anamnesis',
   'hermeneia', 'telos', 'horismos', 'aitesis', 'prothesis',
   'analogia', 'syneidesis', 'prosoche', 'epharmoge', 'katalepsis',
 ];
 
+// Sync validator: ensures PROTOCOL_ORDER and PROTOCOL_METADATA keys are aligned.
+// Called at release-notes generation time (not module load) — drift would cause
+// silent table entry drop, so fail-fast where drift has observable effect.
+// Load-time validation is intentionally avoided to keep require("./package.js")
+// safe for consumers (tests, static-checks) that do not call generateReleaseNotes.
+function validateProtocolTables() {
+  const orderSet = new Set(PROTOCOL_ORDER);
+  const metaSet = new Set(Object.keys(PROTOCOL_METADATA));
+  const missingInMeta = PROTOCOL_ORDER.filter(k => !metaSet.has(k));
+  const missingInOrder = Object.keys(PROTOCOL_METADATA).filter(k => !orderSet.has(k));
+  if (missingInMeta.length || missingInOrder.length) {
+    const msg = [
+      'PROTOCOL_ORDER/PROTOCOL_METADATA sync error:',
+      missingInMeta.length ? `  missing in PROTOCOL_METADATA: ${missingInMeta.join(', ')}` : null,
+      missingInOrder.length ? `  missing in PROTOCOL_ORDER: ${missingInOrder.join(', ')}` : null,
+    ].filter(Boolean).join('\n');
+    throw new Error(msg);
+  }
+}
+
 // Curated first-release highlights (Phase A: no previous tag exists)
 const FIRST_RELEASE_HIGHLIGHTS = `## Highlights
 
-### 10 Epistemic Protocols
+### 11 Epistemic Protocols
 
 Structure human-AI interaction quality at every decision point. Each protocol resolves a typed deficit:
 
@@ -100,7 +124,7 @@ Structure human-AI interaction quality at every decision point. Each protocol re
 - **Decision**: \`/gap\` (unnoticed gaps before action)
 - **Execution**: \`/attend\` (execution-time risk evaluation)
 - **Verification**: \`/contextualize\` (post-execution context mismatch)
-- **Cross-cutting**: \`/bound\` (epistemic boundaries), \`/grasp\` (comprehension verification)
+- **Cross-cutting**: \`/bound\` (epistemic boundaries), \`/recollect\` (vague recall recognition), \`/grasp\` (comprehension verification)
 
 ### Typed Deficit-Resolution System
 
@@ -374,6 +398,11 @@ function generateComputedHighlights(changelog) {
 }
 
 function generateReleaseNotes(buildResults, { tag = null, changelog = null } = {}) {
+  // Drift check at the observable-effect site: release notes would silently drop
+  // protocols missing from PROTOCOL_METADATA (filtered via generateReleaseNotes's
+  // PROTOCOL_ORDER.map → .filter(Boolean) chain), so fail-fast before emitting.
+  validateProtocolTables();
+
   const tagStr = tag ? ` ${tag}` : '';
 
   // Section 1: Headline

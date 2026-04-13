@@ -120,6 +120,7 @@ Phase 2 Qs (validate)      → always_gated (gated: user validates structural ma
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
@@ -180,7 +181,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Grounding probe | User requests "concrete example", "how does this apply to my case", "show me in my context" |
 | Structural mismatch indicators | Abstract assumptions that may not hold in the concrete domain |
 
-**Cross-session enrichment**: Accumulated mapping validation history from prior Reflexion cycles provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Accumulated mapping validation history from prior Reflexion cycles provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior domain mappings the user has worked with, providing structural correspondence candidates that Phase 1 can evaluate against the current abstract–concrete pair. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Skip**:
 - Output is already domain-specific with concrete instantiations

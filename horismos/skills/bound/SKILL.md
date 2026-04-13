@@ -122,6 +122,7 @@ Phase 2 Qc (classify)      → always_gated (gated: UserSupplies/AIPropose/AIAut
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
@@ -333,4 +334,4 @@ After integration:
 16. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
 17. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
 
-**Cross-session enrichment**: Accumulated boundary preferences from prior Reflexion cycles may serve as heuristic input for Phase 1 calibration proposals — but per-decision freshness (Rule 11) takes precedence. Prior preferences inform, they do not predetermine. Gate judgment remains with the user.
+**Cross-session enrichment**: Accumulated boundary preferences from prior Reflexion cycles may serve as heuristic input for Phase 1 calibration proposals — but per-decision freshness (Rule 11) takes precedence. Prior preferences inform, they do not predetermine. In parallel, when **`/recollect`** has been invoked this session, the recalled context may surface prior BoundaryMap classifications for structurally similar domains, providing classification candidates for Phase 1 — but Rule 11 per-decision freshness remains authoritative, and recalled classifications are candidates to evaluate, not defaults to adopt. Gate judgment remains with the user.

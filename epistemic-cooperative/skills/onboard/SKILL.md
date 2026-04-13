@@ -57,6 +57,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Prosoche `/attend` | Execution | Checking execution readiness and controlling risky actions | Bash deploy/push/apply keywords, upstream deficit signals, `wrong_file_edited` friction |
 | Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the context | Post-execution environment mismatch |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
+| Anamnesis `/recollect` | Cross-cutting | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | Katalepsis `/grasp` | Cross-cutting | You approved AI work but didn't fully understand it | Verification keywords in firstPrompt ("explain", "what did you do") |
 
 ## Phase Execution
@@ -74,7 +75,7 @@ Do NOT present the full protocol catalog upfront. Start with a concise welcome a
 
 **If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 10 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
+**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 11 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
 - Text: Post-catalog path selection
 - Options:
   - Quick recommendation
@@ -93,7 +94,7 @@ Then **Gate #2**:
 - Options:
   - Pre-execution (Planning) — /clarify, /goal, /bound, /inquire
   - Analysis/Decision — /frame, /ground, /gap
-  - Execution/Verification/Understanding — /attend, /contextualize, /grasp
+  - Execution/Verification/Understanding — /attend, /contextualize, /recollect, /grasp
 
 **Gate #3** (Targeted only, session source):
 - Text: Session source selection

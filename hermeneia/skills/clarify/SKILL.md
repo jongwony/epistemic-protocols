@@ -121,6 +121,7 @@ Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent int
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**: User recognizes intent-expression misalignment (user signal), or AI detects ambiguous expression (AI-detected trigger, requires user confirmation). Both paths help articulate what the user partially knows. Boundary with Aitesis: if the ambiguity is in the user's *expression* of intent (how it was said), use Hermeneia; if the AI lacks *factual execution context* (what information the system needs), use Aitesis.
@@ -186,7 +187,7 @@ Clarified expression becomes input to subsequent protocols.
 - User explicitly declines clarification
 - Expression already clarified in current session
 
-**Cross-session enrichment**: Accumulated clarification patterns from prior Reflexion cycles may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Accumulated clarification patterns from prior Reflexion cycles may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces the user's prior terminology and phrasing patterns, improving intent extraction by grounding Iᵥ construction in recognized expression habits. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expression, Precision, Coherence, Background}, the Gap Taxonomy warrants promotion to a new named type. When accumulated classification false positives across 3+ sessions cluster around a specific named type, that type's detection boundary warrants revision or demotion to Emergent.
 
