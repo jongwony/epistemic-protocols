@@ -93,9 +93,11 @@ const PROTOCOL_ORDER = [
 ];
 
 // Sync validator: ensures PROTOCOL_ORDER and PROTOCOL_METADATA keys are aligned.
-// Runs at module load to fail-fast on misaligned updates (e.g., new protocol added
-// to one structure but missed in the other — silent release-notes drop symptom).
-(function validateProtocolTables() {
+// Called at release-notes generation time (not module load) — drift would cause
+// silent table entry drop, so fail-fast where drift has observable effect.
+// Load-time validation is intentionally avoided to keep require("./package.js")
+// safe for consumers (tests, static-checks) that do not call generateReleaseNotes.
+function validateProtocolTables() {
   const orderSet = new Set(PROTOCOL_ORDER);
   const metaSet = new Set(Object.keys(PROTOCOL_METADATA));
   const missingInMeta = PROTOCOL_ORDER.filter(k => !metaSet.has(k));
@@ -108,7 +110,7 @@ const PROTOCOL_ORDER = [
     ].filter(Boolean).join('\n');
     throw new Error(msg);
   }
-})();
+}
 
 // Curated first-release highlights (Phase A: no previous tag exists)
 const FIRST_RELEASE_HIGHLIGHTS = `## Highlights
@@ -396,6 +398,11 @@ function generateComputedHighlights(changelog) {
 }
 
 function generateReleaseNotes(buildResults, { tag = null, changelog = null } = {}) {
+  // Drift check at the observable-effect site: release notes would silently drop
+  // protocols missing from PROTOCOL_METADATA (filtered via generateReleaseNotes's
+  // PROTOCOL_ORDER.map → .filter(Boolean) chain), so fail-fast before emitting.
+  validateProtocolTables();
+
   const tagStr = tag ? ` ${tag}` : '';
 
   // Section 1: Headline

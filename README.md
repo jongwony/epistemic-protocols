@@ -38,6 +38,7 @@ $skill-installer install these skills from jongwony/epistemic-protocols:
 - analogia/skills/ground
 - prosoche/skills/attend
 - epharmoge/skills/contextualize
+- anamnesis/skills/recollect
 - epistemic-cooperative/skills/onboard
 ```
 
@@ -46,7 +47,7 @@ Restart Codex, then start with `$onboard`.
 <details>
 <summary>Notes</summary>
 
-- This installs 10 protocols + `onboard`. `/report`, `/dashboard`, `reflexion`, `write` are not included.
+- This installs 11 protocols + `onboard`. `/report`, `/dashboard`, `reflexion`, `write` are not included.
 - To install a single skill, use the same `skill-installer` pattern with one path.
 - This README is the source of truth for the Codex-supported install set.
 
