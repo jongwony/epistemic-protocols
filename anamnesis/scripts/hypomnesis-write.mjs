@@ -1,13 +1,20 @@
 #!/usr/bin/env node
 /**
- * SessionEnd hook: write hypomnesis store entries for /recollect access.
+ * SessionEnd + PreCompact hook: write hypomnesis store entries for /recollect access.
+ *
+ * Entry points:
+ *   - SessionEnd: gated by age ≥ 24h AND tokens ≥ 100k (mirrors Claude Code's
+ *     resume-summary prompt heuristic, tuned for cross-session recall worth).
+ *   - PreCompact: ungated — user/runtime already classified the session as
+ *     worth summarizing; index before /compact lossily rewrites the transcript.
  *
  * Architecture: deterministic mjs harness + claude -p haiku LLM extraction.
  *   1. Read stdin (hook input) + parse session JSONL (deterministic)
- *   2. Build 3 prompts (clue: user-only, vector: full, narrative: full)
- *   3. Call claude -p --model haiku per prompt (LLM semantic extraction)
- *   4. Validate JSON output + assemble md files (deterministic)
- *   5. Atomic write to hypomnesis/{session-id}/
+ *   2. Apply gate per entry point
+ *   3. Build 3 prompts (clue: user-only, vector: full, narrative: full)
+ *   4. Call claude -p --model haiku per prompt (LLM semantic extraction)
+ *   5. Validate JSON output + assemble md files (deterministic)
+ *   6. Atomic write to hypomnesis/{session-id}/
  *
  * Recursion safety: --setting-sources "" prevents hook loading in child process.
  * Fail-open: top-level try/catch → process.exit(0).
@@ -28,7 +35,18 @@ const MIN_SESSION_BYTES = 1024;
 const MAX_USER_MSGS = 150;
 const MAX_ALL_CHARS = 80_000;
 const HAIKU_TIMEOUT = 120_000;
+// Observed reason values in ~/.claude/logs/hooks.log (33 days, 1408 records):
+// other, prompt_input_exit, resume, clear. "compact" never observed — PreCompact
+// does not trigger SessionEnd; the two events are temporally independent.
 const SKIP_REASONS = new Set(["clear"]);
+const KNOWN_EVENTS = new Set(["SessionEnd", "PreCompact"]);
+
+// SessionEnd gate: token threshold mirrors Claude Code's resume-summary prompt
+// heuristic (cli.js `HF7` modal, default 100k). Last-turn-age raised from
+// 70min → 24h because sub-day sessions rarely warrant cross-session recall
+// indexing. Note: this measures time since the last turn, not session start.
+const GATE_MIN_LAST_TURN_AGE_MS = 24 * 60 * 60 * 1000;
+const GATE_MIN_TOKENS = 100_000;
 
 // --- Helpers ---
 
@@ -82,6 +100,10 @@ function parseSession(transcriptPath) {
   const allTexts = [];
   const timestamps = [];
   const protocols = new Set();
+  let lastAssistantInputTokens = 0;
+  let outputTokensSum = 0;
+  let lastTurnHadFreshInput = false;
+  let sawAnyAssistantUsage = false;
 
   const protocolMap = {
     "/frame": "frame", "/gap": "gap", "/clarify": "clarify",
@@ -97,7 +119,10 @@ function parseSession(transcriptPath) {
     raw = fs.readFileSync(transcriptPath, "utf8");
   } catch (e) {
     logErr(`failed to read transcript ${transcriptPath}: ${e.message}`);
-    return { userMsgs, allTexts, timestamps, protocols: [] };
+    return {
+      userMsgs, allTexts, timestamps, protocols: [],
+      tokenEstimate: 0,
+    };
   }
   let totalChars = 0;
 
@@ -126,9 +151,38 @@ function parseSession(transcriptPath) {
         totalChars += text.length;
       }
     }
+
+    if (etype === "assistant") {
+      const usage = entry.message?.usage;
+      if (usage) {
+        sawAnyAssistantUsage = true;
+        const inTok = Number(usage.input_tokens ?? 0) || 0;
+        const outTok = Number(usage.output_tokens ?? 0) || 0;
+        if (inTok > 0) {
+          lastAssistantInputTokens = inTok;
+          lastTurnHadFreshInput = true;
+        } else {
+          lastTurnHadFreshInput = false;
+        }
+        outputTokensSum += outTok;
+      } else {
+        lastTurnHadFreshInput = false;
+      }
+    }
   }
 
-  return { userMsgs, allTexts, timestamps, protocols: [...protocols].sort() };
+  // Mirrors the context-weight estimate: final assistant turn's input_tokens
+  // captures full accumulated context; output_tokens sum reflects total
+  // generation. cache_read/cache_creation excluded — conservative estimate.
+  const tokenEstimate = lastAssistantInputTokens + outputTokensSum;
+
+  return {
+    userMsgs, allTexts, timestamps,
+    protocols: [...protocols].sort(),
+    tokenEstimate,
+    lastTurnHadFreshInput,
+    sawAnyAssistantUsage,
+  };
 }
 
 // --- Prompt Builders ---
@@ -405,14 +459,50 @@ function writeStore(targetDir, files) {
   }
 }
 
+// --- Gate ---
+
+function lastTurnAgeMs(timestamps) {
+  // Time since the last transcript timestamp, not since session start.
+  // Mirrors Claude Code's findLast-with-60s-grace reference — anamnesis runs
+  // post-turn, so the last timestamp is effectively the reference point.
+  const last = timestamps.at(-1);
+  if (!last) {
+    logErr(`no timestamps found in transcript; lastTurnAgeMs defaulting to 0`);
+    return 0;
+  }
+  const t = Date.parse(last);
+  if (!Number.isFinite(t)) {
+    logErr(`invalid last timestamp "${last}"; lastTurnAgeMs defaulting to 0`);
+    return 0;
+  }
+  return Date.now() - t;
+}
+
+function passesSessionEndGate(ageMs, tokenEstimate) {
+  return ageMs >= GATE_MIN_LAST_TURN_AGE_MS && tokenEstimate >= GATE_MIN_TOKENS;
+}
+
 // --- Main ---
 
 function main() {
   const input = readHookInput();
   if (!input) return;
 
-  const { session_id: sessionId, transcript_path: transcriptPath, cwd, reason } = input;
-  if (SKIP_REASONS.has(reason) || !sessionId || !transcriptPath) return;
+  const {
+    session_id: sessionId,
+    transcript_path: transcriptPath,
+    cwd,
+    reason,
+    hook_event_name: eventName,
+  } = input;
+  if (!sessionId || !transcriptPath) return;
+
+  const event = eventName ?? "SessionEnd";
+  if (!KNOWN_EVENTS.has(event)) {
+    logErr(`unrecognized hook_event_name "${event}"; skipping`);
+    return;
+  }
+  if (event === "SessionEnd" && SKIP_REASONS.has(reason)) return;
 
   const stat = fs.statSync(transcriptPath, { throwIfNoEntry: false });
   if (!stat || stat.size < MIN_SESSION_BYTES) return;
@@ -422,8 +512,29 @@ function main() {
   const projectDir = cwd || path.dirname(transcriptPath);
   const storeDir = path.join(projectDir, "hypomnesis", sessionId);
 
-  const { userMsgs, allTexts, timestamps, protocols } = parseSession(transcriptPath);
+  const {
+    userMsgs, allTexts, timestamps, protocols, tokenEstimate,
+    lastTurnHadFreshInput, sawAnyAssistantUsage,
+  } = parseSession(transcriptPath);
   if (userMsgs.length === 0) return;
+
+  // Observability for stale token estimates (final assistant turn had no fresh
+  // input_tokens — full cache hit or tool-use-only turn can leave the estimate
+  // based on an earlier turn).
+  if (sawAnyAssistantUsage && !lastTurnHadFreshInput && tokenEstimate > 0) {
+    logErr(`last assistant turn lacked fresh input_tokens; tokenEstimate ${tokenEstimate} may use stale value`);
+  }
+
+  // PreCompact: runtime already classified the session as worth summarizing
+  // (manual = user accepted "Resume from summary"; auto = context-fill).
+  // SessionEnd: apply AND gate to filter ephemeral sessions.
+  if (event === "SessionEnd") {
+    if (tokenEstimate === 0) {
+      logErr(`tokenEstimate is 0 (no assistant usage data parsed); SessionEnd gate will fail closed`);
+    }
+    const ageMs = lastTurnAgeMs(timestamps);
+    if (!passesSessionEndGate(ageMs, tokenEstimate)) return;
+  }
 
   const startedAt = timestamps[0] ?? "";
   const lastTurnAt = timestamps.at(-1) ?? "";

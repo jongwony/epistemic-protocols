@@ -204,7 +204,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Epharmoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Analogia**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Prosoche**: Phase -1 (Sub-A0 upstream routing, Sub-A materialization, Sub-B team coordination) and Phases 1-3 (Gate path) run in main agent (gate interaction, Skill). Phase 0 delegates p=Low tasks to prosoche-executor subagent or team agents via Agent tool.
-- **Anamnesis**: No Task delegation—must run in main agent (user-facing gates require main agent context). SessionEnd hook (`anamnesis/scripts/hypomnesis-write.mjs`) operates outside protocol flow, extracting session recall index via `claude -p haiku` harness.
+- **Anamnesis**: No Task delegation—must run in main agent (user-facing gates require main agent context). SessionEnd + PreCompact hooks (`anamnesis/scripts/hypomnesis-write.mjs`) operate outside protocol flow, extracting session recall index via `claude -p haiku` harness.
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.
 - **Onboard**: All paths use inline Quick Scan (no subagents) for Phase 1. Deep pattern extraction belongs in Report. Main agent handles all phases. Quick path: Phases 0-1, 2a-2b, 4 (Trial triggers actual protocol execution in-session). Targeted path: Phases 0-6 (full learning experience).
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
