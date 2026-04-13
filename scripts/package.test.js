@@ -316,10 +316,10 @@ describe('generateReleaseNotes', () => {
     assert.ok(prothesisPos < katalepsisPos, 'Katalepsis should be last');
   });
 
-  it('includes all 10 protocols in protocols table', () => {
+  it('includes all 11 protocols in protocols table', () => {
     const notes = generateReleaseNotes(mockResults);
     const protocolNames = [
-      'Hermeneia', 'Telos', 'Horismos', 'Aitesis', 'Prothesis',
+      'Anamnesis', 'Hermeneia', 'Telos', 'Horismos', 'Aitesis', 'Prothesis',
       'Analogia', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Katalepsis',
     ];
     for (const name of protocolNames) {
@@ -339,13 +339,13 @@ describe('generateReleaseNotes', () => {
     assert.ok(notes.includes('### New'));
     assert.ok(notes.includes('### Fixed'));
     assert.ok(notes.includes('**prothesis**: Two-mode redesign'));
-    assert.ok(!notes.includes('### 10 Epistemic Protocols'));
+    assert.ok(!notes.includes('### 11 Epistemic Protocols'));
   });
 
   it('falls back to curated highlights when changelog groups empty', () => {
     const changelog = { groups: {}, ungrouped: [] };
     const notes = generateReleaseNotes(mockResults, { changelog });
-    assert.ok(notes.includes('### 10 Epistemic Protocols'));
+    assert.ok(notes.includes('### 11 Epistemic Protocols'));
   });
 });
 
@@ -378,6 +378,12 @@ describe('package.js CLI', () => {
     const result = JSON.parse(output);
     const bundle = result.results.find(entry => entry.plugin === 'bundle');
 
+    // Regression guard: packaging must not emit plugin-malformation or missing-SKILL
+    // warnings for anamnesis (distinct from non-blocking style warnings like line
+    // guidelines). A silent skip of anamnesis would drop results.length without
+    // surfacing the cause — this filter catches that specific failure mode.
+    const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
+    assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
     assert.equal(result.results.length, 21);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),

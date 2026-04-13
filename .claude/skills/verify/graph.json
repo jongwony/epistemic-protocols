@@ -47,6 +47,7 @@
     { "source": "anamnesis", "target": "telos", "type": "advisory", "satisfies": "과거 목표 차원 선호가 공동 구축을 개선" },
     { "source": "anamnesis", "target": "horismos", "type": "advisory", "satisfies": "과거 경계 분류 이력이 분류 제안을 제공" },
     { "source": "anamnesis", "target": "prosoche", "type": "advisory", "satisfies": "과거 위험 이력이 위험 분류를 강화" },
-    { "source": "anamnesis", "target": "analogia", "type": "advisory", "satisfies": "과거 도메인 매핑이 매핑 후보를 제공" }
+    { "source": "anamnesis", "target": "analogia", "type": "advisory", "satisfies": "과거 도메인 매핑이 매핑 후보를 제공" },
+    { "source": "anamnesis", "target": "epharmoge", "type": "advisory", "satisfies": "과거 적용-맥락 불일치 이력이 현재 불일치 감지를 강화" }
   ]
 }

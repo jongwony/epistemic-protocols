@@ -5,7 +5,7 @@ description: "Protocol handbook — instant reference for when to use each epist
 
 # Catalog Skill
 
-Instant reference handbook for 10 epistemic protocols. Browse by cluster, look up by command, or find the right protocol for a situation.
+Instant reference handbook for 11 epistemic protocols. Browse by cluster, look up by command, or find the right protocol for a situation.
 
 ## When to Use
 
@@ -23,7 +23,7 @@ Skip when:
 
 | Invocation | Behavior |
 |------------|----------|
-| `/catalog` | Overview: 10 protocols grouped by cluster, 1-line each + usage hints |
+| `/catalog` | Overview: 11 protocols grouped by cluster, 1-line each + usage hints |
 | `/catalog {cluster}` | Cluster detail: expanded protocol cards with scenarios |
 | `/catalog {command}` | Single protocol detail: full card from scenarios.md |
 
@@ -69,6 +69,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
 | Horismos | `/bound` | Unclear who decides what — ownership boundaries undefined |
+| Anamnesis | `/recollect` | Resolve vague recall into recognized context — /recollect (ἀνάμνησις: recollection) |
 | Katalepsis | `/grasp` | AI did work but you don't fully understand what or why |
 
 ## Detail Mode

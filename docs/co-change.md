@@ -19,5 +19,6 @@ Protocol modifications require synchronized edits across multiple files. Any pro
 | Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |
 | Relay interaction pattern change | SKILL.md TOOL GROUNDING + `.claude/rules/derived-principles.md` (Convergence Evidence) + criteria.md + static-checks.js + plugin.json version bumps |
 | SKILL.md frontmatter description change (type signature 포함) | `scripts/package.js` DESCRIPTION_OVERRIDES (morphism notation 동기화) |
+| Hypomnesis store write pipeline change (mjs harness) | `anamnesis/hooks/hooks.json` (SessionEnd hook registration), `anamnesis/scripts/hypomnesis-write.mjs` (mjs harness implementation), `anamnesis/skills/recollect/SKILL.md` Scan section (read-side pattern), `anamnesis/.claude-plugin/plugin.json` version bump |
 | Axiom change (A1-A7 definition or summary) | `.claude/rules/axioms.md` (source of truth) → `CLAUDE.md` (reference) |
 | Editing/Git convention change | `.claude/rules/editing-conventions.md` (primary) → `CLAUDE.md` (reference) |

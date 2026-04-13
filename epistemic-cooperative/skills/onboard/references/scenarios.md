@@ -54,6 +54,23 @@ Each protocol has a realistic situation, intervention description, trial prompt,
 
 **Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Without explicit boundary definition, AI either over-assumes autonomy (causing surprise) or under-assumes (causing friction). Workflow position: cross-cutting — the BoundaryMap tells all downstream protocols what the human controls vs. what AI controls. Game feel: "Who decides what here?" → domain-by-domain classification → BoundaryMap emerges → shared understanding of ownership.
 
+## Anamnesis `/recollect`
+
+**Situation**: You hint at a prior discussion — "that thing we decided about the caching layer last week" or "the approach we settled on for the migration" — but you can't name the session, the file, or the exact conclusion. Claude has no visible context for what you mean, and asking you to re-explain would lose the original framing.
+
+**Intervention**: `/recollect` scans the hypomnesis store (session vectors + summaries) and memory for narrative candidates matching your vague cue, then presents 2-3 recognized contexts for you to confirm — resolving ambiguous recall into a concrete prior context before the current work proceeds.
+
+**Trial prompt**: "Let's practice: say 'Pick up where we left off on the caching thing' and I'll show how /recollect surfaces candidate prior contexts"
+
+**Quiz Q (situation)**: You start a session with "continue the refactor we discussed" but can't remember which refactor, which session, or what was decided. You need Claude to ground on the right prior context before acting.
+- A) Hermeneia `/clarify` — B) Aitesis `/inquire` — C) Anamnesis `/recollect` — D) Katalepsis `/grasp`
+- Answer: C
+
+**Quiz Q (design)**: You reference "the direction we agreed on" from a past session but have no specific pointer. How would you use a protocol to surface the right prior context for recognition?
+- Hint: The problem isn't unclear intent or missing external context — it's that prior session context is vague and needs to be resolved into something recognizable.
+
+**Philosophy**: ἀνάμνησις (recollection) — Plato's theory of knowledge as recollection of what the soul already knew. Core principle: **Recognition over Recall**. Vague cues become concrete when candidates are surfaced for user recognition, not retrieved by keyword. Workflow position: cross-cutting — resolves prior context before any cluster proceeds. Game feel: "Something we talked about before..." → candidates surface → you recognize the right one → grounded continuation.
+
 ## Syneidesis `/gap`
 
 **Situation**: You're about to merge a PR that adds a new API endpoint. The code looks clean, tests pass, but you haven't considered: rate limiting, authentication for the new route, or how it interacts with the existing caching layer.
