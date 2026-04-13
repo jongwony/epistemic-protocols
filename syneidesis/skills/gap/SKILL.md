@@ -103,6 +103,7 @@ Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key difference**: Syneidesis audits the user's decision quality at committed action points (metacognitive: "has the user considered all angles?"). This is distinct from Aitesis, which monitors AI's context sufficiency (heterocognitive: "do I have enough context to execute?"), and Epharmoge, which evaluates AI's execution quality post-hoc ("does the result fit the context?"). The operational test: if the gap would be filled by the user reconsidering their decision, it's Syneidesis; if by providing context, it's Aitesis; if by adapting the result, it's Epharmoge.

@@ -253,6 +253,7 @@ Priority ordering: autonomy > transparency > noise-minimization > speed > simpli
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:

@@ -371,14 +371,14 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 19 skills plus bundle in dry-run', () => {
+  it('packages all 20 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
     const result = JSON.parse(output);
     const bundle = result.results.find(entry => entry.plugin === 'bundle');
 
-    assert.equal(result.results.length, 20);
+    assert.equal(result.results.length, 21);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -398,6 +398,7 @@ describe('package.js CLI', () => {
         'ground.zip',
         'inquire.zip',
         'onboard.zip',
+        'recollect.zip',
         'reflexion.zip',
         'report.zip',
         'sophia.zip',

@@ -68,6 +68,11 @@
       "name": "epistemic-cooperative",
       "source": "./epistemic-cooperative",
       "description": "/catalog for protocol handbook, /report for Growth Map (epistemic analysis + insights), /onboard for quest-based protocol learning, /dashboard for coverage dashboard, /compose for protocol composition authoring, /sophia for philosopher match, /curses for strength-shadow analysis"
+    },
+    {
+      "name": "anamnesis",
+      "source": "./anamnesis",
+      "description": "Resolve vague recall into recognized context — /recollect (ἀνάμνησις: recollection)"
     }
   ]
 }

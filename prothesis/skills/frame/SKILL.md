@@ -203,6 +203,7 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key difference**: Prothesis operates at the framework-selection level — choosing which analytical lenses to apply — while all other protocols operate within an already-established framework. It is also the only protocol that can assemble a multi-agent team for parallel perspective analysis (Mode 2) or provide lightweight lens recommendations (Mode 1). Syneidesis surfaces gaps in a decision, Aitesis verifies execution context, but both assume the analytical lens is already chosen. Prothesis is the protocol that chooses the lens.

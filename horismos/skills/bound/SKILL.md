@@ -122,6 +122,7 @@ Phase 2 Qc (classify)      → always_gated (gated: UserSupplies/AIPropose/AIAut
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:

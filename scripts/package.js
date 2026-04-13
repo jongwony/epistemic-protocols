@@ -39,6 +39,7 @@ const PLUGINS = [
   { dir: 'epistemic-cooperative', skill: 'dashboard' },
   { dir: 'epistemic-cooperative', skill: 'sophia' },
   { dir: 'epistemic-cooperative', skill: 'curses' },
+  { dir: 'anamnesis', skill: 'recollect' },
 ];
 
 // claude.ai description overrides (originals exceed 200 chars)
@@ -80,10 +81,12 @@ const PROTOCOL_METADATA = {
   analogia:   { name: 'Analogia', command: '/ground', deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
   prosoche:   { name: 'Prosoche', command: '/attend', deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
   epharmoge:  { name: 'Epharmoge', command: '/contextualize', deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
+  anamnesis:  { name: 'Anamnesis', command: '/recollect', deficit: 'RecallAmbiguous', resolution: 'RecalledContext' },
 };
 
-// Display order: CANONICAL_PRECEDENCE + Katalepsis (structurally last)
+// Display order: Anamnesis (recall, session start) + CANONICAL_PRECEDENCE + Katalepsis (structurally last)
 const PROTOCOL_ORDER = [
+  'anamnesis',
   'hermeneia', 'telos', 'horismos', 'aitesis', 'prothesis',
   'analogia', 'syneidesis', 'prosoche', 'epharmoge', 'katalepsis',
 ];

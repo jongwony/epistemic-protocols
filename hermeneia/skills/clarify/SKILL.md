@@ -121,6 +121,7 @@ Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent int
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**: User recognizes intent-expression misalignment (user signal), or AI detects ambiguous expression (AI-detected trigger, requires user confirmation). Both paths help articulate what the user partially knows. Boundary with Aitesis: if the ambiguity is in the user's *expression* of intent (how it was said), use Hermeneia; if the AI lacks *factual execution context* (what information the system needs), use Aitesis.
