@@ -11,6 +11,17 @@
           }
         ]
       }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs\"",
+            "async": true
+          }
+        ]
+      }
     ]
   }
 }
