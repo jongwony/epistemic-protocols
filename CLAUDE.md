@@ -204,6 +204,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Compose**: No delegation—main agent handles all phases. Read/Grep for graph.json and ELIDABLE CHECKPOINTS extraction, Write for template generation.
 - **Sophia**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (matching, presentation, report).
 - **Curses**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (analysis, recommendations, report).
+- **Write**: No delegation—main agent handles all phases. Composes /frame (Prothesis) for perspective analysis; the composed protocol's delegation rules apply when invoked.
 
 ## Conventions
 

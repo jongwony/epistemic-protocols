@@ -50,15 +50,15 @@ Scope boundary: this principle applies to instructions the LLM interprets and ap
 
 ## White Bear Avoidance
 
-**Derived from A4 (Semantic Autonomy) + A7 (Adversarial Anticipation).**
+Derived from A7 (Adversarial Anticipation).
 
-LLM-facing instructions prefer **positive rationale** ("X IS Y because Z") over **negative prohibition** ("do not use W"). Negative injunctions evoke the forbidden target (White Bear problem: "don't think of a white bear" → thought of white bear).
+LLM-facing instructions prefer **positive rationale** ("X IS Y because Z") over **negative prohibition** ("do not use W"). Negative injunctions evoke the forbidden target (White Bear problem: "don't think of a white bear" → thought of white bear), a recognized LLM rationalization path that A7 anticipates.
 
 **Scope**: LLM-facing instructions only; contributor-facing documentation exempt.
 
 **Relation to Zero-Shot Instruction Preference**: orthogonal complement. Zero-Shot works on the *example* axis (prefer no-example over ambiguous example); White Bear Avoidance works on the *prohibition* axis (prefer positive framing over prohibition).
 
-**Evidence**: PR #235 (2026-04-12) converted "avoid markdown code blocks in Ink output" to "emit element patterns directly" — positive phrasing reduced prohibited-pattern drift.
+**Evidence**: observed pattern across multiple LLM-facing instruction updates — converting phrasings like "avoid markdown code blocks in Ink output" to "emit element patterns directly" reduces prohibited-pattern drift in subsequent runs.
 
 ## Loop Continuity under Bounded Regret
 
