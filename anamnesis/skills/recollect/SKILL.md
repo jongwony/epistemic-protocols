@@ -119,13 +119,13 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 -- (see ── SUBSTRATE AGNOSTICISM ──). Any substrate satisfying the morphism laws realizes Anamnesis.
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 -- Store binding:
---   SSOT  ↦ ~/.claude/projects/{slug}/*.jsonl          (session JSONL, append-only)
---   INDEX ↦ {cwd}/hypomnesis/{session-id}/              (SessionEnd/PreCompact hook writes to
---                                                         user working dir, colocated with
---                                                         user artifacts so /recollect's
---                                                         Read/Grep can reach it from cwd;
---                                                         PR #249 decision 2026-04-13)
---         ∪ ~/.claude/projects/{slug}/memory/           (curated insights, sibling to SSOT)
+--   {slug} = dirname(transcript_path) — Claude Code's project partition identifier
+--   SSOT  ↦ ~/.claude/projects/{slug}/*.jsonl                    (session JSONL, append-only)
+--   INDEX ↦ ~/.claude/projects/{slug}/hypomnesis/{session-id}/   (SessionEnd/PreCompact hook;
+--                                                                 writer topology follows
+--                                                                 Claude Code's slug partition,
+--                                                                 preventing cwd-scattered INDEX)
+--         ∪ ~/.claude/projects/{slug}/memory/                    (user-curated insights)
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
 Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over SSOT ∪ INDEX)

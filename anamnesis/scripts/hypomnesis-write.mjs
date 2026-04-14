@@ -15,7 +15,10 @@
  *   3. Build 3 prompts (clue: user-only, vector: full, narrative: full)
  *   4. Call claude -p --model haiku per prompt (LLM semantic extraction)
  *   5. Validate JSON output + assemble md files (deterministic)
- *   6. Atomic write to hypomnesis/{session-id}/
+ *   6. Atomic write to ~/.claude/projects/{slug}/hypomnesis/{session-id}/
+ *      (slug derived from transcript_path dirname — sibling to SSOT JSONL.
+ *      v0.4.4 moved this from {cwd}/hypomnesis/ so writer topology follows
+ *      Claude Code's own slug partition, preventing cwd-scattered INDEX.)
  *
  * Recursion safety: --setting-sources "" prevents hook loading in child process.
  * Fail-open: top-level try/catch → process.exit(0).
@@ -735,7 +738,6 @@ function main() {
   const {
     session_id: sessionId,
     transcript_path: transcriptPath,
-    cwd,
     reason,
     hook_event_name: eventName,
   } = input;
@@ -751,10 +753,17 @@ function main() {
   const stat = fs.statSync(transcriptPath, { throwIfNoEntry: false });
   if (!stat || stat.size < MIN_SESSION_BYTES) return;
 
-  // Store lives in user's working directory so /recollect can find it,
-  // not in Claude's internal transcript storage (~/.claude/projects/...).
-  const projectDir = cwd || path.dirname(transcriptPath);
-  const storeDir = path.join(projectDir, "hypomnesis", sessionId);
+  // INDEX is sibling to SSOT under ~/.claude/projects/{slug}/ so that /recollect
+  // reaches a single canonical location regardless of invocation cwd. transcript_path
+  // is always ~/.claude/projects/{slug}/{session-id}.jsonl, so dirname is the slug dir.
+  // Shape guard: unexpected transcript_path format makes dirname return "." (writes
+  // to ./hypomnesis/, defeating the v0.4.4 migration silently). Log but fail-open
+  // so indexing still proceeds when the assumption breaks.
+  const slugDir = path.dirname(transcriptPath);
+  if (!slugDir || slugDir === ".") {
+    logErr(`transcript_path "${transcriptPath}" lacks directory component; slugDir="${slugDir}" — INDEX may write to wrong location`);
+  }
+  const storeDir = path.join(slugDir, "hypomnesis", sessionId);
 
   const {
     userMsgs, allTexts, timestamps, protocols, tokenEstimate,
@@ -886,7 +895,7 @@ function main() {
         `budget ${TWO_TRACK_BUDGET_MS}ms exhausted after ${elapsed}ms`,
       );
     } else {
-      const corpusRoot = path.join(projectDir, "hypomnesis");
+      const corpusRoot = path.join(slugDir, "hypomnesis");
       const result = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
       files["coinage.md"] = buildCoinageMd(sessionId, date, result, false, null);
     }
