@@ -284,8 +284,6 @@ Anamnesis is not simplified search. Three differentiators:
 
 **Anamnesis vs Aitesis**: Both involve information access. Aitesis discovers facts the user does not know (ContextInsufficient — "I need information"). Anamnesis verifies context the user vaguely knows exists (RecallAmbiguous — "I know this was discussed, but where?"). The phenomenological test: does the user have an empty intention seeking fulfillment (Anamnesis) or no intention at all regarding the topic (Aitesis)? When the user has an empty intention but the recalled content is wholly absent from stores, the protocol exits with NullMatch — the recall target may not exist in the stored context.
 
-**Anamnesis vs Reflexion**: Reflexion extracts cross-session learning patterns through guided dialogue (retrospective, write-oriented — inscribes insights into persistent memory). Anamnesis resolves vague recall into specific recognized context (recognition-oriented, read-only — reads from stores without modifying them). Three-axis orthogonality on the same memory layer: retrospective analysis (Reflexion), prospective preservation (/crystallize), vague-recall access (Anamnesis).
-
 **Anamnesis vs Prothesis**: Prothesis selects analytical frameworks when none exist (FrameworkAbsent). Anamnesis locates prior discussions when the user has vague recall of their existence (RecallAmbiguous). If the user does not know a framework was ever discussed, it is not Anamnesis — it is Prothesis or Aitesis.
 
 **Anamnesis vs Hermeneia**: Hermeneia clarifies what the user means now (expression gap in current intent). Anamnesis locates what the user discussed before (recall gap in prior context). If the user's current expression is ambiguous, it is Hermeneia; if their reference to prior context is vague, it is Anamnesis.
@@ -343,7 +341,7 @@ Heuristic signals for empty intention detection (not hard gates):
 | Failed self-recall | User attempts to reference prior context but trails off, hedges, or uses approximation language |
 | Cognitive effort signals | User pauses mid-reference, self-corrects, or expresses frustration at not finding a prior discussion |
 
-**Cross-session enrichment**: Prior recall patterns from Reflexion cycles provide starting points for Phase 1 contextual scan — previously successful recall paths may guide initial search scope. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Prior recall indices persisted in the hypomnesis store provide starting points for Phase 1 contextual scan — previously successful recall paths may guide initial search scope. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
 **Skip**:
 - User provides specific reference (file path, session ID, issue number, exact quote)

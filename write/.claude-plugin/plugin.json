@@ -1,9 +1,0 @@
-{
-  "name": "write",
-  "description": "Multi-perspective blog drafting from session insights",
-  "version": "1.1.1",
-  "author": {
-    "name": "Jongwon Choi",
-    "url": "https://github.com/jongwony"
-  }
-}

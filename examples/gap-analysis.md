@@ -48,11 +48,11 @@
 
 **트리거 발화/행동**: 새 세션에서 "지난번에 정한 분석 프레임을 이어서 쓰자"라고 하지만, 이전 Lens L이 세션 컨텍스트에 없다.
 
-**결핍(전)**: `DecisionForgotten → ContinuedDeliberation` — Reflexion이 근접하지만 "특정 결정 검색"은 미지원. 이전 세션의 프로토콜 산출물(Lens, DC, GoalContract)이 새 세션에서 접근 불가.
+**결핍(전)**: `DecisionForgotten → ContinuedDeliberation` — Anamnesis가 근접하지만 "특정 결정 검색"은 미지원. 이전 세션의 프로토콜 산출물(Lens, DC, GoalContract)이 새 세션에서 접근 불가.
 
-**해결(후)**: Reflexion이 부분적으로 커버하지만, 특정 결정/계약을 검색하고 복원하는 메커니즘은 별도로 필요하다.
+**해결(후)**: Anamnesis가 부분적으로 커버하지만, 특정 결정/계약을 검색하고 복원하는 메커니즘은 별도로 필요하다.
 
-**인접 프로토콜 배제**: Reflexion이 가장 근접하지만, insight 추출과 결정 복원은 다른 목적이다.
+**인접 프로토콜 배제**: Anamnesis가 가장 근접하지만, 모호한 recall 해소와 결정 복원은 다른 목적이다.
 
 ---
 

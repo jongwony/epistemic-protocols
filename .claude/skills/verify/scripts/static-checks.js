@@ -252,9 +252,11 @@ function checkCrossReference() {
   for (const ref of fileRefs) {
     const refPath = ref[1];
     // Check in likely locations
+    // Single canonical location after reflexion removal and write consolidation
+    // into epistemic-cooperative. Array form retained to accommodate future
+    // references-hosting plugins without restructuring the resolver.
     const locations = [
-      path.join(projectRoot, 'reflexion/skills/reflexion', refPath),
-      path.join(projectRoot, 'write/skills/write', refPath),
+      path.join(projectRoot, 'epistemic-cooperative/skills/write', refPath),
     ];
 
     let exists = locations.some(loc => fs.existsSync(loc));

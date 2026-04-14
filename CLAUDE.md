@@ -47,12 +47,7 @@ epistemic-protocols/
 │   ├── hooks/hooks.json               # SessionEnd hook: hypomnesis store writer
 │   ├── scripts/hypomnesis-write.mjs   # mjs harness + claude -p haiku extraction
 │   └── skills/recollect/SKILL.md     # Full protocol definition (user-invocable)
-├── reflexion/                         # Skill: cross-session learning
-│   ├── .claude-plugin/plugin.json
-│   ├── agents/                        # Parallel extraction agents
-│   ├── commands/                      # /reflect, /quick-reflect
-│   └── skills/reflexion/SKILL.md
-├── epistemic-cooperative/               # Utility skills: report + onboarding + analytics + configuration
+├── epistemic-cooperative/               # Utility skills: report + onboarding + analytics + configuration + writing
 │   ├── .claude-plugin/plugin.json
 │   ├── agents/                        # project-scanner, session-analyzer, coverage-scanner, dimension-profiler
 │   └── skills/
@@ -62,10 +57,8 @@ epistemic-protocols/
 │       ├── catalog/SKILL.md           # Protocol handbook — instant reference
 │       ├── compose/SKILL.md           # Protocol composition authoring assistant
 │       ├── sophia/SKILL.md            # Philosopher match via behavioral dimensions
-│       └── curses/SKILL.md            # Strength-shadow analysis and attitude recommendations
-├── write/                             # Skill: multi-perspective blog drafting
-│   ├── .claude-plugin/plugin.json
-│   └── skills/write/SKILL.md
+│       ├── curses/SKILL.md            # Strength-shadow analysis and attitude recommendations
+│       └── write/SKILL.md             # Multi-perspective blog drafting from session insights
 └── src/                               # Landing page (independent sub-project)
     ├── package.json                   # React + Vite + Tailwind (isolated deps)
     ├── vite.config.ts
@@ -74,11 +67,10 @@ epistemic-protocols/
 
 **Component Types**:
 - **Skills** (`skills/*/SKILL.md`): Full protocol/workflow definitions with YAML frontmatter; user-invocable by default (v2.1.0+)
-- **Commands** (`commands/*.md`): Lightweight invokers (reflexion only—prothesis/syneidesis use skills directly)
-- **Agents** (`agents/*.md`): Subagents for parallel task execution (reflexion, epistemic-cooperative)
+- **Agents** (`agents/*.md`): Subagents for parallel task execution (epistemic-cooperative)
 
 **Conventions**:
-- Subagent naming: `plugin-name:agent-name` (e.g., `reflexion:session-summarizer`)
+- Subagent naming: `plugin-name:agent-name` (e.g., `epistemic-cooperative:session-analyzer`)
 - References directory: `skills/*/references/` for detailed documentation (optional per plugin)
 - No external dependencies; Node.js standard library only (plugin code). `src/` landing page is an independent sub-project with its own `package.json`
 
@@ -102,7 +94,7 @@ epistemic-protocols/
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 | Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
 
-**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/compose`, `/sophia`, `/curses`), Reflexion (`/reflect`), Write (`/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
+**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/compose`, `/sophia`, `/curses`, `/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
 
 ## Axioms
 
@@ -147,7 +139,7 @@ Protocols grouped by primary concern, ordered by activation sequence within each
   - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge, Anamnesis)
   - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia)
   - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche)
-  - **User-invoked**: Deliberate practice; no deficit awareness required (Reflexion, Write)
+  - **User-invoked**: Deliberate practice; no deficit awareness required (Write)
 
 ## Development
 
@@ -212,6 +204,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Compose**: No delegation—main agent handles all phases. Read/Grep for graph.json and ELIDABLE CHECKPOINTS extraction, Write for template generation.
 - **Sophia**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (matching, presentation, report).
 - **Curses**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (analysis, recommendations, report).
+- **Write**: No delegation—main agent handles all phases. Composes /frame (Prothesis) for perspective analysis; the composed protocol's delegation rules apply when invoked.
 
 ## Conventions
 

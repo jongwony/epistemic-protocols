@@ -156,7 +156,6 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
   - Prosoche: ExecutionBlind → SituatedExecution (User-initiated, EVALUATE)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
-  - Reflexion: KnowledgeTacit → PersistedKnowledge (User-invoked, CRYSTALLIZE)
   - Write: InsightInternal → ExternalizedKnowledge (User-invoked, EXTERNALIZE)
 - [ ] Initiator correctly specified (AI-guided vs Hybrid vs User-initiated vs User-invoked)
 - [ ] Gap taxonomy matches protocol purpose

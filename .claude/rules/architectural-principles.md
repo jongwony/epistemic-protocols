@@ -14,7 +14,7 @@ Inter-protocol data flows as natural language in the session context — no stru
 
 ## Cross-Session Knowledge Composition
 
-Reflexion-stored knowledge enriches protocol detection in subsequent sessions. This is the session-boundary extension of Session Text Composition — where intra-session data flows through conversation context, cross-session data flows through persistent memory. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision (Tertiary hermeneutic circle).
+Anamnesis's hypomnesis store persists session recall indices that enrich protocol detection in subsequent sessions. This is the session-boundary extension of Session Text Composition — where intra-session data flows through conversation context, cross-session data flows through the hypomnesis store. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision (Tertiary hermeneutic circle).
 
 **Formal layer boundary**: Cross-session enrichment operates as a runtime heuristic inscribed in protocol operational prose, not as a formal phase step. PHASE TRANSITIONS and TOOL GROUNDING blocks remain unchanged — enrichment does not introduce new phase transitions or tool calls. This boundary is intentional: heuristic inputs influence detection sensitivity but do not alter the protocol's formal specification.
 
@@ -63,6 +63,24 @@ Principle: side effects require explicit answer types, not tool-level escape. Wh
 CLAUDE.md principles guide contributors (protocol designers). End users receive only SKILL.md content via the plugin system. For a principle to affect runtime protocol behavior, it must be structurally embedded in SKILL.md — documenting it in CLAUDE.md alone is insufficient.
 
 **Session-level observer exception**: The Dual Advisory Layer principle establishes Output Style nudge as a legitimate runtime mechanism complementary to graph.json. Nudge operates as a session-level cross-cutting observer — it belongs to no single SKILL.md because it observes across all protocols. Audience Reach applies to protocol-specific runtime behavior (which must be embedded in that protocol's SKILL.md), not to session-level observation patterns that are architecturally cross-cutting. Each SKILL.md governs its own protocol's detection (e.g., Post-Convergence conditions); Output Style governs the session-level observation layer.
+
+### Amendment: Bidirectional Reach
+
+The original Audience Reach principle addresses leakage FROM contributor-facing text INTO LLM-runtime context. The reverse direction — LLM-runtime text leaking into contributor docs — is a symmetric failure mode.
+
+**Bidirectional rule**: audience partitioning is symmetric. Contributor docs must not assume runtime state; runtime text must not assume contributor-onboarding context.
+
+**Static-check candidate**: structural-specs can detect reverse-leakage by flagging contributor-doc sections that reference runtime-only symbols (mode state variables, protocol internal invariants).
+
+## Utility Skills — A7 Delegation
+
+**Pure relay utilities** — utilities that do NOT present gates and do NOT synthesize protocol outputs — delegate A7 (Adversarial Anticipation) to the composed protocols they call. A pure-relay utility is not obligated to implement A7 gate-integrity guards when it has no gates of its own.
+
+**Principle**: A7 guards attach to the gate boundary, not to every wrapper layer. Wrapping a protocol in a pure-relay utility skill does NOT require re-implementing A7 in the utility.
+
+**Scope boundary**: This delegation applies only to utilities that behave as relay pipes (forward outputs unchanged). Utilities that perform **output synthesis or post-processing** — selecting among, merging, or narratively recomposing protocol outputs — exercise constitutive authority (A2 constitution territory) and must inherit A7 adversarial guards against the same rationalization paths the synthesis step introduces. The operational test: "Does the utility's output-layer add selection, interpretation, or composition beyond forwarding?" If yes, A7 applies at the synthesis step even if no formal gate is presented.
+
+**Implication**: Pure-relay utility SKILL.md authoring may omit A7 sections; document only the composed protocol's A7 inheritance. Synthesis utilities must document their A7 obligations at the synthesis boundary.
 
 ## Direction over Accumulated Workload
 

@@ -15,16 +15,6 @@
       "description": "Surface potential gaps at decision points — /gap (συνείδησις: knowing-together)"
     },
     {
-      "name": "reflexion",
-      "source": "./reflexion",
-      "description": "Cross-session learning via Reflexion pattern"
-    },
-    {
-      "name": "write",
-      "source": "./write",
-      "description": "Multi-perspective blog drafting from session insights"
-    },
-    {
       "name": "hermeneia",
       "source": "./hermeneia",
       "description": "Clarify intent-expression gaps through dialogue — /clarify (ἑρμηνεία: interpretation)"
@@ -67,7 +57,7 @@
     {
       "name": "epistemic-cooperative",
       "source": "./epistemic-cooperative",
-      "description": "/catalog for protocol handbook, /report for Growth Map (epistemic analysis + insights), /onboard for quest-based protocol learning, /dashboard for coverage dashboard, /compose for protocol composition authoring, /sophia for philosopher match, /curses for strength-shadow analysis"
+      "description": "/catalog for protocol handbook, /report for Growth Map (epistemic analysis + insights), /onboard for quest-based protocol learning, /dashboard for coverage dashboard, /compose for protocol composition authoring, /sophia for philosopher match, /curses for strength-shadow analysis, /write for multi-perspective blog drafting"
     },
     {
       "name": "anamnesis",

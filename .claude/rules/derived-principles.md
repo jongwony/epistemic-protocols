@@ -48,6 +48,18 @@ LLM-facing instructions (Output Style, SKILL.md prose, agent prompts) state prin
 
 Scope boundary: this principle applies to instructions the LLM interprets and applies at runtime — not to contributor-facing documentation where examples serve comprehension. The boundary test: "would removing this example increase the LLM's latitude in applying the principle to novel contexts?" If yes, the example is anchoring and should be removed. If the example aids human understanding without constraining LLM application, it is outside scope. SKILL.md formal blocks (Definition code blocks) are LLM-facing by definition; prose outside formal blocks in SKILL.md is hybrid (read by both LLMs and contributors) — err toward principle-only in hybrid contexts.
 
+## White Bear Avoidance
+
+Derived from A7 (Adversarial Anticipation).
+
+LLM-facing instructions prefer **positive rationale** ("X IS Y because Z") over **negative prohibition** ("do not use W"). Negative injunctions evoke the forbidden target (White Bear problem: "don't think of a white bear" → thought of white bear), a recognized LLM rationalization path that A7 anticipates.
+
+**Scope**: LLM-facing instructions only; contributor-facing documentation exempt.
+
+**Relation to Zero-Shot Instruction Preference**: orthogonal complement. Zero-Shot works on the *example* axis (prefer no-example over ambiguous example); White Bear Avoidance works on the *prohibition* axis (prefer positive framing over prohibition).
+
+**Evidence**: observed pattern across multiple LLM-facing instruction updates — converting phrasings like "avoid markdown code blocks in Ink output" to "emit element patterns directly" reduces prohibited-pattern drift in subsequent runs.
+
 ## Loop Continuity under Bounded Regret
 
 Derived from A2 (Detection with Authority) + A5 (Interaction Kind Factorization).

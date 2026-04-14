@@ -29,6 +29,6 @@ node .claude/skills/verify/scripts/static-checks.js .
 `scripts/package.js` applies non-trivial transforms when building release ZIPs:
 - Renames `SKILL.md` → `Skill.md` (marketplace case convention)
 - Strips frontmatter fields: `allowed-tools`, `license`, `compatibility`, `metadata`
-- Overrides descriptions exceeding 200 chars (`frame`, `reflexion`)
+- Overrides descriptions exceeding 200 chars (`frame`, `catalog`)
 - Excludes `agents/`, `commands/`, README files from ZIPs
 - 500-line guideline per SKILL.md (warns if exceeded)
