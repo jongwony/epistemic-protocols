@@ -254,16 +254,6 @@ The scan finds candidates; the narrative Qc enables recognition; the user consti
 
 3. **Guided recall orientation on Refine**: When initial candidates do not match, the protocol facilitates structured recognitive orientation — presenting concrete navigation through adjacent memory vectors rather than open-ended questions. The user's vague memory and the stored context are brought into productive contact through specific alternatives that enable recognition.
 
-## Epistemic Distinction from Information Retrieval
-
-Anamnesis is not simplified search. Three differentiators:
-
-1. **Phenomenological trigger**: Activates only when `empty_intention(V)` — user knows something exists but cannot locate it. Not for finding unknown information (Aitesis) or querying known references (direct Read/Grep).
-
-2. **Synthesis of identification**: The recognition gate (Phase 2 Qc) is where empty intention meets fulfilled re-presentation (Husserl *Cartesian Meditations* §§38-39). The user does not confirm a search result — they recognize a context identity. This recognition is constitutive: the user's judgment creates the verified match, not the scan's confidence score.
-
-3. **Recall deepening, not query refinement**: The Refine path enriches the user's recall context through Socratic probing with structured navigation, not by adjusting search parameters. The improvement is in the user's recall orientation (bringing vague memory into productive contact with adjacent stored context), not in the search query.
-
 ## Distinction from Other Protocols
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
@@ -288,21 +278,14 @@ Anamnesis is not simplified search. Three differentiators:
 
 **Anamnesis vs Hermeneia**: Hermeneia clarifies what the user means now (expression gap in current intent). Anamnesis locates what the user discussed before (recall gap in prior context). If the user's current expression is ambiguous, it is Hermeneia; if their reference to prior context is vague, it is Anamnesis.
 
-**Structural distinction**: Anamnesis operates on the user's retention context — the accumulated prior discussions and decisions stored in hypomnesis and memory. The operational test: if the uncertainty is about whether something was previously discussed and where, it is Anamnesis; if it is about whether enough information exists to proceed now, it is Aitesis; if it is about what the user currently means, it is Hermeneia.
-
 ## Mode Activation
 
 ### Activation
 
-AI detects empty intention in user expression OR user calls `/recollect`. Detection is silent (Phase 0); recognition always requires user interaction via gate (Phase 2). On direct `/recollect`, bind `V` from the current or most recent context; if no recoverable vague recall exists, request the recall target before Phase 0.
+AI detects empty intention in user expression (Layer 2, silent Phase 0) OR user calls `/recollect` (Layer 1, always available). Recognition always requires user interaction at Phase 2 gate. On direct `/recollect`, bind `V` from current/recent context; if none recoverable, request the recall target before Phase 0.
 
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/recollect` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Empty intention detected via in-protocol heuristics. Detection is silent (Phase 0).
+**Empty intention** — user has vague memory of prior context but cannot locate/specify it (knows-that ∃ something, not what/where).
 
-**Empty intention** = user has a vague memory of prior discussion, decision, or context but cannot locate or fully specify it. The user knows-that (something exists) but not what/where (specific content or location).
-
-Gate predicate:
 ```
 empty_intention(V) ≡ ∃ context(c, prior) : knows_exists(user, c) ∧ ¬can_locate(user, c)
 ```
@@ -320,14 +303,11 @@ When Anamnesis is active:
 **Action**: At Phase 2, present narrative candidate for user recognition via gate interaction and yield turn.
 </system-reminder>
 
-- Anamnesis completes before context-dependent work proceeds
-- Loaded instructions resume after recall is resolved or dismissed
+Anamnesis completes before context-dependent work; loaded instructions resume after recall resolves or dismisses.
 
-**Protocol precedence**: Relationship to Aitesis determined by graph.json (precondition or advisory). When active, recognized context narrows Aitesis scope.
+**Protocol precedence**: graph.json is authoritative. Anamnesis is an 8-outgoing advisory hub (Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia) with no incoming advisory edges; Katalepsis is structurally last.
 
-**Advisory relationships**: Provides to Aitesis (recalled context narrows scan scope), Prothesis (prior perspective preferences), Syneidesis (prior gap patterns), Hermeneia (prior phrasing/terminology), Telos (prior goal preferences), Horismos (prior boundary classifications), Prosoche (prior risk patterns), Analogia (prior domain mappings) — 8 outgoing advisory hub. No incoming advisory edges (source is session JSONL + hypomnesis store). Katalepsis is structurally last.
-
-**Temporal ordering note**: Advisory edges do not enforce activation ordering via graph.json precondition. For the advisory flow to materialize, `/recollect` should be invoked early in the session — typically before Hermeneia–Telos–Horismos precondition chain activates. If Horismos or another downstream protocol activates first, the advisory enrichment is simply unreachable in that session; it is not an error. User awareness of session-start recall is the ordering mechanism.
+**Temporal ordering**: Advisory edges do not enforce activation ordering. `/recollect` should be invoked early — before Hermeneia–Telos–Horismos precondition chain — for advisory flow to materialize. If downstream protocols activate first, advisory enrichment is unreachable in that session (not an error); user awareness of session-start recall is the ordering mechanism.
 
 ### Trigger Signals
 
@@ -365,11 +345,7 @@ Heuristic signals for empty intention detection (not hard gates):
 Detect empty intention and extract contextual trace. This phase is **silent** — no user interaction.
 
 1. **Detect empty intention**: Analyze user expression for vague recall markers — self-referential past tense, existence claims without specification, temporal references without anchors
-2. **Extract trace + classify input type**: `extract_trace(input, Σ)` populates `RecallTrace` (keywords, temporal, associations, identifiers); `classify(V, Σ)` assigns `InputType` ∈ {StructuredIdentifier, NaturalRecall, Mixed} which binds `Track` ∈ {entropy, salience, hybrid} for Phase 1 dispatch. Within the salience track, session context (Σ) is the primary ranking signal; within the entropy track, literal precision dominates ranking.
-   - **Context extraction**: What is the user currently working on? What topic area does the vague recall relate to? The current conversation structure and direction are the strongest clues for narrowing the search space
-   - **Keyword extraction**: Specific terms from user expression — treated as heuristic hints, not definitive search terms
-   - **Temporal extraction**: Any time references — converted to search window constraints
-   - **Association extraction**: Related concepts inferred from session context — often more reliable than user-supplied keywords
+2. **Extract trace + classify input type**: `extract_trace(input, Σ)` populates `RecallTrace` (keywords, temporal, associations, identifiers); `classify(V, Σ)` assigns `InputType` ∈ {StructuredIdentifier, NaturalRecall, Mixed} → binds `Track` ∈ {entropy, salience, hybrid}. Session context (Σ) — the current conversation's structure and direction — is the strongest clue for narrowing search space; user keywords are heuristic hints, not definitive queries.
 3. **Assess trace ambiguity**:
    - **Low** (3+ specific signals across keywords, temporal, associations): proceed to Phase 1 with targeted scan
    - **Moderate** (1-2 signals): proceed to Phase 1 with broader scan scope and semantic similarity
@@ -388,11 +364,7 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
    - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over `INDEX` (SSOT fallback on degraded_scan) — match against `MarkerProfile` (coinage / actor / temporal / emotional / cognitive / singularity); session context (Σ) supplies ranking signal within this track.
    - **hybrid track** (`InputType = Mixed`): union of entropy and salience results.
 
-   **Common ranking signals** (track-internal, not track-selecting):
-   - **Temporal neighborhood**: When a temporal signal exists, explore sessions in that time range AND their adjacent sessions — what was discussed before and after the candidate.
-   - **Adjacent vector discovery**: For each candidate session, collect what other topics were discussed alongside — these become concrete Refine hints in Phase 2.
-
-   Tool realization (Claude Code substrate): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING.
+   Tool realization (Claude Code substrate): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING. Rule 6 defines track-internal ranking composition.
 
 2. **Adaptive behavior based on trace ambiguity**:
    - **High ambiguity**: Present hypomnesis store overview as orientation text (relay) — surface the store's structure and major topic clusters so the user can orient their recall. This is informational, not a gated interaction; the overview provides context for the subsequent targeted scan.
@@ -437,11 +409,7 @@ Options:
 
 Other is always available — maps to `Reorient`: user describes a fundamentally different recall dimension that neither Recognize nor Refine captures (e.g., recalling a concept rather than a discussion, an external reference rather than a session). The protocol re-characterizes V with the new description and re-scans from the orthogonal angle.
 
-**Design principles**:
-- **Narrative over summary**: Tell the discussion's story (origin → direction → outcome), not just the conclusion. The story is what triggers recognition.
-- **Adjacent vectors in Refine**: Concrete alternatives from the store, not generic "something else?" — reduces cognitive load and enables Recognition (A1) in the Refine path itself
-- **Progress visible**: Display attempt count and candidate scope
-- **Cross-LOOP continuity**: On subsequent iterations, reference prior presented candidates and explain the differential
+Design principles for Phase 2 presentation — narrative over summary, concrete adjacent vectors on Refine, progress visibility, cross-LOOP continuity — are enforced by Rules 4, 5, 11, and 21.
 
 ### Phase 3: Integration
 
@@ -462,23 +430,13 @@ After user response:
    Which direction is closer to your memory?
    ```
 
-   **Design principle**: Structured navigation (Recognition), not open-ended recall demands. Each option is a concrete memory vector with narrative context. The probe facilitates guided recall orientation — bringing the user's vague memory into productive contact with specific stored alternatives.
+   After user response: `enrich(V, H)` — integrate hint into trace (keywords, associations, temporal narrowing), re-enter Phase 1 with enriched context. Structured navigation design is governed by Rule 5.
 
-   After user response: `enrich(V, H)` — integrate user's hint into trace (keywords, associations, temporal narrowing), re-enter Phase 1 with enriched context for re-scan.
+3. **Reorient(description)**: User surfaces an orthogonal recall dimension neither candidate nor adjacent vectors match — the target is fundamentally different from what was assumed. `rebind(V, d, Σ)` rebuilds V.trace from the new description (fresh construction, not Refine's incremental enrichment). Re-enter Phase 1 with rebuilt trace. NullMatch on re-scan may route cross-protocol (e.g., ContextInsufficient → Aitesis; expression ambiguity → /clarify).
 
-3. **Reorient(description)**: User's recall is in an orthogonal dimension — neither the presented candidate nor its adjacent vectors match because the recall target is fundamentally different from what was assumed. The protocol re-characterizes V:
+   **Refine vs Reorient test**: would the user's new description produce any overlap with the current candidate set? Overlap → Refine; disjoint → Reorient.
 
-   `rebind(V, d, Sigma)` — rebuild V.trace from the user's description rather than enriching the existing trace. This is not incremental enrichment (Refine) but a fresh trace construction from the orthogonal dimension the user has surfaced.
-
-   Re-enter Phase 1 with rebuilt trace. If the re-scan yields NullMatch, the NullMatch information may include cross-protocol routing suggestions (e.g., if the user's description reveals ContextInsufficient rather than RecallAmbiguous, suggest Aitesis; if expression ambiguity, suggest /clarify).
-
-   **Distinction from Refine**: Refine enriches V within the same search space (guided recall orientation with adjacent vectors). Reorient rebuilds V from a different search space entirely (orthogonal dimension shift). The operational test: would the user's new description produce any overlap with the current candidate set? If yes, it is Refine; if the sets are disjoint, it is Reorient.
-
-After integration:
-- If `recall_complete`: present convergence evidence trace (VagueRecall → [enrichments applied] → Candidate(recognized) → ClueVector_prose emitted), proceed
-- If Refine: return to Phase 1 with enriched trace
-- If Reorient: return to Phase 1 with rebuilt trace (orthogonal re-scan)
-- Log `(Candidate, R)` to history
+After integration: `recall_complete` → present convergence evidence trace (VagueRecall → [enrichments applied] → Candidate(recognized) → ClueVector_prose emitted), proceed. Refine → Phase 1 with enriched trace. Reorient → Phase 1 with rebuilt trace (orthogonal re-scan). Log `(Candidate, R)` to history.
 
 ## Intensity
 
@@ -488,35 +446,19 @@ After integration:
 | Medium | Moderate specificity, 2-3 candidates in scope | Full narrative + adjacent vectors in Refine option |
 | Heavy | Low specificity, Refine path expected, high ambiguity trace | Full narrative + adjacent vectors + Socratic probing with structured navigation + hypomnesis overview on initial scan |
 
-## UX Safeguards
-
-| Rule | Structure | Effect |
-|------|-----------|--------|
-| Gate specificity | `activate(Anamnesis) only if empty_intention(V)` | Prevents false activation on specific references |
-| Track-dispatched scan | Phase 1 dispatches by InputType → entropy/salience/hybrid | Prevents single-strategy blind spots (keyword-only, Σ-only) |
-| Narrative Qc | Phase 2 presents discussion story, not result summary | Enables recognition without additional investigation |
-| Guided recall orientation in Refine | Refine includes adjacent vectors from store | Prevents cognitive load from hint-less Refine |
-| One candidate per cycle | Present highest-priority candidate per Phase 2 | Prevents recognition overload |
-| Session immunity | Recognized recall target → skip for session | Respects prior recognition |
-| Progress visibility | `[attempt N/3, M candidates]` in Phase 2 | User sees recall progress |
-| Attempt cap | Max 3 recall attempts per activation | Prevents infinite recall deepening |
-| Early exit | User can accept current state at any Phase 2 | Full control over recall depth |
-| Ambiguity routing | High ambiguity → hypomnesis overview or /clarify | Prevents blind scan on vague expressions |
-| NullMatch protection | At least one probe enrichment before NullMatch | Prevents premature abandonment |
-
 ## Rules
 
 1. **AI-guided, user-recognized**: AI detects empty intention and scans stores; recognition requires user identification via gate interaction (Phase 2). AI detection is implicitly confirmed when the user engages with recognition (Phase 2 gate response, not Esc).
 
 2. **Recognition over Recall**: Present narrative candidates via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation.
 
-3. **Input-typed dispatch**: Phase 1 scan is dispatched by `InputType` classified from V and Σ — `StructuredIdentifier` routes to entropy track (exact-literal precision scan via `scan_entropy`), `NaturalRecall` routes to salience track (MarkerProfile match via `scan_salience`), `Mixed` routes to hybrid. Σ-primary scan survives only as a special case within the salience track's ranking layer, not as an absolute rule across all inputs. The track determines which scan is authoritative; the session context (Σ) enriches ranking within the selected track.
+3. **Input-typed dispatch**: Phase 1 scan dispatches by `InputType` classified from V and Σ — `StructuredIdentifier` → entropy track, `NaturalRecall` → salience track, `Mixed` → hybrid. Σ-primary scan survives only as a ranking-layer special case within the salience track, not as an absolute scan rule.
 
-4. **Narrative Qc presentation**: Phase 2 presents candidates as discussion narratives (origin → direction → outcome), not result summaries. Narrative enables recognition by providing the contextual story; result-only presentation forces additional investigation that defeats the protocol's purpose.
+4. **Narrative Qc presentation**: Phase 2 presents candidates as discussion narratives (origin → direction → outcome), not result summaries. Result-only presentation defeats recognition by forcing additional investigation.
 
-5. **Guided recall orientation in Refine**: When user selects Refine, present structured navigation through adjacent memory vectors from the store — concrete alternative topics with brief narratives. Open-ended questions shift cognitive burden to the user; structured alternatives enable Recognition (A1) in the recall-deepening process itself.
+5. **Guided recall orientation in Refine**: On Refine, present structured navigation through adjacent memory vectors with brief narratives — open-ended questions shift cognitive burden; structured alternatives enable Recognition (A1) in recall-deepening.
 
-6. **Track-internal ranking strategy**: Ranking within a track composes the signals appropriate to that track — on the entropy track, literal precision (rarity in corpus) dominates; on the salience track, Σ-match, marker-profile overlap, temporal neighborhood, and adjacent vector discovery compose the weight. Single-signal scans (keyword-only or Σ-only) have structural blind spots regardless of track; track-appropriate composite ranking addresses them.
+6. **Track-internal ranking strategy**: Ranking composes track-appropriate signals — entropy track: literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery. Single-signal scans have structural blind spots regardless of track.
 
 7. **Adaptive ambiguity handling**: When trace ambiguity is high (0-1 specific signals), present hypomnesis store overview or consider /clarify composition before targeted scanning. Do not scan blindly on vague expressions — orient the user first.
 
@@ -530,7 +472,7 @@ After integration:
 
 12. **Early exit honored**: When user declares recall sufficient or presses Esc, accept immediately regardless of remaining candidates or attempts.
 
-13. **Cross-protocol awareness**: Defer to Aitesis when user has no recall — no empty intention, needs new information. Defer to /clarify when user's expression itself is ambiguous (expression gap, not recall gap). Route to HybridRecall composition (`/recollect * /inquire`) when recognized context needs further enrichment. On NullMatch after exhausted probing, offer Aitesis handoff with accumulated recall trace as context seed — the recall INDEX (hypomnesis/) may lack entries due to lifecycle gaps or pre-store sessions, but the SSOT (session JSONL) retains the information and Aitesis can search it directly.
+13. **Cross-protocol awareness**: Defer to Aitesis when user needs new information (no empty intention); defer to /clarify when expression itself is ambiguous (expression gap ≠ recall gap). Compose `/recollect * /inquire` when recognized context needs enrichment. On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace — INDEX may lack entries (lifecycle gaps or pre-store sessions) while SSOT retains the information.
 
 14. **Context-Question Separation**: Present all narrative context, evidence, and adjacent vectors as text before the gate; the gate contains only the recognition question and options with differential implications. Embedding narrative in gate fields = protocol violation.
 
@@ -538,18 +480,18 @@ After integration:
 
 16. **No silent activation dismissal**: If Phase 0 determines no empty intention (e.g., user provides a specific reference), present the finding before proceeding without Anamnesis.
 
-17. **No premature NullMatch**: Do not declare NullMatch before attempting at least one Socratic probe enrichment. First scan returning zero → probe for enrichment → enriched re-scan → then NullMatch if still empty. The user's initial expression may be too vague to match, but a single probe can unlock recall.
+17. **No premature NullMatch**: At least one Socratic probe enrichment must precede NullMatch declaration. First scan returning zero → probe → enriched re-scan → NullMatch only if still empty.
 
-18. **No skipped Qc**: Even with a single high-confidence candidate, Phase 2 gate is mandatory. The synthesis of identification is constitutive — it cannot be auto-resolved by confidence scores. High confidence justifies Light intensity (abbreviated narrative), not gate elision.
+18. **No skipped Qc**: Phase 2 gate is mandatory even with single high-confidence candidate. Synthesis of identification is constitutive — cannot auto-resolve via confidence score. High confidence justifies Light intensity, not gate elision.
 
-19. **No asserted recognition**: AI presents narrative candidates; user constitutes recognition. Asserting "this must be what you are looking for" = protocol violation. Present and yield; never assert on behalf of the user.
+19. **No asserted recognition**: AI presents; user constitutes recognition. Asserting "this must be what you want" = protocol violation.
 
-20. **No merged probe+recognition**: Socratic probing (Qs) and recognition (Qc) are separate gate interactions. Do not combine identification questions with recall-deepening questions in a single gate. The probe deepens the user's recall context; the recognition verifies identity. These are distinct epistemic operations.
+20. **No merged probe+recognition**: Socratic probing (Qs) and recognition (Qc) are separate gates — the probe deepens recall context, Qc verifies identity. Combining them = protocol violation.
 
-21. **Cross-LOOP narrative persistence**: Narrative format, adjacent vector enrichment, and guided recall orientation persist across all LOOP iterations. Second and subsequent attempts reference prior presented candidates and explain the differential. Continuity across loops prevents repetitive presentation and builds cumulative orientation.
+21. **Cross-LOOP narrative persistence**: Narrative format and adjacent vector enrichment persist across LOOP iterations; subsequent attempts reference prior candidates and explain the differential.
 
-22. **Substrate non-coupling**: FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, and the five formal blocks (ENTROPY EXTRACTION, SALIENCE MARKERS, STORE TOPOLOGY, SUBSTRATE AGNOSTICISM, KNOWN FAILURE MODES) must not name specific tools, agents, platforms, schedulers, or storage media. Realization bindings (tool names, concrete file paths, language, backend) belong exclusively to TOOL GROUNDING. Violation = substrate leakage into protocol essence, which A4 Semantic Autonomy forbids.
+22. **Substrate non-coupling**: Protocol essence (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, five formal blocks) must not name specific tools, agents, platforms, or storage media. Realization bindings belong exclusively to TOOL GROUNDING (A4 Semantic Autonomy).
 
 ## Known Limitations
 
-Known failure modes of the two-track dispatch and store topology are formally specified in the `── KNOWN FAILURE MODES ──` block above (FalseAnchor, ExtractorLacking, NullMatch₁/₂, MutualNull). The prior v0.3.3 "Σ-primary scan bias" hypothesis is deprecated: with input-typed dispatch (Rule 3), Σ-weighting is bounded to the salience track's ranking layer, not the scan layer — Σ-divergence is therefore a ranking concern within a single track, not a structural flaw of the protocol. MutualNull (genuine absence from Store) replaces it as the principal structural failure mode.
+Failure modes are formally specified in `── KNOWN FAILURE MODES ──` (FalseAnchor, ExtractorLacking, NullMatch₁/₂, MutualNull). MutualNull — genuine absence from Store — is the principal structural failure mode; the deprecated v0.3.3 "Σ-primary scan bias" hypothesis is bounded by Rule 3 input-typed dispatch to a ranking-layer concern within the salience track.

@@ -50,15 +50,15 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 |----------|---------|-------------|-------------|
 | Hermeneia `/clarify` | Planning | AI keeps misunderstanding your intent | Same file 3+ edits (same intent), `misunderstood_request` friction |
 | Telos `/goal` | Planning | You have a desire but no clear goal | Vague first prompts ("improve", "optimize", "ideas for"), `wrong_approach` friction |
-| Aitesis `/inquire` | Planning | AI is about to execute without enough context | `context_loss` friction |
+| Aitesis `/inquire` | Planning | AI is about to answer without enough observable context | External fact queries, verifiable grounding (for prior-session recall → use `/recollect`) |
 | Prothesis `/frame` | Analysis | Unsure which analytical perspective to use | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
 | Syneidesis `/gap` | Decision | Right before committing, checking for blind spots | Same file 3+ edits (different concerns), `excessive_changes` friction |
-| Prosoche `/attend` | Execution | Checking execution readiness and controlling risky actions | Bash deploy/push/apply keywords, upstream deficit signals, `wrong_file_edited` friction |
-| Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the context | Post-execution environment mismatch |
+| Prosoche `/attend` | Execution | Risk-classified execution — safe actions flow, risky ones gate | Mixed-risk plans (bulk safe work + judgment moments), upstream deficit signals, `wrong_file_edited` friction |
+| Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the accumulated conversation context | Mismatch against session-built constraints (user-aware context accumulation) |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
-| Anamnesis `/recollect` | Cross-cutting | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| Katalepsis `/grasp` | Cross-cutting | You approved AI work but didn't fully understand it | Verification keywords in firstPrompt ("explain", "what did you do") |
+| Anamnesis `/recollect` | Cross-cutting | Resolving vague recall of prior sessions or discussions | Cross-session state recovery via narrative recognition (Recognition over Retrieval) |
+| Katalepsis `/grasp` | Cross-cutting | Rapid core comprehension via categorical decomposition | Category-based grasp (problem/method/result/limits) for new knowledge, reviews, or AI-completed work |
 
 ## Phase Execution
 
