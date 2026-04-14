@@ -2,3 +2,9 @@
 dist/
 dist-site/
 node_modules/
+
+# Anamnesis hook output — session INDEX is written to user working dir
+# (cwd/hypomnesis/{session-id}/), containing per-session clue/vector/
+# narrative + entropy/markers/coinage. Personal session content; never
+# commit even in self-hosting dogfood context.
+hypomnesis/

@@ -35,6 +35,17 @@ const MIN_SESSION_BYTES = 1024;
 const MAX_USER_MSGS = 150;
 const MAX_ALL_CHARS = 80_000;
 const HAIKU_TIMEOUT = 120_000;
+
+// v0.4.0 two-track extension budgets.
+// Soft cap on deterministic extract/detect/coinage; the haiku calls above are
+// bounded separately by HAIKU_TIMEOUT and are unaffected by this budget.
+const TWO_TRACK_BUDGET_MS = 5_000;
+const COINAGE_MIN_REMAINING_MS = 500;
+const COINAGE_PRECISION_THRESHOLD = 0.5;
+const COINAGE_MIN_SESSION_OCC = 2;
+const COINAGE_MAX_OUTPUT = 30;
+const MARKER_CAT_LIMIT = 30;
+const ENTROPY_MAX_OUTPUT = 40;
 // Observed reason values in ~/.claude/logs/hooks.log (33 days, 1408 records):
 // other, prompt_input_exit, resume, clear. "compact" never observed — PreCompact
 // does not trigger SessionEnd; the two events are temporally independent.
@@ -426,6 +437,233 @@ function extractCrossRefs(userMsgs, allTexts) {
   return [...refs].sort().slice(0, 10);
 }
 
+// --- v0.4.0 Two-Track Extension: deterministic extract / detect / coinage ---
+//
+// Morphism laws (see SKILL.md ── ENTROPY EXTRACTION ── and ── SALIENCE MARKERS ──):
+//   extract: identity, locality, compositionality (pattern registry union)
+//   detect:  monotonicity, locality, idempotence (pure pattern match, modulo truncation)
+//   coinage: corpus-comparative (Zipf deviation), budget-bounded
+//
+// Output: entropy.md (IdentifierTuples), markers.md (MarkerProfile), coinage.md (CoinageSet).
+
+// extract: Session → Set(IdentifierTuple) — entropy-track anchors
+const ENTROPY_EXTRACTORS = [
+  { name: "url", pattern: /\bhttps?:\/\/[^\s<>"'`)\]]+/g },
+  { name: "pr_ref", pattern: /\bPR\s*#\d+\b/gi },
+  { name: "issue_ref", pattern: /(?<![\w-])#\d{1,5}\b/g },
+  { name: "session_id", pattern: /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/g },
+  { name: "commit_sha", pattern: /(?<![\w-])[0-9a-f]{7,40}(?![\w-])/g },
+  { name: "path_ref", pattern: /\b[\w.-]+\/[\w./-]+\.\w{1,6}\b/g },
+];
+
+function extractEntropyRefs(allTexts) {
+  const refs = new Map();
+  for (const text of allTexts) {
+    for (const { name, pattern } of ENTROPY_EXTRACTORS) {
+      for (const match of text.matchAll(pattern)) {
+        const literal = match[0];
+        if (literal.length > 300) continue;
+        const existing = refs.get(literal);
+        if (existing) {
+          existing.count += 1;
+        } else {
+          refs.set(literal, { literal, source: name, count: 1 });
+        }
+      }
+    }
+  }
+  return [...refs.values()]
+    .sort((a, b) => b.count - a.count || a.literal.localeCompare(b.literal))
+    .slice(0, ENTROPY_MAX_OUTPUT);
+}
+
+// detect: Session → MarkerProfile — salience-track profile
+// Laws: monotonicity/locality hold exactly; idempotence holds up to output truncation.
+const MARKER_PATTERNS = {
+  actor: /@[\w-]{2,40}\b/g,
+  temporal: /\b(\d{4}-\d{2}-\d{2}|\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|yesterday|today|tomorrow|last\s+\w+|next\s+\w+|어제|오늘|내일|이번주|지난주|다음주|주말)\b/gi,
+  emotional: /(?:!{2,}|\?{2,}|\bwow\b|\bexactly\b|\bperfect\b|완벽|맞습니다|최고|중요합니다?)/gi,
+  cognitive: /\b(?:however|therefore|because|hence|thus|nonetheless|moreover)\b|따라서|그래서|왜냐하면|그러나|하지만|결국/gi,
+};
+const COINAGE_PATTERN = /\b(?:[a-z]+(?:[A-Z][a-z]+)+|[A-Z][a-z]+(?:[A-Z][a-z]+){1,3})\b/g;
+
+function detectMarkers(userMsgs, allTexts) {
+  const profile = {
+    coinage: new Set(),
+    actor: new Set(),
+    temporal: new Set(),
+    emotional: new Set(),
+    cognitive: new Set(),
+    singularity: new Set(),
+  };
+  for (const text of allTexts) {
+    for (const match of text.matchAll(COINAGE_PATTERN)) {
+      if (profile.coinage.size >= MARKER_CAT_LIMIT) break;
+      profile.coinage.add(match[0]);
+    }
+    for (const [category, pattern] of Object.entries(MARKER_PATTERNS)) {
+      if (profile[category].size >= MARKER_CAT_LIMIT) continue;
+      for (const match of text.matchAll(pattern)) {
+        if (profile[category].size >= MARKER_CAT_LIMIT) break;
+        profile[category].add(match[0]);
+      }
+    }
+  }
+  for (const msg of userMsgs.slice(0, 30)) {
+    if (profile.singularity.size >= 10) break;
+    const text = cleanText(msg.text).trim();
+    if (text.length >= 80 && text.length <= 500 && /[!?]|\*\*/.test(text)) {
+      profile.singularity.add(text.slice(0, 200));
+    }
+  }
+  return Object.fromEntries(
+    Object.entries(profile).map(([k, v]) => [k, [...v]])
+  );
+}
+
+// coinage: Session × Corpus × θ → CoinageSet
+// salience_precision(t, s, corpus) = |occ(t, s)| / (1 + |occ(t, corpus \ {s})|)
+function computeCoinage(userMsgs, allTexts, corpusPath, currentSessionId, budgetMs) {
+  const start = Date.now();
+  const sessionText = [
+    ...userMsgs.map((m) => m.text),
+    ...allTexts,
+  ].join(" ").toLowerCase();
+  const tokenRe = /\b[a-zA-Z가-힣_][a-zA-Z가-힣_0-9-]{3,29}\b/g;
+  const sessionCounts = new Map();
+  for (const match of sessionText.matchAll(tokenRe)) {
+    const t = match[0];
+    sessionCounts.set(t, (sessionCounts.get(t) ?? 0) + 1);
+  }
+
+  const corpusCounts = new Map();
+  let corpusSampled = 0;
+  try {
+    if (fs.existsSync(corpusPath)) {
+      const entries = fs.readdirSync(corpusPath);
+      for (const entry of entries) {
+        if (entry === currentSessionId) continue;
+        if (Date.now() - start > budgetMs) break;
+        const cluePath = path.join(corpusPath, entry, "clue.md");
+        if (!fs.existsSync(cluePath)) continue;
+        try {
+          const content = fs.readFileSync(cluePath, "utf8").toLowerCase();
+          for (const match of content.matchAll(tokenRe)) {
+            const t = match[0];
+            corpusCounts.set(t, (corpusCounts.get(t) ?? 0) + 1);
+          }
+          corpusSampled += 1;
+        } catch {}
+      }
+    }
+  } catch (e) {
+    logErr(`coinage corpus scan failed: ${e.message}`);
+  }
+
+  const coinage = [];
+  for (const [token, sessionOcc] of sessionCounts.entries()) {
+    if (sessionOcc < COINAGE_MIN_SESSION_OCC) continue;
+    const corpusOcc = corpusCounts.get(token) ?? 0;
+    const precision = sessionOcc / (1 + corpusOcc);
+    if (precision >= COINAGE_PRECISION_THRESHOLD) {
+      coinage.push({ token, precision, sessionOcc, corpusOcc });
+    }
+  }
+  coinage.sort((a, b) => b.precision - a.precision);
+  return {
+    coinage: coinage.slice(0, COINAGE_MAX_OUTPUT),
+    corpus_sessions_sampled: corpusSampled,
+    elapsed_ms: Date.now() - start,
+  };
+}
+
+function buildEntropyMd(sessionId, date, refs) {
+  const lines = [
+    "---",
+    `session_id: ${sessionId}`,
+    `date: ${date}`,
+    `identifier_count: ${refs.length}`,
+    `extractors: [${ENTROPY_EXTRACTORS.map((e) => e.name).join(", ")}]`,
+    "---",
+    "",
+    "## Identifier Tuples",
+    "",
+  ];
+  if (refs.length === 0) {
+    lines.push("No structured identifiers extracted.");
+  } else {
+    lines.push("| literal | source | session_count |");
+    lines.push("|---------|--------|---------------|");
+    for (const r of refs) {
+      lines.push(`| \`${escMd(r.literal)}\` | ${r.source} | ${r.count} |`);
+    }
+  }
+  return lines.join("\n") + "\n";
+}
+
+function buildMarkersMd(sessionId, date, profile) {
+  const counts = Object.fromEntries(
+    Object.entries(profile).map(([k, v]) => [k, v.length])
+  );
+  const lines = [
+    "---",
+    `session_id: ${sessionId}`,
+    `date: ${date}`,
+    `marker_categories: [${Object.keys(profile).join(", ")}]`,
+    `marker_counts: ${JSON.stringify(counts)}`,
+    "---",
+    "",
+    "## MarkerProfile",
+    "",
+  ];
+  for (const [category, items] of Object.entries(profile)) {
+    lines.push(`### ${category} (${items.length})`);
+    if (items.length === 0) {
+      lines.push("_none_");
+    } else {
+      for (const item of items) {
+        lines.push(`- ${escMd(item)}`);
+      }
+    }
+    lines.push("");
+  }
+  return lines.join("\n") + "\n";
+}
+
+function buildCoinageMd(sessionId, date, result, skipped, skipReason) {
+  const lines = [
+    "---",
+    `session_id: ${sessionId}`,
+    `date: ${date}`,
+    `coinage_count: ${result?.coinage.length ?? 0}`,
+    `budget_skipped: ${skipped}`,
+    `corpus_sessions_sampled: ${result?.corpus_sessions_sampled ?? 0}`,
+    `elapsed_ms: ${result?.elapsed_ms ?? 0}`,
+    `threshold: ${COINAGE_PRECISION_THRESHOLD}`,
+    "---",
+    "",
+    "## Zipf-Deviation Coinage Set",
+    "",
+  ];
+  if (skipped) {
+    lines.push(`Coinage computation skipped: ${skipReason}.`);
+    lines.push("MarkerProfile and IdentifierTuples remain intact (Anamnesis R1 fallback).");
+  } else if (!result || result.coinage.length === 0) {
+    lines.push("No high-precision coinage detected against current corpus.");
+  } else {
+    lines.push("| token | precision | session_occ | corpus_occ |");
+    lines.push("|-------|-----------|-------------|------------|");
+    for (const c of result.coinage) {
+      lines.push(`| \`${escMd(c.token)}\` | ${c.precision.toFixed(3)} | ${c.sessionOcc} | ${c.corpusOcc} |`);
+    }
+  }
+  return lines.join("\n") + "\n";
+}
+
+function escMd(s) {
+  return String(s).replace(/[`|]/g, "").replace(/\n/g, " ");
+}
+
 // --- Atomic Writer ---
 
 function writeStore(targetDir, files) {
@@ -585,6 +823,43 @@ function main() {
     }
   } catch (e) {
     logErr(`narrative extraction failed: ${e.message}`);
+  }
+
+  // --- v0.4.0 Two-Track Extension ---
+  // Deterministic extract/detect run first; coinage runs if budget allows.
+  // Soft cap: TWO_TRACK_BUDGET_MS. On exhaustion, coinage is skipped while
+  // markers + entropy refs remain intact (Anamnesis R1 fallback).
+  const twoTrackStart = Date.now();
+
+  try {
+    const refs = extractEntropyRefs(allTexts);
+    files["entropy.md"] = buildEntropyMd(sessionId, date, refs);
+  } catch (e) {
+    logErr(`entropy extraction failed: ${e.message}`);
+  }
+
+  try {
+    const profile = detectMarkers(userMsgs, allTexts);
+    files["markers.md"] = buildMarkersMd(sessionId, date, profile);
+  } catch (e) {
+    logErr(`marker detection failed: ${e.message}`);
+  }
+
+  try {
+    const elapsed = Date.now() - twoTrackStart;
+    const remaining = TWO_TRACK_BUDGET_MS - elapsed;
+    if (remaining < COINAGE_MIN_REMAINING_MS) {
+      files["coinage.md"] = buildCoinageMd(
+        sessionId, date, null, true,
+        `budget ${TWO_TRACK_BUDGET_MS}ms exhausted after ${elapsed}ms`,
+      );
+    } else {
+      const corpusRoot = path.join(projectDir, "hypomnesis");
+      const result = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
+      files["coinage.md"] = buildCoinageMd(sessionId, date, result, false, null);
+    }
+  } catch (e) {
+    logErr(`coinage extraction failed: ${e.message}`);
   }
 
   if (Object.keys(files).length > 0) {
