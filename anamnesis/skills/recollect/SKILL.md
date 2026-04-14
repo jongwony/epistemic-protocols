@@ -16,7 +16,8 @@ Resolve vague recall into recognized context through AI-guided contextual scan a
 ── FLOW ──
 Anamnesis(V) → Detect(V) →
   not-empty_intention(V): skip → deactivate
-  empty_intention(V): Scan(store, trace(V)) → Rank(C[]) →
+  empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} →
+    Scan_{Track}(Store, trace(V)) → Rank(C[]) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
     |C[]| = 0 ∧ attempts > 0: NullMatch → inform(V, Σ) → deactivate
     |C[]| > 0: Qc(C[top], evidence, progress) → Stop → R →
@@ -27,7 +28,9 @@ Anamnesis(V) → Detect(V) →
 ── MORPHISM ──
 VagueRecall
   → detect(empty_intention)              -- recognize vague recall state
-  → scan(store, recall_trace)            -- search hypomnesis/ + memory/
+  → classify(input_type)                 -- InputType ∈ {StructuredIdentifier, NaturalRecall, Mixed}
+  → dispatch(input_type)                 -- Track ∈ {entropy, salience, hybrid}
+  → scan(Store, Track, recall_trace)     -- track-specific scan (see STORE TOPOLOGY)
   → rank(candidates, recall_trace)       -- order by relevance
   → present(candidate, Socratic)         -- Socratic candidate presentation
   → recognize(candidate, user)           -- synthesis of identification (Husserl CM §§38-39)
@@ -35,34 +38,41 @@ VagueRecall
   → RecalledContext
 requires: empty_intention(V)              -- phenomenological trigger
 deficit:  RecallAmbiguous                 -- activation precondition (Layer 1/2)
-preserves: stores                         -- hypomnesis/ ∪ memory/ are read-only; V is enriched/rebound during protocol
+preserves: Store                          -- SSOT ⊕ INDEX are read-only; V is enriched/rebound during protocol
 invariant: Recognition over Retrieval
 
 ── TYPES ──
-V              = VagueRecall { trace: RecallTrace, enrichments: List(Hint) }
-RecallTrace    = { keywords: Set(String), temporal: Optional(String),
-                   associations: Set(String) }
-Hint           = String   -- user recall context from Socratic probe
-store          = hypomnesis/ ∪ memory/     -- hypomnesis/: ~/.claude/projects/{slug}/hypomnesis/{session-id}/ (recall INDEX, written by SessionEnd hook); memory/: ~/.claude/projects/{slug}/memory/ (curated insights)
-Scan           = (store, RecallTrace) → List(Candidate)
-Candidate      = { session_id: Optional(SessionId),
-                   topic: String,
-                   keywords: Set(String),
-                   fingerprint: Prose,
-                   cross_refs: List(Anchor),
-                   confidence: ∈ {low, medium, high},
-                   resumption_hint: Optional(String) }
-Anchor         = String   -- opaque: memory path, URL, session ID, doc path
-Prose          = String   -- source-agnostic NL description
-Rank           = List(Candidate) → List(Candidate)
-Probe          = (V, Σ) → List(SocraticQuestion)
+V                = VagueRecall { trace: RecallTrace, enrichments: List(Hint), input_type: InputType }
+RecallTrace      = { keywords: Set(String), temporal: Optional(String),
+                     associations: Set(String), identifiers: Set(IdentifierTuple) }
+Hint             = String   -- user recall context from Socratic probe
+InputType        ∈ {StructuredIdentifier, NaturalRecall, Mixed}      -- classified from V + Σ
+Track            ∈ {entropy, salience, hybrid}                       -- dispatched from InputType
+Source           = String   -- opaque: store location identifier (substrate-agnostic)
+IdentifierTuple  = { literal: String, source: Source, precision: ℝ } -- entropy-track anchor
+MarkerProfile    = { coinage: Set(Token), actor: Set(Entity),
+                     temporal: Set(TimeRef), emotional: Set(Marker),
+                     cognitive: Set(Marker), singularity: Set(Event) }  -- salience-track profile
+Store            = SSOT ⊕ INDEX               -- see ── STORE TOPOLOGY ── block
+Scan             = (Store, Track, RecallTrace) → List(Candidate)
+Candidate        = { session_id: Optional(SessionId),
+                     topic: String,
+                     keywords: Set(String),
+                     fingerprint: Prose,
+                     cross_refs: List(Anchor),
+                     confidence: ∈ {low, medium, high},
+                     resumption_hint: Optional(String) }
+Anchor           = String   -- opaque: memory path, URL, session ID, doc path
+Prose            = String   -- source-agnostic NL description
+Rank             = List(Candidate) → List(Candidate)
+Probe            = (V, Σ) → List(SocraticQuestion)
 SocraticQuestion = { dimension: ∈ {temporal, associative, contextual}, question: String }
-R              = Recognition ∈ {Recognize(Candidate), Refine, Reorient(description)}
-H              = Hint     -- answer from Socratic probe gate (Qs)
+R                = Recognition ∈ {Recognize(Candidate), Refine, Reorient(description)}
+H                = Hint     -- answer from Socratic probe gate (Qs)
 ClueVector_prose = String
 RecalledContext  = session text containing ClueVector_prose
-NullMatch       = |Scan(store, trace)| = 0 after all enrichment attempts
-Phase          ∈ {0, 1, 2, 3}
+NullMatch        = |Scan(Store, Track, trace)| = 0 after all enrichment attempts
+Phase            ∈ {0, 1, 2, 3}
 
 ── V-BINDING ──
 bind(V) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
@@ -79,7 +89,8 @@ Edge cases:
 
 ── PHASE TRANSITIONS ──
 Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent)
-Phase 1: V → Scan(store, trace(V)) → Rank(C[]) → C[ranked]     -- search + rank [Tool]
+           → Classify(V, Σ) → InputType → Track                  -- dispatch (silent)
+Phase 1: V → Scan_{Track}(Store, trace(V)) → Rank(C[]) → C[ranked]  -- track-dispatched scan + rank [Tool]
            |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → Phase 1
            |C[ranked]| = 0 ∧ attempts > 0 → NullMatch → inform → deactivate
 Phase 2: C[top] → Qc(C[top], evidence, progress) → Stop → R    -- recognition gate [Tool]
@@ -104,9 +115,18 @@ NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (attempts = max ∨ enrichments exhau
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
 ── TOOL GROUNDING ──
+-- A4 realization binding (Claude Code substrate). Non-normative with respect to protocol essence
+-- (see ── SUBSTRATE AGNOSTICISM ──). Any substrate satisfying the morphism laws realizes Anamnesis.
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
+-- Store binding:
+--   SSOT  ↦ ~/.claude/projects/{slug}/*.jsonl          (session JSONL, append-only)
+--   INDEX ↦ ~/.claude/projects/{slug}/hypomnesis/       (SessionEnd hook-generated)
+--         ∪ ~/.claude/projects/{slug}/memory/           (curated insights)
 Phase 0 Detect      (sense)    → Internal analysis
-Phase 1 Scan        (observe)  → Read, Grep, Glob (hypomnesis/ + memory/)
+Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
+Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over SSOT ∪ INDEX)
+Phase 1 Scan_salience (observe)  → Read, Grep, Glob (MarkerProfile match over INDEX; SSOT fallback on degraded_scan)
+Phase 1 Scan_hybrid   (observe)  → union of above
 Phase 1 Rank        (sense)    → Internal analysis (conditional: haiku scoring for large candidate sets)
 Phase 2 Qc          (gate)     → present (narrative Socratic candidate; mandatory)
 Phase 3 integrate   (track)    → Internal state update
@@ -129,6 +149,89 @@ Phase 3 Qs (Socratic probe)  → always_gated (only user accesses own retention 
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
+
+── ENTROPY EXTRACTION ──
+extract : Session → Set(IdentifierTuple)
+laws:
+  identity:          extract(∅) = ∅
+  locality:          extract(s₁ ⊔ s₂) = extract(s₁) ⊔ extract(s₂)          -- disjoint sessions
+  compositionality:  extract(s) = ⋃ᵢ extractor_i(s)                         -- plugin-summable
+
+precision(t, corpus) = 1 / (1 + |occ(t, corpus \ {t.source})|)
+reject(t, θ) ≡ precision(t, corpus) < θ                                    -- derivable, not enumerated
+
+extractor registry:
+  core (bootstrap) = { URL_path_literal, ExplicitRef_literal, Citation_literal }
+  plugin           = { domain-specific extractors conforming to laws }
+
+dispatch binding: InputType = StructuredIdentifier → Track = entropy
+
+── SALIENCE MARKERS ──
+detect : Session → MarkerProfile
+categories: { coinage, actor, temporal, emotional, cognitive, singularity }   -- working hypothesis (Emergent admitted)
+laws:
+  monotonicity:   s₁ ⊆ s₂ ⟹ detect(s₁) ⊆ detect(s₂)
+  locality:       detect(s₁ ⊔ s₂) = detect(s₁) ⊔ detect(s₂)                 -- disjoint sessions
+  idempotence:    detect(witnesses(detect(s))) = detect(s)                    -- second pass stable
+
+coinage(s, corpus, θ) = { t ∈ s : salience_precision(t, s, corpus) ≥ θ }
+  where salience_precision(t, s, corpus) = |occ(t, s)| / (1 + |occ(t, corpus \ {s})|)
+  -- Zipf deviation: rare in corpus, repeated within session (low-frequency high-entropy)
+
+dispatch binding: InputType = NaturalRecall → Track = salience
+
+── STORE TOPOLOGY ──
+Store = SSOT ⊕ INDEX
+  SSOT  = authoritative session record (complete, append-only)
+  INDEX = recall accelerator (derived, rebuildable, lossy)
+
+scan_{Track} : (Store, Trace) → List(Candidate)
+  scan_entropy(Store, trace)    = exact-match over IdentifierTuples        -- uses SSOT ∪ INDEX
+  scan_salience(Store, trace)   = MarkerProfile match (ranked by Σ)        -- INDEX-accelerated; SSOT fallback
+  scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
+
+degraded_scan: INDEX = ∅ ⟹ scan'(SSOT, Track, trace)                      -- SSOT sufficient for recall
+  -- INDEX accelerates; SSOT guarantees. Cold start falls back to SSOT directly.
+  -- Precondition for Cold-Start invariant (see Verification).
+
+── SUBSTRATE AGNOSTICISM ──
+The protocol essence (form) consists of FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, and the
+formal blocks ENTROPY EXTRACTION / SALIENCE MARKERS / STORE TOPOLOGY / KNOWN FAILURE MODES.
+The essence makes no reference to specific tools, agents, platforms, schedulers, or storage
+media. Any realization (matter) satisfying the morphism laws and the store topology realizes
+Anamnesis.
+
+form ⊥ matter:
+  form   = ⟨FLOW, MORPHISM, TYPES, laws of extract/detect/scan⟩             -- protocol definition
+  matter = ⟨tool names, file paths, language, scheduler, storage backend⟩   -- realization
+
+TOOL GROUNDING below specifies one such realization (Claude Code substrate); it is
+non-normative with respect to the protocol's epistemic content.
+
+Referent: A4 Semantic Autonomy (contributor axiom). This section locally inscribes the
+realization boundary for user-visible clarity; the local inscription is intentional and
+preserves the hermeneutic circle until a marketplace shared-document mechanism exists.
+
+── KNOWN FAILURE MODES ──
+FalseAnchor       : extract(s) contains t with high precision but t ≠ recall_target
+                    -- cause: precision threshold locally calibrated but semantically wrong
+                    -- detection: Qc Recognize=false despite scan_entropy match
+
+ExtractorLacking  : recall_target ∈ s ∧ ∄ extractor_i : recall_target ∈ extractor_i(s)
+                    -- cause: domain-specific extractor absent from registry
+                    -- detection: NullMatch on scan_entropy ∧ user can cite literal
+
+NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
+                    -- cause: literal absent from SSOT/INDEX (pre-store, lifecycle gap)
+                    -- recovery: offer Aitesis handoff with accumulated trace
+
+NullMatch₂        : scan_salience(Store, trace) = ∅ ∧ InputType = NaturalRecall
+                    -- cause: profile too vague or target session lacks distinctive markers
+                    -- recovery: Socratic probe enrichment → Phase 1 re-scan
+
+MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
+                    -- structural risk: recall target genuinely absent from Store
+                    -- action: NullMatch pathway with full scope disclosure (principal failure mode)
 ```
 
 ## Core Principle
@@ -137,7 +240,7 @@ Phase 3 Qs (Socratic probe)  → always_gated (only user accesses own retention 
 
 The scan finds candidates; the narrative Qc enables recognition; the user constitutes the identity match. Three constitutive distinctions from search/retrieval:
 
-1. **Context-primary trace**: The current session context is the primary search signal, not user-supplied keywords which may be inaccurate or incomplete. The protocol assists in finding together with the user, not merely executes a keyword query.
+1. **Input-typed dispatch**: V's input type determines the scan track. Structured identifiers (URLs, explicit references, citations) route to the entropy track where high-precision literal matching dominates; natural recall (temporal hedges, existence claims, vague topical references) routes to the salience track where marker profiles and session context (Σ) rank candidates. Treating every input as Σ-primary keyword query has structural blind spots; track-appropriate scanning resolves them.
 
 2. **Narrative presentation**: Candidates are presented as discussion narratives (question asked → direction taken → outcome reached), not as result summaries. Narrative enables recognition by providing the contextual story that triggers identification; result-only summaries require additional investigation that defeats the protocol's purpose.
 
@@ -256,7 +359,7 @@ Heuristic signals for empty intention detection (not hard gates):
 Detect empty intention and extract contextual trace. This phase is **silent** — no user interaction.
 
 1. **Detect empty intention**: Analyze user expression for vague recall markers — self-referential past tense, existence claims without specification, temporal references without anchors
-2. **Extract trace**: `extract_trace(input, Sigma)` — session context (Sigma) is the **primary** signal, user expression keywords are **secondary** (user's recall may be inaccurate or point to a similar but different discussion)
+2. **Extract trace + classify input type**: `extract_trace(input, Σ)` populates `RecallTrace` (keywords, temporal, associations, identifiers); `classify(V, Σ)` assigns `InputType` ∈ {StructuredIdentifier, NaturalRecall, Mixed} which binds `Track` ∈ {entropy, salience, hybrid} for Phase 1 dispatch. Within the salience track, session context (Σ) is the primary ranking signal; within the entropy track, literal precision dominates ranking.
    - **Context extraction**: What is the user currently working on? What topic area does the vague recall relate to? The current conversation structure and direction are the strongest clues for narrowing the search space
    - **Keyword extraction**: Specific terms from user expression — treated as heuristic hints, not definitive search terms
    - **Temporal extraction**: Any time references — converted to search window constraints
@@ -270,24 +373,27 @@ Detect empty intention and extract contextual trace. This phase is **silent** �
 
 **Scan scope**: Bound text, conversation context, session history. Does NOT modify files or call external services.
 
-### Phase 1: Contextual Scan + Rank
+### Phase 1: Track-Dispatched Scan + Rank
 
-Scan hypomnesis and memory stores with contextual awareness, then rank candidates.
+Dispatch the scan on the classified `Track`, execute track-appropriate lookup over `Store = SSOT ⊕ INDEX`, then rank candidates.
 
-1. **Contextual scan strategy** (not keyword-only):
-   - **Session context match**: Find sessions and documents discussing topics similar to current session context (Sigma) — this is the primary search dimension
-   - **Keyword match**: Find mentions of trace keywords across stores — secondary, potentially inaccurate
-   - **Temporal neighborhood**: When a temporal signal exists, explore sessions in that time range AND their adjacent sessions — what was discussed before and after the candidate
-   - **Adjacent vector discovery**: For each candidate session, collect what other topics were discussed alongside — these become concrete Refine hints in Phase 2
+1. **Track-dispatched scan strategy**:
+   - **entropy track** (`InputType = StructuredIdentifier`): execute `scan_entropy` over `SSOT ∪ INDEX` — literal match on `IdentifierTuple.literal`; precision-thresholded (low-frequency, high-entropy identifiers win). URL path literals, explicit references, citation tokens dominate.
+   - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over `INDEX` (SSOT fallback on degraded_scan) — match against `MarkerProfile` (coinage / actor / temporal / emotional / cognitive / singularity); session context (Σ) supplies ranking signal within this track.
+   - **hybrid track** (`InputType = Mixed`): union of entropy and salience results.
 
-   **Call Read/Grep/Glob** across `hypomnesis/ ∪ memory/` with contextual search strategy.
+   **Common ranking signals** (track-internal, not track-selecting):
+   - **Temporal neighborhood**: When a temporal signal exists, explore sessions in that time range AND their adjacent sessions — what was discussed before and after the candidate.
+   - **Adjacent vector discovery**: For each candidate session, collect what other topics were discussed alongside — these become concrete Refine hints in Phase 2.
+
+   Tool realization (Claude Code substrate): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING.
 
 2. **Adaptive behavior based on trace ambiguity**:
    - **High ambiguity**: Present hypomnesis store overview as orientation text (relay) — surface the store's structure and major topic clusters so the user can orient their recall. This is informational, not a gated interaction; the overview provides context for the subsequent targeted scan.
-   - **Moderate ambiguity**: Broaden scan scope to include semantic similarity and temporal neighborhood
-   - **Low ambiguity**: Direct targeted scan with context + keyword convergence
+   - **Moderate ambiguity**: Broaden scan scope to include semantic similarity and temporal neighborhood.
+   - **Low ambiguity**: Direct targeted scan using the dispatched track.
 
-3. **Rank candidates**: Order by relevance with weight hierarchy: context match > keyword match > temporal proximity. Each candidate carries:
+3. **Rank candidates**: Ranking is track-internal. On the entropy track, precision (low occurrence in corpus) dominates; on the salience track, Σ-match + marker-profile overlap + temporal proximity compose the weight. Each candidate carries:
    - Its core topic and narrative summary
    - Adjacent topics from the same session or time period
    - Confidence level based on trace alignment
@@ -381,7 +487,7 @@ After integration:
 | Rule | Structure | Effect |
 |------|-----------|--------|
 | Gate specificity | `activate(Anamnesis) only if empty_intention(V)` | Prevents false activation on specific references |
-| Context-primary scan | Phase 1 uses Sigma context + trace, not keywords alone | Reduces keyword-only blind spots |
+| Track-dispatched scan | Phase 1 dispatches by InputType → entropy/salience/hybrid | Prevents single-strategy blind spots (keyword-only, Σ-only) |
 | Narrative Qc | Phase 2 presents discussion story, not result summary | Enables recognition without additional investigation |
 | Guided recall orientation in Refine | Refine includes adjacent vectors from store | Prevents cognitive load from hint-less Refine |
 | One candidate per cycle | Present highest-priority candidate per Phase 2 | Prevents recognition overload |
@@ -398,13 +504,13 @@ After integration:
 
 2. **Recognition over Recall**: Present narrative candidates via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation.
 
-3. **Context-primary trace**: Session context (Sigma) is the primary trace signal for Phase 1 scan. User-supplied keywords are secondary and may be inaccurate. The protocol assists in finding with the user — it is a cognitive partner, not a query executor.
+3. **Input-typed dispatch**: Phase 1 scan is dispatched by `InputType` classified from V and Σ — `StructuredIdentifier` routes to entropy track (exact-literal precision scan via `scan_entropy`), `NaturalRecall` routes to salience track (MarkerProfile match via `scan_salience`), `Mixed` routes to hybrid. Σ-primary scan survives only as a special case within the salience track's ranking layer, not as an absolute rule across all inputs. The track determines which scan is authoritative; the session context (Σ) enriches ranking within the selected track.
 
 4. **Narrative Qc presentation**: Phase 2 presents candidates as discussion narratives (origin → direction → outcome), not result summaries. Narrative enables recognition by providing the contextual story; result-only presentation forces additional investigation that defeats the protocol's purpose.
 
 5. **Guided recall orientation in Refine**: When user selects Refine, present structured navigation through adjacent memory vectors from the store — concrete alternative topics with brief narratives. Open-ended questions shift cognitive burden to the user; structured alternatives enable Recognition (A1) in the recall-deepening process itself.
 
-6. **Contextual scan strategy**: Phase 1 scan uses session context match, keyword match, temporal neighborhood, and adjacent vector discovery. Keyword-only scan has structural blind spots; contextual scan addresses them by treating the current conversation as the primary search signal.
+6. **Track-internal ranking strategy**: Ranking within a track composes the signals appropriate to that track — on the entropy track, literal precision (rarity in corpus) dominates; on the salience track, Σ-match, marker-profile overlap, temporal neighborhood, and adjacent vector discovery compose the weight. Single-signal scans (keyword-only or Σ-only) have structural blind spots regardless of track; track-appropriate composite ranking addresses them.
 
 7. **Adaptive ambiguity handling**: When trace ambiguity is high (0-1 specific signals), present hypomnesis store overview or consider /clarify composition before targeted scanning. Do not scan blindly on vague expressions — orient the user first.
 
@@ -436,6 +542,8 @@ After integration:
 
 21. **Cross-LOOP narrative persistence**: Narrative format, adjacent vector enrichment, and guided recall orientation persist across all LOOP iterations. Second and subsequent attempts reference prior presented candidates and explain the differential. Continuity across loops prevents repetitive presentation and builds cumulative orientation.
 
+22. **Substrate non-coupling**: FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, and the five formal blocks (ENTROPY EXTRACTION, SALIENCE MARKERS, STORE TOPOLOGY, SUBSTRATE AGNOSTICISM, KNOWN FAILURE MODES) must not name specific tools, agents, platforms, schedulers, or storage media. Realization bindings (tool names, concrete file paths, language, backend) belong exclusively to TOOL GROUNDING. Violation = substrate leakage into protocol essence, which A4 Semantic Autonomy forbids.
+
 ## Known Limitations
 
-**Sigma-primary scan bias**: The context-primary scan design (Rule 3) assumes correlation between the user's current session context and their recall target. When the user's current work has diverged from the topic they are trying to recall (e.g., they have moved on to a different task), the Sigma-primary scan may bias candidates toward the current topic rather than the recalled topic. In such cases, user-supplied keywords become the more reliable signal. The adaptive ambiguity handling (Rule 7: falling back to broader scan on high ambiguity) partially mitigates this, but practitioners should be aware that the context-primary design trades keyword-only blind spots for context-divergence blind spots. The Refine path provides a natural recovery mechanism when initial candidates are biased by Sigma divergence.
+Known failure modes of the two-track dispatch and store topology are formally specified in the `── KNOWN FAILURE MODES ──` block above (FalseAnchor, ExtractorLacking, NullMatch₁/₂, MutualNull). The prior v0.3.3 "Σ-primary scan bias" hypothesis is deprecated: with input-typed dispatch (Rule 3), Σ-weighting is bounded to the salience track's ranking layer, not the scan layer — Σ-divergence is therefore a ranking concern within a single track, not a structural flaw of the protocol. MutualNull (genuine absence from Store) replaces it as the principal structural failure mode.
