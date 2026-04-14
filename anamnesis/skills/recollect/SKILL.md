@@ -450,7 +450,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 1. **AI-guided, user-recognized**: AI detects empty intention and scans stores; recognition requires user identification via gate interaction (Phase 2). AI detection is implicitly confirmed when the user engages with recognition (Phase 2 gate response, not Esc).
 
-2. **Recognition over Recall**: Present narrative candidates via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation.
+2. **Recognition over Retrieval**: Present narrative candidates via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation.
 
 3. **Input-typed dispatch**: Phase 1 scan dispatches by `InputType` classified from V and Σ — `StructuredIdentifier` → entropy track, `NaturalRecall` → salience track, `Mixed` → hybrid. Σ-primary scan survives only as a ranking-layer special case within the salience track, not as an absolute scan rule.
 
