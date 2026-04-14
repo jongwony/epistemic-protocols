@@ -459,10 +459,15 @@ const ENTROPY_EXTRACTORS = [
 function extractEntropyRefs(allTexts) {
   const refs = new Map();
   for (const text of allTexts) {
+    const urlSpans = [];
     for (const { name, pattern } of ENTROPY_EXTRACTORS) {
       for (const match of text.matchAll(pattern)) {
         const literal = match[0];
         if (literal.length > 300) continue;
+        const start = match.index;
+        const end = start + literal.length;
+        if (name === "path_ref" && urlSpans.some(([s, e]) => start >= s && end <= e)) continue;
+        if (name === "url") urlSpans.push([start, end]);
         const existing = refs.get(literal);
         if (existing) {
           existing.count += 1;
@@ -547,13 +552,19 @@ function computeCoinage(userMsgs, allTexts, corpusPath, currentSessionId, budget
         const cluePath = path.join(corpusPath, entry, "clue.md");
         if (!fs.existsSync(cluePath)) continue;
         try {
+          const timeBeforeRead = Date.now();
           const content = fs.readFileSync(cluePath, "utf8").toLowerCase();
+          if (Date.now() - start > budgetMs) {
+            logErr(`coinage: budget overrun by ${Date.now() - timeBeforeRead}ms on ${entry}`);
+          }
           for (const match of content.matchAll(tokenRe)) {
             const t = match[0];
             corpusCounts.set(t, (corpusCounts.get(t) ?? 0) + 1);
           }
           corpusSampled += 1;
-        } catch {}
+        } catch (e) {
+          if (e.code !== "ENOENT") logErr(`coinage: failed to read ${cluePath}: ${e.message}`);
+        }
       }
     }
   } catch (e) {
@@ -661,7 +672,11 @@ function buildCoinageMd(sessionId, date, result, skipped, skipReason) {
 }
 
 function escMd(s) {
-  return String(s).replace(/[`|]/g, "").replace(/\n/g, " ");
+  return String(s)
+    .replace(/\\/g, "\\\\")
+    .replace(/\|/g, "\\|")
+    .replace(/`/g, "\\`")
+    .replace(/\n/g, " ");
 }
 
 // --- Atomic Writer ---

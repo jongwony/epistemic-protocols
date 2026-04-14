@@ -49,7 +49,7 @@ Hint             = String   -- user recall context from Socratic probe
 InputType        ∈ {StructuredIdentifier, NaturalRecall, Mixed}      -- classified from V + Σ
 Track            ∈ {entropy, salience, hybrid}                       -- dispatched from InputType
 Source           = String   -- opaque: store location identifier (substrate-agnostic)
-IdentifierTuple  = { literal: String, source: Source, precision: ℝ } -- entropy-track anchor
+IdentifierTuple  = { literal: String, source: Source, precision: ℝ[0,1] } -- entropy-track anchor
 MarkerProfile    = { coinage: Set(Token), actor: Set(Entity),
                      temporal: Set(TimeRef), emotional: Set(Marker),
                      cognitive: Set(Marker), singularity: Set(Event) }  -- salience-track profile
@@ -71,7 +71,7 @@ R                = Recognition ∈ {Recognize(Candidate), Refine, Reorient(descr
 H                = Hint     -- answer from Socratic probe gate (Qs)
 ClueVector_prose = String
 RecalledContext  = session text containing ClueVector_prose
-NullMatch        = |Scan(Store, Track, trace)| = 0 after all enrichment attempts
+NullMatch        = predicate; canonical definition in ── CONVERGENCE ──
 Phase            ∈ {0, 1, 2, 3}
 
 ── V-BINDING ──
@@ -165,7 +165,10 @@ precision(t, corpus) = 1 / (1 + |occ(t, corpus \ {t.source})|)
 reject(t, θ) ≡ precision(t, corpus) < θ                                    -- derivable, not enumerated
 
 extractor registry:
-  core (bootstrap) = { URL_path_literal, ExplicitRef_literal, Citation_literal }
+  core (bootstrap) = { URL_literal, PathRef_literal, PR_literal, Issue_literal, Commit_literal, Citation_literal }
+                     -- semantic categories: URL_path group {URL_literal, PathRef_literal},
+                     --                      ExplicitRef group {PR_literal, Issue_literal, Commit_literal},
+                     --                      Citation group {Citation_literal}
   plugin           = { domain-specific extractors conforming to laws }
 
 dispatch binding: InputType = StructuredIdentifier → Track = entropy
@@ -183,6 +186,7 @@ coinage(s, corpus, θ) = { t ∈ s : salience_precision(t, s, corpus) ≥ θ }
   -- Zipf deviation: rare in corpus, repeated within session (low-frequency high-entropy)
 
 dispatch binding: InputType = NaturalRecall → Track = salience
+                  InputType = Mixed → Track = hybrid    -- union scan: entropy ∪ salience
 
 ── STORE TOPOLOGY ──
 Store = SSOT ⊕ INDEX
