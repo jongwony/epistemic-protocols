@@ -447,6 +447,10 @@ function extractCrossRefs(userMsgs, allTexts) {
 // Output: entropy.md (IdentifierTuples), markers.md (MarkerProfile), coinage.md (CoinageSet).
 
 // extract: Session → Set(IdentifierTuple) — entropy-track anchors
+// ORDER INVARIANT: "url" must precede "path_ref". extractEntropyRefs records url
+// spans during iteration and suppresses path_ref matches that fall inside them.
+// Reordering without updating the dedup logic will silently break URL-substring
+// dedup (path_ref would count github.com/foo/bar.ts on top of the matching URL).
 const ENTROPY_EXTRACTORS = [
   { name: "url", pattern: /\bhttps?:\/\/[^\s<>"'`)\]]+/g },
   { name: "pr_ref", pattern: /\bPR\s*#\d+\b/gi },
@@ -459,10 +463,15 @@ const ENTROPY_EXTRACTORS = [
 function extractEntropyRefs(allTexts) {
   const refs = new Map();
   for (const text of allTexts) {
+    const urlSpans = [];
     for (const { name, pattern } of ENTROPY_EXTRACTORS) {
       for (const match of text.matchAll(pattern)) {
         const literal = match[0];
         if (literal.length > 300) continue;
+        const start = match.index;
+        const end = start + literal.length;
+        if (name === "path_ref" && urlSpans.some(([s, e]) => start >= s && end <= e)) continue;
+        if (name === "url") urlSpans.push([start, end]);
         const existing = refs.get(literal);
         if (existing) {
           existing.count += 1;
@@ -548,12 +557,17 @@ function computeCoinage(userMsgs, allTexts, corpusPath, currentSessionId, budget
         if (!fs.existsSync(cluePath)) continue;
         try {
           const content = fs.readFileSync(cluePath, "utf8").toLowerCase();
+          if (Date.now() - start > budgetMs) {
+            logErr(`coinage: budget overrun by ${(Date.now() - start) - budgetMs}ms (triggered on ${entry})`);
+          }
           for (const match of content.matchAll(tokenRe)) {
             const t = match[0];
             corpusCounts.set(t, (corpusCounts.get(t) ?? 0) + 1);
           }
           corpusSampled += 1;
-        } catch {}
+        } catch (e) {
+          if (e.code !== "ENOENT") logErr(`coinage: failed to read ${cluePath}: ${e.message}`);
+        }
       }
     }
   } catch (e) {
@@ -661,7 +675,11 @@ function buildCoinageMd(sessionId, date, result, skipped, skipReason) {
 }
 
 function escMd(s) {
-  return String(s).replace(/[`|]/g, "").replace(/\n/g, " ");
+  return String(s)
+    .replace(/\\/g, "\\\\")
+    .replace(/\|/g, "\\|")
+    .replace(/`/g, "\\`")
+    .replace(/\n/g, " ");
 }
 
 // --- Atomic Writer ---
