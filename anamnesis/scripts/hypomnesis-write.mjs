@@ -756,7 +756,13 @@ function main() {
   // INDEX is sibling to SSOT under ~/.claude/projects/{slug}/ so that /recollect
   // reaches a single canonical location regardless of invocation cwd. transcript_path
   // is always ~/.claude/projects/{slug}/{session-id}.jsonl, so dirname is the slug dir.
+  // Shape guard: unexpected transcript_path format makes dirname return "." (writes
+  // to ./hypomnesis/, defeating the v0.4.4 migration silently). Log but fail-open
+  // so indexing still proceeds when the assumption breaks.
   const slugDir = path.dirname(transcriptPath);
+  if (!slugDir || slugDir === ".") {
+    logErr(`transcript_path "${transcriptPath}" lacks directory component; slugDir="${slugDir}" — INDEX may write to wrong location`);
+  }
   const storeDir = path.join(slugDir, "hypomnesis", sessionId);
 
   const {
