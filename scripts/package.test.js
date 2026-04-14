@@ -405,7 +405,6 @@ describe('package.js CLI', () => {
         'inquire.zip',
         'onboard.zip',
         'recollect.zip',
-        'reflexion.zip',
         'report.zip',
         'sophia.zip',
         'write.zip',
@@ -457,7 +456,7 @@ describe('package.js CLI', () => {
 // restores the file via the finally block.
 
 describe('cross-ref-scan detector liveness', () => {
-  // Regex matches the reflexion PLUGINS tuple with tolerance for whitespace,
+  // Regex matches the catalog PLUGINS tuple with tolerance for whitespace,
   // quote-style, and trailing-comma variations. `m` flag lets `^`/`$` match
   // line boundaries; capture group 1 preserves leading indent so the
   // comment-out replacement stays visually aligned with surrounding entries.
@@ -465,8 +464,8 @@ describe('cross-ref-scan detector liveness', () => {
   // the trailing comma, this match still succeeds — replacing the earlier
   // exact-string match, which was flagged in review for fragility under
   // non-semantic reformatting.
-  const REFLEXION_TUPLE_RE =
-    /^([ \t]*)(\{\s*dir:\s*['"]reflexion['"],\s*skill:\s*['"]reflexion['"]\s*\},?)\s*$/m;
+  const LIVENESS_TUPLE_RE =
+    /^([ \t]*)(\{\s*dir:\s*['"]epistemic-cooperative['"],\s*skill:\s*['"]catalog['"]\s*\},?)\s*$/m;
   const PACKAGE_JS_PATH = path.join(__dirname, 'package.js');
   const REPO_ROOT = path.join(__dirname, '..');
   const STATIC_CHECKS = path.join(
@@ -478,15 +477,15 @@ describe('cross-ref-scan detector liveness', () => {
     'static-checks.js'
   );
 
-  it('fires publication-gap warning when reflexion entry is removed', () => {
+  it('fires publication-gap warning when catalog entry is removed', () => {
     const backup = fs.readFileSync(PACKAGE_JS_PATH, 'utf8');
 
     // Precondition: ensure we know where to inject the mutation.
-    const match = backup.match(REFLEXION_TUPLE_RE);
+    const match = backup.match(LIVENESS_TUPLE_RE);
     assert.ok(
       match,
-      'precondition failed: could not find reflexion PLUGINS tuple in scripts/package.js — ' +
-      'update REFLEXION_TUPLE_RE in package.test.js to match the current formatting'
+      'precondition failed: could not find epistemic-cooperative/catalog PLUGINS tuple in scripts/package.js — ' +
+      'update LIVENESS_TUPLE_RE in package.test.js to match the current formatting'
     );
 
     try {
@@ -531,16 +530,16 @@ describe('cross-ref-scan detector liveness', () => {
       }
       const result = JSON.parse(output);
 
-      // Expectation: exactly one publication-gap warning for reflexion/reflexion.
+      // Expectation: exactly one publication-gap warning for epistemic-cooperative/catalog.
       const gaps = (result.warn || []).filter(
         w =>
           typeof w.message === 'string' &&
-          w.message.includes('publication-gap: reflexion/reflexion')
+          w.message.includes('publication-gap: epistemic-cooperative/catalog')
       );
       assert.equal(
         gaps.length,
         1,
-        `expected exactly 1 publication-gap warning for reflexion/reflexion, got ${gaps.length}. ` +
+        `expected exactly 1 publication-gap warning for epistemic-cooperative/catalog, got ${gaps.length}. ` +
         'If 0: the detector is silently no-op (regression of PR #242 bug class). ' +
         'If >1: unexpected duplicate detection — investigate cross-ref-scan loop logic.'
       );

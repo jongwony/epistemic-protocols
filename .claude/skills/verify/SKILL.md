@@ -255,7 +255,7 @@ Ready to commit.
 
 ### Concerns (2 issues)
 - Categorical terminology: prothesis.md:35 - limit/colimit may not match intended semantics
-- Directive verb: reflexion/SKILL.md:32 - "Invoke AskUserQuestion" should be "call"
+- Directive verb: prothesis/skills/frame/SKILL.md:32 - "Invoke AskUserQuestion" should be "call"
 
 ### Notes (1 observation)
 - Version: prothesis plugin.json version not bumped since last change

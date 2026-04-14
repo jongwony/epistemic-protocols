@@ -43,7 +43,7 @@ When the project's epistemic vocabulary evolves (for example, a future heavy aud
 
 ## Scope: Track Alpha (Mission/Vision)
 
-Mission and vision sources audited in c059212d. The original report says "28 source entries" composed of 4 base files plus 10 protocol plugin manifests plus additional entries. The exact 14-entry enumeration below reflects the marketplace's protocol category as of the baseline date; non-protocol plugins (write, reflexion, epistemic-cooperative) are excluded based on the "Epistemic Core" scope statement in the baseline report.
+Mission and vision sources audited in c059212d. The original report says "28 source entries" composed of 4 base files plus 10 protocol plugin manifests plus additional entries. The exact 14-entry enumeration below reflects the marketplace's protocol category as of the baseline date; non-protocol plugins (epistemic-cooperative) are excluded based on the "Epistemic Core" scope statement in the baseline report.
 
 Base files (4):
 

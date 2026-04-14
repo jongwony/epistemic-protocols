@@ -253,8 +253,7 @@ function checkCrossReference() {
     const refPath = ref[1];
     // Check in likely locations
     const locations = [
-      path.join(projectRoot, 'reflexion/skills/reflexion', refPath),
-      path.join(projectRoot, 'write/skills/write', refPath),
+      path.join(projectRoot, 'epistemic-cooperative/skills/write', refPath),
     ];
 
     let exists = locations.some(loc => fs.existsSync(loc));

@@ -1,9 +1,0 @@
-{
-  "name": "reflexion",
-  "description": "Cross-session learning via Reflexion pattern",
-  "version": "3.2.5",
-  "author": {
-    "name": "Jongwon Choi",
-    "url": "https://github.com/jongwony"
-  }
-}
