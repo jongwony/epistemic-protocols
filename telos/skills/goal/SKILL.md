@@ -13,13 +13,13 @@ Co-construct defined end states from vague goals through AI-proposed, user-shape
 
 ```
 ── FLOW ──
-G → Gᵥ → detect(Gᵥ) → Dd → confirm(Dd) → Dₐ → Dₛ → P → A → C' → (loop until sufficient)
+G → Gᵥ → detect(Gᵥ) → Dd → Dₐ → Dₛ → P → A → C' → (loop until sufficient)
 
 ── MORPHISM ──
 VagueGoal
   → recognize(goal, indeterminacy)     -- confirm goal needs definition
-  → detect(dimensions, evidence)       -- surface indeterminate dimensions
-  → propose(dimension, candidate)      -- generate concrete falsifiable proposal
+  → detect(dimensions, evidence)       -- surface indeterminate dimensions (relay: full taxonomy)
+  → propose(dimension, candidate)      -- generate concrete falsifiable proposal (gated)
   → integrate(response, contract)      -- shape contract from user response
   → approve(contract)                  -- verify sufficiency of GoalContract
   → DefinedEndState
@@ -33,7 +33,8 @@ G   = User's vague goal (the goal to define)
 Gᵥ  = Verified vague goal (user-confirmed)
 Dd  = AI-detected dimensions ⊆ {Outcome, Metric, Boundary, Priority} ∪ Emergent(G)
 Dₛ  = Selected dimension ∈ {Outcome, Metric, Boundary, Priority}
-Dₐ  = Applicable dimensions (user-confirmed from full taxonomy assessment, Dₐ ⊇ {Outcome})
+Dₐ  = Applicable dimensions = Dd ∪ {Outcome} (protocol constraint: Dₐ ⊇ {Outcome})
+      -- presented as relay (full taxonomy); user override via free response at Phase 2 gates
 P   = Proposal (AI-generated concrete candidate)
 A   = User's response ∈ {Accept, Modify(aspect, direction), Reject, Extend(aspect)}
 C   = GoalContract { outcome: ?, metric: ?, boundary: ?, priority: ? }
@@ -54,7 +55,7 @@ Edge cases:
 
 ── PHASE TRANSITIONS ──
 Phase 0:  G → recognize(G) → Qc(confirm) → Stop → Gᵥ           -- trigger + confirm [Tool]
-Phase 1:  Gᵥ → detect(Gᵥ) → Dd → Qc(Dd, evidence) → Stop → Dₐ, Dₛ  -- dimension detection + confirm [Tool]
+Phase 1:  Gᵥ → detect(Gᵥ) → Dd → TextPresent(relay) → Dₐ, Dₛ  -- dimension detection + full taxonomy presentation [Tool]
 Phase 2:  Dₛ → propose(Dₛ, context) → P                        -- AI proposal (sense)
         → Qs(P) → Stop → A                                      -- co-construction [Tool]
 Phase 3:  A → integrate(A, C) → C'                             -- contract update (sense)
@@ -78,7 +79,7 @@ early_exit = user_declares_sufficient (any progress level)
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Qc (gate)    → present (goal confirmation + activation approval)
 Phase 1 detect (sense) → Internal analysis (dimension detection from Gᵥ)
-Phase 1 Qc (gate)    → present (full taxonomy assessment + progress display)
+Phase 1 present (relay) → TextPresent+Proceed (full taxonomy with evidence + falsification + emergent probe + progress display; flows into Phase 2)
 Phase 2 P  (observe) → Read, Grep (context for proposal generation; fallback: template)
 Phase 2 Qs (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
 Phase 3    (track)   → Internal GoalContract update (no external tool)
@@ -89,9 +90,9 @@ converge (relay)     → TextPresent+Proceed (convergence evidence trace; contex
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
 Phase 0 Qc (confirm)       → elidable when: explicit_arg via /goal "text"
                               default: proceed with inferred goal seed
-                              regret: bounded (Phase 1 Qc provides correction opportunity)
-Phase 1 Qc (dimensions)    → always_gated (gated: dimension set shapes goal construction)
-Phase 2 Qs (negotiate)     → always_gated (gated: Accept/Modify/Reject/Extend — user shapes contract)
+                              regret: bounded (Phase 2 Qs free-response override available)
+Phase 1 present (taxonomy) → relay (full taxonomy with evidence; no gate — A5 option-set relay test: Proceed dominates under user-invoked /goal)
+Phase 2 Qs (negotiate)     → always_gated (gated: Accept/Modify/Reject/Extend — user shapes contract; free response overrides taxonomy — emergent add, dimension exclude, redirect)
 Phase 4 Qc (approve)       → always_gated (gated: contract approval — final binding decision)
 
 ── MODE STATE ──
@@ -109,7 +110,7 @@ Phase 4 Qc (approve)       → always_gated (gated: contract approval — final 
 ## Epistemic Distinction from Requirements Engineering
 
 Telos is not simplified requirements gathering. Three differentiators:
-1. **Detection with user authority**: AI presents full taxonomy assessment with evidence and falsification conditions; user confirms or revises (not elicited by checklist)
+1. **Detection with user authority**: AI presents full taxonomy assessment as relay with evidence and falsification conditions; user authority is exercised at Phase 2 co-construction gates via structured response and free-response override (not elicited by checklist)
 2. **Morphism firing**: Activates only when `GoalIndeterminate` precondition is recognized — not a mandatory pipeline stage
 3. **Falsifiable proposals**: AI proposes specific candidates that can be directly accepted or rejected, surfacing value conflicts and trade-offs (epistemic function) rather than collecting specifications (engineering function)
 
@@ -200,7 +201,7 @@ Approved GoalContract becomes input to subsequent protocols.
 
 **Emergent dimension detection**: Named dimensions are working hypotheses, not exhaustive categories. Detect Emergent dimensions when:
 - The goal's indeterminacy spans multiple named dimensions (e.g., outcome and boundary are entangled and cannot be defined independently)
-- User includes a dimension via "Revise assessment" that doesn't map to the four named types
+- User includes a dimension via free-response override at Phase 2 gate that doesn't map to the four named types
 - The goal involves domain-specific concerns that resist decomposition into Outcome/Metric/Boundary/Priority (e.g., stakeholder alignment, phasing/sequencing, risk tolerance)
 
 Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState` and map to a GoalContract field.
@@ -239,9 +240,9 @@ Options:
 
 **Skip condition**: If G was explicitly provided via `/goal "text"`, proceed directly to Phase 1.
 
-### Phase 1: Dimension Detection and Confirmation
+### Phase 1: Dimension Detection
 
-Analyze Gᵥ to detect indeterminate dimensions, then **present** for user confirmation via gate interaction.
+Analyze Gᵥ to detect indeterminate dimensions, present full taxonomy assessment as **relay**, then proceed directly to Phase 2 co-construction.
 
 **Cross-session enrichment**: Prior GoalContract patterns accumulated through prior Reflexion cycles may adjust Phase 1 dimension weighting — dimensions that were consistently important in similar goal constructions receive initial emphasis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces the user's prior goal-dimension preferences for adjacent work, biasing Phase 1 dimension prompts toward the axes they have already treated as constitutive. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
 
@@ -249,7 +250,7 @@ Analyze Gᵥ to detect indeterminate dimensions, then **present** for user confi
 
 Per Gap Taxonomy above. Apply priority order: Outcome → Boundary → Priority → Metric. Emergent dimensions must satisfy morphism `GoalIndeterminate → DefinedEndState`; boundary: goal definition (in-scope) vs. expression gap (→ `/clarify`) or execution context (→ `/inquire`).
 
-**Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be excluded** via "Revise assessment" toggle.
+**Outcome constraint**: Outcome is always included in Dₐ regardless of detection — it is a protocol constraint (`|Dₐ| ≥ 1`). If not detected, include with `[protocol constraint]` annotation. **Outcome cannot be excluded** via free-response override.
 
 Present the full taxonomy assessment as text output — every named dimension shown with detection status, evidence, and falsification condition for undetected dimensions:
 
@@ -261,27 +262,17 @@ Present the full taxonomy assessment as text output — every named dimension sh
 
 Emergent dimensions include boundary annotation: "This is a goal definition gap (Telos scope). Not: expression gap (→ `/clarify`) or execution context (→ `/inquire`)"
 
-Then **present**:
-
-```
-How would you like to proceed?
-
-Options:
-1. **Proceed with current assessment** — start co-construction with detected dimensions
-2. **Revise assessment** — toggle any dimensions or describe an emergent dimension (Outcome cannot be excluded)
-```
-
 - Detected dimensions: evidence for why the dimension needs definition
 - Not-currently-detected dimensions: evidence considered + falsification condition ("would apply if [specific condition]")
 - Evidence parity: each dimension (detected or not) receives comparable analytical depth
 
-**Revise sub-step**: On "Revise assessment" selection, user specifies which dimensions to toggle (include previously unselected, exclude previously detected) or describes an emergent dimension. Multiple revisions in a single response are supported. Outcome exclusion is rejected with explanation (protocol constraint: `Dₐ ⊇ {Outcome}`). After modification, re-present the updated assessment for final confirmation. Phase 1 completes when user selects "Proceed with current assessment."
+Then proceed directly to Phase 2 for Dₐ in priority order (Outcome → Boundary → Priority → Metric). Dₐ = Dd ∪ {Outcome}.
 
-**Emergent response parsing**: If user provides emergent dimension content alongside "Proceed with current assessment," treat the emergent content as implicit "Revise assessment" — incorporate the emergent dimension and re-present the updated assessment. If the content is ambiguous (could be a comment on an existing dimension rather than a new emergent), ask the user to clarify before proceeding.
+**User override via free response**: Users may override the taxonomy at any Phase 2 gate — describe an emergent dimension, exclude a non-Outcome dimension, redirect, or declare sufficient (early exit). Free response containing taxonomy-revision content triggers LOOP re-entry with updated detection. Outcome cannot be excluded (protocol constraint: `Dₐ ⊇ {Outcome}`).
 
-**Soft guard**: If user excludes all dimensions except Outcome (by protocol constraint), confirm: "Only Outcome will be defined. Continue with minimal GoalContract?" If confirmed, `Dₐ = {Outcome}` → proceed to Phase 2. If declined, re-present assessment for reconsideration.
+On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only undefined dimensions. Phase 2 gates include "Sufficient — approve current GoalContract" option for early exit.
 
-On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only undefined dimensions. Include "Sufficient — approve current GoalContract" option for early exit.
+**Rationale** (A5 option-set relay test): Under user-invoked `/goal`, "Proceed with current taxonomy" is the dominant option — a separate proceed/revise gate would present false alternatives. Full taxonomy presentation is preserved (relay) to support Recognition during Phase 2 proposal evaluation; taxonomy revision is reachable via Phase 2 gate free response.
 
 ### Phase 2: Co-Construction
 
@@ -376,7 +367,7 @@ Options:
 
 1. **AI-guided, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via gate interaction (Phase 0)
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Modify options use structured sub-choices, not free text
-3. **Detection with user authority**: AI presents full taxonomy assessment — every named dimension with detection status, evidence, and falsification condition; user confirms or revises (no selective presentation, no auto-proceed). Outcome always included (protocol constraint)
+3. **Detection with user authority**: AI presents full taxonomy assessment as relay — every named dimension with detection status, evidence, and falsification condition. Outcome always included (protocol constraint). User authority is exercised at Phase 2 co-construction gates (including free-response override: emergent add, non-Outcome exclusion, redirect), not at a separate taxonomy-confirmation gate
 4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions
 5. **Concrete proposals**: Every proposal must be specific enough to accept or reject
 6. **User authority**: User shapes, accepts, or rejects; AI does not override
