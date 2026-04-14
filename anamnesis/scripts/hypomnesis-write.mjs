@@ -3,8 +3,9 @@
  * SessionEnd + PreCompact hook: write hypomnesis store entries for /recollect access.
  *
  * Entry points:
- *   - SessionEnd: gated by age ≥ 24h AND tokens ≥ 100k (mirrors Claude Code's
- *     resume-summary prompt heuristic, tuned for cross-session recall worth).
+ *   - SessionEnd: cooldown-gated by narrative.md mtime (skip if last write
+ *     < 300s ago). Post-extraction discard when clue/vector/narrative are all
+ *     empty — enables retry on next SessionEnd once cooldown expires.
  *   - PreCompact: ungated — user/runtime already classified the session as
  *     worth summarizing; index before /compact lossily rewrites the transcript.
  *
@@ -52,12 +53,11 @@ const ENTROPY_MAX_OUTPUT = 40;
 const SKIP_REASONS = new Set(["clear"]);
 const KNOWN_EVENTS = new Set(["SessionEnd", "PreCompact"]);
 
-// SessionEnd gate: token threshold mirrors Claude Code's resume-summary prompt
-// heuristic (cli.js `HF7` modal, default 100k). Last-turn-age raised from
-// 70min → 24h because sub-day sessions rarely warrant cross-session recall
-// indexing. Note: this measures time since the last turn, not session start.
-const GATE_MIN_LAST_TURN_AGE_MS = 24 * 60 * 60 * 1000;
-const GATE_MIN_TOKENS = 100_000;
+// SessionEnd gate: cooldown against narrative.md mtime. Skip if last index
+// write occurred < 300s ago — prevents resume-cycle spam during active
+// multi-day sessions while permitting indexing once activity gap exceeds
+// the cooldown window. PreCompact bypasses cooldown entirely.
+const COOLDOWN_MS = 300 * 1000;
 
 // --- Helpers ---
 
@@ -717,25 +717,13 @@ function writeStore(targetDir, files) {
 
 // --- Gate ---
 
-function lastTurnAgeMs(timestamps) {
-  // Time since the last transcript timestamp, not since session start.
-  // Mirrors Claude Code's findLast-with-60s-grace reference — anamnesis runs
-  // post-turn, so the last timestamp is effectively the reference point.
-  const last = timestamps.at(-1);
-  if (!last) {
-    logErr(`no timestamps found in transcript; lastTurnAgeMs defaulting to 0`);
-    return 0;
-  }
-  const t = Date.parse(last);
-  if (!Number.isFinite(t)) {
-    logErr(`invalid last timestamp "${last}"; lastTurnAgeMs defaulting to 0`);
-    return 0;
-  }
-  return Date.now() - t;
-}
-
-function passesSessionEndGate(ageMs, tokenEstimate) {
-  return ageMs >= GATE_MIN_LAST_TURN_AGE_MS && tokenEstimate >= GATE_MIN_TOKENS;
+function isLowInfo(clue, vector, narrative) {
+  const clueEmpty = !clue?.initial_request?.trim() && !clue?.key_utterances?.length;
+  const vectorEmpty = !vector?.decisions?.length;
+  const narrativeEmpty = !narrative?.origin?.trim() && !narrative?.outcome?.trim();
+  // Discard ONLY when all 3 are empty (conservative — retry via next SessionEnd
+  // once cooldown expires). Missing extraction (null) is treated as empty.
+  return clueEmpty && vectorEmpty && narrativeEmpty;
 }
 
 // --- Main ---
@@ -780,16 +768,31 @@ function main() {
   if (sawAnyAssistantUsage && !lastTurnHadFreshInput && tokenEstimate > 0) {
     logErr(`last assistant turn lacked fresh input_tokens; tokenEstimate ${tokenEstimate} may use stale value`);
   }
+  // Diagnostic: zero tokenEstimate despite observed assistant usage indicates
+  // corrupted JSONL or format change. No longer gates the write (cooldown gate
+  // replaces tokens threshold), but retained as an anomaly signal.
+  if (sawAnyAssistantUsage && tokenEstimate === 0) {
+    logErr(`tokenEstimate is 0 despite observed assistant usage; possible corrupted JSONL or format change`);
+  }
 
   // PreCompact: runtime already classified the session as worth summarizing
   // (manual = user accepted "Resume from summary"; auto = context-fill).
-  // SessionEnd: apply AND gate to filter ephemeral sessions.
+  // SessionEnd: cooldown gate against narrative.md mtime — silent skip if
+  // last write < 300s ago. ENOENT returns undefined via throwIfNoEntry
+  // (first-write path); unexpected errors (EACCES, EIO) are logged and fail open.
   if (event === "SessionEnd") {
-    if (tokenEstimate === 0) {
-      logErr(`tokenEstimate is 0 (no assistant usage data parsed); SessionEnd gate will fail closed`);
+    const narrativePath = path.join(storeDir, "narrative.md");
+    let narrativeStat;
+    try {
+      narrativeStat = fs.statSync(narrativePath, { throwIfNoEntry: false });
+    } catch (e) {
+      logErr(`narrative.md stat failed unexpectedly (${e.code ?? e.message}); failing open`);
     }
-    const ageMs = lastTurnAgeMs(timestamps);
-    if (!passesSessionEndGate(ageMs, tokenEstimate)) return;
+    if (narrativeStat && Date.now() - narrativeStat.mtimeMs < COOLDOWN_MS) {
+      const remainingSec = Math.round((COOLDOWN_MS - (Date.now() - narrativeStat.mtimeMs)) / 1000);
+      logErr(`cooldown active — skipping SessionEnd (${remainingSec}s remaining)`);
+      return;
+    }
   }
 
   const startedAt = timestamps[0] ?? "";
@@ -799,6 +802,8 @@ function main() {
 
   const files = {};
   let clueData = null;
+  let vectorData = null;
+  let narrativeData = null;
 
   // --- Clue: user messages only ---
   try {
@@ -816,7 +821,7 @@ function main() {
   // --- Vector: full context ---
   try {
     const vectorRaw = callHaiku(buildVectorPrompt(allTexts));
-    const vectorData = parseHaikuOutput(vectorRaw);
+    vectorData = parseHaikuOutput(vectorRaw);
     if (validateVector(vectorData)) {
       files["vector.md"] = buildVectorMd(sessionId, date, vectorData);
     } else {
@@ -829,7 +834,7 @@ function main() {
   // --- Narrative: full context ---
   try {
     const narrativeRaw = callHaiku(buildNarrativePrompt(allTexts, protocols));
-    const narrativeData = parseHaikuOutput(narrativeRaw);
+    narrativeData = parseHaikuOutput(narrativeRaw);
     if (validateNarrative(narrativeData)) {
       const topics = clueData?.topics ?? [];
       files["narrative.md"] = buildNarrativeMd(
@@ -841,6 +846,15 @@ function main() {
     }
   } catch (e) {
     logErr(`narrative extraction failed: ${e.message}`);
+  }
+
+  // Post-extraction low-info discard: silent skip when all 3 haiku extractions
+  // produced empty payloads — enables retry via next SessionEnd once cooldown
+  // expires. Two-track extensions (entropy/markers/coinage) are also skipped
+  // since ghost sessions lack the semantic content they depend on.
+  if (isLowInfo(clueData, vectorData, narrativeData)) {
+    logErr(`low-info discard: all 3 extractions produced empty payloads — skipping write, retry eligible at next SessionEnd`);
+    return;
   }
 
   // --- v0.4.0 Two-Track Extension ---
