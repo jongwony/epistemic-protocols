@@ -718,9 +718,8 @@ function writeStore(targetDir, files) {
 // --- Gate ---
 
 function isLowInfo(clue, vector, narrative) {
-  const clueEmpty = !clue?.initial_request?.trim()
-    && (!clue?.key_utterances || clue.key_utterances.length === 0);
-  const vectorEmpty = !vector?.decisions || vector.decisions.length === 0;
+  const clueEmpty = !clue?.initial_request?.trim() && !clue?.key_utterances?.length;
+  const vectorEmpty = !vector?.decisions?.length;
   const narrativeEmpty = !narrative?.origin?.trim() && !narrative?.outcome?.trim();
   // Discard ONLY when all 3 are empty (conservative — retry via next SessionEnd
   // once cooldown expires). Missing extraction (null) is treated as empty.
@@ -769,20 +768,30 @@ function main() {
   if (sawAnyAssistantUsage && !lastTurnHadFreshInput && tokenEstimate > 0) {
     logErr(`last assistant turn lacked fresh input_tokens; tokenEstimate ${tokenEstimate} may use stale value`);
   }
+  // Diagnostic: zero tokenEstimate despite observed assistant usage indicates
+  // corrupted JSONL or format change. No longer gates the write (cooldown gate
+  // replaces tokens threshold), but retained as an anomaly signal.
+  if (sawAnyAssistantUsage && tokenEstimate === 0) {
+    logErr(`tokenEstimate is 0 despite observed assistant usage; possible corrupted JSONL or format change`);
+  }
 
   // PreCompact: runtime already classified the session as worth summarizing
   // (manual = user accepted "Resume from summary"; auto = context-fill).
   // SessionEnd: cooldown gate against narrative.md mtime — silent skip if
-  // last write < 300s ago. Fail-open on stat error (ENOENT = first write).
+  // last write < 300s ago. ENOENT returns undefined via throwIfNoEntry
+  // (first-write path); unexpected errors (EACCES, EIO) are logged and fail open.
   if (event === "SessionEnd") {
     const narrativePath = path.join(storeDir, "narrative.md");
+    let narrativeStat;
     try {
-      const narrativeStat = fs.statSync(narrativePath);
-      if (Date.now() - narrativeStat.mtimeMs < COOLDOWN_MS) {
-        return;
-      }
-    } catch {
-      // ENOENT or stat failure → fail-open, proceed to write (first-write path)
+      narrativeStat = fs.statSync(narrativePath, { throwIfNoEntry: false });
+    } catch (e) {
+      logErr(`narrative.md stat failed unexpectedly (${e.code ?? e.message}); failing open`);
+    }
+    if (narrativeStat && Date.now() - narrativeStat.mtimeMs < COOLDOWN_MS) {
+      const remainingSec = Math.round((COOLDOWN_MS - (Date.now() - narrativeStat.mtimeMs)) / 1000);
+      logErr(`cooldown active — skipping SessionEnd (${remainingSec}s remaining)`);
+      return;
     }
   }
 
@@ -844,6 +853,7 @@ function main() {
   // expires. Two-track extensions (entropy/markers/coinage) are also skipped
   // since ghost sessions lack the semantic content they depend on.
   if (isLowInfo(clueData, vectorData, narrativeData)) {
+    logErr(`low-info discard: all 3 extractions produced empty payloads — skipping write, retry eligible at next SessionEnd`);
     return;
   }
 
