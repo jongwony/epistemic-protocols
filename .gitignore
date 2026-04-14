@@ -3,8 +3,8 @@ dist/
 dist-site/
 node_modules/
 
-# Anamnesis hook output — session INDEX is written to user working dir
-# (cwd/hypomnesis/{session-id}/), containing per-session clue/vector/
-# narrative + entropy/markers/coinage. Personal session content; never
-# commit even in self-hosting dogfood context.
+# Anamnesis hook output — v0.4.4+ writes INDEX to ~/.claude/projects/{slug}/
+# hypomnesis/{session-id}/ (outside repo). This pattern remains to ignore any
+# pre-v0.4.4 residue at {cwd}/hypomnesis/ until the transitional data is
+# archived or removed. Personal session content; never commit.
 hypomnesis/
