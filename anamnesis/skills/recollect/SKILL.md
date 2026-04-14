@@ -165,10 +165,10 @@ precision(t, corpus) = 1 / (1 + |occ(t, corpus \ {t.source})|)
 reject(t, θ) ≡ precision(t, corpus) < θ                                    -- derivable, not enumerated
 
 extractor registry:
-  core (bootstrap) = { URL_literal, PathRef_literal, PR_literal, Issue_literal, Commit_literal, Citation_literal }
+  core (bootstrap) = { URL_literal, PathRef_literal, PR_literal, Issue_literal, Commit_literal, SessionID_literal }
                      -- semantic categories: URL_path group {URL_literal, PathRef_literal},
                      --                      ExplicitRef group {PR_literal, Issue_literal, Commit_literal},
-                     --                      Citation group {Citation_literal}
+                     --                      Citation group {SessionID_literal}  -- UUIDs as session citations
   plugin           = { domain-specific extractors conforming to laws }
 
 dispatch binding: InputType = StructuredIdentifier → Track = entropy
