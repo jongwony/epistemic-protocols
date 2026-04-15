@@ -371,7 +371,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 20 skills plus bundle in dry-run', () => {
+  it('packages all 19 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -384,7 +384,7 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 21);
+    assert.equal(result.results.length, 20);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -410,17 +410,16 @@ describe('package.js CLI', () => {
         'write.zip',
       ],
     );
-    // Lower-bound invariant: the 38 baseline reflects 13 original + 6
-    // publication-surface plugins × ~2 files each at PR #242 merge time. Any
-    // additive change (new plugin, new reference doc, new agent) only
-    // increases this count. A shrink indicates an unintended regression
-    // (plugin removed or files accidentally excluded from the packager),
-    // which should fail. This replaces the brittle equality assertion from
-    // PR #242 — three independent reviewers flagged the original as
-    // fragile under additive changes (cross-model convergence).
+    // Lower-bound invariant: baseline reflects the current plugin set at
+    // merge time. Any additive change (new plugin, new reference doc, new
+    // agent) only increases this count. A shrink indicates an unintended
+    // regression (plugin removed or files accidentally excluded from the
+    // packager), which should fail. Baseline reset to 33 after PR #259
+    // (reflexion plugin removed + write relocated to epistemic-cooperative)
+    // — that shrink was intentional and the guard updated accordingly.
     assert.ok(
-      bundle.files >= 38,
-      `expected bundle.files >= 38 (regression guard), got ${bundle.files}`
+      bundle.files >= 33,
+      `expected bundle.files >= 33 (regression guard), got ${bundle.files}`
     );
   });
 });
