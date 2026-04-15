@@ -41,6 +41,7 @@ const translations = {
     "protocol.Prosoche.desc": "Gate risky actions for human judgment \u2014 pause before irreversible decisions",
     "protocol.Epharmoge.desc": "Adapt correct-in-theory solutions to your actual situation and constraints",
     "protocol.Horismos.desc": "Separate known information from unknowns to reason more precisely",
+    "protocol.Anamnesis.desc": "Recover prior context from past sessions when recall is vague or incomplete",
     "protocol.Katalepsis.desc": "Ensure comprehension of substantial changes before they take effect",
 
     // Protocol categories
@@ -53,6 +54,7 @@ const translations = {
     "protocol.Prosoche.category": "Attention",
     "protocol.Epharmoge.category": "Adaptation",
     "protocol.Horismos.category": "Boundary",
+    "protocol.Anamnesis.category": "Recall",
     "protocol.Katalepsis.category": "Comprehension",
 
     // Utilities
@@ -123,6 +125,7 @@ const translations = {
     "protocol.Prosoche.desc": "\uc704\ud5d8\ud55c \ud589\ub3d9\uc740 \uc778\uac04\uc758 \ud310\ub2e8\uc5d0 \ub9e1\uae41\ub2c8\ub2e4 \u2014 \ub418\ub3cc\ub9b4 \uc218 \uc5c6\ub294 \uacb0\uc815 \uc804\uc5d0 \uba48\ucda5\ub2c8\ub2e4",
     "protocol.Epharmoge.desc": "\uc774\ub860\uc801\uc73c\ub85c \uc62c\ubc14\ub978 \ud574\uacb0\ucc45\uc744 \uc2e4\uc81c \uc0c1\ud669\uacfc \uc81c\uc57d\uc5d0 \ub9de\uac8c \uc870\uc815\ud569\ub2c8\ub2e4",
     "protocol.Horismos.desc": "\uc54c\ub824\uc9c4 \uc815\ubcf4\uc640 \ubbf8\uc9c0\uc758 \uac83\uc744 \ubd84\ub9ac\ud558\uc5ec \ub354 \uc815\ud655\ud558\uac8c \ucd94\ub860\ud569\ub2c8\ub2e4",
+    "protocol.Anamnesis.desc": "\ud68c\uc0c1\uc774 \ubaa8\ud638\ud558\uac70\ub098 \ubd88\uc644\uc804\ud560 \ub54c \uc774\uc804 \uc138\uc158\uc758 \ub9e5\ub77d\uc744 \ubcf5\uc6d0\ud569\ub2c8\ub2e4",
     "protocol.Katalepsis.desc": "\uc2e4\uc9c8\uc801\uc778 \ubcc0\uacbd\uc0ac\ud56d\uc774 \uc801\uc6a9\ub418\uae30 \uc804\uc5d0 \uc774\ud574\ub97c \ud655\uc778\ud569\ub2c8\ub2e4",
 
     // Protocol categories
@@ -135,6 +138,7 @@ const translations = {
     "protocol.Prosoche.category": "\uc8fc\uc758",
     "protocol.Epharmoge.category": "\uc801\uc751",
     "protocol.Horismos.category": "\uacbd\uacc4",
+    "protocol.Anamnesis.category": "\ud68c\uc0c1",
     "protocol.Katalepsis.category": "\uc774\ud574",
 
     // Utilities
@@ -201,7 +205,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback(
     (key: TranslationKey): string => {
-      return translations[locale][key] ?? translations.en[key] ?? key;
+      const value = translations[locale][key] ?? translations.en[key];
+      if (value === undefined) {
+        if (import.meta.env.DEV) {
+          console.warn(`[i18n] Missing translation key: ${key}`);
+        }
+        return key;
+      }
+      return value;
     },
     [locale]
   );

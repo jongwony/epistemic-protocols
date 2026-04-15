@@ -109,6 +109,7 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 | Analogia | ἀναλογία | Proportion |
 | Prosoche | προσοχή | Attention |
 | Epharmoge | ἐφαρμογή | Application, fitting |
+| Anamnesis | ἀνάμνησις | Recollection |
 
 </details>
 
