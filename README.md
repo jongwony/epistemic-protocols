@@ -2,13 +2,13 @@
 
 > [한국어](./README_ko.md)
 
-When AI collaboration goes off-track, you redo everything. These protocols catch direction errors early — at the plan level, not the code level. Fix the direction, not the implementation.
+When AI collaboration goes off-track, you redo everything. These protocols catch misalignment early — often at the plan level, before it hardens into code or other downstream work. Fix the direction before the implementation compounds it.
 
 ## Why
 
-Correcting a wrong direction at the plan level costs one conversation turn.
-At the code level, it costs hours of rework.
-These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, execution — so you and AI stay aligned before committing to implementation.
+Correcting a wrong direction at the plan level can cost one conversation turn.
+Once it hardens into code, rollout steps, or downstream explanations, it can cost hours of rework.
+These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, execution, applicability, recall, and comprehension — so you and AI can surface, judge, and adapt misalignment before it compounds.
 
 ## Quick Start
 
@@ -79,7 +79,7 @@ Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/fram
 
 ## Design
 
-Each protocol targets a specific point where AI collaboration can go wrong. For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
+Each protocol targets a specific decision point where human-AI collaboration can drift. Public docs lead with the plan-level hook because it is the clearest entry story; contributor docs explain the broader machinery spanning planning, execution, verification, recall, and comprehension. For the bridge between those layers, see [docs/mission-bridge.md](./docs/mission-bridge.md). For architecture details and design philosophy, see [CLAUDE.md](./CLAUDE.md).
 
 ## For Contributors
 
@@ -109,6 +109,7 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 | Analogia | ἀναλογία | Proportion |
 | Prosoche | προσοχή | Attention |
 | Epharmoge | ἐφαρμογή | Application, fitting |
+| Anamnesis | ἀνάμνησις | Recollection |
 
 </details>
 

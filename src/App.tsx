@@ -34,6 +34,7 @@ const protocols = [
   { name: "Prosoche", command: "/attend" },
   { name: "Epharmoge", command: "/contextualize" },
   { name: "Horismos", command: "/bound" },
+  { name: "Anamnesis", command: "/recollect" },
   { name: "Katalepsis", command: "/grasp" },
 ];
 

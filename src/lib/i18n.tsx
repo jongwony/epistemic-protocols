@@ -11,10 +11,10 @@ const translations = {
     "nav.install": "Install",
 
     // Hero
-    "hero.badge": "10 decision-point checkpoints",
+    "hero.badge": "11 decision-point checkpoints",
     "hero.title.line1": "Catch wrong directions",
     "hero.title.line2": "at the plan level",
-    "hero.subtitle": "Correcting a wrong direction at the plan level costs one conversation turn. At the code level, it costs hours of rework.",
+    "hero.subtitle": "Correcting a wrong direction at the plan level can cost one conversation turn. The same checkpoint discipline helps catch goal, context, execution, and applicability drift before it compounds into hours of rework.",
     "hero.cta.install": "Install for Claude Code",
     "hero.cta.github": "View on GitHub",
 
@@ -41,6 +41,7 @@ const translations = {
     "protocol.Prosoche.desc": "Gate risky actions for human judgment \u2014 pause before irreversible decisions",
     "protocol.Epharmoge.desc": "Adapt correct-in-theory solutions to your actual situation and constraints",
     "protocol.Horismos.desc": "Separate known information from unknowns to reason more precisely",
+    "protocol.Anamnesis.desc": "Recover prior context from past sessions when recall is vague or incomplete",
     "protocol.Katalepsis.desc": "Ensure comprehension of substantial changes before they take effect",
 
     // Protocol categories
@@ -53,6 +54,7 @@ const translations = {
     "protocol.Prosoche.category": "Attention",
     "protocol.Epharmoge.category": "Adaptation",
     "protocol.Horismos.category": "Boundary",
+    "protocol.Anamnesis.category": "Recall",
     "protocol.Katalepsis.category": "Comprehension",
 
     // Utilities
@@ -93,10 +95,10 @@ const translations = {
     "nav.install": "\uc124\uce58",
 
     // Hero
-    "hero.badge": "10\uac1c\uc758 \uc758\uc0ac\uacb0\uc815 \uccb4\ud06c\ud3ec\uc778\ud2b8",
+    "hero.badge": "11\uac1c\uc758 \uc758\uc0ac\uacb0\uc815 \uccb4\ud06c\ud3ec\uc778\ud2b8",
     "hero.title.line1": "\uc798\ubabb\ub41c \ubc29\ud5a5\uc744",
     "hero.title.line2": "\uacc4\ud68d \ub2e8\uacc4\uc5d0\uc11c \uc7a1\uc544\ub0b4\uc138\uc694",
-    "hero.subtitle": "\uacc4\ud68d \ub2e8\uacc4\uc5d0\uc11c \uc798\ubabb\ub41c \ubc29\ud5a5\uc744 \ubc14\ub85c\uc7a1\ub294 \ub370\ub294 \ub300\ud654 \ud55c \ud134\uc774\uba74 \ub429\ub2c8\ub2e4. \ucf54\ub4dc \ub2e8\uacc4\uc5d0\uc11c\ub294 \uba87 \uc2dc\uac04\uc758 \uc7ac\uc791\uc5c5\uc774 \ud544\uc694\ud569\ub2c8\ub2e4.",
+    "hero.subtitle": "\uacc4\ud68d \ub2e8\uacc4\uc5d0\uc11c \uc798\ubabb\ub41c \ubc29\ud5a5\uc744 \ubc14\ub85c\uc7a1\ub294 \ub370\ub294 \ub300\ud654 \ud55c \ud134\uc774\uba74 \ub420 \uc218 \uc788\uc2b5\ub2c8\ub2e4. \uac19\uc740 \uccb4\ud06c\ud3ec\uc778\ud2b8 \uaddc\uc728\uc740 \ubaa9\ud45c, \ub9e5\ub77d, \uc2e4\ud589, \uc801\uc6a9\uc131\uc758 \uc5b4\uae0b\ub0a8\ub3c4 \uba87 \uc2dc\uac04\uc758 \uc7ac\uc791\uc5c5\uc73c\ub85c \ucee4\uc9c0\uae30 \uc804\uc5d0 \uc7a1\uc544\ub0c5\ub2c8\ub2e4.",
     "hero.cta.install": "Claude Code\uc5d0 \uc124\uce58",
     "hero.cta.github": "GitHub\uc5d0\uc11c \ubcf4\uae30",
 
@@ -123,6 +125,7 @@ const translations = {
     "protocol.Prosoche.desc": "\uc704\ud5d8\ud55c \ud589\ub3d9\uc740 \uc778\uac04\uc758 \ud310\ub2e8\uc5d0 \ub9e1\uae41\ub2c8\ub2e4 \u2014 \ub418\ub3cc\ub9b4 \uc218 \uc5c6\ub294 \uacb0\uc815 \uc804\uc5d0 \uba48\ucda5\ub2c8\ub2e4",
     "protocol.Epharmoge.desc": "\uc774\ub860\uc801\uc73c\ub85c \uc62c\ubc14\ub978 \ud574\uacb0\ucc45\uc744 \uc2e4\uc81c \uc0c1\ud669\uacfc \uc81c\uc57d\uc5d0 \ub9de\uac8c \uc870\uc815\ud569\ub2c8\ub2e4",
     "protocol.Horismos.desc": "\uc54c\ub824\uc9c4 \uc815\ubcf4\uc640 \ubbf8\uc9c0\uc758 \uac83\uc744 \ubd84\ub9ac\ud558\uc5ec \ub354 \uc815\ud655\ud558\uac8c \ucd94\ub860\ud569\ub2c8\ub2e4",
+    "protocol.Anamnesis.desc": "\ud68c\uc0c1\uc774 \ubaa8\ud638\ud558\uac70\ub098 \ubd88\uc644\uc804\ud560 \ub54c \uc774\uc804 \uc138\uc158\uc758 \ub9e5\ub77d\uc744 \ubcf5\uc6d0\ud569\ub2c8\ub2e4",
     "protocol.Katalepsis.desc": "\uc2e4\uc9c8\uc801\uc778 \ubcc0\uacbd\uc0ac\ud56d\uc774 \uc801\uc6a9\ub418\uae30 \uc804\uc5d0 \uc774\ud574\ub97c \ud655\uc778\ud569\ub2c8\ub2e4",
 
     // Protocol categories
@@ -135,6 +138,7 @@ const translations = {
     "protocol.Prosoche.category": "\uc8fc\uc758",
     "protocol.Epharmoge.category": "\uc801\uc751",
     "protocol.Horismos.category": "\uacbd\uacc4",
+    "protocol.Anamnesis.category": "\ud68c\uc0c1",
     "protocol.Katalepsis.category": "\uc774\ud574",
 
     // Utilities
@@ -201,7 +205,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback(
     (key: TranslationKey): string => {
-      return translations[locale][key] ?? translations.en[key] ?? key;
+      const value = translations[locale][key] ?? translations.en[key];
+      if (value === undefined) {
+        if (import.meta.env.DEV) {
+          console.warn(`[i18n] Missing translation key: ${key}`);
+        }
+        return key;
+      }
+      return value;
     },
     [locale]
   );
