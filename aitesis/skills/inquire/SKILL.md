@@ -56,20 +56,35 @@ Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
 Observability ∈ {StaticObservation, DynamicObservation, BeliefVerification}
                -- exists(fact, env) sub-modes
 -- Layer 2 (tool implementation, Factual and Coherence/MemoryInternal fibers — fibration structure)
-Verifiability ∈ {ReadOnlyVerifiable, EmpiricallyObservable, UserDependent}
+Verifiability  ∈ {ReadOnlyVerifiable, EmpiricallyObservable, UserDependent}
+EvidenceSource ∈ {UserTacit, Instrumentation, CodeDerivable, CanonicalExternal}
+                 ∪ Emergent(EvidenceSource)
+               -- open set symmetric with Dimension; Emergent accumulator for novel channels
+               -- (TestSuite, AsyncComms, HypomnesisIndex, RuntimeObservability, etc.)
+               -- base promotion requires revision threshold (N≥3 sessions clustering)
+ValidSources : Verifiability → ℘(EvidenceSource)
+  ValidSources(ReadOnlyVerifiable)    = {CodeDerivable, UserTacit, CanonicalExternal} ∪ Emergent(EvidenceSource)
+  ValidSources(EmpiricallyObservable) = {Instrumentation, UserTacit}                  ∪ Emergent(EvidenceSource)
+  ValidSources(UserDependent)         = {UserTacit}                                    ∪ Emergent(EvidenceSource)
+  -- Emergent(EvidenceSource) fallback-admissible when no base element fits the observed channel
+  -- cost-ordering tiebreaker (ascending): CodeDerivable < CanonicalExternal < Instrumentation < UserTacit
+  -- default selects lowest-cost valid source; override requires cite per Rule 20 (cite-or-observe)
 CoherenceType ∈ {MemoryInternal, CrossDomain}
                -- 2D: Scope(Same/Cross) × Resolution(Evidence/Structure); off-diagonal → Gate
 Scope      ∈ {Same, Cross}
 Resolution ∈ {Evidence, Structure}
 off_diagonal(s, r) = ¬((s = Same ∧ r = Evidence) ∨ (s = Cross ∧ r = Structure))
 classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
-             where Fiber(Factual)       = Verifiability
+             where Fiber(Factual)       = Σ(v: Verifiability). ValidSources(v)
                    Fiber(Coherence)     = CoherenceType
                    Fiber(Relevance)     = Unit    -- detect only
                    Fiber(Emergent(_))   = Unit    -- detect only (default; refinable per discovered dimension)
              -- 2-layer model = Grothendieck fibration: Layer 2 exists over Factual fiber;
+             --   Factual fiber is itself a dependent sum — (Verifiability v, EvidenceSource s ∈ ValidSources(v))
+             --   EvidenceSource choice within ValidSources(v) routes resolution channel
              -- Coherence fiber classifies into CoherenceType, where MemoryInternal instances enter the Factual resolution path
-             -- CrossDomain/Relevance/Emergent → detect + show routing target in classify summary
+             --   (and inherit EvidenceSource via Factual reclassification)
+             -- CrossDomain/Relevance/Emergent → detect + show routing target in classify summary (no EvidenceSource tag)
 ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalObservation = (Uᵢ', ObservationSpec) → Uₑ  -- dynamic evidence gathering
 Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2)
@@ -110,7 +125,7 @@ early_exit = user_declares_sufficient
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Scan    (sense)       → Internal analysis (no external tool)
-Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch (conditional: environmental dependency)
+Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch, WebFetch (conditional: CanonicalExternal channel — RFCs, vendor API docs, standards; `source: "web:{url}"` tag + staleness guard via codebase version cross-check)
 Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
 Phase 1 Qc      (gate)        → present (conditional: Coherence 2D off-diagonal gate; fires only when scope ≠ resolution assessment)
 Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering, Factual only); cleanup via Bash
@@ -306,6 +321,19 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
     - When evidence scope ⊊ claim scope: split — covered portion proceeds to Step 3 (ReadOnly resolution), uncovered portion is classified separately and enters the appropriate verifiability path
   - EmpiricallyObservable: fact requires DynamicObservation — does not exist statically but is observable through non-destructive execution, reversible, and bounded (< 30s) → empirical observation
   - UserDependent: neither read-only verifiable nor empirically observable → Phase 2 directly
+- **EvidenceSource selection** (Layer 2, Factual dimension — `Fiber(Factual) = Σ(v: Verifiability). ValidSources(v)`):
+  - For each Factual(v) uncertainty, select EvidenceSource from `ValidSources(v)`:
+    - `ValidSources(ReadOnlyVerifiable) = {CodeDerivable, UserTacit, CanonicalExternal} ∪ Emergent(EvidenceSource)`
+    - `ValidSources(EmpiricallyObservable) = {Instrumentation, UserTacit} ∪ Emergent(EvidenceSource)`
+    - `ValidSources(UserDependent) = {UserTacit} ∪ Emergent(EvidenceSource)`
+  - **Default**: lowest-cost valid source (ascending cost-ordering: CodeDerivable < CanonicalExternal < Instrumentation < UserTacit)
+  - **Override**: Rule 20 cite-or-observe applies — choosing UserTacit over Instrumentation for EmpiricallyObservable requires cited dominance basis (operational context absent from instrumentation / temporally-scoped knowledge / setup > 30s bound). Without citation, default to Instrumentation
+  - **Routing consequence** (determines Step 3/4/Phase 2 channel):
+    - CodeDerivable → Step 3 (Read-only verification; codebase Read/Grep)
+    - CanonicalExternal → Step 3 with WebFetch/WebSearch (published external docs; `source: "web:{url}"` tag + staleness guard analogous to memory evidence)
+    - Instrumentation → Step 4 (Empirical observation via Bash lifecycle)
+    - UserTacit → Phase 2 directly (user-dependent inquiry; includes reclassified Coherence/MemoryInternal)
+    - Emergent(source) → record observed channel in classify summary; default routing follows parent Verifiability; accumulate toward revision threshold
 - **Coherence classification** (Layer 2, 2D model: Scope × Resolution):
   - Pre-filter: cross-scope + rule-resolvable (existing scope hierarchy, established precedence) → coexistence (exit Coherence; not a contradiction)
   - Same scope + evidence-resolvable → MemoryInternal → factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent) → follows Factual resolution path (Step 3, Step 4, or Phase 2)
@@ -333,10 +361,11 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
 If all uncertainties context-resolved or read-only-resolved (no observed or user-dependent remaining): proceed with execution (no user interruption).
 If observed or user-dependent uncertainties remain: proceed to Phase 2.
 
-**Web context** (conditional): When uncertainty carries an environmental dependency signal
-(external API versions, library maintenance status, breaking changes)
-and the information is not available in the codebase, extend context collection to web search.
+**Web context** (CanonicalExternal channel, conditional): When uncertainty carries an environmental dependency signal
+(external API versions, library maintenance status, breaking changes, RFC/standard semantics, vendor documentation)
+and the information is not available in the codebase, extend context collection to WebSearch/WebFetch.
 Web evidence is tagged with `source: "web:{url}"` for traceability.
+**Staleness guard** (analogous to memory evidence): documentation may be temporally decoupled from the library version actually in use — verify against codebase import/pin version before treating as resolved. When staleness cannot be verified, classify as Factual/EmpiricallyObservable with explicit `staleness:unverified` tag, or escalate to user confirmation via classify summary. The CanonicalExternal source carries publishing authority (standards body, vendor) distinct from internal CodeDerivable evidence — cite both when cross-validating.
 
 **Scope restriction**:
 - Context collection: Read-only investigation (Read, Grep, WebSearch). — core preserved
@@ -363,15 +392,18 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 **Surfacing format**:
 
 Present the classification results, uncertainty description, and evidence as text output:
-- **Classification summary**:
-  - U1: Factual/ReadOnly (basis: evidence summary)
-  - U2: Factual/EmpiricallyObservable (basis: evidence summary)
+- **Classification summary** (Factual entries include `EvidenceSource` selection per Rule 20 cite-or-observe):
+  - U1: Factual/ReadOnly, EvidenceSource: CodeDerivable (basis: evidence summary)
+  - U1a: Factual/ReadOnly, EvidenceSource: CanonicalExternal (basis: [doc url + codebase version cross-check])
+  - U2: Factual/EmpiricallyObservable, EvidenceSource: Instrumentation (basis: evidence summary)
+  - U2a: Factual/EmpiricallyObservable, EvidenceSource: UserTacit over Instrumentation, basis: {dominance_reason — operational context / temporal scope / setup > 30s} (Rule 20 cite)
   - U2b: Factual/EmpiricallyObservable → UserDependent (escape: [condition] — "[rationale]")
   - U2c: Factual/partial (evidence scope ⊊ claim scope: covers [scope A], claim requires [scope B] — uncovered portion classified separately)
-  - U3a: Coherence/MemoryInternal (basis: evidence summary — same-scope, evidence-resolvable) → factual reclassification
+  - U2e: Factual/*, EvidenceSource: Emergent(source) (observed channel: [description] — fallback-admissible; accumulates toward revision threshold)
+  - U3a: Coherence/MemoryInternal → factual reclassification (inherits EvidenceSource from reclassified Verifiability)
   - U3b: Coherence/CrossDomain (basis: evidence summary — structure-requiring) → deficit-matched routing
   - U4: Relevance (basis: evidence summary) → /goal
-  - Any classification to revise?
+  - Any classification (dimension / verifiability / EvidenceSource) to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]
 - **Progress**: [N resolved / M actionable uncertainties] (excludes non-actionable routed)
@@ -424,7 +456,7 @@ After integration:
 |------|-----------|--------|
 | Gate specificity | `activate(Aitesis) only if ∃ requirement(r) : ¬available(r) ∧ ¬trivially_inferrable(r)` | Prevents false activation on clear tasks |
 | Context collection first | Phase 1 before Phase 2 | Enriches question quality before asking |
-| Uncertainty cap | One uncertainty per Phase 2 cycle, priority order | Prevents question overload |
+| Uncertainty cap | One coherent cluster per Phase 2 cycle (size ≤ 4, default), priority order, per-item non-overlapping information-gain leverage | Prevents question overload while permitting shared-frame clusters |
 | Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
 | Progress visibility | `[N resolved / M actionable]` in Phase 2 | User sees progress on actionable (Factual + Coherence/MemoryInternal) uncertainties |
 | Narrowing signal | Signal when `narrowing(Q, A)` shows diminishing returns | User can exit when remaining uncertainties are marginal |
@@ -437,6 +469,9 @@ After integration:
 | Observation cleanup | All test artifacts removed after observation | No residual files |
 | Observation timeout | 30s limit → fall back to user inquiry | Prevents hanging |
 | Observation risk gate | Elevated-risk observation → reclassify as UserDependent | Safety preserved |
+| Free-response escape | Phase 2 gate accepts "unknown / partial answer" as valid response — auto-promotes to next-preferred EvidenceSource (e.g., UserTacit "unknown" → Instrumentation if Verifiability = EmpiricallyObservable, else retain as UserDependent) | User need not simulate certainty for unknowns; routing degrades gracefully |
+| Cost-ordering tiebreaker | When multiple `EvidenceSource ∈ ValidSources(v)` apply, default selects ascending cost: `CodeDerivable < CanonicalExternal < Instrumentation < UserTacit` | Minimizes user-interrupt cost and network dependency; override requires Rule 20 cite basis |
+| EvidenceSource transparency | Factual uncertainty classify summary shows `EvidenceSource: {selected}` with basis citation when override applied | Rule 20 cite-or-observe audit visibility |
 
 ## Rules
 
@@ -446,7 +481,7 @@ After integration:
 4. **Evidence over Inference over Detection**: When context is insufficient, infer the highest-gain question rather than detect via fixed checklist (lower boundary). When a factual uncertainty is empirically observable, observe directly rather than infer from reasoning alone (upper boundary — Rule 20 is the structural guard). Evidence-claim alignment: partial evidence covering a subset of the claim scope is inference for the uncovered portion, not evidence — verify evidence scope ⊇ claim scope before treating as resolved, and classify the uncovered portion separately
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on prospect requirements
 6. **Evidence-grounded**: Every surfaced uncertainty must cite specific observable evidence or collection results, not speculation
-7. **One at a time**: Surface one uncertainty per Phase 2 cycle; do not bundle multiple uncertainties
+7. **One coherent cluster**: Surface one coherent cluster per Phase 2 cycle. Cluster admissible when (a) each item has explicit, non-overlapping information-gain rationale, (b) items share a common decision frame, (c) cluster size ≤ 4 (default). Do not bundle disjoint uncertainties across frames — those surface in separate cycles by priority
 8. **Dismiss respected**: User dismissal is final for that uncertainty domain in the current session
 9. **Convergence persistence**: Mode active until all identified uncertainties are resolved or dismissed
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N resolved / M actionable]` — actionable excludes non_factual_detected (non-actionable: CrossDomain coherence + detect-only dimensions, routed not resolved)
@@ -459,5 +494,6 @@ After integration:
 17. **No silent sufficiency assumption**: If Phase 0 scan detects no uncertainties, present this finding with reasoning to user for confirmation before proceeding — do not silently declare context sufficient
 18. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
 19. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
-20. **No observation avoidance**: When a Factual uncertainty is classifiable as EmpiricallyObservable (observable through bounded, non-destructive Bash execution), classifying it as UserDependent to avoid empirical observation = protocol violation. The AI must execute observation. Observation has exactly two outcomes, both of which proceed to Phase 2 via `Uₑ`: (i) differentiating evidence found → attach evidence to `Uₑ` → Phase 2; (ii) no differentiating signal found → the null-signal finding is itself an observation output — attach as negative evidence to `Uₑ` → Phase 2. Post-observation null-signal findings are NOT reclassifications to UserDependent; they are `Uₑ` items with observation-grounded negative evidence. Reclassification to UserDependent is legitimate only under empirically verifiable escape conditions evaluated BEFORE observation execution: (a) observation requires persistent environment mutation beyond instrument setup, (b) execution exceeds 30s bound, (c) risk gate triggers (elevated-risk observation). Pre-observation categorical classification reinstates the inference-before-observation shortcut this rule guards against — classification must arise from observation output, not substitute for it.
+20. **No observation avoidance (cite-or-observe)**: When a Factual uncertainty is classifiable as EmpiricallyObservable (observable through bounded, non-destructive Bash execution), the AI must either execute observation with `EvidenceSource = Instrumentation` OR cite explicit Instrumentation-absent dominance basis for choosing `EvidenceSource = UserTacit`. Two rationalization paths are equally violations: (A) **Verifiability shortcut** — classifying as UserDependent to avoid observation (pre-observation classification shortcut); (B) **Source-choice shortcut** — selecting `UserTacit` over `Instrumentation` within `ValidSources(EmpiricallyObservable)` without cited dominance basis. Legitimate `UserTacit` preference requires explicit citation of Instrumentation-absent context: (a) operational or domain knowledge not captured by instrumentation, (b) temporally-scoped knowledge not reproducible via static observation, (c) setup cost exceeding the 30s bound. Without such citation, default to `Instrumentation`. Cited basis must appear in the Phase 2 classify summary as `EvidenceSource: UserTacit over Instrumentation, basis: {specific_reason}`. Observation has exactly two outcomes, both of which proceed to Phase 2 via `Uₑ`: (i) differentiating evidence found → attach evidence to `Uₑ` → Phase 2; (ii) no differentiating signal found → the null-signal finding is itself an observation output — attach as negative evidence to `Uₑ` → Phase 2. Post-observation null-signal findings are NOT reclassifications to UserDependent; they are `Uₑ` items with observation-grounded negative evidence. Reclassification to UserDependent is legitimate only under empirically verifiable escape conditions evaluated BEFORE observation execution: (a) observation requires persistent environment mutation beyond instrument setup, (b) execution exceeds 30s bound, (c) risk gate triggers (elevated-risk observation). Pre-observation categorical classification reinstates the inference-before-observation shortcut this rule guards against — classification must arise from observation output, not substitute for it.
 21. **No pre-filter rationalization**: Pre-filter (coexistence exit) applies only when an explicit, named scope hierarchy rule or documented precedence ordering resolves the apparent contradiction without epistemic protocol intervention. Classifying a genuine cross-domain structural contradiction as "rule-resolvable" to avoid routing = pre-filter misuse (analogous to Rule 20's observation avoidance guard)
+22. **Divergence-bounding (frame-first)**: When `|Uᵢ| × branching_factor ≥ 16` during Phase 1 Ctx (e.g., 4+ uncertainties each with 4+ candidate resolution paths, or 2 uncertainties with 8+ side-effect branches each), the AI must present a **decision frame option set** before enumerating per-branch detail. Frame-first means: enumerate the sub-decision frames (e.g., "which posture — in-place optimization / schema redesign / offload / defer?") as a bounded choice, await user selection, then enumerate detail only within the selected frame. Enumerating side-effects or sub-branches across all frames simultaneously before framing = protocol violation — the resulting divergence forces the user to simulate multiple framings in parallel, defeating Recognition (A1) and producing the session-divergence failure mode observed in cross-session practice (user restart signal after uncontrolled side-effect enumeration). Exception: when `|Uᵢ| ≤ 3` or branching uniformly low, full enumeration is permitted without frame-first
