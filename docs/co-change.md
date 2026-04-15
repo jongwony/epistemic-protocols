@@ -21,4 +21,5 @@ Protocol modifications require synchronized edits across multiple files. Any pro
 | SKILL.md frontmatter description change (type signature 포함) | `scripts/package.js` DESCRIPTION_OVERRIDES (morphism notation 동기화) |
 | Hypomnesis store write pipeline change (mjs harness) | `anamnesis/hooks/hooks.json` (SessionEnd hook registration), `anamnesis/scripts/hypomnesis-write.mjs` (mjs harness implementation), `anamnesis/skills/recollect/SKILL.md` Scan section (read-side pattern), `anamnesis/.claude-plugin/plugin.json` version bump |
 | Axiom change (A1-A7 definition or summary) | `.claude/rules/axioms.md` (source of truth) → `CLAUDE.md` (reference) |
+| Mission/vision wording change | `CLAUDE.md` (maintainer umbrella), `docs/mission-bridge.md` (audience boundary + derivation rule), README/landing copy when public framing changes; verify runtime users still rely on `SKILL.md` + plugin descriptions rather than mission docs |
 | Editing/Git convention change | `.claude/rules/editing-conventions.md` (primary) → `CLAUDE.md` (reference) |
