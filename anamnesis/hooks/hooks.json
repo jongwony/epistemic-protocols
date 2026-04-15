@@ -1,5 +1,5 @@
 {
-  "description": "Hypomnesis store writer — indexes session content for /recollect access.",
+  "description": "Hypomnesis store writer — indexes session content and substitute channel deposits for /recollect access.",
   "hooks": {
     "SessionEnd": [
       {
@@ -18,6 +18,17 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs\"",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-subagent-hook.mjs\"",
             "async": true
           }
         ]
