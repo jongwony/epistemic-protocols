@@ -1,8 +1,9 @@
 /**
- * SubagentStop hook — substitute channel capture for /btw and /recap.
+ * SubagentStop hook — substitute channel capture for all substitute channel invocations.
  *
  * Filter: agent_type === "" (non-empty types are typed subagents, not substitute channel).
- * Output: ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl (append-only).
+ * Output: ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl
+ *         (append-only; {slug} = dirname(transcript_path)).
  * Non-goals: cooldown gate, LLM extraction, INDEX integration — raw relay only.
  */
 
@@ -32,8 +33,11 @@ function main() {
 
   const { session_id, transcript_path, agent_id, agent_type, agent_transcript_path, last_assistant_message } = payload;
 
+  if (agent_type === undefined) {
+    logErr(`agent_type field absent from payload; skipping`);
+    return;
+  }
   if (agent_type !== "") {
-    logErr(`skipping non-empty agent_type="${agent_type}"`);
     return;
   }
   if (!last_assistant_message) {
@@ -46,13 +50,18 @@ function main() {
   }
 
   const slugDir = path.dirname(transcript_path);
-  if (slugDir === "." || slugDir === "/") {
-    logErr(`unexpected slugDir="${slugDir}" from transcript_path="${transcript_path}"; skipping`);
+  if (!path.isAbsolute(slugDir)) {
+    logErr(`slugDir is not absolute: "${slugDir}" (transcript_path="${transcript_path}"); skipping`);
     return;
   }
 
-  const target = path.join(slugDir, "hypomnesis", "subagent", `${agent_id}.jsonl`);
-  fs.mkdirSync(path.dirname(target), { recursive: true });
+  const safeAgentId = path.basename(agent_id);
+  if (safeAgentId !== agent_id || safeAgentId === "" || safeAgentId === ".") {
+    logErr(`agent_id failed sanitization: "${agent_id}"; skipping`);
+    return;
+  }
+
+  const target = path.join(slugDir, "hypomnesis", "subagent", `${safeAgentId}.jsonl`);
 
   const entry = {
     timestamp: new Date().toISOString(),
@@ -61,7 +70,14 @@ function main() {
     agent_transcript_path: agent_transcript_path ?? null,
     last_assistant_message,
   };
-  fs.appendFileSync(target, JSON.stringify(entry) + "\n");
+
+  try {
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.appendFileSync(target, JSON.stringify(entry) + "\n");
+  } catch (e) {
+    logErr(`write failed target="${target}": ${e.message}`);
+    return;
+  }
 }
 
 try {

@@ -120,9 +120,11 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 -- Store binding:
 --   {slug} = dirname(transcript_path) — Claude Code's project partition identifier
---   SSOT  ↦ ~/.claude/projects/{slug}/*.jsonl                    (session JSONL, append-only)
---   INDEX ↦ ~/.claude/projects/{slug|session-id}/hypomnesis/     (narrative/clue/vector/hook — classified by writer category annotation)
---         ∪ ~/.claude/projects/{slug|session-id}/memory/         (user-curated insights)
+--   SSOT  ↦ ~/.claude/projects/{slug}/*.jsonl                                 (session JSONL, append-only)
+--   INDEX ↦ ~/.claude/projects/{slug}/hypomnesis/{session-id}/                (per-session recall index from SessionEnd/PreCompact)
+--         ∪ ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl    (substitute channel capture from SubagentStop)
+--         ∪ ~/.claude/projects/{slug}/memory/                                 (user-curated insights)
+--   slug-partitioned: prevents cwd-scattered INDEX; cross-cwd /recollect reaches one canonical location
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
 Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over SSOT ∪ INDEX)
