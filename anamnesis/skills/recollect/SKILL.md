@@ -115,7 +115,7 @@ NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (attempts = max ∨ enrichments exhau
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
 ── TOOL GROUNDING ──
--- A4 realization binding (Claude Code substrate). Non-normative with respect to protocol essence
+-- Realization binding (Claude Code substrate). Non-normative with respect to protocol essence
 -- (see ── SUBSTRATE AGNOSTICISM ──). Any substrate satisfying the morphism laws realizes Anamnesis.
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 -- Store binding:
@@ -215,7 +215,7 @@ form ⊥ matter:
 TOOL GROUNDING below specifies one such realization (Claude Code substrate); it is
 non-normative with respect to the protocol's epistemic content.
 
-Referent: A4 Semantic Autonomy (contributor axiom). This section locally inscribes the
+Referent: Semantic autonomy at the realization boundary. This section locally inscribes the
 realization boundary for user-visible clarity; the local inscription is intentional and
 preserves the hermeneutic circle until a marketplace shared-document mechanism exists.
 
@@ -388,11 +388,12 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
 **Narrative presentation format**:
 
 Present the candidate as narrative text — the discussion's story, not just its result:
-- **When/Where**: Temporal and spatial context — when the discussion happened (with temporal distance, e.g., "3 days ago" or "2 weeks ago"), which session or document
+- **When/Where**: Temporal and spatial context — when the discussion happened (with temporal distance, e.g., "3 days ago" or "2 weeks ago"), which session or document. Use short session reference in narrative for readability.
 - **Source**: Provenance of the stored context — whether it was user-crystallized (via /crystallize), auto-generated (SessionEnd hook narrative), or memory-curated (manually written to memory/)
 - **Origin**: What prompted the discussion — the question or situation that started it
 - **Direction**: How the discussion developed — what path was taken, what was explored
 - **Outcome**: What was decided, produced, or concluded
+- **Session**: Full session ID for `claude --resume` verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`). Narrative uses short reference; this field provides the resumable identifier.
 - **Adjacent**: Other topics discussed nearby in the same time period — for Refine orientation
 - **Progress**: `[attempt N/3, M candidates in scope]`
 
@@ -414,7 +415,7 @@ Design principles for Phase 2 presentation — narrative over summary, concrete 
 
 After user response:
 
-1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference, topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), resumption hint if applicable. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition.
+1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID for `--resume` verification), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), resumption hint if applicable. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition.
 
 2. **Refine**: Candidate not recognized but recall direction acknowledged. Initiate Socratic probing for recall deepening:
 
@@ -455,7 +456,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 4. **Narrative Qc presentation**: Phase 2 presents candidates as discussion narratives (origin → direction → outcome), not result summaries. Result-only presentation defeats recognition by forcing additional investigation.
 
-5. **Guided recall orientation in Refine**: On Refine, present structured navigation through adjacent memory vectors with brief narratives — open-ended questions shift cognitive burden; structured alternatives enable Recognition (A1) in recall-deepening.
+5. **Guided recall orientation in Refine**: On Refine, present structured navigation through adjacent memory vectors with brief narratives — open-ended questions shift cognitive burden; structured alternatives enable recognition in recall-deepening.
 
 6. **Track-internal ranking strategy**: Ranking composes track-appropriate signals — entropy track: literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery. Single-signal scans have structural blind spots regardless of track.
 
@@ -489,7 +490,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 21. **Cross-LOOP narrative persistence**: Narrative format and adjacent vector enrichment persist across LOOP iterations; subsequent attempts reference prior candidates and explain the differential.
 
-22. **Substrate non-coupling**: Protocol essence (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, five formal blocks) must not name specific tools, agents, platforms, or storage media. Realization bindings belong exclusively to TOOL GROUNDING (A4 Semantic Autonomy).
+22. **Substrate non-coupling**: Protocol essence (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, five formal blocks) must not name specific tools, agents, platforms, or storage media. Realization bindings belong exclusively to TOOL GROUNDING (semantic autonomy at the realization boundary).
 
 ## Known Limitations
 
