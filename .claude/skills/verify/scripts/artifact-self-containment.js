@@ -11,10 +11,6 @@
 const path = require('path');
 const { buildRuntimeContractViews } = require(path.resolve(__dirname, '../../../../scripts/package.js'));
 
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function stripFencedCode(text) {
   return text.replace(/```[\s\S]*?```/g, '');
 }
@@ -33,6 +29,10 @@ function isExternalTarget(target) {
     target.startsWith('https://') ||
     target.startsWith('mailto:')
   );
+}
+
+function stripFragmentAndQuery(target) {
+  return target.split('#')[0].split('?')[0];
 }
 
 function parseRelativeLinks(markdown) {
@@ -70,25 +70,29 @@ function hasRoutingCue(description, skill) {
 }
 
 const BANNED_RUNTIME_DEPENDENCIES = [
-  { pattern: /\bmission-bridge\.md\b/i, message: 'references mission bridge from runtime contract surface' },
-  { pattern: /\baxioms?\.md\b/i, message: 'references axioms doc from runtime contract surface' },
-  { pattern: /\bA[1-7]\b/, message: 'references contributor-only axiom identifier from runtime contract surface' },
-  { pattern: /(?:^|[\s`(])\.claude\//m, message: 'references .claude contributor path from runtime contract surface' },
-  { pattern: /(?:^|[\s`(])docs\//m, message: 'references repo docs path from runtime contract surface' },
+  { pattern: /\bmission-bridge\.md\b/gi, message: 'references mission bridge from runtime contract surface' },
+  { pattern: /\baxioms?\.md\b/gi, message: 'references axioms doc from runtime contract surface' },
+  { pattern: /\bA[1-7]\b(?!\.\d)/g, message: 'references contributor-only axiom identifier from runtime contract surface' },
+  { pattern: /(?<![\w/-])\.claude\//gm, message: 'references .claude contributor path from runtime contract surface' },
+  { pattern: /(?<![\w/-])docs\//gm, message: 'references repo docs path from runtime contract surface' },
 ];
 
 function checkSurfaceLeaks(text, fileLabel, checkName, bucket) {
-  const prose = stripFencedCode(text);
+  const prose = stripCodeFromText(text);
+  let anyMatch = false;
   for (const rule of BANNED_RUNTIME_DEPENDENCIES) {
-    const match = prose.match(rule.pattern);
-    if (match) {
+    rule.pattern.lastIndex = 0;
+    const matches = [...prose.matchAll(rule.pattern)];
+    if (matches.length > 0) {
+      anyMatch = true;
       bucket.fail.push({
         check: checkName,
         file: fileLabel,
-        message: `${rule.message}: "${match[0].trim()}"`
+        message: `${rule.message}: ${matches.map(m => `"${m[0].trim()}"`).join(', ')} (${matches.length} occurrence${matches.length > 1 ? 's' : ''})`
       });
     }
   }
+  return anyMatch;
 }
 
 function runArtifactSelfContainmentCheck() {
@@ -99,6 +103,7 @@ function runArtifactSelfContainmentCheck() {
   for (const view of views) {
     const surfaceLabel = `${view.plugin}:${view.skill}`;
     const entrySet = new Set(view.packagedEntries.map(normalizePosix));
+    let hadFailure = false;
 
     if (view.skillEntryCount !== 1 || !view.transformedSkillMd || !entrySet.has(view.skillPath)) {
       results.fail.push({
@@ -109,12 +114,19 @@ function runArtifactSelfContainmentCheck() {
       continue;
     }
 
-    checkSurfaceLeaks(view.transformedSkillMd, `${surfaceLabel}:Skill.md`, check, results);
-    checkSurfaceLeaks(view.pluginDescription, `${surfaceLabel}:plugin-description`, check, results);
+    if (checkSurfaceLeaks(view.transformedSkillMd, `${surfaceLabel}:Skill.md`, check, results)) {
+      hadFailure = true;
+    }
+    if (checkSurfaceLeaks(view.pluginDescription, `${surfaceLabel}:plugin-description`, check, results)) {
+      hadFailure = true;
+    }
 
     for (const relativeTarget of parseRelativeLinks(view.transformedSkillMd)) {
-      const resolved = resolvePackagedTarget(view.skillPath, relativeTarget);
+      const pathOnly = stripFragmentAndQuery(relativeTarget);
+      if (!pathOnly) continue;
+      const resolved = resolvePackagedTarget(view.skillPath, pathOnly);
       if (!entrySet.has(resolved)) {
+        hadFailure = true;
         results.fail.push({
           check,
           file: `${surfaceLabel}:Skill.md`,
@@ -139,11 +151,13 @@ function runArtifactSelfContainmentCheck() {
       });
     }
 
-    results.pass.push({
-      check,
-      file: surfaceLabel,
-      message: 'runtime contract surface verified'
-    });
+    if (!hadFailure) {
+      results.pass.push({
+        check,
+        file: surfaceLabel,
+        message: 'runtime contract surface verified'
+      });
+    }
   }
 
   return results;

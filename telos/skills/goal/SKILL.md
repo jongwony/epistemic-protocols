@@ -94,8 +94,8 @@ converge (relay)     → TextPresent+Proceed (convergence evidence trace; contex
 Phase 0 Qc (confirm)       → elidable when: explicit_arg via /goal "text"
                               default: proceed with inferred goal seed
                               regret: bounded (Phase 2 Qs free-response override available)
-Phase 1 present (taxonomy) → relay (full taxonomy with evidence; no gate — A5 option-set relay test: Proceed dominates under user-invoked or user-confirmed activation)
-Phase 2 Qs (negotiate)     → always_gated (gated: Accept/Modify/Reject/Extend — user shapes contract; free response overrides taxonomy — emergent add, non-Outcome exclude, redirect; override capability must be disclosed at gate per A2)
+Phase 1 present (taxonomy) → relay (full taxonomy with evidence; no gate — option-set relay test: Proceed dominates under user-invoked or user-confirmed activation)
+Phase 2 Qs (negotiate)     → always_gated (gated: Accept/Modify/Reject/Extend — user shapes contract; free response overrides taxonomy — emergent add, non-Outcome exclude, redirect; override capability must be disclosed at gate under user authority)
 Phase 4 Qc (approve)       → always_gated (gated: contract approval — final binding decision)
 
 ── MODE STATE ──

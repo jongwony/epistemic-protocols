@@ -187,6 +187,52 @@ describe('runtime contract view', () => {
 });
 
 // ============================================================
+// artifact-self-containment detector liveness
+// ============================================================
+
+describe('artifact-self-containment detector liveness', () => {
+  const REPO_ROOT = path.join(__dirname, '..');
+  const TARGET_SKILL_MD = path.join(REPO_ROOT, 'hermeneia', 'skills', 'clarify', 'SKILL.md');
+  const INJECTION = '\n\nContributor reference: .claude/rules/axioms.md (A1)\n';
+
+  it('fires when a known banned pattern is injected into a Skill.md', () => {
+    const backup = fs.readFileSync(TARGET_SKILL_MD, 'utf8');
+    try {
+      fs.writeFileSync(TARGET_SKILL_MD, backup + INJECTION);
+
+      const result = runArtifactSelfContainmentCheck();
+
+      const hermeneiaFails = result.fail.filter(
+        f => f.file && f.file.startsWith('hermeneia:clarify')
+      );
+      assert.ok(
+        hermeneiaFails.length >= 1,
+        `expected ≥1 fail for hermeneia:clarify after injecting banned patterns, ` +
+        `got ${hermeneiaFails.length}. If 0: detector is silently no-op (liveness failure). ` +
+        `Fails: ${JSON.stringify(result.fail)}`
+      );
+
+      const hasClaudePath = hermeneiaFails.some(f => /\.claude/.test(f.message));
+      assert.ok(hasClaudePath, '.claude/ banned pattern should fire on injected content');
+
+      const hasAxiomsMd = hermeneiaFails.some(f => /axioms?\.md/.test(f.message));
+      assert.ok(hasAxiomsMd, 'axioms.md banned pattern should fire on injected content');
+    } finally {
+      try {
+        fs.writeFileSync(TARGET_SKILL_MD, backup);
+      } catch (restoreErr) {
+        process.stderr.write(
+          '\n\n!!! LIVENESS TEST FAILED TO RESTORE hermeneia SKILL.md !!!\n' +
+          'Manual recovery required: git checkout hermeneia/skills/clarify/SKILL.md\n' +
+          `Original restore error: ${restoreErr && restoreErr.message}\n\n`
+        );
+        throw restoreErr;
+      }
+    }
+  });
+});
+
+// ============================================================
 // createZip
 // ============================================================
 
