@@ -7,6 +7,8 @@ description: "Quick protocol recommendation from recent sessions, or quest-based
 
 Start with a quick recommendation based on recent sessions, then optionally continue to guided learning — so users experience value first, learn second.
 
+Invoke directly with `/onboard` when the user wants onboarding or protocol discovery.
+
 ## When to Use
 
 Invoke this skill when:

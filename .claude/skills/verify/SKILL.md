@@ -51,6 +51,9 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 - Graph integrity (node/edge validation, orphaned nodes, isolated nodes, DAG acyclicity)
 - Spec-vs-impl drift (TYPES definitions ↔ PHASE TRANSITIONS/prose usage, resolution type consistency)
 - Cross-reference scan (protocol name consistency, deficit → resolution pairs, distinction table completeness, edge type allowlist)
+- Onboard sync, precedence linear extension, partition invariant, catalog sync
+- Gate type soundness (warning-level safeguard for coproduct/prose option alignment)
+- Artifact self-containment (runtime-contract view: packaged `Skill.md` + plugin description metadata + packaged support references)
 
 ### Phase 2: Expert Review
 
@@ -238,7 +241,7 @@ Most common pattern: invoke `/verify` before `/commit` command.
 
 All checks passed.
 
-- Static checks: 12 pass, 0 fail, 0 warn
+- Static checks: 16 pass, 0 fail, 0 warn
 - Type/Category review: No issues
 - Instruction Design review: No issues
 

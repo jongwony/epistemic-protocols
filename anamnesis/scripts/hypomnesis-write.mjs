@@ -291,6 +291,7 @@ function callHaiku(prompt) {
     timeout: HAIKU_TIMEOUT,
     stdio: ["pipe", "pipe", "pipe"],
     maxBuffer: 8 * 1024 * 1024,
+    cwd: "/tmp",
   });
   return output.trim();
 }

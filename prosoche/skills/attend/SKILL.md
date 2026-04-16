@@ -82,8 +82,9 @@ Phase          ∈ {-1, 0, 1, 2, 3}
 SituatedExecution = Σ' where (∀ t ∈ T: situated(t)) ∨ user_withdraw ∨ user_esc
 
 -- Sub-A0 (Upstream Protocol Router):
+D                = Set(DetectedDeficit)                             -- unresolved upstream deficits
 DetectedDeficit  = { protocol: ProtocolId, deficit: DeficitCondition, evidence: String }
-UpstreamScan     = (C, Resolved) → { d ∈ Detect(C) : d.protocol ∉ Resolved ∧ d.deficit ∉ Resolved }
+UpstreamScan     = (C, Resolved) → { d ∈ Detect(C) : d.protocol ∉ Resolved ∧ d.deficit ∉ Resolved } = D
 RouteDecision    = Proceed | Route(ProtocolId) | Other(ProtocolId)
 Resolved         = Set(ProtocolId ∪ DeficitCondition) -- protocols executed + deficits addressed via Other
 SuspendState     = { resolved: Resolved, iteration: N }
@@ -398,7 +399,7 @@ Options:
 2. **Route on context richness**:
    - **Resume** (`C.tasks ≠ ∅`, no prior): Adopt existing tasks, skip confirmation — tasks already user-validated
    - **Conflict** (`C.tasks ≠ ∅` + `C.prior`): **Present** via gate interaction 1x — resume existing tasks, refresh from prior, or merge
-   - **Confirm boundary** (`C.prior` exists, no tasks): Create tasks from prior protocol output, **present** via gate interaction 1x to confirm materialized task list — crossing the protocol boundary (prior output → Prosoche tasks) is a constitution act per A2 relay/constitution boundary, even when intent was verified upstream. Longer chains carry more context but do not eliminate the boundary crossing
+   - **Confirm boundary** (`C.prior` exists, no tasks): Create tasks from prior protocol output, **present** via gate interaction 1x to confirm materialized task list — crossing the protocol boundary (prior output → Prosoche tasks) is a relay/constitution boundary, even when intent was verified upstream. Longer chains carry more context but do not eliminate the boundary crossing
    - **Auto-proceed** (neither + Fired): Create tasks from arguments — Sub-A0's upstream interaction already verified context. Phase 0 Classify provides independent downstream risk check.
    - **Confirm** (neither + ¬Fired): Create tasks from arguments, **present** via gate interaction 1x to verify task list — transparent cold start without upstream or prior verification. Phase 0 Classify provides independent downstream risk check.
 3. **Create tasks** via TaskCreate, establishing the task list that Phase 0 will iterate

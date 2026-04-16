@@ -12,7 +12,15 @@ const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('zlib');
-const { parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip, generateReleaseNotes } = require('./package');
+const {
+  buildRuntimeContractViews,
+  parseFrontmatter,
+  serializeFrontmatter,
+  transformSkillMd,
+  createZip,
+  generateReleaseNotes
+} = require('./package');
+const { runArtifactSelfContainmentCheck } = require('../.claude/skills/verify/scripts/artifact-self-containment');
 
 // ============================================================
 // parseFrontmatter
@@ -153,6 +161,28 @@ describe('transformSkillMd', () => {
     const result = transformSkillMd(content, 'gap');
     const { fields } = parseFrontmatter(result);
     assert.equal(fields.get('description'), 'Short description');
+  });
+});
+
+// ============================================================
+// runtime contract view / artifact self-containment
+// ============================================================
+
+describe('runtime contract view', () => {
+  it('builds a packaged runtime view for every skill', () => {
+    const views = buildRuntimeContractViews();
+    assert.equal(views.length, 19);
+    for (const view of views) {
+      assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one Skill.md entry`);
+      assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed Skill.md`);
+      assert.ok(view.packagedEntries.includes(`${view.skill}/Skill.md`), `${view.plugin}:${view.skill} should package Skill.md`);
+      assert.ok(typeof view.pluginDescription === 'string');
+    }
+  });
+
+  it('artifact self-containment passes with no runtime boundary leaks', () => {
+    const result = runArtifactSelfContainmentCheck();
+    assert.deepEqual(result.fail, []);
   });
 });
 

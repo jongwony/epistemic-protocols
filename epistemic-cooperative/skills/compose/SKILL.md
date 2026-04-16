@@ -25,9 +25,9 @@ Accept a protocol chain specification from the user.
 **Input forms**:
 - Inline argument: `/compose clarify → goal → bound → inquire`
 - Conversational: user describes the desired chain
-- Cluster shortcut: `/compose planning` (resolve via Epistemic Concern Clusters in CLAUDE.md)
+- Cluster shortcut: `/compose planning` (resolve via the built-in Cluster Shortcuts table below)
 
-**Normalization**: Accept protocol names (Hermeneia), slash commands (/clarify), skill names (clarify), or short names. Case-insensitive. Arrow separators (`→`, `->`, `,`, spaces) all accepted. Resolve to canonical `(protocol_name, slash_command)` pairs using the Plugins table in CLAUDE.md.
+**Normalization**: Accept protocol names (Hermeneia), slash commands (/clarify), skill names (clarify), or short names. Case-insensitive. Arrow separators (`→`, `->`, `,`, spaces) all accepted. Resolve to canonical `(protocol_name, slash_command)` pairs using the registry below.
 
 **Output path**: Ask the user where to write the generated SKILL.md. Default: `~/.claude/skills/{chain-name}/SKILL.md` for user-level skills, or suggest a project-level path if appropriate.
 
@@ -37,9 +37,25 @@ Present the interpreted chain with canonical protocol names, slash commands, and
 1. **Confirm** — proceed with this chain
 2. **Modify** — adjust protocols, order, or output path
 
+**Protocol registry**:
+
+| Protocol | Slash | Skill token |
+|----------|-------|-------------|
+| Hermeneia | `/clarify` | `clarify` |
+| Telos | `/goal` | `goal` |
+| Horismos | `/bound` | `bound` |
+| Aitesis | `/inquire` | `inquire` |
+| Prothesis | `/frame` | `frame` |
+| Analogia | `/ground` | `ground` |
+| Syneidesis | `/gap` | `gap` |
+| Prosoche | `/attend` | `attend` |
+| Epharmoge | `/contextualize` | `contextualize` |
+| Anamnesis | `/recollect` | `recollect` |
+| Katalepsis | `/grasp` | `grasp` |
+
 ## Phase 1: Validate (Graph Constraints)
 
-Read `.claude/skills/verify/graph.json`. Check three constraints:
+Read `references/graph.json` (bundled with this skill). Check three constraints:
 
 ### 1.1 Precondition Order
 
@@ -61,7 +77,7 @@ For each protocol in the chain: check if any precondition source is missing. The
 
 On missing precondition: suggest inserting the missing protocol at the correct position.
 
-**Design note — chain-position × regret interaction**: The A5 concern (unbounded-regret gates positioned late in a chain degrade user judgment quality) is valid but not yet addressed. Phase 3 disposition operates per-gate without chain-position awareness. A future revision will introduce a decision load model that quantifies remaining gate cost (loop depth × regret weight) per disposition choice, replacing the removed position-ratio advisory with a structurally sound, Phase 2-integrated mechanism.
+**Design note — chain-position × regret interaction**: The concern that unbounded-regret gates positioned late in a chain degrade user judgment quality is valid but not yet addressed. Phase 3 disposition operates per-gate without chain-position awareness. A future revision will introduce a decision load model that quantifies remaining gate cost (loop depth × regret weight) per disposition choice, replacing the removed position-ratio advisory with a structurally sound, Phase 2-integrated mechanism.
 
 **On all validations passing**: proceed to Phase 2 with the validated chain.
 
@@ -184,7 +200,7 @@ Legend: ■ = presented, · = elided, × = pruned
 | Elided Gate | Supporting Output | Basis |
 |-------------|-------------------|-------|
 
-The `Basis` column connects to the 3-axis elidability model (`docs/analysis/protocol-composition-gate-elision.md`) — Axis 2 (O_support) is the primary justification source.
+The `Basis` column connects to the 3-axis elidability model used in this skill — Axis 2 (`O_support`) is the primary justification source.
 
 **Gate #2** (Qc, bounded regret — Phase 4 allows regeneration):
 
@@ -273,7 +289,7 @@ On Accept: write the template using the Write tool. Present the output path and 
 
 ## Cluster Shortcuts
 
-Predefined chain patterns based on Epistemic Concern Clusters (CLAUDE.md):
+Predefined chain patterns based on the built-in concern clusters:
 
 | Shortcut | Chain | Rationale |
 |----------|-------|-----------|
@@ -299,7 +315,7 @@ Shortcuts are convenience aliases — the user can always specify a custom chain
 ## Rules
 
 1. **Authoring, not execution**: /compose generates SKILL.md files; it does not execute protocol chains at runtime
-2. **Graph authority**: graph.json is the authoritative source for chain validation — do not override precondition or suppression edges without user explicit confirmation
+2. **Graph authority**: `references/graph.json` is the authoritative source for chain validation — do not override precondition or suppression edges without user explicit confirmation
 3. **Conservative default**: When disposition is ambiguous, default to PRESENT (ask user) over ELIDE (auto-pass)
 4. **Catch-chain is structural**: Catch-chain invariant violations block template generation — not advisory, not overridable
 5. **Inline decision flow**: The disposition decision flow (3-axis model) must be included in the generated template so the runtime agent can apply it without cross-referencing analysis documents

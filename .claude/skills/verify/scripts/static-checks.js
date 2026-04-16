@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const { execFileSync } = require('child_process');
+const { runArtifactSelfContainmentCheck } = require('./artifact-self-containment');
 
 const projectRoot = process.argv[2] || process.cwd();
 
@@ -70,6 +71,47 @@ function walkFiles(dir, predicate, checkName) {
   }
   walk(dir);
   return collected;
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function extractFormalSection(content, sectionName) {
+  const lines = content.split('\n');
+  const header = `── ${sectionName} ──`;
+  let collecting = false;
+  const collected = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!collecting) {
+      if (trimmed === header) collecting = true;
+      continue;
+    }
+    if (trimmed === '```' || /^── [^\n]+ ──$/.test(trimmed)) break;
+    collected.push(line);
+  }
+
+  return collected.join('\n').replace(/^\n+|\n+$/g, '');
+}
+
+function extractAllFormalSections(content, sectionSuffix) {
+  const lines = content.split('\n');
+  const sections = [];
+  const headerPattern = new RegExp(`^── (?:\\w+ )*${escapeRegex(sectionSuffix)} ──$`);
+
+  for (let i = 0; i < lines.length; i++) {
+    if (!headerPattern.test(lines[i].trim())) continue;
+    const collected = [];
+    for (let j = i + 1; j < lines.length; j++) {
+      const trimmed = lines[j].trim();
+      if (trimmed === '```' || /^── [^\n]+ ──$/.test(trimmed)) break;
+      collected.push(lines[j]);
+    }
+    sections.push(collected.join('\n').replace(/^\n+|\n+$/g, ''));
+  }
+  return sections;
 }
 
 // ============================================================
@@ -350,11 +392,6 @@ function checkToolGrounding() {
   // Valid annotation vocabulary (7-label MECE set)
   const VALID_ANNOTATIONS = new Set(['sense', 'observe', 'track', 'transform', 'dispatch', 'gate', 'relay']);
 
-  // Escape special regex characters
-  function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
-
   // Find operation in PHASE TRANSITIONS with any valid pattern
   function findOperationInPhaseTransitions(phaseSection, operation) {
     const escapedOp = escapeRegex(operation);
@@ -411,8 +448,8 @@ function checkToolGrounding() {
     }
 
     // Check 6b: Extract tool bindings from TOOL GROUNDING section
-    const groundingMatch = content.match(/── TOOL GROUNDING ──([\s\S]*?)(?=──|$)/);
-    if (!groundingMatch) {
+    const groundingSection = extractFormalSection(content, 'TOOL GROUNDING');
+    if (!groundingSection) {
       results.warn.push({
         check: 'tool-grounding',
         file: relPath,
@@ -420,8 +457,6 @@ function checkToolGrounding() {
       });
       continue;
     }
-
-    const groundingSection = groundingMatch[1];
     const toolBindings = [];
 
     // Parse lines like: "S (extern) → ..." or "Phase 4a Δ (detect) → ..."
@@ -459,8 +494,8 @@ function checkToolGrounding() {
     }
 
     // Check 6c: Verify PHASE TRANSITIONS reference tool bindings
-    const phaseMatch = content.match(/── PHASE TRANSITIONS ──([\s\S]*?)(?=──|$)/);
-    if (!phaseMatch) {
+    const phaseSection = extractFormalSection(content, 'PHASE TRANSITIONS');
+    if (!phaseSection) {
       results.warn.push({
         check: 'tool-grounding',
         file: relPath,
@@ -468,8 +503,6 @@ function checkToolGrounding() {
       });
       continue;
     }
-
-    const phaseSection = phaseMatch[1];
 
     for (const binding of toolBindings) {
       // Skip internal operations
@@ -945,10 +978,7 @@ function checkSpecVsImpl() {
   // Matches: ── TYPES ──, ── ENTRY TYPES ──, ── DELEGATION TYPES ──, etc.
   function extractTypeNames(content) {
     const typeNames = [];
-    const sectionPattern = /── (?:\w+ )*TYPES ──([\s\S]*?)(?=──|```)/g;
-    let sectionMatch;
-    while ((sectionMatch = sectionPattern.exec(content)) !== null) {
-      const typesSection = sectionMatch[1];
+    for (const typesSection of extractAllFormalSections(content, 'TYPES')) {
       const typePattern = /^([A-ZΑ-Ωa-z][A-Za-zΑ-Ωα-ω₀-₉ₐ-ₜ']*)\s+[=∈]/gm;
       let match;
       while ((match = typePattern.exec(typesSection)) !== null) {
@@ -963,9 +993,7 @@ function checkSpecVsImpl() {
 
   // Extract type names from PHASE TRANSITIONS section
   function extractPhaseTypeRefs(content) {
-    const phaseMatch = content.match(/── PHASE TRANSITIONS ──([\s\S]*?)(?=──|```)/);
-    if (!phaseMatch) return '';
-    return phaseMatch[1];
+    return extractFormalSection(content, 'PHASE TRANSITIONS');
   }
 
   for (const relPath of PROTOCOL_FILES) {
@@ -2066,9 +2094,8 @@ function checkGateTypeSoundness() {
     } catch { continue; }
 
     // 1. Extract TYPES section from Definition code block
-    const typesMatch = content.match(/── TYPES ──\n([\s\S]*?)(?=\n── [A-Z])/);
-    if (!typesMatch) continue;
-    const typesSection = typesMatch[1];
+    const typesSection = extractFormalSection(content, 'TYPES');
+    if (!typesSection) continue;
 
     // 2. Parse coproducts: lines with ∈ {X, Y, Z} pattern
     const coproducts = [];
@@ -2146,7 +2173,8 @@ function checkGateTypeSoundness() {
 
       // Check for constructors missing from prose options (potential deletion)
       const missing = cp.constructors.filter(c =>
-        !lLower.some(ln => stemMatch(c.name.toLowerCase(), ln))
+        !lLower.some(ln => stemMatch(c.name.toLowerCase(), ln)) &&
+        !new RegExp(escapeRegex(c.raw)).test(prose)
       );
 
       // Check for prose options missing from constructors (potential injection)
@@ -2174,6 +2202,13 @@ function checkGateTypeSoundness() {
   }
 }
 
+function checkArtifactSelfContainment() {
+  const artifactResults = runArtifactSelfContainmentCheck();
+  results.pass.push(...artifactResults.pass);
+  results.fail.push(...artifactResults.fail);
+  results.warn.push(...artifactResults.warn);
+}
+
 // ============================================================
 // Run All Checks
 // ============================================================
@@ -2193,6 +2228,7 @@ try {
   checkPrecedenceLinearExtension();
   checkPartitionInvariant();
   checkGateTypeSoundness();
+  checkArtifactSelfContainment();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
