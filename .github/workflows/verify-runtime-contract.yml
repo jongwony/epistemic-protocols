@@ -1,0 +1,48 @@
+name: Verify Runtime Contract
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+    paths:
+      - 'prothesis/**/SKILL.md'
+      - 'syneidesis/**/SKILL.md'
+      - 'hermeneia/**/SKILL.md'
+      - 'katalepsis/**/SKILL.md'
+      - 'telos/**/SKILL.md'
+      - 'horismos/**/SKILL.md'
+      - 'aitesis/**/SKILL.md'
+      - 'analogia/**/SKILL.md'
+      - 'prosoche/**/SKILL.md'
+      - 'epharmoge/**/SKILL.md'
+      - 'anamnesis/**/SKILL.md'
+      - 'epistemic-cooperative/**/SKILL.md'
+      - '**/skills/**/references/**'
+      - '**/.claude-plugin/plugin.json'
+      - '.claude/skills/verify/**'
+      - 'scripts/package.js'
+      - 'scripts/package.test.js'
+      - '.github/workflows/verify-runtime-contract.yml'
+
+jobs:
+  verify-runtime-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run package tests
+        run: node --test scripts/package.test.js
+
+      - name: Run static checks
+        run: node .claude/skills/verify/scripts/static-checks.js .
+
+      - name: Run packaging dry-run
+        run: node scripts/package.js --dry-run

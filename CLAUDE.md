@@ -76,7 +76,7 @@ epistemic-protocols/
 - References directory: `skills/*/references/` for detailed documentation (optional per plugin)
 - No external dependencies; Node.js standard library only (plugin code). `src/` landing page is an independent sub-project with its own `package.json`
 
-**Plugin Encapsulation**: Users interact only with SKILL.md (loaded via plugin system). `.claude/rules/` prescriptive changes affecting protocol behavior must be compiled into SKILL.md Rules sections. SKILL.md must be self-contained — no external references (axiom identifiers, rule file paths, design-philosophy concepts, mission/vision docs) that require reading contributor documentation.
+**Plugin Encapsulation**: Runtime users interact with the packaged runtime contract: `Skill.md` (normative user contract) plus plugin description metadata (discovery/routing only, not full semantics). `.claude/rules/` prescriptive changes affecting protocol behavior must be compiled into `Skill.md` Rules sections. `Skill.md` must be self-contained — no external references (axiom identifiers, rule file paths, design-philosophy concepts, mission/vision docs) that require reading contributor documentation. Claim-strength boundaries for each runtime surface are tracked in [docs/runtime-dependency-ledger.md](docs/runtime-dependency-ledger.md).
 
 **SKILL.md Formal Block Anatomy**: FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, ELIDABLE CHECKPOINTS, MODE STATE, COMPOSITION (and optional blocks). Details: [docs/structural-specs.md](docs/structural-specs.md#skillmd-formal-block-anatomy)
 
@@ -155,13 +155,14 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 
 ## CI/CD
 
-Three GitHub Actions workflows (`.github/workflows/`):
+Four GitHub Actions workflows (`.github/workflows/`):
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | `release.yml` | Tag push (`v*`) | Package → ZIP integrity → `gh release create --draft` |
 | `claude-code-review.yml` | PR opened/ready | 3-stage pipeline: Sonnet review → jq extraction → Haiku comment |
 | `claude-epistemic-review.yml` | PR with protocol changes | Multi-perspective analysis (Category Theory, Type Theory, Operational Semantics) + gap scan |
+| `verify-runtime-contract.yml` | PR with runtime-contract changes, manual dispatch | Tests + static checks + packaging dry-run for packaged `Skill.md` / metadata boundary |
 
 Details: [docs/ci-review-pipeline.md](docs/ci-review-pipeline.md)
 
@@ -186,7 +187,7 @@ Run `/verify` before commits. Static checks via:
 node .claude/skills/verify/scripts/static-checks.js .
 ```
 
-15 static checks: json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync, gate-type-soundness. Details: [docs/verification.md](docs/verification.md)
+16 static checks: json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync, gate-type-soundness, artifact-self-containment. `artifact-self-containment` validates the packaged runtime contract view (`Skill.md` + plugin description metadata + packaged support entries) rather than source prose alone. Details: [docs/verification.md](docs/verification.md)
 
 ## Delegation Constraint
 

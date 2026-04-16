@@ -49,69 +49,69 @@ These signals are extracted once and referenced by D1 and D5:
 - **goal_category_balance**: Facets `goal_categories` — Grep for exploration-related keywords (analysis, investigation, planning, design) vs implementation-related keywords (implementation, bug, fix, maintenance). Use keyword matching, not exact string comparison, since vocabulary varies. Express as exploration_keywords / total_keywords ratio.
 - **protocol_counts**: Coverage slash command counts (if `coverage_data` provided).
 
-### D1: Inquiry Mode (Deductive <-> Abductive)
+### D1: Inquiry Mode (Deductive ↔ Abductive)
 
 **Low (Deductive)**: Step-by-step, systematic approach. Top-down reasoning.
 **High (Abductive)**: Hypothesis-first, creative leaps. Bottom-up pattern discovery.
 
 **Signals**:
-- **exploration_ratio** (shared) -> higher = more abductive
-- **goal_category_balance** (shared) -> higher exploration ratio = more abductive
-- **protocol_counts** (shared) -> `/frame`, `/inquire` = abductive; `/bound`, `/attend` = deductive
-- rules/ file count and structure complexity -> more rules = more deductive
+- **exploration_ratio** (shared) → higher = more abductive
+- **goal_category_balance** (shared) → higher exploration ratio = more abductive
+- **protocol_counts** (shared) → `/frame`, `/inquire` = abductive; `/bound`, `/attend` = deductive
+- rules/ file count and structure complexity → more rules = more deductive
 
-### D2: Verification Depth (Trust <-> Doubt)
+### D2: Verification Depth (Trust ↔ Doubt)
 
 **Low (Trust)**: Accepts first reasonable output. Moves fast.
 **High (Doubt)**: Verifies extensively. Multiple checkpoints before accepting.
 
 **Signals**:
-- Facets: `friction_counts.user_rejected_action` -> higher = more doubt
-- Facets: `outcome` "fully_achieved" without friction -> trust pattern
-- Session-meta: `duration_minutes` relative to (`user_message_count` + `assistant_message_count`) -> longer per message = more verification
-- Coverage: protocol counts (if available) -> `/gap`, `/ground`, `/grasp` = doubt
+- Facets: `friction_counts.user_rejected_action` → higher = more doubt
+- Facets: `outcome` "fully_achieved" without friction → trust pattern
+- Session-meta: `duration_minutes` relative to (`user_message_count` + `assistant_message_count`) → longer per message = more verification
+- Coverage: protocol counts (if available) → `/gap`, `/ground`, `/grasp` = doubt
 
-### D3: Communication Style (Directive <-> Dialogical)
+### D3: Communication Style (Directive ↔ Dialogical)
 
 **Low (Directive)**: Short commands, clear expectations. Monological.
 **High (Dialogical)**: Extended exchanges, co-construction. Hermeneutic.
 
 **Signals**:
-- Session-meta: `user_response_times` median -> longer = more dialogical (thinking time). Note: this array may be empty in many sessions; when empty, skip this signal and rely on other D3 indicators.
-- Facets: `session_type` "iterative_refinement" ratio -> dialogical
-- Session-meta: `user_message_count` relative to `assistant_message_count` -> higher user ratio = more dialogical
+- Session-meta: `user_response_times` median → longer = more dialogical (thinking time). Note: this array may be empty in many sessions; when empty, skip this signal and rely on other D3 indicators.
+- Facets: `session_type` "iterative_refinement" ratio → dialogical
+- Session-meta: `user_message_count` relative to `assistant_message_count` → higher user ratio = more dialogical
 
-### D4: Rule Orientation (Contextual <-> Systematic)
+### D4: Rule Orientation (Contextual ↔ Systematic)
 
 **Low (Contextual)**: Few explicit rules, case-by-case judgment.
 **High (Systematic)**: Many explicit rules, systematic governance.
 
 **Signals**:
-- Count files in rules/ directory via Glob -> direct measure
-- Grep CLAUDE.md for rule-like patterns (MUST, NEVER, ALWAYS) -> count
-- Grep settings.json for "hooks" entries (if `settings_json` path is provided in `data_sources`) -> systematic
-- Grep for boundary/constraint definitions -> systematic
+- Count files in rules/ directory via Glob → direct measure
+- Grep CLAUDE.md for rule-like patterns (MUST, NEVER, ALWAYS) → count
+- Grep settings.json for "hooks" entries (if `settings_json` path is provided in `data_sources`) → systematic
+- Grep for boundary/constraint definitions → systematic
 
-### D5: Attention Scope (Known <-> Unknown)
+### D5: Attention Scope (Known ↔ Unknown)
 
 **Low (Known/KK)**: Focus on consolidation, maintenance, refinement.
 **High (Unknown/UU)**: Focus on exploration, discovery, new patterns.
 
 **Signals**:
-- **exploration_ratio** (shared) -> higher = more UU
-- **goal_category_balance** (shared) -> higher exploration ratio = more UU
-- **protocol_counts** (shared) -> diversity count (5+ distinct protocols) = more UU
-- Session-meta: `project_path` diversity across sampled sessions -> more distinct projects = more UU
+- **exploration_ratio** (shared) → higher = more UU
+- **goal_category_balance** (shared) → higher exploration ratio = more UU
+- **protocol_counts** (shared) → diversity count (5+ distinct protocols) = more UU
+- Session-meta: `project_path` diversity across sampled sessions → more distinct projects = more UU
 
-### D6: Delegation Pattern (Self-reliant <-> Extended Mind)
+### D6: Delegation Pattern (Self-reliant ↔ Extended Mind)
 
 **Low (Self-reliant)**: Handles most tasks directly. Minimal AI delegation.
 **High (Extended Mind)**: Extensive AI delegation. Parallel agents. Task orchestration.
 
 **Signals**:
-- Session-meta: `tool_counts.TaskCreate`, `tool_counts.TaskUpdate` -> higher = Extended Mind
-- Session-meta: `tool_counts.Task` (agent spawning) -> Extended Mind
-- Session-meta: `tool_counts.AskUserQuestion` relative to total messages -> collaborative ratio
+- Session-meta: `tool_counts.TaskCreate`, `tool_counts.TaskUpdate` → higher = Extended Mind
+- Session-meta: `tool_counts.Task` (agent spawning) → Extended Mind
+- Session-meta: `tool_counts.AskUserQuestion` relative to total messages → collaborative ratio
 
 ## Process
 

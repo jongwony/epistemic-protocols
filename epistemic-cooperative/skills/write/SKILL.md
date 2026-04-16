@@ -7,6 +7,8 @@ description: Write blog posts from session insights with multi-perspective analy
 
 Transform session insights and conceptual explorations into structured, publishable content through multi-perspective analysis and iterative refinement.
 
+Invoke directly with `/write` when the user wants blog drafting from session insights.
+
 ## When to Use
 
 Invoke this skill when:

@@ -94,8 +94,8 @@ Phase 0 Qc (confirm)       → conditional: ai_strong only (user_signal path ski
 Phase 1a Qc (E confirm)    → elidable when: explicit_arg(E) via /clarify "text"
                               default: proceed with bound E
                               regret: bounded (Phase 2 Qs free-response override available)
-Phase 1b present (taxonomy) → relay (full taxonomy with evidence; no gate — A5 option-set relay test: Proceed dominates under user-invoked or user-confirmed activation)
-Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent into clarification; free response overrides taxonomy — emergent add, type exclude, redirect; override capability must be disclosed at gate per A2)
+Phase 1b present (taxonomy) → relay (full taxonomy with evidence; no gate — option-set relay test: Proceed dominates under user-invoked or user-confirmed activation)
+Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent into clarification; free response overrides taxonomy — emergent add, type exclude, redirect; override capability must be disclosed at gate as part of user authority disclosure)
 
 ── MODE STATE ──
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, detected: Set(Gap), gaps: Set(Gap),
@@ -312,14 +312,14 @@ Then filter Gd against (Λ.clarified ∪ Λ.excluded) to produce Gₛ, and proce
 
 **User override via free response**: Users may override the taxonomy at any Phase 2 gate — describe an emergent gap (added to Λ.emergent), exclude a detected type (added to Λ.excluded), redirect to a different expression (re-binds E), or declare convergence. Override capability must be disclosed at Phase 2 gates (see Phase 2 prose).
 
-**Response classification** (discriminator for free-response parsing — closes A7 adversarial pathway):
+**Response classification** (discriminator for free-response parsing — closes the adversarial free-response pathway):
 - **Revision**: response references named gap types (Coherence/Background/Expression/Precision/Emergent) with revision verbs (exclude, remove, skip, add, redirect) → add to Λ.excluded or Λ.emergent, LOOP re-entry with filtered detection
 - **Clarification**: response addresses the presented Phase 2 question directly → Phase 2 integration (Phase 3)
 - **Mixed**: response contains both revision and clarification content → process revision first (update Λ and re-detect), then process clarification in the re-entered Phase 2
 - **Ambiguous**: content could be either and surface interpretation differs from latent interpretation → present: "Your response could be interpreted as [X revision] or [Y clarification]. Which did you intend?" (do not silently choose)
 - **Exclusion-to-empty**: if free response excludes the last remaining type in Gₛ, `|Gₛ| = 0` on next filter → convergence path per LOOP (evaluate `|remaining| = 0`)
 
-**Rationale** (A5 option-set relay test): Under user-invoked or user-confirmed activation, "Proceed with current taxonomy" is the dominant option — a separate proceed/revise gate would present false alternatives. Full taxonomy presentation is preserved (relay) to support Recognition during Phase 2 answer formulation; taxonomy revision is reachable via Phase 2 gate free response with classification discriminator above.
+**Rationale** (option-set relay test): Under user-invoked or user-confirmed activation, "Proceed with current taxonomy" is the dominant option — a separate proceed/revise gate would present false alternatives. Full taxonomy presentation is preserved (relay) to support Recognition during Phase 2 answer formulation; taxonomy revision is reachable via Phase 2 gate free response with classification discriminator above.
 
 ### Phase 2: Clarification
 
@@ -327,7 +327,7 @@ Then filter Gd against (Λ.clarified ∪ Λ.excluded) to produce Gₛ, and proce
 
 **Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
 
-**Override disclosure (A2 Detection with Authority)**: At each Phase 2 gate, include a brief disclosure line in the pre-gate context surfacing the free-response override capability — without this disclosure the user cannot exercise authority they do not know they hold. Example disclosure: "*(Free response beyond the options: exclude this gap type, add an emergent type, or redirect to a different expression — see Phase 1b response classification.)*"
+**Override disclosure (detection with user authority)**: At each Phase 2 gate, include a brief disclosure line in the pre-gate context surfacing the free-response override capability — without this disclosure the user cannot exercise authority they do not know they hold. Example disclosure: "*(Free response beyond the options: exclude this gap type, add an emergent type, or redirect to a different expression — see Phase 1b response classification.)*"
 
 Present the detected ambiguity as text output:
 - The potential ambiguity: [gap description]
@@ -407,7 +407,7 @@ When multiple gaps detected:
 
 1. **Hybrid-initiated, user-confirmed**: Activate on user signal, or with user confirmation when AI detects ambiguous expression
 2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
-3. **Detection with user authority**: AI presents full taxonomy assessment as relay — every named type with detection status, evidence, and falsification condition. User authority is exercised at Phase 2 clarification gates (including free-response override: emergent add, type exclusion, redirect), not at a separate taxonomy-confirmation gate. **A7 guard**: Abbreviating the taxonomy (omitting named types, evidence, or falsification conditions) under the rationale that Phase 2 free-response override provides correction = protocol violation. Full taxonomy presentation at Phase 1b is structurally required regardless of relay/gate classification; override is a user authority channel, not an AI shortcut for incomplete detection
+3. **Detection with user authority**: AI presents full taxonomy assessment as relay — every named type with detection status, evidence, and falsification condition. User authority is exercised at Phase 2 clarification gates (including free-response override: emergent add, type exclusion, redirect), not at a separate taxonomy-confirmation gate. **Guard**: Abbreviating the taxonomy (omitting named types, evidence, or falsification conditions) under the rationale that Phase 2 free-response override provides correction = protocol violation. Full taxonomy presentation at Phase 1b is structurally required regardless of relay/gate classification; override is a user authority channel, not an AI shortcut for incomplete detection
 4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
 5. **Articulation support**: Help user express what they know, don't guess what they mean
 6. **Minimal questioning**: Surface only gaps that affect execution

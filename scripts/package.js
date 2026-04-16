@@ -131,8 +131,8 @@ Every protocol carries a type signature \`(Deficit, Initiator, Action, Target) â
 
 ### Formal Verification
 
-14 static checks validate protocol integrity before every commit:
-json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync.
+16 static checks validate protocol integrity before every commit:
+json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync, gate-type-soundness, artifact-self-containment.
 
 Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory edges, and suppression rules with cycle detection.
 
@@ -353,6 +353,39 @@ function collectFiles(baseDir, prefix) {
 
   walk(baseDir, prefix + '/');
   return files;
+}
+
+function buildRuntimeContractView(plugin) {
+  const skillDir = path.join(projectRoot, plugin.dir, 'skills', plugin.skill);
+  const pluginJsonPath = path.join(projectRoot, plugin.dir, '.claude-plugin', 'plugin.json');
+  const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+  const files = collectFiles(skillDir, plugin.skill);
+  const packagedEntries = [];
+  let transformedSkillMd = null;
+  let skillEntryCount = 0;
+
+  for (const file of files) {
+    if (file.isSkillMd) {
+      const content = fs.readFileSync(file.sourcePath, 'utf8');
+      transformedSkillMd = transformSkillMd(content, plugin.skill);
+      skillEntryCount++;
+    }
+    packagedEntries.push(file.zipPath);
+  }
+
+  return {
+    plugin: plugin.dir,
+    skill: plugin.skill,
+    pluginDescription: pluginJson.description || '',
+    skillEntryCount,
+    skillPath: `${plugin.skill}/Skill.md`,
+    transformedSkillMd,
+    packagedEntries,
+  };
+}
+
+function buildRuntimeContractViews() {
+  return PLUGINS.map(buildRuntimeContractView);
 }
 
 // ============================================================
@@ -580,4 +613,14 @@ if (require.main === module) {
   }
 }
 
-module.exports = { PLUGINS, parseFrontmatter, serializeFrontmatter, transformSkillMd, createZip, generateReleaseNotes };
+module.exports = {
+  PLUGINS,
+  buildRuntimeContractView,
+  buildRuntimeContractViews,
+  collectFiles,
+  parseFrontmatter,
+  serializeFrontmatter,
+  transformSkillMd,
+  createZip,
+  generateReleaseNotes,
+};

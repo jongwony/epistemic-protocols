@@ -23,6 +23,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 13. **partition-invariant**: Verifies MODE STATE pairwise disjoint partition invariants — universe set and partition members exist as MODE STATE fields
 14. **catalog-sync**: Catalog SKILL.md protocol coverage — all protocol names and commands present, count verified against `PROTOCOL_FILES`
 15. **gate-type-soundness**: TYPES answer coproducts matched against Phase prose option enumerations — detects gate mutation (option injection/deletion/substitution) via stem matching. Warning level (safeguard). Type-preserving materialization permitted
+16. **artifact-self-containment**: Validates the packaged runtime-contract view — transformed `Skill.md`, plugin description metadata, and packaged support entries. Fails on contributor-doc leakage or broken packaged references; warns on weak invocation/routing cues
 
 ## Packaging Transformations
 
@@ -32,3 +33,18 @@ node .claude/skills/verify/scripts/static-checks.js .
 - Overrides descriptions exceeding 200 chars (`frame`, `catalog`)
 - Excludes `agents/`, `commands/`, README files from ZIPs
 - 500-line guideline per SKILL.md (warns if exceeded)
+
+## Runtime Contract Surfaces
+
+`artifact-self-containment` does not inspect source prose in isolation. It checks the runtime-contract view that users actually encounter:
+
+- `Skill.md`: normative contract for protocol semantics, phases, gates, and usage
+- Plugin `description` metadata: discovery/routing hint only; intentionally weaker than `Skill.md`
+- Packaged support entries: bundled `references/` or local assets that `Skill.md` links to
+
+Two implications follow:
+
+- Contributor/governance docs (`CLAUDE.md`, `.claude/rules/`, `docs/mission-bridge.md`, analysis docs) are not allowed runtime dependencies.
+- Plugin descriptions operate under a tight marketplace budget, so they are evaluated for routing clarity, not for full semantic completeness.
+
+Claim-strength boundaries for these surfaces are summarized in [runtime-dependency-ledger.md](runtime-dependency-ledger.md).
