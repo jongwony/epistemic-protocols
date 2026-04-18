@@ -28,6 +28,10 @@ Inter-protocol guidance operates through two distinct mechanisms at different ab
 
 **Emergent boundary annotations**: Routing hints in Emergent sections of SKILL.md (e.g., `→ /clarify`, `→ /gap` in Emergent gap types or mismatch dimensions) are dialogue interaction dynamics — potential conversational routing that emerges from user-AI turn interaction. These belong to the Output Style nudge layer, not graph.json. They do not constitute structural advisory edges and must not be formalized in graph.json.
 
+**Definitional-Observational convergence**: AI-observation concerns without constitutive user authority (runtime detection, cross-cutting commentary, session-context nudges) have repeatedly converged into Output Style rather than SKILL.md. Observed instances (N=4): Post-Convergence traversal → Output Style nudge (archived); Integration+basis runtime display → Output Style echo format; protocol nudge arrow (↗) → Output Style session observer; Basis marker → Output Style session-level citation (deliberately placed outside per-protocol TOOL GROUNDING). Definitional structure (TYPES, FLOW, PHASE TRANSITIONS, gate interactions) lives in SKILL.md; observational commentary lives in Output Style. This convergence is not a design imposition but a recurring empirical outcome of applying the Dual Advisory Layer division.
+
+**Authoring checkpoint**: Before inscribing AI-detection prose into SKILL.md, apply the test: "Does this concern require gated user constitution (differential futures, constitutive choice), or is it runtime AI observation that the user can immediately recognize or dismiss?" Gated constitution → SKILL.md. Runtime observation → Output Style. Prevents SKILL.md bloat; preserves definitional minimality against the gravitational pull of new AI-observation ideas.
+
 ## Coexistence over Mirroring
 
 Protocols coexist with Claude Code built-in commands (`/simplify`, `/batch`) as orthogonal tools occupying different layers:
