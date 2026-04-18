@@ -120,10 +120,10 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 -- Store binding:
 --   {slug} = dirname(transcript_path) — Claude Code's project partition identifier
---   SSOT  ↦ ~/.claude/projects/{slug}/*.jsonl                                 (session JSONL, append-only)
---   INDEX ↦ ~/.claude/projects/{slug}/hypomnesis/{session-id}/                (per-session recall index from SessionEnd/PreCompact)
---         ∪ ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl    (substitute channel capture from SubagentStop)
---         ∪ ~/.claude/projects/{slug}/memory/                                 (user-curated insights)
+--   SSOT             ↦ ~/.claude/projects/{slug}/*.jsonl                                 (session JSONL, append-only)
+--   INDEX_semantic   ↦ ~/.claude/projects/{slug}/hypomnesis/{session-id}/                (per-session recall index from SessionEnd/PreCompact)
+--   INDEX_substitute ↦ ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl    (substitute channel capture from SubagentStop)
+--   memory           ↦ ~/.claude/projects/{slug}/memory/                                 (user-curated insights)
 --   slug-partitioned: prevents cwd-scattered INDEX; cross-cwd /recollect reaches one canonical location
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
@@ -189,8 +189,10 @@ dispatch binding: InputType = NaturalRecall → Track = salience
 
 ── STORE TOPOLOGY ──
 Store = SSOT ⊕ INDEX
-  SSOT  = authoritative session record (complete, append-only)
-  INDEX = recall accelerator (derived, rebuildable, lossy)
+  SSOT             = authoritative session record (complete, append-only)
+  INDEX            = INDEX_semantic ⊕ INDEX_substitute    -- derived, rebuildable, lossy
+  INDEX_semantic   = per-session semantic index (IdentifierTuples, MarkerProfile, Coinage, narrative)
+  INDEX_substitute = substitute channel raw message log (append-only, no LLM extraction)
 
 scan_{Track} : (Store, Trace) → List(Candidate)
   scan_entropy(Store, trace)    = exact-match over IdentifierTuples        -- uses SSOT ∪ INDEX
@@ -227,6 +229,16 @@ FalseAnchor       : extract(s) contains t with high precision but t ≠ recall_t
 ExtractorLacking  : recall_target ∈ s ∧ ∄ extractor_i : recall_target ∈ extractor_i(s)
                     -- cause: domain-specific extractor absent from registry
                     -- detection: NullMatch on scan_entropy ∧ user can cite literal
+
+PartialExtract    : extract(s) or detect(s) produces a well-formed but semantically partial
+                    INDEX from corrupted or truncated source; reader cannot distinguish this
+                    state from a complete INDEX
+                    -- cause: parser tolerates malformed source lines (continue-on-error);
+                             anomalous extraction-shape signals may be diagnostic-logged but
+                             do not gate the write
+                    -- detection: currently invisible to reader — surfaces only when user
+                             fails to recognize a candidate derived from partial extraction
+                             (observability log / schema version field enable direct detection)
 
 NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
                     -- cause: literal absent from SSOT/INDEX (pre-store, lifecycle gap)
