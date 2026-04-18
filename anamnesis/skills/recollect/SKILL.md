@@ -115,8 +115,7 @@ NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (attempts = max ∨ enrichments exhau
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
 ── TOOL GROUNDING ──
--- Realization binding (Claude Code substrate). Non-normative with respect to protocol essence
--- (see ── SUBSTRATE AGNOSTICISM ──). Any substrate satisfying the morphism laws realizes Anamnesis.
+-- Realization binding (Claude Code substrate), non-normative w.r.t. protocol essence — see ── SUBSTRATE AGNOSTICISM ──; any substrate satisfying morphism laws realizes Anamnesis.
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 -- Store binding:
 --   {slug} = dirname(transcript_path) — Claude Code's project partition identifier
@@ -188,11 +187,9 @@ dispatch binding: InputType = NaturalRecall → Track = salience
                   InputType = Mixed → Track = hybrid    -- union scan: entropy ∪ salience
 
 ── STORE TOPOLOGY ──
-Store = SSOT ⊕ INDEX
-  SSOT             = authoritative session record (complete, append-only)
-  INDEX            = INDEX_semantic ⊕ INDEX_substitute    -- derived, rebuildable, lossy
-  INDEX_semantic   = per-session semantic index (IdentifierTuples, MarkerProfile, Coinage, narrative)
-  INDEX_substitute = substitute channel raw message log (append-only, no LLM extraction)
+Store = SSOT ⊕ INDEX    -- INDEX = INDEX_semantic (IdentifierTuples, MarkerProfile, Coinage, narrative) ⊕ INDEX_substitute (substitute channel raw log, no LLM extraction)
+  SSOT  = authoritative session record (complete, append-only)
+  INDEX = recall accelerator (derived, rebuildable, lossy)
 
 scan_{Track} : (Store, Trace) → List(Candidate)
   scan_entropy(Store, trace)    = exact-match over IdentifierTuples        -- uses SSOT ∪ INDEX
@@ -230,15 +227,9 @@ ExtractorLacking  : recall_target ∈ s ∧ ∄ extractor_i : recall_target ∈ 
                     -- cause: domain-specific extractor absent from registry
                     -- detection: NullMatch on scan_entropy ∧ user can cite literal
 
-PartialExtract    : extract(s) or detect(s) produces a well-formed but semantically partial
-                    INDEX from corrupted or truncated source; reader cannot distinguish this
-                    state from a complete INDEX
-                    -- cause: parser tolerates malformed source lines (continue-on-error);
-                             anomalous extraction-shape signals may be diagnostic-logged but
-                             do not gate the write
-                    -- detection: currently invisible to reader — surfaces only when user
-                             fails to recognize a candidate derived from partial extraction
-                             (observability log / schema version field enable direct detection)
+PartialExtract    : extract/detect produces well-formed but semantically partial INDEX from corrupted/truncated source
+                    -- cause: continue-on-error parser tolerates malformed lines; anomalous shape logged but not write-gated
+                    -- detection: invisible to reader without schema version field or observability log surface
 
 NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
                     -- cause: literal absent from SSOT/INDEX (pre-store, lifecycle gap)
