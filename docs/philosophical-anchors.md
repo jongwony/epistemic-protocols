@@ -12,7 +12,7 @@ A2's relay/constitution boundary (defined in `.claude/rules/axioms.md` §A2) is 
 
 *Cartesian Meditations* (Husserl 1931), especially §§38-39. Passive synthesis constitutes pre-egoic, pre-reflective givenness — the mechanical transmission of sense-data without egoic judgment. Active synthesis constitutes meaning through egoic acts of attention, selection, and interpretation.
 
-Relay corresponds to passive synthesis; constitution corresponds to active synthesis. "Constitution" in A2 is not a generic term but a direct structural reference to Husserl's technical vocabulary — the homomorphism is not merely lexical. A2 inscribes this vocabulary choice deliberately; the `axioms.md` etymology note flags it for runtime vocabulary disambiguation.
+Relay corresponds to passive synthesis; constitution corresponds to active synthesis. "Constitution" in A2 is not a generic term but a direct structural reference to Husserl's technical vocabulary — the homomorphism is not merely lexical. A2's rules/ inscription retains "Constitution" and "Relay" as operational terms (self-contained via A2 body definitions); this document carries the etymological grounding separately, per the rules/ pure-formality boundary established by audit-2026-04-11 #237 resolution.
 
 ### Clark & Chalmers' active externalism
 
@@ -73,8 +73,12 @@ See `docs/audit-2026-04-11.md` §Positive Findings P5 for empirical vindication 
 
 ## Cross-references
 
-- `.claude/rules/axioms.md` §A2 (main axiom + etymology note pointing here)
-- `.claude/rules/axioms.md` §A5 (main axiom + philosophical ground pointer)
-- `.claude/rules/architectural-principles.md` §Epistemic Cost Topology (with inline phenomenological vindication note)
+- `.claude/rules/axioms.md` §A2 (main axiom; Constitution/Relay retained as operational terms, etymology lives here)
+- `.claude/rules/axioms.md` §A5 (main axiom; philosophical ground lives here)
+- `.claude/rules/architectural-principles.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
 - `.claude/rules/meta-principle.md` Axiomatization Judgment Framework (Non-Derivability criterion referenced in §A5 above)
 - `docs/audit-2026-04-11.md` §Positive Findings P2, P5 (audit empirical grounding for A2 and Epistemic Cost Topology)
+
+## Note on rules/ purity
+
+Per audit-2026-04-11 #237 resolution (Option B': Demote), `.claude/rules/` carries operational prose only — no philosophical names, citations, or vindication appeals. This document is the designated container for philosophical grounding. Runtime LLMs read rules/; contributors read docs/. The two-layer split preserves Audience Reach boundaries while maintaining full philosophical lineage.
