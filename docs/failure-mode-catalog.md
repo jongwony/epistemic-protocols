@@ -70,3 +70,13 @@ Contributor reference cataloging recurring framing and elicitation failure patte
 **Evidence note**: Long-standing observation in software engineering practice; formalized in approaches such as defensive design and property-based testing. HCI literature: general observation that novice-to-intermediate users frame prospects around the nominal path more frequently than experts, and AI-produced code inherits this framing unless edge-case prompting is explicit.
 
 **Mapping**: Contributor reference. The failure-and-edge-modes framing-omission is the natural locus for this pattern.
+
+---
+
+## 7. Scope-Creep
+
+**Description**: The user's stated scope expands turn-over-turn without explicit renegotiation. Each incremental addition appears minor, but accumulated scope exceeds the original contract. The AI silently absorbs each increment, optimizing for the latest specification while losing track of the original target. Manifests as "I wanted to fix X, how did we end up rewriting Y?" The drift is visible across turns but invisible within any single turn.
+
+**Evidence note**: Named as a distinct SE risk category in Capers Jones, *Assessment and Control of Software Risks* (Prentice Hall, 1994), which dedicates a chapter to creeping user requirements and quantifies typical growth at 1–3% per month during design/coding. DeMarco's *Controlling Software Projects* (1982) addresses requirements volatility earlier but does not name the pattern as a distinct failure mode. HCI literature: observed in long-running mixed-initiative sessions where each turn's incremental request appears locally justified while cumulative drift remains unsurfaced — this framing is derivative of the SE risk tradition.
+
+**Mapping**: Informs the A″ `⇌ framing` observer — when the stated goal expands across turns without explicit renegotiation, the observer cites the turns where scope additions accumulated past the original target.
