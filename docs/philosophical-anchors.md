@@ -1,6 +1,6 @@
 # Philosophical Anchors
 
-Cross-traditional grounding for A2's relay/constitution boundary, A5's extended-cognition framing, and the Epistemic Cost Topology architectural principle. This document provides philosophical lineage, citations, and non-derivability analyses that support the axiom and principle system without bloating LLM-facing rules files.
+Cross-traditional grounding for A2's relay/constitution boundary, A5's extended-cognition framing, the Epistemic Cost Topology architectural principle, and Anamnesis's Husserlian synthesis of identification. This document provides philosophical lineage, citations, and non-derivability analyses that support the axiom, principle, and protocol system without bloating LLM-facing rules or SKILL.md files.
 
 **Audience**: Contributor-facing per Audience Reach principle (`architectural-principles.md`). This document is not auto-loaded by protocols — it serves contributors who want to understand the deeper philosophical grounding of the system, while LLM-facing rules files retain only operationally relevant content.
 
@@ -12,7 +12,7 @@ A2's relay/constitution boundary (defined in `.claude/rules/axioms.md` §A2) is 
 
 *Cartesian Meditations* (Husserl 1931), especially §§38-39. Passive synthesis constitutes pre-egoic, pre-reflective givenness — the mechanical transmission of sense-data without egoic judgment. Active synthesis constitutes meaning through egoic acts of attention, selection, and interpretation.
 
-Relay corresponds to passive synthesis; constitution corresponds to active synthesis. "Constitution" in A2 is not a generic term but a direct structural reference to Husserl's technical vocabulary — the homomorphism is not merely lexical. A2 inscribes this vocabulary choice deliberately; the `axioms.md` etymology note flags it for runtime vocabulary disambiguation.
+Relay corresponds to passive synthesis; constitution corresponds to active synthesis. "Constitution" in A2 is not a generic term but a direct structural reference to Husserl's technical vocabulary — the homomorphism is not merely lexical. A2's rules/ inscription retains "Constitution" and "Relay" as operational terms (self-contained via A2 body definitions); this document carries the etymological grounding separately, per the rules/ pure-formality boundary established by audit-2026-04-11 #237 resolution.
 
 ### Clark & Chalmers' active externalism
 
@@ -66,6 +66,39 @@ The finitude of extended cognitive workspace is not a contingent engineering con
 
 See `docs/audit-2026-04-11.md` §Positive Findings P5 for empirical vindication from audit dual-stream analysis.
 
+## §Anamnesis — Husserlian Synthesis of Identification
+
+Anamnesis (`anamnesis/skills/recollect/SKILL.md`) uses Husserlian phenomenological vocabulary in its core morphism — "synthesis of identification", "empty intention", "phenomenological trigger". These are not post-hoc vindications but load-bearing protocol semantics: the operation names define what Anamnesis does.
+
+### Husserl's synthesis of identification
+
+In Husserl's *Cartesian Meditations* §§38-39, the synthesis of identification is the constitutive act where an empty intention (a reference to something not fully given) meets fulfilled re-presentation (perceptual or imaginal givenness that confirms the reference). The classic example: I seek my missing keys — the empty intention points to an absent object; I find them — the fulfilled re-presentation confirms "these are the keys I was seeking." Identity is not given directly; it is constituted through the meeting of empty and fulfilled modes.
+
+### Mapping to Anamnesis
+
+Anamnesis's operation is structurally homomorphic to this Husserlian structure:
+
+- **Empty intention** (`V.trace`): the user's vague recall — "something was discussed before, but where?" An intentional reference to content whose location is unknown.
+- **Candidate presentation** (Phase 2 Qc): scanned candidates from `Store = SSOT ⊕ INDEX` — potentially fulfilling content.
+- **Recognition** (`Recognize(c)`): the synthesis where empty intention meets fulfilled re-presentation. The user constitutes identity — "yes, this is what I was recalling."
+
+The protocol's Core Principle ("Recognition over Retrieval") directly inscribes this: recognition is a constitutive act, not a similarity-match output.
+
+### Load-bearing status in SKILL.md
+
+The Husserlian terms are load-bearing in Anamnesis for two reasons:
+
+1. **Operation definition**: "synthesis of identification" names the morphism Anamnesis instantiates. Renaming to a generic term (e.g., "recognition synthesis") would obscure the phenomenological structure the protocol implements; the category-theoretic composition with Aitesis and Katalepsis assumes this specific constitutive pattern.
+2. **Type predicate**: `empty_intention(V)` is the activation precondition — a formal type predicate in the MORPHISM block. It distinguishes Anamnesis (empty intention seeking fulfillment) from Aitesis (no intention at all toward the domain) and from Hermeneia (intent misarticulated in current expression, not absent in prior context). Operational rephrasing would erase the phenomenological distinction that underlies these protocol boundaries.
+
+### Relation to A2's Husserlian lineage
+
+A2's relay/constitution boundary also uses Husserlian vocabulary ("constitution" = active synthesis). Both axiom-level (A2) and protocol-level (Anamnesis) uses share the same philosophical source. The two uses are complementary: A2 addresses authority allocation (who constitutes meaning), Anamnesis addresses reference fulfillment (how recall constitutes identity). This convergence on a single philosophical lineage is not coincidental — both epistemic moments (authority allocation at gates, identity constitution in recall) are instances of the same Husserlian constitutive act.
+
+### Relation to audit-2026-04-11 #237
+
+#237's Option B' resolution removed philosophical vocabulary from `.claude/rules/` but explicitly scoped to rules/. Protocol SKILL.md files were not in B' scope. For Anamnesis, the Husserlian terms are operational (not vindication), so cascade-to-SKILL.md would be unwarranted — this section captures the philosophical grounding for contributor reference without requiring operational rephrasing of the protocol.
+
 ## Citations
 
 - Clark, A., & Chalmers, D. (1998). The extended mind. *Analysis*, 58(1), 7-19.
@@ -73,8 +106,13 @@ See `docs/audit-2026-04-11.md` §Positive Findings P5 for empirical vindication 
 
 ## Cross-references
 
-- `.claude/rules/axioms.md` §A2 (main axiom + etymology note pointing here)
-- `.claude/rules/axioms.md` §A5 (main axiom + philosophical ground pointer)
-- `.claude/rules/architectural-principles.md` §Epistemic Cost Topology (with inline phenomenological vindication note)
+- `.claude/rules/axioms.md` §A2 (main axiom; Constitution/Relay retained as operational terms, etymology lives here)
+- `.claude/rules/axioms.md` §A5 (main axiom; philosophical ground lives here)
+- `.claude/rules/architectural-principles.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
 - `.claude/rules/meta-principle.md` Axiomatization Judgment Framework (Non-Derivability criterion referenced in §A5 above)
+- `anamnesis/skills/recollect/SKILL.md` (runtime protocol using Husserlian "synthesis of identification" and "empty_intention" as load-bearing operational terms; phenomenological context lives here)
 - `docs/audit-2026-04-11.md` §Positive Findings P2, P5 (audit empirical grounding for A2 and Epistemic Cost Topology)
+
+## Note on rules/ purity
+
+Per audit-2026-04-11 #237 resolution (Option B': Demote), `.claude/rules/` carries operational prose only — no philosophical names, citations, or vindication appeals. This document is the designated container for philosophical grounding. Runtime LLMs read rules/; contributors read docs/. The two-layer split preserves Audience Reach boundaries while maintaining full philosophical lineage.

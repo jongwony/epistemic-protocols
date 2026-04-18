@@ -171,7 +171,7 @@ describe('transformSkillMd', () => {
 describe('runtime contract view', () => {
   it('builds a packaged runtime view for every skill', () => {
     const views = buildRuntimeContractViews();
-    assert.equal(views.length, 19);
+    assert.equal(views.length, 20);
     for (const view of views) {
       assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one Skill.md entry`);
       assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed Skill.md`);
@@ -447,7 +447,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 19 skills plus bundle in dry-run', () => {
+  it('packages all 20 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -460,7 +460,7 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 20);
+    assert.equal(result.results.length, 21);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -479,6 +479,7 @@ describe('package.js CLI', () => {
         'grasp.zip',
         'ground.zip',
         'inquire.zip',
+        'introspect.zip',
         'onboard.zip',
         'recollect.zip',
         'report.zip',
@@ -511,7 +512,7 @@ describe('package.js CLI', () => {
 // a subprocess that reads the same file. Placing the two describes in
 // SEPARATE files would cause a cross-file race (confirmed during Stage 2
 // development: liveness.test.js + package.test.js run concurrently → CLI
-// subprocess sees mutated 19-entry PLUGINS → result.results.length !== 20).
+// subprocess sees mutated 20-entry PLUGINS → result.results.length !== 21).
 // Keeping both in this single file guarantees sequential execution of
 // top-level describes, eliminating the race by construction.
 //

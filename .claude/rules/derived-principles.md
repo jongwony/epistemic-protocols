@@ -40,6 +40,24 @@ Derived from A1 (Recognition over Recall) + A4 (Semantic Autonomy).
 
 The Recognition over Recall principle is a content invariant — the protocol function lies in the structured options pattern, not in the specific tool that renders them. Structured numbered text followed by turn yield satisfies the same epistemic function as an AskUserQuestion tool call. The invariant: user receives structured options with differential implications, and their response is parsed into a typed answer.
 
+## Outcome Equivalence
+
+Derived from A4 (Semantic Autonomy) + realization-completeness assumption.
+
+**Layered argument structure**:
+
+1. **A4 asserts functor existence (definitional)**: Semantic Autonomy establishes that a protocol definition's epistemic meaning exists independent of any specific platform. Abstract gate operations are defined over the epistemic category (phases, transitions, morphisms) without reference to target tools.
+
+2. **Realization-completeness is an independent empirical assumption**: For a given platform P, realization-completeness holds when P's primitives preserve gate semantics (present structured content → yield turn → parse response). This is not entailed by A4 — it is a separate assumption about each target platform, empirically testable per realization.
+
+3. **Outcome Equivalence is the conjunction**: Given the same protocol definition, the same user responses, and a platform satisfying realization-completeness, the epistemic outcome (convergence conditions, output structures) is equivalent across realizations.
+
+The argument chain matters: A4 alone does not guarantee outcome preservation at the realization boundary; it guarantees the definition's autonomy from any specific realization. Outcome Equivalence bridges the definitional layer (A4) and the empirical layer (realization) via the completeness assumption.
+
+**Falsifiability and counter-evidence**: Per Axiomatization Judgment Framework, Outcome Equivalence is falsifiable when a realization fails the completeness assumption. Known counter-example: Prothesis TOOL GROUNDING `Await` depends on SubagentStop (a Claude Code substrate guarantee). Platforms without equivalent teammate-termination semantics partially refute Outcome Equivalence at the realization boundary. When this happens, A4 survives intact (the definition remains autonomous); Outcome Equivalence fails locally (that specific realization does not preserve outcomes).
+
+**Distinction from A4 — tier rationale**: A4 is non-derivable from any combination of other axioms. Outcome Equivalence is derivable from A4 *plus* the realization-completeness assumption. Because the latter is itself empirically testable (not axiomatic), the conjunction cannot be axiomatic — Outcome Equivalence lives in Derived tier rather than as a definitional corollary of A4.
+
 ## Zero-Shot Instruction Preference
 
 Derived from A4 (Semantic Autonomy).
@@ -48,19 +66,7 @@ LLM-facing instructions (Output Style, SKILL.md prose, agent prompts) state prin
 
 Scope boundary: this principle applies to instructions the LLM interprets and applies at runtime — not to contributor-facing documentation where examples serve comprehension. The boundary test: "would removing this example increase the LLM's latitude in applying the principle to novel contexts?" If yes, the example is anchoring and should be removed. If the example aids human understanding without constraining LLM application, it is outside scope. SKILL.md formal blocks (Definition code blocks) are LLM-facing by definition; prose outside formal blocks in SKILL.md is hybrid (read by both LLMs and contributors) — err toward principle-only in hybrid contexts.
 
-## White Bear Avoidance
-
-Derived from A7 (Adversarial Anticipation).
-
-LLM-facing instructions prefer **positive rationale** ("X IS Y because Z") over **negative prohibition** ("do not use W"). Negative injunctions evoke the forbidden target (White Bear problem: "don't think of a white bear" → thought of white bear), a recognized LLM rationalization path that A7 anticipates.
-
-**Scope**: LLM-facing instructions only; contributor-facing documentation exempt.
-
-**Relation to Zero-Shot Instruction Preference**: orthogonal complement. Zero-Shot works on the *example* axis (prefer no-example over ambiguous example); White Bear Avoidance works on the *prohibition* axis (prefer positive framing over prohibition).
-
-**Evidence**: observed pattern across multiple LLM-facing instruction updates — converting phrasings like "avoid markdown code blocks in Ink output" to "emit element patterns directly" reduces prohibited-pattern drift in subsequent runs.
-
-**Empirical scope**: grounded in output-format instructions (markdown emission, structural rendering, list formatting). Generalization to other instruction types — notably turn-yield behavior at gate interactions — is a theoretical extension not yet empirically tested. Apply with awareness of this scope boundary; when removing a negative formulation of turn-yield obligation, preserve co-located positive reminder at the decision point to retain calibration signal.
+**Safeguard-tier complement**: `safeguards.md §White Bear Avoidance` addresses the prohibition axis (prefer positive framing over negative prohibition). Zero-Shot (Derived, A4-grounded) operates on the example axis; White Bear (Safeguard) operates on the prohibition axis. The two were previously documented as orthogonal complements of a single Derived-tier pair; tier reclassification of White Bear (audit-2026-04-11 cascade from #241) reflects its empirical trajectory — becomes LESS important as models handle negative formulations more robustly.
 
 ## Loop Continuity under Bounded Regret
 

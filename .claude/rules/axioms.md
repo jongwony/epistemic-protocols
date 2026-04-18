@@ -35,8 +35,6 @@ A2's detection/authority distinction operationalizes through a relay/constitutio
 - **Relay**: AI exercises zero epistemic authority — mechanically transmits environmental facts with cited basis. Auto-resolution is legitimate when the action is relay.
 - **Constitution**: AI exercises epistemic authority through selection, interpretation, scope expansion, or environment mutation. User confirmation required.
 
-*Etymology note*: "Constitution" is Husserl's technical term from *Cartesian Meditations* §§38-39 (active synthesis); "Relay" corresponds to passive synthesis. See `docs/philosophical-anchors.md` for the full lineage and extended-cognition grounding.
-
 Single test: "Is the AI acting as a relay or exercising authority?" Five verification indicators derive from this test — all are natural consequences of zero epistemic authority:
 
 | Indicator | Relay | Constitution |
@@ -80,7 +78,7 @@ Corollary (Priority Override): When a protocol is active, its behavioral require
 
 Once a protocol definition is inscribed in SKILL.md, its epistemic meaning achieves autonomy from any specific platform or tool ecosystem — it depends only on what any language model can do (generate text, yield turn), not on platform-specific features. Protocol specifications define gate semantics (what to present, what response constitutes), not tool mechanics. A gate is: present structured content → yield turn → parse response. The realization layer maps this to concrete tools based on client capabilities and user preferences.
 
-Corollary (Outcome Equivalence): Given the same protocol definition and the same user responses, the epistemic outcome must be equivalent across realizations — convergence conditions and output structures are preserved regardless of platform.
+The empirical corollary that outcomes are preserved across realizations (Outcome Equivalence) is derivable from A4 given realization-completeness assumptions; see `derived-principles.md §Outcome Equivalence`.
 
 Category-theoretic interpretation (informal): TOOL GROUNDING can be understood as a structure-preserving mapping from abstract epistemic operations to platform-specific tool calls, analogous to a natural transformation between functors. Semantic Autonomy requires this mapping to preserve the MORPHISM chain's structure regardless of target platform. A rigorous formalization would require defining the source category (epistemic operations, with phases as objects and gate transitions as morphisms) and target category (platform tool calls) — this remains a guiding analogy rather than a proven correspondence.
 
@@ -96,8 +94,6 @@ Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts th
 
 Composition scope: The factorization G = R(p) ∘ A applies to individual gate operations within a single protocol activation. Inter-protocol composition (sequential activation of multiple protocols) operates through Session Text Composition — natural language in session context, not formal gate composition. Associativity of gate operations across protocol boundaries is not claimed; each protocol's gates are independently factored.
 
-*Philosophical ground*: See `docs/philosophical-anchors.md` §A5 for the extended-cognition framing and non-derivability analysis (what A5 introduces beyond A2's constitution category).
-
 ## A6. Context-Question Separation
 
 Gate interactions structurally separate context (analysis, evidence, rationale) from questions (the essential choice and its options). All analytical content is presented as text output before the gate; the gate contains only the question and option-specific differential implications.
@@ -108,8 +104,15 @@ Formal boundary: if removing a sentence from the gate would cause loss of an opt
 
 Non-derivability from A1: Recognition over Recall (A1) constrains what is presented (options with differential futures); Context-Question Separation constrains where content is positioned (context as pre-gate text, question in gate). A1-compliant gates can still embed analytical context within question fields — the user receives options with differential futures, but must parse them amid explanatory text. A6 addresses this orthogonal failure mode: position-dependent Recognition degradation that A1's content requirement does not capture.
 
-## A7. Adversarial Anticipation
+## Gate Integrity (Operational Guards, Safeguard-tier)
 
-Each protocol must anticipate how an AI agent might shortcut or rationalize away from faithful execution, and include structural guards in Rules and Phase prose. Formal specification guarantees definitional consistency; adversarial design guarantees execution fidelity. Common rationalization paths: premature convergence assertion, silent detection dismissal, skipping gate interaction entirely (presenting content without yielding turn for response), collapsing Qs gates to plain acknowledgment, gate mutation (option injection — adding options not in definition, option deletion — removing defined options, option substitution — replacing defined options with different ones). Distinct from gate mutation: **type-preserving materialization** — specializing a generic option into a concrete term while preserving the answer type constructor. The boundary: if the TYPES coproduct classifies the user's response identically before and after specialization, the transformation is materialization; if it requires a new constructor or alters the coproduct structure, it is mutation. These are orthogonal concerns — a protocol can be formally correct yet routinely circumvented.
+*Tier*: Safeguard (formerly A7 / Adversarial Anticipation). Reclassified per audit-2026-04-11 #241 resolution — see `safeguards.md §Adversarial Anticipation` for the tier trajectory analysis and empirical evidence. The operational guards below remain load-bearing for gate execution fidelity regardless of tier and are inlined here to remain accessible when `axioms.md` is loaded without `safeguards.md`.
 
-**Guard consistency**: Adversarial guards (prescriptive Rules + adversarial Rules) must be internally consistent. Contradictory guards lower AI confidence, causing the agent to skip the entire signal rather than navigate the contradiction. A single clear guard is stronger than two contradictory guards. When fixing contradictions, removing the conflict strengthens the remaining guard rather than weakening adversarial coverage.
+**Gate mutation taxonomy** (rationalization paths a protocol must anticipate):
+- **Option injection** — adding options not in the TYPES coproduct definition
+- **Option deletion** — removing defined options from the coproduct
+- **Option substitution** — replacing defined options with different ones
+
+Distinct from mutation: **type-preserving materialization** — specializing a generic option into a concrete term while preserving the answer type constructor. Boundary: if the TYPES coproduct classifies the user's response identically before and after specialization, the transformation is materialization; if it requires a new constructor or alters the coproduct structure, it is mutation.
+
+**Guard consistency**: Adversarial guards (prescriptive Rules + adversarial Rules) must be internally consistent. Contradictory guards lower AI confidence, causing the agent to skip the entire signal rather than navigate the contradiction. A single clear guard is stronger than two contradictory guards.

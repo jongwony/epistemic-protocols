@@ -48,8 +48,6 @@ Do not mirror built-in execution capabilities (e.g., worktree isolation, PR crea
 
 The epistemic meta-layer has a fundamentally different cost topology from the execution layer. In the execution layer (code, tests, docs), AI drives the marginal cost of completeness toward zero — pursuing completeness is correct. In the epistemic meta-layer (protocols, axioms, formal systems), unused protocols pollute cognitive space — the cost of an unused protocol exceeds the cost of a missing one. This asymmetry grounds Deficit Empiricism: empirical restraint is the correct posture for protocol creation, even when execution-layer intuitions suggest "why not create more?" Attempts to apply execution-domain completeness principles directly to the epistemic domain should be identified and the cost function difference surfaced.
 
-**Phenomenological vindication**: This principle's asymmetry survives Husserlian eidetic reduction. It corresponds to Husserl's distinction between thematic consciousness (what attention is directed at) and marginal consciousness (what remains in the co-given field) — the asymmetry is not a pragmatic design choice but a reflection of the finitude of attentional capacity. Under Extended Mind framing (Clark & Chalmers, *Analysis* 58:7-19, 1998), this reflects the finite capacity of the extended cognitive workspace: adding unused cognitive tools pollutes the workspace even when each tool is individually valid, because attentional cost does not distinguish invoked from uninvoked candidates. See `docs/audit-2026-04-11.md` §Positive Findings P5.
-
 ## Three-Tier Termination
 
 Protocol exit follows a graduated taxonomy based on side-effect presence:
@@ -76,15 +74,15 @@ The original Audience Reach principle addresses leakage FROM contributor-facing 
 
 **Static-check candidate**: structural-specs can detect reverse-leakage by flagging contributor-doc sections that reference runtime-only symbols (mode state variables, protocol internal invariants).
 
-## Utility Skills — A7 Delegation
+## Utility Skills — Adversarial Anticipation (Safeguard) Delegation
 
-**Pure relay utilities** — utilities that do NOT present gates and do NOT synthesize protocol outputs — delegate A7 (Adversarial Anticipation) to the composed protocols they call. A pure-relay utility is not obligated to implement A7 gate-integrity guards when it has no gates of its own.
+**Pure relay utilities** — utilities that do NOT present gates and do NOT synthesize protocol outputs — delegate Adversarial Anticipation guards (Safeguard tier; formerly A7, see `safeguards.md §Adversarial Anticipation`) to the composed protocols they call. A pure-relay utility is not obligated to implement gate-integrity guards when it has no gates of its own.
 
-**Principle**: A7 guards attach to the gate boundary, not to every wrapper layer. Wrapping a protocol in a pure-relay utility skill does NOT require re-implementing A7 in the utility.
+**Principle**: Adversarial Anticipation guards attach to the gate boundary, not to every wrapper layer. Wrapping a protocol in a pure-relay utility skill does NOT require re-implementing adversarial guards in the utility.
 
-**Scope boundary**: This delegation applies only to utilities that behave as relay pipes (forward outputs unchanged). Utilities that perform **output synthesis or post-processing** — selecting among, merging, or narratively recomposing protocol outputs — exercise constitutive authority (A2 constitution territory) and must inherit A7 adversarial guards against the same rationalization paths the synthesis step introduces. The operational test: "Does the utility's output-layer add selection, interpretation, or composition beyond forwarding?" If yes, A7 applies at the synthesis step even if no formal gate is presented.
+**Scope boundary**: This delegation applies only to utilities that behave as relay pipes (forward outputs unchanged). Utilities that perform **output synthesis or post-processing** — selecting among, merging, or narratively recomposing protocol outputs — exercise constitutive authority (A2 constitution territory) and must inherit adversarial guards against the same rationalization paths the synthesis step introduces. The operational test: "Does the utility's output-layer add selection, interpretation, or composition beyond forwarding?" If yes, Adversarial Anticipation applies at the synthesis step even if no formal gate is presented.
 
-**Implication**: Pure-relay utility SKILL.md authoring may omit A7 sections; document only the composed protocol's A7 inheritance. Synthesis utilities must document their A7 obligations at the synthesis boundary.
+**Implication**: Pure-relay utility SKILL.md authoring may omit adversarial-guard sections; document only the composed protocol's guard inheritance. Synthesis utilities must document their adversarial-guard obligations at the synthesis boundary.
 
 ## Direction over Accumulated Workload
 
