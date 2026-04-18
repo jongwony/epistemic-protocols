@@ -288,9 +288,7 @@ On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only
 
 ### Phase 2: Co-Construction
 
-**Present** a concrete proposal via gate interaction.
-
-**Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
+**Present** a concrete proposal via gate interaction. Gate presentation yields turn for user response.
 
 **Override disclosure (detection with user authority)**: At each Phase 2 gate, include a brief disclosure line in the pre-gate context surfacing the free-response override capability — without this disclosure the user cannot exercise authority they do not know they hold. Example disclosure: "*(Free response beyond Accept/Modify/Reject/Extend: exclude a non-Outcome dimension, add an emergent dimension, or redirect — see Phase 1 response classification. Outcome cannot be excluded.)*"
 
@@ -380,7 +378,7 @@ Options:
 ## Rules
 
 1. **AI-guided, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via gate interaction (Phase 0)
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation. Modify options use structured sub-choices, not free text
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding. Modify options use structured sub-choices, not free text
 3. **Detection with user authority**: AI presents full taxonomy assessment as relay — every named dimension with detection status, evidence, and falsification condition. Outcome always included (protocol constraint). User authority is exercised at Phase 2 co-construction gates (including free-response override: emergent add, non-Outcome exclusion, redirect), not at a separate taxonomy-confirmation gate. **Guard**: Abbreviating the taxonomy (omitting named dimensions, evidence, or falsification conditions) under the rationale that Phase 2 free-response override provides correction = protocol violation. Full taxonomy presentation at Phase 1 is structurally required regardless of relay/gate classification; override is a user authority channel, not an AI shortcut for incomplete detection
 4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions
 5. **Concrete proposals**: Every proposal must be specific enough to accept or reject
@@ -392,10 +390,10 @@ Options:
 11. **Small phases**: One dimension per cycle; no bundling unless user requests
 12. **Escape hatch**: User can provide own definition for any field directly
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
-14. **No premature sufficiency**: Do not skip Phase 4 (GoalContract review). Even when all Dₐ appear defined, present the assembled GoalContract with transformation trace for explicit user approval
-15. **No silent dimension skip**: If detect(Gᵥ) finds fewer than expected undefined dimensions, present the detection evidence. Do not silently declare dimensions as "already defined" without showing why
+14. **Phase 4 requirement**: Present the assembled GoalContract with transformation trace for explicit user approval, even when all Dₐ appear defined
+15. **Skip justification**: When detect(Gᵥ) finds fewer than expected undefined dimensions, present the detection evidence showing why dimensions qualify as "already defined"
 16. **Full taxonomy assessment**: Phase 1 must present ALL named dimension types with detection status and evidence. Presenting only detected dimensions with a generic "Add" option = protocol violation (Recognition over Recall applied to gate content)
 17. **Falsification condition**: Each not-currently-detected dimension must include "would apply if [specific condition]" — exclusion rationale without falsification condition = protocol violation
 18. **Emergent probe**: Emergent slot must include an active probe question or AI-detected hypothesis with evidence. "No emergent dimensions detected" as bare statement without probe = protocol violation
-19. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
-20. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
+19. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings
+20. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

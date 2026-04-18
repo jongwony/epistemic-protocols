@@ -323,9 +323,7 @@ Then filter Gd against (Λ.clarified ∪ Λ.excluded) to produce Gₛ, and proce
 
 ### Phase 2: Clarification
 
-**Present** clarification options via gate interaction.
-
-**Do NOT bypass the gate.** Structured presentation with turn yield is mandatory — presenting content without yielding for response = protocol violation.
+**Present** clarification options via gate interaction. Gate presentation yields turn for user response.
 
 **Override disclosure (detection with user authority)**: At each Phase 2 gate, include a brief disclosure line in the pre-gate context surfacing the free-response override capability — without this disclosure the user cannot exercise authority they do not know they hold. Example disclosure: "*(Free response beyond the options: exclude this gap type, add an emergent type, or redirect to a different expression — see Phase 1b response classification.)*"
 
@@ -406,7 +404,7 @@ When multiple gaps detected:
 ## Rules
 
 1. **Hybrid-initiated, user-confirmed**: Activate on user signal, or with user confirmation when AI detects ambiguous expression
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
 3. **Detection with user authority**: AI presents full taxonomy assessment as relay — every named type with detection status, evidence, and falsification condition. User authority is exercised at Phase 2 clarification gates (including free-response override: emergent add, type exclusion, redirect), not at a separate taxonomy-confirmation gate. **Guard**: Abbreviating the taxonomy (omitting named types, evidence, or falsification conditions) under the rationale that Phase 2 free-response override provides correction = protocol violation. Full taxonomy presentation at Phase 1b is structurally required regardless of relay/gate classification; override is a user authority channel, not an AI shortcut for incomplete detection
 4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
 5. **Articulation support**: Help user express what they know, don't guess what they mean
@@ -418,10 +416,10 @@ When multiple gaps detected:
 11. **Escape hatch**: Always allow user to provide their own phrasing
 12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
-14. **No premature convergence**: Do not declare |remaining| = 0 without presenting convergence evidence trace. "All gaps resolved" as assertion without per-gap evidence = protocol violation
-15. **No silent gap dismissal**: If detect(Eᵥ) finds no gaps (Gd = ∅), present this finding with reasoning to the user for confirmation before concluding — do not silently proceed
+14. **Convergence evidence**: Present transformation trace before declaring |remaining| = 0; per-gap evidence is required
+15. **Zero-gap surfacing**: If detect(Eᵥ) finds no gaps (Gd = ∅), present this finding with reasoning for user confirmation
 16. **Full taxonomy assessment**: Phase 1b must present ALL named gap types with detection status and evidence. Presenting only detected types with a generic "Add" option = protocol violation (Recognition over Recall applied to gate content)
 17. **Falsification condition**: Each not-currently-detected type must include "would apply if [specific condition]" — exclusion rationale without falsification condition = protocol violation
 18. **Emergent probe**: Emergent slot must include an active probe question or AI-detected hypothesis with evidence. "No emergent gaps detected" as bare statement without probe = protocol violation
-19. **Option-set relay test**: Before presenting gate options, apply the relay test to the option set: if AI analysis converges to a single dominant option (option-level entropy→0), the interaction is relay — present the finding directly instead of wrapping it in false options. Each gate option must be genuinely viable under different user value weightings
-20. **Gate integrity**: Do not inject options not in the definition, delete defined options, or substitute defined options with different ones (gate mutation). Type-preserving materialization — specializing a generic option into a concrete term while preserving the TYPES coproduct structure — is permitted and distinct from mutation
+19. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings
+20. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

@@ -453,7 +453,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 1. **AI-guided, user-recognized**: AI detects empty intention and scans stores; recognition requires user identification via gate interaction (Phase 2). AI detection is implicitly confirmed when the user engages with recognition (Phase 2 gate response, not Esc).
 
-2. **Recognition over Retrieval**: Present narrative candidates via gate interaction and yield turn — structured content must reach the user with response opportunity. Bypassing the gate (presenting content without yielding turn) = protocol violation.
+2. **Recognition over Retrieval**: Present narrative candidates via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding.
 
 3. **Input-typed dispatch**: Phase 1 scan dispatches by `InputType` classified from V and Σ — `StructuredIdentifier` → entropy track, `NaturalRecall` → salience track, `Mixed` → hybrid. Σ-primary scan survives only as a ranking-layer special case within the salience track, not as an absolute scan rule.
 
@@ -479,9 +479,9 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 14. **Context-Question Separation**: Present all narrative context, evidence, and adjacent vectors as text before the gate; the gate contains only the recognition question and options with differential implications. Embedding narrative in gate fields = protocol violation.
 
-15. **No premature convergence**: Do not declare recall_complete without presenting convergence evidence trace. "Recall resolved" as assertion without transformation trace = protocol violation.
+15. **Convergence evidence**: Present transformation trace before declaring recall_complete.
 
-16. **No silent activation dismissal**: If Phase 0 determines no empty intention (e.g., user provides a specific reference), present the finding before proceeding without Anamnesis.
+16. **Activation surfacing**: If Phase 0 determines no empty intention (e.g., user provides a specific reference), present the finding before proceeding without Anamnesis.
 
 17. **No premature NullMatch**: At least one Socratic probe enrichment must precede NullMatch declaration. First scan returning zero → probe → enriched re-scan → NullMatch only if still empty.
 
