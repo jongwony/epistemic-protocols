@@ -40,6 +40,16 @@ Derived from A1 (Recognition over Recall) + A4 (Semantic Autonomy).
 
 The Recognition over Recall principle is a content invariant — the protocol function lies in the structured options pattern, not in the specific tool that renders them. Structured numbered text followed by turn yield satisfies the same epistemic function as an AskUserQuestion tool call. The invariant: user receives structured options with differential implications, and their response is parsed into a typed answer.
 
+## Outcome Equivalence
+
+Derived from A4 (Semantic Autonomy).
+
+Given the same protocol definition and the same user responses, the epistemic outcome is equivalent across realizations — convergence conditions and output structures are preserved regardless of platform. Where A4 asserts semantic autonomy as a definitional principle (epistemic meaning independent of platform), Outcome Equivalence is the empirically verifiable corollary at the realization boundary.
+
+**Realization-completeness dependent**: Outcome Equivalence holds when a platform's primitives preserve gate semantics (present structured content → yield turn → parse response). The claim is falsifiable per Axiomatization Judgment Framework — counter-evidence includes platform-specific termination signals that do not generalize: Prothesis TOOL GROUNDING `Await` depends on SubagentStop (a Claude Code substrate guarantee), and platforms without equivalent teammate-termination semantics partially refute Outcome Equivalence at the realization boundary. This empirical frailty is why Outcome Equivalence lives in Derived tier rather than as a definitional corollary of A4: the principle requires a realization-completeness assumption that is itself empirically testable.
+
+**Distinction from A4**: A4 is non-derivable from any combination of other axioms — it asserts the autonomy of inscribed protocol definitions. Outcome Equivalence is derivable from A4 plus the assumption that a given realization preserves gate primitives. When the assumption fails, A4 survives intact (the definition remains autonomous), but Outcome Equivalence fails locally (that realization does not preserve outcomes).
+
 ## Zero-Shot Instruction Preference
 
 Derived from A4 (Semantic Autonomy).

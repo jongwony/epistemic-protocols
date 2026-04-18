@@ -78,7 +78,7 @@ Corollary (Priority Override): When a protocol is active, its behavioral require
 
 Once a protocol definition is inscribed in SKILL.md, its epistemic meaning achieves autonomy from any specific platform or tool ecosystem — it depends only on what any language model can do (generate text, yield turn), not on platform-specific features. Protocol specifications define gate semantics (what to present, what response constitutes), not tool mechanics. A gate is: present structured content → yield turn → parse response. The realization layer maps this to concrete tools based on client capabilities and user preferences.
 
-Corollary (Outcome Equivalence): Given the same protocol definition and the same user responses, the epistemic outcome must be equivalent across realizations — convergence conditions and output structures are preserved regardless of platform.
+The empirical corollary that outcomes are preserved across realizations (Outcome Equivalence) is derivable from A4 given realization-completeness assumptions; see `derived-principles.md §Outcome Equivalence`.
 
 Category-theoretic interpretation (informal): TOOL GROUNDING can be understood as a structure-preserving mapping from abstract epistemic operations to platform-specific tool calls, analogous to a natural transformation between functors. Semantic Autonomy requires this mapping to preserve the MORPHISM chain's structure regardless of target platform. A rigorous formalization would require defining the source category (epistemic operations, with phases as objects and gate transitions as morphisms) and target category (platform tool calls) — this remains a guiding analogy rather than a proven correspondence.
 
