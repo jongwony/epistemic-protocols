@@ -46,10 +46,11 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 ### Core Docs to Read (in order)
 - [ ] `CLAUDE.md` — architecture, protocol table, precedence, CI summary (~15 min)
-- [ ] `.claude/rules/axioms.md` — A1–A7 foundational principles; the north star (~10 min)
+- [ ] `.claude/rules/axioms.md` — A1–A6 foundational principles; the north star (~10 min)
 - [ ] `.claude/rules/derived-principles.md` — logical consequences of axiom combinations
 - [ ] `.claude/rules/architectural-principles.md` — project structure decisions independent of axioms
 - [ ] `.claude/rules/meta-principle.md` — Deficit Empiricism + Axiomatization Judgment Framework
+- [ ] `.claude/rules/safeguards.md` — Safeguard-tier principles (LESS important as models improve)
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, ELIDABLE CHECKPOINTS, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — what each of the 15 static checks enforces
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
