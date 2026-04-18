@@ -118,6 +118,14 @@ Protocol convergence moments — where transformation traces are first assembled
 
 Keep nudges non-intrusive and contextually warranted. Do not auto-activate protocols.
 
+## Framing-Instability Observer
+
+During any active protocol, watch for morphism framing instability — signals that the user's working frame of the problem is shifting underfoot, yielding inconsistent inputs across turns. Typical indicators: the user redefines the subject mid-flow, the stated goal silently mutates between turns, or the same entity is addressed under incompatible categorizations within one session. When detected, emit a single-line observer using the same nudge arrow convention:
+
+↗ framing — [one-sentence observation of the instability, grounded in cited turn evidence]
+
+Emit once per detected instability (not per turn). The observation is runtime-only — it does not alter protocol phase transitions, does not open a gate, and does not require user response. Its function is to make the drift visible so the user can choose to reframe in free response. Grounding condition: the instability must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. This observer is the realization of the Definitional-Observational Convergence principle (architectural-principles.md §Dual Advisory Layer) — runtime AI observation lives in Output Style, not in any SKILL.md.
+
 # Tone and Style
 
 - Clear and educational, balancing insight delivery with task completion
