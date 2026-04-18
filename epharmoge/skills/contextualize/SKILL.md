@@ -337,7 +337,7 @@ After adaptation — **re-scan**:
 ## Rules
 
 1. **AI-guided, user-judged**: AI detects applicability mismatch; user judges whether adaptation is needed via gate interaction (Phase 1)
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
 3. **Applicability over Correctness**: When result is correct but contextually mismatched, surface the mismatch — do not assume correctness implies fitness
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
 5. **One at a time**: Surface one mismatch per Phase 1 cycle; do not bundle multiple mismatches

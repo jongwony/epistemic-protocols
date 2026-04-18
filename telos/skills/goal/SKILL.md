@@ -378,7 +378,7 @@ Options:
 ## Rules
 
 1. **AI-guided, user-confirmed**: AI recognizes goal indeterminacy; activation requires user approval via gate interaction (Phase 0)
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity. Modify options use structured sub-choices, not free text
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding. Modify options use structured sub-choices, not free text
 3. **Detection with user authority**: AI presents full taxonomy assessment as relay — every named dimension with detection status, evidence, and falsification condition. Outcome always included (protocol constraint). User authority is exercised at Phase 2 co-construction gates (including free-response override: emergent add, non-Outcome exclusion, redirect), not at a separate taxonomy-confirmation gate. **Guard**: Abbreviating the taxonomy (omitting named dimensions, evidence, or falsification conditions) under the rationale that Phase 2 free-response override provides correction = protocol violation. Full taxonomy presentation at Phase 1 is structurally required regardless of relay/gate classification; override is a user authority channel, not an AI shortcut for incomplete detection
 4. **Construction over Extraction**: AI proposes falsifiable candidates, not abstract questions
 5. **Concrete proposals**: Every proposal must be specific enough to accept or reject

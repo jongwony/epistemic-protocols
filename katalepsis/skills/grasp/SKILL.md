@@ -419,7 +419,7 @@ For each task (category):
 ## Rules
 
 1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
 3. **Chunk complexity**: Break large changes into digestible categories
 4. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
 5. **Code grounding**: Reference specific code locations

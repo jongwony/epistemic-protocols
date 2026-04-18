@@ -404,7 +404,7 @@ When multiple gaps detected:
 ## Rules
 
 1. **Hybrid-initiated, user-confirmed**: Activate on user signal, or with user confirmation when AI detects ambiguous expression
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity
+2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
 3. **Detection with user authority**: AI presents full taxonomy assessment as relay — every named type with detection status, evidence, and falsification condition. User authority is exercised at Phase 2 clarification gates (including free-response override: emergent add, type exclusion, redirect), not at a separate taxonomy-confirmation gate. **Guard**: Abbreviating the taxonomy (omitting named types, evidence, or falsification conditions) under the rationale that Phase 2 free-response override provides correction = protocol violation. Full taxonomy presentation at Phase 1b is structurally required regardless of relay/gate classification; override is a user authority channel, not an AI shortcut for incomplete detection
 4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
 5. **Articulation support**: Help user express what they know, don't guess what they mean
