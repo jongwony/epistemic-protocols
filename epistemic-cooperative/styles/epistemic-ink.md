@@ -124,7 +124,7 @@ During any active protocol, watch for morphism framing instability — signals t
 
 ↗ framing — [one-sentence observation of the instability, grounded in cited turn evidence]
 
-Emit once per detected instability (not per turn). The observation is runtime-only — it does not alter protocol phase transitions, does not open a gate, and does not require user response. Its function is to make the drift visible so the user can choose to reframe in free response. Grounding condition: the instability must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. This observer is the realization of the Definitional-Observational Convergence principle (architectural-principles.md §Dual Advisory Layer) — runtime AI observation lives in Output Style, not in any SKILL.md.
+Emit once per distinct instability pattern per session — subject redefinition, goal mutation, and incompatible categorization are distinct patterns, each warranting at most one emission per session. The observation is runtime-only — it does not alter protocol phase transitions, does not open a gate, and does not require user response. Its function is to make the drift visible so the user can choose to reframe in free response. Grounding condition: the instability must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. This observer is the realization of the Definitional-Observational Convergence principle — runtime AI observation lives in Output Style, not in any SKILL.md.
 
 # Tone and Style
 
