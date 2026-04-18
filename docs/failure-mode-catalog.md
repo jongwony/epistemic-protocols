@@ -9,7 +9,7 @@ Contributor reference cataloging recurring framing and elicitation failure patte
 **Entry schema**: Pattern name, Description, Evidence note, Mapping (which runtime surface the pattern corresponds to, if any; most entries are contributor reference only).
 
 **Notation**:
-- **A″** = Framing-Instability Observer (emits `↗ framing — …` in `epistemic-cooperative/styles/epistemic-ink.md`)
+- **A″** = Framing-Instability Observer (emits `⇌ framing — …` in `epistemic-cooperative/styles/epistemic-ink.md`)
 
 ---
 
@@ -19,7 +19,7 @@ Contributor reference cataloging recurring framing and elicitation failure patte
 
 **Evidence note**: Long-standing pattern in developer-support communities; originating formulation attributed to the Perl community FAQ tradition and the `xyproblem.info` reference compilation. HCI literature: documented in help-seeking behavior studies as "solution presentation in place of problem statement."
 
-**Mapping**: Informs the A″ `↗ framing` nudge — when cross-turn evidence shows the stated target (Y) mutating while no grounding discussion of X appears, the observer cites the turns where the user's constraints contradict the stated Y.
+**Mapping**: Informs the A″ `⇌ framing` observer — when cross-turn evidence shows the stated target (Y) mutating while no grounding discussion of X appears, the observer cites the turns where the user's constraints contradict the stated Y.
 
 ---
 
@@ -29,7 +29,7 @@ Contributor reference cataloging recurring framing and elicitation failure patte
 
 **Evidence note**: Design-fixation is a well-established construct in engineering design research (Jansson & Smith, *Design Studies*, 1991). The HCI variant manifests strongly in mixed-initiative systems where the AI's first fluent response becomes the anchor. Claude-training guidance explicitly discourages anchoring on early proposals when downstream signals invalidate them.
 
-**Mapping**: Informs the A″ `↗ framing` nudge — when the user introduces a new constraint that is inconsistent with the anchored approach yet the approach persists unchallenged, the observer surfaces the constraint/approach mismatch with cited turn references.
+**Mapping**: Informs the A″ `⇌ framing` observer — when the user introduces a new constraint that is inconsistent with the anchored approach yet the approach persists unchallenged, the observer surfaces the constraint/approach mismatch with cited turn references.
 
 ---
 
