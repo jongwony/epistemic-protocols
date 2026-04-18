@@ -115,15 +115,14 @@ NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (attempts = max ∨ enrichments exhau
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
 ── TOOL GROUNDING ──
--- Realization binding (Claude Code substrate). Non-normative with respect to protocol essence
--- (see ── SUBSTRATE AGNOSTICISM ──). Any substrate satisfying the morphism laws realizes Anamnesis.
+-- Realization binding (Claude Code substrate), non-normative w.r.t. protocol essence — see ── SUBSTRATE AGNOSTICISM ──; any substrate satisfying morphism laws realizes Anamnesis.
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 -- Store binding:
 --   {slug} = dirname(transcript_path) — Claude Code's project partition identifier
---   SSOT  ↦ ~/.claude/projects/{slug}/*.jsonl                                 (session JSONL, append-only)
---   INDEX ↦ ~/.claude/projects/{slug}/hypomnesis/{session-id}/                (per-session recall index from SessionEnd/PreCompact)
---         ∪ ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl    (substitute channel capture from SubagentStop)
---         ∪ ~/.claude/projects/{slug}/memory/                                 (user-curated insights)
+--   SSOT             ↦ ~/.claude/projects/{slug}/*.jsonl                                 (session JSONL, append-only)
+--   INDEX_semantic   ↦ ~/.claude/projects/{slug}/hypomnesis/{session-id}/                (per-session recall index from SessionEnd/PreCompact)
+--   INDEX_substitute ↦ ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl    (substitute channel capture from SubagentStop)
+--   memory           ↦ ~/.claude/projects/{slug}/memory/                                 (user-curated insights)
 --   slug-partitioned: prevents cwd-scattered INDEX; cross-cwd /recollect reaches one canonical location
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
@@ -188,18 +187,18 @@ dispatch binding: InputType = NaturalRecall → Track = salience
                   InputType = Mixed → Track = hybrid    -- union scan: entropy ∪ salience
 
 ── STORE TOPOLOGY ──
-Store = SSOT ⊕ INDEX
-  SSOT  = authoritative session record (complete, append-only)
-  INDEX = recall accelerator (derived, rebuildable, lossy)
+Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-curated)
+  SSOT             = authoritative session record (complete, append-only)
+  INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile, Coinage, narrative) -- derived from SSOT, rebuildable, lossy
+  INDEX_substitute = substitute channel raw message log -- append-only, primary capture, authoritative (loss non-recoverable)
 
 scan_{Track} : (Store, Trace) → List(Candidate)
   scan_entropy(Store, trace)    = exact-match over IdentifierTuples        -- uses SSOT ∪ INDEX
   scan_salience(Store, trace)   = MarkerProfile match (ranked by Σ)        -- INDEX-accelerated; SSOT fallback
   scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
 
-degraded_scan: INDEX = ∅ ⟹ scan'(SSOT, Track, trace)                      -- SSOT sufficient for recall
-  -- INDEX accelerates; SSOT guarantees. Cold start falls back to SSOT directly.
-  -- Precondition for Cold-Start invariant (see Verification).
+degraded_scan: INDEX_semantic = ∅ ⟹ scan'(SSOT, Track, trace)             -- SSOT guarantees semantic recall; cold start falls back to SSOT directly
+  -- INDEX_substitute loss non-recoverable (SSOT lacks subagent-channel messages); precondition for Cold-Start invariant (see Verification)
 
 ── SUBSTRATE AGNOSTICISM ──
 The protocol essence (form) consists of FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, and the
@@ -227,6 +226,10 @@ FalseAnchor       : extract(s) contains t with high precision but t ≠ recall_t
 ExtractorLacking  : recall_target ∈ s ∧ ∄ extractor_i : recall_target ∈ extractor_i(s)
                     -- cause: domain-specific extractor absent from registry
                     -- detection: NullMatch on scan_entropy ∧ user can cite literal
+
+PartialExtract    : extract/detect produces well-formed but semantically partial INDEX from corrupted/truncated source
+                    -- cause: continue-on-error parser tolerates malformed lines; anomalous shape logged but not write-gated
+                    -- detection: invisible to reader without schema version field or observability log surface
 
 NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
                     -- cause: literal absent from SSOT/INDEX (pre-store, lifecycle gap)
@@ -389,7 +392,7 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
 
 Present the candidate as narrative text — the discussion's story, not just its result:
 - **When/Where**: Temporal and spatial context — when the discussion happened (with temporal distance, e.g., "3 days ago" or "2 weeks ago"), which session or document. Use short session reference in narrative for readability.
-- **Source**: Provenance of the stored context — whether it was user-crystallized (via /crystallize), auto-generated (SessionEnd hook narrative), or memory-curated (manually written to memory/)
+- **Source**: Provenance of the stored context — whether it was user-crystallized (via /crystallize) or auto-generated (SessionEnd hook narrative)
 - **Origin**: What prompted the discussion — the question or situation that started it
 - **Direction**: How the discussion developed — what path was taken, what was explored
 - **Outcome**: What was decided, produced, or concluded
@@ -472,7 +475,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 12. **Early exit honored**: When user declares recall sufficient or presses Esc, accept immediately regardless of remaining candidates or attempts.
 
-13. **Cross-protocol awareness**: Defer to Aitesis when user needs new information (no empty intention); defer to /clarify when expression itself is ambiguous (expression gap ≠ recall gap). Compose `/recollect * /inquire` when recognized context needs enrichment. On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace — INDEX may lack entries (lifecycle gaps or pre-store sessions) while SSOT retains the information.
+13. **Cross-protocol awareness**: Defer to Aitesis when user needs new information (no empty intention); defer to /clarify when expression itself is ambiguous (expression gap ≠ recall gap). Compose `/recollect * /inquire` when recognized context needs enrichment. On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — lifecycle gap / pre-store, missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis; INDEX may lack entries (lifecycle gaps or pre-store sessions) while SSOT retains the information.
 
 14. **Context-Question Separation**: Present all narrative context, evidence, and adjacent vectors as text before the gate; the gate contains only the recognition question and options with differential implications. Embedding narrative in gate fields = protocol violation.
 
@@ -494,4 +497,4 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 ## Known Limitations
 
-Failure modes are formally specified in `── KNOWN FAILURE MODES ──` (FalseAnchor, ExtractorLacking, NullMatch₁/₂, MutualNull). MutualNull — genuine absence from Store — is the principal structural failure mode; the deprecated v0.3.3 "Σ-primary scan bias" hypothesis is bounded by Rule 3 input-typed dispatch to a ranking-layer concern within the salience track.
+Failure modes are formally specified in `── KNOWN FAILURE MODES ──` (FalseAnchor, ExtractorLacking, PartialExtract, NullMatch₁/₂, MutualNull). MutualNull — genuine absence from Store — is the principal structural failure mode; the deprecated v0.3.3 "Σ-primary scan bias" hypothesis is bounded by Rule 3 input-typed dispatch to a ranking-layer concern within the salience track.
