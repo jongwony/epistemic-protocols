@@ -10,6 +10,14 @@ Correcting a wrong direction at the plan level can cost one conversation turn.
 Once it hardens into code, rollout steps, or downstream explanations, it can cost hours of rework.
 These protocols insert structured checkpoints at decision points — intent, goal, context, perspective, execution, applicability, recall, and comprehension — so you and AI can surface, judge, and adapt misalignment before it compounds.
 
+## Mission and Machinery
+
+**Stated Mission** — the public hook: catch wrong directions early, especially at the plan level. This is the clearest entry story and how most users reach for the protocols.
+
+**Realized Machinery** — the actual coverage: structured checkpoints span planning, analysis, decision, execution, verification, recall, and comprehension. Protocols such as Prosoche (execution-time risk), Epharmoge (post-execution applicability), Anamnesis (session recall), and Katalepsis (comprehension verification) extend beyond plan-level alone.
+
+The two layers serve different audiences: README and landing copy carry the narrow public contract; `SKILL.md` and `CLAUDE.md` describe the full machinery. See [docs/mission-bridge.md](./docs/mission-bridge.md) for the governance rules that keep these layers aligned.
+
 ## Quick Start
 
 ### Claude Code
