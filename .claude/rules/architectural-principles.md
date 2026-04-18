@@ -74,15 +74,15 @@ The original Audience Reach principle addresses leakage FROM contributor-facing 
 
 **Static-check candidate**: structural-specs can detect reverse-leakage by flagging contributor-doc sections that reference runtime-only symbols (mode state variables, protocol internal invariants).
 
-## Utility Skills — A7 Delegation
+## Utility Skills — Adversarial Anticipation (Safeguard) Delegation
 
-**Pure relay utilities** — utilities that do NOT present gates and do NOT synthesize protocol outputs — delegate A7 (Adversarial Anticipation) to the composed protocols they call. A pure-relay utility is not obligated to implement A7 gate-integrity guards when it has no gates of its own.
+**Pure relay utilities** — utilities that do NOT present gates and do NOT synthesize protocol outputs — delegate Adversarial Anticipation guards (Safeguard tier; formerly A7, see `safeguards.md §Adversarial Anticipation`) to the composed protocols they call. A pure-relay utility is not obligated to implement gate-integrity guards when it has no gates of its own.
 
-**Principle**: A7 guards attach to the gate boundary, not to every wrapper layer. Wrapping a protocol in a pure-relay utility skill does NOT require re-implementing A7 in the utility.
+**Principle**: Adversarial Anticipation guards attach to the gate boundary, not to every wrapper layer. Wrapping a protocol in a pure-relay utility skill does NOT require re-implementing adversarial guards in the utility.
 
-**Scope boundary**: This delegation applies only to utilities that behave as relay pipes (forward outputs unchanged). Utilities that perform **output synthesis or post-processing** — selecting among, merging, or narratively recomposing protocol outputs — exercise constitutive authority (A2 constitution territory) and must inherit A7 adversarial guards against the same rationalization paths the synthesis step introduces. The operational test: "Does the utility's output-layer add selection, interpretation, or composition beyond forwarding?" If yes, A7 applies at the synthesis step even if no formal gate is presented.
+**Scope boundary**: This delegation applies only to utilities that behave as relay pipes (forward outputs unchanged). Utilities that perform **output synthesis or post-processing** — selecting among, merging, or narratively recomposing protocol outputs — exercise constitutive authority (A2 constitution territory) and must inherit adversarial guards against the same rationalization paths the synthesis step introduces. The operational test: "Does the utility's output-layer add selection, interpretation, or composition beyond forwarding?" If yes, Adversarial Anticipation applies at the synthesis step even if no formal gate is presented.
 
-**Implication**: Pure-relay utility SKILL.md authoring may omit A7 sections; document only the composed protocol's A7 inheritance. Synthesis utilities must document their A7 obligations at the synthesis boundary.
+**Implication**: Pure-relay utility SKILL.md authoring may omit adversarial-guard sections; document only the composed protocol's guard inheritance. Synthesis utilities must document their adversarial-guard obligations at the synthesis boundary.
 
 ## Direction over Accumulated Workload
 

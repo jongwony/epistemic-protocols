@@ -104,4 +104,15 @@ Formal boundary: if removing a sentence from the gate would cause loss of an opt
 
 Non-derivability from A1: Recognition over Recall (A1) constrains what is presented (options with differential futures); Context-Question Separation constrains where content is positioned (context as pre-gate text, question in gate). A1-compliant gates can still embed analytical context within question fields — the user receives options with differential futures, but must parse them amid explanatory text. A6 addresses this orthogonal failure mode: position-dependent Recognition degradation that A1's content requirement does not capture.
 
-*Adversarial Anticipation (formerly A7)* was reclassified to Safeguard tier per audit-2026-04-11 #241 resolution. See `safeguards.md §Adversarial Anticipation`.
+## Gate Integrity (Operational Guards, Safeguard-tier)
+
+*Tier*: Safeguard (formerly A7 / Adversarial Anticipation). Reclassified per audit-2026-04-11 #241 resolution — see `safeguards.md §Adversarial Anticipation` for the tier trajectory analysis and empirical evidence. The operational guards below remain load-bearing for gate execution fidelity regardless of tier and are inlined here to remain accessible when `axioms.md` is loaded without `safeguards.md`.
+
+**Gate mutation taxonomy** (rationalization paths a protocol must anticipate):
+- **Option injection** — adding options not in the TYPES coproduct definition
+- **Option deletion** — removing defined options from the coproduct
+- **Option substitution** — replacing defined options with different ones
+
+Distinct from mutation: **type-preserving materialization** — specializing a generic option into a concrete term while preserving the answer type constructor. Boundary: if the TYPES coproduct classifies the user's response identically before and after specialization, the transformation is materialization; if it requires a new constructor or alters the coproduct structure, it is mutation.
+
+**Guard consistency**: Adversarial guards (prescriptive Rules + adversarial Rules) must be internally consistent. Contradictory guards lower AI confidence, causing the agent to skip the entire signal rather than navigate the contradiction. A single clear guard is stronger than two contradictory guards.
