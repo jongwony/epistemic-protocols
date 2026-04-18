@@ -101,18 +101,16 @@ epistemic-protocols/
 
 ## Axioms
 
-A1-A7 operational summaries auto-loaded via `.claude/rules/axioms.md`. Full definitions with rationale in the same file.
+A1-A6 operational summaries auto-loaded via `.claude/rules/axioms.md`. Full definitions with rationale in the same file. Adversarial Anticipation (formerly A7) reclassified to Safeguard tier per audit-2026-04-11 #241 — see `.claude/rules/safeguards.md`.
 
 ## Design Philosophy
 
 Prescriptive principles are modularized into `.claude/rules/` by Axiom Hierarchy tier and auto-loaded per-session:
-- `.claude/rules/axioms.md` — A1-A7 foundational principles (MORE important as models improve)
+- `.claude/rules/axioms.md` — A1-A6 foundational principles (MORE important as models improve)
 - `.claude/rules/derived-principles.md` — principles derived from axiom combinations
 - `.claude/rules/architectural-principles.md` — project structure decisions (axiom-independent)
 - `.claude/rules/meta-principle.md` — Deficit Empiricism + Axiomatization Judgment Framework
-
-### Safeguard
-- **Gate Type Soundness**: TYPES coproduct must match Phase prose options; becomes less critical as models improve (warning-level static check)
+- `.claude/rules/safeguards.md` — Safeguard-tier principles (LESS important as models improve)
 
 ## Protocol Precedence
 
