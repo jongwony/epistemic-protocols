@@ -270,6 +270,8 @@ TaskCreate({
 
 When Syneidesis is active, **present** via gate interaction for:
 
+Gate presentation yields turn for user response.
+
 | Trigger | Action |
 |---------|--------|
 | Any confirmation needed | Present as structured options |
@@ -311,4 +313,4 @@ Note: Esc key → unconditional loop termination (LOOP level). Gate interaction 
 9. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation
 10. **No gap inflation**: Do not surface gaps that lack observable evidence merely to appear thorough. Each surfaced gap must cite specific context from D
 11. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings
-12. **Gate integrity**: Present the defined option set. Type-preserving materialization — specializing a generic option while preserving the TYPES coproduct — is the only permitted transformation
+12. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

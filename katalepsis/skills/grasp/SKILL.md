@@ -234,7 +234,7 @@ Analyze AI work result and extract categories:
 
 ### Phase 1: Entry Point Selection
 
-**Present** entry points via gate interaction to let user select where to start.
+**Present** entry points via gate interaction to let user select where to start. Gate presentation yields turn for user response.
 
 ```
 question: "What would you like to understand first?"
@@ -293,7 +293,9 @@ For each task (category):
 
 3. **Verify comprehension** by **presenting** a Socratic probe via gate interaction:
 
-      Present the relevant context as text output:
+   Gate presentation yields turn for user response.
+
+   Present the relevant context as text output:
    - What the AI work did for this aspect (the component, behavior, or mechanism being tested)
    - The specific scenario or input being used for the probe
 
@@ -425,5 +427,5 @@ For each task (category):
 7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
 8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **Convergence evidence**: Present transformation trace before declaring all tasks completed; per-task evidence is required
-10. **Zero-gap surfacing**: If Phase 3 analysis finds no comprehension gaps for a category, present this finding with reasoning before marking as self-evident
-11. **Gate integrity**: Present the defined option set. Type-preserving materialization — specializing a generic option while preserving the TYPES coproduct — is the only permitted transformation
+10. **Zero-gap surfacing**: If Phase 3 analysis finds no comprehension gaps for a category, present this finding with reasoning for user confirmation before marking as self-evident
+11. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

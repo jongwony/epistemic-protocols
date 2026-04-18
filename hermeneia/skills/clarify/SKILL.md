@@ -323,7 +323,7 @@ Then filter Gd against (Λ.clarified ∪ Λ.excluded) to produce Gₛ, and proce
 
 ### Phase 2: Clarification
 
-**Present** clarification options via gate interaction.
+**Present** clarification options via gate interaction. Gate presentation yields turn for user response.
 
 **Override disclosure (detection with user authority)**: At each Phase 2 gate, include a brief disclosure line in the pre-gate context surfacing the free-response override capability — without this disclosure the user cannot exercise authority they do not know they hold. Example disclosure: "*(Free response beyond the options: exclude this gap type, add an emergent type, or redirect to a different expression — see Phase 1b response classification.)*"
 
@@ -422,4 +422,4 @@ When multiple gaps detected:
 17. **Falsification condition**: Each not-currently-detected type must include "would apply if [specific condition]" — exclusion rationale without falsification condition = protocol violation
 18. **Emergent probe**: Emergent slot must include an active probe question or AI-detected hypothesis with evidence. "No emergent gaps detected" as bare statement without probe = protocol violation
 19. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings
-20. **Gate integrity**: Present the defined option set. Type-preserving materialization — specializing a generic option while preserving the TYPES coproduct — is the only permitted transformation
+20. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

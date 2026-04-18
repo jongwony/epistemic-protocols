@@ -288,7 +288,7 @@ On loop re-entry: show progress (`[defined]` / `[undefined]`) and re-detect only
 
 ### Phase 2: Co-Construction
 
-**Present** a concrete proposal via gate interaction.
+**Present** a concrete proposal via gate interaction. Gate presentation yields turn for user response.
 
 **Override disclosure (detection with user authority)**: At each Phase 2 gate, include a brief disclosure line in the pre-gate context surfacing the free-response override capability — without this disclosure the user cannot exercise authority they do not know they hold. Example disclosure: "*(Free response beyond Accept/Modify/Reject/Extend: exclude a non-Outcome dimension, add an emergent dimension, or redirect — see Phase 1 response classification. Outcome cannot be excluded.)*"
 
@@ -396,4 +396,4 @@ Options:
 17. **Falsification condition**: Each not-currently-detected dimension must include "would apply if [specific condition]" — exclusion rationale without falsification condition = protocol violation
 18. **Emergent probe**: Emergent slot must include an active probe question or AI-detected hypothesis with evidence. "No emergent dimensions detected" as bare statement without probe = protocol violation
 19. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings
-20. **Gate integrity**: Present the defined option set. Type-preserving materialization — specializing a generic option while preserving the TYPES coproduct — is the only permitted transformation
+20. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

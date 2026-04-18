@@ -316,4 +316,4 @@ After integration:
 14. **Convergence evidence**: Present transformation trace before declaring all_addressed(R'); per-correspondence evidence is required
 15. **Zero-gap surfacing**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
 16. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings
-17. **Gate integrity**: Present the defined option set. Type-preserving materialization — specializing a generic option while preserving the TYPES coproduct — is the only permitted transformation
+17. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

@@ -259,6 +259,8 @@ TaskCreate({
 })
 ```
 
+Gate presentation yields turn for user response.
+
 **Surfacing format** (natural integration with execution completion):
 
 Present the mismatch findings as text output:
@@ -349,4 +351,4 @@ After adaptation — **re-scan**:
 13. **Convergence evidence**: Present transformation trace before declaring adjudicated(R', X); per-mismatch evidence is required
 14. **Zero-mismatch surfacing**: If Phase 0 scan detects no context mismatches, present this finding with reasoning for user confirmation
 15. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings
-16. **Gate integrity**: Present the defined option set. Type-preserving materialization — specializing a generic option while preserving the TYPES coproduct — is the only permitted transformation
+16. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

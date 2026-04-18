@@ -60,6 +60,8 @@ LLM-facing instructions prefer **positive rationale** ("X IS Y because Z") over 
 
 **Evidence**: observed pattern across multiple LLM-facing instruction updates — converting phrasings like "avoid markdown code blocks in Ink output" to "emit element patterns directly" reduces prohibited-pattern drift in subsequent runs.
 
+**Empirical scope**: grounded in output-format instructions (markdown emission, structural rendering, list formatting). Generalization to other instruction types — notably turn-yield behavior at gate interactions — is a theoretical extension not yet empirically tested. Apply with awareness of this scope boundary; when removing a negative formulation of turn-yield obligation, preserve co-located positive reminder at the decision point to retain calibration signal.
+
 ## Loop Continuity under Bounded Regret
 
 Derived from A2 (Detection with Authority) + A5 (Interaction Kind Factorization).
