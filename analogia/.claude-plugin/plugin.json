@@ -1,7 +1,7 @@
 {
   "name": "analogia",
   "description": "Validate structural mapping between domains \u2014 /ground (\u1f00\u03bd\u03b1\u03bb\u03bf\u03b3\u03af\u03b1: a proportion)",
-  "version": "1.6.12",
+  "version": "1.6.13",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
