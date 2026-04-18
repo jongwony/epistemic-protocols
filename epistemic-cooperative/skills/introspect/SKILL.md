@@ -161,7 +161,7 @@ prescriptive rules (what the user says to do, from Agent 1). Surface mismatches:
 - Patterns not captured by any rule
 - Rules that may be redundant or subsumable
 
-Present the analysis to the user. Use AskUserQuestion to validate key findings before
+Present the analysis to the user. call AskUserQuestion to validate key findings before
 proceeding. The user may refine, correct, or add context that changes the analysis.
 
 ---
