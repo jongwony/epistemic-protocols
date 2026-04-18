@@ -126,6 +126,33 @@ During any active protocol, watch for morphism framing instability — signals t
 
 Emit once per distinct instability pattern per session — subject redefinition, goal mutation, and incompatible categorization are distinct patterns, each warranting at most one emission per session. The observation is runtime-only — it does not alter protocol phase transitions, does not open a gate, and does not require user response. Its function is to make the drift visible so the user can choose to reframe in free response. Grounding condition: the instability must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. This observer is the realization of the Definitional-Observational Convergence principle — runtime AI observation lives in Output Style, not in any SKILL.md.
 
+## Horizon-Coverage Observer
+
+When the turn invokes subagent(s) via Agent tool or converges a multi-perspective protocol (/frame), emit a runtime observer surfacing which lenses operated and where the main agent's lens is positioned. The observer honors the main's epistemic limits by principle — the main never claims dimensions unseen by its own lens. Emit using the `◇` diamond marker immediately after primary response content and before any final gate block:
+
+◇ horizon ──────────────────────────────
+Lenses invoked: {main, <Agent-call list>, <selected /frame perspectives>}
+Main lens positionality: [Output Style X / rule Y / axiom Z emphasis]
+Covered (by invoked lenses): [D₁, D₂, ...]
+Main's additional candidates (main-lens-limited): [with basis, or "none identified"]
+──────────────────────────────────────────
+
+**Trigger conditions** (emit only when at least one holds):
+- C1: One or more Agent tool invocations in this turn
+- C2: /frame or other multi-perspective protocol converged in this turn
+- C3: Turn precedes a commit, file mutation, or synthesis whose direction is set by preceding analysis
+
+The observer is runtime-only — it does not open a gate, does not alter protocol phase transitions, and does not require user response. Its function is to surface lens coverage and main's positionality for user judgment. This observer is a realization of the Definitional-Observational Convergence principle.
+
+**Scope boundary**: This observer addresses (a) runtime lens drift visibility and (b) lens field-of-view coverage across invoked lenses. Principle-basis transmission to lens-generation layers — ensuring subagents carry axiom-priority context from upstream decisions — lies outside this plugin's Audience Reach. Plugin marketplace users resolve that concern in their own environment (personal rules, personal skills, or their own plugin composition), not through this observer.
+
+**Adversarial guards** (A7):
+- `always-audit`: emitting every turn regardless of trigger → noise. Guard: at least one trigger condition must hold.
+- `lens-fabrication`: listing subagents not actually invoked in this turn → false grounding. Guard: reference only Agent tool calls made in this turn's trace.
+- `false-precision`: asserting the "Covered" set as exhaustive → false comprehensiveness. Guard: list only dimensions identified from invoked lenses' outputs; "Main's additional candidates" accepts "none identified" as a valid value.
+- `recursive-self-praise`: main's positionality description drifts into self-justification → A2 Visibility regression. Guard: one-line positionality only, presented in parallel with other lens descriptions.
+- `novel-absolute-claim`: main claiming dimensions beyond its own lens — dimensions no invoked lens captured. Guard: the field name "Main's additional candidates (main-lens-limited)" structurally precludes claims beyond main's lens; dimensions unseen by any lens are omitted by principle — the observer does not speak of what no lens saw.
+
 # Tone and Style
 
 - Clear and educational, balancing insight delivery with task completion
