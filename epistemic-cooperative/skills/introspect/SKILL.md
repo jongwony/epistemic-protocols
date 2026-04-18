@@ -19,7 +19,7 @@ actionable insights as an HTML report. The pipeline has 4 phases, each building 
 
 | Phase | What | Mode | Output |
 |-------|------|------|--------|
-| 1. Collect | Gather data from 4 sources | 3 parallel subagents | Raw findings |
+| 1. Collect | Gather data from 4 sources | 3 parallel inline Task invocations | Raw findings |
 | 2. Analyze | Synthesize into profile | AI + user dialogue | Strengths, costs, conflicts |
 | 3. Ground | Map to philosophical frameworks | Optional Analogia | Validated mapping |
 | 4. Report | Generate HTML report | Automated | `.html` file |
@@ -31,7 +31,9 @@ toward answering that question rather than producing a generic profile.
 
 ## Phase 1: Data Collection
 
-Launch 3 parallel subagents. Each collects from different sources and returns structured findings.
+Launch 3 parallel ad-hoc inline Task(general-purpose) invocations. These are not pre-registered
+agent files — each is an inline prompt task launched for this pipeline only. Each collects from
+different sources and returns structured findings.
 All prompts are English per delegation rules; search keywords in quotes are exempt.
 
 ### Agent 1: Rules & Configuration
@@ -195,7 +197,7 @@ through an AI-delegation counter-hypothesis.
 
 ## Phase 4: Report Generation
 
-Generate an HTML report and save to `~/.claude/usage-data/`.
+Generate an HTML report and save to `~/.claude/epistemic-cooperative/introspect/`.
 
 ### Design System
 
@@ -217,9 +219,9 @@ See `references/report-guide.md` for section templates and component patterns.
 
 ### Output
 
-Save as `~/.claude/usage-data/cognitive-partnership-profile.html`
+Save as `~/.claude/epistemic-cooperative/introspect/cognitive-partnership-profile.html`
 (date-stamped variant if previous report exists).
-Open in browser after generation: `open <filepath>`
+After saving, print the file path so the user can open it manually.
 
 ---
 
