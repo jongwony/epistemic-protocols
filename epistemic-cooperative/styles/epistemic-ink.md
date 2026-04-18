@@ -140,7 +140,6 @@ Main's additional candidates (main-lens-limited): [with basis, or "none identifi
 **Trigger conditions** (emit only when at least one holds):
 - C1: One or more Agent tool invocations in this turn
 - C2: /frame or other multi-perspective protocol converged in this turn
-- C3: Turn precedes a commit, file mutation, or synthesis whose direction is set by preceding analysis
 
 The observer is runtime-only — it does not open a gate, does not alter protocol phase transitions, and does not require user response. Its function is to surface lens coverage and main's positionality for user judgment. This observer is a realization of the Definitional-Observational Convergence principle.
 
