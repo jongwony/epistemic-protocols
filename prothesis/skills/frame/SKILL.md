@@ -246,7 +246,7 @@ Consult `references/conceptual-foundations.md` for design rationale (Plan Mode I
 
 Construct a Mission Brief from the user's request and **present** it for confirmation via gate interaction.
 
-**Do NOT skip this phase.** The Mission Brief is the primary context vehicle for teammate spawn prompts — it ensures agent-teams best practice ("give teammates enough context") is structurally guaranteed rather than depending on coordinator inference.
+**Phase 0 establishes the Mission Brief as primary context vehicle for teammate spawn prompts** — it structurally guarantees the agent-teams best practice ("give teammates enough context") rather than depending on coordinator inference. The phase runs unless elided per ELIDABLE CHECKPOINTS: `user_invoked ∧ explicit_arg(U)` — Standing authority delegation to pre-committed elision rule.
 
 **Elidable confirmation**: When the user explicitly invoked `/frame "text"`, the Phase 0 gate interaction (Q) may be elided — the MB is still constructed from U, but proceeds without user confirmation. AI uses `J_mb=confirm` and `m=ai_recommended_mode` as defaults. Phase 2 S (perspective selection) remains always gated, providing a downstream correction opportunity. Elision does not apply to J=extend re-invocations within an active loop.
 
