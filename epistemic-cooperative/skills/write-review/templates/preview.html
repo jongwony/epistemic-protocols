@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>__TITLE_PLACEHOLDER__ — preview</title>
+<script src="/marked.min.js"></script>
+<style>
+  :root {
+    --accent: #2c7be5;
+    --highlight: #fff3a3;
+    --highlight-edge: #d4a017;
+    --muted: #666;
+    --bg: #fafafa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", sans-serif;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5em 1.5em 5em;
+    line-height: 1.7;
+    color: #222;
+    background: white;
+  }
+  header {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1em;
+    margin-bottom: 2em;
+    color: var(--muted);
+    font-size: .9em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header a { color: var(--accent); text-decoration: none; }
+  header a:hover { text-decoration: underline; }
+  #content { font-size: 17px; }
+  #content h1 { font-size: 2em; margin-top: 1.5em; }
+  #content h2 { font-size: 1.5em; margin-top: 1.4em; }
+  #content h3 { font-size: 1.2em; margin-top: 1.2em; }
+  #content blockquote {
+    border-left: 3px solid #ddd;
+    padding-left: 1em;
+    color: #555;
+    margin: 1em 0;
+  }
+  #content code {
+    background: #f3f3f3;
+    padding: .1em .35em;
+    border-radius: 3px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: .92em;
+  }
+  #content pre {
+    background: #f3f3f3;
+    padding: 1em;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+  #content pre code { background: transparent; padding: 0; }
+  #content table {
+    border-collapse: collapse;
+    margin: 1em 0;
+  }
+  #content th, #content td {
+    border: 1px solid #ddd;
+    padding: .4em .7em;
+  }
+  #content th { background: #f7f7f7; }
+
+  /* Annotated text */
+  .annotated {
+    background: var(--highlight);
+    border-bottom: 2px solid var(--highlight-edge);
+    padding: 1px 0;
+    cursor: help;
+  }
+  .annotated::after {
+    content: "💬";
+    font-size: .65em;
+    margin-left: 2px;
+    vertical-align: super;
+  }
+
+  /* Popup */
+  #popup {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+    padding: .8em;
+    z-index: 1000;
+    width: 340px;
+    display: none;
+  }
+  #popup.show { display: block; }
+  #popup-anchor-preview {
+    font-size: .85em;
+    color: var(--muted);
+    margin-bottom: .5em;
+    padding: .4em .5em;
+    background: var(--bg);
+    border-left: 3px solid var(--highlight-edge);
+    border-radius: 3px;
+    max-height: 4.5em;
+    overflow: hidden;
+    line-height: 1.4;
+  }
+  #popup textarea {
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: .5em;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+  }
+  #popup textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  #popup-actions {
+    display: flex;
+    gap: .5em;
+    justify-content: flex-end;
+    margin-top: .5em;
+  }
+  #popup button {
+    padding: .4em .9em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-size: .9em;
+  }
+  #popup button.primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  #popup button:hover { filter: brightness(.95); }
+  #popup-hint {
+    font-size: .75em;
+    color: var(--muted);
+    margin-top: .35em;
+    text-align: right;
+  }
+
+  /* Status bar */
+  #status {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid #eee;
+    padding: .55em 1.5em;
+    font-size: .85em;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 500;
+  }
+  #status-conn::before {
+    content: "●";
+    color: #52c41a;
+    margin-right: .35em;
+  }
+  #status-conn.disconnected::before { color: #aaa; }
+  #status-count strong { color: #222; }
+
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #e0e0e0; }
+    header { border-bottom-color: #333; color: #888; }
+    #content blockquote { border-left-color: #444; color: #aaa; }
+    #content code, #content pre { background: #2a2a2a; }
+    #content th, #content td { border-color: #333; }
+    #content th { background: #252525; }
+    .annotated { background: #5a4a00; color: #fff; }
+    #popup { background: #222; border-color: #444; }
+    #popup-anchor-preview { background: #2a2a2a; color: #aaa; }
+    #popup textarea { background: #2a2a2a; border-color: #444; color: #e0e0e0; }
+    #popup button { background: #2a2a2a; border-color: #444; color: #e0e0e0; }
+    #status { background: #1a1a1a; border-top-color: #333; }
+    #status-count strong { color: #e0e0e0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <span><a href="/">← all drafts</a></span>
+  <span><strong>__TITLE_PLACEHOLDER__</strong></span>
+</header>
+
+<div id="content"></div>
+
+<div id="popup">
+  <div id="popup-anchor-preview"></div>
+  <textarea id="popup-textarea" placeholder="Comment on this selection…"></textarea>
+  <div id="popup-actions">
+    <button id="popup-cancel">Cancel</button>
+    <button id="popup-submit" class="primary">Submit</button>
+  </div>
+  <div id="popup-hint">⌘Enter to submit · Esc to cancel</div>
+</div>
+
+<div id="status">
+  <span id="status-conn">live</span>
+  <span id="status-count"><strong id="count">0</strong> comments this session</span>
+</div>
+
+<script type="text/markdown" id="md-source">__MARKDOWN_CONTENT_PLACEHOLDER__</script>
+
+<script>
+const SLUG = __SLUG_PLACEHOLDER__;
+
+// Render markdown
+const sourceText = document.getElementById("md-source").textContent;
+const content = document.getElementById("content");
+content.innerHTML = marked.parse(sourceText);
+// Cache once — innerText forces layout reflow per access (expensive on long drafts)
+const contentText = content.innerText;
+
+// Selection-popup state
+const popup = document.getElementById("popup");
+const popupPreview = document.getElementById("popup-anchor-preview");
+const popupTextarea = document.getElementById("popup-textarea");
+const popupSubmit = document.getElementById("popup-submit");
+const popupCancel = document.getElementById("popup-cancel");
+const countEl = document.getElementById("count");
+
+let pending = null; // { range, anchor, context_before, context_after }
+let count = 0;
+
+content.addEventListener("mouseup", () => {
+  // Let the selection settle before reading it
+  setTimeout(handleSelection, 0);
+});
+
+function handleSelection() {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  const text = sel.toString().trim();
+  if (text.length < 2) return;
+  const range = sel.getRangeAt(0);
+  if (!content.contains(range.commonAncestorContainer)) return;
+
+  const idx = contentText.indexOf(text);
+  const context_before = idx >= 0 ? contentText.slice(Math.max(0, idx - 60), idx).replace(/\s+/g, " ").trim() : "";
+  const context_after = idx >= 0 ? contentText.slice(idx + text.length, idx + text.length + 60).replace(/\s+/g, " ").trim() : "";
+
+  pending = { range: range.cloneRange(), anchor: text, context_before, context_after };
+
+  const rect = range.getBoundingClientRect();
+  const popupWidth = 340;
+  const left = Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - popupWidth - 16);
+  popup.style.top = (window.scrollY + rect.bottom + 8) + "px";
+  popup.style.left = Math.max(16, left) + "px";
+  popupPreview.textContent = text.length > 200 ? text.slice(0, 200) + "…" : text;
+  popupTextarea.value = "";
+  popup.classList.add("show");
+  popupTextarea.focus();
+}
+
+function dismissPopup() {
+  popup.classList.remove("show");
+  pending = null;
+  const sel = window.getSelection();
+  if (sel) sel.removeAllRanges();
+}
+
+popupCancel.addEventListener("click", dismissPopup);
+popupSubmit.addEventListener("click", submitFeedback);
+
+popupTextarea.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    submitFeedback();
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    dismissPopup();
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (!popup.contains(e.target) && !content.contains(e.target)) dismissPopup();
+});
+
+async function submitFeedback() {
+  if (!pending) return dismissPopup();
+  const comment = popupTextarea.value.trim();
+  if (!comment) return dismissPopup();
+
+  const captured = pending; // capture before dismiss
+
+  try {
+    const resp = await fetch("/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slug: SLUG,
+        anchor: captured.anchor,
+        context_before: captured.context_before,
+        context_after: captured.context_after,
+        comment,
+      }),
+    });
+    if (!resp.ok) throw new Error("server " + resp.status);
+
+    // Visual mark — best effort; surroundContents fails if range crosses element boundaries
+    try {
+      const mark = document.createElement("mark");
+      mark.className = "annotated";
+      mark.title = comment;
+      captured.range.surroundContents(mark);
+    } catch (e) {
+      console.warn("range crosses element boundary; comment saved without visual mark.", e);
+    }
+    count++;
+    countEl.textContent = count;
+  } catch (e) {
+    alert("feedback submission failed: " + e.message);
+  }
+  dismissPopup();
+}
+
+// WebSocket hot reload
+function connectWS() {
+  const conn = document.getElementById("status-conn");
+  const proto = location.protocol === "https:" ? "wss:" : "ws:";
+  const ws = new WebSocket(`${proto}//${location.host}/ws`);
+
+  ws.onopen = () => {
+    conn.classList.remove("disconnected");
+    conn.textContent = "live";
+  };
+  ws.onclose = () => {
+    conn.classList.add("disconnected");
+    conn.textContent = "reconnecting…";
+    setTimeout(connectWS, 2000);
+  };
+  ws.onmessage = (e) => {
+    try {
+      const msg = JSON.parse(e.data);
+      if (msg.slug === SLUG) {
+        sessionStorage.setItem("scrollY", String(window.scrollY));
+        location.reload();
+      }
+    } catch {
+      // ignore non-JSON frames
+    }
+  };
+}
+connectWS();
+
+// Restore scroll on reload
+const savedScroll = sessionStorage.getItem("scrollY");
+if (savedScroll) {
+  window.scrollTo(0, parseInt(savedScroll, 10));
+  sessionStorage.removeItem("scrollY");
+}
+</script>
+</body>
+</html>

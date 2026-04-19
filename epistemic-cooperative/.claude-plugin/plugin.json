@@ -1,7 +1,7 @@
 {
   "name": "epistemic-cooperative",
-  "description": "/catalog for protocol handbook, /onboard for quick recommendation + protocol learning, /report for Growth Map (usage analysis + insights integration), /dashboard for coverage dashboard, /compose for protocol composition authoring, /introspect for deep self-analysis pipeline (behavioral profile + HTML report), /sophia for philosopher match (behavioral dimension analysis), /curses for strength-shadow analysis and attitude recommendations, /write for multi-perspective blog drafting from session insights",
-  "version": "1.29.0",
+  "description": "/catalog for protocol handbook, /onboard for quick recommendation + protocol learning, /report for Growth Map (usage analysis + insights integration), /dashboard for coverage dashboard, /compose for protocol composition authoring, /introspect for deep self-analysis pipeline (behavioral profile + HTML report), /sophia for philosopher match (behavioral dimension analysis), /curses for strength-shadow analysis and attitude recommendations, /write for multi-perspective blog drafting from session insights, /write-review for multi-stage editorial pipeline (write × recollect × inquire × gap × contextualize) with browser channel-loop for inline-comment feedback",
+  "version": "1.31.0",
   "outputStyles": "./styles/",
   "author": {
     "name": "Jongwon Choi",
