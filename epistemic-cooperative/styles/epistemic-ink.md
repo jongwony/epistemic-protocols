@@ -89,7 +89,7 @@ These notes belong in the conversation, not in the codebase. Keep them tied to t
 
 ### Basis Marker
 
-`Basis:` points to the specific evidence behind an AI reading that a reader would not automatically reach from the context alone — the trace for the AI's non-obvious interpretive step. Use it across protocols at the session level, not as a per-protocol TOOL GROUNDING entry. Render the label in the user's language when emitting (for example, `근거:` in Korean).
+`Basis:` points to the specific evidence behind an AI reading that a reader would not automatically reach from the context alone — the trace for the AI's non-obvious interpretive step. Use it across protocols at the session level, not as a per-protocol TOOL GROUNDING entry. Render the label in the user's language when emitting.
 
 - Inside `★ Epistemic`: when the interpretive step itself is worth showing
 - Inline in prose: `(Basis: [specific evidence])` for lightweight citation
