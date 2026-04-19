@@ -302,7 +302,7 @@ Analyze AI work result, extract categories, annotate priority, and check briefin
 2. **Categorize**: Group by taxonomy above
 3. **Prioritize (internal ordering)**: Architecture > new code > modification > ...
 4. **Summarize**: Prepare concise category descriptions
-5. **Priority annotation (BD-1a)**: For each category, attach an AI-autonomous priority hint with cited basis (session evidence grounding the recommendation). Annotation is a label shown alongside each Phase 1 option (e.g., "likely needs causal context first" with basis "earlier session turn: user asked 'why this design?'"). Annotation informs user choice but does **not** pre-select — user retains full multi-select authority per Invariant 6.
+5. **Priority annotation (BD-1a)**: For each category, attach an AI-autonomous priority hint with cited basis (session evidence grounding the recommendation). Annotation is a short label shown alongside each Phase 1 option and names the basis — the specific session evidence that grounds the priority. Annotation informs user choice but does **not** pre-select — user retains full multi-select authority per Invariant 6.
 6. **Narrative availability check (Nₐ)**: Determine whether session-internal narrative is available to support Background briefing. `Nₐ = true` when the result R was produced within the current session with traceable question-context-direction sequence; `Nₐ = false` when R is external (cloned code without session work, uploaded PDF, official documentation, imported artifact). If `Nₐ = false`, Phase 1 briefing is skipped — producing Background without session-derived narrative would violate R3 (provisional language requires honest hypothesis-not-declaration framing).
 
 **Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 category prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
@@ -319,7 +319,7 @@ Fires iff `Nₐ = true` (Phase 0 determined session narrative is available).
 
 - **Form**: Plain text block, ≤ 7±2 propositions (CLT working memory bound). Yields no turn.
 - **Content**: Background only — WHY the AI work was done (what question/problem drove it). Framing (how AI worked) and Emergent dimensions (cross-cutting AI findings) are **excluded** — they surface AI introspection, not user comprehension targets, and add cognitive load without serving verification.
-- **Phrasing (R3 provisional)**: Surface AI's framing as risked-and-revisable hypothesis, not authoritative ground. Use hypothesis-not-declaration framing ("AI took the following framing...", "The matter appears to have put this question..."). Avoid declarative ("These candidates address X concern via...").
+- **Phrasing (R3 provisional)**: Surface AI's framing as risked-and-revisable hypothesis, not authoritative ground. Phrasing must mark the framing as AI's current reading (revisable on user dialogue), not as settled ground. Declarative authority-voice is excluded.
 - **Skip conditions**: `Nₐ = false` (external artifact without session narrative); OR same-artifact fade triggered by mechanical signals only — same session id + same input identifier + explicit user re-invoke. AI inference of "this seems related to prior artifact" is prohibited (Invariant 4). Cross-artifact, no fade.
 - **Same-artifact fade**: On re-invocation matching mechanical signals, demonstrably-consumed segments collapse to one-line reference; not-yet-consumed segments present at full depth.
 
@@ -328,8 +328,8 @@ Fires iff `Nₐ = true` (Phase 0 determined session narrative is available).
 Pre-gate assistant text that names the free-response channels available at the gate without duplicating them as structured options. Emit unconditionally when Phase 1 fires.
 
 Minimum helper content:
-- Reframe availability: free-response "Reframe — [direction]" at the gate classifies as a direction-rethink request; routes per BD-2 (expression issue → /clarify, end-state issue → /goal, framework issue → /frame).
-- Declarative intensity availability: free-response "C4 Heavy, C1 Light" or equivalent at the gate integrates per-category intensity calibration.
+- Reframe availability: user may free-respond with a direction-rethink request at the gate; the classifier routes the request per BD-2 (expression issue → /clarify, end-state issue → /goal, framework issue → /frame).
+- Declarative intensity availability: user may free-respond with per-category intensity assignments (Light/Medium/Heavy per selected category); the classifier integrates these into the intensity calibration for Phase 3.
 - ESC note: completing a category subset and pressing ESC after the subset is a first-class workflow (Invariant 6); convergence does not require all categories.
 
 Adapt wording to the specific session; no fixed template.
@@ -391,9 +391,9 @@ For each task (category):
    - Detected relevant aspects for [Category]: [GT list]
    - Starting aspect: [c*] — [1-line reason]
 
-   **Ordering rule (BD-1b)**: Causality-first when the category lacks established WHY in session context (the e2601ef9 friction pattern — "이게 왜 필요한지" redirect); otherwise per current /grasp default ordering by gap type relevance. Priority annotation from Phase 0 (BD-1a) informs the reason line.
+   **Ordering rule (BD-1b)**: Causality-first when the category lacks established WHY in session context — the user is likely to redirect to causal grounding before engaging other aspects, so lead with Causality to prevent the redirect overhead. Otherwise per current /grasp default ordering by gap type relevance. Priority annotation from Phase 0 (BD-1a) informs the reason line.
 
-   **Free-response override**: This step is relay, not a gate — Phase 3 proceeds to probe construction. User can override the starting aspect at any probe response turn via free-response ("let's start with Scope instead"); R4 monitoring additionally watches for S3 structural-reframing patterns that indicate misordered entry.
+   **Free-response override**: This step is relay, not a gate — Phase 3 proceeds to probe construction. User can override the starting aspect at any probe response turn via free-response directing a different gap type; R4 monitoring additionally watches for S3 structural-reframing patterns that indicate misordered entry.
 
    Remaining aspects surface in step 3d aspect coverage check.
 
@@ -410,7 +410,7 @@ For each task (category):
    - Medium → scenario-based gate targeting prediction
    - Heavy → multi-step decomposed gate targeting causal reasoning
 
-   The AI-inferred default is Heavy (conservative — over-probing rarely harms comprehension; under-probing risks confirmation-bias pass-through). User override via free-response ("this is Light for me") recalibrates subsequent probes and contributes to R9 M2 coherence measurement.
+   The AI-inferred default is Heavy (conservative — over-probing rarely harms comprehension; under-probing risks confirmation-bias pass-through). User override via free-response recalibrates subsequent probes and contributes to coherence measurement (declared intensity vs observed performance).
 
    Construct a probe based on the detected gap type — the probe should test whether the user can demonstrate the specific knowledge that gap type targets (prediction for Expectation, explanation for Causality, impact awareness for Scope, ordering for Sequence).
 
@@ -586,8 +586,8 @@ Every /grasp output surface — briefing text, probe question, probe options, as
 **Triggering (BD-7, AI-autonomous with cited basis)**: AI detects terms on first mention during output writing and checks against established-in-session set. Target: eliminate "what does this symbol mean?" re-lookup overhead — the actual user-experienced cognitive load that originally motivated Briefing-as-Triage.
 
 - Detection: term `τ` is introduced in /grasp output AND `τ ∉ established_in(Σ)` where `established_in(Σ)` is the set of terms defined earlier in the current session (user explained OR AI introduced with gloss).
-- Gloss form: inline parenthetical or em-dash appositive — e.g., "deficit taxonomy (the list of gap types the protocol can detect)" or "morphism — a function that transforms one kind of result into another".
-- Cited basis: AI silently tracks which terms were glossed; user can request the gloss be omitted via free response ("you can skip glosses") and the session settings honor that preference until re-invoked.
+- Gloss form: inline parenthetical or em-dash appositive immediately following the term, stating the meaning in plain session-appropriate language. The gloss is shortest that resolves the lookup; longer glosses signal the term should be replaced rather than explained.
+- Cited basis: AI silently tracks which terms were glossed; user can request gloss omission via free response and the session honors that preference until re-invoked.
 - Budget: glosses must stay ≤ 30% of surface text length per block; if an output surface would exceed this, the surface is itself too abstract — simplify rather than gloss-stack.
 
 **Scope**: applies only to `/grasp`-generated surfaces. User-provided terms are never glossed back at the user — that would be patronizing.
@@ -620,7 +620,7 @@ Every /grasp output surface — briefing text, probe question, probe options, as
 16. **Mechanical same-artifact fade (R6)**: Background segment fade on re-invocation requires mechanical signals only — same /grasp session id + same input-artifact identifier + explicit user re-invoke. AI inference of "this seems related to prior artifact" is prohibited. Cross-artifact, no fade.
 17. **Observable detector rules (R7)**: R4 misalignment signals operate via observable rules with explicit false-positive rate budgets per signal (S1 ≤ 30%, S2 ≤ 40%, S3 ≤ 25%, S4 ≤ 50%). Not "intuitive detection." Tuning logged, never silent.
 18. **Complexity hidden internally (R10)**: User-facing surface must not grow beyond the design budget (+200 tokens per invocation net). Internal mechanisms (R4 signal terminology, FP budgets, debt metadata structure, BoundaryMap) do not leak into user-visible text. Detection: briefing > 7±2 propositions OR R4 gate prose containing "S3 signal" / "FP budget" = boundary leak requiring revision.
-19. **Abstraction Accessibility (R11, BD-7)**: Every /grasp output surface carries inline plain-language gloss for terms not established in session context. AI-autonomous with cited basis; user can opt out via free response ("skip glosses"). Budget: glosses ≤ 30% of surface text length per block.
+19. **Abstraction Accessibility (R11, BD-7)**: Every /grasp output surface carries inline plain-language gloss for terms not established in session context. AI-autonomous with cited basis; user can opt out via free-response gloss-suppression request. Budget: glosses ≤ 30% of surface text length per block.
 20. **Three-block Phase 1 structure**: Phase 1 renders in order (1) conditional Background relay → (2) helper prose naming free-response channels → (3) clean categorical gate. Helper content (Reframe mechanics, intensity examples, ESC note) belongs BEFORE the gate, not inside gate option descriptions. AskUserQuestion-conformant format.
 21. **Structural gate-option criterion**: An item belongs in a gate's structured option list only when (i) it is a categorical selection that cannot be cleanly expressed via free-response, AND (ii) its distinction from other options produces differential downstream behavior that depends on categorical selection for unambiguous parsing. Reframe/intensity at Phase 1 fail criterion (i) — they arrive via free-response. R4 gate {continue, intensity, Reframe} pass — three structurally distinct actions needing categorical pick.
 22. **Priority annotation ≠ pre-selection (BD-1a)**: AI annotates each Phase 1 category option with an AI-priority hint and cited basis; user retains full multi-select authority. Annotation informs recognition; it does not substitute for user judgment. Invariant 1 + Invariant 6 binding.
