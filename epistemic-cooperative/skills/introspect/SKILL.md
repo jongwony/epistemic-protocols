@@ -1,13 +1,6 @@
 ---
 name: introspect
-description: >
-  Deep self-analysis pipeline: collect behavioral data from sessions/rules/usage,
-  analyze patterns across 5 dimensions, identify strengths and their structural costs,
-  ground findings philosophically via Analogia, and produce an HTML report.
-  Use when: "analyze my patterns", "what are my curses", "cognitive profile",
-  "self-analysis", "introspect", "how do I work with AI", "what should I improve",
-  "identity analysis", or any reflective question about working patterns and
-  AI collaboration style.
+description: "Deep self-analysis pipeline: collects session/rule/usage data, analyzes across 5 dimensions (strength-shadow + Analogia grounding), produces HTML report. User-invoked via /introspect."
 ---
 
 # Introspect
