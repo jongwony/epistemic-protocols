@@ -71,10 +71,19 @@ turn ingests these as <code>&lt;feedback&gt;</code>-anchored directives.</p>
 </body></html>`;
 };
 
+// Strip YAML frontmatter so marked.js renders body only. Anchor matching in the revision
+// loop still works because feedback anchors are captured from rendered body text and then
+// located in the source file via plain string search — frontmatter rarely shares verbatim
+// runs with body prose.
+const stripFrontmatter = (md: string) => {
+  const m = md.match(/^---\r?\n[\s\S]*?\r?\n---\r?(?:\n|$)/);
+  return m ? md.slice(m[0].length) : md;
+};
+
 const renderPreview = async (slug: string) => {
   const path = drafts.get(slug);
   if (!path) return null;
-  const md = await readFile(path, "utf8");
+  const md = stripFrontmatter(await readFile(path, "utf8"));
   // C3: title goes into HTML context (escape & < > " '); slug goes into JS string literal context (JSON.stringify)
   return template
     .replaceAll("__TITLE_PLACEHOLDER__", escapeHtml(slug))

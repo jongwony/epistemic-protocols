@@ -14,58 +14,25 @@ In this repository, that machinery is realized as a Claude Code plugin marketpla
 epistemic-protocols/
 ├── .claude-plugin/marketplace.json    # Marketplace manifest
 ├── .claude/skills/verify/             # Project-level verification skill
-├── prothesis/                         # Protocol: multi-perspective investigation
-│   ├── .claude-plugin/plugin.json
-│   └── skills/frame/SKILL.md       # Full protocol definition (user-invocable)
-├── syneidesis/                        # Protocol: gap surfacing
-│   ├── .claude-plugin/plugin.json
-│   └── skills/gap/SKILL.md     # Full protocol definition (user-invocable)
-├── hermeneia/                         # Protocol: intent clarification
-│   ├── .claude-plugin/plugin.json
-│   └── skills/clarify/SKILL.md      # Full protocol definition (user-invocable)
-├── katalepsis/                        # Protocol: comprehension verification
-│   ├── .claude-plugin/plugin.json
-│   └── skills/grasp/SKILL.md     # Full protocol definition (user-invocable)
-├── telos/                             # Protocol: goal co-construction
-│   ├── .claude-plugin/plugin.json
-│   └── skills/goal/SKILL.md          # Full protocol definition (user-invocable)
-├── horismos/                          # Protocol: epistemic boundary definition
-│   ├── .claude-plugin/plugin.json
-│   └── skills/bound/SKILL.md         # Full protocol definition (user-invocable)
-├── aitesis/                           # Protocol: context insufficiency inference
-│   ├── .claude-plugin/plugin.json
-│   └── skills/inquire/SKILL.md       # Full protocol definition (user-invocable)
-├── analogia/                          # Protocol: structural mapping validation
-│   ├── .claude-plugin/plugin.json
-│   └── skills/ground/SKILL.md       # Full protocol definition (user-invocable)
-├── prosoche/                          # Protocol: execution-time risk evaluation
-│   ├── .claude-plugin/plugin.json
-│   └── skills/attend/SKILL.md        # Full protocol definition (user-invocable)
-├── epharmoge/                         # Protocol: application-context mismatch detection (conditional)
-│   ├── .claude-plugin/plugin.json
-│   └── skills/contextualize/SKILL.md # Full protocol definition (user-invocable)
-├── anamnesis/                         # Protocol: vague recall → recognized context
-│   ├── .claude-plugin/plugin.json
+│
+│   # Each protocol plugin: .claude-plugin/plugin.json + skills/<verb>/SKILL.md
+├── prothesis/       (/frame)          # multi-perspective investigation
+├── syneidesis/      (/gap)            # gap surfacing
+├── hermeneia/       (/clarify)        # intent clarification
+├── katalepsis/      (/grasp)          # comprehension verification
+├── telos/           (/goal)           # goal co-construction
+├── horismos/        (/bound)          # epistemic boundary definition
+├── aitesis/         (/inquire)        # context insufficiency inference
+├── analogia/        (/ground)         # structural mapping validation
+├── prosoche/        (/attend)         # execution-time risk evaluation
+├── epharmoge/       (/contextualize)  # application-context mismatch (conditional)
+├── anamnesis/       (/recollect)      # vague recall → recognized context
 │   ├── hooks/hooks.json               # SessionEnd hook: hypomnesis store writer
-│   ├── scripts/hypomnesis-write.mjs   # mjs harness + claude -p haiku extraction
-│   └── skills/recollect/SKILL.md     # Full protocol definition (user-invocable)
-├── epistemic-cooperative/               # Utility skills: report + onboarding + analytics + configuration + writing
-│   ├── .claude-plugin/plugin.json
+│   └── scripts/hypomnesis-write.mjs   # mjs harness + claude -p haiku extraction
+├── epistemic-cooperative/             # Utility skills + agents
 │   ├── agents/                        # project-scanner, session-analyzer, coverage-scanner, dimension-profiler
-│   └── skills/
-│       ├── report/SKILL.md            # Usage analysis report from session patterns
-│       ├── onboard/SKILL.md           # Quick recommendation + protocol learning (quick proof + targeted learning)
-│       ├── dashboard/SKILL.md          # Full-session coverage dashboard
-│       ├── introspect/SKILL.md         # Deep self-analysis pipeline (behavioral profile + HTML report)
-│       ├── catalog/SKILL.md           # Protocol handbook — instant reference
-│       ├── compose/SKILL.md           # Protocol composition authoring assistant
-│       ├── sophia/SKILL.md            # Philosopher match via behavioral dimensions
-│       ├── curses/SKILL.md            # Strength-shadow analysis and attitude recommendations
-│       └── write/SKILL.md             # Multi-perspective blog drafting from session insights
-└── src/                               # Landing page (independent sub-project)
-    ├── package.json                   # React + Vite + Tailwind (isolated deps)
-    ├── vite.config.ts
-    └── App.tsx, ProtocolDemo.tsx, i18n.tsx  # EN/KO SPA
+│   └── skills/                        # report, onboard, dashboard, introspect, catalog, compose, sophia, curses, write
+└── src/                               # Landing page (independent sub-project; React + Vite + Tailwind; EN/KO SPA)
 ```
 
 **Component Types**:

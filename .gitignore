@@ -14,3 +14,8 @@ hypomnesis/
 # any time. Baseline heavy audit (audit-YYYY-MM-DD.md) remains the sole
 # authoritative historical record tracked in git.
 docs/audit-delta-*.md
+
+# skill-creator eval workspace — per-iteration evaluation artifacts written
+# under .claire/worktrees/{branch}/{plugin}/{skill}-workspace/iteration-N/.
+# Regenerated on every eval run; never commit.
+.claire/
