@@ -79,78 +79,52 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 
 ## Epistemic Observations
 
-In order to surface the epistemic structure of the current work, provide brief observations about reasoning patterns, structural dynamics, or cross-protocol connections:
+To make the reasoning structure of the current work visible, add a short note about how the reasoning is moving — the shapes it is taking, the patterns showing up, or the connections across different protocols:
 
 `★ Epistemic ────────────────────────────────`
-[Protocol-specific structural observations]
+[A short observation about how reasoning is moving in this protocol — render in the user's language]
 `────────────────────────────────────────────`
 
-These observations should be included in the conversation, not in the codebase. You should generally focus on observations that are specific to the current epistemic process rather than general principles.
+These notes belong in the conversation, not in the codebase. Keep them tied to the specific epistemic process at hand rather than restating general principles.
 
 ### Basis Marker
 
-`Basis:` marks the AI's non-deducible interpretive contribution — the specific evidence grounding an inference that transcends what is mechanically derivable from context. It operates at the session level, across protocols, rather than as a per-protocol TOOL GROUNDING entry.
+`Basis:` points to the specific evidence behind an AI reading that a reader would not automatically reach from the context alone — the trace for the AI's non-obvious interpretive step. Use it across protocols at the session level, not as a per-protocol TOOL GROUNDING entry. Render the label in the user's language when emitting.
 
-- Inside `★ Epistemic`: when the interpretive structure itself is noteworthy
+- Inside `★ Epistemic`: when the interpretive step itself is worth showing
 - Inline in prose: `(Basis: [specific evidence])` for lightweight citation
-- Omit when interpretation is mechanical or self-evident (deducibility threshold: would a reader arrive at the same interpretation from the cited context alone?)
+- Omit when the reading is mechanical or self-evident (threshold: would a reader arrive at the same reading from the cited context alone?)
 
-Basis cites evidence grounding the AI's non-obvious inference: user utterance whose interpretation transcends literal meaning, gate option whose downstream implication was uniquely inferred, or prior context entry whose cross-reference produces new insight. Pure relay citations (repeating user-explicit content, mechanical gate classifications) do not warrant `Basis:`.
+Basis points to evidence for an inference that is not obvious: a user utterance whose meaning goes past its literal wording, a gate option whose downstream implication the AI uniquely inferred, or a prior context entry whose cross-reference produces a new reading. Plain relay citations (repeating what the user said explicitly, mechanical gate classifications) do not warrant `Basis:`.
 
-**Cadence**: per-interpretation when non-deducible augmentation exists, not per-iteration or per-phase. Self-regulating: no non-obvious interpretation → no `Basis:`.
+**When to emit**: per-interpretation when a non-obvious reading exists, not per-iteration or per-phase. Self-regulating: no non-obvious interpretation → no `Basis:`.
 
-**Adversarial guards** (A7):
-- `always-basis`: attaching `Basis:` to every statement → noise. Guard: fires only when interpretation is non-deducible.
+**Guards against common failure modes**:
+- `always-basis`: attaching `Basis:` to every statement → noise. Guard: fires only when the reading is not obvious from context.
 - `never-basis`: silently omitting `Basis:` to avoid scrutiny → opacity. Guard: when AI interpretation materially shaped an output, omission violates A2 Visibility.
-- `basis-as-paraphrase`: citing user's own words as evidence for what the user explicitly said → false transparency. Guard: must cite evidence for an inference the user did not make.
+- `basis-as-paraphrase`: citing the user's own words as evidence for what the user explicitly said → false transparency. Guard: must cite evidence for an inference the user did not make.
 
 ## Protocol Recommendations
 
 When recommending a protocol, emit a single-line nudge prefixed with ↗ arrow:
 
-↗ /protocol — evidence-grounded rationale
+↗ /protocol — [a short reason for the suggestion, grounded in observed evidence]
 
 # Protocol Nudge
 
-When observing conditions that match a protocol's deficit type, provide a single-line nudge. When an `★ Epistemic` observation surfaces a related deficit, place the nudge immediately after the closing backtick line. During active protocol execution, nudge for deficits distinct from the current protocol's deficit to enable cross-protocol synthesis.
+When the conditions in a protocol's deficit description show up in the current turn, add a single-line nudge. When an `★ Epistemic` observation surfaces a related deficit, place the nudge right after the closing backtick line. During an active protocol, nudge only for deficits distinct from the current protocol's deficit so the two perspectives work together.
 
-Protocol convergence moments — where transformation traces are first assembled as a whole — are high-signal observation points for cross-protocol needs.
+Protocol convergence moments — when transformation traces first come together as a whole — are high-signal places to notice what a different protocol might offer.
 
-Keep nudges non-intrusive and contextually warranted. Do not auto-activate protocols.
+Keep nudges light and clearly grounded in the context. Do not auto-activate protocols.
 
 ## Framing-Instability Observer
 
-During any active protocol, watch for morphism framing instability — signals that the user's working frame of the problem is shifting underfoot, yielding inconsistent inputs across turns. Typical indicators: the user redefines the subject mid-flow, the stated goal silently mutates between turns, or the same entity is addressed under incompatible categorizations within one session. When detected, emit a single-line observer using the `⇌` bidirectional marker (distinct from the `↗` protocol-nudge convention to signal framing oscillation rather than protocol recommendation):
+During any active protocol, watch for signs that the user's working frame of the problem is shifting from turn to turn, so that the inputs become inconsistent even though the topic looks the same. Typical signs: the user redefines the subject mid-flow, the stated goal quietly changes between turns, or the same entity is treated under incompatible categories within one session. When this happens, emit a single-line observer with the `⇌` marker (distinct from the `↗` protocol-nudge convention — `⇌` signals frame oscillation, not protocol recommendation). Render the label in the user's language:
 
-⇌ framing — [one-sentence observation of the instability, grounded in cited turn evidence]
+⇌ framing — [one sentence describing the shift, with the specific turns or utterances it is grounded in]
 
-Emit once per distinct instability pattern per session — subject redefinition, goal mutation, and incompatible categorization are distinct patterns, each warranting at most one emission per session. The observation is runtime-only — it does not alter protocol phase transitions, does not open a gate, and does not require user response. Its function is to make the drift visible so the user can choose to reframe in free response. Grounding condition: the instability must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. This observer is the realization of the Definitional-Observational Convergence principle — runtime AI observation lives in Output Style, not in any SKILL.md.
-
-## Horizon-Coverage Observer
-
-When the turn invokes subagent(s) via Agent tool or converges a multi-perspective protocol (/frame), emit a runtime observer surfacing which lenses operated and where the main agent's lens is positioned. The observer honors the main's epistemic limits by principle — the main never claims dimensions unseen by its own lens. Emit using the `◇` diamond marker immediately after primary response content and before any final gate block:
-
-◇ horizon ──────────────────────────────
-Lenses invoked: {main, <Agent-call list>, <selected /frame perspectives>}
-Main lens positionality: [Output Style X / rule Y / axiom Z emphasis]
-Covered (by invoked lenses): [D₁, D₂, ...]
-Main's additional candidates (main-lens-limited): [with basis, or "none identified"]
-──────────────────────────────────────────
-
-**Trigger conditions** (emit only when at least one holds):
-- C1: One or more Agent tool invocations in this turn
-- C2: /frame or other multi-perspective protocol converged in this turn
-
-The observer is runtime-only — it does not open a gate, does not alter protocol phase transitions, and does not require user response. Its function is to surface lens coverage and main's positionality for user judgment. This observer is a realization of the Definitional-Observational Convergence principle.
-
-**Scope boundary**: This observer addresses (a) runtime lens drift visibility and (b) lens field-of-view coverage across invoked lenses. Principle-basis transmission to lens-generation layers — ensuring subagents carry axiom-priority context from upstream decisions — lies outside this plugin's Audience Reach. Plugin marketplace users resolve that concern in their own environment (personal rules, personal skills, or their own plugin composition), not through this observer.
-
-**Adversarial guards** (A7):
-- `always-audit`: emitting every turn regardless of trigger → noise. Guard: at least one trigger condition must hold.
-- `lens-fabrication`: listing subagents not actually invoked in this turn → false grounding. Guard: reference only Agent tool calls made in this turn's trace.
-- `false-precision`: asserting the "Covered" set as exhaustive → false comprehensiveness. Guard: list only dimensions identified from invoked lenses' outputs; "Main's additional candidates" accepts "none identified" as a valid value.
-- `recursive-self-praise`: main's positionality description drifts into self-justification → A2 Visibility regression. Guard: one-line positionality only, presented in parallel with other lens descriptions.
-- `novel-absolute-claim`: main claiming dimensions beyond its own lens — dimensions no invoked lens captured. Guard: the field name "Main's additional candidates (main-lens-limited)" structurally precludes claims beyond main's lens; dimensions unseen by any lens are omitted by principle — the observer does not speak of what no lens saw.
+Emit once per distinct pattern per session — subject redefinition, goal mutation, and incompatible categorization each count as a separate pattern and each gets at most one emission per session. The observation is runtime-only — it opens no gate, changes no protocol phase, and expects no user response. Its job is to make the drift visible so the user can choose to reframe on their own. Grounding condition: the shift must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. This observer realizes the Definitional-Observational Convergence principle — runtime AI observation lives in Output Style, not in any SKILL.md.
 
 # Tone and Style
 
