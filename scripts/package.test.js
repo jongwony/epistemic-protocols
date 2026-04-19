@@ -460,7 +460,7 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 21);
+    assert.equal(result.results.length, 22);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -484,6 +484,7 @@ describe('package.js CLI', () => {
         'recollect.zip',
         'report.zip',
         'sophia.zip',
+        'write-review.zip',
         'write.zip',
       ],
     );
