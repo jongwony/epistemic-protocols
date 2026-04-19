@@ -2,7 +2,7 @@
 
 Principles that become LESS important as models improve; temporary guards against current model limitations.
 
-Per Axiomatization Judgment Framework (see `meta-principle.md`), Safeguard-tier principles are revisitable as model capability evolves — their operational force diminishes with empirical evidence of reduced need. Demotion from higher tiers is a legitimate Rückkehr outcome when empirical trajectory diverges from the tier's definitional criterion.
+Per Axiomatization Judgment Framework (see `meta-principle.md`), Safeguard-tier principles are revisitable as model capability evolves — their operational force diminishes with empirical evidence of reduced need. Demotion from higher tiers is a legitimate Circular Return outcome when empirical trajectory diverges from the tier's definitional criterion.
 
 **Actionable revision criterion**: Safeguard-tier status is not a passive label but an operational commitment to revisit guards as evidence accumulates. Triggers for revising corresponding SKILL.md Rules sections: (1) model version upgrade with demonstrated instruction-following improvement, (2) observed violation rate sustained below prior baseline across sessions with current models, or (3) a successful compression PR (e.g., the PR #270 XC1-XC4 precedent) demonstrating guard reducibility without outcome loss. When any trigger fires, reduce or remove guards; document the reduction with empirical basis citation. This prevents carrying obsolete safeguards into future protocol releases as models improve.
 

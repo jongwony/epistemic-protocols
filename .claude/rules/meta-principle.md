@@ -4,7 +4,7 @@ Governs evolution of the principle system itself.
 
 ## Deficit Empiricism
 
-Protocol creation must be grounded in observed deficit instances (N≥3) from actual sessions. Theoretical deficit classification alone is insufficient justification — the deficit must have demonstrably caused cost (wasted effort, wrong direction, missed consideration) in practice. This grounds the type system in empirical evidence rather than a priori categorization.
+Protocol creation requires an orthogonal option surface — every genuine alternative the AI can enumerate — presented at Gates with differential futures, under variation-stable essence. A candidate deficit qualifies when its distinctive character persists under variation across instance, user profile, platform context, and session type. Essence intuition under such variation, not enumerative count, is the criterion. The surface-plus-Gate pattern is already operational in protocols such as Telos Phase 1 Full Taxonomy Confirmation and Hermeneia Phase 1b — Deficit Empiricism is their meta-criterion, not a separate procedure.
 
 ---
 
@@ -28,7 +28,7 @@ When evaluating a principle for promotion:
 
 4. **Adversarial Grounding**: The principle encodes a safeguard against AI shortcutting or rationalization. Formal correctness of a protocol definition is not sufficient; execution fidelity requires structural guards. If a principle's primary role is to prevent an anticipated failure mode, it merits axiom status.
 
-5. **Empirical Vindication Across Sessions**: Multiple observed sessions (N≥3 minimum) demonstrate that the *absence* of the principle as a structural constraint leads to repeated violations. Promoting the principle to axiom status and embedding it in protocol structure resolves the observed instances. This follows Deficit Empiricism: axiomatization must be grounded in observed cost.
+5. **Empirical Vindication Across Sessions**: Observed sessions demonstrate that the *absence* of the principle as a structural constraint leads to repeated violations whose distinctive character persists under variation across contexts and session types. Promoting the principle to axiom status and embedding it in protocol structure resolves the observed instances. This follows Deficit Empiricism: axiomatization must be grounded in variation-stable essence, not enumerative count.
 
 ### Demotion Criteria (From Axiom or Derived to Lower Tier)
 
@@ -44,20 +44,20 @@ When evaluating whether a principle should be downgraded:
 
 The promotion/demotion decision follows a hermeneutic circle pattern:
 
-1. **Prejudgment (Vorverständnis)**: Observe a recurring violation or safeguard gap across sessions. Propose a candidate principle based on observed deficit.
+1. **Prejudgment**: Observe a recurring violation or safeguard gap across sessions. Propose a candidate principle based on observed deficit.
 
-2. **Inscription (Aufschreibung)**: Attempt to embed the candidate principle structurally in one or more SKILL.md definitions. Test whether the embedding prevents the observed violations.
+2. **Inscription**: Attempt to embed the candidate principle structurally in one or more SKILL.md definitions. Test whether the embedding prevents the observed violations.
 
-3. **Validation via Interpretation (Auslegung)**: Re-examine historical sessions with the candidate principle in place. Would applying this principle have prevented observed failures? Does the principle create new, unforeseen constraints elsewhere?
+3. **Validation via Interpretation**: Re-examine historical sessions with the candidate principle in place. Would applying this principle have prevented observed failures? Does the principle create new, unforeseen constraints elsewhere?
 
-4. **Horizons Fusion (Horizontverschmelzung)**: If validation succeeds, promote the principle to axiom. If the principle is better expressed as a logical consequence of existing axioms, classify it as derived and annotate the derivation. If it is platform-specific, classify as architectural.
+4. **Horizons Fusion**: If validation succeeds, promote the principle to axiom. If the principle is better expressed as a logical consequence of existing axioms, classify it as derived and annotate the derivation. If it is platform-specific, classify as architectural.
 
-5. **Circular Return (Rückkehr)**: As models improve, revisit axioms. A principle might become *more* important (reinforcing axiom status) or might become *less* critical if model behavior changes. The circle is ongoing.
+5. **Circular Return**: As models improve, revisit axioms. A principle might become *more* important (reinforcing axiom status) or might become *less* critical if model behavior changes. The circle is ongoing.
 
 **Note on the circle's stability**: Unlike philosophical hermeneutics (where understanding is open-ended), axiomatization seeks closure — a stable set of non-derivable foundational principles. The circle terminates when new observations no longer prompt principle revisions; this is evidence that the axiom set has reached productive stability (though it remains revisable).
 
 ### Tension-Accumulation Threshold
 
-Rückkehr's trigger is not calendar-based but tension-accumulative. The decision criterion: act when the accumulated cost of maintaining current state (axiom tension, guard contradiction, classification ambiguity) exceeds the immediate cost of revision (diff scope, review burden, downstream adjustment). The independent variable is context accumulation — not elapsed time. The Axiom Hierarchy's tier dynamics apply: Safeguard-tier tensions self-resolve; Axiom-tier tensions compound.
+Circular Return's trigger is not calendar-based but tension-accumulative. The decision criterion: act when the accumulated cost of maintaining current state (axiom tension, guard contradiction, classification ambiguity) exceeds the immediate cost of revision (diff scope, review burden, downstream adjustment). The independent variable is context accumulation — not elapsed time. The Axiom Hierarchy's tier dynamics apply: Safeguard-tier tensions self-resolve; Axiom-tier tensions compound.
 
 **Protocol-level manifestation**: The trigger extends beyond axiom evolution. Each protocol's decision dimensions inherit the same criterion as domain-specific instances. Definition lives here (meta-principle); manifestation is inscribed in individual SKILL.md operational prose.

@@ -8,3 +8,9 @@ node_modules/
 # pre-v0.4.4 residue at {cwd}/hypomnesis/ until the transitional data is
 # archived or removed. Personal session content; never commit.
 hypomnesis/
+
+# audit-delta skill output — point-in-time derived view from three live sources
+# (git log + gh CLI + frozen-config.md). Stateless per SKILL.md; regenerable
+# any time. Baseline heavy audit (audit-YYYY-MM-DD.md) remains the sole
+# authoritative historical record tracked in git.
+docs/audit-delta-*.md
