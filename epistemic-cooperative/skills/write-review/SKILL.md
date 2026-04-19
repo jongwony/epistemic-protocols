@@ -1,6 +1,6 @@
 ---
 name: write-review
-description: "Multi-stage editorial pipeline for written drafts — composes /write, /recollect, /inquire, /gap, /contextualize and closes the loop via a browser preview with section-anchored inline comments. Use when the user wants to take a draft from raw idea to publish-ready, when the user mentions reviewing or refining a written piece (blog post, LinkedIn post, Medium article, Slack announcement, PR description, 1-pager), or when iterative editorial feedback over multiple turns is anticipated. Invoke explicitly with /write-review."
+description: "Multi-stage editorial pipeline composing /write × /recollect × /inquire × /gap × /contextualize with a browser channel-loop for inline-comment feedback. User-invoked via /write-review."
 skills:
   - epistemic-cooperative:write
   - anamnesis:recollect
