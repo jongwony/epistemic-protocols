@@ -76,7 +76,7 @@ turn ingests these as <code>&lt;feedback&gt;</code>-anchored directives.</p>
 // located in the source file via plain string search — frontmatter rarely shares verbatim
 // runs with body prose.
 const stripFrontmatter = (md: string) => {
-  const m = md.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n/);
+  const m = md.match(/^---\r?\n[\s\S]*?\r?\n---\r?(?:\n|$)/);
   return m ? md.slice(m[0].length) : md;
 };
 
