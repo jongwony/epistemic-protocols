@@ -14,27 +14,31 @@ Achieve certain comprehension of AI work through structured verification, enabli
 ```
 ── FLOW ──
 R → C → annotate(C) → Brief?(C, Nₐ) → Sₑ → Tᵣ →
-  ∀t ∈ Sₑ: detect(C_t) → GT → order(GT, c*) → P → Δ →
-    Q → A → monitor(A, S₁₋₄) →
-      fire_offer?: R4_gate(Q_c|Q_i|Q_r) → Stop → J_R4
-        J_R4 = continue    → Q(coverage)
-        J_R4 = intensity(ι) → recalibrate(Q, ι) → Q
-        J_R4 = Reframe(P)  → debt(t) ← unresolved; suspend(t); execute(P)[Skill]; restore → re-enter(t)
-      ¬fire_offer: Q(coverage)
-    → Tᵤ → P' → (loop until katalepsis)
+  ∀t ∈ Sₑ: detect(C_t) → GT → order(GT, c*) → φ → Δ →
+    Qs(Δ, ι) → A → monitor(A, S₁₋₄) →
+      proposal(A)?    → TaskCreate[Proposal]
+      misconception(A)? → Qᵣs(Aᵣ) → Read(source) if eval(A, Aᵣ) requires
+    → φ' → Tᵤ →
+      fire_offer(c)?: Qc_R4(J_R4) → Stop → J_R4
+        J_R4 = continue      → Qc(coverage)
+        J_R4 = intensity(ι') → recalibrate(Qs, ι') → Qs
+        J_R4 = Reframe(Π)    → debt(t) ← unresolved; suspend(t); execute(Π)[Skill]; restore → re-enter(t)
+      ¬fire_offer: Qc(coverage)
+    → (loop until katalepsis)
 
 ── MORPHISM ──
 Result
   → categorize(result)                 -- extract comprehension categories from AI work
   → annotate(priority)                 -- AI-autonomous category priority hint (BD-1a, cited basis)
   → brief?(result, narrative)          -- conditional Background briefing (R1-R3, session_narrative gate)
-  → select(entry_points)              -- user chooses categories to verify (multi-select gate; Invariant 6)
-  → register(tasks)                   -- track selected categories as tasks
-  → verify(comprehension)             -- Socratic probing per gap type, Causality-first when c* lacks WHY (BD-1b)
-  → monitor(misalignment)             -- S1-S4 observable signals, single-pass detector (R4, R7)
-  → recalibrate?(intensity)            -- Light/Medium/Heavy probe adaptation
-  → reframe?(deficit, debt)            -- path reset with debt preservation (R5, R8)
-  → confirm(coverage)                 -- aspect coverage check per category
+  → select(entry_points)               -- user chooses categories to verify (multi-select gate; Invariant 6)
+  → register(tasks)                    -- track selected categories as tasks
+  → [ verify(comprehension)            -- Socratic probing per gap type, Causality-first when entry category lacks WHY (BD-1b)
+      → monitor(misalignment)          -- S1-S4 observable signals, single-pass detector (R4, R7)
+      → ( recalibrate?(intensity)      -- Light/Medium/Heavy probe adaptation; returns to verify
+        | reframe?(deficit, debt)      -- path reset with debt preservation (R5, R8); returns to verify via re-entry
+        | confirm(coverage) )          -- aspect coverage check per category
+    ]*                                 -- re-entrant fixpoint: verify may repeat for the same task until coverage confirms
   → VerifiedUnderstanding
 requires: result_exists(R)              -- AI work output must exist in context
 deficit:  ResultUngrasped               -- activation precondition (Layer 1)
@@ -49,25 +53,38 @@ B  = Briefing block: Background-only relay text, provisional language (R1-R3)
 Sₑ = User-selected entry points (multi-select; Invariant 6 preserves ESC-friendly subset choice)
 Tᵣ = Task registration for tracking
 ι  = Intensity ∈ {Light, Medium, Heavy} — per-category calibration (user-declared or AI-inferred)
-P  = User's phantasia (current representation/understanding)
+φ  = User's phantasia (current representation/understanding)
 Δ  = Detected comprehension gap
-Q  = Verification question (via gate interaction)
+Qs = Socratic probe (gate interaction)
+Qc = Classificatory gate (gate interaction)
+Qᵣs = Misconception reasoning inquiry (gate interaction)
+Qc_R4 = R4 conditional re-entry gate (fires iff fire_offer(c))
 A  = User's answer
 Aᵣ = User's reasoning behind misconception (via gate interaction)
 Tᵤ = Task update (progress tracking)
-P' = Updated phantasia (refined understanding)
+φ' = Updated phantasia (refined understanding)
+TurnIndex = Natural number — monotonic turn counter within a probe cycle (enables window=3 co-occurrence predicate)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
-J_R4  = R4Judgment ∈ {continue, intensity(ι'), Reframe(ProtocolId)}
+J_R4  = R4Judgment ∈ {continue, intensity(ι'), Reframe(Π)}
 GT = Relevant gap types per category ⊆ {Expectation, Causality, Scope, Sequence} ∪ Emergent(C)
-c* = AI-ordered first probe within a category; Causality-first when c* lacks established WHY (BD-1b)
+c* = AI-ordered first probe within a category; Causality-first when the entry category lacks established WHY (BD-1b)
+Π  = ProtocolId ∈ {/clarify, /goal, /frame}  — Reframe routing target (BD-2)
+
+-- Annotation dictionary (AI-autonomous context, cited basis; labels used in Phase/Rule prose):
+BD-1a = priority annotation per category (AI label alongside each Phase 1 option; not pre-selection)
+BD-1b = Causality-first probe ordering when the entry category lacks established WHY
+BD-2  = Reframe sub-routing over Π (expression issue → /clarify, end-state issue → /goal, framework issue → /frame)
+BD-7  = abstraction gloss triggering for terms not established in session context
 
 -- R4 misalignment detector (observable rules, R7):
 Sᵢ ∈ {S1, S2, S3, S4}
 S1 = Performance-declaration mismatch: (ι_declared, eval(A)) dissonance
-S2 = Repair attempt: within-2-turn self-revision patterns
-S3 = Structural reframing: probe-direction pivot patterns (strongest signal)
+S2 = Repair attempt: within-2-turn self-revision patterns (user self-corrects first articulation)
+S3 = Structural reframing: probe-direction pivot patterns (strongest signal; user redirects probe topic)
 S4 = Silence/disengagement: composite (time > 60s ∧ content < 20 chars) OR explicit skip markers
-fire_offer(c) = single_signal_threshold(Sᵢ) ∨ co_occurrence(Sᵢ, Sⱼ, window=3)
+signals[c] = List[(Sᵢ, TurnIndex)]  — time-ordered accumulator for category c (drawn from Λ.signals[c])
+fire_offer(c) = single_threshold(signals[c]) ∨ co_occurrence(signals[c], window=3)
+-- formula references signals[c] explicitly; co_occurrence requires TurnIndex-ordered List (Set is uncomputable)
 
 -- R8 verification debt (Reframe-triggered):
 debt(t) = { pending_probes: List[GapType],
@@ -75,34 +92,42 @@ debt(t) = { pending_probes: List[GapType],
             partial_probes: List[{gt, eval: partial, followup_pending: true}] }
 -- debt persists on task metadata when Reframe fires; cleared on re-entry or explicit user dismissal
 
+-- Reframe suspend/restore state (mirrors Prosoche upstream routing pattern):
+SuspendState = { suspended_phase: Phase, suspended_task: TaskId, debt: debt(t), reframe_target: Π }
+
 -- R11 abstraction gloss (BD-7):
 gloss(τ, Σ) = inline plain-language explanation when τ ∉ established_in(Σ)
 -- fires on first mention of unestablished terms in /grasp output (briefing, probes, R4 gate, coverage)
 
 ── PHASE TRANSITIONS ──
-Phase 0: R → Categorize(R) → C → annotate_priority(C) → Nₐ?(R)         -- silent: categorize + BD-1a annotation + narrative-availability check
-Phase 1: C → brief?(C, Nₐ) → helper_prose → Qc(entry points, multi) → Stop → Sₑ  -- three-block: Background (conditional) → Helper → clean Gate [Tool]
-Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                                -- task registration [Tool]
-Phase 3: Tᵣ → TaskUpdate(current) → detect(C_t) → GT → order(GT, c*) → P → Δ   -- aspect-select relay; Causality-first when c* lacks WHY (BD-1b)
-       → Qs(Δ, ι) → Stop → A → monitor(A, S₁₋₄) → P' → Tᵤ               -- verification loop (intensity-calibrated; Qc for Expectation/Sequence, Qs for Causality/Scope/Emergent); silent misalignment monitor [Tool]
+Phase 0: R → Categorize(R) → C → annotate_priority(C) → Nₐ?(R)          -- silent: categorize + BD-1a annotation + narrative-availability check
+Phase 1: C → brief?(C, Nₐ) → helper_prose → Qc(entry points, multi) → Stop → Sₑ   -- three-block: Background (conditional) → Helper → clean Gate [Tool]
+Phase 2: Sₑ → TaskCreate[selected] → Tᵣ                                  -- task registration [Tool]
+Phase 3: Tᵣ → TaskUpdate(current) → detect(C_t) → GT → order(GT, c*) → φ → Δ   -- aspect-select relay; Causality-first when entry category lacks WHY (BD-1b)
+       → Qs(Δ, ι) → Stop → A                                              -- intensity-calibrated probe; Qc-kind for Expectation/Sequence, Qs-kind for Causality/Scope/Emergent [Tool]
+       → monitor(A, S₁₋₄)                                                 -- silent misalignment monitor appends to Λ.signals[c] with TurnIndex
        → TaskCreate[Proposal] if proposal(A)                              -- proposal ejection (detected from Other) [Tool]
        → Qᵣs(Aᵣ) → Stop if misconception(A)                              -- reasoning inquiry [Tool]
        → Read(source) if eval(A, Aᵣ) requires                            -- AI-determined reference [Tool]
-       → Qc_R4(J_R4) → Stop if fire_offer(c)                              -- conditional R4 re-entry gate {continue, intensity(ι'), Reframe(P)} [Tool]
-         J_R4 = Reframe(P) → debt(t) ← unresolved; suspend(t); execute(P)[Skill]; restore → re-enter(t)  -- R8 debt preservation
+       → φ' → Tᵤ                                                         -- phantasia update + task progress
+       → Qc_R4(J_R4) → Stop if fire_offer(c)                              -- conditional R4 re-entry gate {continue, intensity(ι'), Reframe(Π)} [Tool]
+         J_R4 = Reframe(Π) → debt(t) ← unresolved; suspend(Λ)[TaskCreate]; execute(Π)[Skill]; restore(Λ)[TaskGet] → re-enter(t)  -- R8 debt preservation; suspend/restore mirrors Prosoche Sub-A0 pattern
        → Qc(coverage) → Stop if correct(A)                                -- aspect summary [Tool]
 
 ── LOOP ──
-After Phase 3 verification: Evaluate comprehension per gap type; run single-pass misalignment monitor (R4).
+After Phase 3 probe-response cycle: Evaluate comprehension per gap type; run single-pass misalignment monitor (R4) which appends to Λ.signals[c] with TurnIndex.
 If |GT| = 0 for current category: present self-evident finding with reasoning per Rule 10, mark task completed upon confirmation, proceed to next task.
 If gap detected: Continue questioning within current category.
-If fire_offer(c): Present R4 conditional gate before aspect coverage. continue → default path; intensity(ι') → recalibrate next probe; Reframe(P) → preserve debt(t), suspend task, execute P inline, restore, re-enter t with debt surfaced.
+If fire_offer(c): Present R4 conditional gate before aspect coverage. continue → default path; intensity(ι') → recalibrate next probe with successor intensity; Reframe(Π) → preserve debt(t), suspend Λ via TaskCreate, execute Π inline via Skill, restore Λ via TaskGet, re-enter t with debt surfaced.
 If correct: Aspect summary — show probed vs unprobed gap types.
   User selects "sufficient" → TaskUpdate completed, next pending task.
   User selects additional aspect → Resume with selected gap type.
   User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, resume current loop position.
 User ESC after any completed category's probe cycle → graceful termination per Invariant 6 (selective-verification honored).
 Continue until: all selected tasks completed OR user ESC.
+
+Re-entrant fixpoint: the MORPHISM `[verify → monitor → (recalibrate | reframe | confirm)]*` may repeat for the same task until confirm(coverage) accepts. FLOW and PHASE TRANSITIONS above capture the repetition via the J_R4 branches returning to verify; MORPHISM marks it with `*` (Kleene-closure over the verify-subchain).
+
 Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
@@ -138,7 +163,7 @@ converge             (relay)   → TextPresent+Proceed (convergence evidence tra
 Phase 1 brief?        → relay, conditional (fires iff Nₐ = true; regret: bounded — R4 triggered re-entry catches mis-framed entry)
 Phase 1 helper        → relay (fires unconditionally when Phase 1 emits; regret: bounded — free-response channels remain available without helper)
 Phase 1 Qc (entry)    → always_gated (gated: verification scope selection + Invariant 6 ESC-friendly multi-select anchor)
-Phase 3 order         → relay (AI-autonomous aspect ordering; regret: bounded — free-response override + R4 monitor catches mis-ordering)
+Phase 3 order         → relay (A5 relay test: option-level entropy → 0 because BD-1b's Causality-first rule selects the unique entry dominating under the category's WHY-availability evidence. When entry category has established WHY, default ordering dominates; when WHY is absent, Causality dominates. No weighting configuration produces a different starting aspect given the same evidence set, so the choice is deterministic relative to Λ. Free-response override remains available at any probe response turn, and R4 monitor's S3 signal catches mis-ordering; regret: bounded)
 Phase 3 Qs (verify)   → always_gated (gated: Socratic probe — user comprehension is the measurement)
 Phase 3 Qᵣs (reason)  → always_gated (gated: misconception reasoning hypothesis)
 Phase 3 Qc_R4 (re-entry) → always_gated, conditional (fires iff fire_offer(c); gated: continue/intensity/Reframe is constitutive judgment on protocol path)
@@ -158,8 +183,8 @@ Phase 3 Qc (coverage) → always_gated (gated: aspect coverage — sufficient vs
   detected: Map<TaskId, Set<GapType>>,
   probed: Map<TaskId, Set<GapType>>,
   intensity: Map<TaskId, Intensity>,  -- per-category calibration (declared or AI-inferred)
-  signals: Map<TaskId, Set<MisalignmentSignal>>,  -- R4 monitor accumulator, window=3 turns
-  resolved_protocols: Set<ProtocolId>, -- Reframe execution history for session
+  signals: Map<TaskId, List[(MisalignmentSignal, TurnIndex)]>,  -- R4 monitor accumulator, time-ordered for window=3 predicate
+  upstream: Option<SuspendState>,     -- Reframe suspend/restore checkpoint (mirrors Prosoche Sub-A0 pattern)
   active: Bool
 }
 
@@ -179,13 +204,13 @@ These six invariants constrain every revision of the protocol's behavior and dow
 
 1. **"AI offers, user decides" boundary**: AI detects and surfaces; user retains judgment authority. The protocol may minimize gate frequency but must not collapse the offering/deciding separation into AI-autonomous user-judgment substitution. Phase 1 multi-select, Phase 3 probe gates, and R4 conditional re-entry all honor this.
 
-2. **Stoic katalepsis ↔ hermeneutic firmness reread**: The protocol name remains Katalepsis, but operation realizes "firmness-in-the-circle" (stabilized hermeneutic spiral) rather than Cartesian certainty. R3 provisional language honors this — briefing surfaces AI's framing as risked-and-revisable, not authoritative ground.
+2. **Provisional framing over declarative certainty**: Briefing phrasing marks AI's framing as current reading (revisable on user dialogue), not settled ground. Declarative authority-voice is excluded. The protocol aims for stabilized understanding through dialogue, not unconditional certainty — revision on evidence is expected rather than exceptional.
 
 3. **Domain-expert ≠ artifact-expert distinction**: Briefing applies at per-artifact level even for protocol-design experts. The user knows /grasp; they do not know each new AI artifact. Background briefing presence is not gated on expertise inference — only on AI's narrative-availability honesty.
 
 4. **Detection-from-silence asymmetry**: AI cannot reliably detect "user already framed this artifact" from invocation context. The unbounded-regret case (missed briefing → cognitive collapse) dominates the bounded-regret case (redundant briefing → seconds for expert). Same-artifact fade requires mechanical signals only (same session id, same input identifier, explicit re-invoke), never AI inference of "this seems related."
 
-5. **Single-pass spiral, triggered re-entry only**: Hermeneutic circle is honored by ONCE-at-startup briefing default. Mid-protocol re-entry is triggered (R4 observable signals), not routine — this is not a retraction of the spiral but the dialogical "Sache spricht" moment within the spiral.
+5. **Single-pass default, triggered re-entry only**: Briefing fires ONCE at startup by default. Mid-protocol re-entry is triggered by R4 observable signals, not routine. Re-entry is not retraction of the default path — it is the dialogical moment where observed misalignment warrants path reset.
 
 6. **Selective-verification + ESC-friendly workflow**: /grasp is a selective verification protocol — user retains the right to verify a category subset only and ESC after completing the subset. Phase 1 multi-select is the intent-expression channel for this selection. Per-category task lifecycle supports graceful ESC — completion of all categories is NOT a convergence prerequisite. This invariant bounds design revisions: mechanisms that collapse Phase 1 into AI-autonomous category selection (removing user's explicit subset declaration) are rejected because they increase burden on the ESC workflow.
 
@@ -480,14 +505,16 @@ For each task (category):
 
    Signal definitions (R7 observable rules, not intuitive detection):
 
-   | Signal | Trigger | FP budget |
-   |--------|---------|-----------|
+   | Signal | Trigger (predicate form, language-agnostic) | FP budget |
+   |--------|---------------------------------------------|-----------|
    | **S1 Performance-declaration mismatch** | `(ι_declared = Light ∧ eval(A) ∈ {partial, misconception}) ∨ (ι_declared = Heavy ∧ first_probe.eval = correct ∧ followup.eval = correct)`. Scope: applies only when response is evaluable; refusal-to-probe handled by S3 alone | ≤ 30% |
-   | **S2 Repair attempt** | Within-2-turn self-revision: user response contains `["actually", "wait", "no, I mean", "let me restate", "사실은", "아니, 그러니까", "다시 말하면"]` OR second response to same probe without AI intermediate | ≤ 40% |
-   | **S3 Structural reframing** | Probe-direction pivot markers `["why", "이게 왜", "근데 그건", "actually the point is", "but isn't this about"]` AND probe topic ≠ user response primary noun phrase. Strongest evidence: explicit redirect to different gap type or category | ≤ 25% |
-   | **S4 Silence/disengagement** | Content-based: response contains `["just proceed", "doesn't matter", "skip", "그만", "넘어가자", "아무튼"]`. Composite: `time > 60s ∧ content < 20 chars` (both required). **Time alone is not a trigger** — deliberative responses routinely exceed 60s | ≤ 50% |
+   | **S2 Repair attempt** | User self-revises their first articulation within a 2-turn window: the response contains a self-correction marker that retracts or restates the prior content, OR the user issues a second response to the same probe without an intervening AI turn. Evaluated by semantic function (retraction intent), not keyword match | ≤ 40% |
+   | **S3 Structural reframing** | User response pivots the probe's direction: the response shifts the probe's topic to an adjacent or contrary framing, questions the probe's premise rather than answering it, or explicitly redirects to a different gap type or category. Evaluated by semantic function (pivot intent relative to probe topic), not keyword match. Strongest evidence: explicit redirect | ≤ 25% |
+   | **S4 Silence/disengagement** | Composite (both required): `time > 60s ∧ content < 20 chars`. OR explicit disengagement: response carries semantic force of withdrawal from the verification (skip / proceed-without-completing / terminate). **Time alone is not a trigger** — deliberative responses routinely exceed 60s. Evaluated by semantic function, not keyword match | ≤ 50% |
 
-   Composite trigger: `fire_offer(c) = single_signal_threshold(Sᵢ) ∨ co_occurrence(Sᵢ, Sⱼ, window=3)`.
+   Composite trigger: `fire_offer(c) = single_threshold(Λ.signals[c]) ∨ co_occurrence(Λ.signals[c], window=3)`.
+
+   Signal detection is semantic-function driven, not enumerated-keyword matching. Novel phrasings matching the semantic predicate fire the signal; coincidental surface matches that lack the semantic intent do not. Per-signal FP budgets govern tuning.
 
    **Conservative default**: Initial deployment ≤ 1 trigger per 5 /grasp invocations (highest-precision threshold per signal). Tune only after dogfood evidence; log all tuning.
 
