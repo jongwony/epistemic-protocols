@@ -76,6 +76,11 @@ BD-1b = Causality-first probe ordering when the entry category lacks established
 BD-2  = Reframe sub-routing over Π (expression issue → /clarify, end-state issue → /goal, framework issue → /frame)
 BD-7  = abstraction gloss triggering for terms not established in session context
 
+-- Aliases used in MODE STATE:
+BriefingBlock = relay text of B (Background-only block; the runtime-rendered form)
+Understanding = the phantasia's runtime shape; carries revision history across probes (no further internal structure at this specification layer)
+MisalignmentSignal = Sᵢ ∈ {S1, S2, S3, S4} (detector class labels; see below)
+
 -- R4 misalignment detector (observable rules, R7):
 Sᵢ ∈ {S1, S2, S3, S4}
 S1 = Performance-declaration mismatch: (ι_declared, eval(A)) dissonance
@@ -132,8 +137,8 @@ Convergence evidence: At all-tasks-completed, present transformation trace — f
 
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
-           ∧ P' ≅ R (user understanding matches AI result)
-VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
+           ∧ φ' ≅ R (user understanding matches AI result)
+VerifiedUnderstanding = φ' where (∀t ∈ Λ.tasks: t.status = completed ∧ φ' ≅ R) ∨ user_esc
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
@@ -149,8 +154,8 @@ Phase 3 order        (relay)   → TextPresent+Proceed (aspect-select relay: AI-
 Phase 3 Qs           (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3 monitor      (sense)   → Internal analysis (R4 misalignment signal detection S1-S4; silent)
 Phase 3 Qᵣs          (gate)    → present (misconception reasoning inquiry)
-Phase 3 Qc_R4        (gate)    → present (conditional re-entry: {continue, intensity(ι'), Reframe(P)}; fires iff fire_offer(c))
-Phase 3 execute(P)   (dispatch) → Skill (reframed protocol inline execution; debt preserved on task metadata)
+Phase 3 Qc_R4        (gate)    → present (conditional re-entry: {continue, intensity(ι'), Reframe(Π)}; fires iff fire_offer(c))
+Phase 3 execute(Π)   (dispatch) → Skill (reframed protocol inline execution; debt preserved on task metadata)
 Phase 3 Qc           (gate)    → present (aspect coverage: sufficient/aspect)
 Phase 3 Ref          (observe) → Read (source artifact, AI-determined)
 Phase 3 Tᵤ           (track)   → TaskUpdate (progress tracking; metadata.verification_debt when Reframe fires)
@@ -163,7 +168,7 @@ converge             (relay)   → TextPresent+Proceed (convergence evidence tra
 Phase 1 brief?        → relay, conditional (fires iff Nₐ = true; regret: bounded — R4 triggered re-entry catches mis-framed entry)
 Phase 1 helper        → relay (fires unconditionally when Phase 1 emits; regret: bounded — free-response channels remain available without helper)
 Phase 1 Qc (entry)    → always_gated (gated: verification scope selection + Invariant 6 ESC-friendly multi-select anchor)
-Phase 3 order         → relay (A5 relay test: option-level entropy → 0 because BD-1b's Causality-first rule selects the unique entry dominating under the category's WHY-availability evidence. When entry category has established WHY, default ordering dominates; when WHY is absent, Causality dominates. No weighting configuration produces a different starting aspect given the same evidence set, so the choice is deterministic relative to Λ. Free-response override remains available at any probe response turn, and R4 monitor's S3 signal catches mis-ordering; regret: bounded)
+Phase 3 order         → relay (option-set relay test: option-level entropy → 0 because BD-1b's Causality-first rule selects the unique entry dominating under the category's WHY-availability evidence. When entry category has established WHY, default ordering dominates; when WHY is absent, Causality dominates. No weighting configuration produces a different starting aspect given the same evidence set, so the choice is deterministic relative to Λ. Free-response override remains available at any probe response turn, and R4 monitor's S3 signal catches mis-ordering; regret: bounded)
 Phase 3 Qs (verify)   → always_gated (gated: Socratic probe — user comprehension is the measurement)
 Phase 3 Qᵣs (reason)  → always_gated (gated: misconception reasoning hypothesis)
 Phase 3 Qc_R4 (re-entry) → always_gated, conditional (fires iff fire_offer(c); gated: continue/intensity/Reframe is constitutive judgment on protocol path)
@@ -336,7 +341,7 @@ Analyze AI work result, extract categories, annotate priority, and check briefin
 
 ### Phase 1: Entry Point Selection (Three-Block Structure)
 
-Phase 1 renders in three ordered blocks: (1) conditional Background briefing, (2) pre-gate helper prose, (3) clean categorical gate. The ordering conforms to the AskUserQuestion built-in tool format — gate contains only the question + structured options + implicit free-response channel; all analysis/mechanics/examples are emitted as assistant prose **before** the gate boundary.
+Phase 1 renders in three ordered blocks: (1) conditional Background briefing, (2) pre-gate helper prose, (3) clean categorical gate. The ordering respects Context-Question Separation: the gate contains only the question + structured options + the implicit free-response channel; all analysis, mechanics, and examples are emitted as assistant prose **before** the gate boundary. This is tool-agnostic — any realization that preserves gate semantics (present structured content → yield turn → parse response) satisfies the contract.
 
 **Block 1: Background briefing (conditional, relay)**
 
@@ -489,7 +494,7 @@ For each task (category):
 
    | Evaluation | Action | Tool |
    |------------|--------|------|
-   | Correct (P' ≅ R) | Confirm, proceed to next aspect or category | TaskUpdate |
+   | Correct (φ' ≅ R) | Confirm, proceed to next aspect or category | TaskUpdate |
    | Partial gap | Targeted followup probe on the gap area | Gate interaction |
    | Misconception | Reasoning inquiry → targeted correction | Gate interaction, Read (AI-determined) |
 
@@ -540,20 +545,20 @@ For each task (category):
 
    - **continue** → proceed to Step 3d
    - **intensity(ι')** → recalibrate `Λ.intensity[c]`, re-probe with new intensity
-   - **Reframe(P)** → Step 3c-debt
+   - **Reframe(Π)** → Step 3c-debt
 
 3c-debt. **Verification debt preservation (R8, on Reframe fire)**:
 
-   Reframe is a verification path reset, not exemption. When Reframe(P) fires for category `c`:
+   Reframe is a verification path reset, not exemption. When Reframe(Π) fires for category `c`:
 
    1. Compute `verification_debt(c)`:
       - `pending_probes`: gap types in `GT_detected(c) \ GT_probed(c)`
       - `in_progress_probe`: the probe whose response triggered Reframe — evaluation remains `unresolved`
       - `partial_probes`: gap types with `eval = partial` and pending follow-up
    2. Persist `Λ.tasks[c].metadata.verification_debt = debt` (task stays `in_progress`, not `completed`)
-   3. Suspend `Λ` state (TaskCreate for Λ.upstream with Resolved set)
-   4. Execute protocol P inline via Skill tool
-   5. On P convergence: restore `Λ` via TaskGet; re-enter category `c` with debt surfaced ("이전 verification이 미해결 상태입니다. Reframe 후 재개합니다." + in-progress probe context)
+   3. Suspend `Λ` state into `Λ.upstream: SuspendState` (TaskCreate with {suspended_phase, suspended_task=c, debt, reframe_target=Π})
+   4. Execute protocol Π inline via Skill tool
+   5. On Π convergence: restore `Λ` from `Λ.upstream` via TaskGet; re-enter category `c` with debt surfaced (one-line Korean notice that verification remains unresolved and resumption follows Reframe, plus the in-progress probe context)
    6. User options on re-entry:
       - **Resume** (default) — continue from pending probe
       - **Mark debt cleared** — explicit user judgment that reframing obsoleted the original probes
@@ -648,7 +653,7 @@ Every /grasp output surface — briefing text, probe question, probe options, as
 17. **Observable detector rules (R7)**: R4 misalignment signals operate via observable rules with explicit false-positive rate budgets per signal (S1 ≤ 30%, S2 ≤ 40%, S3 ≤ 25%, S4 ≤ 50%). Not "intuitive detection." Tuning logged, never silent.
 18. **Complexity hidden internally (R10)**: User-facing surface must not grow beyond the design budget (+200 tokens per invocation net). Internal mechanisms (R4 signal terminology, FP budgets, debt metadata structure, BoundaryMap) do not leak into user-visible text. Detection: briefing > 7±2 propositions OR R4 gate prose containing "S3 signal" / "FP budget" = boundary leak requiring revision.
 19. **Abstraction Accessibility (R11, BD-7)**: Every /grasp output surface carries inline plain-language gloss for terms not established in session context. AI-autonomous with cited basis; user can opt out via free-response gloss-suppression request. Budget: glosses ≤ 30% of surface text length per block.
-20. **Three-block Phase 1 structure**: Phase 1 renders in order (1) conditional Background relay → (2) helper prose naming free-response channels → (3) clean categorical gate. Helper content (Reframe mechanics, intensity examples, ESC note) belongs BEFORE the gate, not inside gate option descriptions. AskUserQuestion-conformant format.
+20. **Three-block Phase 1 structure**: Phase 1 renders in order (1) conditional Background relay → (2) helper prose naming free-response channels → (3) clean categorical gate. Helper content (Reframe mechanics, intensity examples, ESC note) belongs BEFORE the gate, not inside gate option descriptions. The gate boundary respects Context-Question Separation and is tool-agnostic — any realization preserving gate semantics satisfies the structural contract.
 21. **Structural gate-option criterion**: An item belongs in a gate's structured option list only when (i) it is a categorical selection that cannot be cleanly expressed via free-response, AND (ii) its distinction from other options produces differential downstream behavior that depends on categorical selection for unambiguous parsing. Reframe/intensity at Phase 1 fail criterion (i) — they arrive via free-response. R4 gate {continue, intensity, Reframe} pass — three structurally distinct actions needing categorical pick.
 22. **Priority annotation ≠ pre-selection (BD-1a)**: AI annotates each Phase 1 category option with an AI-priority hint and cited basis; user retains full multi-select authority. Annotation informs recognition; it does not substitute for user judgment. Invariant 1 + Invariant 6 binding.
 23. **Causality-first when WHY is absent (BD-1b)**: Phase 3 aspect-select relay orders probes so that Causality comes first when the entry category lacks established WHY in session context. Free-response override at any probe response.
