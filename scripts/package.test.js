@@ -171,7 +171,7 @@ describe('transformSkillMd', () => {
 describe('runtime contract view', () => {
   it('builds a packaged runtime view for every skill', () => {
     const views = buildRuntimeContractViews();
-    assert.equal(views.length, 20);
+    assert.equal(views.length, 21);
     for (const view of views) {
       assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one Skill.md entry`);
       assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed Skill.md`);
