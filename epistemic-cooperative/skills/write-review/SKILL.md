@@ -56,8 +56,8 @@ This phase is conditional: skip when the draft topic carries no prior session fo
 
 Invoke `/inquire` against the draft's factual surface — named people, project names, citations, statistics, technical claims about external systems. `/inquire` Phase 1 dispatches to the right verification track (CodeDerivable, CanonicalExternal via WebFetch, Instrumentation, UserTacit) per claim.
 
-**Pipeline context rule** (scope differentiation, satisfies suppression edge `syneidesis ⊣ aitesis`):
-> `/inquire` here targets **factual verifiability** of draft claims (Fiber(Factual)). The Phase 3 `/gap` invocation targets **content quality** (consideration, alternative, assumption gaps about the decision-to-publish). These are explicitly different scopes — `/inquire` does not pre-empt `/gap`.
+**Pipeline context rule** (`syneidesis ⊣ aitesis` suppression precondition not met — distinct scopes):
+> Suppression edges fire when source and target cover the **same scope**. Here `/inquire` targets **factual verifiability** of draft claims (Fiber(Factual)), while the Phase 3 `/gap` invocation targets **content quality** (consideration, alternative, assumption gaps about the decision-to-publish). Because these scopes are distinct, the same-scope precondition is never triggered and both protocols invoke independently — `/inquire` does not pre-empt `/gap`.
 
 ## Phase 3: Gap Audit (`gap`)
 
@@ -112,8 +112,8 @@ When `feedback-{slug}.jsonl` exists in the draft's directory, the next `/write-r
 3. Archives the consumed JSONL to `feedback-{slug}-{timestamp}.consumed.jsonl` to prevent re-ingestion
 4. The browser auto-reloads via WebSocket; the user inspects the updated draft and either approves or adds further comments — closing the loop
 
-**Pipeline context rule** (scope differentiation, satisfies suppression edge `aitesis ⊣ epharmoge`):
-> `/inquire` (Phase 2) verifies factual claims of the **draft as work-in-progress**. `/contextualize` (Phase 5) verifies applicability of the **draft as publish-ready artifact** against actual posting context (platform conventions, audience access, CTA fit). Pre-execution and post-execution scopes are distinct — pre+post stacking is the intended structural use, not a violation.
+**Pipeline context rule** (`aitesis ⊣ epharmoge` suppression precondition not met — distinct pre/post scopes):
+> Suppression edges fire when source and target cover the **same scope**. `/inquire` (Phase 2) verifies factual claims of the **draft as work-in-progress**; `/contextualize` (Phase 5) verifies applicability of the **draft as publish-ready artifact** against actual posting context (platform conventions, audience access, CTA fit). Because pre-execution and post-execution scopes are distinct, the same-scope precondition is never triggered; pre+post stacking here is the intended structural use, not a violation.
 
 ### Why a browser channel, not chat-gate
 
@@ -153,14 +153,14 @@ When sub-protocols are invoked from this pipeline:
 |---|---|
 | `/write` | Default Layer 1 multi-variant generation; output to `~/.claude/.write/` |
 | `/recollect` | Track = hybrid (drafts often mix proper-noun citations with vague topical recall); skip when draft has no prior session footprint |
-| `/inquire` | Scope = factual verifiability of draft claims; suppression edge with `/gap` is satisfied by scope differentiation declared above |
+| `/inquire` | Scope = factual verifiability of draft claims; `syneidesis ⊣ aitesis` suppression precondition (same-scope) is not met — `/inquire`'s factual scope is distinct from `/gap`'s content-quality scope |
 | `/gap` | Decision `D` = publish; stakes = High by default for public posts |
-| `/contextualize` | Information source = `feedback-{slug}.jsonl` from browser channel + standard post-execution scan; suppression edge with `/inquire` is satisfied by pre/post scope differentiation declared above |
+| `/contextualize` | Information source = `feedback-{slug}.jsonl` from browser channel + standard post-execution scan; `aitesis ⊣ epharmoge` suppression precondition (same-scope) is not met — pre-execution `/inquire` and post-execution `/contextualize` operate on distinct scopes |
 
 ## Rules
 
 1. **Composition, not absorption** — each sub-protocol remains independently invocable. `/write-review` orchestrates; it does not duplicate sub-protocol gate definitions.
-2. **Scope differentiation is structural** — the two suppression edges (`syneidesis ⊣ aitesis`, `aitesis ⊣ epharmoge`) are honored via the declared scope differentiation; chains that collapse the scopes back into one violate this rule.
+2. **Scope differentiation is structural** — the two suppression edges (`syneidesis ⊣ aitesis`, `aitesis ⊣ epharmoge`) fire only on same-scope co-activation; this pipeline keeps the scopes distinct (factual vs content-quality, pre-execution vs post-execution), so the suppression precondition is never met. Chains that collapse the scopes back into one would re-trigger suppression and violate this rule.
 3. **Browser channel is optional, not mandatory** — Phase 5 falls back to standard `/contextualize` chat-gate when the user prefers (e.g., headless environment, no browser available). The L3 mechanism augments, never replaces, the underlying epistemic check.
 4. **Feedback consumption is single-shot** — each `feedback-{slug}.jsonl` is read once and archived to prevent stale loops.
 5. **Platform variants are first-class** — when multiple variants exist (LinkedIn + Medium), Phase 5 channel review covers each variant with its own preview page; comments are namespaced per variant.

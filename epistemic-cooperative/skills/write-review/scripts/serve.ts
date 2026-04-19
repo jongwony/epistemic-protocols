@@ -33,13 +33,28 @@ const SCRIPT_DIR = new URL(".", import.meta.url).pathname;
 const TEMPLATES_DIR = resolve(SCRIPT_DIR, "..", "templates");
 const TEMPLATE_PATH = resolve(TEMPLATES_DIR, "preview.html");
 const MARKED_PATH = resolve(TEMPLATES_DIR, "marked.min.js");
-const template = await readFile(TEMPLATE_PATH, "utf8");
+
+let template: string;
+try {
+  template = await readFile(TEMPLATE_PATH, "utf8");
+} catch (e) {
+  console.error(`fatal: cannot read template ${TEMPLATE_PATH}: ${(e as Error).message}`);
+  console.error("the skill installation may be incomplete; verify templates/preview.html ships with the skill.");
+  process.exit(1);
+}
 
 const escapeForScriptTag = (s: string) => s.replace(/<\/script/gi, "<\\/script");
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+// Validation caps (M5): protect disk + JSONL schema integrity
+const MAX_ANCHOR_LEN = 500;
+const MAX_CONTEXT_LEN = 200;
+const MAX_COMMENT_LEN = 5000;
 
 const renderIndex = () => {
   const items = [...drafts.keys()]
-    .map((s) => `<li><a href="/preview/${encodeURIComponent(s)}">${s}</a></li>`)
+    .map((s) => `<li><a href="/preview/${encodeURIComponent(s)}">${escapeHtml(s)}</a></li>`)
     .join("\n");
   return `<!doctype html><html><head><meta charset=utf-8>
 <title>write-review</title>
@@ -60,9 +75,10 @@ const renderPreview = async (slug: string) => {
   const path = drafts.get(slug);
   if (!path) return null;
   const md = await readFile(path, "utf8");
+  // C3: title goes into HTML context (escape & < > " '); slug goes into JS string literal context (JSON.stringify)
   return template
-    .replaceAll("__TITLE_PLACEHOLDER__", slug)
-    .replaceAll("__SLUG_PLACEHOLDER__", slug)
+    .replaceAll("__TITLE_PLACEHOLDER__", escapeHtml(slug))
+    .replaceAll("__SLUG_PLACEHOLDER__", JSON.stringify(slug))
     .replace("__MARKDOWN_CONTENT_PLACEHOLDER__", escapeForScriptTag(md));
 };
 
@@ -75,6 +91,7 @@ interface FeedbackBody {
 }
 
 const server = Bun.serve({
+  hostname: "127.0.0.1", // M2: bind to loopback only — drafts and feedback are user-private
   port: 0,
   async fetch(req, srv) {
     const url = new URL(req.url);
@@ -103,9 +120,20 @@ const server = Bun.serve({
       } catch {
         return new Response("invalid JSON", { status: 400 });
       }
-      if (typeof body.slug !== "string" || !body.anchor || !body.comment) {
-        return new Response("missing fields", { status: 400 });
+      // M5: type guards + length caps to protect disk and JSONL schema
+      const isStr = (v: unknown): v is string => typeof v === "string";
+      if (!isStr(body.slug) || !isStr(body.anchor) || !isStr(body.comment)) {
+        return new Response("missing or non-string fields", { status: 400 });
       }
+      if (body.context_before != null && !isStr(body.context_before)) return new Response("context_before must be string", { status: 400 });
+      if (body.context_after != null && !isStr(body.context_after)) return new Response("context_after must be string", { status: 400 });
+      if (body.anchor.length === 0 || body.comment.length === 0) {
+        return new Response("anchor and comment must be non-empty", { status: 400 });
+      }
+      if (body.anchor.length > MAX_ANCHOR_LEN) return new Response(`anchor exceeds ${MAX_ANCHOR_LEN} chars`, { status: 413 });
+      if (body.comment.length > MAX_COMMENT_LEN) return new Response(`comment exceeds ${MAX_COMMENT_LEN} chars`, { status: 413 });
+      if ((body.context_before?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_before exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
+      if ((body.context_after?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_after exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
       const draft = drafts.get(body.slug);
       if (!draft) return new Response("unknown slug", { status: 400 });
       const entry = {
@@ -117,7 +145,14 @@ const server = Bun.serve({
         timestamp: new Date().toISOString(),
       };
       const feedbackPath = resolve(dirname(draft), `feedback-${body.slug}.jsonl`);
-      await appendFile(feedbackPath, JSON.stringify(entry) + "\n", "utf8");
+      // C2: surface I/O failures (disk full, permission denied) instead of silent loss
+      try {
+        await appendFile(feedbackPath, JSON.stringify(entry) + "\n", "utf8");
+      } catch (e) {
+        const msg = (e as Error).message;
+        console.error(`[feedback] FAILED to append ${feedbackPath}: ${msg}`);
+        return new Response(`feedback write failed: ${msg}`, { status: 500 });
+      }
       console.error(`[feedback] ${body.slug} ← "${body.anchor.slice(0, 50)}${body.anchor.length > 50 ? "…" : ""}"`);
       return Response.json({ ok: true, path: feedbackPath });
     }

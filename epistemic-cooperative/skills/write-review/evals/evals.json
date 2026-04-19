@@ -6,7 +6,7 @@
       "id": 1,
       "name": "dual-platform-blog-with-research-claims",
       "prompt": "수십 개의 AI 세션을 다루다 보니 30분만 지나면 까먹습니다. 인간이 어떻게 기억하는지(특히 Salience라는 철학적 개념), Karpathy의 LLM Wiki gist, Garry Tan의 GBrain, 그리고 알츠하이머에 걸리지 않은 수녀들을 추적한 Nun Study를 엮어서, LinkedIn 셀프 브랜딩 판본(GitHub CTA)과 Medium 채용 판본(채용 페이지 CTA) 두 가지로 써주세요. 인용한 사실은 모두 검증해 주시고, 게시 직전에 적용성 검토까지 부탁합니다.",
-      "expected_output": "Two draft files under ~/.claude/.write/ — one LinkedIn (concise, self-branding tone, GitHub link CTA) and one Medium (long-form, team-culture framing, recruiting link CTA). External attributions (Karpathy llm-wiki gist, garrytan/gbrain repository, David Snowdon Nun Study idea-density finding) verified via /inquire and cited in frontmatter. /gap surfaces overclaim risks (e.g., correlational research → prescriptive system design). Channel preview launchable via scripts/serve.sh; comment loop demonstrated end-to-end.",
+      "expected_output": "Two draft files under ~/.claude/.write/ — one LinkedIn (concise, self-branding tone, GitHub link CTA) and one Medium (long-form, team-culture framing, recruiting link CTA). External attributions (Karpathy llm-wiki gist, garrytan/gbrain repository, David Snowdon Nun Study idea-density finding) verified via /inquire and cited in frontmatter. /gap surfaces overclaim risks (e.g., correlational research → prescriptive system design). Channel preview launchable via `bun scripts/serve.ts`; comment loop demonstrated end-to-end.",
       "files": [],
       "assertions": []
     },
@@ -21,7 +21,7 @@
     {
       "id": 3,
       "name": "pr-description-with-codebase-facts",
-      "prompt": "방금 끝낸 PR 설명을 써야 해요. epistemic-cooperative/skills/write-review/ 디렉터리를 새로 만들었고 SKILL.md, scripts/serve.sh, scripts/build_preview.py, templates/preview.html, evals/evals.json을 추가했습니다. Ray Amjad의 3-layer artifact 프레임워크를 참고해서 L1(multi-variant)과 L3(채널 루프)만 흡수하고 L2(인터랙티브)는 Topology Divergence 근거로 기각했어요. 한국어 PR body로 부탁드려요.",
+      "prompt": "방금 끝낸 PR 설명을 써야 해요. epistemic-cooperative/skills/write-review/ 디렉터리를 새로 만들었고 SKILL.md, scripts/serve.ts, templates/preview.html, templates/marked.min.js, evals/evals.json을 추가했습니다. Ray Amjad의 3-layer artifact 프레임워크를 참고해서 L1(multi-variant)과 L3(채널 루프)만 흡수하고 L2(인터랙티브)는 Topology Divergence 근거로 기각했어요. 한국어 PR body로 부탁드려요.",
       "expected_output": "Korean PR body with Summary and Test plan sections per project conventions. /inquire CodeDerivable verifies the actual files exist at the cited paths and that L2 rejection rationale is recorded somewhere (e.g., in SKILL.md Composition Lineage section). /gap surfaces gaps like missing CHANGELOG entry or version bump check. /contextualize verifies fit with the project's PR body language preference (Korean) and conventional commit-style summary.",
       "files": [],
       "assertions": []
