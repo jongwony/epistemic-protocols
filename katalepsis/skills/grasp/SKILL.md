@@ -116,8 +116,8 @@ Phase 0 Categorize   (observe) → Internal analysis (Read for context if needed
 Phase 0 annotate     (sense)   → Internal analysis (AI-autonomous priority annotation per category with cited basis, BD-1a)
 Phase 0 Nₐ check     (sense)   → Internal analysis (session_narrative_available gate for R1 briefing)
 Phase 1 brief?       (relay)   → TextPresent+Proceed (Background block; fires iff Nₐ = true, provisional language per R3)
-Phase 1 helper       (relay)   → TextPresent+Proceed (pre-gate prose: Reframe/intensity free-response mechanics + ESC note, per § 6.5.10)
-Phase 1 Qc           (gate)    → present (entry point multi-select; clean option list — categorical selections only, per § 6.5.11)
+Phase 1 helper       (relay)   → TextPresent+Proceed (pre-gate prose: Reframe/intensity free-response mechanics + ESC note)
+Phase 1 Qc           (gate)    → present (entry point multi-select; clean option list — categorical selections only)
 Phase 2 Tᵣ           (track)   → TaskCreate (category tracking)
 Phase 3 detect       (sense)   → Internal analysis (gap type relevance detection per category)
 Phase 3 order        (relay)   → TextPresent+Proceed (aspect-select relay: AI-ordered probe sequence, Causality-first when c* lacks WHY; free-response override available, BD-1b)
@@ -336,7 +336,7 @@ Adapt wording to the specific session; no fixed template.
 
 **Block 3: Categorical gate (clean)**
 
-**Present** the multi-select gate with only categorical options — no options that duplicate free-response paths (structural gate-option criterion, § 6.5.11).
+**Present** the multi-select gate with only categorical options — no options that duplicate free-response paths (structural gate-option criterion).
 
 ```
 question: "What would you like to understand first?"
@@ -615,13 +615,13 @@ Every /grasp output surface — briefing text, probe question, probe options, as
 11. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 12. **Conditional briefing (R1-R2)**: Phase 1 Background briefing fires iff `Nₐ = true` (session-internal narrative available). External artifacts (cloned code without session work, uploaded PDFs, official docs) skip briefing — producing Background without narrative source is fabrication and violates R3. Framing and Emergent segmentation are excluded; Background-only.
 13. **Provisional language (R3)**: Briefing phrasing surfaces AI's framing as risked-and-revisable hypothesis — avoid declarative authority. This is the Hermeneutic Vorurteil guard.
-14. **Triggered re-entry (R4)**: Mid-protocol re-entry fires on observable misalignment signals S1-S4 per § Misalignment monitoring step 3c-monitor. Single-pass per probe cycle. Conservative default: ≤ 1 trigger per 5 invocations. Never silent — always surfaces via Qc_R4 gate.
+14. **Triggered re-entry (R4)**: Mid-protocol re-entry fires on observable misalignment signals S1-S4 (step 3c-monitor). Single-pass per probe cycle. Conservative default: ≤ 1 trigger per 5 invocations. Never silent — always surfaces via Qc_R4 gate.
 15. **Reframe preserves debt (R5, R8)**: Reframe is a verification path reset, not exemption. Pending probes persist on task metadata; re-entry after reframed protocol returns presents the unresolved probe context. Reframe is available via (a) Phase 1 free-response, (b) Phase 3 free-response, (c) R4 trigger gate option — three channels.
 16. **Mechanical same-artifact fade (R6)**: Background segment fade on re-invocation requires mechanical signals only — same /grasp session id + same input-artifact identifier + explicit user re-invoke. AI inference of "this seems related to prior artifact" is prohibited. Cross-artifact, no fade.
 17. **Observable detector rules (R7)**: R4 misalignment signals operate via observable rules with explicit false-positive rate budgets per signal (S1 ≤ 30%, S2 ≤ 40%, S3 ≤ 25%, S4 ≤ 50%). Not "intuitive detection." Tuning logged, never silent.
 18. **Complexity hidden internally (R10)**: User-facing surface must not grow beyond the design budget (+200 tokens per invocation net). Internal mechanisms (R4 signal terminology, FP budgets, debt metadata structure, BoundaryMap) do not leak into user-visible text. Detection: briefing > 7±2 propositions OR R4 gate prose containing "S3 signal" / "FP budget" = boundary leak requiring revision.
 19. **Abstraction Accessibility (R11, BD-7)**: Every /grasp output surface carries inline plain-language gloss for terms not established in session context. AI-autonomous with cited basis; user can opt out via free response ("skip glosses"). Budget: glosses ≤ 30% of surface text length per block.
 20. **Three-block Phase 1 structure**: Phase 1 renders in order (1) conditional Background relay → (2) helper prose naming free-response channels → (3) clean categorical gate. Helper content (Reframe mechanics, intensity examples, ESC note) belongs BEFORE the gate, not inside gate option descriptions. AskUserQuestion-conformant format.
-21. **Structural gate-option criterion (§ 6.5.11)**: An item belongs in a gate's structured option list only when (i) it is a categorical selection that cannot be cleanly expressed via free-response, AND (ii) its distinction from other options produces differential downstream behavior that depends on categorical selection for unambiguous parsing. Reframe/intensity at Phase 1 fail criterion (i) — they arrive via free-response. R4 gate {continue, intensity, Reframe} pass — three structurally distinct actions needing categorical pick.
+21. **Structural gate-option criterion**: An item belongs in a gate's structured option list only when (i) it is a categorical selection that cannot be cleanly expressed via free-response, AND (ii) its distinction from other options produces differential downstream behavior that depends on categorical selection for unambiguous parsing. Reframe/intensity at Phase 1 fail criterion (i) — they arrive via free-response. R4 gate {continue, intensity, Reframe} pass — three structurally distinct actions needing categorical pick.
 22. **Priority annotation ≠ pre-selection (BD-1a)**: AI annotates each Phase 1 category option with an AI-priority hint and cited basis; user retains full multi-select authority. Annotation informs recognition; it does not substitute for user judgment. Invariant 1 + Invariant 6 binding.
 23. **Causality-first when WHY is absent (BD-1b)**: Phase 3 aspect-select relay orders probes so that Causality comes first when the entry category lacks established WHY in session context. Free-response override at any probe response.
