@@ -68,7 +68,7 @@ const EXCLUDE_NAMES = new Set([
   'README.md', 'README_ko.md',
 ]);
 const EXCLUDE_EXTS = new Set(['.zip']);
-const EXCLUDE_DIRS = new Set(['agents', 'commands']);
+const EXCLUDE_DIRS = new Set(['agents', 'commands', 'evals']);
 const STRIP_FIELDS = new Set(['allowed-tools', 'license', 'compatibility', 'metadata']);
 
 // Protocol metadata for release notes (deficit → resolution pairs)
