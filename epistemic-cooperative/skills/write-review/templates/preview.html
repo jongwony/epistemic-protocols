@@ -167,6 +167,29 @@
   #status-conn.disconnected::before { color: #aaa; }
   #status-count strong { color: #222; }
 
+  /* Toast — confirms each submit silently append to disk, since popup close alone is ambiguous */
+  #toast {
+    position: fixed;
+    bottom: 3.2em;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: #222;
+    color: white;
+    padding: .5em 1em;
+    border-radius: 20px;
+    font-size: .85em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+    z-index: 1500;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  #toast.error { background: #c0392b; }
+
   @media (prefers-color-scheme: dark) {
     body { background: #1a1a1a; color: #e0e0e0; }
     header { border-bottom-color: #333; color: #888; }
@@ -199,13 +222,15 @@
     <button id="popup-cancel">Cancel</button>
     <button id="popup-submit" class="primary">Submit</button>
   </div>
-  <div id="popup-hint">⌘Enter to submit · Esc to cancel</div>
+  <div id="popup-hint">⌘Enter to submit · Esc to cancel · click a 💬 mark to edit</div>
 </div>
 
 <div id="status">
   <span id="status-conn">live</span>
   <span id="status-count"><strong id="count">0</strong> comments this session</span>
 </div>
+
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script type="text/markdown" id="md-source">__MARKDOWN_CONTENT_PLACEHOLDER__</script>
 
@@ -235,6 +260,17 @@ content.addEventListener("mouseup", () => {
   setTimeout(handleSelection, 0);
 });
 
+function setPopupMode(isEdit) {
+  popupSubmit.textContent = isEdit ? "Update" : "Submit";
+}
+
+function positionPopupNear(rect) {
+  const popupWidth = 340;
+  const left = Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - popupWidth - 16);
+  popup.style.top = (window.scrollY + rect.bottom + 8) + "px";
+  popup.style.left = Math.max(16, left) + "px";
+}
+
 function handleSelection() {
   const sel = window.getSelection();
   if (!sel || sel.isCollapsed) return;
@@ -247,18 +283,44 @@ function handleSelection() {
   const context_before = idx >= 0 ? contentText.slice(Math.max(0, idx - 60), idx).replace(/\s+/g, " ").trim() : "";
   const context_after = idx >= 0 ? contentText.slice(idx + text.length, idx + text.length + 60).replace(/\s+/g, " ").trim() : "";
 
-  pending = { range: range.cloneRange(), anchor: text, context_before, context_after };
+  pending = { range: range.cloneRange(), anchor: text, context_before, context_after, editingMark: null };
 
-  const rect = range.getBoundingClientRect();
-  const popupWidth = 340;
-  const left = Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - popupWidth - 16);
-  popup.style.top = (window.scrollY + rect.bottom + 8) + "px";
-  popup.style.left = Math.max(16, left) + "px";
+  positionPopupNear(range.getBoundingClientRect());
   popupPreview.textContent = text.length > 200 ? text.slice(0, 200) + "…" : text;
   popupTextarea.value = "";
+  setPopupMode(false);
   popup.classList.add("show");
   popupTextarea.focus();
 }
+
+// Click an existing annotation to edit it. Append-only JSONL is preserved — the edit
+// resubmits with the same (anchor, context_before, context_after) tuple; the revision
+// consumer applies latest-timestamp-wins dedup on that tuple.
+function openEditPopup(markEl) {
+  pending = {
+    range: null,
+    anchor: markEl.dataset.anchor || markEl.textContent,
+    context_before: markEl.dataset.contextBefore || "",
+    context_after: markEl.dataset.contextAfter || "",
+    editingMark: markEl,
+  };
+  positionPopupNear(markEl.getBoundingClientRect());
+  const anchorText = pending.anchor;
+  popupPreview.textContent = anchorText.length > 200 ? anchorText.slice(0, 200) + "…" : anchorText;
+  popupTextarea.value = markEl.dataset.comment || "";
+  setPopupMode(true);
+  popup.classList.add("show");
+  popupTextarea.focus();
+  popupTextarea.select();
+}
+
+content.addEventListener("click", (e) => {
+  const mark = e.target.closest(".annotated");
+  if (mark) {
+    e.stopPropagation();
+    openEditPopup(mark);
+  }
+});
 
 function dismissPopup() {
   popup.classList.remove("show");
@@ -284,6 +346,16 @@ document.addEventListener("click", (e) => {
   if (!popup.contains(e.target) && !content.contains(e.target)) dismissPopup();
 });
 
+const toastEl = document.getElementById("toast");
+let toastTimer = null;
+function showToast(msg, isError) {
+  toastEl.textContent = msg;
+  toastEl.classList.toggle("error", !!isError);
+  toastEl.classList.add("show");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+}
+
 async function submitFeedback() {
   if (!pending) return dismissPopup();
   const comment = popupTextarea.value.trim();
@@ -305,19 +377,30 @@ async function submitFeedback() {
     });
     if (!resp.ok) throw new Error("server " + resp.status);
 
-    // Visual mark — best effort; surroundContents fails if range crosses element boundaries
-    try {
-      const mark = document.createElement("mark");
-      mark.className = "annotated";
-      mark.title = comment;
-      captured.range.surroundContents(mark);
-    } catch (e) {
-      console.warn("range crosses element boundary; comment saved without visual mark.", e);
+    if (captured.editingMark) {
+      captured.editingMark.dataset.comment = comment;
+      captured.editingMark.title = comment;
+      showToast("✓ updated");
+    } else {
+      // Visual mark — best effort; surroundContents fails if range crosses element boundaries
+      try {
+        const mark = document.createElement("mark");
+        mark.className = "annotated";
+        mark.title = comment;
+        mark.dataset.anchor = captured.anchor;
+        mark.dataset.contextBefore = captured.context_before;
+        mark.dataset.contextAfter = captured.context_after;
+        mark.dataset.comment = comment;
+        captured.range.surroundContents(mark);
+      } catch (e) {
+        console.warn("range crosses element boundary; comment saved without visual mark (edit unavailable).", e);
+      }
+      count++;
+      countEl.textContent = count;
+      showToast(`✓ saved (${count} total)`);
     }
-    count++;
-    countEl.textContent = count;
   } catch (e) {
-    alert("feedback submission failed: " + e.message);
+    showToast(`✗ save failed: ${e.message}`, true);
   }
   dismissPopup();
 }
