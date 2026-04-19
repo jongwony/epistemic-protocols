@@ -1,0 +1,38 @@
+{
+  "skill_name": "write-review",
+  "description": "Editorial pipeline test cases spanning the length × fact-burden × audience axes. Each case exercises a different sub-protocol load.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "dual-platform-blog-with-research-claims",
+      "prompt": "수십 개의 AI 세션을 다루다 보니 30분만 지나면 까먹습니다. 인간이 어떻게 기억하는지(특히 Salience라는 철학적 개념), Karpathy의 LLM Wiki gist, Garry Tan의 GBrain, 그리고 알츠하이머에 걸리지 않은 수녀들을 추적한 Nun Study를 엮어서, LinkedIn 셀프 브랜딩 판본(GitHub CTA)과 Medium 채용 판본(채용 페이지 CTA) 두 가지로 써주세요. 인용한 사실은 모두 검증해 주시고, 게시 직전에 적용성 검토까지 부탁합니다.",
+      "expected_output": "Two draft files under ~/.claude/.write/ — one LinkedIn (concise, self-branding tone, GitHub link CTA) and one Medium (long-form, team-culture framing, recruiting link CTA). External attributions (Karpathy llm-wiki gist, garrytan/gbrain repository, David Snowdon Nun Study idea-density finding) verified via /inquire and cited in frontmatter. /gap surfaces overclaim risks (e.g., correlational research → prescriptive system design). Channel preview launchable via scripts/serve.sh; comment loop demonstrated end-to-end.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "slack-policy-announcement-short",
+      "prompt": "팀 정책 변경 공지를 써야 해요. 매주 금요일 오후 2시에 하던 팀 회고를 격주 화요일 오전 10시로 옮긴다는 내용. Slack #fd-team 채널에 올릴 짧은 한국어 공지 부탁드려요.",
+      "expected_output": "Single Slack-formatted announcement under ~150 words. /inquire largely skipped (no external claims to verify; only the schedule fact, which is user-supplied). /gap surfaces consideration gaps relevant to the change (e.g., transition window, who is responsible for setting up the new cadence, fallback if a Tuesday is a holiday). /contextualize verifies tone fits Slack channel conventions. Channel preview is optional — for a short Slack message, chat-gate /contextualize is fully sufficient and the skill should not auto-launch the browser.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 3,
+      "name": "pr-description-with-codebase-facts",
+      "prompt": "방금 끝낸 PR 설명을 써야 해요. epistemic-cooperative/skills/write-review/ 디렉터리를 새로 만들었고 SKILL.md, scripts/serve.sh, scripts/build_preview.py, templates/preview.html, evals/evals.json을 추가했습니다. Ray Amjad의 3-layer artifact 프레임워크를 참고해서 L1(multi-variant)과 L3(채널 루프)만 흡수하고 L2(인터랙티브)는 Topology Divergence 근거로 기각했어요. 한국어 PR body로 부탁드려요.",
+      "expected_output": "Korean PR body with Summary and Test plan sections per project conventions. /inquire CodeDerivable verifies the actual files exist at the cited paths and that L2 rejection rationale is recorded somewhere (e.g., in SKILL.md Composition Lineage section). /gap surfaces gaps like missing CHANGELOG entry or version bump check. /contextualize verifies fit with the project's PR body language preference (Korean) and conventional commit-style summary.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 4,
+      "name": "one-pager-multi-audience-strategic",
+      "prompt": "사내 기술 의사결정 1-pager 써야 해요. 우리 팀이 RAG 기반 지식관리에서 epistemic-protocol 기반 Salience 인덱싱으로 전환을 검토 중인데, 같은 한 페이지에서 (a) 엔지니어가 왜 기술적으로 다른지, (b) PM이 사용자 경험이 어떻게 바뀌는지, (c) 경영진이 왜 지금 투자해야 하는지 — 세 가지 답을 모두 얻을 수 있도록 섹션을 구조화해주세요. 한국어로 부탁드려요.",
+      "expected_output": "Structured one-pager (~600-900 words) with three clearly demarcated audience sections (Engineering / Product / Executive) on a single page. /recollect surfaces prior session material on Topology Divergence and Salience-over-Structure. /inquire verifies the RAG vs epistemic-topology distinction with citable evidence. /gap surfaces counter-arguments per audience (engineer: complexity overhead; PM: learning curve; exec: opportunity cost). /contextualize confirms the multi-audience structure works on a single page (length, scannability). Channel preview strongly recommended — multi-stakeholder review is the L3 mechanism's natural use case.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}

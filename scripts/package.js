@@ -39,6 +39,7 @@ const PLUGINS = [
   { dir: 'epistemic-cooperative', skill: 'sophia' },
   { dir: 'epistemic-cooperative', skill: 'curses' },
   { dir: 'epistemic-cooperative', skill: 'write' },
+  { dir: 'epistemic-cooperative', skill: 'write-review' },
   { dir: 'anamnesis', skill: 'recollect' },
 ];
 
@@ -59,6 +60,7 @@ const DESCRIPTION_OVERRIDES = {
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   compose: 'Protocol composition authoring — build composition SKILL.md from protocol chains',
   write: 'Multi-perspective blog drafting — transforms session insights into publishable content via iterative perspective-based refinement.',
+  'write-review': 'Multi-stage editorial pipeline — composes /write × /recollect × /inquire × /gap × /contextualize, closing the loop via a Bun-served browser preview with Medium-style selection-anchored inline comments.',
 };
 
 const EXCLUDE_NAMES = new Set([
