@@ -1,17 +1,17 @@
 ---
 name: release
 description: Release for this repo — CalVer tag + narrative prepend.
-allowed-tools: Read, Write, Edit, Bash(gh release:*), Bash(gh run:*), Bash(git tag:*), Bash(git push:*), Bash(git log:*), Bash(git status:*), Bash(git describe:*), AskUserQuestion
+allowed-tools: Read, Write, Edit, Bash(gh *), Bash(git *), AskUserQuestion
 ---
 
 # Release (project-local)
 
-Creates a CalVer tagged release with a hand-written narrative prepended to the CI auto-generated body. Overrides the global `/release` skill for this repo.
+Creates a CalVer tagged release with a hand-written narrative prepended to the body CI generates via `scripts/package.js`. Overrides the global `/release` skill for this repo.
 
 ## Purpose
 
-- Push CalVer tag → CI (`release.yml`) builds ZIPs + creates draft with auto-generated notes
-- Prepend a hand-written narrative block to the CI-generated body so the release surfaces "why this release matters" before the commit list
+- Push CalVer tag → CI (`release.yml`) runs `scripts/package.js` to build ZIPs + produce `dist/release-notes.md`, then `gh release create --draft --notes-file` attaches it
+- Prepend a hand-written narrative block to the script-generated body so the release surfaces "why this release matters" before the commit list
 - Leave publish (draft → published) to the user for manual review
 
 ## Preconditions
@@ -39,7 +39,7 @@ Creates a CalVer tagged release with a hand-written narrative prepended to the C
 - Poll `gh run list --workflow=release.yml --limit 1 --json status,conclusion,databaseId` every 5s, max 12 attempts (60s total)
 - When `status=completed` and `conclusion=success`, fetch draft: `gh release view <tag> --json body,url`
 - If still `in_progress` after 60s: surface run URL and ask user whether to keep waiting
-- If CI fails: surface logs via `gh run view <id> --log-failed`, do not proceed to Phase 4
+- If CI fails: surface logs via `gh run view <id> --log-failed`, do not proceed to Phase 4. Remediation: fix the cause and retag with `.N` increment, or clean up the pushed tag with `git push origin :refs/tags/<tag>` before retrying
 
 ### Phase 4: Narrative drafting
 
@@ -71,17 +71,23 @@ Draft narrative using this template (Korean, matching repo's PR body convention)
 
 ---
 
-{auto-generated body}
+{script-generated body}
 ```
 
 Emoji selection is descriptive (choose what fits the change's semantic class), not prescriptive. Examples observed across releases: ✍️ editing/writing, 🔎 introspection, 🧠 memory/cognition, 🏛️ structural/axiom, 🪢 cross-cutting principle, 🔍 verification, 🎯 classification, ⚡ simplification.
 
 ### Phase 5: Gate
 
-Present the drafted narrative (theme + bullets) with the full composed body preview. Options:
-1. **Apply** — prepend narrative as drafted
-2. **Modify** — user supplies edits or requests regeneration
-3. **Skip** — leave CI body as-is (patch-only releases per Rule 5)
+**Context** (emit before the gate, as text output):
+- Full composed body preview: narrative draft + `---` + script-generated body
+- Theme sentence and bullet selection rationale
+
+**Question**: Apply the drafted narrative to the draft release?
+
+Options:
+1. **Apply** — prepend narrative as drafted; proceed to Phase 6
+2. **Modify** — user supplies edits or regeneration directive; revised draft re-presents at Phase 5 (loop until Apply or Skip)
+3. **Skip** — leave script-generated body as-is (patch-only releases per Rule 5); proceed to Phase 6 with no prepend
 
 This gate is mandatory even if the narrative seems obvious — theme choice is a constitutive judgment the user owns.
 
@@ -93,9 +99,9 @@ This gate is mandatory even if the narrative seems obvious — theme choice is a
 
 ## Rules
 
-1. **Tag before narrative**: CI must create the draft first. Narrative prepends to auto-generated content; it does not replace or regenerate the Highlights/Protocols/Assets sections.
+1. **Tag before narrative**: CI must create the draft first. Narrative prepends to the script-generated body (Highlights/Protocols/Assets sections from `scripts/package.js`); the skill does not replace or regenerate those sections.
 2. **Korean narrative**: matches the repo's PR body language convention.
-3. **User publishes**: this skill never runs `gh release edit --draft=false` and never calls `gh release create` directly (CI owns creation). Publish is a manual action by the user on the GitHub web UI.
+3. **Terminal operation bounded to body edit**: the skill's terminal operation is `gh release edit <tag> --notes-file <path>` against the existing draft. Release creation is owned by CI (via tag push trigger); publish-to-public is owned by the user via the GitHub web UI.
 4. **Theme over item list**: the narrative answers "why this release matters"; the auto-generated section already enumerates what changed. Do not duplicate the commit list inside the narrative.
 5. **3-4 bullets max**: more dilutes impact. If fewer than 3 user-facing changes exist, propose skipping the narrative entirely (patch-only releases do not need it).
 6. **No draft republish on existing body**: if the draft already has a narrative (check for leading `>` blockquote in fetched body), ask before overwriting.
