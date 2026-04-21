@@ -97,6 +97,8 @@ Invoke /gap for final validation:
 - Consideration gaps
 - Duplicate content
 
+**Composition note**: When /write output is downstream-reviewed by /artifact-review, this Phase 7 internal /gap and /artifact-review's Pipeline Phase 2 /gap address distinct scopes (internal draft quality here vs. fixation-event decision quality downstream). Both invocations are intentional; the scope distinction preserves the /gap invariant.
+
 ### 8. Finalization
 
 Apply final edits. Optionally clean intermediate versions.

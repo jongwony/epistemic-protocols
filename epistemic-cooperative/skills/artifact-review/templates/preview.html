@@ -399,10 +399,11 @@ async function submitFeedback() {
       countEl.textContent = count;
       showToast(`✓ saved (${count} total)`);
     }
+    dismissPopup();
   } catch (e) {
-    showToast(`✗ save failed: ${e.message}`, true);
+    // Preserve comment text on failure (5xx, network error) so the user can retry — don't dismiss.
+    showToast(`✗ save failed: ${e.message} — comment preserved, press ⌘Enter to retry`, true);
   }
-  dismissPopup();
 }
 
 // WebSocket hot reload
@@ -419,6 +420,13 @@ function connectWS() {
     conn.classList.add("disconnected");
     conn.textContent = "reconnecting…";
     setTimeout(connectWS, 2000);
+  };
+  ws.onerror = (e) => {
+    // Surface handshake / protocol errors instead of swallowing them into the infinite reconnect loop.
+    conn.classList.add("disconnected");
+    conn.textContent = "ws error";
+    console.error("[ws] error:", e);
+    // onclose fires next and triggers the reconnect timer; no manual action needed here.
   };
   ws.onmessage = (e) => {
     try {

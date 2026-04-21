@@ -22,6 +22,15 @@ if (args.length === 0) {
   process.exit(1);
 }
 
+// Reject flag-shaped args so they don't become phantom draft paths via `resolve()`.
+// --skip-channel and similar flags are honored by the skill caller, not this server.
+const unknownFlags = args.filter((a) => a.startsWith("-"));
+if (unknownFlags.length > 0) {
+  console.error(`unknown flag(s): ${unknownFlags.join(", ")}`);
+  console.error("usage: bun scripts/serve.ts <draft.md> [<draft.md> ...]");
+  process.exit(1);
+}
+
 const drafts = new Map<string, string>(); // slug -> absolute path
 for (const arg of args) {
   const abs = resolve(arg);
@@ -48,6 +57,7 @@ const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
 // Validation caps: protect disk + JSONL schema integrity
+const MAX_SLUG_LEN = 200;
 const MAX_ANCHOR_LEN = 500;
 const MAX_CONTEXT_LEN = 200;
 const MAX_COMMENT_LEN = 5000;
@@ -111,9 +121,14 @@ const server = Bun.serve({
 
     if (url.pathname.startsWith("/preview/")) {
       const slug = decodeURIComponent(url.pathname.slice("/preview/".length));
-      const html = await renderPreview(slug);
-      if (!html) return new Response("not found", { status: 404 });
-      return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      try {
+        const html = await renderPreview(slug);
+        if (!html) return new Response("not found", { status: 404 });
+        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      } catch (e) {
+        console.error(`[preview] render failed for slug=${slug}: ${(e as Error).message}`);
+        return new Response("render failed", { status: 500 });
+      }
     }
 
     if (url.pathname === "/marked.min.js") {
@@ -139,6 +154,7 @@ const server = Bun.serve({
       if (body.anchor.length === 0 || body.comment.length === 0) {
         return new Response("anchor and comment must be non-empty", { status: 400 });
       }
+      if (body.slug.length > MAX_SLUG_LEN) return new Response(`slug exceeds ${MAX_SLUG_LEN} chars`, { status: 413 });
       if (body.anchor.length > MAX_ANCHOR_LEN) return new Response(`anchor exceeds ${MAX_ANCHOR_LEN} chars`, { status: 413 });
       if (body.comment.length > MAX_COMMENT_LEN) return new Response(`comment exceeds ${MAX_COMMENT_LEN} chars`, { status: 413 });
       if ((body.context_before?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_before exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
@@ -186,13 +202,16 @@ const server = Bun.serve({
 const lastFire = new Map<string, number>();
 const WATCH_DEBOUNCE_MS = 150;
 for (const [slug, path] of drafts) {
-  watch(path, () => {
+  const watcher = watch(path, () => {
     const now = Date.now();
     const prev = lastFire.get(slug) ?? 0;
     if (now - prev < WATCH_DEBOUNCE_MS) return;
     lastFire.set(slug, now);
     console.error(`[watch] ${slug} changed → publish reload`);
     server.publish("reload", JSON.stringify({ slug }));
+  });
+  watcher.on("error", (err: NodeJS.ErrnoException) => {
+    console.error(`[watch] error on ${path}: ${err.message} (code=${err.code ?? "unknown"})`);
   });
 }
 

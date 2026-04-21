@@ -18,9 +18,11 @@ Unlike domain-specific editorial wrappers, `/artifact-review` is agnostic about 
 ```
 /artifact-review(artifact_path, fixation_event D, application_context)
 
-artifact_path        : String | List<String>    -- path to markdown file(s)
-fixation_event D     : String                   -- committed action (publish, commit, deposit, approve, merge, ...)
-application_context  : String                   -- where the fixed artifact operates
+artifact_path        : String | List<String>                      -- path to markdown file(s)
+fixation_event D     : Irreversible(String) | Reversible(String)  -- committed action; tag drives /gap stakes default
+                                                                   --   Irreversible (stakes=High default): publish, deposit, merge
+                                                                   --   Reversible   (stakes=Medium default): commit-to-execution, approve-pending-revise
+application_context  : String                                     -- where the fixed artifact operates
 ```
 
 The caller — whether the user invoking `/artifact-review` directly or a composing skill that calls this one — supplies all three fields. When `D` or `application_context` is omitted, the skill infers defaults from the artifact path when possible (e.g., `~/.claude/plans/*.md` → D = "commit to execution", `~/.claude/.write/*.md` → D = "publish"); if inference yields no confident match, the skill asks the user.
@@ -89,6 +91,8 @@ Common gaps across artifact types:
 - **Stakes**: caller-supplied; default High for irreversible D, Medium otherwise
 - **Suppression precondition**: `syneidesis ⊣ aitesis` does NOT fire — distinct scope dimensions (factual layer vs decision layer)
 
+**Double-/gap composition note**: When `/artifact-review` is called downstream of `/write` (i.e., `/write` produces a draft that `/artifact-review` then reviews), both skills invoke `/gap` at distinct scopes — `/write`'s internal Phase 7 `/gap` audits draft-quality gaps (procedural / duplicate / consideration within the artifact), while `/artifact-review`'s Pipeline Phase 2 `/gap` audits decision-quality gaps w.r.t. fixation event `D`. The scope distinction preserves the scope-differentiation invariant; composition is not redundant.
+
 ## Pipeline Phase 3: Application-Fit Check (`/contextualize`) + Channel-Loop
 
 The terminal applicability check, augmented by a browser channel.
@@ -108,8 +112,8 @@ Invoke `/contextualize` with `application_context` as `X`. Scans for Convention 
 Channel server requires the `bun` runtime. Run a pre-flight check:
 
 ```bash
-if ! command -v bun >/dev/null 2>&1; then
-  echo "bun is required for the channel-loop preview." >&2
+if ! bun --version >/dev/null 2>&1 || [ "$(bun --version | cut -d. -f1)" -lt 1 ]; then
+  echo "bun >= 1.0 required for the channel-loop preview (Bun.serve + WebSocket API)." >&2
   echo "install: curl -fsSL https://bun.sh/install | bash" >&2
   exit 1
 fi
@@ -127,7 +131,7 @@ In the browser (one tab per artifact):
 
 ### Re-entry into the Pipeline
 
-Each JSONL line: `{slug, anchor, context_before, context_after, comment, timestamp}`. `context_before` + `context_after` (60 chars each) disambiguate repeated anchors.
+Each JSONL line: `{slug, anchor, context_before, context_after, comment, timestamp, source_offset?}`. `context_before` + `context_after` (60 chars each) disambiguate repeated anchors. `source_offset` (optional integer) records the source-markdown byte offset when the browser can derive it — used when rendered text diverges from source (marked.js strips emphasis markers, link text drops URL parts, code block fences become `<pre>`).
 
 When `feedback-{slug}.jsonl` exists in the artifact's directory, the next `/artifact-review` invocation:
 1. Reads each line, locates the anchor in the source markdown using surrounding context
@@ -174,14 +178,15 @@ Application context:              {caller-supplied context}
 Suffix-replay rules:
 - **Mid-chain invalidation**: Pipeline Phase 1 factual correction invalidating a Pipeline Phase 2 gap resolution → replay forward from Pipeline Phase 2 (not backward compensation)
 - **Same-reason cap**: Same-reason replay capped at 2 attempts before surfacing to the user with options: replay / proceed accepting mismatch / terminate preserving artifacts
-- **Feedback consumption**: `feedback-{slug}.jsonl` from a prior browser session is consumed once and archived to prevent stale comments re-entering subsequent loops
+- **Feedback consumption**: `feedback-{slug}.jsonl` from a prior browser session is consumed once and archived to prevent stale comments re-entering subsequent loops. When the archive write fails (disk full, permission denied), surface the failure to the user — do not silently retry — and halt consumption until the underlying cause is resolved; silent retry would re-inject identical `<feedback>` directives into the revision pass.
+- **Anchor-not-found on re-entry**: When a revision pass removes or substantially rewrites the anchor span, the next iteration cannot locate the original feedback target. Behavior: (a) attempt fuzzy-match only when both `context_before` and `context_after` match within edit distance 5 — if matched, proceed as located; (b) otherwise emit the directive as `<feedback anchor="..." status="anchor-missing">comment</feedback>` with the original anchor + context retained so the user can judge whether the intent still applies — do not silently drop the feedback.
 - **Scope-attribution drift**: Finding's scope attribution changing mid-pipeline → record under `origin: ambiguous` and re-scan the upstream protocol with re-attributed scope
 
 ## Rules
 
 1. **Composition, not absorption** — each sub-protocol remains independently invocable. `/artifact-review` orchestrates; it does not duplicate sub-protocol gate definitions.
 2. **Scope differentiation is structural** — the two suppression edges fire only on same-scope co-activation. This pipeline keeps scopes distinct via the named 3-scope + Emergent clause. Chains that collapse scopes would re-trigger suppression and violate this rule.
-3. **Emergent attribution priority** — boundary cases resolve by Factual > Decision > Application priority; remaining ambiguity is surfaced as an `origin: ambiguous` marker in the session text trace (not as a struct field on sub-protocol types) so both protocols detect the finding at their respective gates.
+3. **Emergent attribution priority** — boundary cases resolve by Factual > Decision > Application priority; remaining ambiguity is surfaced as an `origin: ambiguous` marker in the session text trace (not as a struct field on sub-protocol types) so both protocols detect the finding at their respective gates. This composition-level `origin` (scope attribution) is distinct from Epharmoge's internal `Origin ∈ {Initial, Emerged(aspect)}` struct (within-protocol mismatch provenance) — shared name, non-overlapping domain.
 4. **Browser channel is augmentation, not mandate** — `--skip-channel` or missing bun runtime falls back to standard `/contextualize` chat-gate.
 5. **Feedback consumption is single-shot with latest-timestamp dedup** — each `feedback-{slug}.jsonl` is read once and archived; entries sharing `(anchor, context_before, context_after)` keep only the latest timestamp.
 6. **Caller-supplied signature is required** — `fixation_event D` and `application_context` must be explicit. When omitted, the skill infers defaults from the artifact path; if inference yields no confident match, the skill asks the user. Silent assumption of domain-specific defaults (e.g., "publish") would re-impose bias the composition is designed to avoid.
