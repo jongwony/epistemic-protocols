@@ -17,7 +17,7 @@ Creates a CalVer tagged release with a hand-written narrative prepended to the b
 ## Preconditions
 
 - Working tree clean, on `main` (or user-specified branch)
-- `gh` authenticated for `jongwony/epistemic-protocols`
+- `gh` authenticated with push access to the target remote (fork or upstream)
 - Node 22+ on PATH (packaging requires `zlib.crc32`)
 
 ## Flow
