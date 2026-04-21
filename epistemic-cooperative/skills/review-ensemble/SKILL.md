@@ -79,7 +79,7 @@ else
 fi
 ```
 
-**Optional: codex-adversarial** — If the user requests adversarial review or the change is large/architectural, also launch an adversarial prompt in background with a separate suffix:
+**Optional: codex-adversarial** — If the user requests adversarial review or the change is large/architectural, also launch an adversarial prompt in background using a distinct temp file `/tmp/ensemble_codex_adversarial_${SUFFIX}.txt` (same `SUFFIX`, different filename) so the adversarial runner does not overwrite or re-read the standard review prompt:
 
 ```
 You are a skeptical reviewer. Challenge the implementation approach and design choices in the following diff.
@@ -107,9 +107,9 @@ Execute with `Bash(run_in_background: true, timeout: 300000)`:
 ```bash
 CODEX_RUN=$(find ~/.claude/plugins -path "*/codex-plus/scripts/codex-run.sh" -print -quit 2>/dev/null)
 if [ -n "$CODEX_RUN" ]; then
-  "$CODEX_RUN" -s read-only -r high /tmp/ensemble_codex_review_${SUFFIX}.txt
+  "$CODEX_RUN" -s read-only -r high /tmp/ensemble_codex_adversarial_${SUFFIX}.txt
 else
-  codex exec --skip-git-repo-check -m gpt-5.4 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_review_${SUFFIX}.txt
+  codex exec --skip-git-repo-check -m gpt-5.4 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_adversarial_${SUFFIX}.txt
 fi
 ```
 
@@ -141,6 +141,10 @@ After /frame completes (Lens L in context), the background Codex task will send 
 1. Read the Codex output from the completed background task
 2. Parse Codex findings: `[severity] file:line — description` format + VERDICT
 3. Record both Lens L and Codex findings for aggregation
+4. Clean up the temp prompt files after reading (prevents `/tmp` accumulation across invocations):
+   ```bash
+   rm -f /tmp/ensemble_codex_review_${SUFFIX}.txt /tmp/ensemble_codex_adversarial_${SUFFIX}.txt
+   ```
 
 If the Codex background task has not completed yet when /frame finishes, wait for the notification — do not poll or sleep.
 
