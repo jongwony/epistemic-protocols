@@ -39,7 +39,7 @@ const PLUGINS = [
   { dir: 'epistemic-cooperative', skill: 'sophia' },
   { dir: 'epistemic-cooperative', skill: 'curses' },
   { dir: 'epistemic-cooperative', skill: 'write' },
-  { dir: 'epistemic-cooperative', skill: 'write-review' },
+  { dir: 'epistemic-cooperative', skill: 'artifact-review' },
   { dir: 'anamnesis', skill: 'recollect' },
 ];
 
@@ -154,8 +154,8 @@ const BUNDLE_NAME = 'epistemic-protocols-bundle';
 
 // ============================================================
 // Section 2: YAML Frontmatter Parser
-// Supports: simple key-value, quoted values, >-/> folded scalar
-// Unsupported: lists, nested objects, | literal block, multi-line unquoted values
+// Supports: simple key-value, quoted values, >-/> folded scalar, block list (- items)
+// Unsupported: nested objects, | literal block, multi-line unquoted values, flow-style arrays
 // ============================================================
 
 function parseFrontmatter(content) {
@@ -172,6 +172,16 @@ function parseFrontmatter(content) {
   let currentKey = null;
   let currentValue = '';
   let inFolded = false;
+  let inBlockList = false;
+  let blockList = [];
+
+  const unquote = (v) => {
+    if ((v.startsWith('"') && v.endsWith('"')) ||
+        (v.startsWith("'") && v.endsWith("'"))) {
+      return v.slice(1, -1);
+    }
+    return v;
+  };
 
   for (let i = 1; i < endIdx; i++) {
     const line = lines[i];
@@ -183,6 +193,17 @@ function parseFrontmatter(content) {
       }
       fields.set(currentKey, currentValue);
       inFolded = false;
+    }
+
+    if (inBlockList) {
+      const listMatch = line.match(/^\s+-\s+(.*)$/);
+      if (listMatch) {
+        blockList.push(unquote(listMatch[1].trim()));
+        continue;
+      }
+      fields.set(currentKey, [...blockList]);
+      inBlockList = false;
+      blockList = [];
     }
 
     const m = line.match(/^([a-zA-Z][\w-]*):\s*(.*)/);
@@ -197,15 +218,27 @@ function parseFrontmatter(content) {
       continue;
     }
 
-    if ((val.startsWith('"') && val.endsWith('"')) ||
-        (val.startsWith("'") && val.endsWith("'"))) {
-      val = val.slice(1, -1);
+    // Block list: empty key value + next non-blank line begins with indented "- "
+    if (val === '') {
+      let isBlockList = false;
+      for (let j = i + 1; j < endIdx; j++) {
+        const peek = lines[j];
+        if (peek === '') continue;
+        if (/^\s+-\s+/.test(peek)) isBlockList = true;
+        break;
+      }
+      if (isBlockList) {
+        inBlockList = true;
+        blockList = [];
+        continue;
+      }
     }
 
-    fields.set(currentKey, val);
+    fields.set(currentKey, unquote(val));
   }
 
   if (inFolded && currentKey) fields.set(currentKey, currentValue);
+  if (inBlockList && currentKey) fields.set(currentKey, [...blockList]);
 
   return { fields, body: lines.slice(endIdx + 1).join('\n') };
 }
@@ -213,6 +246,20 @@ function parseFrontmatter(content) {
 function serializeFrontmatter(fields) {
   let yaml = '---\n';
   for (const [key, value] of fields) {
+    if (Array.isArray(value)) {
+      yaml += `${key}:\n`;
+      for (const item of value) {
+        // YAML plain scalar safe if not starting with reserved indicators and no embedded newline.
+        // `plugin:skill` format is safe (colon not followed by space).
+        const needsQuote = /^[-[\]{}&*!|>'"%@`]/.test(item) || item.includes('\n');
+        if (needsQuote) {
+          yaml += `  - "${item.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`;
+        } else {
+          yaml += `  - ${item}\n`;
+        }
+      }
+      continue;
+    }
     const needsQuote = value.includes(':') || value.includes('#') ||
       value.includes('"') || value.startsWith('{') || value.startsWith('[');
     if (needsQuote) {

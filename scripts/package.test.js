@@ -86,6 +86,35 @@ describe('parseFrontmatter', () => {
     const { fields } = parseFrontmatter(content);
     assert.equal(fields.get('description'), 'last field');
   });
+
+  it('parses block list (composition skill skills: field)', () => {
+    const content = '---\nname: artifact-review\nskills:\n  - aitesis:inquire\n  - syneidesis:gap\n  - epharmoge:contextualize\n---\nBody';
+    const { fields } = parseFrontmatter(content);
+    assert.deepEqual(fields.get('skills'), ['aitesis:inquire', 'syneidesis:gap', 'epharmoge:contextualize']);
+    assert.equal(fields.get('name'), 'artifact-review');
+  });
+
+  it('parses block list followed by another field', () => {
+    const content = '---\nskills:\n  - a\n  - b\ntrailing: value\n---\n';
+    const { fields } = parseFrontmatter(content);
+    assert.deepEqual(fields.get('skills'), ['a', 'b']);
+    assert.equal(fields.get('trailing'), 'value');
+  });
+
+  it('parses block list at end of frontmatter', () => {
+    const content = '---\nname: bar\nskills:\n  - one\n  - two\n---\n';
+    const { fields } = parseFrontmatter(content);
+    assert.deepEqual(fields.get('skills'), ['one', 'two']);
+  });
+
+  it('preserves block list through parse → serialize round-trip', () => {
+    const content = '---\nname: rt\nskills:\n  - aitesis:inquire\n  - syneidesis:gap\n---\nBody';
+    const { fields, body } = parseFrontmatter(content);
+    const rebuilt = serializeFrontmatter(fields) + '\n' + body;
+    const reparsed = parseFrontmatter(rebuilt);
+    assert.deepEqual(reparsed.fields.get('skills'), ['aitesis:inquire', 'syneidesis:gap']);
+    assert.equal(reparsed.fields.get('name'), 'rt');
+  });
 });
 
 // ============================================================
@@ -121,6 +150,12 @@ describe('serializeFrontmatter', () => {
     const fields = new Map([['data', '{key: val}']]);
     const result = serializeFrontmatter(fields);
     assert.match(result, /data: "{key: val}"/);
+  });
+
+  it('serializes array values as block list', () => {
+    const fields = new Map([['name', 'x'], ['skills', ['plugin:a', 'plugin:b']]]);
+    const result = serializeFrontmatter(fields);
+    assert.equal(result, '---\nname: x\nskills:\n  - plugin:a\n  - plugin:b\n---');
   });
 });
 
@@ -447,7 +482,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 20 skills plus bundle in dry-run', () => {
+  it('packages all 21 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -464,6 +499,7 @@ describe('package.js CLI', () => {
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
+        'artifact-review.zip',
         'attend.zip',
         'bound.zip',
         'catalog.zip',
@@ -484,9 +520,8 @@ describe('package.js CLI', () => {
         'recollect.zip',
         'report.zip',
         'sophia.zip',
-        'write-review.zip',
         'write.zip',
-      ],
+      ].sort(),
     );
     // Lower-bound invariant: baseline reflects the current plugin set at
     // merge time. Any additive change (new plugin, new reference doc, new
