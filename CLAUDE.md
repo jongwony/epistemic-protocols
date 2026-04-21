@@ -31,7 +31,7 @@ epistemic-protocols/
 │   └── scripts/hypomnesis-write.mjs   # mjs harness + claude -p haiku extraction
 ├── epistemic-cooperative/             # Utility skills + agents
 │   ├── agents/                        # project-scanner, session-analyzer, coverage-scanner, dimension-profiler
-│   └── skills/                        # report, onboard, dashboard, introspect, catalog, compose, sophia, curses, write
+│   └── skills/                        # report, onboard, dashboard, introspect, catalog, compose, sophia, curses, write, artifact-review, review-ensemble
 └── src/                               # Landing page (independent sub-project; React + Vite + Tailwind; EN/KO SPA)
 ```
 
@@ -64,7 +64,7 @@ epistemic-protocols/
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 | Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
 
-**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/compose`, `/introspect`, `/sophia`, `/curses`, `/write`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
+**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/dashboard`, `/compose`, `/introspect`, `/sophia`, `/curses`, `/write`, `/artifact-review`, `/review-ensemble`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
 
 ## Axioms
 
@@ -176,6 +176,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Curses**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (analysis, recommendations, report).
 - **Write**: No delegation—main agent handles all phases. Composes /frame (Prothesis) for perspective analysis; the composed protocol's delegation rules apply when invoked.
 - **Artifact Review**: No delegation—main agent handles all pipeline phases. Composes /inquire × /gap × /contextualize; sub-protocol delegation rules apply when invoked. Channel-loop runs as a background Bun process (not Task delegation).
+- **Review Ensemble**: Main agent handles all phases. Phase 2 launches Codex CLI in background (Bash run_in_background) and invokes `prothesis:frame` foreground via Skill(); composed protocol's delegation rules apply when invoked. Fallback mode spawns two inline Agent subagents in parallel when `prothesis:frame` is unavailable.
 
 ## Conventions
 
