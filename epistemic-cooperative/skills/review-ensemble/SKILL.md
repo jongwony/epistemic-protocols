@@ -1,7 +1,6 @@
 ---
 name: review-ensemble
-description: |
-  This skill should be used when the user asks to "ensemble review", "multi-model review", "cross-model review", "review-ensemble", "review from different angles", "thorough code review", "comprehensive review", or wants multiple independent reviewers to analyze changes in parallel. Also trigger when the user wants code reviewed by both Claude and another model, asks for "cross-model" or "multi-perspective" analysis of code changes, or says "review this PR from multiple viewpoints". Orchestrates /frame (Claude multi-perspective review with agent-aware mapping) + Codex (cross-model independent review), then aggregates into a unified verdict.
+description: Cross-model code review composition — orchestrates /frame (Claude multi-perspective) + Codex (independent model) in parallel, then aggregates into a unified verdict. User-invoked via /review-ensemble.
 skills:
   - prothesis:frame
 ---
