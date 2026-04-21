@@ -447,7 +447,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 20 skills plus bundle in dry-run', () => {
+  it('packages all 21 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -464,6 +464,7 @@ describe('package.js CLI', () => {
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
+        'artifact-review.zip',
         'attend.zip',
         'bound.zip',
         'catalog.zip',
@@ -484,9 +485,8 @@ describe('package.js CLI', () => {
         'recollect.zip',
         'report.zip',
         'sophia.zip',
-        'write-review.zip',
         'write.zip',
-      ],
+      ].sort(),
     );
     // Lower-bound invariant: baseline reflects the current plugin set at
     // merge time. Any additive change (new plugin, new reference doc, new

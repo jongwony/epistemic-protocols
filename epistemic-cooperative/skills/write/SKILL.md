@@ -1,6 +1,10 @@
 ---
 name: write
-description: Write blog posts from session insights with multi-perspective analysis.
+description: Write blog posts from session insights with material recall and multi-perspective analysis.
+skills:
+  - anamnesis:recollect
+  - prothesis:frame
+  - syneidesis:gap
 ---
 
 # Write Skill
@@ -24,11 +28,12 @@ Skip when:
 ## Workflow Overview
 
 ```
-PROTHESIS(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → REFINE → VALIDATE → FINALIZE
+RECOLLECT → PROTHESIS(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → REFINE → VALIDATE → FINALIZE
 ```
 
 | Phase | Tool | Decision Point |
 |-------|------|----------------|
+| Recollect | /recollect protocol | Prior session material recognition |
 | Prothesis | /frame protocol | Context-derived perspectives, parallel inquiry |
 | Format | AskUserQuestion | Output type, language |
 | Draft | Write | — |
@@ -37,6 +42,12 @@ PROTHESIS(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → 
 | Finalize | Edit | — |
 
 ## Phase Execution
+
+### 0. Material Recall (/recollect)
+
+Invoke `/recollect` to surface prior session material relevant to the drafting topic — terminology coined in earlier sessions, prior decisions referenced, framings already established. The recalled context enriches the Phase 1-3 context acquisition (`G(U) → C`), improving perspective selection in the multi-perspective analysis.
+
+This phase is conditional: skip silently when the drafting topic has no prior session footprint (e.g., entirely new domain). Anamnesis's internal Phase 0 scan determines applicability.
 
 ### 1-3. Prothesis Protocol (Multi-Perspective Analysis)
 
@@ -120,6 +131,7 @@ Apply final edits. Optionally clean intermediate versions.
 ## Integration
 
 This skill integrates with:
+- **/recollect** — Material recall (Phase 0)
 - **/frame** — Multi-perspective analysis (Phases 1-3)
 - **/gap** — Gap detection (Phase 7)
 

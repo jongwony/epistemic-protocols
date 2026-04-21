@@ -57,7 +57,7 @@
     {
       "name": "epistemic-cooperative",
       "source": "./epistemic-cooperative",
-      "description": "/catalog for protocol handbook, /report for Growth Map (epistemic analysis + insights), /onboard for quest-based protocol learning, /dashboard for coverage dashboard, /compose for protocol composition authoring, /introspect for deep self-analysis pipeline (behavioral profile + HTML report), /sophia for philosopher match, /curses for strength-shadow analysis, /write for multi-perspective blog drafting, /write-review for editorial pipeline composition with browser channel-loop"
+      "description": "/catalog for protocol handbook, /report for Growth Map (epistemic analysis + insights), /onboard for quest-based protocol learning, /dashboard for coverage dashboard, /compose for protocol composition authoring, /introspect for deep self-analysis pipeline (behavioral profile + HTML report), /sophia for philosopher match, /curses for strength-shadow analysis, /write for multi-perspective blog drafting, /artifact-review for markdown artifact review with browser inline-comment channel"
     },
     {
       "name": "anamnesis",

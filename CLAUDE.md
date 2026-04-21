@@ -175,6 +175,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Sophia**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (matching, presentation, report).
 - **Curses**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (analysis, recommendations, report).
 - **Write**: No delegation—main agent handles all phases. Composes /frame (Prothesis) for perspective analysis; the composed protocol's delegation rules apply when invoked.
+- **Artifact Review**: No delegation—main agent handles all pipeline phases. Composes /inquire × /gap × /contextualize; sub-protocol delegation rules apply when invoked. Channel-loop runs as a background Bun process (not Task delegation).
 
 ## Conventions
 

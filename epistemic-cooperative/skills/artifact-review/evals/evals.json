@@ -1,0 +1,27 @@
+{
+  "skill_name": "artifact-review",
+  "description": "Test cases for the artifact-review composition skill. Each eval exercises the 3-protocol pipeline (/inquire × /gap × /contextualize + channel-loop) against a different artifact type + fixation event combination, verifying the caller-supplied signature (artifact_path, fixation_event D, application_context) routes scopes correctly and that the channel-loop augmentation activates for the terminal applicability check.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "blog-post-publish",
+      "prompt": "I've got a draft at ~/.claude/.write/2026-04-21-epistemic-protocols-composition.md for a Medium post about how epistemic protocols handle composition — I cite Ray Amjad's artifact framework and reference our own graph.json structure. Before I publish to medium.com and linkedin.com I want a full review: verify my factual claims (especially the Ray Amjad attribution and a couple of stats about LLM gate-response rates I pulled from a paper), audit for consideration gaps at the publish decision (counter-arguments, audience misfit, disclosure of AI-assisted writing), and then render it in a browser so I can leave inline comments on specific sentences. Walk me through it.",
+      "expected_output": "Runs the three protocols in pipeline order with D='publish' (stakes High — externally visible). Phase 1: /inquire dispatches to CanonicalExternal for Ray Amjad source + paper cites, UserTacit for stats that lack web source. Phase 2: /gap surfaces consideration/audience/disclosure gaps. Phase 3: /contextualize + channel-loop — bun scripts/serve.ts launches, browser opens for inline comments on the rendered preview. feedback-2026-04-21-epistemic-protocols-composition.jsonl accumulates comments for re-entry.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "plan-file-commit",
+      "prompt": "Before I start executing on ~/.claude/plans/anamnesis-stage3-hypomnesis-write.md I need a thorough review. The plan references current Anamnesis Phase 0 scan behavior, cites the graph.json advisory edges from anamnesis to 9 downstream protocols, and proposes a new SessionEnd hook schedule. I want to verify the factual references are still accurate (the protocol may have shifted since I drafted this), audit planning gaps (what could I be missing about rollback, what alternative implementation paths I haven't considered, what assumptions I'm carrying silently), and check that the plan actually fits the current worktree + merge-freeze context. Then I want to leave inline notes in the browser before I commit to executing any of this.",
+      "expected_output": "Runs with D='commit to execution', application_context='current worktree + merge freeze state'. Phase 1: /inquire verifies graph.json edges via CodeDerivable (read .claude/skills/verify/graph.json), verifies Anamnesis Phase 0 behavior via CodeDerivable (read anamnesis SKILL.md). Phase 2: /gap surfaces procedural/alternative/assumption gaps at the commit-to-execution decision with default stakes High (irreversible start of execution). Phase 3: /contextualize scans Convention/Environment/Dependency against the plan, channel-loop opens for inline plan notes.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "crystallize-deposit",
+      "prompt": "I just ran /crystallize and the output is at ~/.claude/plans/extended-mind-stage2-crystallize.md plus the memory addendum at ~/.claude/projects/-Users-choi-Downloads-github-private-epistemic-protocols/memory/project_extended_mind_stage2.md. Before the next session rehydrates from this I want to verify nothing is stale: factual references to Stage 2 decisions should match what's actually committed, consideration gaps at the deposit decision (what if a future session lands after merge freeze ends? what rehydration failure modes am I not anticipating?), and whether the triple-redundancy integrity (plan + memory + index) actually fits the rehydrate context. I need to catch drift before it pollutes the next session's starting state.",
+      "expected_output": "Runs with D='deposit to hypomnesis store', application_context='future session rehydrate at fresh /compact boundary'. Phase 1: /inquire verifies factual claims via CodeDerivable (recent commits) + memory: source inspection for MEMORY.md index consistency. Phase 2: /gap surfaces assumption/alternative gaps at the deposit decision with High stakes (affects future sessions). Phase 3: /contextualize scans for Convention (memory frontmatter format) / Environment (post-compact context emptiness) / Dependency (MEMORY.md index pointer integrity) mismatches; channel-loop opens for inline annotations.",
+      "files": []
+    }
+  ]
+}
