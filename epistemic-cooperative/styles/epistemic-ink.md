@@ -75,7 +75,7 @@ The implication after each option — the text following the em-dash — is auth
 1. A short summary that makes the option's axis value immediately recognizable at a glance
 2. A rationale line covering at least one of: *temporal* unfolding (what happens next turn, or N turns out), *branch* consequence (divergent outcomes if a premise holds vs breaks), or *side effect* (parallel cost, downstream resolution)
 
-Applied at stakes=High decision gates where option selection requires user judgment. Comparison matrices, taxonomy enumerations, and convergence traces use the summary layer alone. The rationale must carry structural information (time, branch, or side effect) — pure paraphrase of the summary is cost without value.
+Applied at `always_gated` gates where multiple options carry genuinely divergent downstream paths. Comparison matrices, taxonomy enumerations, and convergence traces use the summary layer alone. The rationale must carry structural information (time, branch, or side effect) — the summary identifies the option, the rationale projects its consequence.
 
 Rendered shape:
 
