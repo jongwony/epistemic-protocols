@@ -37,7 +37,7 @@ invariant: Dialectical Triangulation over Unilateral Proposal
 ── TYPES ──
 A              = AbstractionSeed (in-process state: instances + essence intuition + optional label)
 Detect         = A → (Bool, (Iᵢ, E, L?) if true)
-Iᵢ             = Set(Instance) where |Iᵢ| ≥ 3             -- inductive material threshold
+Iᵢ             = Set(Instance)                             -- instance set observed; cardinality unconstrained (any N ≥ 1 qualifies when essence is sensed; richer sets provide stronger triangulation material)
 Instance       = { content: String, context: String }       -- concrete case observed
 E              = EssenceIntuition                           -- variation-stable core signal from conversation
 L              = Option(TentativeLabel)                     -- user-provided provisional name, if any
@@ -59,10 +59,10 @@ bind(A) = explicit_arg ∪ recent_instance_cluster ∪ surfaced_essence
 Priority: explicit_arg > recent_instance_cluster > surfaced_essence
 
 /induce "theme"              → A = AbstractionSeed with theme label
-/induce (alone)              → A = most recent N≥3 instance cluster in session
+/induce (alone)              → A = most recent instance cluster in session (any cardinality)
 "the pattern across..."      → A = instance cluster under discussion
 
-If fewer than 3 instances exist: pause activation and request concrete cases before Phase 0.
+If no essence signal is detectable (neither user sensing language nor AI-inferrable core pattern): pause activation and surface the scan result before Phase 0, inviting the user to either name what feels in-process or withdraw.
 
 ── PHASE TRANSITIONS ──
 Phase 0: A → Detect(A) → in_process?                                       -- detection gate (silent)
@@ -147,14 +147,16 @@ AI detects in-process abstraction OR user calls `/induce`. Detection is silent (
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/induce` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: In-process abstraction detected via in-protocol heuristics (N≥3 instance cluster + essence intuition signal + absent locator). Detection is silent (Phase 0).
+- **Layer 2 (AI-guided)**: In-process abstraction detected via in-protocol heuristics (essence intuition signal + absent locator; instance cluster supports but does not gate detection). Detection is silent (Phase 0).
 
-**In-process abstraction** = an instance set has accumulated toward a shared essence but the abstraction has not located itself (no settled name, scope, or positional claim).
+**In-process abstraction** = an essence is sensed toward which an abstraction is forming, but the abstraction has not located itself (no settled name, scope, or positional claim). Instance count is evidence for the sensing, not a gate on activation — a single strongly-gripping instance may qualify; multiple instances provide richer triangulation material.
 
 Gate predicate:
 ```
-in_process(A) ≡ |instances(A)| ≥ 3 ∧ essence_sensed(A) ∧ ¬located(A)
+in_process(A) ≡ essence_sensed(A) ∧ ¬located(A)
 ```
+
+Instance cardinality (N) is a **trigger signal** (see Trigger Signals table below), not a hard gate. Periagoge's own abstraction-formation purpose would self-defeat if gated on "already stabilized pattern (N ≥ 3)" — the protocol is designed to help during the *formative* stage, which often begins at N=1 or N=2 with strong phenomenological grip, or even in comparative analysis across competing candidate readings.
 
 ### Priority
 
@@ -182,7 +184,7 @@ Heuristic signals for in-process abstraction detection (not hard gates):
 
 | Signal | Detection |
 |--------|-----------|
-| Instance accumulation | 3+ concrete cases appear in conversation without a pre-existing abstract name |
+| Instance accumulation | concrete cases (1+ with strong grip, commonly 3+) appear in conversation without a pre-existing abstract name; count is supportive evidence for essence sensing, not a hard gate |
 | Essence intuition language | User phrases such as "something about these cases...", "the pattern I'm seeing...", "these all have...", "why do these keep happening..." |
 | Absent locator | No settled name, scope, or positional claim for the emerging abstraction |
 | Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (3+ instances, no pre-existing abstract structure) and nudges to `/induce` |
@@ -191,7 +193,7 @@ Heuristic signals for in-process abstraction detection (not hard gates):
 **Cross-session enrichment**: Accumulated abstraction formation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides Fuse candidates for Phase 1 — previously crystallized abstractions in adjacent domains become lateral Synagoge targets. When `/recollect` has been invoked in session, recalled adjacent abstractions enter the candidate construction pool as fuse-reference. Heuristic input may bias toward previously observed patterns; gate judgment remains with the user.
 
 **Skip**:
-- Single instance only (no inductive material for colimit formation)
+- No essence signal detectable (neither user sensing language nor AI-inferrable core pattern)
 - Abstraction already located (name + scope + position settled) — no in-process state to turn
 - User explicitly names the abstraction without in-process signals
 - `/ground` substitution is the actual need (abstract structure exists; validate against concrete target)
@@ -211,12 +213,11 @@ Heuristic signals for in-process abstraction detection (not hard gates):
 
 Analyze conversation state for in-process abstraction. This phase is **silent** — no user interaction.
 
-1. **Bind seed** `A`: use explicit argument or the most recent N≥3 instance cluster surfaced in session
-2. **Check threshold**: `|Iᵢ| ≥ 3` — fewer instances means insufficient inductive material; skip
-3. **Check essence signal** `E`: scan for variation-stable core signal in conversation (user essence-intuition language or AI-inferred pattern)
-4. **Check locator absence**: if a name plus scope plus position is already settled, skip (no turning needed)
-5. If all criteria met: proceed to Phase 1 with `(Iᵢ, E, L?)`
-6. If Analogia misfit signal is present (colimit-shaped input forced into substitution): absorb the misfit as valid Periagoge trigger without re-confirmation
+1. **Bind seed** `A`: use explicit argument or the most recent instance cluster surfaced in session (any cardinality — N=1 strong-grip single case, N=2 comparative analysis, and N≥3 accumulation all qualify when essence is sensed)
+2. **Check essence signal** `E`: scan for variation-stable core signal in conversation (user essence-intuition language or AI-inferred pattern). This is the primary gate — if no essence is sensed, the abstraction has nothing to turn toward
+3. **Check locator absence**: if a name plus scope plus position is already settled, skip (no turning needed)
+4. If essence_sensed ∧ ¬located: proceed to Phase 1 with `(Iᵢ, E, L?)`
+5. If Analogia misfit signal is present (colimit-shaped input forced into substitution): absorb the misfit as valid Periagoge trigger without re-confirmation
 
 **Scope restriction**: Detection is silent. Does NOT modify files or call external services.
 
@@ -295,7 +296,7 @@ After integration:
 
 | Rule | Structure | Effect |
 |------|-----------|--------|
-| Gate specificity | `activate(Periagoge) only if |Iᵢ| ≥ 3 ∧ essence_sensed ∧ ¬located` | Prevents false activation on single instances or settled abstractions |
+| Gate specificity | `activate(Periagoge) only if essence_sensed ∧ ¬located` | Prevents false activation on settled abstractions or essence-less inputs; instance count is evidence-for-essence, not a gate |
 | Personalized grounding | Phase 1 requires grounding drawn from user's own domain context | Prevents generic textbook examples that fail to trigger recognition |
 | Socratic moves preserved | Phase 2 options map to dialectical families (Synagoge/Diairesis/Fuse/Reorient) | Each move has a recognized shape, not open-ended revision |
 | Session immunity | Crystallized or dismissed (Iᵢ, E) pair → skip for session | Respects user's crystallization or release |
