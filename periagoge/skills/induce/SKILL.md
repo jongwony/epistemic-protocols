@@ -135,7 +135,7 @@ Phase 2 Qs (triangulate)   → always_gated (gated: Confirm/Widen/Narrow/Fuse/Re
 - **Periagoge vs Analogia**: Categorical dual. Analogia validates a given abstract structure against a concrete target (static substitution — given Sₐ, establish Sₐ → Sₜ correspondence). Periagoge forms a new abstraction from concrete instances (dynamic colimit — given {Iᵢ}, construct emergent abstraction). When the input is a colimit-shaped instance set with no pre-existing abstract structure, forcing it into Analogia's substitution interface produces source-domain confabulation; Periagoge resolves that misfit by handling abstraction formation directly.
 - **Periagoge vs Telos**: Both construct rather than extract, but target different categories. Telos constructs goals (what to do); Periagoge constructs abstractions (how to see patterns across cases). A goal can be concrete and singular; an abstraction collects multiple concrete instances under a shared essence.
 - **Periagoge vs Hermeneia**: Hermeneia clarifies existing intent — user has an intent that needs articulation. Periagoge forms a new abstraction — user has instances and essence intuition but no located abstraction yet. The precondition witness differs: Hermeneia requires `∃ intent I`, Periagoge starts from `¬located(A)` while `essence_sensed(A)`.
-- **Periagoge vs Prothesis**: Prothesis selects an analytical framework for an inquiry when none exists. Periagoge forms an abstraction from observed instances. Prothesis operates on questions (which lens to apply); Periagoge operates on patterns (which essence to name).
+- **Periagoge vs Prothesis**: Prothesis selects among candidate analytical frameworks (including cases where multiple candidates are already named). Periagoge forms a new abstraction from an instance cocone when no locator is available. Comparative analysis between already-named candidate readings — even with multiple instances or strong essence sensing — is Prothesis territory (frame selection), not Periagoge's colimit formation. Scope is specified by the operation kind, not by instance count.
 
 **Formation distinction**: Periagoge operates on the colimit — the emergent structure arising from a cocone of concrete instances, not a substitution into a pre-existing frame. The operational test: if 3+ concrete instances with a sensed essence are present but no located abstraction yet, it is Periagoge; if an abstract structure already exists and needs validation against a concrete target, it is Analogia; if a goal needs defining, it is Telos; if an intent needs articulating, it is Hermeneia.
 
@@ -156,7 +156,7 @@ Gate predicate:
 in_process(A) ≡ essence_sensed(A) ∧ ¬located(A)
 ```
 
-Instance cardinality (N) is a **trigger signal** (see Trigger Signals table below), not a hard gate. Periagoge's own abstraction-formation purpose would self-defeat if gated on "already stabilized pattern (N ≥ 3)" — the protocol is designed to help during the *formative* stage, which often begins at N=1 or N=2 with strong phenomenological grip, or even in comparative analysis across competing candidate readings.
+Periagoge's scope is specified by **operation**, not by instance count. The operation is colimit formation — constructing a new abstraction from an instance cocone when essence is sensed but no locator is yet available. Gating on "already stabilized pattern (N ≥ 3)" would self-defeat the formative purpose and reinforce a misleading stereotype that any unnamed-pattern-with-multiple-instances is Periagoge territory. Instance cardinality is a **trigger signal** (see Trigger Signals table), not a hard gate: a single strongly-gripping case can trigger formation; accumulated sets simply offer richer triangulation material. Comparative analysis between already-named candidate readings or frames is a different operation (frame selection / understanding gap) and belongs to Prothesis or Syneidesis, not Periagoge — regardless of how many instances are involved.
 
 ### Priority
 
@@ -197,6 +197,7 @@ Heuristic signals for in-process abstraction detection (not hard gates):
 - Abstraction already located (name + scope + position settled) — no in-process state to turn
 - User explicitly names the abstraction without in-process signals
 - `/ground` substitution is the actual need (abstract structure exists; validate against concrete target)
+- Comparative analysis between already-named candidate readings or frames — defer to Prothesis (frame selection) or Syneidesis (gap in decision); this is not colimit formation regardless of instance count
 - Same (instance set, essence) pair was crystallized or dismissed in current session (session immunity)
 
 ### Mode Deactivation
