@@ -93,7 +93,7 @@ Phase 0 Detect     (sense)   → Internal analysis (no external tool)
 Phase 1 Propose    (observe) → Read, Grep (user's domain context for personalized grounding); WebSearch (conditional: cross-domain adjacent abstractions)
 Phase 2 Qs         (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not a UserMove)
 Phase 3            (track)   → Internal state update
-converge       (relay)     → TextPresent+Proceed (convergence evidence trace; proceed with crystallized abstraction)
+converge           (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with crystallized abstraction)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
@@ -174,7 +174,7 @@ When Periagoge is active:
 
 **Protocol precedence**: Activation order position 7/10 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
 
-**Advisory relationships**: Receives from Hermeneia (precondition: clarified intent narrows abstraction seed), Anamnesis (advisory: recalled adjacent abstractions provide Fuse candidates). Provides to Katalepsis (precondition: crystallized abstraction enables comprehension verification). Katalepsis is structurally last.
+**Advisory relationships**: Receives from Hermeneia (advisory: clarified intent narrows the abstraction seed but is not required — activation depends only on instance-set signals, not on prior intent clarification), Anamnesis (advisory: recalled adjacent abstractions provide Fuse candidates). Provides to Katalepsis (precondition via wildcard: crystallized abstraction enables comprehension verification). Katalepsis is structurally last.
 
 ### Trigger Signals
 
@@ -254,12 +254,12 @@ Options:
 1. **Confirm** — [what the crystallized abstraction enables downstream]
 2. **Widen (Synagoge)** — [how upward or lateral broadening reshapes the candidate]
 3. **Narrow (Diairesis)** — [what dimension specializes or what to exclude]
-4. **Fuse** — [which adjacent abstraction to merge with, if any surfaced]
+4. **Fuse** — [which adjacent abstraction to merge with] *(presented only when Phase 1 surfaces adjacent candidates; otherwise omitted)*
 5. **Reorient** — [what orthogonal axis to pursue instead]
 6. **Dismiss** — [what assumption about this essence is released]
 ```
 
-Free response is always available — the user may propose an alternative abstraction, specify a dimension not captured by the presented moves, or describe a shape the options do not cover.
+When Phase 1 surfaces no adjacent candidates, omit the Fuse option — dead signal suppression. Free response is always available — the user may name an adjacent abstraction for fusion, propose an alternative abstraction, specify a dimension not captured by the presented moves, or describe a shape the options do not cover.
 
 **Design principles**:
 - **Personalized grounding**: Never use a generic example. The grounding must be drawn from the user's domain context so they can recognize it as theirs.
@@ -312,7 +312,8 @@ After integration:
 4. **Dialectical Triangulation over Unilateral Proposal**: AI candidate is a working hypothesis, not a claim. Crystallization belongs to the user's move.
 5. **Personalized grounding**: The grounding example must be recognizable to the user as theirs — drawn from their codebase, configs, session history, or stated domain. Generic textbook examples fail the personalization requirement.
 6. **Socratic move preservation**: Phase 2 options map to recognized dialectical families. Widen = Synagoge (upward or lateral). Narrow = Diairesis. Fuse = lateral Synagoge with adjacent abstraction. Reorient = orthogonal redirection. The vocabulary is operational, not ornamental.
-7. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal.
+7. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal. The user may also name an adjacent abstraction via free response when Fuse is not presented (because Phase 1 surfaced no candidates) and they hold one in mind.
+7a. **Fuse dead-signal suppression**: Phase 2 omits the Fuse option when Phase 1 surfaces no adjacent abstraction candidates. Free response remains the channel for user-proposed fusion targets.
 8. **Session immunity**: Crystallized or dismissed (Iᵢ, E) pair → skip for session.
 9. **Attempt cap**: Max 5 triangulations per abstraction seed. At cap, surface unresolved candidate with explicit status and deactivate.
 10. **Convergence persistence**: Mode active until crystallized, Esc, or attempt cap.
@@ -320,6 +321,6 @@ After integration:
 12. **Cross-protocol awareness**: Defer to Hermeneia when intent-articulation is the primary deficit; defer to Analogia when a pre-existing abstract structure needs validation against a target; defer to Telos when goal-construction is the primary deficit.
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields violates this separation.
 14. **Convergence evidence**: At crystallization, present transformation trace — for each step in history, show (candidate → user_move → candidate'). Per-step evidence is required.
-15. **Absorb Analogia misfit**: When `/ground` Phase 0 detects colimit-shaped input (3+ instances with no pre-existing abstract structure) and nudges here, absorb the misfit as valid Periagoge trigger without requiring re-confirmation.
-16. **Option-set relay test**: If AI analysis converges to a single dominant move (option-level entropy → 0), present the finding directly. Each gate option must be genuinely viable under different user value weightings.
+15. **Absorb Analogia misfit**: When `/ground` Phase 0 detects colimit-shaped input (3+ instances with no pre-existing abstract structure) and nudges here, absorb the misfit as valid Periagoge trigger without requiring re-confirmation. Before Phase 1, surface the routing rationale with the cited `/ground` detection basis ("colimit-shaped input detected: [N instances], no pre-existing abstract structure — redirecting to abstraction crystallization") so the user can see the evidence that justified the redirect without re-asking.
+16. **Option-set relay test**: If AI analysis converges to a single dominant move (option-level entropy → 0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. **Exception**: The Confirm/Dismiss pair is excluded from the relay-test — user crystallization judgment is constitutive regardless of AI analysis entropy. Phase 2 remains `always_gated` even when only one shaping move appears analytically viable.
 17. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option like "Widen" into a concrete direction while preserving the UserMove coproduct) is distinct from mutation.

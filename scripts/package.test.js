@@ -206,7 +206,7 @@ describe('transformSkillMd', () => {
 describe('runtime contract view', () => {
   it('builds a packaged runtime view for every skill', () => {
     const views = buildRuntimeContractViews();
-    assert.equal(views.length, 22);
+    assert.equal(views.length, 23);
     for (const view of views) {
       assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one Skill.md entry`);
       assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed Skill.md`);
@@ -427,11 +427,11 @@ describe('generateReleaseNotes', () => {
     assert.ok(prothesisPos < katalepsisPos, 'Katalepsis should be last');
   });
 
-  it('includes all 11 protocols in protocols table', () => {
+  it('includes all 12 protocols in protocols table', () => {
     const notes = generateReleaseNotes(mockResults);
     const protocolNames = [
       'Anamnesis', 'Hermeneia', 'Telos', 'Horismos', 'Aitesis', 'Prothesis',
-      'Analogia', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Katalepsis',
+      'Analogia', 'Periagoge', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Katalepsis',
     ];
     for (const name of protocolNames) {
       assert.ok(notes.includes(name), `Expected ${name} in protocols table`);
@@ -450,13 +450,13 @@ describe('generateReleaseNotes', () => {
     assert.ok(notes.includes('### New'));
     assert.ok(notes.includes('### Fixed'));
     assert.ok(notes.includes('**prothesis**: Two-mode redesign'));
-    assert.ok(!notes.includes('### 11 Epistemic Protocols'));
+    assert.ok(!notes.includes('### 12 Epistemic Protocols'));
   });
 
   it('falls back to curated highlights when changelog groups empty', () => {
     const changelog = { groups: {}, ungrouped: [] };
     const notes = generateReleaseNotes(mockResults, { changelog });
-    assert.ok(notes.includes('### 11 Epistemic Protocols'));
+    assert.ok(notes.includes('### 12 Epistemic Protocols'));
   });
 });
 
@@ -482,7 +482,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 22 skills plus bundle in dry-run', () => {
+  it('packages all 23 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -495,7 +495,7 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 23);
+    assert.equal(result.results.length, 24);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -514,6 +514,7 @@ describe('package.js CLI', () => {
         'goal.zip',
         'grasp.zip',
         'ground.zip',
+        'induce.zip',
         'inquire.zip',
         'introspect.zip',
         'onboard.zip',

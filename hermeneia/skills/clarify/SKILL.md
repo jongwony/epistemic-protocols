@@ -160,7 +160,7 @@ When Hermeneia is active:
 
 **Protocol precedence**: Activation order position 1/10 (graph.json is authoritative source for information flow). Concern cluster: Planning.
 
-**Advisory relationships**: Provides to Telos (precondition: clarified intent enables goal construction), Aitesis (advisory: background gaps suggest context insufficiency). Katalepsis is structurally last.
+**Advisory relationships**: Provides to Telos (precondition: clarified intent enables goal construction), Aitesis (advisory: background gaps suggest context insufficiency), Periagoge (advisory: clarified intent narrows the abstraction seed). Katalepsis is structurally last.
 
 Clarified expression becomes input to subsequent protocols.
 
