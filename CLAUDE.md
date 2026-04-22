@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Epistemic Protocols is a layered system for human-AI collaboration: it inserts structured checkpoints at decision points so misalignment is surfaced early, judged explicitly, and adapted before it compounds into expensive downstream work.
 
-In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
+In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **AbstractionInProcess → CrystallizedAbstraction** (Periagoge), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
 
 ## Architecture
 
@@ -24,6 +24,7 @@ epistemic-protocols/
 ├── horismos/        (/bound)          # epistemic boundary definition
 ├── aitesis/         (/inquire)        # context insufficiency inference
 ├── analogia/        (/ground)         # structural mapping validation
+├── periagoge/       (/induce)         # in-process abstraction crystallization
 ├── prosoche/        (/attend)         # execution-time risk evaluation
 ├── epharmoge/       (/contextualize)  # application-context mismatch (conditional)
 ├── anamnesis/       (/recollect)      # vague recall → recognized context
@@ -60,6 +61,7 @@ epistemic-protocols/
 | Horismos | `/bound` | BoundaryUndefined → DefinedBoundary |
 | Aitesis | `/inquire` | ContextInsufficient → InformedExecution |
 | Analogia | `/ground` | MappingUncertain → ValidatedMapping |
+| Periagoge | `/induce` | AbstractionInProcess → CrystallizedAbstraction |
 | Prosoche | `/attend` | ExecutionBlind → SituatedExecution |
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 | Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
@@ -88,7 +90,7 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 | Concern | Protocols |
 |---------|-----------|
 | Planning | `/clarify` (Hermeneia), `/goal` (Telos), `/inquire` (Aitesis) |
-| Analysis | `/frame` (Prothesis), `/ground` (Analogia) |
+| Analysis | `/frame` (Prothesis), `/ground` (Analogia), `/induce` (Periagoge) |
 | Decision | `/gap` (Syneidesis) |
 | Execution | `/attend` (Prosoche) |
 | Verification | `/contextualize` (Epharmoge) |
@@ -97,14 +99,14 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 **Cross-cutting**: `/bound` (Horismos) — BoundaryMap narrows scope for 5 downstream protocols via DAG-downstream advisory. `/recollect` (Anamnesis) — recalled context enriches 9 downstream protocols via advisory-only edges (no precondition weight). **Structural asymmetry**: Horismos sits downstream of the Hermeneia→Telos→Horismos DAG chain, so its 5 edges propagate through committed activation. Anamnesis has 9 advisory-only edges with no precondition enforcement — cardinality is larger but operational weight differs. `/grasp` (Katalepsis) — requires all to complete.
 
 **Key graph relationships**:
-- Preconditions (DAG-enforced): Hermeneia → Telos → Horismos; * → Katalepsis (includes Anamnesis via wildcard)
-- Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia, Epharmoge}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}, Telos → {Prothesis}
+- Preconditions (DAG-enforced): Hermeneia → Telos → Horismos; Hermeneia → Periagoge; * → Katalepsis (includes Anamnesis and Periagoge via wildcard)
+- Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia, Periagoge, Epharmoge}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}, Telos → {Prothesis}
 - Suppression: Syneidesis ⊣ Aitesis (same scope), Aitesis ⊣ Epharmoge (pre+post stacking)
 
 **Initiator taxonomy** (2-layer model):
 - **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.
 - **Layer 2** (in-protocol heuristics): Behavior varies by initiator type:
-  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge, Anamnesis)
+  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis)
   - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia)
   - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Write)
@@ -164,6 +166,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Aitesis**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Epharmoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Analogia**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Periagoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Prosoche**: Phase -1 (Sub-A0 upstream routing, Sub-A materialization, Sub-B team coordination) and Phases 1-3 (Gate path) run in main agent (gate interaction, Skill). Phase 0 delegates p=Low tasks to prosoche-executor subagent or team agents via Agent tool.
 - **Anamnesis**: No Task delegation—must run in main agent (user-facing gates require main agent context). SessionEnd + PreCompact hooks (`anamnesis/scripts/hypomnesis-write.mjs`) operate outside protocol flow, extracting session recall index via `claude -p haiku` harness.
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.

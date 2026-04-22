@@ -118,6 +118,7 @@ Phase 2 Qs (validate)      → always_gated (gated: user validates structural ma
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
+| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
@@ -166,7 +167,7 @@ When Analogia is active:
 - Analogia completes before output dependent on mapping validity proceeds
 - Loaded instructions resume after mapping status is made explicit
 
-**Protocol precedence**: Activation order position 6/9 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
+**Protocol precedence**: Activation order position 6/10 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
 
 **Advisory relationships**: Receives from Prothesis (advisory: perspective simulation provides mapping construction context), Aitesis (advisory: inferred context narrows mapping domain identification), Horismos (advisory: BoundaryMap narrows mapping domain identification). Provides to Syneidesis (advisory: validated mapping improves gap detection accuracy). Katalepsis is structurally last.
 
@@ -189,6 +190,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 - Same domain pair was validated in current session (session immunity)
 - Phase 1 domain analysis confirms structural correspondence is trivial
 - No abstract framework is applied (output is purely concrete)
+- Colimit-shaped input detected (3+ concrete instances without pre-existing abstract structure) — route to `/induce` (Periagoge) for abstraction formation; Analogia's substitution interface is the wrong shape for colimit formation
 
 ### Mode Deactivation
 
@@ -206,9 +208,10 @@ Analyze text for mapping uncertainty. This phase is **silent** — no user inter
 
 1. **Bind output** `R`: use explicit argument or the current/most recent output under discussion
 2. **Scan output** `R` for abstract structures: patterns, models, analogies, frameworks applied to user's domain
-3. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
-4. If all mappings trivially established: present finding per Rule 15 before proceeding (Analogia not activated)
-5. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
+3. **Colimit-shape detection**: assess whether `R` is a colimit-shaped input — 3+ concrete instances surfaced without a pre-existing abstract structure to map into. If both criteria hold, Analogia's substitution interface forces source-domain confabulation; nudge to `/induce` (Periagoge) for abstraction formation and skip Analogia activation.
+4. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
+5. If all mappings trivially established: present finding per Rule 15 before proceeding (Analogia not activated)
+6. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
 
 **Scan scope**: Bound text R, conversation context, observable domain signals. Does NOT modify files or call external services.
 
@@ -311,7 +314,7 @@ After integration:
 9. **Convergence persistence**: Mode active until all identified correspondences are addressed or user Esc key
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N validated / M total]`
 11. **Early exit honored**: When user declares mapping sufficient, accept immediately regardless of remaining correspondences
-12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit
+12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit; defer to Periagoge (`/induce`) when input is colimit-shaped (3+ concrete instances without pre-existing abstract structure — abstraction formation rather than mapping validation)
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **Convergence evidence**: Present transformation trace before declaring all_addressed(R'); per-correspondence evidence is required
 15. **Zero-gap surfacing**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation

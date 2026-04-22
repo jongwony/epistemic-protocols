@@ -26,13 +26,14 @@ const PROTOCOL_FILES = [
   'horismos/skills/bound/SKILL.md',
   'aitesis/skills/inquire/SKILL.md',
   'analogia/skills/ground/SKILL.md',
+  'periagoge/skills/induce/SKILL.md',
   'epharmoge/skills/contextualize/SKILL.md',
   'prosoche/skills/attend/SKILL.md',
   'anamnesis/skills/recollect/SKILL.md',
 ];
 
-const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Syneidesis → Prosoche → Epharmoge';
-const CANONICAL_CLUSTERS = 'Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
+const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Periagoge → Syneidesis → Prosoche → Epharmoge';
+const CANONICAL_CLUSTERS = 'Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
 const PRECEDENCE_FILES = [
   'hermeneia/skills/clarify/SKILL.md',
   'telos/skills/goal/SKILL.md',
@@ -40,6 +41,7 @@ const PRECEDENCE_FILES = [
   'aitesis/skills/inquire/SKILL.md',
   'prothesis/skills/frame/SKILL.md',
   'analogia/skills/ground/SKILL.md',
+  'periagoge/skills/induce/SKILL.md',
   'syneidesis/skills/gap/SKILL.md',
   'prosoche/skills/attend/SKILL.md',
   'epharmoge/skills/contextualize/SKILL.md',
@@ -1090,6 +1092,7 @@ function checkCrossRefScan() {
     'Horismos':   { deficit: 'BoundaryUndefined', resolution: 'DefinedBoundary' },
     'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
     'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
+    'Periagoge':  { deficit: 'AbstractionInProcess', resolution: 'CrystallizedAbstraction' },
     'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
     'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
     'Anamnesis':  { deficit: 'RecallAmbiguous', resolution: 'RecalledContext' },
@@ -1244,7 +1247,7 @@ function checkCrossRefScan() {
       message: 'CLAUDE.md missing Epistemic Concern Clusters table'
     },
     {
-      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Epharmoge, Anamnesis\)/,
+      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis\)/,
       message: 'CLAUDE.md initiator taxonomy missing protocol in the AI-guided set'
     },
   ];

@@ -45,6 +45,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 |----------|---------|-------------|
 | Prothesis | `/frame` | No framework — need analytical lenses or multi-perspective team |
 | Analogia | `/ground` | Abstract idea needs concrete domain validation |
+| Periagoge | `/induce` | Concrete instances accumulating — abstraction has not located itself |
 
 ### Decision
 

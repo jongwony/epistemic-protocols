@@ -252,6 +252,7 @@ Priority ordering: autonomy > transparency > noise-minimization > speed > simpli
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
+| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
@@ -297,7 +298,7 @@ When Prosoche is active:
 - Loaded instructions and other protocol behaviors are retained
 - Prosoche adds a risk assessment layer, does not modify protocol logic
 
-**Protocol precedence**: Activation order position 8/9 (graph.json is authoritative source for information flow). Concern cluster: Execution.
+**Protocol precedence**: Activation order position 9/10 (graph.json is authoritative source for information flow). Concern cluster: Execution.
 
 **Advisory relationships**: Receives from Aitesis (advisory: inferred context narrows execution risk assessment), Horismos (advisory: BoundaryMap adjusts risk assessment threshold). Provides to Epharmoge (advisory: execution-time attention provides post-execution applicability context). Katalepsis is structurally last.
 

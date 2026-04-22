@@ -2,8 +2,8 @@
   "version": "2.2.0",
   "nodes": [
     "hermeneia", "telos", "horismos", "aitesis", "analogia",
-    "prothesis", "syneidesis", "prosoche", "epharmoge", "katalepsis",
-    "anamnesis"
+    "periagoge", "prothesis", "syneidesis", "prosoche", "epharmoge",
+    "katalepsis", "anamnesis"
   ],
   "edge_types": {
     "precondition": {
@@ -48,6 +48,8 @@
     { "source": "anamnesis", "target": "horismos", "type": "advisory", "satisfies": "과거 경계 분류 이력이 분류 제안을 제공" },
     { "source": "anamnesis", "target": "prosoche", "type": "advisory", "satisfies": "과거 위험 이력이 위험 분류를 강화" },
     { "source": "anamnesis", "target": "analogia", "type": "advisory", "satisfies": "과거 도메인 매핑이 매핑 후보를 제공" },
-    { "source": "anamnesis", "target": "epharmoge", "type": "advisory", "satisfies": "과거 적용-맥락 불일치 이력이 현재 불일치 감지를 강화" }
+    { "source": "anamnesis", "target": "epharmoge", "type": "advisory", "satisfies": "과거 적용-맥락 불일치 이력이 현재 불일치 감지를 강화" },
+    { "source": "hermeneia", "target": "periagoge", "type": "precondition", "satisfies": "의도 명확화가 추상화 형성의 시드를 좁힘" },
+    { "source": "anamnesis", "target": "periagoge", "type": "advisory", "satisfies": "인접 추상화 재호출이 Fuse 후보를 제공" }
   ]
 }
