@@ -4,7 +4,47 @@ Governs evolution of the principle system itself.
 
 ## Deficit Empiricism
 
-Protocol creation requires an orthogonal option surface — every genuine alternative the AI can enumerate — presented at Gates with differential futures, under variation-stable essence. A candidate deficit qualifies when its distinctive character persists under variation across instance, user profile, platform context, and session type. Essence intuition under such variation, not enumerative count, is the criterion. The surface-plus-Gate pattern is already operational in protocols such as Telos Phase 1 Full Taxonomy Confirmation and Hermeneia Phase 1b — Deficit Empiricism is their meta-criterion, not a separate procedure.
+Protocol creation is a conjecture under two-stage validation: Stage 1 (Compile) establishes structural fit before the protocol enters circulation; Stage 2 (Runtime) accumulates use-corroboration after the protocol is in the hands of sessions. Empiricism lives in Stage 2 — lived-through use of the protocol, not a pre-submit instance count. A candidate deficit qualifies when its distinctive character persists under variation across instance, user profile, platform context, and session type; essence intuition under such variation remains the criterion. The surface-plus-Gate pattern is already operational in protocols such as Telos Phase 1 Full Taxonomy Confirmation and Hermeneia Phase 1b — Deficit Empiricism is their meta-criterion, not a separate procedure.
+
+**Philosophical grounding**: The two-stage division inherits Popperian conjecture-refutation (falsifiability declared before use, corroboration accumulated after) rather than inductive accumulation, and the Zuhandenheit premise that a tool's fit is disclosed through inhabitation, not inspection from outside use.
+
+### Stage 1 — Compile (Pre-submit Structural Fit)
+
+A candidate protocol, axiom, or morphism-internal feature passes Stage 1 when it satisfies four conditions:
+
+1. **Structural coherence**: fits the axiom hierarchy (A1–A6), preserves type soundness in TYPES coproducts, completes MORPHISM chains without orphan phases.
+2. **Operation-kind clarity**: the cognitive operation is distinguishable from adjacent protocols (e.g., colimit / frame / map / gap / induce). Shared input shapes alone do not collapse protocols whose operations differ.
+3. **Falsifiability**: explicit failure conditions stated — what observation would refute retention.
+4. **Orthogonal option surface preserved**: every genuine alternative the AI can enumerate is presented at Gates with differential futures, under variation-stable essence.
+
+Stage 1 produces a conjecture. The conjecture enters circulation; it is not yet corroborated data.
+
+Mechanical enforcement of Stage 1 conditions (especially Falsifiability) via static check extensions is future work; presently these operate as authoring guidelines audited at review time.
+
+### Stage 2 — Runtime (Post-deploy Use-corroboration)
+
+Once deployed, the protocol accumulates post-use evidence in Popper's sense — observations of whether it resolves the claimed deficit when actually invoked. Revision is cheap in EP (SKILL.md edit + `/verify` + commit), so the correct pipeline is **deploy → observe → revise**. Observed friction triggers sharpening, narrowing, or retraction. Variation-stable corroboration across sessions constitutes Stage 2 retention evidence in Popper's sense. A protocol failing Stage 2 is retractable; removal is a legitimate outcome.
+
+**Retraction operationalization** — the multi-file cascade (plugin.json, SKILL.md, graph.json, CLAUDE.md, marketplace.json) required for clean protocol removal — is future work. The coproduct {Retained | Retracted} currently operates with one fully realized branch (Retained); Retracted state transitions (Removed / Archived / Deprecated) remain unspecified, so Stage 2 retraction signals surface protocols for review-level removal discussion rather than automatic deletion.
+
+### Relation to Axiomatization Judgment Framework
+
+The two-stage split maps cleanly onto existing Promotion Criteria (below in this file): criteria 1–4 (Model Invariance Reversal, Non-Derivability, Structural Independence, Adversarial Grounding) are Stage 1 compile checks — resolvable before the principle enters circulation. Criterion 5 (Empirical Vindication Across Sessions) is Stage 2 runtime corroboration. Conjectural Grounding makes this split explicit: promotion decisions use Stage 1 + Stage 2 jointly, and the Hermeneutic Circle Evolution Model's Prejudgment → Inscription → Validation → Horizons Fusion → Circular Return loop is the operational realization of the two stages running as one cycle; Circular Return is the long-arc Stage 2 revisitation as model capability shifts.
+
+### Anti-inflation Clause
+
+Stage 2's revision cheapness does not license session-frustration → protocol proliferation. The Epistemic Cost Topology ground holds: unused protocols pollute cognitive space, so the cost of an unused protocol still exceeds the cost of a missing one. Two structural guards preserve anti-inflation under the new model:
+
+- **Stage 1 blocks frustration-driven creation**: a candidate that cannot state its axiom fit, operation-kind distinction, and falsifiability condition does not compile and does not enter circulation at all. Frustration alone is not a conjecture.
+- **Stage 2 permits retraction**: post-use corroboration can invalidate a protocol. A protocol that fails to resolve its claimed deficit in use is a candidate for removal, not accumulation. Cost Topology is enforced at both endpoints — not only at creation.
+
+This preserves the prior Direction over Accumulated Workload budget: authoring labor converges toward zero, but verification labor — running Stage 1 compile checks and observing Stage 2 corroboration — remains bounded and must be budgeted.
+
+### Operational Tests
+
+- **Stage 1 passes** when: axiom fit is citable, operation-kind is distinguished from every adjacent protocol by cognitive operation (not input shape), falsifiability condition is stated, and the option surface at Gates remains orthogonal under variation.
+- **Stage 2 corroboration suffices for retention** when: sessions invoking the protocol show the claimed deficit resolved, variation-stable corroboration is observed across the four variation axes (instance, user profile, platform context, session type), and no sustained friction pattern points to structural mis-fit.
+- **Retraction is indicated** when Stage 2 shows (a) the claimed deficit is not observed in use — the deficit does not exist, or (b) the protocol's conjectured operation-kind collapses into an adjacent protocol under observation. Iteration (sharpening / narrowing), not retraction, applies when (c) the deficit is observed but the current framing does not resolve it — framing failure is a revise-in-place signal.
 
 ---
 
@@ -28,7 +68,7 @@ When evaluating a principle for promotion:
 
 4. **Adversarial Grounding**: The principle encodes a safeguard against AI shortcutting or rationalization. Formal correctness of a protocol definition is not sufficient; execution fidelity requires structural guards. If a principle's primary role is to prevent an anticipated failure mode, it merits axiom status.
 
-5. **Empirical Vindication Across Sessions**: Observed sessions demonstrate that the *absence* of the principle as a structural constraint leads to repeated violations whose distinctive character persists under variation across contexts and session types. Promoting the principle to axiom status and embedding it in protocol structure resolves the observed instances. This follows Deficit Empiricism: axiomatization must be grounded in variation-stable essence, not enumerative count.
+5. **Empirical Vindication Across Sessions**: Observed sessions demonstrate that the *absence* of the principle as a structural constraint leads to repeated violations whose distinctive character persists under variation across contexts and session types. Promoting the principle to axiom status and embedding it in protocol structure resolves the observed instances. This follows Deficit Empiricism: axiomatization must be grounded in variation-stable essence.
 
 ### Demotion Criteria (From Axiom or Derived to Lower Tier)
 

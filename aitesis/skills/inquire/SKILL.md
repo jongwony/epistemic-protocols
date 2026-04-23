@@ -63,7 +63,7 @@ EvidenceSource ∈ {UserTacit, Instrumentation, CodeDerivable, CanonicalExternal
                  ∪ Emergent(EvidenceSource)
                -- open set symmetric with Dimension; Emergent accumulator for novel channels
                -- (TestSuite, AsyncComms, HypomnesisIndex, RuntimeObservability, etc.)
-               -- base promotion requires revision threshold (N≥3 sessions clustering)
+               -- Emergent base promotion under variation-stable observed use
 ValidSources : Verifiability → ℘(EvidenceSource)
   ValidSources(ReadOnlyVerifiable)    = {CodeDerivable, UserTacit, CanonicalExternal} ∪ Emergent(EvidenceSource)
   ValidSources(EmpiricallyObservable) = {Instrumentation, UserTacit}                  ∪ Emergent(EvidenceSource)
@@ -179,7 +179,7 @@ Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgme
 -- Invariant: uncertainties = context_resolved ∪ read_only_resolved ∪ empirically_observed ∪ non_factual_detected ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
 -- Note: observation_skips and source_choice_overrides are audit logs orthogonal to the partition —
 --       observation_skips: logged when EmpiricallyObservable is reclassified to UserDependent via Rule 20 (a)-(c) escape conditions
---       source_choice_overrides: logged when UserTacit is selected over cheaper EvidenceSource with cited dominance basis (Rule 20A/B); enables N≥3 revision threshold tracking
+--       source_choice_overrides: logged when UserTacit is selected over cheaper EvidenceSource with cited dominance basis (Rule 20A/B); audit trail supports variation-stable observed use for cost-ordering
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
@@ -360,7 +360,7 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
     - `CanonicalExternal` → Step 3 with WebFetch/WebSearch (published external docs; `source: "web:{url}"` tag + determinism verification + staleness guard — see Web context below)
     - `Instrumentation` → Step 4 (Empirical observation via Bash lifecycle)
     - `UserTacit` → Phase 2 directly (user-dependent inquiry; includes reclassified Coherence/MemoryInternal items)
-    - `Emergent(source)` → **always Phase 2** (always_gated per ELIDABLE CHECKPOINTS): record observed channel description in classify summary, await user confirmation that this channel is appropriate; accumulate toward revision threshold. Parent Verifiability tier is NOT used to bypass Phase 2 — the channel is unvalidated by definition.
+    - `Emergent(source)` → **always Phase 2** (always_gated per ELIDABLE CHECKPOINTS): record observed channel description in classify summary, await user confirmation that this channel is appropriate; accumulate toward variation-stable observed use for base promotion. Parent Verifiability tier is NOT used to bypass Phase 2 — the channel is unvalidated by definition.
 - **Coherence classification** (Layer 2, 2D model: Scope × Resolution):
   - Pre-filter: cross-scope + rule-resolvable (existing scope hierarchy, established precedence) → coexistence (exit Coherence; not a contradiction)
   - Same scope + evidence-resolvable → MemoryInternal → factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent) → follows Factual resolution path (Step 3, Step 4, or Phase 2)
@@ -430,7 +430,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - U2a: Factual/EmpiricallyObservable, EvidenceSource: UserTacit over Instrumentation, basis: {dominance_reason — operational context / temporal scope / setup > 30s} (Rule 20 cite)
   - U2b: Factual/EmpiricallyObservable → UserDependent (escape: [condition] — "[rationale]")
   - U2c: Factual/partial (evidence scope ⊊ claim scope: covers [scope A], claim requires [scope B] — uncovered portion classified separately)
-  - U2e: Factual/*, EvidenceSource: Emergent(source) (observed channel: [description] — fallback-admissible; accumulates toward revision threshold)
+  - U2e: Factual/*, EvidenceSource: Emergent(source) (observed channel: [description] — fallback-admissible; accumulates toward variation-stable observed use)
   - U3a: Coherence/MemoryInternal → factual reclassification; EvidenceSource selected from `ValidSources(reclassified_v)` via the same procedure as directly-classified Factual items (Step 2 — EvidenceSource inheritance procedure; cost-ordering, external-dependency preference, and Rule 20 cite-or-observe apply identically)
   - U3b: Coherence/CrossDomain (basis: evidence summary — structure-requiring) → deficit-matched routing
   - U4: Relevance (basis: evidence summary) → /goal
@@ -505,7 +505,7 @@ After integration:
 | Observation risk gate | Elevated-risk observation → reclassify as UserDependent | Safety preserved |
 | Free-response escape | Phase 2 gate accepts `Unknown(Partial)` as typed answer constructor (TYPES `A`) — Phase 3 auto-promotes uncertainty to next-preferred EvidenceSource in `ValidSources(v)` and re-enters Phase 1 classification via backward arc (PHASE TRANSITIONS) | User need not simulate certainty for unknowns; routing degrades gracefully through typed, formally-tracked arc |
 | Cost-ordering tiebreaker | Default ascending cost-ordering defined in TYPES (`CodeDerivable < CanonicalExternal < Instrumentation < UserTacit`). **External-dependency preference**: when uncertainty carries environmental-dependency signal, prefer `CanonicalExternal` over `CodeDerivable` unless authority-override basis cited. Override logged to `Λ.source_choice_overrides` | Minimizes user-interrupt cost; preserves external authority when relevant; Rule 20 cite basis required for UserTacit preference |
-| EvidenceSource transparency | Factual uncertainty classify summary shows `EvidenceSource: {selected}` with basis citation when override applied; `Λ.source_choice_overrides` preserves cite audit across session for N≥3 revision threshold tracking | Rule 20 cite-or-observe audit visibility |
+| EvidenceSource transparency | Factual uncertainty classify summary shows `EvidenceSource: {selected}` with basis citation when override applied; `Λ.source_choice_overrides` preserves cite audit across sessions for variation-stable observed use | Rule 20 cite-or-observe audit visibility |
 
 ## Rules
 

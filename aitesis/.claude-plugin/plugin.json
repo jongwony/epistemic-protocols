@@ -1,7 +1,7 @@
 {
   "name": "aitesis",
   "description": "Infer context insufficiency before execution \u2014 /inquire (\u03b1\u1f34\u03c4\u03b7\u03c3\u03b9\u03c2: a requesting)",
-  "version": "4.3.9",
+  "version": "4.3.11",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

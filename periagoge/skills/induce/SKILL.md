@@ -156,7 +156,7 @@ Gate predicate:
 in_process(A) ≡ essence_sensed(A) ∧ ¬located(A)
 ```
 
-Periagoge's scope is specified by **operation**, not by instance count. The operation is colimit formation — constructing a new abstraction from an instance cocone when essence is sensed but no locator is yet available. Gating on "already stabilized pattern (N ≥ 3)" would self-defeat the formative purpose and reinforce a misleading stereotype that any unnamed-pattern-with-multiple-instances is Periagoge territory. Instance cardinality is a **trigger signal** (see Trigger Signals table), not a hard gate: a single strongly-gripping case can trigger formation; accumulated sets simply offer richer triangulation material. Comparative analysis between already-named candidate readings or frames is a different operation (frame selection / understanding gap) and belongs to Prothesis or Syneidesis, not Periagoge — regardless of how many instances are involved.
+Periagoge's scope is specified by **operation**: colimit formation — constructing a new abstraction from an instance cocone when essence is sensed but no locator is yet available. Instance cardinality is a **trigger signal** (see Trigger Signals table): a single strongly-gripping case can trigger formation; accumulated sets simply offer richer triangulation material. The operation distinguishes Periagoge from adjacent protocols: comparative analysis between already-named readings or frames belongs to Prothesis (frame selection); audit of decision gaps belongs to Syneidesis (gap); only colimit formation is Periagoge territory.
 
 ### Priority
 
@@ -206,8 +206,8 @@ Periagoge's scope, stated positively by canonical use patterns:
 
 | # | Scenario | Prototype | Structure |
 |---|----------|-----------|-----------|
-| S1 | **Review-time pattern accumulation** — multiple observations accumulating during ongoing review/work feel coherent but lack a name | PR-review session recognizing a recurring deficit pattern; multi-sprint retro finding common success factors | N≥3 + review/reflection context |
-| S2 | **Terminology crystallization** — several loose phrases are being used interchangeably and need consolidation into a single precise term | "eidetic variation" replacing "N≥3 Millian induction"; informal "we keep saying X-ish" → settled term | lexical colimit |
+| S1 | **Review-time pattern accumulation** — multiple observations accumulating during ongoing review/work feel coherent but lack a name | PR-review session recognizing a recurring deficit pattern; multi-sprint retro finding common success factors | accumulated observations + review/reflection context |
+| S2 | **Terminology crystallization** — several loose phrases are being used interchangeably and need consolidation into a single precise term | "eidetic variation" settling a previously loose terminological space; informal "we keep saying X-ish" → settled term | lexical colimit |
 | S3 | **Cross-domain structural sensing** — parallel structures observed across different domains; user wants to name the shared essence | same pattern across multiple projects/codebases; "these pipelines feel structurally similar" | cross-domain colimit |
 | S4 | **Meta-pattern in own recurring work** — reflection on a recurring cognitive/behavioral move in one's own practice → naming | "I keep doing X in different contexts" → formalization as a principle | self-reflective colimit |
 
@@ -235,7 +235,7 @@ The operational test: "Is the user operation *forming a new abstraction from obs
 
 Analyze conversation state for in-process abstraction. This phase is **silent** — no user interaction.
 
-1. **Bind seed** `A`: use explicit argument or the most recent instance cluster surfaced in session (any cardinality — N=1 strong-grip single case, N=2 comparative analysis, and N≥3 accumulation all qualify when essence is sensed)
+1. **Bind seed** `A`: use explicit argument or the most recent instance cluster surfaced in session (any cardinality qualifies when essence is sensed — N=1 (strong-grip single case), N=2 (paired comparison), N≥3 (accumulated set))
 2. **Check essence signal** `E`: scan for variation-stable core signal in conversation (user essence-intuition language or AI-inferred pattern). This is the primary gate — if no essence is sensed, the abstraction has nothing to turn toward
 3. **Check locator absence**: if a name plus scope plus position is already settled, skip (no turning needed)
 4. If essence_sensed ∧ ¬located: proceed to Phase 1 with `(Iᵢ, E, L?)`
