@@ -46,9 +46,9 @@ G              = GroundingExample { scenario: String, domain: String, mapping: S
                                                              -- personalized to user's own domain context
 Propose        = (Iᵢ, E, ctx) → (P, G)
 V              = UserMove ∈ {Confirm, Widen(direction), Narrow(specializer), Fuse(adjacent), Reorient(axis), Dismiss}
-                 direction    ∈ {upward, lateral}           -- Synagoge family
-                 specializer  = dimension to constrain      -- Diairesis family
-                 adjacent     = neighboring abstraction ref  -- lateral Synagoge (fuse)
+                 direction    ∈ {upward, lateral}           -- Synagoge family; AI-proposed broadening (user Recognition mode)
+                 specializer  = dimension to constrain      -- Diairesis family (user-directed specialization)
+                 adjacent     = neighboring abstraction ref  -- lateral Synagoge with user-named reference (user Production mode)
                  axis         = orthogonal dimension         -- full redirection
 Qs             = Shaping interaction with candidate + grounding [Tool: gate interaction]
 crystallized(A) = ∃ step ∈ history : V(step) = Confirm
@@ -66,7 +66,10 @@ If no essence signal is detectable (neither user sensing language nor AI-inferra
 
 ── PHASE TRANSITIONS ──
 Phase 0: A → Detect(A) → in_process?                                       -- detection gate (silent)
-Phase 1: (Iᵢ, E, L?) → Propose(Iᵢ, E, ctx) → (P, G)                        -- candidate + grounding construction [Tool]
+Phase 1: (Iᵢ, E, L?) → Dispatch(Iᵢ, E) → (Iᵢ', E', ctx') → Propose(Iᵢ', E', ctx') → (P, G)   -- per-case + per-seed helper dispatch + candidate construction [Tool]
+             Dispatch(i ∈ Iᵢ): conditionally Skill(/aitesis:inquire | /hermeneia:clarify | /anamnesis:recollect | /horismos:bound | /analogia:ground)
+             Dispatch(E):      conditionally Skill(/telos:goal) if purposes_contradictory(Iᵢ)
+             unresolvable → halt(Phase 1), surface to user
 Phase 2: (P, G) → Qs(P, G, progress) → Stop → V                            -- triangulation gate [Tool]
 Phase 3: V → integrate(V, candidate) → candidate'                          -- candidate update (sense)
 
@@ -90,7 +93,8 @@ early_exit = user_esc ∨ attempts_exhausted
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
 Phase 0 Detect     (sense)   → Internal analysis (no external tool)
-Phase 1 Propose    (observe) → Read, Grep (user's domain context for personalized grounding); WebSearch (conditional: cross-domain adjacent abstractions)
+Phase 1 Propose    (observe + dispatch) → Read, Grep (user's domain context for personalized grounding); WebSearch (conditional: cross-domain adjacent abstractions); conditionally per-instance: Skill(/aitesis:inquire | /hermeneia:clarify | /anamnesis:recollect | /horismos:bound | /analogia:ground) for case-specific deficit resolution; conditionally per-seed: Skill(/telos:goal) when instance purposes appear contradictory
+Phase 1 halt    (gate)  → present (Phase 1 surfaces unresolvable dispatch issue; user resolves / skips / withdraws before Phase 2) [Tool]
 Phase 2 Qs         (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not a UserMove)
 Phase 3            (track)   → Internal state update
 converge           (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with crystallized abstraction)
@@ -200,12 +204,34 @@ Heuristic signals for in-process abstraction detection (not hard gates):
 - Comparative analysis between already-named candidate readings or frames — defer to Prothesis (frame selection) or Syneidesis (gap in decision); this is not colimit formation regardless of instance count
 - Same (instance set, essence) pair was crystallized or dismissed in current session (session immunity)
 
+### Canonical Invocation Scenarios
+
+Periagoge's scope, stated positively by canonical use patterns:
+
+| # | Scenario | Prototype | Structure |
+|---|----------|-----------|-----------|
+| S1 | **Review-time pattern accumulation** — multiple observations accumulating during ongoing review/work feel coherent but lack a name | PR-review session recognizing a recurring deficit pattern; multi-sprint retro finding common success factors | N≥3 + review/reflection context |
+| S2 | **Terminology crystallization** — several loose phrases are being used interchangeably and need consolidation into a single precise term | "eidetic variation" replacing "N≥3 Millian induction"; informal "we keep saying X-ish" → settled term | lexical colimit |
+| S3 | **Cross-domain structural sensing** — parallel structures observed across different domains; user wants to name the shared essence | same pattern across multiple projects/codebases; "these pipelines feel structurally similar" | cross-domain colimit |
+| S4 | **Meta-pattern in own recurring work** — reflection on a recurring cognitive/behavioral move in one's own practice → naming | "I keep doing X in different contexts" → formalization as a principle | self-reflective colimit |
+
+**Edge case (still valid)**: Single instance with strong phenomenological grip — e.g., "yesterday I was in a strange mode, what was that?" — qualifies when essence_sensed is active and no locator exists. Rare but legitimate.
+
+**Non-scenarios (out of scope — defer to named protocol)**:
+- Comparative analysis between already-named candidate readings/frames → Prothesis (`/frame`) or Syneidesis (`/gap`)
+- Validating an existing abstract structure against a concrete target → Analogia (`/ground`)
+- Articulating a misexpressed intent that is already clear internally → Hermeneia (`/clarify`)
+- Co-constructing a goal with no clear end state → Telos (`/goal`)
+
+The operational test: "Is the user operation *forming a new abstraction from observed instances*, or is it something else (selecting, validating, articulating, goaling)?" Only the first is Periagoge.
+
 ### Mode Deactivation
 
 | Trigger | Effect |
 |---------|--------|
 | User confirms candidate | Crystallize and proceed |
 | User Esc key | Return to normal operation; abstraction remains in-process |
+| Phase 1 dispatch unresolvable | Halt Phase 1, surface issue; user may resolve, skip instance, or withdraw |
 | Attempt cap reached (5 triangulations) | Surface remaining candidate with explicit unresolved status, deactivate |
 
 ## Protocol
@@ -224,15 +250,26 @@ Analyze conversation state for in-process abstraction. This phase is **silent** 
 
 ### Phase 1: Candidate Proposal + Grounding Construction
 
-Generate candidate abstraction with a personalized grounding example.
+Generate candidate abstraction with a personalized grounding example. This phase includes **per-case + per-seed dispatch** — Periagoge's internal control flow that invokes helper protocols when specific deficits block clean integration, strengthening the Stop condition before Phase 2.
 
-1. **Synthesize candidate** `P`: from `(Iᵢ, E)`, construct a named abstraction with structure and instance-to-abstraction mapping. The candidate is a working hypothesis, not a claim.
-2. **Construct personalized grounding** `G`: call Read/Grep to collect evidence about the user's own domain context (codebase, configs, session history). The grounding example must be drawn from the user's domain — a scenario they recognize as theirs — not a generic textbook case.
+1. **Per-instance dispatch** (internal control flow): For each instance `i ∈ Iᵢ`, assess whether any of the following deficits blocks clean incorporation into the cocone:
+   - `context_gap(i)` — domain context for `i` is missing/incomplete → `Skill(/aitesis:inquire)` with case-specific prospect → integrate result into `ctx`
+   - `framing_ambiguous(i)` — linguistic framing of `i` does not match user intent (expression gap) → `Skill(/hermeneia:clarify)` on `i` → integrate clarified framing
+   - `vague_recall(i)` — `i` references past material only half-surfaced in session → `Skill(/anamnesis:recollect)` to concretize → integrate recognized context
+   - `scope_boundary_ambiguous(i)` — whether `i` belongs in `Iᵢ` is unclear → `Skill(/horismos:bound)` for instance-scope classification → include / exclude from `Iᵢ'`
+   - `mapping_uncertainty(i, candidate_sketch)` — draft candidate may not preserve `i`'s structure under the proposed mapping → `Skill(/analogia:ground)` with `(Sₐ=sketch, Sₜ=i)` → refine sketch
+2. **Per-seed dispatch**: If instance purposes appear contradictory across `Iᵢ` (e.g., different instances imply different end-states an abstraction should serve):
+   - `contradictory_purposes(Iᵢ)` → `Skill(/telos:goal)` to co-construct the purpose the abstraction serves → reconcile or partition seed
+3. **Halt on unresolvable**: If any dispatch returns an unresolvable issue (user cannot provide context, framing remains ambiguous, boundary cannot be set, mapping structurally fails, purposes remain contradictory): Phase 1 halts and surfaces the remaining issues to user before Phase 2 gate. User may resolve directly, skip the affected instance, or withdraw (`user_esc`). This strengthens the Stop condition — no candidate is proposed on faulty material.
+4. **Synthesize candidate** `P`: from `(Iᵢ', E)` (enriched by dispatch), construct a named abstraction with structure and instance-to-abstraction mapping. The candidate is a working hypothesis, not a claim.
+5. **Construct personalized grounding** `G`: call Read/Grep to collect evidence about the user's own domain context (codebase, configs, session history). The grounding example must be drawn from the user's domain — a scenario they recognize as theirs — not a generic textbook case.
    - When the user's domain is outside the current codebase (external API, academic field, professional practice), extend context collection to web search (WebSearch). Tag web evidence with `source: "web:{url}"` for traceability.
-3. **Check adjacent abstractions**: if recall (Anamnesis hypomnesis store or in-session history) surfaces neighboring abstractions, note them as Fuse candidates for Phase 2.
-4. Package `(P, G)` with Fuse candidates and proceed to Phase 2.
+6. **Check adjacent abstractions**: if recall (Anamnesis hypomnesis store or in-session history) surfaces neighboring abstractions, note them as Fuse candidates for Phase 2.
+7. Package `(P, G)` with Fuse candidates and proceed to Phase 2.
 
-**Scope restriction**: Read-only investigation (Read, Grep, WebSearch). No test execution or file modifications.
+**Dispatch scope restriction**: Dispatch is *conditional and on-demand*, not pre-run batch. Each helper is invoked only when the corresponding deficit is detected for the specific instance (or seed, for Telos). Dispatch is Periagoge's internal control flow — not a protocol-composition-level relationship, so no graph.json advisory edges are implied by it.
+
+**Scope restriction (file system)**: Read-only investigation (Read, Grep, WebSearch). Helper protocols invoked via Skill run under their own scope rules.
 
 ### Phase 2: Dialectical Triangulation Gate
 
@@ -254,9 +291,9 @@ Does this candidate crystallize the abstraction you were forming?
 
 Options:
 1. **Confirm** — [what the crystallized abstraction enables downstream]
-2. **Widen (Synagoge)** — [how upward or lateral broadening reshapes the candidate]
+2. **Widen (Synagoge)** — AI-proposed broadening (Recognition mode) — [how upward or lateral scope expansion from AI's domain knowledge reshapes the candidate]
 3. **Narrow (Diairesis)** — [what dimension specializes or what to exclude]
-4. **Fuse** — [which adjacent abstraction to merge with] *(presented only when Phase 1 surfaces adjacent candidates; otherwise omitted)*
+4. **Fuse** — user-named adjacent reference (Production mode) — [which adjacent abstraction to explicitly pull in for merge] *(presented only when Phase 1 surfaces adjacent candidates; otherwise omitted)*
 5. **Reorient** — [what orthogonal axis to pursue instead]
 6. **Dismiss** — [what assumption about this essence is released]
 ```
@@ -326,3 +363,4 @@ After integration:
 15. **Absorb Analogia misfit**: When `/ground` Phase 0 detects colimit-shaped input (3+ instances with no pre-existing abstract structure) and nudges here, absorb the misfit as valid Periagoge trigger without requiring re-confirmation. Before Phase 1, surface the routing rationale with the cited `/ground` detection basis ("colimit-shaped input detected: [N instances], no pre-existing abstract structure — redirecting to abstraction crystallization") so the user can see the evidence that justified the redirect without re-asking.
 16. **Option-set relay test**: If AI analysis converges to a single dominant move (option-level entropy → 0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. **Exception**: The Confirm/Dismiss pair is excluded from the relay-test — user crystallization judgment is constitutive regardless of AI analysis entropy. Phase 2 remains `always_gated` even when only one shaping move appears analytically viable.
 17. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option like "Widen" into a concrete direction while preserving the UserMove coproduct) is distinct from mutation.
+18. **Per-case + per-seed dispatch**: Phase 1 has internal control flow that invokes helper protocols when specific deficits block clean instance integration: `/aitesis:inquire` (context gap), `/hermeneia:clarify` (framing ambiguity), `/anamnesis:recollect` (vague recall), `/horismos:bound` (scope boundary ambiguity), `/analogia:ground` (mapping uncertainty) per-instance; `/telos:goal` per-seed (contradictory purposes across Iᵢ). Dispatch is *conditional and on-demand*, fires only when the corresponding deficit is detected. It is Periagoge's internal control flow, not a protocol-composition-level relationship — no graph.json advisory edges encode this dispatch. Unresolvable dispatch results halt Phase 1 and surface to user, strengthening the Stop condition before Phase 2 — no candidate is proposed on faulty material.
