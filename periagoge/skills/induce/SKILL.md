@@ -26,7 +26,7 @@ A
   → detect(instances, essence, locator)   -- verify in-process abstraction exists
   → propose(candidate, grounding)         -- AI generates candidate + personalized example
   → triangulate(candidate, user_move)     -- user shapes via widen/narrow/fuse/reorient
-  → integrate(move, candidate)            -- update candidate per user response
+  → integrate(V, candidate)               -- update candidate per user response
   → crystallize(abstraction)              -- convergence when confirmed
   → CrystallizedAbstraction
 requires: in_process(A)                    -- runtime gate (Phase 0)
@@ -68,7 +68,7 @@ If no essence signal is detectable (neither user sensing language nor AI-inferra
 Phase 0: A → Detect(A) → in_process?                                       -- detection gate (silent)
 Phase 1: (Iᵢ, E, L?) → Propose(Iᵢ, E, ctx) → (P, G)                        -- candidate + grounding construction [Tool]
 Phase 2: (P, G) → Qs(P, G, progress) → Stop → V                            -- triangulation gate [Tool]
-Phase 3: V → integrate(V, candidate) → candidate'                          -- candidate update (sense)
+Phase 3: V → integrate(V, candidate) → candidate'                          -- candidate update (track)
 
 ── LOOP ──
 After Phase 3: evaluate user move.
@@ -83,7 +83,7 @@ Continue until: crystallized(A) ∨ user_esc ∨ attempts_exhausted.
 Convergence evidence: At crystallized(A), present transformation trace — for each step ∈ history, show (candidate → user_move → candidate'). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-crystallized(A) = ∃ step ∈ history : V(step) = Confirm
+crystallized(A): see TYPES (V = Confirm in history)
 progress(Λ) = |history| / max_attempts
 early_exit = user_esc ∨ attempts_exhausted
 
