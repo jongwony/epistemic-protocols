@@ -140,6 +140,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: ἀναλογία (proportion, analogy) — Gentner's Structure Mapping Theory (1983). Core principle: **Structural Correspondence over Abstract Assertion**. An analogy is only as good as its structural match to your domain. Workflow position: Analysis cluster — now validate that abstract advice maps to concrete reality. Game feel: "Sounds right in theory, but does it fit MY situation?" → decompose analogy → check each mapping → instantiate with real components.
 
+## Periagoge `/induce`
+
+**Situation**: Over a week you've noticed three separate incidents that bother you — a teammate ghosted a thread after you replied quickly, a meeting where you answered first and others went silent, a review comment where your detailed response shut down the discussion. You sense these have something in common but can't name it yet. "Too fast" isn't quite it. "Over-responding" is close but not right. The abstraction hasn't located itself.
+
+**Intervention**: `/induce` proposes a candidate abstraction with a grounding example drawn from your own domain — e.g., "reply-latency as participation cost" with an example from your own thread — then offers Socratic moves to shape it. Widen upward (is this really about pacing in async communication?), narrow (specifically on replies that close rather than open?), fuse with an adjacent idea (this relates to turn-taking norms), or reorient entirely. You turn the candidate until it clicks.
+
+**Trial prompt**: "Let's practice: describe 3-4 cases you're noticing a pattern across, and I'll show how /induce proposes a candidate abstraction you can shape"
+
+**Quiz Q (situation)**: You keep running into the same feeling across unrelated tasks — a bug fix that bloated into a refactor, a meeting that drifted into planning, a PR review that turned into a redesign. You sense a pattern but don't have the word for it yet.
+- A) Analogia `/ground` — B) Periagoge `/induce` — C) Syneidesis `/gap` — D) Hermeneia `/clarify`
+- Answer: B
+
+**Quiz Q (design)**: You have three examples of a phenomenon but no name for it. How would you get a candidate abstraction proposed — one you can test, widen, narrow, or discard — rather than staring at the cases until something clicks?
+- Hint: The answer is not hoping the word arrives unbidden — it's dialectical shaping with the candidate in hand.
+
+**Philosophy**: περιαγωγή (turning-around) — Plato *Republic* VII.518d, the soul's turning toward the intelligible; the dialectical collection and division moves of *Phaedrus* 265d–266a. Core principle: **Dialectical Triangulation over Unilateral Proposal**. Abstraction formation from concrete instances requires shaping by the user — AI proposes, user widens/narrows/fuses/reorients. Workflow position: Analysis cluster — dual of `/ground`. Where `/ground` validates a given structure against a target (substitution), `/induce` forms a new structure from instances (colimit). Game feel: "These cases share something — what is it?" → candidate arrives with a grounding example → widen, narrow, or reorient → the name locates itself.
+
 ## Prosoche `/attend`
 
 **Situation**: You ask Claude "clean up my Downloads folder for me." The folder holds hundreds of files — obvious junk (duplicate zips, old installers), probably-junk (unclear PDF scans), and things you actually need (tax receipts, signed contracts). Deleting everything is dangerous; doing nothing misses the point.

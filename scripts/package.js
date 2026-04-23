@@ -28,6 +28,7 @@ const PLUGINS = [
   { dir: 'aitesis', skill: 'inquire' },
   { dir: 'horismos', skill: 'bound' },
   { dir: 'analogia', skill: 'ground' },
+  { dir: 'periagoge', skill: 'induce' },
   { dir: 'prosoche', skill: 'attend' },
   { dir: 'epharmoge', skill: 'contextualize' },
   { dir: 'epistemic-cooperative', skill: 'onboard' },
@@ -55,6 +56,7 @@ const DESCRIPTION_OVERRIDES = {
   inquire: 'Infer context insufficiency before execution — (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution',
   attend: 'Evaluate execution-time risks — (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution',
   ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, Text) → ValidatedMapping',
+  induce: 'Crystallize in-process abstraction via dialectical triangulation — (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction',
   bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
@@ -81,6 +83,7 @@ const PROTOCOL_METADATA = {
   aitesis:    { name: 'Aitesis', command: '/inquire', deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
   prothesis:  { name: 'Prothesis', command: '/frame', deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
   analogia:   { name: 'Analogia', command: '/ground', deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
+  periagoge:  { name: 'Periagoge', command: '/induce', deficit: 'AbstractionInProcess', resolution: 'CrystallizedAbstraction' },
   syneidesis: { name: 'Syneidesis', command: '/gap', deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
   prosoche:   { name: 'Prosoche', command: '/attend', deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
   epharmoge:  { name: 'Epharmoge', command: '/contextualize', deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
@@ -91,7 +94,7 @@ const PROTOCOL_METADATA = {
 const PROTOCOL_ORDER = [
   'anamnesis',
   'hermeneia', 'telos', 'horismos', 'aitesis', 'prothesis',
-  'analogia', 'syneidesis', 'prosoche', 'epharmoge', 'katalepsis',
+  'analogia', 'periagoge', 'syneidesis', 'prosoche', 'epharmoge', 'katalepsis',
 ];
 
 // Sync validator: ensures PROTOCOL_ORDER and PROTOCOL_METADATA keys are aligned.
@@ -117,7 +120,7 @@ function validateProtocolTables() {
 // Curated first-release highlights (Phase A: no previous tag exists)
 const FIRST_RELEASE_HIGHLIGHTS = `## Highlights
 
-### 11 Epistemic Protocols
+### 12 Epistemic Protocols
 
 Structure human-AI interaction quality at every decision point. Each protocol resolves a typed deficit:
 

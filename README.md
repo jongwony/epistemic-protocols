@@ -44,6 +44,7 @@ $skill-installer install these skills from jongwony/epistemic-protocols:
 - aitesis/skills/inquire
 - horismos/skills/bound
 - analogia/skills/ground
+- periagoge/skills/induce
 - prosoche/skills/attend
 - epharmoge/skills/contextualize
 - anamnesis/skills/recollect
@@ -55,7 +56,7 @@ Restart Codex, then start with `$onboard`.
 <details>
 <summary>Notes</summary>
 
-- This installs 11 protocols + `onboard`. `/report`, `/dashboard`, `/write` are not included.
+- This installs 12 protocols + `onboard`. `/report`, `/dashboard`, `/write` are not included.
 - To install a single skill, use the same `skill-installer` pattern with one path.
 - This README is the source of truth for the Codex-supported install set.
 
@@ -70,6 +71,7 @@ Restart Codex, then start with `$onboard`.
 | [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
+| [Periagoge](./periagoge) | `/induce` | Multiple concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
 | [Prosoche](./prosoche) | `/attend` | Want execution readiness checked and risky actions gated for your judgment |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
@@ -77,7 +79,7 @@ Restart Codex, then start with `$onboard`.
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
 
-Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)
+Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)
 
 ## Utilities
 
@@ -115,6 +117,7 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 | Horismos | ὁρισμός | A bounding |
 | Aitesis | αἴτησις | Request, inquiry |
 | Analogia | ἀναλογία | Proportion |
+| Periagoge | περιαγωγή | Turning-around |
 | Prosoche | προσοχή | Attention |
 | Epharmoge | ἐφαρμογή | Application, fitting |
 | Anamnesis | ἀνάμνησις | Recollection |

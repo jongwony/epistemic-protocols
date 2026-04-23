@@ -267,13 +267,13 @@ The scan finds candidates; the narrative Qc enables recognition; the user consti
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
+| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
 **Key differences**:
-
 **Anamnesis vs Aitesis**: Both involve information access. Aitesis discovers facts the user does not know (ContextInsufficient — "I need information"). Anamnesis verifies context the user vaguely knows exists (RecallAmbiguous — "I know this was discussed, but where?"). The phenomenological test: does the user have an empty intention seeking fulfillment (Anamnesis) or no intention at all regarding the topic (Aitesis)? When the user has an empty intention but the recalled content is wholly absent from stores, the protocol exits with NullMatch — the recall target may not exist in the stored context.
 
 **Anamnesis vs Prothesis**: Prothesis selects analytical frameworks when none exist (FrameworkAbsent). Anamnesis locates prior discussions when the user has vague recall of their existence (RecallAmbiguous). If the user does not know a framework was ever discussed, it is not Anamnesis — it is Prothesis or Aitesis.
@@ -307,7 +307,7 @@ When Anamnesis is active:
 
 Anamnesis completes before context-dependent work; loaded instructions resume after recall resolves or dismisses.
 
-**Protocol precedence**: graph.json is authoritative. Anamnesis is an 8-outgoing advisory hub (Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia) with no incoming advisory edges; Katalepsis is structurally last.
+**Protocol precedence**: graph.json is authoritative. Anamnesis is a 10-outgoing advisory hub (Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia, Periagoge, Epharmoge) with no incoming advisory edges; Katalepsis is structurally last.
 
 **Temporal ordering**: Advisory edges do not enforce activation ordering. `/recollect` should be invoked early — before Hermeneia–Telos–Horismos precondition chain — for advisory flow to materialize. If downstream protocols activate first, advisory enrichment is unreachable in that session (not an error); user awareness of session-start recall is the ordering mechanism.
 

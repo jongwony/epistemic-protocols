@@ -47,6 +47,7 @@ Present the interpreted chain with canonical protocol names, slash commands, and
 | Aitesis | `/inquire` | `inquire` |
 | Prothesis | `/frame` | `frame` |
 | Analogia | `/ground` | `ground` |
+| Periagoge | `/induce` | `induce` |
 | Syneidesis | `/gap` | `gap` |
 | Prosoche | `/attend` | `attend` |
 | Epharmoge | `/contextualize` | `contextualize` |
