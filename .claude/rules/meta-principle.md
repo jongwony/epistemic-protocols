@@ -19,13 +19,17 @@ A candidate protocol, axiom, or morphism-internal feature passes Stage 1 when it
 
 Stage 1 produces a conjecture. The conjecture enters circulation; it is not yet corroborated data.
 
+Mechanical enforcement of Stage 1 conditions (especially Falsifiability) via static check extensions is future work; presently these operate as authoring guidelines audited at review time.
+
 ### Stage 2 — Runtime (Post-deploy Use-corroboration)
 
 Once deployed, the protocol accumulates post-use evidence in Popper's sense — observations of whether it resolves the claimed deficit when actually invoked. Revision is cheap in EP (SKILL.md edit + `/verify` + commit), so the correct pipeline is **deploy → observe → revise**. Observed friction triggers sharpening, narrowing, or retraction. Variation-stable corroboration across sessions constitutes Stage 2 retention evidence in Popper's sense. A protocol failing Stage 2 is retractable; removal is a legitimate outcome.
 
+**Retraction operationalization** — the multi-file cascade (plugin.json, SKILL.md, graph.json, CLAUDE.md, marketplace.json) required for clean protocol removal — is future work. The coproduct {Retained | Retracted} currently operates with one fully realized branch (Retained); Retracted state transitions (Removed / Archived / Deprecated) remain unspecified, so Stage 2 retraction signals surface protocols for review-level removal discussion rather than automatic deletion.
+
 ### Relation to Axiomatization Judgment Framework
 
-The two-stage split maps cleanly onto existing Promotion Criteria (below in this file): criteria 1–4 (Model Invariance Reversal, Non-Derivability, Structural Independence, Adversarial Grounding) are Stage 1 compile checks — resolvable before the principle enters circulation. Criterion 5 (Empirical Vindication Across Sessions) is Stage 2 runtime corroboration. Conjectural Grounding makes this split explicit: promotion decisions use Stage 1 + Stage 2 jointly, and the Hermeneutic Circle Evolution Model's Prejudgment → Inscription → Validation → Horizons Fusion loop is the operational realization of the two stages running as one cycle.
+The two-stage split maps cleanly onto existing Promotion Criteria (below in this file): criteria 1–4 (Model Invariance Reversal, Non-Derivability, Structural Independence, Adversarial Grounding) are Stage 1 compile checks — resolvable before the principle enters circulation. Criterion 5 (Empirical Vindication Across Sessions) is Stage 2 runtime corroboration. Conjectural Grounding makes this split explicit: promotion decisions use Stage 1 + Stage 2 jointly, and the Hermeneutic Circle Evolution Model's Prejudgment → Inscription → Validation → Horizons Fusion → Circular Return loop is the operational realization of the two stages running as one cycle; Circular Return is the long-arc Stage 2 revisitation as model capability shifts.
 
 ### Anti-inflation Clause
 
@@ -39,8 +43,8 @@ This preserves the prior Direction over Accumulated Workload budget: authoring l
 ### Operational Tests
 
 - **Stage 1 passes** when: axiom fit is citable, operation-kind is distinguished from every adjacent protocol by cognitive operation (not input shape), falsifiability condition is stated, and the option surface at Gates remains orthogonal under variation.
-- **Stage 2 corroboration suffices for retention** when: sessions invoking the protocol show the claimed deficit resolved, variation-stable corroboration is observed across contexts, and no sustained friction pattern points to structural mis-fit.
-- **Retraction is indicated** when: Stage 2 shows the deficit unresolved in use, or the protocol's conjectured operation-kind collapses into an adjacent protocol under observation.
+- **Stage 2 corroboration suffices for retention** when: sessions invoking the protocol show the claimed deficit resolved, variation-stable corroboration is observed across the four variation axes (instance, user profile, platform context, session type), and no sustained friction pattern points to structural mis-fit.
+- **Retraction is indicated** when Stage 2 shows (a) the claimed deficit is not observed in use — the deficit does not exist, or (b) the protocol's conjectured operation-kind collapses into an adjacent protocol under observation. Iteration (sharpening / narrowing), not retraction, applies when (c) the deficit is observed but the current framing does not resolve it — framing failure is a revise-in-place signal.
 
 ---
 
