@@ -36,11 +36,15 @@ Each presented option in a decision gate must occupy a decision-relevant differe
 
 Two concrete failure modes characterize the operational scope:
 - **Cost-symmetric baggage**: options differ only on items whose inclusion leaves downstream trajectories equivalent across options. Such options share a trajectory and should collapse to one.
-- **Meta-actions as peer options**: options representing defer, gather-more-context, or exit — not positions on the decision axis but exits from the gate. These surface as free-response pathways, not peer options.
+- **Meta-actions as peer options**: options whose selection produces no trajectory on the decision axis — pure exits, deferrals, or off-axis context-gathering that do not commit to any downstream action. Options whose selection triggers a structurally distinct downstream trajectory (including cleanup trajectories via `user_withdraw` in `architectural-principles.md §Three-Tier Termination`) remain on-axis peer options, not meta-actions. Meta-actions surface as free-response pathways, not peer options.
 
-Operational test: "Do the presented options produce materially different downstream trajectories, or do some share the same trajectory while differing on incidental packaging?" Shared-trajectory options collapse to one; meta-actions surface as free-response pathways.
+Operational test: "Do the presented options produce materially different downstream trajectories, or do some share the same trajectory while differing on incidental packaging?" Shared-trajectory options collapse to one; options producing no on-axis trajectory surface as free-response pathways.
 
-Scope: decision gates — gates whose options are positions on a decision axis. Verification gates are excluded: Katalepsis comprehension probes (1-correct option design by purpose) and Anamnesis Phase 2 recognition gates (past-identity synthesis, not future-trajectory selection) have option structures determined by verification task requirements, not by decision-axis position. The requirement applies to gates where the user's response constitutes a forward-looking choice among alternatives.
+**False-positive collapse guard**: Trajectory equivalence is an epistemic claim. When equivalence assessment requires user-private knowledge or is plausibly contested, preserve the options as distinct — collapsing under contested equivalence would exercise constitutive authority under relay appearance (dual to the false-positive gating failure mode named in `§Loop Continuity under Bounded Regret`).
+
+**Trade-off**: The principle prioritizes option-set purity (only decision-axis positions as peer options) over Recognition of structurally urgent meta-action prompts in time-bounded gates. Protocols with urgent off-axis prompts (e.g., "gather more context" before a time-bounded routing decision) must surface the prompt through alternative affordances (pre-gate text, progress indicators, or separate checkpoint gates), not by re-introducing them as peer options.
+
+Scope: decision gates — gates whose options are positions on a decision axis. **Structural test**: "Does accepting this option commit the agent to any downstream action beyond record-keeping?" If yes → decision-axis gate → requirement applies. If no → pure verification → excluded. Verification gates are excluded: Katalepsis comprehension probes (1-correct option design by purpose) and Anamnesis Phase 2 recognition gates (past-identity synthesis, not future-trajectory selection) have option structures determined by verification task requirements, not by decision-axis position. The requirement applies to gates where the user's response constitutes a forward-looking choice among alternatives.
 
 ## Convergence Evidence
 
