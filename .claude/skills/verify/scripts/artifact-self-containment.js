@@ -72,6 +72,10 @@ function hasRoutingCue(description, skill) {
 const BANNED_RUNTIME_DEPENDENCIES = [
   { pattern: /\bmission-bridge\.md\b/gi, message: 'references mission bridge from runtime contract surface' },
   { pattern: /\baxioms?\.md\b/gi, message: 'references axioms doc from runtime contract surface' },
+  { pattern: /\bderived-principles\.md\b/gi, message: 'references derived-principles doc from runtime contract surface' },
+  { pattern: /\barchitectural-principles\.md\b/gi, message: 'references architectural-principles doc from runtime contract surface' },
+  { pattern: /\bmeta-principle\.md\b/gi, message: 'references meta-principle doc from runtime contract surface' },
+  { pattern: /\bsafeguards\.md\b/gi, message: 'references safeguards doc from runtime contract surface' },
   { pattern: /\bA[1-7]\b(?!\.\d)/g, message: 'references contributor-only axiom identifier from runtime contract surface' },
   { pattern: /(?<![\w/-])\.claude\//gm, message: 'references .claude contributor path from runtime contract surface' },
   { pattern: /(?<![\w/-])docs\//gm, message: 'references repo docs path from runtime contract surface' },
