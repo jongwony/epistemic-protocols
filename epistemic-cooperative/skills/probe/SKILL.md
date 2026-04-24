@@ -119,7 +119,7 @@ UserSituation
   → present(H[], multi_hypothesis)    -- minimum two hypotheses, falsification visible
   → recognize(h, user)                -- user-constituted recognition (synthesis of identification)
   → emit(ProtocolRoute | FitReviewNote)
-  → ProtocolRoute
+  → ProtocolRoute | FitReviewNote
 requires: vague_deficit(U)             -- activation precondition (Layer 1 only)
 deficit:  DeficitUnrecognized          -- activation precondition
 preserves: Catalog                     -- catalog read-only; U is rebindable on Narrow
@@ -192,6 +192,7 @@ Phase 2 Qc (recognition)     → always_gated (constitutive user act; Standing-a
 ── MODE STATE ──
 Λ = { phase: Phase, U: UserSituation,
       hypotheses: List(Hypothesis), presented: Set(Hypothesis),
+      dismissed_in_session: Set(Hypothesis),
       narrow_iterations: Nat,
       disposition: Optional(Recognition),
       active: Bool, cause_tag: String }
@@ -225,7 +226,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 
 ## UX Safeguards
 
-- **Session immunity for dismissed hypotheses** — A hypothesis dismissed in the current session is not re-presented in the same session unless the user explicitly re-probes the same scope. Re-presenting a dismissed hypothesis without user-driven re-scope erodes the user's disposition authority (Rule 6 reinforcement).
+- **Session immunity for dismissed hypotheses** — A hypothesis dismissed in the current session is not re-presented in the same session unless the user explicitly re-probes the same scope. Re-presenting a dismissed hypothesis without user-driven re-scope erodes the user's disposition authority (Rule 6 reinforcement). Realized via `Λ.dismissed_in_session`: Phase 3 Dismiss adds presented hypotheses to this set; Phase 1 Scan filters out members of this set unless `Λ.U` was re-bound via Narrow (which clears the set for the new scope).
 - **Progress opacity** — No progress counter, no "X of Y hypotheses considered" framing. Such counters reintroduce a quasi-score (Rule 7 reinforcement).
 - **Ephemeral recognition** — Each probe disposition is a present-tense fit review, not a permanent record. The user's disposition does not bind future probes (Rule 7 reinforcement).
 - **Pre-gate evidence visibility** — All hypothesis evidence and reverse-evidence is laid out before the disposition gate so the user reads context before deciding (Rule 11 reinforcement; context-question separation is structural).
