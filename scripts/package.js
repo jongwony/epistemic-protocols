@@ -147,6 +147,7 @@ Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory e
 
 - \`/catalog\` — instant protocol handbook and reference
 - \`/onboard\` — quest-based protocol learning (quick recommendation + targeted scenarios)
+- \`/probe\` — deficit recognition fit review (multi-hypothesis surfacing before protocol commitment)
 - \`/report\` — Growth Map with epistemic analysis from session patterns
 - \`/dashboard\` — full-session coverage analytics
 - \`/reflect\` — cross-session insight extraction into persistent memory

@@ -59,14 +59,14 @@ Scan the user's situation against the full catalog of 12 epistemic deficits. For
 - Concrete situation evidence (what the user said or did that suggests this deficit)
 - A reverse-evidence condition: what observation would refute this hypothesis
 
-Construct the candidate set. Keep at minimum two candidates with non-overlapping reverse-evidence conditions — singleton high-confidence framing is forbidden (see Rules section, CSA-#5).
+Construct the candidate set. Keep at minimum two candidates with non-overlapping reverse-evidence conditions — singleton high-confidence framing is forbidden (see Rules section, Rule 5).
 
 ### Phase 2: Hypothesis Presentation
 
 Present the candidate hypotheses as text output before the gate. Format per hypothesis:
 
 ```
-Hypothesis N — Two interpretations possible / decision point is X
+Hypothesis N — N interpretations possible / decision point is X
   Deficit: <DeficitName> (<protocol>)
   Evidence: <quote or paraphrase of user's situation>
   Reverse-evidence: <observation that would refute this hypothesis>
@@ -168,12 +168,12 @@ Phase 1 → Phase 2 → Phase 3 →
   Narrow: rebind U to narrower scope → Phase 1
   Stop: deactivate
 Max 3 narrowing iterations. Exhausted: surface candidate set as fit-review note → deactivate.
-Convergence evidence: per disposition, emit one of {ProtocolRoute, FitReviewNote, no-disposition stop record}.
+Convergence evidence: per disposition, emit one of {ProtocolRoute, FitReviewNote} or deactivate without artifact (Stop).
 
 ── CONVERGENCE ──
 recognized = R ∈ {Recognize(h), Redirect(d), Dismiss}
 exhausted  = narrow_iterations ≥ 3
-session_text(probe) ∋ {ProtocolRoute | FitReviewNote | stop_record}
+session_text(probe) ∋ {ProtocolRoute | FitReviewNote} (Stop deactivates without artifact)
 
 ── TOOL GROUNDING ──
 -- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
@@ -188,7 +188,6 @@ converge            (relay)    → TextPresent+Proceed (convergence trace)
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
 Phase 2 Qc (recognition)     → always_gated (constitutive user act; Standing-authority delegation forbidden)
-Phase 3 Narrow (re-scope)    → always_gated (scope rebinding alters subsequent hypothesis space)
 
 ── MODE STATE ──
 Λ = { phase: Phase, U: UserSituation,
@@ -207,30 +206,30 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 
 ## Rules
 
-1. **User-invoked only (CSA-#1)** — Probe activates only on explicit `/probe` invocation. AI auto-surfacing is structurally forbidden; Layer 1/Layer 2 separation is enforced.
-2. **Opt-in, default off (CSA-#2)** — No sticky activation, no background scanning, no implicit re-activation across turns. The user explicitly activates each session.
-3. **Current-session default scope (CSA-#3)** — Default evidence window is the present session. Cross-session evidence is opt-in only.
-4. **All-time scope requires explicit confirmation (CSA-#4)** — Cross-session recall (reading prior `misfit.md` records or session history beyond the current session) requires an explicit Active-authority confirmation; never default behavior.
-5. **Multi-hypothesis required (CSA-#5)** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden.
-6. **Disposition field belongs to the user (CSA-#6)** — Recognize / Redirect / Dismiss / Narrow / Stop is a constitutive user act. AI never resolves the disposition unilaterally.
-7. **No cumulative score / grade / ranking (CSA-#7)** — Across uses, no fitness metric, success rate, or aggregated quality score is produced or stored. Each probe is independent.
-8. **Stop / narrow / skip always present (CSA-#8)** — Stop, narrow-scope, and skip options appear at every gate. Three-Tier Termination inheritance: graceful exit is always available.
-9. **Blocked vocabulary (CSA-#9)** — The terms "wrong", "misuse detected", and "should have used" must not appear in Probe output. These vocabularies frame Probe as a corrective judge rather than a fit-review companion.
-10. **Recommended vocabulary (CSA-#10)** — Use "fit review" as the positive framing replacement for the blocked vocabulary in #9. Output describes hypotheses, evidence, and reverse-evidence; never verdicts.
-11. **Hypothesis form (CSA-#11)** — Each hypothesis is phrased as low-confidence dialogic: "N interpretations possible / decision point is X". Certainty framings ("clearly", "definitely", "the answer is") are forbidden.
+1. **User-invoked only** — Probe activates only on explicit `/probe` invocation. AI auto-surfacing is structurally forbidden; Layer 1/Layer 2 separation is enforced.
+2. **Opt-in, default off** — No sticky activation, no background scanning, no implicit re-activation across turns. The user explicitly activates each session.
+3. **Current-session default scope** — Default evidence window is the present session. Cross-session evidence is opt-in only.
+4. **All-time scope requires explicit confirmation** — Cross-session recall (reading prior `misfit.md` records or session history beyond the current session) requires an explicit Active-authority confirmation; never default behavior.
+5. **Multi-hypothesis required** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden.
+6. **Disposition field belongs to the user** — Recognize / Redirect / Dismiss / Narrow / Stop is a constitutive user act. AI never resolves the disposition unilaterally.
+7. **No cumulative score / grade / ranking** — Across uses, no fitness metric, success rate, or aggregated quality score is produced or stored. Each probe is independent.
+8. **Stop / Narrow / Dismiss always present** — Stop, Narrow, and Dismiss options appear at every gate, matching the Phase 2 disposition labels. Three-Tier Termination inheritance: graceful exit is always available.
+9. **Blocked vocabulary** — The terms "wrong", "misuse detected", and "should have used" must not appear in Probe output. These vocabularies frame Probe as a corrective judge rather than a fit-review companion.
+10. **Recommended vocabulary** — Use "fit review" as the positive framing replacement for the blocked vocabulary in #9. Output describes hypotheses, evidence, and reverse-evidence; never verdicts.
+11. **Hypothesis form** — Each hypothesis is phrased as low-confidence dialogic: "N interpretations possible / decision point is X". Certainty framings ("clearly", "definitely", "the answer is") are forbidden.
 12. **Recognition over Recall** — Present structured hypothesis options via gate interaction and yield turn. Each option carries differential reverse-evidence so the post-selection state is anticipatable.
 13. **Detection with Authority** — AI detects candidate deficits with cited situation evidence; the user constitutes the recognition. AI never resolves the disposition.
 14. **Context-Question Separation** — All hypothesis evidence and reverse-evidence is presented as text output before the gate. The gate contains only the disposition options.
-15. **Convergence evidence** — Present a transformation trace before declaring convergence: each disposition produces a session-text artifact (ProtocolRoute, FitReviewNote, or stop record).
+15. **Convergence evidence** — Present a transformation trace before declaring convergence: Recognize/Redirect/Dismiss/Narrow produce a session-text artifact (ProtocolRoute or FitReviewNote); Stop deactivates without an artifact.
 16. **Coexistence with /catalog and /onboard** — Probe does not replace passive reference (`/catalog`) or pattern-based recommendation (`/onboard`). The three skills occupy distinct stances.
 
 ## UX Safeguards
 
-- **Session immunity for dismissed hypotheses** — A hypothesis dismissed in the current session is not re-presented in the same session unless the user explicitly re-probes the same scope. Re-presenting a dismissed hypothesis without user-driven re-scope erodes the user's disposition authority (CSA-#6 reinforcement).
-- **Progress opacity** — No progress counter, no "X of Y hypotheses considered" framing. Such counters reintroduce a quasi-score (CSA-#7 reinforcement).
-- **Ephemeral recognition** — Each probe disposition is a present-tense fit review, not a permanent record. The user's disposition does not bind future probes (CSA-#7 reinforcement).
-- **Pre-gate evidence visibility** — All hypothesis evidence and reverse-evidence is laid out before the disposition gate so the user reads context before deciding (CSA-#11 reinforcement; context-question separation is structural).
-- **Vocabulary discipline** — Probe output uses "hypothesis", "fit review", "evidence", "reverse-evidence", "disposition", "route". The skill never speaks of mistakes, errors, or misuse (CSA-#9 + CSA-#10 reinforcement).
+- **Session immunity for dismissed hypotheses** — A hypothesis dismissed in the current session is not re-presented in the same session unless the user explicitly re-probes the same scope. Re-presenting a dismissed hypothesis without user-driven re-scope erodes the user's disposition authority (Rule 6 reinforcement).
+- **Progress opacity** — No progress counter, no "X of Y hypotheses considered" framing. Such counters reintroduce a quasi-score (Rule 7 reinforcement).
+- **Ephemeral recognition** — Each probe disposition is a present-tense fit review, not a permanent record. The user's disposition does not bind future probes (Rule 7 reinforcement).
+- **Pre-gate evidence visibility** — All hypothesis evidence and reverse-evidence is laid out before the disposition gate so the user reads context before deciding (Rule 11 reinforcement; context-question separation is structural).
+- **Vocabulary discipline** — Probe output uses "hypothesis", "fit review", "evidence", "reverse-evidence", "disposition", "route". The skill never speaks of mistakes, errors, or misuse (Rule 9 + Rule 10 reinforcement).
 
 ## Trigger Signals
 
