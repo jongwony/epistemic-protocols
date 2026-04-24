@@ -28,6 +28,20 @@ All taxonomies must include an Emergent dimension to ensure comprehensiveness; n
 
 **Dead Signal Test**: When designing classification taxonomies for stigmergy artifacts, every value must carry a distinct downstream behavioral signal. If a proposed value's behavior is always resolvable to an existing value, it is a dead signal — handle via runtime interpretation (e.g., free input followed by routing) rather than taxonomy expansion. Derived from the same A1+A5 basis: a dead signal offers no Recognition value, as it presents a distinction without a differential future.
 
+## Differential Future Requirement
+
+Derived from A1 (Recognition over Recall) + A5 (Interaction Kind Factorization).
+
+Each presented option in a decision gate must occupy a decision-relevant differential-future position — a position whose downstream trajectory materially differs from the trajectories of the other presented options. A1 requires options with differential futures; A5 distinguishes relay from gated by entropy at the option-set level. This principle operationalizes their composition: when options lack differential future, they are not genuine alternatives but incidental packaging variants, which A5 resolves as relay.
+
+Two concrete failure modes characterize the operational scope:
+- **Cost-symmetric baggage**: options differ only on items whose inclusion leaves downstream trajectories equivalent across options. Such options share a trajectory and should collapse to one.
+- **Meta-actions as peer options**: options representing defer, gather-more-context, or exit — not positions on the decision axis but exits from the gate. These surface as free-response pathways, not peer options.
+
+Operational test: "Do the presented options produce materially different downstream trajectories, or do some share the same trajectory while differing on incidental packaging?" Shared-trajectory options collapse to one; meta-actions surface as free-response pathways.
+
+Scope: decision gates — gates whose options are positions on a decision axis. Verification gates are excluded: Katalepsis comprehension probes (1-correct option design by purpose) and Anamnesis Phase 2 recognition gates (past-identity synthesis, not future-trajectory selection) have option structures determined by verification task requirements, not by decision-axis position. The requirement applies to gates where the user's response constitutes a forward-looking choice among alternatives.
+
 ## Convergence Evidence
 
 Derived from A3 (Convergence Persistence).
