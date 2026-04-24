@@ -1,7 +1,7 @@
 {
   "name": "syneidesis",
   "description": "Surface potential gaps at decision points \u2014 /gap (\u03c3\u03c5\u03bd\u03b5\u03af\u03b4\u03b7\u03c3\u03b9\u03c2: knowing-together)",
-  "version": "2.21.29",
+  "version": "2.21.30",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
