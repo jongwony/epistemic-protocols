@@ -85,7 +85,13 @@ Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/fram
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/report`, `/dashboard`, `/write` | Protocol learning, usage analysis, coverage dashboard, and multi-perspective blog drafting |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, and multi-perspective blog drafting |
+
+**Three discovery modes coexist** (none replaces the others):
+
+- `/catalog` — passive reference handbook (browse / lookup; you already know the question)
+- `/onboard` — pattern-based recommendation + optional trial (session-history-driven; you want to learn what fits your patterns)
+- `/probe` — active AI-hypothesized deficit recognition (multi-hypothesis fit review when you feel something is off but cannot yet name which deficit fits)
 
 ## Design
 
