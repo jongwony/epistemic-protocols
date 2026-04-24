@@ -53,7 +53,10 @@ const ENTROPY_MAX_OUTPUT = 40;
 // Observed reason values in ~/.claude/logs/hooks.log (33 days, 1408 records):
 // other, prompt_input_exit, resume, clear. "compact" never observed — PreCompact
 // does not trigger SessionEnd; the two events are temporally independent.
-const SKIP_REASONS = new Set(["clear"]);
+// "clear" was previously skipped without documented rationale, but /clear fires
+// SessionEnd with intact payload; MIN_SESSION_BYTES + COOLDOWN_MS already cover
+// the noise/duplicate cases an exclusion would address.
+const SKIP_REASONS = new Set([]);
 const KNOWN_EVENTS = new Set(["SessionEnd", "PreCompact"]);
 
 // SessionEnd gate: cooldown against narrative.md mtime. Skip if last index
