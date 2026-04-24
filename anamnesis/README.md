@@ -32,8 +32,8 @@ AI systems often discard vague recall signals (`RecallAmbiguous`) — the user s
 ## Protocol Flow
 
 ```
-Phase 0: Detect      → Recognize empty intention / vague recall signal (silent)
-Phase 1: Scan        → Classify input type, dispatch track, scan stores along Salience dimensions
+Phase 0: Detect      → Recognize empty intention, classify input type, dispatch track (silent)
+Phase 1: Scan        → Scan stores along Salience dimensions, rank candidates
 Phase 2: Recognize   → Present ranked candidates for Socratic recognition (gate interaction)
 Phase 3: Integrate   → Emit recognized context into session; loop via Refine or Reorient on miss
 ```
