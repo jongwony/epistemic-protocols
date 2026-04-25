@@ -77,7 +77,7 @@ Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with progress v
 converge (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 1 Qc (applicability) → always_gated (Constitution: Confirm/Dismiss/Adapt applicability judgment)
 
 ── MODE STATE ──
@@ -176,7 +176,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 | Scope overflow | Result addresses more or less than the observed use case requires |
 | Temporal context | Result applies to a version, state, or phase that may have shifted |
 
-**Cross-session enrichment**: Repeated mismatch patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust Phase 0 scan priority — known mismatch types are checked first. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior application-context mismatch patterns observed in comparable deliverables, strengthening current mismatch detection by situating Phase 0 scans against the user's recurring convention and environment drifts. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Repeated mismatch patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust Phase 0 scan priority — known mismatch types are checked first. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior application-context mismatch patterns observed in comparable deliverables, strengthening current mismatch detection by situating Phase 0 scans against the user's recurring convention and environment drifts. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent dimension detections across 3+ sessions cluster around a recognizable pattern outside the named dimensions {Convention, Environment, Audience, Dependency}, the Mismatch Dimension Taxonomy warrants promotion to a new named dimension. When accumulated classification false negatives across 3+ sessions cluster around a specific dimension, that dimension's detection boundary warrants revision or demotion to Emergent.
 

@@ -96,7 +96,7 @@ Phase 3            (track)   → Internal state update
 converge           (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with crystallized abstraction)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 2 Qs (triangulate)   → always_gated (Constitution: Confirm/Widen/Narrow/Fuse/Reorient/Dismiss — user shapes abstraction via constitutive judgment; free response overrides presented options)
 
 ── MODE STATE ──
@@ -190,7 +190,7 @@ Heuristic signals for in-process abstraction detection (not hard gates):
 | Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (3+ instances, no pre-existing abstract structure) and nudges to `/induce` |
 | Adjacent abstraction surfacing | Recall yields neighboring abstractions, suggesting a fuse or specialize move is imminent |
 
-**Cross-session enrichment**: Accumulated abstraction formation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides Fuse candidates for Phase 1 — previously crystallized abstractions in adjacent domains become lateral Synagoge targets. When `/recollect` has been invoked in session, recalled adjacent abstractions enter the candidate construction pool as fuse-reference. Heuristic input may bias toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Accumulated abstraction formation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides Fuse candidates for Phase 1 — previously crystallized abstractions in adjacent domains become lateral Synagoge targets. When `/recollect` has been invoked in session, recalled adjacent abstractions enter the candidate construction pool as fuse-reference. Heuristic input may bias toward previously observed patterns; constitutive judgment remains with the user.
 
 **Skip**:
 - No essence signal detectable (neither user sensing language nor AI-inferrable core pattern)

@@ -371,7 +371,7 @@ function checkRequiredSections() {
       results.warn.push({
         check: 'structure',
         file: relPath,
-        message: 'Missing optional section: "── ELIDABLE CHECKPOINTS ──" (gate elidability analysis)'
+        message: 'Missing optional section: "── ELIDABLE CHECKPOINTS ──" (Constitution-interaction elidability analysis)'
       });
     }
 

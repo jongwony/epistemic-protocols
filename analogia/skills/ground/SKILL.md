@@ -87,7 +87,7 @@ Phase 3         (track)     → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with validated mapping)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 2 Qs (validate)      → always_gated (Constitution: user validates structural mapping with examples)
 
 ── MODE STATE ──
@@ -182,7 +182,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Grounding probe | User requests "concrete example", "how does this apply to my case", "show me in my context" |
 | Structural mismatch indicators | Abstract assumptions that may not hold in the concrete domain |
 
-**Cross-session enrichment**: Accumulated mapping validation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior domain mappings the user has worked with, providing structural correspondence candidates that Phase 1 can evaluate against the current abstract–concrete pair. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Accumulated mapping validation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior domain mappings the user has worked with, providing structural correspondence candidates that Phase 1 can evaluate against the current abstract–concrete pair. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Skip**:
 - Output is already domain-specific with concrete instantiations

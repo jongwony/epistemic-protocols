@@ -74,7 +74,7 @@ A (track)      → Internal state update (no external tool)
 converge (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 1 Qs (gap surface)   → always_gated (Constitution: user judgment on surfaced gap determines adjustment)
 Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes level)
                                 regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
@@ -222,7 +222,7 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 - Reversible + Any impact → Low stakes
 - Time pressure → stakes ↑ one level
 
-**Cross-session enrichment**: Repeated gap patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior gap categories the user has frequently overlooked in comparable decisions, further adjusting detection weights toward those blind spots. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Repeated gap patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior gap categories the user has frequently overlooked in comparable decisions, further adjusting detection weights toward those blind spots. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern that the named gap types fail to capture, the cost of maintaining the current taxonomy exceeds the cost of adding a named type — promote the Emergent cluster. Conversely, when a named type consistently yields zero detections across 3+ sessions, consider whether it remains a distinct gap category or has become observationally inert — consistently undetected despite applicable contexts.
 

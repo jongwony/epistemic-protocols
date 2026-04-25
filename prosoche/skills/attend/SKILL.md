@@ -210,9 +210,9 @@ Withdraw shutdown    (dispatch) → SendMessage (shutdown_request to team member
 converge             (extension)    → TextPresent+Proceed (coordinator convergence evidence trace; proceed with situated execution)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
--- Extension (relay): AI transmits deterministically, zero epistemic authority, auto-resolvable
--- Constitution (gated): AI exercises authority (selection, interpretation, boundary crossing) — requires user confirmation
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
+-- Extension: AI transmits deterministically, zero epistemic authority, auto-resolvable
+-- Constitution: AI exercises authority (selection, interpretation, boundary crossing) — requires user confirmation
 Phase -1 Sub-A0 Qc (routing)   → conditional: fires only when D[] ≠ ∅
                                    default: present detected deficits with routing options
                                    regret: bounded (Materialize + Phase 0 Classify provide independent checks)
@@ -311,7 +311,7 @@ When Prosoche is active:
 - User explicitly says "just do it" or "proceed without checks"
 - pattern(E) already in session_approvals (cached approval)
 
-**Cross-session enrichment**: Repeated risk patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may serve as Phase 0 classification heuristics — known risk signatures from prior executions improve risk level estimation. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior risk patterns specific to this user and codebase (past incidents, recurring failure modes), enriching Phase 0 risk classification with situated evidence. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Repeated risk patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may serve as Phase 0 classification heuristics — known risk signatures from prior executions improve risk level estimation. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior risk patterns specific to this user and codebase (past incidents, recurring failure modes), enriching Phase 0 risk classification with situated evidence. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent risk signal detections across 3+ sessions cluster around a recognizable pattern outside the named types, the Risk Signal Taxonomy warrants a new named type. When accumulated classification false negatives across 3+ sessions cluster around a specific pattern, the severity boundary for that pattern warrants revision. The within-session Compound rule is a micro-instance of this threshold applied at session scope.
 

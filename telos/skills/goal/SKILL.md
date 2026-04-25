@@ -90,7 +90,7 @@ Phase 4 Qc (constitution)    → present (GoalContract review + approval)
 converge (extension)     → TextPresent+Proceed (convergence evidence trace; context for Phase 4 Qc GoalContract approval)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 0 Qc (confirm)       → elidable when: explicit_arg via /goal "text"
                               default: proceed with inferred goal seed
                               regret: bounded (Phase 2 Qs free-response override available)
@@ -250,7 +250,7 @@ Options:
 
 Analyze Gᵥ to detect indeterminate dimensions, present full taxonomy assessment as **Extension (auto-proceed)**, then proceed directly to Phase 2 co-construction.
 
-**Cross-session enrichment**: Prior GoalContract patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust Phase 1 dimension weighting — dimensions that were consistently important in similar goal constructions receive initial emphasis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces the user's prior goal-dimension preferences for adjacent work, biasing Phase 1 dimension prompts toward the axes they have already treated as constitutive. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Prior GoalContract patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust Phase 1 dimension weighting — dimensions that were consistently important in similar goal constructions receive initial emphasis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces the user's prior goal-dimension preferences for adjacent work, biasing Phase 1 dimension prompts toward the axes they have already treated as constitutive. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent dimension appearances across 3+ sessions cluster around a recognizable goal construct not captured by the named dimensions, the dimension taxonomy warrants revision — promote the cluster. When a named dimension (other than Outcome, which is protocol-constrained) consistently receives trivial or vacuous detection across 3+ sessions, evaluate whether the dimension's detection criteria need sharpening or the dimension has become redundant.
 

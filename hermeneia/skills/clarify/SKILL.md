@@ -88,7 +88,7 @@ integrate    (track)   → Internal state update (no external tool)
 converge     (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with clarified expression)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 0 Qc (confirm)       → conditional: ai_strong only (user_signal path skips Phase 0)
                               regret: bounded (Phase 1a Qc always_gated; immune(E) on decline)
 Phase 1a Qc (E confirm)    → elidable when: explicit_arg(E) via /clarify "text"
@@ -191,7 +191,7 @@ Clarified expression becomes input to subsequent protocols.
 - User explicitly declines clarification
 - Expression already clarified in current session
 
-**Cross-session enrichment**: Accumulated clarification patterns from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces the user's prior terminology and phrasing patterns, improving intent extraction by grounding Iᵥ construction in recognized expression habits. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Accumulated clarification patterns from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces the user's prior terminology and phrasing patterns, improving intent extraction by grounding Iᵥ construction in recognized expression habits. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expression, Precision, Coherence, Background}, the Gap Taxonomy warrants promotion to a new named type. When accumulated classification false positives across 3+ sessions cluster around a specific named type, that type's detection boundary warrants revision or demotion to Emergent.
 

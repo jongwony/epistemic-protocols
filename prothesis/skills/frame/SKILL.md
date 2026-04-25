@@ -160,7 +160,7 @@ characterize (sense)     → Internal operation (perspective count tier classifi
 converge (extension)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 0 Qc (MB+mode)    → elidable when: user_invoked ∧ explicit_arg(U)
                            default: (Q1=confirm, Q2=ai_recommended_mode)
                            regret: bounded (Phase 2 Sc always_gated; J_mb=modify on re-invoke)
@@ -298,7 +298,7 @@ MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and
 
 After context gathering (Phase 1), **present** perspectives via Cognitive Partnership Move (Constitution) with `multiSelect: true`.
 
-**Cross-session enrichment**: Prior framing experiences accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) guide Phase 2 perspective formulation bidirectionally — previously effective analytical lenses for similar domains provide starting hypotheses (exploitation), while prior coverage gaps (unaddressed horizon limits) signal domains where novel perspectives should be prioritized (exploration). In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior framework or perspective preferences, biasing the Phase 2 framework candidate set toward lenses the user has already found productive in this line of work. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Prior framing experiences accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) guide Phase 2 perspective formulation bidirectionally — previously effective analytical lenses for similar domains provide starting hypotheses (exploitation), while prior coverage gaps (unaddressed horizon limits) signal domains where novel perspectives should be prioritized (exploration). In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior framework or perspective preferences, biasing the Phase 2 framework candidate set toward lenses the user has already found productive in this line of work. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent trigger detections across 3+ sessions cluster around a recognizable pattern outside the named types {Contradiction, Horizon Intersection, Uncorroborated High-Stakes}, the Trigger Detection Criteria warrants promotion to a new named trigger type. When accumulated false positive triggers across 3+ sessions cluster around a specific named type, that type's detection heuristic warrants revision or demotion to Emergent.
 

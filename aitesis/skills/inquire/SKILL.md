@@ -151,7 +151,7 @@ Phase 3         (track)       → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 1 Qc (coherence 2D)  → conditional: fires only when scope ≠ resolution assessment
                               always_gated when fired (Constitution: user classifies coherence type as MemoryInternal or CrossDomain)
 Phase 1 Emergent(EvidenceSource)  → always_gated (Constitution: channel unvalidated by definition; regardless of parent Verifiability,
@@ -270,7 +270,7 @@ Heuristic signals for context insufficiency inference (not hard gates):
 
 **Default-scan trigger** (resolves the bootstrapping asymmetry of the Prior-decision implication signal): When the prospect scope touches architecture decisions, API or protocol design, persisted state schemas, or user-facing behavior commitments, the Prior-decision signal fires by default — Phase 1 Ctx begins with a bounded scan over persistent memory (MEMORY.md, prior-decision logs in `.insights/`) regardless of explicit user mention. Without this default, detection would require the AI to already suspect prior involvement, which is the condition the signal is meant to surface. The default-scan is scope-triggered (not blanket), bounded to Phase 1 Ctx (no gate), and subject to the memory staleness rule in Phase 1 Step 1 (verify against current state before treating as resolved).
 
-**Cross-session enrichment**: Domain knowledge accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may narrow the Phase 0 uncertainty scan — known domain patterns reduce the scope of novel-domain signals. In parallel, when **`/recollect`** has been invoked this session, the recalled context narrows the Phase 1 context scan scope — recognized prior context reduces the factual uncertainty surface before collection begins. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Domain knowledge accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may narrow the Phase 0 uncertainty scan — known domain patterns reduce the scope of novel-domain signals. In parallel, when **`/recollect`** has been invoked this session, the recalled context narrows the Phase 1 context scan scope — recognized prior context reduces the factual uncertainty surface before collection begins. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated observation_skips entries across 3+ sessions cluster around a specific EscapeCondition with consistent rationale, the Verifiability classification boundary warrants revision — the escape is systematic, not exceptional. When accumulated Emergent dimension detections across 3+ sessions reveal a recurring non-factual uncertainty pattern, the Layer 1 dimension set warrants a new fiber in the fibration structure — promoted fibers default to Unit (detect-only) unless the pattern exhibits internal classification structure requiring a structured fiber type.
 

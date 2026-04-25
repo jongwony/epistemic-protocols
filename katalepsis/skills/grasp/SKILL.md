@@ -86,7 +86,7 @@ converge    (extension)  → TextPresent+Proceed (convergence evidence trace; pr
 -- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 1 Qc (entry points)  → always_gated (Constitution: verification scope selection)
 Phase 3 Qs (verify)        → always_gated (Constitution: Socratic probe — user comprehension is the measurement)
 Phase 3 Qᵣs (reasoning)   → always_gated (Constitution: misconception reasoning hypothesis)
@@ -229,7 +229,7 @@ Analyze AI work result and extract categories:
 3. **Prioritize**: Order by importance (architecture > new code > modification > ...)
 4. **Summarize**: Prepare concise category descriptions
 
-**Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 category prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
+**Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 category prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expectation, Causality, Scope, Sequence}, the Gap Taxonomy warrants promotion to a new named type. When accumulated probe misclassifications across 3+ sessions cluster around a specific gap type's probe kind boundary (Qc vs Qs), that type's probe kind assignment warrants revision.
 

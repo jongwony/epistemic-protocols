@@ -84,7 +84,7 @@ Phase 3       (track)   → Internal state update
 converge  (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with defined boundary)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 2 Qc (classify)      → always_gated (Constitution: UserSupplies/AIPropose/AIAutonomous — boundary ownership)
 
 ── MODE STATE ──
