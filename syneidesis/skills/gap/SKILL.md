@@ -22,7 +22,7 @@ Decision
   → surface(gap, as_question)         -- present gap as question
   → judge(user_response)              -- collect user judgment
   → AuditedDecision
-requires: committed(Decision)           -- runtime gate (Phase 0)
+requires: committed(Decision)           -- runtime checkpoint (Phase 0)
 deficit:  GapUnnoticed                  -- activation precondition (Layer 1/2)
 preserves: D                            -- read-only throughout; morphism acts on Σ only
 invariant: Surfacing over Deciding
@@ -43,7 +43,7 @@ A      = Adjustment: J × D × Σ → Σ'
 AuditedDecision = Σ' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
-Phase 0: D → committed?(D) → Scan(D) → G              -- gate + detection (silent)
+Phase 0: D → committed?(D) → Scan(D) → G              -- checkpoint + detection (silent)
 Phase 1: G → TaskCreate[all gaps] → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register all, surface first [Tool]
 Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
 
@@ -66,16 +66,16 @@ Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1)
 proceed(Σ) = ¬blocked(Σ)
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Qs (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+Qs (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (track)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (observe) → Read, Grep (stored knowledge extraction: context for gap identification)
 A (track)      → Internal state update (no external tool)
-converge (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
+converge (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
-Phase 1 Qs (gap surface)   → always_gated (gated: user judgment on surfaced gap determines adjustment)
+-- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+Phase 1 Qs (gap surface)   → always_gated (Constitution: user judgment on surfaced gap determines adjustment)
 Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes level)
                                 regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
 
@@ -131,7 +131,7 @@ When Syneidesis is active:
 
 **Retained**: Safety boundaries, secrets handling, deny-paths, user explicit instructions
 
-**Action**: At decision points, present potential gaps via gate interaction and yield turn.
+**Action**: At decision points, present potential gaps via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Stakes Assessment replaces tier-based gating
@@ -160,7 +160,7 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 
 **Cycle**: [Deliberation → Gap → Revision → Execution]
 1. **Deliberation**: Plan mode analysis generates recommendations (Prothesis provides multi-perspective deliberation when active)
-2. **Gap**: Syneidesis surfaces unconfirmed assumptions via gate interaction
+2. **Gap**: Syneidesis surfaces unconfirmed assumptions via Cognitive Partnership Move (Constitution)
 3. **Revision**: Integrate user response, re-evaluate if needed
 4. **Execution**: Only after explicit scope confirmation
 
@@ -222,7 +222,7 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 - Reversible + Any impact → Low stakes
 - Time pressure → stakes ↑ one level
 
-**Cross-session enrichment**: Repeated gap patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior gap categories the user has frequently overlooked in comparable decisions, further adjusting detection weights toward those blind spots. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Repeated gap patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior gap categories the user has frequently overlooked in comparable decisions, further adjusting detection weights toward those blind spots. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern that the named gap types fail to capture, the cost of maintaining the current taxonomy exceeds the cost of adding a named type — promote the Emergent cluster. Conversely, when a named type consistently yields zero detections across 3+ sessions, consider whether it remains a distinct gap category or has become observationally inert — consistently undetected despite applicable contexts.
 
@@ -267,11 +267,11 @@ TaskCreate({
 
 **Dependencies**: Use `addBlockedBy` when gaps have logical dependencies (e.g., "backup location" blocked by "backup exists?").
 
-### Interactive Surfacing (Gate Interaction)
+### Interactive Surfacing (Constitution)
 
-When Syneidesis is active, **present** via gate interaction for:
+When Syneidesis is active, **present** via Cognitive Partnership Move (Constitution) for:
 
-Gate presentation yields turn for user response.
+Constitution presentation yields turn for user response.
 
 | Trigger | Action |
 |---------|--------|
@@ -289,17 +289,17 @@ Gate presentation yields turn for user response.
 
 | Environment | Address | Dismiss | Probe |
 |-------------|---------|---------|-------|
-| Gate interaction | Selection | Selection | Selection |
+| Constitution interaction | Selection | Selection | Selection |
 
-Note: Esc key → unconditional loop termination (LOOP level). Gate interaction blocks until response or Esc.
+Note: Esc key → unconditional loop termination (LOOP level). Constitution interaction blocks until response or Esc.
 
 ## Intensity
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Reversible, low impact | Gate interaction with Confirm as default option |
-| Medium | Reversible + high impact, OR Irreversible + low impact | Gate interaction with rationale context |
-| Heavy | Irreversible + high impact | Detailed rationale + gate interaction with explicit options |
+| Light | Reversible, low impact | Constitution interaction with Confirm as default option |
+| Medium | Reversible + high impact, OR Irreversible + low impact | Constitution interaction with rationale context |
+| Heavy | Irreversible + high impact | Detailed rationale + Constitution interaction with explicit options |
 
 ## Rules
 
@@ -309,9 +309,9 @@ Note: Esc key → unconditional loop termination (LOOP level). Gate interaction 
 4. **Minimal intrusion**: Lightest intervention that achieves awareness
 5. **Stakes calibration**: Intensity follows stakes matrix above
 6. **Gap dependencies**: Use task blocking when gaps have logical order
-7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 8. **Convergence evidence**: Present convergence audit trace before declaring all tasks completed; per-gap evidence is required
 9. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation
 10. **No gap inflation**: Do not surface gaps that lack observable evidence merely to appear thorough. Each surfaced gap must cite specific context from D
-11. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
+11. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 12. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

@@ -23,7 +23,7 @@ Expression
   → clarify(gap, as_options)           -- present structured clarification choices
   → integrate(answer, intent)          -- update intent model from response
   → ClarifiedIntent
-requires: trigger(E) ∈ {user_signal, ai_strong ∧ confirmed}  -- Phase 0 gate
+requires: trigger(E) ∈ {user_signal, ai_strong ∧ confirmed}  -- Phase 0 checkpoint
 deficit:  IntentMisarticulated                                -- activation precondition (Layer 1/2)
 preserves: E                                                  -- read-only throughout; morphism acts on Î only
 invariant: Articulation over Assumption
@@ -35,13 +35,13 @@ Gd = AI-detected gap types ⊆ {Expression, Precision, Coherence, Background} �
      -- raw detection output, presented as full taxonomy at Phase 1b
 Gₛ = Effective working gap set = Gd \ (Λ.clarified ∪ Λ.excluded)
      -- target of Phase 2 iteration; mutable via user free-response override (Λ.excluded additions, Λ.emergent additions)
-Q  = Clarification question (via gate interaction)
+Q  = Clarification question (via Cognitive Partnership Move (Constitution))
 A  = User's answer
 Î  = Inferred intent (AI's model of user's goal)
 Î' = Updated intent after clarification
 ClarifiedIntent = Î' where |remaining| = 0 ∨ cycle(G) ∨ stall(Δ, 2) ∨ user_esc
 T  = Trigger source ∈ {user_signal, ai_strong, ai_soft}
-suggest_only = ai_soft terminal: passive suggestion without activation (no gate interaction; Λ.active = false)
+suggest_only = ai_soft terminal: passive suggestion without activation (no Constitution interaction; Λ.active = false)
 
 ── E-BINDING ──
 bind(E) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_expr
@@ -63,39 +63,39 @@ Phase 0:  E → recognize(E) → T                           -- trigger recognit
           T = ai_strong   → Qc(confirm) → Stop → {yes: Phase 1a | no: immune(E)}  -- AI-detected confirm [Tool]
           T = ai_soft     → suggest_only                  -- suggest, do not activate
 Phase 1a: E → Qc(E) → Stop → Eᵥ                          -- E confirmation [Tool]
-Phase 1b: Eᵥ → detect(Eᵥ) → Gd → TextPresent(relay) → filter(Gd, Λ) → Gₛ  -- gap detection + full taxonomy presentation [Tool]
+Phase 1b: Eᵥ → detect(Eᵥ) → Gd → TextPresent(extension) → filter(Gd, Λ) → Gₛ  -- gap detection + full taxonomy presentation [Tool]
 Phase 2:  Gₛ → Qs(Gₛ) → Stop → A                         -- clarification [Tool]
 Phase 3:  A → integrate(A, Î) → Î'                       -- intent update (sense)
 
 ── LOOP ──
 After Phase 3: return to Phase 1b for newly surfaced gaps.
 On re-entry, detect(Eᵥ) re-analyzes the expression in the context of prior clarifications; gap types in (Λ.clarified ∪ Λ.excluded) are filtered from Gd → Gₛ (type-level filtering ensures convergence; new instances of a clarified or user-excluded type are excluded).
-Re-entry is pure relay; taxonomy revision remains reachable via Phase 2 free response (adds to Λ.excluded or Λ.emergent, triggering re-detection).
+Re-entry is pure Extension (auto-proceed); taxonomy revision remains reachable via Phase 2 free response (adds to Λ.excluded or Λ.emergent, triggering re-detection).
 If |Gₛ| = 0 after filtering (all detected types clarified/excluded, or empty detection): skip Phase 2, evaluate convergence (|remaining| = 0).
 Continue until converge: |remaining| = 0, cycle detected, or user exits.
 Mode remains active until convergence.
 Convergence evidence: At |remaining| = 0, present transformation trace — for each g ∈ Λ.clarified, show (IntentMisarticulated(g) → resolution(g)) from Λ.history. Convergence is demonstrated, not asserted.
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase 0 Qc   (gate)   → present (AI-detected activation confirmation; ai_strong only)
-Phase 1a Qc  (gate)   → present (E confirmation)
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+Phase 0 Qc   (constitution)   → present (AI-detected activation confirmation; ai_strong only)
+Phase 1a Qc  (constitution)   → present (E confirmation)
 Phase 1b detect (sense)  → Internal analysis (gap detection from Eᵥ)
-Phase 1b present (relay) → TextPresent+Proceed (full taxonomy with evidence + falsification + emergent probe; flows into Phase 2)
-Phase 2 Qs   (gate)   → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
+Phase 1b present (extension) → TextPresent+Proceed (full taxonomy with evidence + falsification + emergent probe; flows into Phase 2)
+Phase 2 Qs   (constitution)   → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
 suggest_only (sense)   → no tool call (passive suggestion; Λ.active = false)
 integrate    (track)   → Internal state update (no external tool)
-converge     (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with clarified expression)
+converge     (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with clarified expression)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
 Phase 0 Qc (confirm)       → conditional: ai_strong only (user_signal path skips Phase 0)
-                              regret: bounded (Phase 1a Qc always gated; immune(E) on decline)
+                              regret: bounded (Phase 1a Qc always_gated; immune(E) on decline)
 Phase 1a Qc (E confirm)    → elidable when: explicit_arg(E) via /clarify "text"
                               default: proceed with bound E
                               regret: bounded (Phase 2 Qs free-response override available)
-Phase 1b present (taxonomy) → relay (full taxonomy with evidence; no gate — option-set relay test: Proceed dominates under user-invoked or user-confirmed activation)
-Phase 2 Qs (clarify)       → always_gated (gated: user incorporates intent into clarification; free response overrides taxonomy — emergent add, type exclude, redirect; override capability must be disclosed at gate as part of user authority disclosure)
+Phase 1b present (taxonomy) → extension (full taxonomy with evidence; no Constitution interaction — option-set relay test, Extension classification: Proceed dominates under user-invoked or user-confirmed activation)
+Phase 2 Qs (clarify)       → always_gated (Constitution: user incorporates intent into clarification; free response overrides taxonomy — emergent add, type exclude, redirect; override capability must be disclosed at the Constitution interaction as part of user authority disclosure)
 
 ── MODE STATE ──
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, detected: Set(Gap), gaps: Set(Gap),
@@ -152,7 +152,7 @@ When Hermeneia is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present clarification options via gate interaction and yield turn.
+**Action**: At Phase 2, present clarification options via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Hermeneia completes before other workflows begin
@@ -181,9 +181,9 @@ Clarified expression becomes input to subsequent protocols.
 
 | Strength | Trigger | Action |
 |----------|---------|--------|
-| Strong (`ai_strong`) | Standalone ambiguous expression with multiple valid interpretations | Confirm via gate interaction, then activate |
-| Strong (`ai_strong`) | Request referencing undefined scope or entity | Confirm via gate interaction, then activate |
-| Strong (`ai_strong`) | Scope-reference mismatch (expression scope ≠ referenced context) | Confirm via gate interaction, then activate |
+| Strong (`ai_strong`) | Standalone ambiguous expression with multiple valid interpretations | Confirm via Cognitive Partnership Move (Constitution), then activate |
+| Strong (`ai_strong`) | Request referencing undefined scope or entity | Confirm via Cognitive Partnership Move (Constitution), then activate |
+| Strong (`ai_strong`) | Scope-reference mismatch (expression scope ≠ referenced context) | Confirm via Cognitive Partnership Move (Constitution), then activate |
 | Soft (`ai_soft`) | Minor lexical ambiguity resolvable from context | Suggest only; do not activate |
 
 **Skip** (user-initiated):
@@ -191,7 +191,7 @@ Clarified expression becomes input to subsequent protocols.
 - User explicitly declines clarification
 - Expression already clarified in current session
 
-**Cross-session enrichment**: Accumulated clarification patterns from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces the user's prior terminology and phrasing patterns, improving intent extraction by grounding Iᵥ construction in recognized expression habits. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Accumulated clarification patterns from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may improve ai_strong trigger precision — known intent-expression gaps in similar contexts reduce false positive detection. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces the user's prior terminology and phrasing patterns, improving intent extraction by grounding Iᵥ construction in recognized expression habits. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expression, Precision, Coherence, Background}, the Gap Taxonomy warrants promotion to a new named type. When accumulated classification false positives across 3+ sessions cluster around a specific named type, that type's detection boundary warrants revision or demotion to Emergent.
 
@@ -269,7 +269,7 @@ Options:
 
 User confirmation required before proceeding to Phase 1a. If user selects option 2, mark session immunity and do not re-trigger for this expression.
 
-`T = ai_soft` → suggest only; do not present via gate interaction, do not activate.
+`T = ai_soft` → suggest only; do not present via Cognitive Partnership Move (Constitution); do not activate.
 
 ### Phase 1a: Expression Confirmation
 
@@ -291,7 +291,7 @@ Options:
 
 ### Phase 1b: Gap Detection
 
-Analyze Eᵥ to detect applicable gap types, present full taxonomy assessment as **relay**, then proceed directly to Phase 2 clarification.
+Analyze Eᵥ to detect applicable gap types, present full taxonomy assessment as **Extension (auto-proceed)**, then proceed directly to Phase 2 clarification.
 
 Per Gap Taxonomy above. Apply priority order: Coherence → Background → Expression → Precision. Emergent gaps must satisfy morphism `IntentMisarticulated → ClarifiedIntent`; boundary: intent-expression gap (in-scope) vs. goal definition (→ `/goal`) or execution context (→ `/inquire`).
 
@@ -311,7 +311,7 @@ Emergent gaps include boundary annotation: "This is an intent-expression gap (He
 
 Then filter Gd against (Λ.clarified ∪ Λ.excluded) to produce Gₛ, and proceed directly to Phase 2 for Gₛ in priority order (Coherence → Background → Expression → Precision). If `|Gₛ| = 0` after filtering: skip Phase 2, evaluate convergence (`|remaining| = 0` in LOOP).
 
-**User override via free response**: Users may override the taxonomy at any Phase 2 gate — describe an emergent gap (added to Λ.emergent), exclude a detected type (added to Λ.excluded), redirect to a different expression (re-binds E), or declare convergence. Override capability must be disclosed at Phase 2 gates (see Phase 2 prose).
+**User override via free response**: Users may override the taxonomy at any Phase 2 Constitution interaction — describe an emergent gap (added to Λ.emergent), exclude a detected type (added to Λ.excluded), redirect to a different expression (re-binds E), or declare convergence. Override capability must be disclosed at Phase 2 Constitution interactions (see Phase 2 prose).
 
 **Response classification** (discriminator for free-response parsing — closes the adversarial free-response pathway):
 - **Revision**: response references named gap types (Coherence/Background/Expression/Precision/Emergent) with revision verbs (exclude, remove, skip, add, redirect) → add to Λ.excluded or Λ.emergent, LOOP re-entry with filtered detection
@@ -320,13 +320,13 @@ Then filter Gd against (Λ.clarified ∪ Λ.excluded) to produce Gₛ, and proce
 - **Ambiguous**: content could be either and surface interpretation differs from latent interpretation → present: "Your response could be interpreted as [X revision] or [Y clarification]. Which did you intend?" (do not silently choose)
 - **Exclusion-to-empty**: if free response excludes the last remaining type in Gₛ, `|Gₛ| = 0` on next filter → convergence path per LOOP (evaluate `|remaining| = 0`)
 
-**Rationale** (option-set relay test): Under user-invoked or user-confirmed activation, "Proceed with current taxonomy" is the dominant option — a separate proceed/revise gate would present false alternatives. Full taxonomy presentation is preserved (relay) to support Recognition during Phase 2 answer formulation; taxonomy revision is reachable via Phase 2 gate free response with classification discriminator above.
+**Rationale** (option-set relay test, Extension classification): Under user-invoked or user-confirmed activation, "Proceed with current taxonomy" is the dominant option — a separate proceed/revise Constitution interaction would present false alternatives. Full taxonomy presentation is preserved (Extension/auto-proceed) to support Recognition during Phase 2 answer formulation; taxonomy revision is reachable via Phase 2 Constitution interaction free response with classification discriminator above.
 
 ### Phase 2: Clarification
 
-**Present** clarification options via gate interaction. Gate presentation yields turn for user response.
+**Present** clarification options via Cognitive Partnership Move (Constitution). Constitution presentation yields turn for user response.
 
-**Override disclosure (detection with user authority)**: At each Phase 2 gate, include a brief disclosure line in the pre-gate context surfacing the free-response override capability — without this disclosure the user cannot exercise authority they do not know they hold. Example disclosure: "*(Free response beyond the options: exclude this gap type, add an emergent type, or redirect to a different expression — see Phase 1b response classification.)*"
+**Override disclosure (detection with user authority)**: At each Phase 2 Constitution interaction, include a brief disclosure line in the pre-Constitution-interaction context surfacing the free-response override capability — without this disclosure the user cannot exercise authority they do not know they hold. Example disclosure: "*(Free response beyond the options: exclude this gap type, add an emergent type, or redirect to a different expression — see Phase 1b response classification.)*"
 
 Present the detected ambiguity as text output:
 - The potential ambiguity: [gap description]
@@ -380,9 +380,9 @@ Proceeding with this understanding.
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Minor ambiguity, low stakes | Gate interaction with binary disambiguation |
-| Medium | Significant ambiguity, moderate stakes | Gap statement + structured gate interaction with multiple options |
-| Heavy | Core intent unclear, high stakes | Detailed options with implications + structured gate interaction |
+| Light | Minor ambiguity, low stakes | Constitution interaction with binary disambiguation |
+| Medium | Significant ambiguity, moderate stakes | Gap statement + structured Constitution interaction with multiple options |
+| Heavy | Core intent unclear, high stakes | Detailed options with implications + structured Constitution interaction |
 
 ## Multi-Gap Handling
 
@@ -405,8 +405,8 @@ When multiple gaps detected:
 ## Rules
 
 1. **Hybrid-initiated, user-confirmed**: Activate on user signal, or with user confirmation when AI detects ambiguous expression
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
-3. **Detection with user authority**: AI presents full taxonomy assessment as relay — every named type with detection status, evidence, and falsification condition. User authority is exercised at Phase 2 clarification gates (including free-response override: emergent add, type exclusion, redirect), not at a separate taxonomy-confirmation gate. **Guard**: Abbreviating the taxonomy (omitting named types, evidence, or falsification conditions) under the rationale that Phase 2 free-response override provides correction = protocol violation. Full taxonomy presentation at Phase 1b is structurally required regardless of relay/gate classification; override is a user authority channel, not an AI shortcut for incomplete detection
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
+3. **Detection with user authority**: AI presents full taxonomy assessment as Extension (auto-proceed) — every named type with detection status, evidence, and falsification condition. User authority is exercised at Phase 2 clarification Constitution interactions (including free-response override: emergent add, type exclusion, redirect), not at a separate taxonomy-confirmation Constitution interaction. **Guard**: Abbreviating the taxonomy (omitting named types, evidence, or falsification conditions) under the rationale that Phase 2 free-response override provides correction = protocol violation. Full taxonomy presentation at Phase 1b is structurally required regardless of Extension/Constitution classification; override is a user authority channel, not an AI shortcut for incomplete detection
 4. **Maieutic over Informational**: Frame questions to guide discovery, not merely gather data
 5. **Articulation support**: Help user express what they know, don't guess what they mean
 6. **Minimal questioning**: Surface only gaps that affect execution
@@ -416,11 +416,11 @@ When multiple gaps detected:
 10. **Reflective pause**: Include "reconsider" option for complex intent clarification
 11. **Escape hatch**: Always allow user to provide their own phrasing
 12. **Small phases**: Prefer granular phases with user checkpoints over large autonomous phases
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **Convergence evidence**: Present transformation trace before declaring |remaining| = 0; per-gap evidence is required
 15. **Zero-gap surfacing**: If detect(Eᵥ) finds no gaps (Gd = ∅), present this finding with reasoning for user confirmation
-16. **Full taxonomy assessment**: Phase 1b must present ALL named gap types with detection status and evidence. Presenting only detected types with a generic "Add" option = protocol violation (Recognition over Recall applied to gate content)
+16. **Full taxonomy assessment**: Phase 1b must present ALL named gap types with detection status and evidence. Presenting only detected types with a generic "Add" option = protocol violation (Recognition over Recall applied to Constitution interaction content)
 17. **Falsification condition**: Each not-currently-detected type must include "would apply if [specific condition]" — exclusion rationale without falsification condition = protocol violation
 18. **Emergent probe**: Emergent slot must include an active probe question or AI-detected hypothesis with evidence. "No emergent gaps detected" as bare statement without probe = protocol violation
-19. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
+19. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 20. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

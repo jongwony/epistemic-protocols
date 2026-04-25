@@ -21,7 +21,7 @@ Inquiry
   → confirm(mission_brief)              -- validate inquiry framing with user
   → gather(context)                     -- targeted context acquisition guided by MBᵥ
   → propose(perspectives)               -- generate distinct analytical lenses from context
-  → select(perspectives)                -- user chooses lenses via gate interaction
+  → select(perspectives)                -- user chooses lenses via Cognitive Partnership Move (Constitution)
   → LensEstablished                     -- Mode 1 terminus; composable with downstream protocols
   → spawn(team)                         -- assemble perspective team via TeamCreate
   → inquire(parallel)                   -- isolated perspective analysis per teammate
@@ -33,7 +33,7 @@ Inquiry
   → present(lens)                       -- full synthesis output to user
   → route(selection)                    -- user routing decision
   → FramedInquiry
-requires: framework_absent(U)             -- runtime gate (Phase 0)
+requires: framework_absent(U)             -- runtime checkpoint (Phase 0)
 deficit:  FrameworkAbsent                  -- activation precondition (Layer 1/2)
 preserves: U                               -- original request read-only
 invariant: Placement over Prescription
@@ -41,10 +41,10 @@ invariant: Placement over Prescription
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
 MB     = MissionBrief(U): { inquiry_intent, expected_deliverable, scope_constraint }  -- AI-inferred from U
-Q(MB, M) = ConfirmAndSelect: (MB, ModeOptions) → (MBᵥ, m)  -- extern (combined gate interaction)
+Q(MB, M) = ConfirmAndSelect: (MB, ModeOptions) → (MBᵥ, m)  -- extern (combined Constitution interaction)
 Q1(MB)   = Confirm: MB → MBᵥ                                -- Mission Brief confirmation component of Q
 Q2(M)    = Select: ModeOptions → m                           -- Mode selection component of Q
-           Q = Q1 × Q2 (composed in single gate interaction; Modify loop re-presents Q1 only)
+           Q = Q1 × Q2 (composed in single Constitution interaction; Modify loop re-presents Q1 only)
 MBᵥ    = Verified MissionBrief (user-confirmed)
 m      = Mode ∈ {recommend, inquire}              -- lens recommendation vs. framed inquiry
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
@@ -61,7 +61,7 @@ Await  = Passive completion barrier: T_running → R   -- see TOOL GROUNDING (Aw
 Ω      = Collection: R → R', retain(T)               -- finalize results; team lifecycle deferred to loop
 R      = Set(Result)                                  -- raw inquiry outputs
 R'     = Set(Result) post-collection                  -- after Phase 3 collection
-P      = Preview: R' → UserVisible(R')               -- per-perspective summary output before synthesis (text, not gate interaction)
+P      = Preview: R' → UserVisible(R')               -- per-perspective summary output before synthesis (text, not Constitution interaction)
 Δ      = Trigger detection: R' → Δₛ                  -- produces named trigger set
 Δₛ     = Set(Trigger)                                 -- detected triggers per Trigger Detection Criteria; cite evidence per trigger
 D?     = Conditional dialogue: Δₛ ≠ ∅ → peer negotiation → structured report → conditional hub-spoke → Dᵣ; Δₛ = ∅ → skip dialogue (Dᵣ = ∅)
@@ -95,7 +95,7 @@ Edge cases:
 Phase 0:  U → MB(U) → Qc(MB, M) → Stop → (MBᵥ, m)              -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]
-Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: relay | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → Await[IdleNotification](T_running) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + inquiry dispatch + wait + collection + preview [Tool]
+Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: extension | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → Await[IdleNotification](T_running) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + inquiry dispatch + wait + collection + preview [Tool]
 Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Qc(routing) → Stop → J  -- triggers, cross-dialogue, synthesis, presentation & routing [Tool]
           J=wrap_up → PF Qc(select) → Stop → Ω → TeamDelete → TaskCreate(selected)  [Tool]
 
@@ -117,7 +117,7 @@ After LensEstablished (mode branching):
 
 During Phase 3 (Inquiry, including Await):
   Coordinator is passive during Await: no polling, no status checks, no passive observation per Rule 14 wait discipline
-  Esc key → tool-level termination (no gate tool open; team orphaned per user_esc)
+  Esc key → tool-level termination (no Constitution interaction tool open; team orphaned per user_esc)
   -- Recovery from indefinite wait is user-initiated; no timeout or polling fallback
 
 After Phase 4 (routing):
@@ -138,38 +138,38 @@ S (select)  = extern: user choice boundary
 I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase 0 Qc (gate)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
-Sc (gate)                → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
-T (dispatch)             → TeamCreate tool (parallel topology: creates team with shared task list); agent-aware realization: match available agents to selected perspectives before spawn — 0 matches: proceed with AI-generated teammates; 1 match: relay (auto-assign); 2+ matches: ELIDABLE gate (user confirms agent-perspective mapping, each option genuinely viable under different value weightings per option-set relay test)
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+Phase 0 Qc (constitution)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
+Sc (constitution)                → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
+T (dispatch)             → TeamCreate tool (parallel topology: creates team with shared task list); agent-aware realization: match available agents to selected perspectives before spawn — 0 matches: proceed with AI-generated teammates; 1 match: Extension (auto-assign); 2+ matches: Constitution (ELIDABLE) (user confirms agent-perspective mapping, each option genuinely viable under different user value weightings per option-set relay test, Extension classification)
 ∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates — each receives MBᵥ + perspective only; no Phase 1 context G passed)
 ∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination — dispatch phase)
 Await (sense)            → IdleNotification (passive wait: teammate SubagentStop events surface as coordinator idle notifications; teammate→coordinator message delivery occurs at coordinator turn boundary, not at teammate send time; async message-passing execution model; no coordinator poll per Rule 14)
-Phase 3 P (relay)        → TextPresent+Proceed (per-perspective epistemic contribution + key finding summaries)
+Phase 3 P (extension)        → TextPresent+Proceed (per-perspective epistemic contribution + key finding summaries)
 Phase 4 Δ (sense)        → Internal operation (trigger check per Trigger Detection Criteria; cite evidence per detected trigger)
 Phase 4 D? (dispatch)    → SendMessage tool (conditional topology: coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
-Phase 4 O (relay)        → TextPresent+Proceed (full synthesis — convergence, divergence, integrated assessment)
-Phase 4 Qc (gate)        → present (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
-PF Qc (gate)             → present (multiSelect: preservation scope; in LOOP wrap_up path only)
+Phase 4 O (extension)        → TextPresent+Proceed (full synthesis — convergence, divergence, integrated assessment)
+Phase 4 Qc (constitution)        → present (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
+PF Qc (constitution)             → present (multiSelect: preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (track) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (dispatch)             → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Λ (track)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
 G (observe)              → Read, Glob, Grep (meta-scope context acquisition: guided by MBᵥ to identify relevant perspectives — not passed to teammates; teammates independently collect object-scope evidence through their own lens)
 Phase 4 Syn (sense)      → Internal operation (no external tool; basis_cited in O(L) Synthesis Basis section)
 characterize (sense)     → Internal operation (perspective count tier classification)
-converge (relay)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
+converge (extension)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
 Phase 0 Qc (MB+mode)    → elidable when: user_invoked ∧ explicit_arg(U)
                            default: (Q1=confirm, Q2=ai_recommended_mode)
-                           regret: bounded (Phase 2 Sc always gated; J_mb=modify on re-invoke)
-Phase 2 Sc (perspective) → always_gated (gated: lens selection is epistemic choice)
+                           regret: bounded (Phase 2 Sc always_gated; J_mb=modify on re-invoke)
+Phase 2 Sc (perspective) → always_gated (Constitution: lens selection is epistemic choice)
 Phase 3 AgentMap? (map)  → elidable when: agent_count(perspective) ≤ 1
                            default: auto-assign (1 match) or AI-generated (0 matches)
                            regret: bounded (execution assignment correctable by team restructuring)
-Phase 4 Qc (routing)     → always_gated (gated: loop path + team lifecycle)
-PF Qc (preserve)         → always_gated (gated: knowledge preservation scope)
+Phase 4 Qc (routing)     → always_gated (Constitution: loop path + team lifecycle)
+PF Qc (preserve)         → always_gated (Constitution: knowledge preservation scope)
 
 ── CATEGORICAL NOTE ──
 ∩ = graded meet (intersection with coordinator-assessed agreement strength) over comparison morphisms between perspective outputs
@@ -229,7 +229,7 @@ When Prothesis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: Before analysis, present perspective options via gate interaction and yield turn.
+**Action**: Before analysis, present perspective options via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Prothesis completes before other workflows begin
@@ -245,9 +245,9 @@ Consult `references/conceptual-foundations.md` for design rationale (Plan Mode I
 
 ### Phase 0: Intent Confirmation (Mission Brief)
 
-Construct a Mission Brief from the user's request and **present** it for confirmation via gate interaction.
+Construct a Mission Brief from the user's request and **present** it for confirmation via Cognitive Partnership Move (Constitution).
 
-**Phase 0 establishes the Mission Brief as primary context vehicle for teammate spawn prompts** — it structurally guarantees the agent-teams best practice ("give teammates enough context") rather than depending on coordinator inference. The phase runs unless elided per ELIDABLE CHECKPOINTS: `user_invoked ∧ explicit_arg(U)` — Standing authority delegation to pre-committed elision rule. On elision, the MB is still constructed from U but proceeds without the Phase 0 gate interaction; AI uses `J_mb=confirm` and `m=ai_recommended_mode` as defaults. Phase 2 S (perspective selection) remains always gated, providing a downstream correction opportunity. Elision does not apply to J=extend re-invocations within an active loop.
+**Phase 0 establishes the Mission Brief as primary context vehicle for teammate spawn prompts** — it structurally guarantees the agent-teams best practice ("give teammates enough context") rather than depending on coordinator inference. The phase runs unless elided per ELIDABLE CHECKPOINTS: `user_invoked ∧ explicit_arg(U)` — Standing authority delegation to pre-committed elision rule. On elision, the MB is still constructed from U but proceeds without the Phase 0 Constitution interaction; AI uses `J_mb=confirm` and `m=ai_recommended_mode` as defaults. Phase 2 S (perspective selection) remains always_gated, providing a downstream correction opportunity. Elision does not apply to J=extend re-invocations within an active loop.
 
 The coordinator infers the Mission Brief from U (the user's request):
 
@@ -276,7 +276,7 @@ Q2. Mode:
 
 **Pre-fill from explicit text**: `/frame "text"` → pre-fill from provided text, still confirm.
 
-**Combined question**: Mission Brief confirmation and Mode selection are combined into a single gate interaction:
+**Combined question**: Mission Brief confirmation and Mode selection are combined into a single Cognitive Partnership Move (Constitution):
 - Q1 (Mission Brief): MB confirmation/modification (4 options)
 - Q2 (Mode): Recommend / Inquire (2 options)
 AI places the recommended Mode as Q2's first option with "(Recommended)" suffix based on inquiry characteristics:
@@ -296,13 +296,13 @@ MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and
 
 ### Phase 2: Prothesis (Perspective Placement)
 
-After context gathering (Phase 1), **present** perspectives via gate interaction with `multiSelect: true`.
+After context gathering (Phase 1), **present** perspectives via Cognitive Partnership Move (Constitution) with `multiSelect: true`.
 
-**Cross-session enrichment**: Prior framing experiences accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) guide Phase 2 perspective formulation bidirectionally — previously effective analytical lenses for similar domains provide starting hypotheses (exploitation), while prior coverage gaps (unaddressed horizon limits) signal domains where novel perspectives should be prioritized (exploration). In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior framework or perspective preferences, biasing the Phase 2 framework candidate set toward lenses the user has already found productive in this line of work. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Prior framing experiences accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) guide Phase 2 perspective formulation bidirectionally — previously effective analytical lenses for similar domains provide starting hypotheses (exploitation), while prior coverage gaps (unaddressed horizon limits) signal domains where novel perspectives should be prioritized (exploration). In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior framework or perspective preferences, biasing the Phase 2 framework candidate set toward lenses the user has already found productive in this line of work. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent trigger detections across 3+ sessions cluster around a recognizable pattern outside the named types {Contradiction, Horizon Intersection, Uncorroborated High-Stakes}, the Trigger Detection Criteria warrants promotion to a new named trigger type. When accumulated false positive triggers across 3+ sessions cluster around a specific named type, that type's detection heuristic warrants revision or demotion to Emergent.
 
-Gate presentation yields turn for user response.
+Constitution presentation yields turn for user response.
 
 Each perspective is an **individual option**. Do not pre-combine perspectives into composite options (e.g., "All three", "1+2 only"). The user selects one or more perspectives directly.
 
@@ -334,7 +334,7 @@ Optional dimension naming (apply when initial generation seems redundant):
 **Pre-suggested perspective handling**: When the user supplies perspectives in U (e.g., naming specific agents, frameworks, or roles), treat these as **pre-confirmed base perspectives** (Pᵦ):
 
 - Pᵦ are **auto-included** in Pₛ — do not re-present them as selectable options
-- Gate interaction presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
+- Constitution interaction presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
 - State Pᵦ in the question text as context (e.g., "Base: [Pᵦ names]. Which additional lens(es)?")
 - AI must propose at least 1 novel perspective when Pᵦ ≠ ∅ — re-presenting known perspectives as options saturates the finite option space and structurally conceals unknown unknowns
 
@@ -354,8 +354,8 @@ Per LOOP Pₛ count tiers for escalation recommendation.
 For each selected perspective in Pₛ, check whether available agents match the perspective's analytical focus:
 
 - **0 matches**: Proceed with AI-generated teammate (default behavior — no agent mapping step)
-- **1 match**: Relay — auto-assign the agent to the perspective (entropy→0, single viable option)
-- **2+ matches**: ELIDABLE gate — present agent-perspective mapping for user confirmation. Each option must be genuinely viable under different value weightings (option-set relay test). If all options collapse to one dominant choice, present as relay instead
+- **1 match**: Extension — auto-assign the agent to the perspective (entropy→0, single viable option)
+- **2+ matches**: Constitution (ELIDABLE) — present agent-perspective mapping for user confirmation. Each option must be genuinely viable under different value weightings (option-set relay test, Extension classification). If all options collapse to one dominant choice, present as Extension instead
 
 Agent matching is heuristic: compare perspective focus description against agent `description` and `when to use` fields. Matching does not affect perspective selection (theoria) — it only determines execution assignment (praxis). "Placement over Prescription" invariant: /frame places perspectives; agent mapping realizes execution.
 
@@ -435,7 +435,7 @@ Collect inquiry results into R'. Team remains active — shutdown/retain decisio
 **Horizon Limits**: [What this lens missed]
 ```
 
-This is informational text output — not a gate interaction. The coordinator summarizes each perspective's output (not verbatim teammate content) to control rendering length while preserving epistemic contribution visibility.
+This is informational text output — not a Constitution interaction. The coordinator summarizes each perspective's output (not verbatim teammate content) to control rendering length while preserving epistemic contribution visibility.
 
 #### Isolated Context Requirement
 
@@ -477,14 +477,14 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    - Divergence: [remaining unresolved points, if any]
    ```
 
-   This is informational text — not a gate interaction. Skip this step if Δₛ = ∅ (no triggers detected).
+   This is informational text — not a Constitution interaction. Skip this step if Δₛ = ∅ (no triggers detected).
 6. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises synthesis constitution as Synthesizer: horizons fusion from peer inputs, not new analysis. Information collection from peers; the integration (Horizontverschmelzung) is the coordinator's own.
-7. **User review**: Output the full synthesis as text (O(L)), then **present** routing options via gate interaction. The user reads the complete synthesis with scrollback, then selects next action.
+7. **User review**: Output the full synthesis as text (O(L)), then **present** routing options via Cognitive Partnership Move (Constitution). The user reads the complete synthesis with scrollback, then selects next action.
 
    **Step 1** — Text output O(L) (full synthesis, per Synthesis template below):
    Output the Framed Analysis as markdown text. No truncation risk — text output supports full rendering with scrollback.
 
-   **Step 2** — Gate interaction (routing only):
+   **Step 2** — Constitution interaction (routing only):
 
    ```
    question: "How would you like to proceed?"
@@ -533,7 +533,7 @@ After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅)
 Note: Perspective Summaries are surfaced earlier via P(R') preview (Phase 3 Collection). The synthesis template focuses on integration — convergence, divergence resolution, and assessment — rather than repeating individual perspective findings.
 
 **Loop behavior**: Per LOOP. Key operational details:
-- **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect gate interaction; selected items migrate to session TaskCreate after TeamDelete. When presenting convergence evidence, annotate each perspective's contribution with which Lens section(s) (∩, D, A) the perspective influenced, whether unique findings survived synthesis, and each perspective's horizon limits that remained unaddressed. Coverage gaps (union of unaddressed horizon limits across all perspectives) are recorded alongside survival signals — enabling cross-session enrichment that balances exploitation (proven perspectives) with exploration (perspectives addressing prior blind spots).
+- **Wrap up**: PF presents L categories (convergence, divergence, assessment highlights) via multiSelect Constitution interaction; selected items migrate to session TaskCreate after TeamDelete. When presenting convergence evidence, annotate each perspective's contribution with which Lens section(s) (∩, D, A) the perspective influenced, whether unique findings survived synthesis, and each perspective's horizon limits that remained unaddressed. Coverage gaps (union of unaddressed horizon limits across all perspectives) are recorded alongside survival signals — enabling cross-session enrichment that balances exploitation (proven perspectives) with exploration (perspectives addressing prior blind spots).
 
 All other routing options (Extend, Add input, withdraw) and convergence behavior Per LOOP.
 
@@ -552,25 +552,25 @@ Heuristic criteria for Phase 4 trigger detection (Δ). Coordinator cites evidenc
 
 ## Rules
 
-1. **Mission Brief confirmation**: Always present Mission Brief for confirmation via gate interaction before context gathering (Phase 0 → Phase 1 gate). Pre-filled text (`/frame "text"`) still requires confirmation.
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
+1. **Mission Brief confirmation**: Always present Mission Brief for confirmation via Cognitive Partnership Move (Constitution) before context gathering (Phase 0 → Phase 1 Constitution interaction). Pre-filled text (`/frame "text"`) still requires confirmation.
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
 3. **Epistemic Integrity**: Each perspective analyzes in isolated teammate context within an agent team; main agent direct analysis = protocol violation (violates isolation requirement). Mode 1 (recommend) is exempt — no team or isolation (Pₛ selection only). Phase topology per Rule 7
 4. **Synthesis Constraint**: Integration derives only from what perspectives provided; no new analysis. Synthesis constitution (horizons fusion) is integration, not analysis — explicitly marked in Synthesis Basis for verification
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
-6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then present routing options via gate interaction to confirm or extend analysis
-7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via gate interaction
-8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then present routing options via Cognitive Partnership Move (Constitution) to confirm or extend analysis
+7. **Phase-dependent topology**: Analysis (Phase 3) enforces strict isolation; cross-dialogue (Phase 4) uses peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via Cognitive Partnership Move (Constitution)
+8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **Convergence evidence**: Present transformation trace before declaring wrap_up (Mode 2) or recommend terminus (Mode 1); per-perspective contribution is the required evidence
 10. **Zero-result surfacing**: If Phase 2 generation yields no candidate frameworks, present the finding with reasoning for user confirmation
 11. **Concrete routing**: Phase 4 routing options must include session-specific rationale derived from L. Generic labels without Lens-grounded content = protocol violation (analogical application of Full Taxonomy Confirmation — session-grounded concreteness over generic labels)
-12. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
+12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 13. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 14. **Wait discipline**: During Phase 3 Await, the coordinator MUST NOT (a) re-prompt teammates regardless of interval duration — any re-prompt risks interrupting teammate mid-composition and inducing content revision rather than resolving apparent silence; (b) observe teammate state passively (TaskList reads, agent memory inspection, filesystem reads under team directories) as a basis for behavioral decisions before the completion signal arrives — passive observation defeats passive-wait semantics and becomes a post-hoc rationalization path disguised as "task tracking, not polling"; (c) proceed with partial R — Await converges only when all teammates in T have signaled completion, and partial collection without `user_esc` violates convergence persistence. Scope: Phase 3 inquiry wait only; Phase 4 hub-spoke step 4 content-bearing follow-ups are sent after peers have idled and are out of scope. Platform-specific delivery mechanics are documented in TOOL GROUNDING (Await entry); epistemic prose depends only on the existence of a completion signal, not on its platform form. Recovery from indefinite wait is user-initiated via `user_esc` per LOOP; any of (a)/(b)/(c) = protocol violation
 
 ## Adversarial Guards
 
 - **role-drift**: team members gradually drift toward lowest-common-denominator stances; fires when 2+ members' Phase 2 outputs converge on identical framing across 3+ iterations. Guard: surface divergence-collapse as an epistemic signal, not efficiency.
-- **gate-reduction-delay**: Phase 3 gate reduction proposals delayed past their warranted trigger, leaving the team in high-friction gating longer than needed. Guard: when reduction criteria met, propose explicitly rather than continuing status quo.
+- **constitution-reduction-delay**: Phase 3 Constitution-interaction reduction proposals delayed past their warranted trigger, leaving the team in high-friction Constitution mode longer than needed. Guard: when reduction criteria met, propose explicitly rather than continuing status quo.
 - **fixture-early-detection**: perspective fixture (shared unexamined assumption) detected via unanimous agreement on a contested claim in first 2 rounds. Guard: surface the fixture and request a dissenting frame.
 
 ## Known Limitations

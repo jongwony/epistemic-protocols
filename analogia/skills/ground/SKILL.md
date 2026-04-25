@@ -24,7 +24,7 @@ R
   → validate(instantiation, user)      -- user verifies mapping adequacy
   → terminalize(mapping, user)         -- make mapping status explicit in output
   → ValidatedMapping
-requires: uncertain(mapping(Sₐ, Sₜ))    -- runtime gate (Phase 0)
+requires: uncertain(mapping(Sₐ, Sₜ))    -- runtime checkpoint (Phase 0)
 deficit:  MappingUncertain               -- activation precondition (Layer 1/2)
 preserves: content_identity(R)           -- output content invariant; mapping status recorded in R'
 invariant: Structural Correspondence over Abstract Assertion
@@ -58,7 +58,7 @@ Priority: explicit_arg > current_output > most_recent_output
 If no relevant text exists: pause activation and request a grounding target before Phase 0.
 
 ── PHASE TRANSITIONS ──
-Phase 0: R → Detect(R) → uncertain?                             -- mapping uncertainty gate (silent)
+Phase 0: R → Detect(R) → uncertain?                             -- mapping uncertainty checkpoint (silent)
 Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M               -- domain decomposition + mapping [Tool]
 Phase 2: M → I(M, Sₜ) → Qs(I, progress) → Stop → V             -- instantiation + validation [Tool]
 Phase 3: V → integrate(V, R) → R'                               -- output update (sense)
@@ -79,16 +79,16 @@ narrowing(V, M) = |remaining(after)| < |remaining(before)|
 early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect  (sense)     → Internal analysis (no external tool)
 Phase 1 Map     (observe)   → Read, Grep (stored knowledge extraction: domain structure analysis); WebSearch (conditional: external domain knowledge)
-Phase 2 Qs      (gate)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
+Phase 2 Qs      (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (track)     → Internal state update
-converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with validated mapping)
+converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with validated mapping)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
-Phase 2 Qs (validate)      → always_gated (gated: user validates structural mapping with examples)
+-- Axis: Extension/Constitution = interaction kind (operational synonyms: relay/gated); always_gated/elidable = regret profile
+Phase 2 Qs (validate)      → always_gated (Constitution: user validates structural mapping with examples)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,
@@ -138,7 +138,7 @@ See `references/best-practices.md` for user-language triggers and grounding scen
 
 ### Activation
 
-AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via gate interaction (Phase 2). On direct `/ground`, bind `R` from the current or most recent output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
+AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2). On direct `/ground`, bind `R` from the current or most recent output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/ground` slash command or description-matching input. Always available.
@@ -161,7 +161,7 @@ When Analogia is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present concrete instantiation for user validation of mapping adequacy via gate interaction and yield turn.
+**Action**: At Phase 2, present concrete instantiation for user validation of mapping adequacy via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Analogia completes before output dependent on mapping validity proceeds
@@ -182,7 +182,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Grounding probe | User requests "concrete example", "how does this apply to my case", "show me in my context" |
 | Structural mismatch indicators | Abstract assumptions that may not hold in the concrete domain |
 
-**Cross-session enrichment**: Accumulated mapping validation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior domain mappings the user has worked with, providing structural correspondence candidates that Phase 1 can evaluate against the current abstract–concrete pair. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Accumulated mapping validation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior domain mappings the user has worked with, providing structural correspondence candidates that Phase 1 can evaluate against the current abstract–concrete pair. This is a heuristic input that may bias detection toward previously observed patterns; constitution judgment remains with the user.
 
 **Skip**:
 - Output is already domain-specific with concrete instantiations
@@ -202,7 +202,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 
 ## Protocol
 
-### Phase 0: Mapping Uncertainty Gate (Silent)
+### Phase 0: Mapping Uncertainty Checkpoint (Silent)
 
 Analyze text for mapping uncertainty. This phase is **silent** — no user interaction.
 
@@ -235,7 +235,7 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 
 ### Phase 2: Instantiation + Validation
 
-**Present** concrete instantiations for user validation via gate interaction.
+**Present** concrete instantiations for user validation via Cognitive Partnership Move (Constitution).
 
 **Selection criterion**: Choose the correspondence whose validation would maximally narrow the remaining mapping uncertainty. When priority is equal, prefer the correspondence with richer structural evidence.
 
@@ -285,7 +285,7 @@ After integration:
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Single obvious correspondence | Brief example + gate interaction with Confirm default |
+| Light | Single obvious correspondence | Brief example + Constitution interaction with Confirm default |
 | Medium | Multiple correspondences, partial structural match | Mapping table + concrete examples |
 | Heavy | Complex cross-domain mapping, structural mismatches detected | Full domain decomposition + multiple instantiations + gap analysis |
 
@@ -303,8 +303,8 @@ After integration:
 
 ## Rules
 
-1. **AI-guided, user-validated**: AI detects mapping uncertainty; validation requires user choice via gate interaction (Phase 2)
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
+1. **AI-guided, user-validated**: AI detects mapping uncertainty; validation requires user choice via Cognitive Partnership Move (Constitution) (Phase 2)
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
 3. **Domain decomposition first**: Before presenting instantiations, decompose abstract and concrete domain structures through codebase analysis (Phase 1)
 4. **Structural Correspondence over Abstract Assertion**: When mapping is uncertain, construct explicit correspondences rather than assert mapping validity — silence is worse than a rejected mapping
 5. **Concrete instantiation required**: Every mapping presented must include at least one concrete example in the user's domain
@@ -315,8 +315,8 @@ After integration:
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N validated / M total]`
 11. **Early exit honored**: When user declares mapping sufficient, accept immediately regardless of remaining correspondences
 12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit; defer to Periagoge (`/induce`) when input is colimit-shaped (3+ concrete instances without pre-existing abstract structure — abstraction formation rather than mapping validation)
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **Convergence evidence**: Present transformation trace before declaring all_addressed(R'); per-correspondence evidence is required
 15. **Zero-gap surfacing**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
-16. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
+16. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 17. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
