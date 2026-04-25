@@ -32,7 +32,7 @@ All taxonomies must include an Emergent dimension to ensure comprehensiveness; n
 
 Derived from A1 (Recognition over Recall) + A5 (Interaction Kind Factorization).
 
-Each presented option in a decision gate must occupy a decision-relevant differential-future position — a position whose downstream trajectory materially differs from the trajectories of the other presented options. A1 requires options with differential futures; A5 distinguishes relay from gated by entropy at the option-set level. This principle operationalizes their composition: when options lack differential future, they are not genuine alternatives but incidental packaging variants, which A5 resolves as relay.
+Each presented option in a decision gate must occupy a decision-relevant differential-future position — a position whose downstream trajectory materially differs from the trajectories of the other presented options. A1 requires options with differential futures; A5 distinguishes Extension from Constitution by entropy at the option-set level (operational synonyms: relay/gated). This principle operationalizes their composition: when options lack differential future, they are not genuine alternatives but incidental packaging variants, which A5 resolves as relay.
 
 Two concrete failure modes characterize the operational scope:
 - **Cost-symmetric baggage**: options differ only on items whose inclusion leaves downstream trajectories equivalent across options. Such options share a trajectory and should collapse to one.
@@ -90,7 +90,7 @@ Scope boundary: this principle applies to instructions the LLM interprets and ap
 
 Derived from A2 (Detection with Authority) + A5 (Interaction Kind Factorization).
 
-A2's relay/constitution boundary establishes that relay actions are legitimately auto-resolvable; A5's bounded/unbounded regret classifies individual gates by elision consequence. This principle derives a prescriptive obligation from both: within any execution loop, bounded-regret actions must not trigger Stop — the loop continues. The "must not" is this principle's own contribution, not a direct reading of A2 (which permits but does not require auto-resolution) or A5 (which classifies but does not prescribe loop behavior). Only unbounded-regret actions (genuinely viable alternative paths whose wrong choice creates irreversible divergence) warrant interruption.
+A2's relay/constitution boundary establishes that Extension actions are legitimately auto-resolvable; A5's bounded/unbounded regret classifies individual gates by elision consequence. This principle derives a prescriptive obligation from both: within any execution loop, bounded-regret actions must not trigger Stop — the loop continues. The "must not" is this principle's own contribution, not a direct reading of A2 (which permits but does not require auto-resolution) or A5 (which classifies but does not prescribe loop behavior). Only unbounded-regret Constitution actions (genuinely viable alternative paths whose wrong choice creates irreversible divergence) warrant interruption.
 
 **Plan-level aggregation**: Compound unbounded-regret is superadditive — multiple irreversible decisions in one plan interact, and their aggregate regret exceeds the sum of individual gate-level risks. When compound regret crosses the plan-direction threshold, the user should judge the plan shape, not just individual items. The specific threshold is protocol-level implementation.
 

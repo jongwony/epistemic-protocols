@@ -194,7 +194,7 @@ After Chain Summary, present cost visibility sub-section:
 
 Legend: ■ = presented, · = elided, × = pruned
 
-**Conditional entropy**: `Σ log₂(|options_i|)` bits over presented gates — quantifies total user decision load.
+**Conditional entropy**: `Σ log₂(|options_i|)` bits over presented gates — quantifies total user decision load. Higher entropy across gates indicates more user decision points; lower entropy indicates more auto-resolvable gates.
 
 **O_support visibility** — each elided gate's justification:
 

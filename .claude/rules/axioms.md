@@ -28,16 +28,16 @@ AI detects conditions (gaps, uncertainties, mismatches, risks) and presents them
 
 This separation preserves human agency in epistemic dialogue: the AI's role is to illuminate the decision space, not to occupy it. When detection and judgment collapse into a single agent act, the user loses the opportunity to exercise informed choice.
 
-### Operational Refinement: Relay/Constitution Boundary
+### Operational Refinement: Cognitive Partnership Move (Extension / Constitution)
 
-A2's detection/authority distinction operationalizes through a relay/constitution boundary at the action level:
+A2's detection/authority distinction operationalizes through the Cognitive Partnership Move at the action level. Every AI act in dialogue is a partnership move with one of two modes:
 
-- **Relay**: AI exercises zero epistemic authority — mechanically transmits environmental facts with cited basis. Auto-resolution is legitimate when the action is relay.
-- **Constitution**: AI exercises epistemic authority through selection, interpretation, scope expansion, or environment mutation. User confirmation required.
+- **Extension (relay mode)**: AI exercises zero epistemic authority — mechanically transmits environmental facts with cited basis. Auto-resolution is legitimate when the action is relay.
+- **Constitution (gated mode)**: AI exercises epistemic authority through selection, interpretation, scope expansion, or environment mutation. User confirmation required.
 
 Single test: "Is the AI acting as a relay or exercising authority?" Five verification indicators derive from this test — all are natural consequences of zero epistemic authority:
 
-| Indicator | Relay | Constitution |
+| Indicator | Extension (relay mode) | Constitution (gated mode) |
 |-----------|-------|-------------|
 | Deterministic | Result uniquely determined by environment | Multiple valid results |
 | Citable | External source is the basis | AI inference is the basis |
@@ -55,8 +55,8 @@ A2's authority extends to a second order: not only WHO exercises judgment (1st o
 
 Gate authority decomposes into two modes:
 
-- **Standing authority**: User's constitutive judgment crystallized into deterministic rules — system prompts, compose automation, CI/CD configurations. Operates in the relay domain (entropy→0).
-- **Active authority**: User's live constitutive judgment exercised at protocol gates. Operates in the constitution domain (entropy>0).
+- **Standing authority**: User's constitutive judgment crystallized into deterministic rules — system prompts, compose automation, CI/CD configurations. Operates in the Extension domain (entropy→0).
+- **Active authority**: User's live constitutive judgment exercised at protocol gates. Operates in the Constitution domain (entropy>0).
 
 The act of creating Standing authority — writing a system prompt rule, configuring a CI/CD gate, defining compose elision — is itself an Active authority exercise: User's conscious choice to delegate specific gate decisions to pre-committed rules. This self-referential grounding (2nd order → 1st order) ensures Standing authority is always traceable to a constitutive act.
 
@@ -84,13 +84,13 @@ Category-theoretic interpretation (informal): TOOL GROUNDING can be understood a
 
 ## A5. Interaction Kind Factorization
 
-Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts the gate (Ep → Abs) and R(p) realizes it for preferences p (Abs → Cl). Gate interactions classify as relay (auto-resolve: deterministic, citable, within-boundary, entropy→0) or gated (user judgment constitutes meaning: informed selection among options with differential futures). Relay interactions have bounded regret when elided (correctable at next gate); gated interactions have unbounded regret (missed user judgment). The operational test: accepting a proposal as-is may appear mechanical, but informed acceptance after recognizing differential futures is itself constitutive. Regret annotations (elidable/always_gated) are the operational mechanism in ELIDABLE CHECKPOINTS; TYPES and FLOW retain Q/Qc/Qs as formal type variables, while TOOL GROUNDING uses (gate)/(extern) for operation classification.
+Every user-facing gate operation factors as G = R(p) ∘ A, where A abstracts the gate (Ep → Abs) and R(p) realizes it for preferences p (Abs → Cl). Gate interactions classify as Extension (auto-resolve: deterministic, citable, within-boundary, entropy→0; relay mode in operational vocabulary) or Constitution (user judgment constitutes meaning: informed selection among options with differential futures; gated mode in operational vocabulary). Extension interactions have bounded regret when elided (correctable at next gate); Constitution interactions have unbounded regret (missed user judgment). The operational test: accepting a proposal as-is may appear mechanical, but informed acceptance after recognizing differential futures is itself constitutive. Regret annotations (elidable/always_gated) are the operational mechanism in ELIDABLE CHECKPOINTS; TYPES and FLOW retain Q/Qc/Qs as formal type variables, while TOOL GROUNDING uses (gate)/(extern) for operation classification.
 
-**Option-set-level relay test**: The relay/gated classification extends to constructed option sets. Before presenting gate options in non-Katalepsis protocols, apply the relay test to the options as a set: if AI analysis converges to a single dominant option (option-level entropy→0 — one option is analytically correct while others serve as foils), the interaction is misclassified as gated. Present the finding directly as relay output instead of wrapping it in false options. Operational test: "Would a knowledgeable observer find each option genuinely viable under different value weightings?" If yes → gated (genuine deliberation where user values determine the choice). If no → relay (present the finding directly). Katalepsis is excluded — 1-correct option sets serve the Socratic verification purpose by design. See `derived-principles.md §Differential Future Requirement` for A1+A5-derived refinements covering cost-symmetric baggage and meta-action-as-peer detection, with Anamnesis Phase 2 recognition gates additionally excluded as verification-category.
+**Option-set-level relay test**: The relay/gated classification extends to constructed option sets (equivalent to Extension-classification of the option set under the Cognitive Partnership Move taxonomy). Before presenting gate options in non-Katalepsis protocols, apply the relay test to the options as a set: if AI analysis converges to a single dominant option (option-level entropy→0 — one option is analytically correct while others serve as foils), the interaction is misclassified as gated. Present the finding directly as relay output instead of wrapping it in false options. Operational test: "Would a knowledgeable observer find each option genuinely viable under different value weightings?" If yes → gated (genuine deliberation where user values determine the choice). If no → relay (present the finding directly). Katalepsis is excluded — 1-correct option sets serve the Socratic verification purpose by design. See `derived-principles.md §Differential Future Requirement` for A1+A5-derived refinements covering cost-symmetric baggage and meta-action-as-peer detection, with Anamnesis Phase 2 recognition gates additionally excluded as verification-category.
 
 **Gated interaction realization**: Gated does not mean unstructured. Gated interactions present AI-inferred rationale options (2-3 reasoning hypotheses grounded in context) that the user can evaluate, extend, or replace. The constitutive property lies in the user's implicit freedom to respond beyond presented options — this freedom is inherent in conversation turn structure, not an explicit escape hatch. A blank canvas forces Recall; structured rationale enables Recognition of reasoning paths. This extends A1 (Recognition over Recall) to gated interactions.
 
-**Epistemic scope trajectory**: Gated interactions are EP's core epistemic contribution — they encode the irreducibly human act of constituting new meaning through dialogue. Relay interactions (auto-resolvable selections) converge toward platform-native capabilities as models improve. EP's mission alignment concentrates on the gated axis where human participation cannot be automated.
+**Epistemic scope trajectory**: Constitution interactions are EP's core epistemic contribution — they encode the irreducibly human act of constituting new meaning through dialogue. Extension interactions (auto-resolvable selections) converge toward platform-native capabilities as models improve. EP's mission alignment concentrates on the Constitution axis where human participation cannot be automated.
 
 Composition scope: The factorization G = R(p) ∘ A applies to individual gate operations within a single protocol activation. Inter-protocol composition (sequential activation of multiple protocols) operates through Session Text Composition — natural language in session context, not formal gate composition. Associativity of gate operations across protocol boundaries is not claimed; each protocol's gates are independently factored.
 
