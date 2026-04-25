@@ -82,6 +82,8 @@ Prescriptive principles are modularized into `.claude/rules/` by Axiom Hierarchy
 - `.claude/rules/architectural-principles.md` — project structure decisions (axiom-independent)
 - `.claude/rules/meta-principle.md` — Deficit Empiricism + Axiomatization Judgment Framework
 - `.claude/rules/safeguards.md` — Safeguard-tier principles (LESS important as models improve)
+- `.claude/rules/project-profile-calibration.md` — Cognitive Partnership Move calibration mechanism (six profile variables → Extension/Constitution default)
+- `.claude/rules/project-profile.md` — this project's profile declaration
 
 ## Protocol Precedence
 
