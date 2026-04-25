@@ -70,15 +70,6 @@ epistemic-protocols/
 
 **Probe utility (deficit recognition fit review)**: `/probe` (epistemic-cooperative) surfaces multiple candidate deficit hypotheses with reverse-evidence conditions when the user is uncertain which protocol fits the present situation. Probe is a utility skill, not a 13th core protocol — it is intentionally absent from `graph.json`. Coexistence over Mirroring applies: `/probe` may enrich scans with prior `misfit.md` records via opt-in cross-session read (default scope is current session; cross-session recall requires explicit user confirmation) and routes the user's recognized choice to the selected core protocol; the relationship is prose-level, not a graph.json edge. Probe stands in structural homology with Anamnesis (RECOGNIZE operation family — past context recognition vs present-situation deficit recognition) but the homology is descriptive, not enforced as advisory edges. Stage 2 evidence-collection modality: probe is released as a usage-evidence instrument; architectural inscription is deferred until Stage 2 variation-stable retention evidence accumulates. Verification framework limitations (drop-in feasibility vs endpoint well-defined-ness — two-axis distinction) tracked in [docs/probe-verification-framework.md](docs/probe-verification-framework.md) — N=1 instance L4a (PR #288), Stage 2 corroboration pending.
 
-## Project Profile
-
-Cognitive Partnership Move calibration mechanism and this project's profile declaration are split into progressive-disclosure files (loaded on demand when calibration / profile / gating-default topics are active):
-
-- @.claude/profiles/calibration.md — Calibration mechanism (six profile variables → Extension/Constitution default)
-- @.claude/profiles/project-profile.md — This project's profile declaration
-
-Both files are skill-ready: future conversion to `.claude/skills/{name}/SKILL.md` is anticipated when calibration or profile maintenance becomes operationally interactive.
-
 ## Axioms
 
 A1-A6 operational summaries auto-loaded via `.claude/rules/axioms.md`. Full definitions with rationale in the same file. Adversarial Anticipation (formerly A7) reclassified to Safeguard tier per audit-2026-04-11 #241 — see `.claude/rules/safeguards.md`.
@@ -91,6 +82,8 @@ Prescriptive principles are modularized into `.claude/rules/` by Axiom Hierarchy
 - `.claude/rules/architectural-principles.md` — project structure decisions (axiom-independent)
 - `.claude/rules/meta-principle.md` — Deficit Empiricism + Axiomatization Judgment Framework
 - `.claude/rules/safeguards.md` — Safeguard-tier principles (LESS important as models improve)
+- `.claude/rules/project-profile-calibration.md` — Cognitive Partnership Move calibration mechanism (six profile variables → Extension/Constitution default)
+- `.claude/rules/project-profile.md` — this project's profile declaration
 
 ## Protocol Precedence
 

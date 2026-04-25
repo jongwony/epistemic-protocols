@@ -22,7 +22,3 @@ This mechanism calibrates *ambiguous* decisions. Constitution-required decisions
 ## Cross-Project Corroboration
 
 This mechanism defines the calibration *structure*, not the values across projects. Each project's profile declaration is independent; corroboration via observed cross-project variation in calibration practice (testimony N>1) supports structural soundness without claiming a universal value distribution.
-
-## Skill-readiness
-
-This file is structured for future conversion to a skill (`.claude/skills/project-profile-calibration/SKILL.md`) when the calibration becomes operationally interactive (e.g., guided profile assessment). Current form: progressive-disclosure reference loaded on demand via CLAUDE.md @-import.
