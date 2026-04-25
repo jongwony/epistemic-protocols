@@ -13,7 +13,7 @@ Each project declares a profile that determines the default Cognitive Partnershi
 
 ## Calibration Rule
 
-Aggregated low-cost profile → Extension-default for ambiguous gates with grasp/dogfood as correction channel; aggregated high-cost profile → Constitution-tighten. The aggregate function is qualitative; projects with mixed profiles classify per-decision rather than globally.
+Aggregated low-cost profile → Extension-default for ambiguous gates with Katalepsis (`/grasp`) + Stage 2 active-use feedback as correction channel; aggregated high-cost profile → Constitution-tighten. The aggregate function is qualitative; projects with mixed profiles classify per-decision rather than globally.
 
 ## Scope Boundary
 
@@ -21,4 +21,4 @@ This mechanism calibrates *ambiguous* decisions. Constitution-required decisions
 
 ## Cross-Project Corroboration
 
-This mechanism defines the calibration *structure*, not the values across projects. Each project's profile declaration is independent; corroboration via observed cross-project variation in calibration practice (testimony N>1) supports structural soundness without claiming a universal value distribution.
+This mechanism defines the calibration *structure*, not the values across projects. Each project's profile declaration is independent. Cross-project variation in calibration practice — when observed — would corroborate the mechanism's structural soundness without claiming a universal value distribution; the mechanism is currently Stage 1 (structural fit) awaiting Stage 2 (accumulated use evidence) validation.
