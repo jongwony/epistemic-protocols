@@ -141,7 +141,7 @@ Steps 2 and 4 are **conditional** — apply only when Horismos is in the chain a
 - `answer(G) ⊆ output(prior)`: prior protocol in the chain produces output that entails this gate's answer (e.g., ClarifiedIntent from Hermeneia entails Telos Phase 0 seed confirmation)
 - `BoundaryMap(domain(G)) = AIAutonomous`: user delegated decision authority to AI via Horismos (only when Horismos is in the chain)
 
-**RESOLVE-OR-PRESENT** (for Qs gates in AIAutonomous domains): The Qs gate itself is never elided — instead, the protocol's Phase 1 context collection scope expands for AIAutonomous domains. If Phase 1 resolves the uncertainty (entropy → 0), the Qs gate is never reached. If entropy remains > 0, the Qs gate fires as PRESENT. Encode this as a conditional pipeline context rule when applicable.
+**RESOLVE-OR-PRESENT** (for Qs gates in AIAutonomous domains): The Qs gate itself is never elided — instead, the protocol's Phase 1 context collection scope expands for AIAutonomous domains. If Phase 1 resolves the uncertainty (entropy → 0) — i.e., the gate is classified as Extension — the Qs gate is never reached. If entropy remains > 0, the Qs gate fires as PRESENT. Encode this as a conditional pipeline context rule when applicable.
 
 ### Catch-Chain Invariant
 
@@ -194,7 +194,7 @@ After Chain Summary, present cost visibility sub-section:
 
 Legend: ■ = presented, · = elided, × = pruned
 
-**Conditional entropy**: `Σ log₂(|options_i|)` bits over presented gates — quantifies total user decision load.
+**Conditional entropy**: `Σ log₂(|options_i|)` bits over presented gates — quantifies total user decision load. Higher entropy across gates indicates higher Constitution density; lower entropy indicates Extension dominance.
 
 **O_support visibility** — each elided gate's justification:
 

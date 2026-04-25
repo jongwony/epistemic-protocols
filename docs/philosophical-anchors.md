@@ -26,7 +26,7 @@ The convergence of these lineages — phenomenological (Husserl) and analytic ph
 
 ### Operational correspondence to extended-cognition labor division
 
-The relay/constitution boundary maps directly onto the Known-Knowns → AI / Unknown-Unknowns → Human division of cognitive labor. Relay operations (entropy→0, deterministic, citable) are the domain where AI extends user cognition as competent tool. Constitution operations (entropy>0, novel selection) are the domain where user epistemic authority remains non-delegable. A2 does not *prescribe* this mapping — it *recognizes* a pattern already present in effective extended cognition.
+The relay/constitution boundary maps directly onto the Known-Knowns → AI / Unknown-Unknowns → Human division of cognitive labor. Extension operations (entropy→0, deterministic, citable; relay in operational vocabulary) are the domain where AI extends user cognition as competent tool. Constitution operations (entropy>0, novel selection; gated in operational vocabulary) are the domain where user epistemic authority remains non-delegable. A2 does not *prescribe* this mapping — it *recognizes* a pattern already present in effective extended cognition.
 
 ## §A5. Interaction Kind Factorization — Extended Mind Ground
 
@@ -44,7 +44,7 @@ A5 introduces the following that A2 alone does not provide:
 
 3. **ELIDABLE CHECKPOINTS mechanism**: The operational mechanism for annotating gates as `elidable` or `always_gated` lives in A5, not A2. A2's Standing/Active authority distinction is orthogonal to A5's regret dimension — the same gate carries both annotations independently (A2 coordination note in `axioms.md`).
 
-4. **Option-set-level relay test**: The test for whether constructed option sets constitute genuine gated interactions or collapse to relay (option-level entropy→0) is A5-specific. A2 does not analyze option-set structure.
+4. **Option-set-level relay test**: The test for whether constructed option sets constitute genuine gated interactions or collapse to relay (option-level entropy→0; equivalent to Extension-classification of the option set) is A5-specific. A2 does not analyze option-set structure.
 
 A5 *inherits* A2's constitution properties on its gated side, but the factorization, regret analysis, and elision mechanism are A5's independent contributions. Both flow from the same extended-cognition ground, but shared ground does not imply derivability — only that the two axioms are mutually compatible and jointly necessary for the full gate theory.
 
