@@ -70,6 +70,21 @@ epistemic-protocols/
 
 **Probe utility (deficit recognition fit review)**: `/probe` (epistemic-cooperative) surfaces multiple candidate deficit hypotheses with reverse-evidence conditions when the user is uncertain which protocol fits the present situation. Probe is a utility skill, not a 13th core protocol — it is intentionally absent from `graph.json`. Coexistence over Mirroring applies: `/probe` may enrich scans with prior `misfit.md` records via opt-in cross-session read (default scope is current session; cross-session recall requires explicit user confirmation) and routes the user's recognized choice to the selected core protocol; the relationship is prose-level, not a graph.json edge. Probe stands in structural homology with Anamnesis (RECOGNIZE operation family — past context recognition vs present-situation deficit recognition) but the homology is descriptive, not enforced as advisory edges. Stage 2 evidence-collection modality: probe is released as a usage-evidence instrument; architectural inscription is deferred until Stage 2 variation-stable retention evidence accumulates. Verification framework limitations (drop-in feasibility vs endpoint well-defined-ness — two-axis distinction) tracked in [docs/probe-verification-framework.md](docs/probe-verification-framework.md) — N=1 instance L4a (PR #288), Stage 2 corroboration pending.
 
+## Project Profile
+
+This project's Cognitive Partnership Move calibration profile (per `architectural-principles.md §Project Profile Calibration`):
+
+| Variable | Value | Rationale |
+|---|---|---|
+| Revision cost | Low | Markdown edit + `/verify` + commit |
+| Deploy fan-out | Low | Pre-broad-distribution; iterative release |
+| Dependency lock-in | None | Node.js stdlib only (plugin code); no external API contracts |
+| Runtime persistence | Low | Client AI session ephemeral |
+| Hermeneutic circle availability | High | Stage 2 Runtime + dogfooding active; revision pipeline cheap |
+| Notation maturity | High | Category-theoretic notation across SKILL.md formal blocks |
+
+Calibration result: **Extension-default** for ambiguous gates. Constitution preserved for the three categories per `architectural-principles.md §Project Profile Calibration` scope boundary: (a) user IS measurement (Katalepsis, Hermeneia Phase 2), (b) user authority IS resolution (Telos, Horismos, Syneidesis), (c) safety requires human (Prosoche Phase 2).
+
 ## Axioms
 
 A1-A6 operational summaries auto-loaded via `.claude/rules/axioms.md`. Full definitions with rationale in the same file. Adversarial Anticipation (formerly A7) reclassified to Safeguard tier per audit-2026-04-11 #241 — see `.claude/rules/safeguards.md`.
