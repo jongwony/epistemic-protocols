@@ -72,18 +72,12 @@ epistemic-protocols/
 
 ## Project Profile
 
-This project's Cognitive Partnership Move calibration profile (per `architectural-principles.md §Project Profile Calibration`):
+Cognitive Partnership Move calibration mechanism and this project's profile declaration are split into progressive-disclosure files (loaded on demand when calibration / profile / gating-default topics are active):
 
-| Variable | Value | Rationale |
-|---|---|---|
-| Revision cost | Low | Markdown edit + `/verify` + commit |
-| Deploy fan-out | Low | Pre-broad-distribution; iterative release |
-| Dependency lock-in | None | Node.js stdlib only (plugin code); no external API contracts |
-| Runtime persistence | Low | Client AI session ephemeral |
-| Hermeneutic circle availability | High | Stage 2 Runtime + dogfooding active; revision pipeline cheap |
-| Notation maturity | High | Category-theoretic notation across SKILL.md formal blocks |
+- @.claude/profiles/calibration.md — Calibration mechanism (six profile variables → Extension/Constitution default)
+- @.claude/profiles/project-profile.md — This project's profile declaration
 
-Calibration result: **Extension-default** for ambiguous gates. Constitution preserved for the three categories per `architectural-principles.md §Project Profile Calibration` scope boundary: (a) user IS measurement (Katalepsis, Hermeneia Phase 2), (b) user authority IS resolution (Telos, Horismos, Syneidesis), (c) safety requires human (Prosoche Phase 2).
+Both files are skill-ready: future conversion to `.claude/skills/{name}/SKILL.md` is anticipated when calibration or profile maintenance becomes operationally interactive.
 
 ## Axioms
 

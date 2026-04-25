@@ -48,27 +48,6 @@ Do not mirror built-in execution capabilities (e.g., worktree isolation, PR crea
 
 The epistemic meta-layer has a fundamentally different cost topology from the execution layer. In the execution layer (code, tests, docs), AI drives the marginal cost of completeness toward zero — pursuing completeness is correct. In the epistemic meta-layer (protocols, axioms, formal systems), unused protocols pollute cognitive space — the cost of an unused protocol exceeds the cost of a missing one. This asymmetry grounds Deficit Empiricism: empirical restraint is the correct posture for protocol creation, even when execution-layer intuitions suggest "why not create more?" Attempts to apply execution-domain completeness principles directly to the epistemic domain should be identified and the cost function difference surfaced.
 
-## Project Profile Calibration
-
-Each project declares a profile that determines the default Cognitive Partnership Move mode (Extension or Constitution; see `axioms.md` A2/A5) for ambiguous decisions. The profile is the project's calibration of how much Phase 1 entropy reduction is feasible relative to gating cost. This principle specializes the §Epistemic Cost Topology meta-layer asymmetry to the project-specific calibration dimension: the meta-layer cost gradient grounds Deficit Empiricism for *creation* decisions, while project profile governs *gating-default* decisions for already-existing protocols.
-
-Profile variables (six):
-
-1. Revision cost — labor per unit change. Lower → broader Extension scope.
-2. Deploy fan-out — user count / dependent system count. Lower → broader Extension scope.
-3. Dependency lock-in — external dependency / API contract surface. Less → broader Extension scope.
-4. Runtime persistence — state durability. Lower → broader Extension scope.
-5. Hermeneutic circle availability — dogfooding + Stage 2 frequency. Higher → richer correction channel for Extension.
-6. Notation maturity — cost of cross-domain restructuring. Higher maturity → Extension-supportive.
-
-Calibration rule: aggregated low-cost profile → Extension-default for ambiguous gates with grasp/dogfood as correction channel; aggregated high-cost profile → Constitution-tighten. The aggregate function is qualitative; projects with mixed profiles classify per-decision rather than globally.
-
-**Scope boundary**: this principle calibrates *ambiguous* decisions. Constitution-required decisions remain Constitution regardless of profile in three categories — (a) user IS the measurement target, (b) user authority IS the resolution, (c) safety requires human. These three categories are inscribed inline rather than externally referenced to preserve rule-file self-containment.
-
-**Cross-project corroboration**: this principle defines the mechanism, not the values across projects. Each project's profile declaration is independent; corroboration via observed cross-project variation in calibration practice (testimony N>1) supports the mechanism's structural soundness without claiming a universal value distribution.
-
-This project's profile (epistemic-protocols): low-cost across all six variables → Extension-default for ambiguous gates. The three Constitution-required categories preserved per the scope boundary above.
-
 ## Three-Tier Termination
 
 Protocol exit follows a graduated taxonomy based on side-effect presence:
