@@ -29,7 +29,7 @@ A
   → integrate(V, candidate)               -- update candidate per user response
   → crystallize(abstraction)              -- convergence when confirmed
   → CrystallizedAbstraction
-requires: in_process(A)                    -- runtime gate (Phase 0)
+requires: in_process(A)                    -- runtime checkpoint (Phase 0)
 deficit:  AbstractionInProcess              -- activation precondition (Layer 1/2)
 preserves: instance_set(A)                  -- Iᵢ read-only; candidate mutates across loop
 invariant: Dialectical Triangulation over Unilateral Proposal
@@ -50,7 +50,7 @@ V              = UserMove ∈ {Confirm, Widen(direction), Narrow(specializer), F
                  specializer  = dimension to constrain      -- Diairesis family (user-directed specialization)
                  adjacent     = neighboring abstraction ref  -- lateral Synagoge with user-named reference (user Production mode)
                  axis         = orthogonal dimension         -- full redirection
-Qs             = Shaping interaction with candidate + grounding [Tool: gate interaction]
+Qs             = Shaping interaction with candidate + grounding [Tool: Constitution interaction]
 crystallized(A) = ∃ step ∈ history : V(step) = Confirm
 CrystallizedAbstraction = P where confirmed(P) via Confirm move
 
@@ -65,9 +65,9 @@ Priority: explicit_arg > recent_instance_cluster > surfaced_essence
 If no essence signal is detectable (neither user sensing language nor AI-inferrable core pattern): pause activation and surface the scan result before Phase 0, inviting the user to either name what feels in-process or withdraw.
 
 ── PHASE TRANSITIONS ──
-Phase 0: A → Detect(A) → in_process?                                       -- detection gate (silent)
+Phase 0: A → Detect(A) → in_process?                                       -- detection checkpoint (silent)
 Phase 1: (Iᵢ, E, L?) → Propose(Iᵢ, E, ctx) → (P, G)                        -- candidate + grounding construction [Tool]
-Phase 2: (P, G) → Qs(P, G, progress) → Stop → V                            -- triangulation gate [Tool]
+Phase 2: (P, G) → Qs(P, G, progress) → Stop → V                            -- triangulation Constitution interaction [Tool]
 Phase 3: V → integrate(V, candidate) → candidate'                          -- candidate update (track)
 
 ── LOOP ──
@@ -88,16 +88,16 @@ progress(Λ) = |history| / max_attempts
 early_exit = user_esc ∨ attempts_exhausted
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect     (sense)   → Internal analysis (no external tool)
 Phase 1 Propose    (observe) → Read, Grep (user's domain context for personalized grounding); WebSearch (conditional: cross-domain adjacent abstractions)
-Phase 2 Qs         (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not a UserMove)
+Phase 2 Qs         (constitution)    → present (mandatory; Esc key → loop termination at LOOP level, not a UserMove)
 Phase 3            (track)   → Internal state update
-converge           (relay)   → TextPresent+Proceed (convergence evidence trace; proceed with crystallized abstraction)
+converge           (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with crystallized abstraction)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
-Phase 2 Qs (triangulate)   → always_gated (gated: Confirm/Widen/Narrow/Fuse/Reorient/Dismiss — user shapes abstraction via constitutive judgment; free response overrides presented options)
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
+Phase 2 Qs (triangulate)   → always_gated (Constitution: Confirm/Widen/Narrow/Fuse/Reorient/Dismiss — user shapes abstraction via constitutive judgment; free response overrides presented options)
 
 ── MODE STATE ──
 Λ = { phase: Phase, A: AbstractionSeed, Iᵢ: Set(Instance), E: EssenceIntuition,
@@ -143,7 +143,7 @@ Phase 2 Qs (triangulate)   → always_gated (gated: Confirm/Widen/Narrow/Fuse/Re
 
 ### Activation
 
-AI detects in-process abstraction OR user calls `/induce`. Detection is silent (Phase 0); candidate proposal plus triangulation always requires user interaction via gate interaction (Phase 2).
+AI detects in-process abstraction OR user calls `/induce`. Detection is silent (Phase 0); candidate proposal plus triangulation always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/induce` slash command or description-matching input. Always available.
@@ -168,7 +168,7 @@ When Periagoge is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present candidate abstraction plus personalized grounding example via gate interaction and yield turn.
+**Action**: At Phase 2, present candidate abstraction plus personalized grounding example via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Periagoge completes before output dependent on the crystallized abstraction proceeds
@@ -190,7 +190,7 @@ Heuristic signals for in-process abstraction detection (not hard gates):
 | Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (3+ instances, no pre-existing abstract structure) and nudges to `/induce` |
 | Adjacent abstraction surfacing | Recall yields neighboring abstractions, suggesting a fuse or specialize move is imminent |
 
-**Cross-session enrichment**: Accumulated abstraction formation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides Fuse candidates for Phase 1 — previously crystallized abstractions in adjacent domains become lateral Synagoge targets. When `/recollect` has been invoked in session, recalled adjacent abstractions enter the candidate construction pool as fuse-reference. Heuristic input may bias toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Accumulated abstraction formation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides Fuse candidates for Phase 1 — previously crystallized abstractions in adjacent domains become lateral Synagoge targets. When `/recollect` has been invoked in session, recalled adjacent abstractions enter the candidate construction pool as fuse-reference. Heuristic input may bias toward previously observed patterns; constitutive judgment remains with the user.
 
 **Skip**:
 - No essence signal detectable (neither user sensing language nor AI-inferrable core pattern)
@@ -231,7 +231,7 @@ The operational test: "Is the user operation *forming a new abstraction from obs
 
 ## Protocol
 
-### Phase 0: In-Process Detection Gate (Silent)
+### Phase 0: In-Process Detection Checkpoint (Silent)
 
 Analyze conversation state for in-process abstraction. This phase is **silent** — no user interaction.
 
@@ -255,9 +255,9 @@ Generate candidate abstraction with a personalized grounding example.
 
 **Scope restriction**: Read-only investigation (Read, Grep, WebSearch). No test execution or file modifications.
 
-### Phase 2: Dialectical Triangulation Gate
+### Phase 2: Dialectical Triangulation (Constitution)
 
-**Present** the candidate and grounding example via gate interaction.
+**Present** the candidate and grounding example via Cognitive Partnership Move (Constitution).
 
 **Surfacing format**:
 
@@ -329,8 +329,8 @@ After integration:
 
 ## Rules
 
-1. **AI-guided, user-triangulated**: AI detects in-process abstraction and proposes candidates; crystallization requires user move via gate interaction (Phase 2).
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity; gate interaction requires turn yield before proceeding.
+1. **AI-guided, user-triangulated**: AI detects in-process abstraction and proposes candidates; crystallization requires user move via Cognitive Partnership Move (Constitution) (Phase 2).
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield before proceeding.
 3. **Candidate plus grounding required**: Every Phase 2 surfacing pairs a candidate abstraction with a personalized grounding example drawn from the user's own domain context.
 4. **Dialectical Triangulation over Unilateral Proposal**: AI candidate is a working hypothesis, not a claim. Crystallization belongs to the user's move.
 5. **Personalized grounding**: The grounding example must be recognizable to the user as theirs — drawn from their codebase, configs, session history, or stated domain. Generic textbook examples fail the personalization requirement.
@@ -342,8 +342,8 @@ After integration:
 10. **Convergence persistence**: Mode active until crystallized, Esc, or attempt cap.
 11. **Progress visibility**: Every Phase 2 surfacing includes attempt counter.
 12. **Cross-protocol awareness**: Defer to Hermeneia when intent-articulation is the primary deficit; defer to Analogia when a pre-existing abstract structure needs validation against a target; defer to Telos when goal-construction is the primary deficit.
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields violates this separation.
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields violates this separation.
 14. **Convergence evidence**: At crystallization, present transformation trace — for each step in history, show (candidate → user_move → candidate'). Per-step evidence is required.
 15. **Absorb Analogia misfit**: When `/ground` Phase 0 detects colimit-shaped input (3+ instances with no pre-existing abstract structure) and nudges here, absorb the misfit as valid Periagoge trigger without requiring re-confirmation. Before Phase 1, surface the routing rationale with the cited `/ground` detection basis ("colimit-shaped input detected: [N instances], no pre-existing abstract structure — redirecting to abstraction crystallization") so the user can see the evidence that justified the redirect without re-asking.
-16. **Option-set relay test**: If AI analysis converges to a single dominant move (option-level entropy → 0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options. **Exception**: The Confirm/Dismiss pair is excluded from the entire preceding test (relay resolution, cost-symmetric collapse, and off-axis pathway demotion) — user crystallization judgment is constitutive regardless of AI analysis entropy. Phase 2 remains `always_gated` even when only one shaping move appears analytically viable.
+16. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant move (option-level entropy → 0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options. **Exception**: The Confirm/Dismiss pair is excluded from the entire preceding test (Extension resolution, cost-symmetric collapse, and off-axis pathway demotion) — user crystallization judgment is constitutive regardless of AI analysis entropy. Phase 2 remains `always_gated` even when only one shaping move appears analytically viable.
 17. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option like "Widen" into a concrete direction while preserving the UserMove coproduct) is distinct from mutation.

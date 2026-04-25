@@ -21,7 +21,7 @@ Epharmoge(R, X) → Eval(R, X) → Mᵢ? → Register(Mᵢ) → Q(Mᵢ[0]) → A
   → surface(mismatch, as_inquiry)      -- present mismatch with evidence
   → adapt(result, direction)           -- adapt result to context
   → ContextualizedExecution
-requires: mismatch_detected(R, X)       -- runtime gate (Phase 0)
+requires: mismatch_detected(R, X)       -- runtime checkpoint (Phase 0)
 deficit:  ApplicationDecontextualized    -- activation precondition (Layer 1/2)
 preserves: X                             -- application context is fixed reference; morphism transforms R only
 invariant: Applicability over Correctness
@@ -44,7 +44,7 @@ R'     = Adapted result (contextualized output)
 ContextualizedExecution = R' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
-Phase 0: R → Eval(R, X) → Mᵢ?                                  -- applicability gate (silent)
+Phase 0: R → Eval(R, X) → Mᵢ?                                  -- applicability checkpoint (silent)
 Phase 1: Mᵢ → TaskCreate[all mismatches] → Qc(Mᵢ[0], evidence) → Stop → A  -- register all, surface first [Tool]
 Phase 2: A → adapt(A, R) → R' → TaskUpdate → Eval(R', X) → Mₑ? -- adaptation + update + re-scan [Tool]
 
@@ -68,17 +68,17 @@ contextualized(R') = adjudicated(R', X) ∨ user_esc
 progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress when re-scan discovers new mismatches
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Eval   (sense)   → Internal analysis (no external tool)
-Qc     (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Qc     (constitution)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (transform) → Edit, Write (result adaptation based on user direction)
                     -- (transform): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
 Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
-converge (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
+converge (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
-Phase 1 Qc (applicability) → always_gated (gated: Confirm/Dismiss/Adapt applicability judgment)
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
+Phase 1 Qc (applicability) → always_gated (Constitution: Confirm/Dismiss/Adapt applicability judgment)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
@@ -123,17 +123,17 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 
 ## Mode Activation
 
-### Conditional Gate
+### Conditional Activation Prerequisite
 
-> **This protocol is conditional.** AI-guided activation (Layer 2) requires operational experience with Aitesis (④) to validate the pre/post context fitness axis. Until this gate is satisfied, Epharmoge exists as a formal specification only and must not auto-activate via Layer 2.
+> **This protocol is conditional.** AI-guided activation (Layer 2) requires operational experience with Aitesis (④) to validate the pre/post context fitness axis. Until this prerequisite is satisfied, Epharmoge exists as a formal specification only and must not auto-activate via Layer 2.
 >
 > Activation criteria: Observed pattern of "context gathered but application mismatched" in Aitesis inference operational data.
 >
-> User-invocable activation (Layer 1 / `/contextualize`) is always available regardless of this gate.
+> User-invocable activation (Layer 1 / `/contextualize`) is always available regardless of this prerequisite.
 
 ### Activation
 
-AI detects applicability mismatch after execution OR user calls `/contextualize`. Detection is silent (Phase 0); surfacing always requires user interaction via gate interaction (Phase 1).
+AI detects applicability mismatch after execution OR user calls `/contextualize`. Detection is silent (Phase 0); surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 1).
 
 **Application decontextualized** = the result is technically correct but may not fit the actual application context.
 
@@ -155,7 +155,7 @@ When Epharmoge is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 1, present mismatch evidence via gate interaction and yield turn.
+**Action**: At Phase 1, present mismatch evidence via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Epharmoge completes before proceeding to next task
@@ -176,7 +176,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 | Scope overflow | Result addresses more or less than the observed use case requires |
 | Temporal context | Result applies to a version, state, or phase that may have shifted |
 
-**Cross-session enrichment**: Repeated mismatch patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust Phase 0 scan priority — known mismatch types are checked first. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior application-context mismatch patterns observed in comparable deliverables, strengthening current mismatch detection by situating Phase 0 scans against the user's recurring convention and environment drifts. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Repeated mismatch patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust Phase 0 scan priority — known mismatch types are checked first. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior application-context mismatch patterns observed in comparable deliverables, strengthening current mismatch detection by situating Phase 0 scans against the user's recurring convention and environment drifts. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent dimension detections across 3+ sessions cluster around a recognizable pattern outside the named dimensions {Convention, Environment, Audience, Dependency}, the Mismatch Dimension Taxonomy warrants promotion to a new named dimension. When accumulated classification false negatives across 3+ sessions cluster around a specific dimension, that dimension's detection boundary warrants revision or demotion to Emergent.
 
@@ -234,7 +234,7 @@ When multiple mismatches are identified, surface in severity order (Critical →
 
 ## Protocol
 
-### Phase 0: Applicability Gate (Silent)
+### Phase 0: Applicability Checkpoint (Silent)
 
 Evaluate result against application context. This phase is **silent** — no user interaction.
 
@@ -249,7 +249,7 @@ Evaluate result against application context. This phase is **silent** — no use
 
 ### Phase 1: Mismatch Surfacing
 
-**Register all identified mismatches as Tasks** (TaskCreate), then **present** the highest-severity remaining mismatch via gate interaction.
+**Register all identified mismatches as Tasks** (TaskCreate), then **present** the highest-severity remaining mismatch via Cognitive Partnership Move (Constitution).
 
 **Task format**:
 ```
@@ -260,7 +260,7 @@ TaskCreate({
 })
 ```
 
-Gate presentation yields turn for user response.
+Constitution presentation yields turn for user response.
 
 **Surfacing format** (natural integration with execution completion):
 
@@ -318,8 +318,8 @@ After adaptation — **re-scan**:
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Minor severity mismatches only | Gate interaction with Dismiss as default option |
-| Medium | Significant severity, evidence is clear | Structured gate interaction with evidence |
+| Light | Minor severity mismatches only | Constitution interaction with Dismiss as default option |
+| Medium | Significant severity, evidence is clear | Structured Constitution interaction with evidence |
 | Heavy | Critical severity, multiple interacting mismatches | Detailed evidence + adaptation options |
 
 ## UX Safeguards
@@ -337,8 +337,8 @@ After adaptation — **re-scan**:
 
 ## Rules
 
-1. **AI-guided, user-judged**: AI detects applicability mismatch; user judges whether adaptation is needed via gate interaction (Phase 1)
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
+1. **AI-guided, user-judged**: AI detects applicability mismatch; user judges whether adaptation is needed via Cognitive Partnership Move (Constitution) (Phase 1)
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
 3. **Applicability over Correctness**: When result is correct but contextually mismatched, surface the mismatch — do not assume correctness implies fitness
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
 5. **One at a time**: Surface one mismatch per Phase 1 cycle; do not bundle multiple mismatches
@@ -347,9 +347,9 @@ After adaptation — **re-scan**:
 8. **Non-circularity**: Information source is the result itself compared against context, not pre-execution context scans (independence from Aitesis)
 9. **Early exit honored**: When user accepts result as-is, accept immediately regardless of remaining mismatches
 10. **Cross-protocol awareness**: Suppress when Aitesis resolved overlapping domains in the same execution scope (within recommendation chains only)
-11. **Conditional gate**: AI-guided activation (Layer 2) requires Aitesis operational experience confirmation. User-invocable activation (Layer 1 / `/contextualize`) is always available
-12. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+11. **Conditional activation prerequisite**: AI-guided activation (Layer 2) requires Aitesis operational experience confirmation. User-invocable activation (Layer 1 / `/contextualize`) is always available
+12. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 13. **Convergence evidence**: Present transformation trace before declaring adjudicated(R', X); per-mismatch evidence is required
 14. **Zero-mismatch surfacing**: If Phase 0 scan detects no context mismatches, present this finding with reasoning for user confirmation
-15. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
+15. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 16. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

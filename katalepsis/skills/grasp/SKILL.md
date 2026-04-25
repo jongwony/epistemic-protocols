@@ -35,9 +35,9 @@ Sₑ = User-selected entry points
 Tᵣ = Task registration for tracking
 P  = User's phantasia (current representation/understanding)
 Δ  = Detected comprehension gap
-Q  = Verification question (via gate interaction)
+Q  = Verification question (via Cognitive Partnership Move (Constitution))
 A  = User's answer
-Aᵣ = User's reasoning behind misconception (via gate interaction)
+Aᵣ = User's reasoning behind misconception (via Cognitive Partnership Move (Constitution))
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
@@ -71,26 +71,26 @@ Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
 VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
-Phase 1 Qc  (gate)   → present (entry point selection)
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+Phase 1 Qc  (constitution)   → present (entry point selection)
 Phase 2 Tᵣ  (track)   → TaskCreate (category tracking)
 Phase 3 detect (sense) → Internal analysis (gap type relevance detection per category)
-Phase 3 Qs  (gate)   → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
-Phase 3 Qᵣs (gate)  → present (misconception reasoning inquiry)
-Phase 3 Qc  (gate)   → present (aspect coverage: sufficient/aspect)
+Phase 3 Qs  (constitution)   → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
+Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
 Phase 3 Ref (observe) → Read (source artifact, AI-determined)
 Phase 3 Tᵤ  (track)  → TaskUpdate (progress tracking)
 Phase 3 Prop (track)  → TaskCreate (proposal ejection)
 Categorize  (observe) → Internal analysis (Read for context if needed)
-converge    (relay)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
+converge    (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
 -- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
-Phase 1 Qc (entry points)  → always_gated (gated: verification scope selection)
-Phase 3 Qs (verify)        → always_gated (gated: Socratic probe — user comprehension is the measurement)
-Phase 3 Qᵣs (reasoning)   → always_gated (gated: misconception reasoning hypothesis)
-Phase 3 Qc (coverage)      → always_gated (gated: aspect coverage — sufficient vs explore more)
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
+Phase 1 Qc (entry points)  → always_gated (Constitution: verification scope selection)
+Phase 3 Qs (verify)        → always_gated (Constitution: Socratic probe — user comprehension is the measurement)
+Phase 3 Qᵣs (reasoning)   → always_gated (Constitution: misconception reasoning hypothesis)
+Phase 3 Qc (coverage)      → always_gated (Constitution: aspect coverage — sufficient vs explore more)
 
 ── MODE STATE ──
 Λ = {
@@ -153,8 +153,8 @@ When Katalepsis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 1, present entry point selection via gate interaction and yield turn.
-At Phase 3, present comprehension verification via gate interaction and yield turn.
+**Action**: At Phase 1, present entry point selection via Cognitive Partnership Move (Constitution).
+At Phase 3, present comprehension verification via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Katalepsis provides structured comprehension path
@@ -229,13 +229,13 @@ Analyze AI work result and extract categories:
 3. **Prioritize**: Order by importance (architecture > new code > modification > ...)
 4. **Summarize**: Prepare concise category descriptions
 
-**Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 category prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 category prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expectation, Causality, Scope, Sequence}, the Gap Taxonomy warrants promotion to a new named type. When accumulated probe misclassifications across 3+ sessions cluster around a specific gap type's probe kind boundary (Qc vs Qs), that type's probe kind assignment warrants revision.
 
 ### Phase 1: Entry Point Selection
 
-**Present** entry points via gate interaction to let user select where to start. Gate presentation yields turn for user response.
+**Present** entry points via Cognitive Partnership Move (Constitution) to let user select where to start. Constitution presentation yields turn for user response.
 
 ```
 question: "What would you like to understand first?"
@@ -292,9 +292,9 @@ For each task (category):
 
    This lightweight `select_start` prevents AI-imposed framing on the first probe without requiring full pre-authorization of the detection set. User picks starting direction; remaining aspects surface in step 3d.
 
-3. **Verify comprehension** by **presenting** a Socratic probe via gate interaction:
+3. **Verify comprehension** by **presenting** a Socratic probe via Cognitive Partnership Move (Constitution):
 
-   Gate presentation yields turn for user response.
+   Constitution presentation yields turn for user response.
 
    Present the relevant context as text output:
    - What the AI work did for this aspect (the component, behavior, or mechanism being tested)
@@ -358,11 +358,11 @@ For each task (category):
 
    **Misconception handling** (three-step):
 
-   1. **Reasoning inquiry**: Present the detected misconception context as text output (what the user answered vs. what was expected, without revealing the correct answer). Then **present** AI-generated reasoning hypotheses via gate interaction. Infer 2-3 likely reasoning paths from the specific misconception and present as options. Each option is a context-specific hypothesis derived from the user's actual wrong answer (not a generic template). Do not reveal the correct answer yet. "Other" is always available for unlisted reasoning.
+   1. **Reasoning inquiry**: Present the detected misconception context as text output (what the user answered vs. what was expected, without revealing the correct answer). Then **present** AI-generated reasoning hypotheses via Cognitive Partnership Move (Constitution). Infer 2-3 likely reasoning paths from the specific misconception and present as options. Each option is a context-specific hypothesis derived from the user's actual wrong answer (not a generic template). Do not reveal the correct answer yet. "Other" is always available for unlisted reasoning.
 
    2. **Targeted correction**: Using both A and Aᵣ, address the root cause of the misconception. If Aᵣ reveals a specific mental model error, correct that model directly. Call Read for supporting reference if eval(A, Aᵣ) requires.
 
-   3. **Resume**: Output a brief text nudge before presenting via gate interaction — remind the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option. Adapt wording to fit the current context (no fixed template). This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User input via Other triggers Step 3b Proposal ejection workflow, then resumes the verification loop. Present via gate interaction again for the same aspect.
+   3. **Resume**: Output a brief text nudge before presenting via Cognitive Partnership Move (Constitution) — remind the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option. Adapt wording to fit the current context (no fixed template). This surfaces the Proposal path at the cognitive transition point between correction and re-verification, when users may have formed improvement ideas but are focused on "getting the right answer." User input via Other triggers Step 3b Proposal ejection workflow, then resumes the verification loop. Present a fresh Constitution interaction for the same aspect.
 
 3d. **Aspect coverage check** (before marking category complete):
 
@@ -413,20 +413,20 @@ For each task (category):
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Simple change, user seems familiar | Single-probe gate interaction targeting core understanding |
-| Medium | Moderate complexity | Scenario-based gate interaction targeting prediction |
-| Heavy | Complex architecture or unfamiliar pattern | Multi-step decomposed gate interaction targeting causal reasoning |
+| Light | Simple change, user seems familiar | Single-probe Constitution interaction targeting core understanding |
+| Medium | Moderate complexity | Scenario-based Constitution interaction targeting prediction |
+| Heavy | Complex architecture or unfamiliar pattern | Multi-step decomposed Constitution interaction targeting causal reasoning |
 
 ## Rules
 
 1. **User-initiated only**: Activate only when user signals desire to understand
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
 3. **Chunk complexity**: Break large changes into digestible categories
 4. **Task tracking**: Call TaskCreate/TaskUpdate for progress visibility
 5. **Code grounding**: Reference specific code locations
 6. **User authority**: User's "I understand" is final
 7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, and return to verification. This preserves user-generated insights without disrupting the comprehension loop. The protocol does not track ejected proposals in its own state.
-8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **Convergence evidence**: Present transformation trace before declaring all tasks completed; per-task evidence is required
 10. **Zero-gap surfacing**: If Phase 3 analysis finds no comprehension gaps for a category, present this finding with reasoning for user confirmation before marking as self-evident
 11. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation

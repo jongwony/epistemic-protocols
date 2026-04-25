@@ -371,7 +371,7 @@ function checkRequiredSections() {
       results.warn.push({
         check: 'structure',
         file: relPath,
-        message: 'Missing optional section: "── ELIDABLE CHECKPOINTS ──" (gate elidability analysis)'
+        message: 'Missing optional section: "── ELIDABLE CHECKPOINTS ──" (Constitution-interaction elidability analysis)'
       });
     }
 
@@ -391,8 +391,8 @@ function checkToolGrounding() {
   // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS
   const MANDATORY_CLASSIFICATIONS = new Set(['dispatch']);
 
-  // Valid annotation vocabulary (7-label MECE set)
-  const VALID_ANNOTATIONS = new Set(['sense', 'observe', 'track', 'transform', 'dispatch', 'gate', 'relay']);
+  // Valid annotation vocabulary (7-label MECE set; Cognitive Partnership Move primary frame)
+  const VALID_ANNOTATIONS = new Set(['sense', 'observe', 'track', 'transform', 'dispatch', 'constitution', 'extension']);
 
   // Find operation in PHASE TRANSITIONS with any valid pattern
   function findOperationInPhaseTransitions(phaseSection, operation) {
@@ -538,25 +538,25 @@ function checkToolGrounding() {
       });
     }
 
-    // Check 6e: Verify Realization header distinguishes gate and relay
+    // Check 6e: Verify Realization header distinguishes Constitution and Extension
     const realizationLine = groundingSection.match(/-- Realization:.*$/m);
     if (realizationLine) {
       const header = realizationLine[0];
-      if (!header.includes('gate') || !header.includes('relay')) {
+      if (!header.includes('Constitution') || !header.includes('Extension')) {
         results.warn.push({
           check: 'tool-grounding',
           file: relPath,
-          message: 'Realization header should distinguish gate and relay interaction kinds (e.g., "gate → TextPresent+Stop; relay → TextPresent+Proceed")'
+          message: 'Realization header should distinguish Constitution and Extension interaction kinds (e.g., "Constitution → TextPresent+Stop; Extension → TextPresent+Proceed")'
         });
       }
     }
 
     // Check 6f: Verify convergence behavior is explicitly classified with interaction kind
-    if (!/\bconverge\s*\((relay|gate)\)/i.test(groundingSection)) {
+    if (!/\bconverge\s*\((extension|constitution)\)/i.test(groundingSection)) {
       results.warn.push({
         check: 'tool-grounding',
         file: relPath,
-        message: 'Convergence behavior not explicitly classified in TOOL GROUNDING — add converge entry with (relay) or (gate) annotation'
+        message: 'Convergence behavior not explicitly classified in TOOL GROUNDING — add converge entry with (extension) or (constitution) annotation'
       });
     }
 

@@ -29,7 +29,7 @@ Prospect
   → surface(classify_result + observed + remaining, as_inquiry)
   → integrate(answer, prospect)
   → InformedExecution
-requires: uncertain(sufficiency(X))      -- runtime gate (Phase 0)
+requires: uncertain(sufficiency(X))      -- runtime checkpoint (Phase 0)
 deficit:  ContextInsufficient            -- activation precondition (Layer 1/2)
 preserves: task_identity(X)              -- task intent invariant; prospect context mutated (X → X')
 invariant: Evidence over Inference over Detection
@@ -45,7 +45,7 @@ Uᵢ       = Identified uncertainties from Scan(X)
 Ctx      = Context collection: Uᵢ → (Uᵢ', Uᵣ)
 Uᵢ'      = Enriched uncertainties (evidence added, not resolved)
 Uᵣ       = Context-resolved uncertainties (resolved during collection)
-Q        = Inquiry (gate interaction), ordered by information gain
+Q        = Inquiry (Constitution interaction), ordered by information gain
 A        = User answer ∈ {Provide(context), Point(location), Dismiss, Unknown(Partial)}
              -- Unknown(Partial) = user declines certainty; Phase 3 auto-promotes via Rule 20 tiebreaker (UserTacit → next-preferred
              -- EvidenceSource in ValidSources(v)) and re-enters Phase 1 for reclassification; routing arc formalized in PHASE TRANSITIONS
@@ -92,7 +92,7 @@ ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup:
 EmpiricalObservation = (Uᵢ', ObservationSpec) → Uₑ  -- dynamic evidence gathering
 Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2); excludes items routed via UserTacit override per Rule 20
 Uₑ_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, (EmpiricallyObservable, s)) ∧ s ≠ UserTacit }
-              -- Phase 1 observation gate; excludes Rule 20 cite-based UserTacit overrides (those route directly to Uᵢ'')
+              -- Phase 1 observation checkpoint; excludes Rule 20 cite-based UserTacit overrides (those route directly to Uᵢ'')
 Uₑ         = Empirically observed uncertainties    -- evidence attached, proceeds to Phase 2
 Uᵢ''       = Remaining user-dependent uncertainties
              -- Includes: (a) Factual/UserDependent items
@@ -111,10 +111,10 @@ branching_factor : Uncertainty → ℕ
     -- per-uncertainty count must be citable in Phase 2 classify summary when Rule 22 exception is invoked
 
 ── PHASE TRANSITIONS ──
-Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency gate (silent)
+Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency checkpoint (silent)
 Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- Step 1: context collection [Tool]
          Step₂ classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) → -- Step 2: epistemic classification (core act); Uₙ = non-actionable
-         [if off-diagonal(scope, resolution)] Qc(scope_assessment, resolution_assessment) → Stop → Ac  -- Coherence 2D gate [Tool]
+         [if off-diagonal(scope, resolution)] Qc(scope_assessment, resolution_assessment) → Stop → Ac  -- Coherence 2D Constitution interaction [Tool]
          -- evaluation order: Qc resolves before Uₑ_candidates computation; reclassified MemoryInternal/EmpiricallyObservable enters Uₑ_candidates
          Step₃ ReadOnlyVerify(Uᵣ') →                           -- Step 3: read-only verification (CodeDerivable + CanonicalExternal) [Tool]
            [if staleness_unverified(u) ∨ scope_gap(u)] reclassify(u, EmpiricallyObservable) → goto Step₂  -- backward arc (T4): staleness/scope failure re-enters classification
@@ -140,26 +140,26 @@ narrowing(Q, A) = |remaining(after)| < |remaining(before)| ∨ context(remaining
 early_exit = user_declares_sufficient
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Scan    (sense)       → Internal analysis (no external tool)
 Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch, WebFetch (conditional: CanonicalExternal channel — RFCs, vendor API docs, standards; `source: "web:{url}"` tag + staleness guard via codebase version cross-check)
 Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
-Phase 1 Qc      (gate)        → present (conditional: Coherence 2D off-diagonal gate; fires only when scope ≠ resolution assessment)
+Phase 1 Qc      (constitution)        → present (conditional: Coherence 2D off-diagonal Constitution interaction; fires only when scope ≠ resolution assessment)
 Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering, Factual only); cleanup via Bash
-Phase 2 Qs      (gate)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
+Phase 2 Qs      (constitution)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
-converge     (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
+converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 1 Qc (coherence 2D)  → conditional: fires only when scope ≠ resolution assessment
-                              always_gated when fired (gated: user classifies coherence type as MemoryInternal or CrossDomain)
-Phase 1 Emergent(EvidenceSource)  → always_gated (gated: channel unvalidated by definition; regardless of parent Verifiability,
+                              always_gated when fired (Constitution: user classifies coherence type as MemoryInternal or CrossDomain)
+Phase 1 Emergent(EvidenceSource)  → always_gated (Constitution: channel unvalidated by definition; regardless of parent Verifiability,
                                     route to Phase 2 to present observed channel description and await user confirmation before proceeding)
-Phase 1 CanonicalExternal staleness-unverified  → always_gated (gated: when staleness cannot be verified, require BOTH
+Phase 1 CanonicalExternal staleness-unverified  → always_gated (Constitution: when staleness cannot be verified, require BOTH
                                                    `staleness:unverified` tag AND Phase 2 classify summary surfacing — no silent
                                                    escalation path; publishing authority claim warrants user awareness)
-Phase 2 Qs (transparent)   → always_gated (gated: user provides context judgment on insufficiency)
+Phase 2 Qs (transparent)   → always_gated (Constitution: user provides context judgment on insufficiency)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: Prospect, uncertainties: Set(Uncertainty),
@@ -223,7 +223,7 @@ Write is authorized for observation instrument setup (temporary test artifacts w
 
 ### Activation
 
-AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0); surfacing always requires user interaction via gate interaction (Phase 2).
+AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0); surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
@@ -246,7 +246,7 @@ When Aitesis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present highest information-gain uncertainty candidate with classify results via gate interaction and yield turn.
+**Action**: At Phase 2, present highest information-gain uncertainty candidate with classify results via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Aitesis completes before execution proceeds
@@ -270,7 +270,7 @@ Heuristic signals for context insufficiency inference (not hard gates):
 
 **Default-scan trigger** (resolves the bootstrapping asymmetry of the Prior-decision implication signal): When the prospect scope touches architecture decisions, API or protocol design, persisted state schemas, or user-facing behavior commitments, the Prior-decision signal fires by default — Phase 1 Ctx begins with a bounded scan over persistent memory (MEMORY.md, prior-decision logs in `.insights/`) regardless of explicit user mention. Without this default, detection would require the AI to already suspect prior involvement, which is the condition the signal is meant to surface. The default-scan is scope-triggered (not blanket), bounded to Phase 1 Ctx (no gate), and subject to the memory staleness rule in Phase 1 Step 1 (verify against current state before treating as resolved).
 
-**Cross-session enrichment**: Domain knowledge accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may narrow the Phase 0 uncertainty scan — known domain patterns reduce the scope of novel-domain signals. In parallel, when **`/recollect`** has been invoked this session, the recalled context narrows the Phase 1 context scan scope — recognized prior context reduces the factual uncertainty surface before collection begins. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Domain knowledge accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may narrow the Phase 0 uncertainty scan — known domain patterns reduce the scope of novel-domain signals. In parallel, when **`/recollect`** has been invoked this session, the recalled context narrows the Phase 1 context scan scope — recognized prior context reduces the factual uncertainty surface before collection begins. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated observation_skips entries across 3+ sessions cluster around a specific EscapeCondition with consistent rationale, the Verifiability classification boundary warrants revision — the escape is systematic, not exceptional. When accumulated Emergent dimension detections across 3+ sessions reveal a recurring non-factual uncertainty pattern, the Layer 1 dimension set warrants a new fiber in the fibration structure — promoted fibers default to Unit (detect-only) unless the pattern exhibits internal classification structure requiring a structured fiber type.
 
@@ -394,7 +394,7 @@ If observed or user-dependent uncertainties remain: proceed to Phase 2.
 and the information is not available in the codebase, extend context collection to WebSearch/WebFetch.
 Web evidence is tagged with `source: "web:{url}"` for traceability.
 
-**Determinism verification** (relay precondition): CanonicalExternal is classified as relay only when the source is deterministic for the claim scope. Verify one of: (a) pinned version or dated snapshot (specific RFC with publication date, vendor doc with version pin, W3C spec with date stamp), (b) tag-pinned URL (`/v1.2/`, `?version=X`), or (c) cached copy with recorded fetch timestamp. When the source is undated or versionless and the claim depends on temporal context (API behavior, deprecated features, vendor defaults), the fetch is NON-deterministic → classify as constitution and escalate via Phase 2 classify summary before treating as evidence.
+**Determinism verification** (Extension precondition): CanonicalExternal is classified as Extension only when the source is deterministic for the claim scope. Verify one of: (a) pinned version or dated snapshot (specific RFC with publication date, vendor doc with version pin, W3C spec with date stamp), (b) tag-pinned URL (`/v1.2/`, `?version=X`), or (c) cached copy with recorded fetch timestamp. When the source is undated or versionless and the claim depends on temporal context (API behavior, deprecated features, vendor defaults), the fetch is NON-deterministic → classify as Constitution and escalate via Phase 2 classify summary before treating as evidence.
 
 **Staleness guard** (analogous to memory evidence): documentation may be temporally decoupled from the library version actually in use — verify against codebase import/pin version before treating as resolved. When staleness cannot be verified, the guard requires BOTH: (1) `staleness:unverified` tag attached to the evidence record, AND (2) surfacing to the user in Phase 2 classify summary regardless of whether EmpiricallyObservable reclassification subsequently resolves the uncertainty — no silent escalation path (no "or" fallback). The CanonicalExternal source carries publishing authority (standards body, vendor) distinct from internal CodeDerivable evidence — cite both when cross-validating, and always cite the authority source when its temporal alignment cannot be independently verified (see ELIDABLE CHECKPOINTS `CanonicalExternal staleness-unverified` always_gated entry).
 
@@ -416,7 +416,7 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 
 ### Phase 2: Uncertainty Surfacing
 
-**Present** the highest-priority remaining uncertainty with classify results via gate interaction.
+**Present** the highest-priority remaining uncertainty with classify results via Cognitive Partnership Move (Constitution).
 
 **Classification transparency** (Always show): Phase 2 always includes classify results for remaining uncertainties. This is informational — no approval required. Users can override classification by stating objection. When only one uncertainty remains, inline the classification with the uncertainty description rather than showing a separate summary block.
 
@@ -480,8 +480,8 @@ After integration:
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Marginal priority uncertainties only | Gate interaction with Dismiss as default option |
-| Medium | Significant priority uncertainties, context collection partially resolved | Structured gate interaction with progress |
+| Light | Marginal priority uncertainties only | Constitution interaction with Dismiss as default option |
+| Medium | Significant priority uncertainties, context collection partially resolved | Structured Constitution interaction with progress |
 | Heavy | Critical priority, multiple unresolved uncertainties | Detailed evidence + collection results + classify results + resolution paths |
 
 ## UX Safeguards
@@ -503,14 +503,14 @@ After integration:
 | Observation cleanup | All test artifacts removed after observation | No residual files |
 | Observation timeout | 30s limit → fall back to user inquiry | Prevents hanging |
 | Observation risk gate | Elevated-risk observation → reclassify as UserDependent | Safety preserved |
-| Free-response escape | Phase 2 gate accepts `Unknown(Partial)` as typed answer constructor (TYPES `A`) — Phase 3 auto-promotes uncertainty to next-preferred EvidenceSource in `ValidSources(v)` and re-enters Phase 1 classification via backward arc (PHASE TRANSITIONS) | User need not simulate certainty for unknowns; routing degrades gracefully through typed, formally-tracked arc |
+| Free-response escape | Phase 2 Constitution interaction accepts `Unknown(Partial)` as typed answer constructor (TYPES `A`) — Phase 3 auto-promotes uncertainty to next-preferred EvidenceSource in `ValidSources(v)` and re-enters Phase 1 classification via backward arc (PHASE TRANSITIONS) | User need not simulate certainty for unknowns; routing degrades gracefully through typed, formally-tracked arc |
 | Cost-ordering tiebreaker | Default ascending cost-ordering defined in TYPES (`CodeDerivable < CanonicalExternal < Instrumentation < UserTacit`). **External-dependency preference**: when uncertainty carries environmental-dependency signal, prefer `CanonicalExternal` over `CodeDerivable` unless authority-override basis cited. Override logged to `Λ.source_choice_overrides` | Minimizes user-interrupt cost; preserves external authority when relevant; Rule 20 cite basis required for UserTacit preference |
 | EvidenceSource transparency | Factual uncertainty classify summary shows `EvidenceSource: {selected}` with basis citation when override applied; `Λ.source_choice_overrides` preserves cite audit across sessions for variation-stable observed use | Rule 20 cite-or-observe audit visibility |
 
 ## Rules
 
-1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via gate interaction (Phase 2)
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding
+1. **AI-guided, user-resolved**: AI infers context insufficiency; resolution requires user choice via Cognitive Partnership Move (Constitution) (Phase 2)
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
 3. **Context collection first, epistemic classification second**: Before asking the user, (a) collect contextual evidence through Read/Grep over codebase and persistent memory — persistent memory here means **prior-committed decisions and rationale** (architecture choices already merged, conventions documented in rules, deliberate trade-offs recorded in memory files), NOT inductive patterns loaded per-session (pattern loading may bias detection toward previously observed patterns and is outside Phase 1 Ctx scope); memory-sourced evidence is tagged `memory:{path}` and subject to the staleness guard in Phase 1 Step 1 (NOT eligible for Factual/ReadOnly direct-resolve; verify against current state or escalate to user confirmation), (b) classify uncertainties by dimension (Factual/Coherence/Relevance) and verifiability, (c) show classification transparently in Phase 2, (d) for Factual/ReadOnly: resolve directly (codebase evidence only), (e) for Factual/EmpiricallyObservable: run empirical observation to attach evidence (memory evidence lands here when staleness is unverified), (f) for Coherence/MemoryInternal: resolve through factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent), (g) for Coherence/CrossDomain and Relevance: detect and show routing target in classify summary
 4. **Evidence over Inference over Detection**: When context is insufficient, infer the highest-gain question rather than detect via fixed checklist (lower boundary). When a factual uncertainty is empirically observable, observe directly rather than infer from reasoning alone (upper boundary — Rule 20 is the structural guard). Evidence-claim alignment: partial evidence covering a subset of the claim scope is inference for the uncovered portion, not evidence — verify evidence scope ⊇ claim scope before treating as resolved, and classify the uncovered portion separately
 5. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically based on prospect requirements
@@ -523,10 +523,10 @@ After integration:
 12. **Cross-protocol awareness**: Defer to Syneidesis when gap surfacing is already active for the same task scope
 13. **Evidence before inquiry**: User inquiry is for judgment — not for facts the AI can discover
 14. **Always show**: User can override classification without explicit approval step. Visible by default, ask only on exception
-15. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+15. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 16. **Convergence evidence**: Present transformation trace before declaring remaining = ∅; per-uncertainty evidence is required
 17. **Zero-uncertainty surfacing**: If Phase 0 scan detects no uncertainties, present the finding with reasoning for user confirmation
-18. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
+18. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 19. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 20. **No observation avoidance (cite-or-observe)**: When a Factual uncertainty has a cheaper EvidenceSource available in `ValidSources(v)` than `UserTacit`, the AI must either resolve via the cheaper source OR cite explicit dominance basis for preferring `UserTacit`. Three rationalization paths are equally violations: (A) **Verifiability shortcut** — classifying as UserDependent to avoid observation (pre-observation classification shortcut); (B) **Source-choice shortcut (EmpiricallyObservable)** — selecting `UserTacit` over `Instrumentation` within `ValidSources(EmpiricallyObservable)` without cited dominance basis; (C) **Source-choice shortcut (ReadOnlyVerifiable)** — selecting `UserTacit` over `CodeDerivable` or `CanonicalExternal` within `ValidSources(ReadOnlyVerifiable)` without cited dominance basis (this silent escape bypasses both codebase lookup and authority-source consultation). Legitimate `UserTacit` preference requires explicit citation in the Phase 2 classify summary and a log entry in `Λ.source_choice_overrides`. Dominance basis by Verifiability tier: **EmpiricallyObservable** → (a) operational or domain knowledge not captured by instrumentation, (b) temporally-scoped knowledge not reproducible via static observation, (c) setup cost exceeding the 30s bound. **ReadOnlyVerifiable** → (a) tacit domain knowledge not captured in source code or external documentation, (b) interpretive judgment over canonical text (policy interpretation, contract reading), (c) authority-override rationale (internal fork supersedes upstream, documented exception to standard). Without such citation, default to the cheaper source. Cited basis must appear in the Phase 2 classify summary as `EvidenceSource: UserTacit over {cheaper_source}, basis: {specific_reason}`. Observation has exactly two outcomes, both of which proceed to Phase 2 via `Uₑ`: (i) differentiating evidence found → attach evidence to `Uₑ` → Phase 2; (ii) no differentiating signal found → the null-signal finding is itself an observation output — attach as negative evidence to `Uₑ` → Phase 2. Post-observation null-signal findings are NOT reclassifications to UserDependent; they are `Uₑ` items with observation-grounded negative evidence. Reclassification to UserDependent is legitimate only under empirically verifiable escape conditions evaluated BEFORE observation execution: (a) observation requires persistent environment mutation beyond instrument setup, (b) execution exceeds 30s bound, (c) risk gate triggers (elevated-risk observation); these escape conditions log to `Λ.observation_skips`. Pre-observation categorical classification reinstates the inference-before-observation shortcut this rule guards against — classification must arise from observation output, not substitute for it.
 21. **No pre-filter rationalization**: Pre-filter (coexistence exit) applies only when an explicit, named scope hierarchy rule or documented precedence ordering resolves the apparent contradiction without epistemic protocol intervention. Classifying a genuine cross-domain structural contradiction as "rule-resolvable" to avoid routing = pre-filter misuse (analogous to Rule 20's observation avoidance guard)

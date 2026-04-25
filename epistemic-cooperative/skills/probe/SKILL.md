@@ -63,7 +63,7 @@ Construct the candidate set. Keep at minimum two candidates with non-overlapping
 
 ### Phase 2: Hypothesis Presentation
 
-Present the candidate hypotheses as text output before the gate. Format per hypothesis:
+Present the candidate hypotheses as text output before the Constitution interaction. Format per hypothesis:
 
 ```
 Hypothesis N — N interpretations possible / decision point is X
@@ -72,7 +72,7 @@ Hypothesis N — N interpretations possible / decision point is X
   Reverse-evidence: <observation that would refute this hypothesis>
 ```
 
-Then present the recognition gate:
+Then present the recognition Constitution interaction:
 
 ```
 Which hypothesis fits your present situation?
@@ -134,7 +134,7 @@ Hypothesis       = { deficit: DeficitName, protocol: ProtocolId,
                      evidence: String, reverse_evidence: String }
 H[]              = List(Hypothesis)                 -- |H[]| ≥ 2 invariant
 Scan             = (UserSituation, Catalog) → H[]
-Qc               = present hypothesis set with evidence and reverse-evidence; gate
+Qc               = present hypothesis set with evidence and reverse-evidence; Constitution interaction
 R                = Recognition ∈ {Recognize(Hypothesis), Redirect(DeficitName | ProtocolId),
                                   Dismiss, Narrow(Slice), Stop}
 ProtocolRoute    = session text { recognized_deficit, target_protocol, evidence_trace }
@@ -152,7 +152,7 @@ Phase 0: U → Detect(U) → vague_deficit(U)?                          -- silen
 Phase 1: U → Scan(U, Catalog) → H[]                                 -- catalog scan
            |H[]| < 2 → enrich(U) → Phase 1                          -- multi-hypothesis invariant
            |H[]| ≥ 2 → Phase 2
-Phase 2: H[] → present(H[], evidence, reverse_evidence) → Qc → Stop → R   -- recognition gate [Tool]
+Phase 2: H[] → present(H[], evidence, reverse_evidence) → Qc → Stop → R   -- recognition Constitution interaction [Tool]
 Phase 3: R → integrate(R, U) →
            Recognize(h) → emit(ProtocolRoute(h)) → converge          -- user-constituted route
            Redirect(d)  → emit(ProtocolRoute(d)) → converge          -- user-named alternative
@@ -176,17 +176,17 @@ exhausted  = narrow_iterations ≥ 3
 session_text(probe) ∋ {ProtocolRoute | FitReviewNote} (Stop deactivates without artifact)
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect      (sense)    → Internal analysis (heuristic vague-deficit detection)
 Phase 1 Scan        (sense)    → Internal analysis (catalog match against situation)
 Phase 1 enrich      (sense)    → Internal analysis (situation broadening when |H[]| < 2)
-Phase 2 Qc          (gate)     → present (multi-hypothesis recognition gate)
-Phase 3 emit        (relay)    → TextPresent+Proceed (ProtocolRoute or FitReviewNote)
+Phase 2 Qc          (constitution)     → present (multi-hypothesis recognition Constitution interaction)
+Phase 3 emit        (extension)    → TextPresent+Proceed (ProtocolRoute or FitReviewNote)
 Phase 3 rebind      (track)    → Internal state update (Narrow disposition)
-converge            (relay)    → TextPresent+Proceed (convergence trace)
+converge            (extension)    → TextPresent+Proceed (convergence trace)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 2 Qc (recognition)     → always_gated (constitutive user act; Standing-authority delegation forbidden)
 
 ── MODE STATE ──
@@ -214,11 +214,11 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 5. **Multi-hypothesis required** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden.
 6. **Disposition field belongs to the user** — Recognize / Redirect / Dismiss / Narrow / Stop is a constitutive user act. AI never resolves the disposition unilaterally.
 7. **No cumulative score / grade / ranking** — Across uses, no fitness metric, success rate, or aggregated quality score is produced or stored. Each probe is independent.
-8. **Stop / Narrow / Dismiss always present** — Stop, Narrow, and Dismiss options appear at every gate, matching the Phase 2 disposition labels. Three-Tier Termination inheritance: graceful exit is always available.
+8. **Stop / Narrow / Dismiss always present** — Stop, Narrow, and Dismiss options appear at every Constitution interaction, matching the Phase 2 disposition labels. Three-Tier Termination inheritance: graceful exit is always available.
 9. **Blocked vocabulary** — The terms "wrong", "misuse detected", and "should have used" must not appear in Probe output. These vocabularies frame Probe as a corrective judge rather than a fit-review companion.
 10. **Recommended vocabulary** — Use "fit review" as the positive framing replacement for the blocked vocabulary in #9. Output describes hypotheses, evidence, and reverse-evidence; never verdicts.
 11. **Hypothesis form** — Each hypothesis is phrased as low-confidence dialogic: "N interpretations possible / decision point is X". Certainty framings ("clearly", "definitely", "the answer is") are forbidden.
-12. **Recognition over Recall** — Present structured hypothesis options via gate interaction and yield turn. Each option carries differential reverse-evidence so the post-selection state is anticipatable.
+12. **Recognition over Recall** — Present structured hypothesis options via Cognitive Partnership Move (Constitution) and yield turn. Each option carries differential reverse-evidence so the post-selection state is anticipatable.
 13. **Detection with Authority** — AI detects candidate deficits with cited situation evidence; the user constitutes the recognition. AI never resolves the disposition.
 14. **Context-Question Separation** — All hypothesis evidence and reverse-evidence is presented as text output before the gate. The gate contains only the disposition options.
 15. **Convergence evidence** — Present a transformation trace before declaring convergence: Recognize/Redirect/Dismiss/Narrow produce a session-text artifact (ProtocolRoute or FitReviewNote); Stop deactivates without an artifact.

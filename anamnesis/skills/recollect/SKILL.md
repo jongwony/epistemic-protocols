@@ -116,7 +116,7 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
 ── TOOL GROUNDING ──
 -- Realization binding (Claude Code substrate), non-normative w.r.t. protocol essence — see ── SUBSTRATE AGNOSTICISM ──; any substrate satisfying morphism laws realizes Anamnesis.
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 -- Store binding:
 --   {slug} = dirname(transcript_path) — Claude Code's project partition identifier
 --   SSOT             ↦ ~/.claude/projects/{slug}/*.jsonl                                 (session JSONL, append-only)
@@ -130,15 +130,15 @@ Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over SSOT ∪ IND
 Phase 1 Scan_salience (observe)  → Read, Grep, Glob (MarkerProfile match over INDEX; SSOT fallback on degraded_scan)
 Phase 1 Scan_hybrid   (observe)  → union of above
 Phase 1 Rank        (sense)    → Internal analysis (conditional: haiku scoring for large candidate sets)
-Phase 2 Qc          (gate)     → present (narrative Socratic candidate; mandatory)
+Phase 2 Qc          (constitution)     → present (narrative Socratic candidate; mandatory)
 Phase 3 integrate   (track)    → Internal state update
 Phase 3 Probe       (sense)    → Internal (gap detection)
-Phase 3 Qs          (gate)     → present (Socratic probing with structured navigation; mandatory on Refine)
-Phase 3 emit        (relay)    → TextPresent+Proceed (ClueVector_prose)
-converge            (relay)    → TextPresent+Proceed (convergence trace)
+Phase 3 Qs          (constitution)     → present (Socratic probing with structured navigation; mandatory on Refine)
+Phase 3 emit        (extension)    → TextPresent+Proceed (ClueVector_prose)
+converge            (extension)    → TextPresent+Proceed (convergence trace)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
 Phase 2 Qc (recognition)     → always_gated (synthesis of identification is constitutive)
 Phase 3 Qs (Socratic probe)  → always_gated (only user accesses own retention context)
 
@@ -302,7 +302,7 @@ When Anamnesis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present narrative candidate for user recognition via gate interaction and yield turn.
+**Action**: At Phase 2, present narrative candidate for user recognition via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 Anamnesis completes before context-dependent work; loaded instructions resume after recall resolves or dismisses.
@@ -323,7 +323,7 @@ Heuristic signals for empty intention detection (not hard gates):
 | Failed self-recall | User attempts to reference prior context but trails off, hedges, or uses approximation language |
 | Cognitive effort signals | User pauses mid-reference, self-corrects, or expresses frustration at not finding a prior discussion |
 
-**Cross-session enrichment**: Prior recall indices persisted in the hypomnesis store provide starting points for Phase 1 contextual scan — previously successful recall paths may guide initial search scope. This is a heuristic input that may bias detection toward previously observed patterns; gate judgment remains with the user.
+**Cross-session enrichment**: Prior recall indices persisted in the hypomnesis store provide starting points for Phase 1 contextual scan — previously successful recall paths may guide initial search scope. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Skip**:
 - User provides specific reference (file path, session ID, issue number, exact quote)
@@ -369,7 +369,7 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
    Tool realization (Claude Code substrate): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING. Rule 6 defines track-internal ranking composition.
 
 2. **Adaptive behavior based on trace ambiguity**:
-   - **High ambiguity**: Present hypomnesis store overview as orientation text (relay) — surface the store's structure and major topic clusters so the user can orient their recall. This is informational, not a gated interaction; the overview provides context for the subsequent targeted scan.
+   - **High ambiguity**: Present hypomnesis store overview as orientation text (extension) — surface the store's structure and major topic clusters so the user can orient their recall. This is informational, not a gated interaction; the overview provides context for the subsequent targeted scan.
    - **Moderate ambiguity**: Broaden scan scope to include semantic similarity and temporal neighborhood.
    - **Low ambiguity**: Direct targeted scan using the dispatched track.
 
@@ -382,9 +382,9 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
 
 **Scope restriction**: Read-only investigation only (Read, Grep, Glob). No file modifications.
 
-### Phase 2: Narrative Recognition Gate
+### Phase 2: Narrative Recognition (Constitution)
 
-**Present** the highest-priority candidate as a discussion narrative for user recognition via gate interaction.
+**Present** the highest-priority candidate as a discussion narrative for user recognition via Cognitive Partnership Move (Constitution).
 
 **Selection criterion**: Choose the candidate whose recognition would maximally resolve the user's empty intention. When priority is equal, prefer the candidate with richer narrative context and adjacent vectors.
 
@@ -424,7 +424,7 @@ After user response:
 
    **Probe(V, Sigma)**: Analyze what the user rejected and what the stored adjacent vectors suggest they might be seeking. Generate structured navigation through the memory space — concrete options, not open-ended questions:
 
-   **Present** Socratic probe via gate interaction (Qs, mandatory on Refine):
+   **Present** Socratic probe via Cognitive Partnership Move (Constitution) (Qs, mandatory on Refine):
    ```
    Adjacent areas from this time period and context:
    1. [Topic A] — [brief narrative: what was discussed and why]
@@ -451,9 +451,9 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 ## Rules
 
-1. **AI-guided, user-recognized**: AI detects empty intention and scans stores; recognition requires user identification via gate interaction (Phase 2). AI detection is implicitly confirmed when the user engages with recognition (Phase 2 gate response, not Esc).
+1. **AI-guided, user-recognized**: AI detects empty intention and scans stores; recognition requires user identification via Cognitive Partnership Move (Constitution) (Phase 2). AI detection is implicitly confirmed when the user engages with recognition (Phase 2 gate response, not Esc).
 
-2. **Recognition over Retrieval**: Present narrative candidates via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding.
+2. **Recognition over Retrieval**: Present narrative candidates via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding.
 
 3. **Input-typed dispatch**: Phase 1 scan dispatches by `InputType` classified from V and Σ — `StructuredIdentifier` → entropy track, `NaturalRecall` → salience track, `Mixed` → hybrid. Σ-primary scan survives only as a ranking-layer special case within the salience track, not as an absolute scan rule.
 
@@ -477,7 +477,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 13. **Cross-protocol awareness**: Defer to Aitesis when user needs new information (no empty intention); defer to /clarify when expression itself is ambiguous (expression gap ≠ recall gap). Compose `/recollect * /inquire` when recognized context needs enrichment. On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — lifecycle gap / pre-store, missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis; INDEX may lack entries (lifecycle gaps or pre-store sessions) while SSOT retains the information.
 
-14. **Context-Question Separation**: Present all narrative context, evidence, and adjacent vectors as text before the gate; the gate contains only the recognition question and options with differential implications. Embedding narrative in gate fields = protocol violation.
+14. **Context-Question Separation**: Present all narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding narrative in the Constitution interaction = protocol violation.
 
 15. **Convergence evidence**: Present transformation trace before declaring recall_complete.
 
@@ -485,11 +485,11 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 17. **No premature NullMatch**: At least one Socratic probe enrichment must precede NullMatch declaration. First scan returning zero → probe → enriched re-scan → NullMatch only if still empty.
 
-18. **No skipped Qc**: Phase 2 gate is mandatory even with single high-confidence candidate. Synthesis of identification is constitutive — cannot auto-resolve via confidence score. High confidence justifies Light intensity, not gate elision.
+18. **No skipped Qc**: Phase 2 Constitution interaction is mandatory even with single high-confidence candidate. Synthesis of identification is constitutive — cannot auto-resolve via confidence score. High confidence justifies Light intensity, not constitution elision.
 
 19. **No asserted recognition**: AI presents; user constitutes recognition. Asserting "this must be what you want" = protocol violation.
 
-20. **No merged probe+recognition**: Socratic probing (Qs) and recognition (Qc) are separate gates — the probe deepens recall context, Qc verifies identity. Combining them = protocol violation.
+20. **No merged probe+recognition**: Socratic probing (Qs) and recognition (Qc) are separate Constitution interactions — the probe deepens recall context, Qc verifies identity. Combining them = protocol violation.
 
 21. **Cross-LOOP narrative persistence**: Narrative format and adjacent vector enrichment persist across LOOP iterations; subsequent attempts reference prior candidates and explain the differential.
 

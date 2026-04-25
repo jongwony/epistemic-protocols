@@ -27,7 +27,7 @@ TaskScope
   → classify(domain, as_inquiry)       -- present domain for user boundary classification
   → integrate(response, map)           -- update BoundaryMap from user classification
   → DefinedBoundary
-requires: boundary_undefined(T)         -- runtime gate (Phase 0)
+requires: boundary_undefined(T)         -- runtime checkpoint (Phase 0)
 deficit:  BoundaryUndefined             -- activation precondition (Layer 1/2)
 preserves: task_identity(T)             -- task scope invariant; BoundaryMap mutated
 invariant: Definition over Assumption
@@ -41,7 +41,7 @@ Bᵢ             = Set(Domain) from Probe(T)                    -- boundary-unde
 Ctx            = Context collection: Bᵢ → (Bᵢ', Bᵣ)          -- enrich + resolve
 Bᵢ'            = Set(Domain) enriched with context evidence    -- after Phase 1
 Bᵣ             = Set(Domain) resolved from context             -- auto-resolved in Phase 1
-Q              = Boundary inquiry ordered by impact [Tool: gate interaction]
+Q              = Boundary inquiry ordered by impact [Tool: Constitution interaction]
 A              = User answer ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismiss}
 B              = BoundaryMap: Map(Domain, BoundaryClassification)
 BoundaryClassification ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismissed}
@@ -49,7 +49,7 @@ DefinedBoundary = B where |remaining| = 0 ∨ user_esc
 Phase          ∈ {0, 1, 2, 3}
 
 ── PHASE TRANSITIONS ──
-Phase 0: T → Probe(T) → Bᵢ?                                           -- boundary detection gate (silent)
+Phase 0: T → Probe(T) → Bᵢ?                                           -- boundary detection checkpoint (silent)
 Phase 1: Bᵢ → Ctx(Bᵢ) → (Bᵢ', Bᵣ)                                     -- context collection [Tool]
 Phase 2: Bᵢ' → Qc(Bᵢ'[max_impact], progress) → Stop → A               -- boundary classification [Tool]
 Phase 3: A → integrate(A, B) → B'                                      -- map update (sense)
@@ -76,16 +76,16 @@ converge iff |remaining| = 0 ∨ user_esc
   user_esc:         user exits via Esc key (ungraceful, no cleanup needed)
 
 ── TOOL GROUNDING ──
--- Realization: gate → TextPresent+Stop; relay → TextPresent+Proceed
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Probe (sense)   → Internal analysis (no external tool)
 Phase 1 Ctx   (observe) → Read, Grep, Glob (codebase scan for boundary signals: CLAUDE.md, boundaries.md, rules/, prior session context)
-Phase 2 Qc    (gate)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 2 Qc    (constitution)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3       (track)   → Internal state update
-converge  (relay)       → TextPresent+Proceed (convergence evidence trace; proceed with defined boundary)
+converge  (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with defined boundary)
 
 ── ELIDABLE CHECKPOINTS ──
--- Axis: relay/gated = interaction kind; always_gated/elidable = regret profile
-Phase 2 Qc (classify)      → always_gated (gated: UserSupplies/AIPropose/AIAutonomous — boundary ownership)
+-- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
+Phase 2 Qc (classify)      → always_gated (Constitution: UserSupplies/AIPropose/AIAutonomous — boundary ownership)
 
 ── MODE STATE ──
 Λ = { phase: Phase, T: TaskScope,
@@ -138,7 +138,7 @@ Phase 2 Qc (classify)      → always_gated (gated: UserSupplies/AIPropose/AIAut
 
 ### Activation
 
-AI probes for boundary-undefined domains before execution OR user calls `/bound`. Probing is silent (Phase 0); classification always requires user interaction via gate interaction (Phase 2).
+AI probes for boundary-undefined domains before execution OR user calls `/bound`. Probing is silent (Phase 0); classification always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/bound` slash command or description-matching input. Always available.
@@ -161,7 +161,7 @@ When Horismos is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present highest-impact boundary-undefined domain for user classification via gate interaction and yield turn.
+**Action**: At Phase 2, present highest-impact boundary-undefined domain for user classification via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Horismos completes before execution proceeds
@@ -221,7 +221,7 @@ When multiple domains are identified, present in impact order (High → Medium �
 
 ## Protocol
 
-### Phase 0: Boundary Detection Gate (Silent)
+### Phase 0: Boundary Detection Checkpoint (Silent)
 
 Analyze task scope for boundary-undefined domains. This phase is **silent** — no user interaction.
 
@@ -251,7 +251,7 @@ Collect contextual evidence to enrich domain descriptions and improve classifica
 
 ### Phase 2: Boundary Classification
 
-**Present** the highest-impact remaining boundary-undefined domain via gate interaction.
+**Present** the highest-impact remaining boundary-undefined domain via Cognitive Partnership Move (Constitution).
 
 **Selection criterion**: Choose the domain whose classification would maximally narrow the remaining boundary-undefined space and most affect downstream protocol operation (impact ordering). When impact is equal, prefer the domain with richer collected evidence.
 
@@ -299,8 +299,8 @@ After integration:
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | 1-2 domains, single-pass (no re-probe) | Gate interaction with Dismiss as default option |
-| Medium | 3-5 domains, may re-probe once | Structured gate interaction with progress |
+| Light | 1-2 domains, single-pass (no re-probe) | Constitution interaction with Dismiss as default option |
+| Medium | 3-5 domains, may re-probe once | Structured Constitution interaction with progress |
 | Heavy | 6+ domains, multiple re-probe cycles | Detailed evidence + collection results + classification paths |
 
 ## UX Safeguards
@@ -317,22 +317,22 @@ After integration:
 
 ## Rules
 
-1. **AI-guided, user-classified**: AI detects boundary-undefined domains; classification requires user choice via gate interaction (Phase 2). AI detection is implicitly confirmed when the user engages with classification (Phase 2 gate interaction response, not Esc).
-2. **Recognition over Recall**: Present structured options via gate interaction and yield turn — structured content reaches the user with response opportunity — gate interaction requires turn yield before proceeding. Options are UserSupplies/AIPropose/AIAutonomous/Dismiss — never open-ended.
+1. **AI-guided, user-classified**: AI detects boundary-undefined domains; classification requires user choice via Cognitive Partnership Move (Constitution) (Phase 2). AI detection is implicitly confirmed when the user engages with classification (Phase 2 gate interaction response, not Esc).
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding. Options are UserSupplies/AIPropose/AIAutonomous/Dismiss — never open-ended.
 3. **Context collection first**: Before asking the user, collect contextual evidence through Read/Grep/Glob codebase exploration to auto-resolve where possible and enrich remaining domains (Phase 1).
 4. **Definition over Assumption**: When boundary ownership is unclear, define explicitly rather than assume — silence is worse than a dismissed classification.
 5. **No fixed taxonomy**: Domains emerge dynamically from task probe, not a predefined list. Do not impose categories.
 6. **Context resolution preferred**: Auto-resolve from existing config, rules, and conventions where possible. Minimize user interaction to what truly requires human judgment.
-7. **One at a time**: Present one domain per Phase 2 cycle; do not batch multiple domains in a single gate interaction.
+7. **One at a time**: Present one domain per Phase 2 cycle; do not batch multiple domains in a single Constitution interaction.
 8. **Impact ordering**: Present domains in impact order (highest-impact first). Impact is relational — depends on downstream protocol dependencies.
 9. **Session text output**: BoundaryMap is output as session text. No structured data channel. Downstream protocols naturally read it from conversation context.
-10. **Circular re-probing is healthy**: Integration may surface new boundary-undefined domains. Re-probe cycles are normal dialogue. `user_esc` guarantees termination at every gate interaction moment.
+10. **Circular re-probing is healthy**: Integration may surface new boundary-undefined domains. Re-probe cycles are normal dialogue. `user_esc` guarantees termination at every Constitution interaction moment.
 11. **Per-decision boundary**: Each invocation produces a fresh BoundaryMap for the current task scope. Do not carry over classifications from prior sessions or invocations.
 12. **Epistemic router**: BoundaryMap is a shared resource consumed by all downstream protocols — Aitesis uses it as gate threshold, Prothesis as framework filter, Telos as goal detail level, Syneidesis as gap relevance filter, Prosoche as risk evaluation threshold. This shared consumption is why Horismos requires independent protocol status rather than absorption into any single consumer.
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via gate interaction. The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **Convergence evidence**: Present transformation trace before declaring |remaining| = 0; per-domain evidence is required
 15. **Zero-domain surfacing**: If Phase 0 probe detects no boundary-undefined domains, present this finding with reasoning for user confirmation
-16. **Option-set relay test**: If AI analysis converges to a single dominant option (option-level entropy→0), present the finding directly. Each gate option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
+16. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 17. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 
-**Cross-session enrichment**: Accumulated boundary preferences from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may serve as heuristic input for Phase 1 calibration proposals — but per-decision freshness (Rule 11) takes precedence. Prior preferences inform, they do not predetermine. In parallel, when **`/recollect`** has been invoked this session, the recalled context may surface prior BoundaryMap classifications for structurally similar domains, providing classification candidates for Phase 1 — but Rule 11 per-decision freshness remains authoritative, and recalled classifications are candidates to evaluate, not defaults to adopt. Gate judgment remains with the user.
+**Cross-session enrichment**: Accumulated boundary preferences from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may serve as heuristic input for Phase 1 calibration proposals — but per-decision freshness (Rule 11) takes precedence. Prior preferences inform, they do not predetermine. In parallel, when **`/recollect`** has been invoked this session, the recalled context may surface prior BoundaryMap classifications for structurally similar domains, providing classification candidates for Phase 1 — but Rule 11 per-decision freshness remains authoritative, and recalled classifications are candidates to evaluate, not defaults to adopt. Constitution judgment remains with the user.
