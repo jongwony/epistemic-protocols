@@ -43,6 +43,7 @@ const PLUGINS = [
   { dir: 'epistemic-cooperative', skill: 'artifact-review' },
   { dir: 'epistemic-cooperative', skill: 'review-ensemble' },
   { dir: 'epistemic-cooperative', skill: 'probe' },
+  { dir: 'epistemic-cooperative', skill: 'steer' },
   { dir: 'anamnesis', skill: 'recollect' },
 ];
 
