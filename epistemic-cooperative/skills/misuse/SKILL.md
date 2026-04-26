@@ -175,7 +175,8 @@ Misuse(scope) → Phase0(scope, user_confirm) →
           Reorient(v): reclassify(v) → present anew | dismiss
           Stop: break loop
         |reviewed| ≥ 10: break loop (max review threshold)
-      emit(ViolationReview) → converge
+      reviewed > 0: emit(ViolationReview) → converge
+      reviewed = 0: deactivate(no-op note)
 
 ── MORPHISM ──
 SessionHistory
@@ -281,15 +282,15 @@ The `~/.claude/projects/{slug}/hypomnesis/{session-id}/misfit.md` file (written 
 
 ## Rules
 
-1. **Operation-grounded classification** — Surface shape (e.g., "N instances + slash command") is necessary but not sufficient for VIOLATION classification. The cognitive operation actually performed must be examined against the protocol's declared operation. Per `feedback_protocol_scope_by_operation.md`: protocols are defined by operation, not input shape.
+1. **Operation-grounded classification** — Surface shape (e.g., "N instances + slash command") is necessary but not sufficient for VIOLATION classification. The cognitive operation actually performed must be examined against the protocol's declared operation. Protocols are defined by cognitive operation, not by input shape (instance count is evidence, not gate).
 2. **Self-stereotype guard** — The classifier itself must not commit the same stereotype error it detects. Apply 2-step check (surface match → operation verification). On uncertain operation verification, classify as AMBIGUOUS, not VIOLATION. False-positive cost (eroded protocol use) exceeds false-negative cost (missed violation surfaced later).
 3. **N=1 dogfooding caveat** — Heuristics in this skill and its taxonomy are derived from a single-user session corpus. Patterns are working hypotheses with N=1 corroboration, not population evidence. The Phase 5 emit must surface this caveat in the artifact.
-4. **Recognition is verification, not decision-axis** — Phase 4 Qc is structurally homologous to Anamnesis Phase 2 recognition gates: past-identity synthesis, not future-trajectory selection. Differential Future Requirement is excluded by the verification-gate clause in `derived-principles.md §Differential Future Requirement`. A 1-correct option structure (was-violation / was-legitimate) is legitimate by purpose.
+4. **Recognition is verification, not decision-axis** — Phase 4 Qc is structurally homologous to Anamnesis Phase 2 recognition gates: past-identity synthesis, not future-trajectory selection. The Differential Future Requirement (which mandates differential downstream trajectories among gate options) does not apply to verification gates whose option structure is determined by verification task requirements. A 1-correct option structure (was-violation / was-legitimate) is legitimate by purpose.
 5. **Cross-session opt-in, default off** — Default scope is current session. Reading other sessions or other projects requires explicit user confirmation in Phase 0. This matches `/probe` substrate policy and applies to both session JSONL reads and `misfit.md` reads.
 6. **Extension / Constitution vocabulary** — Classification descriptions use the Cognitive Partnership Move vocabulary: Extension (relay-mode, citable basis, deterministic) and Constitution (gated-mode, AI-inference basis, multiple valid results). Older relay/gated phrasing is replaced by the current vocabulary throughout output.
 7. **Observation-only artifact** — Misuse never auto-rewrites past sessions, never auto-reroutes a past invocation to a different protocol, never produces a corrective action. Calibration metadata in Phase 5 is for future live-nudge design, not for present action.
 8. **Bounded review depth** — Phase 4 loop terminates at `min(|V[]|, 10)` candidates per session of `/misuse`. Audit fatigue erodes verdict quality; bounded review preserves recognition fidelity. The user can re-invoke `/misuse` for additional candidates.
-9. **No cumulative score / rate / index** — Across uses, no "violation rate", "user reliability index", "protocol fidelity score", or aggregated metric is produced or stored. Each audit is independent. Aggregation at the cumulative-rate level reintroduces the corrective-judge framing that Rule 11 rejects.
+9. **No cumulative score / rate / index** — Across uses, no "violation rate", "user reliability index", "protocol fidelity score", or aggregated metric is produced or stored. Each audit is independent. Aggregation at the cumulative-rate level reintroduces the corrective-judge framing that Rule 7 (observation-only artifact) and Rule 11 (audit-vocabulary) jointly reject.
 10. **Verdict belongs to the user** — Recognize / Dismiss / Reorient / Stop is a constitutive user act. AI presents evidence and cited criterion; AI never resolves the verdict unilaterally.
 11. **Recommended vocabulary** — Use "violation review", "contract integrity audit", "candidate violation", "evidence", "criterion cited". Vocabulary that frames the skill as a corrective judge (e.g., "wrong", "should have used", "user error") is replaced by the audit-and-fit-review vocabulary.
 12. **Recognition over Recall** — Each Phase 4 candidate presents structured evidence (pre-context, post-output, cited criterion) so the user recognizes the violation pattern from presented context, not from memory of the past session.

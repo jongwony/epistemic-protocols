@@ -2,7 +2,7 @@
 
 Contract integrity criteria for `/ground` (Analogia) and `/induce` (Periagoge) invocations. Loaded by Phase 2 of `/misuse` to classify candidate invocations as `LEGITIMATE`, `VIOLATION`, or `AMBIGUOUS`.
 
-## Vocabulary (A2 Cognitive Partnership Move)
+## Vocabulary (Cognitive Partnership Move)
 
 The classification axis distinguishes Extension (relay-mode) from Constitution (gated-mode). Five verification indicators:
 
@@ -96,7 +96,7 @@ Instance count is NOT a gate — it is evidence for sensing, not a precondition.
 
 ### Violation: `/frame` Over-extension (separate class, evidence-pending)
 
-- **Definition** — `/frame` remained active when `/induce` should have been handed off. Source: `feedback_framing_blind_recursion.md`. The `/frame` skill produces 5+ converged perspectives, the user independently proposes a candidate name within or after the frame analysis, and no `/induce` invocation followed.
+- **Definition** — `/frame` remained active when `/induce` should have been handed off. The `/frame` skill produces 5+ converged perspectives, the user independently proposes a candidate name within or after the frame analysis, and no `/induce` invocation followed.
 - **Detection signals**:
   - `/frame` session reaches 5+ converged perspectives (perspective count visible in `/frame` output structure)
   - User message after `/frame` synthesis contains a coined name pattern (a noun phrase the AI did not propose, used as if naming the synthesized abstraction)
@@ -131,4 +131,4 @@ When variation-stable retention evidence accumulates, this taxonomy may expand:
 - **`/frame` over-extension** as a primary VIOLATION class once the 5+perspective + coined-name + no-`/induce`-followup pattern is observed across multiple sessions.
 - **Cross-protocol violation classes** — patterns like "Telos GoalContract auto-resolved by AI without user gate" require cross-protocol evidence and are deferred until that evidence appears.
 
-Expansion proposals should follow the Stage 1 / Stage 2 split in `meta-principle.md §Deficit Empiricism`: Stage 1 compile checks (operation-kind clarity, falsifiability) precede Stage 2 retention evidence.
+Expansion proposals should follow a two-stage validation: Stage 1 compile checks (structural coherence, operation-kind clarity, falsifiability conditions stated, orthogonal option surface preserved) before the criterion enters circulation; Stage 2 runtime use-corroboration (variation-stable retention evidence across instance / user-profile / platform-context / session-type) before promotion from working hypothesis to validated criterion.
