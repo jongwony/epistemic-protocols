@@ -53,24 +53,36 @@ Phase 0 is silent — no surfacing. If detection fails (deficit is already clear
 
 ### Phase 1: Catalog Scan
 
-Scan the user's situation against the full catalog of 12 epistemic deficits. For each candidate deficit, gather:
+Scan the user's situation against the full catalog of 12 epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
 
-- The deficit name and matching protocol
-- Concrete situation evidence (what the user said or did that suggests this deficit)
-- A reverse-evidence condition: what observation would refute this hypothesis
+- A `deficit: DeficitName` matched against the situation
+- The `protocol: ProtocolId` that addresses that deficit
+- `evidence: Evidence` — the situation signal supporting the match
+- `reverse_evidence: Evidence` — the observation that would shrink the coverage to exclude this entry
+
+A hypothesis with `|coverage| = 1` is a single-protocol projection (preserves prior single-protocol behavior). A hypothesis with `|coverage| ≥ 2` is a set-valued coverage — multi-protocol projection within one hypothesis. This intra-hypothesis multi-protocol projection is structurally distinct from the inter-protocol composition defined in the `── COMPOSITION ──` block; do not conflate the two.
+
+When `Λ.coverage_constraint` is set (from a prior `Narrow(CoverageSubset)`), filter the scan output to hypotheses whose coverage protocol set intersects with the constraint — this preserves user-directed narrowing across re-scan iterations.
 
 Construct the candidate set. Keep at minimum two candidates with non-overlapping reverse-evidence conditions — singleton high-confidence framing is forbidden (see Rules section, Rule 5).
 
 ### Phase 2: Hypothesis Presentation
 
-Present the candidate hypotheses as text output before the Constitution interaction. Format per hypothesis:
+Present the candidate hypotheses as text output before the Constitution interaction. Each rendered line under `Coverage:` corresponds to one `CoverageEntry` (deficit, protocol, evidence, reverse_evidence). Format per hypothesis:
 
 ```
 Hypothesis N — N interpretations possible / decision point is X
-  Deficit: <DeficitName> (<protocol>)
-  Evidence: <quote or paraphrase of user's situation>
-  Reverse-evidence: <observation that would refute this hypothesis>
+  Coverage:
+    /<protocol_a> (<DeficitName>):
+      Evidence: <quote or paraphrase>
+      Reverse-evidence: <observation that would shrink coverage to exclude this entry>
+    /<protocol_b> (<DeficitName>):
+      Evidence: <...>
+      Reverse-evidence: <...>
+  (Singleton |coverage|=1: render the single CoverageEntry as one protocol line, equivalent to prior single-protocol format)
 ```
+
+**Coverage option-set minimality**: When `|coverage| ≥ 2`, coverage subsets are NOT enumerated as additional options — the per-entry Evidence and Reverse-evidence within the Coverage block serve as the short descriptions that guide singleton selection. The user invokes a singleton through free response or `Narrow(CoverageSubset)`. This preserves option-set minimality and induces the Hermeneutic circle through iterative user-initiated dialogue rather than AI-side menu expansion. (Per Rule 14, this contextual rule informs the gate decision and therefore precedes the gate options.)
 
 Then present the recognition Constitution interaction:
 
@@ -78,10 +90,10 @@ Then present the recognition Constitution interaction:
 Which hypothesis fits your present situation?
 
 Options:
-1. Recognize (Hypothesis 1 / 2 / N) — proceed to /<protocol>
+1. Recognize (Hypothesis 1 / 2 / N) — adopt the hypothesis's coverage as a whole (proceed to /<protocol> for singleton; for |coverage|≥2, the user invokes any protocol in the coverage via free response)
 2. Redirect — name a different deficit or protocol than presented
 3. Dismiss — none of these fit; continue without protocol invocation
-4. Narrow scope — restrict to a specific concern before re-probing
+4. Narrow scope — restrict to a specific concern (Slice) OR shrink coverage to a subset (CoverageSubset) before re-probing
 5. Stop — exit /probe without disposition
 ```
 
@@ -91,10 +103,12 @@ The disposition field belongs to the user. AI does not score, rank, or pre-resol
 
 After user response:
 
-- **Recognize**: Emit the recognized deficit + protocol route as session text. The user now has a constituted recognition record they can act on (e.g., invoke `/<protocol>` directly).
+- **Recognize**: Emit the recognized route as session text, carrying `target_coverage: Set(CoverageEntry)` — each entry pairs a deficit with its protocol, plus the supporting evidence and reverse-evidence. The user may invoke any subset of coverage protocols; the constituted recognition record covers the entire coverage set.
 - **Redirect**: Record the user-named deficit/protocol as the recognized route. AI does not contest user redirection.
 - **Dismiss**: Emit a short fit-review note recording that none of the presented hypotheses fit. No protocol is recommended.
-- **Narrow scope**: User narrows the scope (e.g., a specific decision, file, conversation slice) and Phase 1 re-runs over the narrowed scope.
+- **Narrow scope** — branches by argument type (distinct semantics):
+  - `Narrow(s: Slice)`: User restricts the situation scope (e.g., a specific decision, file, conversation slice). Rebind `U.session_slice ← s`, clear `Λ.dismissed_in_session` (new scope justifies fresh dismissals), and re-run Phase 1.
+  - `Narrow(s: CoverageSubset)`: User restricts the protocol set of the selected hypothesis without changing situation scope. Write `Λ.coverage_constraint ← s`, preserve `Λ.dismissed_in_session` (situation unchanged), and re-run Phase 1 — Scan filters output to hypotheses whose coverage protocols intersect `s`. Compound-filter exhaustion: if `|H[]| < 2` cannot be satisfied after both `Λ.coverage_constraint` and `Λ.dismissed_in_session` filters apply, surface a fit-review note explaining the constraint combination and deactivate (explicit handling for the compound case; do not rely on the generic `narrow_iterations ≥ 3` exhaustion path alone).
 - **Stop**: Deactivate without disposition.
 
 No cumulative score, grade, or ranking is produced or stored across uses.
@@ -103,22 +117,28 @@ No cumulative score, grade, or ranking is produced or stored across uses.
 ── FLOW ──
 Probe(U) → Detect(U) →
   named_deficit(U): skip → deactivate
-  vague_deficit(U): Scan(U, Catalog) → H[] →
+  vague_deficit(U): Scan(U, Catalog, Λ.coverage_constraint) → H[] →           -- each h ∈ H[] carries Set(CoverageEntry), |coverage|≥1
     |H[]| < 2: enrich Scan or expand Catalog window → re-scan
     |H[]| ≥ 2: present(H[]) → Qc(H[], evidence, reverse_evidence) → Stop → R →
-      Recognize(h): emit(ProtocolRoute(h)) → converge
-      Redirect(d): emit(ProtocolRoute(d)) → converge
-      Dismiss: emit(FitReviewNote(no_fit)) → converge
-      Narrow(s): rebind(U, s) → Phase 1
-      Stop: deactivate
+      Recognize(h):     emit(ProtocolRoute(h.coverage)) → converge            -- target_coverage = h.coverage : Set(CoverageEntry)
+      Redirect(d):      emit(ProtocolRoute(d)) → converge
+      Dismiss:          emit(FitReviewNote(no_fit)) → converge
+      Narrow(s: Slice): rebind(U.session_slice, s) → clear(Λ.dismissed_in_session) → Phase 1
+                        -- new situation scope justifies clearing dismissals
+      Narrow(s: CoverageSubset): write(Λ.coverage_constraint, s) → Phase 1
+                        -- coverage filter only; situation scope unchanged; dismissals preserved
+      Stop:             deactivate
 
 ── MORPHISM ──
 UserSituation
   → detect(vague_deficit)             -- recognize that a deficit is implied but not named
-  → scan(situation, Catalog)          -- enumerate candidate deficits with evidence + reverse-evidence
-  → present(H[], multi_hypothesis)    -- minimum two hypotheses, falsification visible
-  → recognize(h, user)                -- user-constituted recognition (synthesis of identification)
-  → emit(ProtocolRoute | FitReviewNote)
+  → scan(situation, Catalog, Λ.coverage_constraint)
+                                      -- enumerate candidate hypotheses as Set(CoverageEntry); set-valued coverage
+                                      --   (multi-protocol projection within a hypothesis is structurally distinct
+                                      --    from inter-protocol composition defined in the COMPOSITION block)
+  → present(H[], multi_hypothesis)    -- minimum two hypotheses, falsification visible per CoverageEntry
+  → recognize(h, user)                -- user adopts h.coverage as a whole; refinable via Narrow(CoverageSubset)
+  → emit(ProtocolRoute | FitReviewNote)   -- ProtocolRoute carries target_coverage as Set(CoverageEntry)
   → ProtocolRoute | FitReviewNote
 requires: vague_deficit(U)             -- activation precondition (Layer 1 only)
 deficit:  DeficitUnrecognized          -- activation precondition
@@ -130,14 +150,28 @@ U                = UserSituation { utterance: String, session_slice: Optional(Sl
 Catalog          = Set(DeficitEntry)               -- 12 named deficits + Emergent
 DeficitEntry     = { deficit: DeficitName, protocol: ProtocolId,
                      trigger_signal: String, reverse_evidence_template: String }
-Hypothesis       = { deficit: DeficitName, protocol: ProtocolId,
-                     evidence: String, reverse_evidence: String }
+Evidence         = String                           -- quoted or paraphrased situation evidence
+CoverageEntry    = { deficit: DeficitName, protocol: ProtocolId,
+                     evidence: Evidence, reverse_evidence: Evidence }
+                   -- per-protocol unit; deficit label is co-located with its protocol (no top-level deficit set)
+Hypothesis       = { coverage: Set(CoverageEntry) } -- |coverage| ≥ 1
+                   -- |coverage|=1: singleton hypothesis (single-protocol projection)
+                   -- |coverage|≥2: set-valued coverage (multi-protocol projection within one hypothesis)
 H[]              = List(Hypothesis)                 -- |H[]| ≥ 2 invariant
-Scan             = (UserSituation, Catalog) → H[]
+Scan             = (UserSituation, Catalog, Optional(Set(ProtocolId))) → H[]
+                   -- third argument is Λ.coverage_constraint; when set, output is filtered to hypotheses
+                   --   whose coverage protocol set intersects with the constraint
+CoverageSubset   = Set(ProtocolId)                  -- 0 < |CoverageSubset| < |selected.coverage|
+                   -- non-empty proper subset of a selected hypothesis's coverage protocols
 Qc               = present hypothesis set with evidence and reverse-evidence; Constitution interaction
-R                = Recognition ∈ {Recognize(Hypothesis), Redirect(DeficitName | ProtocolId),
-                                  Dismiss, Narrow(Slice), Stop}
-ProtocolRoute    = session text { recognized_deficit, target_protocol, evidence_trace }
+R                = Recognition ∈ {Recognize(Hypothesis),                  -- adopts entire coverage
+                                  Redirect(DeficitName | ProtocolId),
+                                  Dismiss,
+                                  Narrow(Slice | CoverageSubset),         -- distinct semantics per variant; see FLOW
+                                  Stop}
+ProtocolRoute    = session text { target_coverage: Set(CoverageEntry) }    -- |target_coverage| ≥ 1
+                   -- recognized_deficits = π_deficit(target_coverage); evidence_trace = π_evidence(target_coverage)
+                   --   (derived projections, not separate fields)
 FitReviewNote    = session text { presented_hypotheses, dismissed: true }
 DeficitName      ∈ {IntentMisarticulated, GoalIndeterminate, BoundaryUndefined,
                     ContextInsufficient, FrameworkAbsent, MappingUncertain,
@@ -149,23 +183,26 @@ Phase            ∈ {0, 1, 2, 3}
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → Detect(U) → vague_deficit(U)?                          -- silent trigger detection
-Phase 1: U → Scan(U, Catalog) → H[]                                 -- catalog scan
+Phase 1: U → Scan(U, Catalog, Λ.coverage_constraint) → H[]          -- catalog scan; each h carries Set(CoverageEntry)
+           Λ.coverage_constraint set → filter H[] to {h : π_protocol(h.coverage) ∩ Λ.coverage_constraint ≠ ∅}
            |H[]| < 2 → enrich(U) → Phase 1                          -- multi-hypothesis invariant
            |H[]| ≥ 2 → Phase 2
 Phase 2: H[] → present(H[], evidence, reverse_evidence) → Qc → Stop → R   -- recognition Constitution interaction [Tool]
 Phase 3: R → integrate(R, U) →
-           Recognize(h) → emit(ProtocolRoute(h)) → converge          -- user-constituted route
-           Redirect(d)  → emit(ProtocolRoute(d)) → converge          -- user-named alternative
-           Dismiss      → emit(FitReviewNote(no_fit)) → converge     -- no fit, recorded
-           Narrow(s)    → rebind(U, s) → Phase 1                     -- scope-narrowed re-scan
-           Stop         → deactivate                                  -- exit without disposition
+           Recognize(h)            → emit(ProtocolRoute(h.coverage)) → converge   -- target_coverage : Set(CoverageEntry)
+           Redirect(d)             → emit(ProtocolRoute(d)) → converge            -- user-named alternative
+           Dismiss                 → emit(FitReviewNote(no_fit)) → converge       -- no fit, recorded
+           Narrow(s: Slice)        → rebind(U.session_slice, s) → clear(Λ.dismissed_in_session) → Phase 1
+           Narrow(s: CoverageSubset) → write(Λ.coverage_constraint, s) → Phase 1  -- preserve dismissed_in_session
+           Stop                    → deactivate                                    -- exit without disposition
 
 ── LOOP ──
 Phase 1 → Phase 2 → Phase 3 →
   Recognize: converge
   Redirect: converge
   Dismiss: converge
-  Narrow: rebind U to narrower scope → Phase 1
+  Narrow(Slice): rebind U to narrower scope → Phase 1
+  Narrow(CoverageSubset): apply coverage filter → Phase 1
   Stop: deactivate
 Max 3 narrowing iterations. Exhausted: surface candidate set as fit-review note → deactivate.
 Convergence evidence: per disposition, emit one of {ProtocolRoute, FitReviewNote} or deactivate without artifact (Stop).
@@ -182,7 +219,8 @@ Phase 1 Scan        (sense)    → Internal analysis (catalog match against situ
 Phase 1 enrich      (sense)    → Internal analysis (situation broadening when |H[]| < 2)
 Phase 2 Qc          (constitution)     → present (multi-hypothesis recognition Constitution interaction)
 Phase 3 emit        (extension)    → TextPresent+Proceed (ProtocolRoute or FitReviewNote)
-Phase 3 rebind      (track)    → Internal state update (Narrow disposition)
+Phase 3 rebind      (track)    → Internal state update (Narrow(Slice) disposition — rebinds U.session_slice, clears Λ.dismissed_in_session)
+Phase 3 write       (track)    → Internal state update (Narrow(CoverageSubset) disposition — sets Λ.coverage_constraint, preserves Λ.dismissed_in_session)
 converge            (extension)    → TextPresent+Proceed (convergence trace)
 
 ── ELIDABLE CHECKPOINTS ──
@@ -193,6 +231,7 @@ Phase 2 Qc (recognition)     → always_gated (constitutive user act; Standing-a
 Λ = { phase: Phase, U: UserSituation,
       hypotheses: List(Hypothesis), presented: Set(Hypothesis),
       dismissed_in_session: Set(Hypothesis),
+      coverage_constraint: Optional(Set(ProtocolId)),   -- written by Narrow(CoverageSubset); consumed by Phase 1 Scan filter
       narrow_iterations: Nat,
       disposition: Optional(Recognition),
       active: Bool, cause_tag: String }
@@ -211,7 +250,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 2. **Opt-in, default off** — No sticky activation, no background scanning, no implicit re-activation across turns. The user explicitly activates each session.
 3. **Current-session default scope** — Default evidence window is the present session. Cross-session evidence is opt-in only.
 4. **All-time scope requires explicit confirmation** — Cross-session recall (reading prior `misfit.md` records or session history beyond the current session) requires an explicit Active-authority confirmation; never default behavior.
-5. **Multi-hypothesis required** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden.
+5. **Multi-hypothesis required** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden. Anti-singleton guard operates at hypothesis level (`|H[]| ≥ 2`). Each hypothesis carries set-valued coverage (`|coverage| ≥ 1`; `|coverage| ≥ 2` represents intra-hypothesis multi-protocol projection — structurally distinct from inter-protocol composition defined in the `── COMPOSITION ──` block). The reverse-evidence requirement applies per CoverageEntry within `Hypothesis.coverage`. **Two-level cardinality**: A single hypothesis with `|coverage| = 2` does NOT satisfy this guard — `|H[]| ≥ 2` requires at minimum two distinct Hypothesis records, each with its own coverage. The `|H[]| ≥ 2` guard operates on hypothesis count; `|coverage| ≥ 1` on per-hypothesis projection.
 6. **Disposition field belongs to the user** — Recognize / Redirect / Dismiss / Narrow / Stop is a constitutive user act. AI never resolves the disposition unilaterally.
 7. **No cumulative score / grade / ranking** — Across uses, no fitness metric, success rate, or aggregated quality score is produced or stored. Each probe is independent.
 8. **Stop / Narrow / Dismiss always present** — Stop, Narrow, and Dismiss options appear at every Constitution interaction, matching the Phase 2 disposition labels. Three-Tier Termination inheritance: graceful exit is always available.
@@ -226,7 +265,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 
 ## UX Safeguards
 
-- **Session immunity for dismissed hypotheses** — A hypothesis dismissed in the current session is not re-presented in the same session unless the user explicitly re-probes the same scope. Re-presenting a dismissed hypothesis without user-driven re-scope erodes the user's disposition authority (Rule 6 reinforcement). Realized via `Λ.dismissed_in_session`: Phase 3 Dismiss adds presented hypotheses to this set; Phase 1 Scan filters out members of this set unless `Λ.U` was re-bound via Narrow (which clears the set for the new scope).
+- **Session immunity for dismissed hypotheses** — A hypothesis dismissed in the current session is not re-presented in the same session unless the user explicitly re-probes the same scope. Re-presenting a dismissed hypothesis without user-driven re-scope erodes the user's disposition authority (Rule 6 reinforcement). Realized via `Λ.dismissed_in_session`: Phase 3 Dismiss adds presented hypotheses to this set; Phase 1 Scan filters out members of this set. Clearing rules: `Narrow(Slice)` clears the set (new situation scope justifies fresh dismissals); `Narrow(CoverageSubset)` preserves the set (situation unchanged, only coverage filter applied).
 - **Progress opacity** — No progress counter, no "X of Y hypotheses considered" framing. Such counters reintroduce a quasi-score (Rule 7 reinforcement).
 - **Ephemeral recognition** — Each probe disposition is a present-tense fit review, not a permanent record. The user's disposition does not bind future probes (Rule 7 reinforcement).
 - **Pre-gate evidence visibility** — All hypothesis evidence and reverse-evidence is laid out before the disposition gate so the user reads context before deciding (Rule 11 reinforcement; context-question separation is structural).
