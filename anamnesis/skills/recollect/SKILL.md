@@ -396,7 +396,8 @@ Present the candidate as narrative text — the discussion's story, not just its
 - **Origin**: What prompted the discussion — the question or situation that started it
 - **Direction**: How the discussion developed — what path was taken, what was explored
 - **Outcome**: What was decided, produced, or concluded
-- **Session**: Full session ID and originating `cwd` for `claude --resume` verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`, `cwd: /home/user/project`). Narrative uses short reference; both fields together form the complete resumable handle — Claude Code resolves the project slug from invocation cwd, so the session ID alone is insufficient when the user is in a different directory.
+- **Session**: Full session ID for `claude --resume` verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`). Narrative uses short reference; this field provides the resumable identifier.
+- **Resume**: Copy-paste-ready invocation pairing the originating cwd with the session ID — `cd <cwd> && claude --resume <session_id>`. Claude Code resolves the project slug from invocation cwd, so both components are required; emit only the literal command, no narrative wrapper. Omit this field only when the originating cwd is absent from the index (pre-0.4.18 entries) and surface the omission to the user.
 - **Adjacent**: Other topics discussed nearby in the same time period — for Refine orientation
 - **Progress**: `[attempt N/3, M candidates in scope]`
 
@@ -418,7 +419,7 @@ Design principles for Phase 2 presentation — narrative over summary, concrete 
 
 After user response:
 
-1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID and originating cwd for `--resume` verification — both are required to reconstruct the resumable handle), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), resumption hint if applicable. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition.
+1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID for `--resume` verification), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), and a literal `cd <cwd> && claude --resume <session_id>` line built from the index entry's `cwd` and `session_id` frontmatter (the project slug derives from invocation cwd, so the command is the resumable handle). This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition.
 
 2. **Refine**: Candidate not recognized but recall direction acknowledged. Initiate Socratic probing for recall deepening:
 
