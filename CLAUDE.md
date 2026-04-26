@@ -128,17 +128,17 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 - Packaging: `node scripts/package.js [--dry-run]` — produces `dist/*.zip` + `dist/release-notes.md`
 - Changelog: `node scripts/generate-changelog.js` — git conventional commit parser between tags
 - Installer: `scripts/install.sh` — curl-based marketplace installer (README.md is source of truth for install set)
+- Pre-commit hook: `.githooks/pre-commit` runs tests + static checks + packaging dry-run when staged paths touch the runtime contract (per-protocol `SKILL.md`, `plugin.json`, `references/`, verify scripts, package scripts). Activate per clone: `git config core.hooksPath .githooks`.
 
 ## CI/CD
 
-Four GitHub Actions workflows (`.github/workflows/`):
+Three GitHub Actions workflows (`.github/workflows/`):
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | `release.yml` | Tag push (`v*`) | Package → ZIP integrity → `gh release create --draft` |
 | `claude-code-review.yml` | PR opened/ready | 3-stage pipeline: Sonnet review → jq extraction → Haiku comment |
 | `claude-epistemic-review.yml` | PR with protocol changes | Multi-perspective analysis (Category Theory, Type Theory, Operational Semantics) + gap scan |
-| `verify-runtime-contract.yml` | PR with runtime-contract changes, manual dispatch | Tests + static checks + packaging dry-run for packaged `Skill.md` / metadata boundary |
 
 Details: [docs/ci-review-pipeline.md](docs/ci-review-pipeline.md)
 
