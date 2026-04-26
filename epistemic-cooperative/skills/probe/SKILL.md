@@ -53,11 +53,11 @@ Phase 0 is silent — no surfacing. If detection fails (deficit is already clear
 
 ### Phase 1: Catalog Scan
 
-Scan the user's situation against the full catalog of 12 epistemic deficits. For each candidate deficit, gather:
+Scan the user's situation against the full catalog of 12 epistemic deficits. For each candidate hypothesis, gather:
 
-- The deficit name and matching protocol
-- Concrete situation evidence (what the user said or did that suggests this deficit)
-- A reverse-evidence condition: what observation would refute this hypothesis
+- The deficit pattern (one or more deficit names) and its coverage (one or more matching protocols)
+- For each protocol in the coverage: situation evidence (what the user said or did) and a reverse-evidence condition (observation that would shrink the coverage to exclude this protocol)
+- Each Hypothesis may project onto multiple protocol spaces simultaneously when situation evidence matches deficit signals from several protocols (categorical product realization per the COMPOSITION block)
 
 Construct the candidate set. Keep at minimum two candidates with non-overlapping reverse-evidence conditions — singleton high-confidence framing is forbidden (see Rules section, Rule 5).
 
@@ -67,9 +67,15 @@ Present the candidate hypotheses as text output before the Constitution interact
 
 ```
 Hypothesis N — N interpretations possible / decision point is X
-  Deficit: <DeficitName> (<protocol>)
-  Evidence: <quote or paraphrase of user's situation>
-  Reverse-evidence: <observation that would refute this hypothesis>
+  Deficit pattern: <description>
+  Coverage:
+    /<protocol_a> (<DeficitName>):
+      Evidence: <quote or paraphrase>
+      Reverse-evidence: <observation that would shrink coverage to exclude this protocol>
+    /<protocol_b> (<DeficitName>):
+      Evidence: <...>
+      Reverse-evidence: <...>
+  (Singleton |coverage|=1: collapses to single protocol line, equivalent to current format)
 ```
 
 Then present the recognition Constitution interaction:
@@ -78,23 +84,25 @@ Then present the recognition Constitution interaction:
 Which hypothesis fits your present situation?
 
 Options:
-1. Recognize (Hypothesis 1 / 2 / N) — proceed to /<protocol>
+1. Recognize (Hypothesis 1 / 2 / N) — adopt the hypothesis's coverage as a whole (proceed to /<protocol> for singleton; for |coverage|≥2, the user invokes any protocol in the coverage via free response)
 2. Redirect — name a different deficit or protocol than presented
 3. Dismiss — none of these fit; continue without protocol invocation
-4. Narrow scope — restrict to a specific concern before re-probing
+4. Narrow scope — restrict to a specific concern OR shrink coverage subset before re-probing
 5. Stop — exit /probe without disposition
 ```
 
 The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice.
 
+**Coverage option-set minimality**: When |coverage|≥2, coverage subsets are NOT enumerated as additional options — the per-protocol Evidence and Reverse-evidence within the Coverage block serve as the short descriptions that guide singleton selection. The user invokes a singleton through free response or Narrow(CoverageSubset). This preserves option-set minimality and induces the Hermeneutic circle through iterative user-initiated dialogue rather than AI-side menu expansion.
+
 ### Phase 3: Route Integration
 
 After user response:
 
-- **Recognize**: Emit the recognized deficit + protocol route as session text. The user now has a constituted recognition record they can act on (e.g., invoke `/<protocol>` directly).
+- **Recognize**: Emit the recognized deficit + protocol route as session text, carrying `target_coverage` (set-valued). The user may invoke any subset of coverage protocols; the constituted recognition record covers the entire coverage set.
 - **Redirect**: Record the user-named deficit/protocol as the recognized route. AI does not contest user redirection.
 - **Dismiss**: Emit a short fit-review note recording that none of the presented hypotheses fit. No protocol is recommended.
-- **Narrow scope**: User narrows the scope (e.g., a specific decision, file, conversation slice) and Phase 1 re-runs over the narrowed scope.
+- **Narrow scope**: User narrows the scope (e.g., a specific decision, file, conversation slice) OR shrinks the coverage of a selected hypothesis (CoverageSubset) before re-probing. Phase 1 re-runs over the narrowed scope.
 - **Stop**: Deactivate without disposition.
 
 No cumulative score, grade, or ranking is produced or stored across uses.
@@ -103,22 +111,22 @@ No cumulative score, grade, or ranking is produced or stored across uses.
 ── FLOW ──
 Probe(U) → Detect(U) →
   named_deficit(U): skip → deactivate
-  vague_deficit(U): Scan(U, Catalog) → H[] →
+  vague_deficit(U): Scan(U, Catalog) → H[] →                                  -- each h ∈ H[] may carry |coverage|≥1
     |H[]| < 2: enrich Scan or expand Catalog window → re-scan
     |H[]| ≥ 2: present(H[]) → Qc(H[], evidence, reverse_evidence) → Stop → R →
-      Recognize(h): emit(ProtocolRoute(h)) → converge
+      Recognize(h): emit(ProtocolRoute(h.coverage)) → converge                -- set-valued target_coverage
       Redirect(d): emit(ProtocolRoute(d)) → converge
       Dismiss: emit(FitReviewNote(no_fit)) → converge
-      Narrow(s): rebind(U, s) → Phase 1
+      Narrow(s): rebind(U, s) → Phase 1                                       -- s ∈ Slice ∪ CoverageSubset
       Stop: deactivate
 
 ── MORPHISM ──
 UserSituation
   → detect(vague_deficit)             -- recognize that a deficit is implied but not named
-  → scan(situation, Catalog)          -- enumerate candidate deficits with evidence + reverse-evidence
-  → present(H[], multi_hypothesis)    -- minimum two hypotheses, falsification visible
-  → recognize(h, user)                -- user-constituted recognition (synthesis of identification)
-  → emit(ProtocolRoute | FitReviewNote)
+  → scan(situation, Catalog)          -- enumerate candidate hypotheses; each may project onto multiple protocol spaces (categorical product realization per COMPOSITION block)
+  → present(H[], multi_hypothesis)    -- minimum two hypotheses, falsification visible per protocol in coverage
+  → recognize(h, user)                -- user adopts h's coverage as a whole; refinable via Narrow(CoverageSubset)
+  → emit(ProtocolRoute | FitReviewNote)   -- ProtocolRoute carries target_coverage (set-valued)
   → ProtocolRoute | FitReviewNote
 requires: vague_deficit(U)             -- activation precondition (Layer 1 only)
 deficit:  DeficitUnrecognized          -- activation precondition
@@ -130,14 +138,22 @@ U                = UserSituation { utterance: String, session_slice: Optional(Sl
 Catalog          = Set(DeficitEntry)               -- 12 named deficits + Emergent
 DeficitEntry     = { deficit: DeficitName, protocol: ProtocolId,
                      trigger_signal: String, reverse_evidence_template: String }
-Hypothesis       = { deficit: DeficitName, protocol: ProtocolId,
-                     evidence: String, reverse_evidence: String }
-H[]              = List(Hypothesis)                 -- |H[]| ≥ 2 invariant
-Scan             = (UserSituation, Catalog) → H[]
+Hypothesis       = { deficit: NonEmptySet(DeficitName),
+                     coverage: NonEmptyMap(ProtocolId,
+                                           { evidence: String, reverse_evidence: String }) }
+                   -- |coverage|=1 preserves current singleton behavior (upward-compatible)
+                   -- |coverage|≥2 realizes categorical product per COMPOSITION block
+H[]              = List(Hypothesis)                 -- |H[]| ≥ 2 invariant; each Hypothesis may have |coverage|≥1
+Scan             = (UserSituation, Catalog) → H[]   -- each Hypothesis may project onto multiple protocol spaces (categorical product realization per COMPOSITION block)
 Qc               = present hypothesis set with evidence and reverse-evidence; Constitution interaction
-R                = Recognition ∈ {Recognize(Hypothesis), Redirect(DeficitName | ProtocolId),
-                                  Dismiss, Narrow(Slice), Stop}
-ProtocolRoute    = session text { recognized_deficit, target_protocol, evidence_trace }
+R                = Recognition ∈ {Recognize(Hypothesis),                  -- adopts entire coverage
+                                  Redirect(DeficitName | ProtocolId),
+                                  Dismiss,
+                                  Narrow(Slice | CoverageSubset),         -- now also admits subset of selected coverage
+                                  Stop}
+ProtocolRoute    = session text { recognized_deficits: NonEmptySet(DeficitName),
+                                  target_coverage: NonEmptySet(ProtocolId),
+                                  evidence_trace: Map(ProtocolId, Evidence) }
 FitReviewNote    = session text { presented_hypotheses, dismissed: true }
 DeficitName      ∈ {IntentMisarticulated, GoalIndeterminate, BoundaryUndefined,
                     ContextInsufficient, FrameworkAbsent, MappingUncertain,
@@ -149,15 +165,15 @@ Phase            ∈ {0, 1, 2, 3}
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → Detect(U) → vague_deficit(U)?                          -- silent trigger detection
-Phase 1: U → Scan(U, Catalog) → H[]                                 -- catalog scan
+Phase 1: U → Scan(U, Catalog) → H[]                                 -- catalog scan; each h may carry |coverage|≥1
            |H[]| < 2 → enrich(U) → Phase 1                          -- multi-hypothesis invariant
            |H[]| ≥ 2 → Phase 2
 Phase 2: H[] → present(H[], evidence, reverse_evidence) → Qc → Stop → R   -- recognition Constitution interaction [Tool]
 Phase 3: R → integrate(R, U) →
-           Recognize(h) → emit(ProtocolRoute(h)) → converge          -- user-constituted route
+           Recognize(h) → emit(ProtocolRoute(h.coverage)) → converge -- user-constituted route; target_coverage set-valued
            Redirect(d)  → emit(ProtocolRoute(d)) → converge          -- user-named alternative
            Dismiss      → emit(FitReviewNote(no_fit)) → converge     -- no fit, recorded
-           Narrow(s)    → rebind(U, s) → Phase 1                     -- scope-narrowed re-scan
+           Narrow(s)    → rebind(U, s) → Phase 1                     -- scope or coverage-subset narrowed re-scan
            Stop         → deactivate                                  -- exit without disposition
 
 ── LOOP ──
@@ -211,7 +227,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 2. **Opt-in, default off** — No sticky activation, no background scanning, no implicit re-activation across turns. The user explicitly activates each session.
 3. **Current-session default scope** — Default evidence window is the present session. Cross-session evidence is opt-in only.
 4. **All-time scope requires explicit confirmation** — Cross-session recall (reading prior `misfit.md` records or session history beyond the current session) requires an explicit Active-authority confirmation; never default behavior.
-5. **Multi-hypothesis required** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden.
+5. **Multi-hypothesis required** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden. Anti-singleton guard operates at hypothesis level (|H[]|≥2). Each hypothesis may itself realize categorical product (|coverage|≥1; |coverage|≥2 represents multi-protocol projection per the COMPOSITION block). The reverse-evidence requirement applies per-protocol within Hypothesis.coverage.
 6. **Disposition field belongs to the user** — Recognize / Redirect / Dismiss / Narrow / Stop is a constitutive user act. AI never resolves the disposition unilaterally.
 7. **No cumulative score / grade / ranking** — Across uses, no fitness metric, success rate, or aggregated quality score is produced or stored. Each probe is independent.
 8. **Stop / Narrow / Dismiss always present** — Stop, Narrow, and Dismiss options appear at every Constitution interaction, matching the Phase 2 disposition labels. Three-Tier Termination inheritance: graceful exit is always available.
