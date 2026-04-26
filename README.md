@@ -85,13 +85,17 @@ Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/fram
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, and project profile recalibration via session calibration drift audit |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/misuse` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration via session calibration drift audit, and retrospective contract violation detection |
 
 **Three discovery modes coexist** (none replaces the others):
 
 - `/catalog` — passive reference handbook (browse / lookup; you already know the question)
 - `/onboard` — pattern-based recommendation + optional trial (session-history-driven; you want to learn what fits your patterns)
 - `/probe` — active AI-hypothesized deficit recognition (multi-hypothesis fit review when you feel something is off but cannot yet name which deficit fits)
+
+**Retrospective audit** (separate category from the discovery trio above):
+
+- `/misuse` — retrospective contract violation scan (detects past `/ground` and `/induce` protocol violations; surfaces structured violation records for user-constituted review)
 
 ## Design
 
