@@ -122,13 +122,13 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 ## Development
 
 - **Node.js 22+** required (`zlib.crc32` used in packaging; CI pins Node 22)
-- **No package.json** — Node.js standard library only (exception: `src/package.json` for landing page)
+- **Plugin code: Node.js standard library only** — no runtime dependencies. Root `package.json` carries husky as the only devDependency (pre-commit activation); `src/package.json` for landing page.
 - Static checks: `node .claude/skills/verify/scripts/static-checks.js .`
 - Tests: `node --test scripts/package.test.js`
 - Packaging: `node scripts/package.js [--dry-run]` — produces `dist/*.zip` + `dist/release-notes.md`
 - Changelog: `node scripts/generate-changelog.js` — git conventional commit parser between tags
 - Installer: `scripts/install.sh` — curl-based marketplace installer (README.md is source of truth for install set)
-- Pre-commit hook: `.githooks/pre-commit` runs tests + static checks + packaging dry-run when staged paths touch the runtime contract (per-protocol `SKILL.md`, `plugin.json`, `references/`, verify scripts, package scripts). Activate per clone: `git config core.hooksPath .githooks`.
+- Pre-commit hook: `.husky/pre-commit` runs tests + static checks + packaging dry-run when staged paths touch the runtime contract (per-protocol `SKILL.md`, `plugin.json`, `references/`, verify scripts, package scripts). Activated automatically by `npm install` via husky's prepare script.
 
 ## CI/CD
 

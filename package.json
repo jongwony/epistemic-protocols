@@ -1,0 +1,12 @@
+{
+  "name": "epistemic-protocols-hooks",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Husky-managed pre-commit hooks for runtime-contract verification. Plugin code itself uses Node.js stdlib only.",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}
