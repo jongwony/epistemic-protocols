@@ -124,9 +124,10 @@ Patterns that require dual-interpretation:
 - **D2 high + D4 high**: Could be "cure-as-disease accumulation" OR "systematic
   verification infrastructure that scales"
 
-When presenting these, frame as: "This pattern admits two readings — [curse
-interpretation] or [strategy interpretation]. Which better describes your
-experience?" The user's response determines downstream recommendations.
+When presenting these, surface both readings transparently: "[curse interpretation]
+— alternate reading: [strategy interpretation]." Proceed under the curse reading
+by default; if the user later red-lines toward the strategy reading, re-derive
+downstream recommendations on the next turn.
 
 ### User dialogue
 
@@ -134,15 +135,12 @@ When presenting dimensions to the user, always include the human-readable explan
 from the dimension-profiler output (e.g., "D4 Rule Orientation — how you govern work")
 so users unfamiliar with the framework understand what each dimension measures.
 
-Present the top 3-4 strength-shadow pairs and ask the user to validate.
-The user may:
-- Confirm a finding
-- Reframe it (e.g., re-categorize a "curse" as a deliberate "strategy")
-- Dismiss it as not applicable
-- Add context that changes the analysis
-
-User counter-evidence that changes the structural category (e.g., flaw to strategy)
-requires re-derivation of downstream recommendations.
+Present the top 3-4 strength-shadow pairs as text output and proceed directly
+to Phase 3 recommendations under the primary (curse) interpretation. The user
+may red-line via free response at any subsequent turn — confirm, reframe (e.g.,
+re-categorize a "curse" as a deliberate "strategy"), dismiss, or add context.
+Counter-evidence that changes the structural category triggers re-derivation
+of downstream recommendations on the next turn, not pre-emptive gating.
 
 ---
 
