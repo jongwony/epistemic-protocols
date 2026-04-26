@@ -108,7 +108,7 @@ After user response:
 - **Dismiss**: Emit a short fit-review note recording that none of the presented hypotheses fit. No protocol is recommended.
 - **Narrow scope** — branches by argument type (distinct semantics):
   - `Narrow(s: Slice)`: User restricts the situation scope (e.g., a specific decision, file, conversation slice). Rebind `U.session_slice ← s`, clear `Λ.dismissed_in_session` (new scope justifies fresh dismissals), and re-run Phase 1.
-  - `Narrow(s: CoverageSubset)`: User restricts the protocol set of the selected hypothesis without changing situation scope. Write `Λ.coverage_constraint ← s`, preserve `Λ.dismissed_in_session` (situation unchanged), and re-run Phase 1 — Scan filters output to hypotheses whose coverage protocols intersect `s`.
+  - `Narrow(s: CoverageSubset)`: User restricts the protocol set of the selected hypothesis without changing situation scope. Write `Λ.coverage_constraint ← s`, preserve `Λ.dismissed_in_session` (situation unchanged), and re-run Phase 1 — Scan filters output to hypotheses whose coverage protocols intersect `s`. Compound-filter exhaustion: if `|H[]| < 2` cannot be satisfied after both `Λ.coverage_constraint` and `Λ.dismissed_in_session` filters apply, surface a fit-review note explaining the constraint combination and deactivate (explicit handling for the compound case; do not rely on the generic `narrow_iterations ≥ 3` exhaustion path alone).
 - **Stop**: Deactivate without disposition.
 
 No cumulative score, grade, or ranking is produced or stored across uses.
@@ -201,7 +201,8 @@ Phase 1 → Phase 2 → Phase 3 →
   Recognize: converge
   Redirect: converge
   Dismiss: converge
-  Narrow: rebind U to narrower scope → Phase 1
+  Narrow(Slice): rebind U to narrower scope → Phase 1
+  Narrow(CoverageSubset): apply coverage filter → Phase 1
   Stop: deactivate
 Max 3 narrowing iterations. Exhausted: surface candidate set as fit-review note → deactivate.
 Convergence evidence: per disposition, emit one of {ProtocolRoute, FitReviewNote} or deactivate without artifact (Stop).
@@ -218,7 +219,8 @@ Phase 1 Scan        (sense)    → Internal analysis (catalog match against situ
 Phase 1 enrich      (sense)    → Internal analysis (situation broadening when |H[]| < 2)
 Phase 2 Qc          (constitution)     → present (multi-hypothesis recognition Constitution interaction)
 Phase 3 emit        (extension)    → TextPresent+Proceed (ProtocolRoute or FitReviewNote)
-Phase 3 rebind      (track)    → Internal state update (Narrow disposition)
+Phase 3 rebind      (track)    → Internal state update (Narrow(Slice) disposition — rebinds U.session_slice, clears Λ.dismissed_in_session)
+Phase 3 write       (track)    → Internal state update (Narrow(CoverageSubset) disposition — sets Λ.coverage_constraint, preserves Λ.dismissed_in_session)
 converge            (extension)    → TextPresent+Proceed (convergence trace)
 
 ── ELIDABLE CHECKPOINTS ──
