@@ -154,8 +154,17 @@ prescriptive rules (what the user says to do, from Agent 1). Surface mismatches:
 - Patterns not captured by any rule
 - Rules that may be redundant or subsumable
 
-Present the analysis to the user. call AskUserQuestion to validate key findings before
-proceeding. The user may refine, correct, or add context that changes the analysis.
+Present the analysis as text output (strengths, shadows, conflict surface) and
+proceed to Phase 3 directly — Phase 1 evidence already establishes pattern existence,
+so pre-validation is Extension-eligible for relay-eligible findings. End the Phase 2
+output with a visible red-line discovery line so the correction pathway is explicit:
+"If any pattern seems misclassified or rules need adjusting, say so — I'll re-derive
+from there." Conflict-surface synthesis (rules the user contradicts, redundant rules)
+involves intent inference (deliberate exception vs drift), so the discovery line is
+required to surface this constitutive layer without a full pre-validation gate. The
+user may red-line via free response at any subsequent turn (refine, correct, dismiss
+a pattern, or add context); when that happens, regenerate affected downstream
+sections on the next turn.
 
 ---
 
