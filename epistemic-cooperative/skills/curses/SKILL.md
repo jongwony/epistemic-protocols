@@ -124,10 +124,14 @@ Patterns that require dual-interpretation:
 - **D2 high + D4 high**: Could be "cure-as-disease accumulation" OR "systematic
   verification infrastructure that scales"
 
-When presenting these, surface both readings transparently: "[curse interpretation]
-— alternate reading: [strategy interpretation]." Proceed under the curse reading
-by default; if the user later red-lines toward the strategy reading, re-derive
-downstream recommendations on the next turn.
+For these dual-interpretation patterns specifically, retain a Constitution gate
+before downstream derivation: "This pattern admits two readings — [curse
+interpretation] or [strategy interpretation]. Which better describes your
+experience?" The user's intent here is project-profile category (a) — user IS
+the measurement target — and cannot be auto-resolved regardless of profile;
+downstream recommendations depend on this choice. Single-interpretation pairs
+(e.g., D1+D2, isolated dimensions) bypass this gate and proceed via the relay
+path described under "User dialogue" below.
 
 ### User dialogue
 
@@ -135,12 +139,14 @@ When presenting dimensions to the user, always include the human-readable explan
 from the dimension-profiler output (e.g., "D4 Rule Orientation — how you govern work")
 so users unfamiliar with the framework understand what each dimension measures.
 
-Present the top 3-4 strength-shadow pairs as text output and proceed directly
-to Phase 3 recommendations under the primary (curse) interpretation. The user
-may red-line via free response at any subsequent turn — confirm, reframe (e.g.,
-re-categorize a "curse" as a deliberate "strategy"), dismiss, or add context.
-Counter-evidence that changes the structural category triggers re-derivation
-of downstream recommendations on the next turn, not pre-emptive gating.
+Present single-interpretation strength-shadow pairs (the majority — those without
+the dual-interpretation gate above) as text output and proceed directly to Phase 3
+recommendations. End the Phase 2 output with a visible red-line discovery line
+so the correction pathway is explicit: "If any pair seems misclassified, say so
+— I'll re-derive from there." The user may red-line via free response at any
+subsequent turn — confirm, reframe, dismiss, or add context. Counter-evidence
+that changes the structural category triggers re-derivation of downstream
+recommendations on the next turn.
 
 ---
 
