@@ -396,7 +396,7 @@ Present the candidate as narrative text — the discussion's story, not just its
 - **Origin**: What prompted the discussion — the question or situation that started it
 - **Direction**: How the discussion developed — what path was taken, what was explored
 - **Outcome**: What was decided, produced, or concluded
-- **Session**: Full session ID for `claude --resume` verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`). Narrative uses short reference; this field provides the resumable identifier.
+- **Session**: Full session ID and originating `cwd` for `claude --resume` verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`, `cwd: /home/user/project`). Narrative uses short reference; both fields together form the complete resumable handle — Claude Code resolves the project slug from invocation cwd, so the session ID alone is insufficient when the user is in a different directory.
 - **Adjacent**: Other topics discussed nearby in the same time period — for Refine orientation
 - **Progress**: `[attempt N/3, M candidates in scope]`
 
@@ -418,7 +418,7 @@ Design principles for Phase 2 presentation — narrative over summary, concrete 
 
 After user response:
 
-1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID for `--resume` verification), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), resumption hint if applicable. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition.
+1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID and originating cwd for `--resume` verification — both are required to reconstruct the resumable handle), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), resumption hint if applicable. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition.
 
 2. **Refine**: Candidate not recognized but recall direction acknowledged. Initiate Socratic probing for recall deepening:
 
