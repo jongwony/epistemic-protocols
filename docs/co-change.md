@@ -15,7 +15,7 @@ Protocol modifications require synchronized edits across multiple files. Any pro
 | Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions, `graph.json` |
 | Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Protocol nudge pattern change | Output Style nudge section, plugin.json version bumps |
-| Convergence-awareness nudge wording | epistemic-ink.md (Protocol Nudge), `.claude/rules/architectural-principles.md` (Dual Advisory Layer), `.claude/rules/derived-principles.md` (Full Taxonomy) |
+| Convergence-awareness nudge wording | epistemic-ink.md (Protocol Nudge), `.claude/principles/architectural-principles.md` (Dual Advisory Layer), `.claude/rules/derived-principles.md` (Full Taxonomy) |
 | Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |
 | Relay interaction pattern change | SKILL.md TOOL GROUNDING + `.claude/rules/derived-principles.md` (Convergence Evidence) + criteria.md + static-checks.js + plugin.json version bumps |
 | Derived principle addition | `.claude/rules/derived-principles.md` (new entry with derivation annotation) + `.claude/rules/axioms.md` (reciprocal pointer in parent axiom) + SKILL.md Rules inline summary in protocols scoped-in per the principle's Scope block (self-contained inline wording; no external reference to rule files) + plugin.json version bumps for affected plugins |
