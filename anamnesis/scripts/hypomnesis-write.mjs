@@ -121,6 +121,8 @@ function parseSession(transcriptPath) {
   let outputTokensSum = 0;
   let lastTurnHadFreshInput = false;
   let sawAnyAssistantUsage = false;
+  // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
+  let cwd = "";
 
   const protocolMap = {
     "/frame": "frame", "/gap": "gap", "/clarify": "clarify",
@@ -138,7 +140,7 @@ function parseSession(transcriptPath) {
     logErr(`failed to read transcript ${transcriptPath}: ${e.message}`);
     return {
       userMsgs, allTexts, timestamps, protocols: [],
-      tokenEstimate: 0,
+      tokenEstimate: 0, cwd: "",
     };
   }
   let totalChars = 0;
@@ -151,6 +153,7 @@ function parseSession(transcriptPath) {
     const ts = entry.timestamp ?? "";
     if (ts) timestamps.push(ts);
     const etype = entry.type ?? "";
+    if (typeof entry.cwd === "string" && entry.cwd) cwd = entry.cwd;
 
     if (etype === "user" && userMsgs.length < MAX_USER_MSGS) {
       const text = textFromContent(entry.message?.content ?? "");
@@ -199,6 +202,7 @@ function parseSession(transcriptPath) {
     tokenEstimate,
     lastTurnHadFreshInput,
     sawAnyAssistantUsage,
+    cwd,
   };
 }
 
@@ -344,10 +348,11 @@ function validateNarrative(data) {
 
 // --- File Builders ---
 
-function buildClueMd(sessionId, date, startedAt, lastTurnAt, data, crossRefs) {
+function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRefs) {
   const lines = [
     "---",
     `session_id: ${sessionId}`,
+    `cwd: "${esc(cwd)}"`,
     `date: ${date}`,
     `started_at: ${startedAt}`,
     `last_turn_at: ${lastTurnAt}`,
@@ -395,10 +400,11 @@ function buildVectorMd(sessionId, date, data) {
   return lines.join("\n") + "\n";
 }
 
-function buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, topics, protocols, data) {
+function buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, cwd, topics, protocols, data) {
   return [
     "---",
     `session_id: ${sessionId}`,
+    `cwd: "${esc(cwd)}"`,
     `started_at: ${startedAt}`,
     `last_turn_at: ${lastTurnAt}`,
     `date: ${date}`,
@@ -771,7 +777,7 @@ function main() {
 
   const {
     userMsgs, allTexts, timestamps, protocols, tokenEstimate,
-    lastTurnHadFreshInput, sawAnyAssistantUsage,
+    lastTurnHadFreshInput, sawAnyAssistantUsage, cwd: sessionCwd,
   } = parseSession(transcriptPath);
   if (userMsgs.length === 0) return;
 
@@ -823,7 +829,7 @@ function main() {
     const clueRaw = callHaiku(buildCluePrompt(userMsgs));
     clueData = parseHaikuOutput(clueRaw);
     if (validateClue(clueData)) {
-      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, clueData, crossRefs);
+      files["clue.md"] = buildClueMd(sessionId, date, startedAt, lastTurnAt, sessionCwd, clueData, crossRefs);
     } else {
       logErr(`clue validation failed: invalid schema`);
     }
@@ -851,7 +857,7 @@ function main() {
     if (validateNarrative(narrativeData)) {
       const topics = clueData?.topics ?? [];
       files["narrative.md"] = buildNarrativeMd(
-        sessionId, date, startedAt, lastTurnAt,
+        sessionId, date, startedAt, lastTurnAt, sessionCwd,
         topics, protocols, narrativeData,
       );
     } else {
