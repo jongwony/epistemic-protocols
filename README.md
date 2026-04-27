@@ -85,7 +85,7 @@ Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/fram
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/misuse` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration via session calibration drift audit, and retrospective contract violation detection |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration via session calibration drift audit, retrospective contract violation detection, and the Horizon-Fusion Text (HFT) write/read pair for cross-session continuity |
 
 **Three discovery modes coexist** (none replaces the others):
 
@@ -96,6 +96,11 @@ Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/fram
 **Retrospective audit** (separate category from the discovery trio above):
 
 - `/misuse` — retrospective contract violation scan (detects past `/ground` and `/induce` protocol violations; surfaces structured violation records for user-constituted review)
+
+**Cross-session continuity** (HFT write/read pair):
+
+- `/crystallize` — inscribe a session's horizon-fusion residue into a four-layer Markdown file (Surface Text · Wirkungsgeschichte · Reference Shells · Excluded) at stage transition or before a session boundary
+- `/rehydrate` — enter a previously inscribed HFT to prime the current session with the originating session's Vorverständnis; auxiliary substrates (auto-memory, hypomnesis) remain reachable only via explicit `/inquire` or `/recollect` invocations
 
 ## Design
 
