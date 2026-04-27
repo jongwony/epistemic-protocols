@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Runtime-contract pre-commit hook.
+# Replaces .github/workflows/verify-runtime-contract.yml.
+# Scope: per-protocol SKILL.md, plugin.json, references/, verify scripts, package scripts.
+# Activate with: git config core.hooksPath .githooks
+set -euo pipefail
+
+re='^(prothesis|syneidesis|hermeneia|katalepsis|telos|horismos|aitesis|analogia|periagoge|prosoche|epharmoge|anamnesis|epistemic-cooperative)/.*/SKILL\.md$|^.+/skills/.+/references/|^.+/\.claude-plugin/plugin\.json$|^\.claude/skills/verify/|^scripts/package(\.test)?\.js$|^\.githooks/pre-commit$'
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -z "$staged" ] || ! printf '%s\n' "$staged" | grep -qE "$re"; then
+  exit 0
+fi
+
+cd "$(git rev-parse --show-toplevel)"
+echo "→ runtime-contract: tests"
+node --test scripts/package.test.js
+echo "→ runtime-contract: static checks"
+node .claude/skills/verify/scripts/static-checks.js .
+echo "→ runtime-contract: packaging dry-run"
+node scripts/package.js --dry-run
