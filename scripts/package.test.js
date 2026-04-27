@@ -213,6 +213,24 @@ describe('runtime contract view', () => {
       assert.ok(view.packagedEntries.includes(`${view.skill}/Skill.md`), `${view.plugin}:${view.skill} should package Skill.md`);
       assert.ok(typeof view.pluginDescription === 'string');
     }
+
+    // HFT format spec must be packaged in BOTH crystallize and rehydrate so
+    // each skill is self-contained when installed standalone (rehydrate.zip
+    // without crystallize.zip must still resolve references/hft-format.md).
+    // Regression guard: if `collectFiles` ever drops the `references/`
+    // directory or the duplication is removed, this assertion fires.
+    const crystallizeView = views.find(v => v.skill === 'crystallize');
+    assert.ok(crystallizeView, 'crystallize runtime view should exist');
+    assert.ok(
+      crystallizeView.packagedEntries.includes('crystallize/references/hft-format.md'),
+      'crystallize should package references/hft-format.md',
+    );
+    const rehydrateView = views.find(v => v.skill === 'rehydrate');
+    assert.ok(rehydrateView, 'rehydrate runtime view should exist');
+    assert.ok(
+      rehydrateView.packagedEntries.includes('rehydrate/references/hft-format.md'),
+      'rehydrate should package references/hft-format.md (duplicated for standalone-installable self-containment)',
+    );
   });
 
   it('artifact self-containment passes with no runtime boundary leaks', () => {

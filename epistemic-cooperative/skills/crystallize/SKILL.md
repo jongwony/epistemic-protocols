@@ -109,7 +109,7 @@ Collect anchors to auxiliary substrates. Three subsections:
 
 No-data invariant: Reference Shell entries are paths or URLs only. Do not inline content from any anchored substrate. Inlining auto-memory or hypomnesis content into HFT body collapses topology separation.
 
-Present the assembled anchors via Cognitive Partnership Move (Constitution). User options: Accept · Modify(anchor, direction) · Reject · Free response (add or remove anchors).
+Default behavior: auto-collect when all three subsections are mechanically determinable (current session ID is known, `git diff` returns paths, URLs come from session context). Auto-collected anchors flow into Phase 5 final approval where they are reviewed alongside the rest of the HFT draft. Surface a Cognitive Partnership Move (Constitution) with options Accept · Modify(anchor, direction) · Reject · Free response only when an anchor source is ambiguous (e.g., multiple plausible PRs to cite, or the user has explicitly requested manual review). The default and the Constitution path together honor the elidable annotation in ELIDABLE CHECKPOINTS — Phase 5 Qc remains the binding gate.
 
 ### Phase 5: Excluded Layer + Frontmatter Confirmation
 
@@ -167,6 +167,8 @@ SessionState
                                          -- new entries since predecessor (append-only)
   → enumerate_reference_shells(state)    -- anchors only, no data
   → assemble(layers, frontmatter)        -- four-layer HFT structure
+                                         -- invariant: HFT_draft.W_full = P_prev.W + W_delta
+                                         --            (verbatim predecessor + append-only delta)
   → inscribe_hft(path)                   -- atomic write
   → emit_anchor_tasks(plan_path)         -- TaskList entries pointing into HFT
   → InscribedHFT
@@ -181,12 +183,13 @@ SessionState   = { transcript_window, decisions, terminology, files_touched, url
 P_prev         = Optional(InscribedHFT)            -- predecessor file content + frontmatter
 S              = SurfaceText { design_concept: String, ubiquitous_language: List<(term, meaning)>, sache: String }
 W              = Wirkungsgeschichte { trajectory: List<Entry>, rejected: List<Entry>, priors: List<Entry> }
-W_delta        = Wirkungsgeschichte                 -- new entries only (subset structure)
+W_delta        ⊂ Wirkungsgeschichte                 -- proper subset: current-stage entries only (each list ⊂ corresponding W list)
 R              = ReferenceShells { session: List<KV>, files: List<Path>, urls: List<URL> }
 Excluded       = List<(substrate, rationale)>
 Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from, stage_classification, n1_dogfooding_caveat }
-HFT_draft      = { frontmatter, S, W_full = P_prev.W + W_delta, R, Excluded }
-InscribedHFT   = { path, content }                  -- written to ~/.claude/plans/<stage>.md
+HFT_draft      = { frontmatter, S, W_full, R, Excluded }
+                 -- W_full invariant: see assemble(...) in MORPHISM
+InscribedHFT   = { path, content: HFT_draft }       -- written to ~/.claude/plans/<stage>.md
 A_S, A_W, A_R  = UserResponse ∈ {Accept, Modify(subsection, direction), Reject, FreeResponse}
 V              = ApprovalResponse ∈ {Approve, Revise(layer), Cancel}
 Qs             = Per-layer co-construction Constitution interaction
@@ -254,8 +257,9 @@ Phase 5 Qc (final approval)      → always_gated (Constitution: writing to disk
       active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved (advisory: Hermeneia · Periagoge · Telos → /crystallize at stage closure).
-   Pair: /crystallize (write) ↔ /rehydrate (read) share references/hft-format.md as format contract.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges not applicable (/crystallize is a utility skill, intentionally absent from graph.json).
+   Prose-level advisory only: Hermeneia · Periagoge · Telos → /crystallize at stage closure (no enforced edge).
+   Pair: /crystallize (write) ↔ /rehydrate (read) share references/hft-format.md as format contract (duplicated into each skill's references/ for standalone-installable self-containment).
 ```
 
 ## Rules

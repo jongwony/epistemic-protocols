@@ -14,7 +14,7 @@ Invoke directly with `/rehydrate [stage-name]` at session start or after `/compa
 
 **Rehydrate** (reader half of the HFT pair): A dialogical act of resolving a fresh session's empty horizon into the originating session's horizon by parsing an inscribed HFT, where the AI 1-pass reads Surface Text to form Vorverständnis, scans Wirkungsgeschichte to recognize how the horizon was formed, surfaces Reference Shell anchors as available without auto-fetching, and the user confirms readiness to first-utter from the resumed horizon — entry belongs to the user's confirmation act, not the AI's parsing act.
 
-This skill is the reader half of a pair. `/crystallize` is the writer half. The two share the HFT format spec at `../crystallize/references/hft-format.md` and operate asymmetrically: write occurs at session end (compress live horizon into text); read occurs at session start (parse text and prime new horizon).
+This skill is the reader half of a pair. `/crystallize` is the writer half. The two share the HFT format spec at `references/hft-format.md` and operate asymmetrically: write occurs at session end (compress live horizon into text); read occurs at session start (parse text and prime new horizon).
 
 The semantics differ from a generic "data load" operation. HFT is not consumed as data; it is read as a *text inviting horizon fusion*. The fresh session enters the originating session's tradition and proceeds from there — not from a blank state with loaded variables.
 
@@ -42,7 +42,7 @@ Skip when:
 
 The /rehydrate and /crystallize pair is distinct from `/recollect` and `/inquire` by *artifact persistence*: HFT is a Markdown file written by the predecessor session and consumed by the successor session, while recollect/inquire operate on live or loosely-indexed context within or across sessions.
 
-The HFT format spec lives at `../crystallize/references/hft-format.md` (shared with the writer half). This skill reads HFT files conforming to that spec; do not redefine layer structure here.
+The HFT format spec lives at `references/hft-format.md` (shared with the writer half). This skill reads HFT files conforming to that spec; do not redefine layer structure here.
 
 ## Protocol
 
@@ -74,7 +74,7 @@ Compute drift signal:
 - Run `git rev-parse HEAD` and compare with `git_head` from frontmatter
 - If different, note the drift — the worktree has advanced since inscription. This is informational, not blocking
 
-Phase 1 produces no Constitution interaction; the verification result feeds Phase 5 readiness summary.
+Phase 1 produces no Constitution interaction; the verification result feeds the Phase 6 readiness summary.
 
 ### Phase 2: Surface Text 1-Pass Read
 
@@ -175,10 +175,10 @@ G → discover_hft(G) → path? →
     scan_wirk(layer) → W →
     surface_refs(layer) → R →
     filter_anchor_tasks(fm.stage) → T →
-    Qc(resumption_path) → Stop → P_choice → integrate(P_choice) →
-    Qc(readiness, approve) → Stop → V →
+    Qc_resumption(P_choice) → Stop → P_choice → integrate(P_choice) →
+    Qc_readiness(approve) → Stop → V →
       Confirm: emit(ResumedHorizon) → deactivate
-      Re-read: return to read_frontmatter → pass_surface
+      Re-read: return to pass_surface
       Abort:   deactivate (no horizon entered)
   not_found: deactivate (no-op note)
 
@@ -202,15 +202,18 @@ invariant: No Auto-Fetch, Topology Separation Honored
 G              = StageSignal { argument: Optional(String), inferred: Optional(String) }
 HFT_path       = Path
 Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from, stage_classification, n1_dogfooding_caveat }
-SurfaceText    = { design_concept, ubiquitous_language, sache }
-Wirkungsgeschichte = { trajectory, rejected, priors }
+SurfaceText    = { design_concept: String, ubiquitous_language: List<(term, meaning)>, sache: String }
+Wirkungsgeschichte = { trajectory: List<Entry>, rejected: List<Entry>, priors: List<Entry> }
 ReferenceShells = { session: List<KV>, files: List<Path>, urls: List<URL> }
-T              = AnchorTaskSet              -- TaskList subset filtered by metadata
+T              = AnchorTaskSet
+                 = { t : Task | t.metadata.source = "crystallize-hft" ∧ t.metadata.stage = stage_id }
+                 -- predicate filters TaskList; stage_id sourced from frontmatter
 P_choice       = ResumptionPath ∈ {HandOffToAttend, PickUpManually, Defer}
 V              = ApprovalResponse ∈ {Confirm, ReRead, Abort}
 ReadinessSummary = { hft_path, frontmatter, surface_summary, wirk_summary, refs, anchor_tasks, resumption, caveat }
 ResumedHorizon = session text { readiness_summary, deactivation: true }
-Qc             = Constitution interaction (resumption path; readiness approval)
+Qc_resumption  = Constitution interaction → P_choice              -- Phase 5 (resumption path selection)
+Qc_readiness   = Constitution interaction → V                     -- Phase 6 (final readiness approval)
 
 ── PHASE TRANSITIONS ──
 Phase 0:  G → discover_hft(G) → HFT_path                              -- one-line discovery report or deactivation
@@ -218,8 +221,8 @@ Phase 1:  HFT_path → read_frontmatter → Frontmatter → verify          -- s
 Phase 2:  HFT_body → pass_surface(SurfaceText) → primer                -- 1-pass read; AI restates Sache [Tool: Read]
 Phase 3:  HFT_body → scan_wirk(Wirkungsgeschichte) → trajectory        -- top-to-bottom; informational
 Phase 4:  HFT_body → surface_refs(ReferenceShells) → R                 -- enumerate, do not fetch
-Phase 5:  Frontmatter, T → Qc(resumption_path) → Stop → P_choice       -- Constitution: HandOff/Manual/Defer [Tool]
-Phase 6:  ReadinessSummary → Qc(approve) → Stop → V                    -- Constitution: Confirm/ReRead/Abort [Tool]
+Phase 5:  Frontmatter, T → Qc_resumption → Stop → P_choice             -- Constitution: HandOff/Manual/Defer [Tool]
+Phase 6:  ReadinessSummary → Qc_readiness → Stop → V                   -- Constitution: Confirm/ReRead/Abort [Tool]
 Phase 7:  V = Confirm → emit(ResumedHorizon) → deactivate
 
 ── LOOP ──
@@ -242,15 +245,17 @@ Phase 2 pass_surface (observe)        → Read (HFT body)
 Phase 3 scan_wirk (observe)           → (already in context from Phase 2 Read)
 Phase 4 surface_refs (observe)        → (already in context)
 Phase 5 filter_anchor_tasks (observe) → TaskList (metadata filter)
-Phase 5 Qc (constitution)             → present (resumption path)
-Phase 6 Qc (constitution)             → present (readiness approval)
+Phase 5 Qc_resumption (constitution)  → present (resumption path)
+Phase 6 Qc_readiness  (constitution)  → present (readiness approval)
 Phase 7 emit (extension)              → TextPresent+Proceed (convergence trace)
 
 ── ELIDABLE CHECKPOINTS ──
-Phase 0 discovery report → extension (one-line confirm; no gate when uniquely determined)
-Phase 1 verify           → extension (silent unless malformed; surface drift in readiness summary)
-Phase 5 Qc (resumption)  → always_gated (Constitution: resumption path commits downstream trajectory; user authority IS resolution)
-Phase 6 Qc (readiness)   → always_gated (Constitution: confirms session is primed; final binding act)
+Phase 0 (unique match)        → extension (one-line confirm; no gate when discovery is uniquely determined)
+Phase 0 (multi-candidate)     → always_gated (Constitution: user selects HFT among candidates; user authority IS resolution)
+Phase 0 (no match)            → extension (deactivation no-op note; no gate)
+Phase 1 verify                → extension (silent unless malformed; surface drift in readiness summary)
+Phase 5 Qc_resumption         → always_gated (Constitution: resumption path commits downstream trajectory; user authority IS resolution)
+Phase 6 Qc_readiness          → always_gated (Constitution: confirms session is primed; final binding act)
 
 ── MODE STATE ──
 Λ = { phase: Phase, G: StageSignal, HFT_path: Optional(Path),
@@ -261,8 +266,9 @@ Phase 6 Qc (readiness)   → always_gated (Constitution: confirms session is pri
       active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved (advisory: /rehydrate → Katalepsis at session-start verification).
-   Pair: /crystallize (write) ↔ /rehydrate (read) share format contract at ../crystallize/references/hft-format.md.
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges not applicable (/rehydrate is a utility skill, intentionally absent from graph.json).
+   Prose-level advisory only: /rehydrate → Katalepsis at session-start verification (no enforced edge).
+   Pair: /crystallize (write) ↔ /rehydrate (read) share format contract at references/hft-format.md (duplicated into each skill's references/ for standalone-installable self-containment).
    Optional downstream: Phase 5 HandOffToAttend invokes `/attend` with anchor tasks (when user selects that resumption path).
 ```
 
@@ -280,7 +286,7 @@ Phase 6 Qc (readiness)   → always_gated (Constitution: confirms session is pri
 10. **No anchor task auto-execution**: Phase 5 must yield turn for user choice. Auto-handing-off to `/attend` without user selection violates Constitution boundary
 11. **Convergence evidence**: Phase 6 readiness summary is the trace; transformation from HorizonNotEntered to ResumedHorizon is demonstrated, not asserted
 12. **Context-Question Separation**: each Constitution interaction places analysis as text before the gate
-13. **No format spec redefinition**: HFT layer structure is defined at `../crystallize/references/hft-format.md`. This skill consumes that spec; deviations from it are HFT defects, not reader-side adaptations
+13. **No format spec redefinition**: HFT layer structure is defined at `references/hft-format.md`. This skill consumes that spec; deviations from it are HFT defects, not reader-side adaptations
 14. **No auto-hooks**: this skill does not register SessionStart or PreCompact hooks. Hook integration is out of scope for the present GoalContract
 
 ## UX Safeguards
@@ -317,7 +323,7 @@ Skip `/rehydrate` when:
 
 ## Stage 1 Conjecture (N=1 Dogfooding)
 
-This skill is a Stage 1 (Compile) conjecture. Structural fit was established via a single dogfooding session crystallizing the HFT format from concrete instance set into a four-layer abstraction (see `../crystallize/references/hft-format.md` for the format spec's own Stage 1 caveat). Stage 2 (Runtime) use-corroboration is pending — accumulating cross-session activations across user-context variation. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities, registering auto-hooks, integrating with `/attend`'s adopt-resume slot beyond the optional Phase 5 hand-off) is deferred until variation-stable retention evidence accumulates.
+This skill is a Stage 1 (Compile) conjecture. Structural fit was established via a single dogfooding session crystallizing the HFT format from concrete instance set into a four-layer abstraction (see `references/hft-format.md` for the format spec's own Stage 1 caveat). Stage 2 (Runtime) use-corroboration is pending — accumulating cross-session activations across user-context variation. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities, registering auto-hooks, integrating with `/attend`'s adopt-resume slot beyond the optional Phase 5 hand-off) is deferred until variation-stable retention evidence accumulates.
 
 When in doubt about a phase or rule under live use, prefer fidelity to the contract over local convenience; report any tension as Stage 2 evidence rather than silently relaxing the constraint.
 
