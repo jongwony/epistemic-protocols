@@ -45,9 +45,19 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 
 Sections accumulating use evidence that warrants reconsideration for promotion back to `.claude/rules/`. Initially empty — populated as Stage 2 corroboration accumulates.
 
+Scope: this list tracks **demoted content** (sections originally in `.claude/rules/` that moved here per the Demotion Ledger above) accumulating use evidence sufficient for re-promotion. Stage 1 conjectures newly inscribed in SKILL.md awaiting first-time Stage 2 corroboration are tracked separately in the Stage 2 Corroboration Watch below.
+
 | Section | Source | Use evidence | Proposed promotion date |
 |---------|--------|--------------|-------------------------|
-| Hypothesis-Surface as Constitutive Output | `epistemic-cooperative/skills/probe/SKILL.md` (Phase 2 morphism simplification, free-response Constitution + entropy=0 deterministic handoff with SafeTarget whitelist) | Stage 1 conjecture (2026-04-27); Stage 2 mechanism TBD (separate design round; candidates: /probe deterministic handoff post-hoc audit hook, hypomnesis misfit.md writer + accumulation) | TBD |
+| _(none yet)_ | — | — | — |
+
+## Stage 2 Corroboration Watch
+
+Stage 1 conjectures inscribed in SKILL.md or Skill descriptions awaiting first-time Stage 2 use-corroboration. Distinct from the Promotion Watch List — entries here have not previously occupied `.claude/rules/`; they are first-time conjectures whose viability depends on accumulated use evidence per Deficit Empiricism.
+
+| Conjecture | Source | Stage 2 mechanism | Inscribed date |
+|------------|--------|-------------------|----------------|
+| Hypothesis-Surface as Constitutive Output | `epistemic-cooperative/skills/probe/SKILL.md` (Phase 2 morphism simplification: typed Qc → free-response Constitution) | TBD (separate design round; candidates: /probe free-response disposition extraction post-hoc audit hook, hypomnesis misfit.md writer + misfit accumulation) | 2026-04-27 |
 
 ## Promotion Criteria
 
