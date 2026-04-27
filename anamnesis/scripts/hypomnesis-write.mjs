@@ -121,10 +121,7 @@ function parseSession(transcriptPath) {
   let outputTokensSum = 0;
   let lastTurnHadFreshInput = false;
   let sawAnyAssistantUsage = false;
-  // Latest cwd observed in JSONL — required for `claude --resume <session-id>`
-  // since Claude Code resolves the project slug from invocation cwd. Resumes
-  // can in principle change cwd; the final value reflects the directory the
-  // user must be in to resume cleanly.
+  // Latest cwd wins — Claude Code resolves the project slug from invocation cwd at resume time.
   let cwd = "";
 
   const protocolMap = {
