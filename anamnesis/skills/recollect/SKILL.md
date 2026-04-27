@@ -497,7 +497,3 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 21. **Cross-LOOP narrative persistence**: Narrative format and adjacent vector enrichment persist across LOOP iterations; subsequent attempts reference prior candidates and explain the differential.
 
 22. **Substrate non-coupling**: Protocol essence (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, five formal blocks) must not name specific tools, agents, platforms, or storage media. Realization bindings belong exclusively to TOOL GROUNDING (semantic autonomy at the realization boundary).
-
-## Known Limitations
-
-Failure modes are formally specified in `── KNOWN FAILURE MODES ──` (FalseAnchor, ExtractorLacking, PartialExtract, NullMatch₁/₂, MutualNull). MutualNull — genuine absence from Store — is the principal structural failure mode; the deprecated v0.3.3 "Σ-primary scan bias" hypothesis is bounded by Rule 3 input-typed dispatch to a ranking-layer concern within the salience track.
