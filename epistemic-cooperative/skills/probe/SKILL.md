@@ -84,24 +84,37 @@ Hypothesis N — N interpretations possible / decision point is X
 
 **Coverage option-set minimality**: When `|coverage| ≥ 2`, coverage subsets are NOT enumerated as additional options — the per-entry Evidence and Reverse-evidence within the Coverage block serve as the short descriptions that guide singleton selection. The user invokes a singleton through free response or `Narrow(CoverageSubset)`. This preserves option-set minimality and induces the Hermeneutic circle through iterative user-initiated dialogue rather than AI-side menu expansion. (Per Rule 14, this contextual rule informs the gate decision and therefore precedes the gate options.)
 
-Then present the recognition Constitution interaction:
+**Entropy=0 deterministic handoff** (Phase 2 sub-branch, evaluated before the free-response prompt):
+
+When the candidate set has converged so that exactly one route is uniquely determined by Phase 1 evidence — `|H[]| = 1` (despite the Rule 5 multi-hypothesis guard, this state can arise after `Narrow(CoverageSubset)` filtering) ∧ `|coverage| = 1` ∧ the single coverage protocol is in the SafeTarget set (defined in TYPES) — the gate elides into a deterministic handoff. The hypothesis surface itself is the disposition signal; no free-response prompt is presented. The handoff emits `ProtocolRoute(h.coverage)` as session text with an inline note recording the elision basis (`|H[]|=1 ∧ |coverage|=1 ∧ target ∈ SafeTarget`) so the user can read the trace and reverse course before invoking the downstream protocol. SafeTarget excludes any protocol whose Phase 1 mutates state before the first user-facing gate (those break the ESC-reversibility assumption that justifies elision).
+
+Otherwise (entropy > 0 — multiple hypotheses, multi-protocol coverage, or unsafe target), present the recognition Constitution interaction as a free-response prompt:
 
 ```
 Which hypothesis fits your present situation?
 
-Options:
-1. Recognize (Hypothesis 1 / 2 / N) — adopt the hypothesis's coverage as a whole (proceed to /<protocol> for singleton; for |coverage|≥2, the user invokes any protocol in the coverage via free response)
-2. Redirect — name a different deficit or protocol than presented
-3. Dismiss — none of these fit; continue without protocol invocation
-4. Narrow scope — restrict to a specific concern (Slice) OR shrink coverage to a subset (CoverageSubset) before re-probing
-5. Stop — exit /probe without disposition
+Free response — the disposition is constituted by the user's natural utterance.
+Recognition / Redirect / Dismiss / Narrow scope / Stop are all reachable via free response;
+Phase 3 parses the utterance into the corresponding R coproduct constructor.
+The hypothesis surface above carries the full deficit space; no typed selection is required.
 ```
 
-The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice.
+The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice. Free response preserves the user's implicit freedom to respond beyond any anticipated typed options — this freedom is inherent in conversation turn structure: gated does not mean unstructured; it means the user's response is constitutive (Rule 12 Recognition over Recall and Rule 14 Context-Question Separation, both inscribed in this SKILL.md).
 
 ### Phase 3: Route Integration
 
-After user response:
+After user response (free-response utterance from Phase 2 or deterministic-handoff emission):
+
+**Free-response parse** (when Phase 2 presented the free-response prompt): Phase 3 parses the user utterance into the R coproduct constructor via lexical patterns:
+- "yes / option N / hypothesis N / recognize / take H_x / go with H_x" → `Recognize(h)` where h is the named or selected hypothesis
+- "no, what about /X / actually try /Y / use /Z instead" → `Redirect(d)` where d is the user-named deficit or protocol
+- "none of these / dismiss / not a fit" → `Dismiss`
+- "narrow to <slice> / just /A and /B / restrict to <scope>" → `Narrow(Slice | CoverageSubset)` per the user's narrowing form
+- "stop / nevermind / exit / cancel" → `Stop`
+
+When the utterance does not unambiguously resolve into a single constructor, Phase 3 issues one bounded re-prompt requesting clarification. Persistent ambiguity after the bounded retry defaults to `Stop` to preserve the user's exit-without-disposition right.
+
+**Disposition handling**:
 
 - **Recognize**: Emit the recognized route as session text, carrying `target_coverage: Set(CoverageEntry)` — each entry pairs a deficit with its protocol, plus the supporting evidence and reverse-evidence. The user may invoke any subset of coverage protocols; the constituted recognition record covers the entire coverage set.
 - **Redirect**: Record the user-named deficit/protocol as the recognized route. AI does not contest user redirection.
@@ -119,7 +132,9 @@ Probe(U) → Detect(U) →
   named_deficit(U): skip → deactivate
   vague_deficit(U): Scan(U, Catalog, Λ.coverage_constraint) → H[] →           -- each h ∈ H[] carries Set(CoverageEntry), |coverage|≥1
     |H[]| < 2: enrich Scan or expand Catalog window → re-scan
-    |H[]| ≥ 2: present(H[]) → Qc(H[], evidence, reverse_evidence) → Stop → R →
+    |H[]| ≥ 2: present(H[]) → entropy_check →
+      |H[]|=1 ∧ |coverage|=1 ∧ target ∈ SafeTarget: emit(ProtocolRoute(h.coverage), basis_note) → converge   -- entropy=0 deterministic handoff
+      otherwise:                                    Qc(H[]) → Stop → utterance → parse → R →
       Recognize(h):     emit(ProtocolRoute(h.coverage)) → converge            -- target_coverage = h.coverage : Set(CoverageEntry)
       Redirect(d):      emit(ProtocolRoute(d)) → converge
       Dismiss:          emit(FitReviewNote(no_fit)) → converge
@@ -136,7 +151,7 @@ UserSituation
                                       -- enumerate candidate hypotheses as Set(CoverageEntry); set-valued coverage
                                       --   (multi-protocol projection within a hypothesis is structurally distinct
                                       --    from inter-protocol composition defined in the COMPOSITION block)
-  → present(H[], multi_hypothesis)    -- minimum two hypotheses, falsification visible per CoverageEntry
+  → present(H[], multi_hypothesis)    -- hypothesis surface IS the constitutive output; deficit-space disclosure precedes user judgment
   → recognize(h, user)                -- user adopts h.coverage as a whole; refinable via Narrow(CoverageSubset)
   → emit(ProtocolRoute | FitReviewNote)   -- ProtocolRoute carries target_coverage as Set(CoverageEntry)
   → ProtocolRoute | FitReviewNote
@@ -163,7 +178,16 @@ Scan             = (UserSituation, Catalog, Optional(Set(ProtocolId))) → H[]
                    --   whose coverage protocol set intersects with the constraint
 CoverageSubset   = Set(ProtocolId)                  -- 0 < |CoverageSubset| < |selected.coverage|
                    -- non-empty proper subset of a selected hypothesis's coverage protocols
-Qc               = present hypothesis set with evidence and reverse-evidence; Constitution interaction
+SafeTarget       = {clarify, goal, bound, frame, ground, induce, recollect, grasp}
+                   -- whitelist of protocols whose Phase 1 stays read-only before the first user-facing gate,
+                   -- preserving ESC reversibility for entropy=0 deterministic handoff
+                   -- Excluded protocols (Phase 1 mutation present before first user-facing gate):
+                   --   inquire (Aitesis Phase 1 Write/Bash dynamic observation)
+                   --   gap (Syneidesis Phase 1 TaskCreate)
+                   --   contextualize (Epharmoge Phase 1 TaskCreate)
+                   --   attend (Prosoche Phase 0 Agent delegation)
+Qc               = present hypothesis set with evidence and reverse-evidence;
+                   free-response Constitution interaction (Phase 3 parses utterance into R)
 R                = Recognition ∈ {Recognize(Hypothesis),                  -- adopts entire coverage
                                   Redirect(DeficitName | ProtocolId),
                                   Dismiss,
@@ -187,7 +211,9 @@ Phase 1: U → Scan(U, Catalog, Λ.coverage_constraint) → H[]          -- cata
            Λ.coverage_constraint set → filter H[] to {h : π_protocol(h.coverage) ∩ Λ.coverage_constraint ≠ ∅}
            |H[]| < 2 → enrich(U) → Phase 1                          -- multi-hypothesis invariant
            |H[]| ≥ 2 → Phase 2
-Phase 2: H[] → present(H[], evidence, reverse_evidence) → Qc → Stop → R   -- recognition Constitution interaction [Tool]
+Phase 2: H[] → present(H[], evidence, reverse_evidence) → entropy_check →
+           |H[]|=1 ∧ |coverage|=1 ∧ target ∈ SafeTarget → emit(ProtocolRoute, basis_note)   -- entropy=0 deterministic handoff (no gate)
+           otherwise → Qc(H[]) → Stop → utterance → parse → R                               -- free-response Constitution interaction [Tool]
 Phase 3: R → integrate(R, U) →
            Recognize(h)            → emit(ProtocolRoute(h.coverage)) → converge   -- target_coverage : Set(CoverageEntry)
            Redirect(d)             → emit(ProtocolRoute(d)) → converge            -- user-named alternative
@@ -217,7 +243,10 @@ session_text(probe) ∋ {ProtocolRoute | FitReviewNote} (Stop deactivates withou
 Phase 0 Detect      (sense)    → Internal analysis (heuristic vague-deficit detection)
 Phase 1 Scan        (sense)    → Internal analysis (catalog match against situation)
 Phase 1 enrich      (sense)    → Internal analysis (situation broadening when |H[]| < 2)
-Phase 2 Qc          (constitution)     → present (multi-hypothesis recognition Constitution interaction)
+Phase 2 entropy_check (sense)      → Internal analysis (|H[]|=1 ∧ |coverage|=1 ∧ target ∈ SafeTarget)
+Phase 2 Qc          (constitution)     → present (multi-hypothesis surface) + free-response receive (no typed option enumeration)
+Phase 2 emit        (extension)    → TextPresent+Proceed (entropy=0 deterministic handoff: ProtocolRoute with elision basis_note)
+Phase 3 parse       (sense)        → Internal analysis (free-response utterance → R coproduct via lexical patterns; bounded retry on ambiguous)
 Phase 3 emit        (extension)    → TextPresent+Proceed (ProtocolRoute or FitReviewNote)
 Phase 3 rebind      (track)    → Internal state update (Narrow(Slice) disposition — rebinds U.session_slice, clears Λ.dismissed_in_session)
 Phase 3 write       (track)    → Internal state update (Narrow(CoverageSubset) disposition — sets Λ.coverage_constraint, preserves Λ.dismissed_in_session)
@@ -225,7 +254,8 @@ converge            (extension)    → TextPresent+Proceed (convergence trace)
 
 ── ELIDABLE CHECKPOINTS ──
 -- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 2 Qc (recognition)     → always_gated (constitutive user act; Standing-authority delegation forbidden)
+Phase 2 Qc (recognition)     → always_gated (constitutive user act; Standing-authority delegation forbidden in the entropy>0 branch)
+Phase 2 entropy=0 handoff    → elidable (Standing-authority delegation when |H[]|=1 ∧ |coverage|=1 ∧ target ∈ SafeTarget; basis_note emit ensures audit visibility for ESC reversibility)
 
 ── MODE STATE ──
 Λ = { phase: Phase, U: UserSituation,
@@ -253,7 +283,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 5. **Multi-hypothesis required** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden. Anti-singleton guard operates at hypothesis level (`|H[]| ≥ 2`). Each hypothesis carries set-valued coverage (`|coverage| ≥ 1`; `|coverage| ≥ 2` represents intra-hypothesis multi-protocol projection — structurally distinct from inter-protocol composition defined in the `── COMPOSITION ──` block). The reverse-evidence requirement applies per CoverageEntry within `Hypothesis.coverage`. **Two-level cardinality**: A single hypothesis with `|coverage| = 2` does NOT satisfy this guard — `|H[]| ≥ 2` requires at minimum two distinct Hypothesis records, each with its own coverage. The `|H[]| ≥ 2` guard operates on hypothesis count; `|coverage| ≥ 1` on per-hypothesis projection.
 6. **Disposition field belongs to the user** — Recognize / Redirect / Dismiss / Narrow / Stop is a constitutive user act. AI never resolves the disposition unilaterally.
 7. **No cumulative score / grade / ranking** — Across uses, no fitness metric, success rate, or aggregated quality score is produced or stored. Each probe is independent.
-8. **Stop / Narrow / Dismiss always present** — Stop, Narrow, and Dismiss options appear at every Constitution interaction, matching the Phase 2 disposition labels. Three-Tier Termination inheritance: graceful exit is always available.
+8. **Stop / Narrow / Dismiss always reachable via free response** — Stop, Narrow, and Dismiss are always available as user dispositions; they are reached through natural-language utterance (parsed by Phase 3 lexical patterns) rather than typed selection. Graceful exit and scope narrowing are always available — no typed dropdown is required to reach them.
 9. **Blocked vocabulary** — The terms "wrong", "misuse detected", and "should have used" must not appear in Probe output. These vocabularies frame Probe as a corrective judge rather than a fit-review companion.
 10. **Recommended vocabulary** — Use "fit review" as the positive framing replacement for the blocked vocabulary in #9. Output describes hypotheses, evidence, and reverse-evidence; never verdicts.
 11. **Hypothesis form** — Each hypothesis is phrased as low-confidence dialogic: "N interpretations possible / decision point is X". Certainty framings ("clearly", "definitely", "the answer is") are forbidden.
@@ -292,6 +322,7 @@ Skip Probe when:
 | Trigger | Effect |
 |---------|--------|
 | User Esc key | Deactivate Probe (ungraceful, no disposition record) |
-| User selects Stop | Graceful exit without disposition |
-| User selects Recognize / Redirect / Dismiss | Convergence with disposition record (ProtocolRoute or FitReviewNote) |
+| User utters Stop (parsed from free response) | Graceful exit without disposition |
+| User utters Recognize / Redirect / Dismiss (parsed from free response) | Convergence with disposition record (ProtocolRoute or FitReviewNote) |
+| Entropy=0 deterministic handoff (\|H[]\|=1 ∧ \|coverage\|=1 ∧ target ∈ SafeTarget) | Convergence with ProtocolRoute + basis_note (no Phase 2 prompt issued) |
 | Narrow iterations exhausted (3 max) | Surface candidate set as fit-review note → deactivate |

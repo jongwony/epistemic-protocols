@@ -47,7 +47,7 @@ Sections accumulating use evidence that warrants reconsideration for promotion b
 
 | Section | Source | Use evidence | Proposed promotion date |
 |---------|--------|--------------|-------------------------|
-| _(none yet)_ | — | — | — |
+| Hypothesis-Surface as Constitutive Output | `epistemic-cooperative/skills/probe/SKILL.md` (Phase 2 morphism simplification, free-response Constitution + entropy=0 deterministic handoff with SafeTarget whitelist) | Stage 1 conjecture (2026-04-27); Stage 2 mechanism TBD (separate design round; candidates: /probe deterministic handoff post-hoc audit hook, hypomnesis misfit.md writer + accumulation) | TBD |
 
 ## Promotion Criteria
 
