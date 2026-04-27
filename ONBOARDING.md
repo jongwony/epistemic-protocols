@@ -48,9 +48,10 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `CLAUDE.md` — architecture, protocol table, precedence, CI summary (~15 min)
 - [ ] `.claude/rules/axioms.md` — A1–A6 foundational principles; the north star (~10 min)
 - [ ] `.claude/rules/derived-principles.md` — logical consequences of axiom combinations
-- [ ] `.claude/rules/architectural-principles.md` — project structure decisions independent of axioms
-- [ ] `.claude/rules/meta-principle.md` — Deficit Empiricism + Axiomatization Judgment Framework
+- [ ] `.claude/rules/architectural-principles.md` — Epistemic Cost Topology (T1, per-turn); other architectural principles in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
+- [ ] `.claude/rules/meta-principle.md` — Deficit Empiricism intro (T1, per-turn); Stage 1/2 detail + Axiomatization Judgment Framework in `.claude/principles/meta-principle.md` (T2-T3, lazy-load)
 - [ ] `.claude/rules/safeguards.md` — Safeguard-tier principles (LESS important as models improve) (~5 min)
+- [ ] `.claude/principles/README.md` — demotion zone overview, demotion ledger, promotion-via-use criteria
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, ELIDABLE CHECKPOINTS, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — what each of the 15 static checks enforces
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)

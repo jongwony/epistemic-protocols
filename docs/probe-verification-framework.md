@@ -59,7 +59,7 @@ Commit `a58c6fc` is preserved as a valid surface-consistency minimum-diff — it
 
 **Conjecture**: Probe's surgical/design classification benefits from explicit two-axis verification. The drop-in feasibility check alone is insufficient; an endpoint well-defined-ness check should run alongside before a candidate is committed to the surgical lane.
 
-This is a *single observation*. Per `meta-principle.md` Stage 2 doctrine, framework promotion requires variation-stable corroboration across instance, user profile, platform context, and session type. Until additional instances accumulate and resolve into the same essence under variation, this remains hypothesis-level — recorded for future reference, not enforced as a Probe operating rule.
+This is a *single observation*. Per `.claude/principles/meta-principle.md` Stage 2 doctrine, framework promotion requires variation-stable corroboration across instance, user profile, platform context, and session type. Until additional instances accumulate and resolve into the same essence under variation, this remains hypothesis-level — recorded for future reference, not enforced as a Probe operating rule.
 
 Falsification conditions:
 - If subsequent surgical classifications consistently match the well-defined endpoint without two-axis verification, the hypothesis is unnecessary.

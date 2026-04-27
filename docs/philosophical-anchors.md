@@ -34,7 +34,7 @@ A5 (defined in `.claude/rules/axioms.md` §A5) shares the extended-cognition gro
 
 ### Non-derivability from A2 (despite shared ground)
 
-Despite sharing the extended-cognition ground, **A5 is not derivable from A2**. The Axiomatization Judgment Framework's Non-Derivability criterion (see `.claude/rules/meta-principle.md`) requires that axioms introduce genuinely new structure, not merely restate consequences of existing axioms. Sharing a philosophical ground does not imply derivability.
+Despite sharing the extended-cognition ground, **A5 is not derivable from A2**. The Axiomatization Judgment Framework's Non-Derivability criterion (see `.claude/principles/meta-principle.md`) requires that axioms introduce genuinely new structure, not merely restate consequences of existing axioms. Sharing a philosophical ground does not imply derivability.
 
 A5 introduces the following that A2 alone does not provide:
 
@@ -109,7 +109,7 @@ A2's relay/constitution boundary also uses Husserlian vocabulary ("constitution"
 - `.claude/rules/axioms.md` §A2 (main axiom; Constitution/Relay retained as operational terms, etymology lives here)
 - `.claude/rules/axioms.md` §A5 (main axiom; philosophical ground lives here)
 - `.claude/rules/architectural-principles.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
-- `.claude/rules/meta-principle.md` Axiomatization Judgment Framework (Non-Derivability criterion referenced in §A5 above)
+- `.claude/principles/meta-principle.md` Axiomatization Judgment Framework (Non-Derivability criterion referenced in §A5 above)
 - `anamnesis/skills/recollect/SKILL.md` (runtime protocol using Husserlian "synthesis of identification" and "empty_intention" as load-bearing operational terms; phenomenological context lives here)
 - `docs/audit-2026-04-11.md` §Positive Findings P2, P5 (audit empirical grounding for A2 and Epistemic Cost Topology)
 
