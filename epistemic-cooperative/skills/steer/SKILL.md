@@ -76,7 +76,7 @@ Scan the target session for calibration moves and classify each into a drift clu
 
 Scan procedure:
 1. Read the target session transcript (`~/.claude/projects/{slug}/{session-id}.jsonl`)
-2. Extract calibration move candidates — gate interactions (`always_gated` or `elidable` Constitution/Extension presentations), auto-resolutions where AI proceeded without user gate, agent boundary actions (Skill / Agent / SendMessage invocations), Standing-authority delegations
+2. Extract calibration move candidates — gate interactions (Constitution / Extension presentations per TOOL GROUNDING), auto-resolutions where AI proceeded without user gate, agent boundary actions (Skill / Agent / SendMessage invocations), Standing-authority delegations
 3. For each candidate, identify the move kind (Constitution / Extension / BoundaryAction) and the axis it implicates (which of the six profile variables it bears on, when applicable)
 
 Classification — assign each move to one cluster of the partition:
@@ -222,7 +222,7 @@ deficit:  CalibrationDriftOpaque             -- activation precondition (user-in
 preserves: SessionHistory                    -- read-only audit; SessionCalibrationMoves are derived
 invariant: Recognition over Profile-Mutation, Backup over Risk
                                               -- ProjectProfileFile is mutated at Phase 5 Approve;
-                                              -- mutation is gated by always_gated final approve and
+                                              -- mutation is gated by Phase 5 Constitution final approve and
                                               -- protected by mandatory pre-write timestamped backup
 
 ── TYPES ──
@@ -298,29 +298,22 @@ session_text(steer) ∋ {UpdatedProjectProfile | NoUpdateNote | DiffArtifact}
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 resolve_defaults  (sense)        → Internal analysis (CWD inspection, layer inference)
-Phase 0 Qc                (constitution) → present (scope confirmation)
+Phase 0 scope_from_arg    (extension)    → TextPresent+Proceed (when explicit_arg fully specifies scope — target_session, layer, cross_session all explicit; proceed with bound scope; Phase 5 Modify re-entry can adjust)
+Phase 0 Qc                (constitution) → present (scope confirmation; when scope partially or fully inferred)
 Phase 1 Read              (observe)      → Read (existing project-profile.md at chosen layer)
 Phase 2 Read              (observe)      → Read (session JSONL transcript at target session path)
 Phase 2 extract           (sense)        → Internal analysis (calibration move identification)
 Phase 2 classify          (sense)        → Internal analysis (per-move drift cluster assignment)
 Phase 3 present           (extension)    → TextPresent+Proceed (cluster evidence pre-gate)
-Phase 3 Qc                (constitution) → present (per-cluster verdict; mandatory)
+Phase 3 Qc                (constitution) → present (per-cluster verdict; constitutive user verdict per cluster; Active-authority required at every cluster)
 Phase 3 integrate         (track)        → Internal Λ update (cluster verdict recording)
 Phase 4 assemble_diff     (sense)        → Internal analysis (variable-level diff construction)
 Phase 5 present           (extension)    → TextPresent+Proceed (diff + backup path pre-gate)
-Phase 5 Qc                (constitution) → present (final approval; mandatory)
+Phase 5 Qc                (constitution) → present (final approval; writable side effect with cross-session persistence; user authority required)
 Phase 5 backup            (transform)    → Write (timestamped backup file)
 Phase 5 Write             (transform)    → Write (proposed profile to layer path)
 Phase 5 emit              (extension)    → TextPresent+Proceed (UpdatedProjectProfile or NoUpdateNote or DiffArtifact)
 converge                  (extension)    → TextPresent+Proceed (convergence evidence trace)
-
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 0 Qc (scope confirm) → elidable when: explicit_arg fully specifies scope (target_session, layer, cross_session all explicit)
-                              default: proceed with inferred scope
-                              regret: bounded (Phase 5 Modify re-entry can adjust if scope was wrong)
-Phase 3 Qc (per-cluster)   → always_gated (constitutive user verdict per cluster; Active-authority required at every cluster)
-Phase 5 Qc (final approve) → always_gated (writable side effect with cross-session persistence; user authority required)
 
 ── MODE STATE ──
 Λ = { phase: Phase, scope: Scope, P_existing: ProjectProfile,

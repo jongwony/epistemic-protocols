@@ -111,14 +111,14 @@ SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
 |-------|-------------|
 | 0. Specify | Chain specification input and normalization |
 | 1. Validate | graph.json precondition/suppression validation |
-| 2. Catalog | ELIDABLE CHECKPOINTS extraction per protocol |
-| 3. Disposition | 3-axis model gate disposition analysis |
+| 2. Catalog | TOOL GROUNDING entry extraction per protocol (Constitution/Extension classification) |
+| 3. Disposition | Composition-level gate disposition analysis |
 | 4. Generate | Composition SKILL.md template generation |
 
 Key features:
 - Graph-aware chain validation (preconditions, suppressions)
-- Automated gate inventory from ELIDABLE CHECKPOINTS
-- 3-axis disposition model (relay/gated × regret × epistemic access)
+- Automated gate inventory from TOOL GROUNDING entries
+- Composition-time disposition model (epistemic access × catch-chain × BoundaryMap)
 - Catch-chain invariant verification
 - `/review`-pattern template output with pipeline context rules
 

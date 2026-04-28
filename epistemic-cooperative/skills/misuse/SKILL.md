@@ -247,21 +247,16 @@ session_text(misuse) ∋ ViolationReview when reviewed > 0; empty no-op note whe
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 scope_confirm  (constitution)  → present (scope Constitution interaction; only if scope unspecified)
+Phase 0 scope_from_arg (extension)     → TextPresent+Proceed (when scope specified by user; proceed with bound scope)
+Phase 0 scope_confirm  (constitution)  → present (when scope unspecified; constitutive scope authorization)
 Phase 1 extract        (extension)     → Agent(epistemic-cooperative:session-analyzer, mode=friction_pointers)
 Phase 1 read_misfit    (extension)     → Read (~/.claude/projects/{slug}/hypomnesis/{session-id}/misfit.md, opt-in)
 Phase 2 read_taxonomy  (extension)     → Read (references/violation-taxonomy.md)
 Phase 2 classify       (sense)         → Internal analysis (per-invocation 2-step check)
 Phase 3 aggregate      (sense)         → Internal analysis (clustering + ranking)
-Phase 4 Qc             (constitution)  → present (per-invocation recognition Constitution interaction)
+Phase 4 Qc             (constitution)  → present (per-invocation recognition Constitution interaction; constitutive user verdict)
 Phase 5 emit           (extension)     → TextPresent+Proceed (ViolationReview)
 converge               (extension)     → TextPresent+Proceed (convergence trace)
-
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 0 scope_confirm (scope unspecified) → always_gated (constitutive scope authorization)
-Phase 0 scope_confirm (scope specified)   → elided (user already supplied scope)
-Phase 4 Qc (per-invocation verdict)       → always_gated (constitutive user verdict; Standing-authority delegation forbidden)
 
 ── MODE STATE ──
 Λ = { phase: Phase, scope: Scope,

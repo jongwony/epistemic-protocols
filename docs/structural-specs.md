@@ -16,8 +16,7 @@ All protocols share this structure within `Definition` code block:
 ── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
-── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping; gate/relay interaction kind annotation
-── ELIDABLE CHECKPOINTS ──  (if applicable) Per-gate dual-axis analysis (relay/gated interaction kind + regret profile)
+── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping; `(constitution)`/`(extension)` interaction kind annotation; conditional Constitution-to-Extension specialization recorded as separate `(extension)` entries within the same phase
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ── COMPOSITION ──       Protocol composition operator definitions (product: D₁ × D₂ → R₁ × R₂)
@@ -122,14 +121,14 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 
 **Tertiary pattern** (cross-session, aspirational — storage half operative, consumption half pending protocol grounding): Anamnesis hypomnesis store persists session recall indices → next session's protocol Phase 0/1 detection is enriched by accumulated domain knowledge → better protocol execution produces richer insights → hypomnesis store deepens → spiral deepening. The storage half (Anamnesis hypomnesis write) and the consumption half (each protocol's Phase 0/1 reading stored knowledge) together complete the cross-session hermeneutic circle. Unlike Primary/Secondary which operate within a single session, Tertiary operates across session boundaries with persistent knowledge as the medium. Consumption grounding requires protocol SKILL.md updates specifying how Phase 0/1 reads stored knowledge — contingent on prior Anamnesis hypomnesis output.
 
-## Relay Classification Audit Trail
+## Extension Classification Audit Trail
 
-When an ELIDABLE CHECKPOINT is classified as Extension (operational annotation: relay) and auto-resolved, the justification should be traceable to the five relay indicators defined in A2 Relay/Constitution Boundary (`axioms.md` table: deterministic, citable, within-boundary, entropy→0, basis-cited). This is not a new principle but an audit format surfacing existing A2 indicators.
+When a TOOL GROUNDING entry is classified as `(extension)` (relay-eligible) and auto-resolved, the justification should be traceable to the five relay indicators defined in A2 Relay/Constitution Boundary (`axioms.md` table: deterministic, citable, within-boundary, entropy→0, basis-cited). This is not a new principle but an audit format surfacing existing A2 indicators.
 
-### Relay Justification Format
+### Extension Justification Format
 
 ```
-[Extension] {Protocol} Phase {N} {Gate Label}
+[Extension] {Protocol} Phase {N} {Entry Label}
   ├─ deterministic:    {yes/no} — {evidence}
   ├─ citable:          {yes/no} — {source}
   ├─ within-boundary:  {yes/no} — {scope}
@@ -138,4 +137,4 @@ When an ELIDABLE CHECKPOINT is classified as Extension (operational annotation: 
   verdict: Extension ({N}/5)
 ```
 
-Relationship to the 3-axis elidability model (`docs/analysis/protocol-composition-gate-elision.md`): the 3-axis model determines whether a gate CAN be elided; relay justification documents HOW the elision is justified at the A2 level.
+Relationship to historical 3-axis elidability model (`docs/analysis/protocol-composition-gate-elision.md`, pre-unification): prior analysis used three axes; the post-unification single TOOL GROUNDING axis subsumes the prior model — `(extension)` classifies relay-eligibility, `(constitution)` classifies Constitution requirement, with conditional specialization absorbed as separate `(extension)` entries.

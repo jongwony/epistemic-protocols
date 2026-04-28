@@ -139,9 +139,12 @@ I (inquiry) = purpose: perspective-informed interpretation
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Qc (constitution)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; Esc key → loop termination at LOOP level)
-Sc (constitution)                → present (mandatory; multiSelect: true; Esc key → loop termination at LOOP level)
-T (dispatch)             → TeamCreate tool (parallel topology: creates team with shared task list); agent-aware realization: match available agents to selected perspectives before spawn — 0 matches: proceed with AI-generated teammates; 1 match: Extension (auto-assign); 2+ matches: Constitution (ELIDABLE) (user confirms agent-perspective mapping, each option genuinely viable under different user value weightings per option-set relay test, Extension classification)
+Phase 0 MB_from_arg (extension)  → TextPresent+Proceed (when user_invoked ∧ explicit_arg(U); Q1=confirm + m=ai_recommended_mode defaults; Phase 2 Sc remains constitution as downstream correction opportunity)
+Phase 0 Qc (constitution)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; when no explicit_arg; Esc key → loop termination at LOOP level)
+Sc (constitution)                → present (mandatory; multiSelect: true; lens selection is epistemic choice; Esc key → loop termination at LOOP level)
+Phase 3 AgentMap_auto (extension)  → TextPresent+Proceed (when agent_count(perspective) ≤ 1; auto-assign for 1 match, AI-generated for 0 matches; execution assignment correctable by team restructuring)
+Phase 3 AgentMap_select (constitution) → present (when agent_count(perspective) ≥ 2; user confirms agent-perspective mapping; option-set relay test applies)
+T (dispatch)             → TeamCreate tool (parallel topology: creates team with shared task list)
 ∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates — each receives MBᵥ + perspective only; no Phase 1 context G passed)
 ∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination — dispatch phase)
 Await (sense)            → IdleNotification (passive wait: teammate SubagentStop events surface as coordinator idle notifications; teammate→coordinator message delivery occurs at coordinator turn boundary, not at teammate send time; async message-passing execution model; no coordinator poll per Rule 14)
@@ -149,8 +152,8 @@ Phase 3 P (extension)        → TextPresent+Proceed (per-perspective epistemic 
 Phase 4 Δ (sense)        → Internal operation (trigger check per Trigger Detection Criteria; cite evidence per detected trigger)
 Phase 4 D? (dispatch)    → SendMessage tool (conditional topology: coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
 Phase 4 O (extension)        → TextPresent+Proceed (full synthesis — convergence, divergence, integrated assessment)
-Phase 4 Qc (constitution)        → present (routing only: extend/add_input/wrap_up/withdraw options; Esc key → loop termination at LOOP level)
-PF Qc (constitution)             → present (multiSelect: preservation scope; in LOOP wrap_up path only)
+Phase 4 Qc (constitution)        → present (routing only: extend/add_input/wrap_up/withdraw options; loop path + team lifecycle; Esc key → loop termination at LOOP level)
+PF Qc (constitution)             → present (multiSelect: preservation scope; knowledge preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (track) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
 Ω (dispatch)             → SendMessage tool (type: "shutdown_request", graceful teammate termination)
 Λ (track)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
@@ -158,18 +161,6 @@ G (observe)              → Read, Glob, Grep (meta-scope context acquisition: g
 Phase 4 Syn (sense)      → Internal operation (no external tool; basis_cited in O(L) Synthesis Basis section)
 characterize (sense)     → Internal operation (perspective count tier classification)
 converge (extension)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
-
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 0 Qc (MB+mode)    → elidable when: user_invoked ∧ explicit_arg(U)
-                           default: (Q1=confirm, Q2=ai_recommended_mode)
-                           regret: bounded (Phase 2 Sc always_gated; J_mb=modify on re-invoke)
-Phase 2 Sc (perspective) → always_gated (Constitution: lens selection is epistemic choice)
-Phase 3 AgentMap? (map)  → elidable when: agent_count(perspective) ≤ 1
-                           default: auto-assign (1 match) or AI-generated (0 matches)
-                           regret: bounded (execution assignment correctable by team restructuring)
-Phase 4 Qc (routing)     → always_gated (Constitution: loop path + team lifecycle)
-PF Qc (preserve)         → always_gated (Constitution: knowledge preservation scope)
 
 ── CATEGORICAL NOTE ──
 ∩ = graded meet (intersection with coordinator-assessed agreement strength) over comparison morphisms between perspective outputs
@@ -247,7 +238,7 @@ Consult `references/conceptual-foundations.md` for design rationale (Plan Mode I
 
 Construct a Mission Brief from the user's request and **present** it for confirmation via Cognitive Partnership Move (Constitution).
 
-**Phase 0 establishes the Mission Brief as primary context vehicle for teammate spawn prompts** — it structurally guarantees the agent-teams best practice ("give teammates enough context") rather than depending on coordinator inference. The phase runs unless elided per ELIDABLE CHECKPOINTS: `user_invoked ∧ explicit_arg(U)` — Standing authority delegation to pre-committed elision rule. On elision, the MB is still constructed from U but proceeds without the Phase 0 Constitution interaction; AI uses `J_mb=confirm` and `m=ai_recommended_mode` as defaults. Phase 2 S (perspective selection) remains always_gated, providing a downstream correction opportunity. Elision does not apply to J=extend re-invocations within an active loop.
+**Phase 0 establishes the Mission Brief as primary context vehicle for teammate spawn prompts** — it structurally guarantees the agent-teams best practice ("give teammates enough context") rather than depending on coordinator inference. When `user_invoked ∧ explicit_arg(U)`, the Phase 0 MB_from_arg Extension entry takes the path: the MB is still constructed from U but proceeds without the Phase 0 Constitution interaction; AI uses `J_mb=confirm` and `m=ai_recommended_mode` as defaults. Phase 2 S (perspective selection) remains Constitution, providing a downstream correction opportunity. The Extension path does not apply to J=extend re-invocations within an active loop.
 
 The coordinator infers the Mission Brief from U (the user's request):
 

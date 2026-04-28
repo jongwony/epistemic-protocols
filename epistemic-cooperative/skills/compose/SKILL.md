@@ -1,6 +1,6 @@
 ---
 name: compose
-description: "Protocol composition authoring assistant — build composition SKILL.md files from protocol Lego blocks. Validates chains against graph.json, analyzes gate dispositions via the 3-axis model, and generates pipeline templates. Use when the user asks to 'compose protocols', 'create composition skill', 'build protocol chain', 'combine protocols', or wants to author a composition workflow like /review."
+description: "Protocol composition authoring assistant — build composition SKILL.md files from protocol Lego blocks. Validates chains against graph.json, analyzes gate dispositions via the Constitution/Extension classification model, and generates pipeline templates. Use when the user asks to 'compose protocols', 'create composition skill', 'build protocol chain', 'combine protocols', or wants to author a composition workflow like /review."
 ---
 
 # Compose: Protocol Composition Authoring
@@ -87,8 +87,8 @@ On missing precondition: suggest inserting the missing protocol at the correct p
 Read all protocol SKILL.md files in parallel (paths are deterministic after Phase 1 validation). For each protocol:
 
 1. **Locate SKILL.md**: Read `{protocol}/skills/{skill}/SKILL.md`
-2. **Extract ELIDABLE CHECKPOINTS**: Grep for `ELIDABLE CHECKPOINTS` section
-3. **Parse each gate entry**: Extract Phase number, Kind (relay/gated), label, condition (always_gated/elidable/conditional), regret profile (bounded/unbounded), and safety net reference (if stated)
+2. **Extract TOOL GROUNDING**: Grep for `TOOL GROUNDING` section
+3. **Parse each entry**: Extract Phase number, label, classification (`constitution` or `extension`), inline condition (parenthetical text after the entry, if any), and downstream safety reference (if stated)
 
 Build the gate inventory:
 
@@ -98,32 +98,33 @@ List<{
   phase: Number,
   kind: Qc | Qs,
   label: String,
-  condition: always_gated | elidable | conditional,
-  elidable_when: String?,       -- condition text for elidable/conditional gates
-  regret: bounded | unbounded,
-  safety_net: String?            -- downstream catch gate reference
+  classification: constitution | extension,
+  condition: String?,            -- inline condition text for split (extension) entries (e.g., "when explicit_arg(U)")
+  safety_net: String?            -- downstream Constitution gate reference
 }>
 ```
+
+Constitution entries are gated (user judgment required); Extension entries are conditional auto-resolutions whose condition is recorded inline. Pairs of (extension)/(constitution) entries within the same Phase represent split conditional gates — the Extension path takes the auto-resolution when its condition fires; otherwise the Constitution path requires user judgment.
 
 Present the inventory as an informational summary (no gate — Phase 3 is where the user reviews):
 
 ```
 ## Gate Inventory
 
-{protocol}: {N} gates ({M} Qs, {K} Qc)
-  - Phase {X} {Kind} ({label}): {condition}
+{protocol}: {N} entries ({M} Constitution, {K} Extension)
+  - Phase {X} ({label}): {classification}{ — when condition if Extension}
   ...
 
-Chain Total: {total} gates
+Chain Total: {total} entries ({total_constitution} Constitution, {total_extension} Extension)
 ```
 
-## Phase 3: Disposition (3-Axis Analysis)
+## Phase 3: Disposition (Composition-Level Gate Analysis)
 
-Apply the disposition decision flow to each gate in the inventory.
+Apply the disposition decision flow to each gate in the inventory. Constitution/Extension classification (parsed from TOOL GROUNDING) is the input; composition-level disposition determines whether each Constitution gate becomes PRESENT, PRUNE, or ELIDE within this specific chain. Extension entries (split conditional auto-resolutions) require no disposition — they fire when their inline condition holds and otherwise fall through to the paired Constitution entry within the same Phase.
 
 ### Disposition Decision Flow
 
-For each gate G in the composition context:
+For each Constitution gate G in the composition context:
 
 ```
 1. Qs(G)?                                              → PRESENT
@@ -145,13 +146,13 @@ Steps 2 and 4 are **conditional** — apply only when Horismos is in the chain a
 
 ### Catch-Chain Invariant
 
-For every gate marked ELIDE, verify:
+For every Constitution gate G whose disposition is ELIDE, verify:
 
 ```
-elidable(G) ⟹ ¬elidable(safety_net(G))
+disposition(G) = ELIDE ⟹ disposition(safety_net(G)) ≠ ELIDE
 ```
 
-If violated: promote the safety net gate to PRESENT. This prevents cascading elision from removing all user checkpoints.
+If violated: promote the safety net gate to PRESENT. This prevents cascading composition-time delegation from removing all user checkpoints.
 
 ### Presentation
 
@@ -182,7 +183,7 @@ Interaction reduction: ~{percent}%
 After Chain Summary, present cost visibility sub-section:
 
 **Gate density**: `{total_gates} / {protocol_count}` = `{density}` gates/protocol
-**Always-gated ratio**: `{always_gated_count} / {presented_gates}`
+**Constitution ratio**: `{constitution_count} / {presented_gates}`
 
 **System 2 load** — ASCII timeline per protocol:
 
@@ -201,7 +202,7 @@ Legend: ■ = presented, · = elided, × = pruned
 | Elided Gate | Supporting Output | Basis |
 |-------------|-------------------|-------|
 
-The `Basis` column connects to the 3-axis elidability model used in this skill — Axis 2 (`O_support`) is the primary justification source.
+The `Basis` column connects to the composition-time disposition model used in this skill — `O_support` (prior protocol output entails this gate's answer) is the primary justification source for ELIDE dispositions.
 
 **Gate #2** (Qc, bounded regret — Phase 4 allows regeneration):
 
@@ -319,7 +320,7 @@ Shortcuts are convenience aliases — the user can always specify a custom chain
 2. **Graph authority**: `references/graph.json` is the authoritative source for chain validation — do not override precondition or suppression edges without user explicit confirmation
 3. **Conservative default**: When disposition is ambiguous, default to PRESENT (ask user) over ELIDE (auto-pass)
 4. **Catch-chain is structural**: Catch-chain invariant violations block template generation — not advisory, not overridable
-5. **Inline decision flow**: The disposition decision flow (3-axis model) must be included in the generated template so the runtime agent can apply it without cross-referencing analysis documents
+5. **Inline decision flow**: The composition-level disposition decision flow must be included in the generated template so the runtime agent can apply it without cross-referencing analysis documents
 6. **BoundaryMap conditionality**: BoundaryMap-dependent dispositions are generated as conditional rules only when Horismos is in the chain; omit otherwise
 7. **No duplicate gates**: The generated template references protocols by `skills:` frontmatter and pipeline context rules — it does not duplicate the protocol's own gate definitions
 8. **Template completeness**: Every generated template must include: frontmatter with skills list, pipeline context rules, materialized view template, error recovery section, and rules section

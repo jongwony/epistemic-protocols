@@ -366,15 +366,6 @@ function checkRequiredSections() {
       }
     }
 
-    // Check 5b: Optional section - ELIDABLE CHECKPOINTS (warn if missing)
-    if (!content.includes('── ELIDABLE CHECKPOINTS ──')) {
-      results.warn.push({
-        check: 'structure',
-        file: relPath,
-        message: 'Missing optional section: "── ELIDABLE CHECKPOINTS ──" (Constitution-interaction elidability analysis)'
-      });
-    }
-
     results.pass.push({
       check: 'structure',
       file: relPath,
@@ -2213,6 +2204,84 @@ function checkArtifactSelfContainment() {
 }
 
 // ============================================================
+// Check 17: Single-Axis Soundness
+// ============================================================
+// Enforces the unified Constitution/Extension annotation axis in TOOL GROUNDING.
+// Live SKILL.md / rule / doc files must not contain the obsolete dual-axis vocabulary
+// (`── ELIDABLE CHECKPOINTS ──` section header, `always_gated`, or `elidable` as annotation tokens).
+// Historical analysis docs and audit reports keep their pre-unification references.
+function checkSingleAxisSoundness() {
+  const BANNED_PATTERNS = [
+    { pattern: /── ELIDABLE CHECKPOINTS ──/, label: '── ELIDABLE CHECKPOINTS ── section header' },
+    { pattern: /\balways_gated\b/, label: '`always_gated` annotation token' },
+    { pattern: /\belidable\b/, label: '`elidable` annotation token' }
+  ];
+
+  const SKIP_PATTERNS = [
+    /^docs\/analysis\//,
+    /^docs\/audit-/,
+    /^\.claude\/skills\/audit-delta\//,
+    /^\.claude\/worktrees\//,
+    /^node_modules\//,
+    /^dist\//,
+    /^\.git\//
+  ];
+
+  function isWhitelisted(relPath) {
+    return SKIP_PATTERNS.some((re) => re.test(relPath));
+  }
+
+  function* walk(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relPath = path.relative(process.cwd(), fullPath);
+      if (isWhitelisted(relPath)) continue;
+      if (entry.isDirectory()) {
+        if (entry.name.startsWith('.git') || entry.name === 'node_modules' || entry.name === 'dist') continue;
+        yield* walk(fullPath);
+      } else if (entry.isFile() && entry.name.endsWith('.md')) {
+        yield relPath;
+      }
+    }
+  }
+
+  const violations = [];
+  for (const relPath of walk(process.cwd())) {
+    let content;
+    try {
+      content = fs.readFileSync(relPath, 'utf8');
+    } catch {
+      continue;
+    }
+    const lines = content.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      for (const { pattern, label } of BANNED_PATTERNS) {
+        if (pattern.test(lines[i])) {
+          violations.push({ file: relPath, line: i + 1, label, snippet: lines[i].trim().slice(0, 200) });
+        }
+      }
+    }
+  }
+
+  if (violations.length === 0) {
+    results.pass.push({
+      check: 'single-axis-soundness',
+      file: 'all .md files (live)',
+      message: `Single-axis soundness verified — no obsolete dual-axis vocabulary (${BANNED_PATTERNS.map(p => p.label).join(', ')})`
+    });
+  } else {
+    for (const v of violations) {
+      results.fail.push({
+        check: 'single-axis-soundness',
+        file: `${v.file}:${v.line}`,
+        message: `Banned vocabulary: ${v.label} — "${v.snippet}"`
+      });
+    }
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -2232,6 +2301,7 @@ try {
   checkPartitionInvariant();
   checkGateTypeSoundness();
   checkArtifactSelfContainment();
+  checkSingleAxisSoundness();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));

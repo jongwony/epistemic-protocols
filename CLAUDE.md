@@ -47,7 +47,7 @@ epistemic-protocols/
 
 **Plugin Encapsulation**: Runtime users interact with the packaged runtime contract: `Skill.md` (normative user contract) plus plugin description metadata (discovery/routing only, not full semantics). `.claude/rules/` prescriptive changes affecting protocol behavior must be compiled into `Skill.md` Rules sections. `Skill.md` must be self-contained — no external references (axiom identifiers, rule file paths, design-philosophy concepts, mission/vision docs) that require reading contributor documentation. Claim-strength boundaries for each runtime surface are tracked in [docs/runtime-dependency-ledger.md](docs/runtime-dependency-ledger.md).
 
-**SKILL.md Formal Block Anatomy**: FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, ELIDABLE CHECKPOINTS, MODE STATE, COMPOSITION (and optional blocks). Details: [docs/structural-specs.md](docs/structural-specs.md#skillmd-formal-block-anatomy)
+**SKILL.md Formal Block Anatomy**: FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION (and optional blocks). Details: [docs/structural-specs.md](docs/structural-specs.md#skillmd-formal-block-anatomy)
 
 ## Plugins
 
@@ -185,7 +185,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Dashboard**: Phase 2 delegates to coverage-scanner subagent (single) for batch aggregation. Main agent handles Phases 1, 3, 4.
 - **Introspect**: Phase 1 launches 3 ad-hoc inline Task(general-purpose) invocations in parallel (rules/config collection, usage stats collection, session behavior collection). Main agent handles Phase 2 (5-dimension analysis, Strength-Shadow, normative-descriptive conflict surface) — emits analysis as text output with a visible red-line discovery line; corrections via free response at subsequent turns regenerate affected downstream sections. Phase 3 main agent optionally composes `/analogia:ground`. Phase 4 main agent generates HTML output; `references/report-guide.md` used for CSS/component templates.
 - **Catalog**: No delegation—text-only output, main agent handles all. Read tool for scenarios.md detail mode only.
-- **Compose**: No delegation—main agent handles all phases. Read/Grep for graph.json and ELIDABLE CHECKPOINTS extraction, Write for template generation.
+- **Compose**: No delegation—main agent handles all phases. Read/Grep for graph.json and TOOL GROUNDING extraction, Write for template generation.
 - **Sophia**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (matching, presentation, report).
 - **Curses**: Phase 1 delegates to coverage-scanner then dimension-profiler subagents (serial chain). Main agent handles Phases 2-4 (analysis, recommendations, report).
 - **Write**: No delegation—main agent handles all phases. Composes /frame (Prothesis) for perspective analysis; the composed protocol's delegation rules apply when invoked.

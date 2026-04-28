@@ -80,23 +80,15 @@ early_exit = user_declares_sufficient (any progress level)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Qc (constitution)    → present (goal confirmation + activation approval)
+Phase 0 G_from_arg (extension) → TextPresent+Proceed (when explicit_arg via /goal "text"; proceed with inferred goal seed; Phase 2 Qs free-response override available downstream)
+Phase 0 Qc (constitution)    → present (goal confirmation + activation approval; when no explicit_arg)
 Phase 1 detect (sense) → Internal analysis (dimension detection from Gᵥ)
-Phase 1 present (extension) → TextPresent+Proceed (full taxonomy with evidence + falsification + emergent probe + progress display; flows into Phase 2)
+Phase 1 present (extension) → TextPresent+Proceed (full taxonomy with evidence + falsification + emergent probe + progress display; option-set relay test — Proceed dominates under user-invoked or user-confirmed activation; flows into Phase 2)
 Phase 2 P  (observe) → Read, Grep (context for proposal generation; fallback: template)
-Phase 2 Qs (constitution)    → present (mandatory; Esc key → loop termination at LOOP level, not a Response)
+Phase 2 Qs (constitution)    → present (mandatory; Accept/Modify/Reject/Extend — user shapes contract; free response overrides taxonomy — emergent add, non-Outcome exclude, redirect; override capability must be disclosed at the Constitution interaction under user authority; Esc key → loop termination at LOOP level, not a Response)
 Phase 3    (track)   → Internal GoalContract update (no external tool)
-Phase 4 Qc (constitution)    → present (GoalContract review + approval)
+Phase 4 Qc (constitution)    → present (GoalContract review + approval — final binding decision)
 converge (extension)     → TextPresent+Proceed (convergence evidence trace; context for Phase 4 Qc GoalContract approval)
-
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 0 Qc (confirm)       → elidable when: explicit_arg via /goal "text"
-                              default: proceed with inferred goal seed
-                              regret: bounded (Phase 2 Qs free-response override available)
-Phase 1 present (taxonomy) → extension (full taxonomy with evidence; no Constitution interaction — option-set relay test, Extension classification: Proceed dominates under user-invoked or user-confirmed activation)
-Phase 2 Qs (negotiate)     → always_gated (Constitution: Accept/Modify/Reject/Extend — user shapes contract; free response overrides taxonomy — emergent add, non-Outcome exclude, redirect; override capability must be disclosed at the Constitution interaction under user authority)
-Phase 4 Qc (approve)       → always_gated (Constitution: contract approval — final binding decision)
 
 ── MODE STATE ──
 Λ = { phase: Phase, G: Goal, Gᵥ: Goal, detected: Set(Dim), applicable: Set(Dim),

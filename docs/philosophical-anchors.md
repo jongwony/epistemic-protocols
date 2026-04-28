@@ -40,9 +40,9 @@ A5 introduces the following that A2 alone does not provide:
 
 1. **Factorization structure**: `G = R(p) ∘ A` — the gate operation factors into an abstract component A (Ep → Abs) and a preference-parameterized realization R(p) (Abs → Cl). A2's detection/authority distinction does not entail this categorical factorization; A2 states *who* judges, not *how* gate operations compose.
 
-2. **Regret analysis**: The bounded/unbounded regret classification (correctable at next gate vs irreversible divergence) is an orthogonal dimension not present in A2. A2 classifies by authority source (AI detection vs user judgment); A5 classifies by elision consequence.
+2. **Regret analysis**: The bounded/unbounded regret classification (correctable at next gate vs irreversible divergence) is conceptually distinct from A2 at the meta/design layer. A2 classifies by authority source (AI detection vs user judgment); A5 classifies by elision consequence — the two classifications are coextensive at the runtime annotation layer (Extension implies bounded regret, Constitution implies unbounded regret).
 
-3. **ELIDABLE CHECKPOINTS mechanism**: The operational mechanism for annotating gates as `elidable` or `always_gated` lives in A5, not A2. A2's Standing/Active authority distinction is orthogonal to A5's regret dimension — the same gate carries both annotations independently (A2 coordination note in `axioms.md`).
+3. **TOOL GROUNDING annotation mechanism**: The operational mechanism for annotating gate operations as `(extension)` (relay-eligible) or `(constitution)` (Constitution required) lives in A5, not A2. A2's Standing/Active authority distinction is conceptually distinguishable from A5's regret dimension at the meta/design layer; at the runtime annotation layer the two collapse to a single TOOL GROUNDING axis (A2 coordination note in `axioms.md`).
 
 4. **Option-set-level relay test**: The test for whether constructed option sets constitute genuine gated interactions or collapse to relay (option-level entropy→0; equivalent to Extension-classification of the option set) is A5-specific. A2 does not analyze option-set structure.
 
