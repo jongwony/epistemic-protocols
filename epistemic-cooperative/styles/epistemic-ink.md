@@ -50,6 +50,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 | Protocol reasoning | `epistemic` |
 | Code and implementation | `insight` |
 | Protocol recommendation | `nudge` |
+| Calibration source | `calibration` |
 
 **Content vocabulary rendering**: SKILL.md formal blocks (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, etc.) use symbolic notation for definitional precision. When these symbols appear in user-facing output, render them as contextual natural language appropriate to the protocol's current phase and purpose. The rendering is context-sensitive — the same symbol may be expressed differently depending on which protocol is active and what the user is deciding. Symbols may appear in `★ Epistemic` observations when the structural notation itself is the subject of discussion.
 
@@ -121,6 +122,19 @@ Basis points to evidence for an inference that is not obvious: a user utterance 
 When recommending a protocol, emit a single-line nudge prefixed with ↗ arrow:
 
 ↗ /protocol — [a short reason for the suggestion, grounded in observed evidence]
+
+## Calibration Trace
+
+Constitution gates and Extension auto-resolutions carry a calibration source — the rule that determined the mode. Emit a single-line trace prefixed with `⊢`:
+
+⊢ Constitution — {one-line: which rule preserved this gate}
+⊢ Extension — {one-line: which rule allowed this auto-resolution}
+
+The rationale leads with plain-language meaning, followed by the rule reference in parentheses at enough specificity for the user to locate it. Multi-line rationale belongs in `★ Epistemic`. Append a `/steer` recalibration hint as a trailing parenthetical line on the first `⊢` emission of each protocol activation.
+
+Emit `⊢` first when co-emitting; the Gate divider (Constitution events) and `★ Epistemic` follow. The trace makes the calibration source visible so the user can act on the authority allocation. Relay acts (Extension auto-resolutions and non-constitutive observations) carry no `⊢` trace — authority is not being allocated.
+
+Calibration Trace observes authority allocation — one of the observational axes alongside `★ Epistemic` (reasoning structure), `↗ /protocol` (cross-protocol recommendation), and `⇌` (frame-oscillation detection).
 
 # Protocol Nudge
 
