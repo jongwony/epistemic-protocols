@@ -119,13 +119,14 @@ Reference Shells (available; not auto-loaded):
 - Session Anchors: previous_session_id=<id>, branch=<name>, pr_number=<N>
 - File Anchors: <N paths>
 - External References: <N URLs>
+- Task Anchors: <N session task paths> (e.g., ~/.claude/tasks/<previous_session_id>/)
 ```
 
-This separation enforces topology distinction: auto-memory and hypomnesis remain operationally distinct; the user explicitly invokes /inquire or /recollect when those substrates are needed.
+This separation enforces topology distinction: auto-memory, hypomnesis, and per-session task substrates remain operationally distinct; the user explicitly invokes /inquire or /recollect when those substrates are needed.
 
 ### Phase 5: Anchor Task Identification
 
-Filter `TaskList` for tasks with `metadata.source == "crystallize-hft"` and `metadata.stage == <stage_id from frontmatter>`. These are the anchor tasks emitted by the originating `/crystallize` invocation.
+Filter `TaskList` for tasks with `metadata.source == "crystallize-hft"` and `metadata.stage == <stage_id from frontmatter>`. These are the anchor tasks emitted by the originating `/crystallize` invocation in the *current* session scope. Cross-session anchor tasks (originating session differs from current session) live under the Task Anchors path surfaced in Phase 4 — the user reaches them via `/inquire` or `/recollect` against `~/.claude/tasks/<previous_session_id>/`.
 
 Present the anchor task set:
 
@@ -152,7 +153,7 @@ Rehydration Convergence Trace
 - Generated: <date>, baseline git_head: <SHA>, drift: <none / N commits ahead>
 - Surface Text: 1-pass read; Sache = "<restated>"
 - Wirkungsgeschichte: <N trajectory entries, N rejected alternatives, N external priors> recognized
-- Reference Shells: <N session, N file, N external> available (not auto-loaded)
+- Reference Shells: <N session, N file, N external, N task> available (not auto-loaded)
 - Anchor tasks: <N pending, N in-progress, N completed>
 - Resumption: <chosen path from Phase 5>
 - Stage 1 caveat: this HFT is Stage 1 conjecture; format may evolve.
@@ -204,7 +205,8 @@ HFT_path       = Path
 Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from, stage_classification, n1_dogfooding_caveat }
 SurfaceText    = { design_concept: String, ubiquitous_language: List<(term, meaning)>, sache: String }
 Wirkungsgeschichte = { trajectory: List<Entry>, rejected: List<Entry>, priors: List<Entry> }
-ReferenceShells = { session: List<KV>, files: List<Path>, urls: List<URL> }
+ReferenceShells = { session: List<KV>, files: List<Path>, urls: List<URL>, tasks: List<Path> }
+                 -- tasks: per-session task substrate paths (~/.claude/tasks/<session_id>/); surfaced as anchor, not auto-fetched
 T              = AnchorTaskSet
                  = { t : Task | t.metadata.source = "crystallize-hft" ∧ t.metadata.stage = stage_id }
                  -- predicate filters TaskList; stage_id sourced from frontmatter

@@ -49,8 +49,9 @@ An HFT file has exactly four layers, identified by H2 headings and ordered as be
 1. `### Session Anchors` — `previous_session_id`, `branch`, optional `pr_number`. One key per line.
 2. `### File Anchors` — file paths the work touched or depends on. One path per line.
 3. `### External References` — URLs to external materials (videos, articles, prior memos). One URL per line.
+4. `### Task Anchors` — paths to per-session task substrates (`~/.claude/tasks/<session_id>/`). One path per line. The path inscription enables cross-session anchor task discovery via `/inquire` or `/recollect` (TaskList scope covers the current session only).
 
-**No-data invariant**: Reference Shells must contain only identifiers and paths, never copied content. Inlining the referenced data into HFT body violates the topology-separation invariant (auto-memory and hypomnesis are operationally distinct substrates and must stay distinct).
+**No-data invariant**: Reference Shells must contain only identifiers and paths, never copied content. Inlining the referenced data into HFT body violates the topology-separation invariant (auto-memory, hypomnesis, and per-session task substrates are operationally distinct and must stay distinct).
 
 ### Layer 4: Excluded (Topology Declaration)
 
@@ -60,6 +61,7 @@ An HFT file has exactly four layers, identified by H2 headings and ordered as be
 
 - `auto-memory MEMORY.md body` — separate topology; reachable via its own auto-load mechanism
 - `hypomnesis sub-index body` — separate topology; reachable via `/recollect` or `/inquire`
+- `per-session task substrate body` — separate topology; path inscribed as Task Anchor in Reference Shells, reachable via `/inquire` or `/recollect`
 - `tactical execution traces` — regenerable by fresh session from Surface Text + Wirkungsgeschichte
 
 Project-specific exclusions extend this list.
@@ -103,7 +105,7 @@ A writer protocol inscribes layers in the following order, because each layer de
 2. Inscribe `### Design Concept` and `### Ubiquitous Language` — fresh per stage
 3. Inscribe `### Sache` — the live subject for the new stage
 4. Append new entries to `### Formation Trajectory`, `### Rejected Alternatives`, `### External Priors` — preserves prior content
-5. Update `### Session Anchors`, `### File Anchors`, `### External References`
+5. Update `### Session Anchors`, `### File Anchors`, `### External References`, `### Task Anchors`
 6. Refresh `### Excluded` only if topology choice changed
 7. Write frontmatter with current `git_head` and `generated_at`
 

@@ -101,21 +101,23 @@ Present the delta via Cognitive Partnership Move (Constitution). User options: A
 
 ### Phase 4: Reference Shell Enumeration
 
-Collect anchors to auxiliary substrates. Three subsections:
+Collect anchors to auxiliary substrates. Four subsections:
 
 1. **Session Anchors** — `previous_session_id` (current session ID), current `branch`, optional `pr_number` (from `gh pr view --json number 2>/dev/null`)
 2. **File Anchors** — file paths the work touched. Source: `git diff --name-only <predecessor-baseline>..HEAD` if predecessor frontmatter `git_head` is available, else `git diff --name-only main..HEAD`
 3. **External References** — URLs to external materials cited in the session (videos, articles, prior memos)
+4. **Task Anchors** — `~/.claude/tasks/<previous_session_id>/` per stage (the per-session task substrate path), mechanically derivable from `previous_session_id`. Multi-stage HFT accumulates one path per inherited stage per the Reference Shells refresh policy (update in place, stale anchors retained). Inscribed for cross-session anchor task discovery via `/inquire` or `/recollect`
 
-No-data invariant: Reference Shell entries are paths or URLs only. Do not inline content from any anchored substrate. Inlining auto-memory or hypomnesis content into HFT body collapses topology separation.
+No-data invariant: Reference Shell entries are paths or URLs only. Do not inline content from any anchored substrate. Inlining auto-memory, hypomnesis, or task substrate content into HFT body collapses topology separation.
 
-Default behavior: auto-collect when all three subsections are mechanically determinable (current session ID is known, `git diff` returns paths, URLs come from session context). Auto-collected anchors flow into Phase 5 final approval where they are reviewed alongside the rest of the HFT draft. Surface a Cognitive Partnership Move (Constitution) with options Accept · Modify(anchor, direction) · Reject · Free response only when an anchor source is ambiguous (e.g., multiple plausible PRs to cite, or the user has explicitly requested manual review). The default and the Constitution path together honor the elidable annotation in ELIDABLE CHECKPOINTS — Phase 5 Qc remains the binding gate.
+Default behavior: auto-collect when all four subsections are mechanically determinable (current session ID is known, `git diff` returns paths, URLs come from session context, task path derives from session ID). Auto-collected anchors flow into Phase 5 final approval where they are reviewed alongside the rest of the HFT draft. Surface a Cognitive Partnership Move (Constitution) with options Accept · Modify(anchor, direction) · Reject · Free response only when an anchor source is ambiguous (e.g., multiple plausible PRs to cite, or the user has explicitly requested manual review). The default and the Constitution path together honor the elidable annotation in ELIDABLE CHECKPOINTS — Phase 5 Qc remains the binding gate.
 
 ### Phase 5: Excluded Layer + Frontmatter Confirmation
 
 Default Excluded entries (always present unless rationale changes):
 - `auto-memory MEMORY.md body` — separate topology
 - `hypomnesis sub-index body` — separate topology
+- `per-session task substrate body` — separate topology
 - `tactical execution traces` — regenerable from Surface Text + Wirkungsgeschichte
 
 Frontmatter assembly:
@@ -184,7 +186,8 @@ P_prev         = Optional(InscribedHFT)            -- predecessor file content +
 S              = SurfaceText { design_concept: String, ubiquitous_language: List<(term, meaning)>, sache: String }
 W              = Wirkungsgeschichte { trajectory: List<Entry>, rejected: List<Entry>, priors: List<Entry> }
 W_delta        ⊂ Wirkungsgeschichte                 -- proper subset: current-stage entries only (each list ⊂ corresponding W list)
-R              = ReferenceShells { session: List<KV>, files: List<Path>, urls: List<URL> }
+R              = ReferenceShells { session: List<KV>, files: List<Path>, urls: List<URL>, tasks: List<Path> }
+                 -- tasks: per-session task substrate paths (~/.claude/tasks/<session_id>/); mechanically derivable from session_id
 Excluded       = List<(substrate, rationale)>
 Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from, stage_classification, n1_dogfooding_caveat }
 HFT_draft      = { frontmatter, S, W_full, R, Excluded }
