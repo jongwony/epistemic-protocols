@@ -13,8 +13,9 @@ This project's Cognitive Partnership Move calibration profile (per `project-prof
 
 ## Calibration Result
 
-**Extension-default** for ambiguous gates. Constitution preserved for the three categories per `project-profile-calibration.md` scope boundary:
+**Extension-default** for ambiguous gates. Constitution preserved at the floor of the epistemic substrate per `project-profile-calibration.md §Scope Boundary` (aligned with `architectural-principles.md §Epistemic Completeness Boundary`):
 
-- (a) user IS measurement — Katalepsis, Hermeneia Phase 2
-- (b) user authority IS resolution — Telos, Horismos, Syneidesis
-- (c) safety requires human — Prosoche Phase 2
+- Katalepsis (`/grasp`): user IS the measurement target
+- Prosoche `/attend` Phase 2: gate interaction (epistemic substrate); gate-passage actions requiring substrate enforcement are delegated by handoff
+
+Bounded zone (in-principle delegatable; covered by Standing authority + Stage 2 correction): Telos GoalContract, Horismos BoundaryMap, Syneidesis decision pattern, Hermeneia Phase 2 articulation.

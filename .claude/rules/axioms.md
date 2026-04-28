@@ -66,8 +66,6 @@ The act of creating Standing authority — writing a system prompt rule, configu
 
 **A5 coordination**: Standing/Active is an authority-source dimension orthogonal to A5's regret dimension (bounded/unbounded). A5 classifies gates by *what happens if elided* (regret); Standing/Active classifies by *who authorized the elision* (authority source). The same gate carries both annotations independently: `elidable` (A5: bounded regret) AND delegatable to Standing authority (A2: User pre-committed). Neither dimension subsumes the other.
 
-**Scope boundary**: EP protocols govern authority boundary definition and protection (epistemic scope). Standing authority implementation — system prompts, CI/CD rules, compose automation — belongs to the operational scope outside EP protocols. EP defines where the boundary is; the operational layer realizes the delegation.
-
 ## A3. Convergence Persistence
 
 Protocol modes remain active until convergence conditions are met or the user explicitly exits. A protocol that deactivates before convergence abandons its epistemic commitment — the deficit it was created to address remains unresolved.

@@ -17,7 +17,13 @@ Aggregated low-cost profile → Extension-default for ambiguous gates with Katal
 
 ## Scope Boundary
 
-This mechanism calibrates *ambiguous* decisions. Constitution-required decisions remain Constitution regardless of profile in three categories — (a) user IS the measurement target, (b) user authority IS the resolution, (c) safety requires human. These three categories are inscribed inline rather than externally referenced to preserve self-containment.
+This mechanism calibrates *ambiguous* decisions. Decisions whose epistemic completion requires further user judgment — not substrate enforcement — remain Constitution regardless of profile (in-principle delegation impossibility within the epistemic substrate; see `architectural-principles.md §Epistemic Completeness Boundary` for the substrate boundary).
+
+Floor instances (Constitution preserved):
+- Katalepsis (`/grasp`): the user is the measurement target.
+- Prosoche `/attend` Phase 2: gate interaction (risk classification, intent transmission, judgment surfacing) — the epistemic part. Gate-passage actions requiring substrate enforcement (harness permission, high-stake execution) are non-epistemic substrate, delegated by handoff per the Boundary.
+
+Bounded zone (in-principle delegatable; runtime conditional cover by Standing authority + Stage 2 correction): Telos GoalContract, Horismos BoundaryMap, Syneidesis decision pattern, Hermeneia Phase 2 articulation.
 
 ## Cross-Project Corroboration
 

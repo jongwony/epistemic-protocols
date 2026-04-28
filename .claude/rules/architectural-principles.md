@@ -19,4 +19,18 @@ The factorization is realized by complementary mechanisms. File content typicall
 
 Sibling concept to A5 (Interaction Kind Factorization): A5 factors gate operations into Extension/Constitution × bounded/unbounded; Tier Factorization factors tier classifications into axis_α × axis_β. Promotion/demotion along axis_β follows Stage 2 use corroboration (per `meta-principle.md` §Deficit Empiricism — full detail in `.claude/principles/meta-principle.md`).
 
+## Epistemic Completeness Boundary
+
+EP principles govern the epistemic substrate — the domain of human-AI dialogue where authority, judgment, framing, and recognition are constituted. Their completeness claim terminates at substrate boundaries: physical safety, harness permission, credential policy, and high-stake action execution belong to native harnesses or specialized plugins, not to EP protocols.
+
+The boundary lives at the architectural layer rather than within axioms. EP's mission is to surface invisible territory in human-AI dialogue; a principle that absorbs its own application boundary into its body makes its own scope invisible. Substrate-scope declarations therefore sit one layer above the dialogue mechanics they delimit — domain-internal mechanics in the axiom layer, domain-scope declarations in the architectural layer (analogous to mathematical practice where domain commitments sit in metatheory rather than within the axiom system itself).
+
+Operationally: EP defines and protects authority-boundary visibility; the operational layer (system prompts, CI/CD rules, compose automation, harness permissions) realizes the delegation. Protocols may classify and surface non-epistemic risk at boundary crossings, but they neither discharge nor enforce external substrate semantics.
+
+**Test**: if the remaining obligation after epistemic detection requires substrate enforcement rather than further epistemic judgment, EP records the handoff and stops; the obligation is delegated, not absorbed.
+
+**Observed instances**:
+- A2 authority allocation: Standing authority implementation (system prompts, CI/CD, compose automation) is non-epistemic substrate; A2 governs the *visibility* of authority allocation within the epistemic substrate, not its operational realization.
+- Prosoche `/attend` Phase 2: gate interaction (risk classification, intent transmission, judgment surfacing) is epistemic substrate; gate-passage actions requiring harness permission or high-stake execution are non-epistemic substrate, delegated by handoff.
+
 > **Demoted detail**: Other architectural principles (Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload) live in `.claude/principles/architectural-principles.md` (axis_β = T2–T3, conditional invocation). Fetch via Read/Grep when authoring/verify-time inquiry warrants. Promotion back to this file is governed by Stage 2 use corroboration; see `.claude/principles/README.md` for the demotion ledger.
