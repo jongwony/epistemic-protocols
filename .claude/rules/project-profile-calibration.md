@@ -19,11 +19,21 @@ Aggregated low-cost profile → Extension-default for ambiguous gates with Katal
 
 This mechanism calibrates *ambiguous* decisions. Decisions whose epistemic completion requires further user judgment — not substrate enforcement — remain Constitution regardless of profile (in-principle delegation impossibility within the epistemic substrate; see `architectural-principles.md §Epistemic Completeness Boundary` for the substrate boundary).
 
-Floor instances (Constitution preserved):
-- Katalepsis (`/grasp`): the user is the measurement target.
-- Prosoche `/attend` Phase 2: gate interaction (risk classification, intent transmission, judgment surfacing) — the epistemic part. Gate-passage actions requiring substrate enforcement (harness permission, high-stake execution) are non-epistemic substrate, delegated by handoff per the Boundary.
+**Floor vs bounded zone distinguishing criterion**: both involve epistemic substrate gate interaction; the split is about whether the gate's content is *runtime-discovered* (cannot be pre-committed via Standing authority pattern because the relevant condition is not knowable at protocol-definition time) or *contract-pre-committed* (pattern is pre-commitable as a project-level standing rule).
 
-Bounded zone (in-principle delegatable; runtime conditional cover by Standing authority + Stage 2 correction): Telos GoalContract, Horismos BoundaryMap, Syneidesis decision pattern, Hermeneia Phase 2 articulation.
+Floor instances (Constitution preserved — runtime-discovered):
+- Katalepsis (`/grasp`): the user is the measurement target — comprehension is verified, not pre-committed. Retry would change the verification's identity (re-asking after seeing the answer ≠ original verification).
+- Prosoche `/attend` Phase 2: gate interaction over runtime-discovered risk patterns — the specific irreversibility, security boundary, or human-communication context emerges at execution time and is not pattern-pre-committable. Gate-passage actions requiring substrate enforcement (harness permission, high-stake execution) are non-epistemic substrate, delegated by handoff per the Boundary.
+
+Bounded zone (in-principle delegatable via contract-style Standing authority + Stage 2 correction):
+- Telos GoalContract — pre-commitable as project-level standing goals.
+- Horismos BoundaryMap — pre-commitable as project-level scope rules.
+- Syneidesis decision pattern — pre-commitable as recurring decision templates.
+- Hermeneia Phase 2 articulation — pre-commitable as default-articulation rules for recurring intent patterns. Distinguished from Katalepsis floor by *retry semantics*: incorrect articulation is correctable at the next Hermeneia invocation (bounded regret), whereas Katalepsis's measurement identity precludes retry without altering the verification.
+
+**Stage 1 conjecture (operational realization deferred)**: "in-principle delegatable" is a *capability* statement (Standing authority pattern would in principle cover the gate). Operational realization — per-protocol `ELIDABLE CHECKPOINTS` migration from `always_gated` to `elidable` where appropriate — is deferred to per-protocol future stages with their own Stage 2 corroboration. Current SKILL.md `always_gated` annotations remain runtime-authoritative.
+
+**Self-containment policy**: the previous design note ("inscribed inline rather than externally referenced to preserve self-containment") applied to a self-contained enumeration. With substrate-scope semantics relocated to `architectural-principles.md §Epistemic Completeness Boundary`, cross-referencing the source becomes the correct pattern. Plugin Encapsulation's self-containment requirement applies to *SKILL.md* (runtime contract surface — no rule-file path citations); `.claude/rules/` files cross-reference each other freely as the cross-document inscription pattern is normal for the rule layer.
 
 ## Cross-Project Corroboration
 
