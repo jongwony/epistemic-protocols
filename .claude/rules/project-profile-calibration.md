@@ -17,7 +17,7 @@ Aggregated low-cost profile → Extension-default for ambiguous gates with Katal
 
 ## Scope Boundary
 
-This mechanism calibrates *ambiguous* decisions. Constitution-required decisions remain Constitution regardless of profile in three categories — (a) user IS the measurement target, (b) user authority IS the resolution, (c) safety requires human. These three categories are inscribed inline rather than externally referenced to preserve self-containment.
+This mechanism calibrates *ambiguous* decisions. Constitution-required decisions remain Constitution regardless of profile in two categories — (a) user IS the measurement target, (b) safety requires human. These two categories are inscribed inline rather than externally referenced to preserve self-containment.
 
 ## Cross-Project Corroboration
 

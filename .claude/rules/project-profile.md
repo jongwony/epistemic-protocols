@@ -13,8 +13,7 @@ This project's Cognitive Partnership Move calibration profile (per `project-prof
 
 ## Calibration Result
 
-**Extension-default** for ambiguous gates. Constitution preserved for the three categories per `project-profile-calibration.md` scope boundary:
+**Extension-default** for ambiguous gates. Constitution preserved for the two categories per `project-profile-calibration.md` scope boundary:
 
 - (a) user IS measurement — Katalepsis, Hermeneia Phase 2
-- (b) user authority IS resolution — Telos, Horismos, Syneidesis
-- (c) safety requires human — Prosoche Phase 2
+- (b) safety requires human — Prosoche Phase 2
