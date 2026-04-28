@@ -153,7 +153,7 @@ Rehydration Convergence Trace
 - Generated: <date>, baseline git_head: <SHA>, drift: <none / N commits ahead>
 - Surface Text: 1-pass read; Sache = "<restated>"
 - Wirkungsgeschichte: <N trajectory entries, N rejected alternatives, N external priors> recognized
-- Reference Shells: <N session, N file, N external> available (not auto-loaded)
+- Reference Shells: <N session, N file, N external, N task> available (not auto-loaded)
 - Anchor tasks: <N pending, N in-progress, N completed>
 - Resumption: <chosen path from Phase 5>
 - Stage 1 caveat: this HFT is Stage 1 conjecture; format may evolve.

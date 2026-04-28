@@ -61,7 +61,7 @@ An HFT file has exactly four layers, identified by H2 headings and ordered as be
 
 - `auto-memory MEMORY.md body` — separate topology; reachable via its own auto-load mechanism
 - `hypomnesis sub-index body` — separate topology; reachable via `/recollect` or `/inquire`
-- `~/.claude/tasks/<session_id>/ body` — separate topology; path inscribed as Task Anchor in Reference Shells, reachable via `/inquire` or `/recollect`
+- `per-session task substrate body` — separate topology; path inscribed as Task Anchor in Reference Shells, reachable via `/inquire` or `/recollect`
 - `tactical execution traces` — regenerable by fresh session from Surface Text + Wirkungsgeschichte
 
 Project-specific exclusions extend this list.
