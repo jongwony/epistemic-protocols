@@ -149,7 +149,7 @@ Pass `--skip-channel` to Pipeline Phase 3 to fall back to standard `/contextuali
 
 ## Why No Gate Reduction
 
-The 3-axis disposition analysis for this composition yields 0% gate reduction — all 4 user gates are PRESENT in composed context. Reason: all three protocols require **unbounded-regret user judgment** on answers not entailed by upstream protocol outputs:
+The composition-level disposition analysis for this composition yields 0% gate reduction — all 4 user gates are PRESENT in composed context. Reason: all three protocols require **Constitution user judgment** on answers not entailed by upstream protocol outputs:
 - `InformedExecution` (Aitesis output) does not entail the `{Address, Dismiss, Probe}` judgment Syneidesis asks
 - `AuditedDecision` (Syneidesis output) does not entail the `{Confirm, Adapt, Dismiss}` judgment Epharmoge asks
 

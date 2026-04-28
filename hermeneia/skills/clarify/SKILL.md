@@ -78,24 +78,15 @@ Convergence evidence: At |remaining| = 0, present transformation trace — for e
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Qc   (constitution)   → present (AI-detected activation confirmation; ai_strong only)
-Phase 1a Qc  (constitution)   → present (E confirmation)
+Phase 0 Qc   (constitution)   → present (AI-detected activation confirmation; fires only on ai_strong path; user_signal path skips Phase 0; immune(E) on decline)
+Phase 1a E_from_arg (extension) → TextPresent+Proceed (when explicit_arg(E) via /clarify "text"; proceed with bound E; Phase 2 Qs free-response override available downstream)
+Phase 1a Qc  (constitution)   → present (E confirmation; when no explicit_arg)
 Phase 1b detect (sense)  → Internal analysis (gap detection from Eᵥ)
-Phase 1b present (extension) → TextPresent+Proceed (full taxonomy with evidence + falsification + emergent probe; flows into Phase 2)
-Phase 2 Qs   (constitution)   → present (clarification options; Esc key → loop termination at LOOP level, not an Answer)
+Phase 1b present (extension) → TextPresent+Proceed (full taxonomy with evidence + falsification + emergent probe; option-set relay test — Proceed dominates under user-invoked or user-confirmed activation; flows into Phase 2)
+Phase 2 Qs   (constitution)   → present (clarification options; user incorporates intent into clarification; free response overrides taxonomy — emergent add, type exclude, redirect; override capability must be disclosed at the Constitution interaction as part of user authority disclosure; Esc key → loop termination at LOOP level, not an Answer)
 suggest_only (sense)   → no tool call (passive suggestion; Λ.active = false)
 integrate    (track)   → Internal state update (no external tool)
 converge     (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with clarified expression)
-
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 0 Qc (confirm)       → conditional: ai_strong only (user_signal path skips Phase 0)
-                              regret: bounded (Phase 1a Qc always_gated; immune(E) on decline)
-Phase 1a Qc (E confirm)    → elidable when: explicit_arg(E) via /clarify "text"
-                              default: proceed with bound E
-                              regret: bounded (Phase 2 Qs free-response override available)
-Phase 1b present (taxonomy) → extension (full taxonomy with evidence; no Constitution interaction — option-set relay test, Extension classification: Proceed dominates under user-invoked or user-confirmed activation)
-Phase 2 Qs (clarify)       → always_gated (Constitution: user incorporates intent into clarification; free response overrides taxonomy — emergent add, type exclude, redirect; override capability must be disclosed at the Constitution interaction as part of user authority disclosure)
 
 ── MODE STATE ──
 Λ = { phase: Phase, trigger: T, E: Expression, Eᵥ: Expression, detected: Set(Gap), gaps: Set(Gap),

@@ -110,7 +110,7 @@ Collect anchors to auxiliary substrates. Four subsections:
 
 No-data invariant: Reference Shell entries are paths or URLs only. Do not inline content from any anchored substrate. Inlining auto-memory, hypomnesis, or task substrate content into HFT body collapses topology separation.
 
-Default behavior: auto-collect when all four subsections are mechanically determinable (current session ID is known, `git diff` returns paths, URLs come from session context, task path derives from session ID). Auto-collected anchors flow into Phase 5 final approval where they are reviewed alongside the rest of the HFT draft. Surface a Cognitive Partnership Move (Constitution) with options Accept · Modify(anchor, direction) · Reject · Free response only when an anchor source is ambiguous (e.g., multiple plausible PRs to cite, or the user has explicitly requested manual review). The default and the Constitution path together honor the elidable annotation in ELIDABLE CHECKPOINTS — Phase 5 Qc remains the binding gate.
+Default behavior: auto-collect when all four subsections are mechanically determinable (current session ID is known, `git diff` returns paths, URLs come from session context, task path derives from session ID). Auto-collected anchors flow into Phase 5 final approval where they are reviewed alongside the rest of the HFT draft. Surface a Cognitive Partnership Move (Constitution) with options Accept · Modify(anchor, direction) · Reject · Free response only when an anchor source is ambiguous (e.g., multiple plausible PRs to cite, or the user has explicitly requested manual review). The Extension auto-collect path and the Constitution path together honor the split-entry pattern in TOOL GROUNDING — Phase 5 Qc remains the binding gate.
 
 ### Phase 5: Excluded Layer + Frontmatter Confirmation
 
@@ -226,29 +226,21 @@ session_text(crystallize) ∋ trace
 
 ── TOOL GROUNDING ──
 Phase 0 recognize    (sense)        → Internal analysis (stage signal recognition)
+Phase 0 stage_from_arg (extension)  → TextPresent+Proceed (when explicit_arg(stage) provided; Phase 5 Qc final approval still gates write)
+Phase 0 confirm Qc   (constitution) → present (one-line confirm for inferred stage; when no explicit_arg)
 Phase 1 load_predecessor (observe)  → Read, Glob (predecessor HFT lookup)
 Phase 2 distill_surface (sense)     → Internal analysis (compress session state)
-Phase 2 Qs           (constitution) → present (Surface Text co-construction)
+Phase 2 Qs           (constitution) → present (Surface Text co-construction; Surface Text is the user-facing primer; user authority IS resolution)
 Phase 3 extract_wirk (sense)        → Internal analysis (delta extraction)
-Phase 3 Qs           (constitution) → present (Wirkungsgeschichte co-construction)
+Phase 3 Qs           (constitution) → present (Wirkungsgeschichte co-construction; rejected-alternatives and trajectory carry user judgment)
 Phase 4 enumerate_ref (observe)     → Bash (git diff --name-only, gh pr view)
-Phase 4 Qs           (constitution) → present (Reference Shells co-construction)
+Phase 4 Qs_auto      (extension)    → TextPresent+Proceed (when anchors are mechanically determinable — current session_id, git diff, gh pr view — and user has not requested manual review; auto-collect; surface assembled list for review at Phase 5 Qc)
+Phase 4 Qs           (constitution) → present (Reference Shells co-construction; when anchor source is ambiguous or user has requested manual review)
 Phase 5 assemble     (sense)        → Internal analysis (four-layer assembly)
-Phase 5 Qc           (constitution) → present (final approval)
+Phase 5 Qc           (constitution) → present (final approval; writing to disk is the binding act)
 Phase 6 write_hft    (extension)    → Write (HFT inscription)
 Phase 6 emit_anchor_tasks (extension) → TaskCreate (anchor tasks)
 converge             (extension)    → TextPresent+Proceed (convergence trace)
-
-── ELIDABLE CHECKPOINTS ──
-Phase 0 confirm (inferred stage) → elidable when: explicit_arg(stage) provided
-                                    default: present one-line confirm for inferred stage
-                                    regret: bounded (Phase 5 Qc final approval still gates write)
-Phase 2 Qs (Surface)             → always_gated (Constitution: Surface Text is the user-facing primer; user authority IS resolution)
-Phase 3 Qs (Wirkungsgeschichte)  → always_gated (Constitution: rejected-alternatives and trajectory carry user judgment)
-Phase 4 Qs (Reference Shells)    → elidable when: anchors are mechanically determinable (current session_id, git diff, gh pr view) and user has not requested manual review
-                                    default: auto-collect; surface assembled list for review at Phase 5 Qc
-                                    regret: bounded (Phase 5 Qc still allows revise)
-Phase 5 Qc (final approval)      → always_gated (Constitution: writing to disk is the binding act; cannot be elided)
 
 ── MODE STATE ──
 Λ = { phase: Phase, G: StageSignal, stage_id: String,

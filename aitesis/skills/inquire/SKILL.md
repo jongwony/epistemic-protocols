@@ -144,22 +144,13 @@ early_exit = user_declares_sufficient
 Phase 0 Scan    (sense)       → Internal analysis (no external tool)
 Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch, WebFetch (conditional: CanonicalExternal channel — RFCs, vendor API docs, standards; `source: "web:{url}"` tag + staleness guard via codebase version cross-check)
 Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
-Phase 1 Qc      (constitution)        → present (conditional: Coherence 2D off-diagonal Constitution interaction; fires only when scope ≠ resolution assessment)
+Phase 1 Qc      (constitution)        → present (conditional: Coherence 2D off-diagonal Constitution interaction; fires only when scope ≠ resolution assessment; user classifies coherence type as MemoryInternal or CrossDomain)
+Phase 1 Emergent_channel (constitution) → present (channel unvalidated by definition; regardless of parent Verifiability, route to Phase 2 to present observed channel description and await user confirmation before proceeding)
+Phase 1 CanonicalExternal_staleness (constitution) → present (when staleness cannot be verified; require BOTH `staleness:unverified` tag AND Phase 2 classify summary surfacing — no silent escalation path; publishing authority claim warrants user awareness)
 Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering, Factual only); cleanup via Bash
-Phase 2 Qs      (constitution)        → present (mandatory: classify result + uncertainty surfacing; Esc key → loop termination at LOOP level, not an Answer)
+Phase 2 Qs      (constitution)        → present (mandatory: classify result + uncertainty surfacing; user provides context judgment on insufficiency; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
-
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 1 Qc (coherence 2D)  → conditional: fires only when scope ≠ resolution assessment
-                              always_gated when fired (Constitution: user classifies coherence type as MemoryInternal or CrossDomain)
-Phase 1 Emergent(EvidenceSource)  → always_gated (Constitution: channel unvalidated by definition; regardless of parent Verifiability,
-                                    route to Phase 2 to present observed channel description and await user confirmation before proceeding)
-Phase 1 CanonicalExternal staleness-unverified  → always_gated (Constitution: when staleness cannot be verified, require BOTH
-                                                   `staleness:unverified` tag AND Phase 2 classify summary surfacing — no silent
-                                                   escalation path; publishing authority claim warrants user awareness)
-Phase 2 Qs (transparent)   → always_gated (Constitution: user provides context judgment on insufficiency)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: Prospect, uncertainties: Set(Uncertainty),
@@ -360,7 +351,7 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
     - `CanonicalExternal` → Step 3 with WebFetch/WebSearch (published external docs; `source: "web:{url}"` tag + determinism verification + staleness guard — see Web context below)
     - `Instrumentation` → Step 4 (Empirical observation via Bash lifecycle)
     - `UserTacit` → Phase 2 directly (user-dependent inquiry; includes reclassified Coherence/MemoryInternal items)
-    - `Emergent(source)` → **always Phase 2** (always_gated per ELIDABLE CHECKPOINTS): record observed channel description in classify summary, await user confirmation that this channel is appropriate; accumulate toward variation-stable observed use for base promotion. Parent Verifiability tier is NOT used to bypass Phase 2 — the channel is unvalidated by definition.
+    - `Emergent(source)` → **always Phase 2** (Constitution per TOOL GROUNDING `Phase 1 Emergent_channel`): record observed channel description in classify summary, await user confirmation that this channel is appropriate; accumulate toward variation-stable observed use for base promotion. Parent Verifiability tier is NOT used to bypass Phase 2 — the channel is unvalidated by definition.
 - **Coherence classification** (Layer 2, 2D model: Scope × Resolution):
   - Pre-filter: cross-scope + rule-resolvable (existing scope hierarchy, established precedence) → coexistence (exit Coherence; not a contradiction)
   - Same scope + evidence-resolvable → MemoryInternal → factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent) → follows Factual resolution path (Step 3, Step 4, or Phase 2)
@@ -396,7 +387,7 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 
 **Determinism verification** (Extension precondition): CanonicalExternal is classified as Extension only when the source is deterministic for the claim scope. Verify one of: (a) pinned version or dated snapshot (specific RFC with publication date, vendor doc with version pin, W3C spec with date stamp), (b) tag-pinned URL (`/v1.2/`, `?version=X`), or (c) cached copy with recorded fetch timestamp. When the source is undated or versionless and the claim depends on temporal context (API behavior, deprecated features, vendor defaults), the fetch is NON-deterministic → classify as Constitution and escalate via Phase 2 classify summary before treating as evidence.
 
-**Staleness guard** (analogous to memory evidence): documentation may be temporally decoupled from the library version actually in use — verify against codebase import/pin version before treating as resolved. When staleness cannot be verified, the guard requires BOTH: (1) `staleness:unverified` tag attached to the evidence record, AND (2) surfacing to the user in Phase 2 classify summary regardless of whether EmpiricallyObservable reclassification subsequently resolves the uncertainty — no silent escalation path (no "or" fallback). The CanonicalExternal source carries publishing authority (standards body, vendor) distinct from internal CodeDerivable evidence — cite both when cross-validating, and always cite the authority source when its temporal alignment cannot be independently verified (see ELIDABLE CHECKPOINTS `CanonicalExternal staleness-unverified` always_gated entry).
+**Staleness guard** (analogous to memory evidence): documentation may be temporally decoupled from the library version actually in use — verify against codebase import/pin version before treating as resolved. When staleness cannot be verified, the guard requires BOTH: (1) `staleness:unverified` tag attached to the evidence record, AND (2) surfacing to the user in Phase 2 classify summary regardless of whether EmpiricallyObservable reclassification subsequently resolves the uncertainty — no silent escalation path (no "or" fallback). The CanonicalExternal source carries publishing authority (standards body, vendor) distinct from internal CodeDerivable evidence — cite both when cross-validating, and always cite the authority source when its temporal alignment cannot be independently verified (see TOOL GROUNDING `Phase 1 CanonicalExternal_staleness` Constitution entry).
 
 **Scope restriction**:
 - Context collection: Read-only investigation (Read, Grep, WebSearch). — core preserved

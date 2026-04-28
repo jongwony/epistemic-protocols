@@ -190,40 +190,30 @@ active(Λ) = Λ.active ∧ (∃ t ∈ Λ.tasks: t.status ∉ {completed, halted}
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase -1 Sub-A0 scan    (sense)    → Internal analysis (heuristic deficit detection, execution-blocking filter)
-Phase -1 Sub-A0 Qc      (constitution)    → present (upstream routing: Route(P)/Other/Proceed) [Tool]
+Phase -1 Sub-A0 transparent (extension) → TextPresent+Proceed (when D[] = ∅; transparent pass-through to Sub-A; Materialize + Phase 0 Classify provide independent checks)
+Phase -1 Sub-A0 Qc      (constitution)    → present (when D[] ≠ ∅; upstream routing: Route(P)/Other/Proceed) [Tool]
 Phase -1 Sub-A0 suspend (track)   → TaskCreate (persist Λ.upstream: Resolved, iteration) [Tool]
 Phase -1 Sub-A0 restore (track)   → TaskGet (restore Λ.upstream after upstream converges) [Tool]
 Phase -1 Sub-A0 execute (dispatch) → Skill (upstream protocol inline execution) [Tool]
 Phase -1 Sub-A0 resolve Qc (constitution)   → present (Other: user selects protocol P) [Tool]
-Phase -1 Materialize (track)   → TaskList (read existing tasks) [Tool]
-Phase -1 Materialize (track)   → TaskCreate (create from context) [Tool]
-Phase -1 Materialize confirm Qc (constitution)   → TaskCreate + present (transparent cold start) [Tool]
+Phase -1 Materialize_read (track)   → TaskList (read existing tasks) [Tool]
+Phase -1 Materialize_create (track)   → TaskCreate (create from context) [Tool]
+Phase -1 Materialize_resume (extension) → TextPresent+Proceed (when C.tasks ≠ ∅ ∧ ¬C.prior; adopt existing tasks — already user-validated; Phase 0 Classify provides independent risk check)
+Phase -1 Materialize_auto_proceed (extension) → TextPresent+Proceed (when C.tasks = ∅ ∧ ¬C.prior ∧ Fired; Sub-A0 interaction verified context; Phase 0 Classify provides independent risk check)
+Phase -1 Materialize_confirm_boundary Qc (constitution) → present (when C.tasks = ∅ ∧ C.prior; cross-protocol boundary crossing — prior protocol output → Prosoche tasks) [Tool]
+Phase -1 Materialize_conflict Qc (constitution) → present (when C.tasks ≠ ∅ ∧ C.prior; resume vs refresh vs merge) [Tool]
+Phase -1 Materialize_confirm Qc (constitution) → TaskCreate + present (when C.tasks = ∅ ∧ ¬C.prior ∧ ¬Fired; transparent cold start) [Tool]
 Phase -1 TeamCoord Qc  (constitution)    → present (team structure selection) [Tool]
+Phase -1 Augment Qc (constitution) → present (role confirmation; |roles| ≤ 6 cap) [Tool]
 Phase 0 delegate     (dispatch) → Agent(prosoche:prosoche-executor) [Tool]
 Phase 0 delegate     (dispatch) → Agent(team-agent, Gate prompt) or SendMessage(team-agent, Gate prompt) [Tool]
 Phase 0 Classify     (sense)   → Internal analysis (no external tool)
 Phase 1 Eval         (observe) → Read, Grep (evidence gathering; optional)
-Phase 2 Qc           (constitution)    → present (checkpoint with evidence)
+Phase 2 Qc           (constitution)    → present (checkpoint with evidence; execution risk judgment)
 Phase 3 A            (track)   → Internal state update (no external tool)
 Task completion      (track)   → TaskUpdate (status tracking) [Tool]
 Withdraw shutdown    (dispatch) → SendMessage (shutdown_request to team members) [Tool]
 converge             (extension)    → TextPresent+Proceed (coordinator convergence evidence trace; proceed with situated execution)
-
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
--- Extension: AI transmits deterministically, zero epistemic authority, auto-resolvable
--- Constitution: AI exercises authority (selection, interpretation, boundary crossing) — requires user confirmation
-Phase -1 Sub-A0 Qc (routing)   → conditional: fires only when D[] ≠ ∅
-                                   default: present detected deficits with routing options
-                                   regret: bounded (Materialize + Phase 0 Classify provide independent checks)
-Phase -1 confirm_boundary (prior) → always_gated (Constitution: cross-protocol boundary crossing)
-                                   regret: bounded (Phase 0 Classify provides independent risk check)
-Phase -1 confirm (cold start)   → conditional: fires when ¬Fired ∧ ¬C.prior (transparent cold start)
-                                   regret: bounded (Phase 0 Classify provides independent risk check)
-Phase -1 conflict (tasks+prior) → always_gated (Constitution: resume vs refresh vs merge)
-Phase -1 TeamCoord (team)       → always_gated (Constitution: team structure selection)
-Phase -1 Augment (roles)        → always_gated (Constitution: role confirmation)
-Phase 2 Qc (checkpoint)         → always_gated (Constitution: execution risk judgment)
 
 ── MODE STATE ──
 Λ = { phase: Phase, E: ExecutionAction,

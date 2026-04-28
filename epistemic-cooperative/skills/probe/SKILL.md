@@ -227,10 +227,6 @@ Phase 3 rebind      (track)    → Internal state update (Narrow(Slice) disposit
 Phase 3 write       (track)    → Internal state update (Narrow(CoverageSubset) disposition — sets Λ.coverage_constraint, preserves Λ.dismissed_in_session)
 converge            (extension)    → TextPresent+Proceed (convergence trace)
 
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 2 Qc (recognition)     → always_gated (constitutive user act; Standing-authority delegation forbidden)
-
 ── MODE STATE ──
 Λ = { phase: Phase, U: UserSituation,
       hypotheses: List(Hypothesis), presented: Set(Hypothesis),

@@ -16,8 +16,7 @@ All protocols share this structure within `Definition` code block:
 ── PHASE TRANSITIONS ── Phase-by-phase state transitions; [Tool] suffix marks external operations
 ── LOOP ──              Post-phase control flow (J values → next phase or terminal)
 ── BOUNDARY ──          (if applicable) Purpose annotations for key operations
-── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping; gate/relay interaction kind annotation
-── ELIDABLE CHECKPOINTS ──  (if applicable) Per-gate dual-axis analysis (relay/gated interaction kind + regret profile)
+── TOOL GROUNDING ──    Symbol → concrete Claude Code tool mapping; `(constitution)`/`(extension)` interaction kind annotation; conditional Constitution-to-Extension specialization recorded as separate `(extension)` entries within the same phase
 ── CATEGORICAL NOTE ──  (if applicable) Mathematical notation definitions
 ── MODE STATE ──        Runtime state type (Λ) with nested state types
 ── COMPOSITION ──       Protocol composition operator definitions (product: D₁ × D₂ → R₁ × R₂)
@@ -122,14 +121,14 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 
 **Tertiary pattern** (cross-session, aspirational — storage half operative, consumption half pending protocol grounding): Anamnesis hypomnesis store persists session recall indices → next session's protocol Phase 0/1 detection is enriched by accumulated domain knowledge → better protocol execution produces richer insights → hypomnesis store deepens → spiral deepening. The storage half (Anamnesis hypomnesis write) and the consumption half (each protocol's Phase 0/1 reading stored knowledge) together complete the cross-session hermeneutic circle. Unlike Primary/Secondary which operate within a single session, Tertiary operates across session boundaries with persistent knowledge as the medium. Consumption grounding requires protocol SKILL.md updates specifying how Phase 0/1 reads stored knowledge — contingent on prior Anamnesis hypomnesis output.
 
-## Relay Classification Audit Trail
+## Extension Classification Audit Trail
 
-When an ELIDABLE CHECKPOINT is classified as Extension (operational annotation: relay) and auto-resolved, the justification should be traceable to the five relay indicators defined in A2 Relay/Constitution Boundary (`axioms.md` table: deterministic, citable, within-boundary, entropy→0, basis-cited). This is not a new principle but an audit format surfacing existing A2 indicators.
+When a TOOL GROUNDING entry is classified as `(extension)` (relay-eligible) and auto-resolved, the justification should be traceable to the five relay indicators defined in A2 Relay/Constitution Boundary (`axioms.md` table: deterministic, citable, within-boundary, entropy→0, basis-cited). This is not a new principle but an audit format surfacing existing A2 indicators.
 
-### Relay Justification Format
+### Extension Justification Format
 
 ```
-[Extension] {Protocol} Phase {N} {Gate Label}
+[Extension] {Protocol} Phase {N} {Entry Label}
   ├─ deterministic:    {yes/no} — {evidence}
   ├─ citable:          {yes/no} — {source}
   ├─ within-boundary:  {yes/no} — {scope}
@@ -138,4 +137,25 @@ When an ELIDABLE CHECKPOINT is classified as Extension (operational annotation: 
   verdict: Extension ({N}/5)
 ```
 
-Relationship to the 3-axis elidability model (`docs/analysis/protocol-composition-gate-elision.md`): the 3-axis model determines whether a gate CAN be elided; relay justification documents HOW the elision is justified at the A2 level.
+Relationship to historical 3-axis elidability model (`docs/analysis/protocol-composition-gate-elision.md`, pre-unification): prior analysis used three axes; the post-unification single TOOL GROUNDING axis subsumes the prior model — `(extension)` classifies relay-eligibility, `(constitution)` classifies Constitution requirement, with conditional specialization absorbed as separate `(extension)` entries.
+
+## Split-Entry Naming Convention
+
+When a phase contains a conditional gate (some runtime conditions resolve to Extension while others require Constitution), the gate is split into separate TOOL GROUNDING entries within the same phase. Naming pattern:
+
+- **Extension half**: `Phase N {gate_label}_{condition} (extension)` — descriptive condition suffix indicating when this entry fires (e.g., `_from_arg`, `_auto`, `_resume`, `_unique_match`, `_no_match`).
+- **Constitution half**: `Phase N {gate_label} (constitution)` or `Phase N {gate_label}_{purpose} (constitution)` — the canonical gate label, with an optional purpose suffix when ambiguity persists. This entry fires on the default branch (when the Extension condition is not met).
+
+The Extension entry's condition suffix records the predicate inline. Both halves point to the same underlying phase operation; the split is realization, not phase duplication.
+
+Examples observed in current SKILL.md:
+
+- prothesis: `Phase 0 MB_from_arg (extension)` + `Phase 0 Qc (constitution)`
+- prothesis: `Phase 3 AgentMap_auto (extension)` + `Phase 3 AgentMap_select (constitution)`
+- crystallize: `Phase 0 stage_from_arg (extension)` + `Phase 0 confirm Qc (constitution)`
+- crystallize: `Phase 4 Qs_auto (extension)` + `Phase 4 Qs (constitution)`
+- misuse: `Phase 0 scope_from_arg (extension)` + `Phase 0 scope_confirm (constitution)`
+- telos: `Phase 0 G_from_arg (extension)` + `Phase 0 Qc (constitution)`
+- rehydrate: `Phase 0 unique_match (extension)` + `Phase 0 no_match (extension)` + `Phase 0 select_candidate Qc (constitution)`
+
+Non-split (canonical) form remains the default: when no conditional specialization exists, the entry stays as the canonical label (`Phase N Qc (constitution)` or `Phase N {label} (extension)`). Split applies only when one runtime branch is genuinely Extension-eligible.

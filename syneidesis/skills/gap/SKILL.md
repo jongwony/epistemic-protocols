@@ -73,12 +73,6 @@ Scan (observe) → Read, Grep (stored knowledge extraction: context for gap iden
 A (track)      → Internal state update (no external tool)
 converge (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
 
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 1 Qs (gap surface)   → always_gated (Constitution: user judgment on surfaced gap determines adjustment)
-Phase 1 Qs option 3 (Probe) → always visible (rationale depth varies by stakes level)
-                                regret: bounded (Address/Dismiss cover all judgment paths; Probe adds verification depth)
-
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, active: Bool }
 

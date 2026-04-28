@@ -76,10 +76,6 @@ adapt  (transform) → Edit, Write (result adaptation based on user direction)
 Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
 converge (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 1 Qc (applicability) → always_gated (Constitution: Confirm/Dismiss/Adapt applicability judgment)
-
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
       state: Σ, active: Bool, cause_tag: String }

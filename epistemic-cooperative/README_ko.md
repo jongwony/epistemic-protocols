@@ -111,14 +111,14 @@ SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
 |------|------|
 | 0. Specify | 체인 명세 입력 및 정규화 |
 | 1. Validate | graph.json precondition/suppression 검증 |
-| 2. Catalog | 프로토콜별 ELIDABLE CHECKPOINTS 추출 |
-| 3. Disposition | 3축 모델 게이트 배치 분석 |
+| 2. Catalog | 프로토콜별 TOOL GROUNDING 항목 추출 (Constitution/Extension 분류) |
+| 3. Disposition | 합성 시점 게이트 배치 분석 |
 | 4. Generate | 합성 SKILL.md 템플릿 생성 |
 
 주요 특징:
 - 그래프 인식 체인 검증 (precondition, suppression)
-- ELIDABLE CHECKPOINTS에서 자동 게이트 인벤토리
-- 3축 배치 모델 (relay/gated × regret × epistemic access)
+- TOOL GROUNDING 항목에서 자동 게이트 인벤토리
+- 합성 시점 배치 모델 (epistemic access × catch-chain × BoundaryMap)
 - Catch-chain 불변량 검증
 - `/review` 패턴 템플릿 출력 (pipeline context rules 포함)
 

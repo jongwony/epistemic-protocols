@@ -85,13 +85,6 @@ Categorize  (observe) → Internal analysis (Read for context if needed)
 converge    (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
 -- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity
 
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 1 Qc (entry points)  → always_gated (Constitution: verification scope selection)
-Phase 3 Qs (verify)        → always_gated (Constitution: Socratic probe — user comprehension is the measurement)
-Phase 3 Qᵣs (reasoning)   → always_gated (Constitution: misconception reasoning hypothesis)
-Phase 3 Qc (coverage)      → always_gated (Constitution: aspect coverage — sufficient vs explore more)
-
 ── MODE STATE ──
 Λ = {
   phase: Phase,

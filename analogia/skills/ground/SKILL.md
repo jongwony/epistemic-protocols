@@ -86,10 +86,6 @@ Phase 2 Qs      (constitution)      → present (mandatory; Esc key → loop ter
 Phase 3         (track)     → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with validated mapping)
 
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 2 Qs (validate)      → always_gated (Constitution: user validates structural mapping with examples)
-
 ── MODE STATE ──
 Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,
       mappings: Set(Correspondence), confirmed: Set(Correspondence),

@@ -241,23 +241,18 @@ session_text(rehydrate) ∋ trace
 
 ── TOOL GROUNDING ──
 Phase 0 discover_hft (observe)        → Glob, Read (frontmatter probe)
+Phase 0 unique_match (extension)      → TextPresent+Proceed (when discovery is uniquely determined; one-line confirm; no gate)
+Phase 0 no_match (extension)          → TextPresent+Proceed (when discovery returns nothing; deactivation no-op note; no gate)
+Phase 0 select_candidate Qc (constitution) → present (when multi-candidate; user selects HFT among candidates; user authority IS resolution)
 Phase 1 read_frontmatter (observe)    → Read (file frontmatter parse)
-Phase 1 verify (observe)              → Bash (git rev-parse HEAD for drift)
+Phase 1 verify (observe)              → Bash (git rev-parse HEAD for drift; silent unless malformed; surface drift in readiness summary)
 Phase 2 pass_surface (observe)        → Read (HFT body)
 Phase 3 scan_wirk (observe)           → (already in context from Phase 2 Read)
 Phase 4 surface_refs (observe)        → (already in context)
 Phase 5 filter_anchor_tasks (observe) → TaskList (metadata filter)
-Phase 5 Qc_resumption (constitution)  → present (resumption path)
-Phase 6 Qc_readiness  (constitution)  → present (readiness approval)
+Phase 5 Qc_resumption (constitution)  → present (resumption path commits downstream trajectory; user authority IS resolution)
+Phase 6 Qc_readiness  (constitution)  → present (readiness approval; confirms session is primed; final binding act)
 Phase 7 emit (extension)              → TextPresent+Proceed (convergence trace)
-
-── ELIDABLE CHECKPOINTS ──
-Phase 0 (unique match)        → extension (one-line confirm; no gate when discovery is uniquely determined)
-Phase 0 (multi-candidate)     → always_gated (Constitution: user selects HFT among candidates; user authority IS resolution)
-Phase 0 (no match)            → extension (deactivation no-op note; no gate)
-Phase 1 verify                → extension (silent unless malformed; surface drift in readiness summary)
-Phase 5 Qc_resumption         → always_gated (Constitution: resumption path commits downstream trajectory; user authority IS resolution)
-Phase 6 Qc_readiness          → always_gated (Constitution: confirms session is primed; final binding act)
 
 ── MODE STATE ──
 Λ = { phase: Phase, G: StageSignal, HFT_path: Optional(Path),

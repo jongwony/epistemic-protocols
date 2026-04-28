@@ -139,11 +139,6 @@ Phase 3 Qs          (constitution)     → present (Socratic probing with struct
 Phase 3 emit        (extension)    → TextPresent+Proceed (ClueVector_prose)
 converge            (extension)    → TextPresent+Proceed (convergence trace)
 
-── ELIDABLE CHECKPOINTS ──
--- Axis: Extension/Constitution = interaction kind; always_gated/elidable = regret profile
-Phase 2 Qc (recognition)     → always_gated (synthesis of identification is constitutive)
-Phase 3 Qs (Socratic probe)  → always_gated (only user accesses own retention context)
-
 ── MODE STATE ──
 Λ = { phase: Phase, V: VagueRecall,
       candidates: List(Candidate), presented: Set(Candidate),
