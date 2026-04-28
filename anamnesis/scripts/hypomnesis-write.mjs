@@ -702,6 +702,7 @@ function writeStore(targetDir, files) {
   fs.mkdirSync(parent, { recursive: true });
 
   if (fs.existsSync(targetDir)) {
+    fs.chmodSync(targetDir, 0o755);
     for (const [name, content] of Object.entries(files)) {
       const dest = path.join(targetDir, name);
       try {
@@ -715,12 +716,17 @@ function writeStore(targetDir, files) {
       }
     }
   } else {
+    // mkdtempSync defaults to 0o700, which makes ripgrep traversal silently
+    // empty the INDEX — /recollect then falls back to SSOT-only via
+    // degraded_scan. Chmod to 0o755 after rename so the INDEX stays
+    // readable as a sibling of the slug-level JSONL.
     const tmp = fs.mkdtempSync(path.join(parent, ".hyp-"));
     try {
       for (const [name, content] of Object.entries(files)) {
         fs.writeFileSync(path.join(tmp, name), content, "utf8");
       }
       fs.renameSync(tmp, targetDir);
+      fs.chmodSync(targetDir, 0o755);
     } catch (e) {
       fs.rmSync(tmp, { recursive: true, force: true });
       throw e;
