@@ -138,3 +138,24 @@ When a TOOL GROUNDING entry is classified as `(extension)` (relay-eligible) and 
 ```
 
 Relationship to historical 3-axis elidability model (`docs/analysis/protocol-composition-gate-elision.md`, pre-unification): prior analysis used three axes; the post-unification single TOOL GROUNDING axis subsumes the prior model — `(extension)` classifies relay-eligibility, `(constitution)` classifies Constitution requirement, with conditional specialization absorbed as separate `(extension)` entries.
+
+## Split-Entry Naming Convention
+
+When a phase contains a conditional gate (some runtime conditions resolve to Extension while others require Constitution), the gate is split into separate TOOL GROUNDING entries within the same phase. Naming pattern:
+
+- **Extension half**: `Phase N {gate_label}_{condition} (extension)` — descriptive condition suffix indicating when this entry fires (e.g., `_from_arg`, `_auto`, `_resume`, `_unique_match`, `_no_match`).
+- **Constitution half**: `Phase N {gate_label} (constitution)` or `Phase N {gate_label}_{purpose} (constitution)` — the canonical gate label, with an optional purpose suffix when ambiguity persists. This entry fires on the default branch (when the Extension condition is not met).
+
+The Extension entry's condition suffix records the predicate inline. Both halves point to the same underlying phase operation; the split is realization, not phase duplication.
+
+Examples observed in current SKILL.md:
+
+- prothesis: `Phase 0 MB_from_arg (extension)` + `Phase 0 Qc (constitution)`
+- prothesis: `Phase 3 AgentMap_auto (extension)` + `Phase 3 AgentMap_select (constitution)`
+- crystallize: `Phase 0 stage_from_arg (extension)` + `Phase 0 confirm Qc (constitution)`
+- crystallize: `Phase 4 Qs_auto (extension)` + `Phase 4 Qs (constitution)`
+- misuse: `Phase 0 scope_from_arg (extension)` + `Phase 0 scope_confirm (constitution)`
+- telos: `Phase 0 G_from_arg (extension)` + `Phase 0 Qc (constitution)`
+- rehydrate: `Phase 0 unique_match (extension)` + `Phase 0 no_match (extension)` + `Phase 0 select_candidate Qc (constitution)`
+
+Non-split (canonical) form remains the default: when no conditional specialization exists, the entry stays as the canonical label (`Phase N Qc (constitution)` or `Phase N {label} (extension)`). Split applies only when one runtime branch is genuinely Extension-eligible.

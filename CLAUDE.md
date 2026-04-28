@@ -166,7 +166,7 @@ Run `/verify` before commits. Static checks via:
 node .claude/skills/verify/scripts/static-checks.js .
 ```
 
-16 static checks: json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync, gate-type-soundness, artifact-self-containment. `artifact-self-containment` validates the packaged runtime contract view (`Skill.md` + plugin description metadata + packaged support entries) rather than source prose alone. Details: [docs/verification.md](docs/verification.md)
+17 static checks: json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync, gate-type-soundness, artifact-self-containment, single-axis-soundness. `artifact-self-containment` validates the packaged runtime contract view (`Skill.md` + plugin description metadata + packaged support entries) rather than source prose alone. `single-axis-soundness` enforces `TOOL GROUNDING`'s `(constitution)`/`(extension)` markers as the sole runtime annotation axis across live `*.md` files. Details: [docs/verification.md](docs/verification.md)
 
 ## Delegation Constraint
 

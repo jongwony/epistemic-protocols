@@ -144,7 +144,7 @@ Phase 0 Qc (constitution)        → present (combined: Q1=Mission Brief confirm
 Sc (constitution)                → present (mandatory; multiSelect: true; lens selection is epistemic choice; Esc key → loop termination at LOOP level)
 Phase 3 AgentMap_auto (extension)  → TextPresent+Proceed (when agent_count(perspective) ≤ 1; auto-assign for 1 match, AI-generated for 0 matches; execution assignment correctable by team restructuring)
 Phase 3 AgentMap_select (constitution) → present (when agent_count(perspective) ≥ 2; user confirms agent-perspective mapping; option-set relay test applies)
-T (dispatch)             → TeamCreate tool (parallel topology: creates team with shared task list)
+Phase 3 T (dispatch)     → TeamCreate tool (parallel topology: creates team with shared task list; fires after either AgentMap_auto or AgentMap_select resolves the perspective → agent mapping)
 ∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates — each receives MBᵥ + perspective only; no Phase 1 context G passed)
 ∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination — dispatch phase)
 Await (sense)            → IdleNotification (passive wait: teammate SubagentStop events surface as coordinator idle notifications; teammate→coordinator message delivery occurs at coordinator turn boundary, not at teammate send time; async message-passing execution model; no coordinator poll per Rule 14)

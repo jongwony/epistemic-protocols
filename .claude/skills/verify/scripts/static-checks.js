@@ -2222,6 +2222,7 @@ function checkSingleAxisSoundness() {
     /^docs\/audit-/,
     /^\.claude\/skills\/audit-delta\//,
     /^\.claude\/worktrees\//,
+    /^\.claude-pr\//,
     /^node_modules\//,
     /^dist\//,
     /^\.git\//

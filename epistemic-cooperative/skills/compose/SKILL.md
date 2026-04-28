@@ -31,7 +31,7 @@ Accept a protocol chain specification from the user.
 
 **Output path**: Ask the user where to write the generated SKILL.md. Default: `~/.claude/skills/{chain-name}/SKILL.md` for user-level skills, or suggest a project-level path if appropriate.
 
-**Gate #1** (Qc, bounded regret — Phase 1 validates):
+**Gate #1** (Qc — Phase 1 validates):
 
 Present the interpreted chain with canonical protocol names, slash commands, and proposed output path. Options:
 1. **Confirm** — proceed with this chain
@@ -154,6 +154,8 @@ disposition(G) = ELIDE ⟹ disposition(safety_net(G)) ≠ ELIDE
 
 If violated: promote the safety net gate to PRESENT. This prevents cascading composition-time delegation from removing all user checkpoints.
 
+**Safety-net search scope**: `safety_net(G)` searches forward within the same protocol — the next downstream Constitution gate after G in the protocol's phase order. Cross-protocol fallback: when a protocol's terminal Constitution gate is an ELIDE candidate and no within-protocol downstream Constitution gate remains, the next protocol's first Constitution gate in the chain serves as the cross-protocol safety net. If both fail (the chain's terminal Constitution gate is itself an ELIDE candidate), promote G to PRESENT — the catch-chain cannot be discharged. This preserves the invariant under Stage 2 split-Extension migration where some Constitution gates become Extension entries.
+
 ### Presentation
 
 Present per-protocol sub-tables:
@@ -204,7 +206,7 @@ Legend: ■ = presented, · = elided, × = pruned
 
 The `Basis` column connects to the composition-time disposition model used in this skill — `O_support` (prior protocol output entails this gate's answer) is the primary justification source for ELIDE dispositions.
 
-**Gate #2** (Qc, bounded regret — Phase 4 allows regeneration):
+**Gate #2** (Qc — Phase 4 allows regeneration):
 
 Options:
 1. **Accept all** — proceed to template generation
@@ -274,13 +276,13 @@ Suffix replay rules:
 **7. Rules**
 
 Standard rules section:
-1. No silent authority transfer — all Qs gates and unbounded-regret Qc gates require user response
+1. No silent authority transfer — all Qs gates and Constitution Qc gates require user response
 2. Catch-chain invariant — never elide both a gate and its safety net
 3. BoundaryMap integration — conditional dispositions when Horismos is in the chain
 4. Session Text Composition — inter-protocol data flows as natural language
 5. Coexistence — composition does not absorb protocols; each remains independently invocable
 
-### Gate #3 (Qs, unbounded regret — template is the final artifact)
+### Gate #3 (Qs — template is the final artifact)
 
 Present the generated template for review. Options:
 1. **Accept** — write to the specified output path
