@@ -85,7 +85,7 @@ A1-A6 operational summaries auto-loaded via `.claude/rules/axioms.md`. Full defi
 Prescriptive principles partition along Tier Factorization's o-tier (operational invocation frequency) into `.claude/rules/` (T1, auto-loaded per-session) and `.claude/principles/` (T2-T3, lazy-loaded via Read/Grep at authoring/verify time):
 - `.claude/rules/axioms.md` — A1-A6 foundational principles (MORE important as models improve)
 - `.claude/rules/derived-principles.md` — principles derived from axiom combinations
-- `.claude/rules/architectural-principles.md` — Epistemic Cost Topology (T1, per-turn); other architectural principles live in `.claude/principles/architectural-principles.md` (T2-T3)
+- `.claude/rules/architectural-principles.md` — Epistemic Cost Topology + Epistemic Completeness Boundary + Tier Factorization (T1, per-turn); other architectural principles live in `.claude/principles/architectural-principles.md` (T2-T3)
 - `.claude/rules/meta-principle.md` — Deficit Empiricism intro + Philosophical grounding (T1, per-turn); Stage 1/2 detail + Axiomatization Judgment Framework live in `.claude/principles/meta-principle.md` (T2-T3, axiom-evolution time)
 - `.claude/rules/safeguards.md` — Safeguard-tier principles (LESS important as models improve)
 - `.claude/rules/project-profile-calibration.md` — Cognitive Partnership Move calibration mechanism (six profile variables → Extension/Constitution default)

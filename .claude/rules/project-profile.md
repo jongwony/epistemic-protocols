@@ -13,7 +13,12 @@ This project's Cognitive Partnership Move calibration profile (per `project-prof
 
 ## Calibration Result
 
-**Extension-default** for ambiguous gates. Constitution preserved for the two categories per `project-profile-calibration.md` scope boundary:
+**Extension-default** for ambiguous gates. Constitution preserved at the floor of the epistemic substrate per `project-profile-calibration.md §Scope Boundary` (aligned with `architectural-principles.md §Epistemic Completeness Boundary`).
 
-- (a) user IS measurement — Katalepsis, Hermeneia Phase 2
-- (b) safety requires human — Prosoche Phase 2
+Floor (runtime-discovered, retry would change identity):
+- Katalepsis (`/grasp`): user IS the measurement target.
+- Prosoche `/attend` Phase 2: gate interaction over runtime-discovered risk patterns; gate-passage actions requiring substrate enforcement are delegated by handoff.
+
+Bounded zone (in-principle delegatable via contract-style Standing authority + Stage 2 correction): Telos GoalContract, Horismos BoundaryMap, Syneidesis decision pattern, Hermeneia Phase 2 articulation. Hermeneia Phase 2 differs from Katalepsis floor by *retry semantics* — incorrect articulation is correctable at the next invocation (bounded regret), whereas Katalepsis's measurement identity precludes retry without altering the verification. Telos / Horismos / Syneidesis are protocol-internally grounded by `always_gated` checkpoints; profile-layer mention is for future migration visibility, not runtime enforcement.
+
+Stage 1 conjecture: "in-principle delegatable" is a capability statement; operational `ELIDABLE CHECKPOINTS` migration is deferred to per-protocol future stages. Current SKILL.md `always_gated` annotations remain runtime-authoritative.

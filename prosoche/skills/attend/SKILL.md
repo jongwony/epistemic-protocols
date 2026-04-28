@@ -243,6 +243,14 @@ Phase 2 Qc (checkpoint)         → always_gated (Constitution: execution risk j
 
 Priority ordering: autonomy > transparency > noise-minimization > speed > simplicity.
 
+## Substrate Boundary
+
+Prosoche operates within the epistemic substrate — its protocol scope covers risk detection, classification, evaluation, and surfacing through Phase -1 to Phase 2 gate interactions. The Phase 2 gate transmits user judgment back into the execution intent.
+
+Post-gate execution belongs to non-epistemic substrates. After Phase 3 records `J` and updates `Σ'`, the actual action — `rm`, `git push`, `deploy`, harness permission grant, network request, file system mutation — is realized by native harnesses, the executor subagent, or the operating environment. Prosoche neither discharges nor enforces the substrate semantics of the gated action; it records the handoff and stops.
+
+When elevated-risk findings reach Phase 2, the epistemic part (intent transmission, evidence, judgment surfacing) is Prosoche's; the substrate part (whether the harness permits the action, whether the deploy succeeds, whether the comment reaches its audience) is delegated by handoff.
+
 ## Distinction from Other Protocols
 
 | Protocol | Initiator | Deficit → Resolution | Focus |
@@ -589,3 +597,4 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 20. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 21. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 22. **No bounded-regret loop interruption**: Within the LOOP, before each Stop, verify the finding represents unbounded regret — genuinely viable alternative paths whose wrong choice creates irreversible divergence. If the action is bounded-regret (deterministic, single viable path, correctable at next Constitution interaction), present the resolution as Extension (auto-proceed) and continue to the next task. Self-check: "Is this finding something the user needs to judge, or something I can proceed with and show at convergence?" Stopping on bounded-regret items within LOOP is the false-positive dual of Rule 19 (Low-risk classification surfacing). Plan-level threshold: when `count(severity ≥ Elevated ∩ signal_type = Irreversibility) > 1` in T[], surface the compound effect as a plan-direction question before individual task processing (Irreversibility per RISK SIGNAL TAXONOMY: rm, git push, --force, DROP, deploy)
+23. **Substrate boundary**: Prosoche's protocol scope is the epistemic substrate — risk detection, classification, evaluation, and gate surfacing through Phase -1 to Phase 2. Post-gate execution (the gated action's substrate enforcement, harness permission, network/state mutation) belongs to native harnesses or specialized substrates, delegated by handoff after Phase 3 judgment integration
