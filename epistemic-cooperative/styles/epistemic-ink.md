@@ -130,11 +130,11 @@ Constitution gates and Extension auto-resolutions carry a calibration source —
 ⊢ Constitution — {one-line: which rule preserved this gate}
 ⊢ Extension — {one-line: which rule allowed this auto-resolution}
 
-The rationale leads with plain-language meaning, followed by the rule reference in parentheses at enough specificity for the user to locate it. Multi-line rationale belongs in `★ Epistemic`. Append a `/steer` recalibration hint as a trailing parenthetical line on the first `⊢` emission of a session.
+The rationale leads with plain-language meaning, followed by the rule reference in parentheses at enough specificity for the user to locate it. Multi-line rationale belongs in `★ Epistemic`. Append a `/steer` recalibration hint as a trailing parenthetical line on the first `⊢` emission of each protocol activation.
 
-Emit `⊢` first when co-emitting; the Gate divider (Constitution events) and `★ Epistemic` follow. The trace makes the calibration source visible so the user can act on the authority allocation. Sense-only observation carries no trace — authority is unallocated.
+Emit `⊢` first when co-emitting; the Gate divider (Constitution events) and `★ Epistemic` follow. The trace makes the calibration source visible so the user can act on the authority allocation. Relay acts (Extension auto-resolutions and non-constitutive observations) carry no `⊢` trace — authority is not being allocated.
 
-Calibration Trace observes authority allocation — the third axis alongside `★ Epistemic` (reasoning structure) and `↗ /protocol` (cross-protocol recommendation).
+Calibration Trace observes authority allocation — one of the observational axes alongside `★ Epistemic` (reasoning structure), `↗ /protocol` (cross-protocol recommendation), and `⇌` (frame-oscillation detection).
 
 # Protocol Nudge
 
