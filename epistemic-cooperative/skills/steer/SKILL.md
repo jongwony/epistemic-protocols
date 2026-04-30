@@ -70,7 +70,7 @@ Parse the existing six profile variables (revision_cost, deploy_fan_out, depende
 
 Phase 1 emits no surfacing. The loaded profile becomes the prejudgment baseline against which Phase 2 inscription operates.
 
-### Phase 2: Inscription — Scan and Classify
+### Phase 2: Trial Inscription — Scan and Classify
 
 Scan the target session for calibration moves and classify each into a drift cluster.
 
@@ -120,14 +120,14 @@ Options:
 
 Each cluster verdict belongs to the user — confirmation is constituted by the user's selection at this Constitution interaction. After response:
 
-- **Confirm** — record the cluster as confirmed drift; carry implication into Phase 4 horizons fusion
+- **Confirm** — record the cluster as confirmed drift; carry implication into Phase 4 tier resolution
 - **Dismiss** — record the cluster as user-dismissed noise; exclude from diff
 - **Reorient** — accept the user's alternative implication; record cluster as confirmed-with-modified-implication; carry into Phase 4
 - **Stop** — break loop; proceed to Phase 4 with whatever has been confirmed so far
 
 Loop Phase 3 over clusters in evidential-strength order (highest-evidence first). Phase 3 honors the cluster set as enumerated in Phase 2 — no dynamic cluster injection during the loop.
 
-### Phase 4: Horizons Fusion — Assemble Diff
+### Phase 4: Tier Resolution — Assemble Diff
 
 Assemble a profile diff from confirmed cluster implications:
 
@@ -210,10 +210,10 @@ Steer(scope) → Phase0(scope, user_confirm) →
 SessionCalibrationMoves
   → resolve_scope(user_confirm)         -- scope determination (target session, layer, cross_session)
   → load_existing_profile(layer)        -- prejudgment
-  → scan(session, calibration_moves)    -- inscription start
-  → classify(moves, drift_taxonomy)     -- inscription complete
+  → scan(session, calibration_moves)    -- trial inscription start
+  → classify(moves, drift_taxonomy)     -- trial inscription complete
   → present_per_cluster(cluster, V)     -- per-cluster validation
-  → assemble_diff(confirmed)            -- horizons fusion
+  → assemble_diff(confirmed)            -- tier resolution
   → present_diff(approve)               -- final Constitution interaction
   → write(profile, layer, backup)       -- circular return (inscription to rule layer)
   → UpdatedProjectProfile
@@ -268,12 +268,12 @@ When defaults are inferred, Phase 0 surfaces them in the scope-confirmation Cons
 Phase 0: scope_seed → resolve_defaults → Qc(scope_confirm) → Stop → Scope    -- scope determination [Tool]
 Phase 1: Scope → Read(existing_profile_path) → P_existing                     -- prejudgment load [Tool]
            file_absent → P_existing = P_∅ (first-time induction)
-Phase 2: Scope → Read(session_jsonl) → extract(M[]) → classify(M[]) → clusters  -- inscription [Tool]
+Phase 2: Scope → Read(session_jsonl) → extract(M[]) → classify(M[]) → clusters  -- trial inscription [Tool]
            |M[]| < min_viable → deactivate(no-op note)
 Phase 3: clusters → loop:
            present(cluster, evidence) → Qc(cluster) → Stop → V → integrate    -- per-cluster Constitution interaction [Tool]
            V = Stop → break loop
-Phase 4: confirmed_clusters → assemble_diff(P_existing) → diff                -- horizons fusion (sense)
+Phase 4: confirmed_clusters → assemble_diff(P_existing) → diff                -- tier resolution (sense)
 Phase 5: diff → present(diff, backup_path) → Qc(approve) → Stop → A           -- final Constitution interaction [Tool]
            A = Approve → Write(backup) → Write(P_proposed) → emit(UpdatedProjectProfile)
            A = Modify → regenerate(diff) → Phase 5 re-entry
