@@ -58,6 +58,8 @@ Stage 1 conjectures inscribed in SKILL.md or Skill descriptions awaiting first-t
 | Conjecture | Source | Stage 2 mechanism | Inscribed date |
 |------------|--------|-------------------|----------------|
 | Hypothesis-Surface as Constitutive Output | `epistemic-cooperative/skills/probe/SKILL.md` (Phase 2 morphism simplification: typed Qc → free-response Constitution) | TBD (separate design round; candidates: /probe free-response disposition extraction post-hoc audit hook, hypomnesis misfit.md writer + misfit accumulation) | 2026-04-27 |
+| Tertiary pattern consumption-half realization | `docs/structural-specs.md` Tertiary pattern (cross-session hypomnesis store consumption by downstream protocol Phase 0/1) | TBD (candidates: per-protocol Phase 0/1 hypomnesis read inscription, recall-enrichment correlation observation across sessions, /recollect ↔ downstream protocol convergence-quality coupling) | 2026-04-30 |
+| Rule 20 compression operational fidelity | `aitesis/skills/inquire/SKILL.md` Rule 20 (3-mode rationalization-path taxonomy compressed to "Cite-or-observe" general principle per PR #270 XC3 precedent) | Stage 2 monitoring: observe whether the compressed form preserves cite-or-observe guard fidelity in the absence of explicit (A) Verifiability / (B) EmpiricallyObservable / (C) ReadOnlyVerifiable shortcut labels. Surface re-expansion if violation pattern emerges. | 2026-04-30 |
 
 ## Promotion Criteria
 
