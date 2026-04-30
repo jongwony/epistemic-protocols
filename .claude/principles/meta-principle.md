@@ -27,7 +27,7 @@ Once deployed, the protocol accumulates post-use evidence in Popper's sense — 
 
 ### Relation to Axiomatization Judgment Framework
 
-The two-stage split maps cleanly onto existing Promotion Criteria (below in this file): criteria 1–4 (Model Invariance Reversal, Non-Derivability, Structural Independence, Adversarial Grounding) are Stage 1 compile checks — resolvable before the principle enters circulation. Criterion 5 (Empirical Vindication Across Sessions) is Stage 2 runtime corroboration. Conjectural Grounding makes this split explicit: promotion decisions use Stage 1 + Stage 2 jointly, and the Principle Evolution Process's Prejudgment → Inscription → Validation → Horizons Fusion → Circular Return loop is the operational realization of the two stages running as one cycle; Circular Return is the long-arc Stage 2 revisitation as model capability shifts.
+The two-stage split maps cleanly onto existing Promotion Criteria (below in this file): criteria 1–4 (Model Invariance Reversal, Non-Derivability, Structural Independence, Adversarial Grounding) are Stage 1 compile checks — resolvable before the principle enters circulation. Criterion 5 (Empirical Vindication Across Sessions) is Stage 2 runtime corroboration. Conjectural Grounding makes this split explicit: promotion decisions use Stage 1 + Stage 2 jointly, and the Principle Evolution Process's Prejudgment → Trial inscription → Validation → Tier resolution → Circular Return loop is the operational realization of the two stages running as one cycle; Circular Return is the long-arc Stage 2 revisitation as model capability shifts.
 
 ### Anti-inflation Clause
 
@@ -80,15 +80,15 @@ When evaluating whether a principle should be downgraded:
 
 ### Principle Evolution Process
 
-The promotion/demotion decision follows an iterative pattern (phase names — *Prejudgment, Inscription, Validation, Horizons Fusion, Circular Return* — retained as inherited terminology from the prior "Hermeneutic Circle Evolution Model" framing per #240 partial closure. **Operative-weight caveat**: these names are not purely conventional. "Horizons Fusion" carries the Gadamerian *Horizontverschmelzung* commitment that understanding is achieved through fusion rather than subsumption; "Inscription" tracks the *Aufschreibung* concern flagged in DQ8 (audit-2026-04-11). The container rename ("Process" instead of "Hermeneutic Circle") reduces surface dependency without resolving phase-level commitments. Phase-level reduction is a deferred follow-up beyond this PR's scope):
+The promotion/demotion decision follows an iterative pattern. **Phase-name lineage**: phase names were partially reduced from the prior "Hermeneutic Circle Evolution Model" framing per #313 Option C. *Inscription* was renamed to *Trial inscription* (DQ8 #241 *Aufschreibung* false-pedigree concern resolved); *Horizons Fusion* was renamed to *Tier resolution* (Gadamerian *Horizontverschmelzung* fusion-vs-subsumption commitment removed). *Prejudgment* and *Circular Return* are retained as project-specific borrowings of Gadamerian *Vorurteil* and the hermeneutic-spiral concept respectively — borrowings only, not subscription to the broader hermeneutic commitment that interpretation is constitutively non-terminal; EP pursues a closable axiom set per the stability note at the end of this section.
 
 1. **Prejudgment**: Observe a recurring violation or safeguard gap across sessions. Propose a candidate principle based on observed deficit.
 
-2. **Inscription**: Attempt to embed the candidate principle structurally in one or more SKILL.md definitions. Test whether the embedding prevents the observed violations.
+2. **Trial inscription**: Attempt to embed the candidate principle structurally in one or more SKILL.md definitions. Test whether the embedding prevents the observed violations.
 
 3. **Validation via Interpretation**: Re-examine historical sessions with the candidate principle in place. Would applying this principle have prevented observed failures? Does the principle create new, unforeseen constraints elsewhere?
 
-4. **Horizons Fusion**: If validation succeeds, promote the principle to axiom. If the principle is better expressed as a logical consequence of existing axioms, classify it as derived and annotate the derivation. If it is platform-specific, classify as architectural.
+4. **Tier resolution**: If validation succeeds, promote the principle to axiom. If the principle is better expressed as a logical consequence of existing axioms, classify it as derived and annotate the derivation. If it is platform-specific, classify as architectural.
 
 5. **Circular Return**: As models improve, revisit axioms. A principle might become *more* important (reinforcing axiom status) or might become *less* critical if model behavior changes. The circle is ongoing.
 
