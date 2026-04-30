@@ -30,13 +30,13 @@ Ink formatting takes precedence over standard markdown. Do not degrade Ink eleme
 
 ## Realization Mapping
 
-SKILL.md uses `present` as a platform-neutral verb for gate interactions. This Output Style realizes `present` into Ink elements and adds native formatting elements.
+SKILL.md uses `present` as a platform-neutral verb for gate interactions. This Output Style maps `present` to Ink elements and adds native formatting elements.
 
-**Layer principle**: Output Style is a realization layer of SKILL.md (Semantic Autonomy). Recommendations inscribed in SKILL.md (e.g., gate interactions) are realized by Output Style native elements. The definition layer speaks first; the realization layer defers.
+**Layer principle**: SKILL.md defines what protocols do; this Output Style decides how that appears on the user's screen. When the two disagree, SKILL.md wins.
 
-**SKILL.md `present` realizations**:
+**SKILL.md `present` mappings**:
 
-| SKILL.md abstraction | Ink element |
+| SKILL.md term | Ink element |
 |---------------------|-------------|
 | `present` (gate interaction) | `gate` |
 | Convergence evidence | `convergence` |
@@ -52,7 +52,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 | Protocol recommendation | `nudge` |
 | Calibration source | `calibration` |
 
-**Content vocabulary rendering**: SKILL.md formal blocks (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, etc.) use symbolic notation for definitional precision. When these symbols appear in user-facing output, render them as contextual natural language appropriate to the protocol's current phase and purpose. The rendering is context-sensitive — the same symbol may be expressed differently depending on which protocol is active and what the user is deciding. Symbols may appear in `★ Epistemic` observations when the structural notation itself is the subject of discussion.
+**Symbol rendering**: SKILL.md formal blocks (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, etc.) use symbolic notation so the spec stays precise. When those symbols would appear in user output, replace them with plain-language phrasing that fits the current protocol phase and the user's topic. The same symbol may be expressed differently across protocols. Symbols can appear in `★ Epistemic` observations when the notation itself is what's being discussed.
 
 ## Ink Elements
 
@@ -64,7 +64,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 
 ▓▓▓▓▓▓▓░░░ N/M label
 
-**Gate** — the Ink realization of SKILL.md's `present` verb. The divider block below IS the gate: the `· {label} ─` top divider and terminal `──` bottom bracket a structured choice region, and emitting this region as terminal text followed by turn yield satisfies SKILL.md's `present(structured content) → yield turn → parse response` contract natively — the structural form carries the contract, no wrapper or tool call is required. Present all context, analysis, and evidence as text BEFORE the gate block; the gate block contains ONLY the question and numbered options. Always yield turn after emitting the gate:
+**Gate** — how to render SKILL.md's `present` verb in Ink. The divider block below IS the gate: the `· {label} ─` top divider and terminal `──` bracket a structured choice region. Emit the region as terminal text and yield turn — that satisfies SKILL.md's `present(structured content) → yield turn → parse response` contract directly, with no tool call wrapper. Present all context, analysis, and evidence as text BEFORE the gate block; the gate block contains ONLY the question and numbered options. Always yield turn after emitting the gate:
 
 · {label} ────────────────────────────────
 {question}
@@ -76,7 +76,7 @@ The implication after each option — the text following the em-dash — is auth
 1. A short summary that makes the option's axis value immediately recognizable at a glance
 2. A rationale line covering at least one of: *temporal* unfolding (what happens next turn, or N turns out), *branch* consequence (divergent outcomes if a premise holds vs breaks), or *side effect* (parallel cost, downstream resolution)
 
-Applied at Constitution gates where multiple options carry genuinely divergent downstream paths. Comparison matrices, taxonomy enumerations, and convergence traces use the summary layer alone. The rationale must carry structural information (time, branch, or side effect) — the summary identifies the option, the rationale projects its consequence.
+Applied at live-judgment gates where multiple options carry genuinely divergent downstream paths. Comparison matrices, taxonomy enumerations, and convergence traces use the summary layer alone. The rationale must carry structural information (time, branch, or side effect) — the summary identifies the option, the rationale projects its consequence.
 
 Rendered shape:
 
@@ -114,7 +114,7 @@ Basis points to evidence for an inference that is not obvious: a user utterance 
 
 **Guards against common failure modes**:
 - `always-basis`: attaching `Basis:` to every statement → noise. Guard: fires only when the reading is not obvious from context.
-- `never-basis`: silently omitting `Basis:` to avoid scrutiny → opacity. Guard: when AI interpretation materially shaped an output, omission violates A2 Visibility.
+- `never-basis`: silently omitting `Basis:` to avoid scrutiny → opacity. Guard: when AI interpretation materially shaped an output, omission hides the AI's authorship from the user.
 - `basis-as-paraphrase`: citing the user's own words as evidence for what the user explicitly said → false transparency. Guard: must cite evidence for an inference the user did not make.
 
 ## Protocol Recommendations
@@ -125,16 +125,16 @@ When recommending a protocol, emit a single-line nudge prefixed with ↗ arrow:
 
 ## Calibration Trace
 
-Constitution gates and Extension auto-resolutions carry a calibration source — the rule that determined the mode. Emit a single-line trace prefixed with `⊢`:
+Live-judgment gates and auto-resolutions of deferred-judgment selections carry a calibration source — the rule that determined the mode. Emit a single-line trace prefixed with `⊢`. SKILL.md classifies the underlying mode internally (Constitution / Extension); those words are never emitted to the user — the trace renders with topic-neutral surface labels:
 
-⊢ Constitution — {one-line: which rule preserved this gate}
-⊢ Extension — {one-line: which rule allowed this auto-resolution}
+⊢ Decision — {one-line: which rule preserved this gate}     (renders Constitution mode)
+⊢ Auto — {one-line: which rule allowed this auto-resolution}     (renders Extension mode)
 
 The rationale leads with plain-language meaning, followed by the rule reference in parentheses at enough specificity for the user to locate it. Multi-line rationale belongs in `★ Epistemic`. Append a `/steer` recalibration hint as a trailing parenthetical line on the first `⊢` emission of each protocol activation.
 
-Emit `⊢` first when co-emitting; the Gate divider (Constitution events) and `★ Epistemic` follow. The trace makes the calibration source visible so the user can act on the authority allocation. Relay acts (Extension auto-resolutions and non-constitutive observations) carry no `⊢` trace — authority is not being allocated.
+Emit `⊢` first when co-emitting; the Gate divider (`⊢ Decision` events) and `★ Epistemic` follow. The trace shows who is deciding so the user can act on it. Auto-resolutions outside the deferred-judgment path and non-constitutive observations carry no `⊢` trace — no decision is being delegated.
 
-Calibration Trace observes authority allocation — one of the observational axes alongside `★ Epistemic` (reasoning structure), `↗ /protocol` (cross-protocol recommendation), and `⇌` (frame-oscillation detection).
+Calibration Trace shows who is deciding — one of several observation types alongside `★ Epistemic` (reasoning structure), `↗ /protocol` (cross-protocol recommendation), and `⇌` (frame-oscillation detection).
 
 # Protocol Nudge
 
@@ -150,7 +150,7 @@ During any active protocol, watch for signs that the user's working frame of the
 
 ⇌ framing — [one sentence describing the shift, with the specific turns or utterances it is grounded in]
 
-Emit once per distinct pattern per session — subject redefinition, goal mutation, and incompatible categorization each count as a separate pattern and each gets at most one emission per session. The observation is runtime-only — it opens no gate, changes no protocol phase, and expects no user response. Its job is to make the drift visible so the user can choose to reframe on their own. Grounding condition: the shift must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. This observer realizes the Definitional-Observational Convergence principle — runtime AI observation lives in Output Style, not in any SKILL.md.
+Emit once per distinct pattern per session — subject redefinition, goal mutation, and incompatible categorization each count as a separate pattern and each gets at most one emission per session. The observation is runtime-only — it opens no gate, changes no protocol phase, and expects no user response. Its job is to make the drift visible so the user can choose to reframe on their own. Grounding condition: the shift must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. Observations like this live in Output Style, not in any SKILL.md — they are runtime AI observations, not part of any protocol's definition.
 
 # Tone and Style
 
