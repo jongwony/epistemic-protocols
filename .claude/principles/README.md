@@ -18,7 +18,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 | File | Source | Demoted sections |
 |------|--------|------------------|
 | `architectural-principles.md` | `.claude/rules/architectural-principles.md` | Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload |
-| `meta-principle.md` | `.claude/rules/meta-principle.md` | Stage 1 / Stage 2 detail, Anti-inflation Clause, Operational Tests, Axiomatization Judgment Framework (Core Principle, Promotion Criteria, Demotion Criteria, Hermeneutic Circle Evolution Model, Tension-Accumulation Threshold) |
+| `meta-principle.md` | `.claude/rules/meta-principle.md` | Stage 1 / Stage 2 detail, Anti-inflation Clause, Operational Tests, Axiomatization Judgment Framework (Core Principle, Promotion Criteria, Demotion Criteria, Principle Evolution Process, Tension-Accumulation Threshold) |
 
 ## Demotion Ledger
 
@@ -38,7 +38,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 | Relation to Axiomatization Judgment Framework | `meta-principle.md` | 2026-04-27 | T3 — tier-evolution time only |
 | Anti-inflation Clause | `meta-principle.md` | 2026-04-27 | T2 — guard against frustration-driven creation |
 | Operational Tests | `meta-principle.md` | 2026-04-27 | T3 — authoring guidance detail |
-| Axiomatization Judgment Framework (Core Principle, Promotion / Demotion Criteria, Hermeneutic Circle Evolution Model) | `meta-principle.md` | 2026-04-27 | T2-T3 — axiom-evolution time, very rare |
+| Axiomatization Judgment Framework (Core Principle, Promotion / Demotion Criteria, Principle Evolution Process) | `meta-principle.md` | 2026-04-27 | T2-T3 — axiom-evolution time, very rare |
 | Tension-Accumulation Threshold | `meta-principle.md` | 2026-04-27 | T2 — Circular Return trigger criterion |
 
 ## Promotion Watch List
@@ -58,6 +58,8 @@ Stage 1 conjectures inscribed in SKILL.md or Skill descriptions awaiting first-t
 | Conjecture | Source | Stage 2 mechanism | Inscribed date |
 |------------|--------|-------------------|----------------|
 | Hypothesis-Surface as Constitutive Output | `epistemic-cooperative/skills/probe/SKILL.md` (Phase 2 morphism simplification: typed Qc → free-response Constitution) | TBD (separate design round; candidates: /probe free-response disposition extraction post-hoc audit hook, hypomnesis misfit.md writer + misfit accumulation) | 2026-04-27 |
+| Tertiary pattern consumption-half realization | `docs/structural-specs.md` Tertiary pattern (cross-session hypomnesis store consumption by downstream protocol Phase 0/1) | TBD (candidates: per-protocol Phase 0/1 hypomnesis read inscription, recall-enrichment correlation observation across sessions, /recollect ↔ downstream protocol convergence-quality coupling) | 2026-04-30 |
+| Rule 20 compression operational fidelity | `aitesis/skills/inquire/SKILL.md` Rule 20 (3-mode rationalization-path taxonomy compressed to "Cite-or-observe" general principle per PR #270 XC3 precedent) | Stage 2 monitoring: observe whether the compressed form preserves cite-or-observe guard fidelity in the absence of explicit (A) Verifiability / (B) EmpiricallyObservable / (C) ReadOnlyVerifiable shortcut labels. Surface re-expansion if violation pattern emerges. | 2026-04-30 |
 
 ## Promotion Criteria
 

@@ -27,7 +27,7 @@ Once deployed, the protocol accumulates post-use evidence in Popper's sense — 
 
 ### Relation to Axiomatization Judgment Framework
 
-The two-stage split maps cleanly onto existing Promotion Criteria (below in this file): criteria 1–4 (Model Invariance Reversal, Non-Derivability, Structural Independence, Adversarial Grounding) are Stage 1 compile checks — resolvable before the principle enters circulation. Criterion 5 (Empirical Vindication Across Sessions) is Stage 2 runtime corroboration. Conjectural Grounding makes this split explicit: promotion decisions use Stage 1 + Stage 2 jointly, and the Hermeneutic Circle Evolution Model's Prejudgment → Inscription → Validation → Horizons Fusion → Circular Return loop is the operational realization of the two stages running as one cycle; Circular Return is the long-arc Stage 2 revisitation as model capability shifts.
+The two-stage split maps cleanly onto existing Promotion Criteria (below in this file): criteria 1–4 (Model Invariance Reversal, Non-Derivability, Structural Independence, Adversarial Grounding) are Stage 1 compile checks — resolvable before the principle enters circulation. Criterion 5 (Empirical Vindication Across Sessions) is Stage 2 runtime corroboration. Conjectural Grounding makes this split explicit: promotion decisions use Stage 1 + Stage 2 jointly, and the Principle Evolution Process's Prejudgment → Inscription → Validation → Horizons Fusion → Circular Return loop is the operational realization of the two stages running as one cycle; Circular Return is the long-arc Stage 2 revisitation as model capability shifts.
 
 ### Anti-inflation Clause
 
@@ -52,7 +52,7 @@ This preserves the prior Direction over Accumulated Workload budget: authoring l
 
 **Axioms are principles that become MORE important as models improve.** This is the defining property of axiomaticity. Unlike derived principles (which logically depend on axiom combinations and remain constant) or architectural principles (which encode project structure and are independent of model capability), axioms gain critical force as AI capabilities increase. A principle that remains equally important or becomes *less* important as models improve is not an axiom.
 
-**Key insight**: When models become more capable at circumventing safeguards, the structural guards embedding axioms must become more rigorous, not less. Adversarial Anticipation (A7) exemplifies this: early models might fail to shortcut faithfully; advanced models routinely rationalize away from strict definitions unless the protocol structure itself enforces fidelity.
+**Key insight**: When models become more capable, the structural guards embedding axioms must become more rigorous, not less. Detection with Authority (A2) exemplifies this: as AI capability grows, the structural separation between AI detection and User judgment becomes more critical because more-capable AI is more able to silently resolve decisions that should remain User-constituted. Axiom-tier classification is therefore conditional on observed trajectory, not declared by intent — a principle whose importance demonstrably decreases under capability improvement is not axiom-material even when adversarially grounded. The A7 (formerly Adversarial Anticipation) reclassification to Safeguard tier (audit-2026-04-11 #241, PR #273; empirical basis: PR #270 11-protocol Rules-section compression under Opus 4.7 instruction-following premise — net −14 lines, zero verify warnings) is the canonical case study and motivates Criterion 4 below.
 
 ### Promotion Criteria (From Derived or Architectural to Axiom)
 
@@ -64,7 +64,7 @@ When evaluating a principle for promotion:
 
 3. **Structural Independence**: The principle applies across protocols and architectural boundaries, not confined to one protocol, one tool layer, or one implementation choice. It must constrain structure at the design level, not guide implementation at the execution level.
 
-4. **Adversarial Grounding**: The principle encodes a safeguard against AI shortcutting or rationalization. Formal correctness of a protocol definition is not sufficient; execution fidelity requires structural guards. If a principle's primary role is to prevent an anticipated failure mode, it merits axiom status.
+4. **Adversarial Grounding (subordinate to trajectory test)**: The principle encodes a safeguard against AI shortcutting or rationalization. Formal correctness of a protocol definition is not sufficient; execution fidelity requires structural guards. **Adversarial grounding alone is insufficient for promotion** — Criterion 1 (Model Invariance Reversal) must be satisfied *independently*, not derived from Criterion 4. Even when Criteria 2, 3, and 5 (Non-Derivability, Structural Independence, Empirical Vindication) co-apply with Criterion 4, the candidate's trajectory claim must survive the trajectory test on its own evidence — adversarial grounding does not transmit trajectory force. The A7 (formerly Adversarial Anticipation) demotion to Safeguard tier (audit-2026-04-11 #241, PR #273) stands as the precedent: when empirical compression evidence (PR #270 — 11-protocol Rules section compression under Opus 4.7 instruction-following premise, net −14 lines, zero verify warnings) shows reduced reliance with model improvement, adversarial grounding does not warrant axiom status. Promotion via this criterion requires non-adversarial supplementary grounding that survives the trajectory test independently. *Precedent direction note*: the A7 demotion functions as **inversive precedent** — it establishes that adversarial grounding could not maintain Axiom-tier status when trajectory reversed, which by inversion implies adversarial grounding alone cannot ground promotion. A direct promotion-direction precedent (a candidate denied Axiom status despite adversarial grounding) is not yet observed; should one arise, it would strengthen this criterion's evidentiary chain.
 
 5. **Empirical Vindication Across Sessions**: Observed sessions demonstrate that the *absence* of the principle as a structural constraint leads to repeated violations whose distinctive character persists under variation across contexts and session types. Promoting the principle to axiom status and embedding it in protocol structure resolves the observed instances. This follows Deficit Empiricism: axiomatization must be grounded in variation-stable essence.
 
@@ -78,9 +78,9 @@ When evaluating whether a principle should be downgraded:
 
 3. **Implementation Detail or Platform Dependency**: The principle guides how to realize axioms in a specific tool ecosystem, encoding platform capabilities or architectural trade-offs rather than epistemic foundations. These belong in Architectural. *Example*: "use YAML frontmatter for SKILL.md metadata" is architectural, not axiomatic — it emerges from our chosen realization layer, not epistemic necessity.
 
-### Hermeneutic Circle Evolution Model
+### Principle Evolution Process
 
-The promotion/demotion decision follows a hermeneutic circle pattern:
+The promotion/demotion decision follows an iterative pattern (phase names — *Prejudgment, Inscription, Validation, Horizons Fusion, Circular Return* — retained as inherited terminology from the prior "Hermeneutic Circle Evolution Model" framing per #240 partial closure. **Operative-weight caveat**: these names are not purely conventional. "Horizons Fusion" carries the Gadamerian *Horizontverschmelzung* commitment that understanding is achieved through fusion rather than subsumption; "Inscription" tracks the *Aufschreibung* concern flagged in DQ8 (audit-2026-04-11). The container rename ("Process" instead of "Hermeneutic Circle") reduces surface dependency without resolving phase-level commitments. Phase-level reduction is a deferred follow-up beyond this PR's scope):
 
 1. **Prejudgment**: Observe a recurring violation or safeguard gap across sessions. Propose a candidate principle based on observed deficit.
 
@@ -92,7 +92,7 @@ The promotion/demotion decision follows a hermeneutic circle pattern:
 
 5. **Circular Return**: As models improve, revisit axioms. A principle might become *more* important (reinforcing axiom status) or might become *less* critical if model behavior changes. The circle is ongoing.
 
-**Note on the circle's stability**: Unlike philosophical hermeneutics (where understanding is open-ended), axiomatization seeks closure — a stable set of non-derivable foundational principles. The circle terminates when new observations no longer prompt principle revisions; this is evidence that the axiom set has reached productive stability (though it remains revisable).
+**Note on stability**: Unlike philosophical hermeneutics (where understanding is open-ended by disciplinary commitment — the interpretive process is constitutively non-terminal), axiomatization seeks closure — a stable set of non-derivable foundational principles. The process terminates when new observations no longer prompt principle revisions; this is evidence that the axiom set has reached productive stability (though it remains revisable).
 
 ### Tension-Accumulation Threshold
 
