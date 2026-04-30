@@ -18,7 +18,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 | File | Source | Demoted sections |
 |------|--------|------------------|
 | `architectural-principles.md` | `.claude/rules/architectural-principles.md` | Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload |
-| `meta-principle.md` | `.claude/rules/meta-principle.md` | Stage 1 / Stage 2 detail, Anti-inflation Clause, Operational Tests, Axiomatization Judgment Framework (Core Principle, Promotion Criteria, Demotion Criteria, Hermeneutic Circle Evolution Model, Tension-Accumulation Threshold) |
+| `meta-principle.md` | `.claude/rules/meta-principle.md` | Stage 1 / Stage 2 detail, Anti-inflation Clause, Operational Tests, Axiomatization Judgment Framework (Core Principle, Promotion Criteria, Demotion Criteria, Principle Evolution Process, Tension-Accumulation Threshold) |
 
 ## Demotion Ledger
 
@@ -38,7 +38,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 | Relation to Axiomatization Judgment Framework | `meta-principle.md` | 2026-04-27 | T3 — tier-evolution time only |
 | Anti-inflation Clause | `meta-principle.md` | 2026-04-27 | T2 — guard against frustration-driven creation |
 | Operational Tests | `meta-principle.md` | 2026-04-27 | T3 — authoring guidance detail |
-| Axiomatization Judgment Framework (Core Principle, Promotion / Demotion Criteria, Hermeneutic Circle Evolution Model) | `meta-principle.md` | 2026-04-27 | T2-T3 — axiom-evolution time, very rare |
+| Axiomatization Judgment Framework (Core Principle, Promotion / Demotion Criteria, Principle Evolution Process) | `meta-principle.md` | 2026-04-27 | T2-T3 — axiom-evolution time, very rare |
 | Tension-Accumulation Threshold | `meta-principle.md` | 2026-04-27 | T2 — Circular Return trigger criterion |
 
 ## Promotion Watch List
