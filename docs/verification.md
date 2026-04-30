@@ -25,6 +25,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 15. **gate-type-soundness**: TYPES answer coproducts matched against Phase prose option enumerations — detects gate mutation (option injection/deletion/substitution) via stem matching. Warning level (safeguard). Type-preserving materialization permitted
 16. **artifact-self-containment**: Validates the packaged runtime-contract view — transformed `Skill.md`, plugin description metadata, and packaged support entries. Fails on contributor-doc leakage or broken packaged references; warns on weak invocation/routing cues
 17. **single-axis-soundness**: Enforces `TOOL GROUNDING`'s `(constitution)`/`(extension)` markers as the sole runtime annotation axis across live `*.md` files. Whitelisted paths: `docs/analysis/`, `docs/audit-*`, `.claude/skills/audit-delta/`, `.claude/worktrees/`, `.claude-pr/`, `node_modules/`, `dist/`, `.git/`. Source-of-truth banned-vocabulary list lives in the check function itself (`checkSingleAxisSoundness`)
+18. **agents-symlinks-sync**: Verifies `.agents/skills/` (Devin's native skill discovery path) materializes every `<plugin>/skills/<name>/` source as a relative symlink with matching target. Fails on missing, extra, non-symlink, or mis-targeted entries. Repair via `scripts/sync-agents-symlinks.sh`
 
 ## Packaging Transformations
 

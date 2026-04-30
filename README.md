@@ -62,6 +62,20 @@ Restart Codex, then start with `$onboard`.
 
 </details>
 
+### Devin
+
+Devin discovers skills under `.agents/skills/`. This repository ships a pre-materialized view of every protocol/utility skill at that path (relative symlinks back to the per-plugin source — no duplication). When Devin clones the repo it picks them up automatically; no installer step is required.
+
+To regenerate after adding/renaming skills:
+
+```bash
+scripts/sync-agents-symlinks.sh
+```
+
+The `agents-symlinks-sync` static check fails the pre-commit if the materialized view drifts from the plugin sources.
+
+> Note: skill discovery is verified; runtime tool grounding (Claude-Code-specific tools referenced in `PHASE TRANSITIONS` / `TOOL GROUNDING`) may behave differently in Devin. Treat Devin compatibility as Stage 1 conjecture pending Stage 2 use evidence.
+
 ## Protocols
 
 | Protocol | Command | When to use |
