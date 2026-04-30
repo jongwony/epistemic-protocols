@@ -2283,6 +2283,90 @@ function checkSingleAxisSoundness() {
 }
 
 // ============================================================
+// Check 18: Agents Symlinks Sync (Agent Skills cross-tool standard)
+// ============================================================
+// .agents/skills/ exposes plugin skills under the Agent Skills specification
+// path (agentskills.io) used by Cursor, GitHub Copilot, Devin, OpenCode,
+// Codex CLI, Gemini CLI, and other compliant tools. Single source of truth is
+// each <plugin>/skills/<name>/ directory; the .agents/skills/ entries are
+// relative symlinks materialized by scripts/sync-agents-symlinks.sh. This
+// check enforces parity between the two views — fails on missing, extra,
+// non-symlink, or mis-targeted entries.
+function checkAgentsSymlinksSync() {
+  const SOURCE_PLUGINS = [
+    'prothesis', 'syneidesis', 'hermeneia', 'katalepsis', 'telos', 'horismos',
+    'aitesis', 'analogia', 'periagoge', 'prosoche', 'epharmoge', 'anamnesis',
+    'epistemic-cooperative',
+  ];
+  const agentsDir = path.join(projectRoot, '.agents', 'skills');
+
+  const expected = new Map(); // name -> absolute target dir
+  for (const plugin of SOURCE_PLUGINS) {
+    const skillsRoot = path.join(projectRoot, plugin, 'skills');
+    if (!fs.existsSync(skillsRoot)) continue;
+    for (const entry of fs.readdirSync(skillsRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      expected.set(entry.name, path.join(skillsRoot, entry.name));
+    }
+  }
+
+  if (!fs.existsSync(agentsDir)) {
+    results.fail.push({
+      check: 'agents-symlinks-sync',
+      file: '.agents/skills/',
+      message: `Missing — run scripts/sync-agents-symlinks.sh to materialize ${expected.size} skill symlinks for Devin compatibility`,
+    });
+    return;
+  }
+
+  const actual = new Map(); // name -> { isSymlink, target }
+  for (const entry of fs.readdirSync(agentsDir, { withFileTypes: true })) {
+    const full = path.join(agentsDir, entry.name);
+    let resolved = null;
+    try { resolved = fs.realpathSync(full); } catch { /* dangling */ }
+    actual.set(entry.name, { isSymlink: entry.isSymbolicLink(), target: resolved });
+  }
+
+  const violations = [];
+  for (const [name, expectedTarget] of expected) {
+    const got = actual.get(name);
+    if (!got) {
+      violations.push({ name, reason: `missing symlink (expected → ${path.relative(projectRoot, expectedTarget)})` });
+      continue;
+    }
+    if (!got.isSymlink) {
+      violations.push({ name, reason: 'not a symlink (must be a relative symlink, not a regular directory or copy)' });
+      continue;
+    }
+    if (!got.target || path.resolve(got.target) !== path.resolve(expectedTarget)) {
+      const gotRel = got.target ? path.relative(projectRoot, got.target) : '<dangling>';
+      violations.push({ name, reason: `target mismatch — points to ${gotRel}, expected ${path.relative(projectRoot, expectedTarget)}` });
+    }
+  }
+  for (const name of actual.keys()) {
+    if (!expected.has(name)) {
+      violations.push({ name, reason: 'extra entry — no matching <plugin>/skills/ source' });
+    }
+  }
+
+  if (violations.length === 0) {
+    results.pass.push({
+      check: 'agents-symlinks-sync',
+      file: '.agents/skills/',
+      message: `Devin skill view in sync — ${expected.size} symlinks match plugin sources`,
+    });
+  } else {
+    for (const v of violations) {
+      results.fail.push({
+        check: 'agents-symlinks-sync',
+        file: `.agents/skills/${v.name}`,
+        message: `${v.reason} — run scripts/sync-agents-symlinks.sh to repair`,
+      });
+    }
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -2303,6 +2387,7 @@ try {
   checkGateTypeSoundness();
   checkArtifactSelfContainment();
   checkSingleAxisSoundness();
+  checkAgentsSymlinksSync();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));

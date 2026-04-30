@@ -62,6 +62,20 @@ Restart Codex, then start with `$onboard`.
 
 </details>
 
+### Other agent tools (Agent Skills standard)
+
+Cursor, GitHub Copilot, Devin, OpenCode, Codex CLI, Gemini CLI, and others discover skills under `.agents/skills/<name>/SKILL.md` per the [Agent Skills specification](https://agentskills.io/specification). This repository ships a pre-materialized view of every protocol/utility skill at that path (relative symlinks back to the per-plugin source — no duplication). Cloning the repo is sufficient; no installer step is required.
+
+To regenerate after adding/renaming skills:
+
+```bash
+scripts/sync-agents-symlinks.sh
+```
+
+The `agents-symlinks-sync` static check fails the pre-commit if the materialized view drifts from the plugin sources.
+
+> Note: skill *discovery* via `.agents/skills/` is a verified cross-tool standard. Runtime *tool grounding* (host-specific tools referenced in `PHASE TRANSITIONS` / `TOOL GROUNDING` such as `Skill()`, `Task`, `AskUserQuestion`) varies by tool — protocol behavior in non-Claude-Code hosts is Stage 1 conjecture pending Stage 2 use evidence.
+
 ## Protocols
 
 | Protocol | Command | When to use |
