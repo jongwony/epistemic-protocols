@@ -1,6 +1,6 @@
 ---
 name: steer
-description: "Project profile recalibration via session calibration drift audit. Scan session calibration moves for Constitution overapplication, Extension misapplication, and existing profile drift, present per-cluster evidence for user-constituted verdict, then write an updated user-global or project-local project-profile rule file via hermeneutic circle. Use this skill whenever the user wants to 'recalibrate project profile', 'audit calibration drift', 'reinduce Cognitive Partnership Move defaults', 'steer project profile', or invokes /steer. Periagoge family — extends /induce with a writable rule inscription step for ProjectProfile. Stage 2 evidence-collection instrument."
+description: "Project profile recalibration via session calibration drift audit. Scan session calibration moves for Constitution overapplication, Extension misapplication, and existing profile drift, present per-cluster evidence for user-constituted verdict, then write an updated user-global or project-local project-profile rule file via Circular Return. Use this skill whenever the user wants to 'recalibrate project profile', 'audit calibration drift', 'reinduce Cognitive Partnership Move defaults', 'steer project profile', or invokes /steer. Periagoge family — extends /induce with a writable rule inscription step for ProjectProfile. Stage 2 evidence-collection instrument."
 user_invocable: true
 ---
 
@@ -68,7 +68,7 @@ Read the existing project-profile rule file at the chosen layer:
 
 Parse the existing six profile variables (revision_cost, deploy_fan_out, dependency_lock_in, runtime_persistence, hermeneutic_circle_availability, notation_maturity) and the calibration result (Extension-default vs Constitution-default vs mixed). When the file does not exist, treat the existing profile as the empty profile P_∅ — the audit then operates as a first-time profile induction rather than a recalibration.
 
-Phase 1 emits no surfacing. The loaded profile becomes the prejudgment baseline against which Phase 2 inscription operates.
+Phase 1 emits no surfacing. The loaded profile becomes the prejudgment baseline against which Phase 2 trial inscription operates.
 
 ### Phase 2: Trial Inscription — Scan and Classify
 
