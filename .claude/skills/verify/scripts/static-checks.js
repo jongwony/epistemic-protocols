@@ -2283,13 +2283,15 @@ function checkSingleAxisSoundness() {
 }
 
 // ============================================================
-// Check 18: Agents Symlinks Sync (Devin compatibility)
+// Check 18: Agents Symlinks Sync (Agent Skills cross-tool standard)
 // ============================================================
-// .agents/skills/ exposes plugin skills under Devin's native skill discovery
-// path. Single source of truth is each <plugin>/skills/<name>/ directory; the
-// .agents/skills/ entries are relative symlinks materialized by
-// scripts/sync-agents-symlinks.sh. This check enforces parity between the
-// two views — fails on missing, extra, non-symlink, or mis-targeted entries.
+// .agents/skills/ exposes plugin skills under the Agent Skills specification
+// path (agentskills.io) used by Cursor, GitHub Copilot, Devin, OpenCode,
+// Codex CLI, Gemini CLI, and other compliant tools. Single source of truth is
+// each <plugin>/skills/<name>/ directory; the .agents/skills/ entries are
+// relative symlinks materialized by scripts/sync-agents-symlinks.sh. This
+// check enforces parity between the two views — fails on missing, extra,
+// non-symlink, or mis-targeted entries.
 function checkAgentsSymlinksSync() {
   const SOURCE_PLUGINS = [
     'prothesis', 'syneidesis', 'hermeneia', 'katalepsis', 'telos', 'horismos',

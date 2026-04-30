@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
-# Sync .agents/skills/ symlinks for Devin compatibility.
+# Sync .agents/skills/ symlinks — Agent Skills cross-tool standard view.
 #
-# Devin scans .agents/skills/<skill-name>/SKILL.md (its native skill path),
-# while Claude Code/Agent SDK scan .claude/skills/ and plugin directories.
-# This script materializes a Devin-discoverable view by symlinking each
-# protocol/utility skill directory into .agents/skills/.
+# .agents/skills/<name>/SKILL.md is the discovery path used by Cursor,
+# GitHub Copilot, Devin, OpenCode, Codex CLI, Gemini CLI, and other tools
+# implementing the Agent Skills specification (https://agentskills.io).
+# Claude Code itself uses its own plugin marketplace (.claude-plugin/) and
+# does not scan this directory.
 #
-# Single source of truth remains the per-plugin skill directory (e.g.
-# prothesis/skills/frame/). Symlinks are relative so the layout survives
-# repository relocation. The companion static-check `agents-symlinks-sync`
-# fails when the materialized view drifts from the source set.
+# This script materializes the cross-tool view by symlinking each
+# protocol/utility skill directory into .agents/skills/. The single source
+# of truth remains the per-plugin skill directory (e.g. prothesis/skills/
+# frame/). Symlinks are relative so the layout survives repository
+# relocation. The companion static-check `agents-symlinks-sync` fails when
+# the materialized view drifts from the source set.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
