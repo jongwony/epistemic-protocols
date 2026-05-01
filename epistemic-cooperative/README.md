@@ -14,7 +14,7 @@ A utility plugin for epistemic protocol onboarding and analytics. Unlike protoco
 |-------|---------|--------|
 | `/onboard` | Quick recommendation + protocol learning | Terminal-based guided experience |
 | `/report` | Growth Map with epistemic analysis | HTML artifact (`~/.claude/.report/growth-map.html`) |
-| `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.insights/dashboard.html`) |
+| `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | Protocol handbook — instant reference | Terminal-based protocol browser |
 | `/compose` | Protocol composition authoring | Generated composition SKILL.md file |
 

@@ -97,7 +97,6 @@ COLLECT:
    - Decision-making patterns (how user makes choices)
    - Protocol usage patterns (which epistemic protocols, how often)
    - Communication style (directive, collaborative, exploratory)
-3. Cross-reference with .insights/ files for existing analysis
 
 RETURN FORMAT:
 ## Interaction Style
