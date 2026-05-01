@@ -262,6 +262,10 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 14. **Context-Question Separation** — All hypothesis evidence and reverse-evidence is presented as text output before the gate. The gate contains only the disposition options.
 15. **Convergence evidence** — Present a transformation trace before declaring convergence: Recognize/Redirect/Dismiss/Narrow produce a session-text artifact (ProtocolRoute or FitReviewNote); Stop deactivates without an artifact.
 16. **Coexistence with /catalog and /onboard** — Probe does not replace passive reference (`/catalog`) or pattern-based recommendation (`/onboard`). The three skills occupy distinct stances.
+17. **Structural-change calibration** — When a candidate hypothesis concerns whether a structural change crosses the architectural threshold, distinguish at hypothesis construction time:
+    - **Architectural inscription**: addition of a new core protocol, addition of a `graph.json` edge, category-level promotion. Stage 2 deferral framing applies.
+    - **Type-level realization**: type-level realization of an already-inscribed `── COMPOSITION ──` product within an existing protocol's operational scope. Evidence-collection modality internal iteration; Stage 2 deferral framing does not apply.
+    The distinction informs `evidence` / `reverse_evidence` formulation when structural-change extent (line count, file count, scope size) is the apparent signal — extent alone does not determine architectural status. Maps approximately to the surgical / design downstream-remediation classification axis carried by `docs/probe-verification-framework.md`: type-level realization ≈ surgical, architectural inscription ≈ design (`≈` denotes approximate analogical mapping between vocabulary axes; not formal type-isomorphism — `≅` is reserved for the latter, e.g., Katalepsis `P'≅R`).
 
 ## UX Safeguards
 
