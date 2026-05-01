@@ -62,6 +62,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: Get file status map
+        id: filestatus
+        run: |
+          BASE_SHA=$(gh pr view ${{ steps.pr.outputs.number }} --json baseRefOid --jq '.baseRefOid')
+          git diff --name-status "$BASE_SHA"...HEAD > .pr-name-status.txt
+          echo "::group::File status map"
+          cat .pr-name-status.txt
+          echo "::endgroup::"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Get PR diff
         run: |
           gh pr diff ${{ steps.pr.outputs.number }} > .pr-diff.txt
@@ -78,11 +89,23 @@ jobs:
             Review ONLY the following changed files:
             ${{ steps.changed.outputs.files }}
 
-            The full unified diff is available at .pr-diff.txt. Read it to understand the exact changes.
-            In unified diff format: lines starting with `+` are ADDITIONS (new code in this PR),
-            lines starting with `-` are DELETIONS (code removed by this PR),
-            lines starting with a space are unchanged context.
-            Base your review strictly on what the diff adds and removes — do not invert the direction.
+            ## File fate (authoritative)
+
+            Read `.pr-name-status.txt` for the per-file fate map produced by `git diff --name-status base...HEAD`:
+            - `A <path>` — Added: the file is created by this PR; it does NOT exist on the base branch
+            - `M <path>` — Modified: the file exists on both base and head; the diff shows the line-level changes
+            - `D <path>` — Deleted: the file exists on the base branch and is removed by this PR
+            - `R<score> <old> <new>` — Renamed (old path replaced by new path)
+            Treat this map as the authoritative source for file fate. Files marked `A` were created by this PR; files marked `D` were removed by this PR.
+
+            ## Diff reading
+
+            The full unified diff is available at `.pr-diff.txt`. The diff records the transition from base branch to PR head:
+            - Lines starting with `+` are added by this PR
+            - Lines starting with `-` are removed by this PR
+            - Lines starting with a space are unchanged context
+            - For files marked `A` in the status map, the diff begins with `--- /dev/null` and `+++ b/<path>`; the `+` lines are the file's initial content created by this PR
+            - For files marked `D` in the status map, the diff begins with `--- a/<path>` and `+++ /dev/null`; the `-` lines are the file's prior content removed by this PR
 
             ## Perspective Analysis
 
@@ -131,10 +154,52 @@ jobs:
           if [ -z "$REVIEW_TEXT" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
+            printf '%s' "$REVIEW_TEXT" > .review-text.txt
             echo "review_text<<REVIEW_TEXT_EOF" >> "$GITHUB_OUTPUT"
             echo "$REVIEW_TEXT" >> "$GITHUB_OUTPUT"
             echo "REVIEW_TEXT_EOF" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Cross-check review for direction errors
+        if: always() && steps.extract.outcome == 'success' && steps.extract.outputs.skip != 'true'
+        id: directioncheck
+        run: |
+          if [ ! -s .pr-name-status.txt ] || [ ! -s .review-text.txt ]; then
+            echo "::warning::Skipping direction cross-check (missing inputs)"
+            {
+              echo "review_text<<REVIEW_TEXT_EOF"
+              cat .review-text.txt 2>/dev/null || true
+              echo "REVIEW_TEXT_EOF"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          ADDED_FILES=$(awk '$1 == "A" {print $2}' .pr-name-status.txt)
+          WARNINGS=""
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            if grep -F -- "$f" .review-text.txt 2>/dev/null | grep -qiE 'delet(e|ed|es|ing|ion)'; then
+              WARNINGS="${WARNINGS}- \`${f}\` is **Added** in this PR (per .pr-name-status.txt) but the review describes it as deleted\n"
+            fi
+          done <<< "$ADDED_FILES"
+
+          if [ -n "$WARNINGS" ]; then
+            {
+              printf '> [!WARNING] **Direction-misread guard fired**\n>\n'
+              printf '> The PR diff records the following files as Added but the review describes them as deleted — likely a diff-direction inversion. Verify against `.pr-name-status.txt` before treating these findings as legitimate.\n>\n'
+              printf '%b' "$WARNINGS"
+              printf '\n---\n\n'
+              cat .review-text.txt
+            } > .review-text.augmented.txt
+            mv .review-text.augmented.txt .review-text.txt
+            echo "::warning::Direction-misread guard fired — review augmented with mismatch warning"
+          fi
+
+          {
+            echo "review_text<<REVIEW_TEXT_EOF"
+            cat .review-text.txt
+            echo "REVIEW_TEXT_EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Post review comments
         if: >-
@@ -154,7 +219,7 @@ jobs:
             an epistemic code review of PR #${{ steps.pr.outputs.number }}.
 
             <review>
-            ${{ steps.extract.outputs.review_text }}
+            ${{ steps.directioncheck.outputs.review_text || steps.extract.outputs.review_text }}
             </review>
 
             For each review finding that references a specific file path and line number,
