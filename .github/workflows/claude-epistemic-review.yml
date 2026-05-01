@@ -154,7 +154,7 @@ jobs:
           if [ -z "$REVIEW_TEXT" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
-            printf '%s' "$REVIEW_TEXT" > .review-text.txt
+            printf '%s\n' "$REVIEW_TEXT" > .review-text.txt
             echo "review_text<<REVIEW_TEXT_EOF" >> "$GITHUB_OUTPUT"
             echo "$REVIEW_TEXT" >> "$GITHUB_OUTPUT"
             echo "REVIEW_TEXT_EOF" >> "$GITHUB_OUTPUT"
@@ -169,6 +169,7 @@ jobs:
             {
               echo "review_text<<REVIEW_TEXT_EOF"
               cat .review-text.txt 2>/dev/null || true
+              echo ""
               echo "REVIEW_TEXT_EOF"
             } >> "$GITHUB_OUTPUT"
             exit 0
@@ -198,6 +199,7 @@ jobs:
           {
             echo "review_text<<REVIEW_TEXT_EOF"
             cat .review-text.txt
+            echo ""
             echo "REVIEW_TEXT_EOF"
           } >> "$GITHUB_OUTPUT"
 
