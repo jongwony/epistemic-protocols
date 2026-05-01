@@ -98,6 +98,8 @@ COLLECT:
    - Protocol usage patterns (which epistemic protocols, how often)
    - Communication style (directive, collaborative, exploratory)
 
+NOTE: COLLECT operates on session transcripts and protocol patterns only — cross-reference to user-personal analysis artifacts (curated insight files) is intentionally out of scope; the analysis remains substrate-agnostic and reproducible across users.
+
 RETURN FORMAT:
 ## Interaction Style
 - [3-5 observed patterns with session evidence]

@@ -160,7 +160,9 @@ For protocols with 3+ session history:
 
 ### Phase 4: Present (Main)
 
-1. **HTML Dashboard**: Write to `~/.claude/.dashboard/dashboard.html` via Write tool
+1. **HTML Dashboard**:
+   - Pre-write step: call Bash `mkdir -p ~/.claude/.dashboard` to ensure the parent directory exists (handles fresh environments without prior `.dashboard/` activity)
+   - Write to `~/.claude/.dashboard/dashboard.html` via Write tool
    - Refer to `references/html-template.md` for the full HTML skeleton
    - 11 sections: Coverage, Protocol Usage, Friction→Protocol, Improvement Opportunities, Growth Timeline, Achievements, Satisfaction Trends, Quality Score, Gate Efficiency, Relay Erosion, Quick Actions
    - Path B degradation: Sections 3 (Friction), 7 (Satisfaction), 8 (Quality Score), 9 (Gate Efficiency), 10 (Relay Erosion) show "Facets data enables richer analysis" guidance. Sections 9-10 additionally show "Insufficient data for erosion tracking" when protocol session count < 3
