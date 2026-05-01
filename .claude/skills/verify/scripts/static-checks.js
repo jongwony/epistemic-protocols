@@ -2367,6 +2367,65 @@ function checkAgentsSymlinksSync() {
 }
 
 // ============================================================
+// Check 19: Workflow Paths Sync
+// ============================================================
+// Verifies .github/workflows/claude-epistemic-review.yml `paths` includes
+// every protocol plugin directory. Prevents new protocols from silently
+// missing the multi-perspective epistemic review trigger (Issue #258 pattern:
+// anamnesis + periagoge omitted at workflow inception). Utility plugins
+// (epistemic-cooperative) are intentionally out of scope.
+function checkWorkflowPathsSync() {
+  const relPath = '.github/workflows/claude-epistemic-review.yml';
+  const workflowFile = path.join(projectRoot, relPath);
+
+  if (!fs.existsSync(workflowFile)) {
+    results.fail.push({
+      check: 'workflow-paths-sync',
+      file: relPath,
+      message: 'Missing — claude-epistemic-review.yml not found',
+    });
+    return;
+  }
+
+  const content = fs.readFileSync(workflowFile, 'utf8');
+  const pathsBlockMatch = content.match(/^\s+paths:\s*\n((?:\s+-\s+'[^']+'\s*\n)+)/m);
+  if (!pathsBlockMatch) {
+    results.fail.push({
+      check: 'workflow-paths-sync',
+      file: relPath,
+      message: 'on.pull_request.paths block not found or unparseable',
+    });
+    return;
+  }
+
+  const declaredPaths = new Set();
+  const pathLineRe = /-\s+'([^']+)'/g;
+  let m;
+  while ((m = pathLineRe.exec(pathsBlockMatch[1])) !== null) {
+    declaredPaths.add(m[1]);
+  }
+
+  const expected = PROTOCOL_FILES.map(p => p.split('/')[0]);
+  const missing = expected.filter(name => !declaredPaths.has(`${name}/**`));
+
+  if (missing.length === 0) {
+    results.pass.push({
+      check: 'workflow-paths-sync',
+      file: relPath,
+      message: `All ${expected.length} protocol paths declared in epistemic-review trigger`,
+    });
+  } else {
+    for (const name of missing) {
+      results.fail.push({
+        check: 'workflow-paths-sync',
+        file: relPath,
+        message: `Missing protocol path — add "- '${name}/**'" under on.pull_request.paths so ${name} PRs trigger epistemic review`,
+      });
+    }
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -2388,6 +2447,7 @@ try {
   checkArtifactSelfContainment();
   checkSingleAxisSoundness();
   checkAgentsSymlinksSync();
+  checkWorkflowPathsSync();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
