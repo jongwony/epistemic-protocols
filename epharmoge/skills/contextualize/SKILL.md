@@ -223,8 +223,10 @@ Each mismatch is characterized by:
 | Level | Criterion | Action |
 |-------|-----------|--------|
 | **Critical** | Result actively harmful in current context | Must resolve before using result |
-| **Significant** | Result suboptimal or partially inappropriate | Surface to user for judgment |
-| **Minor** | Result adequate but could fit better | Surface with pre-selected Dismiss option |
+| **Significant** | Result suboptimal or partially inappropriate AND mismatch carries demonstrable behavioral impact (downstream-decision impact, runtime divergence, gate-trajectory change) | Surface to user for judgment |
+| **Minor** | Result adequate but could fit better, OR mismatch is structural-only without demonstrable behavioral impact | Surface with pre-selected Dismiss option |
+
+Behavioral-impact qualifier (Significant criterion): structural-change extent alone — line count, file count, scope size — is insufficient grounds for Significant; the mismatch must produce a demonstrable downstream behavioral consequence. See Rule 17.
 
 When multiple mismatches are identified, surface in severity order (Critical → Significant → Minor). Only one mismatch surfaced per Phase 1 cycle.
 
@@ -349,3 +351,4 @@ After adaptation — **re-scan**:
 14. **Zero-mismatch surfacing**: If Phase 0 scan detects no context mismatches, present this finding with reasoning for user confirmation
 15. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 16. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
+17. **Significant requires demonstrable behavioral impact**: Severity = Significant requires that the mismatch produces a demonstrable behavioral consequence — downstream-decision impact, runtime divergence, gate-trajectory change. Structural-change extent (line count, file count, scope size) alone is insufficient grounds — categorize as Minor when behavioral impact is undemonstrated. This guards against false-positive gating arising from conflation of structural-change extent with applicability impact, where Rule 15 (Option-set relay test) would otherwise apply only ex post via user challenge
