@@ -212,8 +212,9 @@ TOOL GROUNDING below specifies one such realization (Claude Code substrate); it 
 non-normative with respect to the protocol's epistemic content.
 
 Referent: Semantic autonomy at the realization boundary. This section locally inscribes the
-realization boundary for user-visible clarity; the local inscription is intentional and
-preserves the hermeneutic circle until a marketplace shared-document mechanism exists.
+realization boundary for user-visible clarity; the local inscription is intentional —
+externalizing the realization-boundary explanation would split the user-visible contract
+from its semantic grounding, breaking the hermeneutic circle that local inscription preserves.
 
 ── KNOWN FAILURE MODES ──
 FalseAnchor       : extract(s) contains t with high precision but t ≠ recall_target
