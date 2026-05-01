@@ -34,7 +34,7 @@ Eval   = Applicability evaluation: (R, X) → Set(Mismatch)
 Mismatch = { aspect: String, dimension: Dimension, description: String, evidence: String, severity: Severity, origin: Origin }
 Dimension ∈ {Convention, Environment, Audience, Dependency} ∪ Emergent(Dimension)
 Origin ∈ {Initial, Emerged(aspect)}                            -- mismatch provenance: initial scan or spawned by adapting parent aspect
-Severity ∈ {Critical, Significant, Minor}
+Severity ∈ {Critical, Significant, Minor}                      -- Significant requires demonstrable behavioral impact (current-session task graph / downstream protocol activations); see Rule 17
 Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial
 Mₑ     = Newly emerged mismatches from Eval(R', X)             -- origin = Emerged(adapted_aspect)
 Register = Mᵢ → Set(Task) [Tool: TaskCreate]                  -- mismatch registration as tracked tasks
@@ -224,9 +224,9 @@ Each mismatch is characterized by:
 |-------|-----------|--------|
 | **Critical** | Result actively harmful in current context | Must resolve before using result |
 | **Significant** | Result suboptimal or partially inappropriate AND mismatch carries demonstrable behavioral impact (downstream-decision impact, runtime divergence, gate-trajectory change) | Surface to user for judgment |
-| **Minor** | Result adequate but could fit better, OR mismatch is structural-only without demonstrable behavioral impact | Surface with pre-selected Dismiss option |
+| **Minor** | Result adequate but could fit better, OR mismatch lacks demonstrable behavioral impact (covers both structural-only and suboptimal-without-impact cases) | Surface with pre-selected Dismiss option |
 
-Behavioral-impact qualifier (Significant criterion): structural-change extent alone — line count, file count, scope size — is insufficient grounds for Significant; the mismatch must produce a demonstrable downstream behavioral consequence. See Rule 17.
+Behavioral-impact qualifier (Significant criterion): structural-change extent alone — line count, file count, scope size — is insufficient grounds for Significant; the mismatch must produce a demonstrable downstream behavioral consequence. **Assessment scope**: demonstrability is evaluated against the visible task graph and downstream protocol activations within the current session — not speculative future sessions, hypothetical user trajectories, or out-of-session consequences. When the visible session offers no anchor for the predicted consequence, the mismatch defaults to Minor (¬behavioral_impact disjunct). See Rule 17.
 
 When multiple mismatches are identified, surface in severity order (Critical → Significant → Minor). Only one mismatch surfaced per Phase 1 cycle.
 
@@ -239,7 +239,7 @@ Evaluate result against application context. This phase is **silent** — no use
 1. **Scan result** `R` against context `X`: environment state, conventions, use case scope, temporal validity, user constraints
 2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)
 3. If all aspects warranted: present finding per Rule 14 before concluding (Epharmoge not activated)
-4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity, `origin=Initial` — proceed to Phase 1
+4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity (per Rule 17 — behavioral-impact qualifier assessed against current-session task graph), `origin=Initial` — proceed to Phase 1
 
 **Information source**: The result `R` itself compared against observable context `X`. NOT a re-scan of pre-execution context (non-circularity with Aitesis).
 
