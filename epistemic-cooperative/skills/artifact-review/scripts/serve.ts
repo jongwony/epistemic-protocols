@@ -23,7 +23,6 @@ if (args.length === 0) {
 }
 
 // Reject flag-shaped args so they don't become phantom draft paths via `resolve()`.
-// --skip-channel and similar flags are honored by the skill caller, not this server.
 const unknownFlags = args.filter((a) => a.startsWith("-"));
 if (unknownFlags.length > 0) {
   console.error(`unknown flag(s): ${unknownFlags.join(", ")}`);
