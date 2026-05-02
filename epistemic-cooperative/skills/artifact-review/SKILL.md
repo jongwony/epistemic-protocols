@@ -197,7 +197,7 @@ On user-explicit termination (free-response exit), present the transformation tr
 Iterations: {N} loops, [scan|skip] sequence: {e.g., scan, scan, skip, scan}
 Aggregated across {S} scan rounds:
   Stage 1 (inquire):       {F} factual claims → {V} verified, {C} corrected, {U} flagged uncertain
-  Stage 2 (gap):           {G} gaps surfaced → {A} addressed, {D} dismissed (with assumption)
+  Stage 2 (gap):           {G} gaps surfaced → {A} addressed, {D_dis} dismissed (with assumption)
   Stage 3 (contextualize): {M} mismatches → {R} resolved, {S_dis} dismissed
                            {B} channel comments consumed → {I} incorporated
 Channel state at exit:     {C_unc} unconsumed comments in feedback-{slug}.jsonl (preserved, not archived)

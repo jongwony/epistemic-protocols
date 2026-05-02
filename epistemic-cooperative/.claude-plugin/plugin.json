@@ -1,7 +1,7 @@
 {
   "name": "epistemic-cooperative",
   "description": "/catalog for protocol handbook, /onboard for quick recommendation + protocol learning, /probe for deficit recognition fit review (multi-hypothesis surfacing before protocol commitment), /report for Growth Map (usage analysis + insights integration), /dashboard for coverage dashboard, /compose for protocol composition authoring, /introspect for deep self-analysis pipeline (behavioral profile + HTML report), /sophia for philosopher match (behavioral dimension analysis), /curses for strength-shadow analysis and attitude recommendations, /write for multi-perspective blog drafting from session insights, /artifact-review for markdown artifact review before fixation (publish/commit/deposit/merge) via inquire × gap × contextualize through a channel-first browser preview loop, /review-ensemble for cross-model code review composition (Claude /frame + Codex) with unified verdict aggregation, /steer for project profile recalibration via session calibration drift audit (Periagoge family specialization with writable rule inscription), /misuse for retrospective protocol contract violation detection across /ground and /induce sessions, /crystallize for inscribing a session's horizon-fusion residue into a four-layer Horizon-Fusion Text (HFT) for cross-session continuity (writer half of the HFT pair), /rehydrate for entering a previously inscribed HFT to prime the current session with the originating session's Vorverständnis (reader half of the HFT pair). /probe, /steer, /misuse, /crystallize, /rehydrate are Stage 2 evidence-collection instruments.",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "outputStyles": "./styles/",
   "author": {
     "name": "Jongwon Choi",
