@@ -9,7 +9,7 @@ skills:
 
 # Artifact Review: Inquiry × Gap Audit × Application-Fit Pipeline
 
-Take any markdown artifact from drafted state to fixation-ready through three reviews — factual verifiability, decision quality, application fit — bound to a **channel-first feedback loop**. On invocation the skill opens a browser preview of the rendered artifact (Vorverständnis layer) and runs an initial scan (`/inquire` → `/gap` → `/contextualize`); afterward, every loop iteration presents a 2-option branch gate (`scan` / `skip`) before the user returns to the browser for the next round. Span-anchored comments appended to `feedback-{slug}.jsonl` enter as `<feedback anchor="…">…</feedback>` directives at the next scan — current iteration if `scan` is chosen, future iteration if `skip`. Termination is a free-response pathway available at any time.
+Take any markdown artifact from drafted state to fixation-ready through three reviews — factual verifiability, decision quality, application fit — bound to a **channel-first feedback loop**. On invocation the skill opens a browser preview of the rendered artifact (Vorverständnis layer) and runs an initial scan (`/inquire` → `/gap` → `/contextualize`); afterward, every loop iteration presents a 2-option branch gate (`scan` / `continue`) before the user returns to the browser for the next round. Span-anchored comments appended to `feedback-{slug}.jsonl` enter as `<feedback anchor="…">…</feedback>` directives at the next scan — current iteration if `scan` is chosen, future iteration if `continue`. Termination is a free-response pathway available at any time.
 
 Unlike domain-specific editorial wrappers, `/artifact-review` is agnostic about *what kind of artifact* is being reviewed — blog drafts, plan documents, crystallized handoffs, design docs, and changeset descriptions are all valid targets. The caller supplies the fixation event (what commits this artifact to downstream consumers) and the application context (where the fixed artifact will operate). The three protocols then specialize their scopes accordingly.
 
@@ -34,7 +34,7 @@ Phase 0  : channel open (browser, rendered preview) + initial scan
 Phase L  : loop iteration k
              Q (branch gate) :
                ① scan  — consume current JSONL, run /inquire+/gap+/contextualize, then return to browser
-               ② skip  — return to browser without scan; comments accumulate to next scan
+               ② continue  — return to browser without scan; current JSONL queue is preserved and processed in batch at the next scan round
              user reads preview + AI surfacing in browser, drag-comments, then next chat turn answers the gate
 free-exit : user may end the review at any time by saying so (Phase 0 prose declares this once)
 ```
@@ -71,27 +71,27 @@ After each scan completes (initial or subsequent), surface the round counter in 
 
 **Pre-gate prose** (per round):
 ```
-Round {k} complete — {scan|skip}. Browser preview reflects the latest edits.
+Round {k} complete — {scan|continue}. Browser preview reflects the latest edits.
 ```
 
 **Branch gate**:
 
 ```
 Q : Round {k+1} — 다음 라운드를 어떻게 진행할까요? (브라우저에서 코멘트 작성/추가 후 답변)
-  ① scan  — 누적된 코멘트를 input으로 다시 스캔한 뒤 다음 라운드로
-  ② skip  — 스캔 없이 바로 다음 라운드로 (코멘트는 누적 유지)
+  ① scan      — 누적된 코멘트를 즉시 스캔에 input으로 반영하고 결과를 적용한 뒤 다음 라운드로
+  ② continue  — 스캔 없이 브라우저로 복귀해 코멘트 작성을 이어감; 누적 코멘트는 보존되어 다음 scan 라운드에서 일괄 처리
 ```
 
 **Why 2 options, not 3**: Termination is a *meta-action* — exit from the loop modality, not a position on the scan/no-scan axis. Per `derived-principles.md §Differential Future Requirement`, meta-actions surface as free-response pathways rather than peer options. The Phase 0 prose declares the exit affordance once; surfacing it at every gate would inflate the option set without differential trajectory on the loop axis.
 
 **Trajectory differential** — each option produces a materially distinct downstream state:
 - ① `scan` — JSONL consumed + archived this round; `<feedback>` directives enter the revision pass; chat surfaces new findings; user returns to browser with both rendered preview *and* fresh AI surfacing.
-- ② `skip` — JSONL persists for the next `scan`; user returns to browser to keep drag-commenting without AI interruption.
+- ② `continue` — JSONL queue is preserved (no consumption, no edits applied); user returns to browser to keep drag-commenting without AI interruption. The queued comments are batch-processed at the next `scan`.
 
 **Round signal**: The user's next chat turn answering the gate *is* the round-complete signal. No separate browser button is needed — modality stays clean (browser collects comments, chat handles gate decisions).
 
 **Inference defaults** (project-profile.md Extension-default; relay where confident, surface gate where ambiguous):
-- First gate after initial scan with 0 new comments and ≥1 surfaced finding → `skip` is the recognizable default (let user process findings) — but still surface the gate; defaults reduce friction by ordering options, not by auto-selecting.
+- First gate after initial scan with 0 new comments and ≥1 surfaced finding → `continue` is the recognizable default (let user process findings) — but still surface the gate; defaults reduce friction by ordering options, not by auto-selecting.
 - Multi-artifact: each artifact has its own browser tab + JSONL + loop counter; the branch gate is **per-artifact**. Aggregating would let one artifact's pacing block another (Rule 8 multi-artifact-first-class).
 
 ## Scope Differentiation (Suppression Bypass)
@@ -175,7 +175,7 @@ A `scan` action consumes accumulated JSONL at its start:
 3. Archives consumed JSONL to `feedback-{slug}-{timestamp}.consumed.jsonl` to prevent re-ingestion
 4. After the scan applies edits, the browser auto-reloads; the user inspects the updated artifact and answers the next branch gate
 
-When the user picks `skip` at the branch gate, no consumption happens this round — JSONL persists and is consumed at the next `scan`.
+When the user picks `continue` at the branch gate, no consumption happens this round — JSONL persists intact (no edits applied to the artifact either) and is consumed at the next `scan`.
 
 ## Why No Gate Reduction
 
@@ -187,14 +187,14 @@ The composition's value is therefore structural, not interaction-reducing:
 1. **Signature unification** — caller supplies `(artifact, D, context)` once; the composition distributes
 2. **Scope differentiation inscribed** — Named 3-scope + Emergent clause bypasses two suppression edges at pipeline level
 3. **Channel-first modality** — rendered preview is opened in Phase 0 and persists across iterations; sub-protocol scans consume JSONL whenever the user picks `scan` at the branch gate
-4. **Loop branch gate at the iteration boundary** — single 2-option Constitution gate (`scan` / `skip`) controls pacing; termination is a free-response pathway declared once in Phase 0
+4. **Loop branch gate at the iteration boundary** — single 2-option Constitution gate (`scan` / `continue`) controls pacing; termination is a free-response pathway declared once in Phase 0
 
 ## Materialized View
 
 On user-explicit termination (free-response exit), present the transformation trace as aggregated totals — not a per-round breakdown. Round-level visibility belongs to the in-loop pre-gate prose (Phase L); the materialized view is the audit summary.
 
 ```
-Iterations: {N} loops, [scan|skip] sequence: {e.g., scan, scan, skip, scan}
+Iterations: {N} loops, [scan|continue] sequence: {e.g., scan, scan, continue, scan}
 Aggregated across {S} scan rounds:
   Stage 1 (inquire):       {F} factual claims → {V} verified, {C} corrected, {U} flagged uncertain
   Stage 2 (gap):           {G} gaps surfaced → {A} addressed, {D_dis} dismissed (with assumption)
@@ -223,9 +223,9 @@ Suffix-replay rules (apply within a single `scan` action):
 2. **Scope differentiation is structural** — the two suppression edges fire only on same-scope co-activation. This pipeline keeps scopes distinct via the named 3-scope + Emergent clause. Chains that collapse scopes would re-trigger suppression and violate this rule.
 3. **Emergent attribution priority** — boundary cases resolve by Factual > Decision > Application priority; remaining ambiguity is surfaced as an `origin: ambiguous` marker in the session text trace (not as a struct field on sub-protocol types) so both protocols detect the finding at their respective gates. This composition-level `origin` (scope attribution) is distinct from Epharmoge's internal `Origin ∈ {Initial, Emerged(aspect)}` struct (within-protocol mismatch provenance) — shared name, non-overlapping domain.
 4. **Channel is the skill's identity** — opened in Phase 0, persisted across iterations. The rendered preview is the user's first input layer (Vorverständnis); markdown rendering visibility is itself a review surface, not merely a feedback collection mechanism. Missing bun runtime is a hard prerequisite failure (install hint then exit) — there is no degraded-mode fallback. Headless environments invoke `/inquire`, `/gap`, `/contextualize` directly; `/artifact-review` without channel would be a different skill.
-5. **Feedback consumption is single-shot with latest-timestamp dedup** — each `feedback-{slug}.jsonl` is consumed at the start of a `scan` action and archived; entries sharing `(anchor, context_before, context_after)` keep only the latest timestamp. `skip` rounds defer consumption to the next `scan`.
+5. **Feedback consumption is single-shot with latest-timestamp dedup** — each `feedback-{slug}.jsonl` is consumed at the start of a `scan` action and archived; entries sharing `(anchor, context_before, context_after)` keep only the latest timestamp. `continue` rounds defer consumption to the next `scan` (no edits applied in the meantime).
 6. **Caller-supplied signature is required** — `fixation_event D` and `application_context` must be explicit. When omitted, the skill infers defaults from the artifact path; if inference yields no confident match, the skill asks the user. Silent assumption of domain-specific defaults (e.g., "publish") would re-impose bias the composition is designed to avoid.
-7. **Termination is user-explicit and free-response** — convergence is reached when the user signals exit at any time (declared once in Phase 0). The materialized view records which sub-protocols were invoked across all `scan` rounds, so explicit-skip is auditable rather than silent. The loop branch gate carries no `end` option per `derived-principles.md §Differential Future Requirement` (meta-actions surface as free-response pathways, not peer options).
+7. **Termination is user-explicit and free-response** — convergence is reached when the user signals exit at any time (declared once in Phase 0). The materialized view records which sub-protocols were invoked across all `scan` rounds, so any sub-protocol omission (e.g., user exits before any scan ran) is auditable rather than silent. The loop branch gate carries no `end` option per `derived-principles.md §Differential Future Requirement` (meta-actions surface as free-response pathways, not peer options).
 8. **Multi-artifact variants are first-class** — when multiple artifacts are supplied, each runs through the pipeline with its own preview page, feedback file, and per-artifact branch gate; comments are namespaced per artifact and one artifact's pacing does not block another.
 
 ## Bundled Resources
