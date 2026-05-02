@@ -59,7 +59,7 @@ free-exit : user may end the review at any time by saying so (Phase 0 prose decl
 
 On skill activation, before any sub-protocol runs:
 
-1. **Bun preflight** — verify `bun --version` ≥ 1.0. If absent, print install hint and degrade to the **Skip-Channel Fallback** path (single-pass scan with chat-gate; see Channel Modality § Skip-Channel Fallback).
+1. **Bun preflight** — verify `bun --version` ≥ 1.0. If absent, print install hint (`curl -fsSL https://bun.sh/install | bash`) and exit. The channel is the skill's identity; running without it would change what `/artifact-review` *is*, not just degrade UX. Headless environments fall back to `/inquire`, `/gap`, `/contextualize` invoked directly.
 2. **Termination prose (declared once)** — announce *before opening the browser*: *"I'll open a browser preview and run an initial scan. You can end this review at any time by saying so; on exit I will produce the materialized view and stop the channel server."* This is the free-response pathway for termination — it does not appear as a gate option. Announcing first ensures the exit affordance is visible before the first session artifact (the rendered preview) is presented.
 3. **Channel open** — start `bun scripts/serve.ts <artifact.md> [...]`, browser auto-opens to the rendered preview. The published-style render is the user's first input layer (Vorverständnis), independent of any AI surfacing.
 4. **Initial scan** — run the composed pipeline (`/inquire` → `/gap` → `/contextualize`) once. If `feedback-{slug}.jsonl` already exists from a prior session, consume it as input directives per Channel Modality § JSONL Consumption Timing; otherwise the initial scan is AI-led from a blank channel.
@@ -170,10 +170,6 @@ A `scan` action consumes accumulated JSONL at its start:
 
 When the user picks `skip` at the branch gate, no consumption happens this round — JSONL persists and is consumed at the next `scan`.
 
-### Skip-Channel Fallback (degraded mode)
-
-When `bun` is unavailable or the user passes `--skip-channel`, the skill degrades to a single-pass scan with chat-gate dispositions in `/contextualize`. No loop, no rendered preview — only the underlying epistemic checks. This is a fallback for headless environments, not the recommended path.
-
 ## Why No Gate Reduction
 
 Sub-protocol gates inside each `scan` action are not elided. All three protocols require **Constitution user judgment** on answers not entailed by upstream protocol outputs:
@@ -219,7 +215,7 @@ Suffix-replay rules (apply within a single `scan` action):
 1. **Composition, not absorption** — each sub-protocol remains independently invocable. `/artifact-review` orchestrates; it does not duplicate sub-protocol gate definitions.
 2. **Scope differentiation is structural** — the two suppression edges fire only on same-scope co-activation. This pipeline keeps scopes distinct via the named 3-scope + Emergent clause. Chains that collapse scopes would re-trigger suppression and violate this rule.
 3. **Emergent attribution priority** — boundary cases resolve by Factual > Decision > Application priority; remaining ambiguity is surfaced as an `origin: ambiguous` marker in the session text trace (not as a struct field on sub-protocol types) so both protocols detect the finding at their respective gates. This composition-level `origin` (scope attribution) is distinct from Epharmoge's internal `Origin ∈ {Initial, Emerged(aspect)}` struct (within-protocol mismatch provenance) — shared name, non-overlapping domain.
-4. **Channel is the default review modality** — opened in Phase 0, persisted across iterations. The rendered preview is the user's first input layer (Vorverständnis); markdown rendering visibility is itself a review surface, not merely a feedback collection mechanism. `--skip-channel` and missing bun runtime fall back to a degraded single-pass scan with chat-gate, retained only for headless environments.
+4. **Channel is the skill's identity** — opened in Phase 0, persisted across iterations. The rendered preview is the user's first input layer (Vorverständnis); markdown rendering visibility is itself a review surface, not merely a feedback collection mechanism. Missing bun runtime is a hard prerequisite failure (install hint then exit) — there is no degraded-mode fallback. Headless environments invoke `/inquire`, `/gap`, `/contextualize` directly; `/artifact-review` without channel would be a different skill.
 5. **Feedback consumption is single-shot with latest-timestamp dedup** — each `feedback-{slug}.jsonl` is consumed at the start of a `scan` action and archived; entries sharing `(anchor, context_before, context_after)` keep only the latest timestamp. `skip` rounds defer consumption to the next `scan`.
 6. **Caller-supplied signature is required** — `fixation_event D` and `application_context` must be explicit. When omitted, the skill infers defaults from the artifact path; if inference yields no confident match, the skill asks the user. Silent assumption of domain-specific defaults (e.g., "publish") would re-impose bias the composition is designed to avoid.
 7. **Termination is user-explicit and free-response** — convergence is reached when the user signals exit at any time (declared once in Phase 0). The materialized view records which sub-protocols were invoked across all `scan` rounds, so explicit-skip is auditable rather than silent. The loop branch gate carries no `end` option per `derived-principles.md §Differential Future Requirement` (meta-actions surface as free-response pathways, not peer options).
