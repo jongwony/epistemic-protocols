@@ -1,6 +1,6 @@
 ---
 name: artifact-review
-description: "Review markdown artifacts before fixation (publish/commit/deposit/merge) via /inquire × /gap × /contextualize + browser inline-comment channel. User-invoked via /artifact-review."
+description: "Review markdown artifacts before fixation (publish/commit/deposit/merge) via /inquire × /gap × /contextualize through a channel-first browser preview loop. User-invoked via /artifact-review."
 skills:
   - aitesis:inquire
   - syneidesis:gap
