@@ -67,10 +67,17 @@ On skill activation, before any sub-protocol runs:
 
 ## Phase L: Loop Iteration Branch Gate
 
-After each scan completes (initial or subsequent), present:
+After each scan completes (initial or subsequent), surface the round counter in pre-gate prose so the user always knows where they are in the loop, then present the branch gate. Termination is the user's decision and is not surfaced as a peer option.
+
+**Pre-gate prose** (per round):
+```
+Round {k} complete — {scan|skip}. Browser preview reflects the latest edits.
+```
+
+**Branch gate**:
 
 ```
-Q : 다음 라운드를 어떻게 진행할까요? (브라우저에서 코멘트 작성/추가 후 답변)
+Q : Round {k+1} — 다음 라운드를 어떻게 진행할까요? (브라우저에서 코멘트 작성/추가 후 답변)
   ① scan  — 누적된 코멘트를 input으로 다시 스캔한 뒤 다음 라운드로
   ② skip  — 스캔 없이 바로 다음 라운드로 (코멘트는 누적 유지)
 ```
@@ -184,16 +191,16 @@ The composition's value is therefore structural, not interaction-reducing:
 
 ## Materialized View
 
-On user-explicit termination (free-response exit), present the transformation trace:
+On user-explicit termination (free-response exit), present the transformation trace as aggregated totals — not a per-round breakdown. Round-level visibility belongs to the in-loop pre-gate prose (Phase L); the materialized view is the audit summary.
 
 ```
 Iterations: {N} loops, [scan|skip] sequence: {e.g., scan, scan, skip, scan}
-Per scan round k:
+Aggregated across {S} scan rounds:
   Stage 1 (inquire):       {F} factual claims → {V} verified, {C} corrected, {U} flagged uncertain
   Stage 2 (gap):           {G} gaps surfaced → {A} addressed, {D} dismissed (with assumption)
-  Stage 3 (contextualize): {M} mismatches → {R} resolved, {S} dismissed
+  Stage 3 (contextualize): {M} mismatches → {R} resolved, {S_dis} dismissed
                            {B} channel comments consumed → {I} incorporated
-Channel state at exit:     {C} unconsumed comments in feedback-{slug}.jsonl (preserved, not archived)
+Channel state at exit:     {C_unc} unconsumed comments in feedback-{slug}.jsonl (preserved, not archived)
 Artifact(s):                {list of paths}
 Fixation event D:           {caller-supplied D}
 Application context:        {caller-supplied context}
