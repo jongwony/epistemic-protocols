@@ -60,8 +60,8 @@ free-exit : user may end the review at any time by saying so (Phase 0 prose decl
 On skill activation, before any sub-protocol runs:
 
 1. **Bun preflight** — verify `bun --version` ≥ 1.0. If absent, print install hint and degrade to the **Skip-Channel Fallback** path (single-pass scan with chat-gate; see Channel Modality § Skip-Channel Fallback).
-2. **Channel open** — start `bun scripts/serve.ts <artifact.md> [...]`, browser auto-opens to the rendered preview. The published-style render is the user's first input layer (Vorverständnis), independent of any AI surfacing.
-3. **Termination prose (declared once)** — announce: *"You can end this review at any time by saying so; on exit I will produce the materialized view and stop the channel server."* This is the free-response pathway for termination — it does not appear as a gate option.
+2. **Termination prose (declared once)** — announce *before opening the browser*: *"I'll open a browser preview and run an initial scan. You can end this review at any time by saying so; on exit I will produce the materialized view and stop the channel server."* This is the free-response pathway for termination — it does not appear as a gate option. Announcing first ensures the exit affordance is visible before the first session artifact (the rendered preview) is presented.
+3. **Channel open** — start `bun scripts/serve.ts <artifact.md> [...]`, browser auto-opens to the rendered preview. The published-style render is the user's first input layer (Vorverständnis), independent of any AI surfacing.
 4. **Initial scan** — run the composed pipeline (`/inquire` → `/gap` → `/contextualize`) once. If `feedback-{slug}.jsonl` already exists from a prior session, consume it as input directives per Channel Modality § JSONL Consumption Timing; otherwise the initial scan is AI-led from a blank channel.
 5. **Branch gate** — surface the loop iteration gate (Phase L below).
 
