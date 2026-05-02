@@ -9,7 +9,7 @@ skills:
 
 # Artifact Review: Inquiry × Gap Audit × Application-Fit Pipeline
 
-Take any markdown artifact from drafted state to fixation-ready through three reviews — factual verifiability, decision quality, application fit — bound to a **channel-first feedback loop**. On invocation the skill opens a browser preview of the rendered artifact (Vorverständnis layer) and runs an initial scan (`/inquire` → `/gap` → `/contextualize`); afterward, every loop iteration presents a 2-option branch gate (`scan` / `apply`) before the user returns to the browser for the next round. Both options consume the JSONL queue and produce edits — `scan` adds full sub-protocol audit on top, `apply` materializes only the user's comment intent. The queue is consumed every round so the hermeneutic cycle stays seamless; "wait and add more comments" is implicit in not yet answering the gate. Termination is a free-response pathway available at any time.
+Take any markdown artifact from drafted state to fixation-ready through three reviews — factual verifiability, decision quality, application fit — bound to a **channel-first feedback loop**. On invocation the skill opens a browser preview of the rendered artifact (Vorverständnis layer) and runs an initial scan (`/inquire` → `/gap` → `/contextualize`); afterward, every loop iteration presents a 2-option branch gate (`scan` / `apply`) before the user returns to the browser for the next round. Both options produce edits and advance the hermeneutic cycle each round — `scan` fully consumes the JSONL queue and adds sub-protocol audit on top, `apply` partially consumes (faithful translation of unambiguous comment intent; ambiguous comments deferred to a future `scan`). "Wait and add more comments" is implicit in not yet answering the gate. Termination is a free-response pathway available at any time.
 
 Unlike domain-specific editorial wrappers, `/artifact-review` is agnostic about *what kind of artifact* is being reviewed — blog drafts, plan documents, crystallized handoffs, design docs, and changeset descriptions are all valid targets. The caller supplies the fixation event (what commits this artifact to downstream consumers) and the application context (where the fixed artifact will operate). The three protocols then specialize their scopes accordingly.
 
@@ -71,7 +71,9 @@ After each scan completes (initial or subsequent), surface the round counter in 
 
 **Pre-gate prose** (per round):
 ```
-Round {k} complete — {scan|apply}. Browser preview reflects the latest edits.
+Round {k} complete — scan.                                            -- after scan round
+Round {k} complete — apply ({X} applied, {Y} deferred to next scan).  -- after apply round; Y omitted when 0
+Browser preview reflects the latest edits.
 ```
 
 **Branch gate**:
@@ -79,16 +81,19 @@ Round {k} complete — {scan|apply}. Browser preview reflects the latest edits.
 ```
 Q : Round {k+1} — 다음 라운드를 어떻게 진행할까요? (브라우저에서 코멘트 작성/추가가 끝났을 때 답변)
   ① scan   — 누적 코멘트를 input으로 /inquire+/gap+/contextualize 전체 audit 실행 + AI surfaced findings + 코멘트 edits 적용
-  ② apply  — 누적 코멘트를 소비하되 sub-protocol audit은 생략, 코멘트 의도대로 edits만 적용 (더 빠른 라운드)
+  ② apply  — 누적 코멘트를 소비하되 sub-protocol audit은 생략, 코멘트 의도대로 edits만 적용 (더 빠른 라운드).
+              사용자가 직접 cognitive scan을 수행했다는 암묵적 가정 하에 AI는 faithful 번역만 담당.
+              모호 / 충돌 / audit-level 판단 요구 코멘트는 archive 보류 → 큐에 잔존하여 다음 라운드로 자연 deferral
+              (다음 라운드는 `scan` 권고).
 
-코멘트를 더 작성하고 싶으면 답변하지 않고 브라우저에서 계속 작성하세요. 답변 시점이 라운드 종료이며 큐는 그 시점에 일괄 소비됩니다.
+코멘트를 더 작성하고 싶으면 답변하지 않고 브라우저에서 계속 작성하세요. 답변 시점이 라운드 종료이며 큐는 그 시점에 일괄 소비됩니다 (apply 모드는 부분 소비 가능).
 ```
 
 **Why 2 options, not 3**: Termination is a *meta-action* — exit from the loop modality, not a position on the scan/no-scan axis. Per `derived-principles.md §Differential Future Requirement`, meta-actions surface as free-response pathways rather than peer options. The Phase 0 prose declares the exit affordance once; surfacing it at every gate would inflate the option set without differential trajectory on the loop axis.
 
 **Trajectory differential** — both options consume the JSONL queue (so the hermeneutic cycle stays seamless), but differ in AI processing depth:
-- ① `scan` — JSONL consumed + archived; `<feedback>` directives enter a revision pass through `/inquire`+`/gap`+`/contextualize`; chat surfaces new audit findings; edits applied for both audit findings *and* user comment intent; browser auto-reloads.
-- ② `apply` — JSONL consumed + archived; AI materializes user comment intent as edits directly without sub-protocol audit; no new findings surfaced; browser auto-reloads. Lighter, faster round suited for flow-state iteration.
+- ① `scan` — JSONL fully consumed + archived; `<feedback>` directives enter a revision pass through `/inquire`+`/gap`+`/contextualize`; chat surfaces new audit findings; edits applied for both audit findings *and* user comment intent; browser auto-reloads.
+- ② `apply` — JSONL partially consumed: clear comments are translated into edits and archived; ambiguous / conflicting / audit-requiring comments stay in the queue (deferred to a future `scan`). No sub-protocol audit, no AI-surfaced new findings. Lighter, faster round suited for flow-state iteration. Implicit contract: the user has performed their own cognitive scan via drag-commenting, so the AI's role is *faithful translation* of unambiguous intent — when faithful translation is impossible, defer rather than guess.
 
 **Round signal**: The user's next chat turn answering the gate *is* the round-complete signal. No separate browser button is needed — modality stays clean (browser collects comments, chat handles gate decisions).
 
@@ -177,7 +182,13 @@ A `scan` action consumes accumulated JSONL at its start:
 3. Archives consumed JSONL to `feedback-{slug}-{timestamp}.consumed.jsonl` to prevent re-ingestion
 4. After the scan applies edits, the browser auto-reloads; the user inspects the updated artifact and answers the next branch gate
 
-Both `scan` and `apply` consume JSONL at the start of the round and archive it. `apply` skips the sub-protocol audit but still produces edits per comment intent. The "wait without consuming" affordance is implicit in not yet answering the gate — the user may keep drag-commenting in the browser; consumption happens only when the user responds.
+An `apply` action consumes JSONL on a per-comment basis:
+1. For each line, attempt faithful translation (comment intent → concrete Edit/Write call)
+2. **Translatable** (clear edit intent, no conflict): apply edit, mark for archival
+3. **Untranslatable** (ambiguous, conflicts with another comment, requires audit-level judgment such as fact verification or decision-quality assessment): leave the line in the JSONL queue — it survives this round and is processed in a future `scan`
+4. After processing: archive only the translated lines; the queue retains the deferred ones; surface `({X} applied, {Y} deferred)` in the pre-gate prose
+
+Apply mode tools are restricted to Edit / Write — verification or sub-protocol invocation belongs to scan. The "wait without consuming" affordance is implicit in not yet answering the gate — the user may keep drag-commenting in the browser; consumption happens only when the user responds.
 
 ## Why No Gate Reduction
 
@@ -203,6 +214,7 @@ Aggregated across {S} scan rounds:
   Stage 3 (contextualize): {M} mismatches → {R} resolved, {S_dis} dismissed
                            {B} channel comments consumed → {I} incorporated
 Channel state at exit:     {C_unc} unconsumed comments in feedback-{slug}.jsonl (preserved, not archived)
+                            -- includes both never-processed comments AND apply-deferred ones awaiting scan
 Artifact(s):                {list of paths}
 Fixation event D:           {caller-supplied D}
 Application context:        {caller-supplied context}
@@ -225,7 +237,7 @@ Suffix-replay rules (apply within a single `scan` action):
 2. **Scope differentiation is structural** — the two suppression edges fire only on same-scope co-activation. This pipeline keeps scopes distinct via the named 3-scope + Emergent clause. Chains that collapse scopes would re-trigger suppression and violate this rule.
 3. **Emergent attribution priority** — boundary cases resolve by Factual > Decision > Application priority; remaining ambiguity is surfaced as an `origin: ambiguous` marker in the session text trace (not as a struct field on sub-protocol types) so both protocols detect the finding at their respective gates. This composition-level `origin` (scope attribution) is distinct from Epharmoge's internal `Origin ∈ {Initial, Emerged(aspect)}` struct (within-protocol mismatch provenance) — shared name, non-overlapping domain.
 4. **Channel is the skill's identity** — opened in Phase 0, persisted across iterations. The rendered preview is the user's first input layer (Vorverständnis); markdown rendering visibility is itself a review surface, not merely a feedback collection mechanism. Missing bun runtime is a hard prerequisite failure (install hint then exit) — there is no degraded-mode fallback. Headless environments invoke `/inquire`, `/gap`, `/contextualize` directly; `/artifact-review` without channel would be a different skill.
-5. **Feedback consumption is single-shot with latest-timestamp dedup** — every round (`scan` or `apply`) consumes `feedback-{slug}.jsonl` at its start and archives it; entries sharing `(anchor, context_before, context_after)` keep only the latest timestamp. The queue does not accumulate across rounds — gate response is the consumption signal.
+5. **Feedback consumption is single-shot per comment with latest-timestamp dedup** — `scan` archives the entire JSONL at round start; `apply` archives only the comments it translated, leaving deferred (ambiguous / conflicting / audit-requiring) comments in the queue for a future `scan`. Each comment is consumed exactly once across the loop's lifetime. Entries sharing `(anchor, context_before, context_after)` keep only the latest timestamp at the moment of consumption.
 6. **Caller-supplied signature is required** — `fixation_event D` and `application_context` must be explicit. When omitted, the skill infers defaults from the artifact path; if inference yields no confident match, the skill asks the user. Silent assumption of domain-specific defaults (e.g., "publish") would re-impose bias the composition is designed to avoid.
 7. **Termination is user-explicit and free-response** — convergence is reached when the user signals exit at any time (declared once in Phase 0). The materialized view records which sub-protocols were invoked across all `scan` rounds, so any sub-protocol omission (e.g., user exits before any scan ran) is auditable rather than silent. The loop branch gate carries no `end` option per `derived-principles.md §Differential Future Requirement` (meta-actions surface as free-response pathways, not peer options).
 8. **Multi-artifact variants are first-class** — when multiple artifacts are supplied, each runs through the pipeline with its own preview page, feedback file, and per-artifact branch gate; comments are namespaced per artifact and one artifact's pacing does not block another.
