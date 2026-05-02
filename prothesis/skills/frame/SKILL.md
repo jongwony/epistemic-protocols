@@ -123,6 +123,14 @@ During Phase 3 (Inquiry, including Await):
 After Phase 4 (routing):
   J = extend     → Qc(add perspective | deepen existing | review execution results) → Stop
                    → Phase 2 (new perspective) or Phase 3 (SendMessage to existing team)
+                   -- "review execution results" is the Wirkungsgeschichte intake from Prosoche
+                   --   (action-axis Secondary pair partner, per docs/structural-specs.md
+                   --   §Pattern over Vocabulary): the prior Prosoche convergence trace —
+                   --   recurring risk signals across tasks, Compound risk clusters,
+                   --   TeamStructure ineffectiveness, halted-task patterns — surfaces as
+                   --   perspective-formation evidence in this loop. Newly added perspectives
+                   --   that originate from this intake carry the "execution-discovered" tag
+                   --   so origin remains visible in subsequent synthesis.
   J = add_input  → user context → revise Syn(R' + input, Dᵣ) → L' → O(L') → Qc(routing) → Stop
   J = wrap_up    → PF Qc(select) → Stop → Ω(T, shutdown) → TeamDelete → TaskCreate(selected) → terminate with L
   J = withdraw   → Ω(T, shutdown) → TeamDelete → terminate with current L
