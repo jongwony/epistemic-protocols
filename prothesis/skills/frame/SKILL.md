@@ -124,9 +124,8 @@ After Phase 4 (routing):
   J = extend     → Qc(add perspective | deepen existing | review execution results) → Stop
                    → Phase 2 (new perspective) or Phase 3 (SendMessage to existing team)
                    -- "review execution results" is the Wirkungsgeschichte intake from Prosoche
-                   --   (action-axis Secondary pair partner, per docs/structural-specs.md
-                   --   §Pattern over Vocabulary): the prior Prosoche convergence trace —
-                   --   recurring risk signals across tasks, Compound risk clusters,
+                   --   (action-axis Secondary pair partner): the prior Prosoche convergence
+                   --   trace — recurring risk signals across tasks, Compound risk clusters,
                    --   TeamStructure ineffectiveness, halted-task patterns — surfaces as
                    --   perspective-formation evidence in this loop. Newly added perspectives
                    --   that originate from this intake carry the "execution-discovered" tag
