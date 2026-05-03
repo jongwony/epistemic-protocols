@@ -36,7 +36,6 @@
     max-width: 760px;
     margin: 0 auto;
     padding: 2.5em 1.5em 5em;
-    transition: max-width .2s ease, margin-right .2s ease;
   }
   header {
     border-bottom: 1px solid #eee;
@@ -375,7 +374,7 @@
 
 <div id="status">
   <span id="status-conn">live</span>
-  <button id="status-count" type="button" aria-label="Toggle comment list">
+  <button id="status-count" type="button" aria-label="Toggle comment list" aria-controls="sidebar" aria-expanded="false">
     <strong id="count">0</strong> comments
   </button>
 </div>
@@ -410,8 +409,8 @@ const sidebarEmpty = document.getElementById("sidebar-empty");
 const sidebarCount = document.getElementById("sidebar-count");
 const statusCount = document.getElementById("status-count");
 
-let pending = null; // { range, anchor, context_before, context_after, editingMark, tempMark }
-let markIdCounter = 0; // monotonic id assigned per saved mark; bridges DOM <-> sidebar entry
+let pending = null; // { range, anchor, context_before, context_after, editingMark, tempMarks }
+let markIdCounter = 0; // monotonic id assigned per saved mark group; bridges DOM <-> sidebar entry
 
 content.addEventListener("mouseup", () => {
   // Let the selection settle before reading it
@@ -430,42 +429,98 @@ function positionPopupNear(rect) {
   popup.style.left = Math.max(16, left) + "px";
 }
 
-// Wrap pending range in a dashed "drafting" mark so the selection stays visible
-// while the user types in the popup. Returns the mark element on success, or null
-// when the range crosses element boundaries (surroundContents throws).
-function applyPendingMark(range) {
+// Wrap a range across element boundaries by walking its intersecting text nodes
+// and wrapping each fragment individually. Returns an array of <mark> elements
+// (one per text-node fragment). Used by both the pending (dashed) and save (yellow)
+// flows so element-crossing selections produce a visible mark instead of silently
+// failing at surroundContents.
+function wrapRangeInMarks(range, className) {
+  const startCont = range.startContainer;
+  const endCont = range.endContainer;
+  const startOffsetInitial = range.startOffset;
+  const endOffsetInitial = range.endOffset;
+
+  const ancestor = range.commonAncestorContainer;
+  const root = ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentNode : ancestor;
+  if (!root) return [];
+
+  // Snapshot text nodes intersecting the range BEFORE any DOM mutation, so the
+  // walk is unaffected by subsequent splitText / wrap operations.
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const textNodes = [];
+  let n;
+  while ((n = walker.nextNode())) {
+    if (range.intersectsNode(n)) textNodes.push(n);
+  }
+
+  const marks = [];
+  for (const textNode of textNodes) {
+    let startOffset = 0;
+    let endOffset = textNode.length;
+    if (textNode === startCont) startOffset = startOffsetInitial;
+    if (textNode === endCont) endOffset = endOffsetInitial;
+    if (startOffset >= endOffset) continue;
+
+    let target = textNode;
+    if (startOffset > 0) {
+      target = target.splitText(startOffset);
+      endOffset -= startOffset;
+    }
+    if (endOffset < target.length) {
+      target.splitText(endOffset);
+    }
+
+    const mark = document.createElement("mark");
+    mark.className = className;
+    target.parentNode.insertBefore(mark, target);
+    mark.appendChild(target);
+    marks.push(mark);
+  }
+  return marks;
+}
+
+// Apply pending dashed marks for an in-progress selection. Returns array of marks
+// (possibly empty for degenerate ranges with no intersecting text nodes).
+function applyPendingMarks(range) {
   try {
-    const tempMark = document.createElement("mark");
-    tempMark.className = "annotated-pending";
-    range.surroundContents(tempMark);
-    return tempMark;
+    return wrapRangeInMarks(range, "annotated-pending");
   } catch (e) {
-    // Range crosses element boundaries — out of scope for the pending-mark feature.
-    // Save flow's surroundContents at line ~430 documents the same limitation.
-    return null;
+    if (e instanceof DOMException) {
+      // Genuine DOM constraint — popup-only flow remains usable
+      console.warn("[applyPendingMarks] DOM constraint:", e.name, e.message);
+      return [];
+    }
+    throw e; // unexpected — surface for investigation
   }
 }
 
-// Unwrap a temp mark, restoring its children inline. Safe to call with null.
-function removePendingMark(tempMark) {
-  if (!tempMark || !tempMark.parentNode) return;
-  const parent = tempMark.parentNode;
-  while (tempMark.firstChild) parent.insertBefore(tempMark.firstChild, tempMark);
-  parent.removeChild(tempMark);
-  parent.normalize(); // merge adjacent text nodes — keeps DOM clean for next selection
+// Unwrap pending marks, restoring inline text. Safe to call with empty/null array.
+function removePendingMarks(marks) {
+  if (!marks || marks.length === 0) return;
+  for (const mark of marks) {
+    if (!mark.parentNode) continue;
+    const parent = mark.parentNode;
+    while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+    parent.removeChild(mark);
+  }
+  // Single normalize at the end is cheaper than per-mark when marks share parents
+  content.normalize();
 }
 
-// Promote a pending temp mark to a saved annotation in place — keeps the same
-// element instance and avoids a second surroundContents (which would fail again
-// on the same boundary-crossing range).
-function promotePendingMark(tempMark, anchor, context_before, context_after, comment) {
-  tempMark.className = "annotated";
-  tempMark.title = comment;
-  tempMark.dataset.anchor = anchor;
-  tempMark.dataset.contextBefore = context_before;
-  tempMark.dataset.contextAfter = context_after;
-  tempMark.dataset.comment = comment;
-  tempMark.dataset.markId = String(++markIdCounter);
+// Promote pending marks to saved annotations — all marks in the array share the
+// same markId (logical comment identity for sidebar dedup) and server-issued id.
+function promotePendingMarks(marks, anchor, context_before, context_after, comment, id) {
+  const markId = String(++markIdCounter);
+  for (const mark of marks) {
+    mark.className = "annotated";
+    mark.title = comment;
+    mark.dataset.anchor = anchor;
+    mark.dataset.contextBefore = context_before;
+    mark.dataset.contextAfter = context_after;
+    mark.dataset.comment = comment;
+    mark.dataset.markId = markId;
+    mark.dataset.id = id;
+  }
 }
 
 function handleSelection() {
@@ -480,9 +535,9 @@ function handleSelection() {
   const context_before = idx >= 0 ? contentText.slice(Math.max(0, idx - 60), idx).replace(/\s+/g, " ").trim() : "";
   const context_after = idx >= 0 ? contentText.slice(idx + text.length, idx + text.length + 60).replace(/\s+/g, " ").trim() : "";
 
-  // Apply temp mark first; positioning will use the mark's rect when wrap succeeds
+  // Apply temp marks first; positioning uses the first mark's rect when wrap succeeds
   const liveRange = range.cloneRange();
-  const tempMark = applyPendingMark(liveRange);
+  const tempMarks = applyPendingMarks(liveRange);
 
   pending = {
     range: liveRange,
@@ -490,10 +545,10 @@ function handleSelection() {
     context_before,
     context_after,
     editingMark: null,
-    tempMark, // null if surroundContents failed; save flow handles both
+    tempMarks, // empty array for degenerate ranges; save flow handles both cases
   };
 
-  const anchorRect = tempMark ? tempMark.getBoundingClientRect() : range.getBoundingClientRect();
+  const anchorRect = tempMarks.length > 0 ? tempMarks[0].getBoundingClientRect() : range.getBoundingClientRect();
   positionPopupNear(anchorRect);
   popupPreview.textContent = text.length > 200 ? text.slice(0, 200) + "…" : text;
   popupTextarea.value = "";
@@ -514,7 +569,7 @@ function openEditPopup(markEl) {
     context_before: markEl.dataset.contextBefore || "",
     context_after: markEl.dataset.contextAfter || "",
     editingMark: markEl,
-    tempMark: null,
+    tempMarks: [],
   };
   positionPopupNear(markEl.getBoundingClientRect());
   const anchorText = pending.anchor;
@@ -535,9 +590,9 @@ content.addEventListener("click", (e) => {
 });
 
 function dismissPopup() {
-  // Clean up the pending temp mark before clearing state
-  if (pending && pending.tempMark) {
-    removePendingMark(pending.tempMark);
+  // Clean up pending temp marks before clearing state
+  if (pending && pending.tempMarks && pending.tempMarks.length > 0) {
+    removePendingMarks(pending.tempMarks);
   }
   popup.classList.remove("show");
   popup.classList.remove("edit-mode");
@@ -556,12 +611,13 @@ popupTextarea.addEventListener("keydown", (e) => {
     submitFeedback();
   } else if (e.key === "Escape") {
     e.preventDefault();
+    e.stopPropagation(); // prevent document-level Esc handler from also firing
     dismissPopup();
   }
 });
 
 document.addEventListener("click", (e) => {
-  if (!popup.contains(e.target) && !content.contains(e.target) && !sidebar.contains(e.target) && e.target !== statusCount && !statusCount.contains(e.target)) {
+  if (!popup.contains(e.target) && !content.contains(e.target) && !sidebar.contains(e.target) && !statusCount.contains(e.target)) {
     dismissPopup();
   }
 });
@@ -583,47 +639,50 @@ async function submitFeedback() {
 
   const captured = pending; // capture before dismiss
 
+  // Edit case: send the original id so the new entry shares the dedup key with the
+  // previous version. Create case: omit id so server mints a UUID.
+  const reqBody = {
+    slug: SLUG,
+    anchor: captured.anchor,
+    context_before: captured.context_before,
+    context_after: captured.context_after,
+    comment,
+  };
+  if (captured.editingMark && captured.editingMark.dataset.id) {
+    reqBody.id = captured.editingMark.dataset.id;
+  }
+
   try {
     const resp = await fetch("/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        slug: SLUG,
-        anchor: captured.anchor,
-        context_before: captured.context_before,
-        context_after: captured.context_after,
-        comment,
-      }),
+      body: JSON.stringify(reqBody),
     });
     if (!resp.ok) throw new Error("server " + resp.status);
+    const result = await resp.json();
+    const id = result.id;
 
     if (captured.editingMark) {
-      captured.editingMark.dataset.comment = comment;
-      captured.editingMark.title = comment;
+      // Update comment text on all marks in the same logical group
+      const markId = captured.editingMark.dataset.markId;
+      const marks = markId
+        ? content.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+        : [captured.editingMark];
+      for (const mark of marks) {
+        mark.dataset.comment = comment;
+        mark.title = comment;
+        if (id) mark.dataset.id = id;
+      }
       showToast("✓ updated");
-    } else if (captured.tempMark && captured.tempMark.parentNode) {
-      // Promote the dashed pending mark to a permanent annotation
-      promotePendingMark(captured.tempMark, captured.anchor, captured.context_before, captured.context_after, comment);
-      captured.tempMark = null; // do not unwrap on dismiss
+    } else if (captured.tempMarks && captured.tempMarks.length > 0 && captured.tempMarks[0].parentNode) {
+      promotePendingMarks(captured.tempMarks, captured.anchor, captured.context_before, captured.context_after, comment, id);
+      captured.tempMarks = []; // do not unwrap on dismiss
       showToast("✓ saved");
     } else {
-      // Pending mark was not applied (range crossed element boundaries). Try the
-      // original surroundContents anyway as a last-ditch attempt — it will fail
-      // identically and the comment is then saved without a visual mark.
-      try {
-        const mark = document.createElement("mark");
-        mark.className = "annotated";
-        mark.title = comment;
-        mark.dataset.anchor = captured.anchor;
-        mark.dataset.contextBefore = captured.context_before;
-        mark.dataset.contextAfter = captured.context_after;
-        mark.dataset.comment = comment;
-        mark.dataset.markId = String(++markIdCounter);
-        captured.range.surroundContents(mark);
-      } catch (e) {
-        console.warn("range crosses element boundary; comment saved without visual mark (edit unavailable).", e);
-      }
-      showToast("✓ saved");
+      // Truly degenerate range — zero text nodes intersected. Comment is persisted
+      // server-side; no DOM mark was created so editing/deleting via UI is unavailable.
+      console.warn("[submitFeedback] no marks to promote; comment saved without visual mark.");
+      showToast("✓ saved (no visual mark)");
     }
     dismissPopup();
     renderSidebar();
@@ -634,43 +693,73 @@ async function submitFeedback() {
 }
 
 async function deleteFeedback() {
-  if (!pending || !pending.editingMark) return;
+  if (!pending || !pending.editingMark) {
+    showToast("✗ delete unavailable", true);
+    return;
+  }
   const captured = pending;
-  const mark = captured.editingMark;
+  const editedMark = captured.editingMark;
+  const id = editedMark.dataset.id;
+  const markId = editedMark.dataset.markId;
+
+  if (!id) {
+    showToast("✗ delete unavailable (no id — pre-update mark)", true);
+    return;
+  }
 
   try {
     const resp = await fetch("/feedback", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        slug: SLUG,
-        anchor: captured.anchor,
-        context_before: captured.context_before,
-        context_after: captured.context_after,
-      }),
+      body: JSON.stringify({ slug: SLUG, id }),
     });
-    if (!resp.ok) throw new Error("server " + resp.status);
+    if (!resp.ok) {
+      let reason = "HTTP " + resp.status;
+      try {
+        const errBody = await resp.json();
+        if (errBody && errBody.reason) reason = errBody.reason;
+      } catch {
+        // non-JSON body — keep HTTP status as reason
+      }
+      throw new Error(reason);
+    }
+    const result = await resp.json();
+    if (!result.deleted) {
+      throw new Error(result.reason || "server did not confirm deletion");
+    }
 
-    // Unwrap mark in place, restoring plain text
-    const parent = mark.parentNode;
-    if (parent) {
+    // Unwrap ALL marks sharing the same markId — preserves multi-mark groups
+    const marks = markId
+      ? content.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+      : [editedMark];
+    for (const mark of marks) {
+      const parent = mark.parentNode;
+      if (!parent) continue;
       while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
       parent.removeChild(mark);
-      parent.normalize();
     }
+    content.normalize();
     dismissPopup();
     renderSidebar();
     showToast("✓ deleted");
   } catch (e) {
-    showToast(`✗ delete failed: ${e.message}`, true);
+    showToast("✗ delete failed: " + e.message, true);
   }
 }
 
 // ── Sidebar: list-of-comments view + click-to-focus ──
 
 function renderSidebar() {
-  const marks = content.querySelectorAll(".annotated");
-  const n = marks.length;
+  const allMarks = content.querySelectorAll(".annotated");
+  // Group by markId so multi-mark logical comments collapse to one sidebar row.
+  // First-seen mark per group is the canonical scroll/focus target.
+  const groups = new Map();
+  for (const mark of allMarks) {
+    if (!mark.dataset.markId) mark.dataset.markId = String(++markIdCounter);
+    if (!groups.has(mark.dataset.markId)) groups.set(mark.dataset.markId, mark);
+  }
+
+  const n = groups.size;
   sidebarCount.textContent = String(n);
   countEl.textContent = String(n);
 
@@ -682,11 +771,11 @@ function renderSidebar() {
     return;
   }
 
-  marks.forEach((mark) => {
-    if (!mark.dataset.markId) mark.dataset.markId = String(++markIdCounter);
+  for (const mark of groups.values()) {
     const item = document.createElement("div");
     item.className = "sidebar-item";
-    item.dataset.targetMarkId = mark.dataset.markId;
+    item.setAttribute("role", "button");
+    item.setAttribute("tabindex", "0");
 
     const anchorEl = document.createElement("div");
     anchorEl.className = "sidebar-item-anchor";
@@ -700,25 +789,58 @@ function renderSidebar() {
     item.appendChild(anchorEl);
     item.appendChild(commentEl);
     item.addEventListener("click", () => focusMark(mark));
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        focusMark(mark);
+      }
+    });
     sidebarList.appendChild(item);
-  });
+  }
 }
 
 let pulseTimer = null;
 function focusMark(mark) {
   if (!mark || !mark.isConnected) return;
+  // Clean orphaned pending marks before refocusing — popup may be open with a draft
+  // that the user is abandoning by clicking a sidebar item
+  if (pending && pending.tempMarks && pending.tempMarks.length > 0) {
+    removePendingMarks(pending.tempMarks);
+    pending.tempMarks = [];
+  }
   mark.scrollIntoView({ behavior: "smooth", block: "center" });
   // Clear any in-flight pulse so a fresh click always re-triggers the animation
   document.querySelectorAll(".annotated.pulse").forEach((el) => el.classList.remove("pulse"));
   if (pulseTimer) clearTimeout(pulseTimer);
   // Force reflow before re-adding so the transition restarts
   void mark.offsetWidth;
-  mark.classList.add("pulse");
-  pulseTimer = setTimeout(() => mark.classList.remove("pulse"), 800);
+  // Pulse all marks in the same logical group (multi-mark comments span multiple elements)
+  const markId = mark.dataset.markId;
+  const groupMarks = markId
+    ? document.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+    : [mark];
+  groupMarks.forEach((m) => m.classList.add("pulse"));
+  pulseTimer = setTimeout(() => {
+    groupMarks.forEach((m) => m.classList.remove("pulse"));
+  }, 800);
 }
 
 statusCount.addEventListener("click", () => {
-  document.body.classList.toggle("sidebar-open");
+  const opened = document.body.classList.toggle("sidebar-open");
+  statusCount.setAttribute("aria-expanded", opened ? "true" : "false");
+});
+
+// Document-level Esc: dismiss popup if open, otherwise close sidebar.
+// Popup textarea handler runs first and stopPropagation prevents this from firing
+// when the textarea has focus.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (popup.classList.contains("show")) {
+    dismissPopup();
+  } else if (document.body.classList.contains("sidebar-open")) {
+    document.body.classList.remove("sidebar-open");
+    statusCount.setAttribute("aria-expanded", "false");
+  }
 });
 
 // Initial render — empty state on fresh load (no preloaded marks in template)

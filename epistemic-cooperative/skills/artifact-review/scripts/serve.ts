@@ -106,7 +106,15 @@ interface FeedbackBody {
   context_before?: string;
   context_after?: string;
   comment: string;
+  id?: string; // optional on POST: present for edits (re-uses original id), absent for new entries
 }
+
+interface DeleteBody {
+  slug: string;
+  id: string;
+}
+
+const MAX_ID_LEN = 128;
 
 const server = Bun.serve({
   hostname: "127.0.0.1", // bind to loopback only — drafts and feedback are user-private
@@ -160,7 +168,19 @@ const server = Bun.serve({
       if ((body.context_after?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_after exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
       const draft = drafts.get(body.slug);
       if (!draft) return new Response("unknown slug", { status: 400 });
+      // Edit case: client supplies the original id so the new entry shares the dedup key
+      // (latest-timestamp wins). New case: server mints a UUID — guarantees uniqueness so
+      // two distinct annotations with identical (anchor, context) windows never collide.
+      let id: string;
+      if (isStr(body.id) && body.id.length > 0 && body.id.length <= MAX_ID_LEN) {
+        id = body.id;
+      } else if (body.id != null) {
+        return new Response(`id must be string ≤${MAX_ID_LEN} chars`, { status: 400 });
+      } else {
+        id = crypto.randomUUID();
+      }
       const entry = {
+        id,
         slug: body.slug,
         anchor: body.anchor,
         context_before: body.context_before ?? "",
@@ -177,45 +197,76 @@ const server = Bun.serve({
         console.error(`[feedback] FAILED to append ${feedbackPath}: ${msg}`);
         return new Response(`feedback write failed: ${msg}`, { status: 500 });
       }
-      console.error(`[feedback] ${body.slug} ← "${body.anchor.slice(0, 50)}${body.anchor.length > 50 ? "…" : ""}"`);
-      return Response.json({ ok: true, path: feedbackPath });
+      console.error(`[feedback] ${body.slug} id=${id.slice(0, 8)}… ← "${body.anchor.slice(0, 50)}${body.anchor.length > 50 ? "…" : ""}"`);
+      return Response.json({ ok: true, id, path: feedbackPath });
     }
 
     if (url.pathname === "/feedback" && req.method === "DELETE") {
-      // Tombstone strategy: append-only invariant preserved. The downstream JSONL
-      // consumer dedups on (anchor, context_before, context_after) by latest timestamp;
-      // a tombstone entry with `deleted: true` and an empty comment, written later than
-      // the original, naturally suppresses prior entries under that policy. This avoids
-      // file rewrite and stays consistent with the current "append + dedup" contract.
-      let body: Partial<FeedbackBody>;
+      // Tombstone strategy keyed by stable id. Existence check guards against ghost
+      // tombstones (DELETE for non-matching key would silently no-op under the prior
+      // tuple-based contract). Append-only invariant preserved.
+      let body: Partial<DeleteBody>;
       try {
-        body = (await req.json()) as Partial<FeedbackBody>;
+        body = (await req.json()) as Partial<DeleteBody>;
       } catch {
         return new Response("invalid JSON", { status: 400 });
       }
       const isStr = (v: unknown): v is string => typeof v === "string";
-      if (!isStr(body.slug) || !isStr(body.anchor)) {
-        return new Response("missing or non-string fields (slug, anchor)", { status: 400 });
+      if (!isStr(body.slug) || !isStr(body.id)) {
+        return new Response("missing or non-string fields (slug, id)", { status: 400 });
       }
-      if (body.context_before != null && !isStr(body.context_before)) return new Response("context_before must be string", { status: 400 });
-      if (body.context_after != null && !isStr(body.context_after)) return new Response("context_after must be string", { status: 400 });
-      if (body.anchor.length === 0) return new Response("anchor must be non-empty", { status: 400 });
+      if (body.id.length === 0) return new Response("id must be non-empty", { status: 400 });
       if (body.slug.length > MAX_SLUG_LEN) return new Response(`slug exceeds ${MAX_SLUG_LEN} chars`, { status: 413 });
-      if (body.anchor.length > MAX_ANCHOR_LEN) return new Response(`anchor exceeds ${MAX_ANCHOR_LEN} chars`, { status: 413 });
-      if ((body.context_before?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_before exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
-      if ((body.context_after?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_after exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
+      if (body.id.length > MAX_ID_LEN) return new Response(`id exceeds ${MAX_ID_LEN} chars`, { status: 413 });
       const draft = drafts.get(body.slug);
       if (!draft) return new Response("unknown slug", { status: 400 });
+      const feedbackPath = resolve(dirname(draft), `feedback-${body.slug}.jsonl`);
+
+      // Existence check: scan JSONL, find latest entry for this id, ensure it is a live
+      // (non-tombstoned) annotation. Linear scan acceptable — feedback files are per-draft,
+      // typically <1 MB.
+      let liveEntry: any = null;
+      try {
+        const content = await readFile(feedbackPath, "utf8");
+        let latest: any = null;
+        for (const line of content.split("\n")) {
+          if (!line.trim()) continue;
+          try {
+            const e = JSON.parse(line);
+            if (e.id !== body.id) continue;
+            if (!latest || (typeof e.timestamp === "string" && (typeof latest.timestamp !== "string" || e.timestamp > latest.timestamp))) {
+              latest = e;
+            }
+          } catch {
+            // skip malformed lines — preserves resilience to manual edits
+          }
+        }
+        if (latest && !latest.deleted) liveEntry = latest;
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+          const msg = (e as Error).message;
+          console.error(`[feedback] DELETE existence check failed for ${feedbackPath}: ${msg}`);
+          return new Response(`existence check failed: ${msg}`, { status: 500 });
+        }
+        // ENOENT — file does not exist, so target id cannot exist; fall through to 404
+      }
+      if (!liveEntry) {
+        return new Response(JSON.stringify({ ok: false, deleted: false, reason: "not found or already deleted" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+        });
+      }
+
       const tombstone = {
+        id: body.id,
         slug: body.slug,
-        anchor: body.anchor,
-        context_before: body.context_before ?? "",
-        context_after: body.context_after ?? "",
+        anchor: liveEntry.anchor,
+        context_before: liveEntry.context_before ?? "",
+        context_after: liveEntry.context_after ?? "",
         comment: "",
         deleted: true,
         timestamp: new Date().toISOString(),
       };
-      const feedbackPath = resolve(dirname(draft), `feedback-${body.slug}.jsonl`);
       try {
         await appendFile(feedbackPath, JSON.stringify(tombstone) + "\n", "utf8");
       } catch (e) {
@@ -223,8 +274,8 @@ const server = Bun.serve({
         console.error(`[feedback] FAILED to append tombstone ${feedbackPath}: ${msg}`);
         return new Response(`tombstone write failed: ${msg}`, { status: 500 });
       }
-      console.error(`[feedback] DELETE ${body.slug} ← "${body.anchor.slice(0, 50)}${body.anchor.length > 50 ? "…" : ""}"`);
-      return Response.json({ ok: true, path: feedbackPath, deleted: true });
+      console.error(`[feedback] DELETE ${body.slug} id=${body.id.slice(0, 8)}… ← "${(liveEntry.anchor ?? "").slice(0, 50)}${(liveEntry.anchor ?? "").length > 50 ? "…" : ""}"`);
+      return Response.json({ ok: true, id: body.id, deleted: true, path: feedbackPath });
     }
 
     if (url.pathname === "/ws") {
