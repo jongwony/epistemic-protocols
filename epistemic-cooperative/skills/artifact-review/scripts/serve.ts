@@ -181,6 +181,52 @@ const server = Bun.serve({
       return Response.json({ ok: true, path: feedbackPath });
     }
 
+    if (url.pathname === "/feedback" && req.method === "DELETE") {
+      // Tombstone strategy: append-only invariant preserved. The downstream JSONL
+      // consumer dedups on (anchor, context_before, context_after) by latest timestamp;
+      // a tombstone entry with `deleted: true` and an empty comment, written later than
+      // the original, naturally suppresses prior entries under that policy. This avoids
+      // file rewrite and stays consistent with the current "append + dedup" contract.
+      let body: Partial<FeedbackBody>;
+      try {
+        body = (await req.json()) as Partial<FeedbackBody>;
+      } catch {
+        return new Response("invalid JSON", { status: 400 });
+      }
+      const isStr = (v: unknown): v is string => typeof v === "string";
+      if (!isStr(body.slug) || !isStr(body.anchor)) {
+        return new Response("missing or non-string fields (slug, anchor)", { status: 400 });
+      }
+      if (body.context_before != null && !isStr(body.context_before)) return new Response("context_before must be string", { status: 400 });
+      if (body.context_after != null && !isStr(body.context_after)) return new Response("context_after must be string", { status: 400 });
+      if (body.anchor.length === 0) return new Response("anchor must be non-empty", { status: 400 });
+      if (body.slug.length > MAX_SLUG_LEN) return new Response(`slug exceeds ${MAX_SLUG_LEN} chars`, { status: 413 });
+      if (body.anchor.length > MAX_ANCHOR_LEN) return new Response(`anchor exceeds ${MAX_ANCHOR_LEN} chars`, { status: 413 });
+      if ((body.context_before?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_before exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
+      if ((body.context_after?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_after exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
+      const draft = drafts.get(body.slug);
+      if (!draft) return new Response("unknown slug", { status: 400 });
+      const tombstone = {
+        slug: body.slug,
+        anchor: body.anchor,
+        context_before: body.context_before ?? "",
+        context_after: body.context_after ?? "",
+        comment: "",
+        deleted: true,
+        timestamp: new Date().toISOString(),
+      };
+      const feedbackPath = resolve(dirname(draft), `feedback-${body.slug}.jsonl`);
+      try {
+        await appendFile(feedbackPath, JSON.stringify(tombstone) + "\n", "utf8");
+      } catch (e) {
+        const msg = (e as Error).message;
+        console.error(`[feedback] FAILED to append tombstone ${feedbackPath}: ${msg}`);
+        return new Response(`tombstone write failed: ${msg}`, { status: 500 });
+      }
+      console.error(`[feedback] DELETE ${body.slug} ← "${body.anchor.slice(0, 50)}${body.anchor.length > 50 ? "…" : ""}"`);
+      return Response.json({ ok: true, path: feedbackPath, deleted: true });
+    }
+
     if (url.pathname === "/ws") {
       if (srv.upgrade(req)) return;
       return new Response("upgrade failed", { status: 400 });
