@@ -108,7 +108,21 @@ The hermeneutic circle pattern is already structurally encoded in formal blocks 
 
 **Primary circle** (intra-protocol): Each protocol's LOOP section encodes backward flow where partial resolution triggers whole re-interpretation, conditioned by `preserves:` (the text being interpreted remains fixed; only the interpretation evolves).
 
-**Secondary pattern** (inter-protocol): Four complementary pairs form Pre/Post cycles on the context fitness axis — Hermeneia↔Katalepsis (intent), Telos↔Syneidesis (goal), Aitesis↔Epharmoge (context), Prothesis↔Analogia (structure). These cycles operate heuristically via Output Style nudge, driven by observed session conditions rather than graph.json structural edges.
+**Secondary pattern** (inter-protocol hermeneutic spiral revolutions): Five spiral revolutions on distinct epistemic axes — each comprising a forward arc (toward realization) and a backward Wirkungsgeschichte arc (toward updated pre-understanding). The backward arc is uniformly realized via Output Style nudge — the prior protocol's convergence trace becomes Vorverständnis for the paired protocol's next activation. The forward arc topology varies by axis:
+
+| Axis | Pair | Forward arc topology | Forward arc realization |
+|---|---|---|---|
+| intent | Hermeneia ↔ Katalepsis | implicit (temporal precedence) | session-text composition |
+| goal | Telos ↔ Syneidesis | implicit (temporal precedence) | session-text composition |
+| context | Aitesis ↔ Epharmoge | implicit (temporal precedence; mutual suppression prevents stacking) | session-text composition |
+| structure | Prothesis ↔ Analogia | dyadic graph.json advisory | edge `prothesis → analogia` |
+| action — theoria/praxis | Prothesis ↔ Prosoche | triadic graph.json cascade | chain `prothesis → aitesis → prosoche` (frame → inquire → attend, via two advisory edges: "관점 시뮬레이션이 컨텍스트 추론 추천을 제공" and "추론된 컨텍스트가 실행 시 위험 평가 초점을 좁힘") |
+
+**Topological asymmetry of the action axis**: forward arc is triadic (theoria → preparation → praxis, where Aitesis context inference is the preparation step that bridges framework selection and risk-attentive execution); backward arc is dyadic (Prosoche convergence trace's Wirkungsgeschichte emission is read directly by Prothesis Phase 4 LOOP `J=extend` "review execution results", without re-passing through Aitesis). This asymmetry is intentional: praxis-emergent framework patterns are about lens adequacy (Prothesis's domain), not context coverage (Aitesis's domain), so they flow back to theoria directly rather than via the preparation step.
+
+**Multi-axis pairing**: Prothesis appears in two pairs (structure with Analogia, action with Prosoche) because each pair operates on an independent epistemic axis. Aitesis appears both as forward-arc preparation node in the action axis AND as Pre member of the context axis pair — also permitted under axis-independence: in the action axis Aitesis serves as bridge for theoria-to-praxis transition; in the context axis Aitesis itself is the Pre-member whose post-completion is verified by Epharmoge. Multi-axis membership is permitted when the axes are independent.
+
+**Stage 1 conjecture**: hermeneutic spiral revolution framing extends the prior dyadic Pre/Post pair characterization to admit triadic forward arcs (action axis). Stage 2 corroboration accumulates when Prothesis re-activations cite Prosoche convergence trace as perspective-formation evidence and when downstream sessions surface other axes whose forward arc warrants explicit graph.json inscription. Horismos and Periagoge remain Secondary-unpaired by present inscription — separate analysis required; Anamnesis is Tertiary substrate and is exempt from Secondary pairing.
 
 **Artifact-observability boundary** (type naming principle): Protocol input type names encode their temporal relationship to observable artifacts — the dividing line being Read/Grep observability:
 - **Aitesis** (Prospect): Pre-artifact. Context sufficiency is assessed before artifacts are produced. X cannot yet be Read/Grep'd.
