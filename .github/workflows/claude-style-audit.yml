@@ -1,0 +1,195 @@
+name: Claude Style Audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, ready_for_review]
+    # NOTE: this list MUST stay in lockstep with the regex in step `Collect in-scope changed files`.
+    # The verify static check `workflow-paths-sync` covers `claude-epistemic-review.yml`; this workflow
+    # is currently outside that check's scope.
+    paths:
+      - '*/skills/*/SKILL.md'
+      - '*/agents/*.md'
+      - 'epistemic-cooperative/styles/*.md'
+      - '.claude/skills/*/SKILL.md'
+
+jobs:
+  style-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve PR context
+        id: pr
+        run: |
+          if [ -n "${{ github.event.pull_request.number }}" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "sha=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            PR_JSON=$(gh pr view --json number,headRefOid)
+            echo "number=$(echo "$PR_JSON" | jq -r '.number')" >> "$GITHUB_OUTPUT"
+            echo "sha=$(echo "$PR_JSON" | jq -r '.headRefOid')" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Collect in-scope changed files
+        id: scope
+        run: |
+          ALL_FILES=$(gh pr view ${{ steps.pr.outputs.number }} --json files --jq '.files[].path')
+
+          # DRIFT RISK: this regex must mirror the `paths:` trigger above.
+          IN_SCOPE=$(echo "$ALL_FILES" | grep -E '(^[^/]+/skills/[^/]+/SKILL\.md$|^[^/]+/agents/[^/]+\.md$|^epistemic-cooperative/styles/[^/]+\.md$|^\.claude/skills/[^/]+/SKILL\.md$)' || [ $? -eq 1 ])
+
+          if [ -z "$IN_SCOPE" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::No in-scope files changed; skipping audit."
+            exit 0
+          fi
+
+          # Keep files that exist at HEAD; deletions have no post-change artifact to audit.
+          EXISTING=$(echo "$IN_SCOPE" | while IFS= read -r f; do
+            [ -n "$f" ] && [ -f "$f" ] && printf '%s\n' "$f"
+          done)
+
+          if [ -z "$EXISTING" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::All in-scope changes are deletions; skipping audit."
+            exit 0
+          fi
+
+          {
+            echo "skip=false"
+            echo "files<<SCOPE_EOF"
+            printf '%s\n' "$EXISTING"
+            echo "SCOPE_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::group::In-scope files for audit"
+          printf '%s\n' "$EXISTING"
+          echo "::endgroup::"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Run Style Audit
+        if: steps.scope.outputs.skip != 'true'
+        id: audit
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--model claude-sonnet-4-5 --max-turns 30'
+          prompt: |-
+            Run the project-local /style-audit skill against PR #${{ steps.pr.outputs.number }}.
+
+            ## Files in scope (post-change state)
+
+            Audit ONLY these files at their current working-tree state. The working tree at this checkout represents the post-merge state for the PR head; the audit operates on the resulting artifact rather than on a delta.
+
+            ${{ steps.scope.outputs.files }}
+
+            ## Output
+
+            Emit the JSON object specified by the skill's output schema as your final assistant message. The downstream stage extracts this object via jq.
+
+      - name: Extract findings JSON
+        if: always() && steps.audit.outcome == 'success' && steps.audit.outputs.execution_file != ''
+        id: extract
+        run: |
+          AUDIT_RAW=$(mktemp)
+          jq -r '
+            [.[] | select(.type == "assistant") | .message.content[]
+             | select(.type == "text") | .text] | last // empty
+          ' "${{ steps.audit.outputs.execution_file }}" > "$AUDIT_RAW"
+
+          if [ ! -s "$AUDIT_RAW" ]; then
+            rm -f "$AUDIT_RAW"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Empty audit output."
+            exit 0
+          fi
+
+          # Fast path: the last assistant message is the JSON object itself.
+          # Slow path: scripts/extract-audit-json.py finds the last balanced `{...}` containing a `findings` field.
+          if jq -e 'type == "object" and has("findings")' "$AUDIT_RAW" > /dev/null 2>&1; then
+            cp "$AUDIT_RAW" .audit.json
+          else
+            python3 .github/scripts/extract-audit-json.py "$AUDIT_RAW" > .audit.json || true
+          fi
+
+          rm -f "$AUDIT_RAW"
+
+          if [ ! -s .audit.json ]; then
+            echo "::warning::Failed to extract findings JSON from audit output"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          FINDINGS_TOTAL=$(jq -r '.summary.findings_total // (.findings | length)' .audit.json)
+          echo "findings_total=$FINDINGS_TOTAL" >> "$GITHUB_OUTPUT"
+
+          if [ "$FINDINGS_TOTAL" -eq 0 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Style audit clean (0 findings)"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "::group::Findings JSON"
+            cat .audit.json
+            echo "::endgroup::"
+          fi
+
+      - name: Post audit comment
+        if: >-
+          always()
+          && steps.extract.outcome == 'success'
+          && steps.extract.outputs.skip != 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--model claude-haiku-4-5 --max-turns 20'
+          settings: '{"permissions":{"allow":["Bash"]}}'
+          show_full_output: 'true'
+
+          prompt: |-
+            You are the style-audit comment posting agent for PR #${{ steps.pr.outputs.number }}.
+
+            The structured findings JSON is at `.audit.json` in the working tree. Read it.
+
+            For each finding, post one inline PR review comment using gh API. Build the JSON body via jq and pipe through `--input -` to keep shell escaping safe:
+
+            jq -n --arg body "<comment body>" --arg path "<file path>" \
+              --arg commit_id "${{ steps.pr.outputs.sha }}" \
+              --argjson line <line number> \
+              '{body: $body, path: $path, commit_id: $commit_id, line: $line}' \
+            | gh api repos/${{ github.repository }}/pulls/${{ steps.pr.outputs.number }}/comments --input -
+
+            Comment body convention:
+            - First line: `[style-audit:<signal>:<severity>]` tag (signal is `white_bear` or `zero_shot`; severity is `high`, `medium`, or `low`)
+            - Second block: the rationale from the finding (one sentence)
+            - Third block: the suggested rewrite as a fenced suggestion, so reviewers can accept it as a one-click GitHub suggestion:
+
+              ```suggestion
+              <suggested_rewrite>
+              ```
+
+            Rules:
+            - jq output is a single JSON object: `{ ... }`
+            - Findings whose line number falls outside the PR diff move into the summary aggregate
+            - For multiple findings on the same file, line, and signal, post one representative comment
+
+            After all inline comments, post one summary issue comment built from the `summary` field:
+
+            jq -n --arg body "<summary body>" '{body: $body}' \
+            | gh api repos/${{ github.repository }}/issues/${{ steps.pr.outputs.number }}/comments --input -
+
+            Summary body convention:
+            - State total findings, breakdown by signal (`white_bear` / `zero_shot`), and breakdown by severity (`high` / `medium` / `low`)
+            - State that findings are surfaced for review and the PR remains mergeable — this audit operates as a soft gate, the contributor decides whether to rewrite, mark load-bearing, or dismiss each finding
+            - List any out-of-diff findings that were captured here rather than as inline comments
