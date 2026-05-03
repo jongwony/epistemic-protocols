@@ -22,7 +22,7 @@ Inquiry
   → gather(context)                     -- targeted context acquisition guided by MBᵥ
   → propose(perspectives)               -- generate distinct analytical lenses from context
   → select(perspectives)                -- user chooses lenses via Cognitive Partnership Move (Constitution)
-  → LensEstablished                     -- Mode 1 terminus; composable with downstream protocols
+  → LensEstablished                     -- compositional handoff object; Mode 1 terminalizes via characterize(Pₛ)
   → spawn(team)                         -- assemble perspective team via TeamCreate
   → inquire(parallel)                   -- isolated perspective analysis per teammate
   → await(notifications)                -- passive wait for teammate completion signals (see TOOL GROUNDING)
@@ -53,7 +53,7 @@ Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in
 {P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
-LensEstablished = Pₛ where lens selection complete  -- intermediate checkpoint; Mode 1 terminus (J=recommend), Mode 2 continues
+LensEstablished = Pₛ where lens selection complete  -- compositional handoff object; Mode 1 packages it into FramedInquiry, Mode 2 continues
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
 T_running = Team with inquiries in flight             -- intermediate state between dispatch and completion
 ∥I     = Parallel inquiry dispatch: T → T_running    -- per-teammate Inquiry(p) launched
@@ -71,7 +71,11 @@ AgreementStrength ∈ {strong, moderate, weak}  -- coordinator-assessed in Cross
 Syn    = Synthesis: (R', Dᵣ) → (∩, D, A)             -- dual-input: provenance-preserving (Dᵣ = ∅ when Δₛ = ∅)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
 O      = Output: L → UserVisible(L)                   -- full synthesis presentation as text output before routing question
-FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_withdraw ∨ user_esc  -- Mode 2 terminal; Mode 1 terminates at LensEstablished (deficit remains open)
+CountTier ∈ {single_modifier, domain_narrowing, escalation_candidate}
+Lᵣ     = RecommendedLens { handoff: LensEstablished, tier: CountTier, downstream_use: String }
+FramedInquiry = (Lᵣ where m = recommend ∧ LensEstablished) ∪
+                (L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_withdraw ∨ user_esc)
+        -- Mode 1 terminal: selected lens handoff packaged for downstream composition; Mode 2 terminal: synthesized inquiry lens
 user_wrap_up  = (J = wrap_up) at Phase 4   -- user selects wrap_up routing option
 user_withdraw = J = withdraw at Phase 4    -- user selects graceful exit (team cleanup)
 user_esc      = Esc key at any phase       -- tool-level termination (no cleanup)
@@ -102,14 +106,14 @@ Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn
 ── LOOP ──
 After Phase 0 (Mission Brief + Mode Selection):
   (MBᵥ, m) = Q result:
-    m = recommend → Phase 1 → Phase 2 → LensEstablished → terminate
+    m = recommend → Phase 1 → Phase 2 → LensEstablished → characterize(Pₛ) → FramedInquiry → terminate
     m = inquire   → Phase 1 → Phase 2 → LensEstablished → Phase 3 → Phase 4
   J_mb = confirm       → proceed to Phase 1 with (MBᵥ, m)
   J_mb = modify(field) → re-present Q1(MB') → Stop → MBᵥ (m retained from initial selection)
   -- Esc key → terminate (no team exists)
 
 After LensEstablished (mode branching):
-  J = recommend → Mode 1 terminus. characterize(Pₛ) and terminate:
+  J = recommend → Mode 1 terminus. characterize(Pₛ) into Lᵣ, emit FramedInquiry, and terminate:
     characterize(Pₛ) = classify Pₛ by count tier:
       Pₛ.count = 1 → lightweight context modifier for downstream protocol
       Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
@@ -273,7 +277,7 @@ Q2. Mode:
 AI places the recommended Mode as Q2's first option with "(Recommended)" suffix based on inquiry characteristics:
 The recommendation matches mode to analytical demand — Recommend when the inquiry can be resolved from a single analytical direction, Inquire when multiple distinct perspectives are structurally necessary.
 
-**Mode 1 (Recommend)**: Per LOOP — terminates at Phase 2. No team. Pₛ is an intermediate output (not a resolution) — the deficit `FrameworkAbsent` remains open until a downstream protocol completes its own resolution using Pₛ as context.
+**Mode 1 (Recommend)**: Per LOOP — terminates after Phase 2 characterization. No team. `LensEstablished` remains the compositional handoff object; `Lᵣ` packages it as a minimal `FramedInquiry` for downstream use. Prothesis resolves `FrameworkAbsent` by establishing the lens and preserving that lens as composable context.
 
 **Mode 2 (Inquire)**: Per LOOP — full Phase 0 through Phase 4 cycle.
 
