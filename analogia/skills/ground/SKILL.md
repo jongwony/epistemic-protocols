@@ -186,7 +186,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 - Same domain pair was validated in current session (session immunity)
 - Phase 1 domain analysis confirms structural correspondence is trivial
 - No abstract framework is applied (output is purely concrete)
-- Colimit-shaped input detected (`essence_sensed` over concrete instances + `source_abstraction_absent`) — route to `/induce` (Periagoge) for abstraction formation; Analogia's substitution interface fits mapping validation
+- Colimit-shaped input detected (`essence_sensed` over concrete instances + `locator_absent(A)`) — route to `/induce` (Periagoge) for abstraction formation; Analogia's substitution interface fits mapping validation. `locator_absent(A)` is the shared cross-protocol predicate (Periagoge formal `¬located(A)`) — from Analogia's substitution-interface vantage it surfaces as a missing source abstraction Sₐ to substitute from
 
 ### Mode Deactivation
 
@@ -204,7 +204,7 @@ Analyze text for mapping uncertainty. This phase is **silent** — no user inter
 
 1. **Bind output** `R`: use explicit argument or the current/most recent output under discussion
 2. **Scan output** `R` for abstract structures: patterns, models, analogies, frameworks applied to user's domain
-3. **Colimit-shape detection**: assess whether `R` is a colimit-shaped input — `essence_sensed` over concrete instances plus `source_abstraction_absent`. Instance accumulation contributes evidence strength for the essence signal. When both criteria hold, route to `/induce` (Periagoge) for abstraction formation; Analogia remains scoped to mapping validation from a source abstraction to a concrete target.
+3. **Colimit-shape detection**: assess whether `R` is a colimit-shaped input — `essence_sensed` over concrete instances plus `locator_absent(A)` (Periagoge formal `¬located(A)`; from Analogia's substitution-interface vantage this surfaces as no source abstraction Sₐ available). Instance accumulation contributes evidence strength for the essence signal. When both criteria hold, route to `/induce` (Periagoge) for abstraction formation; Analogia remains scoped to mapping validation from a source abstraction to a concrete target.
 4. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
 5. If all mappings trivially established: present finding per Rule 15 before proceeding (Analogia not activated)
 6. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
@@ -310,7 +310,7 @@ After integration:
 9. **Convergence persistence**: Mode active until all identified correspondences are addressed or user Esc key
 10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N validated / M total]`
 11. **Early exit honored**: When user declares mapping sufficient, accept immediately regardless of remaining correspondences
-12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit; defer to Periagoge (`/induce`) when input is colimit-shaped (`essence_sensed` over concrete instances + `source_abstraction_absent` — abstraction formation rather than mapping validation)
+12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit; defer to Periagoge (`/induce`) when input is colimit-shaped (`essence_sensed` over concrete instances + `locator_absent(A)` — abstraction formation rather than mapping validation)
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 14. **Convergence evidence**: Present transformation trace before declaring all_addressed(R'); per-correspondence evidence is required
 15. **Zero-gap surfacing**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
