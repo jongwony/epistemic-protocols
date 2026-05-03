@@ -155,6 +155,7 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 
 ## Acknowledgments
 
+- [@yolohyo](https://github.com/yolohyo) — Comment-lifecycle UX design contribution for artifact-review
 - [@zzsza](https://github.com/zzsza) — Quiz-based participatory UX design contribution for Onboard
 
 ## License

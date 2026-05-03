@@ -155,6 +155,7 @@ scripts/sync-agents-symlinks.sh
 
 ## 감사의 말
 
+- [@yolohyo](https://github.com/yolohyo) — Artifact-review 코멘트 라이프사이클 UX 설계 기여
 - [@zzsza](https://github.com/zzsza) — Onboard 퀴즈 기반 참여형 UX 설계 기여
 
 ## 라이선스
