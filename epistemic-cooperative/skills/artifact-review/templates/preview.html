@@ -9,18 +9,33 @@
     --accent: #2c7be5;
     --highlight: #fff3a3;
     --highlight-edge: #d4a017;
+    --highlight-pending: #e8f4ff;
+    --highlight-pending-edge: #2c7be5;
     --muted: #666;
     --bg: #fafafa;
+    --sidebar-width: 320px;
   }
   * { box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", sans-serif;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 2.5em 1.5em 5em;
+    margin: 0;
+    padding: 0;
     line-height: 1.7;
     color: #222;
     background: white;
+  }
+
+  /* Layout — main content + right sidebar */
+  #layout {
+    display: flex;
+    min-height: 100vh;
+  }
+  #main {
+    flex: 1;
+    min-width: 0;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5em 1.5em 5em;
   }
   header {
     border-bottom: 1px solid #eee;
@@ -68,18 +83,32 @@
   }
   #content th { background: #f7f7f7; }
 
-  /* Annotated text */
+  /* Annotated text — saved marks */
   .annotated {
     background: var(--highlight);
     border-bottom: 2px solid var(--highlight-edge);
     padding: 1px 0;
     cursor: help;
+    transition: box-shadow .25s ease;
   }
   .annotated::after {
     content: "💬";
     font-size: .65em;
     margin-left: 2px;
     vertical-align: super;
+  }
+
+  /* Pending mark — view-state only, while popup is open during compose */
+  .annotated-pending {
+    background: var(--highlight-pending);
+    border-bottom: 2px dashed var(--highlight-pending-edge);
+    padding: 1px 0;
+  }
+  .annotated-pending::after { content: ""; margin: 0; }
+
+  /* Click-to-focus pulse on body mark */
+  .annotated.pulse {
+    box-shadow: 0 0 0 4px rgba(44, 123, 229, .35);
   }
 
   /* Popup */
@@ -121,9 +150,18 @@
   #popup-actions {
     display: flex;
     gap: .5em;
-    justify-content: flex-end;
+    align-items: center;
     margin-top: .5em;
   }
+  #popup-cancel { margin-left: auto; }
+  #popup button.danger {
+    background: #c0392b;
+    color: white;
+    border-color: #c0392b;
+  }
+  #popup button.danger:hover { background: #e74c3c; border-color: #e74c3c; }
+  #popup-delete { display: none; }
+  #popup.edit-mode #popup-delete { display: inline-block; }
   #popup button {
     padding: .4em .9em;
     border: 1px solid #ccc;
@@ -143,6 +181,75 @@
     color: var(--muted);
     margin-top: .35em;
     text-align: right;
+  }
+
+  /* Sidebar — right panel listing all comments */
+  #sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 2.4em; /* clear status bar */
+    width: var(--sidebar-width);
+    background: var(--bg);
+    border-left: 1px solid #eee;
+    transform: translateX(100%);
+    transition: transform .2s ease;
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  body.sidebar-open #sidebar { transform: translateX(0); }
+  #sidebar-header {
+    padding: .75em 1em;
+    border-bottom: 1px solid #eee;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .9em;
+    color: var(--muted);
+  }
+  #sidebar-header strong { color: #222; }
+  #sidebar-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: .5em 0;
+  }
+  #sidebar-empty {
+    padding: 2em 1em;
+    color: var(--muted);
+    font-size: .85em;
+    text-align: center;
+    font-style: italic;
+  }
+  .sidebar-item {
+    padding: .65em 1em;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background .12s ease;
+  }
+  .sidebar-item:hover { background: #f0f4f8; }
+  .sidebar-item-anchor {
+    font-size: .82em;
+    color: var(--muted);
+    border-left: 3px solid var(--highlight-edge);
+    padding-left: .55em;
+    margin-bottom: .35em;
+    line-height: 1.35;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .sidebar-item-comment {
+    font-size: .9em;
+    color: #222;
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
   }
 
   /* Status bar */
@@ -165,6 +272,19 @@
     margin-right: .35em;
   }
   #status-conn.disconnected::before { color: #aaa; }
+  #status-count {
+    background: transparent;
+    border: none;
+    padding: .15em .55em;
+    margin: -.15em -.55em;
+    border-radius: 4px;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    transition: background .12s ease;
+  }
+  #status-count:hover { background: rgba(44, 123, 229, .1); color: #222; }
+  body.sidebar-open #status-count { background: rgba(44, 123, 229, .14); color: #222; }
   #status-count strong { color: #222; }
 
   /* Toast — confirms each submit silently append to disk, since popup close alone is ambiguous */
@@ -198,27 +318,54 @@
     #content th, #content td { border-color: #333; }
     #content th { background: #252525; }
     .annotated { background: #5a4a00; color: #fff; }
+    .annotated-pending { background: #1f3550; color: #fff; }
     #popup { background: #222; border-color: #444; }
     #popup-anchor-preview { background: #2a2a2a; color: #aaa; }
     #popup textarea { background: #2a2a2a; border-color: #444; color: #e0e0e0; }
     #popup button { background: #2a2a2a; border-color: #444; color: #e0e0e0; }
     #status { background: #1a1a1a; border-top-color: #333; }
     #status-count strong { color: #e0e0e0; }
+    #status-count:hover { background: rgba(255,255,255,.06); color: #e0e0e0; }
+    body.sidebar-open #status-count { background: rgba(255,255,255,.1); color: #e0e0e0; }
+    #sidebar { background: #1f1f1f; border-left-color: #333; }
+    #sidebar-header { background: #1a1a1a; border-bottom-color: #333; }
+    #sidebar-header strong { color: #e0e0e0; }
+    .sidebar-item { border-bottom-color: #333; }
+    .sidebar-item:hover { background: #2a2a2a; }
+    .sidebar-item-anchor { color: #aaa; }
+    .sidebar-item-comment { color: #e0e0e0; }
   }
+
 </style>
 </head>
 <body>
-<header>
-  <span><a href="/">← all drafts</a></span>
-  <span><strong>__TITLE_PLACEHOLDER__</strong></span>
-</header>
 
-<div id="content"></div>
+<div id="layout">
+  <div id="main">
+    <header>
+      <span><a href="/">← all drafts</a></span>
+      <span><strong>__TITLE_PLACEHOLDER__</strong></span>
+    </header>
+
+    <div id="content"></div>
+  </div>
+</div>
+
+<aside id="sidebar" aria-label="Comments panel">
+  <div id="sidebar-header">
+    <span><strong id="sidebar-count">0</strong> comments</span>
+    <span style="font-size:.78em;">click to focus</span>
+  </div>
+  <div id="sidebar-list">
+    <div id="sidebar-empty">No comments yet — select text to add one.</div>
+  </div>
+</aside>
 
 <div id="popup">
   <div id="popup-anchor-preview"></div>
   <textarea id="popup-textarea" placeholder="Comment on this selection…"></textarea>
   <div id="popup-actions">
+    <button id="popup-delete" class="danger" type="button" aria-label="Delete comment">Delete</button>
     <button id="popup-cancel">Cancel</button>
     <button id="popup-submit" class="primary">Submit</button>
   </div>
@@ -227,7 +374,9 @@
 
 <div id="status">
   <span id="status-conn">live</span>
-  <span id="status-count"><strong id="count">0</strong> comments this session</span>
+  <button id="status-count" type="button" aria-label="Toggle comment list" aria-controls="sidebar" aria-expanded="false">
+    <strong id="count">0</strong> comments
+  </button>
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
@@ -250,10 +399,18 @@ const popupPreview = document.getElementById("popup-anchor-preview");
 const popupTextarea = document.getElementById("popup-textarea");
 const popupSubmit = document.getElementById("popup-submit");
 const popupCancel = document.getElementById("popup-cancel");
+const popupDelete = document.getElementById("popup-delete");
 const countEl = document.getElementById("count");
 
-let pending = null; // { range, anchor, context_before, context_after }
-let count = 0;
+// Sidebar state
+const sidebar = document.getElementById("sidebar");
+const sidebarList = document.getElementById("sidebar-list");
+const sidebarEmpty = document.getElementById("sidebar-empty");
+const sidebarCount = document.getElementById("sidebar-count");
+const statusCount = document.getElementById("status-count");
+
+let pending = null; // { range, anchor, context_before, context_after, editingMark, tempMarks }
+let markIdCounter = 0; // monotonic id assigned per saved mark group; bridges DOM <-> sidebar entry
 
 content.addEventListener("mouseup", () => {
   // Let the selection settle before reading it
@@ -262,6 +419,7 @@ content.addEventListener("mouseup", () => {
 
 function setPopupMode(isEdit) {
   popupSubmit.textContent = isEdit ? "Update" : "Submit";
+  popup.classList.toggle("edit-mode", !!isEdit);
 }
 
 function positionPopupNear(rect) {
@@ -269,6 +427,100 @@ function positionPopupNear(rect) {
   const left = Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - popupWidth - 16);
   popup.style.top = (window.scrollY + rect.bottom + 8) + "px";
   popup.style.left = Math.max(16, left) + "px";
+}
+
+// Wrap a range across element boundaries by walking its intersecting text nodes
+// and wrapping each fragment individually. Returns an array of <mark> elements
+// (one per text-node fragment). Used by both the pending (dashed) and save (yellow)
+// flows so element-crossing selections produce a visible mark instead of silently
+// failing at surroundContents.
+function wrapRangeInMarks(range, className) {
+  const startCont = range.startContainer;
+  const endCont = range.endContainer;
+  const startOffsetInitial = range.startOffset;
+  const endOffsetInitial = range.endOffset;
+
+  const ancestor = range.commonAncestorContainer;
+  const root = ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentNode : ancestor;
+  if (!root) return [];
+
+  // Snapshot text nodes intersecting the range BEFORE any DOM mutation, so the
+  // walk is unaffected by subsequent splitText / wrap operations.
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const textNodes = [];
+  let n;
+  while ((n = walker.nextNode())) {
+    if (range.intersectsNode(n)) textNodes.push(n);
+  }
+
+  const marks = [];
+  for (const textNode of textNodes) {
+    let startOffset = 0;
+    let endOffset = textNode.length;
+    if (textNode === startCont) startOffset = startOffsetInitial;
+    if (textNode === endCont) endOffset = endOffsetInitial;
+    if (startOffset >= endOffset) continue;
+
+    let target = textNode;
+    if (startOffset > 0) {
+      target = target.splitText(startOffset);
+      endOffset -= startOffset;
+    }
+    if (endOffset < target.length) {
+      target.splitText(endOffset);
+    }
+
+    const mark = document.createElement("mark");
+    mark.className = className;
+    target.parentNode.insertBefore(mark, target);
+    mark.appendChild(target);
+    marks.push(mark);
+  }
+  return marks;
+}
+
+// Apply pending dashed marks for an in-progress selection. Returns array of marks
+// (possibly empty for degenerate ranges with no intersecting text nodes).
+function applyPendingMarks(range) {
+  try {
+    return wrapRangeInMarks(range, "annotated-pending");
+  } catch (e) {
+    if (e instanceof DOMException) {
+      // Genuine DOM constraint — popup-only flow remains usable
+      console.warn("[applyPendingMarks] DOM constraint:", e.name, e.message);
+      return [];
+    }
+    throw e; // unexpected — surface for investigation
+  }
+}
+
+// Unwrap pending marks, restoring inline text. Safe to call with empty/null array.
+function removePendingMarks(marks) {
+  if (!marks || marks.length === 0) return;
+  for (const mark of marks) {
+    if (!mark.parentNode) continue;
+    const parent = mark.parentNode;
+    while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+    parent.removeChild(mark);
+  }
+  // Single normalize at the end is cheaper than per-mark when marks share parents
+  content.normalize();
+}
+
+// Promote pending marks to saved annotations — all marks in the array share the
+// same markId (logical comment identity for sidebar dedup) and server-issued id.
+function promotePendingMarks(marks, anchor, context_before, context_after, comment, id) {
+  const markId = String(++markIdCounter);
+  for (const mark of marks) {
+    mark.className = "annotated";
+    mark.title = comment;
+    mark.dataset.anchor = anchor;
+    mark.dataset.contextBefore = context_before;
+    mark.dataset.contextAfter = context_after;
+    mark.dataset.comment = comment;
+    mark.dataset.markId = markId;
+    mark.dataset.id = id;
+  }
 }
 
 function handleSelection() {
@@ -283,13 +535,27 @@ function handleSelection() {
   const context_before = idx >= 0 ? contentText.slice(Math.max(0, idx - 60), idx).replace(/\s+/g, " ").trim() : "";
   const context_after = idx >= 0 ? contentText.slice(idx + text.length, idx + text.length + 60).replace(/\s+/g, " ").trim() : "";
 
-  pending = { range: range.cloneRange(), anchor: text, context_before, context_after, editingMark: null };
+  // Apply temp marks first; positioning uses the first mark's rect when wrap succeeds
+  const liveRange = range.cloneRange();
+  const tempMarks = applyPendingMarks(liveRange);
 
-  positionPopupNear(range.getBoundingClientRect());
+  pending = {
+    range: liveRange,
+    anchor: text,
+    context_before,
+    context_after,
+    editingMark: null,
+    tempMarks, // empty array for degenerate ranges; save flow handles both cases
+  };
+
+  const anchorRect = tempMarks.length > 0 ? tempMarks[0].getBoundingClientRect() : range.getBoundingClientRect();
+  positionPopupNear(anchorRect);
   popupPreview.textContent = text.length > 200 ? text.slice(0, 200) + "…" : text;
   popupTextarea.value = "";
   setPopupMode(false);
   popup.classList.add("show");
+  // Drop the live selection so the dashed pending mark is the only visible cue
+  sel.removeAllRanges();
   popupTextarea.focus();
 }
 
@@ -303,6 +569,7 @@ function openEditPopup(markEl) {
     context_before: markEl.dataset.contextBefore || "",
     context_after: markEl.dataset.contextAfter || "",
     editingMark: markEl,
+    tempMarks: [],
   };
   positionPopupNear(markEl.getBoundingClientRect());
   const anchorText = pending.anchor;
@@ -323,7 +590,12 @@ content.addEventListener("click", (e) => {
 });
 
 function dismissPopup() {
+  // Clean up pending temp marks before clearing state
+  if (pending && pending.tempMarks && pending.tempMarks.length > 0) {
+    removePendingMarks(pending.tempMarks);
+  }
   popup.classList.remove("show");
+  popup.classList.remove("edit-mode");
   pending = null;
   const sel = window.getSelection();
   if (sel) sel.removeAllRanges();
@@ -331,6 +603,7 @@ function dismissPopup() {
 
 popupCancel.addEventListener("click", dismissPopup);
 popupSubmit.addEventListener("click", submitFeedback);
+popupDelete.addEventListener("click", deleteFeedback);
 
 popupTextarea.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -338,12 +611,15 @@ popupTextarea.addEventListener("keydown", (e) => {
     submitFeedback();
   } else if (e.key === "Escape") {
     e.preventDefault();
+    e.stopPropagation(); // prevent document-level Esc handler from also firing
     dismissPopup();
   }
 });
 
 document.addEventListener("click", (e) => {
-  if (!popup.contains(e.target) && !content.contains(e.target)) dismissPopup();
+  if (!popup.contains(e.target) && !content.contains(e.target) && !sidebar.contains(e.target) && !statusCount.contains(e.target)) {
+    dismissPopup();
+  }
 });
 
 const toastEl = document.getElementById("toast");
@@ -363,48 +639,212 @@ async function submitFeedback() {
 
   const captured = pending; // capture before dismiss
 
+  // Edit case: send the original id so the new entry shares the dedup key with the
+  // previous version. Create case: omit id so server mints a UUID.
+  const reqBody = {
+    slug: SLUG,
+    anchor: captured.anchor,
+    context_before: captured.context_before,
+    context_after: captured.context_after,
+    comment,
+  };
+  if (captured.editingMark && captured.editingMark.dataset.id) {
+    reqBody.id = captured.editingMark.dataset.id;
+  }
+
   try {
     const resp = await fetch("/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        slug: SLUG,
-        anchor: captured.anchor,
-        context_before: captured.context_before,
-        context_after: captured.context_after,
-        comment,
-      }),
+      body: JSON.stringify(reqBody),
     });
     if (!resp.ok) throw new Error("server " + resp.status);
+    const result = await resp.json();
+    const id = result.id;
 
     if (captured.editingMark) {
-      captured.editingMark.dataset.comment = comment;
-      captured.editingMark.title = comment;
-      showToast("✓ updated");
-    } else {
-      // Visual mark — best effort; surroundContents fails if range crosses element boundaries
-      try {
-        const mark = document.createElement("mark");
-        mark.className = "annotated";
-        mark.title = comment;
-        mark.dataset.anchor = captured.anchor;
-        mark.dataset.contextBefore = captured.context_before;
-        mark.dataset.contextAfter = captured.context_after;
+      // Update comment text on all marks in the same logical group
+      const markId = captured.editingMark.dataset.markId;
+      const marks = markId
+        ? content.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+        : [captured.editingMark];
+      for (const mark of marks) {
         mark.dataset.comment = comment;
-        captured.range.surroundContents(mark);
-      } catch (e) {
-        console.warn("range crosses element boundary; comment saved without visual mark (edit unavailable).", e);
+        mark.title = comment;
+        if (id) mark.dataset.id = id;
       }
-      count++;
-      countEl.textContent = count;
-      showToast(`✓ saved (${count} total)`);
+      showToast("✓ updated");
+    } else if (captured.tempMarks && captured.tempMarks.length > 0 && captured.tempMarks[0].parentNode) {
+      promotePendingMarks(captured.tempMarks, captured.anchor, captured.context_before, captured.context_after, comment, id);
+      captured.tempMarks = []; // do not unwrap on dismiss
+      showToast("✓ saved");
+    } else {
+      // Truly degenerate range — zero text nodes intersected. Comment is persisted
+      // server-side; no DOM mark was created so editing/deleting via UI is unavailable.
+      console.warn("[submitFeedback] no marks to promote; comment saved without visual mark.");
+      showToast("✓ saved (no visual mark)");
     }
     dismissPopup();
+    renderSidebar();
   } catch (e) {
     // Preserve comment text on failure (5xx, network error) so the user can retry — don't dismiss.
     showToast(`✗ save failed: ${e.message} — comment preserved, press ⌘Enter to retry`, true);
   }
 }
+
+async function deleteFeedback() {
+  if (!pending || !pending.editingMark) {
+    showToast("✗ delete unavailable", true);
+    return;
+  }
+  const captured = pending;
+  const editedMark = captured.editingMark;
+  const id = editedMark.dataset.id;
+  const markId = editedMark.dataset.markId;
+
+  if (!id) {
+    showToast("✗ delete unavailable (no id — pre-update mark)", true);
+    return;
+  }
+
+  try {
+    const resp = await fetch("/feedback", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug: SLUG, id }),
+    });
+    if (!resp.ok) {
+      let reason = "HTTP " + resp.status;
+      try {
+        const errBody = await resp.json();
+        if (errBody && errBody.reason) reason = errBody.reason;
+      } catch {
+        // non-JSON body — keep HTTP status as reason
+      }
+      throw new Error(reason);
+    }
+    const result = await resp.json();
+    if (!result.deleted) {
+      throw new Error(result.reason || "server did not confirm deletion");
+    }
+
+    // Unwrap ALL marks sharing the same markId — preserves multi-mark groups
+    const marks = markId
+      ? content.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+      : [editedMark];
+    for (const mark of marks) {
+      const parent = mark.parentNode;
+      if (!parent) continue;
+      while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+      parent.removeChild(mark);
+    }
+    content.normalize();
+    dismissPopup();
+    renderSidebar();
+    showToast("✓ deleted");
+  } catch (e) {
+    showToast("✗ delete failed: " + e.message, true);
+  }
+}
+
+// ── Sidebar: list-of-comments view + click-to-focus ──
+
+function renderSidebar() {
+  const allMarks = content.querySelectorAll(".annotated");
+  // Group by markId so multi-mark logical comments collapse to one sidebar row.
+  // First-seen mark per group is the canonical scroll/focus target.
+  const groups = new Map();
+  for (const mark of allMarks) {
+    if (!mark.dataset.markId) mark.dataset.markId = String(++markIdCounter);
+    if (!groups.has(mark.dataset.markId)) groups.set(mark.dataset.markId, mark);
+  }
+
+  const n = groups.size;
+  sidebarCount.textContent = String(n);
+  countEl.textContent = String(n);
+
+  // Clear list (preserve sidebarEmpty node by removing all children then conditionally re-adding)
+  while (sidebarList.firstChild) sidebarList.removeChild(sidebarList.firstChild);
+
+  if (n === 0) {
+    sidebarList.appendChild(sidebarEmpty);
+    return;
+  }
+
+  for (const mark of groups.values()) {
+    const item = document.createElement("div");
+    item.className = "sidebar-item";
+    item.setAttribute("role", "button");
+    item.setAttribute("tabindex", "0");
+
+    const anchorEl = document.createElement("div");
+    anchorEl.className = "sidebar-item-anchor";
+    const anchorText = mark.dataset.anchor || mark.textContent || "";
+    anchorEl.textContent = anchorText;
+
+    const commentEl = document.createElement("div");
+    commentEl.className = "sidebar-item-comment";
+    commentEl.textContent = mark.dataset.comment || "";
+
+    item.appendChild(anchorEl);
+    item.appendChild(commentEl);
+    item.addEventListener("click", () => focusMark(mark));
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        focusMark(mark);
+      }
+    });
+    sidebarList.appendChild(item);
+  }
+}
+
+let pulseTimer = null;
+function focusMark(mark) {
+  if (!mark || !mark.isConnected) return;
+  // Clean orphaned pending marks before refocusing — popup may be open with a draft
+  // that the user is abandoning by clicking a sidebar item
+  if (pending && pending.tempMarks && pending.tempMarks.length > 0) {
+    removePendingMarks(pending.tempMarks);
+    pending.tempMarks = [];
+  }
+  mark.scrollIntoView({ behavior: "smooth", block: "center" });
+  // Clear any in-flight pulse so a fresh click always re-triggers the animation
+  document.querySelectorAll(".annotated.pulse").forEach((el) => el.classList.remove("pulse"));
+  if (pulseTimer) clearTimeout(pulseTimer);
+  // Force reflow before re-adding so the transition restarts
+  void mark.offsetWidth;
+  // Pulse all marks in the same logical group (multi-mark comments span multiple elements)
+  const markId = mark.dataset.markId;
+  const groupMarks = markId
+    ? document.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+    : [mark];
+  groupMarks.forEach((m) => m.classList.add("pulse"));
+  pulseTimer = setTimeout(() => {
+    groupMarks.forEach((m) => m.classList.remove("pulse"));
+  }, 800);
+}
+
+statusCount.addEventListener("click", () => {
+  const opened = document.body.classList.toggle("sidebar-open");
+  statusCount.setAttribute("aria-expanded", opened ? "true" : "false");
+});
+
+// Document-level Esc: dismiss popup if open, otherwise close sidebar.
+// Popup textarea handler runs first and stopPropagation prevents this from firing
+// when the textarea has focus.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (popup.classList.contains("show")) {
+    dismissPopup();
+  } else if (document.body.classList.contains("sidebar-open")) {
+    document.body.classList.remove("sidebar-open");
+    statusCount.setAttribute("aria-expanded", "false");
+  }
+});
+
+// Initial render — empty state on fresh load (no preloaded marks in template)
+renderSidebar();
 
 // WebSocket hot reload
 function connectWS() {
