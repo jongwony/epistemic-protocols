@@ -1,22 +1,22 @@
 ---
-name: artifact-review
-description: "Review markdown artifacts before fixation (publish/commit/deposit/merge) via /inquire × /gap × /contextualize through a channel-first browser preview loop. User-invoked via /artifact-review."
+name: comment-review
+description: "Review markdown artifacts before fixation (publish/commit/deposit/merge) via /inquire × /gap × /contextualize through a channel-first browser preview loop. User-invoked via /comment-review."
 skills:
   - aitesis:inquire
   - syneidesis:gap
   - epharmoge:contextualize
 ---
 
-# Artifact Review: Inquiry × Gap Audit × Application-Fit Pipeline
+# Comment Review: Inquiry × Gap Audit × Application-Fit Pipeline
 
 Take any markdown artifact from drafted state to fixation-ready through three reviews — factual verifiability, decision quality, application fit — bound to a **channel-first feedback loop**. On invocation the skill opens a browser preview of the rendered artifact (Vorverständnis layer) and runs an initial scan (`/inquire` → `/gap` → `/contextualize`); afterward, every loop iteration presents a 2-option branch gate (`scan` / `apply`) before the user returns to the browser for the next round. Both options produce edits and advance the hermeneutic cycle each round — `scan` fully consumes the JSONL queue and adds sub-protocol audit on top, `apply` partially consumes (faithful translation of unambiguous comment intent; ambiguous comments deferred to a future `scan`). "Wait and add more comments" is implicit in not yet answering the gate. Termination is a free-response pathway available at any time.
 
-Unlike domain-specific editorial wrappers, `/artifact-review` is agnostic about *what kind of artifact* is being reviewed — blog drafts, plan documents, crystallized handoffs, design docs, and changeset descriptions are all valid targets. The caller supplies the fixation event (what commits this artifact to downstream consumers) and the application context (where the fixed artifact will operate). The three protocols then specialize their scopes accordingly.
+Unlike domain-specific editorial wrappers, `/comment-review` is agnostic about *what kind of artifact* is being reviewed — blog drafts, plan documents, crystallized handoffs, design docs, and changeset descriptions are all valid targets. The caller supplies the fixation event (what commits this artifact to downstream consumers) and the application context (where the fixed artifact will operate). The three protocols then specialize their scopes accordingly.
 
 ## Caller Signature
 
 ```
-/artifact-review(artifact_path, fixation_event D, application_context)
+/comment-review(artifact_path, fixation_event D, application_context)
 
 artifact_path        : String | List<String>                      -- path to markdown file(s)
 fixation_event D     : Irreversible(String) | Reversible(String)  -- committed action; tag drives /gap stakes default
@@ -25,7 +25,7 @@ fixation_event D     : Irreversible(String) | Reversible(String)  -- committed a
 application_context  : String                                     -- where the fixed artifact operates
 ```
 
-The caller — whether the user invoking `/artifact-review` directly or a composing skill that calls this one — supplies all three fields. When `D` or `application_context` is omitted, the skill infers defaults from the artifact path when possible (e.g., `~/.claude/plans/*.md` → D = "commit to execution", `~/.claude/.write/*.md` → D = "publish"); if inference yields no confident match, the skill asks the user.
+The caller — whether the user invoking `/comment-review` directly or a composing skill that calls this one — supplies all three fields. When `D` or `application_context` is omitted, the skill infers defaults from the artifact path when possible (e.g., `~/.claude/plans/*.md` → D = "commit to execution", `~/.claude/.write/*.md` → D = "publish"); if inference yields no confident match, the skill asks the user.
 
 ## Pipeline Overview
 
@@ -59,7 +59,7 @@ free-exit : user may end the review at any time by saying so (Phase 0 prose decl
 
 On skill activation, before any sub-protocol runs:
 
-1. **Bun preflight** — verify `bun --version` ≥ 1.0. If absent, print install hint (`curl -fsSL https://bun.sh/install | bash`) and exit. The channel is the skill's identity; running without it would change what `/artifact-review` *is*, not just degrade UX. Headless environments fall back to `/inquire`, `/gap`, `/contextualize` invoked directly.
+1. **Bun preflight** — verify `bun --version` ≥ 1.0. If absent, print install hint (`curl -fsSL https://bun.sh/install | bash`) and exit. The channel is the skill's identity; running without it would change what `/comment-review` *is*, not just degrade UX. Headless environments fall back to `/inquire`, `/gap`, `/contextualize` invoked directly.
 2. **Termination prose (declared once)** — announce *before opening the browser*: *"I'll open a browser preview and run an initial scan. You can end this review at any time by saying so; on exit I will produce the materialized view and stop the channel server."* This is the free-response pathway for termination — it does not appear as a gate option. Announcing first ensures the exit affordance is visible before the first session artifact (the rendered preview) is presented.
 3. **Channel open** — start `bun scripts/serve.ts <artifact.md> [...]`, browser auto-opens to the rendered preview. The published-style render is the user's first input layer (Vorverständnis), independent of any AI surfacing.
 4. **Initial scan** — run the composed pipeline (`/inquire` → `/gap` → `/contextualize`) once. If `feedback-{slug}.jsonl` already exists from a prior session, consume it as input directives per Channel Modality § JSONL Consumption Timing; otherwise the initial scan is AI-led from a blank channel.
@@ -141,7 +141,7 @@ Common gaps across artifact types:
 - **Stakes**: caller-supplied; default High for irreversible D, Medium otherwise
 - **Suppression precondition**: `syneidesis ⊣ aitesis` does NOT fire — distinct scope dimensions (factual layer vs decision layer)
 
-**Double-/gap composition note**: When `/artifact-review` is called downstream of `/write` (i.e., `/write` produces a draft that `/artifact-review` then reviews), both skills invoke `/gap` at distinct scopes — `/write`'s internal Phase 7 `/gap` audits draft-quality gaps (procedural / duplicate / consideration within the artifact), while `/artifact-review`'s Scan Stage 2 `/gap` audits decision-quality gaps w.r.t. fixation event `D`. The scope distinction preserves the scope-differentiation invariant; composition is not redundant.
+**Double-/gap composition note**: When `/comment-review` is called downstream of `/write` (i.e., `/write` produces a draft that `/comment-review` then reviews), both skills invoke `/gap` at distinct scopes — `/write`'s internal Phase 7 `/gap` audits draft-quality gaps (procedural / duplicate / consideration within the artifact), while `/comment-review`'s Scan Stage 2 `/gap` audits decision-quality gaps w.r.t. fixation event `D`. The scope distinction preserves the scope-differentiation invariant; composition is not redundant.
 
 ## Scan Stage 3: Application-Fit Check (`/contextualize`)
 
@@ -233,10 +233,10 @@ Suffix-replay rules (apply within a single `scan` action):
 
 ## Rules
 
-1. **Composition, not absorption** — each sub-protocol remains independently invocable. `/artifact-review` orchestrates; it does not duplicate sub-protocol gate definitions.
+1. **Composition, not absorption** — each sub-protocol remains independently invocable. `/comment-review` orchestrates; it does not duplicate sub-protocol gate definitions.
 2. **Scope differentiation is structural** — the two suppression edges fire only on same-scope co-activation. This pipeline keeps scopes distinct via the named 3-scope + Emergent clause. Chains that collapse scopes would re-trigger suppression and violate this rule.
 3. **Emergent attribution priority** — boundary cases resolve by Factual > Decision > Application priority; remaining ambiguity is surfaced as an `origin: ambiguous` marker in the session text trace (not as a struct field on sub-protocol types) so both protocols detect the finding at their respective gates. This composition-level `origin` (scope attribution) is distinct from Epharmoge's internal `Origin ∈ {Initial, Emerged(aspect)}` struct (within-protocol mismatch provenance) — shared name, non-overlapping domain.
-4. **Channel is the skill's identity** — opened in Phase 0, persisted across iterations. The rendered preview is the user's first input layer (Vorverständnis); markdown rendering visibility is itself a review surface, not merely a feedback collection mechanism. Missing bun runtime is a hard prerequisite failure (install hint then exit) — there is no degraded-mode fallback. Headless environments invoke `/inquire`, `/gap`, `/contextualize` directly; `/artifact-review` without channel would be a different skill.
+4. **Channel is the skill's identity** — opened in Phase 0, persisted across iterations. The rendered preview is the user's first input layer (Vorverständnis); markdown rendering visibility is itself a review surface, not merely a feedback collection mechanism. Missing bun runtime is a hard prerequisite failure (install hint then exit) — there is no degraded-mode fallback. Headless environments invoke `/inquire`, `/gap`, `/contextualize` directly; `/comment-review` without channel would be a different skill.
 5. **Feedback consumption is single-shot per comment with latest-timestamp dedup** — `scan` archives the entire JSONL at round start; `apply` archives only the comments it translated, leaving deferred (ambiguous / conflicting / audit-requiring) comments in the queue for a future `scan`. Each comment is consumed exactly once across the loop's lifetime. Entries sharing `(anchor, context_before, context_after)` keep only the latest timestamp at the moment of consumption.
 6. **Caller-supplied signature is required** — `fixation_event D` and `application_context` must be explicit. When omitted, the skill infers defaults from the artifact path; if inference yields no confident match, the skill asks the user. Silent assumption of domain-specific defaults (e.g., "publish") would re-impose bias the composition is designed to avoid.
 7. **Termination is user-explicit and free-response** — convergence is reached when the user signals exit at any time (declared once in Phase 0). The materialized view records which sub-protocols were invoked across all `scan` rounds, so any sub-protocol omission (e.g., user exits before any scan ran) is auditable rather than silent. The loop branch gate carries no `end` option per `derived-principles.md §Differential Future Requirement` (meta-actions surface as free-response pathways, not peer options).

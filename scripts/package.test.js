@@ -88,10 +88,10 @@ describe('parseFrontmatter', () => {
   });
 
   it('parses block list (composition skill skills: field)', () => {
-    const content = '---\nname: artifact-review\nskills:\n  - aitesis:inquire\n  - syneidesis:gap\n  - epharmoge:contextualize\n---\nBody';
+    const content = '---\nname: comment-review\nskills:\n  - aitesis:inquire\n  - syneidesis:gap\n  - epharmoge:contextualize\n---\nBody';
     const { fields } = parseFrontmatter(content);
     assert.deepEqual(fields.get('skills'), ['aitesis:inquire', 'syneidesis:gap', 'epharmoge:contextualize']);
-    assert.equal(fields.get('name'), 'artifact-review');
+    assert.equal(fields.get('name'), 'comment-review');
   });
 
   it('parses block list followed by another field', () => {
@@ -517,11 +517,11 @@ describe('package.js CLI', () => {
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
-        'artifact-review.zip',
         'attend.zip',
         'bound.zip',
         'catalog.zip',
         'clarify.zip',
+        'comment-review.zip',
         'compose.zip',
         'contextualize.zip',
         'crystallize.zip',

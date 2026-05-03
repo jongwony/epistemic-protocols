@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // @ts-nocheck — Bun runtime resolves node:* and Bun globals natively; skip TS-LSP noise.
-// artifact-review channel-loop server (Bun): live preview + selection-anchored feedback channel.
+// comment-review channel-loop server (Bun): live preview + selection-anchored feedback channel.
 //
 // Usage: bun scripts/serve.ts <draft.md> [<draft.md> ...]
 //
@@ -8,7 +8,7 @@
 // browser and attaches a comment via a Medium/Hypothes.is-style popup. Each comment
 // POSTs to /feedback and appends to feedback-{slug}.jsonl in the draft's directory.
 // A WebSocket pushes 'reload' messages whenever the source markdown changes, so the
-// next /artifact-review iteration's edits appear immediately without manual refresh.
+// next /comment-review iteration's edits appear immediately without manual refresh.
 //
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
@@ -66,16 +66,16 @@ const renderIndex = () => {
     .map((s) => `<li><a href="/preview/${encodeURIComponent(s)}">${escapeHtml(s)}</a></li>`)
     .join("\n");
   return `<!doctype html><html><head><meta charset=utf-8>
-<title>artifact-review</title>
+<title>comment-review</title>
 <style>
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:600px;margin:3em auto;padding:0 1em;line-height:1.6;color:#222}
   ul{padding-left:1.2em}li{margin:.4em 0}
   a{color:#2c7be5;text-decoration:none}a:hover{text-decoration:underline}
   code{background:#f3f3f3;padding:.1em .3em;border-radius:3px;font-family:ui-monospace,monospace;font-size:.9em}
 </style>
-</head><body><h1>artifact-review drafts</h1><ul>${items}</ul>
+</head><body><h1>comment-review drafts</h1><ul>${items}</ul>
 <p>Select text in the rendered draft and leave a comment in the popup. Each comment appends to
-<code>feedback-{slug}.jsonl</code> next to the source markdown. The next <code>/artifact-review</code>
+<code>feedback-{slug}.jsonl</code> next to the source markdown. The next <code>/comment-review</code>
 turn ingests these as <code>&lt;feedback&gt;</code>-anchored directives.</p>
 </body></html>`;
 };

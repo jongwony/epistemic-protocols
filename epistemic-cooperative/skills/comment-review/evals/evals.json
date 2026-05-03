@@ -1,6 +1,6 @@
 {
-  "skill_name": "artifact-review",
-  "description": "Test cases for the artifact-review composition skill. Each eval exercises the 3-protocol pipeline (/inquire × /gap × /contextualize + channel-loop) against a different artifact type + fixation event combination, verifying the caller-supplied signature (artifact_path, fixation_event D, application_context) routes scopes correctly and that the channel-loop augmentation activates for the terminal applicability check.",
+  "skill_name": "comment-review",
+  "description": "Test cases for the comment-review composition skill. Each eval exercises the 3-protocol pipeline (/inquire × /gap × /contextualize + channel-loop) against a different artifact type + fixation event combination, verifying the caller-supplied signature (artifact_path, fixation_event D, application_context) routes scopes correctly and that the channel-loop augmentation activates for the terminal applicability check.",
   "evals": [
     {
       "id": 1,
