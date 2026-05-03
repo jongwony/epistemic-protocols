@@ -52,7 +52,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `.claude/rules/meta-principle.md` — Deficit Empiricism intro (T1, per-turn); Stage 1/2 detail + Axiomatization Judgment Framework in `.claude/principles/meta-principle.md` (T2-T3, lazy-load)
 - [ ] `.claude/rules/safeguards.md` — Safeguard-tier principles (LESS important as models improve) (~5 min)
 - [ ] `.claude/principles/README.md` — demotion zone overview, demotion ledger, promotion-via-use criteria
-- [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, ELIDABLE CHECKPOINTS, MODE STATE, COMPOSITION)
+- [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — what each of the 15 static checks enforces
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
 - [ ] `docs/ci-review-pipeline.md` — the three GitHub Actions workflows

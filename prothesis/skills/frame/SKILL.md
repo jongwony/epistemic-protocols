@@ -22,7 +22,7 @@ Inquiry
   → gather(context)                     -- targeted context acquisition guided by MBᵥ
   → propose(perspectives)               -- generate distinct analytical lenses from context
   → select(perspectives)                -- user chooses lenses via Cognitive Partnership Move (Constitution)
-  → LensEstablished                     -- Mode 1 terminus; composable with downstream protocols
+  → LensEstablished                     -- compositional handoff object; Mode 1 terminalizes via characterize(Pₛ)
   → spawn(team)                         -- assemble perspective team via TeamCreate
   → inquire(parallel)                   -- isolated perspective analysis per teammate
   → await(notifications)                -- passive wait for teammate completion signals (see TOOL GROUNDING)
@@ -53,7 +53,7 @@ Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in
 {P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
-LensEstablished = Pₛ where lens selection complete  -- intermediate checkpoint; Mode 1 terminus (J=recommend), Mode 2 continues
+LensEstablished = Pₛ where lens selection complete  -- compositional handoff object; Mode 1 packages it into FramedInquiry, Mode 2 continues
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
 T_running = Team with inquiries in flight             -- intermediate state between dispatch and completion
 ∥I     = Parallel inquiry dispatch: T → T_running    -- per-teammate Inquiry(p) launched
@@ -71,7 +71,12 @@ AgreementStrength ∈ {strong, moderate, weak}  -- coordinator-assessed in Cross
 Syn    = Synthesis: (R', Dᵣ) → (∩, D, A)             -- dual-input: provenance-preserving (Dᵣ = ∅ when Δₛ = ∅)
 L      = Lens { convergence: ∩, divergence: D, assessment: A }
 O      = Output: L → UserVisible(L)                   -- full synthesis presentation as text output before routing question
-FramedInquiry = L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_withdraw ∨ user_esc  -- Mode 2 terminal; Mode 1 terminates at LensEstablished (deficit remains open)
+CountTier ∈ {single_modifier, domain_narrowing, escalation_candidate}  -- advisory metadata (does not branch LOOP); recorded in Lᵣ.tier for downstream reading
+DownstreamUse ∈ {protocol_route, scope_directive, context_binding}  -- protocol_route: lens names a downstream protocol invocation; scope_directive: lens narrows downstream resolution domain; context_binding: lens enriches downstream protocol's pre-execution context
+Lᵣ     = RecommendedLens { handoff: LensEstablished, tier: CountTier, downstream_use: DownstreamUse }
+FramedInquiry = inj₁(Lᵣ where m = recommend ∧ LensEstablished) ⊕
+                inj₂(L where (|Pₛ| ≥ 1 ∧ user_wrap_up) ∨ user_withdraw ∨ user_esc)
+        -- coproduct discriminated by m: inj₁ Mode 1 → Lᵣ (selected lens handoff); inj₂ Mode 2 → L (synthesized inquiry lens). Consumers branch ingest on the tag, not on field probing.
 user_wrap_up  = (J = wrap_up) at Phase 4   -- user selects wrap_up routing option
 user_withdraw = J = withdraw at Phase 4    -- user selects graceful exit (team cleanup)
 user_esc      = Esc key at any phase       -- tool-level termination (no cleanup)
@@ -102,17 +107,19 @@ Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn
 ── LOOP ──
 After Phase 0 (Mission Brief + Mode Selection):
   (MBᵥ, m) = Q result:
-    m = recommend → Phase 1 → Phase 2 → LensEstablished → terminate
+    m = recommend → Phase 1 → Phase 2 → LensEstablished → characterize(Pₛ) → FramedInquiry → terminate
     m = inquire   → Phase 1 → Phase 2 → LensEstablished → Phase 3 → Phase 4
   J_mb = confirm       → proceed to Phase 1 with (MBᵥ, m)
   J_mb = modify(field) → re-present Q1(MB') → Stop → MBᵥ (m retained from initial selection)
   -- Esc key → terminate (no team exists)
 
 After LensEstablished (mode branching):
-  J = recommend → Mode 1 terminus. characterize(Pₛ) and terminate:
-    characterize(Pₛ) = classify Pₛ by count tier:
-      Pₛ.count = 1 → lightweight context modifier for downstream protocol
-      Pₛ.count ≥ 2 → domain-narrowing (Tier 1) or escalate to Mode 2 (Tier 2)
+  J = recommend → Mode 1 terminus. characterize(Pₛ) into Lᵣ, emit FramedInquiry, and terminate:
+    characterize(Pₛ) = classify Pₛ by count tier (advisory metadata; all tiers terminate Mode 1, no LOOP branching):
+      Pₛ.count = 1                                   → tier = single_modifier        (downstream_use = context_binding)
+      Pₛ.count ≥ 2 with cohesive subdomain           → tier = domain_narrowing       (downstream_use = scope_directive)
+      Pₛ.count ≥ 2 with heterogeneous tension        → tier = escalation_candidate   (downstream_use = scope_directive; user may re-invoke `/frame` with m=inquire if Mode 2 synthesis is wanted)
+    Tier value is recorded in Lᵣ.tier; user re-invocation is the only path to Mode 2 from a Mode 1 terminus.
   J = inquire → Continue to Phase 3 (team spawn → parallel inquiry → synthesis → FramedInquiry)
 
 During Phase 3 (Inquiry, including Await):
@@ -159,7 +166,7 @@ wrap_up TaskCreate (track) → TaskCreate (session-scoped: PF-selected findings,
 Λ (track)                → TaskCreate/TaskUpdate (mandatory after Phase 3 spawn, per perspective; TaskUpdate for status tracking)
 G (observe)              → Read, Glob, Grep (meta-scope context acquisition: guided by MBᵥ to identify relevant perspectives — not passed to teammates; teammates independently collect object-scope evidence through their own lens)
 Phase 4 Syn (sense)      → Internal operation (no external tool; basis_cited in O(L) Synthesis Basis section)
-characterize (sense)     → Internal operation (perspective count tier classification)
+characterize (sense)     → Internal operation (perspective count tier classification → Lᵣ { handoff, tier, downstream_use } packaging emitted as inj₁ FramedInquiry)
 converge (extension)          → TextPresent+Proceed (convergence evidence trace; proceed with framed inquiry)
 
 ── CATEGORICAL NOTE ──
@@ -273,7 +280,7 @@ Q2. Mode:
 AI places the recommended Mode as Q2's first option with "(Recommended)" suffix based on inquiry characteristics:
 The recommendation matches mode to analytical demand — Recommend when the inquiry can be resolved from a single analytical direction, Inquire when multiple distinct perspectives are structurally necessary.
 
-**Mode 1 (Recommend)**: Per LOOP — terminates at Phase 2. No team. Pₛ is an intermediate output (not a resolution) — the deficit `FrameworkAbsent` remains open until a downstream protocol completes its own resolution using Pₛ as context.
+**Mode 1 (Recommend)**: Per LOOP — terminates after Phase 2 characterization. No team. `LensEstablished` remains the compositional handoff object; `Lᵣ` packages it as a minimal `FramedInquiry` (`inj₁` constructor) for downstream use. Mode 1 produces a partial resolution: the lens is established (`FrameworkAbsent` is structurally addressed at the framing layer) but downstream protocols apply the lens to complete domain-specific resolution. Advisory-edge consumers (Syneidesis, Telos, Aitesis, Analogia) branch ingest on the `FramedInquiry` coproduct tag — `inj₁(Lᵣ)` is treated as a context-binding handoff (no synthesis fields available), `inj₂(L)` as a fully synthesized lens with convergence/divergence/assessment.
 
 **Mode 2 (Inquire)**: Per LOOP — full Phase 0 through Phase 4 cycle.
 
@@ -346,7 +353,7 @@ For each selected perspective in Pₛ, check whether available agents match the 
 
 - **0 matches**: Proceed with AI-generated teammate (default behavior — no agent mapping step)
 - **1 match**: Extension — auto-assign the agent to the perspective (entropy→0, single viable option)
-- **2+ matches**: Constitution (ELIDABLE) — present agent-perspective mapping for user confirmation. Each option must be genuinely viable under different value weightings (option-set relay test, Extension classification). If all options collapse to one dominant choice, present as Extension instead
+- **2+ matches**: Constitution — present agent-perspective mapping for user confirmation. Each option must be genuinely viable under different value weightings (option-set relay test, Extension classification). If all options collapse to one dominant choice, present as Extension instead
 
 Agent matching is heuristic: compare perspective focus description against agent `description` and `when to use` fields. Matching does not affect perspective selection (theoria) — it only determines execution assignment (praxis). "Placement over Prescription" invariant: /frame places perspectives; agent mapping realizes execution.
 

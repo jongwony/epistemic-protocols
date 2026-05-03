@@ -128,12 +128,12 @@ converge           (extension)   → TextPresent+Proceed (convergence evidence t
 
 **Key differences**:
 
-- **Periagoge vs Analogia**: Categorical dual. Analogia validates a given abstract structure against a concrete target (static substitution — given Sₐ, establish Sₐ → Sₜ correspondence). Periagoge forms a new abstraction from concrete instances (dynamic colimit — given {Iᵢ}, construct emergent abstraction). When the input is a colimit-shaped instance set with no pre-existing abstract structure, forcing it into Analogia's substitution interface produces source-domain confabulation; Periagoge resolves that misfit by handling abstraction formation directly.
+- **Periagoge vs Analogia**: Categorical dual. Analogia validates a given abstract structure against a concrete target (static substitution — given Sₐ, establish Sₐ → Sₜ correspondence). Periagoge forms a new abstraction from concrete instances (dynamic colimit — given {Iᵢ}, construct emergent abstraction). When the input carries `essence_sensed(A)` with `locator_absent(A)` (formal `¬located(A)`; manifests in Analogia as a missing source abstraction Sₐ), Analogia's substitution interface produces source-domain confabulation; Periagoge resolves that misfit by handling abstraction formation directly.
 - **Periagoge vs Telos**: Both construct rather than extract, but target different categories. Telos constructs goals (what to do); Periagoge constructs abstractions (how to see patterns across cases). A goal can be concrete and singular; an abstraction collects multiple concrete instances under a shared essence.
 - **Periagoge vs Hermeneia**: Hermeneia clarifies existing intent — user has an intent that needs articulation. Periagoge forms a new abstraction — user has instances and essence intuition but no located abstraction yet. The precondition witness differs: Hermeneia requires `∃ intent I`, Periagoge starts from `¬located(A)` while `essence_sensed(A)`.
 - **Periagoge vs Prothesis**: Prothesis selects among candidate analytical frameworks (including cases where multiple candidates are already named). Periagoge forms a new abstraction from an instance cocone when no locator is available. Comparative analysis between already-named candidate readings — even with multiple instances or strong essence sensing — is Prothesis territory (frame selection), not Periagoge's colimit formation. Scope is specified by the operation kind, not by instance count.
 
-**Formation distinction**: Periagoge operates on the colimit — the emergent structure arising from a cocone of concrete instances, not a substitution into a pre-existing frame. The operational test: if 3+ concrete instances with a sensed essence are present but no located abstraction yet, it is Periagoge; if an abstract structure already exists and needs validation against a concrete target, it is Analogia; if a goal needs defining, it is Telos; if an intent needs articulating, it is Hermeneia.
+**Formation distinction**: Periagoge operates on the colimit — the emergent structure arising from a cocone of concrete instances. The operational test: Periagoge applies when concrete instances carry `essence_sensed(A)` and `locator_absent(A)`. Instance accumulation contributes evidence strength; the gate is essence signal plus locator gap.
 
 ## Mode Activation
 
@@ -143,16 +143,16 @@ AI detects in-process abstraction OR user calls `/induce`. Detection is silent (
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/induce` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: In-process abstraction detected via in-protocol heuristics (essence intuition signal + absent locator; instance cluster supports but does not gate detection). Detection is silent (Phase 0).
+- **Layer 2 (AI-guided)**: In-process abstraction detected via in-protocol heuristics (essence intuition signal + locator gap; instance cluster contributes evidence strength). Detection is silent (Phase 0).
 
-**In-process abstraction** = an essence is sensed toward which an abstraction is forming, but the abstraction has not located itself (no settled name, scope, or positional claim). Instance count is evidence for the sensing, not a gate on activation — a single strongly-gripping instance may qualify; multiple instances provide richer triangulation material.
+**In-process abstraction** = an essence is sensed toward which an abstraction is forming, with locator gap active (name, scope, or positional claim remains unsettled). Concrete instances supply evidence for the sensed essence; richer instance sets provide stronger triangulation material.
 
 Gate predicate:
 ```
 in_process(A) ≡ essence_sensed(A) ∧ ¬located(A)
 ```
 
-Periagoge's scope is specified by **operation**: colimit formation — constructing a new abstraction from an instance cocone when essence is sensed but no locator is yet available. Instance cardinality is a **trigger signal** (see Trigger Signals table): a single strongly-gripping case can trigger formation; accumulated sets simply offer richer triangulation material. The operation distinguishes Periagoge from adjacent protocols: comparative analysis between already-named readings or frames belongs to Prothesis (frame selection); audit of decision gaps belongs to Syneidesis (gap); only colimit formation is Periagoge territory.
+Periagoge's scope is specified by **operation**: colimit formation — constructing a new abstraction from an instance cocone when essence is sensed and locator gap is active. Instance cardinality is an evidence signal (see Trigger Signals table): stronger accumulation offers richer triangulation material. The operation distinguishes Periagoge from adjacent protocols: comparative analysis between already-named readings or frames belongs to Prothesis (frame selection); audit of decision gaps belongs to Syneidesis (gap); only colimit formation is Periagoge territory.
 
 ### Priority
 
@@ -176,14 +176,14 @@ When Periagoge is active:
 
 ### Trigger Signals
 
-Heuristic signals for in-process abstraction detection (not hard gates):
+Heuristic evidence signals for in-process abstraction detection:
 
 | Signal | Detection |
 |--------|-----------|
-| Instance accumulation | concrete cases (1+ with strong grip, commonly 3+) appear in conversation without a pre-existing abstract name; count is supportive evidence for essence sensing, not a hard gate |
+| Instance accumulation | Concrete cases carry a shared essence signal and provide triangulation material for abstraction formation |
 | Essence intuition language | User phrases such as "something about these cases...", "the pattern I'm seeing...", "these all have...", "why do these keep happening..." |
-| Absent locator | No settled name, scope, or positional claim for the emerging abstraction |
-| Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (3+ instances, no pre-existing abstract structure) and nudges to `/induce` |
+| Locator gap | Name, scope, or positional claim remains unsettled for the emerging abstraction |
+| Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (essence signal + `locator_absent(A)`) and nudges to `/induce` |
 | Adjacent abstraction surfacing | Recall yields neighboring abstractions, suggesting a fuse or specialize move is imminent |
 
 **Cross-session enrichment**: Accumulated abstraction formation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides Fuse candidates for Phase 1 — previously crystallized abstractions in adjacent domains become lateral Synagoge targets. When `/recollect` has been invoked in session, recalled adjacent abstractions enter the candidate construction pool as fuse-reference. Heuristic input may bias toward previously observed patterns; constitutive judgment remains with the user.
@@ -340,6 +340,6 @@ After integration:
 12. **Cross-protocol awareness**: Defer to Hermeneia when intent-articulation is the primary deficit; defer to Analogia when a pre-existing abstract structure needs validation against a target; defer to Telos when goal-construction is the primary deficit.
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields violates this separation.
 14. **Convergence evidence**: At crystallization, present transformation trace — for each step in history, show (candidate → user_move → candidate'). Per-step evidence is required.
-15. **Absorb Analogia misfit**: When `/ground` Phase 0 detects colimit-shaped input (3+ instances with no pre-existing abstract structure) and nudges here, absorb the misfit as valid Periagoge trigger without requiring re-confirmation. Before Phase 1, surface the routing rationale with the cited `/ground` detection basis ("colimit-shaped input detected: [N instances], no pre-existing abstract structure — redirecting to abstraction crystallization") so the user can see the evidence that justified the redirect without re-asking.
+15. **Absorb Analogia misfit**: When `/ground` Phase 0 detects colimit-shaped input (`essence_sensed` + `locator_absent(A)`) and nudges here, absorb the misfit as valid Periagoge trigger. Before Phase 1, surface the routing rationale with the cited `/ground` detection basis ("colimit-shaped input detected: essence_sensed(A), locator_absent(A), [N supporting instances] — redirecting to abstraction crystallization") so the user can recognize the evidence that justified the redirect; the concrete instance count makes the routing rationale verifiable rather than vague.
 16. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant move (option-level entropy → 0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options. **Exception**: The Confirm/Dismiss pair is excluded from the entire preceding test (Extension resolution, cost-symmetric collapse, and off-axis pathway demotion) — user crystallization judgment is constitutive regardless of AI analysis entropy. Phase 2 remains Constitution even when only one shaping move appears analytically viable.
 17. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option like "Widen" into a concrete direction while preserving the UserMove coproduct) is distinct from mutation.
