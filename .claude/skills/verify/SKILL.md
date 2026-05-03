@@ -50,7 +50,7 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 - Version staleness detection (content changes without version bump)
 - Graph integrity (node/edge validation, orphaned nodes, isolated nodes, DAG acyclicity)
 - Spec-vs-impl drift (TYPES definitions ↔ PHASE TRANSITIONS/prose usage, resolution type consistency)
-- Morphism anatomy (FLOW → MORPHISM → TYPES order, deficit-as-precondition, canonical resolution target)
+- Morphism anatomy (FLOW → MORPHISM → TYPES order; deficit-as-precondition; required clauses requires/deficit/preserves/invariant; canonical resolution target; Type signature)
 - Cross-reference scan (protocol name consistency, deficit → resolution pairs, distinction table completeness, edge type allowlist)
 - Onboard sync, precedence linear extension, partition invariant, catalog sync
 - Gate type soundness (warning-level safeguard for coproduct/prose option alignment)
