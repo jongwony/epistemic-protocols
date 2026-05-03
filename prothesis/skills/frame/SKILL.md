@@ -353,7 +353,7 @@ For each selected perspective in Pₛ, check whether available agents match the 
 
 - **0 matches**: Proceed with AI-generated teammate (default behavior — no agent mapping step)
 - **1 match**: Extension — auto-assign the agent to the perspective (entropy→0, single viable option)
-- **2+ matches**: Constitution (ELIDABLE) — present agent-perspective mapping for user confirmation. Each option must be genuinely viable under different value weightings (option-set relay test, Extension classification). If all options collapse to one dominant choice, present as Extension instead
+- **2+ matches**: Constitution — present agent-perspective mapping for user confirmation. Each option must be genuinely viable under different value weightings (option-set relay test, Extension classification). If all options collapse to one dominant choice, present as Extension instead
 
 Agent matching is heuristic: compare perspective focus description against agent `description` and `when to use` fields. Matching does not affect perspective selection (theoria) — it only determines execution assignment (praxis). "Placement over Prescription" invariant: /frame places perspectives; agent mapping realizes execution.
 

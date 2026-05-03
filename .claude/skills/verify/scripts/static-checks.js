@@ -2333,9 +2333,9 @@ function checkArtifactSelfContainment() {
 // Historical analysis docs and audit reports keep their pre-unification references.
 function checkSingleAxisSoundness() {
   const BANNED_PATTERNS = [
-    { pattern: /── ELIDABLE CHECKPOINTS ──/, label: '── ELIDABLE CHECKPOINTS ── section header' },
-    { pattern: /\balways_gated\b/, label: '`always_gated` annotation token' },
-    { pattern: /\belidable\b/, label: '`elidable` annotation token' }
+    { pattern: /── ELIDABLE CHECKPOINTS ──/i, label: '── ELIDABLE CHECKPOINTS ── section header' },
+    { pattern: /\balways_gated\b/i, label: '`always_gated` annotation token' },
+    { pattern: /\belidable\b/i, label: '`elidable` annotation token' }
   ];
 
   const SKIP_PATTERNS = [

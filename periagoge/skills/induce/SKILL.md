@@ -183,7 +183,7 @@ Heuristic evidence signals for in-process abstraction detection:
 | Instance accumulation | Concrete cases carry a shared essence signal and provide triangulation material for abstraction formation |
 | Essence intuition language | User phrases such as "something about these cases...", "the pattern I'm seeing...", "these all have...", "why do these keep happening..." |
 | Locator gap | Name, scope, or positional claim remains unsettled for the emerging abstraction |
-| Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (essence signal + source_abstraction_absent) and nudges to `/induce` |
+| Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (essence signal + `locator_absent(A)`) and nudges to `/induce` |
 | Adjacent abstraction surfacing | Recall yields neighboring abstractions, suggesting a fuse or specialize move is imminent |
 
 **Cross-session enrichment**: Accumulated abstraction formation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides Fuse candidates for Phase 1 — previously crystallized abstractions in adjacent domains become lateral Synagoge targets. When `/recollect` has been invoked in session, recalled adjacent abstractions enter the candidate construction pool as fuse-reference. Heuristic input may bias toward previously observed patterns; constitutive judgment remains with the user.
