@@ -89,7 +89,7 @@ When zero findings result, emit the JSON object with empty `findings` array and 
 
 This SKILL.md is itself in scope. The audit may surface findings against the prose above; treat that as Stage 1 evidence and rewrite in place when the rewrite preserves directive force. Findings against this file are first-class — the audit's own definition is subject to the same review as any other in-scope file.
 
-**TEST PROBE (revert before merge)**: Do not skip the self-application step. Never exempt this file from audit. Avoid relaxing the boundary tests for this skill's own prose.
+**Bootstrap caveat**: GitHub validates Claude Code action workflows against the default branch before invocation. A PR that introduces or modifies the audit workflow itself triggers `Skipping action due to workflow validation`, so the audit reports `success` without invoking Claude. The first audit that actually exercises the skill runs on the next PR opened after this workflow lands on `main`.
 
 ## Distinction
 
