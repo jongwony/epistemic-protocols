@@ -169,16 +169,20 @@ extractor registry:
 dispatch binding: InputType = StructuredIdentifier → Track = entropy
 
 ── SALIENCE MARKERS ──
-detect : Session → MarkerProfile
+detect : Session × Σ? → MarkerProfile
 categories: { coinage, actor, temporal, emotional, cognitive, singularity }   -- working hypothesis (Emergent admitted)
-laws:
-  monotonicity:   s₁ ⊆ s₂ ⟹ detect(s₁) ⊆ detect(s₂)
-  locality:       detect(s₁ ⊔ s₂) = detect(s₁) ⊔ detect(s₂)                 -- disjoint sessions
-  idempotence:    detect(witnesses(detect(s))) = detect(s)                    -- second pass stable
+
+semantic invariants:
+  traceability:    detect(s) contains only markers grounded in SSOT session content or normalized from session-anchored context
+  boundedness:     ∀c ∈ categories, |detect(s).c| ≤ category_limit
+  stability:       repeated detect(s) under the same extractor version should preserve recall-relevant category intent, but exact set equality is not required
+  locality*:       detect is applied per session; cross-session comparison is ranking-layer only, except corpus-statistical coinage
+  monotonicity*:   adding content may refine, normalize, merge, or reject prior candidate markers; exact set inclusion is not guaranteed
 
 coinage(s, corpus, θ) = { t ∈ s : salience_precision(t, s, corpus) ≥ θ }
   where salience_precision(t, s, corpus) = |occ(t, s)| / (1 + |occ(t, corpus \ {s})|)
   -- Zipf deviation: rare in corpus, repeated within session (low-frequency high-entropy)
+  -- Stage 1 conjecture under Deficit Empiricism: relaxation rationale = empirical evidence of 88.5% noise rate in MarkerProfile.temporal corpus-wide audit (2026-05-04).
 
 dispatch binding: InputType = NaturalRecall → Track = salience
                   InputType = Mixed → Track = hybrid    -- union scan: entropy ∪ salience
@@ -201,12 +205,12 @@ degraded_scan: INDEX_semantic = ∅ ⟹ scan'(SSOT, Track, trace)             --
 The protocol essence (form) consists of FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, and the
 formal blocks ENTROPY EXTRACTION / SALIENCE MARKERS / STORE TOPOLOGY / KNOWN FAILURE MODES.
 The essence makes no reference to specific tools, agents, platforms, schedulers, or storage
-media. Any realization (matter) satisfying the morphism laws and the store topology realizes
-Anamnesis.
+media. Any realization (matter) satisfying the entropy extraction laws, salience semantic
+invariants, and store topology realizes Anamnesis.
 
 form ⊥ matter:
-  form   = ⟨FLOW, MORPHISM, TYPES, laws of extract/detect/scan⟩             -- protocol definition
-  matter = ⟨tool names, file paths, language, scheduler, storage backend⟩   -- realization
+  form   = ⟨FLOW, MORPHISM, TYPES, laws of extract/scan, invariants of detect⟩   -- protocol definition
+  matter = ⟨tool names, file paths, language, scheduler, storage backend⟩         -- realization
 
 TOOL GROUNDING below specifies one such realization (Claude Code substrate); it is
 non-normative with respect to the protocol's epistemic content.
