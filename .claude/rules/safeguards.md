@@ -16,17 +16,11 @@ Each protocol must anticipate how an AI agent might shortcut or rationalize away
 
 ## White Bear Avoidance
 
-LLM-facing instructions prefer **positive rationale** ("X IS Y because Z") over **negative prohibition** ("do not use W"). Negative injunctions evoke the forbidden target (White Bear problem: "don't think of a white bear" → thought of white bear), a recognized LLM rationalization path.
+LLM-facing instructions prefer **positive rationale** ("X IS Y because Z") over **negative prohibition** ("do not use W"). Negative injunctions evoke the forbidden target (White Bear problem: "don't think of a white bear" → thought of white bear), a recognized LLM rationalization path. Pattern observed across multiple LLM-facing updates — converting phrasings like "avoid markdown code blocks in Ink output" to "emit element patterns directly" reduces prohibited-pattern drift in subsequent runs.
 
-**Scope**: LLM-facing instructions only; contributor-facing documentation exempt.
+**Empirical scope**: applies to LLM-facing instructions only (contributor-facing documentation exempt); grounded in output-format instructions (markdown emission, structural rendering, list formatting), with generalization to other instruction types — notably turn-yield behavior at gate interactions — remaining a theoretical extension. The application axis is *attractor vs discriminant boundary* (derived from A1 differential future + A5 entropy axis): commission-detectable in produced output → apply avoidance; omission-detectable at a decision-point cue only → preserve the prohibition (removing it erases the calibration signal that distinguishes a gated path from an auto-resolved one). Revisions follow §Adversarial Anticipation guard consistency and Stage 2 retention evidence per `meta-principle.md §Deficit Empiricism`.
 
-**Relation to Zero-Shot Instruction Preference**: Safeguard-tier complement to `derived-principles.md §Zero-Shot Instruction Preference`. Zero-Shot (Derived from A4) works on the *example* axis (prefer no-example over ambiguous example); White Bear works on the *prohibition* axis (prefer positive framing over prohibition).
-
-**Evidence**: observed pattern across multiple LLM-facing instruction updates — converting phrasings like "avoid markdown code blocks in Ink output" to "emit element patterns directly" reduces prohibited-pattern drift in subsequent runs.
-
-**Empirical scope**: grounded in output-format instructions (markdown emission, structural rendering, list formatting). Generalization to other instruction types — notably turn-yield behavior at gate interactions — is a theoretical extension not yet empirically tested. Apply with awareness of this scope boundary; when removing a negative formulation of turn-yield obligation, preserve co-located positive reminder at the decision point to retain calibration signal.
-
-**Tier note**: Originally documented as Derived from A7 (Adversarial Anticipation). With A7 reclassified to Safeguard per audit-2026-04-11 #241, White Bear cascades to the same tier. The cascade is reinforced by independent empirical grounding: the **Evidence** block above documents reduction in prohibited-pattern drift observed directly in White Bear's own output-format instruction domain, separate from the A7 trajectory. The cascade establishes tier eligibility; the independent evidence confirms the principle retains operational force at the Safeguard tier. Scope (LLM-facing instruction framing) and empirical trajectory (becomes LESS important as models handle negative formulations more robustly) match Safeguard tier criteria on both axes.
+**Tier note**: cascaded from A7 (Adversarial Anticipation) reclassification per audit-2026-04-11 #241 — sibling complement to Zero-Shot Instruction Preference on the *prohibition* axis (Zero-Shot operates on the *example* axis). The principle statement's empirical grounding confirms operational force at the Safeguard tier; trajectory matches the criterion (becomes LESS important as models handle negative formulations more robustly).
 
 ## Gate Type Soundness
 

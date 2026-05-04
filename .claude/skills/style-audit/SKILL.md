@@ -1,6 +1,6 @@
 ---
 name: style-audit
-description: This skill should be used when the user asks to "audit phrasing style", "check white bear", "check zero-shot", "audit LLM-facing prose", "run style audit", or invokes /style-audit. Reviews LLM-facing prose in this project's plugin SKILL.md files, project-local skills, agent prompts, and Output Style files for White Bear (prohibition phrasing) and Zero-Shot (anchoring few-shot) compliance as defined in `.claude/rules/safeguards.md` and `.claude/rules/derived-principles.md`. Project-local contributor tooling. Equivalent CI invocation runs via `.github/workflows/claude-style-audit.yml`.
+description: This skill should be used when the user asks to "audit phrasing style", "check white bear", "check zero-shot", "audit LLM-facing prose", "run style audit", or invokes /style-audit. Reviews LLM-facing prose in this project's plugin SKILL.md files, project-local skills, agent prompts, and Output Style files for White Bear (prohibition phrasing) and Zero-Shot (anchoring few-shot) compliance as defined in `.claude/rules/safeguards.md` and `.claude/rules/derived-principles.md`. Project-local contributor tooling.
 allowed-tools: Read, Grep, Glob, Bash(gh *)
 ---
 
@@ -14,14 +14,11 @@ Surface phrasing patterns that invite LLM rationalization drift before they land
 
 ## Inputs
 
-Two invocation modes share the same audit semantics:
-
-**Manual** (interactive `/style-audit` invocation):
+**Manual invocation only** (interactive `/style-audit`):
 - The caller passes target file paths or a glob; with no argument, the skill enumerates the in-scope set under the working tree HEAD.
 - Files are read at their working-tree state — the post-edit, pre-commit content the contributor is about to ship.
 
-**CI** (`.github/workflows/claude-style-audit.yml`):
-- The workflow supplies the in-scope changed-file list at the PR head checkout. The audit subject is the resulting artifact — the file as it would land in `main` — so the audit operates on prose rather than on a delta.
+CI invocation is removed — the workflow file has been deleted from this branch; restore from prior git history when Stage 2 dogfooding completes (see §Stage classification).
 
 ## Scope
 
@@ -35,6 +32,7 @@ Two invocation modes share the same audit semantics:
 - Formal blocks within SKILL.md files: regions delimited by `── FLOW ──`, `── MORPHISM ──`, `── TYPES ──`, `── PHASE TRANSITIONS ──`, `── LOOP ──`, `── TOOL GROUNDING ──`, `── MODE STATE ──`, `── COMPOSITION ──`, and any `── <NAME> ──` block. These are formal definition layers where notation patterns are content.
 - Fenced code blocks (` ``` ... ``` `) — code is content, and example code attached to a definition is part of that definition.
 - Files under `docs/`, `CLAUDE.md`, `README*.md`, `*/references/*.md` — contributor documentation where examples serve human comprehension.
+- Files under `.claude/rules/` and `.claude/principles/` — axiom-tier and demoted-tier rule prose. White Bear avoidance applies to LLM-facing instruction surfaces (SKILL.md, agents, Output Style); rule-tier prose admits intentional negative formulations as discriminant signals (per `safeguards.md §White Bear Avoidance` operational test). One-pass audit across these files would erase calibration signals at intentionally preserved decision points.
 - Files under `.insights/`, `memory/` — session and context substrates outside this skill's audit surface.
 
 ## What to evaluate
@@ -43,7 +41,7 @@ The principle prose for White Bear and Zero-Shot is loaded into the session cont
 
 For each in-scope file, consider every prose sentence outside formal blocks and code fences:
 
-- **White Bear signal** — a sentence in LLM-facing prose framed as a prohibition (do not, never, avoid, must not, should not, cannot) that admits a positive restatement preserving the directive's force. A sentence whose load-bearing meaning collapses without the prohibition (a safety boundary the LLM observes, a contract the LLM honors) remains compliant; the test is whether a positive restatement preserves both the directive's force and its meaning.
+- **White Bear signal** — a sentence in LLM-facing prose framed as a prohibition (do not, never, avoid, must not, should not, cannot) that admits a positive restatement preserving the directive's force. A sentence whose load-bearing meaning collapses without the prohibition (a safety boundary the LLM observes, a contract the LLM honors) remains compliant; the test is whether a positive restatement preserves both the directive's force and its meaning. Cited preserved-prohibition carve-outs (treat as compliant by purpose, surface only as `severity: low` if the rewrite preference is judgment-dependent): Prothesis Rule 14 (Phase 3 `Await` wait discipline — passive completion barrier vs active polling at the per-turn decision point), Aitesis substrate boundary (legitimate inference vs substrate violation per inference), Katalepsis Rule 11 (verification-gate 1-correct option design — comprehension verification vs decision-axis selection by purpose), Hermeneia Phase 2 articulation (user-articulated intent vs AI-imputed intent at the articulation decision point), Prosoche Stop-as-Gate (subagent return path vs main-agent gate interaction at the `GATE_DETECTED` decision point), Epharmoge Layer 2 auto-activation prohibition (deliberate user invocation vs AI speculative activation at protocol activation).
 
 - **Zero-Shot signal** — a passage in LLM-facing prose where a principle is stated alongside few-shot examples or an enumerated example list whose primary effect is anchoring the model to specific instances rather than letting it apply the principle to novel contexts. Examples that delineate the principle's *scope* (clarifying what falls inside or outside the principle's domain) remain compliant; examples that instantiate a principle's *application* invite anchoring.
 
@@ -96,8 +94,10 @@ This SKILL.md is itself in scope. The audit may surface findings against the pro
 | `verify` | Deterministic static checks (JSON schema, notation, cross-ref, graph) | Structural drift between coupled artifacts |
 | `style-audit` | Claude-judge semantic review of LLM-facing prose | Phrasing drift that survives structural validity |
 
-The two surfaces are siblings: `verify` runs deterministically at pre-commit and CI; `style-audit` runs as a Claude-judge CI step on PR open and synchronize, plus on-demand via `/style-audit`. Each maintains its own confidence curve — semantic-judgment findings appear separately from deterministic structural failures.
+The two surfaces are siblings: `verify` runs deterministically at pre-commit and CI; `style-audit` runs on-demand via `/style-audit` (CI invocation removed — see §Stage classification). Each maintains its own confidence curve — semantic-judgment findings appear separately from deterministic structural failures.
 
 ## Stage classification
 
 Stage 2 evidence-collection instrument. Findings carry the N=1 dogfooding caveat inherent to a project where the audit definition, the rule prose, and the contributor are entangled. Architectural inscription — promoting any pattern observed across findings into a deterministic verify check, or into a project-wide phrasing rule — waits on Stage 2 variation-stable retention evidence accumulating across multiple PRs and contributors.
+
+**CI status**: CI invocation is removed to extend Stage 2 dogfooding via manual `/style-audit` use; the workflow file has been deleted from this branch (restorable from prior git history). Re-enablement (restore the workflow file from a prior commit) is gated on accumulated use evidence demonstrating audit findings carry signal beyond N=1 contributor noise.
