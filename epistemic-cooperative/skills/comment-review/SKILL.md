@@ -33,13 +33,13 @@ The caller — whether the user invoking `/comment-review` directly or a composi
 Phase 0  : channel open (browser, rendered preview)
 Phase L  : loop iteration k
              Q (branch gate) :
-               ① scan + apply — consume current JSONL, run /inquire+/gap+/contextualize audit, apply audit findings + comment edits, return to browser
-               ② apply        — consume current JSONL, materialize comment intent as edits without sub-protocol audit, return to browser
+               ① scan + apply — consume current JSONL (fully), run /inquire+/gap+/contextualize audit, apply audit findings + comment edits, return to browser
+               ② apply        — consume current JSONL (partial; defer ambiguous), materialize comment intent as edits without sub-protocol audit, return to browser
              user reads preview + AI surfacing in browser, drag-comments, then next chat turn answers the gate
 free-exit : user may end the review at any time by saying so (Phase 0 prose declares this once)
 ```
 
-3 protocols composed inside each `scan + apply` round. The loop is outer; sub-protocol gates remain standalone within the audit phase (see "Why No Gate Reduction" below). Each iteration boundary surfaces exactly one branch gate.
+3 protocols composed inside each `scan + apply` round (only when the user picks that option; `apply`-only sessions run 0 sub-protocol rounds). The loop is outer; sub-protocol gates remain standalone within the audit phase (see "Why No Gate Reduction" below). Each iteration boundary surfaces exactly one branch gate.
 
 ## When to Use
 
@@ -62,7 +62,7 @@ On skill activation, before any sub-protocol runs:
 1. **Bun preflight** — verify `bun --version` ≥ 1.0. If absent, print install hint (`curl -fsSL https://bun.sh/install | bash`) and exit. The channel is the skill's identity; running without it would change what `/comment-review` *is*, not just degrade UX. Headless environments fall back to `/inquire`, `/gap`, `/contextualize` invoked directly.
 2. **Termination prose (declared once)** — announce *before opening the browser*: *"I'll open a browser preview. You can end this review at any time by saying so; on exit I will produce the materialized view and stop the channel server."* This is the free-response pathway for termination — it does not appear as a gate option. Announcing first ensures the exit affordance is visible before the first session artifact (the rendered preview) is presented.
 3. **Channel open** — start `bun scripts/serve.ts <artifact.md> [...]`, browser auto-opens to the rendered preview. The published-style render is the user's first input layer (Vorverständnis), independent of any AI surfacing — sub-protocol audit runs only when the user picks `scan + apply` at the branch gate.
-4. **Branch gate (Round 1 entry)** — surface the loop iteration gate (Phase L below). When `feedback-{slug}.jsonl` already exists from a prior session, surface the queue size in pre-gate prose so the user can recognize the carryover before choosing a round mode; consumption happens only after the user picks `scan + apply` or `apply` per Channel Modality § JSONL Consumption Timing.
+4. **Branch gate (Round 1 entry)** — surface the loop iteration gate (Phase L below). The pre-gate prose surfaces the queue size when `feedback-{slug}.jsonl` exists from a prior session, or "No prior comments — fresh start." otherwise, so the user can recognize the carryover (or lack thereof) before choosing a round mode; consumption happens only after the user picks `scan + apply` or `apply` per Channel Modality § JSONL Consumption Timing.
 
 ## Phase L: Loop Iteration Branch Gate
 
@@ -71,7 +71,7 @@ After channel open (Round 1 entry) and after each round completes, surface the r
 **Pre-gate prose** (per round):
 ```
 Round 1 entry (after Phase 0 channel open):
-  Round 1 — browser preview opened. {N comments in queue from prior session OR fresh queue}
+  Round 1 — browser preview opened. {N comments in queue from prior session. | No prior comments — fresh start.}
 
 Round k+1 entry (after Round k completed):
   Round {k} complete — scan + apply.                                                    -- after scan + apply round
@@ -102,7 +102,7 @@ To keep commenting, do not yet answer the gate — keep drag-commenting in the b
 **Round signal**: The user's next chat turn answering the gate *is* the round-complete signal. No separate browser button is needed — modality stays clean (browser collects comments, chat handles gate decisions).
 
 **Inference defaults** (project-profile.md Extension-default; relay where confident, surface gate where ambiguous):
-- Round 1 entry (no prior session JSONL, no surfaced findings yet) → `scan + apply` is the recognizable default for fresh artifacts where the user expects AI surfacing before editing; `apply` is the recognizable default when the user has already added comments via drag-select before answering the gate. Defaults reduce friction by ordering options, not by auto-selecting.
+- Round 1 entry → `scan + apply` is the recognizable default when no prior session JSONL exists and no drag-select comments have been added (fresh artifact, no user signal yet); `apply` is the recognizable default when the user has already added drag-select comments before answering the gate. Defaults reduce friction by ordering options, not by auto-selecting.
 - First gate after a `scan + apply` round with 0 new comments and ≥1 surfaced finding → `apply` is the recognizable default if the user has clear edit intent on the surfaced findings; `scan + apply` if the user wants AI to re-evaluate after their changes — but still surface the gate.
 - Multi-artifact: each artifact has its own browser tab + JSONL + loop counter; the branch gate is **per-artifact**. Aggregating would let one artifact's pacing block another (Rule 8 multi-artifact-first-class).
 
@@ -123,11 +123,11 @@ Both fire only on same-scope co-activation. This composition keeps scopes struct
 
 ## Scan Stage 1: Factual Verification (`/inquire`)
 
-Within each `scan` action, `/inquire` runs first against the artifact's factual surface — named people, project names, citations, statistics, technical claims about external systems, links. `/inquire` Phase 1 dispatches to the right verification track (CodeDerivable, CanonicalExternal via WebFetch, Instrumentation, UserTacit) per claim.
+Within each `scan + apply` round, `/inquire` runs first as Stage 1 against the artifact's factual surface — named people, project names, citations, statistics, technical claims about external systems, links. `/inquire` Phase 1 dispatches to the right verification track (CodeDerivable, CanonicalExternal via WebFetch, Instrumentation, UserTacit) per claim.
 
 **Pipeline context rules** (when `/inquire` is called from this pipeline):
 - **Scope**: factual verifiability of artifact claims (fact layer)
-- **Conditional no-op**: artifacts with no factual claims (e.g., plan files describing design intent with no external references) trigger Phase 0 silent exit — the 4-track dispatch finds no resolvable uncertainties and the protocol exits without surfacing
+- **Conditional no-op**: artifacts with no factual claims (e.g., plan files describing design intent with no external references) trigger a silent no-op for this audit stage — the 4-track dispatch finds no resolvable uncertainties; continue with Stage 2 of the `scan + apply` round
 
 ## Scan Stage 2: Decision-Quality Gap Audit (`/gap`)
 
@@ -150,7 +150,7 @@ Common gaps across artifact types:
 
 ## Scan Stage 3: Application-Fit Check (`/contextualize`)
 
-The applicability check that closes each `scan` action. The channel itself is not a stage — it is the surrounding modality opened in Phase 0; this stage consumes whatever JSONL has accumulated since the previous scan.
+The applicability check that closes each `scan + apply` round. The channel itself is not a stage — it is the surrounding modality opened in Phase 0; this stage consumes whatever JSONL has accumulated since the previous round.
 
 ### Standard Path
 
@@ -159,7 +159,7 @@ Invoke `/contextualize` with `application_context` as `X`. Scans for Convention 
 **Pipeline context rules** (when `/contextualize` is called from this pipeline):
 - **Scope**: application fit of fixed artifact against application_context (post-fixation)
 - **X**: caller-supplied application_context
-- **Information source**: accumulated JSONL since previous scan (consumed at the start of this scan; see Channel Modality below) + standard post-execution applicability scan
+- **Information source**: accumulated JSONL since the previous `scan + apply` round (consumed at the start of the current round; see Channel Modality below) + standard post-execution applicability scan
 - **Suppression precondition**: `aitesis ⊣ epharmoge` does NOT fire — distinct temporal scopes (pre-fixation vs post-fixation)
 
 ## Channel Modality
@@ -181,7 +181,7 @@ In the browser (one tab per artifact):
 
 Each JSONL line: `{slug, anchor, context_before, context_after, comment, timestamp, source_offset?}`. `context_before` + `context_after` (60 chars each) disambiguate repeated anchors. `source_offset` (optional integer) records the source-markdown byte offset when the browser can derive it — used when rendered text diverges from source (marked.js strips emphasis markers, link text drops URL parts, code block fences become `<pre>`).
 
-A `scan` action consumes accumulated JSONL at its start:
+A `scan + apply` round consumes accumulated JSONL at its start:
 1. Reads each line, locates the anchor in the source markdown using surrounding context
 2. Wraps each comment as a `<feedback anchor="…">comment</feedback>` directive for the revision pass
 3. Archives consumed JSONL to `feedback-{slug}-{timestamp}.consumed.jsonl` to prevent re-ingestion
@@ -192,12 +192,13 @@ An `apply` action consumes JSONL on a per-comment basis:
 2. **Translatable** (clear edit intent, no conflict): apply edit, mark for archival
 3. **Untranslatable** (ambiguous, conflicts with another comment, requires audit-level judgment such as fact verification or decision-quality assessment): leave the line in the JSONL queue — it survives this round and is processed in a future `scan + apply` round
 4. After processing: archive only the translated lines; the queue retains the deferred ones; surface `({X} applied, {Y} deferred)` in the pre-gate prose
+5. **Empty-queue degenerate**: `apply` selected on an empty queue completes as a no-op — the round counter advances, pre-gate prose surfaces `Round {k} complete — apply (0 applied, 0 deferred)`, browser does not reload (no edits applied). Recovery is implicit: the user can drag-comment in the browser before answering the next gate.
 
 Apply mode tools are restricted to Edit / Write — verification or sub-protocol invocation belongs to the `scan + apply` mode. The "wait without consuming" affordance is implicit in not yet answering the gate — the user may keep drag-commenting in the browser; consumption happens only when the user responds.
 
 ## Why No Gate Reduction
 
-Sub-protocol gates inside each `scan` action are not elided. All three protocols require **Constitution user judgment** on answers not entailed by upstream protocol outputs:
+Sub-protocol gates inside each `scan + apply` round are not elided. All three protocols require **Constitution user judgment** on answers not entailed by upstream protocol outputs:
 - `InformedExecution` (Aitesis output) does not entail the `{Address, Dismiss, Probe}` judgment Syneidesis asks
 - `AuditedDecision` (Syneidesis output) does not entail the `{Confirm, Adapt, Dismiss}` judgment Epharmoge asks
 
@@ -228,11 +229,11 @@ Sub-protocols invoked:      {/inquire: yes|no, /gap: yes|no, /contextualize: yes
 
 ## Error Recovery
 
-Suffix-replay rules (apply within a single `scan` action):
+Suffix-replay rules (apply within a single `scan + apply` round):
 - **Mid-chain invalidation**: Stage 1 factual correction invalidating a Stage 2 gap resolution → replay forward from Stage 2 (not backward compensation)
 - **Same-reason cap**: Same-reason replay capped at 2 attempts before surfacing to the user with options: replay / proceed accepting mismatch / terminate preserving artifacts
-- **Feedback consumption**: `feedback-{slug}.jsonl` is consumed at the start of a `scan` action and archived to `feedback-{slug}-{timestamp}.consumed.jsonl` to prevent stale comments re-entering subsequent scans. When the archive write fails (disk full, permission denied), surface the failure to the user — do not silently retry — and halt consumption until the underlying cause is resolved; silent retry would re-inject identical `<feedback>` directives into the revision pass.
-- **Anchor-not-found on re-entry**: When a revision pass removes or substantially rewrites the anchor span, the next `scan` cannot locate the original feedback target. Behavior: (a) attempt fuzzy-match only when both `context_before` and `context_after` match within edit distance 5 — if matched, proceed as located; (b) otherwise emit the directive as `<feedback anchor="..." status="anchor-missing">comment</feedback>` with the original anchor + context retained so the user can judge whether the intent still applies — do not silently drop the feedback.
+- **Feedback consumption**: `feedback-{slug}.jsonl` is consumed at the start of a `scan + apply` round and archived to `feedback-{slug}-{timestamp}.consumed.jsonl` to prevent stale comments re-entering subsequent rounds. When the archive write fails (disk full, permission denied), surface the failure to the user — do not silently retry — and halt consumption until the underlying cause is resolved; silent retry would re-inject identical `<feedback>` directives into the revision pass.
+- **Anchor-not-found on re-entry**: When a revision pass removes or substantially rewrites the anchor span, the next `scan + apply` round cannot locate the original feedback target. Behavior: (a) attempt fuzzy-match only when both `context_before` and `context_after` match within edit distance 5 — if matched, proceed as located; (b) otherwise emit the directive as `<feedback anchor="..." status="anchor-missing">comment</feedback>` with the original anchor + context retained so the user can judge whether the intent still applies — do not silently drop the feedback.
 - **Scope-attribution drift**: Finding's scope attribution changing mid-scan → record under `origin: ambiguous` and re-scan the upstream protocol with re-attributed scope.
 - **Bun server crash mid-loop**: Surface to user with two options: restart channel and resume (preserves accumulated JSONL) / terminate review with materialized view of completed iterations. Do not silently restart.
 
