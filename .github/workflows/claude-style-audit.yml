@@ -3,7 +3,7 @@ name: Claude Style Audit
 on:
   workflow_dispatch:
   pull_request:
-    types: [opened, ready_for_review]
+    types: [opened, synchronize, ready_for_review]
     # NOTE: this list MUST stay in lockstep with the regex in step `Collect in-scope changed files`.
     # The verify static check `workflow-paths-sync` covers `claude-epistemic-review.yml`; this workflow
     # is currently outside that check's scope.
@@ -21,7 +21,6 @@ jobs:
       contents: read
       pull-requests: write
       issues: read
-      id-token: write
 
     steps:
       - name: Checkout repository
@@ -34,7 +33,12 @@ jobs:
             echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
             echo "sha=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
           else
-            PR_JSON=$(gh pr view --json number,headRefOid)
+            # workflow_dispatch path: branch may have no associated PR.
+            if ! PR_JSON=$(gh pr view --json number,headRefOid 2>/dev/null); then
+              echo "::notice::No open PR for this branch; skipping audit."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             echo "number=$(echo "$PR_JSON" | jq -r '.number')" >> "$GITHUB_OUTPUT"
             echo "sha=$(echo "$PR_JSON" | jq -r '.headRefOid')" >> "$GITHUB_OUTPUT"
           fi
@@ -42,6 +46,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Collect in-scope changed files
+        if: steps.pr.outputs.skip != 'true'
         id: scope
         run: |
           ALL_FILES=$(gh pr view ${{ steps.pr.outputs.number }} --json files --jq '.files[].path')
@@ -80,12 +85,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Run Style Audit
-        if: steps.scope.outputs.skip != 'true'
+        if: steps.pr.outputs.skip != 'true' && steps.scope.outputs.skip != 'true'
         id: audit
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: '--model claude-sonnet-4-5 --max-turns 30'
+          claude_args: '--model claude-sonnet-4-6 --max-turns 30'
           prompt: |-
             Run the project-local /style-audit skill against PR #${{ steps.pr.outputs.number }}.
 
@@ -153,9 +158,8 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: '--model claude-haiku-4-5 --max-turns 20'
+          claude_args: '--model claude-haiku-4-5-20251001 --max-turns 20'
           settings: '{"permissions":{"allow":["Bash"]}}'
-          show_full_output: 'true'
 
           prompt: |-
             You are the style-audit comment posting agent for PR #${{ steps.pr.outputs.number }}.

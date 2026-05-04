@@ -2495,6 +2495,13 @@ function checkAgentsSymlinksSync() {
 // missing the multi-perspective epistemic review trigger (Issue #258 pattern:
 // anamnesis + periagoge omitted at workflow inception). Utility plugins
 // (epistemic-cooperative) are intentionally out of scope.
+//
+// KNOWN EXCLUSION: .github/workflows/claude-style-audit.yml is NOT validated
+// by this check. Its `paths:` trigger and inline grep regex constitute a
+// separate scope set (LLM-facing prose: SKILL.md, agents, output-styles)
+// that does not align with protocol-plugin enumeration. Drift between its
+// `paths:` and inline regex is currently surfaced via in-file comment only.
+// Tracked as a follow-up: extend this check to cover claude-style-audit.yml.
 function checkWorkflowPathsSync() {
   const relPath = '.github/workflows/claude-epistemic-review.yml';
   const workflowFile = path.join(projectRoot, relPath);
