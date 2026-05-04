@@ -41,8 +41,13 @@ const MAX_ALL_CHARS = 80_000;
 const HAIKU_TIMEOUT = 120_000;
 
 // v0.4.0 two-track extension budgets.
-// Soft cap on deterministic extract/detect/coinage; the haiku calls above are
-// bounded separately by HAIKU_TIMEOUT and are unaffected by this budget.
+// Soft cap on deterministic extract/coinage; the haiku calls (clue, vector,
+// narrative, markers) are bounded separately by HAIKU_TIMEOUT and are
+// unaffected by this budget.
+//
+// v0.4.24: MarkerProfile salience markers (actor/temporal/emotional/cognitive/
+// singularity) migrated from regex to Haiku LLM extraction; coinage remains
+// deterministic (Zipf-statistical, defined in SKILL.md ── SALIENCE MARKERS ──).
 const TWO_TRACK_BUDGET_MS = 5_000;
 const COINAGE_MIN_REMAINING_MS = 500;
 const COINAGE_PRECISION_THRESHOLD = 0.5;
@@ -281,6 +286,39 @@ Session content:
 ${sample}`;
 }
 
+function buildMarkerPrompt(allTexts, startedAt) {
+  const sample = allTexts.join("\n---\n").slice(0, 30_000);
+  const dateAnchor = (startedAt && startedAt.length >= 10)
+    ? startedAt.slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+
+  return `You are a session indexer. Extract salience markers as ABSOLUTE/CONCRETE entities only.
+
+Output EXACTLY valid JSON, nothing else:
+{
+  "actor":      [{"name": "...", "role": "...", "phrase_in_text": "..."}],
+  "temporal":   [{"iso": "YYYY-MM-DD", "phrase_in_text": "...", "kind": "date|datetime|range"}],
+  "emotional":  [{"verbatim": "...", "polarity": "positive|negative|emphatic"}],
+  "cognitive":  [{"verbatim": "...", "function": "contrast|cause|conclusion|qualification"}],
+  "singularity":[{"verbatim": "..."}]
+}
+
+Rules:
+- actor: humans, roles, named external systems only. SKIP @team-agent handles such as @architectural-layer-analyst from /frame protocol output, and bare code identifiers.
+- temporal: keep only entries that resolve to an ABSOLUTE timestamp. Normalize relative phrases (yesterday, 어제, last week) to ISO using session start date ${dateAnchor} as anchor; if normalization is ambiguous, omit the entry. Drop fractions and ranges (1/2, 2-3) and future-intent tokens such as "next session" or "next phase".
+- emotional: verbatim quotes that carry stance markers (emphasis, strong agreement or disagreement, surprise).
+- cognitive: verbatim quotes featuring discourse connectives that signal reasoning shifts (however, therefore, 따라서, 하지만, etc.).
+- singularity: memorable user statements (decisions, strong opinions, distinctive coinage).
+- Each category: maximum ${MARKER_CAT_LIMIT} items. Empty arrays are valid and preferred over noise.
+- All values stay in the language they were originally written in.
+- Each item must have a verifiable anchor in the session text.
+
+Session start date (for temporal normalization): ${dateAnchor}
+
+Session content:
+${sample}`;
+}
+
 // --- Haiku Invocation ---
 
 function callHaiku(prompt) {
@@ -344,6 +382,14 @@ function validateNarrative(data) {
     typeof data.direction === "string" &&
     typeof data.outcome === "string"
   );
+}
+
+function validateMarkers(data) {
+  if (!data || typeof data !== "object") return false;
+  for (const key of ["actor", "temporal", "emotional", "cognitive", "singularity"]) {
+    if (!Array.isArray(data[key])) return false;
+  }
+  return true;
 }
 
 // --- File Builders ---
@@ -499,49 +545,16 @@ function extractEntropyRefs(allTexts) {
     .slice(0, ENTROPY_MAX_OUTPUT);
 }
 
-// detect: Session → MarkerProfile — salience-track profile
-// Laws: monotonicity/locality hold exactly; idempotence holds up to output truncation.
-const MARKER_PATTERNS = {
-  actor: /@[\w-]{2,40}\b/g,
-  temporal: /\b(\d{4}-\d{2}-\d{2}|\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?|yesterday|today|tomorrow|last\s+\w+|next\s+\w+|어제|오늘|내일|이번주|지난주|다음주|주말)\b/gi,
-  emotional: /(?:!{2,}|\?{2,}|\bwow\b|\bexactly\b|\bperfect\b|완벽|맞습니다|최고|중요합니다?)/gi,
-  cognitive: /\b(?:however|therefore|because|hence|thus|nonetheless|moreover)\b|따라서|그래서|왜냐하면|그러나|하지만|결국/gi,
-};
-const COINAGE_PATTERN = /\b(?:[a-z]+(?:[A-Z][a-z]+)+|[A-Z][a-z]+(?:[A-Z][a-z]+){1,3})\b/g;
-
-function detectMarkers(userMsgs, allTexts) {
-  const profile = {
-    coinage: new Set(),
-    actor: new Set(),
-    temporal: new Set(),
-    emotional: new Set(),
-    cognitive: new Set(),
-    singularity: new Set(),
-  };
-  for (const text of allTexts) {
-    for (const match of text.matchAll(COINAGE_PATTERN)) {
-      if (profile.coinage.size >= MARKER_CAT_LIMIT) break;
-      profile.coinage.add(match[0]);
-    }
-    for (const [category, pattern] of Object.entries(MARKER_PATTERNS)) {
-      if (profile[category].size >= MARKER_CAT_LIMIT) continue;
-      for (const match of text.matchAll(pattern)) {
-        if (profile[category].size >= MARKER_CAT_LIMIT) break;
-        profile[category].add(match[0]);
-      }
-    }
-  }
-  for (const msg of userMsgs.slice(0, 30)) {
-    if (profile.singularity.size >= 10) break;
-    const text = cleanText(msg.text).trim();
-    if (text.length >= 80 && text.length <= 500 && /[!?]|\*\*/.test(text)) {
-      profile.singularity.add(text.slice(0, 200));
-    }
-  }
-  return Object.fromEntries(
-    Object.entries(profile).map(([k, v]) => [k, [...v]])
-  );
-}
+// MarkerProfile salience extraction — migrated from regex (v0.4.0) to Haiku
+// LLM extraction (v0.4.24). The 5 semantic categories (actor / temporal /
+// emotional / cognitive / singularity) are extracted by buildMarkerPrompt +
+// callHaiku; the 6th category (coinage) remains deterministic via
+// computeCoinage below — the SKILL.md coinage(s, corpus, θ) formula is the
+// authoritative definition and must remain byte-aligned with this function.
+//
+// Per SKILL.md ── SALIENCE MARKERS ── (v0.4.24): semantic invariants
+// (traceability, boundedness, stability) replace prior exact laws
+// (monotonicity, locality, idempotence) for Haiku-extracted categories.
 
 // coinage: Session × Corpus × θ → CoinageSet
 // salience_precision(t, s, corpus) = |occ(t, s)| / (1 + |occ(t, corpus \ {s})|)
@@ -628,29 +641,56 @@ function buildEntropyMd(sessionId, date, refs) {
   return lines.join("\n") + "\n";
 }
 
-function buildMarkersMd(sessionId, date, profile) {
-  const counts = Object.fromEntries(
-    Object.entries(profile).map(([k, v]) => [k, v.length])
-  );
+// buildMarkersMd: assembles markers.md combining Haiku-extracted semantic
+// categories (actor/temporal/emotional/cognitive/singularity) with the
+// deterministic coinage statistics. extractionMethod is recorded in
+// frontmatter for cross-version observability (no ranking influence).
+function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extractionMethod) {
+  const coinageItems = coinageResult?.coinage ?? [];
+  const counts = {
+    coinage: coinageItems.length,
+    actor: haikuMarkers.actor.length,
+    temporal: haikuMarkers.temporal.length,
+    emotional: haikuMarkers.emotional.length,
+    cognitive: haikuMarkers.cognitive.length,
+    singularity: haikuMarkers.singularity.length,
+  };
   const lines = [
     "---",
     `session_id: ${sessionId}`,
     `date: ${date}`,
-    `marker_categories: [${Object.keys(profile).join(", ")}]`,
+    `marker_categories: [coinage, actor, temporal, emotional, cognitive, singularity]`,
     `marker_counts: ${JSON.stringify(counts)}`,
+    `extraction_method: ${extractionMethod}`,
     "---",
     "",
     "## MarkerProfile",
     "",
+    `### coinage (${coinageItems.length})`,
   ];
-  for (const [category, items] of Object.entries(profile)) {
-    lines.push(`### ${category} (${items.length})`);
+  if (coinageItems.length === 0) {
+    lines.push("_none_");
+  } else {
+    for (const c of coinageItems) {
+      lines.push(`- \`${escMd(c.token)}\` (precision ${c.precision.toFixed(3)}, session ${c.sessionOcc} / corpus ${c.corpusOcc})`);
+    }
+  }
+  lines.push("");
+
+  const renderers = {
+    actor: (items) => items.map((i) => `- ${escMd(i.name ?? "")} (role: ${escMd(i.role ?? "")}, phrase: \`${escMd(i.phrase_in_text ?? "")}\`)`),
+    temporal: (items) => items.map((i) => `- ${escMd(i.iso ?? "")} (phrase: \`${escMd(i.phrase_in_text ?? "")}\`, kind: ${escMd(i.kind ?? "")})`),
+    emotional: (items) => items.map((i) => `- ${escMd(i.verbatim ?? "")} (polarity: ${escMd(i.polarity ?? "")})`),
+    cognitive: (items) => items.map((i) => `- ${escMd(i.verbatim ?? "")} (function: ${escMd(i.function ?? "")})`),
+    singularity: (items) => items.map((i) => `- ${escMd(i.verbatim ?? "")}`),
+  };
+  for (const cat of ["actor", "temporal", "emotional", "cognitive", "singularity"]) {
+    const items = haikuMarkers[cat];
+    lines.push(`### ${cat} (${items.length})`);
     if (items.length === 0) {
       lines.push("_none_");
     } else {
-      for (const item of items) {
-        lines.push(`- ${escMd(item)}`);
-      }
+      lines.push(...renderers[cat](items));
     }
     lines.push("");
   }
@@ -875,17 +915,36 @@ function main() {
 
   // Post-extraction low-info discard: silent skip when all 3 haiku extractions
   // produced empty payloads — enables retry via next SessionEnd once cooldown
-  // expires. Two-track extensions (entropy/markers/coinage) are also skipped
-  // since ghost sessions lack the semantic content they depend on.
+  // expires. Two-track extensions (entropy/coinage) and the Haiku marker call
+  // are also skipped since ghost sessions lack the semantic content they
+  // depend on.
   if (isLowInfo(clueData, vectorData, narrativeData)) {
     logErr(`low-info discard: all 3 extractions produced empty payloads — skipping write, retry eligible at next SessionEnd`);
     return;
   }
 
-  // --- v0.4.0 Two-Track Extension ---
-  // Deterministic extract/detect run first; coinage runs if budget allows.
-  // Soft cap: TWO_TRACK_BUDGET_MS. On exhaustion, coinage is skipped while
-  // markers + entropy refs remain intact (Anamnesis R1 fallback).
+  // --- Haiku Marker Extraction (v0.4.24) ---
+  // 4th Haiku call — extracts 5 semantic salience categories
+  // (actor/temporal/emotional/cognitive/singularity). Bound by HAIKU_TIMEOUT
+  // separately, NOT by TWO_TRACK_BUDGET_MS. Fail-open: marker absence does not
+  // abort the write.
+  let markerData = null;
+  try {
+    const markerRaw = callHaiku(buildMarkerPrompt(allTexts, startedAt));
+    markerData = parseHaikuOutput(markerRaw);
+    if (!validateMarkers(markerData)) {
+      logErr(`marker validation failed: invalid schema`);
+      markerData = null;
+    }
+  } catch (e) {
+    logErr(`marker extraction failed: ${e.message}`);
+    markerData = null;
+  }
+
+  // --- Deterministic Two-Track Extension ---
+  // Entropy refs are O(n) over text; coinage is corpus-comparative under
+  // TWO_TRACK_BUDGET_MS soft cap. On exhaustion, coinage is skipped while
+  // entropy refs remain intact (Anamnesis R1 fallback).
   const twoTrackStart = Date.now();
 
   try {
@@ -895,28 +954,34 @@ function main() {
     logErr(`entropy extraction failed: ${e.message}`);
   }
 
-  try {
-    const profile = detectMarkers(userMsgs, allTexts);
-    files["markers.md"] = buildMarkersMd(sessionId, date, profile);
-  } catch (e) {
-    logErr(`marker detection failed: ${e.message}`);
-  }
-
+  let coinageResult = null;
   try {
     const elapsed = Date.now() - twoTrackStart;
     const remaining = TWO_TRACK_BUDGET_MS - elapsed;
+    let skipped = false;
+    let skipReason = null;
     if (remaining < COINAGE_MIN_REMAINING_MS) {
-      files["coinage.md"] = buildCoinageMd(
-        sessionId, date, null, true,
-        `budget ${TWO_TRACK_BUDGET_MS}ms exhausted after ${elapsed}ms`,
-      );
+      skipped = true;
+      skipReason = `budget ${TWO_TRACK_BUDGET_MS}ms exhausted after ${elapsed}ms`;
     } else {
       const corpusRoot = path.join(slugDir, "hypomnesis");
-      const result = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
-      files["coinage.md"] = buildCoinageMd(sessionId, date, result, false, null);
+      coinageResult = computeCoinage(userMsgs, allTexts, corpusRoot, sessionId, remaining);
     }
+    files["coinage.md"] = buildCoinageMd(sessionId, date, coinageResult, skipped, skipReason);
   } catch (e) {
     logErr(`coinage extraction failed: ${e.message}`);
+  }
+
+  // markers.md combines Haiku semantic categories + deterministic coinage
+  // statistics. Built after both inputs settle.
+  if (markerData) {
+    try {
+      files["markers.md"] = buildMarkersMd(
+        sessionId, date, markerData, coinageResult, "haiku-marker-v1",
+      );
+    } catch (e) {
+      logErr(`markers assembly failed: ${e.message}`);
+    }
   }
 
   if (Object.keys(files).length > 0) {
