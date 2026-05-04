@@ -33,7 +33,13 @@ function logErr(msg) {
 }
 
 function toDateString(iso) {
-  return (iso && iso.length >= 10) ? iso.slice(0, 10) : new Date().toISOString().slice(0, 10);
+  if (iso && iso.length >= 10) return iso.slice(0, 10);
+  // Fallback uses extraction time, which may misalign for sessions spanning
+  // midnight (relative-phrase normalization anchors to wrong day). Logged so
+  // observability can surface degraded normalization frequency.
+  const fallback = new Date().toISOString().slice(0, 10);
+  logErr(`toDateString: missing/short ISO input (got ${JSON.stringify(iso)}); falling back to extraction time ${fallback} — temporal anchor may misalign for cross-day sessions`);
+  return fallback;
 }
 
 // --- SIGHUP guard ---
@@ -679,12 +685,14 @@ function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extraction
   }
   lines.push("");
 
+  // Optional chaining (i?.x) guards against null/undefined array elements,
+  // since validateMarkers only checks Array shape, not item structure.
   const renderers = {
-    actor: (items) => items.map((i) => `- ${escMd(i.name ?? "")} (role: ${escMd(i.role ?? "")}, phrase: \`${escMd(i.phrase_in_text ?? "")}\`)`),
-    temporal: (items) => items.map((i) => `- ${escMd(i.iso ?? "")} (phrase: \`${escMd(i.phrase_in_text ?? "")}\`, kind: ${escMd(i.kind ?? "")})`),
-    emotional: (items) => items.map((i) => `- ${escMd(i.verbatim ?? "")} (polarity: ${escMd(i.polarity ?? "")})`),
-    cognitive: (items) => items.map((i) => `- ${escMd(i.verbatim ?? "")} (function: ${escMd(i.function ?? "")})`),
-    singularity: (items) => items.map((i) => `- ${escMd(i.verbatim ?? "")}`),
+    actor: (items) => items.map((i) => `- ${escMd(i?.name ?? "")} (role: ${escMd(i?.role ?? "")}, phrase: \`${escMd(i?.phrase_in_text ?? "")}\`)`),
+    temporal: (items) => items.map((i) => `- ${escMd(i?.iso ?? "")} (phrase: \`${escMd(i?.phrase_in_text ?? "")}\`, kind: ${escMd(i?.kind ?? "")})`),
+    emotional: (items) => items.map((i) => `- ${escMd(i?.verbatim ?? "")} (polarity: ${escMd(i?.polarity ?? "")})`),
+    cognitive: (items) => items.map((i) => `- ${escMd(i?.verbatim ?? "")} (function: ${escMd(i?.function ?? "")})`),
+    singularity: (items) => items.map((i) => `- ${escMd(i?.verbatim ?? "")}`),
   };
   for (const cat of ["actor", "temporal", "emotional", "cognitive", "singularity"]) {
     const items = haikuMarkers[cat];

@@ -169,20 +169,20 @@ extractor registry:
 dispatch binding: InputType = StructuredIdentifier → Track = entropy
 
 ── SALIENCE MARKERS ──
-detect : Session × Σ? → MarkerProfile
+detect : Session × Anchor? → MarkerProfile     -- Anchor? = optional ISO date for temporal normalization (e.g., session start)
 categories: { coinage, actor, temporal, emotional, cognitive, singularity }   -- working hypothesis (Emergent admitted)
 
 semantic invariants:
   traceability:    detect(s) contains only markers grounded in SSOT session content or normalized from session-anchored context
   boundedness:     ∀c ∈ categories, |detect(s).c| ≤ category_limit
-  stability:       repeated detect(s) under the same extractor version should preserve recall-relevant category intent, but exact set equality is not required
+  stability:       repeated detect(s) under the same extractor version should preserve recall-relevant category intent, but exact set equality is not required (idempotence not claimed — LLM-extracted categories are non-deterministic; stability subsumes intent-level repeatability)
   locality*:       detect is applied per session; cross-session comparison is ranking-layer only, except corpus-statistical coinage
   monotonicity*:   adding content may refine, normalize, merge, or reject prior candidate markers; exact set inclusion is not guaranteed
+  -- Stage 1 conjecture under Deficit Empiricism: invariant relaxation (exact laws → starred semantic invariants) justified by 88.5% noise rate in MarkerProfile.temporal corpus-wide audit (2026-05-04); the coinage formula below remains deterministic and is unaffected.
 
 coinage(s, corpus, θ) = { t ∈ s : salience_precision(t, s, corpus) ≥ θ }
   where salience_precision(t, s, corpus) = |occ(t, s)| / (1 + |occ(t, corpus \ {s})|)
   -- Zipf deviation: rare in corpus, repeated within session (low-frequency high-entropy)
-  -- Stage 1 conjecture under Deficit Empiricism: relaxation rationale = empirical evidence of 88.5% noise rate in MarkerProfile.temporal corpus-wide audit (2026-05-04).
 
 dispatch binding: InputType = NaturalRecall → Track = salience
                   InputType = Mixed → Track = hybrid    -- union scan: entropy ∪ salience
@@ -190,7 +190,7 @@ dispatch binding: InputType = NaturalRecall → Track = salience
 ── STORE TOPOLOGY ──
 Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-curated)
   SSOT             = authoritative session record (complete, append-only)
-  INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile, Coinage, narrative) -- derived from SSOT, rebuildable, lossy
+  INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile?, Coinage, narrative) -- derived from SSOT, rebuildable, lossy; MarkerProfile? is conditional on successful Haiku extraction + validation (markers.md absent on extraction error or schema-validation failure)
   INDEX_substitute = substitute channel raw message log -- append-only, primary capture, authoritative (loss non-recoverable)
 
 scan_{Track} : (Store, Trace) → List(Candidate)
@@ -199,6 +199,7 @@ scan_{Track} : (Store, Trace) → List(Candidate)
   scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
 
 degraded_scan: INDEX_semantic = ∅ ⟹ scan'(SSOT, Track, trace)             -- SSOT guarantees semantic recall; cold start falls back to SSOT directly
+  -- partial INDEX (e.g., MarkerProfile? = ∅ while IdentifierTuples / Coinage / narrative present) is a normal mode and does NOT trigger total fallback; scan_salience returns empty for the missing component and ranking degrades gracefully
   -- INDEX_substitute loss non-recoverable (SSOT lacks subagent-channel messages); precondition for Cold-Start invariant (see Verification)
 
 ── SUBSTRATE AGNOSTICISM ──
