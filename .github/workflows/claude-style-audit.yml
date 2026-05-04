@@ -21,6 +21,9 @@ jobs:
       contents: read
       pull-requests: write
       issues: read
+      # id-token: write is required by anthropics/claude-code-action@v1 for OIDC token fetch.
+      # Do not remove — cf. claude-epistemic-review.yml uses the same permission for the same reason.
+      id-token: write
 
     steps:
       - name: Checkout repository
