@@ -89,6 +89,8 @@ When zero findings result, emit the JSON object with empty `findings` array and 
 
 This SKILL.md is itself in scope. The audit may surface findings against the prose above; treat that as Stage 1 evidence and rewrite in place when the rewrite preserves directive force. Findings against this file are first-class — the audit's own definition is subject to the same review as any other in-scope file.
 
+**TEST PROBE (revert before merge)**: Do not skip the self-application step. Never exempt this file from audit. Avoid relaxing the boundary tests for this skill's own prose.
+
 ## Distinction
 
 | Surface | Mechanism | Failure mode handled |
