@@ -13,7 +13,11 @@ In this repository, that machinery is realized as a Claude Code plugin marketpla
 ```
 epistemic-protocols/
 ├── .claude-plugin/marketplace.json    # Marketplace manifest
-├── .claude/skills/verify/             # Project-level verification skill
+├── .claude/skills/                    # Project-local skills (contributor tooling, not packaged)
+│   ├── verify/        (/verify)       # 20-check static verification (deterministic)
+│   ├── style-audit/   (/style-audit)  # White Bear / Zero-Shot LLM-as-judge phrasing audit (CI at PR time)
+│   ├── audit-delta/   (/audit-delta)  # Periodic audit progress tracker (issues + commit activity)
+│   └── release/       (/release)      # CalVer tag + narrative release
 │
 │   # Each protocol plugin: .claude-plugin/plugin.json + skills/<verb>/SKILL.md
 ├── prothesis/       (/frame)          # multi-perspective investigation
@@ -66,7 +70,11 @@ epistemic-protocols/
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 | Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
 
-**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/probe`, `/dashboard`, `/compose`, `/introspect`, `/sophia`, `/curses`, `/write`, `/comment-review`, `/review-ensemble`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
+**Utility skills**:
+- **Plugin (distributed via marketplace)**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/probe`, `/dashboard`, `/compose`, `/introspect`, `/sophia`, `/curses`, `/write`, `/comment-review`, `/review-ensemble`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate`).
+- **Project-local** (`.claude/skills/`, contributor tooling, not packaged): `/verify` (deterministic 20-check static verification, pre-commit + on-demand), `/style-audit` (semantic LLM-as-judge phrasing audit at PR time, sibling to verify), `/audit-delta` (periodic audit progress tracker), `/release` (CalVer tag + narrative release).
+
+Triggers, flows, and detailed descriptions in each plugin's SKILL.md or `.claude/skills/<name>/SKILL.md`.
 
 **Probe utility (deficit recognition fit review)**: `/probe` (epistemic-cooperative) surfaces multiple candidate deficit hypotheses with reverse-evidence conditions when the user is uncertain which protocol fits the present situation. Probe is a utility skill, not a 13th core protocol — it is intentionally absent from `graph.json`. Coexistence over Mirroring applies: `/probe` may enrich scans with prior `misfit.md` records via opt-in cross-session read (default scope is current session; cross-session recall requires explicit user confirmation) and routes the user's recognized choice to the selected core protocol; the relationship is prose-level, not a graph.json edge. Probe stands in structural homology with Anamnesis (RECOGNIZE operation family — past context recognition vs present-situation deficit recognition) but the homology is descriptive, not enforced as advisory edges. Stage 2 evidence-collection modality: probe is released as a usage-evidence instrument; **architectural inscription** (new core protocol, new `graph.json` edge, category-level promotion) is deferred until Stage 2 variation-stable retention evidence accumulates. **Type-level realization** of an already-inscribed `── COMPOSITION ──` product within an existing protocol's operational scope is evidence-collection modality internal iteration and does not require Stage 2 deferral framing — the distinction prevents the false-positive gating pattern recorded in issue #295. Verification framework limitations (drop-in feasibility vs endpoint well-defined-ness — two-axis distinction) tracked in [docs/probe-verification-framework.md](docs/probe-verification-framework.md) — N=1 instance L4a (PR #288), Stage 2 corroboration pending.
 
