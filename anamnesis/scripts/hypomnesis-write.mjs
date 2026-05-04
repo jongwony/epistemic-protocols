@@ -32,6 +32,10 @@ function logErr(msg) {
   try { process.stderr.write(`[hypomnesis-write] ${msg}\n`); } catch {}
 }
 
+function toDateString(iso) {
+  return (iso && iso.length >= 10) ? iso.slice(0, 10) : new Date().toISOString().slice(0, 10);
+}
+
 // --- SIGHUP guard ---
 try { process.on("SIGHUP", () => {}); } catch {}
 
@@ -55,6 +59,7 @@ const COINAGE_MIN_SESSION_OCC = 2;
 const COINAGE_MAX_OUTPUT = 30;
 const MARKER_CAT_LIMIT = 30;
 const ENTROPY_MAX_OUTPUT = 40;
+const MARKER_EXTRACTION_METHOD = "haiku-marker-v1";
 // Observed reason values in ~/.claude/logs/hooks.log (33 days, 1408 records):
 // other, prompt_input_exit, resume, clear. "compact" never observed — PreCompact
 // does not trigger SessionEnd; the two events are temporally independent.
@@ -288,11 +293,9 @@ ${sample}`;
 
 function buildMarkerPrompt(allTexts, startedAt) {
   const sample = allTexts.join("\n---\n").slice(0, 30_000);
-  const dateAnchor = (startedAt && startedAt.length >= 10)
-    ? startedAt.slice(0, 10)
-    : new Date().toISOString().slice(0, 10);
+  const dateAnchor = toDateString(startedAt);
 
-  return `You are a session indexer. Extract salience markers as ABSOLUTE/CONCRETE entities only.
+  return `You are a session indexer. Extract salience markers as concrete, anchored entities.
 
 Output EXACTLY valid JSON, nothing else:
 {
@@ -304,16 +307,15 @@ Output EXACTLY valid JSON, nothing else:
 }
 
 Rules:
-- actor: humans, roles, named external systems only. SKIP @team-agent handles such as @architectural-layer-analyst from /frame protocol output, and bare code identifiers.
-- temporal: keep only entries that resolve to an ABSOLUTE timestamp. Normalize relative phrases (yesterday, 어제, last week) to ISO using session start date ${dateAnchor} as anchor; if normalization is ambiguous, omit the entry. Drop fractions and ranges (1/2, 2-3) and future-intent tokens such as "next session" or "next phase".
-- emotional: verbatim quotes that carry stance markers (emphasis, strong agreement or disagreement, surprise).
-- cognitive: verbatim quotes featuring discourse connectives that signal reasoning shifts (however, therefore, 따라서, 하지만, etc.).
-- singularity: memorable user statements (decisions, strong opinions, distinctive coinage).
-- Each category: maximum ${MARKER_CAT_LIMIT} items. Empty arrays are valid and preferred over noise.
+- actor: named human individuals, role descriptors, and external advisor systems whose attribution persists across sessions.
+- temporal: each entry must resolve to an absolute calendar reference. Convert relative time expressions to ISO date by anchoring against ${dateAnchor}. The kind field declares the resolved precision.
+- emotional: verbatim quotes whose pragmatic function is stance signaling — emphasis, evaluative reaction, or affective intensity. The polarity field declares the resolved valence.
+- cognitive: verbatim quotes featuring discourse connectives whose pragmatic function is signaling reasoning transitions — causal, adversative, or conclusive relations within argument structure. The function field declares the relation type.
+- singularity: memorable user statements distinctive enough to anchor session recall — decisive judgments, strong stances, or distinctive coinage that summarizes the session's character.
+- Each category: maximum ${MARKER_CAT_LIMIT} items. Empty arrays are valid; entries must be verifiable in the session text.
 - All values stay in the language they were originally written in.
-- Each item must have a verifiable anchor in the session text.
 
-Session start date (for temporal normalization): ${dateAnchor}
+Session start date (for temporal anchoring): ${dateAnchor}
 
 Session content:
 ${sample}`;
@@ -862,7 +864,7 @@ function main() {
 
   const startedAt = timestamps[0] ?? "";
   const lastTurnAt = timestamps.at(-1) ?? "";
-  const date = startedAt.slice(0, 10) || new Date().toISOString().slice(0, 10);
+  const date = toDateString(startedAt);
   const crossRefs = extractCrossRefs(userMsgs, allTexts);
 
   const files = {};
@@ -977,7 +979,7 @@ function main() {
   if (markerData) {
     try {
       files["markers.md"] = buildMarkersMd(
-        sessionId, date, markerData, coinageResult, "haiku-marker-v1",
+        sessionId, date, markerData, coinageResult, MARKER_EXTRACTION_METHOD,
       );
     } catch (e) {
       logErr(`markers assembly failed: ${e.message}`);
