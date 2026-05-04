@@ -19,6 +19,8 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 |------|--------|------------------|
 | `architectural-principles.md` | `.claude/rules/architectural-principles.md` | Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload |
 | `meta-principle.md` | `.claude/rules/meta-principle.md` | Stage 1 / Stage 2 detail, Anti-inflation Clause, Operational Tests, Axiomatization Judgment Framework (Core Principle, Promotion Criteria, Demotion Criteria, Principle Evolution Process, Tension-Accumulation Threshold) |
+| `safeguards.md` | `.claude/rules/safeguards.md` | White Bear Avoidance — Relation to Zero-Shot, Evidence elaboration, Tier cascade history (A7 → Safeguard reclassification per audit-2026-04-11 #241) |
+| `derived-principles.md` | `.claude/rules/derived-principles.md` | Zero-Shot Instruction Preference — Safeguard-tier complement note (axis distinction history, prior Derived-tier pair documentation) |
 
 ## Demotion Ledger
 
@@ -40,6 +42,8 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 | Operational Tests | `meta-principle.md` | 2026-04-27 | T3 — authoring guidance detail |
 | Axiomatization Judgment Framework (Core Principle, Promotion / Demotion Criteria, Principle Evolution Process) | `meta-principle.md` | 2026-04-27 | T2-T3 — axiom-evolution time, very rare |
 | Tension-Accumulation Threshold | `meta-principle.md` | 2026-04-27 | T2 — Circular Return trigger criterion |
+| White Bear Avoidance — Relation to Zero-Shot, Evidence elaboration, Tier cascade history | `safeguards.md` | 2026-05-04 | T2-T3 — prospective authoring guidance (T1 keeps principle + scope + condensed empirical scope); cross-tier complement and audit-2026-04-11 cascade context invoked at authoring/verify/tier-evolution time. Retrospective enforcement now handled by `/style-audit` LLM-as-judge at PR time. |
+| Zero-Shot Instruction Preference — Safeguard-tier complement note | `derived-principles.md` | 2026-05-04 | T2-T3 — axis distinction (example axis vs prohibition axis) and tier reclassification history invoked at authoring/tier-evolution time. T1 keeps principle + scope boundary + boundary test + hybrid context (operational guidance audit needs). |
 
 ## Promotion Watch List
 

@@ -84,7 +84,7 @@ LLM-facing instructions (Output Style, SKILL.md prose, agent prompts) state prin
 
 Scope boundary: this principle applies to instructions the LLM interprets and applies at runtime — not to contributor-facing documentation where examples serve comprehension. The boundary test: "would removing this example increase the LLM's latitude in applying the principle to novel contexts?" If yes, the example is anchoring and should be removed. If the example aids human understanding without constraining LLM application, it is outside scope. SKILL.md formal blocks (Definition code blocks) are LLM-facing by definition; prose outside formal blocks in SKILL.md is hybrid (read by both LLMs and contributors) — err toward principle-only in hybrid contexts.
 
-**Safeguard-tier complement**: `safeguards.md §White Bear Avoidance` addresses the prohibition axis (prefer positive framing over negative prohibition). Zero-Shot (Derived, A4-grounded) operates on the example axis; White Bear (Safeguard) operates on the prohibition axis. The two were previously documented as orthogonal complements of a single Derived-tier pair; tier reclassification of White Bear (audit-2026-04-11 cascade from #241) reflects its empirical trajectory — becomes LESS important as models handle negative formulations more robustly.
+> **Demoted detail**: Safeguard-tier complement relationship with `safeguards.md §White Bear Avoidance` (axis distinction history, prior Derived-tier pair documentation, audit-2026-04-11 cascade rationale) lives in `.claude/principles/derived-principles.md`. Fetch via Read/Grep when authoring or evaluating tier evolution.
 
 ## Loop Continuity under Bounded Regret
 
