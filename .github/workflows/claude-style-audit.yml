@@ -1,12 +1,5 @@
 name: Claude Style Audit
 
-# BOOTSTRAP CAVEAT: Claude Code actions validate the workflow file against
-# the default branch (`main`) before invoking Claude. PRs that introduce or
-# modify this workflow will see `Skipping action due to workflow validation`
-# in the Run Style Audit step (success status, but no Claude call), since
-# the workflow on the PR head differs from `main`. The audit only exercises
-# the skill from the next PR opened after this workflow lands on `main`.
-
 on:
   workflow_dispatch:
   pull_request:
