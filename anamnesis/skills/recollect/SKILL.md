@@ -169,12 +169,16 @@ extractor registry:
 dispatch binding: InputType = StructuredIdentifier → Track = entropy
 
 ── SALIENCE MARKERS ──
-detect : Session → MarkerProfile
+detect : Session × Anchor? → MarkerProfile     -- Anchor? = optional ISO date for temporal normalization (e.g., session start)
 categories: { coinage, actor, temporal, emotional, cognitive, singularity }   -- working hypothesis (Emergent admitted)
-laws:
-  monotonicity:   s₁ ⊆ s₂ ⟹ detect(s₁) ⊆ detect(s₂)
-  locality:       detect(s₁ ⊔ s₂) = detect(s₁) ⊔ detect(s₂)                 -- disjoint sessions
-  idempotence:    detect(witnesses(detect(s))) = detect(s)                    -- second pass stable
+
+semantic invariants:
+  traceability:    detect(s) contains only markers grounded in SSOT session content or normalized from session-anchored context
+  boundedness:     ∀c ∈ categories, |detect(s).c| ≤ category_limit
+  stability:       repeated detect(s) under the same extractor version should preserve recall-relevant category intent, but exact set equality is not required (idempotence not claimed — LLM-extracted categories are non-deterministic; stability subsumes intent-level repeatability)
+  locality*:       detect is applied per session; cross-session comparison is ranking-layer only, except corpus-statistical coinage
+  monotonicity*:   adding content may refine, normalize, merge, or reject prior candidate markers; exact set inclusion is not guaranteed
+  -- Stage 1 conjecture under Deficit Empiricism: invariant relaxation (exact laws → starred semantic invariants) justified by 88.5% noise rate in MarkerProfile.temporal corpus-wide audit (2026-05-04); the coinage formula below remains deterministic and is unaffected.
 
 coinage(s, corpus, θ) = { t ∈ s : salience_precision(t, s, corpus) ≥ θ }
   where salience_precision(t, s, corpus) = |occ(t, s)| / (1 + |occ(t, corpus \ {s})|)
@@ -186,7 +190,7 @@ dispatch binding: InputType = NaturalRecall → Track = salience
 ── STORE TOPOLOGY ──
 Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-curated)
   SSOT             = authoritative session record (complete, append-only)
-  INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile, Coinage, narrative) -- derived from SSOT, rebuildable, lossy
+  INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile?, Coinage, narrative) -- derived from SSOT, rebuildable, lossy; MarkerProfile? is conditional on successful Haiku extraction + validation (markers.md absent on extraction error or schema-validation failure)
   INDEX_substitute = substitute channel raw message log -- append-only, primary capture, authoritative (loss non-recoverable)
 
 scan_{Track} : (Store, Trace) → List(Candidate)
@@ -195,18 +199,19 @@ scan_{Track} : (Store, Trace) → List(Candidate)
   scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
 
 degraded_scan: INDEX_semantic = ∅ ⟹ scan'(SSOT, Track, trace)             -- SSOT guarantees semantic recall; cold start falls back to SSOT directly
+  -- partial INDEX (e.g., MarkerProfile? = ∅ while IdentifierTuples / Coinage / narrative present) is a normal mode and does NOT trigger total fallback; scan_salience returns empty for the missing component and ranking degrades gracefully
   -- INDEX_substitute loss non-recoverable (SSOT lacks subagent-channel messages); precondition for Cold-Start invariant (see Verification)
 
 ── SUBSTRATE AGNOSTICISM ──
 The protocol essence (form) consists of FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, and the
 formal blocks ENTROPY EXTRACTION / SALIENCE MARKERS / STORE TOPOLOGY / KNOWN FAILURE MODES.
 The essence makes no reference to specific tools, agents, platforms, schedulers, or storage
-media. Any realization (matter) satisfying the morphism laws and the store topology realizes
-Anamnesis.
+media. Any realization (matter) satisfying the entropy extraction laws, salience semantic
+invariants, and store topology realizes Anamnesis.
 
 form ⊥ matter:
-  form   = ⟨FLOW, MORPHISM, TYPES, laws of extract/detect/scan⟩             -- protocol definition
-  matter = ⟨tool names, file paths, language, scheduler, storage backend⟩   -- realization
+  form   = ⟨FLOW, MORPHISM, TYPES, laws of extract/scan, invariants of detect⟩   -- protocol definition
+  matter = ⟨tool names, file paths, language, scheduler, storage backend⟩         -- realization
 
 TOOL GROUNDING below specifies one such realization (Claude Code substrate); it is
 non-normative with respect to the protocol's epistemic content.
@@ -315,9 +320,9 @@ Heuristic signals for empty intention detection (not hard gates):
 
 | Signal | Detection |
 |--------|-----------|
-| Vague temporal reference | Past-tense hedging about prior sessions or discussions (e.g., "we discussed this before", "there was something about...") |
-| Existence without specification | User asserts prior context exists but cannot name it specifically (e.g., "there was a discussion about...", "I think there was an issue related to...") |
-| Self-referential recall markers | Verbs of remembering paired with uncertainty markers (e.g., "I remember seeing...", "I vaguely recall...", "somewhere we talked about...") |
+| Vague temporal reference | Past-tense hedging about prior sessions or discussions without an exact pointer |
+| Existence without specification | User asserts prior context exists but cannot name it specifically |
+| Self-referential recall markers | Verbs of remembering paired with uncertainty markers |
 | Failed self-recall | User attempts to reference prior context but trails off, hedges, or uses approximation language |
 | Cognitive effort signals | User pauses mid-reference, self-corrects, or expresses frustration at not finding a prior discussion |
 
@@ -353,7 +358,7 @@ Detect empty intention and extract contextual trace. This phase is **silent** �
 4. If `not-empty_intention(V)`: present finding per Rule 16 before proceeding (Anamnesis not activated)
 5. If `empty_intention(V)`: record V with extracted trace — proceed to Phase 1
 
-**Scan scope**: Bound text, conversation context, session history. Does NOT modify files or call external services.
+**Scan scope**: Read-only over bound text, conversation context, and session history.
 
 ### Phase 1: Track-Dispatched Scan + Rank
 
@@ -378,7 +383,7 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
 
 4. If `|C[]| = 0`: NullMatch pathway. Inform user what was searched and not found. Before declaring NullMatch, attempt at least one Socratic probe enrichment (Rule 17). After enrichment attempts exhausted: surface the search scope summary and the accumulated recall trace (keywords, temporal signals, user hints from probing), then offer Aitesis handoff — the recall INDEX (hypomnesis/) may lack the entry (lifecycle gap: SessionEnd did not fire; or pre-store: session predates hypomnesis implementation), but the SSOT (session JSONL) may still contain the information. The accumulated trace from Anamnesis probing becomes context seed for Aitesis to search JSONL directly via session ID.
 
-**Scope restriction**: Read-only investigation only (Read, Grep, Glob). No file modifications.
+**Scope restriction**: Investigation uses Read, Grep, Glob exclusively.
 
 ### Phase 2: Narrative Recognition (Constitution)
 
@@ -389,7 +394,7 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
 **Narrative presentation format**:
 
 Present the candidate as narrative text — the discussion's story, not just its result:
-- **When/Where**: Temporal and spatial context — when the discussion happened (with temporal distance, e.g., "3 days ago" or "2 weeks ago"), which session or document. Use short session reference in narrative for readability.
+- **When/Where**: Temporal and spatial context — when the discussion happened, expressed as temporal distance from the current session, plus which session or document. Use short session reference in narrative for readability.
 - **Source**: Provenance of the stored context — whether it was user-crystallized (via /crystallize) or auto-generated (SessionEnd hook narrative)
 - **Origin**: What prompted the discussion — the question or situation that started it
 - **Direction**: How the discussion developed — what path was taken, what was explored
@@ -462,9 +467,9 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 6. **Track-internal ranking strategy**: Ranking composes track-appropriate signals — entropy track: literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery. Single-signal scans have structural blind spots regardless of track.
 
-7. **Adaptive ambiguity handling**: When trace ambiguity is high (0-1 specific signals), present hypomnesis store overview or consider /clarify composition before targeted scanning. Do not scan blindly on vague expressions — orient the user first.
+7. **Adaptive ambiguity handling**: When trace ambiguity is high (0-1 specific signals), orient the user first — present hypomnesis store overview or consider /clarify composition before targeted scanning.
 
-8. **One candidate per cycle**: Present one highest-priority candidate per Phase 2 cycle; do not bundle multiple candidates.
+8. **One candidate per cycle**: Present one highest-priority candidate per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single identity decision.
 
 9. **Recognition respected**: User's recognition or rejection is final for that candidate in the current session.
 
@@ -476,20 +481,20 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 13. **Cross-protocol awareness**: Defer to Aitesis when user needs new information (no empty intention); defer to /clarify when expression itself is ambiguous (expression gap ≠ recall gap). Compose `/recollect * /inquire` when recognized context needs enrichment. On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — lifecycle gap / pre-store, missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis; INDEX may lack entries (lifecycle gaps or pre-store sessions) while SSOT retains the information.
 
-14. **Context-Question Separation**: Present all narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding narrative in the Constitution interaction = protocol violation.
+14. **Context-Question Separation**: Present all narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications.
 
 15. **Convergence evidence**: Present transformation trace before declaring recall_complete.
 
 16. **Activation surfacing**: If Phase 0 determines no empty intention (e.g., user provides a specific reference), present the finding before proceeding without Anamnesis.
 
-17. **No premature NullMatch**: At least one Socratic probe enrichment must precede NullMatch declaration. First scan returning zero → probe → enriched re-scan → NullMatch only if still empty.
+17. **Probe-first NullMatch**: At least one Socratic probe enrichment precedes any NullMatch declaration. First scan returning zero → probe → enriched re-scan → NullMatch declaration if still empty.
 
-18. **No skipped Qc**: Phase 2 Constitution interaction is mandatory even with single high-confidence candidate. Synthesis of identification is constitutive — cannot auto-resolve via confidence score. High confidence justifies Light intensity, not constitution elision.
+18. **Mandatory Qc**: Phase 2 Constitution interaction runs for every cycle, including single high-confidence candidates. Synthesis of identification is constitutive; confidence score governs intensity (Light/Medium/Heavy), not whether the gate runs.
 
-19. **No asserted recognition**: AI presents; user constitutes recognition. Asserting "this must be what you want" = protocol violation.
+19. **AI presents, user constitutes**: AI presents candidates as recognition options; the user's recognition response constitutes the identity match — presentation and constitution are separate acts.
 
-20. **No merged probe+recognition**: Socratic probing (Qs) and recognition (Qc) are separate Constitution interactions — the probe deepens recall context, Qc verifies identity. Combining them = protocol violation.
+20. **Separate Qs and Qc**: Socratic probing (Qs) and recognition (Qc) run as two distinct Constitution interactions — Qs deepens recall context first, Qc verifies identity second.
 
 21. **Cross-LOOP narrative persistence**: Narrative format and adjacent vector enrichment persist across LOOP iterations; subsequent attempts reference prior candidates and explain the differential.
 
-22. **Substrate non-coupling**: Protocol essence (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, five formal blocks) must not name specific tools, agents, platforms, or storage media. Realization bindings belong exclusively to TOOL GROUNDING (semantic autonomy at the realization boundary).
+22. **Substrate non-coupling**: Protocol essence (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, five formal blocks) names epistemic operations only — realization bindings (tool names, file paths, storage media) belong exclusively to TOOL GROUNDING (semantic autonomy at the realization boundary).
