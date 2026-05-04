@@ -1,17 +1,19 @@
 name: Claude Style Audit
 
 on:
+  # pull_request trigger disabled to extend Stage 2 dogfooding via manual /style-audit
+  # use; re-enable by restoring the trigger block (types + paths) below when accumulated
+  # use evidence demonstrates findings carry signal beyond N=1 contributor noise.
+  #
+  # pull_request:
+  #   types: [opened, synchronize, ready_for_review]
+  #   # NOTE: this list MUST stay in lockstep with the regex in step `Collect in-scope changed files`.
+  #   paths:
+  #     - '*/skills/*/SKILL.md'
+  #     - '*/agents/*.md'
+  #     - 'epistemic-cooperative/styles/*.md'
+  #     - '.claude/skills/*/SKILL.md'
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize, ready_for_review]
-    # NOTE: this list MUST stay in lockstep with the regex in step `Collect in-scope changed files`.
-    # The verify static check `workflow-paths-sync` covers `claude-epistemic-review.yml`; this workflow
-    # is currently outside that check's scope.
-    paths:
-      - '*/skills/*/SKILL.md'
-      - '*/agents/*.md'
-      - 'epistemic-cooperative/styles/*.md'
-      - '.claude/skills/*/SKILL.md'
 
 jobs:
   style-audit:
