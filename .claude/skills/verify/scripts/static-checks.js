@@ -2490,19 +2490,38 @@ function checkAgentsSymlinksSync() {
 // ============================================================
 // Check 19: Workflow Paths Sync
 // ============================================================
-// Verifies .github/workflows/claude-epistemic-review.yml `paths` includes
-// every protocol plugin directory. Prevents new protocols from silently
-// missing the multi-perspective epistemic review trigger (Issue #258 pattern:
-// anamnesis + periagoge omitted at workflow inception). Utility plugins
-// (epistemic-cooperative) are intentionally out of scope.
+// Verifies that PR-triggered Claude-judge workflows declare the right `paths:`
+// triggers so new content is not silently missed.
 //
-// KNOWN EXCLUSION: .github/workflows/claude-style-audit.yml is NOT validated
-// by this check. Its `paths:` trigger and inline grep regex constitute a
-// separate scope set (LLM-facing prose: SKILL.md, agents, output-styles)
-// that does not align with protocol-plugin enumeration. Drift between its
-// `paths:` and inline regex is currently surfaced via in-file comment only.
-// Tracked as a follow-up: extend this check to cover claude-style-audit.yml.
+// Two workflows are validated:
+//
+// - .github/workflows/claude-epistemic-review.yml: `paths:` must enumerate
+//   every protocol plugin directory (Issue #258 pattern: anamnesis + periagoge
+//   omitted at workflow inception). Utility plugins (epistemic-cooperative)
+//   are intentionally out of scope.
+//
+// - .github/workflows/claude-style-audit.yml: `paths:` must declare the four
+//   LLM-facing prose scopes, AND the inline grep regex in `Collect in-scope
+//   changed files` must mirror those globs (drift prevention between the
+//   trigger filter and the runtime filter).
 function checkWorkflowPathsSync() {
+  checkEpistemicReviewPaths();
+  checkStyleAuditPaths();
+}
+
+function parsePathsBlock(content) {
+  const pathsBlockMatch = content.match(/^\s+paths:\s*\n((?:\s+-\s+'[^']+'\s*\n)+)/m);
+  if (!pathsBlockMatch) return null;
+  const declared = new Set();
+  const pathLineRe = /-\s+'([^']+)'/g;
+  let m;
+  while ((m = pathLineRe.exec(pathsBlockMatch[1])) !== null) {
+    declared.add(m[1]);
+  }
+  return declared;
+}
+
+function checkEpistemicReviewPaths() {
   const relPath = '.github/workflows/claude-epistemic-review.yml';
   const workflowFile = path.join(projectRoot, relPath);
 
@@ -2516,21 +2535,14 @@ function checkWorkflowPathsSync() {
   }
 
   const content = fs.readFileSync(workflowFile, 'utf8');
-  const pathsBlockMatch = content.match(/^\s+paths:\s*\n((?:\s+-\s+'[^']+'\s*\n)+)/m);
-  if (!pathsBlockMatch) {
+  const declaredPaths = parsePathsBlock(content);
+  if (!declaredPaths) {
     results.fail.push({
       check: 'workflow-paths-sync',
       file: relPath,
       message: 'on.pull_request.paths block not found or unparseable',
     });
     return;
-  }
-
-  const declaredPaths = new Set();
-  const pathLineRe = /-\s+'([^']+)'/g;
-  let m;
-  while ((m = pathLineRe.exec(pathsBlockMatch[1])) !== null) {
-    declaredPaths.add(m[1]);
   }
 
   const expected = PROTOCOL_FILES.map(p => p.split('/')[0]);
@@ -2550,6 +2562,97 @@ function checkWorkflowPathsSync() {
         message: `Missing protocol path — add "- '${name}/**'" under on.pull_request.paths so ${name} PRs trigger epistemic review`,
       });
     }
+  }
+}
+
+// Canonical scope set for style-audit. Each entry pairs the YAML glob with
+// the regex alternative that must appear in the `Collect in-scope changed
+// files` step's grep -E pattern.
+const STYLE_AUDIT_SCOPE = [
+  {
+    glob: '*/skills/*/SKILL.md',
+    regexFragment: '^[^/]+/skills/[^/]+/SKILL\\.md$',
+  },
+  {
+    glob: '*/agents/*.md',
+    regexFragment: '^[^/]+/agents/[^/]+\\.md$',
+  },
+  {
+    glob: 'epistemic-cooperative/styles/*.md',
+    regexFragment: '^epistemic-cooperative/styles/[^/]+\\.md$',
+  },
+  {
+    glob: '.claude/skills/*/SKILL.md',
+    regexFragment: '^\\.claude/skills/[^/]+/SKILL\\.md$',
+  },
+];
+
+function checkStyleAuditPaths() {
+  const relPath = '.github/workflows/claude-style-audit.yml';
+  const workflowFile = path.join(projectRoot, relPath);
+
+  if (!fs.existsSync(workflowFile)) {
+    results.fail.push({
+      check: 'workflow-paths-sync',
+      file: relPath,
+      message: 'Missing — claude-style-audit.yml not found',
+    });
+    return;
+  }
+
+  const content = fs.readFileSync(workflowFile, 'utf8');
+
+  const declaredPaths = parsePathsBlock(content);
+  if (!declaredPaths) {
+    results.fail.push({
+      check: 'workflow-paths-sync',
+      file: relPath,
+      message: 'on.pull_request.paths block not found or unparseable',
+    });
+    return;
+  }
+
+  const inlineGrepMatch = content.match(/grep -E '\(([^']+)\)'/);
+  if (!inlineGrepMatch) {
+    results.fail.push({
+      check: 'workflow-paths-sync',
+      file: relPath,
+      message: 'Inline grep regex not found in `Collect in-scope changed files` step — required to keep runtime filter in lockstep with paths: trigger',
+    });
+    return;
+  }
+  const regexBody = inlineGrepMatch[1];
+
+  const missingPaths = STYLE_AUDIT_SCOPE
+    .filter(({ glob }) => !declaredPaths.has(glob))
+    .map(({ glob }) => glob);
+
+  const missingRegex = STYLE_AUDIT_SCOPE
+    .filter(({ regexFragment }) => !regexBody.includes(regexFragment))
+    .map(({ regexFragment }) => regexFragment);
+
+  if (missingPaths.length === 0 && missingRegex.length === 0) {
+    results.pass.push({
+      check: 'workflow-paths-sync',
+      file: relPath,
+      message: `All ${STYLE_AUDIT_SCOPE.length} scope patterns mirrored in paths: trigger and inline regex`,
+    });
+    return;
+  }
+
+  for (const glob of missingPaths) {
+    results.fail.push({
+      check: 'workflow-paths-sync',
+      file: relPath,
+      message: `Missing scope pattern in paths: trigger — add "- '${glob}'" so style-audit fires for that scope`,
+    });
+  }
+  for (const fragment of missingRegex) {
+    results.fail.push({
+      check: 'workflow-paths-sync',
+      file: relPath,
+      message: `Inline grep regex missing alternative "${fragment}" — keep the runtime filter in lockstep with the paths: trigger`,
+    });
   }
 }
 
