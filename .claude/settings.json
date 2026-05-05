@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/gh-comments-convergence.mjs",
+            "statusMessage": "Evaluating gh-comments option-set entropy"
+          }
+        ]
+      }
+    ]
+  }
+}
