@@ -41,7 +41,7 @@ Skip when:
 |-------|-----------|---------|-----------|--------|-------------|
 | `/probe` | Prospective (present situation) | Deficit recognition fit review | RECOGNIZE | ProtocolRoute or FitReviewNote | Session text |
 | `/induce` | In-process (instance set) | Abstraction crystallization | INDUCE | CrystallizedAbstraction | Session text |
-| `/steer` | Retrospective (target session) | Cognitive Partnership Move calibration drift | INDUCE extended with writable inscription | UpdatedProjectProfile or NoUpdateNote | Writable rule file (`~/.claude/rules/` or `.claude/rules/`) |
+| `/steer` | Retrospective (target session) | Cognitive Partnership Move calibration drift | INDUCE extended with writable inscription, with routing to operational layer when finding shape mismatches | UpdatedProjectProfile, NoUpdateNote, DiffArtifact, or OperationalLayerRecommendation | Writable rule file (Approve disposition) or session text (other dispositions) |
 
 The skill family coexists by operation and persistence — none replaces the others. Steer is for keeping the project profile current with observed practice; the other skills serve forward-looking or in-conversation needs.
 
@@ -127,15 +127,21 @@ Each cluster verdict belongs to the user — confirmation is constituted by the 
 
 Loop Phase 3 over clusters in evidential-strength order (highest-evidence first). Phase 3 honors the cluster set as enumerated in Phase 2 — no dynamic cluster injection during the loop.
 
-### Phase 4: Tier Resolution — Assemble Diff
+### Phase 4: Tier Resolution — Assemble Diff and Fit-Shape Check
 
 Assemble a profile diff from confirmed cluster implications:
 
 1. For each confirmed cluster, translate the cluster implication into a concrete profile variable change (or calibration result change, when the cluster's implication is structural rather than per-variable)
 2. Resolve cross-cluster conflicts where two or more clusters propose incompatible values for the same variable; when the conflict requires user judgment, surface it in Phase 5 alongside the candidate values
 3. Construct the diff representation: `before` (existing profile) → `after` (proposed profile), variable-by-variable, with provenance citing the confirming cluster(s)
+4. Fit-shape check — evaluate whether the assembled diff fits the project-profile.md structure (six variables + Floor / Bounded zone + calibration result). Mismatch signals:
+   - **Programmatic-trigger material**: the diff's enforcement requires deterministic detection of a specific tool / command / event (e.g., a particular Bash invocation, a specific slash command, a tool result shape) — prose interpretation cannot reliably substitute
+   - **Layer mixing**: the diff compresses universal principle, specific instance, recognition mechanism, and falsification metrics into a single rule-file bullet — the resulting contract is ambiguous between universal rule and concrete operational guidance
+   - **Behavioral enforcement focus**: the diff's load-bearing requirement is *what AI does at runtime*, not *what is visible to user judgment* — per `architectural-principles.md §Epistemic Completeness Boundary`, behavioral enforcement is operational-substrate territory (system prompts, hooks, CI/CD, settings.json), not epistemic substrate
 
-Phase 4 emits no surfacing. The assembled diff becomes the input to Phase 5.
+When any signal fires, set `mismatch_flag` and carry it into Phase 5; the diff itself is still assembled (the user retains override authority — picking Approve forces prose inscription regardless of the recommendation).
+
+Phase 4 emits no surfacing. The assembled diff (with optional mismatch_flag) becomes the input to Phase 5.
 
 ### Phase 5: Circular Return — Final Approve and Write
 
@@ -163,6 +169,14 @@ Backup target: <existing_profile_path>.bak.YYYYMMDD-HHMMSS
 Write target:  <existing_profile_path>
 ```
 
+When `mismatch_flag` is set (Phase 4 fit-shape check fired), surface the mismatch signal as text output between the diff presentation and the approval interaction:
+
+```
+Fit-shape mismatch detected: <signal type> — <one-sentence explanation>
+Recommended operational layer: <hook event | system prompt | CI/CD | settings.json | other>
+Realization template (if RouteToOperationalLayer is selected): <concrete trigger + behavior outline>
+```
+
 Then present the final approval Constitution interaction:
 
 ```
@@ -173,6 +187,7 @@ Options:
 2. Modify — adjust specific variables before write (specify which and how)
 3. Reject — discard the diff; the existing profile remains unchanged; emit NoUpdateNote
 4. Defer — emit the diff as a session-text artifact without writing; the user can apply manually later
+5. RouteToOperationalLayer — emit OperationalLayerRecommendation artifact (mismatch signal + recommended layer + realization template); rule file unchanged. Surface this option only when Phase 4 fit-shape check fired.
 ```
 
 After response:
@@ -181,6 +196,7 @@ After response:
 - **Modify** — accept the user's variable-level adjustments, regenerate the diff, re-present Phase 5 Constitution interaction
 - **Reject** — emit NoUpdateNote session-text artifact recording the reviewed clusters and dismissed diff; existing file unchanged
 - **Defer** — emit the diff as a paste-ready markdown block AND keep the existing profile file unchanged for now; the user retains the audit work for manual application later (distinct from Reject, which discards the diff entirely)
+- **RouteToOperationalLayer** — emit OperationalLayerRecommendation session-text artifact recording: (i) the fit-shape mismatch signal that triggered the routing, (ii) the recommended operational layer per finding shape (hooks, system prompt, CI/CD, settings.json), (iii) a realization template (concrete trigger + behavior outline + scope) for downstream implementation. Existing rule file unchanged. Steer's role is to recognize the routing and emit the realization template; implementation belongs to a downstream task using the appropriate substrate tooling
 
 After integration, log the disposition. The rule file write is the Circular Return — the inscribed profile becomes the new prejudgment baseline for the next `/steer` invocation, and meanwhile shapes Cognitive Partnership Move defaults across all subsequent sessions.
 
@@ -199,11 +215,13 @@ Steer(scope) → Phase0(scope, user_confirm) →
           Reorient(cluster, implication'): record_modified(cluster, implication') → next
           Stop: break loop
       Assemble(confirmed_clusters, P_existing) → diff →
-      present(diff, backup_path) → Qc(approve) → Stop → A →
+      fit_shape_check(diff) → mismatch_flag →
+      present(diff, backup_path, mismatch_flag) → Qc(approve) → Stop → A →
         Approve: backup(P_existing) → write(P_proposed, layer) → emit(UpdatedProjectProfile)
         Modify(adjustments): regenerate(diff, adjustments) → re-present Phase5
         Reject: emit(NoUpdateNote) → no write
         Defer: emit(DiffArtifact) → no write
+        RouteToOperationalLayer: emit(OperationalLayerRecommendation) → no write
       converge
 
 ── MORPHISM ──
@@ -214,9 +232,11 @@ SessionCalibrationMoves
   → classify(moves, drift_taxonomy)     -- trial inscription complete
   → present_per_cluster(cluster, V)     -- per-cluster validation
   → assemble_diff(confirmed)            -- tier resolution
-  → present_diff(approve)               -- final Constitution interaction
-  → write(profile, layer, backup)       -- circular return (inscription to rule layer)
-  → UpdatedProjectProfile
+  → fit_shape_check(diff)               -- operational-layer material detection
+  → present_diff(approve, mismatch_flag) -- final Constitution interaction
+  → write(profile, layer, backup) | emit(OperationalLayerRecommendation)
+                                        -- circular return (inscription to rule layer) OR routing
+  → UpdatedProjectProfile | OperationalLayerRecommendation
 requires: calibration_drift_opaque(scope) ∧ scope_resolved(user)  -- activation precondition + Phase 0 confirmation
 deficit:  CalibrationDriftOpaque             -- activation precondition (user-invoked Layer 1)
 preserves: SessionHistory                    -- read-only audit; SessionCalibrationMoves are derived
@@ -247,10 +267,17 @@ Diff              = { before: ProjectProfile, after: ProjectProfile,
                       provenance: Map(ProfileVariable, List(DriftCluster)),
                       conflicts: List(VariableConflict) }
 VariableConflict  = { variable: ProfileVariable, candidates: List(ProfileValue) }
-A                 = ApprovalDisposition ∈ {Approve, Modify(adjustments), Reject, Defer}
+A                 = ApprovalDisposition ∈ {Approve, Modify(adjustments), Reject, Defer, RouteToOperationalLayer}
+MismatchSignal    ∈ {ProgrammaticTrigger, LayerMixing, BehavioralEnforcement} — Phase 4 fit-shape check output; absent when diff fits project-profile.md structure
+RecommendedLayer  ∈ {Hook(HookEvent), SystemPrompt, CI_CD, Settings, Other(String)}
+HookEvent         ∈ {SessionStart, SessionEnd, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SubagentStop, PreCompact, Notification}
 UpdatedProjectProfile = session text { layer, diff, backup_path, write_path }
 NoUpdateNote      = session text { reviewed_clusters, dismissed_diff }
 DiffArtifact      = session text { diff_markdown, suggested_apply_path }
+OperationalLayerRecommendation = session text { mismatch_signal: MismatchSignal,
+                                                recommended_layer: RecommendedLayer,
+                                                realization_template: String,
+                                                trial_scope: String }
 Phase             ∈ {0, 1, 2, 3, 4, 5}
 
 ── SCOPE-BINDING ──
@@ -273,12 +300,14 @@ Phase 2: Scope → Read(session_jsonl) → extract(M[]) → classify(M[]) → cl
 Phase 3: clusters → loop:
            present(cluster, evidence) → Qc(cluster) → Stop → V → integrate    -- per-cluster Constitution interaction [Tool]
            V = Stop → break loop
-Phase 4: confirmed_clusters → assemble_diff(P_existing) → diff                -- tier resolution (sense)
-Phase 5: diff → present(diff, backup_path) → Qc(approve) → Stop → A           -- final Constitution interaction [Tool]
+Phase 4: confirmed_clusters → assemble_diff(P_existing) → diff →
+           fit_shape_check(diff) → mismatch_flag                                -- tier resolution + fit-shape detection (sense)
+Phase 5: diff, mismatch_flag → present(diff, backup_path, mismatch_flag) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
            A = Approve → Write(backup) → Write(P_proposed) → emit(UpdatedProjectProfile)
            A = Modify → regenerate(diff) → Phase 5 re-entry
            A = Reject → emit(NoUpdateNote)
            A = Defer → emit(DiffArtifact)
+           A = RouteToOperationalLayer → emit(OperationalLayerRecommendation)
 
 ── LOOP ──
 Phase 3 → Phase 4 → Phase 5 →
@@ -286,14 +315,15 @@ Phase 3 → Phase 4 → Phase 5 →
   Modify: regenerate diff; Phase 5 re-entry
   Reject: no write; converge with NoUpdateNote
   Defer: no write; converge with DiffArtifact
+  RouteToOperationalLayer: no write; converge with OperationalLayerRecommendation
 Phase 5 Modify re-entry max 3 iterations. Exhausted: surface assembled diff as DiffArtifact (defer) → converge.
-Convergence evidence: per disposition, emit one of {UpdatedProjectProfile, NoUpdateNote, DiffArtifact}.
+Convergence evidence: per disposition, emit one of {UpdatedProjectProfile, NoUpdateNote, DiffArtifact, OperationalLayerRecommendation}.
 
 ── CONVERGENCE ──
 recognized = all clusters processed (each cluster has Confirm/Dismiss/Reorient verdict OR loop reached Stop)
-approved   = A ∈ {Approve, Reject, Defer}
+approved   = A ∈ {Approve, Reject, Defer, RouteToOperationalLayer}
 written    = A = Approve ∧ backup_created ∧ write_succeeded
-session_text(steer) ∋ {UpdatedProjectProfile | NoUpdateNote | DiffArtifact}
+session_text(steer) ∋ {UpdatedProjectProfile | NoUpdateNote | DiffArtifact | OperationalLayerRecommendation}
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -308,18 +338,21 @@ Phase 3 present           (extension)    → TextPresent+Proceed (cluster eviden
 Phase 3 Qc                (constitution) → present (per-cluster verdict; constitutive user verdict per cluster; Active-authority required at every cluster)
 Phase 3 integrate         (track)        → Internal Λ update (cluster verdict recording)
 Phase 4 assemble_diff     (sense)        → Internal analysis (variable-level diff construction)
-Phase 5 present           (extension)    → TextPresent+Proceed (diff + backup path pre-gate)
-Phase 5 Qc                (constitution) → present (final approval; writable side effect with cross-session persistence; user authority required)
-Phase 5 backup            (transform)    → Write (timestamped backup file)
-Phase 5 Write             (transform)    → Write (proposed profile to layer path)
-Phase 5 emit              (extension)    → TextPresent+Proceed (UpdatedProjectProfile or NoUpdateNote or DiffArtifact)
+Phase 4 fit_shape_check   (sense)        → Internal analysis (operational-layer material detection — programmatic-trigger / layer-mixing / behavioral-enforcement signals)
+Phase 5 present           (extension)    → TextPresent+Proceed (diff + backup path + mismatch_flag pre-gate)
+Phase 5 Qc                (constitution) → present (final approval; writable side effect with cross-session persistence; user authority required; option set extends to RouteToOperationalLayer when mismatch_flag is set)
+Phase 5 backup            (transform)    → Write (timestamped backup file; Approve disposition only)
+Phase 5 Write             (transform)    → Write (proposed profile to layer path; Approve disposition only)
+Phase 5 emit              (extension)    → TextPresent+Proceed (UpdatedProjectProfile or NoUpdateNote or DiffArtifact or OperationalLayerRecommendation, per disposition)
 converge                  (extension)    → TextPresent+Proceed (convergence evidence trace)
 
 ── MODE STATE ──
 Λ = { phase: Phase, scope: Scope, P_existing: ProjectProfile,
       moves: List(CalibrationMove), clusters: List(Cluster),
       cluster_verdicts: List<(Cluster, V)>,
-      diff: Optional(Diff), modify_iterations: Nat,
+      diff: Optional(Diff), mismatch_flag: Optional(MismatchSignal),
+      recommended_layer: Optional(RecommendedLayer),
+      modify_iterations: Nat,
       backup_path: Optional(Path), write_path: Optional(Path),
       disposition: Optional(A), active: Bool, cause_tag: String }
 
@@ -356,8 +389,9 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 12. **Periagoge family lineage** — Steer extends `/induce`'s morphism with a writable rule inscription step. The dialectical triangulation core is preserved (Phase 3 cluster verdicts and Phase 5 final approval realize the same Confirm / Dismiss / Reorient pattern as `/induce`'s widen / narrow / fuse / reorient / dismiss moves, narrowed to the audit-and-inscribe operation), but `/steer` adds a write step that crosses the `preserves`/`mutates` boundary that `/induce` itself respects. The lineage is operational extension on the output axis, not a type-narrowing specialization.
 13. **Coexistence with /probe** — Steer does not replace prospective fit recognition (`/probe`). The pair coexists by time axis and persistence layer: prospective fit recognition (session text, no inscription) versus retrospective calibration with writable rule inscription.
 14. **Out-of-scope** — Past protocol contract integrity audit lies outside Steer's territory. Prospective deficit fit recognition is `/probe` territory. In-conversation abstraction crystallization without rule inscription is `/induce` territory. Steer's scope is limited to project-profile rule layer recalibration based on observed Cognitive Partnership Move calibration.
-15. **Stage 2 evidence-collection modality** — This skill is released as a Stage 2 evidence-collection instrument; architectural inscription (graph.json placement, advisory edges, formal lineage to /induce) is deferred until variation-stable retention evidence accumulates. Every emitted UpdatedProjectProfile, NoUpdateNote, and DiffArtifact carries an N=1 dogfooding caveat acknowledging the single-user evidence base.
+15. **Stage 2 evidence-collection modality** — This skill is released as a Stage 2 evidence-collection instrument; architectural inscription (graph.json placement, advisory edges, formal lineage to /induce) is deferred until variation-stable retention evidence accumulates. Every emitted UpdatedProjectProfile, NoUpdateNote, DiffArtifact, and OperationalLayerRecommendation carries an N=1 dogfooding caveat acknowledging the single-user evidence base.
 16. **Vocabulary discipline** — Output uses positive framing: "drift", "calibration", "fit", "recalibration", "induce", "steering". Output frames per-cluster verdicts as recognition acts and the final approval as a writable inscription. The skill describes evidence and diffs; verdicts and approvals belong to the user.
+17. **Routing to operational layer when finding shape mismatches** — When the Phase 4 fit-shape check detects that the assembled diff requires programmatic-trigger enforcement, mixes universal principle with specific instance and recognition mechanism, or has behavioral enforcement (rather than visibility) as its load-bearing requirement, surface RouteToOperationalLayer as a Phase 5 disposition. The operational layer (hooks, system prompts, CI/CD, settings.json) realizes Standing-authority delegation per `architectural-principles.md §Epistemic Completeness Boundary`. Steer's role is to recognize the routing and emit a realization template (concrete trigger + behavior outline + scope); implementation belongs to a downstream task using the appropriate substrate tooling. The user retains override authority — selecting Approve forces prose inscription despite the routing recommendation.
 
 ## UX Safeguards
 
@@ -368,6 +402,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 - **Diff visibility before final approve** — The Phase 5 Constitution interaction is preceded by the full before/after diff with provenance citing confirming clusters. The user reads what will be written before approving (Rule 9 + Rule 10 reinforcement).
 - **Self-referential N=1 caveat** — Every emitted artifact (UpdatedProjectProfile, NoUpdateNote, DiffArtifact) carries the caveat acknowledging the single-user evidence base. The skill itself is a Stage 2 evidence-collection instrument, and this caveat is part of how that modality is honored (Rule 15 reinforcement).
 - **Defer disposition as escape hatch** — When the user is unsure about writing, the Defer option emits the diff as a session-text artifact for manual application. This honors the "writable side effect needs explicit approval" principle while preserving the audit work (Three-Tier Termination — `user_withdraw`-class disposition with partial state preservation).
+- **Operational-layer routing visibility** — When Phase 4 fit-shape check fires, Phase 5 surfaces the mismatch signal and recommended layer alongside the standard approval options. The user retains override authority: Approve forces prose inscription despite the routing recommendation, RouteToOperationalLayer accepts the recommendation and emits a realization template. The diff itself is unchanged across the two paths — routing is about *where* the inscription lives, not *what* it says (Rule 17 reinforcement).
 
 ## Trigger Signals
 
@@ -395,4 +430,5 @@ Skip Steer when:
 | Phase 5 user selects Approve | Write executed, emit UpdatedProjectProfile, converge |
 | Phase 5 user selects Reject | No write, emit NoUpdateNote, converge |
 | Phase 5 user selects Defer | No write, emit DiffArtifact, converge |
+| Phase 5 user selects RouteToOperationalLayer (only available when fit-shape mismatch detected) | No write, emit OperationalLayerRecommendation, converge |
 | Phase 5 Modify re-entry exhausted (3 max) | Surface assembled diff as DiffArtifact (defer-equivalent) → converge |
