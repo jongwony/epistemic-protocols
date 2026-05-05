@@ -26,12 +26,15 @@ try {
 
 if (payload.tool_name && payload.tool_name !== 'Bash') process.exit(0);
 
-const cmd = payload.tool_input?.command ?? '';
+const cmd = payload.tool_input?.command ?? payload.command ?? '';
 
 const stdoutRaw =
   typeof payload.tool_response === 'string'
     ? payload.tool_response
-    : payload.tool_response?.stdout ?? '';
+    : payload.tool_response?.stdout ??
+      payload.output?.stdout ??
+      payload.stdout ??
+      '';
 
 let parsed;
 try {
