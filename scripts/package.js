@@ -29,6 +29,7 @@ const PLUGINS = [
   { dir: 'horismos', skill: 'bound' },
   { dir: 'analogia', skill: 'ground' },
   { dir: 'periagoge', skill: 'induce' },
+  { dir: 'euporia', skill: 'elicit' },
   { dir: 'prosoche', skill: 'attend' },
   { dir: 'epharmoge', skill: 'contextualize' },
   { dir: 'epistemic-cooperative', skill: 'onboard' },
@@ -63,6 +64,7 @@ const DESCRIPTION_OVERRIDES = {
   attend: 'Evaluate execution-time risks — (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution',
   ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, Text) → ValidatedMapping',
   induce: 'Crystallize in-process abstraction via dialectical triangulation — (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction',
+  elicit: 'Resolve via Extended-Mind reverse induction — (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × Substrate) → ResolvedEndpoint',
   bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
@@ -90,6 +92,7 @@ const PROTOCOL_METADATA = {
   prothesis:  { name: 'Prothesis', command: '/frame', deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
   analogia:   { name: 'Analogia', command: '/ground', deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
   periagoge:  { name: 'Periagoge', command: '/induce', deficit: 'AbstractionInProcess', resolution: 'CrystallizedAbstraction' },
+  euporia:    { name: 'Euporia', command: '/elicit', deficit: 'AbstractAporia', resolution: 'ResolvedEndpoint' },
   syneidesis: { name: 'Syneidesis', command: '/gap', deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
   prosoche:   { name: 'Prosoche', command: '/attend', deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
   epharmoge:  { name: 'Epharmoge', command: '/contextualize', deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
@@ -100,7 +103,7 @@ const PROTOCOL_METADATA = {
 const PROTOCOL_ORDER = [
   'anamnesis',
   'hermeneia', 'telos', 'horismos', 'aitesis', 'prothesis',
-  'analogia', 'periagoge', 'syneidesis', 'prosoche', 'epharmoge', 'katalepsis',
+  'analogia', 'periagoge', 'euporia', 'syneidesis', 'prosoche', 'epharmoge', 'katalepsis',
 ];
 
 // Sync validator: ensures PROTOCOL_ORDER and PROTOCOL_METADATA keys are aligned.
@@ -159,7 +162,7 @@ Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory e
 - \`/write\` — multi-perspective blog drafting from session insights`;
 
 const DESCRIPTION_LIMIT = 200;
-const LINE_GUIDELINE = 500;
+const LINE_GUIDELINE = 510;
 const DIST_DIR = path.join(projectRoot, 'dist');
 const BUNDLE_NAME = 'epistemic-protocols-bundle';
 

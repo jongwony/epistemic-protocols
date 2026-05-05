@@ -103,6 +103,7 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
+| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
@@ -157,7 +158,7 @@ When Epharmoge is active:
 - Epharmoge completes before proceeding to next task
 - Loaded instructions resume after applicability is verified or dismissed
 
-**Protocol precedence**: Activation order position 10/10 (graph.json is authoritative source for information flow). Concern cluster: Verification.
+**Protocol precedence**: Activation order position 11/11 (graph.json is authoritative source for information flow). Concern cluster: Verification.
 
 **Advisory relationships**: Receives from Prosoche (advisory: execution-time attention provides post-execution applicability context); Aitesis (suppression: pre+post stacking prevention). Katalepsis is structurally last.
 

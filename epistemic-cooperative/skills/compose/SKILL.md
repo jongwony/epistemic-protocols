@@ -48,6 +48,7 @@ Present the interpreted chain with canonical protocol names, slash commands, and
 | Prothesis | `/frame` | `frame` |
 | Analogia | `/ground` | `ground` |
 | Periagoge | `/induce` | `induce` |
+| Euporia | `/elicit` | `elicit` |
 | Syneidesis | `/gap` | `gap` |
 | Prosoche | `/attend` | `attend` |
 | Epharmoge | `/contextualize` | `contextualize` |

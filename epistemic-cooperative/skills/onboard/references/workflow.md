@@ -4,7 +4,7 @@ Protocols grouped by primary concern. Clusters are non-directional — they repr
 
 | Cluster | Protocols | Question |
 |---------|-----------|----------|
-| Planning | /clarify, /goal, /inquire | Is our direction clear? |
+| Planning | /clarify, /goal, /inquire, /elicit | Is our direction clear? |
 | Analysis | /frame, /ground, /induce | Are we looking at this right? |
 | Decision | /gap | Are we missing something? |
 | Execution | /attend | Are we ready and doing this safely? |

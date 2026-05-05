@@ -38,6 +38,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Hermeneia | `/clarify` | What you said differs from what you meant |
 | Telos | `/goal` | Goal is vague — no success criteria or scope |
 | Aitesis | `/inquire` | Context is insufficient for confident execution |
+| Euporia | `/elicit` | Intent articulated but decision coordinates implicit in externalized substrate — reverse-trace to surface |
 
 ### Analysis
 

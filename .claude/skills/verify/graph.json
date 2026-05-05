@@ -2,7 +2,7 @@
   "version": "2.2.0",
   "nodes": [
     "hermeneia", "telos", "horismos", "aitesis", "analogia",
-    "periagoge", "prothesis", "syneidesis", "prosoche", "epharmoge",
+    "periagoge", "euporia", "prothesis", "syneidesis", "prosoche", "epharmoge",
     "katalepsis", "anamnesis"
   ],
   "edge_types": {
@@ -50,6 +50,11 @@
     { "source": "anamnesis", "target": "analogia", "type": "advisory", "satisfies": "과거 도메인 매핑이 매핑 후보를 제공" },
     { "source": "anamnesis", "target": "epharmoge", "type": "advisory", "satisfies": "과거 적용-맥락 불일치 이력이 현재 불일치 감지를 강화" },
     { "source": "hermeneia", "target": "periagoge", "type": "advisory", "satisfies": "의도 명확화가 추상화 형성의 시드를 좁힘 (narrowing, precondition 아님)" },
-    { "source": "anamnesis", "target": "periagoge", "type": "advisory", "satisfies": "인접 추상화 재호출이 Fuse 후보를 제공" }
+    { "source": "anamnesis", "target": "periagoge", "type": "advisory", "satisfies": "인접 추상화 재호출이 Fuse 후보를 제공" },
+    { "source": "euporia", "target": "horismos", "type": "advisory", "satisfies": "역추적된 좌표가 후속 경계 정의 컨텍스트를 제공" },
+    { "source": "euporia", "target": "aitesis", "type": "advisory", "satisfies": "역추적된 좌표가 컨텍스트 추론 범위를 좁힘" },
+    { "source": "euporia", "target": "periagoge", "type": "advisory", "satisfies": "해소된 endpoint가 downstream 추상화 형성의 시드를 좁힘 (categorical dual 양립)" },
+    { "source": "anamnesis", "target": "euporia", "type": "advisory", "satisfies": "회상된 세션 이력이 substrate 스캔을 보강" },
+    { "source": "horismos", "target": "euporia", "type": "advisory", "satisfies": "경계 맵이 substrate scope를 좁힘" }
   ]
 }
