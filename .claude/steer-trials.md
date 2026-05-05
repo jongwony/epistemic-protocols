@@ -7,12 +7,12 @@ Project-local inventory of trials inscribed by `/steer` in this project. Lazy-lo
 Each entry records:
 - **Date** — ISO 8601 date of disposition
 - **Disposition** — `Approve` (rule-file write) or `RouteToOperationalLayer` (operational-layer realization)
-- **Mismatch signals** (RouteToOperationalLayer only) — set of `ProgrammaticTrigger` / `LayerMixing` / `BehavioralEnforcement` (compound mismatches are common)
+- **Mismatch signals** — set of `ProgrammaticTrigger` / `LayerMixing` / `BehavioralEnforcement` (compound mismatches are common). Empty set for Approve; non-empty for RouteToOperationalLayer.
 - **Recommended layer** (RouteToOperationalLayer only) — `Hook(event)` / `SystemPrompt` / `CI_CD` / `Settings` / `Other`
 - **Realization** — concrete file paths or rule-layer locations affected
 - **Origin context** — brief one-line summary of the originating audit (cluster type, evidence count, motivating session)
 - **Falsification** — condition(s) that trigger re-evaluation
-- **Re-evaluation** — schedule or trigger for next `/steer` re-run
+- **Reevaluation** — schedule or trigger for next `/steer` re-run
 - **Status** — `active` / `completed` / `retracted`
 
 ## Active Trials
@@ -33,7 +33,7 @@ Each entry records:
   - post-relay user correction rate > 20% (AI's convergence assessment unreliable)
   - relay-applied finding revert within same PR cycle > 0 (AI applied what shouldn't have been applied)
   - continued Constitution gate surfacing > 50% of invocations post-installation (rule not being applied — drift)
-- **Re-evaluation**: `/steer` re-run at the earlier of {1-2 months post-installation, first falsification trigger}
+- **Reevaluation**: `/steer` re-run at the earlier of {1-2 months post-installation, first falsification trigger}
 - **Status**: active
 
 ## Completed / Retracted Trials
