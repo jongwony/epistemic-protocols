@@ -162,6 +162,8 @@ Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory e
 - \`/write\` — multi-perspective blog drafting from session insights`;
 
 const DESCRIPTION_LIMIT = 200;
+// 510 absorbs anamnesis Skill.md at 501 lines (after the +1 Euporia distinction row);
+// existing 525/581/591 lines in aitesis/prothesis/prosoche were already over the prior 500 baseline.
 const LINE_GUIDELINE = 510;
 const DIST_DIR = path.join(projectRoot, 'dist');
 const BUNDLE_NAME = 'epistemic-protocols-bundle';
