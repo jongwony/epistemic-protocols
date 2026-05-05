@@ -139,9 +139,9 @@ Assemble a profile diff from confirmed cluster implications:
    - **Layer mixing**: the diff compresses universal principle, specific instance, recognition mechanism, and falsification metrics into a single rule-file bullet — the resulting contract is ambiguous between universal rule and concrete operational guidance
    - **Behavioral enforcement focus**: the diff's load-bearing requirement is *what AI does at runtime*, not *what is visible to user judgment* — per `architectural-principles.md §Epistemic Completeness Boundary`, behavioral enforcement is operational-substrate territory (system prompts, hooks, CI/CD, settings.json), not epistemic substrate
 
-When any signal fires, set `mismatch_flag` and carry it into Phase 5; the diff itself is still assembled (the user retains override authority — picking Approve forces prose inscription regardless of the recommendation).
+When one or more signals fire, accumulate them into `mismatch_signals` (Set(MismatchSignal)) and carry it into Phase 5; the diff itself is still assembled (the user retains override authority — picking Approve forces prose inscription regardless of the recommendation).
 
-Phase 4 emits no surfacing. The assembled diff (with optional mismatch_flag) becomes the input to Phase 5.
+Phase 4 emits no surfacing. The assembled diff (with `mismatch_signals` set, possibly empty) becomes the input to Phase 5.
 
 ### Phase 5: Circular Return — Final Approve and Write
 
@@ -169,10 +169,10 @@ Backup target: <existing_profile_path>.bak.YYYYMMDD-HHMMSS
 Write target:  <existing_profile_path>
 ```
 
-When `mismatch_flag` is set (Phase 4 fit-shape check fired), surface the mismatch signal as text output between the diff presentation and the approval interaction:
+When `mismatch_signals` is non-empty (Phase 4 fit-shape check fired one or more signals), surface them as text output between the diff presentation and the approval interaction:
 
 ```
-Fit-shape mismatch detected: <signal type> — <one-sentence explanation>
+Fit-shape mismatches detected: <signal_a, signal_b, ...> — <one-sentence explanation per signal>
 Recommended operational layer: <hook event | system prompt | CI/CD | settings.json | other>
 Realization template (if RouteToOperationalLayer is selected): <concrete trigger + behavior outline>
 ```
@@ -215,8 +215,8 @@ Steer(scope) → Phase0(scope, user_confirm) →
           Reorient(cluster, implication'): record_modified(cluster, implication') → next
           Stop: break loop
       Assemble(confirmed_clusters, P_existing) → diff →
-      fit_shape_check(diff) → mismatch_flag →
-      present(diff, backup_path, mismatch_flag) → Qc(approve) → Stop → A →
+      fit_shape_check(diff) → mismatch_signals →
+      present(diff, backup_path, mismatch_signals) → Qc(approve) → Stop → A →
         Approve: backup(P_existing) → write(P_proposed, layer) → append_index(layer) → emit(UpdatedProjectProfile)
         Modify(adjustments): regenerate(diff, adjustments) → re-present Phase5
         Reject: emit(NoUpdateNote) → no write
@@ -232,11 +232,13 @@ SessionCalibrationMoves
   → classify(moves, drift_taxonomy)     -- trial inscription complete
   → present_per_cluster(cluster, V)     -- per-cluster validation
   → assemble_diff(confirmed)            -- tier resolution
-  → fit_shape_check(diff)               -- operational-layer material detection
-  → present_diff(approve, mismatch_flag) -- final Constitution interaction
-  → write(profile, layer, backup) | emit(OperationalLayerRecommendation)
-                                        -- circular return (inscription to rule layer) OR routing
-  → append_index(layer)                  -- trial inventory append (Approve and RouteToOperationalLayer only)
+  → fit_shape_check(diff)                -- operational-layer material detection
+  → present_diff(approve, mismatch_signals)  -- final Constitution interaction
+  → [Approve: write(profile, layer, backup); RouteToOperationalLayer: (no write)]
+                                          -- branch on disposition; write only on Approve
+  → append_index(layer)                   -- trial inventory append (both branches)
+  → emit(UpdatedProjectProfile | OperationalLayerRecommendation)
+                                          -- circular return (inscription) OR routing artifact
   → UpdatedProjectProfile | OperationalLayerRecommendation
 requires: calibration_drift_opaque(scope) ∧ scope_resolved(user)  -- activation precondition + Phase 0 confirmation
 deficit:  CalibrationDriftOpaque             -- activation precondition (user-invoked Layer 1)
@@ -269,19 +271,20 @@ Diff              = { before: ProjectProfile, after: ProjectProfile,
                       conflicts: List(VariableConflict) }
 VariableConflict  = { variable: ProfileVariable, candidates: List(ProfileValue) }
 A                 = ApprovalDisposition ∈ {Approve, Modify(adjustments), Reject, Defer, RouteToOperationalLayer}
-MismatchSignal    ∈ {ProgrammaticTrigger, LayerMixing, BehavioralEnforcement} — Phase 4 fit-shape check output; absent when diff fits project-profile.md structure
+MismatchSignal    ∈ {ProgrammaticTrigger, LayerMixing, BehavioralEnforcement} — atomic Phase 4 fit-shape signal
+MismatchSignals   = Set(MismatchSignal) — Phase 4 fit-shape check output; empty set when diff fits project-profile.md structure; non-empty set lists all detected signals (compound mismatches are common, e.g., ProgrammaticTrigger + BehavioralEnforcement co-occurring)
 RecommendedLayer  ∈ {Hook(HookEvent), SystemPrompt, CI_CD, Settings, Other(String)}
 HookEvent         ∈ {SessionStart, SessionEnd, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SubagentStop, PreCompact, Notification}
 UpdatedProjectProfile = session text { layer, diff, backup_path, write_path, index_entry_path }
 NoUpdateNote      = session text { reviewed_clusters, dismissed_diff }
 DiffArtifact      = session text { diff_markdown, suggested_apply_path }
-OperationalLayerRecommendation = session text { mismatch_signal: MismatchSignal,
+OperationalLayerRecommendation = session text { mismatch_signals: MismatchSignals,
                                                 recommended_layer: RecommendedLayer,
                                                 realization_template: String,
                                                 trial_scope: String,
                                                 index_entry_path: Path }
 TrialIndexEntry   = { date: ISO8601Date, disposition: A,
-                      mismatch_signal: Optional(MismatchSignal),
+                      mismatch_signals: MismatchSignals,
                       recommended_layer: Optional(RecommendedLayer),
                       realization_refs: List(Path | String),
                       origin_context: String,
@@ -312,8 +315,8 @@ Phase 3: clusters → loop:
            present(cluster, evidence) → Qc(cluster) → Stop → V → integrate    -- per-cluster Constitution interaction [Tool]
            V = Stop → break loop
 Phase 4: confirmed_clusters → assemble_diff(P_existing) → diff →
-           fit_shape_check(diff) → mismatch_flag                                -- tier resolution + fit-shape detection (sense)
-Phase 5: diff, mismatch_flag → present(diff, backup_path, mismatch_flag) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
+           fit_shape_check(diff) → mismatch_signals                                -- tier resolution + fit-shape detection (sense)
+Phase 5: diff, mismatch_signals → present(diff, backup_path, mismatch_signals) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
            A = Approve → Write(backup) → Write(P_proposed) → Append(steer_trials_md) → emit(UpdatedProjectProfile)
            A = Modify → regenerate(diff) → Phase 5 re-entry
            A = Reject → emit(NoUpdateNote)
@@ -350,8 +353,8 @@ Phase 3 Qc                (constitution) → present (per-cluster verdict; const
 Phase 3 integrate         (track)        → Internal Λ update (cluster verdict recording)
 Phase 4 assemble_diff     (sense)        → Internal analysis (variable-level diff construction)
 Phase 4 fit_shape_check   (sense)        → Internal analysis (operational-layer material detection — programmatic-trigger / layer-mixing / behavioral-enforcement signals)
-Phase 5 present           (extension)    → TextPresent+Proceed (diff + backup path + mismatch_flag pre-gate)
-Phase 5 Qc                (constitution) → present (final approval; writable side effect with cross-session persistence; user authority required; option set extends to RouteToOperationalLayer when mismatch_flag is set)
+Phase 5 present           (extension)    → TextPresent+Proceed (diff + backup path + mismatch_signals pre-gate)
+Phase 5 Qc                (constitution) → present (final approval; writable side effect with cross-session persistence; user authority required; option set extends to RouteToOperationalLayer when mismatch_signals is non-empty)
 Phase 5 backup            (transform)    → Write (timestamped backup file; Approve disposition only)
 Phase 5 Write             (transform)    → Write (proposed profile to layer path; Approve disposition only)
 Phase 5 append_index      (transform)    → Write (append TrialIndexEntry to steer-trials.md at chosen layer; Approve and RouteToOperationalLayer dispositions only; create file on first entry)
@@ -362,7 +365,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 Λ = { phase: Phase, scope: Scope, P_existing: ProjectProfile,
       moves: List(CalibrationMove), clusters: List(Cluster),
       cluster_verdicts: List<(Cluster, V)>,
-      diff: Optional(Diff), mismatch_flag: Optional(MismatchSignal),
+      diff: Optional(Diff), mismatch_signals: MismatchSignals,
       recommended_layer: Optional(RecommendedLayer),
       modify_iterations: Nat,
       backup_path: Optional(Path), write_path: Optional(Path),

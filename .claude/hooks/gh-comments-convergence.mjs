@@ -68,7 +68,7 @@ if (matched.length === 0) process.exit(0);
 
 const message =
   '[gh-comments PostToolUse — Stage 2 trial guidance]\n\n' +
-  matched.map((g) => `• ${g.message}`).join('\n\n');
+  matched.map((g) => `• [${g.name}] ${g.message}`).join('\n\n');
 
 console.log(
   JSON.stringify({
