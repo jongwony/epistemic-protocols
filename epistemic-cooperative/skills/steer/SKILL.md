@@ -139,9 +139,9 @@ Assemble a profile diff from confirmed cluster implications:
    - **Layer mixing**: the diff compresses universal principle, specific instance, recognition mechanism, and falsification metrics into a single rule-file bullet — the resulting contract is ambiguous between universal rule and concrete operational guidance
    - **Behavioral enforcement focus**: the diff's load-bearing requirement is *what AI does at runtime*, not *what is visible to user judgment* — per `architectural-principles.md §Epistemic Completeness Boundary`, behavioral enforcement is operational-substrate territory (system prompts, hooks, CI/CD, settings.json), not epistemic substrate
 
-When any signal fires, set `mismatch_flag` and carry it into Phase 5; the diff itself is still assembled (the user retains override authority — picking Approve forces prose inscription regardless of the recommendation).
+When one or more signals fire, accumulate them into `mismatch_signals` (Set(MismatchSignal)) and carry it into Phase 5; the diff itself is still assembled (the user retains override authority — picking Approve forces prose inscription regardless of the recommendation).
 
-Phase 4 emits no surfacing. The assembled diff (with optional mismatch_flag) becomes the input to Phase 5.
+Phase 4 emits no surfacing. The assembled diff (with `mismatch_signals` set, possibly empty) becomes the input to Phase 5.
 
 ### Phase 5: Circular Return — Final Approve and Write
 
@@ -169,10 +169,10 @@ Backup target: <existing_profile_path>.bak.YYYYMMDD-HHMMSS
 Write target:  <existing_profile_path>
 ```
 
-When `mismatch_flag` is set (Phase 4 fit-shape check fired), surface the mismatch signal as text output between the diff presentation and the approval interaction:
+When `mismatch_signals` is non-empty (Phase 4 fit-shape check fired one or more signals), surface them as text output between the diff presentation and the approval interaction:
 
 ```
-Fit-shape mismatch detected: <signal type> — <one-sentence explanation>
+Fit-shape mismatches detected: <signal_a, signal_b, ...> — <one-sentence explanation per signal>
 Recommended operational layer: <hook event | system prompt | CI/CD | settings.json | other>
 Realization template (if RouteToOperationalLayer is selected): <concrete trigger + behavior outline>
 ```
@@ -192,13 +192,13 @@ Options:
 
 After response:
 
-- **Approve** — execute write sequence: (i) create timestamped backup of existing file (or skip backup when existing file is absent), (ii) write the new profile to the target path, (iii) emit UpdatedProjectProfile session-text artifact with the diff trace and the backup path for rollback
+- **Approve** — execute write sequence: (i) create timestamped backup of existing file (or skip backup when existing file is absent), (ii) write the new profile to the target path, (iii) append a structured entry to the trial index (`steer-trials.md` at the same layer scope), (iv) emit UpdatedProjectProfile session-text artifact with the diff trace, the backup path for rollback, and the index entry path
 - **Modify** — accept the user's variable-level adjustments, regenerate the diff, re-present Phase 5 Constitution interaction
-- **Reject** — emit NoUpdateNote session-text artifact recording the reviewed clusters and dismissed diff; existing file unchanged
-- **Defer** — emit the diff as a paste-ready markdown block AND keep the existing profile file unchanged for now; the user retains the audit work for manual application later (distinct from Reject, which discards the diff entirely)
-- **RouteToOperationalLayer** — emit OperationalLayerRecommendation session-text artifact recording: (i) the fit-shape mismatch signal that triggered the routing, (ii) the recommended operational layer per finding shape (hooks, system prompt, CI/CD, settings.json), (iii) a realization template (concrete trigger + behavior outline + scope) for downstream implementation. Existing rule file unchanged. Steer's role is to recognize the routing and emit the realization template; implementation belongs to a downstream task using the appropriate substrate tooling
+- **Reject** — emit NoUpdateNote session-text artifact recording the reviewed clusters and dismissed diff; existing file unchanged; trial index untouched (no inscription to track)
+- **Defer** — emit the diff as a paste-ready markdown block AND keep the existing profile file unchanged for now; the user retains the audit work for manual application later (distinct from Reject, which discards the diff entirely); trial index untouched until the user manually applies the diff
+- **RouteToOperationalLayer** — emit OperationalLayerRecommendation session-text artifact recording: (i) the fit-shape mismatch signal that triggered the routing, (ii) the recommended operational layer per finding shape (hooks, system prompt, CI/CD, settings.json), (iii) a realization template (concrete trigger + behavior outline + scope) for downstream implementation. Append a structured entry to the trial index (`steer-trials.md` at the same layer scope) so the proposed routing is inventoried even when implementation is deferred to a downstream task. Existing rule file unchanged. Steer's role is to recognize the routing and emit the realization template; implementation belongs to a downstream task using the appropriate substrate tooling
 
-After integration, log the disposition. The rule file write is the Circular Return — the inscribed profile becomes the new prejudgment baseline for the next `/steer` invocation, and meanwhile shapes Cognitive Partnership Move defaults across all subsequent sessions.
+After integration, log the disposition. The rule file write (Approve) or the index inscription (Approve and RouteToOperationalLayer) is the Circular Return — the inscribed profile becomes the new prejudgment baseline for the next `/steer` invocation, and the trial index becomes the at-a-glance inventory of trials this project's `/steer` has produced.
 
 ```
 ── FLOW ──
@@ -215,13 +215,13 @@ Steer(scope) → Phase0(scope, user_confirm) →
           Reorient(cluster, implication'): record_modified(cluster, implication') → next
           Stop: break loop
       Assemble(confirmed_clusters, P_existing) → diff →
-      fit_shape_check(diff) → mismatch_flag →
-      present(diff, backup_path, mismatch_flag) → Qc(approve) → Stop → A →
-        Approve: backup(P_existing) → write(P_proposed, layer) → emit(UpdatedProjectProfile)
+      fit_shape_check(diff) → mismatch_signals →
+      present(diff, backup_path, mismatch_signals) → Qc(approve) → Stop → A →
+        Approve: backup(P_existing) → write(P_proposed, layer) → append_index(layer) → emit(UpdatedProjectProfile)
         Modify(adjustments): regenerate(diff, adjustments) → re-present Phase5
         Reject: emit(NoUpdateNote) → no write
         Defer: emit(DiffArtifact) → no write
-        RouteToOperationalLayer: emit(OperationalLayerRecommendation) → no write
+        RouteToOperationalLayer: append_index(layer) → emit(OperationalLayerRecommendation)
       converge
 
 ── MORPHISM ──
@@ -232,10 +232,13 @@ SessionCalibrationMoves
   → classify(moves, drift_taxonomy)     -- trial inscription complete
   → present_per_cluster(cluster, V)     -- per-cluster validation
   → assemble_diff(confirmed)            -- tier resolution
-  → fit_shape_check(diff)               -- operational-layer material detection
-  → present_diff(approve, mismatch_flag) -- final Constitution interaction
-  → write(profile, layer, backup) | emit(OperationalLayerRecommendation)
-                                        -- circular return (inscription to rule layer) OR routing
+  → fit_shape_check(diff)                -- operational-layer material detection
+  → present_diff(approve, mismatch_signals)  -- final Constitution interaction
+  → [Approve: write(profile, layer, backup); RouteToOperationalLayer: (no write)]
+                                          -- branch on disposition; write only on Approve
+  → append_index(layer)                   -- trial inventory append (both branches)
+  → emit(UpdatedProjectProfile | OperationalLayerRecommendation)
+                                          -- circular return (inscription) OR routing artifact
   → UpdatedProjectProfile | OperationalLayerRecommendation
 requires: calibration_drift_opaque(scope) ∧ scope_resolved(user)  -- activation precondition + Phase 0 confirmation
 deficit:  CalibrationDriftOpaque             -- activation precondition (user-invoked Layer 1)
@@ -268,16 +271,27 @@ Diff              = { before: ProjectProfile, after: ProjectProfile,
                       conflicts: List(VariableConflict) }
 VariableConflict  = { variable: ProfileVariable, candidates: List(ProfileValue) }
 A                 = ApprovalDisposition ∈ {Approve, Modify(adjustments), Reject, Defer, RouteToOperationalLayer}
-MismatchSignal    ∈ {ProgrammaticTrigger, LayerMixing, BehavioralEnforcement} — Phase 4 fit-shape check output; absent when diff fits project-profile.md structure
+MismatchSignal    ∈ {ProgrammaticTrigger, LayerMixing, BehavioralEnforcement} — atomic Phase 4 fit-shape signal
+MismatchSignals   = Set(MismatchSignal) — Phase 4 fit-shape check output; empty set when diff fits project-profile.md structure; non-empty set lists all detected signals (compound mismatches are common, e.g., ProgrammaticTrigger + BehavioralEnforcement co-occurring)
 RecommendedLayer  ∈ {Hook(HookEvent), SystemPrompt, CI_CD, Settings, Other(String)}
 HookEvent         ∈ {SessionStart, SessionEnd, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SubagentStop, PreCompact, Notification}
-UpdatedProjectProfile = session text { layer, diff, backup_path, write_path }
+UpdatedProjectProfile = session text { layer, diff, backup_path, write_path, index_entry_path }
 NoUpdateNote      = session text { reviewed_clusters, dismissed_diff }
 DiffArtifact      = session text { diff_markdown, suggested_apply_path }
-OperationalLayerRecommendation = session text { mismatch_signal: MismatchSignal,
+OperationalLayerRecommendation = session text { mismatch_signals: MismatchSignals,
                                                 recommended_layer: RecommendedLayer,
                                                 realization_template: String,
-                                                trial_scope: String }
+                                                trial_scope: String,
+                                                index_entry_path: Path }
+TrialIndexEntry   = { date: ISO8601Date, disposition: A,
+                      mismatch_signals: MismatchSignals,
+                      recommended_layer: Optional(RecommendedLayer),
+                      realization_refs: List(Path | String),
+                      origin_context: String,
+                      falsification: Optional(String),
+                      reevaluation: Optional(String),
+                      status: TrialStatus }
+TrialStatus       ∈ {active, completed, retracted}
 Phase             ∈ {0, 1, 2, 3, 4, 5}
 
 ── SCOPE-BINDING ──
@@ -301,13 +315,13 @@ Phase 3: clusters → loop:
            present(cluster, evidence) → Qc(cluster) → Stop → V → integrate    -- per-cluster Constitution interaction [Tool]
            V = Stop → break loop
 Phase 4: confirmed_clusters → assemble_diff(P_existing) → diff →
-           fit_shape_check(diff) → mismatch_flag                                -- tier resolution + fit-shape detection (sense)
-Phase 5: diff, mismatch_flag → present(diff, backup_path, mismatch_flag) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
-           A = Approve → Write(backup) → Write(P_proposed) → emit(UpdatedProjectProfile)
+           fit_shape_check(diff) → mismatch_signals                                -- tier resolution + fit-shape detection (sense)
+Phase 5: diff, mismatch_signals → present(diff, backup_path, mismatch_signals) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
+           A = Approve → Write(backup) → Write(P_proposed) → Append(steer_trials_md) → emit(UpdatedProjectProfile)
            A = Modify → regenerate(diff) → Phase 5 re-entry
            A = Reject → emit(NoUpdateNote)
            A = Defer → emit(DiffArtifact)
-           A = RouteToOperationalLayer → emit(OperationalLayerRecommendation)
+           A = RouteToOperationalLayer → Append(steer_trials_md) → emit(OperationalLayerRecommendation)
 
 ── LOOP ──
 Phase 3 → Phase 4 → Phase 5 →
@@ -339,10 +353,11 @@ Phase 3 Qc                (constitution) → present (per-cluster verdict; const
 Phase 3 integrate         (track)        → Internal Λ update (cluster verdict recording)
 Phase 4 assemble_diff     (sense)        → Internal analysis (variable-level diff construction)
 Phase 4 fit_shape_check   (sense)        → Internal analysis (operational-layer material detection — programmatic-trigger / layer-mixing / behavioral-enforcement signals)
-Phase 5 present           (extension)    → TextPresent+Proceed (diff + backup path + mismatch_flag pre-gate)
-Phase 5 Qc                (constitution) → present (final approval; writable side effect with cross-session persistence; user authority required; option set extends to RouteToOperationalLayer when mismatch_flag is set)
+Phase 5 present           (extension)    → TextPresent+Proceed (diff + backup path + mismatch_signals pre-gate)
+Phase 5 Qc                (constitution) → present (final approval; writable side effect with cross-session persistence; user authority required; option set extends to RouteToOperationalLayer when mismatch_signals is non-empty)
 Phase 5 backup            (transform)    → Write (timestamped backup file; Approve disposition only)
 Phase 5 Write             (transform)    → Write (proposed profile to layer path; Approve disposition only)
+Phase 5 append_index      (transform)    → Write (append TrialIndexEntry to steer-trials.md at chosen layer; Approve and RouteToOperationalLayer dispositions only; create file on first entry)
 Phase 5 emit              (extension)    → TextPresent+Proceed (UpdatedProjectProfile or NoUpdateNote or DiffArtifact or OperationalLayerRecommendation, per disposition)
 converge                  (extension)    → TextPresent+Proceed (convergence evidence trace)
 
@@ -350,10 +365,11 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 Λ = { phase: Phase, scope: Scope, P_existing: ProjectProfile,
       moves: List(CalibrationMove), clusters: List(Cluster),
       cluster_verdicts: List<(Cluster, V)>,
-      diff: Optional(Diff), mismatch_flag: Optional(MismatchSignal),
+      diff: Optional(Diff), mismatch_signals: MismatchSignals,
       recommended_layer: Optional(RecommendedLayer),
       modify_iterations: Nat,
       backup_path: Optional(Path), write_path: Optional(Path),
+      index_path: Optional(Path), index_entry: Optional(TrialIndexEntry),
       disposition: Optional(A), active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
@@ -370,8 +386,9 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 **Write paths**:
 - Proposed profile: same path as the existing profile at the chosen layer
 - Backup: `<existing_profile_path>.bak.YYYYMMDD-HHMMSS` (timestamp ensures backups accumulate without overwrite); backup is created before the proposed profile write so rollback is `mv <backup_path> <existing_profile_path>`
+- Trial index: `.claude/steer-trials.md` (project_local) or `~/.claude/steer-trials.md` (user_global). Lazy-loaded inventory file appended to on Approve and RouteToOperationalLayer dispositions; created on first entry. Reject and Defer leave it untouched.
 
-**First-time induction**: when the existing profile file is absent, Phase 1 treats `P_existing = P_∅` (empty profile). Phase 5 Approve writes the proposed profile without backup (nothing to back up). The emitted UpdatedProjectProfile artifact notes the first-time induction status.
+**First-time induction**: when the existing profile file is absent, Phase 1 treats `P_existing = P_∅` (empty profile). Phase 5 Approve writes the proposed profile without backup (nothing to back up). The emitted UpdatedProjectProfile artifact notes the first-time induction status. The trial index append still occurs.
 
 ## Rules
 
@@ -392,6 +409,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 15. **Stage 2 evidence-collection modality** — This skill is released as a Stage 2 evidence-collection instrument; architectural inscription (graph.json placement, advisory edges, formal lineage to /induce) is deferred until variation-stable retention evidence accumulates. Every emitted UpdatedProjectProfile, NoUpdateNote, DiffArtifact, and OperationalLayerRecommendation carries an N=1 dogfooding caveat acknowledging the single-user evidence base.
 16. **Vocabulary discipline** — Output uses positive framing: "drift", "calibration", "fit", "recalibration", "induce", "steering". Output frames per-cluster verdicts as recognition acts and the final approval as a writable inscription. The skill describes evidence and diffs; verdicts and approvals belong to the user.
 17. **Routing to operational layer when finding shape mismatches** — When the Phase 4 fit-shape check detects that the assembled diff requires programmatic-trigger enforcement, mixes universal principle with specific instance and recognition mechanism, or has behavioral enforcement (rather than visibility) as its load-bearing requirement, surface RouteToOperationalLayer as a Phase 5 disposition. The operational layer (hooks, system prompts, CI/CD, settings.json) realizes Standing-authority delegation per `architectural-principles.md §Epistemic Completeness Boundary`. Steer's role is to recognize the routing and emit a realization template (concrete trigger + behavior outline + scope); implementation belongs to a downstream task using the appropriate substrate tooling. The user retains override authority — selecting Approve forces prose inscription despite the routing recommendation.
+18. **Trial index inscription** — On Approve and RouteToOperationalLayer dispositions, append a structured TrialIndexEntry to `steer-trials.md` at the chosen layer (`.claude/steer-trials.md` for project_local, `~/.claude/steer-trials.md` for user_global). The entry records date, disposition type, mismatch signal (when RouteToOperationalLayer), realization references (rule file path or operational-layer artifact paths), origin context, falsification conditions (if specified), re-evaluation cadence, and current status. The index file is lazy-loaded — its purpose is single-glance trial inventory across sessions, not per-turn enforcement. Reject and Defer dispositions do not append (no inscription to track yet). The index file is created on first entry; existing entries are not retroactively backfilled. Layer scope of the index matches the disposition's layer — index inscription does not cross layer boundaries.
 
 ## UX Safeguards
 
@@ -403,6 +421,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 - **Self-referential N=1 caveat** — Every emitted artifact (UpdatedProjectProfile, NoUpdateNote, DiffArtifact) carries the caveat acknowledging the single-user evidence base. The skill itself is a Stage 2 evidence-collection instrument, and this caveat is part of how that modality is honored (Rule 15 reinforcement).
 - **Defer disposition as escape hatch** — When the user is unsure about writing, the Defer option emits the diff as a session-text artifact for manual application. This honors the "writable side effect needs explicit approval" principle while preserving the audit work (Three-Tier Termination — `user_withdraw`-class disposition with partial state preservation).
 - **Operational-layer routing visibility** — When Phase 4 fit-shape check fires, Phase 5 surfaces the mismatch signal and recommended layer alongside the standard approval options. The user retains override authority: Approve forces prose inscription despite the routing recommendation, RouteToOperationalLayer accepts the recommendation and emits a realization template. The diff itself is unchanged across the two paths — routing is about *where* the inscription lives, not *what* it says (Rule 17 reinforcement).
+- **Trial index as single-glance inventory** — `steer-trials.md` at the chosen layer accumulates one TrialIndexEntry per Approve and per RouteToOperationalLayer disposition. The file is lazy-loaded so its growth does not inflate per-turn token cost; the user opens it on demand to review what trials are active, completed, or retracted. Each entry is self-contained (date, disposition, realization references, falsification, status) so a single read of the file gives the complete inventory without cross-session JSONL scanning (Rule 18 reinforcement).
 
 ## Trigger Signals
 
@@ -427,8 +446,8 @@ Skip Steer when:
 | User Esc key at any Constitution interaction | Deactivate Steer (ungraceful, no disposition record, no write) |
 | Phase 0 detects insufficient moves in scope | Deactivate with no-op note |
 | Phase 3 user selects Stop | Break loop, proceed to Phase 4 with assembled-so-far |
-| Phase 5 user selects Approve | Write executed, emit UpdatedProjectProfile, converge |
+| Phase 5 user selects Approve | Write executed (profile + trial index append), emit UpdatedProjectProfile, converge |
 | Phase 5 user selects Reject | No write, emit NoUpdateNote, converge |
 | Phase 5 user selects Defer | No write, emit DiffArtifact, converge |
-| Phase 5 user selects RouteToOperationalLayer (only available when fit-shape mismatch detected) | No write, emit OperationalLayerRecommendation, converge |
+| Phase 5 user selects RouteToOperationalLayer (only available when fit-shape mismatch detected) | No profile write; trial index append; emit OperationalLayerRecommendation; converge |
 | Phase 5 Modify re-entry exhausted (3 max) | Surface assembled diff as DiffArtifact (defer-equivalent) → converge |
