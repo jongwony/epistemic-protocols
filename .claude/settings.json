@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/gh-comments-convergence.mjs",
-            "statusMessage": "Evaluating gh-comments option-set entropy"
+            "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/claude_dispatcher.mjs",
+            "statusMessage": "Evaluating hook guidance"
           }
         ]
       }
