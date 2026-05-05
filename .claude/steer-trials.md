@@ -7,7 +7,7 @@ Project-local inventory of trials inscribed by `/steer` in this project. Lazy-lo
 Each entry records:
 - **Date** — ISO 8601 date of disposition
 - **Disposition** — `Approve` (rule-file write) or `RouteToOperationalLayer` (operational-layer realization)
-- **Mismatch signal** (RouteToOperationalLayer only) — `ProgrammaticTrigger` / `LayerMixing` / `BehavioralEnforcement`
+- **Mismatch signals** (RouteToOperationalLayer only) — set of `ProgrammaticTrigger` / `LayerMixing` / `BehavioralEnforcement` (compound mismatches are common)
 - **Recommended layer** (RouteToOperationalLayer only) — `Hook(event)` / `SystemPrompt` / `CI_CD` / `Settings` / `Other`
 - **Realization** — concrete file paths or rule-layer locations affected
 - **Origin context** — brief one-line summary of the originating audit (cluster type, evidence count, motivating session)
@@ -20,7 +20,7 @@ Each entry records:
 ### 2026-05-05 — gh-comments-convergence hook
 
 - **Disposition**: RouteToOperationalLayer
-- **Mismatch signal**: ProgrammaticTrigger + BehavioralEnforcement (per-turn rule prose was inadequate; deterministic detection of `fetch_comments.py` invocation needed)
+- **Mismatch signals**: {ProgrammaticTrigger, BehavioralEnforcement} (per-turn rule prose was inadequate; deterministic detection of `fetch_comments.py` invocation needed)
 - **Recommended layer**: `Hook(PostToolUse)` — Bash matcher, fetch_comments.py command detection
 - **Realization**:
   - Script: `.claude/hooks/gh-comments-convergence.mjs` (cross-CLI mjs; Node stdlib only)
