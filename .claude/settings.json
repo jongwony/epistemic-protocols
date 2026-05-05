@@ -7,7 +7,7 @@
           {
             "type": "command",
             "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/claude_dispatcher.mjs",
-            "statusMessage": "Evaluating gh-comments option-set entropy"
+            "statusMessage": "Evaluating hook guidance"
           }
         ]
       }

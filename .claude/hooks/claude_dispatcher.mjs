@@ -22,6 +22,7 @@ try {
   process.exit(0);
 }
 
+// Defense-in-depth — matcher in settings.json should already filter; guard against wiring drift.
 if (payload.tool_name && payload.tool_name !== 'Bash') process.exit(0);
 
 const cmd = payload.tool_input?.command ?? payload.command ?? '';
