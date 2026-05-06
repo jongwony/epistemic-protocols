@@ -5,7 +5,7 @@
 # Activated automatically via `npm install` (husky prepare script).
 set -euo pipefail
 
-re='^(prothesis|syneidesis|hermeneia|katalepsis|telos|horismos|aitesis|analogia|periagoge|euporia|prosoche|epharmoge|anamnesis|epistemic-cooperative)/.*/SKILL\.md$|^.+/skills/.+/references/|^.+/\.claude-plugin/plugin\.json$|^\.claude/skills/verify/|^scripts/package(\.test)?\.js$|^\.husky/pre-commit$'
+re='^[^./][^/]*/skills/.+/SKILL\.md$|^.+/skills/.+/references/|^.+/\.claude-plugin/plugin\.json$|^\.claude/skills/verify/|^scripts/package(\.test)?\.js$|^scripts/load-protocols\.js$|^\.husky/pre-commit$'
 
 staged=$(git diff --cached --name-only --diff-filter=ACMR)
 if [ -z "$staged" ] || ! printf '%s\n' "$staged" | grep -qE "$re"; then

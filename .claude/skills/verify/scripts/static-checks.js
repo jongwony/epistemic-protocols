@@ -1404,7 +1404,12 @@ function checkCrossRefScan() {
   // package.js PLUGINS, graph.json nodes, and marketplace.json plugins against filesystem ground truth
   {
     // Ground truth: directories containing .claude-plugin/plugin.json
+    // Deprecated plugins (plugin.json carries "deprecated": true) are tracked
+    // separately so cross-ref checks can exclude them from active-set diffs
+    // without a hardcoded allowlist (Plugin Encapsulation: deprecation lives
+    // in per-plugin self-description, not in the verifier).
     const allPluginDirs = new Set();
+    const deprecatedPluginDirs = new Set();
     try {
       const entries = fs.readdirSync(projectRoot, { withFileTypes: true });
       for (const entry of entries) {
@@ -1412,6 +1417,10 @@ function checkCrossRefScan() {
         const pluginJsonPath = path.join(projectRoot, entry.name, '.claude-plugin', 'plugin.json');
         if (fs.existsSync(pluginJsonPath)) {
           allPluginDirs.add(entry.name);
+          try {
+            const pj = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+            if (pj.deprecated === true) deprecatedPluginDirs.add(entry.name);
+          } catch (_) { /* json-schema check reports parse errors */ }
         }
       }
     } catch (e) {
@@ -1442,6 +1451,7 @@ function checkCrossRefScan() {
     // Source 1: PROTOCOL_FILES dirs
     for (const dir of allPluginDirs) {
       if (utilityDirs.has(dir)) continue; // utility plugins not expected in PROTOCOL_FILES
+      if (deprecatedPluginDirs.has(dir)) continue; // deprecated plugins exit active enumeration
       if (!protocolDirs.has(dir)) {
         results.warn.push({
           check: 'cross-ref-scan',
@@ -1457,6 +1467,7 @@ function checkCrossRefScan() {
     );
     for (const dir of allPluginDirs) {
       if (utilityDirs.has(dir)) continue;
+      if (deprecatedPluginDirs.has(dir)) continue;
       if (!canonicalDirs.has(dir)) {
         results.warn.push({
           check: 'cross-ref-scan',
@@ -1604,23 +1615,18 @@ function checkCrossRefScan() {
 
         // Bidirectional diff. publication-gap and stale-plugins-entry remain
         // warning-only — these are migration signals (code and filesystem out
-        // of sync mid-refactor), not detector-infrastructure failures. Stage 2
-        // escalates only the infrastructure failure modes above (file missing,
-        // load failure, shape invalid, malformed entry). Drift-detection
-        // escalation is a separate downstream PR, gated on clean warnings.
+        // of sync mid-refactor), not detector-infrastructure failures.
         //
-        // DEPRECATED_PLUGIN_TUPLES: SKILL.md retained on disk for transition
-        // continuity (existing user installs) while the plugin is removed
-        // from packaging — surfacing publication-gap here would noise the
-        // signal rather than communicate a refactor drift. Suppression scope
-        // is intentionally narrow (per-tuple allowlist) so accidental drops
-        // in PLUGINS for non-deprecated plugins still surface as warnings.
-        const DEPRECATED_PLUGIN_TUPLES = new Set([
-          'hermeneia/clarify',
-          'telos/goal',
-        ]);
+        // Deprecated plugins (per-plugin "deprecated": true) are excluded:
+        // SKILL.md is retained on disk for transition continuity but the
+        // plugin is removed from packaging. The filter is derived from
+        // deprecatedPluginDirs (built from plugin.json reads above) — no
+        // hardcoded allowlist. Plugin Encapsulation: deprecation lives in
+        // per-plugin self-description.
         for (const tuple of filesystemTuples) {
-          if (!packagePluginTuples.has(tuple) && !DEPRECATED_PLUGIN_TUPLES.has(tuple)) {
+          const dir = tuple.split('/')[0];
+          if (deprecatedPluginDirs.has(dir)) continue;
+          if (!packagePluginTuples.has(tuple)) {
             results.warn.push({
               check: 'cross-ref-scan',
               file: 'scripts/package.js',
@@ -1650,6 +1656,7 @@ function checkCrossRefScan() {
           // Every protocol dir should appear in graph.json nodes
           for (const dir of allPluginDirs) {
             if (utilityDirs.has(dir)) continue;
+            if (deprecatedPluginDirs.has(dir)) continue;
             if (!graphNodeSet.has(dir)) {
               results.warn.push({
                 check: 'cross-ref-scan',
@@ -1689,6 +1696,7 @@ function checkCrossRefScan() {
           );
           // Every filesystem plugin dir should appear in marketplace.json
           for (const dir of allPluginDirs) {
+            if (deprecatedPluginDirs.has(dir)) continue;
             if (!marketplaceDirs.has(dir)) {
               results.warn.push({
                 check: 'cross-ref-scan',
