@@ -15,11 +15,13 @@ Resolve abstract aporia through Extended-Mind reverse induction. Type: `(Abstrac
 
 ```
 ── FLOW ──
-Euporia(I) → Detect(I) → aporia? →
-  true:  (I, S, ctx) → Substrate access → ReverseTrace(I, S, ctx) → (D[], context) →
-         Qs(D[], cycle_n) → Stop → A → integrate(A, I) → I' →
-         loop until resolved(I') ∨ user_esc ∨ user_dismiss
-  false: deactivate
+Euporia(I) → pre-detect(I, S) → signal? →
+  true:  Detect(I) → aporia? →
+           true:  (I, S, ctx) → Substrate access → ReverseTrace(I, S, ctx) → (D[], context) →
+                  Qs(D[], cycle_n) → Stop → A → integrate(A, I) → I' →
+                  loop until resolved(I') ∨ user_esc ∨ user_dismiss
+           false: deactivate
+  false: surface scan result, invite user to articulate or withdraw
 
 ── MORPHISM ──
 IntentSeed
@@ -56,6 +58,7 @@ resolved(I')   = ∂(intent) ≈ 0 (user constitutive judgment)
 cycle_n        = Nat                            -- current cycle counter; surfaced at every Phase 2
 Phase          ∈ {-1, 0, 1, 2, 3}
 Axis           = String                         -- emergent label; examples: "intent", "goal", "form", "scope", "framework"
+Initiator      ∈ {UserInvoked, AIDetected}      -- bound at activation; informs Hybrid Phase 2 first-surface semantics
 Qs             = Cycle-emergent surfacing interaction with D[] + cycle counter [Tool: Constitution interaction]
 ResolvedEndpoint = I' where user_judges_resolved(I') ∨ user_dismiss(I')
 
@@ -75,7 +78,8 @@ articulate further or withdraw.
 Phase -1: I → pre-detect(aporia signal | substrate availability)     -- pre-activation scan; if no signal: surface result and invite user to articulate or withdraw before Phase 0
 Phase 0: I → Detect(I) → aporia?                                     -- detection checkpoint (silent)
 Phase 1: (I, S, ctx) → Substrate access [Tool] → ReverseTrace [Internal] → (D[], context)
-Phase 2: (D[], cycle_n) → Qs(D[], cycle_n) → Stop → A                -- Constitution; cycle counter visible
+Phase 2: (D[], cycle_n, initiator) → Qs(D[], cycle_n) → Stop → A     -- Constitution; cycle counter visible
+                                                                       -- Hybrid contract: cycle_n=1 ∧ initiator=AIDetected → first surfacing = implicit confirm-or-decline
 Phase 3: A → integrate(A, I) → I'                                    -- track, residual identification
 
 ── LOOP ──
@@ -107,6 +111,7 @@ converge             (extension)    → TextPresent+Proceed (per-cycle coordinat
       D_history: List<DimensionProjection[]>,
       A_history: List<UserAnswer>,
       I_history: List<IntentSeed>,
+      initiator: Initiator,
       residual: Set(Axis),
       resolved: Bool, active: Bool, cause_tag: String }
 -- Cycle constraint: |D_history| = |A_history| = |I_history| = cycle_n (full statement in §Cycle State Invariant)
@@ -237,7 +242,7 @@ Analyze the intent seed for abstract aporia. Silent — no user interaction.
 Read substrate channels and reverse-trace dimension projections.
 
 1. **Substrate scan**: Read/Grep over the user's codebase, rules, recent sessions; Bash for read-only Environment queries (machine-setup metadata only: uname, pwd, tool versions, git config public fields). MUST NOT execute `env`, `printenv`, `set`, `echo $VAR`, or read `.env*` files. Tag each evidence record with its substrate channel (Codebase / Rules / Session / Environment).
-2. **ReverseTrace**: From the intent and the substrate evidence, infer candidate dimensions whose coordinates are likely implicit in the substrate. Each `DimensionProjection` carries (axis_inferred, coordinates, confidence, basis).
+2. **ReverseTrace**: From the intent and the substrate evidence, infer candidate dimensions whose coordinates are likely implicit in the substrate. Each `Coordinate` within the projection carries (name, default, question, basis: Evidence); each `DimensionProjection` carries (axis_inferred, coordinates, confidence).
 3. **Filter by confidence**: Surface dimensions whose substrate basis is concrete; defer low-confidence dimensions to later cycles.
 4. Package `(D[], context)` and proceed to Phase 2.
 
@@ -279,7 +284,7 @@ Or:
 After user response:
 
 1. **Provide(values)**: Update I' with provided coordinate values; mark answered coordinates. Append snapshot of I' to `I_history`.
-2. **Defer(coords)**: Mark deferred coordinates (covers ambiguous/partial/unknown answers); they re-enter Phase 1 substrate scan in the next cycle.
+2. **Defer(coords)**: Mark deferred coordinates (covers ambiguous/partial/unknown answers); they re-enter Phase 1 substrate scan in the next cycle. Append current I' snapshot (unchanged in a Defer cycle) to `I_history` to preserve pairwise alignment with `D_history` and `A_history`.
 3. **Dismiss**: Mark intent as dismissed-with-residual; collect unresolved axes into `residual`. Terminate.
 
 After integration:
@@ -313,7 +318,7 @@ After integration:
 
 1. **AI-guided substrate access, user-resolved**: AI reverse-traces dimension projections from substrate; resolution requires user answer via Cognitive Partnership Move (Constitution) (Phase 2).
 2. **Recognition over Recall**: Present structured dimension surfacing via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield.
-3. **Substrate evidence required**: Every Phase 2 dimension projection cites specific substrate evidence (file:line, rule reference, session id, Environment query). No speculation.
+3. **Substrate evidence required**: Every coordinate in a Phase 2 dimension projection cites specific substrate evidence (file:line, rule reference, session id, Environment query). No speculation.
 4. **Reverse Induction over Axis-Fixed Extraction**: AI does not commit to a single axis at Phase 0; the axis emerges from substrate trace. Cycle-emergent options reflect actual substrate coordinates, not pre-committed dialect families.
 5. **Cycle-emergent option set**: Phase 2 options are constructed per cycle from the dimension projections of that cycle. Fixed dialect (widen / narrow / fuse / reorient) does not apply — that is Periagoge's dual structure.
 6. **Free response honored**: User may answer beyond surfaced coordinates, redirect to a dimension AI did not surface, or terminate. Free response routes the next cycle's substrate scan.
@@ -329,4 +334,4 @@ After integration:
 16. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant coordinate value (option-level entropy → 0), present the value directly as relay. The user answer slot remains constitutive when multiple valid coordinate values exist under different user value weightings.
 17. **Bidirectional advisory with Horismos**: Horismos → Euporia (BoundaryMap narrows substrate scope) and Euporia → Horismos (resolved coordinates inform downstream boundary) form bidirectional advisory edges. Same-session re-entry of either protocol after the other's convergence is permitted but treated as distinct activation — each invocation produces a fresh ResolvedEndpoint or BoundaryMap; the prior instance becomes session evidence rather than auto-cycling input.
 18. **Non-suppression deliberate**: No suppression edge to Aitesis, Hermeneia, or Periagoge in graph.json. Euporia operates on cycle-emergent axis-undetermined intent; Aitesis (factual context) and Hermeneia (intent expression) operate on different layers (coordinate-explication vs fact-supply vs intent-articulation). Sequential composition is intended, not stacking-suppressed.
-17. **Gate integrity**: The cycle-emergent option set is presented as a coherent dimension cluster per cycle; partial omission of surfaced coordinates without user dismissal violates this invariant. Type-preserving materialization (specializing a generic axis into a concrete coordinate while preserving the surfacing structure) is distinct from mutation.
+19. **Gate integrity**: The cycle-emergent option set is presented as a coherent dimension cluster per cycle; partial omission of surfaced coordinates without user dismissal violates this invariant. Type-preserving materialization (specializing a generic axis into a concrete coordinate while preserving the surfacing structure) is distinct from mutation.
