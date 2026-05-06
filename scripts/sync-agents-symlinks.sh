@@ -19,7 +19,7 @@ cd "$(git rev-parse --show-toplevel)"
 
 PLUGINS=(
   prothesis syneidesis hermeneia katalepsis telos horismos
-  aitesis analogia periagoge prosoche epharmoge anamnesis
+  aitesis analogia periagoge euporia prosoche epharmoge anamnesis
   epistemic-cooperative
 )
 

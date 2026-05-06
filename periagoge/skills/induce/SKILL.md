@@ -121,6 +121,7 @@ converge           (extension)   → TextPresent+Proceed (convergence evidence t
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
+| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
@@ -170,7 +171,7 @@ When Periagoge is active:
 - Periagoge completes before output dependent on the crystallized abstraction proceeds
 - Loaded instructions resume after crystallization or Esc
 
-**Protocol precedence**: Activation order position 7/10 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
+**Protocol precedence**: Activation order position 7/11 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
 
 **Advisory relationships**: Receives from Hermeneia (advisory: clarified intent narrows the abstraction seed but is not required — activation depends only on instance-set signals, not on prior intent clarification), Anamnesis (advisory: recalled adjacent abstractions provide Fuse candidates). Provides to Katalepsis (precondition via wildcard: crystallized abstraction enables comprehension verification). Katalepsis is structurally last.
 

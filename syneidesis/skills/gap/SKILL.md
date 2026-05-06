@@ -96,6 +96,7 @@ converge (extension)   → TextPresent+Proceed (convergence evidence trace; proc
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
+| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
@@ -132,7 +133,7 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - Loaded instructions resume after mode deactivation
 
-**Protocol precedence**: Activation order position 8/10 (graph.json is authoritative source for information flow). Concern cluster: Decision.
+**Protocol precedence**: Activation order position 9/11 (graph.json is authoritative source for information flow). Concern cluster: Decision.
 
 **Advisory relationships**: Receives from Prothesis (advisory: perspective simulation provides gap detection context), Analogia (advisory: validated mapping improves gap detection accuracy), Horismos (advisory: BoundaryMap narrows gap detection scope). Provides to Aitesis (suppression: same scope suppression). Katalepsis is structurally last.
 

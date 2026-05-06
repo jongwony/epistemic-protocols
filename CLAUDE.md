@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Epistemic Protocols is a layered system for human-AI collaboration: it inserts structured checkpoints at decision points so misalignment is surfaced early, judged explicitly, and adapted before it compounds into expensive downstream work.
 
-In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **AbstractionInProcess → CrystallizedAbstraction** (Periagoge), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
+In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **AbstractionInProcess → CrystallizedAbstraction** (Periagoge), **AbstractAporia → ResolvedEndpoint** (Euporia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
 
 ## Architecture
 
@@ -25,6 +25,7 @@ epistemic-protocols/
 ├── aitesis/         (/inquire)        # context insufficiency inference
 ├── analogia/        (/ground)         # structural mapping validation
 ├── periagoge/       (/induce)         # in-process abstraction crystallization
+├── euporia/         (/elicit)         # Extended-Mind reverse induction (Periagoge categorical dual)
 ├── prosoche/        (/attend)         # execution-time risk evaluation
 ├── epharmoge/       (/contextualize)  # application-context mismatch (conditional)
 ├── anamnesis/       (/recollect)      # vague recall → recognized context
@@ -62,6 +63,7 @@ epistemic-protocols/
 | Aitesis | `/inquire` | ContextInsufficient → InformedExecution |
 | Analogia | `/ground` | MappingUncertain → ValidatedMapping |
 | Periagoge | `/induce` | AbstractionInProcess → CrystallizedAbstraction |
+| Euporia | `/elicit` | AbstractAporia → ResolvedEndpoint |
 | Prosoche | `/attend` | ExecutionBlind → SituatedExecution |
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 | Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
@@ -100,7 +102,7 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 
 | Concern | Protocols |
 |---------|-----------|
-| Planning | `/clarify` (Hermeneia), `/goal` (Telos), `/inquire` (Aitesis) |
+| Planning | `/clarify` (Hermeneia), `/goal` (Telos), `/inquire` (Aitesis), `/elicit` (Euporia) |
 | Analysis | `/frame` (Prothesis), `/ground` (Analogia), `/induce` (Periagoge) |
 | Decision | `/gap` (Syneidesis) |
 | Execution | `/attend` (Prosoche) |
@@ -111,14 +113,14 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 
 **Key graph relationships**:
 - Preconditions (DAG-enforced): Hermeneia → Telos → Horismos; * → Katalepsis (includes Anamnesis and Periagoge via wildcard)
-- Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia, Periagoge, Epharmoge}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}, Telos → {Prothesis}, Hermeneia → {Aitesis, Periagoge}
+- Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}, Telos → {Prothesis}, Hermeneia → {Aitesis, Periagoge}, Euporia → {Horismos, Aitesis, Periagoge}
 - Suppression: Syneidesis ⊣ Aitesis (same scope), Aitesis ⊣ Epharmoge (pre+post stacking)
 
 **Initiator taxonomy** (2-layer model):
 - **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.
 - **Layer 2** (in-protocol heuristics): Behavior varies by initiator type:
   - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis)
-  - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia)
+  - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia, Euporia)
   - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Write)
 
@@ -178,6 +180,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Epharmoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Analogia**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Periagoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Euporia**: No Task delegation—must run in main agent (user-facing gates require main agent context). Phase 1 substrate access uses Read/Grep/Bash for read-only scan only.
 - **Prosoche**: Phase -1 (Sub-A0 upstream routing, Sub-A materialization, Sub-B team coordination) and Phases 1-3 (Gate path) run in main agent (gate interaction, Skill). Phase 0 delegates p=Low tasks to prosoche-executor subagent or team agents via Agent tool.
 - **Anamnesis**: No Task delegation—must run in main agent (user-facing gates require main agent context). SessionEnd + PreCompact hooks (`anamnesis/scripts/hypomnesis-write.mjs`) operate outside protocol flow, extracting session recall index via `claude -p haiku` harness.
 - **Report**: Phase 1 delegates to project-scanner subagent (single). Phase 2: Path A delegates session-analyzer in targeted mode, Path B in full mode. Main agent handles Phases 3-5.

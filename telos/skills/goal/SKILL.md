@@ -123,6 +123,7 @@ Telos is not simplified requirements gathering. Three differentiators:
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
+| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
@@ -158,7 +159,7 @@ When Telos is active:
 - Telos completes before implementation workflows begin
 - Loaded instructions resume after GoalContract is approved
 
-**Protocol precedence**: Activation order position 2/10 (graph.json is authoritative source for information flow). Concern cluster: Planning.
+**Protocol precedence**: Activation order position 2/11 (graph.json is authoritative source for information flow). Concern cluster: Planning.
 
 **Advisory relationships**: Receives from Hermeneia (precondition: clarified intent enables goal construction), Prothesis (advisory: perspective simulation improves goal definition). Provides to Horismos (precondition: defined goals enable boundary definition), Prothesis (advisory: defined goals improve framework selection and lens configuration). Katalepsis is structurally last.
 

@@ -27,13 +27,14 @@ const PROTOCOL_FILES = [
   'aitesis/skills/inquire/SKILL.md',
   'analogia/skills/ground/SKILL.md',
   'periagoge/skills/induce/SKILL.md',
+  'euporia/skills/elicit/SKILL.md',
   'epharmoge/skills/contextualize/SKILL.md',
   'prosoche/skills/attend/SKILL.md',
   'anamnesis/skills/recollect/SKILL.md',
 ];
 
-const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Periagoge → Syneidesis → Prosoche → Epharmoge';
-const CANONICAL_CLUSTERS = 'Planning (`/clarify`, `/goal`, `/inquire`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
+const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Periagoge → Euporia → Syneidesis → Prosoche → Epharmoge';
+const CANONICAL_CLUSTERS = 'Planning (`/clarify`, `/goal`, `/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
 const PRECEDENCE_FILES = [
   'hermeneia/skills/clarify/SKILL.md',
   'telos/skills/goal/SKILL.md',
@@ -42,6 +43,7 @@ const PRECEDENCE_FILES = [
   'prothesis/skills/frame/SKILL.md',
   'analogia/skills/ground/SKILL.md',
   'periagoge/skills/induce/SKILL.md',
+  'euporia/skills/elicit/SKILL.md',
   'syneidesis/skills/gap/SKILL.md',
   'prosoche/skills/attend/SKILL.md',
   'epharmoge/skills/contextualize/SKILL.md',
@@ -61,6 +63,7 @@ const CANONICAL_PROTOCOLS = {
   'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
   'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
   'Periagoge':  { deficit: 'AbstractionInProcess', resolution: 'CrystallizedAbstraction' },
+  'Euporia':    { deficit: 'AbstractAporia', resolution: 'ResolvedEndpoint' },
   'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
   'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
   'Anamnesis':  { deficit: 'RecallAmbiguous', resolution: 'RecalledContext' },
@@ -2416,7 +2419,7 @@ function checkSingleAxisSoundness() {
 function checkAgentsSymlinksSync() {
   const SOURCE_PLUGINS = [
     'prothesis', 'syneidesis', 'hermeneia', 'katalepsis', 'telos', 'horismos',
-    'aitesis', 'analogia', 'periagoge', 'prosoche', 'epharmoge', 'anamnesis',
+    'aitesis', 'analogia', 'periagoge', 'euporia', 'prosoche', 'epharmoge', 'anamnesis',
     'epistemic-cooperative',
   ];
   const agentsDir = path.join(projectRoot, '.agents', 'skills');

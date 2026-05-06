@@ -157,6 +157,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: περιαγωγή (turning-around) — Plato *Republic* VII.518d, the soul's turning toward the intelligible; the dialectical collection and division moves of *Phaedrus* 265d–266a. Core principle: **Dialectical Triangulation over Unilateral Proposal**. Abstraction formation from concrete instances requires shaping by the user — AI proposes, user widens/narrows/fuses/reorients. Workflow position: Analysis cluster — dual of `/ground`. Where `/ground` validates a given structure against a target (substitution), `/induce` forms a new structure from instances (colimit). Game feel: "These cases share something — what is it?" → candidate arrives with a grounding example → widen, narrow, or reorient → the name locates itself.
 
+## Euporia `/elicit`
+
+**Situation**: You open a session with "I want to make this CLI more usable" — but "usable" could mean reduced friction, smarter defaults, clearer errors, faster startup, or accessibility. The intent is articulated, but which axis matters most for *your* codebase and your team's prior work is implicit in your repo, your rules files, and past PR conversations — not in the utterance itself.
+
+**Intervention**: `/elicit` reverse-traces from the intent through your externalized substrate (codebase, rules, past sessions, environment). Each cycle surfaces a few dimension projections with substrate-cited basis, and your answers explicate which coordinates were already implicit in your externalized cognition. The axis emerges per cycle rather than committing upfront.
+
+**Trial prompt**: "Let's practice: say 'I want to make X more usable / accessible / robust' and I'll show how /elicit reverse-traces dimension projections from your codebase and rules"
+
+**Quiz Q (situation)**: You say "let's tighten the build pipeline" — but "tighten" could mean faster runs, fewer flaky retries, smaller artifacts, or stricter quality gates. Each is a different axis with values implicit in your CI configs and past green/red history.
+- A) Telos `/goal` — B) Aitesis `/inquire` — C) Euporia `/elicit` — D) Hermeneia `/clarify`
+- Answer: C
+
+**Quiz Q (design)**: Your intent is articulated but the axis it commits to depends on coordinates implicit in your externalized cognition (codebase, rules, past sessions). How would you surface those coordinates without forcing a single axis upfront?
+- Hint: Reverse-trace from intent through substrate; let the axis emerge per cycle.
+
+**Philosophy**: εὐπορία (way through, resourcefulness) — the resolving passage that emerges from aporia (no way through). Plato's later dialectic threads aporia and euporia as paired moments of inquiry. Core principle: **Reverse Induction over Axis-Fixed Extraction**. Categorical dual to `/induce` — where `/induce` ascends from instances to abstraction (bottom-up colimit), `/elicit` descends from intent through substrate to coordinates (top-down reverse induction). Workflow position: Planning cluster — alongside `/clarify`, `/goal`, `/inquire`, but for axis-emergent intents that no axis-specific protocol covers. Game feel: "I know I want X, but the axis is fuzzy" → substrate trace surfaces dimension projections → cycle-emergent answers → endpoint resolves.
+
 ## Prosoche `/attend`
 
 **Situation**: You ask Claude "clean up my Downloads folder for me." The folder holds hundreds of files — obvious junk (duplicate zips, old installers), probably-junk (unclear PDF scans), and things you actually need (tax receipts, signed contracts). Deleting everything is dangerous; doing nothing misses the point.

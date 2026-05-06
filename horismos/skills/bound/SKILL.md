@@ -117,6 +117,7 @@ converge  (extension)       → TextPresent+Proceed (convergence evidence trace;
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
 | **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
+| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
@@ -163,7 +164,7 @@ When Horismos is active:
 - Horismos completes before execution proceeds
 - Loaded instructions resume after all domains are bounded or dismissed
 
-**Protocol precedence**: Activation order position 3/10 (graph.json is authoritative source for information flow). Cross-cutting: BoundaryMap is consumed by 5 downstream protocols.
+**Protocol precedence**: Activation order position 3/11 (graph.json is authoritative source for information flow). Cross-cutting: BoundaryMap is consumed by 5 downstream protocols.
 
 **Advisory relationships**: Receives from Telos (precondition: defined goals enable boundary definition). Provides to Aitesis, Prothesis, Prosoche, Analogia, Syneidesis (all advisory: BoundaryMap narrows scope). Katalepsis is structurally last.
 

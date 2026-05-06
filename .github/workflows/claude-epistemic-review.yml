@@ -16,6 +16,7 @@ on:
       - 'prosoche/**'
       - 'epharmoge/**'
       - 'periagoge/**'
+      - 'euporia/**'
       - 'anamnesis/**'
 
 jobs:
