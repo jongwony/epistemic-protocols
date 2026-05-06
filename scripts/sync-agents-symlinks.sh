@@ -17,18 +17,20 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-PLUGINS=(
-  prothesis syneidesis katalepsis horismos
-  aitesis analogia periagoge euporia prosoche epharmoge anamnesis
-  epistemic-cooperative
-)
-
 mkdir -p .agents/skills
 
 # Drop existing top-level symlinks so removed/renamed skills do not linger.
 find .agents/skills -maxdepth 1 -mindepth 1 -type l -delete
 
-for plugin in "${PLUGINS[@]}"; do
+# Plugin set is filesystem-derived: any top-level directory carrying
+# .claude-plugin/plugin.json is a plugin. Plugins whose plugin.json declares
+# "deprecated": true are skipped — deprecation lives in per-plugin
+# self-description (Plugin Encapsulation), not in this script.
+for plugin_dir in */; do
+  plugin="${plugin_dir%/}"
+  pj="$plugin/.claude-plugin/plugin.json"
+  [ -f "$pj" ] || continue
+  if grep -qE '"deprecated"[[:space:]]*:[[:space:]]*true' "$pj"; then continue; fi
   for skill_dir in "$plugin"/skills/*/; do
     [ -d "$skill_dir" ] || continue
     name=$(basename "$skill_dir")

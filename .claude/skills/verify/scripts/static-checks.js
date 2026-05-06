@@ -12,56 +12,50 @@ const path = require('path');
 const util = require('util');
 const { execFileSync } = require('child_process');
 const { runArtifactSelfContainmentCheck } = require('./artifact-self-containment');
+const {
+  discoverPlugins,
+  protocolFiles,
+  sourcePluginDirs,
+  CANONICAL_PRECEDENCE: CANONICAL_PRECEDENCE_ARR,
+} = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
 
 const projectRoot = process.argv[2] || process.cwd();
 
 const results = { pass: [], fail: [], warn: [] };
 
-const PROTOCOL_FILES = [
-  'prothesis/skills/frame/SKILL.md',
-  'syneidesis/skills/gap/SKILL.md',
-  'katalepsis/skills/grasp/SKILL.md',
-  'horismos/skills/bound/SKILL.md',
-  'aitesis/skills/inquire/SKILL.md',
-  'analogia/skills/ground/SKILL.md',
-  'periagoge/skills/induce/SKILL.md',
-  'euporia/skills/elicit/SKILL.md',
-  'epharmoge/skills/contextualize/SKILL.md',
-  'prosoche/skills/attend/SKILL.md',
-  'anamnesis/skills/recollect/SKILL.md',
-];
+// Single discoverPlugins() call shared across every check. plugin.json reads
+// are memoized inside the helper, so the verifier pays one read per
+// plugin.json regardless of how many checks consume the records below.
+const _records = discoverPlugins({ projectRoot });
+const _protocolRecords = _records.filter(r => r.isProtocol);
 
-const CANONICAL_PRECEDENCE = 'Horismos → Aitesis → Prothesis → Analogia → Periagoge → Euporia → Syneidesis → Prosoche → Epharmoge';
+const PROTOCOL_FILES = protocolFiles({ projectRoot });
+
+const CANONICAL_PRECEDENCE = CANONICAL_PRECEDENCE_ARR.join(' → ');
 const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
+
+// PRECEDENCE_FILES = protocols listed in CANONICAL_PRECEDENCE (linear order)
+// + Katalepsis appended (structurally last). Anamnesis is excluded — recall
+// stands outside the precedence partial order. Order matches the canonical
+// presentation used by checkPrecedenceLinearExtension.
 const PRECEDENCE_FILES = [
-  'horismos/skills/bound/SKILL.md',
-  'aitesis/skills/inquire/SKILL.md',
-  'prothesis/skills/frame/SKILL.md',
-  'analogia/skills/ground/SKILL.md',
-  'periagoge/skills/induce/SKILL.md',
-  'euporia/skills/elicit/SKILL.md',
-  'syneidesis/skills/gap/SKILL.md',
-  'prosoche/skills/attend/SKILL.md',
-  'epharmoge/skills/contextualize/SKILL.md',
-  'katalepsis/skills/grasp/SKILL.md',
+  ...CANONICAL_PRECEDENCE_ARR.map(name => `${name.toLowerCase()}/skills/${
+    _protocolRecords.find(r => r.dir === name.toLowerCase())?.skill
+  }/SKILL.md`),
+  `katalepsis/skills/${_protocolRecords.find(r => r.dir === 'katalepsis')?.skill}/SKILL.md`,
 ];
 
 // Authoritative edge type allowlist — used by both graph-integrity and cross-ref-scan checks
 const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression']);
 
-const CANONICAL_PROTOCOLS = {
-  'Prothesis':  { deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
-  'Syneidesis': { deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
-  'Katalepsis': { deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
-  'Horismos':   { deficit: 'BoundaryUndefined', resolution: 'DefinedBoundary' },
-  'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
-  'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
-  'Periagoge':  { deficit: 'AbstractionInProcess', resolution: 'CrystallizedAbstraction' },
-  'Euporia':    { deficit: 'AbstractAporia', resolution: 'ResolvedEndpoint' },
-  'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
-  'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
-  'Anamnesis':  { deficit: 'RecallAmbiguous', resolution: 'RecalledContext' },
-};
+// Protocol display name → {deficit, resolution}. Derived from per-protocol
+// SKILL.md description Type signature; capitalize(dir) for display name.
+const CANONICAL_PROTOCOLS = Object.fromEntries(
+  _protocolRecords.map(r => [
+    r.dir[0].toUpperCase() + r.dir.slice(1),
+    { deficit: r.deficit, resolution: r.resolution },
+  ])
+);
 
 // Shared directory walker for file collection
 function walkFiles(dir, predicate, checkName) {
@@ -2361,11 +2355,8 @@ function checkSingleAxisSoundness() {
 // check enforces parity between the two views — fails on missing, extra,
 // non-symlink, or mis-targeted entries.
 function checkAgentsSymlinksSync() {
-  const SOURCE_PLUGINS = [
-    'prothesis', 'syneidesis', 'katalepsis', 'horismos',
-    'aitesis', 'analogia', 'periagoge', 'euporia', 'prosoche', 'epharmoge', 'anamnesis',
-    'epistemic-cooperative',
-  ];
+  // Source plugin dirs derived from filesystem walk (excludes deprecated).
+  const SOURCE_PLUGINS = sourcePluginDirs({ projectRoot });
   const agentsDir = path.join(projectRoot, '.agents', 'skills');
 
   const expected = new Map(); // name -> absolute target dir
