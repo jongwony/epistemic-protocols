@@ -1552,28 +1552,19 @@ function checkCrossRefScan() {
         });
         subCheckFailed = true;
       } else if (!loadFailed && Array.isArray(PLUGINS)) {
-        // Structural guard: filter malformed tuples and escalate each to
-        // fail + subCheckFailed (Stage 2 loud mode). Without this, a missing
-        // `skill` key produces the string `"dir/undefined"` which flows into
-        // the set-diff as a misleading `stale-plugins-entry` warning. Loud
-        // mode ensures real shape errors surface as parse errors that block
-        // CI, not as phantom filesystem mismatches tolerated silently.
+        // Structural guard: every tuple must have { dir: string, skill: string }.
+        // Loud-mode escalation per Stage 2 — bad shape blocks CI rather than
+        // producing phantom downstream warnings.
         //
-        // Partial-processing note: valid tuples continue through the
-        // bidirectional diff below even when some entries are malformed.
-        // A malformed entry may ALSO produce a downstream publication-gap
-        // warning for the SKILL.md it would have covered — one root cause,
-        // two diagnostics. This is intentional post-escalation noise; the
-        // malformed-plugins-entry fail is the actionable signal, and
-        // contributors should fix that first.
-        const validPlugins = [];
+        // Note: PLUGINS is now derived from scripts/load-protocols.js
+        // discoverPlugins() (filesystem walk). The prior bidirectional diff
+        // (publication-gap, stale-plugins-entry) compared PLUGINS against a
+        // separate filesystem walk — under the helper-derived model both
+        // sides share the same walk, making the diff tautological. Drift
+        // detection moves to graph.json nodes (Source 4) and marketplace.json
+        // plugins (Source 5), which remain hand-curated relative to filesystem.
         for (const p of PLUGINS) {
-          if (p && typeof p.dir === 'string' && typeof p.skill === 'string') {
-            validPlugins.push(p);
-          } else {
-            // util.inspect handles circular references, BigInt, and other
-            // values that would make JSON.stringify throw — we must not
-            // abort the verifier through an unguarded serialization error.
+          if (!p || typeof p.dir !== 'string' || typeof p.skill !== 'string') {
             const serialized = util.inspect(p, { depth: 2, breakLength: 80 });
             results.fail.push({
               check: 'cross-ref-scan',
@@ -1581,66 +1572,6 @@ function checkCrossRefScan() {
               message: `malformed-plugins-entry: expected { dir: string, skill: string } tuple, got ${serialized}`
             });
             subCheckFailed = true;
-          }
-        }
-
-        const packagePluginTuples = new Set(
-          validPlugins.map(p => `${p.dir}/${p.skill}`)
-        );
-
-        // Filesystem walk: for each plugin dir, enumerate ${dir}/skills/<sub>/SKILL.md
-        const filesystemTuples = new Set();
-        for (const dir of allPluginDirs) {
-          const skillsDir = path.join(projectRoot, dir, 'skills');
-          if (!fs.existsSync(skillsDir)) continue;
-          let subEntries;
-          try {
-            subEntries = fs.readdirSync(skillsDir, { withFileTypes: true });
-          } catch (e) {
-            results.warn.push({
-              check: 'cross-ref-scan',
-              file: `${dir}/skills`,
-              message: `Could not read skills directory: ${e.message}`
-            });
-            continue;
-          }
-          for (const sub of subEntries) {
-            if (!sub.isDirectory()) continue;
-            const skillMdPath = path.join(skillsDir, sub.name, 'SKILL.md');
-            if (fs.existsSync(skillMdPath)) {
-              filesystemTuples.add(`${dir}/${sub.name}`);
-            }
-          }
-        }
-
-        // Bidirectional diff. publication-gap and stale-plugins-entry remain
-        // warning-only — these are migration signals (code and filesystem out
-        // of sync mid-refactor), not detector-infrastructure failures.
-        //
-        // Deprecated plugins (per-plugin "deprecated": true) are excluded:
-        // SKILL.md is retained on disk for transition continuity but the
-        // plugin is removed from packaging. The filter is derived from
-        // deprecatedPluginDirs (built from plugin.json reads above) — no
-        // hardcoded allowlist. Plugin Encapsulation: deprecation lives in
-        // per-plugin self-description.
-        for (const tuple of filesystemTuples) {
-          const dir = tuple.split('/')[0];
-          if (deprecatedPluginDirs.has(dir)) continue;
-          if (!packagePluginTuples.has(tuple)) {
-            results.warn.push({
-              check: 'cross-ref-scan',
-              file: 'scripts/package.js',
-              message: `publication-gap: ${tuple} has SKILL.md but is missing from scripts/package.js PLUGINS`
-            });
-          }
-        }
-        for (const tuple of packagePluginTuples) {
-          if (!filesystemTuples.has(tuple)) {
-            results.warn.push({
-              check: 'cross-ref-scan',
-              file: 'scripts/package.js',
-              message: `stale-plugins-entry: scripts/package.js PLUGINS contains ${tuple} but SKILL.md does not exist`
-            });
           }
         }
       }
