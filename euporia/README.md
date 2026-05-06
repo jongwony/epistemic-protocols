@@ -6,7 +6,7 @@ Resolve via Extended-Mind reverse induction — `/elicit`.
 
 Euporia opens a way through abstract aporia by reverse-tracing decision coordinates from the user's externalized cognitive substrate (codebase, rules, past sessions, user environment) and surfacing them as cycle-emergent dimension projections. The user's answers explicate which coordinates were already implicit in their externalized cognition; resolution emerges through cycle iteration rather than axis-fixed extraction.
 
-The protocol stands in categorical dual relation to Periagoge (`/induce`) — Periagoge ascends from concrete instances to abstraction (bottom-up colimit), Euporia descends from intent through substrate to coordinates (top-down reverse induction). The two compose as orthogonal directions of the same dialectic substrate.
+The protocol stands in directional dual relation to Periagoge (`/induce`) — Periagoge ascends from concrete instances to abstraction (bottom-up direction), Euporia descends from intent through substrate to coordinates (top-down direction). The two compose as orthogonal directions of the same dialectic substrate. The pairing is informal direction-orthogonality, not a formal categorical limit/colimit duality.
 
 ## Type
 

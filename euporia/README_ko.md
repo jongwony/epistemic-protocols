@@ -6,7 +6,7 @@ Extended-Mind 역방향 귀납을 통한 해소 — `/elicit`.
 
 Euporia는 추상적 aporia(통로 없음)을 통과하는 길을 연다. 사용자의 외화된 인지 substrate(코드베이스, 규칙, 과거 세션, 사용자 환경)에서 결정 좌표를 역추적하여 cycle별로 emergent하게 dimension projection으로 surface하고, 사용자의 답변이 그 좌표가 이미 외화된 인지에 implicit하게 존재했음을 explicit화하는 방식으로 작동. resolution은 단일 axis로 고정된 추출이 아닌 cycle 반복을 통해 emergent하게 도달한다.
 
-본 프로토콜은 Periagoge(`/induce`)와 categorical dual 관계 — Periagoge는 구체적 인스턴스에서 추상으로 상향(bottom-up colimit), Euporia는 의도에서 substrate를 거쳐 좌표로 하향(top-down reverse induction). 두 프로토콜은 동일 dialectic substrate의 직교 방향으로 합성된다.
+본 프로토콜은 Periagoge(`/induce`)와 방향성 dual 관계 — Periagoge는 구체적 인스턴스에서 추상으로 상향(bottom-up 방향), Euporia는 의도에서 substrate를 거쳐 좌표로 하향(top-down 방향). 두 프로토콜은 동일 dialectic substrate의 직교 방향으로 합성된다. 해당 페어링은 informal direction-orthogonality로서 정식 categorical limit/colimit duality는 아니다.
 
 ## Type
 
