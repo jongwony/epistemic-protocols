@@ -68,7 +68,7 @@ End with: VERDICT: approve | needs-attention
 
 Run via `Bash(run_in_background: true, timeout: 300000)`:
 ```bash
-codex exec --skip-git-repo-check -m gpt-5.4 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_review_${SUFFIX}.txt
+codex exec --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_review_${SUFFIX}.txt
 ```
 
 **Optional: codex-adversarial** — If the user requests adversarial review or the change is large/architectural, also launch an adversarial prompt in background using a distinct temp file `/tmp/ensemble_codex_adversarial_${SUFFIX}.txt` (same `SUFFIX`, different filename) so the adversarial runner does not overwrite or re-read the standard review prompt:
@@ -97,7 +97,7 @@ End with: VERDICT: approve | needs-attention
 
 Execute with `Bash(run_in_background: true, timeout: 300000)`:
 ```bash
-codex exec --skip-git-repo-check -m gpt-5.4 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_adversarial_${SUFFIX}.txt
+codex exec --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_adversarial_${SUFFIX}.txt
 ```
 
 ### Step 2: Invoke /frame Mode 2 (foreground, interactive)
