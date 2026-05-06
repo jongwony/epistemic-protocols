@@ -80,7 +80,7 @@ scripts/sync-agents-symlinks.sh
 | 프로토콜 | 명령어 | 사용 시점 |
 |----------|--------|----------|
 | [Aitesis](./aitesis) | `/inquire` | AI가 필요한 걸 묻지 않고 바로 실행할 때 |
-| [Euporia](./euporia) | `/elicit` | 의도는 발화되었으나 결정 좌표가 코드베이스 / 규칙 / 과거 세션에 implicit하게 존재하여 cycle-emergent 역방향 귀납으로 표면화해야 할 때 |
+| [Euporia](./euporia) | `/elicit` | 의도가 있으나 결과가 명확하지 않아서 귀납적으로 표면화해야 할 때 |
 | [Prothesis](./prothesis) | `/frame` | 여러 관점이 필요한데 어떤 것이 맞는지 모를 때 |
 | [Analogia](./analogia) | `/ground` | AI 추천이 이론적으론 맞는데 내 상황에 맞는지 모를 때 |
 | [Periagoge](./periagoge) | `/induce` | 구체적 사례들이 쌓여 어떤 본질로 수렴하는데 추상화가 아직 자리잡지 않았을 때 |
@@ -92,8 +92,6 @@ scripts/sync-agents-symlinks.sh
 | [Katalepsis](./katalepsis) | `/grasp` | AI가 큰 변경을 했는데 실제로 이해가 필요할 때 |
 
 관심사 클러스터: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)
-
-> **Deprecation 안내**: `/clarify` (Hermeneia)와 `/goal` (Telos)는 2026-05-06부터 deprecated 상태입니다. 두 protocol의 reverse-induction 역할은 `/elicit` (Euporia)로 흡수되었습니다. 기존 사용자의 전환 연속성을 위해 plugin은 당분간 설치 가능하지만 충분한 evidence 누적 후 archive 예정입니다. 신규 사용자는 `/elicit`를 사용해 주세요.
 
 ## 유틸리티
 

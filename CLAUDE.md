@@ -8,8 +8,6 @@ Epistemic Protocols is a layered system for human-AI collaboration: it inserts s
 
 In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **AbstractionInProcess → CrystallizedAbstraction** (Periagoge), **AbstractAporia → ResolvedEndpoint** (Euporia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
 
-> **Deprecation note (2026-05-06)**: Hermeneia (`/clarify`, IntentMisarticulated → ClarifiedIntent) and Telos (`/goal`, GoalIndeterminate → DefinedEndState) are deprecated; their reverse-induction roles are absorbed by Euporia (`/elicit`). Plugin directories `hermeneia/` and `telos/` remain for transition continuity but are removed from `graph.json`, `/probe` catalog, and central enumerations. Full archive deferred until Stage 2 evidence accumulates.
-
 ## Architecture
 
 ```
@@ -25,7 +23,7 @@ epistemic-protocols/
 ├── aitesis/         (/inquire)        # context insufficiency inference
 ├── analogia/        (/ground)         # structural mapping validation
 ├── periagoge/       (/induce)         # in-process abstraction crystallization
-├── euporia/         (/elicit)         # Extended-Mind reverse induction (absorbs deprecated Hermeneia/Telos)
+├── euporia/         (/elicit)         # Extended-Mind reverse induction
 ├── prosoche/        (/attend)         # execution-time risk evaluation
 ├── epharmoge/       (/contextualize)  # application-context mismatch (conditional)
 ├── anamnesis/       (/recollect)      # vague recall → recognized context

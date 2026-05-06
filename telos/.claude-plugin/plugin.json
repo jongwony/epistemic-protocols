@@ -1,7 +1,7 @@
 {
   "name": "telos",
-  "description": "[Deprecated \u2014 use /elicit (Euporia)] Co-construct defined goals from vague intent \u2014 /goal (\u03c4\u03ad\u03bb\u03bf\u03c2: end, purpose)",
-  "version": "1.14.0",
+  "description": "Co-construct defined goals from vague intent \u2014 /goal (\u03c4\u03ad\u03bb\u03bf\u03c2: end, purpose)",
+  "version": "1.14.1",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

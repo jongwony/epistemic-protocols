@@ -80,7 +80,7 @@ The `agents-symlinks-sync` static check fails the pre-commit if the materialized
 | Protocol | Command | When to use |
 |----------|---------|-------------|
 | [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
-| [Euporia](./euporia) | `/elicit` | Intent is articulated but the decision coordinates are implicit in your codebase / rules / past sessions — surface them through cycle-emergent reverse induction |
+| [Euporia](./euporia) | `/elicit` | You have intent but the outcome isn't clear — surface it through inductive dialogue |
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
 | [Periagoge](./periagoge) | `/induce` | Multiple concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
@@ -92,8 +92,6 @@ The `agents-symlinks-sync` static check fails the pre-commit if the materialized
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
 
 Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)
-
-> **Deprecation**: `/clarify` (Hermeneia) and `/goal` (Telos) are deprecated as of 2026-05-06; their reverse-induction roles are absorbed by `/elicit` (Euporia). The plugins remain installable for transition continuity but will be archived after sufficient evidence accumulates. New installs should use `/elicit`.
 
 ## Utilities
 
