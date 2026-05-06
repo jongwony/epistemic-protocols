@@ -133,7 +133,7 @@ When Syneidesis is active:
 - All decision points become candidates for interactive confirmation
 - Loaded instructions resume after mode deactivation
 
-**Protocol precedence**: Activation order position 9/11 (graph.json is authoritative source for information flow). Concern cluster: Decision.
+**Protocol precedence**: Activation order position 7/9 (graph.json is authoritative source for information flow). Concern cluster: Decision.
 
 **Advisory relationships**: Receives from Prothesis (advisory: perspective simulation provides gap detection context), Analogia (advisory: validated mapping improves gap detection accuracy), Horismos (advisory: BoundaryMap narrows gap detection scope). Provides to Aitesis (suppression: same scope suppression). Katalepsis is structurally last.
 

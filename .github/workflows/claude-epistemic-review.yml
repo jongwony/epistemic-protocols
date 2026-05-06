@@ -7,9 +7,7 @@ on:
     paths:
       - 'prothesis/**'
       - 'syneidesis/**'
-      - 'hermeneia/**'
       - 'katalepsis/**'
-      - 'telos/**'
       - 'horismos/**'
       - 'aitesis/**'
       - 'analogia/**'

@@ -1,6 +1,6 @@
 ---
 name: clarify
-description: "Clarify intent-expression gaps. Extracts clarified intent when what you mean differs from what you said. Type: (IntentMisarticulated, Hybrid, EXTRACT, Expression) → ClarifiedIntent. Alias: Hermeneia(ἑρμηνεία)."
+description: "[Deprecated — use /elicit (Euporia) for axis-emergent reverse induction] Clarify intent-expression gaps. Extracts clarified intent when what you mean differs from what you said. Type: (IntentMisarticulated, Hybrid, EXTRACT, Expression) → ClarifiedIntent. Alias: Hermeneia(ἑρμηνεία)."
 ---
 
 # Hermeneia Protocol

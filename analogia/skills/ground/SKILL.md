@@ -164,7 +164,7 @@ When Analogia is active:
 - Analogia completes before output dependent on mapping validity proceeds
 - Loaded instructions resume after mapping status is made explicit
 
-**Protocol precedence**: Activation order position 6/11 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
+**Protocol precedence**: Activation order position 4/9 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
 
 **Advisory relationships**: Receives from Prothesis (advisory: perspective simulation provides mapping construction context), Aitesis (advisory: inferred context narrows mapping domain identification), Horismos (advisory: BoundaryMap narrows mapping domain identification). Provides to Syneidesis (advisory: validated mapping improves gap detection accuracy). Katalepsis is structurally last.
 

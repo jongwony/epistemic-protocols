@@ -22,9 +22,7 @@ const projectRoot = path.resolve(__dirname, '..');
 const PLUGINS = [
   { dir: 'prothesis', skill: 'frame' },
   { dir: 'syneidesis', skill: 'gap' },
-  { dir: 'hermeneia', skill: 'clarify' },
   { dir: 'katalepsis', skill: 'grasp' },
-  { dir: 'telos', skill: 'goal' },
   { dir: 'aitesis', skill: 'inquire' },
   { dir: 'horismos', skill: 'bound' },
   { dir: 'analogia', skill: 'ground' },
@@ -57,9 +55,7 @@ const PLUGINS = [
 const DESCRIPTION_OVERRIDES = {
   frame: 'Multi-perspective investigation — (FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry',
   gap: 'Gap surfacing before decisions — (GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision',
-  clarify: 'Clarify intent-expression gaps — (IntentMisarticulated, Hybrid, EXTRACT, Expression) → ClarifiedIntent',
   grasp: 'Comprehension verification after AI work — (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding',
-  goal: 'Co-construct goals from vague intent — (GoalIndeterminate, AI, CO-CONSTRUCT, VagueGoal) → DefinedEndState',
   inquire: 'Infer context insufficiency before execution — (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution',
   attend: 'Evaluate execution-time risks — (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution',
   ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, Text) → ValidatedMapping',
@@ -85,8 +81,6 @@ const STRIP_FIELDS = new Set(['allowed-tools', 'license', 'compatibility', 'meta
 // Order mirrors PROTOCOL_ORDER: Anamnesis first (recall, session start), then canonical precedence + Katalepsis last.
 const PROTOCOL_METADATA = {
   anamnesis:  { name: 'Anamnesis', command: '/recollect', deficit: 'RecallAmbiguous', resolution: 'RecalledContext' },
-  hermeneia:  { name: 'Hermeneia', command: '/clarify', deficit: 'IntentMisarticulated', resolution: 'ClarifiedIntent' },
-  telos:      { name: 'Telos', command: '/goal', deficit: 'GoalIndeterminate', resolution: 'DefinedEndState' },
   horismos:   { name: 'Horismos', command: '/bound', deficit: 'BoundaryUndefined', resolution: 'DefinedBoundary' },
   aitesis:    { name: 'Aitesis', command: '/inquire', deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
   prothesis:  { name: 'Prothesis', command: '/frame', deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
@@ -102,7 +96,7 @@ const PROTOCOL_METADATA = {
 // Display order: Anamnesis (recall, session start) + CANONICAL_PRECEDENCE + Katalepsis (structurally last)
 const PROTOCOL_ORDER = [
   'anamnesis',
-  'hermeneia', 'telos', 'horismos', 'aitesis', 'prothesis',
+  'horismos', 'aitesis', 'prothesis',
   'analogia', 'periagoge', 'euporia', 'syneidesis', 'prosoche', 'epharmoge', 'katalepsis',
 ];
 
@@ -129,12 +123,12 @@ function validateProtocolTables() {
 // Curated first-release highlights (Phase A: no previous tag exists)
 const FIRST_RELEASE_HIGHLIGHTS = `## Highlights
 
-### 12 Epistemic Protocols
+### 11 Epistemic Protocols
 
 Structure human-AI interaction quality at every decision point. Each protocol resolves a typed deficit:
 
-- **Planning**: \`/clarify\` (intent gaps), \`/goal\` (vague goals), \`/inquire\` (context insufficiency)
-- **Analysis**: \`/frame\` (absent frameworks), \`/ground\` (unmapped abstractions)
+- **Planning**: \`/inquire\` (context insufficiency), \`/elicit\` (axis-emergent reverse induction)
+- **Analysis**: \`/frame\` (absent frameworks), \`/ground\` (unmapped abstractions), \`/induce\` (in-process abstraction)
 - **Decision**: \`/gap\` (unnoticed gaps before action)
 - **Execution**: \`/attend\` (execution-time risk evaluation)
 - **Verification**: \`/contextualize\` (post-execution context mismatch)

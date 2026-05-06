@@ -38,9 +38,7 @@ Paste in Codex and run:
 $skill-installer install these skills from jongwony/epistemic-protocols:
 - prothesis/skills/frame
 - syneidesis/skills/gap
-- hermeneia/skills/clarify
 - katalepsis/skills/grasp
-- telos/skills/goal
 - aitesis/skills/inquire
 - horismos/skills/bound
 - analogia/skills/ground
@@ -57,7 +55,7 @@ Restart Codex, then start with `$onboard`.
 <details>
 <summary>Notes</summary>
 
-- This installs 13 protocols + `onboard`. `/report`, `/dashboard`, `/write` are not included.
+- This installs 11 protocols + `onboard`. `/report`, `/dashboard`, `/write` are not included.
 - To install a single skill, use the same `skill-installer` pattern with one path.
 - This README is the source of truth for the Codex-supported install set.
 
@@ -81,13 +79,11 @@ The `agents-symlinks-sync` static check fails the pre-commit if the materialized
 
 | Protocol | Command | When to use |
 |----------|---------|-------------|
-| [Hermeneia](./hermeneia) | `/clarify` | AI keeps building what you didn't ask for |
-| [Telos](./telos) | `/goal` | You know you want something but can't define success |
 | [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
+| [Euporia](./euporia) | `/elicit` | You have intent but the outcome isn't clear — surface it through inductive dialogue |
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
 | [Periagoge](./periagoge) | `/induce` | Multiple concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
-| [Euporia](./euporia) | `/elicit` | Intent is articulated but the decision coordinates are implicit in your codebase / rules / past sessions — surface them through cycle-emergent reverse induction |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
 | [Prosoche](./prosoche) | `/attend` | Want execution readiness checked and risky actions gated for your judgment |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
@@ -95,7 +91,7 @@ The `agents-symlinks-sync` static check fails the pre-commit if the materialized
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
 
-Concern clusters: Planning (`/clarify`, `/goal`, `/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)
+Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)
 
 ## Utilities
 

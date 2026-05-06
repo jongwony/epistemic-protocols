@@ -53,7 +53,7 @@ Phase 0 is silent — no surfacing. If detection fails (deficit is already clear
 
 ### Phase 1: Catalog Scan
 
-Scan the user's situation against the full catalog of 12 epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
+Scan the user's situation against the full catalog of 11 epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
 
 - A `deficit: DeficitName` matched against the situation
 - The `protocol: ProtocolId` that addresses that deficit
@@ -65,6 +65,8 @@ A hypothesis with `|coverage| = 1` is a single-protocol projection (preserves pr
 When `Λ.coverage_constraint` is set (from a prior `Narrow(CoverageSubset)`), filter the scan output to hypotheses whose coverage protocol set intersects with the constraint — this preserves user-directed narrowing across re-scan iterations.
 
 Construct the candidate set. Keep at minimum two candidates with non-overlapping reverse-evidence conditions — singleton high-confidence framing is forbidden (see Rules section, Rule 5).
+
+**Single-pass routing scope**: Phase 1 enumerates named deficits across the catalog as a one-shot fit review. Per-protocol convergence dynamics — including cycle iteration within a routed protocol such as `/elicit`'s reverse-induction loop — remain internal to that destination protocol; Probe does not surface, measure, or aggregate convergence efficiency across uses (Rule 7 reinforcement; cycle-counter visibility is the destination protocol's UX surface, not Probe's).
 
 ### Phase 2: Hypothesis Presentation
 
@@ -149,7 +151,7 @@ invariant: Recognition over Resolution
 
 ── TYPES ──
 U                = UserSituation { utterance: String, session_slice: Optional(Slice) }
-Catalog          = Set(DeficitEntry)               -- 12 named deficits + Emergent
+Catalog          = Set(DeficitEntry)               -- 11 named deficits + Emergent
 DeficitEntry     = { deficit: DeficitName, protocol: ProtocolId,
                      trigger_signal: String, reverse_evidence_template: String }
 Evidence         = String                           -- quoted or paraphrased situation evidence
@@ -176,12 +178,12 @@ ProtocolRoute    = session text { target_coverage: Set(CoverageEntry) }    -- |t
                    -- recognized_deficits = π_deficit(target_coverage); evidence_trace = π_evidence(target_coverage)
                    --   (derived projections, not separate fields)
 FitReviewNote    = session text { presented_hypotheses, dismissed: true }
-DeficitName      ∈ {IntentMisarticulated, GoalIndeterminate, BoundaryUndefined,
-                    ContextInsufficient, FrameworkAbsent, MappingUncertain,
-                    AbstractionInProcess, GapUnnoticed, ExecutionBlind,
-                    ApplicationDecontextualized, RecallAmbiguous, ResultUngrasped} ∪ Emergent
-ProtocolId       ∈ {clarify, goal, bound, inquire, frame, ground,
-                    induce, gap, attend, contextualize, recollect, grasp} ∪ Emergent
+DeficitName      ∈ {BoundaryUndefined, ContextInsufficient, FrameworkAbsent,
+                    MappingUncertain, AbstractionInProcess, AbstractAporia,
+                    GapUnnoticed, ExecutionBlind, ApplicationDecontextualized,
+                    RecallAmbiguous, ResultUngrasped} ∪ Emergent
+ProtocolId       ∈ {bound, inquire, frame, ground, induce, elicit, gap,
+                    attend, contextualize, recollect, grasp} ∪ Emergent
 Phase            ∈ {0, 1, 2, 3}
 
 ── PHASE TRANSITIONS ──

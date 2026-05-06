@@ -232,19 +232,19 @@ growth_items: [{
 <div class="glance-grid">
   <div class="glance-block">
     <h4>Structured Decisions</h4>
-    <p>3 of 10 protocols actively used across recent sessions. Code review (via /frame) and goal co-construction (via /goal) are your most adopted patterns...</p>
+    <p>3 of 10 protocols actively used across recent sessions. Code review (via /frame) and reverse-induction (via /elicit) are your most adopted patterns...</p>
   </div>
   <div class="glance-block">
     <h4>Unstructured Decisions</h4>
-    <p>81 wrong_approach events occurred without /goal or /clarify. Execution sessions lack /attend despite deploy/push activity in 3 of 8 sessions...</p>
+    <p>81 wrong_approach events occurred without /elicit or /inquire. Execution sessions lack /attend despite deploy/push activity in 3 of 8 sessions...</p>
   </div>
   <div class="glance-block">
     <h4>Coverage Delta</h4>
-    <p>Planning cluster (clarify, goal, inquire): 40% adoption. Execution cluster (attend): 0% adoption in implementation sessions. Verification (grasp): not invoked...</p>
+    <p>Planning cluster (inquire, elicit): 40% adoption. Execution cluster (attend): 0% adoption in implementation sessions. Verification (grasp): not invoked...</p>
   </div>
   <div class="glance-block">
     <h4>Highest-Impact Gap</h4>
-    <p>wrong_approach (81) + misunderstood_request (25) = 106 events addressable by Planning cluster protocols. Estimated rework reduction: ~22% of sessions...</p>
+    <p>wrong_approach (81) + axis_undetermined_intent (25) = 106 events addressable by Planning cluster protocols. Estimated rework reduction: ~22% of sessions...</p>
   </div>
 </div>
 
@@ -264,7 +264,7 @@ growth_items: [{
 <div class="card profile-card">
   <div class="card-title">Protocol Adoption Trajectory</div>
   <p class="narrative">6 distinct protocols invoked in a single session (27b01c32). Planning cluster dominates early adoption; execution and verification clusters remain unexplored. Protocol usage correlates with iterative refinement sessions (multi-task type)...</p>
-  <p class="key-pattern">Preference pattern: Planning-heavy (clarify, goal, inquire) with emerging Analysis adoption (frame, ground).</p>
+  <p class="key-pattern">Preference pattern: Planning-heavy (inquire, elicit) with emerging Analysis adoption (frame, ground, induce).</p>
 </div>
 
 <!-- ====================================================
@@ -297,7 +297,7 @@ growth_items: [{
   </div>
   <div class="layer epistemic">
     <span class="tag">Epistemic</span>
-    <p>Using <span class="cta">/goal</span> would co-construct a defined end state before implementation, preventing direction changes from undefined goals.</p>
+    <p>Using <span class="cta">/elicit</span> would reverse-trace decision coordinates from substrate before implementation, preventing direction changes from axis-undetermined intent.</p>
   </div>
   <div class="evidence">
     "Claude misdiagnosed a root cause as a deferred tool loading issue until you corrected it"
@@ -307,14 +307,14 @@ growth_items: [{
 
 <!-- PATH B: CARD: Diagnostic (existing pattern, replicate per anti-pattern) -->
 <div class="card diagnostic-card">
-  <div class="card-title">Vague goal led to 3 direction changes</div>
+  <div class="card-title">Axis-undetermined intent led to 3 direction changes</div>
   <p>Session started with "improve the auth flow" without specifying what improvement means.</p>
   <div class="snippet">
     <div class="user-msg">Please improve the auth flow</div>
     <div class="ai-msg">I'll improve the authentication flow. Let me first check the current structure...</div>
     <div class="session-ref">project: ~/myapp &middot; session: a1b2c3d4</div>
   </div>
-  <div class="protocol-cta">Using <span class="cta">/goal</span> here would co-construct a defined end state before implementation.</div>
+  <div class="protocol-cta">Using <span class="cta">/elicit</span> here would reverse-trace decision coordinates from substrate before implementation.</div>
   <div class="resume-cmd">cd ~/myapp && claude --resume a1b2c3d4</div>
 </div>
 
@@ -327,7 +327,7 @@ growth_items: [{
     <div class="ai-msg">I've updated the component. I improved both the styling and logic together.</div>
     <div class="session-ref">project: ~/webapp &middot; session: e5f6g7h8</div>
   </div>
-  <div class="protocol-cta">Calling <span class="cta">/clarify</span> would help articulate which aspect to modify, preventing rework.</div>
+  <div class="protocol-cta">Calling <span class="cta">/elicit</span> would surface which axis (component, scope, behavior) is implicit in your substrate, preventing rework.</div>
   <div class="resume-cmd">cd ~/webapp && claude --resume e5f6g7h8</div>
 </div>
 
@@ -340,15 +340,15 @@ growth_items: [{
 
 <!-- CARD: Recommendation (installed) -->
 <div class="card recommendation-card">
-  <div class="card-title">Hermeneia <span class="cta">/clarify</span></div>
-  <p>Clarify intent-expression gaps through dialogue. Matched from: repeated file edits (3 sessions), communication rules detected.</p>
+  <div class="card-title">Aitesis <span class="cta">/inquire</span></div>
+  <p>Infer context insufficiency before execution. Matched from: external fact queries (3 sessions), verifiable grounding patterns.</p>
 </div>
 
 <!-- CARD: Recommendation (not installed) -->
 <div class="card recommendation-card">
-  <div class="card-title">Telos <span class="cta">/goal</span></div>
-  <p>Co-construct defined goals from vague intent. Matched from: vague first prompts (4 sessions), wrong_approach friction.</p>
-  <div class="install-cmd">claude plugin install epistemic-protocols/telos</div>
+  <div class="card-title">Euporia <span class="cta">/elicit</span></div>
+  <p>Resolve via Extended-Mind reverse induction. Matched from: vague first prompts (4 sessions), axis-undetermined intent friction.</p>
+  <div class="install-cmd">claude plugin install epistemic-protocols/euporia</div>
 </div>
 
 <!-- Batch Install: CONDITIONAL, only when 2+ not installed -->
@@ -361,8 +361,8 @@ growth_items: [{
 
 <!-- Quick Start: Always rendered in PATH B, optional supplement in PATH A -->
 <div class="card recommendation-card">
-  <div class="card-title">Try Hermeneia right now</div>
-  <p>You edited <code>src/auth.ts</code> 5 times in recent sessions. Using <span class="cta">/clarify</span> to articulate intent first can reduce rework cycles.</p>
+  <div class="card-title">Try Euporia right now</div>
+  <p>You edited <code>src/auth.ts</code> 5 times in recent sessions. Using <span class="cta">/elicit</span> to surface implicit decision coordinates first can reduce rework cycles.</p>
   <div class="resume-cmd">cd ~/webapp && claude --resume e5f6g7h8</div>
 </div>
 

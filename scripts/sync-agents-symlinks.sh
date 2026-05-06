@@ -18,7 +18,7 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 PLUGINS=(
-  prothesis syneidesis hermeneia katalepsis telos horismos
+  prothesis syneidesis katalepsis horismos
   aitesis analogia periagoge euporia prosoche epharmoge anamnesis
   epistemic-cooperative
 )

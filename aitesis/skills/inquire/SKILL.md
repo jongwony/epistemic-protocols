@@ -244,9 +244,9 @@ When Aitesis is active:
 - Aitesis completes before execution proceeds
 - Loaded instructions resume after context is resolved or dismissed
 
-**Protocol precedence**: Activation order position 4/11 (graph.json is authoritative source for information flow). Concern cluster: Planning.
+**Protocol precedence**: Activation order position 2/9 (graph.json is authoritative source for information flow). Concern cluster: Planning.
 
-**Advisory relationships**: Receives from Horismos (advisory: BoundaryMap narrows context inference scope), Prothesis (advisory: perspective simulation provides context inference recommendations), Hermeneia (advisory: background gaps suggest context insufficiency), Syneidesis (suppression: same scope suppression). Provides to Prosoche (advisory: inferred context narrows execution risk assessment), Analogia (advisory: inferred context narrows mapping domain identification); Epharmoge (suppression: pre+post stacking prevention). Katalepsis is structurally last.
+**Advisory relationships**: Receives from Horismos (advisory: BoundaryMap narrows context inference scope), Prothesis (advisory: perspective simulation provides context inference recommendations), Euporia (advisory: traced coordinates narrow context inference), Syneidesis (suppression: same scope suppression). Provides to Prosoche (advisory: inferred context narrows execution risk assessment), Analogia (advisory: inferred context narrows mapping domain identification); Epharmoge (suppression: pre+post stacking prevention). Katalepsis is structurally last.
 
 ### Trigger Signals
 

@@ -234,9 +234,9 @@ When Prothesis is active:
 - Prothesis completes before other workflows begin
 - Loaded instructions resume after perspective is established
 
-**Protocol precedence**: Activation order position 5/11 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
+**Protocol precedence**: Activation order position 3/9 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
 
-**Advisory relationships**: Receives from Horismos (advisory: BoundaryMap narrows framework selection scope), Telos (advisory: defined goals improve framework selection and lens configuration). Provides to Syneidesis (advisory: perspective simulation provides gap detection context), Telos (advisory: perspective simulation improves goal definition), Aitesis (advisory: perspective simulation provides context inference recommendations), Analogia (advisory: perspective simulation provides mapping construction context). Katalepsis is structurally last.
+**Advisory relationships**: Receives from Horismos (advisory: BoundaryMap narrows framework selection scope). Provides to Syneidesis (advisory: perspective simulation provides gap detection context), Aitesis (advisory: perspective simulation provides context inference recommendations), Analogia (advisory: perspective simulation provides mapping construction context). Katalepsis is structurally last.
 
 Consult `references/conceptual-foundations.md` for design rationale (Plan Mode Integration, Distinction from Socratic Method, Parametric Nature, Specialization) and activation edge cases (per-message application rules, mode deactivation triggers, trigger/skip heuristics).
 

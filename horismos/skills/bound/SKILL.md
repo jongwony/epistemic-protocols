@@ -164,9 +164,9 @@ When Horismos is active:
 - Horismos completes before execution proceeds
 - Loaded instructions resume after all domains are bounded or dismissed
 
-**Protocol precedence**: Activation order position 3/11 (graph.json is authoritative source for information flow). Cross-cutting: BoundaryMap is consumed by 5 downstream protocols.
+**Protocol precedence**: Activation order position 1/9 (graph.json is authoritative source for information flow). Cross-cutting: BoundaryMap is consumed by 5 downstream protocols.
 
-**Advisory relationships**: Receives from Telos (precondition: defined goals enable boundary definition). Provides to Aitesis, Prothesis, Prosoche, Analogia, Syneidesis (all advisory: BoundaryMap narrows scope). Katalepsis is structurally last.
+**Advisory relationships**: Provides to Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia (all advisory: BoundaryMap narrows scope). Receives from Euporia (advisory: resolved coordinates inform downstream boundary definition). Katalepsis is structurally last.
 
 ### Trigger Signals
 

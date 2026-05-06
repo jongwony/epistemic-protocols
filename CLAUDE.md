@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Epistemic Protocols is a layered system for human-AI collaboration: it inserts structured checkpoints at decision points so misalignment is surfaced early, judged explicitly, and adapted before it compounds into expensive downstream work.
 
-In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **IntentMisarticulated → ClarifiedIntent** (Hermeneia), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **GoalIndeterminate → DefinedEndState** (Telos), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **AbstractionInProcess → CrystallizedAbstraction** (Periagoge), **AbstractAporia → ResolvedEndpoint** (Euporia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
+In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **AbstractionInProcess → CrystallizedAbstraction** (Periagoge), **AbstractAporia → ResolvedEndpoint** (Euporia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
 
 ## Architecture
 
@@ -18,14 +18,12 @@ epistemic-protocols/
 │   # Each protocol plugin: .claude-plugin/plugin.json + skills/<verb>/SKILL.md
 ├── prothesis/       (/frame)          # multi-perspective investigation
 ├── syneidesis/      (/gap)            # gap surfacing
-├── hermeneia/       (/clarify)        # intent clarification
 ├── katalepsis/      (/grasp)          # comprehension verification
-├── telos/           (/goal)           # goal co-construction
 ├── horismos/        (/bound)          # epistemic boundary definition
 ├── aitesis/         (/inquire)        # context insufficiency inference
 ├── analogia/        (/ground)         # structural mapping validation
 ├── periagoge/       (/induce)         # in-process abstraction crystallization
-├── euporia/         (/elicit)         # Extended-Mind reverse induction (Periagoge categorical dual)
+├── euporia/         (/elicit)         # Extended-Mind reverse induction
 ├── prosoche/        (/attend)         # execution-time risk evaluation
 ├── epharmoge/       (/contextualize)  # application-context mismatch (conditional)
 ├── anamnesis/       (/recollect)      # vague recall → recognized context
@@ -56,9 +54,7 @@ epistemic-protocols/
 |----------|-------|----------------------|
 | Prothesis | `/frame` | FrameworkAbsent → FramedInquiry |
 | Syneidesis | `/gap` | GapUnnoticed → AuditedDecision |
-| Hermeneia | `/clarify` | IntentMisarticulated → ClarifiedIntent |
 | Katalepsis | `/grasp` | ResultUngrasped → VerifiedUnderstanding |
-| Telos | `/goal` | GoalIndeterminate → DefinedEndState |
 | Horismos | `/bound` | BoundaryUndefined → DefinedBoundary |
 | Aitesis | `/inquire` | ContextInsufficient → InformedExecution |
 | Analogia | `/ground` | MappingUncertain → ValidatedMapping |
@@ -102,25 +98,25 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 
 | Concern | Protocols |
 |---------|-----------|
-| Planning | `/clarify` (Hermeneia), `/goal` (Telos), `/inquire` (Aitesis), `/elicit` (Euporia) |
+| Planning | `/inquire` (Aitesis), `/elicit` (Euporia) |
 | Analysis | `/frame` (Prothesis), `/ground` (Analogia), `/induce` (Periagoge) |
 | Decision | `/gap` (Syneidesis) |
 | Execution | `/attend` (Prosoche) |
 | Verification | `/contextualize` (Epharmoge) |
 | Cross-cutting | `/bound` (Horismos), `/recollect` (Anamnesis), `/grasp` (Katalepsis) |
 
-**Cross-cutting**: `/bound` (Horismos) — BoundaryMap narrows scope for 5 downstream protocols via DAG-downstream advisory. `/recollect` (Anamnesis) — recalled context enriches 10 downstream protocols via advisory-only edges (no precondition weight). **Structural asymmetry**: Horismos sits downstream of the Hermeneia→Telos→Horismos DAG chain, so its 5 edges propagate through committed activation. Anamnesis has 10 advisory-only edges with no precondition enforcement — cardinality is larger but operational weight differs. `/grasp` (Katalepsis) — requires all to complete.
+**Cross-cutting**: `/bound` (Horismos) — BoundaryMap narrows scope for 5 downstream protocols via DAG-downstream advisory. `/recollect` (Anamnesis) — recalled context enriches downstream protocols via advisory-only edges (no precondition weight). `/grasp` (Katalepsis) — requires all to complete.
 
 **Key graph relationships**:
-- Preconditions (DAG-enforced): Hermeneia → Telos → Horismos; * → Katalepsis (includes Anamnesis and Periagoge via wildcard)
-- Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia}, Prothesis → {Syneidesis, Telos, Aitesis, Analogia}, Telos → {Prothesis}, Hermeneia → {Aitesis, Periagoge}, Euporia → {Horismos, Aitesis, Periagoge}
+- Preconditions (DAG-enforced): * → Katalepsis (includes Anamnesis and Periagoge via wildcard). The prior Hermeneia → Telos → Horismos chain dissolved with Hermeneia/Telos deprecation; Horismos has no precondition source, Euporia → Horismos remains advisory.
+- Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia}, Prothesis → {Syneidesis, Aitesis, Analogia}, Euporia → {Horismos, Aitesis, Periagoge}
 - Suppression: Syneidesis ⊣ Aitesis (same scope), Aitesis ⊣ Epharmoge (pre+post stacking)
 
 **Initiator taxonomy** (2-layer model):
 - **Layer 1**: All protocols are user-invocable (slash command or description match). No AI detection at this layer.
 - **Layer 2** (in-protocol heuristics): Behavior varies by initiator type:
-  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis)
-  - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Hermeneia, Euporia)
+  - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis)
+  - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Euporia)
   - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Write)
 
@@ -173,8 +169,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 ## Delegation Constraint
 
 - **Prothesis**: See SKILL.md for phase-specific delegation rules (Phase 0-2 main agent, Phase 3-4 agent team incl. routing)
-- **Syneidesis/Hermeneia/Katalepsis**: No Task delegation—must run in main agent (user-facing gates require main agent context)
-- **Telos**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Syneidesis/Katalepsis**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Horismos**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Aitesis**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Epharmoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
