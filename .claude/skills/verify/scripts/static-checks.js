@@ -20,9 +20,7 @@ const results = { pass: [], fail: [], warn: [] };
 const PROTOCOL_FILES = [
   'prothesis/skills/frame/SKILL.md',
   'syneidesis/skills/gap/SKILL.md',
-  'hermeneia/skills/clarify/SKILL.md',
   'katalepsis/skills/grasp/SKILL.md',
-  'telos/skills/goal/SKILL.md',
   'horismos/skills/bound/SKILL.md',
   'aitesis/skills/inquire/SKILL.md',
   'analogia/skills/ground/SKILL.md',
@@ -33,11 +31,9 @@ const PROTOCOL_FILES = [
   'anamnesis/skills/recollect/SKILL.md',
 ];
 
-const CANONICAL_PRECEDENCE = 'Hermeneia → Telos → Horismos → Aitesis → Prothesis → Analogia → Periagoge → Euporia → Syneidesis → Prosoche → Epharmoge';
-const CANONICAL_CLUSTERS = 'Planning (`/clarify`, `/goal`, `/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
+const CANONICAL_PRECEDENCE = 'Horismos → Aitesis → Prothesis → Analogia → Periagoge → Euporia → Syneidesis → Prosoche → Epharmoge';
+const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
 const PRECEDENCE_FILES = [
-  'hermeneia/skills/clarify/SKILL.md',
-  'telos/skills/goal/SKILL.md',
   'horismos/skills/bound/SKILL.md',
   'aitesis/skills/inquire/SKILL.md',
   'prothesis/skills/frame/SKILL.md',
@@ -56,9 +52,7 @@ const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression']);
 const CANONICAL_PROTOCOLS = {
   'Prothesis':  { deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
   'Syneidesis': { deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
-  'Hermeneia':  { deficit: 'IntentMisarticulated', resolution: 'ClarifiedIntent' },
   'Katalepsis': { deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
-  'Telos':      { deficit: 'GoalIndeterminate', resolution: 'DefinedEndState' },
   'Horismos':   { deficit: 'BoundaryUndefined', resolution: 'DefinedBoundary' },
   'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
   'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
@@ -1362,7 +1356,7 @@ function checkCrossRefScan() {
       message: 'CLAUDE.md missing Epistemic Concern Clusters table'
     },
     {
-      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Telos, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis\)/,
+      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis\)/,
       message: 'CLAUDE.md initiator taxonomy missing protocol in the AI-guided set'
     },
   ];
@@ -1614,8 +1608,19 @@ function checkCrossRefScan() {
         // escalates only the infrastructure failure modes above (file missing,
         // load failure, shape invalid, malformed entry). Drift-detection
         // escalation is a separate downstream PR, gated on clean warnings.
+        //
+        // DEPRECATED_PLUGIN_TUPLES: SKILL.md retained on disk for transition
+        // continuity (existing user installs) while the plugin is removed
+        // from packaging — surfacing publication-gap here would noise the
+        // signal rather than communicate a refactor drift. Suppression scope
+        // is intentionally narrow (per-tuple allowlist) so accidental drops
+        // in PLUGINS for non-deprecated plugins still surface as warnings.
+        const DEPRECATED_PLUGIN_TUPLES = new Set([
+          'hermeneia/clarify',
+          'telos/goal',
+        ]);
         for (const tuple of filesystemTuples) {
-          if (!packagePluginTuples.has(tuple)) {
+          if (!packagePluginTuples.has(tuple) && !DEPRECATED_PLUGIN_TUPLES.has(tuple)) {
             results.warn.push({
               check: 'cross-ref-scan',
               file: 'scripts/package.js',
@@ -2418,7 +2423,7 @@ function checkSingleAxisSoundness() {
 // non-symlink, or mis-targeted entries.
 function checkAgentsSymlinksSync() {
   const SOURCE_PLUGINS = [
-    'prothesis', 'syneidesis', 'hermeneia', 'katalepsis', 'telos', 'horismos',
+    'prothesis', 'syneidesis', 'katalepsis', 'horismos',
     'aitesis', 'analogia', 'periagoge', 'euporia', 'prosoche', 'epharmoge', 'anamnesis',
     'epistemic-cooperative',
   ];

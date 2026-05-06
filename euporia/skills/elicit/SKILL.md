@@ -134,8 +134,6 @@ Per cycle, the trio `(D[step], A[step], I'[step])` is recorded pairwise into `D_
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
@@ -190,7 +188,7 @@ When Euporia is active:
 - Euporia completes before action dependent on the resolved endpoint proceeds
 - Loaded instructions resume after resolution or Esc
 
-**Protocol precedence**: Activation order position 8/11 (graph.json is authoritative source for information flow). Concern cluster: Planning.
+**Protocol precedence**: Activation order position 6/9 (graph.json is authoritative source for information flow). Concern cluster: Planning.
 
 **Advisory relationships**: Receives from Anamnesis (advisory: recalled session history enriches substrate scan), Horismos (advisory: BoundaryMap narrows substrate scope). Provides to Aitesis (advisory: traced coordinates narrow context inference), Periagoge (advisory: resolved endpoint may seed downstream abstraction), Horismos (advisory: resolved coordinates inform downstream boundary definition). Katalepsis is structurally last.
 
@@ -333,5 +331,5 @@ After integration:
 15. **Directional dual to Periagoge**: Forward-looking — Euporia and Periagoge compose as orthogonal directions of the dialectic substrate (bottom-up induction ↔ top-down reverse induction); they do not subsume one another.
 16. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant coordinate value (option-level entropy → 0), present the value directly as relay. The user answer slot remains constitutive when multiple valid coordinate values exist under different user value weightings.
 17. **Bidirectional advisory with Horismos**: Horismos → Euporia (BoundaryMap narrows substrate scope) and Euporia → Horismos (resolved coordinates inform downstream boundary) form bidirectional advisory edges. Same-session re-entry of either protocol after the other's convergence is permitted but treated as distinct activation — each invocation produces a fresh ResolvedEndpoint or BoundaryMap; the prior instance becomes session evidence rather than auto-cycling input.
-18. **Non-suppression deliberate**: No suppression edge to Aitesis, Hermeneia, or Periagoge in graph.json. Euporia operates on cycle-emergent axis-undetermined intent; Aitesis (factual context) and Hermeneia (intent expression) operate on different layers (coordinate-explication vs fact-supply vs intent-articulation). Sequential composition is intended, not stacking-suppressed.
+18. **Non-suppression deliberate**: No suppression edge to Aitesis or Periagoge in graph.json. Euporia operates on cycle-emergent axis-undetermined intent; Aitesis (factual context) operates on a different layer (coordinate-explication vs fact-supply). Sequential composition is intended, not stacking-suppressed.
 19. **Gate integrity**: The cycle-emergent option set is presented as a coherent dimension cluster per cycle; partial omission of surfaced coordinates without user dismissal violates this invariant. Type-preserving materialization (specializing a generic axis into a concrete coordinate while preserving the surfacing structure) is distinct from mutation.

@@ -50,13 +50,11 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 
 | Protocol | Cluster | When to Use | Key Patterns |
 |----------|---------|-------------|-------------|
-| Hermeneia `/clarify` | Planning | AI keeps misunderstanding your intent | Same file 3+ edits (same intent), `misunderstood_request` friction |
-| Telos `/goal` | Planning | You have a desire but no clear goal | Vague first prompts ("improve", "optimize", "ideas for"), `wrong_approach` friction |
 | Aitesis `/inquire` | Planning | AI is about to answer without enough observable context | External fact queries, verifiable grounding (for prior-session recall → use `/recollect`) |
+| Euporia `/elicit` | Planning | Intent articulated but axis-undetermined; decision coordinates implicit in codebase / rules / past sessions | Multi-axis intent without single axis-specific protocol fit; substrate-implicit coordinates surface through cycle-emergent dimensions |
 | Prothesis `/frame` | Analysis | Unsure which analytical perspective to use | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
 | Periagoge `/induce` | Analysis | Concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction | 3+ instances with essence intuition but no located abstraction; `/ground` misfit where colimit is forced into substitution |
-| Euporia `/elicit` | Planning | Intent articulated but axis-undetermined; decision coordinates implicit in codebase / rules / past sessions | Multi-axis intent without single axis-specific protocol fit; substrate-implicit coordinates surface through cycle-emergent dimensions |
 | Syneidesis `/gap` | Decision | Right before committing, checking for blind spots | Same file 3+ edits (different concerns), `excessive_changes` friction |
 | Prosoche `/attend` | Execution | Risk-classified execution — safe actions flow, risky ones gate | Mixed-risk plans (bulk safe work + judgment moments), upstream deficit signals, `wrong_file_edited` friction |
 | Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the accumulated conversation context | Mismatch against session-built constraints (user-aware context accumulation) |
@@ -79,7 +77,7 @@ Do NOT present the full protocol catalog upfront. Start with a concise welcome a
 
 **If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 13 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
+**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 11 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
 - Text: Post-catalog path selection
 - Options:
   - Quick recommendation
@@ -96,7 +94,7 @@ Present a condensed catalog as text output: render the Data Sources table groupe
 Then **Gate #2**:
 - Text: Protocol selection (type name or number in Other)
 - Options:
-  - Pre-execution (Planning) — /clarify, /goal, /bound, /inquire, /elicit
+  - Pre-execution (Planning) — /bound, /inquire, /elicit
   - Analysis/Decision — /frame, /ground, /induce, /gap
   - Execution/Verification/Understanding — /attend, /contextualize, /recollect, /grasp
 
@@ -128,7 +126,7 @@ From collected metadata, infer:
 - **Conversation patterns**: Request clarity level, incremental vs. batch requests, question types (how/why/what)
 - **Task types**: Ratio of feature development, debugging, refactoring, documentation
 
-If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fallback (`/goal`); Targeted path falls back to Onboarding Pool (`/goal`, `/gap`, `/frame`).
+If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fallback (`/elicit`); Targeted path falls back to Onboarding Pool (`/elicit`, `/gap`, `/frame`).
 
 **Output for Phase 2**: User Context Profile (work domains, conversation patterns, task types). Quick Scan infers user context for protocol matching and scenario personalization — behavioral pattern extraction and session diagnostics belong in `/report`.
 
@@ -136,21 +134,21 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 
 **Quick path only.** Select exactly 1 protocol recommendation from the auto-recommend pool.
 
-**Onboarding Pool**: `/goal` (Telos), `/gap` (Syneidesis), `/frame` (Prothesis). These three are chosen because users can quickly experience their value. Protocols like `/clarify` and `/grasp` are user-initiated by nature and should not be proactively suggested in the first encounter.
+**Onboarding Pool**: `/elicit` (Euporia), `/gap` (Syneidesis), `/frame` (Prothesis). These three are chosen because users can quickly experience their value. Protocols like `/grasp` are user-initiated by nature and should not be proactively suggested in the first encounter.
 
 **Recommendation rules** (applied to Quick Scan Profile):
 
 | Protocol | Signal patterns | Priority |
 |----------|----------------|----------|
-| `/goal` | Vague first prompts ("improve", "optimize", "ideas for", "make it better", "help me plan"); desire without success criteria | Highest (also fallback) |
+| `/elicit` | Vague first prompts ("improve", "optimize", "ideas for", "make it better", "help me plan"); intent articulated but axis-undetermined; substrate-implicit decision coordinates | Highest (also fallback) |
 | `/gap` | Multiple revisions on same topic in summary; finalization language ("wrap up", "ready", "finalize", "ship", "merge") | Medium |
 | `/frame` | Exploration/comparison language ("approach", "options", "tradeoffs", "compare", "architecture", "which way") | Medium |
 
 **Decision logic**:
 1. Score each protocol by signal match count from `firstPrompt` and `summary` fields
 2. Select the single strongest match
-3. Tie-break: `/goal` > `/gap` > `/frame`
-4. **Fallback**: If no signals detected (no sessions, sparse metadata), recommend `/goal`
+3. Tie-break: `/elicit` > `/gap` > `/frame`
+4. **Fallback**: If no signals detected (no sessions, sparse metadata), recommend `/elicit`
 
 **Output**: Present recommendation as a single sentence. Do NOT present multiple recommendations or a ranked list.
 
@@ -185,9 +183,9 @@ Branch: Try it now → Phase 4 (quick trial), Learn more about this recommendati
 
 **Targeted path only.** Apply User Context Profile to match protocols to the user's context.
 
-1. Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Onboarding Pool (`/goal`, `/gap`, `/frame`).
+1. Match Profile against the compact mapping table (Data Sources section). Select 2-3 protocols most relevant to the user's work domains and conversation patterns, defaulting to Onboarding Pool (`/elicit`, `/gap`, `/frame`).
 2. **Targeted sub-path**: Filter to target protocol, use Profile for scenario personalization. Note related protocols from the compact mapping table.
-3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → use **Onboarding Pool** (`/goal`, `/gap`, `/frame`). Proceed immediately without blocking the onboarding flow.
+3. **Fallback**: If Profile quality is insufficient (no sessions, sparse metadata) → use **Onboarding Pool** (`/elicit`, `/gap`, `/frame`). Proceed immediately without blocking the onboarding flow.
 
 For detailed mapping logic (Primary/Secondary/Tertiary tables, session diagnostics, anti-pattern detection), refer to `/report` SKILL.md.
 
@@ -214,7 +212,7 @@ Scenario: /X (Protocol Name)
 Expected outcome: [e.g., reduced rework, clearer direction]
 ```
 
-**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a situation could plausibly map to multiple protocols (e.g., "exploration" could be `/goal` or `/frame`), do NOT use it as a scenario — reserve it for Phase 5 quiz material instead. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
+**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a situation could plausibly map to multiple protocols (e.g., "exploration" could be `/elicit` or `/frame`), do NOT use it as a scenario — reserve it for Phase 5 quiz material instead. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
 
 **Anti-pattern**: Scenarios must be self-contained (situation + intervention) with unambiguous protocol fit. Ambiguous patterns belong in Phase 5 quiz.
 
@@ -239,7 +237,7 @@ Guide the user through a real, abbreviated protocol experience.
   - Start with this scenario — call /X
   - Start with my own scenario (type in Other)
 
-**Execution**: The user invokes the actual protocol (e.g., type `/goal`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination (convergence or user Esc). After protocol termination, proceed to **Quick Post-Trial** below.
+**Execution**: The user invokes the actual protocol (e.g., type `/elicit`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination (convergence or user Esc). After protocol termination, proceed to **Quick Post-Trial** below.
 
 **Quick Post-Trial Insight** (2 lines max):
 
@@ -266,7 +264,7 @@ Branch: That's enough for today → end session with brief closing (include text
 
 **Mini practice prompts** (scoped for 2-3 exchanges): Use the **Trial prompt** field from `references/scenarios.md` for the target protocol. Present the trial guidance as regular text output.
 
-**Execution**: Prompt the user to invoke the actual protocol (e.g., type `/clarify`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination (convergence or user Esc). After protocol termination, present Post-Trial Insight and LOOP.
+**Execution**: Prompt the user to invoke the actual protocol (e.g., type `/inquire`). The protocol runs in the same session with the mini prompt as context. Trial ends when the invoked protocol reaches its natural termination (convergence or user Esc). After protocol termination, present Post-Trial Insight and LOOP.
 
 Offer trial for the top-recommended protocol first. If user completes it, optionally offer trial for the second recommendation.
 
@@ -299,7 +297,7 @@ Branch: Quiz → Phase 5, Another scenario → Phase 3, Different protocol → P
 Test protocol recognition through situation-based questions. Question format differs by path.
 
 **Question sourcing** (in priority order):
-1. **Ambiguous scenarios from Phase 3 filtering** — situations that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/goal` or `/frame`)
+1. **Ambiguous scenarios from Phase 3 filtering** — situations that were too ambiguous for scenarios are ideal quiz material (e.g., "exploration" that could be `/elicit` or `/frame`)
 2. Protocols from TRIAL + MAP results (personalized)
 3. Profile-personalized variants of preset scenarios (if User Context Profile available)
 4. Preset scenarios from `references/scenarios.md`
@@ -383,11 +381,11 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 ## Quiz Design
 
-**Difficulty progression**: Start with high-contrast pairs (e.g., `/goal` vs `/attend`), progress to subtle distinctions (e.g., `/clarify` vs `/goal`, `/gap` vs `/attend`).
+**Difficulty progression**: Start with high-contrast pairs (e.g., `/elicit` vs `/attend`), progress to subtle distinctions (e.g., `/elicit` vs `/inquire`, `/gap` vs `/attend`).
 
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
-- `/clarify` ↔ `/gap`: both surface "something wrong" but different targets — `/clarify` fixes expression before work begins (Planning: "I said X but meant Y"), `/gap` audits blind spots at a decision point (Decision: "Am I overlooking something?")
-- `/clarify` ↔ `/goal`: both about "unclear starting point" but different deficits (expression vs. existence)
+- `/elicit` ↔ `/gap`: both surface "something wrong" but different targets — `/elicit` reverse-traces decision coordinates from substrate before action (Planning: axis-undetermined intent), `/gap` audits blind spots at a decision point (Decision: "Am I overlooking something?")
+- `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis asks the user for facts (information layer), Euporia surfaces coordinate values from substrate (coordinate-explication layer)
 - `/gap` ↔ `/attend`: both about risk awareness but `/gap` audits decision quality before committing, `/attend` checks execution readiness (Phase -1 upstream scan) and gates execution-time risks
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
@@ -416,7 +414,7 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 
 1. **Value before learning**: Quick path proves value in under 3 minutes. Learning (scenarios, quizzes) is available but not the default entry.
 2. **One at a time**: Quick path shows 1 recommendation, 1 evidence card, 1 trial. Never present multiple recommendations or ranked lists.
-3. **Onboarding Pool**: `/goal`, `/gap`, `/frame` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/clarify`, `/grasp`, `/attend`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
+3. **Onboarding Pool**: `/elicit`, `/gap`, `/frame` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/grasp`, `/attend`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
 4. **Experience over analysis**: This skill teaches through doing. Analytical output (HTML reports, pattern evidence tables) belongs in `/report`.
 5. **Privacy**: Never transmit session data externally. All analysis runs locally.
 6. **No subagent delegation**: Both Quick and Targeted paths use inline Quick Scan. Deep pattern extraction belongs in `/report`.

@@ -17,7 +17,7 @@
     {
       "name": "hermeneia",
       "source": "./hermeneia",
-      "description": "Clarify intent-expression gaps through dialogue — /clarify (ἑρμηνεία: interpretation)"
+      "description": "[Deprecated — use /elicit (Euporia)] Clarify intent-expression gaps through dialogue — /clarify (ἑρμηνεία: interpretation)"
     },
     {
       "name": "katalepsis",
@@ -27,7 +27,7 @@
     {
       "name": "telos",
       "source": "./telos",
-      "description": "Co-construct defined goals from vague intent — /goal (τέλος: end, purpose)"
+      "description": "[Deprecated — use /elicit (Euporia)] Co-construct defined goals from vague intent — /goal (τέλος: end, purpose)"
     },
     {
       "name": "aitesis",

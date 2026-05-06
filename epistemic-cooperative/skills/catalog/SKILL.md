@@ -27,7 +27,7 @@ Skip when:
 | `/catalog {cluster}` | Cluster detail: expanded protocol cards with scenarios |
 | `/catalog {command}` | Single protocol detail: full card from scenarios.md |
 
-Argument normalization: case-insensitive, accepts `/command` or bare name (e.g., `/catalog clarify` = `/catalog /clarify` = `/catalog Hermeneia`).
+Argument normalization: case-insensitive, accepts `/command` or bare name (e.g., `/catalog inquire` = `/catalog /inquire` = `/catalog Aitesis`).
 
 ## Protocol Catalog
 
@@ -35,8 +35,6 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
-| Hermeneia | `/clarify` | What you said differs from what you meant |
-| Telos | `/goal` | Goal is vague — no success criteria or scope |
 | Aitesis | `/inquire` | Context is insufficient for confident execution |
 | Euporia | `/elicit` | Intent articulated but decision coordinates implicit in externalized substrate — reverse-trace to surface |
 
@@ -80,7 +78,7 @@ When a cluster name or protocol command/name is provided as argument:
 
 1. Normalize the argument:
    - Strip leading `/` if present
-   - Match case-insensitively against protocol names (Hermeneia, Telos, etc.) and commands (clarify, goal, etc.)
+   - Match case-insensitively against protocol names (Aitesis, Euporia, etc.) and commands (inquire, elicit, etc.)
    - Match cluster names: planning, analysis, decision, execution, verification, cross-cutting
 
 2. For **cluster** arguments: display all protocol cards in that cluster with expanded "When to Use" descriptions from the tables above.
