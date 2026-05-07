@@ -35,7 +35,6 @@ Phase 4 emergent scan filters newly created issues by matching against this set 
    - `TYPES`
    - `formal block`
    - `falsifiability`
-   - `Deficit Empiricism`
    - `vocabulary`
    - `soundness`
 
@@ -84,12 +83,11 @@ Protocol skill definitions (10):
 - `epharmoge/skills/contextualize/SKILL.md`
 - `horismos/skills/bound/SKILL.md`
 
-Rules files (4):
+Rules files (3):
 
 - `.claude/rules/axioms.md`
 - `.claude/rules/derived-principles.md`
 - `.claude/rules/architectural-principles.md`
-- `.claude/rules/meta-principle.md`
 
 ## Anchor Issues
 
@@ -143,9 +141,9 @@ Items in this queue are mechanically resolvable (entropy then 0). Each entry was
 
 ### DQ5 — Tension-Accumulation Threshold realization consistency (Severity: Medium)
 
-- **Target**: `.claude/rules/meta-principle.md` line 59 (definition) plus the "revision threshold" prose blocks across multiple SKILL.md files
-- **Problem**: The meta-principle defines Tension-Accumulation as a comparative cost test. Most protocols realize it as a flat "3+ sessions cluster" trigger. Only Syneidesis explicitly states the cost-comparison form.
-- **Completion criterion**: Either (a) align all protocol revision-threshold prose to match the meta-principle's cost-comparison definition, or (b) update the meta-principle to also accept the flat-trigger pattern (bidirectional reconciliation).
+- **Status**: Obsolete. The meta-principle file has been removed from the project; this queue item no longer has a live target.
+- **Original target**: `.claude/rules/meta-principle.md` line 59 (definition) plus the "revision threshold" prose blocks across multiple SKILL.md files.
+- **Original problem**: The meta-principle defined Tension-Accumulation as a comparative cost test while most protocols realized it as a flat "3+ sessions cluster" trigger.
 - **Source analysis**: Track Beta internal cross-file consistency check.
 
 ### DQ6 — Notation first-mention explanation (Severity: Low)
@@ -159,15 +157,15 @@ Items in this queue are mechanically resolvable (entropy then 0). Each entry was
 
 - **Target**: `.claude/rules/derived-principles.md`
 - **Problem**: D3 (Full Taxonomy), D4 (Convergence Evidence), and D6 (Zero-Shot Instruction Preference) import empirical grounding beyond their cited axiom sources, but the imports are not annotated.
-- **Completion criterion**: Add a derivation comment to each principle, such as "A_N plus empirical observation (Deficit Empiricism grounded)".
+- **Completion criterion**: Add a derivation comment to each principle, such as "A_N plus empirical observation (corroborated by accumulated session evidence)".
 - **Source analysis**: Track Beta rules-sources Task #5.
 
 ### DQ8 — Gadamerian "Aufschreibung" rename (Severity: Low)
 
-- **Target**: `.claude/rules/meta-principle.md`, the Hermeneutic Circle Evolution Model section
-- **Problem**: "Aufschreibung" (inscription) is not a Gadamerian or Husserlian phase. The German borrowing implies a false philosophical pedigree.
-- **Completion criterion**: Either (a) rename to "Inscription step" or "Documentation phase", or (b) keep the term and add a disclaimer "(project-specific addition, not a Gadamerian phase)".
-- **Source analysis**: Track Beta external Husserl/Gadamer anchor. Resolution direction aligns with issue #240.
+- **Status**: Obsolete. The meta-principle file has been removed from the project; this queue item no longer has a live target.
+- **Original target**: `.claude/rules/meta-principle.md`, the Hermeneutic Circle Evolution Model section.
+- **Original problem**: "Aufschreibung" (inscription) is not a Gadamerian or Husserlian phase. The German borrowing implied a false philosophical pedigree.
+- **Source analysis**: Track Beta external Husserl/Gadamer anchor.
 
 ### Note: DQ9 (Optional)
 

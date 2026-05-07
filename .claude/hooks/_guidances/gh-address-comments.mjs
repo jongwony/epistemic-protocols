@@ -5,7 +5,7 @@
 // Dispatchers (claude_dispatcher.mjs, codex_dispatcher.mjs) import this module
 // and iterate guidances against the normalized payload.
 //
-// Extension point: append entries to `guidances` as the Stage 2 trial expands.
+// Extension point: append entries to `guidances` as the trial expands.
 // Each entry is self-contained — no external doc references in the message.
 
 export const skill = 'gh-address-comments';
@@ -28,7 +28,7 @@ export const guidances = [
       'architectural disagreement, divergent approaches), surface the gate. ' +
       'Override to gate when in doubt.',
   },
-  // Append new entries here as the Stage 2 trial extends.
+  // Append new entries here as the trial extends.
   // Pattern: { name: string, matchesCommand: (cmd) => boolean,
   //            applies: (parsed) => boolean, message: string }.
 ];

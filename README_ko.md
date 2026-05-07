@@ -73,7 +73,7 @@ scripts/sync-agents-symlinks.sh
 
 `agents-symlinks-sync` 정적 검사가 pre-commit 단계에서 머터리얼라이즈된 뷰와 플러그인 원본 사이의 드리프트를 차단합니다.
 
-> 참고: `.agents/skills/`를 통한 스킬 *디스커버리*는 검증된 cross-tool 표준입니다. 다만 `PHASE TRANSITIONS` / `TOOL GROUNDING`에서 참조하는 호스트별 런타임 도구(`Skill()`, `Task`, `AskUserQuestion` 등)는 도구마다 다를 수 있어, Claude Code 외 호스트에서의 프로토콜 동작은 Stage 2 사용 증거 누적 전까지 Stage 1 추정으로 다루세요.
+> 참고: `.agents/skills/`를 통한 스킬 *디스커버리*는 검증된 cross-tool 표준입니다. 다만 `PHASE TRANSITIONS` / `TOOL GROUNDING`에서 참조하는 호스트별 런타임 도구(`Skill()`, `Task`, `AskUserQuestion` 등)는 도구마다 다를 수 있어, Claude Code 외 호스트에서의 프로토콜 동작은 cross-host 사용 증거가 누적될 때까지 잠정적인 것으로 다루세요.
 
 ## 프로토콜
 

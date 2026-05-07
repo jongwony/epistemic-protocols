@@ -2,7 +2,7 @@
 
 Contributor reference cataloging recurring framing and elicitation failure patterns drawn from HCI literature and language-model interaction practice. Entries in this catalog are background knowledge for contributors considering future runtime changes; they are not wired into any runtime protocol.
 
-**Status**: Contributor reference document. Not a protocol. Outside Deficit Empiricism scope because entries introduce no new TYPES, protocols, or axioms — they surface patterns for contributor judgment only. Wiring a catalog entry into runtime behavior re-engages the usual empirical-grounding requirement.
+**Status**: Contributor reference document. Not a protocol. Entries introduce no new TYPES, protocols, or axioms — they surface patterns for contributor judgment only. Wiring a catalog entry into runtime behavior is a separate decision; it requires the same accumulated use evidence and structural review as any other runtime change.
 
 **Scope**: Patterns that corrupt the epistemic inputs of a human-AI session before execution begins — mis-framings, elicitation gaps, silently narrowed option spaces. Post-execution failure modes (incorrect outputs, miscalibrated confidence in results) are out of scope.
 

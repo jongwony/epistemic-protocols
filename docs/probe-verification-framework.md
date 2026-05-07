@@ -1,12 +1,12 @@
 # Probe Verification Framework — Two-Axis Hypothesis
 
-Status: **Hypothesis (N=1, pre-corroboration)** · Stage 2 evidence-collection modality.
+Status: **Hypothesis (pre-corroboration)** · provisional pending accumulated cross-session use evidence.
 
-This document records an emergent observation about how Probe's Phase 1 candidate-hypothesis classification can fail when verification simulates only one axis of well-defined-ness. It is recorded as a single instance under the project's Stage 2 doctrine — not promoted to framework status until variation-stable corroboration accumulates across additional sessions.
+This document records an emergent observation about how Probe's Phase 1 candidate-hypothesis classification can fail when verification simulates only one axis of well-defined-ness. It is recorded as a single instance — not promoted to framework status until accumulated cross-session corroboration is available.
 
 ## Background
 
-Probe (`/probe`, `epistemic-cooperative:probe`) is itself released as a Stage 2 evidence-collection modality (CLAUDE.md §Plugins). Its Phase 1 scans the user situation against the catalog of epistemic deficits and constructs candidate hypotheses, often classifying each candidate's downstream remediation as either *surgical* (deterministic 1–2 line edit) or *design* (decision-bearing structural change).
+Probe (`/probe`, `epistemic-cooperative:probe`) is itself released provisionally pending accumulated cross-session use evidence (CLAUDE.md §Plugins). Its Phase 1 scans the user situation against the catalog of epistemic deficits and constructs candidate hypotheses, often classifying each candidate's downstream remediation as either *surgical* (deterministic 1–2 line edit) or *design* (decision-bearing structural change).
 
 That classification is itself an inference Probe makes. When it is wrong, the downstream PR/commit plan is mis-scoped: a candidate flagged "surgical" may land an interim patch that needs to be unwound by a later redesign round, while a candidate flagged "design" may sit in a deferred queue when a one-line edit would have closed it cleanly.
 
@@ -55,11 +55,11 @@ Under these grounds, the well-defined endpoint requires changes to TYPES, FLOW b
 
 Commit `a58c6fc` is preserved as a valid surface-consistency minimum-diff — it does not introduce regressions and remains green under static checks. It is **not** the well-defined endpoint. L4a is reclassified into the tier-3 redesign cluster (Task #21) and will be absorbed when ProtocolRoute is unified into a single type. No revert is performed (force-push avoidance, audit-trail preservation).
 
-## Hypothesis (N=1, pre-corroboration)
+## Hypothesis (pre-corroboration)
 
 **Conjecture**: Probe's surgical/design classification benefits from explicit two-axis verification. The drop-in feasibility check alone is insufficient; an endpoint well-defined-ness check should run alongside before a candidate is committed to the surgical lane.
 
-This is a *single observation*. Per `.claude/principles/meta-principle.md` Stage 2 doctrine, framework promotion requires variation-stable corroboration across instance, user profile, platform context, and session type. Until additional instances accumulate and resolve into the same essence under variation, this remains hypothesis-level — recorded for future reference, not enforced as a Probe operating rule.
+This is a *single observation*. Framework promotion requires accumulated cross-session corroboration before the two-axis check is enforced as a Probe operating rule. Until additional instances accumulate and resolve into the same essence, this remains hypothesis-level — recorded for future reference, not enforced.
 
 Falsification conditions:
 - If subsequent surgical classifications consistently match the well-defined endpoint without two-axis verification, the hypothesis is unnecessary.
@@ -74,17 +74,16 @@ Where the hypothesis would intervene in Probe's Phase 1, **if corroborated**:
 - Endpoint signals to look for: type-signature alignments that only restore consistency (not yet right semantics), edits that touch one block while a coupled block remains in tension, edits whose downstream rationale repeats existing redundancy.
 - Failure of the endpoint check downgrades the candidate from surgical to design, routing it into the redesign cluster instead of an immediate batch.
 
-This refinement is not yet inscribed in `probe/SKILL.md`. Inscription requires Stage 2 corroboration per the project's two-stage doctrine.
+This refinement is not yet inscribed in `probe/SKILL.md`. Inscription requires accumulated use corroboration across multiple variation contexts.
 
 ## Open Questions
 
 - **Generalization**: Is the two-axis distinction Probe-specific, or does it apply to other Phase-1-like classifications elsewhere in the protocol set? `recollect` (Phase 1 contextual scan) and `attend` (Phase 0 risk classification) also classify candidates under uncertainty — sibling instances could either corroborate or refute generalization.
 - **Verification cost**: A second axis costs more inference per candidate. Where is the break-even between miss-cost (interim patch + rework) and verify-cost (additional simulation)?
-- **Self-reference**: Probe verification framework refinement is itself a candidate for Probe to surface in a future session ("we observed N=1 false-surgical, is this a pattern?"). The framework is recursively in scope of its own evidence-collection modality.
+- **Self-reference**: Probe verification framework refinement is itself a candidate for Probe to surface in a future session ("we observed a single false-surgical instance, is this a pattern?"). The framework is recursively in scope of its own evidence-collection modality.
 
 ## References
 
 - Instance: PR #288, commit `a58c6fc` (`fix(probe): MORPHISM target widen + Λ session-immunity field`).
 - Probe specification: `epistemic-cooperative/skills/probe/SKILL.md`.
 - Tier-3 redesign task: TaskList #21 (ProtocolRoute single-type unification).
-- Project Stage 2 doctrine: `.claude/rules/meta-principle.md` §Deficit Empiricism.

@@ -78,7 +78,6 @@ const BANNED_RUNTIME_DEPENDENCIES = [
   { pattern: /\baxioms?\.md\b/gi, message: 'references axioms doc from runtime contract surface', severity: 'fail' },
   { pattern: /\bderived-principles\.md\b/gi, message: 'references derived-principles doc from runtime contract surface', severity: 'fail' },
   { pattern: /\barchitectural-principles\.md\b/gi, message: 'references architectural-principles doc from runtime contract surface', severity: 'fail' },
-  { pattern: /\bmeta-principle\.md\b/gi, message: 'references meta-principle doc from runtime contract surface', severity: 'fail' },
   { pattern: /\bsafeguards\.md\b/gi, message: 'references safeguards doc from runtime contract surface', severity: 'fail' },
   { pattern: /\bproject-profile(?:-calibration)?\.md\b/gi, message: 'references project-profile rule from runtime contract surface', severity: 'warn' },
   { pattern: /\bediting-conventions\.md\b/gi, message: 'references editing-conventions rule from runtime contract surface', severity: 'warn' },

@@ -73,7 +73,7 @@ scripts/sync-agents-symlinks.sh
 
 The `agents-symlinks-sync` static check fails the pre-commit if the materialized view drifts from the plugin sources.
 
-> Note: skill *discovery* via `.agents/skills/` is a verified cross-tool standard. Runtime *tool grounding* (host-specific tools referenced in `PHASE TRANSITIONS` / `TOOL GROUNDING` such as `Skill()`, `Task`, `AskUserQuestion`) varies by tool — protocol behavior in non-Claude-Code hosts is Stage 1 conjecture pending Stage 2 use evidence.
+> Note: skill *discovery* via `.agents/skills/` is a verified cross-tool standard. Runtime *tool grounding* (host-specific tools referenced in `PHASE TRANSITIONS` / `TOOL GROUNDING` such as `Skill()`, `Task`, `AskUserQuestion`) varies by tool — protocol behavior in non-Claude-Code hosts is provisional pending accumulated cross-host use evidence.
 
 ## Protocols
 
