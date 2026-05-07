@@ -49,9 +49,8 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `.claude/rules/axioms.md` — A1–A6 foundational principles; the north star (~10 min)
 - [ ] `.claude/rules/derived-principles.md` — logical consequences of axiom combinations
 - [ ] `.claude/rules/architectural-principles.md` — Epistemic Cost Topology (T1, per-turn); other architectural principles in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
-- [ ] `.claude/rules/meta-principle.md` — Deficit Empiricism intro (T1, per-turn); Stage 1/2 detail + Axiomatization Judgment Framework in `.claude/principles/meta-principle.md` (T2-T3, lazy-load)
 - [ ] `.claude/rules/safeguards.md` — Safeguard-tier principles (LESS important as models improve) (~5 min)
-- [ ] `.claude/principles/README.md` — demotion zone overview, demotion ledger, promotion-via-use criteria
+- [ ] `.claude/principles/README.md` — demotion zone overview, demotion ledger
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — what each of the 15 static checks enforces
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
@@ -92,9 +91,8 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 ## Prime Directives
 
-Three principles to internalize before your first PR:
+Two principles to internalize before your first PR:
 
-- **Deficit Empiricism** — New protocols, axioms, or categories require observed deficit instances (N≥3) from actual sessions. Theoretical classification alone is insufficient. See `.claude/rules/meta-principle.md`.
 - **Audience Reach** — `CLAUDE.md` and `.claude/rules/` are contributor-facing. Runtime protocol behavior must be inscribed in SKILL.md itself; documenting something in `CLAUDE.md` alone does not affect user-facing behavior.
 - **Direction over Accumulated Workload** — Contributor authoring labor converges toward zero under AI-assisted editing; structural misalignment accumulates and pollutes all downstream work. When a refactor is theoretically justified, prior commits are not protection from invalidation. Verification labor remains bounded and must be budgeted explicitly.
 

@@ -1,6 +1,6 @@
 # Hooks — layered dispatcher structure
 
-PostToolUse hooks for the epistemic-protocols project's `/steer` Stage 2 trials.
+PostToolUse hooks for the epistemic-protocols project's `/steer` trials.
 
 ## Layers
 

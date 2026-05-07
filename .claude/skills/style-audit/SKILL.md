@@ -18,7 +18,7 @@ Surface phrasing patterns that invite LLM rationalization drift before they land
 - The caller passes target file paths or a glob; with no argument, the skill enumerates the in-scope set under the working tree HEAD.
 - Files are read at their working-tree state — the post-edit, pre-commit content the contributor is about to ship.
 
-CI invocation is removed — the workflow file has been deleted from this branch; restore from prior git history when Stage 2 dogfooding completes (see §Stage classification).
+CI invocation is removed — the workflow file has been deleted from this branch; restore from prior git history when accumulated use evidence justifies re-enablement (see §Release status).
 
 ## Scope
 
@@ -85,7 +85,7 @@ When zero findings result, emit the JSON object with empty `findings` array and 
 
 ## Self-application
 
-This SKILL.md is itself in scope. The audit may surface findings against the prose above; treat that as Stage 1 evidence and rewrite in place when the rewrite preserves directive force. Findings against this file are first-class — the audit's own definition is subject to the same review as any other in-scope file.
+This SKILL.md is itself in scope. The audit may surface findings against the prose above; treat each finding as evidence and rewrite in place when the rewrite preserves directive force. Findings against this file are first-class — the audit's own definition is subject to the same review as any other in-scope file.
 
 ## Distinction
 
@@ -94,10 +94,10 @@ This SKILL.md is itself in scope. The audit may surface findings against the pro
 | `verify` | Deterministic static checks (JSON schema, notation, cross-ref, graph) | Structural drift between coupled artifacts |
 | `style-audit` | Claude-judge semantic review of LLM-facing prose | Phrasing drift that survives structural validity |
 
-The two surfaces are siblings: `verify` runs deterministically at pre-commit and CI; `style-audit` runs on-demand via `/style-audit` (CI invocation removed — see §Stage classification). Each maintains its own confidence curve — semantic-judgment findings appear separately from deterministic structural failures.
+The two surfaces are siblings: `verify` runs deterministically at pre-commit and CI; `style-audit` runs on-demand via `/style-audit` (CI invocation removed — see §Release status). Each maintains its own confidence curve — semantic-judgment findings appear separately from deterministic structural failures.
 
-## Stage classification
+## Release status
 
-Stage 2 evidence-collection instrument. Findings carry the N=1 dogfooding caveat inherent to a project where the audit definition, the rule prose, and the contributor are entangled. Architectural inscription — promoting any pattern observed across findings into a deterministic verify check, or into a project-wide phrasing rule — waits on Stage 2 variation-stable retention evidence accumulating across multiple PRs and contributors.
+Provisional. Findings carry the N=1 dogfooding caveat inherent to a project where the audit definition, the rule prose, and the contributor are entangled. Architectural inscription — promoting any pattern observed across findings into a deterministic verify check, or into a project-wide phrasing rule — waits on accumulated variation-stable retention evidence across multiple PRs and contributors.
 
-**CI status**: CI invocation is removed to extend Stage 2 dogfooding via manual `/style-audit` use; the workflow file has been deleted from this branch (restorable from prior git history). Re-enablement (restore the workflow file from a prior commit) is gated on accumulated use evidence demonstrating audit findings carry signal beyond N=1 contributor noise.
+**CI status**: CI invocation is removed to extend manual `/style-audit` dogfooding; the workflow file has been deleted from this branch (restorable from prior git history). Re-enablement (restore the workflow file from a prior commit) is gated on accumulated use evidence demonstrating audit findings carry signal beyond N=1 contributor noise.

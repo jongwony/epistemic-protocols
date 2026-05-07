@@ -75,12 +75,11 @@ stage: <kebab-case stage identifier>
 generated_at: <YYYY-MM-DD>
 git_head: <full SHA at write time>
 inherits_from: <path to predecessor HFT, or null for first stage>
-stage_classification: stage-1-conjecture
 n1_dogfooding_caveat: true
 ---
 ```
 
-`stage_classification` defaults to `stage-1-conjecture` until Stage 2 use-corroboration accumulates per the project's Deficit Empiricism framework. `n1_dogfooding_caveat: true` causes both `/crystallize` and `/rehydrate` to surface a Stage 1 caveat in their convergence reports.
+`n1_dogfooding_caveat: true` causes both `/crystallize` and `/rehydrate` to surface an N=1 caveat in their convergence reports — a reminder that this format is provisional pending accumulated cross-session use evidence.
 
 ## Multi-Stage Asymmetry
 
@@ -111,7 +110,7 @@ A writer protocol inscribes layers in the following order, because each layer de
 
 A reader protocol parses layers in the order they appear, but uses them with different intents:
 
-1. Read frontmatter — verify `hft_format_version`, surface `stage_classification` and `n1_dogfooding_caveat` to user
+1. Read frontmatter — verify `hft_format_version`, surface `n1_dogfooding_caveat` to user
 2. 1-pass read Surface Text — form Vorverständnis; this primes the session
 3. Scan Wirkungsgeschichte top-to-bottom — answer "how did we get here?"; informs but does not redirect the session
 4. Note Reference Shells — do not auto-fetch; surface as available anchors for the user to invoke explicitly
@@ -143,8 +142,8 @@ These rules apply to HFT files; project SKILL.md and other Markdown files are ou
 - Skipping `### Rejected Alternatives` because "nothing was rejected" — explicit empty section with `_(none in this stage)_` is required; silent omission loses the negative-information signal
 - Treating HFT as a free-form scratchpad — the four layers are the contract; freeform additions go in a separate file referenced via Reference Shells
 
-## Stage 1 Conjecture (N=1 Dogfooding)
+## Provisional Status (N=1 Dogfooding)
 
-This format spec is a Stage 1 (Compile) conjecture. Structural fit was established via a single dogfooding session crystallizing the format from concrete instance set (substrate-coupling temptations, Pocock's Design Concept / Ubiquitous Language, Gadamer's Horizontverschmelzung) into the four-layer abstraction. Stage 2 (Runtime) use-corroboration is pending — accumulating cross-session inscriptions across user-context variation. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities) is deferred until variation-stable retention evidence accumulates.
+This format spec is provisional. Structural fit was established via a single dogfooding session crystallizing the format from a concrete instance set (substrate-coupling temptations, Pocock's Design Concept / Ubiquitous Language, Gadamer's Horizontverschmelzung) into the four-layer abstraction. Cross-session use-corroboration is pending. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities) is deferred until accumulated use evidence is available.
 
-When in doubt about a layer or rule under live use, prefer fidelity to the four-layer contract over local convenience; report any tension as Stage 2 evidence rather than silently relaxing the constraint.
+When in doubt about a layer or rule under live use, prefer fidelity to the four-layer contract over local convenience; report any tension to surface use evidence rather than silently relaxing the constraint.

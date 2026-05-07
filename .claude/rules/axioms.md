@@ -10,7 +10,6 @@ Foundational principles that become MORE important as models improve; foundation
 | Derived | Logically derived from axiom combinations; derivation source annotated |
 | Architectural | Project structure decisions; independent of the axiom system |
 | Safeguard | Principles that become LESS important as models improve; temporary guards against current model limitations |
-| Meta-Principle | Governs evolution of the principle system itself |
 
 ---
 

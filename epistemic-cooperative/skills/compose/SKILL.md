@@ -153,7 +153,7 @@ disposition(G) = ELIDE ⟹ disposition(safety_net(G)) ≠ ELIDE
 
 If violated: promote the safety net gate to PRESENT. This prevents cascading composition-time delegation from removing all user checkpoints.
 
-**Safety-net search scope**: `safety_net(G)` searches forward within the same protocol — the next downstream Constitution gate after G in the protocol's phase order. Cross-protocol fallback: when a protocol's terminal Constitution gate is an ELIDE candidate and no within-protocol downstream Constitution gate remains, the next protocol's first Constitution gate in the chain serves as the cross-protocol safety net. If both fail (the chain's terminal Constitution gate is itself an ELIDE candidate), promote G to PRESENT — the catch-chain cannot be discharged. This preserves the invariant under Stage 2 split-Extension migration where some Constitution gates become Extension entries.
+**Safety-net search scope**: `safety_net(G)` searches forward within the same protocol — the next downstream Constitution gate after G in the protocol's phase order. Cross-protocol fallback: when a protocol's terminal Constitution gate is an ELIDE candidate and no within-protocol downstream Constitution gate remains, the next protocol's first Constitution gate in the chain serves as the cross-protocol safety net. If both fail (the chain's terminal Constitution gate is itself an ELIDE candidate), promote G to PRESENT — the catch-chain cannot be discharged. This preserves the invariant under future split-Extension migration where some Constitution gates become Extension entries.
 
 ### Presentation
 

@@ -1,6 +1,6 @@
 ---
 name: misuse
-description: "Retrospective protocol contract violation detector. Scan past sessions for /ground (Sₐ confabulation) and /induce (stereotype misconflation) contract violations and surface structured violation records for user-constituted review. Use this skill whenever the user asks to 'audit my misuse', 'check protocol misuse', 'scan past invocations', 'misuse history', wants retrospective audit of past /ground or /induce calls, or suspects silent contract violations in prior sessions. Stage 2 evidence-collection instrument."
+description: "Retrospective protocol contract violation detector. Scan past sessions for /ground (Sₐ confabulation) and /induce (stereotype misconflation) contract violations and surface structured violation records for user-constituted review. Use this skill whenever the user asks to 'audit my misuse', 'check protocol misuse', 'scan past invocations', 'misuse history', wants retrospective audit of past /ground or /induce calls, or suspects silent contract violations in prior sessions."
 user_invocable: true
 ---
 
@@ -50,7 +50,7 @@ The skill family coexists by phenomenology — none replaces the others. Misuse 
 
 Determine the audit scope before scanning. Decisions:
 
-- **Target protocols** — fixed at `/ground` and `/induce` for v1.0. Other protocols deferred to Stage 2 expansion.
+- **Target protocols** — fixed at `/ground` and `/induce` for v1.0. Other protocols deferred pending accumulated use evidence.
 - **Session window** — default is the current session only. Cross-session scanning requires explicit user confirmation per Rule 5.
 - **Cross-project scope** — default off. Scanning across `~/.claude/projects/` requires explicit user confirmation.
 

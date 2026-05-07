@@ -1,6 +1,6 @@
 ---
 name: crystallize
-description: "Inscribe a session's horizon-fusion residue into a Horizon-Fusion Text (HFT) for cross-session continuity. Use when the user asks to 'crystallize session', 'crystallize handoff', 'inscribe horizon', 'save next-session state', 'prepare for compact', or invokes /crystallize. Writer half of the HFT pair (paired with /rehydrate). Single-medium handoff: collapses prior multi-substrate patterns into a four-layer Markdown file. Stage 2 evidence-collection instrument."
+description: "Inscribe a session's horizon-fusion residue into a Horizon-Fusion Text (HFT) for cross-session continuity. Use when the user asks to 'crystallize session', 'crystallize handoff', 'inscribe horizon', 'save next-session state', 'prepare for compact', or invokes /crystallize. Writer half of the HFT pair (paired with /rehydrate). Single-medium handoff: collapses prior multi-substrate patterns into a four-layer Markdown file."
 user_invocable: true
 ---
 
@@ -126,7 +126,6 @@ Frontmatter assembly:
 - `generated_at: <YYYY-MM-DD>`
 - `git_head: <git rev-parse HEAD>`
 - `inherits_from: <predecessor path or null>`
-- `stage_classification: stage-1-conjecture` (default; do not auto-promote)
 - `n1_dogfooding_caveat: true` (default; surfaces in `/rehydrate`)
 
 Present full HFT preview (frontmatter + four layers) via Cognitive Partnership Move (Constitution). User options: Approve (write to disk) · Revise(layer) (return to that phase) · Cancel (no-op deactivation).
@@ -189,7 +188,7 @@ W_delta        ⊂ Wirkungsgeschichte                 -- proper subset: current-
 R              = ReferenceShells { session: List<KV>, files: List<Path>, urls: List<URL>, tasks: List<Path> }
                  -- tasks: per-session task substrate paths (~/.claude/tasks/<session_id>/); mechanically derivable from session_id
 Excluded       = List<(substrate, rationale)>
-Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from, stage_classification, n1_dogfooding_caveat }
+Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from, n1_dogfooding_caveat }
 HFT_draft      = { frontmatter, S, W_full, R, Excluded }
                  -- W_full invariant: see assemble(...) in MORPHISM
 InscribedHFT   = { path, content: HFT_draft }       -- written to ~/.claude/plans/<stage>.md
@@ -267,7 +266,7 @@ converge             (extension)    → TextPresent+Proceed (convergence trace)
 6. **Empty-section explicit signal**: an empty Wirkungsgeschichte subsection emits `_(none in this stage)_` rather than being omitted; silent omission loses the negative-information signal
 7. **Recognition over Recall**: each Phase 2–5 Constitution interaction presents structured options (Accept/Modify/Reject for layer co-construction; Approve/Revise/Cancel for final). Free response remains available
 8. **Detection with user authority**: AI distills draft content; user approves, modifies, or rejects. AI never writes to disk without Phase 5 Approve
-9. **Stage 1 caveat surface**: every emitted HFT carries `stage_classification: stage-1-conjecture` and `n1_dogfooding_caveat: true` in frontmatter; do not auto-promote
+9. **Provisional caveat surface**: every emitted HFT carries `n1_dogfooding_caveat: true` in frontmatter; the caveat surfaces in `/rehydrate` reports
 10. **No fabrication**: Surface Text fields (Design Concept, Ubiquitous Language, Sache), Wirkungsgeschichte entries (Formation Trajectory, Rejected Alternatives, External Priors) must be drafted from observable session content. When the AI cannot draft, ask the user; do not invent
 11. **No auto-hooks**: this skill does not register SessionEnd, PreCompact, or SessionStart hooks. Hooks are out of scope for the present GoalContract
 12. **Convergence evidence**: present transformation trace before declaring inscription complete. Per-layer evidence is required
@@ -281,7 +280,7 @@ converge             (extension)    → TextPresent+Proceed (convergence trace)
 - **Phase 4 elision honored** — Reference Shells auto-collect when mechanically determinable; user reviews at Phase 5
 - **Cancel is always available** — Phase 5 Cancel deactivates without writing; no partial state persists between invocations
 - **Re-inscription appends, never overwrites** — re-running on an existing stage path appends a dated revision section; predecessor inheritance chain is preserved
-- **Stage 1 caveat surface in convergence trace** — final report includes a one-line caveat reminding the user that this format is Stage 1 conjecture
+- **Provisional caveat surface in convergence trace** — final report includes a one-line caveat reminding the user that this format is provisional pending accumulated use evidence
 - **Vocabulary discipline** — output uses "horizon", "Wirkungsgeschichte", "Reference Shells", "Surface Text"; the skill never speaks of "data backup" or "state save" (those framings collapse the hermeneutic distinction this format aims to preserve)
 
 ## Trigger Signals
@@ -308,11 +307,11 @@ Skip `/crystallize` when:
 | User Esc | Ungraceful exit; no partial state retained |
 | Phase 2/3/4 revise cap exhausted | Surface unresolved draft; ask user to Approve-as-is or Cancel |
 
-## Stage 1 Conjecture (N=1 Dogfooding)
+## Provisional Status (N=1 Dogfooding)
 
-This skill is a Stage 1 (Compile) conjecture. Structural fit was established via a single dogfooding session crystallizing the HFT format from concrete instance set into a four-layer abstraction (see `references/hft-format.md` for the format spec's own Stage 1 caveat). Stage 2 (Runtime) use-corroboration is pending — accumulating cross-session inscriptions across user-context variation. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities, registering auto-hooks) is deferred until variation-stable retention evidence accumulates.
+This skill is provisional. Structural fit was established via a single dogfooding session crystallizing the HFT format from a concrete instance set into a four-layer abstraction (see `references/hft-format.md` for the format spec's own provisional caveat). Cross-session use-corroboration is pending. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities, registering auto-hooks) is deferred until accumulated use evidence is available.
 
-When in doubt about a phase or rule under live use, prefer fidelity to the contract over local convenience; report any tension as Stage 2 evidence rather than silently relaxing the constraint.
+When in doubt about a phase or rule under live use, prefer fidelity to the contract over local convenience; report any tension to surface use evidence rather than silently relaxing the constraint.
 
 ## Anti-Patterns
 
@@ -321,6 +320,6 @@ When in doubt about a phase or rule under live use, prefer fidelity to the contr
 - Rewriting predecessor Wirkungsgeschichte during inheritance — destroys effective-historical consciousness
 - Surface Text growing without bound across stages — defeats 1-pass primer function
 - Skipping `_(none in this stage)_` for empty Wirkungsgeschichte subsections — loses negative-information signal
-- Auto-promoting `stage_classification` away from `stage-1-conjecture` — violates Deficit Empiricism
+- Removing `n1_dogfooding_caveat: true` before accumulated cross-session use evidence is available — defeats the provisional caveat surface
 - Writing to disk before Phase 5 Approve — Constitution boundary violation
 - Inferring stage identifier without surfacing the inference for user confirmation — silent identity establishment violates user authority

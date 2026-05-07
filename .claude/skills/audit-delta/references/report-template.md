@@ -68,7 +68,7 @@ Placeholders use brace syntax: `{name}`. Repeating sections use `{#each <name>}`
 ## Emergent Findings
 
 {#if emergent-count == 0}
-No new audit-relevant issues opened since baseline ({baseline-date}). Search criteria: title prefix from `references/audit-issue-prefix.txt`, file paths from Track Alpha and Track Beta scope, and keywords (axiom, MORPHISM, TYPES, formal block, falsifiability, Deficit Empiricism, vocabulary, soundness).
+No new audit-relevant issues opened since baseline ({baseline-date}). Search criteria: title prefix from `references/audit-issue-prefix.txt`, file paths from Track Alpha and Track Beta scope, and keywords (axiom, MORPHISM, TYPES, formal block, falsifiability, vocabulary, soundness).
 {/if}
 
 {#each emergent-issue}

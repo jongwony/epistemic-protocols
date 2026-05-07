@@ -178,7 +178,7 @@ semantic invariants:
   stability:       repeated detect(s) under the same extractor version should preserve recall-relevant category intent, but exact set equality is not required (idempotence not claimed — LLM-extracted categories are non-deterministic; stability subsumes intent-level repeatability)
   locality*:       detect is applied per session; cross-session comparison is ranking-layer only, except corpus-statistical coinage
   monotonicity*:   adding content may refine, normalize, merge, or reject prior candidate markers; exact set inclusion is not guaranteed
-  -- Stage 1 conjecture under Deficit Empiricism: invariant relaxation (exact laws → starred semantic invariants) justified by 88.5% noise rate in MarkerProfile.temporal corpus-wide audit (2026-05-04); the coinage formula below remains deterministic and is unaffected.
+  -- Provisional invariant relaxation (exact laws → starred semantic invariants) justified by 88.5% noise rate in MarkerProfile.temporal corpus-wide audit (2026-05-04); the coinage formula below remains deterministic and is unaffected.
 
 coinage(s, corpus, θ) = { t ∈ s : salience_precision(t, s, corpus) ≥ θ }
   where salience_precision(t, s, corpus) = |occ(t, s)| / (1 + |occ(t, corpus \ {s})|)

@@ -101,7 +101,7 @@ Instance count is NOT a gate — it is evidence for sensing, not a precondition.
   - `/frame` session reaches 5+ converged perspectives (perspective count visible in `/frame` output structure)
   - User message after `/frame` synthesis contains a coined name pattern (a noun phrase the AI did not propose, used as if naming the synthesized abstraction)
   - No `/induce` invocation followed within the next several turns
-- **Status** — Pattern documented but **not in `/misuse` v1.0 detector scope**. Defer to Stage 2 expansion when retention evidence accumulates. Current v1.0 classifies this as Emergent and surfaces it only as AMBIGUOUS with note, not as a primary VIOLATION class.
+- **Status** — Pattern documented but **not in `/misuse` v1.0 detector scope**. Defer to a future expansion when accumulated cross-session retention evidence is available. Current v1.0 classifies this as Emergent and surfaces it only as AMBIGUOUS with note, not as a primary VIOLATION class.
 
 ## False-Positive Guard (Self-Stereotype Avoidance)
 
@@ -119,11 +119,11 @@ The default on uncertainty is `AMBIGUOUS`. False-positive cost (eroded protocol 
 
 ## N=1 Dogfooding Caveat
 
-All heuristics in this taxonomy were derived from a single user's session corpus during the design and observation period for `/misuse` v1.0. Patterns are working hypotheses with N=1 corroboration, not population evidence. Stage 2 corroboration is pending: variation-stable retention evidence across user profiles and platform contexts is required before promoting any heuristic from "working hypothesis" to "validated criterion".
+All heuristics in this taxonomy were derived from a single user's session corpus during the design and observation period for `/misuse` v1.0. Patterns are working hypotheses with N=1 corroboration, not population evidence. Variation-stable retention evidence across user profiles and platform contexts is required before promoting any heuristic from "working hypothesis" to "validated criterion".
 
 `/misuse` Phase 5 emit must surface this caveat in the ViolationReview artifact so downstream readers (including future sessions) inherit the epistemic limitation.
 
-## Stage 2 Expansion Path (Reserved)
+## Future Expansion Path (Reserved)
 
 When variation-stable retention evidence accumulates, this taxonomy may expand:
 
@@ -131,4 +131,4 @@ When variation-stable retention evidence accumulates, this taxonomy may expand:
 - **`/frame` over-extension** as a primary VIOLATION class once the 5+perspective + coined-name + no-`/induce`-followup pattern is observed across multiple sessions.
 - **Cross-protocol violation classes** — patterns like "Telos GoalContract auto-resolved by AI without user gate" require cross-protocol evidence and are deferred until that evidence appears.
 
-Expansion proposals should follow a two-stage validation: Stage 1 compile checks (structural coherence, operation-kind clarity, falsifiability conditions stated, orthogonal option surface preserved) before the criterion enters circulation; Stage 2 runtime use-corroboration (variation-stable retention evidence across instance / user-profile / platform-context / session-type) before promotion from working hypothesis to validated criterion.
+Expansion proposals should establish structural coherence, operation-kind clarity, falsifiability conditions, and orthogonal option surface before entering circulation; variation-stable retention evidence across instance / user-profile / platform-context / session-type is required before promotion from working hypothesis to validated criterion.

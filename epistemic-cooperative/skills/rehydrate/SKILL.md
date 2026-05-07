@@ -1,6 +1,6 @@
 ---
 name: rehydrate
-description: "Enter a previously inscribed Horizon-Fusion Text (HFT) so the current session is primed to first-utter from the same horizon as the originating session. Use when the user asks to 'rehydrate', 'enter horizon', 'resume crystallized stage', 'pick up from compact', or invokes /rehydrate. Reader half of the HFT pair (paired with /crystallize). Stage 2 evidence-collection instrument."
+description: "Enter a previously inscribed Horizon-Fusion Text (HFT) so the current session is primed to first-utter from the same horizon as the originating session. Use when the user asks to 'rehydrate', 'enter horizon', 'resume crystallized stage', 'pick up from compact', or invokes /rehydrate. Reader half of the HFT pair (paired with /crystallize)."
 user_invocable: true
 ---
 
@@ -67,8 +67,7 @@ Read the HFT frontmatter. Verify:
 
 - `hft_format_version` — currently 1; surface a warning if a future version is encountered
 - `stage`, `generated_at`, `git_head`, `inherits_from` — required keys present
-- `stage_classification` — surface to user
-- `n1_dogfooding_caveat` — when true, surface the Stage 1 caveat in the readiness report
+- `n1_dogfooding_caveat` — when true, surface the provisional caveat in the readiness report
 
 Compute drift signal:
 - Run `git rev-parse HEAD` and compare with `git_head` from frontmatter
@@ -156,7 +155,7 @@ Rehydration Convergence Trace
 - Reference Shells: <N session, N file, N external, N task> available (not auto-loaded)
 - Anchor tasks: <N pending, N in-progress, N completed>
 - Resumption: <chosen path from Phase 5>
-- Stage 1 caveat: this HFT is Stage 1 conjecture; format may evolve.
+- Provisional caveat: this HFT format is provisional pending accumulated use evidence; format may evolve.
 ```
 
 Present via Cognitive Partnership Move (Constitution) with options:
@@ -202,7 +201,7 @@ invariant: No Auto-Fetch, Topology Separation Honored
 ── TYPES ──
 G              = StageSignal { argument: Optional(String), inferred: Optional(String) }
 HFT_path       = Path
-Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from, stage_classification, n1_dogfooding_caveat }
+Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from, n1_dogfooding_caveat }
 SurfaceText    = { design_concept: String, ubiquitous_language: List<(term, meaning)>, sache: String }
 Wirkungsgeschichte = { trajectory: List<Entry>, rejected: List<Entry>, priors: List<Entry> }
 ReferenceShells = { session: List<KV>, files: List<Path>, urls: List<URL>, tasks: List<Path> }
@@ -277,7 +276,7 @@ Phase 7 emit (extension)              → TextPresent+Proceed (convergence trace
 4. **Read-only throughout**: HFT file is preserved; this skill does not modify, archive, or delete the file. Archive logic, if needed, is a separate concern
 5. **Recognition over Recall**: Phase 5 and Phase 6 Constitution interactions present structured options (HandOff/Manual/Defer; Confirm/ReRead/Abort). Free response remains available
 6. **Detection with user authority**: AI parses HFT and forms primer; user confirms readiness. AI does not declare horizon entered until Phase 6 Confirm
-7. **Stage 1 caveat surface**: when frontmatter `n1_dogfooding_caveat: true`, surface the caveat in the readiness summary
+7. **Provisional caveat surface**: when frontmatter `n1_dogfooding_caveat: true`, surface the caveat in the readiness summary
 8. **Drift signal informational**: when current `git HEAD` differs from frontmatter `git_head`, surface the drift count as informational. Do not block readiness on drift
 9. **Sache restatement is the comprehension test**: Phase 2 requires the AI to restate Sache in its own phrasing. Inability to restate signals malformed HFT or AI parsing failure; surface and ask the user
 10. **No anchor task auto-execution**: Phase 5 must yield turn for user choice. Auto-handing-off to `/attend` without user selection violates Constitution boundary
@@ -291,7 +290,7 @@ Phase 7 emit (extension)              → TextPresent+Proceed (convergence trace
 - **Discovery is silent when unique** — uniquely matched HFT path produces a one-line discovery report; multi-candidate matches present a numbered selection
 - **Re-read cap honored** — Phase 6 ReRead is capped at 2 cycles; on exhaustion, surface and ask Confirm-as-is or Abort
 - **Drift surfaced, not blocking** — git_head drift signals environment change; user decides whether to proceed (the drift may be expected if work happened on the branch since inscription)
-- **Stage 1 caveat surfaced once** — readiness summary includes a single one-line caveat; do not repeat per-section
+- **Provisional caveat surfaced once** — readiness summary includes a single one-line caveat; do not repeat per-section
 - **Vocabulary discipline** — output uses "horizon", "primer", "Vorverständnis", "Wirkungsgeschichte"; the skill never speaks of "data load" or "state restore" (those framings collapse the hermeneutic distinction this format aims to preserve)
 
 ## Trigger Signals
@@ -318,11 +317,11 @@ Skip `/rehydrate` when:
 | Phase 0 no-HFT-found | Mode deactivates with a no-op note |
 | User Esc | Ungraceful exit; no partial primer state retained |
 
-## Stage 1 Conjecture (N=1 Dogfooding)
+## Provisional Status (N=1 Dogfooding)
 
-This skill is a Stage 1 (Compile) conjecture. Structural fit was established via a single dogfooding session crystallizing the HFT format from concrete instance set into a four-layer abstraction (see `references/hft-format.md` for the format spec's own Stage 1 caveat). Stage 2 (Runtime) use-corroboration is pending — accumulating cross-session activations across user-context variation. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities, registering auto-hooks, integrating with `/attend`'s adopt-resume slot beyond the optional Phase 5 hand-off) is deferred until variation-stable retention evidence accumulates.
+This skill is provisional. Structural fit was established via a single dogfooding session crystallizing the HFT format from a concrete instance set into a four-layer abstraction (see `references/hft-format.md` for the format spec's own provisional caveat). Cross-session use-corroboration is pending. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities, registering auto-hooks, integrating with `/attend`'s adopt-resume slot beyond the optional Phase 5 hand-off) is deferred until accumulated use evidence is available.
 
-When in doubt about a phase or rule under live use, prefer fidelity to the contract over local convenience; report any tension as Stage 2 evidence rather than silently relaxing the constraint.
+When in doubt about a phase or rule under live use, prefer fidelity to the contract over local convenience; report any tension to surface use evidence rather than silently relaxing the constraint.
 
 ## Anti-Patterns
 
