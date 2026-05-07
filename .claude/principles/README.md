@@ -37,4 +37,4 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 
 This directory is not an archive (content remains canonical and current) and not a docs/ replacement (docs/ holds investigation/research products, not prescriptive principles). It is a **Tier Factorization o-tier zone** — same content, different invocation frequency, different load mechanism.
 
-The demotion zone reduces auto-load memory pressure (Epistemic Cost Topology applied to the loading dimension) while preserving content reversibility — promotion back to `.claude/rules/` is a single PR away.
+The demotion zone reduces auto-load memory pressure (Epistemic Cost Topology applied to the loading dimension) while keeping the demoted content canonical and editable. The split is one-directional by default: there is no formal re-promotion pathway. A demoted section returning to `.claude/rules/` is a contributor-judgment decision per case, not an inscribed criterion.

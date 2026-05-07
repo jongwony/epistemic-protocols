@@ -119,16 +119,16 @@ The default on uncertainty is `AMBIGUOUS`. False-positive cost (eroded protocol 
 
 ## N=1 Dogfooding Caveat
 
-All heuristics in this taxonomy were derived from a single user's session corpus during the design and observation period for `/misuse` v1.0. Patterns are working hypotheses with N=1 corroboration, not population evidence. Variation-stable retention evidence across user profiles and platform contexts is required before promoting any heuristic from "working hypothesis" to "validated criterion".
+All heuristics in this taxonomy were derived from a single user's session corpus during the design and observation period for `/misuse` v1.0. Patterns are working hypotheses with N=1 corroboration, not population evidence. Accumulated cross-session use evidence is required before promoting any heuristic from "working hypothesis" to "validated criterion".
 
 `/misuse` Phase 5 emit must surface this caveat in the ViolationReview artifact so downstream readers (including future sessions) inherit the epistemic limitation.
 
 ## Future Expansion Path (Reserved)
 
-When variation-stable retention evidence accumulates, this taxonomy may expand:
+When accumulated cross-session use evidence is available, this taxonomy may expand:
 
 - **Other protocols** — `/clarify`, `/goal`, `/inquire`, `/bound`, `/attend`, `/contextualize`, `/recollect`, `/grasp`, `/frame`, `/gap` each have Phase 0 contracts whose violations could be detected by analogous criteria. Each expansion requires its own evidence base before inclusion.
 - **`/frame` over-extension** as a primary VIOLATION class once the 5+perspective + coined-name + no-`/induce`-followup pattern is observed across multiple sessions.
 - **Cross-protocol violation classes** — patterns like "Telos GoalContract auto-resolved by AI without user gate" require cross-protocol evidence and are deferred until that evidence appears.
 
-Expansion proposals should establish structural coherence, operation-kind clarity, falsifiability conditions, and orthogonal option surface before entering circulation; variation-stable retention evidence across instance / user-profile / platform-context / session-type is required before promotion from working hypothesis to validated criterion.
+Expansion proposals should establish structural coherence, operation-kind clarity, falsifiability conditions, and orthogonal option surface before entering circulation; accumulated cross-session use evidence is required before promotion from working hypothesis to validated criterion.

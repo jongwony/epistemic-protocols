@@ -28,7 +28,7 @@ Each entry records:
   - `epistemic-cooperative/.claude-plugin/plugin.json` — 2.12.0 → 2.13.0 minor bump.
 - **Origin context**: Session 8f568beb — Aitesis convergence over session 4d76d47b rule-citation analysis (Synthesis = coproduct mutation correction) + Euporia cycle 1 axis dismiss/defer-open + user articulation of "preserve correct rules + correct via appropriate abstraction axis + leave rule-overlap open". Cluster: Emergent (inscription-decision meta-default; not directly located in any of the six profile variables).
 - **Falsification** (any one triggers re-evaluation):
-  - Drift recurs across N≥3 sessions with same posture pattern → axis promotion candidate (variation-stable retention threshold; narrative extension → seventh variable promotion review).
+  - Drift recurs across N≥3 sessions with same posture pattern → axis promotion candidate (accumulated cross-session use evidence threshold; narrative extension → seventh variable promotion review).
   - Inscription-avoidance leads to derivation failure rate > 20% (posture is over-restrictive).
   - An inscription violating the posture demonstrably yields better outcome (empirical refutation, not principle-internal rebuttal).
 - **Reevaluation**: next `/steer` invocation against fresh session, or upon falsification trigger.
