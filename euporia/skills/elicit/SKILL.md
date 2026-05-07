@@ -160,7 +160,7 @@ Per cycle, the trio `(D[step], A[step], I'[step])` is recorded pairwise into `D_
 
 AI detects abstract aporia OR user calls `/elicit`. Detection is silent (Phase 0); dimension surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
 
-**Hybrid confirmation contract**: For AI-detected activation paths, the first Phase 2 surfacing (cycle_n=1) serves as the user-confirmation moment — Esc at the first surface deactivates without coordinate state change, satisfying the Hybrid initiator's "AI-detected trigger path requires user confirmation" contract via implicit-acknowledge-or-decline at the first dimension surface. Phase 1 substrate scan precedes this confirmation under the substrate read-only constraint (`## UX Safeguards`); no externalized state is mutated before user judgment.
+**Hybrid confirmation contract**: For AI-detected activation paths, the first Phase 2 surfacing (cycle_n=1) serves as the user-confirmation moment — Esc at the first surface deactivates without coordinate state change, satisfying the Hybrid initiator's "AI-detected trigger path requires user confirmation" contract via implicit-acknowledge-or-decline at the first dimension surface. Phase 1 substrate scan precedes this confirmation under the substrate read-only constraint; no externalized state is mutated before user judgment.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/elicit` slash command or description-matching input. Always available.
