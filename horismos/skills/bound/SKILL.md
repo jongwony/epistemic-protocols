@@ -24,7 +24,7 @@ Horismos(T) → Probe(T) → Bᵢ? →
       termination_intent: → Phase 4
       Esc:                → ungraceful deactivate (final_gate skipped)
       else:               cycle_n += 1, loop
-  Phase 4 Qf(residual, {UserRetains, AIAutonomous}) → Stop → bulk_classify → DefinedBoundary
+  Phase 4 Qf(residual, {UserSupplies, AIAutonomous}) → Stop → bulk_classify → DefinedBoundary
                        Esc → ungraceful deactivate
 
 ── MORPHISM ──
@@ -55,17 +55,17 @@ Sub-D          = { domain: Domain, scan_summary: String, evidence: Set(Evidence)
 BoundaryEssence = String                                      -- accumulated boundary essence (crystallized form of the responsibility boundary space); initialized "" at Phase 0; updated as BoundaryEssence' = BoundaryEssence ⊕ Δessence at Phase 3
 Qc             = Per-cycle boundary classification interaction [Tool: Constitution interaction]
 A              = User answer ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismiss}
-                 -- 4-value coproduct preserved (per-cycle Phase 2 answer; gate integrity Rule 16)
+                 -- 4-value coproduct (per-cycle Phase 2 answer; gate integrity Rule 16)
                  -- termination_intent surfaces via free-response affordance, NOT as 5th option
 TerminationIntent = parsed natural-language signal of user satisfaction → enters Phase 4
 B              = BoundaryMap: Map(Domain, BoundaryClassification)
-BoundaryClassification ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismissed, UserRetains}
-                 -- per-cycle Phase 2 surfaces 4-value subset {UserSupplies, AIPropose, AIAutonomous, Dismissed}
-                 -- Phase 4 surfaces 2-value subset (FinalGateAnswer below)
-                 -- UserRetains = bare-tag (user retains decision authority; downstream protocol invocation included; no AI advisory routing)
+BoundaryClassification ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismissed}
+                 -- 4-value coproduct used uniformly across Phase 2 (per-cycle) and Phase 4 (residual bulk)
+                 -- UserSupplies semantic: user retains decision authority for the scope; downstream gates present open questions; user provides values (or invokes other protocols) at decision-point activation
 Qf             = Final gate bulk classification interaction [Tool: Constitution interaction]
-FinalGateAnswer = {UserRetains, AIAutonomous} ⊆ BoundaryClassification        -- Phase 4 surfacing subset
-                 -- AIAutonomous at Phase 4 surfacing is the unscoped form (applied per residual domain; semantically equivalent to per-cycle AIAutonomous(scope))
+FinalGateAnswer = {UserSupplies, AIAutonomous} ⊆ BoundaryClassification        -- Phase 4 surfacing subset
+                 -- Phase 4 UserSupplies: bulk-classify residual domains as user-retained (each residual domain becomes its own scope; lazy-binding — values or protocol invocation deferred to downstream activation)
+                 -- Phase 4 AIAutonomous: bulk-classify residual as AI-delegated (semantically equivalent to per-cycle AIAutonomous(scope))
 DefinedBoundary = B' where (residual = ∅ ∨ user_esc) ∧ BoundaryEssence finalized
 Phase          ∈ {0, 1, 2, 3, 4}
 
@@ -74,7 +74,7 @@ Phase 0: T → Probe(T) → Bᵢ?                                               
 Phase 1: T, cycle_n → Ctx(T, cycle_n) → (Sub-D[cycle_n], auto_resolved?)                                     -- per-cycle context collection + auto-resolve check [Tool]
 Phase 2: Sub-D[cycle_n], BoundaryEssence, cycle_n → Qc(Sub-D[cycle_n], BoundaryEssence, cycle_n) → Stop → A  -- per-cycle classification [Tool]
 Phase 3: A → integrate(A, B, BoundaryEssence) → (B', BoundaryEssence', termination?)                         -- map + essence update via Δessence (track)
-Phase 4: residual, BoundaryEssence → Qf(residual, {UserRetains, AIAutonomous}) → Stop → bulk_classify → DefinedBoundary  -- final gate [Tool]
+Phase 4: residual, BoundaryEssence → Qf(residual, {UserSupplies, AIAutonomous}) → Stop → bulk_classify → DefinedBoundary  -- final gate [Tool]
 
 Phase 0 → Phase 1:  boundary_undefined(T) = true                                            -- domain signal present
 Phase 0 → deactivate: boundary_undefined(T) = false                                         -- no undefined boundary signal
@@ -99,7 +99,7 @@ Cycle 1 ordering: AI Impact ordering selects highest-impact domain.
 Cycle k≥2 ordering: previous cycle's A[cycle_n-1] or free-response routes next cycle's domain selection frame; AI re-applies Impact ordering within the routed frame.
 
 Answer types (UserSupplies/AIPropose/AIAutonomous/Dismiss) determine BoundaryMap entry, not loop path.
-FinalGateAnswer subset {UserRetains, AIAutonomous} ⊆ BoundaryClassification determines residual BoundaryMap entries at Phase 4.
+FinalGateAnswer subset {UserSupplies, AIAutonomous} ⊆ BoundaryClassification determines residual BoundaryMap entries at Phase 4.
 
 Convergence evidence: At Phase 4 completion, present transformation trace — per-cycle (Sub-D[k], Δessence[k], BoundaryClassification[k]) ∀ k ∈ [1, cycle_n] (k bound by ∀ quantifier), plus final gate (∀ d ∈ residual, FinalGateAnswer(d)). BoundaryEssence is presented as separate session text artifact. Convergence is demonstrated, not asserted.
 
@@ -114,7 +114,7 @@ Phase 0 Probe (sense)        → Internal analysis (no external tool)
 Phase 1 Ctx   (observe)      → Read, Grep, Glob (per-cycle re-scan: CLAUDE.md, boundaries.md, rules/, prior session context; Λ.D_history dedup)
 Phase 2 Qc    (constitution) → present (mandatory; per-cycle classification + Δessence + cycle_n + free-response termination affordance; Esc → loop termination, not an Answer)
 Phase 3       (track)        → Internal state update (BoundaryMap + BoundaryEssence accumulation; termination_intent parsing)
-Phase 4 Qf    (constitution) → present (mandatory; residual bulk classification {UserRetains, AIAutonomous}; Esc → ungraceful exit at final gate)
+Phase 4 Qf    (constitution) → present (mandatory; residual bulk classification {UserSupplies, AIAutonomous}; Esc → ungraceful exit at final gate)
 converge      (extension)    → TextPresent+Proceed (per-cycle trace + final gate trace + BoundaryEssence artifact; proceed with defined boundary)
 
 ── MODE STATE ──
@@ -366,14 +366,14 @@ Then **present**:
 How should the remaining domains be classified in bulk?
 
 Options:
-1. **UserRetains** — I retain decision authority for the residual; I invoke downstream
-   protocols at decision points as I see fit.
+1. **UserSupplies** — I retain decision authority for each residual domain (lazy-binding);
+   I provide values or invoke downstream protocols at decision-point activation.
 2. **AIAutonomous** — AI decides autonomously within the residual scope. I delegate.
 ```
 
 **Bulk classification semantics**:
-- **UserRetains** — Each residual domain receives the `UserRetains` tag in `Λ.final_gate_answers`. BoundaryMap entries record the bare-tag classification; downstream protocols read this signal and surface decision questions to the user when activated. The `FinalGateAnswer` coproduct contains no routing constructor — user judges which protocol applies, preserving user decision authority over the residual.
-- **AIAutonomous** — Each residual domain receives `AIAutonomous` (semantically equivalent to per-cycle `AIAutonomous(scope)` with scope = residual domain). Downstream protocols may elide gates per RESOLVE-OR-PRESENT pattern.
+- **UserSupplies** — Each residual domain receives `UserSupplies(domain)` in `Λ.final_gate_answers` (the residual domain itself becomes the scope; lazy-binding). BoundaryMap entries record the disposition; downstream protocols read this signal and surface decision questions to the user when activated. User judges which protocol applies, preserving user decision authority over the residual.
+- **AIAutonomous** — Each residual domain receives `AIAutonomous(domain)` (semantically equivalent to per-cycle `AIAutonomous(scope)` with scope = residual domain). Downstream protocols may elide gates per RESOLVE-OR-PRESENT pattern.
 
 **Granularity option**: User may free-response per-domain mixed disposition. Free response is parsed as a `Map(Domain, FinalGateAnswer)`; the uniform option (1 or 2) applies as default when free response is absent.
 
@@ -386,7 +386,7 @@ Options:
 **Design principles**:
 - **BoundaryEssence visible**: the crystallized abstract boundary essence is presented BEFORE residual classification — user judges bulk disposition with full essence context.
 - **Residual transparency**: every accumulated residual domain is listed by name.
-- **Bare-tag UserRetains**: BoundaryMap entries carry the disposition tag only — user authority is preserved at the residual disposition.
+- **Lazy-binding UserSupplies**: Phase 4 UserSupplies records the disposition with the residual domain as scope; values and protocol invocation occur at downstream activation rather than at Phase 4 surfacing.
 - **Mixed-disposition tolerated**: free response permits per-domain divergence from uniform option.
 
 After Phase 4 user response:
@@ -417,14 +417,14 @@ After Phase 4 user response:
 | Residual transparency | Phase 2 shows `\|residual\|` count; Phase 4 lists every residual domain | User sees how many domains will reach the final gate |
 | Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
 | Auto-resolve preferred | Context-resolved domains skip Phase 2 within their cycle | Minimizes user interaction |
-| Recognition over recall | Present options (per-cycle: UserSupplies/AIPropose/AIAutonomous/Dismiss; Phase 4: UserRetains/AIAutonomous) | Never ask open-ended boundary questions |
+| Recognition over recall | Present options (per-cycle: UserSupplies/AIPropose/AIAutonomous/Dismiss; Phase 4: UserSupplies/AIAutonomous subset) | Bound by typed coproducts |
 | Esc semantics | Esc → ungraceful exit; final gate skipped, residual untreated | Distinguishes hard exit from satisfaction-driven termination |
 | BoundaryEssence artifact | Output as separate session text alongside BoundaryMap at convergence | Periagoge contribution preserved as inspectable trace |
 
 ## Rules
 
 1. **AI-guided, user-classified**: AI detects boundary-undefined signal and surfaces per-cycle anchors; classification requires user choice via Cognitive Partnership Move (Constitution) at Phase 2 (per-cycle 4-value) and Phase 4 (final gate 2-value). AI detection is implicitly confirmed when the user engages with classification.
-2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding. Phase 2 options bind to `A ∈ {UserSupplies, AIPropose, AIAutonomous, Dismiss}`; Phase 4 options bind to `FinalGateAnswer = {UserRetains, AIAutonomous}` (TYPES coproducts).
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding. Phase 2 options bind to `A ∈ {UserSupplies, AIPropose, AIAutonomous, Dismiss}`; Phase 4 options bind to `FinalGateAnswer = {UserSupplies, AIAutonomous} ⊆ BoundaryClassification` (TYPES coproducts).
 3. **Per-cycle context collection**: Each cycle's Phase 1 re-scans substrate (Read/Grep/Glob) for boundary signals in CLAUDE.md, rules/, boundaries.md, project configuration. `Λ.D_history` prevents duplicate domain surfacing.
 4. **Definition over Assumption**: When boundary ownership is unclear, define explicitly rather than assume — silence is worse than a dismissed classification.
 5. **No fixed taxonomy**: Domains emerge dynamically from each task probe; the `Domain = { name, description, evidence }` type carries no category constructor — taxonomy emerges from the task context.
@@ -441,7 +441,7 @@ After Phase 4 user response:
 16. **Gate integrity**: The defined option sets (per-cycle 4-value `A`, Phase 4 2-value `FinalGateAnswer`) are presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation. The free-response termination affordance is positioned in Phase 2 surfacing prose (natural-language satisfaction signal guidance); Phase 3 parses `termination_intent` from free response and routes to Phase 4 — the affordance lives in prose rather than in the typed coproduct, so option-set integrity is preserved.
 17. **Cycle counter visibility**: `cycle_n` surfaced at every Phase 2 surfacing. User perceives signal density and judges termination timing.
 18. **Essence visibility per cycle**: `Δessence` (per-cycle delta) and accumulated `BoundaryEssence` (crystallized form of the responsibility boundary space) shown at every Phase 2 surfacing. The periagoge crystallization contribution is visible-by-cycle through the loop.
-19. **Final gate UserRetains semantics — bare tag**: Phase 4 `UserRetains` records only the disposition tag in `Λ.final_gate_answers`. The `FinalGateAnswer` coproduct contains no routing constructor — BoundaryMap entries carry the disposition tag only, and protocol routing decisions occur when the user activates downstream protocols. User decision authority is preserved at the residual disposition.
+19. **Final gate UserSupplies — lazy-binding semantic**: Phase 4 `UserSupplies(domain)` records the disposition with the residual domain as scope. The `FinalGateAnswer` coproduct (subset of BoundaryClassification) contains no routing constructor — BoundaryMap entries carry only the typed disposition, and value provision or protocol invocation decisions occur when the user activates downstream protocols. User decision authority is preserved at the residual disposition.
 20. **Esc vs termination_intent distinction**: Esc at any Phase 2 → ungraceful exit (final gate skipped, residual untreated). Free-response termination_intent at Phase 2 → graceful Phase 4 entry (residual bulk-classified, BoundaryEssence finalized). Distinct semantic channels.
 21. **Conjecture disclosure**: Per-cycle-emergent loop + essence crystallization is a structural-fit conjecture under accumulating use. Loop topology revision waits on variation-stable retention evidence accumulating across invocations.
 
