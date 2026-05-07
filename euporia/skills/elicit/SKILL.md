@@ -191,7 +191,7 @@ When Euporia is active:
 
 **Protocol precedence**: Activation order position 6/9 (graph.json is authoritative source for information flow). Concern cluster: Planning.
 
-**Advisory relationships**: Receives from Anamnesis (advisory: recalled session history enriches substrate scan), Horismos (advisory: BoundaryMap narrows substrate scope). Provides to Aitesis (advisory: traced coordinates narrow context inference), Periagoge (advisory: resolved endpoint may seed downstream abstraction), Horismos (advisory: resolved coordinates inform downstream boundary definition). Katalepsis is structurally last.
+**Advisory relationships**: Receives from Anamnesis (advisory: recalled session history enriches substrate scan), Horismos (advisory: BoundaryMap narrows substrate scope). Provides to Aitesis (advisory: traced coordinates narrow context inference), Periagoge (advisory: resolved endpoint may seed downstream abstraction), Horismos (advisory: resolved coordinates inform downstream boundary definition). Same-session re-entry between Euporia and Horismos is permitted but treated as distinct activation, producing a fresh ResolvedEndpoint or BoundaryMap rather than auto-cycling — see `## Distinction from Other Protocols` § Euporia vs Horismos. Katalepsis is structurally last.
 
 ### Trigger Signals
 
@@ -316,5 +316,9 @@ After integration:
 ## Rules
 
 1. **AI-guided substrate access, user-resolved**: AI reverse-traces dimension projections from substrate; resolution requires user answer via Cognitive Partnership Move (Constitution) (Phase 2).
-2. **User constitutive interaction**: User answers operate at three layers — coordinate-level (per-coordinate provide/defer/dismiss), endpoint-level (`resolved(I')` is user judgment, not AI assertion), and frame-level (user may redirect to an unsurfaced dimension or terminate; free response routes the next cycle's substrate scan).
-3. **Convergence persistence**: Mode active until user judges resolved, dismisses, or Esc.
+2. **Recognition over Recall**: Present structured dimension surfacing via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield.
+3. **User constitutive interaction**: User answers operate at three layers — coordinate-level (per-coordinate provide/defer/dismiss), endpoint-level (`resolved(I')` is user judgment, not AI assertion), and frame-level (user may redirect to an unsurfaced dimension or terminate; free response routes the next cycle's substrate scan).
+4. **Convergence persistence**: Mode active until user judges resolved, dismisses, or Esc.
+5. **Context-Question Separation**: Output substrate evidence and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the per-coordinate answer slot; the dimension surface is pre-gate context.
+6. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant coordinate value (option-level entropy → 0), present the value directly as relay. The user answer slot remains constitutive when multiple valid coordinate values exist under different user value weightings.
+7. **Gate integrity**: The cycle-emergent option set is presented as a coherent dimension cluster per cycle; partial omission of surfaced coordinates without user dismissal violates this invariant. Type-preserving materialization (specializing a generic axis into a concrete coordinate while preserving the surfacing structure) is distinct from mutation.
