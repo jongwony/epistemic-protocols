@@ -32,7 +32,6 @@ Each entry records:
   - Inscription-avoidance leads to derivation failure rate > 20% (posture is over-restrictive).
   - An inscription violating the posture demonstrably yields better outcome (empirical refutation, not principle-internal rebuttal).
 - **Reevaluation**: next `/steer` invocation against fresh session, or upon falsification trigger.
-- **N=1 scope caveat**: AI verdict-proposal mandate (Phase 3/5) inscribed in Steer SKILL.md only; structurally homologous Misuse Phase 4 gate left untouched pending paired-evidence accumulation per Steer Rule 15. Propagation to Misuse deferred until Stage 2 retention evidence corroborates the proposal-mandate pattern.
 - **Status**: active
 
 ### 2026-05-05 — gh-comments-convergence hook
