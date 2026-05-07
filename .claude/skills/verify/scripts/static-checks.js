@@ -12,6 +12,7 @@ const path = require('path');
 const util = require('util');
 const { execFileSync } = require('child_process');
 const { runArtifactSelfContainmentCheck } = require('./artifact-self-containment');
+const { runLanguagePurityCheck } = require('./language-purity');
 const {
   discoverPlugins,
   protocolFiles,
@@ -2306,6 +2307,13 @@ function checkArtifactSelfContainment() {
   results.warn.push(...artifactResults.warn);
 }
 
+function checkLanguagePurity() {
+  const purityResults = runLanguagePurityCheck({ projectRoot });
+  results.pass.push(...purityResults.pass);
+  results.fail.push(...purityResults.fail);
+  results.warn.push(...purityResults.warn);
+}
+
 // ============================================================
 // Check 17: Single-Axis Soundness
 // ============================================================
@@ -2475,12 +2483,6 @@ function checkAgentsSymlinksSync() {
 // anamnesis + periagoge omitted at workflow inception). Utility plugins
 // (epistemic-cooperative) are intentionally out of scope.
 //
-// KNOWN EXCLUSION: .github/workflows/claude-style-audit.yml is NOT validated
-// by this check. Its `paths:` trigger and inline grep regex constitute a
-// separate scope set (LLM-facing prose: SKILL.md, agents, output-styles)
-// that does not align with protocol-plugin enumeration. Drift between its
-// `paths:` and inline regex is currently surfaced via in-file comment only.
-// Tracked as a follow-up: extend this check to cover claude-style-audit.yml.
 function checkWorkflowPathsSync() {
   const relPath = '.github/workflows/claude-epistemic-review.yml';
   const workflowFile = path.join(projectRoot, relPath);
@@ -2556,6 +2558,7 @@ try {
   checkSingleAxisSoundness();
   checkAgentsSymlinksSync();
   checkWorkflowPathsSync();
+  checkLanguagePurity();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
