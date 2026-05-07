@@ -16,7 +16,7 @@ Define epistemic boundaries per decision through AI-guided classification. Type:
 Horismos(T) → Probe(T) → Bᵢ? →
   |Bᵢ| = 0: skip → deactivate
   |Bᵢ| > 0: cycle_n=1, BoundaryEssence="", loop:
-    Phase 1 Ctx(T, cycle_n) [per-cycle 재스캔] → (Sub-D[cycle_n], auto_resolved?) →
+    Phase 1 Ctx(T, cycle_n) [per-cycle re-scan] → (Sub-D[cycle_n], auto_resolved?) →
       auto_resolved: → Phase 3 (skip Phase 2 for this cycle)
       else:          → Phase 2
     Phase 2 Qc(Sub-D[cycle_n], BoundaryEssence, cycle_n) → Stop → A
@@ -32,7 +32,7 @@ TaskScope
   → probe(task, context)                                           -- detect boundary-undefined domains
   → enrich(domains, codebase, cycle_n)                             -- per-cycle context collection (re-scan)
   → classify(domain, as_inquiry)                                   -- per-cycle domain classification (4-value preserved)
-  → crystallize(Δessence, BoundaryEssence) → BoundaryEssence'      -- per-cycle essence delta integration (책임 경계 공간 crystallized 형태)
+  → crystallize(Δessence, BoundaryEssence) → BoundaryEssence'      -- per-cycle essence delta integration (crystallized form of the responsibility boundary space)
   → finalize(residual, FinalGateAnswer)                            -- bulk classify residual at user-judged termination
   → DefinedBoundary
 requires: boundary_undefined(T)            -- runtime checkpoint (Phase 0)
@@ -52,20 +52,20 @@ Ctx            = (T, cycle_n) → Sub-D                         -- per-cycle con
 Sub-D          = { domain: Domain, scan_summary: String, evidence: Set(Evidence) }  -- per-cycle dimension projection (one anchor domain per cycle)
                                                               -- Sub-D[k] = D_history[k] (k-th historical entry); current cycle = Sub-D[cycle_n]
 Δessence       = String                                       -- per-cycle boundary-essence delta produced at Phase 3 integration
-BoundaryEssence = String                                      -- accumulated boundary essence (책임 경계 공간 crystallized 형태); initialized "" at Phase 0; updated as BoundaryEssence' = BoundaryEssence ⊕ Δessence at Phase 3
+BoundaryEssence = String                                      -- accumulated boundary essence (crystallized form of the responsibility boundary space); initialized "" at Phase 0; updated as BoundaryEssence' = BoundaryEssence ⊕ Δessence at Phase 3
 Qc             = Per-cycle boundary classification interaction [Tool: Constitution interaction]
 A              = User answer ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismiss}
                  -- 4-value coproduct preserved (per-cycle Phase 2 answer; gate integrity Rule 16)
                  -- termination_intent surfaces via free-response affordance, NOT as 5th option
-TerminationIntent = parsed natural-language signal of user satisfaction → Phase 4 진입
+TerminationIntent = parsed natural-language signal of user satisfaction → enters Phase 4
 B              = BoundaryMap: Map(Domain, BoundaryClassification)
 BoundaryClassification ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismissed, UserRetains}
                  -- per-cycle Phase 2 surfaces 4-value subset {UserSupplies, AIPropose, AIAutonomous, Dismissed}
                  -- Phase 4 surfaces 2-value subset (FinalGateAnswer below)
-                 -- UserRetains = bare-tag (사용자 결정권 보유; 다른 프로토콜 호출 포함; AI advisory routing 없음)
+                 -- UserRetains = bare-tag (user retains decision authority; downstream protocol invocation included; no AI advisory routing)
 Qf             = Final gate bulk classification interaction [Tool: Constitution interaction]
 FinalGateAnswer = {UserRetains, AIAutonomous} ⊆ BoundaryClassification        -- Phase 4 surfacing subset
-                 -- AIAutonomous는 Phase 4 surfacing에서 unscoped form (잔여 도메인 단위 적용; per-cycle AIAutonomous(scope)와 의미 동치)
+                 -- AIAutonomous at Phase 4 surfacing is the unscoped form (applied per residual domain; semantically equivalent to per-cycle AIAutonomous(scope))
 DefinedBoundary = B' where (residual = ∅ ∨ user_esc) ∧ BoundaryEssence finalized
 Phase          ∈ {0, 1, 2, 3, 4}
 
@@ -125,10 +125,10 @@ converge      (extension)    → TextPresent+Proceed (per-cycle trace + final ga
       essence_history: List<Δessence>,                 -- per-cycle delta accumulation
       boundary_essence: BoundaryEssence,               -- accumulated essence text
       context_resolved: Set(Domain),                   -- Phase 1 auto-resolved (Bᵣ-equivalent, per-cycle)
-      user_responded: Set(Domain),                     -- Phase 2 4-value classification완료
-      final_gate_classified: Set(Domain),              -- Phase 4 일괄 분류완료
+      user_responded: Set(Domain),                     -- Phase 2 4-value classification completed
+      final_gate_classified: Set(Domain),              -- Phase 4 bulk classification completed
       dismissed: Set(Domain),
-      residual: Set(Domain),                           -- domains_touched 중 미분류 (Phase 4 입력)
+      residual: Set(Domain),                           -- unclassified subset of domains_touched (Phase 4 input)
       boundary_map: BoundaryMap,                       -- per-cycle 4-value entries ⊔ final-gate 2-value entries
       final_gate_answers: Map(Domain, FinalGateAnswer),
       history: List<(Domain, A)>,
@@ -302,7 +302,7 @@ Present as text output:
 - **Cycle**: `cycle_n` (always visible)
 - **Anchor domain**: [Sub-D[cycle_n].domain.name] — [description]
 - **Substrate evidence**: [evidence cited from Read/Grep/Glob with file:line]
-- **Boundary essence so far** (`BoundaryEssence`): [accumulated 책임 경계 공간 crystallized 형태 — empty at cycle 1, refined cumulatively]
+- **Boundary essence so far** (`BoundaryEssence`): [accumulated crystallized form of the responsibility boundary space — empty at cycle 1, refined cumulatively]
 - **Δessence proposed for this cycle**: [how this domain's classification refines the abstract responsibility boundary essence]
 - **Residual count**: [|Λ.residual| domains accumulated for Phase 4 bulk classification]
 
@@ -318,8 +318,8 @@ Options:
 4. **Dismiss** — Proceed with [stated default assumption]
 
 If you feel the boundary essence is sufficiently aligned, express that in natural language
-(e.g., "충분합니다", "satisfied", "good enough — let's wrap up the rest") and the loop
-will proceed to Phase 4 final-gate classification of the remaining domains.
+(e.g., "satisfied", "enough", "good enough — let's wrap up the rest", "ready to finalize")
+and the loop will proceed to Phase 4 final-gate classification of the remaining domains.
 ```
 
 **Free-response termination affordance**: Phase 2 surfacing prose includes the satisfaction signal guidance. The 4-value answer coproduct is preserved — termination_intent is parsed from free response, never injected as a 5th option (Rule 17 gate integrity).
@@ -342,7 +342,7 @@ After user response:
    - **AIAutonomous(scope)**: Record domain as AI-autonomous — downstream protocols may elide gates per RESOLVE-OR-PRESENT pattern.
    - **Dismiss**: Mark domain dismissed; record default assumption used.
 3. **Crystallize Δessence** — append the cycle's `Δessence` to `Λ.essence_history`, then update `Λ.boundary_essence` by integrating the delta (textual refinement of the accumulated essence). The essence text is consumer-visible at Phase 4 and at convergence.
-4. **Detect termination_intent** — if free response signals satisfaction (natural-language patterns like "충분", "satisfied", "good enough", "let's wrap up", "the rest is fine"): set `termination = true`. Otherwise `termination = false`.
+4. **Detect termination_intent** — if free response signals satisfaction (natural-language patterns like "satisfied", "enough", "good enough", "let's wrap up", "the rest is fine", "ready to finalize"): set `termination = true`. Otherwise `termination = false`.
 5. **Append to history** — log `(Domain, A)` and append updated `BoundaryMap` snapshot to history.
 
 **Routing**:
@@ -357,7 +357,7 @@ After user response:
 **Surfacing format**:
 
 Present as text output:
-- **BoundaryEssence (final synthesis)**: [accumulated 책임 경계 공간 crystallized 형태]
+- **BoundaryEssence (final synthesis)**: [accumulated crystallized form of the responsibility boundary space]
 - **Per-cycle classified entries** (already in BoundaryMap): [Domain → BoundaryClassification per cycle]
 - **Residual domains** (`Λ.residual`): [list of all surfaced-but-unclassified domains]
 
@@ -442,7 +442,7 @@ After Phase 4 user response:
 16. **Gate integrity**: The defined option sets (per-cycle 4-value, Phase 4 2-value) are presented intact — injection, deletion, and substitution each violate this invariant. The free-response termination affordance is NOT a 5th option at Phase 2 — termination_intent is parsed from natural-language free response while the 4-value coproduct remains structurally intact. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 17. **Free-response termination affordance**: Phase 2 surfacing prose includes natural-language satisfaction signal guidance. Phase 3 parses `termination_intent` from free response and routes to Phase 4. Free response is honored beyond surfaced options without option mutation — the affordance lives in prose, not in the typed coproduct (Rule 16 gate integrity preserved).
 18. **Cycle counter visibility**: `cycle_n` surfaced at every Phase 2 surfacing. User perceives signal density and judges termination timing.
-19. **Essence visibility per cycle**: `Δessence` (per-cycle delta) and accumulated `BoundaryEssence` (책임 경계 공간 crystallized 형태) shown at every Phase 2 surfacing. The periagoge crystallization contribution is visible-by-cycle, not deferred to convergence.
+19. **Essence visibility per cycle**: `Δessence` (per-cycle delta) and accumulated `BoundaryEssence` (crystallized form of the responsibility boundary space) shown at every Phase 2 surfacing. The periagoge crystallization contribution is visible-by-cycle, not deferred to convergence.
 20. **Final gate UserRetains semantics — bare tag**: Phase 4 `UserRetains` records only the disposition tag in `Λ.final_gate_answers`. Downstream protocol invocation is user-driven; AI does NOT auto-route to specific protocols (e.g., does NOT inject "→ /attend if execution-time" suggestions into BoundaryMap entries). User decision authority is preserved at the residual disposition — user judges which protocol applies when downstream activation occurs.
 21. **Esc vs termination_intent distinction**: Esc at any Phase 2 → ungraceful exit (final gate skipped, residual untreated). Free-response termination_intent at Phase 2 → graceful Phase 4 entry (residual bulk-classified, BoundaryEssence finalized). Distinct semantic channels.
 22. **Conjecture disclosure**: Per-cycle-emergent loop + essence crystallization is a structural-fit conjecture under accumulating use. Variation-stable retention evidence accumulates across invocations before further refinement; isolated-instance reactions do not warrant immediate revision of the loop topology.
