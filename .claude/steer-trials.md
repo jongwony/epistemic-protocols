@@ -17,6 +17,23 @@ Each entry records:
 
 ## Active Trials
 
+### 2026-05-07 — [Emergent] Inscription-decision posture
+
+- **Disposition**: Approve
+- **Mismatch signals**: {} (Phase 4 fit-shape clean — narrative addition to Calibration Result section; no ProgrammaticTrigger / LayerMixing / BehavioralEnforcement)
+- **Recommended layer**: null
+- **Realization**:
+  - `.claude/rules/project-profile.md` — Inscription-decision posture clause added to Calibration Result section (between Bounded zone and Stage 1 conjecture); narrative extension, no new variable.
+  - `epistemic-cooperative/skills/steer/SKILL.md` — Phase 3 + Phase 5 prose augmentation (AI verdict-proposal mandate before each Constitution gate) + Rule 8 refinement.
+  - `epistemic-cooperative/.claude-plugin/plugin.json` — 2.12.0 → 2.13.0 minor bump.
+- **Origin context**: Session 8f568beb — Aitesis convergence over session 4d76d47b rule-citation analysis (Synthesis = coproduct mutation correction) + Euporia cycle 1 axis dismiss/defer-open + user articulation of "preserve correct rules + correct via appropriate abstraction axis + leave rule-overlap open". Cluster: Emergent (inscription-decision meta-default; not directly located in any of the six profile variables).
+- **Falsification** (any one triggers re-evaluation):
+  - Drift recurs across N≥3 sessions with same posture pattern → axis promotion candidate (Stage 2 variation-stable retention threshold; narrative extension → seventh variable promotion review).
+  - Inscription-avoidance leads to derivation failure rate > 20% (posture is over-restrictive).
+  - An inscription violating the posture demonstrably yields better outcome (empirical refutation, not principle-internal rebuttal).
+- **Reevaluation**: next `/steer` invocation against fresh session, or upon falsification trigger.
+- **Status**: active
+
 ### 2026-05-05 — gh-comments-convergence hook
 
 - **Disposition**: RouteToOperationalLayer

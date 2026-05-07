@@ -106,6 +106,10 @@ Cluster [Type] — N moves
   Cluster implication: <what profile change this cluster collectively suggests>
 ```
 
+Then propose AI verdict before yielding turn for user constitution:
+
+`AI proposed verdict: <Confirm | Dismiss | Reorient(implication') | Stop>` — one-paragraph classification justification: cluster evidence, counter-evidence considered, and why the cluster IS (or IS NOT) drift under the proposed verdict. Phase 3 is verification-category (1-correct option structure per definition section); the rationale supports classification accuracy, not competitive ranking among peer alternatives.
+
 Then present the recognition Constitution interaction:
 
 ```
@@ -176,6 +180,10 @@ Fit-shape mismatches detected: <signal_a, signal_b, ...> — <one-sentence expla
 Recommended operational layer: <hook event | system prompt | CI/CD | settings.json | other>
 Realization template (if RouteToOperationalLayer is selected): <concrete trigger + behavior outline>
 ```
+
+Then propose AI disposition before yielding turn for user constitution:
+
+`AI proposed disposition: <Approve | Modify | Reject | Defer | RouteToOperationalLayer>` — one-paragraph rationale referencing diff scope, fit-shape signals (mismatch_signals), backup/rollback availability, and why the proposed disposition dominates alternatives. When mismatch_signals is non-empty, the rationale must address whether prose inscription or operational-layer routing better fits the diff.
 
 Then present the final approval Constitution interaction:
 
@@ -399,7 +407,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 5. **Per-cluster verdict required** — Every non-empty cluster receives a Constitution verdict from the user before Phase 4 diff assembly proceeds.
 6. **Final approval required before write** — Write to the rule file executes only when Phase 5 Approve is selected. Reject and Defer dispositions emit session-text artifacts only; the rule file remains at its current contents.
 7. **Pre-write backup mandatory** — When the existing profile file is present, a timestamped backup is created before the proposed profile write. The backup path is surfaced in the Phase 5 Constitution interaction so the user knows the rollback target before approving.
-8. **Detection with Authority** — AI detects calibration drift candidates with cited move evidence; the user constitutes per-cluster verdicts and the final approval. The verdict and approval acts are the user's exclusive territory.
+8. **Detection with Authority** — AI detects calibration drift candidates with cited move evidence and proposes its own verdict (Phase 3) and disposition (Phase 5) with rationale; the user constitutes per-cluster verdicts and the final approval. AI proposal IS what surfaces the AI's evidence-grounded reading before user constitution — the user evaluates a concrete position rather than constituting a verdict against undifferentiated cluster data. The verdict and approval acts remain the user's exclusive territory.
 9. **Recognition over Recall** — Present structured cluster evidence and verdict options via Cognitive Partnership Move (Constitution) and yield turn. Each cluster verdict option carries differential implication so the post-selection state is anticipatable. The Phase 5 final approval options carry differential downstream trajectories (write executed vs no-write artifact only vs deferred manual apply).
 10. **Context-Question Separation** — All cluster evidence and diff context is presented as text output before the Constitution interaction. The interaction contains only the verdict or approval options.
 11. **Convergence evidence** — Phase 5 emit produces a transformation trace: per cluster, show (cluster_evidence → user_verdict → diff_contribution); final disposition; backup path when written. Per-cluster evidence is required.
