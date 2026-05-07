@@ -191,7 +191,7 @@ When Euporia is active:
 
 **Protocol precedence**: Activation order position 6/9 (graph.json is authoritative source for information flow). Concern cluster: Planning.
 
-**Advisory relationships**: Receives from Anamnesis (advisory: recalled session history enriches substrate scan), Horismos (advisory: BoundaryMap narrows substrate scope). Provides to Aitesis (advisory: traced coordinates narrow context inference), Periagoge (advisory: resolved endpoint may seed downstream abstraction), Horismos (advisory: resolved coordinates inform downstream boundary definition). Same-session re-entry between Euporia and Horismos is permitted but treated as distinct activation, producing a fresh ResolvedEndpoint or BoundaryMap rather than auto-cycling — see `## Distinction from Other Protocols` § Euporia vs Horismos. Katalepsis is structurally last.
+**Advisory relationships**: Receives from Anamnesis (advisory: recalled session history enriches substrate scan), Horismos (advisory: BoundaryMap narrows substrate scope). Provides to Aitesis (advisory: traced coordinates narrow context inference), Periagoge (advisory: resolved endpoint may seed downstream abstraction), Horismos (advisory: resolved coordinates inform downstream boundary definition). Same-session re-entry between Euporia and Horismos is permitted but treated as distinct activation — each invocation produces a fresh ResolvedEndpoint or BoundaryMap, with the prior instance becoming session evidence rather than auto-cycling input. Katalepsis is structurally last.
 
 ### Trigger Signals
 
