@@ -102,6 +102,9 @@ function checkSurfaceLeaks(text, fileLabel, checkName, bucket) {
     const matches = [...prose.matchAll(rule.pattern)];
     if (matches.length > 0) {
       const severity = rule.severity || 'fail';
+      if (!bucket[severity]) {
+        throw new Error(`[artifact-self-containment] unknown severity "${severity}" on rule: ${rule.message}`);
+      }
       if (severity === 'fail') anyFailMatch = true;
       bucket[severity].push({
         check: checkName,

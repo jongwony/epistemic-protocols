@@ -33,9 +33,14 @@ function lineHasHangul(line) {
 
 const WHITELIST_PATTERNS = [
   /(^|\/)README_ko\.md$/,
+  /(^|\/)README\.md$/,                    // English README + Korean localization link
   /^\.claude\/skills\/release(\/|$)/,
   /^src(\/|$)/,
-  /^docs(\/|$)/,
+  /(^|\/)docs(\/|$)/,                     // repo and per-plugin docs
+  /(^|\/)references(\/|$)/,               // plugin contributor references
+  /(^|\/)graph\.json$/,                   // satisfies field is Korean by project convention
+  /^design(\/|$)/,                        // root design docs
+  /^examples(\/|$)/,                      // root examples
   /^\.claude\/rules\/editing-conventions\.md$/,
 ];
 

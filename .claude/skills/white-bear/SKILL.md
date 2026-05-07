@@ -45,7 +45,6 @@ A **White Bear signal** is a sentence in LLM-facing prose framed as a prohibitio
 - Prothesis Rule 14 — Phase 3 `Await` wait discipline (passive completion barrier vs active polling at the per-turn decision point)
 - Aitesis substrate boundary (legitimate inference vs substrate violation per inference)
 - Katalepsis Rule 11 — verification-gate 1-correct option design (comprehension verification vs decision-axis selection by purpose)
-- Hermeneia Phase 2 articulation (user-articulated intent vs AI-imputed intent at the articulation decision point)
 - Prosoche Stop-as-Gate (subagent return path vs main-agent gate interaction at the `GATE_DETECTED` decision point)
 - Epharmoge Layer 2 auto-activation prohibition (deliberate user invocation vs AI speculative activation at protocol activation)
 
