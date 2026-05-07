@@ -17,7 +17,7 @@ Each entry records:
 
 ## Active Trials
 
-### 2026-05-07 — Inscription-decision posture (Hermeneutic Circle)
+### 2026-05-07 — [Emergent] Inscription-decision posture
 
 - **Disposition**: Approve
 - **Mismatch signals**: {} (Phase 4 fit-shape clean — narrative addition to Calibration Result section; no ProgrammaticTrigger / LayerMixing / BehavioralEnforcement)
