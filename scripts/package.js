@@ -13,42 +13,20 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const { discoverPlugins, protocolOrder } = require('./load-protocols');
 const projectRoot = path.resolve(__dirname, '..');
 
 // ============================================================
 // Section 1: Config
 // ============================================================
 
-const PLUGINS = [
-  { dir: 'prothesis', skill: 'frame' },
-  { dir: 'syneidesis', skill: 'gap' },
-  { dir: 'katalepsis', skill: 'grasp' },
-  { dir: 'aitesis', skill: 'inquire' },
-  { dir: 'horismos', skill: 'bound' },
-  { dir: 'analogia', skill: 'ground' },
-  { dir: 'periagoge', skill: 'induce' },
-  { dir: 'euporia', skill: 'elicit' },
-  { dir: 'prosoche', skill: 'attend' },
-  { dir: 'epharmoge', skill: 'contextualize' },
-  { dir: 'epistemic-cooperative', skill: 'onboard' },
-  { dir: 'epistemic-cooperative', skill: 'catalog' },
-  { dir: 'epistemic-cooperative', skill: 'compose' },
-  { dir: 'epistemic-cooperative', skill: 'report' },
-  { dir: 'epistemic-cooperative', skill: 'dashboard' },
-  { dir: 'epistemic-cooperative', skill: 'introspect' },
-  { dir: 'epistemic-cooperative', skill: 'sophia' },
-  { dir: 'epistemic-cooperative', skill: 'curses' },
-  { dir: 'epistemic-cooperative', skill: 'write' },
-  { dir: 'epistemic-cooperative', skill: 'comment-review' },
-  { dir: 'epistemic-cooperative', skill: 'review-ensemble' },
-  { dir: 'epistemic-cooperative', skill: 'goal-research' },
-  { dir: 'epistemic-cooperative', skill: 'probe' },
-  { dir: 'epistemic-cooperative', skill: 'steer' },
-  { dir: 'epistemic-cooperative', skill: 'misuse' },
-  { dir: 'epistemic-cooperative', skill: 'crystallize' },
-  { dir: 'epistemic-cooperative', skill: 'rehydrate' },
-  { dir: 'anamnesis', skill: 'recollect' },
-];
+// Single filesystem walk shared across PLUGINS / PROTOCOL_METADATA /
+// PROTOCOL_ORDER / buildRuntimeContractView / main(). plugin.json reads are
+// memoized inside the helper, so the prior buildRuntimeContractView →
+// packagePlugin double-read collapses to one read per plugin.json.
+const _records = discoverPlugins({ projectRoot });
+
+const PLUGINS = _records.map(r => ({ dir: r.dir, skill: r.skill }));
 
 // claude.ai description overrides (originals exceed 200 chars)
 // Protocol overrides: compact Type-only format for Layer 0 reference
@@ -77,46 +55,43 @@ const EXCLUDE_EXTS = new Set(['.zip']);
 const EXCLUDE_DIRS = new Set(['agents', 'commands', 'evals']);
 const STRIP_FIELDS = new Set(['allowed-tools', 'license', 'compatibility', 'metadata']);
 
-// Protocol metadata for release notes (deficit → resolution pairs)
-// Order mirrors PROTOCOL_ORDER: Anamnesis first (recall, session start), then canonical precedence + Katalepsis last.
-const PROTOCOL_METADATA = {
-  anamnesis:  { name: 'Anamnesis', command: '/recollect', deficit: 'RecallAmbiguous', resolution: 'RecalledContext' },
-  horismos:   { name: 'Horismos', command: '/bound', deficit: 'BoundaryUndefined', resolution: 'DefinedBoundary' },
-  aitesis:    { name: 'Aitesis', command: '/inquire', deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
-  prothesis:  { name: 'Prothesis', command: '/frame', deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
-  analogia:   { name: 'Analogia', command: '/ground', deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
-  periagoge:  { name: 'Periagoge', command: '/induce', deficit: 'AbstractionInProcess', resolution: 'CrystallizedAbstraction' },
-  euporia:    { name: 'Euporia', command: '/elicit', deficit: 'AbstractAporia', resolution: 'ResolvedEndpoint' },
-  syneidesis: { name: 'Syneidesis', command: '/gap', deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
-  prosoche:   { name: 'Prosoche', command: '/attend', deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
-  epharmoge:  { name: 'Epharmoge', command: '/contextualize', deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
-  katalepsis: { name: 'Katalepsis', command: '/grasp', deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
-};
+// Protocol metadata for release notes (deficit → resolution pairs).
+// Derived from per-plugin SKILL.md description Type signature; capitalize(dir)
+// for name; `/${skill}` for command. No hand-curated table — drift cannot
+// occur because the single filesystem walk above is the only source.
+const PROTOCOL_METADATA = Object.fromEntries(
+  _records.filter(r => r.isProtocol).map(r => [r.dir, {
+    name: r.dir[0].toUpperCase() + r.dir.slice(1),
+    command: `/${r.skill}`,
+    deficit: r.deficit,
+    resolution: r.resolution,
+  }])
+);
 
-// Display order: Anamnesis (recall, session start) + CANONICAL_PRECEDENCE + Katalepsis (structurally last)
-const PROTOCOL_ORDER = [
-  'anamnesis',
-  'horismos', 'aitesis', 'prothesis',
-  'analogia', 'periagoge', 'euporia', 'syneidesis', 'prosoche', 'epharmoge', 'katalepsis',
-];
+// Display order: Anamnesis (recall, session start) + CANONICAL_PRECEDENCE
+// linear extension + Katalepsis (structurally last). protocolOrder() walks
+// the same record set and applies the order from load-protocols.js.
+const PROTOCOL_ORDER = protocolOrder({ projectRoot });
 
-// Sync validator: ensures PROTOCOL_ORDER and PROTOCOL_METADATA keys are aligned.
-// Called at release-notes generation time (not module load) — drift would cause
-// silent table entry drop, so fail-fast where drift has observable effect.
-// Load-time validation is intentionally avoided to keep require("./package.js")
-// safe for consumers (tests, static-checks) that do not call generateReleaseNotes.
+// Type-signature parse failure surfacing — release notes table builds from
+// PROTOCOL_METADATA, so a missing deficit/resolution would silently drop the
+// row. Fail-fast at release-notes generation time (not module load) so
+// require("./package.js") stays safe for consumers that do not generate notes.
 function validateProtocolTables() {
-  const orderSet = new Set(PROTOCOL_ORDER);
-  const metaSet = new Set(Object.keys(PROTOCOL_METADATA));
-  const missingInMeta = PROTOCOL_ORDER.filter(k => !metaSet.has(k));
-  const missingInOrder = Object.keys(PROTOCOL_METADATA).filter(k => !orderSet.has(k));
-  if (missingInMeta.length || missingInOrder.length) {
-    const msg = [
-      'PROTOCOL_ORDER/PROTOCOL_METADATA sync error:',
-      missingInMeta.length ? `  missing in PROTOCOL_METADATA: ${missingInMeta.join(', ')}` : null,
-      missingInOrder.length ? `  missing in PROTOCOL_ORDER: ${missingInOrder.join(', ')}` : null,
-    ].filter(Boolean).join('\n');
-    throw new Error(msg);
+  const incomplete = Object.entries(PROTOCOL_METADATA)
+    .filter(([, m]) => !m.deficit || !m.resolution)
+    .map(([k]) => k);
+  if (incomplete.length) {
+    throw new Error(
+      `PROTOCOL_METADATA missing deficit/resolution (Type signature parse failed): ${incomplete.join(', ')}`
+    );
+  }
+  const expectedDirs = new Set(_records.filter(r => r.isProtocol).map(r => r.dir));
+  const missingFromOrder = [...expectedDirs].filter(d => !PROTOCOL_ORDER.includes(d));
+  if (missingFromOrder.length) {
+    throw new Error(
+      `PROTOCOL_ORDER missing protocols (CANONICAL_PRECEDENCE may need update): ${missingFromOrder.join(', ')}`
+    );
   }
 }
 
@@ -418,8 +393,13 @@ function collectFiles(baseDir, prefix) {
 
 function buildRuntimeContractView(plugin) {
   const skillDir = path.join(projectRoot, plugin.dir, 'skills', plugin.skill);
-  const pluginJsonPath = path.join(projectRoot, plugin.dir, '.claude-plugin', 'plugin.json');
-  const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+  // plugin.json read piggybacks on the discoverPlugins() walk that produced
+  // PLUGINS. Falls back to direct read for plugins introduced after module
+  // load (none in current flow, retained for defensive correctness).
+  const record = _records.find(r => r.dir === plugin.dir && r.skill === plugin.skill);
+  const pluginJson = record
+    ? record.pluginJson
+    : JSON.parse(fs.readFileSync(path.join(projectRoot, plugin.dir, '.claude-plugin', 'plugin.json'), 'utf8'));
   const files = collectFiles(skillDir, plugin.skill);
   const packagedEntries = [];
   let transformedSkillMd = null;
@@ -561,18 +541,20 @@ function main() {
 
   for (const plugin of PLUGINS) {
     const skillDir = path.join(projectRoot, plugin.dir, 'skills', plugin.skill);
-    const pluginJsonPath = path.join(projectRoot, plugin.dir, '.claude-plugin', 'plugin.json');
 
     if (!fs.existsSync(skillDir)) {
       warnings.push(`${plugin.dir}: skill directory not found`);
       continue;
     }
 
-    let pluginJson;
-    try {
-      pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
-    } catch (e) {
-      warnings.push(`${plugin.dir}: failed to read plugin.json: ${e.message}`);
+    // plugin.json comes from the shared discoverPlugins() walk — same
+    // object the buildRuntimeContractView path consumes, so a single
+    // process pays one read per plugin.json regardless of which entry
+    // points are exercised.
+    const record = _records.find(r => r.dir === plugin.dir && r.skill === plugin.skill);
+    const pluginJson = record ? record.pluginJson : null;
+    if (!pluginJson) {
+      warnings.push(`${plugin.dir}: plugin record not found in discoverPlugins()`);
       continue;
     }
     let files;

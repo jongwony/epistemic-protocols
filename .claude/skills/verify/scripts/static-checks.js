@@ -12,56 +12,80 @@ const path = require('path');
 const util = require('util');
 const { execFileSync } = require('child_process');
 const { runArtifactSelfContainmentCheck } = require('./artifact-self-containment');
+const {
+  discoverPlugins,
+  protocolFiles,
+  sourcePluginDirs,
+  CANONICAL_PRECEDENCE: CANONICAL_PRECEDENCE_ARR,
+} = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
 
 const projectRoot = process.argv[2] || process.cwd();
 
 const results = { pass: [], fail: [], warn: [] };
 
-const PROTOCOL_FILES = [
-  'prothesis/skills/frame/SKILL.md',
-  'syneidesis/skills/gap/SKILL.md',
-  'katalepsis/skills/grasp/SKILL.md',
-  'horismos/skills/bound/SKILL.md',
-  'aitesis/skills/inquire/SKILL.md',
-  'analogia/skills/ground/SKILL.md',
-  'periagoge/skills/induce/SKILL.md',
-  'euporia/skills/elicit/SKILL.md',
-  'epharmoge/skills/contextualize/SKILL.md',
-  'prosoche/skills/attend/SKILL.md',
-  'anamnesis/skills/recollect/SKILL.md',
-];
+// Single discoverPlugins() call shared across every check. plugin.json reads
+// are memoized inside the helper, so the verifier pays one read per
+// plugin.json regardless of how many checks consume the records below.
+const _records = discoverPlugins({ projectRoot });
+const _protocolRecords = _records.filter(r => r.isProtocol);
 
-const CANONICAL_PRECEDENCE = 'Horismos → Aitesis → Prothesis → Analogia → Periagoge → Euporia → Syneidesis → Prosoche → Epharmoge';
+const PROTOCOL_FILES = protocolFiles({ projectRoot });
+
+const CANONICAL_PRECEDENCE = CANONICAL_PRECEDENCE_ARR.join(' → ');
 const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
+
+// PRECEDENCE_FILES = protocols listed in CANONICAL_PRECEDENCE (linear order)
+// + Katalepsis appended (structurally last). Anamnesis is excluded — recall
+// stands outside the precedence partial order. Order matches the canonical
+// presentation used by checkPrecedenceLinearExtension.
+//
+// Loud-fail: a missing protocol record yields an `undefined` skill segment,
+// producing paths like `horismos/skills/undefined/SKILL.md` that fs.existsSync
+// silently rejects. Throw at construction so the failure is attributable to
+// graph.json (which is the upstream input that decides isProtocol) rather
+// than surfacing later as "all checks pass on zero files" (PR #351 review H1).
+function _precedenceFile(dir) {
+  const rec = _protocolRecords.find(r => r.dir === dir);
+  if (!rec) {
+    throw new Error(
+      `[static-checks] PRECEDENCE_FILES: no protocol record for "${dir}". ` +
+      `Likely cause: graph.json failed to parse or "${dir}" missing from nodes.`
+    );
+  }
+  return `${dir}/skills/${rec.skill}/SKILL.md`;
+}
 const PRECEDENCE_FILES = [
-  'horismos/skills/bound/SKILL.md',
-  'aitesis/skills/inquire/SKILL.md',
-  'prothesis/skills/frame/SKILL.md',
-  'analogia/skills/ground/SKILL.md',
-  'periagoge/skills/induce/SKILL.md',
-  'euporia/skills/elicit/SKILL.md',
-  'syneidesis/skills/gap/SKILL.md',
-  'prosoche/skills/attend/SKILL.md',
-  'epharmoge/skills/contextualize/SKILL.md',
-  'katalepsis/skills/grasp/SKILL.md',
+  ...CANONICAL_PRECEDENCE_ARR.map(name => _precedenceFile(name.toLowerCase())),
+  _precedenceFile('katalepsis'),
 ];
 
 // Authoritative edge type allowlist — used by both graph-integrity and cross-ref-scan checks
 const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression']);
 
-const CANONICAL_PROTOCOLS = {
-  'Prothesis':  { deficit: 'FrameworkAbsent', resolution: 'FramedInquiry' },
-  'Syneidesis': { deficit: 'GapUnnoticed', resolution: 'AuditedDecision' },
-  'Katalepsis': { deficit: 'ResultUngrasped', resolution: 'VerifiedUnderstanding' },
-  'Horismos':   { deficit: 'BoundaryUndefined', resolution: 'DefinedBoundary' },
-  'Aitesis':    { deficit: 'ContextInsufficient', resolution: 'InformedExecution' },
-  'Analogia':   { deficit: 'MappingUncertain', resolution: 'ValidatedMapping' },
-  'Periagoge':  { deficit: 'AbstractionInProcess', resolution: 'CrystallizedAbstraction' },
-  'Euporia':    { deficit: 'AbstractAporia', resolution: 'ResolvedEndpoint' },
-  'Prosoche':   { deficit: 'ExecutionBlind', resolution: 'SituatedExecution' },
-  'Epharmoge':  { deficit: 'ApplicationDecontextualized', resolution: 'ContextualizedExecution' },
-  'Anamnesis':  { deficit: 'RecallAmbiguous', resolution: 'RecalledContext' },
-};
+// Protocol display name → {deficit, resolution}. Derived from per-protocol
+// SKILL.md description Type signature; capitalize(dir) for display name.
+//
+// Loud-fail: extractTypeSignature returns null when the Type pattern is
+// absent or malformed. Null values would silently flow into spec-vs-impl
+// comparisons as the literal string "null", masking the real parse failure
+// (PR #351 review H2). Validate at construction.
+const CANONICAL_PROTOCOLS = Object.fromEntries(
+  _protocolRecords.map(r => [
+    r.dir[0].toUpperCase() + r.dir.slice(1),
+    { deficit: r.deficit, resolution: r.resolution },
+  ])
+);
+{
+  const incomplete = Object.entries(CANONICAL_PROTOCOLS)
+    .filter(([, m]) => !m.deficit || !m.resolution)
+    .map(([k]) => k);
+  if (incomplete.length) {
+    throw new Error(
+      `[static-checks] CANONICAL_PROTOCOLS missing deficit/resolution for: ${incomplete.join(', ')}. ` +
+      `Likely cause: SKILL.md description Type signature absent or malformed for these protocols.`
+    );
+  }
+}
 
 // Shared directory walker for file collection
 function walkFiles(dir, predicate, checkName) {
@@ -1404,7 +1428,12 @@ function checkCrossRefScan() {
   // package.js PLUGINS, graph.json nodes, and marketplace.json plugins against filesystem ground truth
   {
     // Ground truth: directories containing .claude-plugin/plugin.json
+    // Deprecated plugins (plugin.json carries "deprecated": true) are tracked
+    // separately so cross-ref checks can exclude them from active-set diffs
+    // without a hardcoded allowlist (Plugin Encapsulation: deprecation lives
+    // in per-plugin self-description, not in the verifier).
     const allPluginDirs = new Set();
+    const deprecatedPluginDirs = new Set();
     try {
       const entries = fs.readdirSync(projectRoot, { withFileTypes: true });
       for (const entry of entries) {
@@ -1412,6 +1441,21 @@ function checkCrossRefScan() {
         const pluginJsonPath = path.join(projectRoot, entry.name, '.claude-plugin', 'plugin.json');
         if (fs.existsSync(pluginJsonPath)) {
           allPluginDirs.add(entry.name);
+          try {
+            const pj = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
+            if (pj.deprecated === true) deprecatedPluginDirs.add(entry.name);
+          } catch (e) {
+            // Surface parse errors as warnings so the real cause (bad JSON)
+            // shows up in this check's output instead of cascading into a
+            // misleading "missing from PROTOCOL_FILES" downstream warning
+            // (PR #351 review M1). The json-schema check independently
+            // reports the same error; co-reporting is intentional.
+            results.warn.push({
+              check: 'cross-ref-scan',
+              file: path.relative(projectRoot, pluginJsonPath),
+              message: `Could not parse plugin.json for deprecated lookup: ${e.message}`
+            });
+          }
         }
       }
     } catch (e) {
@@ -1442,6 +1486,7 @@ function checkCrossRefScan() {
     // Source 1: PROTOCOL_FILES dirs
     for (const dir of allPluginDirs) {
       if (utilityDirs.has(dir)) continue; // utility plugins not expected in PROTOCOL_FILES
+      if (deprecatedPluginDirs.has(dir)) continue; // deprecated plugins exit active enumeration
       if (!protocolDirs.has(dir)) {
         results.warn.push({
           check: 'cross-ref-scan',
@@ -1457,6 +1502,7 @@ function checkCrossRefScan() {
     );
     for (const dir of allPluginDirs) {
       if (utilityDirs.has(dir)) continue;
+      if (deprecatedPluginDirs.has(dir)) continue;
       if (!canonicalDirs.has(dir)) {
         results.warn.push({
           check: 'cross-ref-scan',
@@ -1541,28 +1587,19 @@ function checkCrossRefScan() {
         });
         subCheckFailed = true;
       } else if (!loadFailed && Array.isArray(PLUGINS)) {
-        // Structural guard: filter malformed tuples and escalate each to
-        // fail + subCheckFailed (Stage 2 loud mode). Without this, a missing
-        // `skill` key produces the string `"dir/undefined"` which flows into
-        // the set-diff as a misleading `stale-plugins-entry` warning. Loud
-        // mode ensures real shape errors surface as parse errors that block
-        // CI, not as phantom filesystem mismatches tolerated silently.
+        // Structural guard: every tuple must have { dir: string, skill: string }.
+        // Loud-mode escalation per Stage 2 — bad shape blocks CI rather than
+        // producing phantom downstream warnings.
         //
-        // Partial-processing note: valid tuples continue through the
-        // bidirectional diff below even when some entries are malformed.
-        // A malformed entry may ALSO produce a downstream publication-gap
-        // warning for the SKILL.md it would have covered — one root cause,
-        // two diagnostics. This is intentional post-escalation noise; the
-        // malformed-plugins-entry fail is the actionable signal, and
-        // contributors should fix that first.
-        const validPlugins = [];
+        // Note: PLUGINS is now derived from scripts/load-protocols.js
+        // discoverPlugins() (filesystem walk). The prior bidirectional diff
+        // (publication-gap, stale-plugins-entry) compared PLUGINS against a
+        // separate filesystem walk — under the helper-derived model both
+        // sides share the same walk, making the diff tautological. Drift
+        // detection moves to graph.json nodes (Source 4) and marketplace.json
+        // plugins (Source 5), which remain hand-curated relative to filesystem.
         for (const p of PLUGINS) {
-          if (p && typeof p.dir === 'string' && typeof p.skill === 'string') {
-            validPlugins.push(p);
-          } else {
-            // util.inspect handles circular references, BigInt, and other
-            // values that would make JSON.stringify throw — we must not
-            // abort the verifier through an unguarded serialization error.
+          if (!p || typeof p.dir !== 'string' || typeof p.skill !== 'string') {
             const serialized = util.inspect(p, { depth: 2, breakLength: 80 });
             results.fail.push({
               check: 'cross-ref-scan',
@@ -1570,71 +1607,6 @@ function checkCrossRefScan() {
               message: `malformed-plugins-entry: expected { dir: string, skill: string } tuple, got ${serialized}`
             });
             subCheckFailed = true;
-          }
-        }
-
-        const packagePluginTuples = new Set(
-          validPlugins.map(p => `${p.dir}/${p.skill}`)
-        );
-
-        // Filesystem walk: for each plugin dir, enumerate ${dir}/skills/<sub>/SKILL.md
-        const filesystemTuples = new Set();
-        for (const dir of allPluginDirs) {
-          const skillsDir = path.join(projectRoot, dir, 'skills');
-          if (!fs.existsSync(skillsDir)) continue;
-          let subEntries;
-          try {
-            subEntries = fs.readdirSync(skillsDir, { withFileTypes: true });
-          } catch (e) {
-            results.warn.push({
-              check: 'cross-ref-scan',
-              file: `${dir}/skills`,
-              message: `Could not read skills directory: ${e.message}`
-            });
-            continue;
-          }
-          for (const sub of subEntries) {
-            if (!sub.isDirectory()) continue;
-            const skillMdPath = path.join(skillsDir, sub.name, 'SKILL.md');
-            if (fs.existsSync(skillMdPath)) {
-              filesystemTuples.add(`${dir}/${sub.name}`);
-            }
-          }
-        }
-
-        // Bidirectional diff. publication-gap and stale-plugins-entry remain
-        // warning-only — these are migration signals (code and filesystem out
-        // of sync mid-refactor), not detector-infrastructure failures. Stage 2
-        // escalates only the infrastructure failure modes above (file missing,
-        // load failure, shape invalid, malformed entry). Drift-detection
-        // escalation is a separate downstream PR, gated on clean warnings.
-        //
-        // DEPRECATED_PLUGIN_TUPLES: SKILL.md retained on disk for transition
-        // continuity (existing user installs) while the plugin is removed
-        // from packaging — surfacing publication-gap here would noise the
-        // signal rather than communicate a refactor drift. Suppression scope
-        // is intentionally narrow (per-tuple allowlist) so accidental drops
-        // in PLUGINS for non-deprecated plugins still surface as warnings.
-        const DEPRECATED_PLUGIN_TUPLES = new Set([
-          'hermeneia/clarify',
-          'telos/goal',
-        ]);
-        for (const tuple of filesystemTuples) {
-          if (!packagePluginTuples.has(tuple) && !DEPRECATED_PLUGIN_TUPLES.has(tuple)) {
-            results.warn.push({
-              check: 'cross-ref-scan',
-              file: 'scripts/package.js',
-              message: `publication-gap: ${tuple} has SKILL.md but is missing from scripts/package.js PLUGINS`
-            });
-          }
-        }
-        for (const tuple of packagePluginTuples) {
-          if (!filesystemTuples.has(tuple)) {
-            results.warn.push({
-              check: 'cross-ref-scan',
-              file: 'scripts/package.js',
-              message: `stale-plugins-entry: scripts/package.js PLUGINS contains ${tuple} but SKILL.md does not exist`
-            });
           }
         }
       }
@@ -1650,6 +1622,7 @@ function checkCrossRefScan() {
           // Every protocol dir should appear in graph.json nodes
           for (const dir of allPluginDirs) {
             if (utilityDirs.has(dir)) continue;
+            if (deprecatedPluginDirs.has(dir)) continue;
             if (!graphNodeSet.has(dir)) {
               results.warn.push({
                 check: 'cross-ref-scan',
@@ -1689,6 +1662,7 @@ function checkCrossRefScan() {
           );
           // Every filesystem plugin dir should appear in marketplace.json
           for (const dir of allPluginDirs) {
+            if (deprecatedPluginDirs.has(dir)) continue;
             if (!marketplaceDirs.has(dir)) {
               results.warn.push({
                 check: 'cross-ref-scan',
@@ -2422,11 +2396,8 @@ function checkSingleAxisSoundness() {
 // check enforces parity between the two views — fails on missing, extra,
 // non-symlink, or mis-targeted entries.
 function checkAgentsSymlinksSync() {
-  const SOURCE_PLUGINS = [
-    'prothesis', 'syneidesis', 'katalepsis', 'horismos',
-    'aitesis', 'analogia', 'periagoge', 'euporia', 'prosoche', 'epharmoge', 'anamnesis',
-    'epistemic-cooperative',
-  ];
+  // Source plugin dirs derived from filesystem walk (excludes deprecated).
+  const SOURCE_PLUGINS = sourcePluginDirs({ projectRoot });
   const agentsDir = path.join(projectRoot, '.agents', 'skills');
 
   const expected = new Map(); // name -> absolute target dir

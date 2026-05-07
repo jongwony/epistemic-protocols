@@ -17,24 +17,21 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-PLUGINS=(
-  prothesis syneidesis katalepsis horismos
-  aitesis analogia periagoge euporia prosoche epharmoge anamnesis
-  epistemic-cooperative
-)
-
 mkdir -p .agents/skills
 
 # Drop existing top-level symlinks so removed/renamed skills do not linger.
 find .agents/skills -maxdepth 1 -mindepth 1 -type l -delete
 
-for plugin in "${PLUGINS[@]}"; do
-  for skill_dir in "$plugin"/skills/*/; do
-    [ -d "$skill_dir" ] || continue
-    name=$(basename "$skill_dir")
-    target="../../${skill_dir%/}"
-    ln -s "$target" ".agents/skills/$name"
-  done
-done
+# Skill tuples come from the loader's CLI mode — JSON-strict deprecated
+# equality lives in load-protocols.js, so this script inherits the same
+# semantics the JS code uses (PR #351 review M2: prior grep pattern could
+# false-positive on description text containing the substring).
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+while IFS= read -r tuple; do
+  [ -n "$tuple" ] || continue
+  skill_name="${tuple#*/}"
+  target="../../${tuple%/*}/skills/${skill_name}"
+  ln -s "$target" ".agents/skills/$skill_name"
+done < <(node "$script_dir/load-protocols.js" --list-skill-tuples)
 
 echo "✓ .agents/skills/ synchronized — $(find .agents/skills -maxdepth 1 -mindepth 1 -type l | wc -l | tr -d ' ') symlinks"
