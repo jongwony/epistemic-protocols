@@ -1,6 +1,6 @@
 ---
 name: zero-shot
-description: This skill should be used when the user asks to "check zero-shot", "audit few-shot anchoring", "find example anchoring", or invokes /zero-shot. Reviews LLM-facing prose in this project's plugin SKILL.md files, project-local skills, agent prompts, and Output Style files for Zero-Shot compliance (principle-only over anchoring few-shot examples) as defined in `.claude/rules/derived-principles.md`. Project-local contributor tooling.
+description: This skill should be used when the user asks to "check zero-shot", "audit few-shot anchoring", "find example anchoring", or invokes /zero-shot. Reviews LLM-facing prose in this project's plugin SKILL.md files, project-local skills, agent prompts, and Output Style files for Zero-Shot compliance (principle-only over anchoring few-shot examples). Project-local contributor tooling.
 allowed-tools: Read, Grep, Glob
 ---
 

@@ -32,13 +32,13 @@ Surface encapsulation drift that the deterministic verify check (`artifact-self-
 
 ## What to evaluate
 
-The principle is defined in `CLAUDE.md`: the packaged runtime contract is `Skill.md` plus plugin description metadata; the surface must be self-contained, with no external references (axiom identifiers, rule file paths, design-philosophy concepts, mission/vision docs) that require reading contributor documentation. The deterministic verify check covers literal pattern matches; this audit covers semantic encapsulation.
+The principle: the packaged runtime contract is `Skill.md` plus plugin description metadata; the surface must be self-contained, with no external references (axiom identifiers, rule file paths, design-philosophy concepts, mission/vision docs) that require reading contributor documentation. The deterministic verify check covers literal pattern matches; this audit covers semantic encapsulation.
 
 Two signal types:
 
 **`contributor_assumption`** — a prose passage that assumes contributor documentation knowledge to be intelligible at the runtime contract surface. The reader of the runtime contract is the LLM agent acting on the protocol, plus the user invoking the skill — neither has read `.claude/rules/`, `.claude/principles/`, or `docs/`. Test: "Does this sentence remain intelligible when read with only the SKILL.md itself and standard background knowledge?" If a sentence references a project-internal concept by name without inline definition, and the concept is not defined elsewhere in the same SKILL.md, the sentence is a finding.
 
-**`bypass_rephrasing`** — a prose passage that conveys a banned reference's content without using its banned token. Example shapes: spelling out a contributor doc title in prose without using its filename; quoting an axiom's content while avoiding the `A1`–`A7` identifiers; describing a design-philosophy concept under a paraphrase. The deterministic check passes; the encapsulation invariant fails. Test: "Would the deterministic check have flagged this if the original token had remained?" If yes, it is a bypass-rephrasing finding.
+**`bypass_rephrasing`** — a prose passage that conveys a banned reference's content without using its banned token. The deterministic check passes; the encapsulation invariant fails. Test: "Would the deterministic check have flagged this if the original token had remained?" If yes, it is a bypass-rephrasing finding.
 
 For each candidate finding, prefer the rewrite that carries the meaning into the runtime surface (compile the relevant rule into `Skill.md` Rules sections per CLAUDE.md guidance) or replaces it with a self-contained restatement. Treat ambiguous cases as `severity: low` and surface them for human triage.
 

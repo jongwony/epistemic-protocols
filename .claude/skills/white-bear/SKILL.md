@@ -1,6 +1,6 @@
 ---
 name: white-bear
-description: This skill should be used when the user asks to "check white bear", "audit prohibition phrasing", "find negative framing", or invokes /white-bear. Reviews LLM-facing prose in this project's plugin SKILL.md files, project-local skills, agent prompts, and Output Style files for White Bear compliance (positive rationale over negative prohibition) as defined in `.claude/rules/safeguards.md`. Project-local contributor tooling.
+description: This skill should be used when the user asks to "check white bear", "audit prohibition phrasing", "find negative framing", or invokes /white-bear. Reviews LLM-facing prose in this project's plugin SKILL.md files, project-local skills, agent prompts, and Output Style files for White Bear compliance (positive rationale over negative prohibition). Project-local contributor tooling.
 allowed-tools: Read, Grep, Glob
 ---
 
