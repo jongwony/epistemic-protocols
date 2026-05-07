@@ -232,7 +232,7 @@ The operational test: "Is the user operation *forming a new abstraction from obs
 
 Analyze conversation state for in-process abstraction. This phase is **silent** — no user interaction.
 
-1. **Bind seed** `A`: use explicit argument or the most recent instance cluster surfaced in session (any cardinality qualifies when essence is sensed — N=1 (strong-grip single case), N=2 (paired comparison), N≥3 (accumulated set))
+1. **Bind seed** `A`: use explicit argument or the most recent instance cluster surfaced in session (any cardinality qualifies when essence is sensed — single case strong-grip, paired comparison, or accumulated set)
 2. **Check essence signal** `E`: scan for variation-stable core signal in conversation (user essence-intuition language or AI-inferred pattern). This is the primary gate — if no essence is sensed, the abstraction has nothing to turn toward
 3. **Check locator absence**: if a name plus scope plus position is already settled, skip (no turning needed)
 4. If essence_sensed ∧ ¬located: proceed to Phase 1 with `(Iᵢ, E, L?)`

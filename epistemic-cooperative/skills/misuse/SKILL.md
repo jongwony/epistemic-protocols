@@ -51,7 +51,7 @@ The skill family coexists by phenomenology — none replaces the others. Misuse 
 Determine the audit scope before scanning. Decisions:
 
 - **Target protocols** — fixed at `/ground` and `/induce` for v1.0. Other protocols deferred pending accumulated use evidence.
-- **Session window** — default is the current session only. Cross-session scanning requires explicit user confirmation per Rule 5.
+- **Session window** — default is the current session only. Cross-session scanning requires explicit user confirmation per Rule 4.
 - **Cross-project scope** — default off. Scanning across `~/.claude/projects/` requires explicit user confirmation.
 
 If the user's `/misuse` invocation does not specify scope, present a Constitution interaction soliciting scope before proceeding to Phase 1. If the user has already specified scope in the invocation, accept it and proceed.
@@ -96,7 +96,7 @@ Cluster classifications across `I[]`:
 
 Construct presentation order: highest-evidence VIOLATION candidate first, then descending evidential strength.
 
-Phase 3 produces no cumulative score or rate. No "user reliability index", no "violation percentage", no "trustworthiness metric" (Rule 7).
+Phase 3 produces no cumulative score or rate. No "user reliability index", no "violation percentage", no "trustworthiness metric" (Rule 6).
 
 ### Phase 4: Per-Invocation Recognition
 
@@ -130,7 +130,7 @@ The verdict belongs to the user. AI never asserts violation unilaterally. After 
 - **Reorient** — re-classify the candidate; if a different violation type matches, present anew; otherwise dismiss
 - **Stop** — deactivate, emit confirmed violations to date
 
-Loop Phase 4 over `I[]` until exhausted, user Stops, or 10 candidates reviewed (whichever first; see Rule 8).
+Loop Phase 4 over `I[]` until exhausted, user Stops, or 10 candidates reviewed (whichever first; see Rule 7).
 
 ### Phase 5: Emit
 
@@ -151,14 +151,9 @@ For each: session_id + turn_index + violation_type + brief evidence summary.
 
 For each violation type: pre-invocation linguistic patterns observed,
 operation-kind verification trace.
-
-### N=1 dogfooding caveat
-
-This audit reflects a single user's session corpus. Patterns are working
-hypotheses with N=1 corroboration, not population evidence.
 ```
 
-The artifact is observation-only. No automated rewrite, no automated reroute (Rule 7). Calibration metadata is the sole structured output beyond the verdicts themselves; downstream live-nudge design is a separate task with its own evidence threshold.
+The artifact is observation-only. No automated rewrite, no automated reroute (Rule 6). Calibration metadata is the sole structured output beyond the verdicts themselves; downstream live-nudge design is a separate task with its own evidence threshold.
 
 ```
 ── FLOW ──
@@ -212,8 +207,7 @@ V[]              = List({Triple, ViolationType, Evidence})  -- ranked VIOLATION 
 R                = Verdict ∈ {Recognize, Dismiss, Reorient, Stop}
 ViolationReview  = session text { confirmed: List(Triple+Type+Evidence),
                                   dismissed: List(Triple),
-                                  calibration_metadata: Prose,
-                                  caveat: "N=1 dogfooding" }
+                                  calibration_metadata: Prose }
 ProtocolId       ∈ {ground, induce}              -- v1.0 scope
 SessionId        = String (UUID)
 Turn             = { role, content, timestamp }
@@ -268,7 +262,7 @@ converge               (extension)     → TextPresent+Proceed (convergence trac
       active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Misuse composes downstream when the user wants to act on confirmed violations (e.g., re-invoke /induce on a Sₐ-confabulation case). Composition target is determined at runtime by user disposition outside this skill (Rule 7 forbids automated reroute), not by static graph.json edges.
+*: product — (D₁ × D₂) → (R₁ × R₂). Misuse composes downstream when the user wants to act on confirmed violations (e.g., re-invoke /induce on a Sₐ-confabulation case). Composition target is determined at runtime by user disposition outside this skill (Rule 6 forbids automated reroute), not by static graph.json edges.
 ```
 
 ## Storage Reference
@@ -279,29 +273,27 @@ The `~/.claude/projects/{slug}/hypomnesis/{session-id}/misfit.md` file (written 
 
 1. **Operation-grounded classification** — Surface shape (e.g., "N instances + slash command") is necessary but not sufficient for VIOLATION classification. The cognitive operation actually performed must be examined against the protocol's declared operation. Protocols are defined by cognitive operation, not by input shape (instance count is evidence, not gate).
 2. **Self-stereotype guard** — The classifier itself must not commit the same stereotype error it detects. Apply 2-step check (surface match → operation verification). On uncertain operation verification, classify as AMBIGUOUS, not VIOLATION. False-positive cost (eroded protocol use) exceeds false-negative cost (missed violation surfaced later).
-3. **N=1 dogfooding caveat** — Heuristics in this skill and its taxonomy are derived from a single-user session corpus. Patterns are working hypotheses with N=1 corroboration, not population evidence. The Phase 5 emit must surface this caveat in the artifact.
-4. **Recognition is verification, not decision-axis** — Phase 4 Qc is structurally homologous to Anamnesis Phase 2 recognition gates: past-identity synthesis, not future-trajectory selection. The Differential Future Requirement (which mandates differential downstream trajectories among gate options) does not apply to verification gates whose option structure is determined by verification task requirements. A 1-correct option structure (was-violation / was-legitimate) is legitimate by purpose.
-5. **Cross-session opt-in, default off** — Default scope is current session. Reading other sessions or other projects requires explicit user confirmation in Phase 0. This matches `/probe` substrate policy and applies to both session JSONL reads and `misfit.md` reads.
-6. **Extension / Constitution vocabulary** — Classification descriptions use the Cognitive Partnership Move vocabulary: Extension (relay-mode, citable basis, deterministic) and Constitution (gated-mode, AI-inference basis, multiple valid results). Older relay/gated phrasing is replaced by the current vocabulary throughout output.
-7. **Observation-only artifact** — Misuse never auto-rewrites past sessions, never auto-reroutes a past invocation to a different protocol, never produces a corrective action. Calibration metadata in Phase 5 is for future live-nudge design, not for present action.
-8. **Bounded review depth** — Phase 4 loop terminates at `min(|V[]|, 10)` candidates per session of `/misuse`. Audit fatigue erodes verdict quality; bounded review preserves recognition fidelity. The user can re-invoke `/misuse` for additional candidates.
-9. **No cumulative score / rate / index** — Across uses, no "violation rate", "user reliability index", "protocol fidelity score", or aggregated metric is produced or stored. Each audit is independent. Aggregation at the cumulative-rate level reintroduces the corrective-judge framing that Rule 7 (observation-only artifact) and Rule 11 (audit-vocabulary) jointly reject.
-10. **Verdict belongs to the user** — Recognize / Dismiss / Reorient / Stop is a constitutive user act. AI presents evidence and cited criterion; AI never resolves the verdict unilaterally.
-11. **Recommended vocabulary** — Use "violation review", "contract integrity audit", "candidate violation", "evidence", "criterion cited". Vocabulary that frames the skill as a corrective judge (e.g., "wrong", "should have used", "user error") is replaced by the audit-and-fit-review vocabulary.
-12. **Recognition over Recall** — Each Phase 4 candidate presents structured evidence (pre-context, post-output, cited criterion) so the user recognizes the violation pattern from presented context, not from memory of the past session.
-13. **Detection with Authority** — AI detects candidate violations with cited textual evidence; the user constitutes the verdict. AI never asserts violation unilaterally (Rule 10 reinforcement at the architectural level).
-14. **Context-Question Separation** — All evidence (pre-context, post-output, cited criterion) is presented as text output before the Phase 4 Constitution interaction. The interaction contains only the verdict options.
-15. **Convergence evidence** — Phase 5 emit produces a transformation trace (scope → extracted invocations → classified candidates → user verdicts → confirmed violations) before declaring convergence.
+3. **Recognition is verification, not decision-axis** — Phase 4 Qc is structurally homologous to Anamnesis Phase 2 recognition gates: past-identity synthesis, not future-trajectory selection. The Differential Future Requirement (which mandates differential downstream trajectories among gate options) does not apply to verification gates whose option structure is determined by verification task requirements. A 1-correct option structure (was-violation / was-legitimate) is legitimate by purpose.
+4. **Cross-session opt-in, default off** — Default scope is current session. Reading other sessions or other projects requires explicit user confirmation in Phase 0. This matches `/probe` substrate policy and applies to both session JSONL reads and `misfit.md` reads.
+5. **Extension / Constitution vocabulary** — Classification descriptions use the Cognitive Partnership Move vocabulary: Extension (relay-mode, citable basis, deterministic) and Constitution (gated-mode, AI-inference basis, multiple valid results). Older relay/gated phrasing is replaced by the current vocabulary throughout output.
+6. **Observation-only artifact** — Misuse never auto-rewrites past sessions, never auto-reroutes a past invocation to a different protocol, never produces a corrective action. Calibration metadata in Phase 5 is for future live-nudge design, not for present action.
+7. **Bounded review depth** — Phase 4 loop terminates at `min(|V[]|, 10)` candidates per session of `/misuse`. Audit fatigue erodes verdict quality; bounded review preserves recognition fidelity. The user can re-invoke `/misuse` for additional candidates.
+8. **No cumulative score / rate / index** — Across uses, no "violation rate", "user reliability index", "protocol fidelity score", or aggregated metric is produced or stored. Each audit is independent. Aggregation at the cumulative-rate level reintroduces the corrective-judge framing that Rule 6 (observation-only artifact) and Rule 10 (audit-vocabulary) jointly reject.
+9. **Verdict belongs to the user** — Recognize / Dismiss / Reorient / Stop is a constitutive user act. AI presents evidence and cited criterion; AI never resolves the verdict unilaterally.
+10. **Recommended vocabulary** — Use "violation review", "contract integrity audit", "candidate violation", "evidence", "criterion cited". Vocabulary that frames the skill as a corrective judge (e.g., "wrong", "should have used", "user error") is replaced by the audit-and-fit-review vocabulary.
+11. **Recognition over Recall** — Each Phase 4 candidate presents structured evidence (pre-context, post-output, cited criterion) so the user recognizes the violation pattern from presented context, not from memory of the past session.
+12. **Detection with Authority** — AI detects candidate violations with cited textual evidence; the user constitutes the verdict. AI never asserts violation unilaterally (Rule 9 reinforcement at the architectural level).
+13. **Context-Question Separation** — All evidence (pre-context, post-output, cited criterion) is presented as text output before the Phase 4 Constitution interaction. The interaction contains only the verdict options.
+14. **Convergence evidence** — Phase 5 emit produces a transformation trace (scope → extracted invocations → classified candidates → user verdicts → confirmed violations) before declaring convergence.
 
 ## UX Safeguards
 
-- **Session immunity for dismissed candidates** — A candidate dismissed in the current `/misuse` session is not re-presented in the same session unless the user re-invokes `/misuse` with explicitly different scope. Re-presenting dismissed candidates erodes the user's verdict authority (Rule 10 reinforcement).
-- **Progress opacity** — No progress counter framed as "X of Y violations confirmed" or similar. Presence of such a counter reintroduces the verdict-rate framing that Rule 9 forbids. The Phase 4 loop tracks reviewed-count internally for Rule 8 termination, but does not surface it as a quasi-score.
+- **Session immunity for dismissed candidates** — A candidate dismissed in the current `/misuse` session is not re-presented in the same session unless the user re-invokes `/misuse` with explicitly different scope. Re-presenting dismissed candidates erodes the user's verdict authority (Rule 9 reinforcement).
+- **Progress opacity** — No progress counter framed as "X of Y violations confirmed" or similar. Presence of such a counter reintroduces the verdict-rate framing that Rule 8 forbids. The Phase 4 loop tracks reviewed-count internally for Rule 7 termination, but does not surface it as a quasi-score.
 - **Ephemeral verdicts** — Each `/misuse` audit is a present-tense fit review of past invocations. Verdicts produced in one audit do not bind future audits — the user can re-invoke and reach a different verdict on the same candidate if context shifts.
-- **Pre-gate evidence visibility** — All evidence is laid out before the verdict Constitution interaction. The user reads context before deciding (Rule 14 reinforcement; structural).
+- **Pre-gate evidence visibility** — All evidence is laid out before the verdict Constitution interaction. The user reads context before deciding (Rule 13 reinforcement; structural).
 - **AMBIGUOUS as default tie-break** — When operation verification is uncertain, classify AMBIGUOUS, not VIOLATION. Surface AMBIGUOUS candidates only on user request after primary VIOLATION review (Rule 2 reinforcement).
-- **Vocabulary discipline** — Output uses "candidate violation", "audit", "fit review", "evidence", "criterion", "verdict". Output never frames past invocations as mistakes, errors, or culpable acts (Rule 11 reinforcement).
-- **Caveat surfacing in artifact** — The Phase 5 ViolationReview artifact explicitly includes the N=1 dogfooding caveat (Rule 3) so downstream readers (including future sessions) inherit the epistemic limitation.
+- **Vocabulary discipline** — Output uses "candidate violation", "audit", "fit review", "evidence", "criterion", "verdict". Output never frames past invocations as mistakes, errors, or culpable acts (Rule 10 reinforcement).
 
 ## Trigger Signals
 

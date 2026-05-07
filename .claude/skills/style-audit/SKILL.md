@@ -98,6 +98,6 @@ The two surfaces are siblings: `verify` runs deterministically at pre-commit and
 
 ## Release status
 
-Provisional. Findings carry the N=1 dogfooding caveat inherent to a project where the audit definition, the rule prose, and the contributor are entangled. Architectural inscription — promoting any pattern observed across findings into a deterministic verify check, or into a project-wide phrasing rule — waits on accumulated cross-session use evidence across multiple PRs and contributors.
+Provisional. Architectural inscription — promoting any pattern observed across findings into a deterministic verify check, or into a project-wide phrasing rule — waits on accumulated cross-session use evidence across multiple PRs and contributors.
 
-**CI status**: CI invocation is removed to extend manual `/style-audit` dogfooding; the workflow file has been deleted from this branch (restorable from prior git history). Re-enablement (restore the workflow file from a prior commit) is gated on accumulated use evidence demonstrating audit findings carry signal beyond N=1 contributor noise.
+**CI status**: CI invocation is removed to extend manual `/style-audit` use; the workflow file has been deleted from this branch (restorable from prior git history). Re-enablement (restore the workflow file from a prior commit) is gated on accumulated use evidence demonstrating audit findings carry signal beyond single-contributor noise.

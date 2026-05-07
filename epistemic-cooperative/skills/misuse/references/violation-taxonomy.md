@@ -44,7 +44,6 @@ The contract assumes `Sₐ` is extractable from `R`. If `Sₐ` is absent from `R
   - The assistant turn immediately after `/ground` contains explicit `Sₐ:` binding, "Source domain:", "Abstract:", or equivalent labeling that names a framework
   - The named framework's identifier (or any close paraphrase) does not appear in any user message in the pre-context window
   - User pre-context contains 3+ concrete instances and no structuring framework — the colimit shape that `/ground` Phase 0 step 3 asks to deflect
-- **Heuristic precision** — N=1 corroboration only; the corpus this taxonomy was derived from is single-user. False positives are corrected by the AMBIGUOUS default tie-break (Phase 2 step 3 of `/misuse`).
 - **Operation-kind verification (step 2 of self-stereotype guard)**:
   - Did the AI's Phase 1 output read out an existing structure (Extension), or did it propose one (Constitution)?
   - Read-out: framework identifier appears verbatim or in close paraphrase in prior user turns; AI is populating a known structure
@@ -89,7 +88,6 @@ Instance count is NOT a gate — it is evidence for sensing, not a precondition.
   - No named candidates in pre-context window
   - AI Phase 1 output proposes a candidate name not present in any prior turn
   - Convergent variation across instances (instances span project / time / session-type axes, suggesting eidetic essence)
-- **Heuristic precision** — N=1 corroboration only.
 - **Operation-kind verification (step 2 of self-stereotype guard)**:
   - Did the user signal essence-sensing (Periagoge legitimate) or candidate selection / decision audit / framework application (look-alike)?
   - Look-alike triggers AMBIGUOUS unless the look-alike pattern is unambiguous in pre-context
@@ -116,12 +114,6 @@ Outcome rules:
 - Step 1 does not match → `LEGITIMATE`
 
 The default on uncertainty is `AMBIGUOUS`. False-positive cost (eroded protocol use, classifier loss of trust) exceeds false-negative cost (missed violation surfaceable on later re-audit).
-
-## N=1 Dogfooding Caveat
-
-All heuristics in this taxonomy were derived from a single user's session corpus during the design and observation period for `/misuse` v1.0. Patterns are working hypotheses with N=1 corroboration, not population evidence. Accumulated cross-session use evidence is required before promoting any heuristic from "working hypothesis" to "validated criterion".
-
-`/misuse` Phase 5 emit must surface this caveat in the ViolationReview artifact so downstream readers (including future sessions) inherit the epistemic limitation.
 
 ## Future Expansion Path (Reserved)
 

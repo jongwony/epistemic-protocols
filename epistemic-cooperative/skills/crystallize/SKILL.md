@@ -126,7 +126,6 @@ Frontmatter assembly:
 - `generated_at: <YYYY-MM-DD>`
 - `git_head: <git rev-parse HEAD>`
 - `inherits_from: <predecessor path or null>`
-- `n1_dogfooding_caveat: true` (default; surfaces in `/rehydrate`)
 
 Present full HFT preview (frontmatter + four layers) via Cognitive Partnership Move (Constitution). User options: Approve (write to disk) · Revise(layer) (return to that phase) · Cancel (no-op deactivation).
 
@@ -188,7 +187,7 @@ W_delta        ⊂ Wirkungsgeschichte                 -- proper subset: current-
 R              = ReferenceShells { session: List<KV>, files: List<Path>, urls: List<URL>, tasks: List<Path> }
                  -- tasks: per-session task substrate paths (~/.claude/tasks/<session_id>/); mechanically derivable from session_id
 Excluded       = List<(substrate, rationale)>
-Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from, n1_dogfooding_caveat }
+Frontmatter    = { hft_format_version, stage, generated_at, git_head, inherits_from }
 HFT_draft      = { frontmatter, S, W_full, R, Excluded }
                  -- W_full invariant: see assemble(...) in MORPHISM
 InscribedHFT   = { path, content: HFT_draft }       -- written to ~/.claude/plans/<stage>.md
@@ -266,13 +265,12 @@ converge             (extension)    → TextPresent+Proceed (convergence trace)
 6. **Empty-section explicit signal**: an empty Wirkungsgeschichte subsection emits `_(none in this stage)_` rather than being omitted; silent omission loses the negative-information signal
 7. **Recognition over Recall**: each Phase 2–5 Constitution interaction presents structured options (Accept/Modify/Reject for layer co-construction; Approve/Revise/Cancel for final). Free response remains available
 8. **Detection with user authority**: AI distills draft content; user approves, modifies, or rejects. AI never writes to disk without Phase 5 Approve
-9. **Provisional caveat surface**: every emitted HFT carries `n1_dogfooding_caveat: true` in frontmatter; the caveat surfaces in `/rehydrate` reports
-10. **No fabrication**: Surface Text fields (Design Concept, Ubiquitous Language, Sache), Wirkungsgeschichte entries (Formation Trajectory, Rejected Alternatives, External Priors) must be drafted from observable session content. When the AI cannot draft, ask the user; do not invent
-11. **No auto-hooks**: this skill does not register SessionEnd, PreCompact, or SessionStart hooks. Hooks are out of scope for the present GoalContract
-12. **Convergence evidence**: present transformation trace before declaring inscription complete. Per-layer evidence is required
-13. **Context-Question Separation**: each Constitution interaction places analysis as text before the gate; the gate contains only options with differential implications
-14. **Length discipline**: Surface Text body ≤ 1500 words. On exceed, surface the violation; do not silently truncate
-15. **Format spec adherence**: HFT structure follows `references/hft-format.md`. Do not redefine layer schema in this skill; defer to the format spec for any interpretive question
+9. **No fabrication**: Surface Text fields (Design Concept, Ubiquitous Language, Sache), Wirkungsgeschichte entries (Formation Trajectory, Rejected Alternatives, External Priors) must be drafted from observable session content. When the AI cannot draft, ask the user; do not invent
+10. **No auto-hooks**: this skill does not register SessionEnd, PreCompact, or SessionStart hooks. Hooks are out of scope for the present GoalContract
+11. **Convergence evidence**: present transformation trace before declaring inscription complete. Per-layer evidence is required
+12. **Context-Question Separation**: each Constitution interaction places analysis as text before the gate; the gate contains only options with differential implications
+13. **Length discipline**: Surface Text body ≤ 1500 words. On exceed, surface the violation; do not silently truncate
+14. **Format spec adherence**: HFT structure follows `references/hft-format.md`. Do not redefine layer schema in this skill; defer to the format spec for any interpretive question
 
 ## UX Safeguards
 
@@ -280,7 +278,6 @@ converge             (extension)    → TextPresent+Proceed (convergence trace)
 - **Phase 4 elision honored** — Reference Shells auto-collect when mechanically determinable; user reviews at Phase 5
 - **Cancel is always available** — Phase 5 Cancel deactivates without writing; no partial state persists between invocations
 - **Re-inscription appends, never overwrites** — re-running on an existing stage path appends a dated revision section; predecessor inheritance chain is preserved
-- **Provisional caveat surface in convergence trace** — final report includes a one-line caveat reminding the user that this format is provisional pending accumulated use evidence
 - **Vocabulary discipline** — output uses "horizon", "Wirkungsgeschichte", "Reference Shells", "Surface Text"; the skill never speaks of "data backup" or "state save" (those framings collapse the hermeneutic distinction this format aims to preserve)
 
 ## Trigger Signals
@@ -307,11 +304,11 @@ Skip `/crystallize` when:
 | User Esc | Ungraceful exit; no partial state retained |
 | Phase 2/3/4 revise cap exhausted | Surface unresolved draft; ask user to Approve-as-is or Cancel |
 
-## Provisional Status (N=1 Dogfooding)
+## Provisional Status
 
-This skill is provisional. Structural fit was established via a single dogfooding session crystallizing the HFT format from a concrete instance set into a four-layer abstraction (see `references/hft-format.md` for the format spec's own provisional caveat). Cross-session use-corroboration is pending. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities, registering auto-hooks) is deferred until accumulated use evidence is available.
+This skill is provisional. Cross-session use-corroboration is pending. Architectural inscription (e.g., promoting HFT as a normative substrate format for other utilities, registering auto-hooks) is deferred until accumulated use evidence is available.
 
-When in doubt about a phase or rule under live use, prefer fidelity to the contract over local convenience; report any tension to surface use evidence rather than silently relaxing the constraint.
+When in doubt about a phase or rule under live use, prefer fidelity to the contract over local convenience.
 
 ## Anti-Patterns
 
@@ -320,6 +317,5 @@ When in doubt about a phase or rule under live use, prefer fidelity to the contr
 - Rewriting predecessor Wirkungsgeschichte during inheritance — destroys effective-historical consciousness
 - Surface Text growing without bound across stages — defeats 1-pass primer function
 - Skipping `_(none in this stage)_` for empty Wirkungsgeschichte subsections — loses negative-information signal
-- Removing `n1_dogfooding_caveat: true` before accumulated cross-session use evidence is available — defeats the provisional caveat surface
 - Writing to disk before Phase 5 Approve — Constitution boundary violation
 - Inferring stage identifier without surfacing the inference for user confirmation — silent identity establishment violates user authority
