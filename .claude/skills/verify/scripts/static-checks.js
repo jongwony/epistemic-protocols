@@ -38,11 +38,25 @@ const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/fram
 // + Katalepsis appended (structurally last). Anamnesis is excluded — recall
 // stands outside the precedence partial order. Order matches the canonical
 // presentation used by checkPrecedenceLinearExtension.
+//
+// Loud-fail: a missing protocol record yields an `undefined` skill segment,
+// producing paths like `horismos/skills/undefined/SKILL.md` that fs.existsSync
+// silently rejects. Throw at construction so the failure is attributable to
+// graph.json (which is the upstream input that decides isProtocol) rather
+// than surfacing later as "all checks pass on zero files" (PR #351 review H1).
+function _precedenceFile(dir) {
+  const rec = _protocolRecords.find(r => r.dir === dir);
+  if (!rec) {
+    throw new Error(
+      `[static-checks] PRECEDENCE_FILES: no protocol record for "${dir}". ` +
+      `Likely cause: graph.json failed to parse or "${dir}" missing from nodes.`
+    );
+  }
+  return `${dir}/skills/${rec.skill}/SKILL.md`;
+}
 const PRECEDENCE_FILES = [
-  ...CANONICAL_PRECEDENCE_ARR.map(name => `${name.toLowerCase()}/skills/${
-    _protocolRecords.find(r => r.dir === name.toLowerCase())?.skill
-  }/SKILL.md`),
-  `katalepsis/skills/${_protocolRecords.find(r => r.dir === 'katalepsis')?.skill}/SKILL.md`,
+  ...CANONICAL_PRECEDENCE_ARR.map(name => _precedenceFile(name.toLowerCase())),
+  _precedenceFile('katalepsis'),
 ];
 
 // Authoritative edge type allowlist — used by both graph-integrity and cross-ref-scan checks
@@ -50,12 +64,28 @@ const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression']);
 
 // Protocol display name → {deficit, resolution}. Derived from per-protocol
 // SKILL.md description Type signature; capitalize(dir) for display name.
+//
+// Loud-fail: extractTypeSignature returns null when the Type pattern is
+// absent or malformed. Null values would silently flow into spec-vs-impl
+// comparisons as the literal string "null", masking the real parse failure
+// (PR #351 review H2). Validate at construction.
 const CANONICAL_PROTOCOLS = Object.fromEntries(
   _protocolRecords.map(r => [
     r.dir[0].toUpperCase() + r.dir.slice(1),
     { deficit: r.deficit, resolution: r.resolution },
   ])
 );
+{
+  const incomplete = Object.entries(CANONICAL_PROTOCOLS)
+    .filter(([, m]) => !m.deficit || !m.resolution)
+    .map(([k]) => k);
+  if (incomplete.length) {
+    throw new Error(
+      `[static-checks] CANONICAL_PROTOCOLS missing deficit/resolution for: ${incomplete.join(', ')}. ` +
+      `Likely cause: SKILL.md description Type signature absent or malformed for these protocols.`
+    );
+  }
+}
 
 // Shared directory walker for file collection
 function walkFiles(dir, predicate, checkName) {
@@ -1414,7 +1444,18 @@ function checkCrossRefScan() {
           try {
             const pj = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
             if (pj.deprecated === true) deprecatedPluginDirs.add(entry.name);
-          } catch (_) { /* json-schema check reports parse errors */ }
+          } catch (e) {
+            // Surface parse errors as warnings so the real cause (bad JSON)
+            // shows up in this check's output instead of cascading into a
+            // misleading "missing from PROTOCOL_FILES" downstream warning
+            // (PR #351 review M1). The json-schema check independently
+            // reports the same error; co-reporting is intentional.
+            results.warn.push({
+              check: 'cross-ref-scan',
+              file: path.relative(projectRoot, pluginJsonPath),
+              message: `Could not parse plugin.json for deprecated lookup: ${e.message}`
+            });
+          }
         }
       }
     } catch (e) {

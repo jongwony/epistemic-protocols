@@ -562,3 +562,28 @@ describe('package.js CLI', () => {
   });
 });
 
+// ============================================================
+// load-protocols Type signature regression guard
+// ============================================================
+
+const { discoverPlugins } = require('./load-protocols');
+
+describe('load-protocols Type signature extraction', () => {
+  // Regression guard for PR #351 review T2: every active protocol's SKILL.md
+  // description (or body fallback) must yield non-null deficit + resolution.
+  // A future SKILL.md edit that breaks the Type signature pattern would
+  // silently drop the protocol from release notes and CANONICAL_PROTOCOLS.
+  // This test fails fast at that boundary.
+  it('every active protocol yields non-null deficit and resolution', () => {
+    const records = discoverPlugins({ projectRoot: path.resolve(__dirname, '..') });
+    const protocols = records.filter(r => r.isProtocol);
+    assert.ok(
+      protocols.length >= 11,
+      `expected >= 11 active protocols, got ${protocols.length} (graph.json may have failed to parse)`
+    );
+    for (const r of protocols) {
+      assert.ok(r.deficit, `${r.dir}: deficit is null — SKILL.md Type signature parse failed`);
+      assert.ok(r.resolution, `${r.dir}: resolution is null — SKILL.md Type signature parse failed`);
+    }
+  });
+});

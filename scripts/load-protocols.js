@@ -46,8 +46,20 @@ function makeJsonReader() {
 // scripts/package.js parseFrontmatter (handles folded scalars, quoting). This
 // loader only needs the Type signature embedded in description, which is a
 // single-line scalar across all current SKILL.md files.
+//
+// Returns null sentinel on read failure (permission error, EMFILE, EIO).
+// discoverPlugins skips null records and emits a stderr diagnostic so the
+// silent-skip class flagged in PR #351 review (C2) cannot recur.
 function parseSkillFrontmatter(skillMdPath) {
-  const content = fs.readFileSync(skillMdPath, 'utf8');
+  let content;
+  try {
+    content = fs.readFileSync(skillMdPath, 'utf8');
+  } catch (e) {
+    process.stderr.write(
+      `[load-protocols] WARN: cannot read SKILL.md ${skillMdPath}: ${e.message}\n`
+    );
+    return null;
+  }
   if (!content.startsWith('---\n')) return { name: null, description: null, content };
   const end = content.indexOf('\n---', 4);
   if (end === -1) return { name: null, description: null, content };
@@ -112,13 +124,24 @@ function discoverPlugins(options = {}) {
   // Active protocol set = graph.json nodes (canonical for inter-morphism
   // relations). Utility plugins are those with plugin.json but absent from
   // graph.json nodes. This boundary is graph-derived, not hardcoded.
+  //
+  // Parse failures are surfaced loudly. The prior silent catch relied on
+  // the graph-integrity static check, but that runs only inside
+  // static-checks.js — package.js dry-run and direct loader calls would
+  // collapse every plugin to utility under a malformed graph.json without
+  // any diagnostic (PR #351 review C1).
   let protocolNodeSet = new Set();
   const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
   if (fs.existsSync(graphPath)) {
     try {
       const graph = readJson(graphPath);
       if (Array.isArray(graph.nodes)) protocolNodeSet = new Set(graph.nodes);
-    } catch (_) { /* graph-integrity check reports parse errors */ }
+    } catch (e) {
+      process.stderr.write(
+        `[load-protocols] WARN: cannot parse graph.json (${e.message}); ` +
+        `every plugin will classify as utility — release/packaging may misbehave\n`
+      );
+    }
   }
 
   const records = [];
@@ -134,8 +157,16 @@ function discoverPlugins(options = {}) {
     let pluginJson;
     try {
       pluginJson = readJson(pluginJsonPath);
-    } catch (_) {
-      continue; // json-schema check reports parse errors
+    } catch (e) {
+      // Surface plugin.json parse errors loudly. Prior silent skip relied
+      // on the json-schema static check, but that runs only inside
+      // static-checks.js — direct loader callers (package.js, scripts)
+      // would see the plugin disappear with no diagnostic (PR #351
+      // review H3).
+      process.stderr.write(
+        `[load-protocols] WARN: cannot parse ${pluginJsonPath}: ${e.message}; plugin skipped\n`
+      );
+      continue;
     }
 
     const deprecated = pluginJson.deprecated === true;
@@ -153,6 +184,7 @@ function discoverPlugins(options = {}) {
       if (!fs.existsSync(skillMdPath)) continue;
 
       const skillMd = parseSkillFrontmatter(skillMdPath);
+      if (skillMd === null) continue; // parse failure already reported on stderr
       const { deficit, resolution } = extractTypeSignature(skillMd);
 
       records.push({
@@ -227,3 +259,28 @@ module.exports = {
   parseSkillFrontmatter,
   extractTypeSignature,
 };
+
+// CLI mode: shell scripts consume the active plugin/skill set via line-
+// delimited stdout. JSON-strict deprecated handling lives in this loader
+// (not in shell grep), so shell consumers inherit the same equality
+// semantics the JS code uses (PR #351 review M2).
+if (require.main === module) {
+  const arg = process.argv[2];
+  switch (arg) {
+    case '--list-plugin-dirs': {
+      const dirs = sourcePluginDirs();
+      process.stdout.write(dirs.join('\n') + '\n');
+      break;
+    }
+    case '--list-skill-tuples': {
+      const tuples = pluginsTuples().map(p => `${p.dir}/${p.skill}`);
+      process.stdout.write(tuples.join('\n') + '\n');
+      break;
+    }
+    default:
+      process.stderr.write(
+        'usage: load-protocols.js [--list-plugin-dirs|--list-skill-tuples]\n'
+      );
+      process.exit(1);
+  }
+}
