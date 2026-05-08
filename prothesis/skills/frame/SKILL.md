@@ -477,7 +477,7 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
    ```
 
    This is informational text — not a Constitution interaction. Skip this step if Δₛ = ∅ (no triggers detected).
-6. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises synthesis constitution as Synthesizer: horizons fusion from peer inputs, not new analysis. Information collection from peers; the integration (Horizontverschmelzung) is the coordinator's own.
+6. **Synthesis**: Coordinator independently integrates all results — peer exchange outcomes, structured reports, and hub-spoke responses (if any) — into a unified assessment. The coordinator exercises synthesis constitution as Synthesizer: horizons fusion from peer inputs, not new analysis. Information collection from peers; the integration (Horizontverschmelzung — the fusion of distinct interpretive horizons into a single situated assessment) is the coordinator's own.
 7. **User review**: Output the full synthesis as text (O(L)), then **present** routing options via Cognitive Partnership Move (Constitution). The user reads the complete synthesis with scrollback, then selects next action.
 
    **Step 1** — Text output O(L) (full synthesis, per Synthesis template below):
