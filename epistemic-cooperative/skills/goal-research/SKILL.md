@@ -32,16 +32,16 @@ Check `which codex 2>/dev/null`. If Codex CLI is not found, expose the missing-b
 
 Generate a unique suffix: `SUFFIX=$(openssl rand -hex 4)`
 
-Write the research prompt to `/tmp/goal_research_${SUFFIX}.txt`:
+Write the research prompt to `/tmp/goal_research_${SUFFIX}.txt`. The prompt **must begin with `/goal`** so Codex's builtin goal-scoping engages explicitly (the `Goal:` label form also works, but the slash form makes the convention unambiguous and aligns with how `$inquire` is invoked):
 
 ```
-Goal: Research and externally verify the target below.
+/goal Research and externally verify the target below.
 
 Research target:
 {research_question}
 
 Workflow:
-1. Use Codex's builtin `goal` command to scope this research endpoint.
+1. The `/goal` prefix above scopes this Codex session as a research endpoint.
 2. Inside that scope, invoke `$inquire` (the Aitesis skill) to drive Tavily-based external verification searches.
 3. Cite each external source used.
 
