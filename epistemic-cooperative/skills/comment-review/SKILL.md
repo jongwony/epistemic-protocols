@@ -121,15 +121,15 @@ Both fire only on same-scope co-activation. This composition keeps scopes struct
 
 **Emergent clause**: Named scopes are working hypotheses per the Full Taxonomy Confirmation principle. Runtime boundary cases — where a finding could legitimately belong to more than one scope — resolve by **attribution priority**: Factual > Decision > Application. When a finding remains ambiguous after priority assessment, record under both scopes with `origin: ambiguous` annotation and surface at the first applicable sub-protocol surfacing gate in the pipeline. Silent attribution drift is a protocol violation; explicit dual-record preserves auditability.
 
-## Scan Stage 1: Factual Verification (`/inquire`)
+## Scan Step 1: Factual Verification (`/inquire`)
 
-Within each `scan + apply` round, `/inquire` runs first as Stage 1 against the artifact's factual surface — named people, project names, citations, statistics, technical claims about external systems, links. `/inquire` Phase 1 dispatches to the right verification track (CodeDerivable, CanonicalExternal via WebFetch, Instrumentation, UserTacit) per claim.
+Within each `scan + apply` round, `/inquire` runs first as Step 1 against the artifact's factual surface — named people, project names, citations, statistics, technical claims about external systems, links. `/inquire` Phase 1 dispatches to the right verification track (CodeDerivable, CanonicalExternal via WebFetch, Instrumentation, UserTacit) per claim.
 
 **Pipeline context rules** (when `/inquire` is called from this pipeline):
 - **Scope**: factual verifiability of artifact claims (fact layer)
-- **Conditional no-op**: artifacts with no factual claims (e.g., plan files describing design intent with no external references) trigger a silent no-op for this audit stage — the 4-track dispatch finds no resolvable uncertainties; continue with Stage 2 of the `scan + apply` round
+- **Conditional no-op**: artifacts with no factual claims (e.g., plan files describing design intent with no external references) trigger a silent no-op for this audit step — the 4-track dispatch finds no resolvable uncertainties; continue with Step 2 of the `scan + apply` round
 
-## Scan Stage 2: Decision-Quality Gap Audit (`/gap`)
+## Scan Step 2: Decision-Quality Gap Audit (`/gap`)
 
 Invoke `/gap` with `D` (caller-supplied fixation event) as the committed action. Stakes are caller-supplied; default to High when `D` is irreversible or externally visible (publish, deposit-to-hypomnesis, merge) and Medium otherwise.
 
@@ -146,11 +146,11 @@ Common gaps across artifact types:
 - **Stakes**: caller-supplied; default High for irreversible D, Medium otherwise
 - **Suppression precondition**: `syneidesis ⊣ aitesis` does NOT fire — distinct scope dimensions (factual layer vs decision layer)
 
-**Double-/gap composition note**: When `/comment-review` is called downstream of `/write` (i.e., `/write` produces a draft that `/comment-review` then reviews), both skills invoke `/gap` at distinct scopes — `/write`'s internal Phase 7 `/gap` audits draft-quality gaps (procedural / duplicate / consideration within the artifact), while `/comment-review`'s Scan Stage 2 `/gap` audits decision-quality gaps w.r.t. fixation event `D`. The scope distinction preserves the scope-differentiation invariant; composition is not redundant.
+**Double-/gap composition note**: When `/comment-review` is called downstream of `/write` (i.e., `/write` produces a draft that `/comment-review` then reviews), both skills invoke `/gap` at distinct scopes — `/write`'s internal Phase 7 `/gap` audits draft-quality gaps (procedural / duplicate / consideration within the artifact), while `/comment-review`'s Scan Step 2 `/gap` audits decision-quality gaps w.r.t. fixation event `D`. The scope distinction preserves the scope-differentiation invariant; composition is not redundant.
 
-## Scan Stage 3: Application-Fit Check (`/contextualize`)
+## Scan Step 3: Application-Fit Check (`/contextualize`)
 
-The applicability check that closes each `scan + apply` round. The channel itself is not a stage — it is the surrounding modality opened in Phase 0; this stage consumes whatever JSONL has accumulated since the previous round.
+The applicability check that closes each `scan + apply` round. The channel itself is not a step — it is the surrounding modality opened in Phase 0; this step consumes whatever JSONL has accumulated since the previous round.
 
 ### Standard Path
 
@@ -215,9 +215,9 @@ On user-explicit termination (free-response exit), present the transformation tr
 ```
 Iterations: {N} loops, [scan+apply|apply] sequence: {e.g., scan+apply, apply, apply, scan+apply}
 Aggregated across {S} scan + apply rounds:
-  Stage 1 (inquire):       {F} factual claims → {V} verified, {C} corrected, {U} flagged uncertain
-  Stage 2 (gap):           {G} gaps surfaced → {A} addressed, {D_dis} dismissed (with assumption)
-  Stage 3 (contextualize): {M} mismatches → {R} resolved, {S_dis} dismissed
+  Step 1 (inquire):       {F} factual claims → {V} verified, {C} corrected, {U} flagged uncertain
+  Step 2 (gap):           {G} gaps surfaced → {A} addressed, {D_dis} dismissed (with assumption)
+  Step 3 (contextualize): {M} mismatches → {R} resolved, {S_dis} dismissed
                            {B} channel comments consumed → {I} incorporated
 Channel state at exit:     {C_unc} unconsumed comments in feedback-{slug}.jsonl (preserved, not archived)
                             -- includes both never-processed comments AND apply-deferred ones awaiting scan + apply
@@ -230,7 +230,7 @@ Sub-protocols invoked:      {/inquire: yes|no, /gap: yes|no, /contextualize: yes
 ## Error Recovery
 
 Suffix-replay rules (apply within a single `scan + apply` round):
-- **Mid-chain invalidation**: Stage 1 factual correction invalidating a Stage 2 gap resolution → replay forward from Stage 2 (not backward compensation)
+- **Mid-chain invalidation**: Step 1 factual correction invalidating a Step 2 gap resolution → replay forward from Step 2 (not backward compensation)
 - **Same-reason cap**: Same-reason replay capped at 2 attempts before surfacing to the user with options: replay / proceed accepting mismatch / terminate preserving artifacts
 - **Feedback consumption**: `feedback-{slug}.jsonl` is consumed at the start of a `scan + apply` round and archived to `feedback-{slug}-{timestamp}.consumed.jsonl` to prevent stale comments re-entering subsequent rounds. When the archive write fails (disk full, permission denied), surface the failure to the user — do not silently retry — and halt consumption until the underlying cause is resolved; silent retry would re-inject identical `<feedback>` directives into the revision pass.
 - **Anchor-not-found on re-entry**: When a revision pass removes or substantially rewrites the anchor span, the next `scan + apply` round cannot locate the original feedback target. Behavior: (a) attempt fuzzy-match only when both `context_before` and `context_after` match within edit distance 5 — if matched, proceed as located; (b) otherwise emit the directive as `<feedback anchor="..." status="anchor-missing">comment</feedback>` with the original anchor + context retained so the user can judge whether the intent still applies — do not silently drop the feedback.
