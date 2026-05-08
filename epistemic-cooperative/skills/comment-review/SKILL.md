@@ -101,7 +101,7 @@ To keep commenting, do not yet answer the gate — keep drag-commenting in the b
 
 **Round signal**: The user's next chat turn answering the gate *is* the round-complete signal. No separate browser button is needed — modality stays clean (browser collects comments, chat handles gate decisions).
 
-**Inference defaults** (project-profile.md Extension-default; relay where confident, surface gate where ambiguous):
+**Inference defaults** (the project's Extension-default calibration for ambiguous gates — relay where confident, surface gate where ambiguous):
 - Round 1 entry → `scan + apply` is the recognizable default when no prior session JSONL exists and no drag-select comments have been added (fresh artifact, no user signal yet); `apply` is the recognizable default when the user has already added drag-select comments before answering the gate. Defaults reduce friction by ordering options, not by auto-selecting.
 - First gate after a `scan + apply` round with 0 new comments and ≥1 surfaced finding → `apply` is the recognizable default if the user has clear edit intent on the surfaced findings; `scan + apply` if the user wants AI to re-evaluate after their changes — but still surface the gate.
 - Multi-artifact: each artifact has its own browser tab + JSONL + loop counter; the branch gate is **per-artifact**. Aggregating would let one artifact's pacing block another (Rule 8 multi-artifact-first-class).
