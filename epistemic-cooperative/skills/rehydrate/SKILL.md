@@ -8,6 +8,8 @@ user_invocable: true
 
 Enter a previously inscribed Horizon-Fusion Text (HFT) — a four-layer Markdown file (Surface Text · Wirkungsgeschichte · Reference Shells · Excluded) — so the current session is primed with the originating session's Vorverständnis (pre-understanding) and can first-utter from the same horizon. Type: `(HorizonNotEntered, User, ENTER, InscribedHFT) → ResumedHorizon`.
 
+> Vocabulary inline: **Wirkungsgeschichte** — effective-historical consciousness, the interpretive trace of how the originating session's horizon was formed (formation trajectory, rejected alternatives, external priors). Subsequent uses in this document refer back to this definition.
+
 Invoke directly with `/rehydrate [stage-name]` at session start or after `/compact`.
 
 ## Definition
