@@ -8,7 +8,9 @@ user_invocable: true
 
 Inscribe a session's horizon-fusion residue into a Horizon-Fusion Text (HFT) — a four-layer Markdown file (Surface Text · Wirkungsgeschichte · Reference Shells · Excluded) that primes a fresh session to enter the same horizon as the originating session. Type: `(HorizonUninscribed, User, INSCRIBE, SessionState) → InscribedHFT`.
 
-> Vocabulary inline: **Wirkungsgeschichte** — effective-historical consciousness, the interpretive trace of how the current horizon was formed (formation trajectory, rejected alternatives, external priors). Subsequent uses in this document refer back to this definition.
+> Vocabulary inline: **Wirkungsgeschichte** — effective-historical consciousness, the interpretive trace of how the current horizon was formed, as seen from the inscribing session's vantage point (formation trajectory, rejected alternatives, external priors). Subsequent uses in this document refer back to this definition.
+>
+> Vocabulary-anchor convention: terms whose meaning spans multiple structural layers (definition, phases, rules, distinctions) receive a top-of-file blockquote like the one above; terms appearing at a single point of use receive an inline parenthetical definition at that point. Apply this convention when introducing new vocabulary in this document.
 
 Invoke directly with `/crystallize [stage-name]` at a stage transition or before a session boundary.
 
