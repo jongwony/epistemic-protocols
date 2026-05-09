@@ -31,7 +31,7 @@ epistemic-protocols/
 │   └── scripts/hypomnesis-write.mjs   # mjs harness + claude -p haiku extraction
 ├── epistemic-cooperative/             # Utility skills + agents
 │   ├── agents/                        # project-scanner, session-analyzer, coverage-scanner, dimension-profiler
-│   └── skills/                        # report, onboard, dashboard, introspect, catalog, compose, sophia, curses, write, comment-review, review-ensemble, goal-research, steer, misuse
+│   └── skills/                        # report, onboard, dashboard, introspect, catalog, compose, sophia, curses, write, comment-review, review-ensemble, goal-research, steer, misuse, dispatch
 └── src/                               # Landing page (independent sub-project; React + Vite + Tailwind; EN/KO SPA)
 ```
 
@@ -64,7 +64,7 @@ epistemic-protocols/
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 | Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
 
-**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/probe`, `/dashboard`, `/compose`, `/introspect`, `/sophia`, `/curses`, `/write`, `/comment-review`, `/review-ensemble`, `/goal-research`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
+**Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/probe`, `/dashboard`, `/compose`, `/introspect`, `/sophia`, `/curses`, `/write`, `/comment-review`, `/review-ensemble`, `/goal-research`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate`, `/dispatch`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
 
 **Probe utility (deficit recognition fit review)**: `/probe` (epistemic-cooperative) surfaces multiple candidate deficit hypotheses with reverse-evidence conditions when the user is uncertain which protocol fits the present situation. Probe is a utility skill, not a 13th core protocol — it is intentionally absent from `graph.json`. Coexistence over Mirroring applies: `/probe` may enrich scans with prior `misfit.md` records via opt-in cross-session read (default scope is current session; cross-session recall requires explicit user confirmation) and routes the user's recognized choice to the selected core protocol; the relationship is prose-level, not a graph.json edge. Probe stands in structural homology with Anamnesis (RECOGNIZE operation family — past context recognition vs present-situation deficit recognition) but the homology is descriptive, not enforced as advisory edges. **Architectural inscription** (new core protocol, new `graph.json` edge, category-level promotion) is deferred pending accumulated use evidence. **Type-level realization** of an already-inscribed `── COMPOSITION ──` product within an existing protocol's operational scope is internal iteration and does not require deferral framing — the distinction prevents the false-positive gating pattern recorded in issue #295. Verification framework limitations (drop-in feasibility vs endpoint well-defined-ness — two-axis distinction) tracked in [docs/probe-verification-framework.md](docs/probe-verification-framework.md) — instance L4a (PR #288), corroboration pending.
 

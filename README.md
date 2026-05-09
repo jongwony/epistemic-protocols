@@ -97,7 +97,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration via session calibration drift audit, retrospective contract violation detection, and the Horizon-Fusion Text (HFT) write/read pair for cross-session continuity |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate`, `/dispatch` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration via session calibration drift audit, retrospective contract violation detection, the Horizon-Fusion Text (HFT) write/read pair for cross-session continuity, and delegated parallel issue resolution with categorical decomposition + per-category PR + Wirkungsgeschichte feedback inscription |
 
 **Three discovery modes coexist** (none replaces the others):
 
@@ -113,6 +113,10 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 - `/crystallize` — inscribe a session's horizon-fusion residue into a four-layer Markdown file (Surface Text · Wirkungsgeschichte · Reference Shells · Excluded) at stage transition or before a session boundary
 - `/rehydrate` — enter a previously inscribed HFT to prime the current session with the originating session's Vorverständnis; auxiliary substrates (auto-memory, hypomnesis) remain reachable only via explicit `/inquire` or `/recollect` invocations
+
+**Delegated parallel work** (multi-issue dispatch):
+
+- `/dispatch` — set a minimal delegation contract (composes `/bound`), categorize open issues by northstar+hermeneutic alignment, fan out per-category sub-branches with per-category PRs, then load review feedback and inscribe rejection traces into linked issues so the next fresh-context session can engage hermeneutically without re-deriving the rejection
 
 ## Design
 
