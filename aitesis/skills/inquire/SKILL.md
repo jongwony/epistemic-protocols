@@ -142,6 +142,7 @@ early_exit = user_declares_sufficient
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Scan    (sense)       → Internal analysis (no external tool)
+Phase 1 Routing_disambiguation (constitution) → present (conditional: Anamnesis empty_intention signal AND Aitesis Prior-decision implication signal both fire from activating utterance; surface routing options before context collection; default none — co-fire requires user judgment)
 Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch, WebFetch (conditional: CanonicalExternal channel — RFCs, vendor API docs, standards; `source: "web:{url}"` tag + staleness guard via codebase version cross-check); Bash (conditional: VersionControlHistory channel — read-only commit-log queries via subprocess (content pickaxe, message search, temporal range); `source: "history:{ref}"` tag; collection-only — ref-type staleness classification handled per Phase 1 Step 1 staleness rule)
 Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
 Phase 1 Qc      (constitution)        → present (conditional: Coherence 2D off-diagonal Constitution interaction; fires only when scope ≠ resolution assessment; user classifies coherence type as MemoryInternal or CrossDomain)
@@ -320,6 +321,26 @@ Analyze prospect requirements against available context across multiple dimensio
 ### Phase 1: Context Collection + Classification + Empirical Observation
 
 Collect contextual evidence, classify each uncertainty by dimension and verifiability, and empirically observe accessible uncertainties with direct evidence.
+
+**Step 0 — Co-fire routing disambiguation (Constitution Qc gate, conditional)**:
+
+When the activating user utterance carries **both** signals simultaneously, present a routing disambiguation gate before context collection begins. Silent routing under co-fire is a Detection-with-Authority violation — both routing paths have differential downstream trajectories that the user must select.
+
+Co-fire trigger condition (both must hold):
+- **Anamnesis empty_intention signal**: utterance contains vague past pointing language (deictic time references, anaphoric "that time / earlier / previously" forms without specific anchor) that does not pinpoint a specific reference
+- **Aitesis Prior-decision implication signal**: prospect references or rests on a decision (architecture, API/protocol design, persisted state schema, user-facing behavior commitment) made in an earlier session, not present in current conversation context
+
+Detection: the gate fires from utterance scan in Phase 0; Phase 1 entry surfaces it before Step 1.
+
+Gate options (Qc, Constitution):
+- **Anamnesis-first**: hand off to `/recollect` to recall past session content; resume Aitesis afterward with the recalled context narrowing the Phase 1 scan scope (per Cross-session enrichment)
+- **Aitesis-only**: skip subjective recall; proceed with codebase + memory file + version-control history collection (objective evidence channels) using staleness-guarded source tags
+- **Anamnesis-only**: hand off to `/recollect`; defer Aitesis activation if recalled context resolves the prior-decision uncertainty without additional objective investigation
+- **Both-disambiguated**: free response identifies which aspect of the utterance pertains to which protocol — user partitions; AI re-classifies uncertainties accordingly
+
+Default: none. Co-fire requires user judgment; no auto-resolve. The gate fires once per activation — on resumption after Anamnesis handoff, Phase 1 proceeds to Step 1 with recalled context, no re-firing.
+
+When only one signal fires (no co-fire), proceed directly to Step 1 — the routing distinction in Step 1 prose (objective historical investigation here vs subjective recall via `/recollect`) handles single-signal cases without gate.
 
 **Step 1 — Context collection**: For each uncertainty in `Uᵢ`:
 - **Call Read/Grep** to search for relevant information in codebase, configs, documentation
