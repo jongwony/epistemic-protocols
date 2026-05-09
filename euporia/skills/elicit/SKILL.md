@@ -1,6 +1,6 @@
 ---
 name: elicit
-description: "Resolve via Extended-Mind reverse induction. Reverse-traces decision coordinates from externalized substrate (codebase, rules, past sessions, user environment) and surfaces them through cycle-emergent dimension projections; user answers explicate the coordinates until intent crystallizes. Type: (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint. Categorical dual to Periagoge. Alias: Euporia(εὐπορία)."
+description: "Resolve via Extended-Mind reverse induction. Reverse-traces decision coordinates from externalized substrate (codebase, rules, past sessions, user environment) and surfaces them through cycle-emergent dimension projections; user answers explicate the coordinates until intent crystallizes. Type: (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint. Directional dual to Periagoge. Alias: Euporia(εὐπορία)."
 ---
 
 # Euporia Protocol
