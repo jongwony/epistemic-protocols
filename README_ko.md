@@ -116,7 +116,7 @@ scripts/sync-agents-symlinks.sh
 
 **위임된 병렬 작업** (multi-issue dispatch):
 
-- `/dispatch` — 최소 위임 계약 설정(`/bound` compose), open issues 를 northstar+해석학적 정합성 axes 로 categorize, 카테고리별 sub-branch 로 fanout 후 카테고리당 PR 제출, review feedback 로드 후 기각 트레이스를 linked issue 로 inscribe — 다음 fresh-context 세션이 기각 트레이스를 재유도하지 않고 해석학적으로 진입 가능
+- `/dispatch` — 최소 위임 계약 설정(`/bound` compose), open issues 를 프로젝트 방향성과 누적된 리뷰 피드백 맥락으로 categorize, 카테고리별 sub-branch 로 fanout 후 카테고리당 PR 제출, review feedback 로드 후 기각 트레이스를 linked issue 로 inscribe — 다음 fresh-context 세션이 기각의 근거를 재유도하지 않고 그대로 이어받아 진입 가능
 
 ## 설계
 

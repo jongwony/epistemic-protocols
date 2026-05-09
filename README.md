@@ -116,7 +116,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 **Delegated parallel work** (multi-issue dispatch):
 
-- `/dispatch` — set a minimal delegation contract (composes `/bound`), categorize open issues by northstar+hermeneutic alignment, fan out per-category sub-branches with per-category PRs, then load review feedback and inscribe rejection traces into linked issues so the next fresh-context session can engage hermeneutically without re-deriving the rejection
+- `/dispatch` — set a minimal delegation contract (composes `/bound`), categorize open issues by project direction and accumulated review-feedback context, fan out per-category sub-branches with per-category PRs, then load review feedback and inscribe rejection traces into linked issues so the next fresh-context session can re-enter without re-deriving the rejection's reasoning
 
 ## Design
 
