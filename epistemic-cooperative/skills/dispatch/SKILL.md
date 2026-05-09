@@ -1,22 +1,24 @@
 ---
 name: dispatch
-description: "Delegated parallel issue resolution via /dispatch. User sets a minimal delegation contract (or accepts profile-derived defaults); AI categorizes open issues by project-northstar and hermeneutic-cycle alignment, fans out per-category sub-branches with per-category PRs, then loads review feedback and inscribes rejection traces to the linked issues so a fresh-context next session can re-enter without re-deriving the rejection. Reads the project's profile rule and editing conventions for personalization. Use when the user asks to 'resolve as many open issues as possible', 'process the open backlog', 'work through pending issues', or invokes /dispatch."
+description: "Delegated parallel issue resolution via /dispatch. User sets a minimal delegation contract (or accepts profile-derived defaults); AI categorizes open issues by project mission/direction (read from the project guide) and evidence-accumulation status (whether substrate-cited locks are satisfied), fans out per-category sub-branches with per-category PRs, then loads review feedback and inscribes rejection traces to the linked issues so a fresh-context next session can re-enter without re-deriving the rejection. Reads the project's profile rule and editing conventions for personalization. Use when the user asks to 'resolve as many open issues as possible', 'process the open backlog', 'work through pending issues', or invokes /dispatch."
 ---
 
 # Dispatch: Delegated Parallel Issue Resolution
 
 Crystallizes a delegated multi-issue workflow into a categorical-decomposition + per-category-PR pipeline with rejection-feedback inscription. Reads the project's personalization rules at activation; the workflow itself is universal.
 
-**This is an orchestration skill, not a single-issue executor.** It composes `/bound` for delegation contract setup, classifies issues by project-northstar and hermeneutic-cycle alignment, fans out work into per-category sub-branches, then loads PR review feedback and inscribes rejection traces to the linked issues so the next fresh-context session can engage hermeneutically without re-deriving the rejection.
+**This is an orchestration skill, not a single-issue executor.** It composes `/bound` for delegation contract setup, classifies issues by **project mission/direction** (the project's stated direction read from its guide — `northstar` for short) and **evidence-accumulation status** (whether substrate-cited locks like "depends on #X" or "pilot data accumulating" are satisfied), fans out work into per-category sub-branches, then loads PR review feedback and inscribes rejection traces to the linked issues so the next fresh-context session can re-enter without re-deriving the rejection.
 
 ## Pipeline Overview
 
 ```
-DETECT → BOUND → SCAN → CATEGORIZE → FANOUT → FEEDBACK → INSCRIBE
- (silent)  (gated)               (per-cat loop)         (post-PR)
+                                                     ┌→ INSCRIBE  (Phase 6 — rejected branch)
+DETECT → BOUND → SCAN → CATEGORIZE → FANOUT → FEEDBACK
+ (silent) (gated)              (per-cat loop)  (per-PR fork)
+                                                     └→ COMPLY    (Phase 7 — compliant branch)
 ```
 
-Phase 1 (BOUND) composes `/bound`. Phase 2-3 (SCAN, CATEGORIZE) run autonomously with northstar + hermeneutic-cycle axes. Phase 4 (FANOUT) executes per-category sub-branches sequentially. Phase 5-6 (FEEDBACK, INSCRIBE) run after PR submission.
+Phase 1 (BOUND) composes `/bound`. Phase 2-3 (SCAN, CATEGORIZE) run autonomously with northstar + evidence-accumulation axes. Phase 4 (FANOUT) executes per-category sub-branches sequentially. Phase 5 routes per PR; Phase 6 (rejected branch) and Phase 7 (compliant branch) are independent siblings dispatched from Phase 5, not sequential phases.
 
 ## Personalization sources
 
@@ -25,7 +27,7 @@ Read at activation (semantic, not hardcoded paths):
 | Source | Purpose |
 |---|---|
 | Project profile rule | Extension-default vs Constitution-default; closure clauses for delegation contract |
-| Project guide (CLAUDE.md or equivalent) | Project northstar; used as a categorization axis |
+| Project guide (CLAUDE.md or equivalent) | Project northstar (mission/direction statement); used as a categorization axis |
 | Project editing conventions | Branch naming pattern, commit message language, PR body language |
 | Harness rules (system prompt) | Branch restrictions, designated working branch, push policy |
 
@@ -81,18 +83,27 @@ These are not skipped silently — they are **classified** in Phase 3.
 
 ## Phase 3: Categorize
 
-Partition the IssueSet by project-northstar + hermeneutic-cycle alignment:
+Partition the IssueSet by project-northstar + evidence-accumulation alignment:
 
 | Class | Disposition |
 |---|---|
 | **Aligned + actionable** | Substrate-cited locks not active, work scope clear → include |
 | **Substrate-locked** | Explicit "Out of scope" / "depends on #X" / evidence-gate not satisfied → skip with hermeneutic respect (premature attempt would violate the trigger condition the issue itself cited) |
 | **Stale or superseded** | Body assumptions no longer hold (referenced files moved, prerequisite already shipped) → skip with note |
-| **Pilot-data dependent** | Requires accumulated empirical observation → skip (the hermeneutic cycle hasn't fired) |
+| **Pilot-data dependent** | Requires accumulated empirical observation → skip (the evidence-accumulation gate hasn't satisfied) |
 
-For aligned+actionable issues, group into 3-6 categories by **character** (e.g., hygiene cleanup, audit-driven, architectural fix, rule-layer crystallization, refactor, mass-application). Category names must derive from project-northstar + hermeneutic-cycle axes — not arbitrary labels.
+For aligned+actionable issues, group into 3-6 categories by **character**. Category names must derive from project-northstar + evidence-accumulation axes — not arbitrary labels.
 
-If the categorization is dominant (single clear partition), present it as **relay** with cited basis. If contested (multiple plausible partitions), present as **Constitution Qc gate** for user judgment.
+If the categorization is dominant (single clear partition), present it as **relay** with cited basis.
+
+If contested (2-3 plausible partitions emerge), surface a **Constitution Qc gate**:
+
+- **Pre-gate text** (Context-Question Separation): list each candidate partition with cited rationale (which northstar axis prioritization → which categorization frame), the issue counts each partition produces, and the per-category-PR fanout pattern that follows.
+- **Gate options**: 2-3 options, one per candidate partition. Each option's label names the partition's organizing principle (the northstar axis emphasized).
+- **Differential future per option**: enumerate what categories + per-category-PR shape result from each option — different category frames produce different review-surface granularity.
+- **Free-response pathway**: user may articulate a partition not enumerated; this routes to re-classification under the user-supplied frame.
+
+The gate body contains only the option labels with their differential implications; analytical context lives in the pre-gate text.
 
 **Output**: CategoryMap with per-category issue list + work-scope summary.
 
@@ -118,6 +129,8 @@ After all PRs are submitted, load review state per PR:
 - General PR comments
 - Inline review comments
 - Reviews
+
+Phase 6 (rejection-trace inscription) and Phase 7 (compliance loop minor-fix) are independent per-PR branches dispatched from Phase 5 — not sequential. Each PR routes to exactly one of the two branches based on its classification below.
 
 Classify each PR into one of three states:
 
@@ -164,6 +177,9 @@ Out-of-scope review suggestions are NOT applied here — they are tracked separa
 | All categories executed + feedback inscribed | Return (PRBatch, InscriptionTrace, SkippedSet) — surface summary with merge-ready and rejected-and-inscribed counts |
 | Effort cap reached | Defer remaining categories with explicit dynamic-stop record; surface what remains and why |
 | User Esc | Return to normal operation; partial state surfaced |
+| Phase 1 BoundaryMap incomplete (user declines / withdraws contract) | Return (∅, ∅, ∅) with the in-progress contract state surfaced; no scan / fanout commenced |
+| Phase 2 scan returns empty IssueSet | Return (∅, ∅, ∅) with explicit "no open issues in scope" surfacing; not a failure state |
+| All categories rejected post-feedback (merged = 0, rejected > 0) | Return (PRBatch, InscriptionTrace, SkippedSet) with merged = 0 surfaced explicitly; per-PR rejection inscriptions are the substantive output, not failure |
 
 Final summary always includes:
 
@@ -175,16 +191,16 @@ Final summary always includes:
 
 ## Rules
 
-1. **Boundary contract first**: Phase 1 must complete before Phase 2. Categorizing without a delegation contract exercises silent constitutive authority.
-2. **Substrate-cited skip surfacing**: Skip decisions on substrate-locked issues quote the lock condition verbatim from the issue body (e.g., the "Out of scope" sentence from the issue). Silent skip drops Recognition.
-3. **One PR per category**: Each category produces exactly one PR. Bundling categories collapses the categorical-decomposition rationale and obscures per-category review surface.
-4. **Northstar-grounded categorization**: Category names derive from project-northstar + hermeneutic-cycle axes. Arbitrary labels (e.g., numeric "Group 1") obscure the alignment basis.
-5. **Inscription verbatim**: Rejection feedback inscription quotes the review comment in full, not summarized. The next session needs the actual rejection trace, not a paraphrase.
-6. **Linked-issue identification**: Phase 6 identifies all linked issues from PR body cite tags and inscribes to each. A single linked issue receiving inscription while a co-linked issue is silently dropped breaks continuity.
-7. **No silent rejection close**: Closing a rejected PR without inscription violates cross-session continuity. Inscribe first; close second.
-8. **Effort cap dynamic-stop record**: When effort cap forces deferral, record cause + remaining categories explicitly so the next session can resume without re-deriving the queue.
-9. **Out-of-scope feedback non-expansion**: Phase 7 applies only minor-fix scope. Out-of-scope review suggestions become new issues or trailing comments — never silent scope expansion.
-10. **Personalization read, not write**: This skill reads the project's profile and editing-convention rules. It does not write to those files. Profile changes belong to `/steer`.
+1. **Boundary contract first** (Detection with Authority anchor): Phase 1 must complete before Phase 2. Categorizing without a delegation contract exercises silent constitutive authority — the categorization axes the AI chooses become unnegotiated authority.
+2. **Substrate-cited skip surfacing** (Derived — Surfacing over Deciding): Skip decisions on substrate-locked issues quote the lock condition verbatim from the issue body (the "Out of scope" sentence, "depends on #X" reference, or evidence-gate clause). Silent skip drops Recognition.
+3. **One PR per category** (Architectural — categorical-decomposition visibility): Each category produces exactly one PR. Bundling categories collapses the categorical-decomposition rationale and obscures per-category review surface.
+4. **Northstar-grounded categorization** (Architectural — alignment-basis visibility): Category names derive from project-northstar + evidence-accumulation axes. Numeric or arbitrary labels obscure the alignment basis and prevent the user from recognizing the partition rationale.
+5. **Inscription verbatim** (Derived — Convergence Evidence): Rejection feedback inscription quotes the review comment in full, not summarized. Paraphrase strips the rejection's specific axiom-violation nuance; without the verbatim trace, a fresh-context next session lacks the background to align on the issue's post-rejection direction and risks re-adopting the same flawed premise — a re-derivation loop. The verbatim quote terminates the loop by preserving the original rejection signal exactly.
+6. **Linked-issue identification** (Cross-protocol — continuity invariant): Phase 6 identifies all linked issues from PR body cite tags and inscribes to each. A single linked issue receiving inscription while a co-linked issue is silently dropped breaks continuity.
+7. **No silent rejection close** (Derived — Loop Continuity under Bounded Regret): Closing a rejected PR without inscription violates cross-session continuity. Inscribe first; close second.
+8. **Effort cap dynamic-stop record** (Derived — Loop Continuity under Bounded Regret): When effort cap forces deferral, record cause + remaining categories explicitly so the next session can resume without re-deriving the queue.
+9. **Out-of-scope feedback non-expansion** (Cross-protocol — scope discipline): Phase 7 applies only minor-fix scope. Out-of-scope review suggestions become new issues or trailing comments — never silent scope expansion.
+10. **Personalization read, not write** (Architectural — personalization boundary): This skill reads the project's profile and editing-convention rules. It does not write to those files. Profile changes belong to `/steer`.
 
 ## Distinction from Other Protocols
 
