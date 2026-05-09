@@ -280,7 +280,7 @@ The scan finds candidates; the narrative Qc enables recognition; the user consti
 **Key differences**:
 **Anamnesis vs Aitesis**: Both involve information access. Aitesis discovers facts the user does not know (ContextInsufficient — "I need information"). Anamnesis verifies context the user vaguely knows exists (RecallAmbiguous — "I know this was discussed, but where?"). The phenomenological test: does the user have an empty intention seeking fulfillment (Anamnesis) or no intention at all regarding the topic (Aitesis)? When the user has an empty intention but the recalled content is wholly absent from stores, the protocol exits with NullMatch — the recall target may not exist in the stored context.
 
-**Composition `/recollect * /inquire`**: When recognized context needs further information enrichment, Anamnesis can compose with Aitesis — the emitted ClueVector_prose enters session text and becomes input substrate for downstream context inference. On NullMatch, the accumulated recall trace seeds Aitesis to search SSOT directly via session ID (INDEX may lack entries while SSOT retains the information).
+**Composition `/recollect * /inquire`**: When recognized context needs further information enrichment, Anamnesis can compose with Aitesis — the emitted ClueVector_prose enters session text and becomes input substrate for downstream context inference. On NullMatch, Aitesis is seeded with the accumulated recall trace to search SSOT directly (INDEX may lack entries while SSOT retains the information).
 
 **Anamnesis vs Prothesis**: Prothesis selects analytical frameworks when none exist (FrameworkAbsent). Anamnesis locates prior discussions when the user has vague recall of their existence (RecallAmbiguous). If the user does not know a framework was ever discussed, it is not Anamnesis — it is Prothesis or Aitesis.
 
@@ -384,7 +384,7 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
    - Adjacent topics from the same session or time period
    - Confidence level based on trace alignment
 
-4. If `|C[]| = 0`: NullMatch pathway. Inform user what was searched and not found. Before declaring NullMatch, attempt at least one Socratic probe enrichment (Rule 17). After enrichment attempts exhausted: surface the search scope summary and the accumulated recall trace (keywords, temporal signals, user hints from probing), then offer Aitesis handoff — the recall INDEX (hypomnesis/) may lack the entry (lifecycle gap: SessionEnd did not fire; or pre-store: session predates hypomnesis implementation), but the SSOT (session JSONL) may still contain the information. The accumulated trace from Anamnesis probing becomes context seed for Aitesis to search JSONL directly via session ID.
+4. If `|C[]| = 0`: NullMatch pathway. Inform user what was searched and not found. Before declaring NullMatch, attempt at least one Socratic probe enrichment. After enrichment attempts exhausted: surface the search scope summary and the accumulated recall trace (keywords, temporal signals, user hints from probing), then offer Aitesis handoff — the recall INDEX (hypomnesis/) may lack the entry (lifecycle gap: SessionEnd did not fire; or pre-store: session predates hypomnesis implementation), but the SSOT (session JSONL) may still contain the information. The accumulated trace from Anamnesis probing becomes context seed for Aitesis to search SSOT directly.
 
 **Scope restriction**: Investigation uses Read, Grep, Glob exclusively.
 
@@ -460,7 +460,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 2. **Recognition over Retrieval**: Present structured narrative options with anticipatable post-selection state (Recognize / Refine / Reorient) — Constitution interaction requires turn yield before proceeding; recognition options enable user evaluation, not blank-canvas recall.
 
-3. **Input-typed dispatch and track-internal ranking**: Phase 1 scan dispatches by `InputType` (StructuredIdentifier → entropy track, NaturalRecall → salience track, Mixed → hybrid); ranking composes track-appropriate signals (entropy: literal precision via corpus rarity; salience: Σ-match + marker-profile overlap + temporal neighborhood). Σ-primary scan survives only as a ranking-layer special case within the salience track.
+3. **Input-typed dispatch and track-internal ranking**: Phase 1 scan dispatches by `InputType` (StructuredIdentifier → entropy track, NaturalRecall → salience track, Mixed → hybrid); ranking composes track-appropriate signals (entropy: literal precision via corpus rarity; salience: Σ-match + marker-profile overlap + temporal neighborhood). Σ-primary scan survives only as a ranking-layer special case within the salience track. Single-signal execution has structural blind spots regardless of track.
 
 4. **Narrative Qc presentation**: Phase 2 presents candidates as discussion narratives (origin → direction → outcome), not result summaries. Result-only presentation defeats recognition by forcing additional investigation.
 
@@ -478,8 +478,10 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 11. **Probe-first NullMatch**: At least one Socratic probe enrichment precedes any NullMatch declaration — first scan returning zero → probe → enriched re-scan → NullMatch declaration only if still empty.
 
-12. **Mandatory Qc, separate Qs and Qc**: Phase 2 Constitution interaction (Qc recognition) runs for every cycle including single high-confidence candidates — synthesis of identification is constitutive; confidence governs intensity (Light/Medium/Heavy), not whether the gate runs. On Refine, Socratic probing (Qs) and recognition (Qc) run as two distinct Constitution interactions — Qs deepens recall context first, Qc verifies identity second. (Safeguard-tier candidate: gate-collapse adversarial guard; revision tracked against PR #270 trajectory.)
+12. **Mandatory Qc, separate Qs and Qc** *(Safeguard tier — revisitable as instruction-following improves)*: Phase 2 Constitution interaction (Qc recognition) runs for every cycle including single high-confidence candidates — synthesis of identification is constitutive; confidence governs intensity (Light/Medium/Heavy), not whether the gate runs. On Refine, Socratic probing (Qs) and recognition (Qc) run as two distinct Constitution interactions — Qs deepens recall context first, Qc verifies identity second.
 
 13. **Cross-LOOP narrative persistence**: Narrative format and adjacent vector enrichment persist across LOOP iterations; subsequent attempts reference prior candidates and explain the differential.
 
 14. **Progress visibility**: Every Phase 2 presentation includes progress indicator `[attempt N/3, M candidates in scope]`.
+
+15. **Substrate non-coupling**: Phase prose names epistemic operations only — tool and path bindings belong exclusively to TOOL GROUNDING.

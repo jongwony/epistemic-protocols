@@ -119,7 +119,7 @@ Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- 
          Step₃ ReadOnlyVerify(Uᵣ') →                           -- Step 3: read-only verification (CodeDerivable + CanonicalExternal) [Tool]
            [if staleness_unverified(u) ∨ scope_gap(u)] reclassify(u, EmpiricallyObservable) → goto Step₂  -- backward arc (T4): staleness/scope failure re-enters classification
          [if Uₑ_candidates ≠ ∅] Step₄ EmpiricalObservation(Uₑ_candidates) → Uₑ  -- Step 4: dynamic evidence gathering [Tool]
-Phase 2: Qs(classify_result + Uₑ + Uᵢ''[cluster], progress) → Stop → A          -- uncertainty surfacing [Tool]; cluster = one coherent cluster (One coherent cluster, size ≤ 4)
+Phase 2: Qs(classify_result + Uₑ + Uᵢ''[cluster], progress) → Stop → A          -- uncertainty surfacing [Tool]; cluster size ≤ 4
 Phase 3: A → integrate(A, X) → X'                               -- prospect update (sense)
          [if A = Unknown(Partial)] auto_promote(uncertainty, next_source(ValidSources(v))) → goto Phase 1  -- backward arc (T2): user declines certainty → re-enter classification with next-preferred EvidenceSource
 
@@ -170,7 +170,7 @@ converge     (extension)       → TextPresent+Proceed (convergence evidence tra
 -- Invariant: uncertainties = context_resolved ∪ read_only_resolved ∪ empirically_observed ∪ non_factual_detected ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
 -- Note: observation_skips and source_choice_overrides are audit logs orthogonal to the partition —
 --       observation_skips: logged when EmpiricallyObservable is reclassified to UserDependent via Cite-or-observe escape conditions
---       source_choice_overrides: logged when UserTacit is selected over cheaper EvidenceSource with cited dominance basis (Cite-or-observe A/B); audit trail supports variation-stable observed use for cost-ordering
+--       source_choice_overrides: logged when UserTacit is selected over cheaper EvidenceSource with cited dominance basis (Cite-or-observe dominance); audit trail supports variation-stable observed use for cost-ordering
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
@@ -312,7 +312,7 @@ Analyze prospect requirements against available context across multiple dimensio
 1. **Scan prospect** `X` for required context: domain knowledge, environmental state, configuration details, user preferences, constraints
 2. **Check availability**: For each requirement, assess whether it is available in conversation, files, or environment
 3. **Dimension assessment**: Identify which dimensions are potentially insufficient — factual (missing information), coherence (conflicting information), relevance (information not relevant to goal)
-4. If all requirements satisfied: present the sufficiency finding with reasoning for user confirmation, then Aitesis is not activated
+4. If all requirements satisfied: present the sufficiency finding with reasoning before proceeding, then Aitesis is not activated
 5. If uncertainties identified: record `Uᵢ` with domain, description — proceed to Phase 1
 
 **Scan scope**: Current prospect context, conversation history, observable environment. Does NOT modify files or call external services.
@@ -510,7 +510,7 @@ After integration:
 7. **Always show classification**: Phase 2 surfacing always includes classify results (dimension + verifiability + EvidenceSource); free response can override classification — visible by default, ask only on exception.
 8. **Context-Question Separation**: Analysis, evidence, rationale as text output before the gate; the gate contains the essential question and option-specific differential implications only.
 9. **Option-set relay test**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
-10. **One coherent cluster**: Surface one coherent cluster per Phase 2 cycle (size ≤ 4 default); cluster admissible when items share decision frame, have non-overlapping information-gain rationale, and are independently answerable. Clustering-basis cite required when cluster size > 1. Yields to Divergence-bounding (frame-first) when divergence triggers fire — frame first, then cluster within selected frame. Procedural detail in UX Safeguards (Uncertainty cap entry).
+10. **One coherent cluster**: Surface one coherent cluster per Phase 2 cycle (size ≤ 4 default); cluster admissible when items share decision frame, have non-overlapping information-gain rationale, and are independently answerable — compound questions (where one item's answer depends on another) collapse the decision space into 2ⁿ implicit states, degrading Recognition. Clustering-basis cite required when cluster size > 1. Yields to Divergence-bounding (frame-first) when divergence triggers fire — frame first, then cluster within selected frame. Procedural detail in UX Safeguards (Uncertainty cap entry).
 11. **Divergence-bounding (frame-first)**: Compute per-uncertainty `branching_factor(u)` during Phase 1 Ctx. When `|Uᵢ| × max branching_factor(u) ≥ 16` OR `Σᵤ branching_factor(u) ≥ 16`, present a decision frame option set before per-branch detail; supersedes One coherent cluster when both apply. Exception (full enumeration without frame-first) requires BOTH `|Uᵢ| ≤ 3` AND each `branching_factor(u) ≤ 2` AND cited per-uncertainty counts (silent self-assessment "uniformly low" forbidden). `branching_factor` definition in TYPES.
 12. **Cite-or-observe** (Evidence-Inquiry boundary structural guard): When a Factual uncertainty has a cheaper EvidenceSource available than UserTacit, resolve via cheaper source OR cite explicit dominance basis (logged to `Λ.source_choice_overrides`). Reclassification of EmpiricallyObservable to UserDependent is legitimate only under empirically verifiable escape conditions evaluated BEFORE observation (env mutation / 30s bound / elevated risk; logged to `Λ.observation_skips`). Observation outputs always proceed to Phase 2 via `Uₑ` — positive (differentiating evidence) or negative (null-signal); pre-observation categorical classification is not a substitute. Verifiability-tier dominance basis detail in Phase 1 Step 2.
 13. **No pre-filter rationalization** (Cite-or-observe dual): Pre-filter (Coherence coexistence exit) applies only when an explicit, named scope hierarchy rule or documented precedence ordering resolves the apparent contradiction without epistemic protocol intervention. Classifying genuine cross-domain structural contradiction as "rule-resolvable" to avoid routing = pre-filter misuse.

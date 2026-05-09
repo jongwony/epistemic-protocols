@@ -568,7 +568,7 @@ Subagent delegation: intensity is determined by the subagent's risk assessment a
 
 1. **User-initiated, AI-evaluated**: User declares execution intent via `/attend`; AI evaluates per-task risk and surfaces Gate-level findings via Cognitive Partnership Move (Constitution) at Phase 2.
 2. **Autonomy-first**: The silent path (`p=Low`) is the primary path — most tasks delegate to subagents without surfacing. Prosoche is a safety net, not a gate on every action.
-3. **Transparency-grounded**: Every surfaced finding cites specific command, target, and risk signal (no speculative warnings); zero-deficit classifications (all `p=Low`) are presented as text output with reasoning before batch delegation. Surfaced and silent paths satisfy the same transparency invariant.
+3. **Transparency-grounded**: Every surfaced finding cites specific command, target, and risk signal (no speculative warnings); all-`p=Low` task classifications are presented as text output with reasoning before batch delegation. Surfaced and silent paths satisfy the same transparency invariant.
 4. **Gate blocks, Advisory informs**: Gate-severity findings require Constitution interaction before execution; Advisory findings are noted inline but do not block.
 5. **Boundary extension**: Prosoche extends `boundaries.md` irreversible classification — never relaxes it. When Prosoche and boundaries.md differ, the stricter classification applies during execution; risks identified by Prosoche but uncovered by boundaries.md apply Prosoche's Gate. HumanCommunication extends boundaries.md to human-facing channels.
 6. **Non-interference**: Prosoche adds a risk-assessment layer alongside any active protocol; it does not modify other protocol logic.
