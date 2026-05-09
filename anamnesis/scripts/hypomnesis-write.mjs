@@ -572,7 +572,12 @@ function computeCoinage(userMsgs, allTexts, corpusPath, currentSessionId, budget
     ...userMsgs.map((m) => m.text),
     ...allTexts,
   ].join(" ").toLowerCase();
-  const tokenRe = /\b[a-zA-Z가-힣_][a-zA-Z가-힣_0-9-]{3,29}\b/g;
+  // Coinage targets English technical vocabulary (function names, identifiers,
+  // jargon). Korean natural-language tokens are handled by Haiku extraction in
+  // the 5 semantic categories above; admitting the Hangul range
+  // (U+AC00..U+D7A3) here would pollute coinage with common conversation
+  // tokens that carry no salience.
+  const tokenRe = /\b[a-zA-Z_][a-zA-Z_0-9-]{3,29}\b/g;
   const sessionCounts = new Map();
   for (const match of sessionText.matchAll(tokenRe)) {
     const t = match[0];
