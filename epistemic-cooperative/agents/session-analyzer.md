@@ -137,19 +137,22 @@ The main agent (Phase 3) determines protocol mapping and coverage status (covere
 
 Detect user correction and backtracking patterns from session JSONL. These serve as direct evidence for anti-pattern detection.
 
-**Detection patterns** (Grep on session JSONL):
+**Detection approach** (semantic classification by you as a multilingual model):
 
-| Signal | Grep Pattern | Notes |
-|--------|-------------|-------|
-| Explicit correction | `"role":"user"` lines containing: "no,", "that's wrong", "not what I", "undo", "revert", "아니", "그게 아니라", "되돌려" | Require ≥20 chars context around keyword |
-| Backtracking | `"role":"user"` lines containing: "go back", "actually,", "wait,", "잠깐", "다시" followed by task keyword | "actually" alone too common; require co-occurrence with task-relevant keyword |
+You natively understand multilingual conversational cues; do not rely on a literal keyword table. Locate user messages via Grep on `"role":"user"`, then read each candidate message and classify by intent:
+
+| Signal | Semantic intent |
+|--------|-----------------|
+| Explicit correction | The user reverses or contradicts a prior assistant action — a no/wrong/undo/revert reaction, or any phrasing whose effect is "do not proceed in that direction". Cross-language; surface phrasing is incidental. |
+| Backtracking | The user redirects mid-task to a prior point — go-back / wait / hold-on cues paired with a task reference, signaling rewind across at least one substantive task step. Distinguish from minor adjustments where the task continues unchanged. |
 
 **Process**:
-1. Grep for correction/backtracking patterns with `output_mode: "count"` for each session
-2. If count > 0: extract one representative snippet per Step 2.5 methodology (user message + preceding AI response pair)
-3. Report: correction count per session, representative snippet (if found)
+1. Grep `"role":"user"` to enumerate user message regions per session
+2. Read a sampled subset of user messages and classify each by the semantic intents above; count corrections + backtracking events per session
+3. If count > 0: extract one representative snippet per Step 2.5 methodology (user message + preceding AI response pair)
+4. Report: correction count per session, representative snippet (if found)
 
-**Quality gate**: Only report corrections where the user message is ≥20 characters and clearly a correction (not ambiguous). Report `(no quality correction snippet)` if criteria not met.
+**Quality gate**: Only report corrections where the user message is ≥20 characters and the semantic classification is unambiguous. Report `(no quality correction snippet)` if criteria not met.
 
 ### Targeted Step (Mode 2 Only)
 
@@ -162,7 +165,7 @@ When `friction_pointers` are provided, skip Steps 1-2 and extract snippets targe
    - **Tier 1**: Grep for extracted keywords in the session JSONL — highest precision
    - **Tier 2**: Grep for friction-key behavioral proxies if Tier 1 yields no results:
      - `wrong_approach` → `"name":"Edit"` clusters (repeated edits)
-     - `misunderstood_request` → correction language patterns ("no,", "that's wrong", "not what I", "아니", "그게 아니라")
+     - `misunderstood_request` → user messages whose semantic intent reads as correction or rejection of the assistant's prior interpretation (cross-language; classify by intent, not by literal keyword)
      - `user_rejected_action` → `"name":"AskUserQuestion"` near rejection context
      - `excessive_changes` → `"name":"Edit"` high-frequency regions
      - `context_loss` → `"name":"Read"` clusters (re-reading attempts)
