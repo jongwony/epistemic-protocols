@@ -97,7 +97,7 @@ scripts/sync-agents-symlinks.sh
 
 | 플러그인 | 명령어 | 용도 |
 |----------|--------|------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 사용 분석, 커버리지 대시보드, 멀티 관점 블로그 작성, 세션 calibration drift audit 기반 프로젝트 프로필 재조정, 소급적 계약 위반 감지, 그리고 cross-session 연속성을 위한 Horizon-Fusion Text(HFT) 쓰기/읽기 쌍 |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate`, `/dispatch` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 사용 분석, 커버리지 대시보드, 멀티 관점 블로그 작성, 세션 calibration drift audit 기반 프로젝트 프로필 재조정, 소급적 계약 위반 감지, cross-session 연속성을 위한 Horizon-Fusion Text(HFT) 쓰기/읽기 쌍, 그리고 카테고리 분해 + 카테고리당 PR + Wirkungsgeschichte 피드백 inscription 으로 위임된 병렬 이슈 해결 |
 
 **세 가지 발견 모드 공존** (서로 대체하지 않음):
 
@@ -113,6 +113,10 @@ scripts/sync-agents-symlinks.sh
 
 - `/crystallize` — 세션의 지평융합 잔여를 4-layer Markdown 파일(표면 텍스트 · Wirkungsgeschichte · Reference Shells · Excluded)로 inscribe; stage 전환 시점 또는 세션 boundary 직전에 호출
 - `/rehydrate` — 기존에 inscribe된 HFT를 진입하여 originating 세션의 Vorverständnis로 현 세션을 prime; auxiliary substrate(auto-memory · hypomnesis)는 `/inquire` 또는 `/recollect` 명시 호출로만 접근 가능
+
+**위임된 병렬 작업** (multi-issue dispatch):
+
+- `/dispatch` — 최소 위임 계약 설정(`/bound` compose), open issues 를 프로젝트 방향성과 누적된 리뷰 피드백 맥락으로 categorize, 카테고리별 sub-branch 로 fanout 후 카테고리당 PR 제출, review feedback 로드 후 기각 트레이스를 linked issue 로 inscribe — 다음 fresh-context 세션이 기각의 근거를 재유도하지 않고 그대로 이어받아 진입 가능
 
 ## 설계
 

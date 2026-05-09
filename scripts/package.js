@@ -45,6 +45,7 @@ const DESCRIPTION_OVERRIDES = {
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   compose: 'Protocol composition authoring — build composition SKILL.md from protocol chains',
   write: 'Multi-perspective blog drafting — transforms session insights into publishable content via iterative perspective-based refinement.',
+  dispatch: 'Delegated parallel issue resolution — categorical decomposition + per-category PRs + rejection-trace inscription for cross-session continuity. Composes /bound for delegation contract.',
 };
 
 const EXCLUDE_NAMES = new Set([
