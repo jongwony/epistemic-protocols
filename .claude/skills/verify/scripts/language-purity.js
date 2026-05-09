@@ -8,6 +8,8 @@
  *   - src/**                      Landing page i18n
  *   - docs/**                     Repo documentation reports
  *   - .claude/rules/editing-conventions.md  Korean commit convention text
+ *   - anamnesis/scripts/hypomnesis-write.mjs        Korean unicode range in tokenization regex
+ *   - epistemic-cooperative/agents/session-analyzer.md  Literal grep patterns for Korean user corrections
  *
  * Severity: warn (Stage 1 surface posture; fail promotion gated on Stage 2
  * retention evidence). One warn record per file with Korean lines listed.
@@ -42,6 +44,8 @@ const WHITELIST_PATTERNS = [
   /^design(\/|$)/,                        // root design docs
   /^examples(\/|$)/,                      // root examples
   /^\.claude\/rules\/editing-conventions\.md$/,
+  /^anamnesis\/scripts\/hypomnesis-write\.mjs$/,                      // Korean unicode range in tokenization regex
+  /^epistemic-cooperative\/agents\/session-analyzer\.md$/,            // Literal grep patterns for Korean user corrections
 ];
 
 const TEXT_EXTENSIONS = new Set([
