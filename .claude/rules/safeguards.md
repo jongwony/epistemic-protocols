@@ -31,6 +31,53 @@ External literature serves as **reference for Safeguard-tier candidate identific
 
 Each pattern is a literature-supported candidate for Safeguard-tier compression. Project-side triggers (per Actionable revision criterion) remain required for actual reduction — literature alone does not warrant rule removal.
 
+## Rule Classification Framework
+
+Methodology for SKILL.md `## Rules` consolidation. Each rule is classified by source and processed per tier-specific action. The framework was applied across PRs #368, #369, #370, #371 with variation-stable outcomes (88 rules across 4 protocols fit the 6 categories without framework modification).
+
+### Six tiers
+
+| Tier | Source | Action |
+|---|---|---|
+| 1. Axiom anchor | A1-A6 (in this directory's `axioms.md`) | KEEP. 1-2 line restatement with axiom name inline; do NOT use the `(Aₙ)` label form per Plugin Encapsulation source-leak prohibition |
+| 2. Derived anchor | Derived principles (Surfacing over Deciding, Convergence Evidence, Pattern over Tool, Outcome Equivalence, Differential Future Requirement, Loop Continuity, Full Taxonomy Confirmation, Zero-Shot Instruction Preference) | KEEP. Anchor reference using principle name |
+| 3. Architectural project-specific | Architectural principles or protocol Core Principle | KEEP. Paragraph-length rules migrate body to Phase prose or UX Safeguards table; invariant 1-line stays in Rules |
+| 4. Cross-protocol | Rule about distinction with another protocol | Move to "Distinction from Other Protocols" section |
+| 5. Safeguard tier | This file's principles or Trajectory Candidates table match | Mark Safeguard tier explicitly + inline the Actionable revision criterion (Compiled-copy consumers pattern) |
+| 6. Edge/Audit | Project UX, non-invariant rule | Move to UX Safeguards table or end-of-Rules cluster |
+
+### Plugin Encapsulation alignment
+
+Two layers governed by different rules:
+
+- **Source layer** (`.claude/rules/*`): tiered files cross-reference each other freely (cross-document inscription is normal for the rule layer)
+- **Consumer layer** (SKILL.md): T1 inline restatement only — axiom/derived/safeguard reference uses inline naming, not file path; Tier 5 Safeguard items inline the Actionable revision criterion (Compiled-copy consumers pattern with drift-tracking comment)
+
+### Application procedure
+
+1. **Read** `## Rules` section of target SKILL.md
+2. **Classify** each rule by tier (1-6) using the Source column
+3. **Apply** the tier-specific Action
+4. **Verify** via `node .claude/skills/verify/scripts/static-checks.js .` (compression preserves semantics — fail 0 expected)
+5. **PR** with classification table + before/after rule count
+
+### Empirical grounding
+
+Framework applied across 4 protocols in parallel fork worktrees with framework variation-stable (no instance required modification of the framework — all 88 rules fit the 6 categories):
+
+| Protocol | PR | Rule count change |
+|---|---|---|
+| Aitesis | #371 | 22 → 14 (-36%) |
+| Prosoche | #368 | 23 → 16 (-30%) |
+| Anamnesis | #369 | 22 → 14 (-36%) |
+| Horismos | #370 | 21 → 16 (-24%) |
+
+Aggregate: 88 → 60 rules (-32%) with zero framework variation across instances.
+
+### Distinction from Safeguard-tier revision
+
+This framework is the *classification methodology* for `## Rules` consolidation (architectural-completeness axis — making rule structure tier-explicit). The Actionable revision criterion (above) addresses the *trajectory* of individual Safeguard-tier rules (model-trajectory axis — when to revisit guards). The two axes are orthogonal: the framework determines which rules carry Safeguard-tier annotation; the criterion determines when those annotated rules are revised.
+
 ## Adversarial Anticipation
 
 Each protocol must anticipate how an AI agent might shortcut or rationalize away from faithful execution, and include structural guards in Rules and Phase prose. Formal specification guarantees definitional consistency; adversarial design guarantees execution fidelity. Common rationalization paths: premature convergence assertion, silent detection dismissal, skipping gate interaction entirely (presenting content without yielding turn for response), collapsing Qs gates to plain acknowledgment, gate mutation (option injection — adding options not in definition, option deletion — removing defined options, option substitution — replacing defined options with different ones). Distinct from gate mutation: **type-preserving materialization** — specializing a generic option into a concrete term while preserving the answer type constructor. The boundary: if the TYPES coproduct classifies the user's response identically before and after specialization, the transformation is materialization; if it requires a new constructor or alters the coproduct structure, it is mutation. These are orthogonal concerns — a protocol can be formally correct yet routinely circumvented.
