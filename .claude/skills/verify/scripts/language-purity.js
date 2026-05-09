@@ -9,6 +9,10 @@
  *   - docs/**                     Repo documentation reports
  *   - .claude/rules/editing-conventions.md  Korean commit convention text
  *
+ * Substantive Korean as data/pattern (not instruction prose):
+ *   - anamnesis/scripts/hypomnesis-write.mjs           Korean tokenization regex char class
+ *   - epistemic-cooperative/agents/session-analyzer.md Korean correction-detection vocabulary
+ *
  * Severity: warn (Stage 1 surface posture; fail promotion gated on Stage 2
  * retention evidence). One warn record per file with Korean lines listed.
  *
@@ -42,6 +46,9 @@ const WHITELIST_PATTERNS = [
   /^design(\/|$)/,                        // root design docs
   /^examples(\/|$)/,                      // root examples
   /^\.claude\/rules\/editing-conventions\.md$/,
+  // Substantive Korean as runtime data/pattern (not instruction prose):
+  /^anamnesis\/scripts\/hypomnesis-write\.mjs$/,           // tokenization regex char class
+  /^epistemic-cooperative\/agents\/session-analyzer\.md$/, // correction-detection vocabulary
 ];
 
 const TEXT_EXTENSIONS = new Set([
