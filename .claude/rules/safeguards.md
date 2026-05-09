@@ -6,7 +6,7 @@ Safeguard-tier principles are revisitable as model capability evolves — their 
 
 **Actionable revision criterion**: Safeguard-tier status is not a passive label but an operational commitment to revisit guards as evidence accumulates. Triggers for revising corresponding SKILL.md Rules sections: (1) model version upgrade with demonstrated instruction-following improvement, (2) observed violation rate sustained below prior baseline across sessions with current models, or (3) a successful compression PR (e.g., the PR #270 XC1-XC4 precedent) demonstrating guard reducibility without outcome loss. When any trigger fires, reduce or remove guards; document the reduction with empirical basis citation. This prevents carrying obsolete safeguards into future protocol releases as models improve.
 
-**Compiled-copy consumers** (drift tracking): The Actionable revision criterion above is inlined into protocol SKILL.md `## Rules` sections under the Safeguard tier annotation per Plugin Encapsulation (no path reference is permitted in SKILL.md). When this criterion changes, audit `## Rules` sections of each protocol for `(Safeguard tier — revisitable as model capability evolves; revision triggers: ...)` formulations and refresh them to match. Current consumers: Aitesis, Prosoche, Horismos (additional protocols may compile the same criterion as the consolidation pattern propagates).
+**Compiled-copy consumers** (drift tracking): The Actionable revision criterion above is inlined into protocol SKILL.md `## Rules` sections under the Safeguard tier annotation per Plugin Encapsulation (no path reference is permitted in SKILL.md). When this criterion changes, audit `## Rules` sections of each protocol for `(Safeguard tier — revisitable as model capability evolves; revision triggers: ...)` formulations and refresh them to match. Current consumers: Aitesis, Prosoche, Horismos (full form). Anamnesis carries an abbreviated form (`revisitable as instruction-following improves`) — full-form restoration deferred to a separate PR.
 
 ## Literature Application Discipline
 
@@ -73,6 +73,8 @@ Framework applied across 4 protocols in parallel fork worktrees with framework v
 | Horismos | #370 | 21 → 16 (-24%) |
 
 Aggregate: 88 → 60 rules (-32%) with zero framework variation across instances.
+
+**Last applied**: 2026-05-09. When subsequent consolidation cycles add new protocols to the empirical grounding table, refresh this date so future cycles can verify the framework's variation-stability with current evidence.
 
 ### Distinction from Safeguard-tier revision
 
