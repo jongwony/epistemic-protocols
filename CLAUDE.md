@@ -2,9 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Northstar
 
-Epistemic Protocols is a domain-free metalanguage of structured types and morphisms for human-AI collaboration: it constrains AI attention without bias, elicits unknowns into utterance, and reflexively re-forms misalignment at each turn — the loop dissolves compounding cost before it forces whole-system refactoring.
+Epistemic Protocols is a domain-free metalanguage of structured types and morphisms for human-AI collaboration: it constrains AI attention without bias, elicits unknowns into utterance, and reflexively re-forms misalignment within the loop — the loop dissolves compounding cost before it forces whole-system refactoring.
+
+## Project Overview
 
 In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **AbstractionInProcess → CrystallizedAbstraction** (Periagoge), **AbstractAporia → ResolvedEndpoint** (Euporia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
 
