@@ -221,6 +221,7 @@ Final summary always includes:
 | Crystallize `/crystallize` | Crystallize freezes the current session into a Horizon-Fusion Text for full cross-session continuity (whole session state). Dispatch inscribes per-rejection feedback to issues (per-rejection scope). Both serve cross-session continuity at different granularities. |
 | Compose `/compose` | Compose authors composition SKILL.md files (build-time). Dispatch executes a delegation pipeline (run-time). |
 | Steer `/steer` | Steer rewrites the project's profile rule after detecting calibration drift. Dispatch reads that profile as a personalization source and does not modify it. |
+| Realign `/realign` | Realign rewrites the project guide's northstar declaration after detecting direction drift in the open issue landscape. Dispatch reads that northstar as a personalization source and does not modify it. Functional dual with Steer on the dispatch read territory: Steer writes the calibration profile, Realign writes the mission-direction northstar. |
 
 ## Composition
 
@@ -229,6 +230,7 @@ Dispatch composes the following protocols at runtime:
 - **Phase 1**: `/bound` (Horismos) — delegation contract
 - **Phase 3**: `/induce` (Periagoge) — implicit, bounded categorization (no separate gate)
 - **Phase 0 enrichment (optional)**: `/recollect` (Anamnesis) — prior rejected feedback context
+- **Phase 0 enrichment (optional)**: `/realign` (Realign) — northstar recalibration from current issue landscape before categorization; user-invoked, never auto-triggered
 
 Composition is sequential — each phase consumes the previous phase's output. Per-category execution within Phase 4 may itself invoke any protocol the per-issue work requires; those compositions are nested under the category's branch context.
 
