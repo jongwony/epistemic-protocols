@@ -218,9 +218,9 @@ Final summary always includes:
 | Horismos `/bound` | Composed by Dispatch Phase 1 (delegation contract). Bound handles a single boundary decision. Dispatch composes Bound at the head of a multi-step parallel workflow then drives execution + feedback inscription. |
 | Periagoge `/induce` | Implicitly used in Phase 3 (instance partition into named categories). Dispatch's categorization is bounded by northstar + hermeneutic-cycle axes; the full Periagoge crystallization with widen / narrow / fuse / reorient moves is not invoked. |
 | Anamnesis `/recollect` | Optional Phase 0 enrichment: prior cycle's rejected feedback context can prime current Dispatch. Recall is utterance-bound; Dispatch is delegation-bound. |
-| Crystallize `/crystallize` | Crystallize freezes the current session into a Horizon-Fusion Text for full cross-session continuity (whole session state). Dispatch inscribes per-rejection feedback to issues (per-rejection scope). Both serve cross-session continuity at different granularities. |
 | Compose `/compose` | Compose authors composition SKILL.md files (build-time). Dispatch executes a delegation pipeline (run-time). |
 | Steer `/steer` | Steer rewrites the project's profile rule after detecting calibration drift. Dispatch reads that profile as a personalization source and does not modify it. |
+| Realign `/realign` | Realign rewrites the project guide's direction line via three-horizon fusion (inscribed direction × external signals × user pre-understanding). Dispatch reads that direction line as a categorization axis (the project northstar) and does not modify it. |
 
 ## Composition
 

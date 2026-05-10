@@ -213,24 +213,6 @@ describe('runtime contract view', () => {
       assert.ok(view.packagedEntries.includes(`${view.skill}/Skill.md`), `${view.plugin}:${view.skill} should package Skill.md`);
       assert.ok(typeof view.pluginDescription === 'string');
     }
-
-    // HFT format spec must be packaged in BOTH crystallize and rehydrate so
-    // each skill is self-contained when installed standalone (rehydrate.zip
-    // without crystallize.zip must still resolve references/hft-format.md).
-    // Regression guard: if `collectFiles` ever drops the `references/`
-    // directory or the duplication is removed, this assertion fires.
-    const crystallizeView = views.find(v => v.skill === 'crystallize');
-    assert.ok(crystallizeView, 'crystallize runtime view should exist');
-    assert.ok(
-      crystallizeView.packagedEntries.includes('crystallize/references/hft-format.md'),
-      'crystallize should package references/hft-format.md',
-    );
-    const rehydrateView = views.find(v => v.skill === 'rehydrate');
-    assert.ok(rehydrateView, 'rehydrate runtime view should exist');
-    assert.ok(
-      rehydrateView.packagedEntries.includes('rehydrate/references/hft-format.md'),
-      'rehydrate should package references/hft-format.md (duplicated for standalone-installable self-containment)',
-    );
   });
 
   it('artifact self-containment passes with no runtime boundary leaks', () => {
@@ -500,7 +482,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 27 skills plus bundle in dry-run', () => {
+  it('packages all 28 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -523,9 +505,9 @@ describe('package.js CLI', () => {
         'comment-review.zip',
         'compose.zip',
         'contextualize.zip',
-        'crystallize.zip',
         'curses.zip',
         'dashboard.zip',
+        'dispatch.zip',
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
         'frame.zip',
@@ -539,8 +521,8 @@ describe('package.js CLI', () => {
         'misuse.zip',
         'onboard.zip',
         'probe.zip',
+        'realign.zip',
         'recollect.zip',
-        'rehydrate.zip',
         'report.zip',
         'review-ensemble.zip',
         'sophia.zip',
@@ -552,12 +534,13 @@ describe('package.js CLI', () => {
     // merge time. Any additive change (new plugin, new reference doc, new
     // agent) only increases this count. A shrink indicates an unintended
     // regression (plugin removed or files accidentally excluded from the
-    // packager), which should fail. Baseline reset to 33 after PR #259
-    // (reflexion plugin removed + write relocated to epistemic-cooperative)
-    // — that shrink was intentional and the guard updated accordingly.
+    // packager), which should fail. Baseline reset to 30 after the
+    // crystallize/rehydrate retire + /realign introduction net -1 plugin
+    // shrink with two references/hft-format.md files dropped — that shrink
+    // was intentional and the guard updated accordingly.
     assert.ok(
-      bundle.files >= 34,
-      `expected bundle.files >= 34 (regression guard), got ${bundle.files}`
+      bundle.files >= 30,
+      `expected bundle.files >= 30 (regression guard), got ${bundle.files}`
     );
   });
 });
