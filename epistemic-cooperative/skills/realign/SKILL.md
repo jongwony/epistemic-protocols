@@ -1,6 +1,6 @@
 ---
 name: realign
-description: "Project-agnostic horizon-fusion utility. Fuses three horizons (the project guide's existing direction, externally surfaced direction signals from configured channels, and the user's present pre-understanding) into a single direction line through dialectical exchange and writes the fused line back to the project guide on user confirmation. Use this skill whenever the user wants to 'realign the project direction', 'fuse the project guide direction with current signals', 'reorient the northstar against open work', or invokes /realign. Periagoge family — extends /induce with three-horizon fusion and a project-guide line write step."
+description: "Project guide direction line via three-horizon fusion. Invoke with /realign."
 user_invocable: true
 ---
 
@@ -277,11 +277,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 7. **Recognition over Recall** — Present structured candidate-with-trace and shaping options via Cognitive Partnership Move (Constitution) and yield turn. Each shaping option carries differential implication so the post-selection state is anticipatable. The Phase 3 final approval options carry differential downstream trajectories (write executed vs no-write artifact only vs deferred manual apply).
 8. **Context-Question Separation** — All horizon content, candidate text, and trace entries are presented as text output before the Constitution interaction. The interaction contains only the verdict or approval options.
 9. **Convergence evidence** — Phase 3 emit produces a transformation trace: per horizon, show (horizon excerpt → role in candidate → contribution to fused line); final disposition; rollback hint when written. Per-horizon evidence is required.
-10. **Periagoge family lineage** — Realign extends `/induce`'s morphism with a three-horizon fusion step before shaping and a writable project-guide line update after confirmation. The dialectical triangulation core is preserved (Phase 2 widen / narrow / fuse / reorient / confirm / dismiss vocabulary is inherited verbatim from `/induce`), but `/realign` adds the fusion trace and the write step that crosses the `preserves`/`mutates` boundary that `/induce` itself respects. The lineage is operational extension on the input axis (three named horizons) and the output axis (writable inscription), not a type-narrowing specialization.
-11. **Coexistence with /steer** — Realign does not replace calibration profile recalibration (`/steer`). The pair coexists by subject and write target: project guide direction line versus project profile rule layer. Both inscribe a confirmed fusion result back to a project artifact through a Periagoge family workflow.
-12. **Out-of-scope** — Calibration profile recalibration is `/steer` territory. Prospective deficit fit recognition is `/probe` territory. In-conversation abstraction crystallization without inscription is `/induce` territory. Realign's scope is limited to the project guide direction line.
-13. **Provisional release modality** — This skill is released provisionally; architectural inscription (graph.json placement, advisory edges, formal lineage to /induce) is deferred pending accumulated cross-session use evidence.
-14. **Self-referential consistency** — When the project guide whose direction line is the write target prescribes principles that this skill's own prose must also satisfy, consistency is guaranteed by the fixed-point property of user confirmation rather than by external derivation.
+10. **Self-referential consistency** — When the project guide whose direction line is the write target prescribes principles that this skill's own prose must also satisfy, consistency is guaranteed by the fixed-point property of user confirmation rather than by external derivation.
 
 ## UX Safeguards
 
@@ -291,22 +287,6 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 - **Shape loop bounded** — Phase 2 shaping loop is capped at 5 iterations; exhaustion converges with FusedDirectionDraft so the audit work is preserved as session text even when no candidate reaches Confirm.
 - **Rollback through version control** — The project guide is expected to be under version control; rollback is `git revert` or `git checkout` on the direction line. The rollback hint is surfaced in the Phase 3 Constitution interaction so the user knows the rollback path before approving (Rule 5 reinforcement).
 - **Defer disposition as escape hatch** — When the user is unsure about writing, the Defer option emits the fused line and trace as a session-text artifact for manual application. This honors the "writable side effect needs explicit approval" principle while preserving the audit work.
-
-## Trigger Signals
-
-Invoke `/realign` when:
-- The user senses the inscribed direction no longer fuses with the external work landscape and the current sense of the project
-- A recent surge of issues, pull-request reviews, or session direction utterances has shifted the project's effective direction in ways the inscribed line does not capture
-- The user wants the inscribed direction line to be re-derived from three horizons rather than edited piecemeal
-- The user wants a fusion artifact (the per-horizon trace) alongside the new line for downstream review
-
-## Skip Conditions
-
-Skip Realign when:
-- The deficit is forward-looking deficit-recognition fit review (`/probe`)
-- The audit target is a calibration profile rather than the project guide direction line (`/steer`)
-- The user wants in-conversation abstraction crystallization without inscription (`/induce`)
-- The project guide does not have a recognizable direction line (Phase 0 deactivates with no-op note)
 
 ## Mode Deactivation
 
