@@ -56,6 +56,8 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 
 **Vocabulary rendering**: SKILL.md Phase prose, Rules sections, and Distinction tables use project-internal frame vocabulary — including contributor-facing handles like "SKILL.md" itself — for definitional precision among contributors. When that vocabulary is rendered into generated user-visible protocol output, express it in plain language that fits the current protocol phase and the user's topic, without changing the source's distinctions. The same source term may be expressed differently across protocols and contexts. Preserve the original wording when the term itself is the subject of discussion, when quoting user-provided text, or when directly citing the source.
 
+When the rendered vocabulary would require user Recall at first encounter, optionally extend the plain-language expression with a brief substrate-cited situational anchor drawn from the user's codebase, configs, or prior session. Self-regulating — emit only when Recall would otherwise occur, not on every term; the anchor's substrate citation follows the Basis Marker discipline.
+
 ## Ink Elements
 
 **Phase header** — emit as a level-2 heading with diamond prefix, phase number/title, and optional progress bracket:
