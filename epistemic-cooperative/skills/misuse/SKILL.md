@@ -312,12 +312,3 @@ Skip Misuse when:
 - The user is asking about a present-moment invocation, not past invocations
 - The chosen scope contains no `/ground` or `/induce` invocations (Phase 1 will deactivate gracefully)
 
-## Mode Deactivation
-
-| Trigger | Effect |
-|---------|--------|
-| User Esc key | Deactivate Misuse (ungraceful, no artifact) |
-| User selects Stop in Phase 4 | Graceful exit; emit partial ViolationReview if any verdicts were given |
-| Phase 4 loop exhausts (`|reviewed| ≥ 10` or `|V[]| = 0`) | Emit ViolationReview, deactivate |
-| Phase 1 returns empty `|I[]| = 0` | Emit no-op note, deactivate |
-| Phase 0 user declines scope confirmation | Deactivate without artifact |

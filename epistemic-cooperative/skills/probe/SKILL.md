@@ -293,11 +293,3 @@ Skip Probe when:
 - The user requests pattern-based recommendation from session history (`/onboard`)
 - The user requests accumulated analytics (`/report`, `/dashboard`)
 
-## Mode Deactivation
-
-| Trigger | Effect |
-|---------|--------|
-| User Esc key | Deactivate Probe (ungraceful, no disposition record) |
-| User utters Stop (parsed from free response) | Graceful exit without disposition |
-| User utters Recognize / Redirect / Dismiss (parsed from free response) | Convergence with disposition record (ProtocolRoute or FitReviewNote) |
-| Narrow iterations exhausted (3 max) | Surface candidate set as fit-review note → deactivate |
