@@ -112,13 +112,13 @@ The gate body contains only the option labels with their differential implicatio
 For each category, sequentially:
 
 0. **Premise verification**: For each issue in the category, run substrate trace before any branch / Edit / Write commences:
-   - **Existence check**: Read/Grep the cited code locations to confirm the surfaced symptom still reproduces in current state (e.g., the warning still fires, the bug still triggers, the boilerplate still exists). If the symptom is no longer present, the issue's premise has drifted — route it to Phase 3 reclassification (Stale/Superseded class) with surfacing; the category re-evaluates with the failing issue removed.
+   - **Existence check**: Read/Grep the cited code locations to confirm the surfaced symptom still reproduces in current state. If the symptom is no longer present, the issue's premise has drifted — reclassify it as Stale/Superseded (per Phase 3 taxonomy) with surfacing; the category proceeds with the failing issue removed.
    - **Approach axis check**: when the issue body enumerates 2+ approach options (a/b/c style), evaluate each option's substrate basis (feasibility, codebase precedent, cost) and select via:
      - **Relay** if a single option dominates by substrate evidence — present the selection with cited basis (file:line, codebase precedent, rule reference)
      - **Constitution Qc gate** if 2+ options remain plausible under different value weightings — surface the alternatives with differential implications before commit
    - **Output**: PremiseTrace per issue (existence_status, axis_selection, substrate_citations) — recorded in the PR body's verify summary so reviewer sees the substrate basis, not just the result.
 
-   Premise verification is a Phase 4 entry-gate, not a downstream check. Issues that fail Step 0 do not progress to Step 1; substrate-cited reclassification preserves the issue's visibility while preventing wasted Phase 4 work.
+   Premise verification is a Phase 4 entry-gate, not a downstream check. Issues that fail Step 0 do not progress to Step 1; substrate-cited reclassification preserves the issue's visibility while preventing wasted Phase 4 work. If all issues in a category fail Step 0, the category produces no branch — surface a one-line skip record (not silent abandonment) alongside the SkippedSet.
 
 1. **Branch**: create sub-branch from base — `<base>-<category-slug>` or `<base>/<category-slug>` per the project editing-convention pattern
 2. **Execute**: inline work for all issues in the category (Edit, Write, Bash for verify-supporting commands)
@@ -241,7 +241,7 @@ Composition is sequential — each phase consumes the previous phase's output. P
 - **Out-of-scope expansion in Phase 7**: applying a "while you're here" review suggestion in the compliance loop. The suggestion belongs in a new issue.
 - **Effort cap omission**: deferring categories silently when cap is hit, leaving the queue state implicit. The next session has to re-derive the unattempted set.
 - **Skipping Phase 4 Step 0 (premise verification)**: jumping from Phase 3 categorization to Phase 4 branch creation without verifying that each Aligned+actionable issue's premise still holds in current code. This produces stale-issue Phase 4 work (the symptom is gone but the AI applies a fix anyway) or silent axis selection on multi-approach issues.
-- **Substrate-uncited framing in commit/PR body**: assertions of necessity, intentionality, or constraint inserted into commit messages or PR descriptions without cited substrate evidence (file:line, rule reference, codebase precedent). Framing decisions must derive from cited substrate recorded in Phase 4 Step 0's PremiseTrace; assertion-only framing is a Step 0 substrate-trace gap symptom that surfaces in Phase 5 review or as user challenge requiring axis pivot. Operational test: for every framing word in the commit/PR text, the writer can point to a specific substrate citation that renders the framing self-evident without the word — if no such citation exists, the framing is unfounded.
+- **Substrate-uncited framing in commit/PR body**: assertions of necessity, intentionality, or constraint inserted into commit messages or PR descriptions without cited substrate evidence (file:line, rule reference, codebase precedent). Framing decisions must derive from cited substrate recorded in Phase 4 Step 0's PremiseTrace; assertion-only framing is a Step 0 substrate-trace gap symptom that surfaces in Phase 5 review or as user challenge requiring axis pivot. Operational test: for every assertion of necessity, intentionality, or constraint in the commit/PR text, the writer can point to a specific substrate citation that renders the assertion self-evident — if no such citation exists, the assertion is unfounded framing.
 
 ## Operational checklist (per cycle)
 
