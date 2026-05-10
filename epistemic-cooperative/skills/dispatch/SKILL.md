@@ -18,7 +18,7 @@ DETECT → BOUND → SCAN → CATEGORIZE → FANOUT → FEEDBACK
                                                      └→ COMPLY    (Phase 7 — compliant branch)
 ```
 
-Phase 1 (BOUND) composes `/bound`. Phase 2-3 (SCAN, CATEGORIZE) run autonomously with northstar + evidence-accumulation axes. Phase 4 (FANOUT) executes per-category sub-branches sequentially. Phase 5 routes per PR; Phase 6 (rejected branch) and Phase 7 (compliant branch) are independent siblings dispatched from Phase 5, not sequential phases.
+Phase 1 (BOUND) composes `/bound`. Phase 2-3 (SCAN, CATEGORIZE) run autonomously with northstar + evidence-accumulation axes. Phase 4 (FANOUT) executes per-category sub-branches sequentially, with each category gated on Step 0 premise verification before branch creation. Phase 5 routes per PR; Phase 6 (rejected branch) and Phase 7 (compliant branch) are independent siblings dispatched from Phase 5, not sequential phases.
 
 ## Personalization sources
 
@@ -111,12 +111,21 @@ The gate body contains only the option labels with their differential implicatio
 
 For each category, sequentially:
 
+0. **Premise verification**: For each issue in the category, run substrate trace before any branch / Edit / Write commences:
+   - **Existence check**: Read/Grep the cited code locations to confirm the surfaced symptom still reproduces in current state. If the symptom is no longer present, the issue's premise has drifted — reclassify it as Stale/Superseded (per Phase 3 taxonomy) with surfacing; the category proceeds with the failing issue removed.
+   - **Approach axis check**: when the issue body enumerates 2+ approach options (a/b/c style), evaluate each option's substrate basis (feasibility, codebase precedent, cost) and select via:
+     - **Relay** if a single option dominates by substrate evidence — present the selection with cited basis (file:line, codebase precedent, rule reference)
+     - **Constitution Qc gate** if 2+ options remain plausible under different value weightings — surface the alternatives with differential implications before commit
+   - **Output**: PremiseTrace per issue (existence_status, axis_selection, substrate_citations) — recorded in the PR body's verify summary so reviewer sees the substrate basis, not just the result.
+
+   Premise verification is a Phase 4 entry-gate, not a downstream check. Issues that fail Step 0 do not progress to Step 1; substrate-cited reclassification preserves the issue's visibility while preventing wasted Phase 4 work. If all issues in a category fail Step 0, the category produces no branch — surface a one-line skip record (not silent abandonment) alongside the SkippedSet.
+
 1. **Branch**: create sub-branch from base — `<base>-<category-slug>` or `<base>/<category-slug>` per the project editing-convention pattern
 2. **Execute**: inline work for all issues in the category (Edit, Write, Bash for verify-supporting commands)
 3. **Verify**: run the project's static check (typically a `node` invocation against `static-checks.js`) — ensure fail count is not increased, no new warns
-4. **Commit**: conventional message per the project editing convention (type + scope + description in the project's commit language); cite issue numbers for `closes` / `fixes`
+4. **Commit**: conventional message per the project editing convention (type + scope + description in the project's commit language); cite issue numbers for `closes` / `fixes`. **Framing assertions in the commit message must cite the substrate basis recorded in PremiseTrace** — phrases asserting necessity, intentionality, or constraint without cited evidence reflect a Step 0 substrate-trace gap.
 5. **Push**: `git push -u origin <sub-branch>`
-6. **PR**: create with title + body per project conventions; reference linked issues; include category rationale and verify summary
+6. **PR**: create with title + body per project conventions; reference linked issues; include category rationale, verify summary, and **PremiseTrace per actionable issue**.
 
 After each PR submission, return to base branch for the next category. Effort cap enforcement: if cap reached mid-fanout, defer remaining categories with explicit dynamic-stop record (not silent abandonment).
 
@@ -231,13 +240,16 @@ Composition is sequential — each phase consumes the previous phase's output. P
 - **Silent rejection close**: closing a rejected PR with only a one-line "frame rejected" comment without redirection inscription. The next session has nothing to enter from.
 - **Out-of-scope expansion in Phase 7**: applying a "while you're here" review suggestion in the compliance loop. The suggestion belongs in a new issue.
 - **Effort cap omission**: deferring categories silently when cap is hit, leaving the queue state implicit. The next session has to re-derive the unattempted set.
+- **Skipping Phase 4 Step 0 (premise verification)**: jumping from Phase 3 categorization to Phase 4 branch creation without verifying that each Aligned+actionable issue's premise still holds in current code. This produces stale-issue Phase 4 work (the symptom is gone but the AI applies a fix anyway) or silent axis selection on multi-approach issues.
+- **Substrate-uncited framing in commit/PR body**: assertions of necessity, intentionality, or constraint inserted into commit messages or PR descriptions without cited substrate evidence (file:line, rule reference, codebase precedent). Framing decisions must derive from cited substrate recorded in Phase 4 Step 0's PremiseTrace; assertion-only framing is a Step 0 substrate-trace gap symptom that surfaces in Phase 5 review or as user challenge requiring axis pivot. Operational test: for every assertion of necessity, intentionality, or constraint in the commit/PR text, the writer can point to a specific substrate citation that renders the assertion self-evident — if no such citation exists, the assertion is unfounded framing.
 
 ## Operational checklist (per cycle)
 
 - [ ] Phase 1 BoundaryMap complete (six domains minimum)
 - [ ] Phase 3 CategoryMap surfaces northstar-grounded category names
 - [ ] Phase 3 SkippedSet surfaces substrate-cited reasons
-- [ ] Phase 4 each PR cites the issue + verify result + category rationale
+- [ ] Phase 4 Step 0 PremiseTrace recorded per actionable issue (existence check + approach axis selection)
+- [ ] Phase 4 each PR cites the issue + verify result + category rationale + PremiseTrace summary
 - [ ] Phase 5 each PR's review state classified before Phase 6/7 dispatch
 - [ ] Phase 6 each rejected PR's linked issues received verbatim-quoted inscription
 - [ ] Phase 7 each compliant PR with minor fixes has the fix appended (no new PR)
