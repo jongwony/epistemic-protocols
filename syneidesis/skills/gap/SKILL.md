@@ -298,15 +298,12 @@ Note: Esc key → unconditional loop termination (LOOP level). Constitution inte
 
 ## Rules
 
-1. **AI-guided, user-judged**: Question > Assertion — ask "was X considered?", never "you missed X"
-2. **Observable evidence**: Surface only gaps with concrete indicators
-3. **User authority**: Dismissal is final
-4. **Minimal intrusion**: Lightest intervention that achieves awareness
-5. **Stakes calibration**: Intensity follows stakes matrix above
-6. **Gap dependencies**: Use task blocking when gaps have logical order
-7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
-8. **Convergence evidence**: Present convergence audit trace before declaring all tasks completed; per-gap evidence is required
-9. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation
-10. **No gap inflation**: Do not surface gaps that lack observable evidence merely to appear thorough. Each surfaced gap must cite specific context from D
-11. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
-12. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
+1. **AI-guided, user-judged** (Detection with Authority): AI surfaces gaps as questions ("was X considered?", never "you missed X"); user authority is final — dismissal terminates a gap.
+2. **Observable evidence regulation**: Surface only gaps with concrete indicators cited from D; no gap inflation merely to appear thorough — each surfaced gap cites specific context from D.
+3. **Minimal intrusion** (Surfacing over Deciding): Lightest intervention that achieves awareness; intensity follows the stakes matrix in `## Intensity`.
+4. **Gap dependencies**: Task blocking enforces logical ordering when gaps have prerequisite relationships.
+5. **Context-Question Separation**: Output analysis, evidence, and rationale as text before presenting the gate; the gate contains the essential question and option-specific differential implications only. Embedding context in question fields = protocol violation.
+6. **Convergence evidence**: Present convergence audit trace before declaring all tasks completed; per-gap evidence is required.
+7. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation.
+8. **Option-set relay test**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
+9. **Gate integrity** (Safeguard tier — revisitable as model capability evolves; revision triggers: model upgrade with demonstrated instruction-following improvement, sustained low violation rate across sessions, or successful compression PR demonstrating guard reducibility without outcome loss): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation. Future-revision tied to instruction-tuning trajectory (alignment-guard internalization).
