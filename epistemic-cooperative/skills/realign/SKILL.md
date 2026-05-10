@@ -50,21 +50,18 @@ The skill family coexists by subject and persistence — none replaces the other
 
 ### Phase 0: Scope Determination
 
-Determine the audit scope before scanning. Three decisions:
+Determine the audit scope before scanning. Two decisions:
 
-- **Project guide path** — the file whose direction line is the write target; default is the project guide at the conventional path of the active project, the user may override
 - **External channels** — the set of substrates whose contents are surfaced as the external-signals horizon; default set is `{ open issues, pull-request reviews including bot reviews, closed disposition trajectory, current session utterances }`; the user may add, remove, or substitute channels
 - **Cross-session evidence** — default off; reading prior session direction history beyond the current session requires explicit user confirmation
 
-If the user invocation does not specify scope, present a Constitution interaction soliciting the three decisions before proceeding to Phase 1. If scope is fully specified, accept it and proceed.
-
-Phase 0 is otherwise silent. If the project guide does not have a recognizable direction line, deactivate with a brief no-op note describing what was searched for.
+If the user invocation does not specify scope, present a Constitution interaction soliciting the two decisions before proceeding to Phase 1. If scope is fully specified, accept it and proceed. The project guide path is not bound at Phase 0 — substrate discovery for Horizon A happens within Phase 1 (the inscribed-direction surfacing sub-step) so that the binding can absorb the convention-inference and ambiguity-resolution work without pre-formalization at scope time.
 
 ### Phase 1: Prejudgment — Three-Horizon Surfacing
 
 Surface each of the three horizons independently before composing any fusion candidate.
 
-**Horizon A — inscribed direction**: Read the project guide and extract the direction line currently inscribed.
+**Horizon A — inscribed direction**: Search the project's substrate for the inscribed direction. Convention-inferred candidate guides (for example, `CLAUDE.md`, `AGENTS.md`, `README.md` at the project root); within each candidate, enumerated marker headers (for example, `Northstar`, `Mission`, `Vision`, `Direction`, `Statement of Intent`) plus an Emergent slot for project-specific markers. If a single candidate × marker pair is found, present it as Horizon A. If multiple candidates or markers are found, present them as a Constitution interaction so the user constitutes which pair is Horizon A (and therefore the Phase 3 write target). If nothing is found, Horizon A is empty — the fusion still proceeds with Horizons B and C, and the user is invited to designate a path × marker for the Phase 3 write target during Phase 2 shaping or Phase 3 approval. The `--guide=<path>` invocation argument, when supplied, overrides convention-inference and binds Horizon A directly to the given path; the marker is then either auto-detected within the file or supplied by `--direction-marker=<header>`.
 
 **Horizon B — external-signals direction**: Scan the configured channels and aggregate the direction-bearing signals; the aggregation is a structured summary, not a fusion candidate.
 
@@ -138,8 +135,7 @@ After integration, log the disposition. The write (Approve) closes the loop — 
 ```
 ── FLOW ──
 Realign(scope) → Phase0(scope, user_confirm) →
-  no_direction_line(scope): deactivate(no-op note)
-  scoped(scope): Surface(Horizon_A, Horizon_B) → Elicit(Horizon_C, Qc) →
+  scoped(scope): Bind(Horizon_A, Qc) → Surface(Horizon_A, Horizon_B) → Elicit(Horizon_C, Qc) →
     Compose(candidate, trace) → present(candidate, trace) → Qc(shape) → Stop → V →
       Confirm: Phase3
       Widen(axis) | Narrow(axis) | Fuse(adjacent) | Reorient(axis): regenerate(candidate, trace) → re-present Phase 2
@@ -153,7 +149,8 @@ Realign(scope) → Phase0(scope, user_confirm) →
 
 ── MORPHISM ──
 ThreeHorizons
-  → resolve_scope(user_confirm)         -- Phase 0 scope determination (project guide path, channels, cross_session)
+  → resolve_scope(user_confirm)         -- Phase 0 scope determination (channels, cross_session)
+  → bind(Horizon_A, user_confirm)       -- Phase 1 inscribed-direction binding (convention-inferred path × marker, disambiguated when ambiguous, empty when nothing inscribed)
   → surface(Horizon_A, Horizon_B)       -- Phase 1 inscribed direction + external-signals direction
   → elicit(Horizon_C, user)             -- Phase 1 user pre-understanding (separate Constitution interaction)
   → compose(candidate, trace)           -- Phase 1 fusion candidate + per-horizon transformation trace
@@ -173,8 +170,9 @@ invariant: Recognition over Direction-Mutation, Fusion over Addendum
                                             -- rollback is git operation on the project guide
 
 ── TYPES ──
-Scope            = { project_guide_path: Path, channels: Set(Channel), cross_session: Bool }
+Scope            = { channels: Set(Channel), cross_session: Bool }
 Channel          ∈ { OpenIssues, PullRequestReviews, ClosedDispositionTrajectory, CurrentSessionUtterances } ∪ Emergent
+BindingSource    ∈ { ExplicitArg, ConventionInferenceUnique, UserDisambiguation, EmptyInscription }
 Horizon          ∈ { InscribedDirection, ExternalSignalsDirection, UserPreUnderstanding }
 HorizonContent   = { horizon: Horizon, content: String, citations: List(String) }
 HorizonRole      ∈ { Preserved, Transformed, Dropped }
@@ -191,17 +189,18 @@ Phase            ∈ {0, 1, 2, 3}
 bind(scope) = explicit_arg ∪ defaults
 Priority: explicit_arg > defaults
 
-/realign --guide=<path>          → Scope.project_guide_path = <path>
-/realign --channels=<set>        → Scope.channels = <set>
-/realign --cross-session         → Scope.cross_session = true
-/realign (alone)                 → Scope.project_guide_path inferred from project root; Scope.channels = default set; Scope.cross_session = false
+/realign --channels=<set>          → Scope.channels = <set>
+/realign --cross-session           → Scope.cross_session = true
+/realign --guide=<path>            → Optional Phase 1 Horizon_A override (binds the inscribed-direction path directly, bypassing convention-inference)
+/realign --direction-marker=<hdr>  → Optional Phase 1 Horizon_A override (binds the inscribed-direction marker header within the chosen path)
+/realign (alone)                   → Scope.channels = default set; Scope.cross_session = false; Horizon_A is resolved by Phase 1 convention-inference with Constitution disambiguation when ambiguous
 
-When defaults are inferred, Phase 0 surfaces them in the scope-confirmation Constitution interaction so the user can override before scan begins.
+When Phase 0 defaults are inferred, Phase 0 surfaces them in the scope-confirmation Constitution interaction so the user can override before scan begins.
 
 ── PHASE TRANSITIONS ──
 Phase 0: scope_seed → resolve_defaults → Qc(scope_confirm) → Stop → Scope         -- scope determination [Tool]
-           no_direction_line → deactivate(no-op note)
-Phase 1: Scope → Read(project_guide) → Horizon_A                                   -- inscribed direction [Tool]
+Phase 1: Scope → InferGuide(convention) → Qc(horizon_a_bind) → Stop → (path, marker)  -- Horizon_A binding (skipped when --guide / --direction-marker fully specify) [Tool]
+           (path, marker) → Read(path, marker) → Horizon_A                         -- inscribed direction (empty when nothing inscribed) [Tool]
            Scope → Scan(channels) → Horizon_B                                      -- external-signals direction [Tool]
            Qc(pre_understanding) → Stop → Horizon_C                                -- user pre-understanding (separate gate) [Tool]
            Compose(Horizon_A, Horizon_B, Horizon_C) → candidate, trace             -- fusion candidate + trace
@@ -228,10 +227,12 @@ session_text(realign) ∋ {FusedDirection | NoFusionNote | FusedDirectionDraft}
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 resolve_defaults  (sense)        → Internal analysis (project root inspection, default channel set assembly)
+Phase 0 resolve_defaults  (sense)        → Internal analysis (default channel set assembly)
 Phase 0 scope_from_arg    (extension)    → TextPresent+Proceed (when explicit_arg fully specifies scope; proceed with bound scope; Phase 3 Modify re-entry can adjust)
 Phase 0 Qc                (constitution) → present (scope confirmation; when scope partially or fully inferred)
-Phase 1 Read              (observe)      → Read (project guide direction line at chosen path)
+Phase 1 InferGuide        (sense)        → Internal analysis (convention-inferred guide candidate set × enumerated direction markers + Emergent slot)
+Phase 1 Qc                (constitution) → present (Horizon A binding; constitutive user pair selection when convention-inference returns multiple candidates × markers; relayed when convention-inference returns a unique pair or when --guide / --direction-marker fully specifies)
+Phase 1 Read              (observe)      → Read (inscribed direction at the bound path × marker; empty Horizon A when nothing inscribed is acceptable input to fusion)
 Phase 1 Scan              (observe)      → Read / Grep / Bash (channel substrates per channel kind: open issues, pull-request reviews, closed disposition trajectory, current session utterances)
 Phase 1 Qc                (constitution) → present (user pre-understanding; constitutive user utterance; conflation with channel attribute list is the failure mode this gate is designed to prevent)
 Phase 1 Compose           (sense)        → Internal analysis (fusion candidate + per-horizon transformation trace; horizons are not privileged against each other; addendum patterns are surfaced as preserved-with-no-transformation traces for user verification)
@@ -246,6 +247,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 
 ── MODE STATE ──
 Λ = { phase: Phase, scope: Scope,
+      horizon_a_binding: { path: Optional(Path), marker: Optional(String), source: BindingSource },
       Horizon_A: HorizonContent, Horizon_B: HorizonContent, Horizon_C: HorizonContent,
       candidate: Optional(FusionCandidate),
       shaping_history: List<(FusionCandidate, V)>, shape_iterations: Nat, modify_iterations: Nat,
@@ -259,17 +261,17 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 ## Storage Reference
 
 **Read paths**:
-- Project guide: the path bound at Phase 0; the inscribed direction line is the single line to be read and replaced
+- Project guide: the path bound at Phase 1 Horizon A binding sub-step; the inscribed direction line at the bound marker is the single line to be read and replaced. When Horizon A is empty (no inscription found), the user designates the write-target path × marker during Phase 2 shaping or Phase 3 approval.
 - External channel substrates: per channel kind, read through the appropriate substrate tool (issues / pull-request reviews / closed-disposition trajectory / current-session utterances)
 - Optional cross-session evidence (opt-in only): prior session direction history is read only when Phase 0 scope binds `cross_session = true`
 
 **Write paths**:
-- Project guide: the same path bound at Phase 0; the existing direction line is replaced by the fused line. Rollback is performed through the project's version control (for example, `git revert` or `git checkout`); a separate timestamped backup is not created because the project guide is expected to be under version control.
+- Project guide: the same path bound at Phase 1 Horizon A binding sub-step (or designated by the user when Horizon A was empty); the existing direction line is replaced by the fused line, or appended when no direction line was inscribed. Rollback is performed through the project's version control (for example, `git revert` or `git checkout`); a separate timestamped backup is not created because the project guide is expected to be under version control.
 
 ## Rules
 
 1. **User-invoked only** — Realign activates only on explicit `/realign` invocation. Layer 1/Layer 2 separation is enforced.
-2. **Three horizons surfaced independently** — Horizon A (inscribed direction), Horizon B (external signals), and Horizon C (user pre-understanding) are surfaced in separate sub-steps before any fusion candidate is composed. The user's pre-understanding sub-step is a Constitution interaction so the user's free utterance is recorded as a horizon, not derived from the channel attribute list.
+2. **Three horizons surfaced independently** — Horizon A (inscribed direction), Horizon B (external signals), and Horizon C (user pre-understanding) are surfaced in separate sub-steps before any fusion candidate is composed. Horizon A binding (path × marker selection) is a Constitution interaction when convention-inference returns multiple candidates × markers; relay when a unique pair is found or when invocation args fully specify. Horizon C (user pre-understanding) is a Constitution interaction so the user's free utterance is recorded as a horizon, not derived from the channel attribute list. Empty Horizon A (nothing inscribed) is acceptable input to fusion — the candidate is composed from Horizons B and C, and the Phase 3 write target is designated by the user during Phase 2 or Phase 3.
 3. **Fusion over addendum** — Any of the three horizons may be transformed or dropped in service of the fused candidate. An additive paste appending one horizon's content to another's as a clause is not a fusion — the per-horizon trace surfaces this so the user can verify no horizon was preserved by silent default.
 4. **Per-horizon trace mandatory** — Every fusion candidate is presented alongside a per-horizon trace marking, for each horizon, which content was preserved, transformed, or dropped, with citations to the originating horizon excerpts.
 5. **Final approval required before write** — Write to the project guide direction line executes only when Phase 3 Approve is selected. Reject and Defer dispositions emit session-text artifacts only; the project guide remains at its current contents.
@@ -293,7 +295,6 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 | Trigger | Effect |
 |---------|--------|
 | User Esc key at any Constitution interaction | Deactivate Realign (ungraceful, no disposition record, no write) |
-| Phase 0 detects no recognizable direction line | Deactivate with no-op note |
 | Phase 2 user selects Dismiss | Emit NoFusionNote, converge |
 | Phase 2 shape loop exhausted (5 max) | Surface assembled candidate as FusedDirectionDraft (defer-equivalent) → converge |
 | Phase 3 user selects Approve | Write executed (project guide direction line), emit FusedDirection, converge |
