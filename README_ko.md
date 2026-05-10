@@ -97,7 +97,7 @@ scripts/sync-agents-symlinks.sh
 
 | 플러그인 | 명령어 | 용도 |
 |----------|--------|------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate`, `/dispatch` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 사용 분석, 커버리지 대시보드, 멀티 관점 블로그 작성, 세션 calibration drift audit 기반 프로젝트 프로필 재조정, 소급적 계약 위반 감지, cross-session 연속성을 위한 Horizon-Fusion Text(HFT) 쓰기/읽기 쌍, 그리고 카테고리 분해 + 카테고리당 PR + Wirkungsgeschichte 피드백 inscription 으로 위임된 병렬 이슈 해결 |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/dispatch` | 프로토콜 학습, 결핍 인식 fit review, 핸드북 레퍼런스, 사용 분석, 커버리지 대시보드, 멀티 관점 블로그 작성, 세션 calibration drift audit 기반 프로젝트 프로필 재조정, 3-horizon 지평융합 기반 프로젝트 가이드 direction line 재정렬, 소급적 계약 위반 감지, 그리고 카테고리 분해 + 카테고리당 PR + Wirkungsgeschichte 피드백 inscription 으로 위임된 병렬 이슈 해결 |
 
 **세 가지 발견 모드 공존** (서로 대체하지 않음):
 
@@ -109,10 +109,9 @@ scripts/sync-agents-symlinks.sh
 
 - `/misuse` — 소급적 계약 위반 스캔 (과거 `/ground`·`/induce` 프로토콜 계약 위반을 감지; 사용자 구성 리뷰를 위한 위반 레코드 제시)
 
-**Cross-session 연속성** (HFT write/read 쌍):
+**프로젝트 가이드 direction-line 융합** (3-horizon Horizontverschmelzung):
 
-- `/crystallize` — 세션의 지평융합 잔여를 4-layer Markdown 파일(표면 텍스트 · Wirkungsgeschichte · Reference Shells · Excluded)로 inscribe; stage 전환 시점 또는 세션 boundary 직전에 호출
-- `/rehydrate` — 기존에 inscribe된 HFT를 진입하여 originating 세션의 Vorverständnis로 현 세션을 prime; auxiliary substrate(auto-memory · hypomnesis)는 `/inquire` 또는 `/recollect` 명시 호출로만 접근 가능
+- `/realign` — 세 horizon(프로젝트 가이드 현 inscribed direction line · 설정된 channel set 으로부터의 외부 direction signals · 별도 sub-step 으로 elicit 되는 사용자의 현 pre-understanding)을 surface, 각 horizon 의 보존 / 변환 / 탈락을 표시한 per-horizon trace 와 함께 fusion candidate 를 합성, `/induce` 의 widen / narrow / fuse / reorient / confirm / dismiss 어휘로 dialectical shaping, 사용자 confirm 시 fused line 을 프로젝트 가이드 direction line 으로 write (rollback 은 프로젝트 버전관리)
 
 **위임된 병렬 작업** (multi-issue dispatch):
 

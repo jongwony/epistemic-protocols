@@ -97,7 +97,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/misuse`, `/crystallize`, `/rehydrate`, `/dispatch` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration via session calibration drift audit, retrospective contract violation detection, the Horizon-Fusion Text (HFT) write/read pair for cross-session continuity, and delegated parallel issue resolution with categorical decomposition + per-category PR + Wirkungsgeschichte feedback inscription |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/dispatch` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration via session calibration drift audit, project guide direction line via three-horizon fusion, retrospective contract violation detection, and delegated parallel issue resolution with categorical decomposition + per-category PR + Wirkungsgeschichte feedback inscription |
 
 **Three discovery modes coexist** (none replaces the others):
 
@@ -109,10 +109,9 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 - `/misuse` — retrospective contract violation scan (detects past `/ground` and `/induce` protocol violations; surfaces structured violation records for user-constituted review)
 
-**Cross-session continuity** (HFT write/read pair):
+**Project guide direction-line fusion** (three-horizon Horizontverschmelzung):
 
-- `/crystallize` — inscribe a session's horizon-fusion residue into a four-layer Markdown file (Surface Text · Wirkungsgeschichte · Reference Shells · Excluded) at stage transition or before a session boundary
-- `/rehydrate` — enter a previously inscribed HFT to prime the current session with the originating session's Vorverständnis; auxiliary substrates (auto-memory, hypomnesis) remain reachable only via explicit `/inquire` or `/recollect` invocations
+- `/realign` — surface three horizons (the project guide's currently inscribed direction line, externally surfaced direction signals from a configured channel set, and the user's present pre-understanding elicited as a separate sub-step), compose a fusion candidate with a per-horizon transformation trace marking what was preserved / transformed / dropped in each horizon, shape the candidate through the dialectical widen / narrow / fuse / reorient / confirm / dismiss vocabulary inherited from `/induce`, and on user confirmation write the fused line back to the project guide direction line (rollback through the project's version control)
 
 **Delegated parallel work** (multi-issue dispatch):
 

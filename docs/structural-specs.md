@@ -152,10 +152,8 @@ Examples observed in current SKILL.md:
 
 - prothesis: `Phase 0 MB_from_arg (extension)` + `Phase 0 Qc (constitution)`
 - prothesis: `Phase 3 AgentMap_auto (extension)` + `Phase 3 AgentMap_select (constitution)`
-- crystallize: `Phase 0 stage_from_arg (extension)` + `Phase 0 confirm Qc (constitution)`
-- crystallize: `Phase 4 Qs_auto (extension)` + `Phase 4 Qs (constitution)`
 - misuse: `Phase 0 scope_from_arg (extension)` + `Phase 0 scope_confirm (constitution)`
-- telos: `Phase 0 G_from_arg (extension)` + `Phase 0 Qc (constitution)`
-- rehydrate: `Phase 0 unique_match (extension)` + `Phase 0 no_match (extension)` + `Phase 0 select_candidate Qc (constitution)`
+- steer: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`
+- realign: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`
 
 Non-split (canonical) form remains the default: when no conditional specialization exists, the entry stays as the canonical label (`Phase N Qc (constitution)` or `Phase N {label} (extension)`). Split applies only when one runtime branch is genuinely Extension-eligible.

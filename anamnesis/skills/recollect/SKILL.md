@@ -399,7 +399,7 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
 
 Present the candidate as narrative text — the discussion's story, not just its result:
 - **When/Where**: Temporal and spatial context — when the discussion happened, expressed as temporal distance from the current session, plus which session or document. Use short session reference in narrative for readability.
-- **Source**: Provenance of the stored context — whether it was user-crystallized (via /crystallize) or auto-generated (SessionEnd hook narrative)
+- **Source**: Provenance of the stored context — whether it was user-inscribed via a session-text utility or auto-generated (SessionEnd hook narrative)
 - **Origin**: What prompted the discussion — the question or situation that started it
 - **Direction**: How the discussion developed — what path was taken, what was explored
 - **Outcome**: What was decided, produced, or concluded

@@ -446,15 +446,3 @@ Skip Steer when:
 - The session contains too few calibration moves to support audit (Phase 0 deactivates)
 - The user wants in-conversation abstraction crystallization without writable rule inscription (`/induce`)
 
-## Mode Deactivation
-
-| Trigger | Effect |
-|---------|--------|
-| User Esc key at any Constitution interaction | Deactivate Steer (ungraceful, no disposition record, no write) |
-| Phase 0 detects insufficient moves in scope | Deactivate with no-op note |
-| Phase 3 user selects Stop | Break loop, proceed to Phase 4 with assembled-so-far |
-| Phase 5 user selects Approve | Write executed (profile + trial index append), emit UpdatedProjectProfile, converge |
-| Phase 5 user selects Reject | No write, emit NoUpdateNote, converge |
-| Phase 5 user selects Defer | No write, emit DiffArtifact, converge |
-| Phase 5 user selects RouteToOperationalLayer (only available when fit-shape mismatch detected) | No profile write; trial index append; emit OperationalLayerRecommendation; converge |
-| Phase 5 Modify re-entry exhausted (3 max) | Surface assembled diff as DiffArtifact (defer-equivalent) → converge |
