@@ -60,7 +60,7 @@ Deprioritize:
 
 **Theme axis enumeration** (conditional on commit set complexity):
 
-When the commit set admits multiple plausible theme axes — distinct ways to group the same commits under different unifying frames — enumerate ALL axes before drafting. Trigger: 5+ semantically distinct change clusters in the commit range, or no single dominant change that carries the release on its own.
+When the commit set admits multiple plausible theme axes — distinct ways to group the same commits under different unifying frames — enumerate ALL axes before drafting. Trigger: no single dominant change carries the release on its own; 5+ semantically distinct change clusters in the commit range is a heuristic signal of this condition, not the trigger by itself.
 
 For each candidate axis, present as a numbered list (text output, not a gate option set — the user's response is free-form selection, supplement, or a new axis):
 - **Theme line**: the unifying frame the axis would emphasize
@@ -93,7 +93,7 @@ Emoji selection is descriptive: choose an emoji whose visual semantic matches th
 ### Phase 5: Gate with horizon fusion
 
 **Context** (emit before the gate, as text output):
-- Theme axis enumeration when generated in Phase 4 (re-surface for Recognition; the user may select a different axis than the one the agent drafted from)
+- Theme axis enumeration when generated in Phase 4 — condense to a labels-only form (axis names without per-axis 4-tuple) and reference the Phase 4 detail above when full re-surfacing would bloat the gate context; otherwise re-surface in full. Either form preserves Recognition that the user may select a different axis than the one the agent drafted from.
 - Full composed body preview: narrative draft + `---` + script-generated body
 - Theme sentence and bullet selection rationale
 
@@ -117,7 +117,7 @@ This gate is mandatory even if the narrative seems obvious — theme choice and 
 2. Treat the user's experiential input as Horizon B — the lived origin
 3. Fuse: preserve Horizon B's voice and the arc the user actually supplied; let Horizon A inform which protocol/utility is named in the closing sentence
 4. Bullets remain anchored to Horizon A (commit-mapping); only Background absorbs Horizon B
-5. Per-horizon trace (preserved / transformed / dropped) is internal — render only the fused candidate at Phase 5
+5. Per-horizon trace (preserved / transformed / dropped) renders as a single line before the fused candidate at Phase 5 — naming what each horizon contributed, what was transformed in fusion, and what was dropped. The trace surfaces fusion accountability, matching the trace-visibility pattern in `/realign`.
 6. Iteration is expected: each loop pass refines whatever dimension the prior pass left under-specified. Continue looping until Apply or Skip — do not pre-empt convergence by treating the first fusion as final.
 
 ### Phase 6: Apply + surface
