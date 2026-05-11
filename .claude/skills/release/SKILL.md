@@ -58,6 +58,20 @@ Deprioritize:
 - Single-PR review-round commits, CI test count bumps, version bumps without content
 - Commits whose only effect is subsumed by a broader commit in the same range
 
+**Theme axis enumeration** (conditional on commit set complexity):
+
+When the commit set admits multiple plausible theme axes — distinct ways to group the same commits under different unifying frames — enumerate ALL axes before drafting. Trigger: 5+ semantically distinct change clusters in the commit range, or no single dominant change that carries the release on its own.
+
+For each candidate axis, present as a numbered list (text output, not a gate option set — the user's response is free-form selection, supplement, or a new axis):
+- **Theme line**: the unifying frame the axis would emphasize
+- **Foregrounds**: which commits become the narrative centerpiece
+- **Backgrounds**: which commits become accompanying detail
+- **Trade-off signal**: structural strength (faithful to commit shape) vs. interpretive weight (post-hoc grouping)
+
+Include a brief epistemic observation on which axes preserve the commit set's actual shape vs. which apply heavier grouping. When the commit set admits a single dominant theme — one frame is uniquely the best fit and other framings would feel like post-hoc reframing — skip axis enumeration and proceed directly to drafting.
+
+After enumeration, draft narrative using the axis the agent judges best-fit; the gate at Phase 5 lets the user pick a different axis if preferred.
+
 Draft narrative using this template (Korean, matching repo's PR body convention):
 
 ```
@@ -74,22 +88,37 @@ Draft narrative using this template (Korean, matching repo's PR body convention)
 {script-generated body}
 ```
 
-Emoji selection is descriptive (choose what fits the change's semantic class), not prescriptive. Examples observed across releases: ✍️ editing/writing, 🔎 introspection, 🧠 memory/cognition, 🏛️ structural/axiom, 🪢 cross-cutting principle, 🔍 verification, 🎯 classification, ⚡ simplification.
+Emoji selection is descriptive: choose an emoji whose visual semantic matches the change class. The same change class may take different emoji across releases — match the release's framing, not a fixed table.
 
-### Phase 5: Gate
+### Phase 5: Gate with horizon fusion
 
 **Context** (emit before the gate, as text output):
+- Theme axis enumeration when generated in Phase 4 (re-surface for Recognition; the user may select a different axis than the one the agent drafted from)
 - Full composed body preview: narrative draft + `---` + script-generated body
 - Theme sentence and bullet selection rationale
 
-**Question**: Apply the drafted narrative to the draft release?
+**Experiential elicitation** (emit as part of context):
+
+Background narratives benefit from the user's experiential grounding — the lived origin that motivated the release. The AI draft maps commit shape; the user supplies the grounding that makes the shape readable. Explicitly invite the user to supplement Background; supplementation is optional. When the AI draft already captures the origin from commit content alone, the invitation can be lightweight — but it must still be surfaced so the option is recognized rather than recalled.
+
+**Question**: Apply the drafted narrative, supplement with experiential context, modify other elements, or skip?
 
 Options:
 1. **Apply** — prepend narrative as drafted; proceed to Phase 6
-2. **Modify** — user supplies edits or regeneration directive; revised draft re-presents at Phase 5 (loop until Apply or Skip)
-3. **Skip** — leave script-generated body as-is (patch-only releases per Rule 5); proceed to Phase 6 with no prepend
+2. **Add experiential context** — user supplies lived origin / environmental observation; AI fuses it with the draft Background as a new horizon (preserving the AI's commit-mapping spine, adding the user's experiential grounding); revised draft re-presents at Phase 5 (loop)
+3. **Modify** — user supplies edits to axis selection, bullet text, emoji, or tone; revised draft re-presents at Phase 5 (loop)
+4. **Skip** — leave script-generated body as-is (patch-only releases per Rule 5); proceed to Phase 6 with no prepend
 
-This gate is mandatory even if the narrative seems obvious — theme choice is a constitutive judgment the user owns.
+This gate is mandatory even if the narrative seems obvious — theme choice and origin framing are constitutive judgments the user owns.
+
+**Horizon fusion sub-protocol** (engaged when user selects Add experiential context):
+
+1. Treat the AI draft Background as Horizon A — the commit-shape narrative
+2. Treat the user's experiential input as Horizon B — the lived origin
+3. Fuse: preserve Horizon B's voice and the arc the user actually supplied; let Horizon A inform which protocol/utility is named in the closing sentence
+4. Bullets remain anchored to Horizon A (commit-mapping); only Background absorbs Horizon B
+5. Per-horizon trace (preserved / transformed / dropped) is internal — render only the fused candidate at Phase 5
+6. Iteration is expected: each loop pass refines whatever dimension the prior pass left under-specified. Continue looping until Apply or Skip — do not pre-empt convergence by treating the first fusion as final.
 
 ### Phase 6: Apply + surface
 
