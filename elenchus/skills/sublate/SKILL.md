@@ -215,7 +215,7 @@ When a source claims authority, the challenge asks whether that authority is act
 
 - The source's current claim: "Source X is verified in the domain it claims to ground."
 - What would shake it: "Source X's verification path is provisional, inferred, cited but unread, or stale."
-- The user decides how to handle the source: keep the source as-is, rewrite the claim with a refinement, withdraw the source, mark the source pending an external measurement, or route the question to an outside reference.
+- The user decides how to handle the source: keep the source as-is, rewrite the claim with a refinement, withdraw the source, wait for an external measurement to settle the question, or treat an outside source-of-truth as the authoritative reference for the claim.
 
 ### Pattern B — Counterfactual Gap Forecasting
 
@@ -223,7 +223,7 @@ When a source supports a conclusion under current conditions, the challenge chan
 
 - The source's current claim: "Y holds in the current working context."
 - What would shake it: "If Z replaces a current condition, a gap opens at point P — does Y still hold?"
-- The user decides how to handle the source: keep the source as-is, rewrite the claim with a refinement, set the source aside until condition Z appears again, or hand the question off to another protocol (e.g., `/gap`, `/attend`).
+- The user decides how to handle the source: keep the source as-is, rewrite the claim with a refinement, set the source aside until condition Z appears again, or hand the question off to another protocol.
 
 ### Pattern C — Cross-Source Consistency Check
 
@@ -231,7 +231,7 @@ When two sources point at the same referent but diverge, the challenge forces an
 
 - The sources' current claim: "Sources X₁ and X₂ refer to the same referent consistently."
 - What would shake it: "X₁'s claim and X₂'s claim diverge at point Q — which source is the authoritative referent, and what reconciles the divergence?"
-- The user decides how to handle the sources: keep the sources as-is, rewrite the claim with a refinement, withdraw one of the sources, route the question to an outside reference, or hand the question off to another protocol.
+- The user decides how to handle the sources: keep the sources as-is, rewrite the claim with a refinement, withdraw one of the sources, treat an outside source-of-truth as the authoritative reference, or hand the question off to another protocol.
 
 ## Protocol
 

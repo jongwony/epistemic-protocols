@@ -412,17 +412,17 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 **Surfacing format**:
 
 Present the classification results, uncertainty description, and evidence as text output:
-- **Classification summary** (each remaining uncertainty shows how the AI plans to resolve it, with the basis cited):
-  - U1: a factual question whose answer can be looked up in the codebase (basis: evidence summary)
-  - U1a: a factual question whose answer comes from a published external document (basis: [doc url + codebase version cross-check])
-  - U2: a factual question that can be checked by running a test (basis: evidence summary)
-  - U2a: a factual question that could be tested but is faster to ask the user, basis: {dominance reason — operational context / temporal scope / setup > 30s}
-  - U2b: a factual question that would have been tested but the test is blocked by [escape condition] ("[rationale]") — falls back to asking the user
-  - U2c: a factual question with partial evidence (covers [scope A], the claim requires [scope B]; the uncovered part is classified separately)
-  - U2e: a factual question via a newly observed evidence channel (channel: [description]) — your confirmation requested before treating this channel as resolved
-  - U3a: a consistency question within the same scope; treated as a factual question whose evidence path is selected by the same procedure as a directly-classified factual item
-  - U3b: a consistency question spanning multiple scopes (basis: evidence summary — structure-requiring) — routed to a downstream protocol
-  - U4: a relevance question (basis: evidence summary) — routed to `/elicit`
+- **Classification summary** (each remaining uncertainty shows how the AI plans to resolve it, with the basis cited; each line is one case the user may see):
+  - a factual question whose answer can be looked up in the codebase (basis: evidence summary)
+  - a factual question whose answer comes from a published external document (basis: doc url + codebase version cross-check)
+  - a factual question that can be checked by running a test (basis: evidence summary)
+  - a factual question that could be tested but is faster to ask the user (basis: dominance reason — operational context, temporal scope, or setup beyond a short time bound)
+  - a factual question that would have been tested but the test is blocked by an environmental escape condition, falling back to asking the user
+  - a factual question with partial evidence — the evidence covers one part of the claim, the uncovered part is classified separately
+  - a factual question via a newly observed evidence channel; your confirmation requested before treating this channel as resolved
+  - a consistency question within the same scope, treated as a factual question (its evidence path is selected by the same procedure as a directly-classified factual item)
+  - a consistency question spanning multiple scopes — routed to a downstream protocol
+  - a relevance question — routed to `/elicit`
   - Any of these classifications to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]
