@@ -9,7 +9,7 @@ Crystallize in-process abstraction through AI-proposed candidate plus user diale
 
 ## Definition
 
-**Periagoge** (περιαγωγή): A dialogical act of turning an in-process abstraction toward its crystallized form, where AI detects when an instance set has converged toward an unnamed essence, proposes a candidate abstraction paired with a personalized grounding example drawn from the user's own domain, and shapes the candidate through user responses — Confirm, Widen (Synagoge), Narrow (Diairesis), Fuse with an adjacent abstraction, or Reorient onto an orthogonal axis — until the abstraction locates itself.[^1]
+**Periagoge** (περιαγωγή): A dialogical act of turning an in-process abstraction toward its crystallized form, where AI detects when an instance set has converged toward an unnamed essence, proposes a candidate abstraction paired with a personalized grounding example drawn from the user's own domain, and shapes the candidate through the user's response — accept the candidate, broaden its scope, narrow it along a specific dimension, fuse it with an adjacent abstraction, or redirect onto an orthogonal axis — until the abstraction locates itself (the Greek dialectical vocabulary supplies the source terms, attributed in the footnote).[^1]
 
 [^1]: The name draws a structural analogy from Plato *Republic* VII.518d, where περιαγωγή names the soul's turning-around toward the intelligible. The protocol borrows the turning-toward structure; it does not claim Platonic paideia. Synagoge (συναγωγή, collection) and Diairesis (διαίρεσις, division) are the twin dialectical moves described in *Phaedrus* 265d–266a; here they name user response families, not a claim to Platonic method.
 
@@ -267,8 +267,8 @@ Does this candidate crystallize the abstraction you were forming?
 
 Options:
 1. **Confirm** — [what the crystallized abstraction enables downstream]
-2. **Widen (Synagoge)** — AI-proposed broadening (Recognition mode) — [how upward or lateral scope expansion from AI's domain knowledge reshapes the candidate]
-3. **Narrow (Diairesis)** — [what dimension specializes or what to exclude]
+2. **Widen** — AI-proposed broadening (Recognition mode) — [how upward or lateral scope expansion from AI's domain knowledge reshapes the candidate]
+3. **Narrow** — [what dimension specializes or what to exclude]
 4. **Fuse** — user-named adjacent reference (Production mode) — [which adjacent abstraction to explicitly pull in for merge] *(presented only when Phase 1 surfaces adjacent candidates; otherwise omitted)*
 5. **Reorient** — [what orthogonal axis to pursue instead]
 6. **Dismiss** — [what assumption about this essence is released]

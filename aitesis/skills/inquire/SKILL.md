@@ -412,18 +412,18 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 **Surfacing format**:
 
 Present the classification results, uncertainty description, and evidence as text output:
-- **Classification summary** (Factual entries include `EvidenceSource` selection per Cite-or-observe rule):
-  - U1: Factual/ReadOnly, EvidenceSource: CodeDerivable (basis: evidence summary)
-  - U1a: Factual/ReadOnly, EvidenceSource: CanonicalExternal (basis: [doc url + codebase version cross-check])
-  - U2: Factual/EmpiricallyObservable, EvidenceSource: Instrumentation (basis: evidence summary)
-  - U2a: Factual/EmpiricallyObservable, EvidenceSource: UserTacit over Instrumentation, basis: {dominance_reason — operational context / temporal scope / setup > 30s} (Cite-or-observe cite)
-  - U2b: Factual/EmpiricallyObservable → UserDependent (escape: [condition] — "[rationale]")
-  - U2c: Factual/partial (evidence scope ⊊ claim scope: covers [scope A], claim requires [scope B] — uncovered portion classified separately)
-  - U2e: Factual/*, EvidenceSource: Emergent(source) (observed channel: [description] — fallback-admissible; accumulates toward variation-stable observed use)
-  - U3a: Coherence/MemoryInternal → factual reclassification; EvidenceSource selected from `ValidSources(reclassified_v)` via the same procedure as directly-classified Factual items (Step 2 — EvidenceSource inheritance procedure; cost-ordering, external-dependency preference, and Cite-or-observe rule apply identically)
-  - U3b: Coherence/CrossDomain (basis: evidence summary — structure-requiring) → deficit-matched routing
-  - U4: Relevance (basis: evidence summary) → `/elicit`
-  - Any classification (dimension / verifiability / EvidenceSource) to revise?
+- **Classification summary** (each remaining uncertainty shows how the AI plans to resolve it, with the basis cited):
+  - U1: a factual question whose answer can be looked up in the codebase (basis: evidence summary)
+  - U1a: a factual question whose answer comes from a published external document (basis: [doc url + codebase version cross-check])
+  - U2: a factual question that can be checked by running a test (basis: evidence summary)
+  - U2a: a factual question that could be tested but is faster to ask the user, basis: {dominance reason — operational context / temporal scope / setup > 30s}
+  - U2b: a factual question that would have been tested but the test is blocked by [escape condition] ("[rationale]") — falls back to asking the user
+  - U2c: a factual question with partial evidence (covers [scope A], the claim requires [scope B]; the uncovered part is classified separately)
+  - U2e: a factual question via a newly observed evidence channel (channel: [description]) — your confirmation requested before treating this channel as resolved
+  - U3a: a consistency question within the same scope; treated as a factual question whose evidence path is selected by the same procedure as a directly-classified factual item
+  - U3b: a consistency question spanning multiple scopes (basis: evidence summary — structure-requiring) — routed to a downstream protocol
+  - U4: a relevance question (basis: evidence summary) — routed to `/elicit`
+  - Any of these classifications to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]
 - **Progress**: [N resolved / M actionable uncertainties] (excludes non-actionable routed)
@@ -437,7 +437,7 @@ Options:
 1. **[Provide X]** — [what this context enables]
 2. **[Point me to...]** — tell me where to find this information
 3. **Dismiss** — proceed with [stated default/assumption]
-4. **Unknown / Partial** — I don't know or have only partial context; auto-promote to next-preferred EvidenceSource and re-classify
+4. **Unknown / Partial** — I don't know, or I only have partial context; the AI will try the next-preferred way of finding the answer and re-classify
 ```
 
 Option 4 is the typed `Unknown(Partial)` constructor (TYPES `A`): Phase 3 auto-promotes to the next-preferred EvidenceSource in `ValidSources(v)` and re-enters Phase 1 classification via the backward arc (PHASE TRANSITIONS). This is a type-preserving materialization — not gate mutation — since the TYPES coproduct already admits `Unknown(Partial)` as a constructor.
