@@ -224,6 +224,7 @@ Apply the mapping tables below to match observed patterns to protocols.
 | Same file edited 3+ times | Edit path frequency | **Syneidesis** `/gap` | Repeated edits without prior gap check |
 | Exploration ratio 3:1+ across multiple sessions | (Read+Grep+Glob) / (Edit+Write) threshold | **Prothesis** `/frame` | Sustained exploration without analytical framework |
 | Bash contains deploy/push/apply keywords | Bash input keyword match | **Prosoche** `/attend` | Executing without risk assessment |
+| Vague first prompts ("improve", "optimize", "ideas for") | firstPrompt keyword match: short underspecified directives | **Euporia** `/elicit` | Goal coordinate aporia — reverse-induce endpoint from substrate |
 | Verification keywords in firstPrompt (user-authored text only) | firstPrompt keyword match: "explain", "what did you do", "help me understand", "verify", "check" | **Katalepsis** `/grasp` | Need to verify comprehension of results |
 
 ### Secondary Mapping Table (Environment Patterns)

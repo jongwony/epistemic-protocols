@@ -89,7 +89,7 @@ RouteDecision    = Proceed | Route(ProtocolId) | Other(ProtocolId)
 Resolved         = Set(ProtocolId ∪ DeficitCondition) -- protocols executed + deficits addressed via Other
 SuspendState     = { resolved: Resolved, iteration: N }
 Fired            = Resolved ≠ ∅ ∨ chose(Proceed)  -- Sub-A0 produced non-trivial interaction
-ProtocolId       ∈ {clarify, goal, bound, inquire, frame, ground}
+ProtocolId       ∈ {elicit, bound, inquire, frame, ground}
 DeficitCondition ∈ {IntentMisarticulated, GoalIndeterminate, BoundaryUndefined,
                     ContextInsufficient, FrameworkAbsent, MappingUncertain}
 

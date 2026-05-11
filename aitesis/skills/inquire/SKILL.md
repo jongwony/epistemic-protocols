@@ -353,13 +353,13 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
   - Pre-filter: cross-scope + rule-resolvable (existing scope hierarchy, established precedence) → coexistence (exit Coherence; not a contradiction)
   - Same scope + evidence-resolvable → MemoryInternal → factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent) → follows Factual resolution path (Step 3, Step 4, or Phase 2)
     - **EvidenceSource inheritance procedure**: reclassified MemoryInternal items enter EvidenceSource selection identically to directly-classified Factual(v) items — the same cost-ordering default, external-dependency preference, and Cite-or-observe rule override requirements apply; `source_choice_overrides` logging applies identically
-  - Cross scope + structure-requiring → CrossDomain → deficit-matched routing: MappingUncertain→`/ground`, BoundaryUndefined→`/bound`, FrameworkAbsent→`/frame`, GapUnnoticed→`/gap`
+  - Cross scope + structure-requiring → CrossDomain → deficit-matched routing: MappingUncertain→`/ground`, BoundaryUndefined→`/bound`, FrameworkAbsent→`/frame`, GapUnnoticed→`/gap`, IntentMisarticulated→`/elicit`, GoalIndeterminate→`/elicit`
   - Off-diagonal (Scope ≠ Resolution): present both assessments with evidence via conditional gate; user classifies as MemoryInternal or CrossDomain
     - (Same, Structure): same-scope contradiction where factual verification is insufficient — resolution requires understanding structural relationships within the scope
     - (Cross, Evidence): cross-scope contradiction where evidence comparison can determine which scope's claim is current — despite scope difference, factual verification suffices
   - MemoryInternal → actionable (proceeds to resolution); CrossDomain → record as `Uₙ` (non_factual_detected) with deficit-matched routing target
 - **Other non-actionable dimensions**: Relevance and Emergent → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
-  - Relevance → deficit-matched: GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`
+  - Relevance → deficit-matched: GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`, IntentMisarticulated→`/elicit`, GoalIndeterminate→`/elicit`
   - Emergent(_) → match observed deficit condition against candidate protocol deficit conditions
 - Store all results in `Λ.classify_results`
 
@@ -421,7 +421,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - U2e: Factual/*, EvidenceSource: Emergent(source) (observed channel: [description] — fallback-admissible; accumulates toward variation-stable observed use)
   - U3a: Coherence/MemoryInternal → factual reclassification; EvidenceSource selected from `ValidSources(reclassified_v)` via the same procedure as directly-classified Factual items (Step 2 — EvidenceSource inheritance procedure; cost-ordering, external-dependency preference, and Cite-or-observe rule apply identically)
   - U3b: Coherence/CrossDomain (basis: evidence summary — structure-requiring) → deficit-matched routing
-  - U4: Relevance (basis: evidence summary) → deficit-matched routing
+  - U4: Relevance (basis: evidence summary) → `/elicit`
   - Any classification (dimension / verifiability / EvidenceSource) to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]

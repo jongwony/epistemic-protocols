@@ -6,8 +6,8 @@ Only deficits whose unresolved state would directly affect execution results are
 
 | DeficitCondition | ProtocolId | Execution-Blocking Pattern | Not Execution-Blocking |
 |---|---|---|---|
-| IntentMisarticulated | /clarify | Task description ambiguous to the point of producing wrong deliverable | Stylistic preference unclear |
-| GoalIndeterminate | /goal | No verifiable end-state — materialized tasks would be ambiguous | Under-specified but actionable goals |
+| IntentMisarticulated | /elicit | Task description ambiguous to the point of producing wrong deliverable | Stylistic preference unclear |
+| GoalIndeterminate | /elicit | No verifiable end-state — materialized tasks would be ambiguous | Under-specified but actionable goals |
 | BoundaryUndefined | /bound | AI vs user responsibility undetermined for critical execution params | Boundary exists but sub-optimal |
 | ContextInsufficient | /inquire | Missing facts that would change task decomposition or tool selection | Nice-to-know context |
 | FrameworkAbsent | /frame | Multiple valid approaches exist and choice affects deliverable structure | Aesthetic framework preference |
@@ -15,7 +15,7 @@ Only deficits whose unresolved state would directly affect execution results are
 
 ## Scan Order
 
-Follows CANONICAL_PRECEDENCE order: clarify → goal → bound → {inquire, frame, ground}. Higher-precedence deficits are surfaced first — resolving them may eliminate downstream deficits.
+Follows CANONICAL_PRECEDENCE order: elicit → bound → {inquire, frame, ground}. Higher-precedence deficits are surfaced first — resolving them may eliminate downstream deficits.
 
 ## Execution-Blocking Filter
 
