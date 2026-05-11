@@ -9,7 +9,7 @@ Vet working context by dialectical antithesis before action through structured p
 
 ## Definition
 
-**Elenchus** (ἔλεγχος): A dialogical act of cross-examination — from the Socratic refutation tradition meaning "testing by argument" — resolving suspect working context into vetted context through provenance challenge, counterfactual gap forecasting, and cross-source consistency check before pre-execution sync. The protocol's lexical verb is `/sublate`, encoding the Hegelian *Aufhebung* (preserve + negate + lift up) motion of thesis → antithesis → synthesis applied to each suspect source.
+**Elenchus** (ἔλεγχος): A dialogical act of cross-examination — from the Socratic refutation tradition meaning "testing by argument" — resolving suspect working context into vetted context through provenance challenge, counterfactual gap forecasting, and cross-source consistency check before pre-execution sync. The protocol's lexical verb is `/sublate`. Each suspect source undergoes the motion of stating its current claim, surfacing what would shake it, and then deciding how to handle the source in light of that challenge (the Hegelian *Aufhebung* — preserve + negate + lift up — supplies the source vocabulary).
 
 ```
 ── FLOW ──
@@ -207,31 +207,31 @@ User-initiated activation triggers Phase 0's silent scan. The scan does not gate
 
 ## Patterns
 
-Three dialectical patterns are inscribed. Each pattern is a thesis ↔ antithesis pair the AI posits at Phase 1 Step 2 per source. The user's disposition at Phase 2 resolves the synthesis. A fourth Emergent pattern is permitted but not pre-named — it must satisfy the morphism `ContextSuspect → VettedContext` (the antithesis must be a *dialectical challenge*, not a separate verification check).
+Three patterns are inscribed. Each pattern pairs a current claim with a challenge that would shake it; the AI surfaces both at Phase 1 Step 2 per source, and the user decides how to handle the source at Phase 2. A fourth Emergent pattern is permitted but not pre-named — it must satisfy `ContextSuspect → VettedContext` (the challenge must directly confront the source's claim, not stand as a side verification check).
 
 ### Pattern A — Source Provenance Audit
 
-The source claims authority. The antithesis challenges that authority's actual verification status.
+When a source claims authority, the challenge asks whether that authority is actually verified.
 
-- Thesis: "Source X is verified in the domain it claims to ground."
-- Antithesis: "Source X's verification path is provisional / inferred / cited but unread / stale."
-- Synthesis (user judgment): Confirmed | Revised | Discarded | Conditional | Bounded.
+- The source's current claim: "Source X is verified in the domain it claims to ground."
+- What would shake it: "Source X's verification path is provisional, inferred, cited but unread, or stale."
+- The user decides how to handle the source: keep the source as-is, rewrite the claim with a refinement, withdraw the source, wait for an external measurement to settle the question, or treat an outside source-of-truth as the authoritative reference for the claim.
 
 ### Pattern B — Counterfactual Gap Forecasting
 
-The source supports a hypothesis under current conditions. The antithesis varies the condition and asks whether the hypothesis still holds.
+When a source supports a conclusion under current conditions, the challenge changes the condition and asks whether the conclusion still stands.
 
-- Thesis: "Y holds in the current working context."
-- Antithesis: "When Z replaces a current condition, gap B opens at point P — does Y still hold?"
-- Synthesis (user judgment): Confirmed | Revised | Deferred(re_trigger_condition=Z) | Routed(downstream_protocol).
+- The source's current claim: "Y holds in the current working context."
+- What would shake it: "If Z replaces a current condition, a gap opens at point P — does Y still hold?"
+- The user decides how to handle the source: keep the source as-is, rewrite the claim with a refinement, set the source aside until condition Z appears again, or hand the question off to another protocol.
 
 ### Pattern C — Cross-Source Consistency Check
 
-Two sources name the same referent but diverge. The antithesis forces explicit reconciliation.
+When two sources point at the same referent but diverge, the challenge forces an explicit reconciliation.
 
-- Thesis: "Sources X₁ and X₂ refer to the same referent consistently."
-- Antithesis: "X₁'s claim and X₂'s claim diverge at point Q — which source is the authoritative referent, and what reconciles the divergence?"
-- Synthesis (user judgment): Confirmed | Revised | Discarded | Bounded(external_reference) | Routed.
+- The sources' current claim: "Sources X₁ and X₂ refer to the same referent consistently."
+- What would shake it: "X₁'s claim and X₂'s claim diverge at point Q — which source is the authoritative referent, and what reconciles the divergence?"
+- The user decides how to handle the sources: keep the sources as-is, rewrite the claim with a refinement, withdraw one of the sources, treat an outside source-of-truth as the authoritative reference, or hand the question off to another protocol.
 
 ## Protocol
 
@@ -330,3 +330,4 @@ Present transformation trace as text output, then proceed with the vetted contex
 10. **Closed coproduct discipline**: Disposition is a closed coproduct of seven named variants plus Emergent. The Other option permits free-response, which the AI maps to the closest variant or surfaces as a candidate Emergent variant for that source — it does not bypass the coproduct.
 11. **Gate integrity** (Safeguard tier — revisitable as model capability evolves; revision triggers: model upgrade with demonstrated instruction-following improvement, sustained low violation rate across sessions, or successful compression PR demonstrating guard reducibility without outcome loss): The defined option set is presented intact — option injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic disposition variant into a concrete instance with parameters while preserving the TYPES coproduct structure) is distinct from mutation.
 12. **Substrate boundary**: Elenchus scope is the epistemic substrate — source identification, antithesis positing, disposition surfacing, and integration through Phase 0 to Phase 3. Post-vetting execution (the downstream action's substrate enforcement, harness permission, network/state mutation) belongs to native harnesses or specialized substrates, delegated by handoff after Phase 3 integration.
+13. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.

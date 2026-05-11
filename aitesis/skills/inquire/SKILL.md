@@ -412,18 +412,18 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 **Surfacing format**:
 
 Present the classification results, uncertainty description, and evidence as text output:
-- **Classification summary** (Factual entries include `EvidenceSource` selection per Cite-or-observe rule):
-  - U1: Factual/ReadOnly, EvidenceSource: CodeDerivable (basis: evidence summary)
-  - U1a: Factual/ReadOnly, EvidenceSource: CanonicalExternal (basis: [doc url + codebase version cross-check])
-  - U2: Factual/EmpiricallyObservable, EvidenceSource: Instrumentation (basis: evidence summary)
-  - U2a: Factual/EmpiricallyObservable, EvidenceSource: UserTacit over Instrumentation, basis: {dominance_reason — operational context / temporal scope / setup > 30s} (Cite-or-observe cite)
-  - U2b: Factual/EmpiricallyObservable → UserDependent (escape: [condition] — "[rationale]")
-  - U2c: Factual/partial (evidence scope ⊊ claim scope: covers [scope A], claim requires [scope B] — uncovered portion classified separately)
-  - U2e: Factual/*, EvidenceSource: Emergent(source) (observed channel: [description] — fallback-admissible; accumulates toward variation-stable observed use)
-  - U3a: Coherence/MemoryInternal → factual reclassification; EvidenceSource selected from `ValidSources(reclassified_v)` via the same procedure as directly-classified Factual items (Step 2 — EvidenceSource inheritance procedure; cost-ordering, external-dependency preference, and Cite-or-observe rule apply identically)
-  - U3b: Coherence/CrossDomain (basis: evidence summary — structure-requiring) → deficit-matched routing
-  - U4: Relevance (basis: evidence summary) → `/elicit`
-  - Any classification (dimension / verifiability / EvidenceSource) to revise?
+- **Classification summary** (each remaining uncertainty shows how the AI plans to resolve it, with the basis cited; each line is one case the user may see):
+  - a factual question whose answer can be looked up in the codebase (basis: evidence summary)
+  - a factual question whose answer comes from a published external document (basis: doc url + codebase version cross-check)
+  - a factual question that can be checked by running a test (basis: evidence summary)
+  - a factual question that could be tested but is faster to ask the user (basis: dominance reason — operational context, temporal scope, or setup beyond a short time bound)
+  - a factual question that would have been tested but the test is blocked by an environmental escape condition, falling back to asking the user
+  - a factual question with partial evidence — the evidence covers one part of the claim, the uncovered part is classified separately
+  - a factual question via a newly observed evidence channel; your confirmation requested before treating this channel as resolved
+  - a consistency question within the same scope, treated as a factual question (its evidence path is selected by the same procedure as a directly-classified factual item)
+  - a consistency question spanning multiple scopes — routed to a downstream protocol
+  - a relevance question — routed to `/elicit`
+  - Any of these classifications to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]
 - **Progress**: [N resolved / M actionable uncertainties] (excludes non-actionable routed)
@@ -437,7 +437,7 @@ Options:
 1. **[Provide X]** — [what this context enables]
 2. **[Point me to...]** — tell me where to find this information
 3. **Dismiss** — proceed with [stated default/assumption]
-4. **Unknown / Partial** — I don't know or have only partial context; auto-promote to next-preferred EvidenceSource and re-classify
+4. **Unknown / Partial** — I don't know, or I only have partial context; the AI will try the next-preferred way of finding the answer and re-classify
 ```
 
 Option 4 is the typed `Unknown(Partial)` constructor (TYPES `A`): Phase 3 auto-promotes to the next-preferred EvidenceSource in `ValidSources(v)` and re-enters Phase 1 classification via the backward arc (PHASE TRANSITIONS). This is a type-preserving materialization — not gate mutation — since the TYPES coproduct already admits `Unknown(Partial)` as a constructor.
@@ -512,3 +512,4 @@ After integration:
 12. **Cite-or-observe** (Evidence-Inquiry boundary structural guard): When a Factual uncertainty has a cheaper EvidenceSource available than UserTacit, resolve via cheaper source OR cite explicit dominance basis (logged to `Λ.source_choice_overrides`). Reclassification of EmpiricallyObservable to UserDependent is legitimate only under empirically verifiable escape conditions evaluated BEFORE observation (env mutation / 30s bound / elevated risk; logged to `Λ.observation_skips`). Observation outputs always proceed to Phase 2 via `Uₑ` — positive (differentiating evidence) or negative (null-signal); pre-observation categorical classification is not a substitute. Verifiability-tier dominance basis detail in Phase 1 Step 2.
 13. **No pre-filter rationalization** (Cite-or-observe dual): Pre-filter (Coherence coexistence exit) applies only when an explicit, named scope hierarchy rule or documented precedence ordering resolves the apparent contradiction without epistemic protocol intervention. Classifying genuine cross-domain structural contradiction as "rule-resolvable" to avoid routing = pre-filter misuse.
 14. **Gate integrity** (Safeguard tier — revisitable as model capability evolves; revision triggers: model upgrade with demonstrated instruction-following improvement, sustained low violation rate across sessions, or successful compression PR demonstrating guard reducibility without outcome loss): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation. Future-revision tied to instruction-tuning trajectory (alignment-guard internalization).
+15. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
