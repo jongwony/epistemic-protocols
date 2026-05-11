@@ -108,7 +108,7 @@ The hermeneutic circle pattern is already structurally encoded in formal blocks 
 
 **Primary circle** (intra-protocol): Each protocol's LOOP section encodes backward flow where partial resolution triggers whole re-interpretation, conditioned by `preserves:` (the text being interpreted remains fixed; only the interpretation evolves).
 
-**Secondary pattern** (inter-protocol): Four complementary pairs form Pre/Post cycles on the context fitness axis — Hermeneia↔Katalepsis (intent), Telos↔Syneidesis (goal), Aitesis↔Epharmoge (context), Prothesis↔Analogia (structure). These cycles operate heuristically via Output Style nudge, driven by observed session conditions rather than graph.json structural edges.
+**Secondary pattern** (inter-protocol): Complementary pairs form Pre/Post cycles on the context fitness axis — Aitesis↔Epharmoge (context), Prothesis↔Analogia (structure). These cycles operate heuristically via Output Style nudge, driven by observed session conditions rather than graph.json structural edges.
 
 **Artifact-observability boundary** (type naming principle): Protocol input type names encode their temporal relationship to observable artifacts — the dividing line being Read/Grep observability:
 - **Aitesis** (Prospect): Pre-artifact. Context sufficiency is assessed before artifacts are produced. X cannot yet be Read/Grep'd.
@@ -137,7 +137,7 @@ When a TOOL GROUNDING entry is classified as `(extension)` (relay-eligible) and 
   verdict: Extension ({N}/5)
 ```
 
-Relationship to historical 3-axis elidability model (`docs/analysis/protocol-composition-gate-elision.md`, pre-unification): prior analysis used three axes; the post-unification single TOOL GROUNDING axis subsumes the prior model — `(extension)` classifies relay-eligibility, `(constitution)` classifies Constitution requirement, with conditional specialization absorbed as separate `(extension)` entries.
+Relationship to historical 3-axis elidability model (pre-unification): prior analysis used three axes; the post-unification single TOOL GROUNDING axis subsumes the prior model — `(extension)` classifies relay-eligibility, `(constitution)` classifies Constitution requirement, with conditional specialization absorbed as separate `(extension)` entries.
 
 ## Split-Entry Naming Convention
 

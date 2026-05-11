@@ -220,7 +220,7 @@ HTML skeleton and guidelines for the `dashboard.html` artifact generated in Phas
   <h2>11. Quick Actions</h2>
   <!-- .action-grid: top 3 CTAs based on analysis
     Each .action-card:
-    - Action title (e.g., "Start using /clarify")
+    - Action title (e.g., "Start using /frame")
     - Action description with evidence
     - .resume-cmd for immediate action
   -->

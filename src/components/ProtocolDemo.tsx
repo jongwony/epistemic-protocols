@@ -22,51 +22,6 @@ interface DemoScenario {
 
 export const demoScenarios: DemoScenario[] = [
   {
-    protocol: "Hermeneia",
-    command: "/clarify",
-    promptKey: "demo.hermeneia.prompt",
-    userPrompt: "Build me a REST API for user management",
-    phases: [
-      { name: "Phase 0", description: "Trigger Recognition" },
-      { name: "Phase 1a", description: "Expression Binding" },
-      { name: "Phase 1b", description: "Gap Detection" },
-      { name: "Phase 2", description: "Clarification Gate" },
-      { name: "Phase 3", description: "Intent Integration" },
-    ],
-    response: [
-      { type: "label", text: "Phase 1b \u2014 Gap Detection (full taxonomy)" },
-      { type: "heading", text: "Scanning for expression\u2013intent gaps:" },
-      { type: "question", text: "Expression gap \u2014 \"REST API\" could mean RESTful HTTP, GraphQL with REST conventions, or gRPC with REST facade" },
-      { type: "question", text: "Precision gap \u2014 \"user management\" unspecified: CRUD only, or also roles, permissions, invitations?" },
-      { type: "question", text: "Background gap \u2014 no auth strategy stated: session-based, JWT, or OAuth2?" },
-      { type: "gate", text: "Select gaps to clarify, or proceed with defaults \u2192" },
-      { type: "insight", text: "3 gaps detected across Expression, Precision, Background dimensions. Phase 2 will resolve each via structured dialogue." },
-    ],
-  },
-  {
-    protocol: "Telos",
-    command: "/goal",
-    promptKey: "demo.telos.prompt",
-    userPrompt: "Optimize the search performance",
-    phases: [
-      { name: "Phase 0", description: "Trigger + Confirmation" },
-      { name: "Phase 1", description: "Dimension Detection" },
-      { name: "Phase 2", description: "Co-Construction Gate" },
-      { name: "Phase 3", description: "Integration" },
-      { name: "Phase 4", description: "Sufficiency Check" },
-    ],
-    response: [
-      { type: "label", text: "Phase 1 \u2014 Dimension Detection against taxonomy" },
-      { type: "heading", text: "Assessing goal dimensions {Outcome, Metric, Boundary, Priority}:" },
-      { type: "question", text: "Outcome \u2014 undefined: speed improvement? relevance ranking? reduced infrastructure cost?" },
-      { type: "question", text: "Metric \u2014 undefined: no p95 latency target, no baseline measurement stated" },
-      { type: "question", text: "Boundary \u2014 undefined: which indices, endpoints, or query types are in scope?" },
-      { type: "question", text: "Priority \u2014 implicit: speed assumed primary, but relevance may matter more" },
-      { type: "gate", text: "Define goal together / Proceed as-is \u2192" },
-      { type: "insight", text: "4/4 dimensions undefined. Phase 2 will co-construct a concrete, falsifiable GoalContract." },
-    ],
-  },
-  {
     protocol: "Aitesis",
     command: "/inquire",
     promptKey: "demo.aitesis.prompt",

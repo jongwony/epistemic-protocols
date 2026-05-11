@@ -141,9 +141,7 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 |----------|-------|---------|
 | Prothesis | πρόθεσις | Setting forth |
 | Syneidesis | συνείδησις | Shared knowing |
-| Hermeneia | ἑρμηνεία | Interpretation |
 | Katalepsis | κατάληψις | Grasping, comprehension |
-| Telos | τέλος | End, purpose |
 | Horismos | ὁρισμός | A bounding |
 | Aitesis | αἴτησις | Request, inquiry |
 | Analogia | ἀναλογία | Proportion |

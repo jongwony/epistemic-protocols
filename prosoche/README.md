@@ -14,7 +14,7 @@ Route upstream epistemic deficits and evaluate execution-time risks during AI op
 
 Prosoche scans for upstream epistemic deficits before task execution, routes to appropriate protocols when readiness gaps are detected, then materializes intent into tasks and classifies each for risk signals — irreversibility, human communication, security boundaries, prompt injection, external mutations, and scope escalation. Most tasks pass silently (p=Low); only elevated-risk tasks are surfaced for user judgment.
 
-**Phase -1 (Sub-A0)**: Before materializing tasks, scans execution context against 6 upstream deficit conditions (`/clarify`, `/goal`, `/bound`, `/inquire`, `/frame`, `/ground`). Only execution-blocking deficits are surfaced. When no deficits are detected, passes through transparently.
+**Phase -1 (Sub-A0)**: Before materializing tasks, scans execution context against upstream deficit conditions (per `skills/attend/references/upstream-heuristics.md`). Only execution-blocking deficits are surfaced. When no deficits are detected, passes through transparently.
 
 **Core principle**: Attention over Automation — autonomy is preserved by default, interrupted only at genuine risk boundaries or unresolved upstream deficits.
 

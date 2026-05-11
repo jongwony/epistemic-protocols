@@ -34,7 +34,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 |------|------|
 | 0. Entry | 경로 선택: 빠른 추천 / 특정 프로토콜 학습 / 전체 둘러보기 |
 | 1. Quick Scan | 최근 세션 메타데이터를 인라인으로 수집 (Glob + Read) |
-| 2a. Pick-1 | Quick path: `/goal`, `/gap`, `/frame` 중 1개 추천 선택 |
+| 2a. Pick-1 | Quick path: `/gap`, `/frame` 중 1개 추천 선택 |
 | 2b. Evidence | Quick path: 근거 카드 1개 표시 (최대 2줄) |
 | 2. Map | Targeted path: 컴팩트 매핑 테이블로 프로토콜 매칭 |
 | 3. Scenario | Targeted path: 프리셋 시나리오로 개입 지점 제시 |
@@ -45,7 +45,7 @@ Targeted + std: ENTRY → SCENARIO → TRIAL → QUIZ → GUIDE
 주요 특징:
 - **학습보다 가치 증명 먼저**: quick path는 3분 이내에 가치를 체감
 - **한 번에 하나만**: 추천 1개, 근거 카드 1개, 체험 1회 — 카탈로그 불필요
-- **Onboarding Pool**: `/goal`, `/gap`, `/frame` — Quick 추천 + Targeted 폴백 통합
+- **Onboarding Pool**: `/gap`, `/frame` — Quick 추천 + Targeted 폴백 통합
 - 실제 프로토콜 시험 실행 (프로토콜당 2-3 교환)
 - Targeted path는 전체 학습 경험 유지 (시나리오, 퀴즈, 가이드)
 - 근거 기반 분석은 `/report`, 빠른 가치 증명은 `/onboard`

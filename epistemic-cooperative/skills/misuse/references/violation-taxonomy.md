@@ -119,8 +119,8 @@ The default on uncertainty is `AMBIGUOUS`. False-positive cost (eroded protocol 
 
 When accumulated cross-session use evidence is available, this taxonomy may expand:
 
-- **Other protocols** — `/clarify`, `/goal`, `/inquire`, `/bound`, `/attend`, `/contextualize`, `/recollect`, `/grasp`, `/frame`, `/gap` each have Phase 0 contracts whose violations could be detected by analogous criteria. Each expansion requires its own evidence base before inclusion.
+- **Other protocols** — `/inquire`, `/bound`, `/attend`, `/contextualize`, `/recollect`, `/grasp`, `/frame`, `/gap` each have Phase 0 contracts whose violations could be detected by analogous criteria. Each expansion requires its own evidence base before inclusion.
 - **`/frame` over-extension** as a primary VIOLATION class once the 5+perspective + coined-name + no-`/induce`-followup pattern is observed across multiple sessions.
-- **Cross-protocol violation classes** — patterns like "Telos GoalContract auto-resolved by AI without user gate" require cross-protocol evidence and are deferred until that evidence appears.
+- **Cross-protocol violation classes** — patterns like "Horismos BoundaryMap auto-resolved by AI without user gate" require cross-protocol evidence and are deferred until that evidence appears.
 
 Expansion proposals should establish structural coherence, operation-kind clarity, falsifiability conditions, and orthogonal option surface before entering circulation; accumulated cross-session use evidence is required before promotion from working hypothesis to validated criterion.

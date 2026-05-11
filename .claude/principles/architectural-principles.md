@@ -26,9 +26,9 @@ Anamnesis's hypomnesis store persists session recall indices that enrich protoco
 
 Inter-protocol guidance operates through two distinct mechanisms at different abstraction levels: graph.json `advisory` edges (structural, validated by static checks, topology-aware) and Output Style nudge (runtime, session-context-dependent, deficit-type matching). These are complementary — graph.json edges encode stable architectural relationships, while nudges respond to observed session conditions. Protocol convergence moments are high-signal observation points for cross-protocol needs, but nudges are not position-constrained and fire whenever contextual evidence warrants.
 
-**Advisory cycle convergence**: Bidirectional advisory edges (e.g., `telos ↔ prothesis`) form mutual enrichment pairs but operate under single-pass semantics — each edge fires at most once per activation. Advisory edges do not carry re-invocation semantics; the composite endomorphism converges in one pass.
+**Advisory cycle convergence**: Bidirectional advisory edges form mutual enrichment pairs but operate under single-pass semantics — each edge fires at most once per activation. Advisory edges do not carry re-invocation semantics; the composite endomorphism converges in one pass.
 
-**Emergent boundary annotations**: Routing hints in Emergent sections of SKILL.md (e.g., `→ /clarify`, `→ /gap` in Emergent gap types or mismatch dimensions) are dialogue interaction dynamics — potential conversational routing that emerges from user-AI turn interaction. These belong to the Output Style nudge layer, not graph.json. They do not constitute structural advisory edges and must not be formalized in graph.json.
+**Emergent boundary annotations**: Routing hints in Emergent sections of SKILL.md (e.g., `→ /gap`, `→ /inquire` in Emergent gap types or mismatch dimensions) are dialogue interaction dynamics — potential conversational routing that emerges from user-AI turn interaction. These belong to the Output Style nudge layer, not graph.json. They do not constitute structural advisory edges and must not be formalized in graph.json.
 
 **Definitional-Observational convergence**: AI-observation concerns without constitutive user authority (runtime detection, cross-cutting commentary, session-context nudges) have repeatedly converged into Output Style rather than SKILL.md. Observed instances (N=4): Post-Convergence traversal → Output Style nudge (archived); Integration+basis runtime display → Output Style echo format; protocol nudge arrow (↗) → Output Style session observer; Basis marker → Output Style session-level citation (deliberately placed outside per-protocol TOOL GROUNDING). Definitional structure (TYPES, FLOW, PHASE TRANSITIONS, gate interactions) lives in SKILL.md; observational commentary lives in Output Style. This convergence is not a design imposition but a recurring empirical outcome of applying the Dual Advisory Layer division.
 
@@ -40,7 +40,7 @@ Protocols coexist with Claude Code built-in commands (`/simplify`, `/batch`) as 
 
 | Layer | Concern | Tools |
 |-------|---------|-------|
-| Epistemic | "Are we doing the right thing?" | Protocols (`/clarify`, `/goal`, `/inquire`, `/gap`, ...) |
+| Epistemic | "Are we doing the right thing?" | Protocols (`/inquire`, `/gap`, `/bound`, `/frame`, ...) |
 | Execution | "Are we doing it correctly?" | Built-ins (`/batch`, `/simplify`) |
 | Verification | "Did we understand?" | Protocol (`/grasp`) |
 

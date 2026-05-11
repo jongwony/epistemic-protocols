@@ -22,8 +22,6 @@ AI applies patterns, models, and analogies from one domain to another without ch
 |----------|-----------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
-| Hermeneia | Hybrid | `IntentMisarticulated → ClarifiedIntent` |
-| Telos | AI-guided | `GoalIndeterminate → DefinedEndState` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | **Analogia** | **AI-guided** | **`MappingUncertain → ValidatedMapping`** |
 | Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |

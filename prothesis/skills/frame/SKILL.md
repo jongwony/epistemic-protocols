@@ -194,8 +194,6 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
@@ -281,11 +279,11 @@ Q2. Mode:
 AI places the recommended Mode as Q2's first option with "(Recommended)" suffix based on inquiry characteristics:
 The recommendation matches mode to analytical demand — Recommend when the inquiry can be resolved from a single analytical direction, Inquire when multiple distinct perspectives are structurally necessary.
 
-**Mode 1 (Recommend)**: Per LOOP — terminates after Phase 2 characterization. No team. `LensEstablished` remains the compositional handoff object; `Lᵣ` packages it as a minimal `FramedInquiry` (`inj₁` constructor) for downstream use. Mode 1 produces a partial resolution: the lens is established (`FrameworkAbsent` is structurally addressed at the framing layer) but downstream protocols apply the lens to complete domain-specific resolution. Advisory-edge consumers (Syneidesis, Telos, Aitesis, Analogia) branch ingest on the `FramedInquiry` coproduct tag — `inj₁(Lᵣ)` is treated as a context-binding handoff (no synthesis fields available), `inj₂(L)` as a fully synthesized lens with convergence/divergence/assessment.
+**Mode 1 (Recommend)**: Per LOOP — terminates after Phase 2 characterization. No team. `LensEstablished` remains the compositional handoff object; `Lᵣ` packages it as a minimal `FramedInquiry` (`inj₁` constructor) for downstream use. Mode 1 produces a partial resolution: the lens is established (`FrameworkAbsent` is structurally addressed at the framing layer) but downstream protocols apply the lens to complete domain-specific resolution. Advisory-edge consumers (Syneidesis, Aitesis, Analogia) branch ingest on the `FramedInquiry` coproduct tag — `inj₁(Lᵣ)` is treated as a context-binding handoff (no synthesis fields available), `inj₂(L)` as a fully synthesized lens with convergence/divergence/assessment.
 
 **Mode 2 (Inquire)**: Per LOOP — full Phase 0 through Phase 4 cycle.
 
-**Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context for agent-teams), not the epistemic layer. Hermeneia resolves intent-expression gaps (user-initiated or AI-detected trigger); Telos co-constructs goals from vague intent. Phase 0 packages confirmed intent into a structured vehicle for teammate consumption — a prerequisite for quality spawn prompts, not a substitute for intent clarification or goal construction.
+**Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context for agent-teams), not the epistemic layer. Phase 0 packages confirmed intent into a structured vehicle for teammate consumption — a prerequisite for quality spawn prompts, not a substitute for upstream intent resolution.
 
 ### Phase 1: Context Gathering
 

@@ -52,7 +52,6 @@ free-exit : user may end the review at any time by saying so (Phase 0 prose decl
 
 - Trivial artifacts (single sentence, typo, comment fix) — direct Edit suffices
 - Code-centric changesets where `/review` is the right tool
-- Artifacts whose fixation event is unclear — use `/goal` first to define D
 - One-shot artifacts the user does not intend to revise
 
 ## Phase 0: Channel Open

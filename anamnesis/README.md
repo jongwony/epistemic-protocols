@@ -20,8 +20,6 @@ AI systems often discard vague recall signals (`RecallAmbiguous`) — the user s
 
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
-| Hermeneia | Hybrid | `IntentMisarticulated → ClarifiedIntent` |
-| Telos | AI-guided | `GoalIndeterminate → DefinedEndState` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | **Anamnesis** | **AI-guided** | **`RecallAmbiguous → RecalledContext`** |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |

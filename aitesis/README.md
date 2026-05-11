@@ -47,10 +47,10 @@ Uncertainties are identified dynamically per task — no fixed taxonomy:
 ## Protocol Precedence
 
 ```
-Hermeneia → Telos → Aitesis → Prothesis → Analogia → Syneidesis → Katalepsis
+Aitesis → Prothesis → Analogia → Syneidesis → Katalepsis
 ```
 
-Aitesis follows Telos: once goals are defined, verify execution context is sufficient. Before perspective framing (Prothesis), mapping validation (Analogia), and gap auditing (Syneidesis), ensure the AI has the context it needs.
+Aitesis runs early: verify execution context is sufficient before perspective framing (Prothesis), mapping validation (Analogia), and gap auditing (Syneidesis).
 
 ## When to Use
 

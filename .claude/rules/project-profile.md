@@ -19,7 +19,7 @@ Floor (runtime-discovered, retry would change identity):
 - Katalepsis (`/grasp`): user IS the measurement target.
 - Prosoche `/attend` Phase 2: gate interaction over runtime-discovered risk patterns; gate-passage actions requiring substrate enforcement are delegated by handoff.
 
-Bounded zone (in-principle delegatable via contract-style Standing authority + post-deploy correction): Telos GoalContract, Horismos BoundaryMap, Syneidesis decision pattern, Hermeneia Phase 2 articulation. Hermeneia Phase 2 differs from Katalepsis floor by *retry semantics* — incorrect articulation is correctable at the next invocation (bounded regret), whereas Katalepsis's measurement identity precludes retry without altering the verification. Telos / Horismos / Syneidesis are protocol-internally grounded by Constitution checkpoints in their TOOL GROUNDING entries; profile-layer mention is for future migration visibility, not runtime enforcement.
+Bounded zone (in-principle delegatable via contract-style Standing authority + post-deploy correction): Horismos BoundaryMap, Syneidesis decision pattern. Horismos / Syneidesis are protocol-internally grounded by Constitution checkpoints in their TOOL GROUNDING entries; profile-layer mention is for future migration visibility, not runtime enforcement.
 
 **Inscription-decision posture** (Emergent — outside the six profile variables): when correcting application drift, articulate the correction at the abstraction axis where it originated (response-level when sufficient), and leave rule-overlap open for model interpretation.
 

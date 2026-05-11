@@ -25,8 +25,6 @@ const localeLabels: Record<Locale, string> = {
 };
 
 const protocols = [
-  { name: "Hermeneia", command: "/clarify" },
-  { name: "Telos", command: "/goal" },
   { name: "Aitesis", command: "/inquire" },
   { name: "Prothesis", command: "/frame" },
   { name: "Analogia", command: "/ground" },

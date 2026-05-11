@@ -27,7 +27,6 @@ Claude Code terminal rendering pipeline has 2-stage unknown HTML handling for `<
 **Symptom root cause attribution (2026-04-10 session)**:
 - User reported "options did not appear": /ground Phase 2 M3 gate emitted as multiline `<Ink element="gate">` block → silently dropped → user saw zero options.
 - User reported "I thought /ground had finished": same mechanism. Phase 2 gate invisible, so the Phase 1 plain-text table appeared as final output, creating the illusion of convergence.
-- /clarify Phase 1b gate: identical failure mode.
 
 **Related**:
 - PR #232 (jongwony/epistemic-protocols): minimal hotfix via epistemic-ink.md line 27 prose clarification. Commit 011171e. Branch `hotfix/ink-rendering-ambiguity`.

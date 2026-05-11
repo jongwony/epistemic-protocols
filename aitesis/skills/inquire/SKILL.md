@@ -190,8 +190,6 @@ Write is authorized for observation instrument setup (temporary test artifacts w
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
@@ -204,8 +202,6 @@ Write is authorized for observation instrument setup (temporary test artifacts w
 
 **Key differences**:
 - **Syneidesis** surfaces gaps at decision points for the user to judge (information flows AI→user) — Aitesis infers context the AI lacks before execution (information flows user→AI)
-- **Telos** co-constructs goals when intent is indeterminate — Aitesis operates when goals exist but execution context is insufficient
-- **Hermeneia** extracts intent the user already has (user signal) or detects expression ambiguity (AI-detected, requires confirmation) — Aitesis infers what context the system lacks
 
 **Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context to execute?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). The operational test: if the information gap would be filled by the user providing context, it's Aitesis; if it would be filled by the user reconsidering their decision, it's Syneidesis.
 
@@ -357,13 +353,13 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
   - Pre-filter: cross-scope + rule-resolvable (existing scope hierarchy, established precedence) → coexistence (exit Coherence; not a contradiction)
   - Same scope + evidence-resolvable → MemoryInternal → factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent) → follows Factual resolution path (Step 3, Step 4, or Phase 2)
     - **EvidenceSource inheritance procedure**: reclassified MemoryInternal items enter EvidenceSource selection identically to directly-classified Factual(v) items — the same cost-ordering default, external-dependency preference, and Cite-or-observe rule override requirements apply; `source_choice_overrides` logging applies identically
-  - Cross scope + structure-requiring → CrossDomain → deficit-matched routing: MappingUncertain→`/ground`, BoundaryUndefined→`/bound`, GoalIndeterminate→`/goal`, FrameworkAbsent→`/frame`, GapUnnoticed→`/gap`, IntentMisarticulated→`/clarify`
+  - Cross scope + structure-requiring → CrossDomain → deficit-matched routing: MappingUncertain→`/ground`, BoundaryUndefined→`/bound`, FrameworkAbsent→`/frame`, GapUnnoticed→`/gap`, IntentMisarticulated→`/elicit`, GoalIndeterminate→`/elicit`
   - Off-diagonal (Scope ≠ Resolution): present both assessments with evidence via conditional gate; user classifies as MemoryInternal or CrossDomain
     - (Same, Structure): same-scope contradiction where factual verification is insufficient — resolution requires understanding structural relationships within the scope
     - (Cross, Evidence): cross-scope contradiction where evidence comparison can determine which scope's claim is current — despite scope difference, factual verification suffices
   - MemoryInternal → actionable (proceeds to resolution); CrossDomain → record as `Uₙ` (non_factual_detected) with deficit-matched routing target
 - **Other non-actionable dimensions**: Relevance and Emergent → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
-  - Relevance → deficit-matched: GoalIndeterminate→`/goal`, GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`, IntentMisarticulated→`/clarify`
+  - Relevance → deficit-matched: GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`, IntentMisarticulated→`/elicit`, GoalIndeterminate→`/elicit`
   - Emergent(_) → match observed deficit condition against candidate protocol deficit conditions
 - Store all results in `Λ.classify_results`
 
@@ -425,7 +421,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - U2e: Factual/*, EvidenceSource: Emergent(source) (observed channel: [description] — fallback-admissible; accumulates toward variation-stable observed use)
   - U3a: Coherence/MemoryInternal → factual reclassification; EvidenceSource selected from `ValidSources(reclassified_v)` via the same procedure as directly-classified Factual items (Step 2 — EvidenceSource inheritance procedure; cost-ordering, external-dependency preference, and Cite-or-observe rule apply identically)
   - U3b: Coherence/CrossDomain (basis: evidence summary — structure-requiring) → deficit-matched routing
-  - U4: Relevance (basis: evidence summary) → /goal
+  - U4: Relevance (basis: evidence summary) → `/elicit`
   - Any classification (dimension / verifiability / EvidenceSource) to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]

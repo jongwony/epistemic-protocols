@@ -127,11 +127,11 @@ Cross-reference pattern data from Step 2 with slash command data to report co-oc
 
 **Co-occurrence report**: For each detected situation, report the factual co-occurrence with slash command data:
 - Situation detected: yes/no
-- Related slash commands found: list of relevant commands (e.g., `/clarify`, `/gap`, `/frame`, `/attend`)
+- Related slash commands found: list of relevant commands (e.g., `/gap`, `/frame`, `/attend`)
 
 The main agent (Phase 3) determines protocol mapping and coverage status (covered/missed/n/a) from these co-occurrence facts.
 
-**Note**: firstPrompt-based situations (vague starts → Telos, verification keywords → Katalepsis) are detected by the main agent (Phase 2 step 4), not by this subagent. Subagent detects situations from tool usage patterns only.
+**Note**: firstPrompt-based situations (verification keywords → Katalepsis) are detected by the main agent (Phase 2 step 4), not by this subagent. Subagent detects situations from tool usage patterns only.
 
 ### Step 2.7: Conversation Quality Signals
 

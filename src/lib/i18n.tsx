@@ -32,8 +32,6 @@ const translations = {
     "protocols.tryDemo": "Try demo",
 
     // Protocol descriptions
-    "protocol.Hermeneia.desc": "Address misalignment in requirements before they compound into costly errors",
-    "protocol.Telos.desc": "Define success criteria clearly so both human and AI share the same target",
     "protocol.Aitesis.desc": "Ensure AI asks the necessary clarifying questions rather than guessing",
     "protocol.Prothesis.desc": "Examine issues from multiple perspectives to avoid tunnel vision",
     "protocol.Analogia.desc": "Apply theoretical advice to your specific context instead of generic solutions",
@@ -45,8 +43,6 @@ const translations = {
     "protocol.Katalepsis.desc": "Ensure comprehension of substantial changes before they take effect",
 
     // Protocol categories
-    "protocol.Hermeneia.category": "Alignment",
-    "protocol.Telos.category": "Direction",
     "protocol.Aitesis.category": "Inquiry",
     "protocol.Prothesis.category": "Perspective",
     "protocol.Analogia.category": "Application",
@@ -76,8 +72,6 @@ const translations = {
     "footer.license": "MIT License",
 
     // Demo scenarios
-    "demo.hermeneia.prompt": "Build me a REST API for user management",
-    "demo.telos.prompt": "Optimize the search performance",
     "demo.aitesis.prompt": "Add caching to the application",
     "demo.prothesis.prompt": "Migrate the monolith to microservices",
     "demo.analogia.prompt": "Follow best practices for error handling",
@@ -116,8 +110,6 @@ const translations = {
     "protocols.tryDemo": "\ub370\ubaa8 \ubcf4\uae30",
 
     // Protocol descriptions
-    "protocol.Hermeneia.desc": "\uc694\uad6c\uc0ac\ud56d\uc758 \uc624\uc815\ub82c\uc774 \ube44\uc6a9\uc774 \ud070 \uc624\ub958\ub85c \ud655\ub300\ub418\uae30 \uc804\uc5d0 \ud574\uc18c\ud569\ub2c8\ub2e4",
-    "protocol.Telos.desc": "\uc778\uac04\uacfc AI\uac00 \uac19\uc740 \ubaa9\ud45c\ub97c \uacf5\uc720\ud558\ub3c4\ub85d \uc131\uacf5 \uae30\uc900\uc744 \uba85\ud655\ud788 \uc815\uc758\ud569\ub2c8\ub2e4",
     "protocol.Aitesis.desc": "AI\uac00 \ucd94\uce21\ud558\uc9c0 \uc54a\uace0 \ud544\uc694\ud55c \uba85\ud655\ud654 \uc9c8\ubb38\uc744 \ud558\ub3c4\ub85d \ubcf4\uc7a5\ud569\ub2c8\ub2e4",
     "protocol.Prothesis.desc": "\ud130\ub110 \ube44\uc804\uc744 \ud53c\ud558\uae30 \uc704\ud574 \ub2e4\uc591\ud55c \uad00\uc810\uc5d0\uc11c \ubb38\uc81c\ub97c \uac80\ud1a0\ud569\ub2c8\ub2e4",
     "protocol.Analogia.desc": "\uc77c\ubc18\uc801\uc778 \ud574\uacb0\ucc45 \ub300\uc2e0 \uad6c\uccb4\uc801\uc778 \ub9e5\ub77d\uc5d0 \uc774\ub860\uc801 \uc870\uc5b8\uc744 \uc801\uc6a9\ud569\ub2c8\ub2e4",
@@ -129,8 +121,6 @@ const translations = {
     "protocol.Katalepsis.desc": "\uc2e4\uc9c8\uc801\uc778 \ubcc0\uacbd\uc0ac\ud56d\uc774 \uc801\uc6a9\ub418\uae30 \uc804\uc5d0 \uc774\ud574\ub97c \ud655\uc778\ud569\ub2c8\ub2e4",
 
     // Protocol categories
-    "protocol.Hermeneia.category": "\uc815\ub82c",
-    "protocol.Telos.category": "\ubc29\ud5a5",
     "protocol.Aitesis.category": "\ud0d0\uad6c",
     "protocol.Prothesis.category": "\uad00\uc810",
     "protocol.Analogia.category": "\uc801\uc6a9",
@@ -160,8 +150,6 @@ const translations = {
     "footer.license": "MIT \ub77c\uc774\uc120\uc2a4",
 
     // Demo scenarios
-    "demo.hermeneia.prompt": "\uc0ac\uc6a9\uc790 \uad00\ub9ac\uc6a9 REST API\ub97c \ub9cc\ub4e4\uc5b4\uc918",
-    "demo.telos.prompt": "\uac80\uc0c9 \uc131\ub2a5\uc744 \ucd5c\uc801\ud654\ud574\uc918",
     "demo.aitesis.prompt": "\uc560\ud50c\ub9ac\ucf00\uc774\uc158\uc5d0 \uce90\uc2f1\uc744 \ucd94\uac00\ud574\uc918",
     "demo.prothesis.prompt": "\ubaa8\ub180\ub9ac\uc2a4\ub97c \ub9c8\uc774\ud06c\ub85c\uc11c\ube44\uc2a4\ub85c \ub9c8\uc774\uadf8\ub808\uc774\uc158\ud574\uc918",
     "demo.analogia.prompt": "\uc5d0\ub7ec \ud578\ub4e4\ub9c1 \ubaa8\ubc94 \uc0ac\ub840\ub97c \ub530\ub77c\uc918",

@@ -22,8 +22,6 @@ Users and AI often operate without clear boundaries about who knows what (`Bound
 |----------|-----------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
-| Hermeneia | Hybrid | `IntentMisarticulated → ClarifiedIntent` |
-| Telos | AI-guided | `GoalIndeterminate → DefinedEndState` |
 | **Horismos** | **AI-guided** | **`BoundaryUndefined → DefinedBoundary`** |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | Analogia | AI-guided | `MappingUncertain → ValidatedMapping` |
