@@ -169,13 +169,13 @@ When Elenchus is active:
 
 ### Triggers
 
-| Signal | Examples |
-|--------|----------|
-| Pre-sync commit | "before I share this in the meeting…", "about to push this PR for review…" |
-| Long-collected context | "we've been building this context for hours — does it still hold?" |
-| Provenance concern | "is the source on X actually verified?" |
-| Counterfactual concern | "if Y were Z instead, would the plan still work?" |
-| Cross-source friction | "these two facts seem to point in different directions" |
+| Signal | Detection |
+|--------|-----------|
+| Pre-sync commit | User signals upcoming externalization of working context (meeting share, PR push, deploy, deposit) |
+| Long-collected context | User signals duration concern about accumulated context |
+| Provenance concern | User questions verification status of a specific source |
+| Counterfactual concern | User varies a current condition and asks whether downstream still holds |
+| Cross-source friction | User notices two collected sources pointing at the same referent diverging |
 
 **Qualifying condition**: Activate only when working context exists and the user signals an upcoming pre-execution sync or externalization. The protocol does not activate on freshly-arrived context with no audit-candidate sources — the silent scan at Phase 0 yields S_high = ∅, which converges trivially.
 
@@ -254,7 +254,7 @@ Generate metadata triple plus dialectical antithesis per source.
 **Step 1 — Tagging**: For each `s ∈ S_high`, attach ProvenanceTag (verification path + confidence), FreshnessTag (age, horizon, stale flag), and LeverageTag (downstream_count, branches). Use Read and Grep to verify provenance against the source's claimed origin where the source's content cites verifiable artifacts.
 
 **Step 2 — Antithesis positing**: For each tagged source, select the most applicable pattern (A, B, C, or Emergent) and construct an antithesis. The antithesis must:
-- Cite the source's specific claim (not paraphrase generically)
+- Cite the source's claim verbatim, anchored to the originating sentence or artifact
 - Name the dialectical challenge concretely (a verification gap, a counterfactual condition, a divergent sibling source)
 - Surface the basis for the challenge so the user can recognize the antithesis's evidence
 
@@ -325,7 +325,7 @@ Present transformation trace as text output, then proceed with the vetted contex
 5. **Surfacing over Deciding**: Per-source antithesis is surfaced with cited basis; AI does not silently downgrade or resolve a source's disposition. A source whose antithesis the AI cannot construct concretely is surfaced as such, not skipped.
 6. **Convergence evidence**: Present transformation trace (source → antithesis → disposition) before declaring all sources vetted; per-source evidence is required, not asserted.
 7. **Source chain preservation**: W.sources is read-only across the protocol's lifetime. Antithesis and disposition annotate, never mutate, the source list. A Discarded disposition removes a source from downstream usage but preserves it in Λ.history with its withdrawal reason.
-8. **Loop continuity under bounded regret**: Deferred dispositions whose re-trigger condition has not been met do not interrupt loop continuation. Only dispositions requiring genuinely viable alternative judgment paths (Constitution-level entropy > 0) warrant Phase 2 surfacing; relay-level operations (tagging, antithesis text construction, trace presentation) proceed without gating.
+8. **Loop continuity under bounded regret**: Deferred dispositions whose re-trigger condition has not been met let the loop continue. Only dispositions requiring genuinely viable alternative judgment paths — where the user's values determine the choice among options (Constitution-level entropy > 0) — warrant Phase 2 surfacing; relay-level operations (tagging, antithesis text construction, trace presentation) proceed inline.
 9. **Antithesis must be dialectical**: An antithesis names a concrete counter-claim (Pattern A: "X is unverified"), counter-condition (Pattern B: "in condition Z, Y fails"), or counter-source (Pattern C: "X₁ and X₂ diverge at Q"). Procedural queries ("have you checked X?") surface in `/inquire` or `/attend`, not here.
 10. **Closed coproduct discipline**: Disposition is a closed coproduct of seven named variants plus Emergent. The Other option permits free-response, which the AI maps to the closest variant or surfaces as a candidate Emergent variant for that source — it does not bypass the coproduct.
 11. **Gate integrity** (Safeguard tier — revisitable as model capability evolves; revision triggers: model upgrade with demonstrated instruction-following improvement, sustained low violation rate across sessions, or successful compression PR demonstrating guard reducibility without outcome loss): The defined option set is presented intact — option injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic disposition variant into a concrete instance with parameters while preserving the TYPES coproduct structure) is distinct from mutation.
