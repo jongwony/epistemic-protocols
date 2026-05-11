@@ -153,8 +153,6 @@ converge      (extension)    → TextPresent+Proceed (per-cycle trace + final ga
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
@@ -170,8 +168,6 @@ converge      (extension)    → TextPresent+Proceed (per-cycle trace + final ga
 **Horismos vs Aitesis**: Both are pre-execution heterocognitive protocols. Aitesis probes factual gaps (context insufficiency — "do I have enough information to execute?"), Horismos probes constitutive boundaries (ownership classification — "who decides what?"). Both share an Akinator-style functor (probe → enrich → ask → integrate), but the ontology differs: Aitesis uncertainties have factual answers discoverable from the environment, while Horismos domains require constitutive decisions about responsibility allocation. The operational test: if the answer exists somewhere in the environment, it is Aitesis; if the answer must be constituted by the user, it is Horismos.
 
 **Horismos vs Epitrope (deprecated)**: Epitrope produced a DelegationContract via scenario-based interview, accumulating an expertise profile across interactions. Horismos produces a BoundaryMap via direct per-decision classification. No scenario calibration, no accumulated profile, no team coordination (team coordination moved to Prosoche). Each invocation starts fresh for the current task scope.
-
-**Horismos vs Telos**: Telos constructs the goal ("what are we doing?"), Horismos defines boundaries around it ("who decides what?"). Telos operates when intent is indeterminate; Horismos operates when intent is clear but ownership is not. In precedence, Telos precedes Horismos — goals must exist before boundaries can be drawn around them.
 
 **Horismos vs Periagoge / Euporia (loop topology borrowing)**: Horismos's per-cycle-emergent loop borrows topology from Periagoge (in-process abstraction crystallization through dialectical iteration) and Euporia (cycle-emergent dimension surfacing with cycle counter visibility and user-judged termination). The borrowing is **topological only** — Horismos's runtime is independent of `/induce`/`/elicit` invocations, and identity is preserved through the formal block: deficit `BoundaryUndefined → DefinedBoundary`, 4-value `BoundaryClassification` per cycle plus 2-value `FinalGateAnswer` at Phase 4 (vs Periagoge's `Confirm/Widen/Narrow/Fuse/Reorient` move set), evidence-cited domain anchors (vs Euporia's substrate-traced coordinate values). The shared structure is the **loop carrier** (per-cycle re-scan, cycle counter visibility, user-judged termination, essence-style cumulative artifact); dialectical content remains specific to each source protocol.
 

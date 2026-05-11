@@ -91,7 +91,7 @@ handles this correctly: a user with D4=30 scores high similarity with Wittgenste
 - **Defining**: D1 (Inquiry mode — but more experimental than Peirce)
 - **Secondary**: D6 (Delegation — collaborative inquiry, social intelligence)
 - **Distinguishing signal**: Moderate across all dimensions + practical orientation
-- **Protocol affinity**: `/goal` (Telos — goal co-construction through experience)
+- **Protocol affinity**: `/induce` (Periagoge — abstraction crystallization through reflective experience)
 
 ### Language & Communication — How We Express
 
@@ -102,7 +102,7 @@ handles this correctly: a user with D4=30 scores high similarity with Wittgenste
 - **Defining**: D4 (Rule-oriented — maxims as conversational governance)
 - **Secondary**: D6 (Delegation — cooperative principle assumes partnership)
 - **Distinguishing signal**: Expects precise, relevant, grounded responses + correctional when maxims violated
-- **Protocol affinity**: `/clarify` (Hermeneia — when expression fails cooperative principle)
+- **Protocol affinity**: `/gap` (Syneidesis — surfaces communicative gaps when cooperative maxims fail)
 
 #### Wittgenstein (1889-1951)
 - **Tradition**: Ordinary language philosophy (later period)
@@ -111,7 +111,7 @@ handles this correctly: a user with D4=30 scores high similarity with Wittgenste
 - **Defining**: D4 (Contextual — anti-systematic, meaning depends on use)
 - **Secondary**: D3 (Dialogical — philosophy as therapeutic dialogue)
 - **Distinguishing signal**: Low rule density + high context sensitivity + adapts approach to situation
-- **Protocol affinity**: `/clarify` (Hermeneia — language game mismatches)
+- **Protocol affinity**: `/contextualize` (Epharmoge — language game mismatches surface as application-context misfit)
 
 ### Hermeneutics — How We Understand
 
@@ -122,7 +122,7 @@ handles this correctly: a user with D4=30 scores high similarity with Wittgenste
 - **Defining**: D3 (Dialogical — understanding IS dialogue)
 - **Secondary**: D6 (Extended Mind — understanding is inherently collaborative)
 - **Distinguishing signal**: Highest dialogue depth + co-constructive interaction + iterative refinement
-- **Protocol affinity**: `/clarify` (Hermeneia — named after Gadamer's core concept)
+- **Protocol affinity**: `/frame` (Prothesis — Gadamerian fusion of horizons through multi-perspective placement)
 
 ### Extended Cognition — How We Think Together
 

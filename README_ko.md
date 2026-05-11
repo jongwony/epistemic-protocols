@@ -141,9 +141,7 @@ scripts/sync-agents-symlinks.sh
 |----------|---------|------|
 | Prothesis | πρόθεσις | 앞에 놓음 (제시) |
 | Syneidesis | συνείδησις | 함께 앎 (공동 인식) |
-| Hermeneia | ἑρμηνεία | 해석 |
 | Katalepsis | κατάληψις | 움켜잡음 (이해) |
-| Telos | τέλος | 끝, 목적 |
 | Horismos | ὁρισμός | 경계 짓기 |
 | Aitesis | αἴτησις | 요청, 질의 |
 | Analogia | ἀναλογία | 유비, 유추 |

@@ -266,8 +266,6 @@ The scan finds candidates; the narrative Qc enables recognition; the user consti
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
@@ -284,8 +282,6 @@ The scan finds candidates; the narrative Qc enables recognition; the user consti
 **Composition `/recollect * /inquire`**: When recognized context needs further information enrichment, Anamnesis can compose with Aitesis — the emitted ClueVector_prose enters session text and becomes input substrate for downstream context inference. On NullMatch, Aitesis is seeded with the accumulated recall trace to search SSOT directly (INDEX may lack entries while SSOT retains the information).
 
 **Anamnesis vs Prothesis**: Prothesis selects analytical frameworks when none exist (FrameworkAbsent). Anamnesis locates prior discussions when the user has vague recall of their existence (RecallAmbiguous). If the user does not know a framework was ever discussed, it is not Anamnesis — it is Prothesis or Aitesis.
-
-**Anamnesis vs Hermeneia**: Hermeneia clarifies what the user means now (expression gap in current intent). Anamnesis locates what the user discussed before (recall gap in prior context). If the user's current expression is ambiguous, it is Hermeneia; if their reference to prior context is vague, it is Anamnesis.
 
 ## Mode Activation
 
@@ -314,9 +310,9 @@ When Anamnesis is active:
 
 Anamnesis completes before context-dependent work; loaded instructions resume after recall resolves or dismisses.
 
-**Protocol precedence**: graph.json is authoritative. Anamnesis is a 10-outgoing advisory hub (Aitesis, Prothesis, Syneidesis, Hermeneia, Telos, Horismos, Prosoche, Analogia, Periagoge, Epharmoge) with no incoming advisory edges; Katalepsis is structurally last.
+**Protocol precedence**: graph.json is authoritative. Anamnesis is an advisory hub (Aitesis, Prothesis, Syneidesis, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia) with no incoming advisory edges; Katalepsis is structurally last.
 
-**Temporal ordering**: Advisory edges do not enforce activation ordering. `/recollect` should be invoked early — before Hermeneia–Telos–Horismos precondition chain — for advisory flow to materialize. If downstream protocols activate first, advisory enrichment is unreachable in that session (not an error); user awareness of session-start recall is the ordering mechanism.
+**Temporal ordering**: Advisory edges do not enforce activation ordering. `/recollect` should be invoked early for advisory flow to materialize. If downstream protocols activate first, advisory enrichment is unreachable in that session (not an error); user awareness of session-start recall is the ordering mechanism.
 
 ### Trigger Signals
 
@@ -337,7 +333,7 @@ Heuristic signals for empty intention detection (not hard gates):
 - Same recall target already resolved in current session (session immunity)
 - No empty intention — user is asking for new information, not recalling prior context (defers to Aitesis)
 - User explicitly declines recall assistance
-- Phase 0 determines the user's expression needs clarification, not recall (defers to /clarify)
+- Phase 0 determines the user's expression needs other handling, not recall
 
 ### Mode Deactivation
 
@@ -358,7 +354,7 @@ Detect empty intention and extract contextual trace. This phase is **silent** �
 3. **Assess trace ambiguity**:
    - **Low** (3+ specific signals across keywords, temporal, associations): proceed to Phase 1 with targeted scan
    - **Moderate** (1-2 signals): proceed to Phase 1 with broader scan scope and semantic similarity
-   - **High** (0-1 signals, vague expression): consider presenting hypomnesis store overview first (Phase 1 adaptive path) or routing to /clarify if the expression itself is ambiguous rather than the recall
+   - **High** (0-1 signals, vague expression): consider presenting hypomnesis store overview first (Phase 1 adaptive path)
 4. If `not-empty_intention(V)`: present the activation finding to the user (e.g., user provided a specific reference, or no recall gap was detected) and proceed without Anamnesis activation.
 5. If `empty_intention(V)`: record V with extracted trace — proceed to Phase 1
 
@@ -441,7 +437,7 @@ After user response:
 
    After user response: `enrich(V, H)` — integrate hint into trace (keywords, associations, temporal narrowing), re-enter Phase 1 with enriched context.
 
-3. **Reorient(description)**: User surfaces an orthogonal recall dimension neither candidate nor adjacent vectors match — the target is fundamentally different from what was assumed. `rebind(V, d, Σ)` rebuilds V.trace from the new description (fresh construction, not Refine's incremental enrichment). Re-enter Phase 1 with rebuilt trace. NullMatch on re-scan may route cross-protocol (e.g., ContextInsufficient → Aitesis; expression ambiguity → /clarify).
+3. **Reorient(description)**: User surfaces an orthogonal recall dimension neither candidate nor adjacent vectors match — the target is fundamentally different from what was assumed. `rebind(V, d, Σ)` rebuilds V.trace from the new description (fresh construction, not Refine's incremental enrichment). Re-enter Phase 1 with rebuilt trace. NullMatch on re-scan may route cross-protocol (e.g., ContextInsufficient → Aitesis).
 
    **Refine vs Reorient test**: would the user's new description produce any overlap with the current candidate set? Overlap → Refine; disjoint → Reorient.
 

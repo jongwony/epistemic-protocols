@@ -97,8 +97,6 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
@@ -210,7 +208,7 @@ Mismatches are identified across named dimensions — working hypotheses for sys
 - User dismisses all named-dimension mismatches but the result still exhibits contextual misfit
 - The execution context involves domain-specific fitness criteria that resist classification into the four named dimensions
 
-Emergent mismatches must satisfy morphism `ApplicationDecontextualized → ContextualizedExecution`; boundary: contextual fit (in-scope) vs. intent expression (→ `/clarify`) or decision gaps (→ `/gap`).
+Emergent mismatches must satisfy morphism `ApplicationDecontextualized → ContextualizedExecution`; boundary: contextual fit (in-scope) vs. decision gaps (→ `/gap`).
 
 Each mismatch is characterized by:
 

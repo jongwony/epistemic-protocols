@@ -108,7 +108,7 @@ Materialize(C) routes on context richness:
 Context detection:
   C.tasks = TaskList content at invocation time (named persistent list: attend-{context})
   C.prior = protocol chain's accumulated output in current session
-           -- longer chains (Telos → Aitesis → Prosoche) = more verified intent
+           -- longer chains (e.g., Aitesis → Prosoche) = more verified intent
            -- longer chains justify confirm_boundary's lighter touch (1 confirmation vs cold-start's full verify)
   ¬C.prior ≡ no protocol invoked before /attend
 Design principles:
@@ -247,8 +247,6 @@ When elevated-risk findings reach Phase 2, the epistemic part (intent transmissi
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |

@@ -22,8 +22,6 @@
 |----------|--------|---------------|
 | Prothesis | AI 주도 | `FrameworkAbsent → FramedInquiry` |
 | Syneidesis | AI 주도 | `GapUnnoticed → AuditedDecision` |
-| Hermeneia | 하이브리드 | `IntentMisarticulated → ClarifiedIntent` |
-| Telos | AI 주도 | `GoalIndeterminate → DefinedEndState` |
 | **Horismos** | **AI 주도** | **`BoundaryUndefined → DefinedBoundary`** |
 | Aitesis | AI 주도 | `ContextInsufficient → InformedExecution` |
 | Analogia | AI 주도 | `MappingUncertain → ValidatedMapping` |

@@ -150,7 +150,7 @@ Apply the mapping tables below to match observed patterns to protocols.
    - **Tier 2**: 1-2 weak patterns found — map + supplementary recommendations
    - **Tier 3**: No patterns / new user — Starter Trio recommendation
 5. Select final 3-5 protocol recommendations
-6. **Session Diagnostics**: Merge situation co-occurrence facts from Phase 2 subagent output (tool-usage patterns) with main agent firstPrompt analysis (Telos, Katalepsis situations). Then determine protocol mapping and cross-reference with slash command history:
+6. **Session Diagnostics**: Merge situation co-occurrence facts from Phase 2 subagent output (tool-usage patterns) with main agent firstPrompt analysis (Katalepsis verification situations). Then determine protocol mapping and cross-reference with slash command history:
    - Situations where a protocol was applicable but not used → anti-pattern candidates
    - Conversation quality signals (user corrections, backtracking) from Phase 2 subagent Step 2.7 → conversation anti-patterns
    - Each anti-pattern: describe the situation, reference the snippet, suggest the protocol
@@ -203,7 +203,7 @@ Apply the mapping tables below to match observed patterns to protocols.
 
 1. **Check plugin installation**: verify whether recommended protocols are installed
    - Check plugin installation via file existence: Glob for `~/.claude/plugins/cache/epistemic-protocols/{plugin-name}/*/skills/*/SKILL.md`. If found, the protocol is installed.
-   - If installed: provide direct CTA (e.g., "Try `/clarify` right now in your current session")
+   - If installed: provide direct CTA (e.g., "Try `/gap` right now in your current session")
    - If not installed: guide marketplace installation:
      - `claude plugin install epistemic-protocols/{plugin-name}` or marketplace URL
      - Brief installation steps
@@ -211,7 +211,7 @@ Apply the mapping tables below to match observed patterns to protocols.
 
 2. Present a **concrete usage scenario** for the top recommendation:
    - Based on the user's actual work context (derived from session analysis)
-   - Example: "You edited the same file 5 times in recent sessions — using `/clarify` to articulate intent first can reduce rework cycles"
+   - Example: "You edited the same file 5 times in recent sessions — running `/gap` before committing can surface blind spots that drive rework"
 
 3. Close with: "Refer to the HTML profile for remaining recommendations. You can re-run `/report` anytime for updated analysis."
 
@@ -221,8 +221,7 @@ Apply the mapping tables below to match observed patterns to protocols.
 
 | Observable Pattern | Detection Method | Protocol | Rationale |
 |---|---|---|---|
-| Vague first prompts ("improve", "optimize", "ideas for") | firstPrompt keyword match | **Telos** `/goal` | Starting without defined goals |
-| Same file edited 3+ times | Edit path frequency; user disambiguates: same intent repeatedly → `/clarify`, different concerns → `/gap` | **Hermeneia** OR **Syneidesis** | Repeated edits without prior gap check or intent clarification |
+| Same file edited 3+ times | Edit path frequency | **Syneidesis** `/gap` | Repeated edits without prior gap check |
 | Exploration ratio 3:1+ across multiple sessions | (Read+Grep+Glob) / (Edit+Write) threshold | **Prothesis** `/frame` | Sustained exploration without analytical framework |
 | Bash contains deploy/push/apply keywords | Bash input keyword match | **Prosoche** `/attend` | Executing without risk assessment |
 | Verification keywords in firstPrompt (user-authored text only) | firstPrompt keyword match: "explain", "what did you do", "help me understand", "verify", "check" | **Katalepsis** `/grasp` | Need to verify comprehension of results |
@@ -232,7 +231,6 @@ Apply the mapping tables below to match observed patterns to protocols.
 | Observable Pattern | Source | Protocol | Rationale |
 |---|---|---|---|
 | Many hook configurations | settings.json hooks | **Prosoche** `/attend` (reinforcing) | User already values safety mechanisms |
-| Communication-related rule files | Glob rules/ | **Hermeneia** `/clarify` (reinforcing) | Explicit communication rule management |
 
 ### Tertiary Mapping Table (Friction Patterns — from Facets)
 
@@ -240,9 +238,8 @@ Applied only when facets data is available (Path A). Complements Primary and Sec
 
 | Friction Key | Protocol | Rationale | Signal Type |
 |---|---|---|---|
-| `wrong_approach` | **Telos** `/goal` | Wrong direction due to undefined goal | Primary |
+| `wrong_approach` | **Syneidesis** `/gap` | Approach gap undetected | Primary |
 | `wrong_approach` + rework situation | **Syneidesis** `/gap` | Approach gap undetected, accompanied by rework | Primary |
-| `misunderstood_request` | **Hermeneia** `/clarify` | Intent-expression mismatch | Primary |
 | `excessive_changes` | **Syneidesis** `/gap` | Scope boundary gap undetected | Primary |
 | `context_loss` | **Aitesis** `/inquire` | Information loss due to insufficient context | Primary |
 | `wrong_file_edited` | **Prosoche** `/attend` | Execution risk not assessed | Primary |
@@ -262,7 +259,7 @@ Applied only when `growth_map_path = A`. Friction-to-protocol mapping uses the T
 |--------|--------|----------|-----------|
 | `suggestions.usage_patterns` | behavioral recommendation | — (execution layer) | CLAUDE.md / config suggestion |
 | `suggestions.features_to_try` | tool adoption gap | — (execution layer) | Feature utilization improvement |
-| session_type = exploration (high ratio) | framework absence | Prothesis / Telos | Sustained exploration without structure |
+| session_type = exploration (high ratio) | framework absence | Prothesis | Sustained exploration without analytical framework |
 | user_satisfaction low sessions | deep-dive target | — (priority signal) | Protocol absence in dissatisfied sessions |
 | response_time long segments | deliberation point | — (priority signal) | Epistemic deficit candidate |
 
@@ -273,11 +270,11 @@ Applied only when `growth_map_path = A`. Friction-to-protocol mapping uses the T
 **Tier 2** (1-2 weak patterns): Map observed patterns + add supplementary "also useful in these situations" recommendations.
 
 **Tier 3** (No patterns / new user): Recommend the **Starter Trio** — three universally applicable protocols:
-- **Hermeneia** `/clarify` — When you want to convey intent more precisely
-- **Telos** `/goal` — When what to build is still unclear
 - **Syneidesis** `/gap` — When you want to check for blind spots before deciding
+- **Aitesis** `/inquire` — When execution context feels insufficient
+- **Horismos** `/bound` — When ownership of multi-domain decisions is unclear
 
-Selection rationale: covers the three most common entry points — intent clarification, goal construction, and decision auditing. Low entry barrier, independently usable.
+Selection rationale: covers the three most common entry points — decision auditing, context grounding, and boundary definition. Low entry barrier, independently usable.
 
 ## Also Available
 

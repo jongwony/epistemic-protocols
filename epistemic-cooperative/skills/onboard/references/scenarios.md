@@ -4,40 +4,6 @@ Fallback scenarios for `/onboard` SCENARIO and QUIZ phases when session data is 
 
 Design note: scenarios anchor on AI-collaboration moments (meta-primary) with familiar everyday-domain fallbacks. Protocol fits are unambiguous; ambiguous cases belong in quiz material.
 
-## Hermeneia `/clarify`
-
-**Situation**: You ask Claude "summarize this article" — Claude returns a dense technical brief when you wanted a casual 2-sentence version for a friend. "Summarize" meant three different things to you (short, core-only, beginner-level) and Claude picked the wrong one.
-
-**Intervention**: `/clarify` decomposes "summarize" into concrete axes (length, audience, depth) and surfaces the gap between what you said and what you meant before Claude generates anything.
-
-**Trial prompt**: "Let's practice: say 'Summarize this article' and I'll show how /clarify decomposes your intent"
-
-**Quiz Q (situation)**: You ask Claude to "make this email better" and it adds formal salutations, restructures paragraphs, and lengthens each sentence — but you just wanted to shorten it for mobile readers.
-- A) Telos `/goal` — B) Hermeneia `/clarify` — C) Syneidesis `/gap` — D) Prothesis `/frame`
-- Answer: B
-
-**Quiz Q (design)**: You want to ask Claude "clean up this text" but worry it might over-edit. How would you use a protocol to pin down what "clean up" means for you?
-- Hint: The issue isn't missing information — your expression doesn't capture what you actually mean.
-
-**Philosophy**: ἑρμηνεία (interpretation) — Aristotle's treatise on language and meaning. Core principle: **Expression ≠ Intent**. Your words are a lossy compression of your intent; `/clarify` decompresses them before execution begins. Workflow position: Planning cluster — intent must be clear before goals, context, or perspectives matter. Game feel: "I said X, but I meant Y" → decompose → align → proceed with shared understanding.
-
-## Telos `/goal`
-
-**Situation**: You open a session with "help me plan a weekend trip to Busan" — no budget, no duration, no must-see sights, no bar for "what makes this trip successful." Claude asks what you want, you say "just a nice time," and three iterations later the schedule misses everything you quietly cared about.
-
-**Intervention**: `/goal` co-constructs a GoalContract by proposing concrete success criteria, scope boundaries, and trade-off priorities — transforming "a nice time" into "2 days / 2 nights, under 300k KRW, must include a beach and one local restaurant, no early mornings."
-
-**Trial prompt**: "Let's practice: say 'Help me plan a weekend trip to Busan' and I'll show how /goal co-constructs success criteria"
-
-**Quiz Q (situation)**: A friend says "help me start exercising." No target, no duration, no starting point defined. You're about to suggest a full program.
-- A) Aitesis `/inquire` — B) Hermeneia `/clarify` — C) Telos `/goal` — D) Prothesis `/frame`
-- Answer: C
-
-**Quiz Q (design)**: You want Claude to "help me prepare for the interview" but haven't defined what "prepared" looks like. How would you establish success criteria before the work starts?
-- Hint: The problem isn't expression — the end state itself is not yet defined.
-
-**Philosophy**: τέλος (end, purpose) — Aristotle's final cause. Core principle: **Co-construction over Extraction**. The goal doesn't pre-exist in the user's head waiting to be extracted — it's built through dialogue. Workflow position: Planning cluster — once intent is clear, define what success looks like. Game feel: "I know I want something but can't define it" → AI proposes concrete criteria → user shapes → GoalContract emerges.
-
 ## Horismos `/bound`
 
 **Situation**: You ask Claude to edit a long email draft. You're fine with typo fixes and smoother phrasing, but paragraph reorganization and tone changes feel like decisions you want to own. Right now there's no explicit boundary — Claude might change anything.
@@ -47,8 +13,8 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show how /bound assigns ownership per edit type"
 
 **Quiz Q (situation)**: You ask Claude to "tidy up my resume" — it rewrites your summary, swaps out job titles, and restructures bullet points. You only wanted typo fixes and better wording; the content decisions are yours.
-- A) Hermeneia `/clarify` — B) Aitesis `/inquire` — C) Horismos `/bound` — D) Telos `/goal`
-- Answer: C
+- A) Aitesis `/inquire` — B) Horismos `/bound` — C) Syneidesis `/gap` — D) Prosoche `/attend`
+- Answer: B
 
 **Quiz Q (design)**: You're about to delegate a multi-step task with some sensitive decisions. How would you make explicit which steps are AI's call vs yours?
 - Hint: The problem isn't unclear intent or missing context — it's undefined ownership of decisions.
@@ -64,7 +30,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Pick up where we left off yesterday' and I'll show how /recollect surfaces narrative candidates"
 
 **Quiz Q (situation)**: You start with "what was that book Claude recommended last time?" — you remember the conversation happened but not the title, genre, or why it stood out.
-- A) Hermeneia `/clarify` — B) Aitesis `/inquire` — C) Anamnesis `/recollect` — D) Katalepsis `/grasp`
+- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Anamnesis `/recollect` — D) Katalepsis `/grasp`
 - Answer: C
 
 **Quiz Q (design)**: You reference "the direction we agreed on" from a past session but have no specific pointer. How would you surface the right prior context for recognition — rather than asking Claude to guess?
@@ -81,7 +47,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Here's my trip checklist, ready to go' and I'll show how /gap surfaces blind spots"
 
 **Quiz Q (situation)**: You're about to accept a job offer. The salary is good, the role sounds interesting, you're ready to reply. Something feels off but you can't name it.
-- A) Prosoche `/attend` — B) Syneidesis `/gap` — C) Epharmoge `/contextualize` — D) Aitesis `/inquire`
+- A) Prosoche `/attend` — B) Syneidesis `/gap` — C) Epharmoge `/contextualize` — D) Periagoge `/induce`
 - Answer: B
 
 **Quiz Q (design)**: You've picked option B out of three. Before committing, how would you check if you're overlooking something the decision logic didn't cover?
@@ -98,7 +64,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Review this email draft for me' and I'll show how /frame recommends audience perspectives"
 
 **Quiz Q (situation)**: You're writing a group chat message announcing a decision. It seems clear to you, but the chat has coworkers, close friends, and your partner. Some will read it as casual, some as formal. You're unsure which lens to evaluate through.
-- A) Telos `/goal` — B) Prothesis `/frame` — C) Syneidesis `/gap` — D) Aitesis `/inquire`
+- A) Horismos `/bound` — B) Prothesis `/frame` — C) Syneidesis `/gap` — D) Aitesis `/inquire`
 - Answer: B
 
 **Quiz Q (design)**: You're about to publish a blog post but only checked it from your own reading angle. How would you structure the review to surface how different readers receive it?
@@ -115,7 +81,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Is the National Museum open next Friday afternoon?' and I'll show how /inquire grounds the answer in observable facts"
 
 **Quiz Q (situation)**: You ask Claude "can my MacBook Air run this 70B model locally?" — the answer depends on your exact spec and the model's published requirements. Claude starts recommending settings without confirming either.
-- A) Hermeneia `/clarify` — B) Aitesis `/inquire` — C) Telos `/goal` — D) Prosoche `/attend`
+- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Horismos `/bound` — D) Prosoche `/attend`
 - Answer: B
 
 **Quiz Q (design)**: You want to ask "will flight KE123 be on time tomorrow?" — a verifiable external fact. How would you make sure Claude checks rather than guesses?
@@ -149,7 +115,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: describe 3-4 cases you're noticing a pattern across, and I'll show how /induce proposes a candidate abstraction you can shape"
 
 **Quiz Q (situation)**: You keep running into the same feeling across unrelated tasks — a bug fix that bloated into a refactor, a meeting that drifted into planning, a PR review that turned into a redesign. You sense a pattern but don't have the word for it yet.
-- A) Analogia `/ground` — B) Periagoge `/induce` — C) Syneidesis `/gap` — D) Hermeneia `/clarify`
+- A) Analogia `/ground` — B) Periagoge `/induce` — C) Syneidesis `/gap` — D) Aitesis `/inquire`
 - Answer: B
 
 **Quiz Q (design)**: You have three examples of a phenomenon but no name for it. How would you get a candidate abstraction proposed — one you can test, widen, narrow, or discard — rather than staring at the cases until something clicks?
@@ -166,13 +132,13 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'I want to make X more usable / accessible / robust' and I'll show how /elicit reverse-traces dimension projections from your codebase and rules"
 
 **Quiz Q (situation)**: You say "let's tighten the build pipeline" — but "tighten" could mean faster runs, fewer flaky retries, smaller artifacts, or stricter quality gates. Each is a different axis with values implicit in your CI configs and past green/red history.
-- A) Telos `/goal` — B) Aitesis `/inquire` — C) Euporia `/elicit` — D) Hermeneia `/clarify`
+- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Euporia `/elicit` — D) Periagoge `/induce`
 - Answer: C
 
 **Quiz Q (design)**: Your intent is articulated but the axis it commits to depends on coordinates implicit in your externalized cognition (codebase, rules, past sessions). How would you surface those coordinates without forcing a single axis upfront?
 - Hint: Reverse-trace from intent through substrate; let the axis emerge per cycle.
 
-**Philosophy**: εὐπορία (way through, resourcefulness) — the resolving passage that emerges from aporia (no way through). Plato's later dialectic threads aporia and euporia as paired moments of inquiry. Core principle: **Reverse Induction over Axis-Fixed Extraction**. Directional dual to `/induce` — where `/induce` ascends from instances to abstraction (bottom-up colimit), `/elicit` descends from intent through substrate to coordinates (top-down reverse induction). Workflow position: Planning cluster — alongside `/clarify`, `/goal`, `/inquire`, but for axis-emergent intents that no axis-specific protocol covers. Game feel: "I know I want X, but the axis is fuzzy" → substrate trace surfaces dimension projections → cycle-emergent answers → endpoint resolves.
+**Philosophy**: εὐπορία (way through, resourcefulness) — the resolving passage that emerges from aporia (no way through). Plato's later dialectic threads aporia and euporia as paired moments of inquiry. Core principle: **Reverse Induction over Axis-Fixed Extraction**. Directional dual to `/induce` — where `/induce` ascends from instances to abstraction (bottom-up colimit), `/elicit` descends from intent through substrate to coordinates (top-down reverse induction). Workflow position: Planning cluster — alongside `/inquire`, but for axis-emergent intents that no axis-specific protocol covers. Game feel: "I know I want X, but the axis is fuzzy" → substrate trace surfaces dimension projections → cycle-emergent answers → endpoint resolves.
 
 ## Prosoche `/attend`
 
@@ -183,7 +149,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Clean up my Downloads folder' and I'll show how /attend classifies actions by risk and executes safely"
 
 **Quiz Q (situation)**: You ask Claude to "archive old emails and keep important ones." Some are clearly newsletters, some look like receipts, some might be from your landlord. You want help — but silent bulk archiving would be a disaster.
-- A) Aitesis `/inquire` — B) Prosoche `/attend` — C) Syneidesis `/gap` — D) Telos `/goal`
+- A) Aitesis `/inquire` — B) Prosoche `/attend` — C) Syneidesis `/gap` — D) Horismos `/bound`
 - Answer: B
 
 **Quiz Q (design)**: You want Claude to act on a plan with mixed-risk actions — some safe, some reversible, some dangerous. How would you get the safe steps executed fast without giving up control over the risky ones?
@@ -217,7 +183,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Help me get the core of this book fast' and I'll show how /grasp decomposes by category and verifies comprehension"
 
 **Quiz Q (situation)**: You skimmed a long article and nodded along. A colleague asks you to summarize the main argument in one sentence and you freeze — you realize skimming wasn't the same as grasping.
-- A) Hermeneia `/clarify` — B) Prothesis `/frame` — C) Katalepsis `/grasp` — D) Syneidesis `/gap`
+- A) Periagoge `/induce` — B) Prothesis `/frame` — C) Katalepsis `/grasp` — D) Syneidesis `/gap`
 - Answer: C
 
 **Quiz Q (design)**: After quickly consuming a complex explanation, how would you verify you actually grasped the core — rather than that you could nod along?
@@ -228,12 +194,6 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 ## Composition Patterns
 
 Real sessions rarely use a single protocol. Composition — invoking multiple protocols together — is often more valuable than any isolated call. Three patterns that appear most in practice:
-
-### `/clarify * /goal` — Vague verb to contract
-
-When you say "help me improve my morning routine" — the verb ("improve") is vague AND the end state is undefined. `/clarify` first decomposes "improve" into axes (energy, speed, focus, health), then `/goal` co-constructs the success criteria for the axis you care about.
-
-**Shape**: vague intent → clarified axis → concrete success bar.
 
 ### `/recollect * /inquire` — Recalled context plus fresh facts
 

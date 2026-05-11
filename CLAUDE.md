@@ -111,7 +111,7 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 **Cross-cutting**: `/bound` (Horismos) — BoundaryMap narrows scope for 5 downstream protocols via DAG-downstream advisory. `/recollect` (Anamnesis) — recalled context enriches downstream protocols via advisory-only edges (no precondition weight). `/grasp` (Katalepsis) — requires all to complete.
 
 **Key graph relationships**:
-- Preconditions (DAG-enforced): * → Katalepsis (includes Anamnesis and Periagoge via wildcard). The prior Hermeneia → Telos → Horismos chain dissolved with Hermeneia/Telos deprecation; Horismos has no precondition source, Euporia → Horismos remains advisory.
+- Preconditions (DAG-enforced): * → Katalepsis (includes Anamnesis and Periagoge via wildcard). Horismos has no precondition source; Euporia → Horismos remains advisory.
 - Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia}, Prothesis → {Syneidesis, Aitesis, Analogia}, Euporia → {Horismos, Aitesis, Periagoge}
 - Suppression: Syneidesis ⊣ Aitesis (same scope), Aitesis ⊣ Epharmoge (pre+post stacking)
 

@@ -113,8 +113,6 @@ converge    (extension)  → TextPresent+Proceed (convergence evidence trace; pr
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
@@ -205,7 +203,7 @@ Comprehension gaps within each category:
 | **Causality** | User doesn't understand why something happens | "Do you understand why this value comes from here?" | Non-obvious causal chains (architecture, dependency) |
 | **Scope** | User doesn't see full impact | "Did you notice this also affects Y?" | Cross-cutting impact (architecture, refactoring) |
 | **Sequence** | User doesn't understand execution order | "Do you see that A happens before B?" | Order-sensitive changes (initialization, dependency) |
-| **Emergent** | Gap outside canonical types | Adapted to specific comprehension deficit | Must satisfy morphism `ResultUngrasped → VerifiedUnderstanding`; boundary: comprehension verification (in-scope) vs. intent expression (→ `/clarify`) or decision gaps (→ `/gap`) |
+| **Emergent** | Gap outside canonical types | Adapted to specific comprehension deficit | Must satisfy morphism `ResultUngrasped → VerifiedUnderstanding`; boundary: comprehension verification (in-scope) vs. decision gaps (→ `/gap`) |
 
 **Emergent gap detection**: Named types are working hypotheses, not exhaustive categories. Detect Emergent gaps when:
 - User's comprehension difficulty spans multiple named types (e.g., understanding both causality and scope simultaneously in a cross-cutting change)

@@ -14,7 +14,7 @@ Analyze the protocol definitions for mathematical soundness.
 **Files to examine**:
 - prothesis/skills/frame/SKILL.md (Definition section)
 - syneidesis/skills/gap/SKILL.md (Definition section)
-- hermeneia/skills/clarify/SKILL.md (Definition section)
+- horismos/skills/bound/SKILL.md (Definition section)
 - katalepsis/skills/grasp/SKILL.md (Definition section)
 
 **Checklist**:
@@ -71,7 +71,7 @@ Analyze the protocol instructions for consistency and completeness.
 **Files to examine**:
 - prothesis/skills/frame/SKILL.md (Mode Activation, Priority sections)
 - syneidesis/skills/gap/SKILL.md (Mode Activation, Priority sections)
-- hermeneia/skills/clarify/SKILL.md (Mode Activation, Priority sections)
+- horismos/skills/bound/SKILL.md (Mode Activation, Priority sections)
 - katalepsis/skills/grasp/SKILL.md (Mode Activation, Priority sections)
 - CLAUDE.md (Axioms)
 
@@ -133,7 +133,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 **Files to examine**:
 - prothesis/skills/frame/SKILL.md (Mode Activation, Rules sections)
 - syneidesis/skills/gap/SKILL.md (Mode Activation, Rules sections)
-- hermeneia/skills/clarify/SKILL.md (Mode Activation, Rules sections)
+- horismos/skills/bound/SKILL.md (Mode Activation, Rules sections)
 - katalepsis/skills/grasp/SKILL.md (Mode Activation, Rules sections)
 - CLAUDE.md (Project Overview, Axioms)
 
@@ -149,12 +149,14 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
 - [ ] Correct epistemic type signature declared:
   - Prothesis: FrameworkAbsent → FramedInquiry (AI-guided, SELECT)
   - Syneidesis: GapUnnoticed → AuditedDecision (AI-guided, SURFACE)
-  - Hermeneia: IntentMisarticulated → ClarifiedIntent (Hybrid, EXTRACT)
-  - Telos: GoalIndeterminate → DefinedEndState (AI-guided, CO-CONSTRUCT)
   - Horismos: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary
   - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INFER)
+  - Analogia: MappingUncertain → ValidatedMapping (AI-guided, VALIDATE)
+  - Periagoge: AbstractionInProcess → CrystallizedAbstraction (AI-guided, CRYSTALLIZE)
+  - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
   - Prosoche: ExecutionBlind → SituatedExecution (User-initiated, EVALUATE)
+  - Anamnesis: RecallAmbiguous → RecalledContext (AI-guided, RECOGNIZE)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
   - Write: InsightInternal → ExternalizedKnowledge (User-invoked, EXTERNALIZE)
 - [ ] Initiator correctly specified (AI-guided vs Hybrid vs User-initiated vs User-invoked)
@@ -196,8 +198,7 @@ When other experts flag these as issues, they should be filtered (not actual iss
 |---------|------------------|-----------|
 | Gate mandate | Structured presentation + turn yield in Phase 1/2 | Unstructured text bypass |
 | Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
-| Hybrid protocol | Hermeneia activates on user signal or with confirmation when AI-detected | Unconfirmed AI auto-activation |
-| Intent accessibility | Hermeneia uses Î (inferred), not I (actual) | Direct access to user intent |
+| Hybrid protocol | Euporia activates on user signal or with confirmation when AI-detected | Unconfirmed AI auto-activation |
 
 ## Synthesis Template
 
@@ -236,17 +237,17 @@ const perspectives = [
   {
     name: 'type-category-theory',
     prompt: TYPE_THEORY_PROMPT,
-    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'hermeneia/skills/clarify/SKILL.md']
+    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'horismos/skills/bound/SKILL.md']
   },
   {
     name: 'instruction-design',
     prompt: INSTRUCTION_DESIGN_PROMPT,
-    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'hermeneia/skills/clarify/SKILL.md', 'CLAUDE.md']
+    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'horismos/skills/bound/SKILL.md', 'CLAUDE.md']
   },
   {
     name: 'claude-code-ecosystem',
     prompt: CLAUDE_CODE_ECOSYSTEM_PROMPT,
-    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'hermeneia/skills/clarify/SKILL.md', 'CLAUDE.md']
+    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'horismos/skills/bound/SKILL.md', 'CLAUDE.md']
   }
 ];
 

@@ -115,8 +115,6 @@ converge           (extension)   → TextPresent+Proceed (convergence evidence t
 |----------|-----------|----------------------|-------|
 | **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
 | **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Hermeneia** | Hybrid | IntentMisarticulated → ClarifiedIntent | Expression clarification |
-| **Telos** | AI-guided | GoalIndeterminate → DefinedEndState | Goal co-construction |
 | **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
 | **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
 | **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
@@ -130,8 +128,6 @@ converge           (extension)   → TextPresent+Proceed (convergence evidence t
 **Key differences**:
 
 - **Periagoge vs Analogia**: Directional dual. Analogia validates a given abstract structure against a concrete target (static substitution — given Sₐ, establish Sₐ → Sₜ correspondence). Periagoge forms a new abstraction from concrete instances (dynamic colimit — given {Iᵢ}, construct emergent abstraction). When the input carries `essence_sensed(A)` with `locator_absent(A)` (formal `¬located(A)`; manifests in Analogia as a missing source abstraction Sₐ), Analogia's substitution interface produces source-domain confabulation; Periagoge resolves that misfit by handling abstraction formation directly.
-- **Periagoge vs Telos**: Both construct rather than extract, but target different categories. Telos constructs goals (what to do); Periagoge constructs abstractions (how to see patterns across cases). A goal can be concrete and singular; an abstraction collects multiple concrete instances under a shared essence.
-- **Periagoge vs Hermeneia**: Hermeneia clarifies existing intent — user has an intent that needs articulation. Periagoge forms a new abstraction — user has instances and essence intuition but no located abstraction yet. The precondition witness differs: Hermeneia requires `∃ intent I`, Periagoge starts from `¬located(A)` while `essence_sensed(A)`.
 - **Periagoge vs Prothesis**: Prothesis selects among candidate analytical frameworks (including cases where multiple candidates are already named). Periagoge forms a new abstraction from an instance cocone when no locator is available. Comparative analysis between already-named candidate readings — even with multiple instances or strong essence sensing — is Prothesis territory (frame selection), not Periagoge's colimit formation. Scope is specified by the operation kind, not by instance count.
 
 **Formation distinction**: Periagoge operates on the colimit — the emergent structure arising from a cocone of concrete instances. The operational test: Periagoge applies when concrete instances carry `essence_sensed(A)` and `locator_absent(A)`. Instance accumulation contributes evidence strength; the gate is essence signal plus locator gap.
@@ -213,10 +209,8 @@ Periagoge's scope, stated positively by canonical use patterns:
 **Non-scenarios (out of scope — defer to named protocol)**:
 - Comparative analysis between already-named candidate readings/frames → Prothesis (`/frame`) or Syneidesis (`/gap`)
 - Validating an existing abstract structure against a concrete target → Analogia (`/ground`)
-- Articulating a misexpressed intent that is already clear internally → Hermeneia (`/clarify`)
-- Co-constructing a goal with no clear end state → Telos (`/goal`)
 
-The operational test: "Is the user operation *forming a new abstraction from observed instances*, or is it something else (selecting, validating, articulating, goaling)?" Only the first is Periagoge.
+The operational test: "Is the user operation *forming a new abstraction from observed instances*, or is it something else (selecting, validating)?" Only the first is Periagoge.
 
 ### Mode Deactivation
 
@@ -338,7 +332,7 @@ After integration:
 9. **Attempt cap**: Max 5 triangulations per abstraction seed. At cap, surface unresolved candidate with explicit status and deactivate.
 10. **Convergence persistence**: Mode active until crystallized, Esc, or attempt cap.
 11. **Progress visibility**: Every Phase 2 surfacing includes attempt counter.
-12. **Cross-protocol awareness**: Defer to Hermeneia when intent-articulation is the primary deficit; defer to Analogia when a pre-existing abstract structure needs validation against a target; defer to Telos when goal-construction is the primary deficit.
+12. **Cross-protocol awareness**: Defer to Analogia when a pre-existing abstract structure needs validation against a target.
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields violates this separation.
 14. **Convergence evidence**: At crystallization, present transformation trace — for each step in history, show (candidate → user_move → candidate'). Per-step evidence is required.
 15. **Absorb Analogia misfit**: When `/ground` Phase 0 detects colimit-shaped input (`essence_sensed` + `locator_absent(A)`) and nudges here, absorb the misfit as valid Periagoge trigger. Before Phase 1, surface the routing rationale with the cited `/ground` detection basis ("colimit-shaped input detected: essence_sensed(A), locator_absent(A), [N supporting instances] — redirecting to abstraction crystallization") so the user can recognize the evidence that justified the redirect; the concrete instance count makes the routing rationale verifiable rather than vague.

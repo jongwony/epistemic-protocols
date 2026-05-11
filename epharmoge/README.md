@@ -22,8 +22,6 @@ AI produces correct results, but correctness alone doesn't guarantee applicabili
 |----------|-----------|---------------|
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
-| Hermeneia | Hybrid | `IntentMisarticulated → ClarifiedIntent` |
-| Telos | AI-guided | `GoalIndeterminate → DefinedEndState` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
 | **Epharmoge** | **AI-guided** | **`ApplicationDecontextualized → ContextualizedExecution`** |

@@ -27,7 +27,6 @@ Protocols the Maintainer Dogfoods:
   /gh-address-comments       ███████░░░░░░░░░░░░░  17x   PR feedback loop
   /analogia:ground           ███████░░░░░░░░░░░░░  16x   structural mapping validation
   /horismos:bound            ██████░░░░░░░░░░░░░░  15x   epistemic boundary definition
-  /hermeneia:clarify         █████░░░░░░░░░░░░░░░  12x   intent-expression gap repair
 
 Contributors are expected to dogfood the protocols they edit — the list above is what that looks like in practice, not a mandated workflow.
 
@@ -65,7 +64,6 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/analogia:ground` — validate abstract-concrete mappings
 - [ ] `/epharmoge:contextualize` — post-execution applicability check against actual project context
 - [ ] `/prosoche:attend` — routes execution-time risks; stops on irreversible actions for approval
-- [ ] `/hermeneia:clarify` — repair intent-expression gaps in commit messages or PR descriptions
 - [ ] [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) — one-shot commit + push + PR + task registration. Optional convenience; lives in the external `jongwony/ClaudePanel.spoon` plugin, not this repo. Plain `git push` + `gh pr create` also works.
 
 ## Contribution Workflow

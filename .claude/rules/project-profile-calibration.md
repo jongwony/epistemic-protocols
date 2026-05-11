@@ -26,12 +26,10 @@ Floor instances (Constitution preserved — runtime-discovered):
 - Prosoche `/attend` Phase 2: gate interaction over runtime-discovered risk patterns — the specific irreversibility, security boundary, or human-communication context emerges at execution time and is not pattern-pre-committable. Gate-passage actions requiring substrate enforcement (harness permission, high-stake execution) are non-epistemic substrate, delegated by handoff per the Boundary.
 
 Bounded zone (in-principle delegatable via contract-style Standing authority + post-deploy correction):
-- Telos GoalContract — pre-commitable as project-level standing goals.
 - Horismos BoundaryMap — pre-commitable as project-level scope rules.
 - Syneidesis decision pattern — pre-commitable as recurring decision templates.
-- Hermeneia Phase 2 articulation — pre-commitable as default-articulation rules for recurring intent patterns. Distinguished from Katalepsis floor by *retry semantics*: incorrect articulation is correctable at the next Hermeneia invocation (bounded regret), whereas Katalepsis's measurement identity precludes retry without altering the verification.
 
-Telos / Horismos / Syneidesis are also grounded by their respective protocol-internal Constitution checkpoints — GoalContract Phase 2, boundary approval Phase 4, gap consideration Phase 3 — providing direct A2 enforcement at the protocol layer. Profile-layer enumeration of these protocols is therefore redundant for runtime enforcement; their inclusion in the bounded zone is for **future split-Extension migration visibility** (recording where conditional Standing-authority delegation could later be inscribed as `(extension)` TOOL GROUNDING entries), not present runtime gating.
+Horismos / Syneidesis are also grounded by their respective protocol-internal Constitution checkpoints — boundary approval Phase 4, gap consideration Phase 3 — providing direct A2 enforcement at the protocol layer. Profile-layer enumeration of these protocols is therefore redundant for runtime enforcement; their inclusion in the bounded zone is for **future split-Extension migration visibility** (recording where conditional Standing-authority delegation could later be inscribed as `(extension)` TOOL GROUNDING entries), not present runtime gating.
 
 **Operational realization deferred**: "in-principle delegatable" is a *capability* statement (Standing authority pattern would in principle cover the gate). Operational realization — adding split `(extension)` entries in TOOL GROUNDING that specialize the Constitution gate under specific runtime conditions — is deferred per-protocol pending accumulated use evidence. Current SKILL.md TOOL GROUNDING `(constitution)` annotations remain runtime-authoritative.
 
