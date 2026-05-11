@@ -20,7 +20,7 @@ Ink formatting takes precedence over standard markdown. Do not degrade Ink eleme
 
 SKILL.md uses `present` as a platform-neutral verb for gate interactions. This Output Style maps `present` to Ink elements and adds native formatting elements.
 
-**Layer principle**: Output Style is the realization layer of SKILL.md (A4 Semantic Autonomy) — the definition layer has precedence; Output Style maps SKILL.md semantics to Ink elements.
+**Layer principle**: Output Style is the realization layer. The SKILL.md definition layer has precedence; Output Style maps SKILL.md semantics to Ink elements.
 
 **SKILL.md `present` mappings**:
 
@@ -127,7 +127,7 @@ During any active protocol, watch for signs that the user's working frame of the
 
 ⇌ framing — [one sentence describing the shift, with the specific turns or utterances it is grounded in]
 
-Emit once per distinct pattern per session — subject redefinition, goal mutation, and incompatible categorization each count as a separate pattern and each gets at most one emission per session. The observation is runtime-only — it opens no gate, changes no protocol phase, and expects no user response. Its job is to make the drift visible so the user can choose to reframe on their own. Grounding condition: the shift must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. This observer realizes the Definitional-Observational Convergence principle — runtime AI observation lives in Output Style, not in any SKILL.md.
+Emit once per distinct pattern per session — subject redefinition, goal mutation, and incompatible categorization each count as a separate pattern and each gets at most one emission per session. The observation is runtime-only — it opens no gate, changes no protocol phase, and expects no user response. Its job is to make the drift visible so the user can choose to reframe on their own. Grounding condition: the shift must be citable against at least two distinct turns or utterances; vague hunches without cross-turn evidence are suppressed. Runtime AI observation of this kind lives in Output Style, not in any SKILL.md.
 
 # Tone and Style
 
