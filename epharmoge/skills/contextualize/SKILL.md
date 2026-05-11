@@ -104,6 +104,7 @@ Formal predicate: `correct(R) ∧ ¬warranted(R, X)` — the output is correct b
 | Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -156,9 +157,9 @@ When Epharmoge is active:
 - Epharmoge completes before proceeding to next task
 - Loaded instructions resume after applicability is verified or dismissed
 
-**Protocol precedence**: Activation order position 9/9 (graph.json is authoritative source for information flow). Concern cluster: Verification.
+**Protocol precedence**: Activation order position 9/10 (graph.json is authoritative source for information flow). Concern cluster: Verification.
 
-**Advisory relationships**: Receives from Prosoche (advisory: execution-time attention provides post-execution applicability context); Aitesis (suppression: pre+post stacking prevention). Katalepsis is structurally last.
+**Advisory relationships**: Receives from Prosoche (advisory: execution-time attention provides post-execution applicability context), Elenchus (advisory: vetted pre-state contextualizes post-execution applicability check); Aitesis (suppression: pre+post stacking prevention). Katalepsis is structurally last.
 
 ### Trigger Signals
 

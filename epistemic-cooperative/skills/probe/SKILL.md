@@ -53,7 +53,7 @@ Phase 0 is silent — no surfacing. If detection fails (deficit is already clear
 
 ### Phase 1: Catalog Scan
 
-Scan the user's situation against the full catalog of 11 epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
+Scan the user's situation against the full catalog of 12 epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
 
 - A `deficit: DeficitName` matched against the situation
 - The `protocol: ProtocolId` that addresses that deficit

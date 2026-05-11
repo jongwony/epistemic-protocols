@@ -273,6 +273,7 @@ The scan finds candidates; the narrative Qc enables recognition; the user consti
 | Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -310,7 +311,7 @@ When Anamnesis is active:
 
 Anamnesis completes before context-dependent work; loaded instructions resume after recall resolves or dismisses.
 
-**Protocol precedence**: graph.json is authoritative. Anamnesis is an advisory hub (Aitesis, Prothesis, Syneidesis, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia) with no incoming advisory edges; Katalepsis is structurally last.
+**Protocol precedence**: graph.json is authoritative. Anamnesis is an advisory hub (Aitesis, Prothesis, Syneidesis, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia, Elenchus) with no incoming advisory edges; Katalepsis is structurally last. Elenchus receives recalled prior context as audit-candidate substrate.
 
 **Temporal ordering**: Advisory edges do not enforce activation ordering. `/recollect` should be invoked early for advisory flow to materialize. If downstream protocols activate first, advisory enrichment is unreachable in that session (not an error); user awareness of session-start recall is the ordering mechanism.
 

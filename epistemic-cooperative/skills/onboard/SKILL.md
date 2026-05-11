@@ -58,6 +58,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Syneidesis `/gap` | Decision | Right before committing, checking for blind spots | Same file 3+ edits (different concerns), `excessive_changes` friction |
 | Prosoche `/attend` | Execution | Risk-classified execution — safe actions flow, risky ones gate | Mixed-risk plans (bulk safe work + judgment moments), upstream deficit signals, `wrong_file_edited` friction |
 | Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the accumulated conversation context | Mismatch against session-built constraints (user-aware context accumulation) |
+| Elenchus `/sublate` | Verification | About to externalize a working context whose apparent sufficiency has decayed | Dialectical antithesis per source (provenance / counterfactual / cross-source consistency) before pre-execution sync |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
 | Anamnesis `/recollect` | Cross-cutting | Resolving vague recall of prior sessions or discussions | Cross-session state recovery via narrative recognition (Recognition over Retrieval) |
 | Katalepsis `/grasp` | Cross-cutting | Rapid core comprehension via categorical decomposition | Category-based grasp (problem/method/result/limits) for new knowledge, reviews, or AI-completed work |
@@ -77,7 +78,7 @@ Do NOT present the full protocol catalog upfront. Start with a concise welcome a
 
 **If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 11 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
+**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 12 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
 - Text: Post-catalog path selection
 - Options:
   - Quick recommendation
@@ -96,7 +97,7 @@ Then **Gate #2**:
 - Options:
   - Pre-execution (Planning) — /bound, /inquire, /elicit
   - Analysis/Decision — /frame, /ground, /induce, /gap
-  - Execution/Verification/Understanding — /attend, /contextualize, /recollect, /grasp
+  - Execution/Verification/Understanding — /attend, /contextualize, /sublate, /recollect, /grasp
 
 **Gate #3** (Targeted only, session source):
 - Text: Session source selection

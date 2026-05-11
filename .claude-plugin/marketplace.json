@@ -50,6 +50,11 @@
       "description": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)"
     },
     {
+      "name": "elenchus",
+      "source": "./elenchus",
+      "description": "Vet working context by dialectical antithesis before action — /sublate (ἔλεγχος: cross-examination)"
+    },
+    {
       "name": "horismos",
       "source": "./horismos",
       "description": "Define epistemic boundaries per decision — /bound (ὁρισμός: a bounding)"

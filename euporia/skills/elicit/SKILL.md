@@ -141,6 +141,7 @@ Per cycle, the trio `(D[step], A[step], I'[step])` is recorded pairwise into `D_
 | **Euporia** | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -189,7 +190,7 @@ When Euporia is active:
 - Euporia completes before action dependent on the resolved endpoint proceeds
 - Loaded instructions resume after resolution or Esc
 
-**Protocol precedence**: Activation order position 6/9 (graph.json is authoritative source for information flow). Concern cluster: Planning.
+**Protocol precedence**: Activation order position 6/10 (graph.json is authoritative source for information flow). Concern cluster: Planning.
 
 **Advisory relationships**: Receives from Anamnesis (advisory: recalled session history enriches substrate scan), Horismos (advisory: BoundaryMap narrows substrate scope). Provides to Aitesis (advisory: traced coordinates narrow context inference), Periagoge (advisory: resolved endpoint may seed downstream abstraction), Horismos (advisory: resolved coordinates inform downstream boundary definition). Same-session re-entry between Euporia and Horismos is permitted but treated as distinct activation — each invocation produces a fresh ResolvedEndpoint or BoundaryMap, with the prior instance becoming session evidence rather than auto-cycling input. Katalepsis is structurally last.
 

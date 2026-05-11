@@ -33,7 +33,7 @@ const _protocolRecords = _records.filter(r => r.isProtocol);
 const PROTOCOL_FILES = protocolFiles({ projectRoot });
 
 const CANONICAL_PRECEDENCE = CANONICAL_PRECEDENCE_ARR.join(' → ');
-const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
+const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
 
 // PRECEDENCE_FILES = protocols listed in CANONICAL_PRECEDENCE (linear order)
 // + Katalepsis appended (structurally last). Anamnesis is excluded — recall

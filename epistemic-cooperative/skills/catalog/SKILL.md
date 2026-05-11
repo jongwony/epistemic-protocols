@@ -5,7 +5,7 @@ description: "Protocol handbook — instant reference for when to use each epist
 
 # Catalog Skill
 
-Instant reference handbook for 11 epistemic protocols. Browse by cluster, look up by command, or find the right protocol for a situation.
+Instant reference handbook for 12 epistemic protocols. Browse by cluster, look up by command, or find the right protocol for a situation.
 
 ## When to Use
 
@@ -23,7 +23,7 @@ Skip when:
 
 | Invocation | Behavior |
 |------------|----------|
-| `/catalog` | Overview: 11 protocols grouped by cluster, 1-line each + usage hints |
+| `/catalog` | Overview: 12 protocols grouped by cluster, 1-line each + usage hints |
 | `/catalog {cluster}` | Cluster detail: expanded protocol cards with scenarios |
 | `/catalog {command}` | Single protocol detail: full card from scenarios.md |
 
@@ -63,6 +63,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
 | Epharmoge | `/contextualize` | Output is correct but may not fit the actual context |
+| Elenchus | `/sublate` | About to externalize a working context whose apparent sufficiency may have decayed |
 
 ### Cross-cutting
 

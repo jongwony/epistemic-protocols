@@ -3,7 +3,7 @@
   "nodes": [
     "horismos", "aitesis", "analogia",
     "periagoge", "euporia", "prothesis", "syneidesis", "prosoche", "epharmoge",
-    "katalepsis", "anamnesis"
+    "elenchus", "katalepsis", "anamnesis"
   ],
   "edge_types": {
     "precondition": {
@@ -47,6 +47,13 @@
     { "source": "euporia", "target": "aitesis", "type": "advisory", "satisfies": "역추적된 좌표가 컨텍스트 추론 범위를 좁힘" },
     { "source": "euporia", "target": "periagoge", "type": "advisory", "satisfies": "해소된 endpoint가 downstream 추상화 형성의 시드를 좁힘 (categorical dual 양립)" },
     { "source": "anamnesis", "target": "euporia", "type": "advisory", "satisfies": "회상된 세션 이력이 substrate 스캔을 보강" },
-    { "source": "horismos", "target": "euporia", "type": "advisory", "satisfies": "경계 맵이 substrate scope를 좁힘" }
+    { "source": "horismos", "target": "euporia", "type": "advisory", "satisfies": "경계 맵이 substrate scope를 좁힘" },
+    { "source": "aitesis", "target": "elenchus", "type": "advisory", "satisfies": "수집된 컨텍스트가 변증법적 audit substrate를 제공" },
+    { "source": "anamnesis", "target": "elenchus", "type": "advisory", "satisfies": "회상된 prior context가 vetting 대상 후보를 제공" },
+    { "source": "horismos", "target": "elenchus", "type": "advisory", "satisfies": "경계 맵이 high-leverage source 범위를 좁힘" },
+    { "source": "elenchus", "target": "syneidesis", "type": "advisory", "satisfies": "vetted context가 갭 감지 정확성을 높임" },
+    { "source": "elenchus", "target": "prosoche", "type": "advisory", "satisfies": "vetted context가 실행 위험 평가 초점을 좁힘" },
+    { "source": "elenchus", "target": "epharmoge", "type": "advisory", "satisfies": "vetted pre-state가 post-execution 적용성 검증 컨텍스트를 제공" },
+    { "source": "elenchus", "target": "horismos", "type": "advisory", "satisfies": "vetted findings가 후속 경계 정의 정보를 제공" }
   ]
 }

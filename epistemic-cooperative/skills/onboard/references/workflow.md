@@ -8,7 +8,7 @@ Protocols grouped by primary concern. Clusters are non-directional — they repr
 | Analysis | /frame, /ground, /induce | Are we looking at this right? |
 | Decision | /gap | Are we missing something? |
 | Execution | /attend | Are we ready and doing this safely? |
-| Verification | /contextualize | Does this fit where it's going? |
+| Verification | /contextualize, /sublate | Does this fit where it's going? Has the working context held up? |
 
 **Cross-cutting**: /bound (boundary — consumed by 5 downstream protocols), /recollect (vague recall resolution — surfaces prior context for recognition), /grasp (comprehension — always last)
 
