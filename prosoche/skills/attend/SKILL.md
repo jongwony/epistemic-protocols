@@ -254,6 +254,7 @@ When elevated-risk findings reach Phase 2, the epistemic part (intent transmissi
 | Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -297,7 +298,7 @@ When Prosoche is active:
 - Loaded instructions and other protocol behaviors are retained
 - Prosoche adds a risk assessment layer, does not modify protocol logic
 
-**Protocol precedence**: Activation order position 8/9 (graph.json is authoritative source for information flow). Concern cluster: Execution.
+**Protocol precedence**: Activation order position 8/10 (graph.json is authoritative source for information flow). Concern cluster: Execution.
 
 **Advisory relationships**: Receives from Aitesis (advisory: inferred context narrows execution risk assessment), Horismos (advisory: BoundaryMap adjusts risk assessment threshold). Provides to Epharmoge (advisory: execution-time attention provides post-execution applicability context). Katalepsis is structurally last.
 

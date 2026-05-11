@@ -174,6 +174,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: ἐφαρμογή (application, fitting) — Aristotle's practical application. Core principle: **Applicability over Correctness**. Correct output that doesn't fit the accumulated conversation context is not useful output. The user's awareness that context has been built up in this session is the trigger. Workflow position: Verification cluster — after work is done, check if it fits where it's going. Game feel: "Done! ...wait, this ignores everything we just discussed" → accumulated-context mismatch surfaces → adapt or dismiss.
 
+## Elenchus `/sublate`
+
+**Situation**: You've been collecting context for two hours — a teammate's verbal claim about API behavior, a doc you read at the start, a Slack thread quote, an inferred constraint built across three hops. Now you're about to share the plan in a meeting. One of those sources has aged, another's verification path is provisional, and two of them quietly point at the same referent in conflicting directions — but you don't know which.
+
+**Intervention**: `/sublate` vets the working context before it externalizes. It selects audit-candidate sources (high-leverage, age beyond horizon, long inference chain, or cross-source contradiction) and posits a dialectical antithesis per source — provenance challenge ("X's verification path is provisional"), counterfactual gap ("under condition Z, Y fails at point P"), or cross-source divergence ("X₁ and X₂ collide at Q"). You judge each source as Confirmed, Revised, Discarded, Deferred, Conditional, Bounded, or Routed before the sync.
+
+**Trial prompt**: "Let's practice: tell me you're about to share an accumulated plan in 15 minutes and want to vet the context first, and I'll show how /sublate dialectically tests each source."
+
+**Quiz Q (situation)**: You've spent the afternoon building a context about a teammate's preferences from three different conversations and one inferred guess. You're about to make a decision based on the synthesis. Something feels off but you can't name which source decayed.
+- A) Aitesis `/inquire` — B) Epharmoge `/contextualize` — C) Elenchus `/sublate` — D) Syneidesis `/gap`
+- Answer: C
+
+**Quiz Q (design)**: After hours of context accumulation, before an external sync, how would you stress-test which sources still hold and which have decayed — without re-collecting everything from scratch?
+- Hint: The output isn't yet produced — the *input* (working context) is what carries silent decay. Antithesis per source is the test, not gap detection across the decision.
+
+**Philosophy**: ἔλεγχος (cross-examination, refutation) — the Socratic mode of testing a claim by deliberately positing its counter-claim and seeing what survives the exchange. The lexical verb `/sublate` carries the Hegelian *Aufhebung* — preserve + negate + lift up. Core principle: **Dialectical Vetting over Silent Trust**. Working context decays silently as time passes, downstream concentration warps incidental claims into load-bearing premises, and cross-source contradictions hide behind topical proximity. Workflow position: Verification cluster — alongside `/contextualize`, but pre-execution rather than post (Elenchus tests inputs before action; Epharmoge tests outputs after). Game feel: "We've built so much context — is any of it still standing?" → per-source antithesis → disposition judgment → vetted context.
+
 ## Katalepsis `/grasp`
 
 **Situation**: You're about to meet a friend who's recommending a dense new book. You want to skim and "get it" before the conversation, but the book has 14 chapters and you have 30 minutes. Random sampling won't give you the core; you need the shape — problem / method / result / limits — fast.

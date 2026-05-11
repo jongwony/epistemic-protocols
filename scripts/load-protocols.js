@@ -26,7 +26,7 @@ const DEFAULT_PROJECT_ROOT = path.resolve(__dirname, '..');
 const CANONICAL_PRECEDENCE = [
   'Horismos', 'Aitesis', 'Prothesis',
   'Analogia', 'Periagoge', 'Euporia',
-  'Syneidesis', 'Prosoche', 'Epharmoge',
+  'Syneidesis', 'Prosoche', 'Epharmoge', 'Elenchus',
 ];
 
 // Per-call memoization cache. discoverPlugins() instantiates a fresh cache

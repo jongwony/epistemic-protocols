@@ -116,6 +116,7 @@ converge     (extension)       → TextPresent+Proceed (convergence evidence tra
 | Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -162,7 +163,7 @@ When Analogia is active:
 - Analogia completes before output dependent on mapping validity proceeds
 - Loaded instructions resume after mapping status is made explicit
 
-**Protocol precedence**: Activation order position 4/9 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
+**Protocol precedence**: Activation order position 4/10 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
 
 **Advisory relationships**: Receives from Prothesis (advisory: perspective simulation provides mapping construction context), Aitesis (advisory: inferred context narrows mapping domain identification), Horismos (advisory: BoundaryMap narrows mapping domain identification). Provides to Syneidesis (advisory: validated mapping improves gap detection accuracy). Katalepsis is structurally last.
 

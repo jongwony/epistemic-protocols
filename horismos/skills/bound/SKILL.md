@@ -160,6 +160,7 @@ converge      (extension)    → TextPresent+Proceed (per-cycle trace + final ga
 | Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -204,7 +205,7 @@ When Horismos is active:
 - Horismos completes before execution proceeds
 - Loaded instructions resume after all domains are bounded or dismissed
 
-**Protocol precedence**: Activation order position 1/9 (graph.json is authoritative source for information flow). Cross-cutting: BoundaryMap is consumed by 5 downstream protocols.
+**Protocol precedence**: Activation order position 1/10 (graph.json is authoritative source for information flow). Cross-cutting: BoundaryMap is consumed by 5 downstream protocols.
 
 **Advisory relationships**: Provides to Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia (all advisory: BoundaryMap narrows scope). Receives from Euporia (advisory: resolved coordinates inform downstream boundary definition). Katalepsis is structurally last.
 

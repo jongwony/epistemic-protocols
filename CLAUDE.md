@@ -8,7 +8,7 @@ Epistemic Protocols is a domain-free metalanguage of structured types and morphi
 
 ## Project Overview
 
-In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **AbstractionInProcess → CrystallizedAbstraction** (Periagoge), **AbstractAporia → ResolvedEndpoint** (Euporia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
+In this repository, that machinery is realized as a Claude Code plugin marketplace for epistemic dialogue — each protocol structures a specific decision point: **FrameworkAbsent → FramedInquiry** (Prothesis), **GapUnnoticed → AuditedDecision** (Syneidesis), **ResultUngrasped → VerifiedUnderstanding** (Katalepsis), **BoundaryUndefined → DefinedBoundary** (Horismos), **ContextInsufficient → InformedExecution** (Aitesis), **MappingUncertain → ValidatedMapping** (Analogia), **AbstractionInProcess → CrystallizedAbstraction** (Periagoge), **AbstractAporia → ResolvedEndpoint** (Euporia), **ExecutionBlind → SituatedExecution** (Prosoche), **ApplicationDecontextualized → ContextualizedExecution** (Epharmoge), **ContextSuspect → VettedContext** (Elenchus), **RecallAmbiguous → RecalledContext** (Anamnesis) during human-AI interaction.
 
 ## Architecture
 
@@ -28,6 +28,7 @@ epistemic-protocols/
 ├── euporia/         (/elicit)         # Extended-Mind reverse induction
 ├── prosoche/        (/attend)         # execution-time risk evaluation
 ├── epharmoge/       (/contextualize)  # application-context mismatch (conditional)
+├── elenchus/        (/sublate)        # dialectical context vetting (pre-execution)
 ├── anamnesis/       (/recollect)      # vague recall → recognized context
 │   ├── hooks/hooks.json               # SessionEnd hook: hypomnesis store writer
 │   └── scripts/hypomnesis-write.mjs   # mjs harness + claude -p haiku extraction
@@ -64,6 +65,7 @@ epistemic-protocols/
 | Euporia | `/elicit` | AbstractAporia → ResolvedEndpoint |
 | Prosoche | `/attend` | ExecutionBlind → SituatedExecution |
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
+| Elenchus | `/sublate` | ContextSuspect → VettedContext |
 | Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
 
 **Utility skills**: Epistemic Cooperative (`/catalog`, `/report`, `/onboard`, `/probe`, `/dashboard`, `/compose`, `/introspect`, `/sophia`, `/curses`, `/write`, `/comment-review`, `/review-ensemble`, `/goal-research`, `/steer`, `/realign`, `/misuse`, `/dispatch`), Verify (`/verify`). Triggers, flows, and detailed descriptions in each plugin's SKILL.md.
@@ -105,14 +107,14 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 | Analysis | `/frame` (Prothesis), `/ground` (Analogia), `/induce` (Periagoge) |
 | Decision | `/gap` (Syneidesis) |
 | Execution | `/attend` (Prosoche) |
-| Verification | `/contextualize` (Epharmoge) |
+| Verification | `/contextualize` (Epharmoge), `/sublate` (Elenchus) |
 | Cross-cutting | `/bound` (Horismos), `/recollect` (Anamnesis), `/grasp` (Katalepsis) |
 
 **Cross-cutting**: `/bound` (Horismos) — BoundaryMap narrows scope for 5 downstream protocols via DAG-downstream advisory. `/recollect` (Anamnesis) — recalled context enriches downstream protocols via advisory-only edges (no precondition weight). `/grasp` (Katalepsis) — requires all to complete.
 
 **Key graph relationships**:
 - Preconditions (DAG-enforced): * → Katalepsis (includes Anamnesis and Periagoge via wildcard). Horismos has no precondition source; Euporia → Horismos remains advisory.
-- Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia}, Prothesis → {Syneidesis, Aitesis, Analogia}, Euporia → {Horismos, Aitesis, Periagoge}
+- Advisory hubs: Anamnesis → {Aitesis, Prothesis, Syneidesis, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia, Elenchus}, Horismos → {Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia, Elenchus}, Prothesis → {Syneidesis, Aitesis, Analogia}, Euporia → {Horismos, Aitesis, Periagoge}, Aitesis → Elenchus, Elenchus → {Syneidesis, Prosoche, Epharmoge, Horismos}
 - Suppression: Syneidesis ⊣ Aitesis (same scope), Aitesis ⊣ Epharmoge (pre+post stacking)
 
 **Initiator taxonomy** (2-layer model):
@@ -120,7 +122,7 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 - **Layer 2** (in-protocol heuristics): Behavior varies by initiator type:
   - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis)
   - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Euporia)
-  - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche)
+  - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche, Elenchus)
   - **User-invoked**: Deliberate practice; no deficit awareness required (Write)
 
 ## Development
@@ -176,6 +178,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 - **Horismos**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Aitesis**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Epharmoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
+- **Elenchus**: No Task delegation—must run in main agent (user-facing gates require main agent context). Phase 1 Step 1 (provenance tagging) uses Read/Grep for read-only source verification only.
 - **Analogia**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Periagoge**: No Task delegation—must run in main agent (user-facing gates require main agent context)
 - **Euporia**: No Task delegation—must run in main agent (user-facing gates require main agent context). Phase 1 substrate access uses Read/Grep/Bash for read-only scan only.

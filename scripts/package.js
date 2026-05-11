@@ -99,7 +99,7 @@ function validateProtocolTables() {
 // Curated first-release highlights (Phase A: no previous tag exists)
 const FIRST_RELEASE_HIGHLIGHTS = `## Highlights
 
-### 11 Epistemic Protocols
+### 12 Epistemic Protocols
 
 Structure human-AI interaction quality at every decision point. Each protocol resolves a typed deficit:
 
@@ -107,7 +107,7 @@ Structure human-AI interaction quality at every decision point. Each protocol re
 - **Analysis**: \`/frame\` (absent frameworks), \`/ground\` (unmapped abstractions), \`/induce\` (in-process abstraction)
 - **Decision**: \`/gap\` (unnoticed gaps before action)
 - **Execution**: \`/attend\` (execution-time risk evaluation)
-- **Verification**: \`/contextualize\` (post-execution context mismatch)
+- **Verification**: \`/contextualize\` (post-execution context mismatch), \`/sublate\` (pre-execution dialectical context vetting)
 - **Cross-cutting**: \`/bound\` (epistemic boundaries), \`/recollect\` (vague recall recognition), \`/grasp\` (comprehension verification)
 
 ### Typed Deficit-Resolution System

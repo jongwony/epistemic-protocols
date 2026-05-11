@@ -201,6 +201,7 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 | Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
 | **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
 | **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
+| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
 | **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
 | **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
 
@@ -232,7 +233,7 @@ When Prothesis is active:
 - Prothesis completes before other workflows begin
 - Loaded instructions resume after perspective is established
 
-**Protocol precedence**: Activation order position 3/9 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
+**Protocol precedence**: Activation order position 3/10 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
 
 **Advisory relationships**: Receives from Horismos (advisory: BoundaryMap narrows framework selection scope). Provides to Syneidesis (advisory: perspective simulation provides gap detection context), Aitesis (advisory: perspective simulation provides context inference recommendations), Analogia (advisory: perspective simulation provides mapping construction context). Katalepsis is structurally last.
 
