@@ -159,7 +159,7 @@ When Epharmoge is active:
 
 **Protocol precedence**: Activation order position 9/10 (graph.json is authoritative source for information flow). Concern cluster: Verification.
 
-**Advisory relationships**: Receives from Prosoche (advisory: execution-time attention provides post-execution applicability context); Aitesis (suppression: pre+post stacking prevention). Katalepsis is structurally last.
+**Advisory relationships**: Receives from Prosoche (advisory: execution-time attention provides post-execution applicability context), Elenchus (advisory: vetted pre-state contextualizes post-execution applicability check); Aitesis (suppression: pre+post stacking prevention). Katalepsis is structurally last.
 
 ### Trigger Signals
 

@@ -207,7 +207,7 @@ When Horismos is active:
 
 **Protocol precedence**: Activation order position 1/10 (graph.json is authoritative source for information flow). Cross-cutting: BoundaryMap is consumed by 5 downstream protocols.
 
-**Advisory relationships**: Provides to Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia (all advisory: BoundaryMap narrows scope). Receives from Euporia (advisory: resolved coordinates inform downstream boundary definition). Katalepsis is structurally last.
+**Advisory relationships**: Provides to Aitesis, Prothesis, Prosoche, Analogia, Syneidesis, Euporia, Elenchus (all advisory: BoundaryMap narrows scope; for Elenchus, narrows high-leverage source range). Receives from Euporia (advisory: resolved coordinates inform downstream boundary definition), Elenchus (advisory: vetting findings inform downstream boundary definition). Katalepsis is structurally last.
 
 ### Trigger Signals
 

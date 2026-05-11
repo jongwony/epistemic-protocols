@@ -134,7 +134,7 @@ When Syneidesis is active:
 
 **Protocol precedence**: Activation order position 7/10 (graph.json is authoritative source for information flow). Concern cluster: Decision.
 
-**Advisory relationships**: Receives from Prothesis (advisory: perspective simulation provides gap detection context), Analogia (advisory: validated mapping improves gap detection accuracy), Horismos (advisory: BoundaryMap narrows gap detection scope). Provides to Aitesis (suppression: same scope suppression). Katalepsis is structurally last.
+**Advisory relationships**: Receives from Prothesis (advisory: perspective simulation provides gap detection context), Analogia (advisory: validated mapping improves gap detection accuracy), Horismos (advisory: BoundaryMap narrows gap detection scope), Elenchus (advisory: vetted context sharpens gap detection accuracy). Provides to Aitesis (suppression: same scope suppression). Katalepsis is structurally last.
 
 ### Mode Deactivation
 

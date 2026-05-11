@@ -311,7 +311,7 @@ When Anamnesis is active:
 
 Anamnesis completes before context-dependent work; loaded instructions resume after recall resolves or dismisses.
 
-**Protocol precedence**: graph.json is authoritative. Anamnesis is an advisory hub (Aitesis, Prothesis, Syneidesis, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia) with no incoming advisory edges; Katalepsis is structurally last.
+**Protocol precedence**: graph.json is authoritative. Anamnesis is an advisory hub (Aitesis, Prothesis, Syneidesis, Horismos, Prosoche, Analogia, Periagoge, Epharmoge, Euporia, Elenchus) with no incoming advisory edges; Katalepsis is structurally last. Elenchus receives recalled prior context as audit-candidate substrate.
 
 **Temporal ordering**: Advisory edges do not enforce activation ordering. `/recollect` should be invoked early for advisory flow to materialize. If downstream protocols activate first, advisory enrichment is unreachable in that session (not an error); user awareness of session-start recall is the ordering mechanism.
 

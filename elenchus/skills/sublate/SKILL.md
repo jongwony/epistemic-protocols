@@ -55,7 +55,9 @@ Disposition    = Confirmed                                   -- assumption survi
 Qs             = Per-source disposition gate
 J              = Map(Source, Disposition)
 V              = VettedContext { dispositions: J, trace: Map(Source, Antithesis) }
-vetted(V)      = ∀ s ∈ S_high : J(s) ≠ Deferred ∨ ¬trigger_met(J(s))
+trigger_met(c)        = Bool                                                                            -- evaluator: true when a Deferred re_trigger_condition c is now satisfied at the LOOP scan
+deferred_pending(Λ)   = {s ∈ S_high | Λ.dispositions(s) = Deferred(c) ∧ ¬trigger_met(c)}                -- sources whose Deferred condition has not yet fired
+vetted(V)      = ∀ s ∈ S_high : ¬(∃c. J(s) = Deferred(c) ∧ trigger_met(c))
 VettedContext  = V where vetted(V) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
@@ -324,7 +326,7 @@ Present transformation trace as text output, then proceed with the vetted contex
 6. **Convergence evidence**: Present transformation trace (source → antithesis → disposition) before declaring all sources vetted; per-source evidence is required, not asserted.
 7. **Source chain preservation**: W.sources is read-only across the protocol's lifetime. Antithesis and disposition annotate, never mutate, the source list. A Discarded disposition removes a source from downstream usage but preserves it in Λ.history with its withdrawal reason.
 8. **Loop continuity under bounded regret**: Deferred dispositions whose re-trigger condition has not been met do not interrupt loop continuation. Only dispositions requiring genuinely viable alternative judgment paths (Constitution-level entropy > 0) warrant Phase 2 surfacing; relay-level operations (tagging, antithesis text construction, trace presentation) proceed without gating.
-9. **Antithesis must be dialectical, not procedural**: A challenge of the form "have you checked X?" is not an antithesis — it is an Aitesis-style context query. An antithesis names a concrete counter-claim (Pattern A: "X is unverified"), counter-condition (Pattern B: "in condition Z, Y fails"), or counter-source (Pattern C: "X₁ and X₂ diverge at Q"). Procedural reminders surface in `/inquire` or `/attend`; only dialectical challenges belong here.
+9. **Antithesis must be dialectical**: An antithesis names a concrete counter-claim (Pattern A: "X is unverified"), counter-condition (Pattern B: "in condition Z, Y fails"), or counter-source (Pattern C: "X₁ and X₂ diverge at Q"). Procedural queries ("have you checked X?") surface in `/inquire` or `/attend`, not here.
 10. **Closed coproduct discipline**: Disposition is a closed coproduct of seven named variants plus Emergent. The Other option permits free-response, which the AI maps to the closest variant or surfaces as a candidate Emergent variant for that source — it does not bypass the coproduct.
 11. **Gate integrity** (Safeguard tier — revisitable as model capability evolves; revision triggers: model upgrade with demonstrated instruction-following improvement, sustained low violation rate across sessions, or successful compression PR demonstrating guard reducibility without outcome loss): The defined option set is presented intact — option injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic disposition variant into a concrete instance with parameters while preserving the TYPES coproduct structure) is distinct from mutation.
 12. **Substrate boundary**: Elenchus scope is the epistemic substrate — source identification, antithesis positing, disposition surfacing, and integration through Phase 0 to Phase 3. Post-vetting execution (the downstream action's substrate enforcement, harness permission, network/state mutation) belongs to native harnesses or specialized substrates, delegated by handoff after Phase 3 integration.
