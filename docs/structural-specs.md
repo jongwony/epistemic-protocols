@@ -89,6 +89,16 @@ TYPES blocks use three distinct type categories, each with its own definitional 
 
 The test: if PHASE TRANSITIONS handle each case differently, use coproduct. If the protocol processes uniformly regardless of input category, use natural language definition.
 
+## User-Facing Emit Load Disciplines
+
+Three separate rules manage cognitive load at runtime:
+
+- **Context-Question Separation** controls placement: analysis, evidence, and rationale appear before the gate; the gate contains only the essential question and option-specific differential implications.
+- **Plain emit discipline** controls vocabulary: user-facing text uses everyday language and keeps formal variables, Greek-rooted protocol terms, and code-style tokens inside formal specification surfaces.
+- **Round-local salience bundling** controls round composition: each user-facing round keeps the current judgment, nearest evidence, and next-move implication adjacent, while deferring background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+
+These disciplines are complementary. A protocol can satisfy Context-Question Separation and Plain emit discipline while still increasing context-switch cost by scattering adjacent evidence across distant paragraphs or mixing unrelated findings into one decision round. Round-local salience bundling closes that gap without introducing measurement: the binding unit is the round-local judgment surface, not a quantified load score.
+
 ## Pattern over Vocabulary
 
 The hermeneutic circle pattern is already structurally encoded in formal blocks — renaming blocks to philosophical terminology adds no structural value. Pattern recognition takes precedence over vocabulary transition.

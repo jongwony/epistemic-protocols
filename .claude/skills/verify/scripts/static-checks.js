@@ -2315,7 +2315,78 @@ function checkLanguagePurity() {
 }
 
 // ============================================================
-// Check 17: Single-Axis Soundness
+// Check 18: Emit Load Discipline
+// ============================================================
+// Enforces compiled-copy coverage for the user-facing cognitive-load
+// disciplines that shape runtime protocol output. Context-Question Separation
+// handles placement, Plain emit discipline handles vocabulary, and
+// Round-local salience bundling handles per-round adjacency and context-switch
+// cost. These must live in each core protocol SKILL.md because packaged
+// runtime contracts cannot depend on contributor docs or Output Style alone.
+function checkEmitLoadDiscipline() {
+  const REQUIRED_RULES = [
+    { label: 'Context-Question Separation', pattern: /\*\*Context-Question Separation\*\*/ },
+    { label: 'Plain emit discipline', pattern: /\*\*Plain emit discipline\*\*/ },
+    { label: 'Round-local salience bundling', pattern: /\*\*Round-local salience bundling\*\*/ },
+  ];
+
+  let checked = 0;
+  for (const relPath of PROTOCOL_FILES) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) {
+      results.warn.push({
+        check: 'emit-load-discipline',
+        file: relPath,
+        message: `Protocol file not found: ${relPath}`
+      });
+      continue;
+    }
+
+    checked++;
+    const content = fs.readFileSync(fullPath, 'utf8');
+    for (const rule of REQUIRED_RULES) {
+      if (!rule.pattern.test(content)) {
+        results.fail.push({
+          check: 'emit-load-discipline',
+          file: relPath,
+          message: `Missing user-facing emit load rule: ${rule.label}`,
+        });
+      }
+    }
+  }
+
+  const stylePath = path.join(projectRoot, 'epistemic-cooperative/styles/epistemic-ink.md');
+  if (!fs.existsSync(stylePath)) {
+    results.fail.push({
+      check: 'emit-load-discipline',
+      file: 'epistemic-cooperative/styles/epistemic-ink.md',
+      message: 'Missing Output Style source for runtime emit load discipline',
+    });
+    return;
+  }
+
+  const styleContent = fs.readFileSync(stylePath, 'utf8');
+  for (const label of ['Vocabulary rendering', 'Round-local salience bundling', 'Drift tracking']) {
+    if (!styleContent.includes(`**${label}**`)) {
+      results.fail.push({
+        check: 'emit-load-discipline',
+        file: 'epistemic-cooperative/styles/epistemic-ink.md',
+        message: `Missing Output Style section: ${label}`,
+      });
+    }
+  }
+
+  if (!results.fail.some(f => f.check === 'emit-load-discipline')) {
+    results.pass.push({
+      check: 'emit-load-discipline',
+      file: 'all core protocol SKILL.md files',
+      message: `Emit load discipline compiled-copy coverage verified for ${checked} protocols`,
+    });
+  }
+}
+
+// ============================================================
+// Check 19: Single-Axis Soundness
 // ============================================================
 // Enforces the unified Constitution/Extension annotation axis in TOOL GROUNDING.
 // Live SKILL.md / rule / doc files must not contain the obsolete dual-axis vocabulary
@@ -2394,7 +2465,7 @@ function checkSingleAxisSoundness() {
 }
 
 // ============================================================
-// Check 18: Agents Symlinks Sync (Agent Skills cross-tool standard)
+// Check 20: Agents Symlinks Sync (Agent Skills cross-tool standard)
 // ============================================================
 // .agents/skills/ exposes plugin skills under the Agent Skills specification
 // path (agentskills.io) used by Cursor, GitHub Copilot, Devin, OpenCode,
@@ -2475,7 +2546,7 @@ function checkAgentsSymlinksSync() {
 }
 
 // ============================================================
-// Check 19: Workflow Paths Sync
+// Check 21: Workflow Paths Sync
 // ============================================================
 // Verifies .github/workflows/claude-epistemic-review.yml `paths` includes
 // every protocol plugin directory. Prevents new protocols from silently
@@ -2555,6 +2626,7 @@ try {
   checkPartitionInvariant();
   checkGateTypeSoundness();
   checkArtifactSelfContainment();
+  checkEmitLoadDiscipline();
   checkSingleAxisSoundness();
   checkAgentsSymlinksSync();
   checkWorkflowPathsSync();

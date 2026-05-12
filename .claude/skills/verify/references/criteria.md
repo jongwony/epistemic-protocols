@@ -29,6 +29,7 @@ Quality criteria for epistemic protocol verification, organized by severity.
 - **Supersession non-conflict**: Different protocols supersede different domains
 - **Activation determinism**: Trigger conditions are unambiguous
 - **Gate mandate**: User-facing gate interactions (Qc/Qs) use structured presentation + turn yield, not unstructured text bypass
+- **Emit load discipline coverage**: Core protocol SKILL.md Rules include Context-Question Separation, Plain emit discipline, and Round-local salience bundling as self-contained runtime instructions
 
 ### Tool Grounding Integrity
 

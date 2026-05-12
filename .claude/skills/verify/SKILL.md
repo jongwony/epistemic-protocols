@@ -55,6 +55,7 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 - Onboard sync, precedence linear extension, partition invariant, catalog sync
 - Gate type soundness (warning-level safeguard for coproduct/prose option alignment)
 - Artifact self-containment (runtime-contract view: packaged `Skill.md` + plugin description metadata + packaged support references). Severity-aware BANNED patterns: strict patterns (mission-bridge, axioms, derived-principles, architectural-principles, meta-principle, safeguards, A1-A7 identifiers, `.claude/`, `docs/`) surface as fail; expansion patterns (project-profile, editing-conventions, `principles/`, design-philosophy concepts — `Stage 1/2`, `Tier Factorization`, `Deficit Empiricism`, `Wirkungsgeschichte`, `Horizontverschmelzung`, `Zuhandenheit`) surface as warn under Stage 1 posture
+- Emit load discipline (compiled-copy coverage for Context-Question Separation, Plain emit discipline, and Round-local salience bundling across all core protocol SKILL.md files, plus Output Style source coverage)
 - Language purity (warn-level Korean character detection across project text files; whitelist preserves intentional Korean regions: `**/README_ko.md`, `.claude/skills/release/`, `src/`, `docs/`, `.claude/rules/editing-conventions.md`)
 
 ### Phase 2: Expert Review
