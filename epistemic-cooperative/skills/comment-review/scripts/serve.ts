@@ -13,8 +13,9 @@
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
 import { watch } from "node:fs";
-import { appendFile, readFile } from "node:fs/promises";
+import { appendFile, readdir, readFile } from "node:fs/promises";
 import { basename, dirname, extname, resolve } from "node:path";
+import { homedir } from "node:os";
 
 const args = process.argv.slice(2);
 if (args.length === 0) {
@@ -89,14 +90,138 @@ const stripFrontmatter = (md: string) => {
   return m ? md.slice(m[0].length) : md;
 };
 
+// TaskList-backed finding store — read-only view onto the harness task store.
+// Per SKILL.md "TaskList File as Sync Medium": tasks live under
+// ~/.claude/tasks/<session-uuid>/<task-id>.json (per-session directories).
+// We scan every session subdirectory and filter entries whose description carries
+// the artifact slug tag, so findings created in earlier sessions remain visible
+// until completed (preserves hermeneutic cycle across sessions).
+//
+// Override the task root via COMMENT_REVIEW_TASK_ROOT for testing; defaults to
+// the harness-managed location.
+const TASK_ROOT = process.env.COMMENT_REVIEW_TASK_ROOT
+  ? resolve(process.env.COMMENT_REVIEW_TASK_ROOT)
+  : resolve(homedir(), ".claude", "tasks");
+
+interface TaskEntry {
+  id?: string;
+  subject?: string;
+  description?: string;
+  activeForm?: string;
+  status?: string;
+  blocks?: unknown;
+  blockedBy?: unknown;
+  owner?: string;
+}
+
+interface Finding {
+  id: string;
+  subject: string;
+  description: string;
+  status: string;
+  // Parsed inline tags (best-effort; missing tags become empty strings)
+  anchor: string;       // [anchor: ...] payload — empty when absent
+  anchorId: string;     // [anchor-id: <UUID>] payload — preferred over anchor for ambiguity-free DOM lookup
+  subProtocol: string;  // [sub-protocol: ...] payload — empty when absent
+  round: string;        // [round: K] payload — empty when absent
+  // The raw description body with inline tags stripped, for display
+  body: string;
+}
+
+// Inline-tag parser: extracts `[key: value]` from description text.
+// Returns the payload string or "" when the tag is absent. Tag bodies may not
+// contain ']' (the inline format does not escape closing brackets).
+const extractTag = (text: string, key: string): string => {
+  const re = new RegExp("\\[" + key + ":\\s*([^\\]]*)\\]");
+  const m = text.match(re);
+  return m ? m[1].trim() : "";
+};
+
+// Strip all known inline tags from the description so the displayed body is clean.
+const stripTags = (text: string): string =>
+  text.replace(/\[(?:anchor|anchor-id|sub-protocol|round|slug|disposition-options):\s*[^\]]*\]/g, "").trim();
+
+const readTaskListForSlug = async (slug: string): Promise<Finding[]> => {
+  let sessions: string[];
+  try {
+    sessions = await readdir(TASK_ROOT);
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") return [];
+    console.error(`[tasks] readdir ${TASK_ROOT} failed: ${(e as Error).message}`);
+    return [];
+  }
+
+  const slugTag = `[slug: ${slug}]`;
+
+  // Sessions and per-session task files scan in parallel — pure I/O, trivially batchable.
+  // Per-session readdir failure (ENOTDIR for plain files, ENOENT for vanished entries)
+  // is treated as "no tasks here, skip" via the catch — no separate stat pre-check.
+  const perSession = await Promise.all(
+    sessions.map(async (sessionDir): Promise<Finding[]> => {
+      const sessionPath = resolve(TASK_ROOT, sessionDir);
+      let taskFiles: string[];
+      try {
+        taskFiles = await readdir(sessionPath);
+      } catch {
+        return [];
+      }
+
+      const perFile = await Promise.all(
+        taskFiles
+          .filter((f) => f.endsWith(".json"))
+          .map(async (file): Promise<Finding | null> => {
+            const taskPath = resolve(sessionPath, file);
+            let raw: string;
+            try {
+              raw = await readFile(taskPath, "utf8");
+            } catch {
+              return null; // task disappeared or unreadable
+            }
+            // Pre-parse fast path: skip JSON.parse for tasks not carrying this slug.
+            // Most session dirs hold tasks unrelated to the current draft.
+            if (!raw.includes(slugTag)) return null;
+            let task: TaskEntry;
+            try {
+              task = JSON.parse(raw) as TaskEntry;
+            } catch {
+              return null; // malformed JSON
+            }
+            const desc = typeof task.description === "string" ? task.description : "";
+            if (!desc.includes(slugTag)) return null;
+            if (task.status === "completed" || task.status === "deleted") return null;
+
+            return {
+              id: typeof task.id === "string" ? task.id : file.replace(/\.json$/, ""),
+              subject: typeof task.subject === "string" ? task.subject : "",
+              description: desc,
+              status: typeof task.status === "string" ? task.status : "pending",
+              anchor: extractTag(desc, "anchor"),
+              anchorId: extractTag(desc, "anchor-id"),
+              subProtocol: extractTag(desc, "sub-protocol"),
+              round: extractTag(desc, "round"),
+              body: stripTags(desc),
+            };
+          }),
+      );
+
+      return perFile.filter((f): f is Finding => f !== null);
+    }),
+  );
+
+  return perSession.flat();
+};
+
 const renderPreview = async (slug: string) => {
   const path = drafts.get(slug);
   if (!path) return null;
   const md = stripFrontmatter(await readFile(path, "utf8"));
+  const findings = await readTaskListForSlug(slug);
   // title goes into HTML context (escape & < > " '); slug goes into JS string literal context (JSON.stringify)
+  // findings goes into JS context (JSON.stringify with script-tag-safe escaping)
   return template
     .replaceAll("__TITLE_PLACEHOLDER__", escapeHtml(slug))
     .replaceAll("__SLUG_PLACEHOLDER__", JSON.stringify(slug))
+    .replace("__FINDINGS_PLACEHOLDER__", escapeForScriptTag(JSON.stringify(findings)))
     .replace("__MARKDOWN_CONTENT_PLACEHOLDER__", escapeForScriptTag(md));
 };
 
@@ -144,6 +269,8 @@ const server = Bun.serve({
       });
     }
 
+    // Server is tag-agnostic: persists every comment as one JSONL line; the apply
+    // step interprets `[disposition: …] [task: …]` tags downstream (see SKILL.md).
     if (url.pathname === "/feedback" && req.method === "POST") {
       let body: FeedbackBody;
       try {
