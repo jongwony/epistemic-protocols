@@ -960,9 +960,21 @@ function renderFindings() {
   }
 
   for (const finding of FINDINGS) {
+    const anchorId = finding.anchorId || "";
     const anchorText = finding.anchor || "";
     let marks = [];
-    if (anchorText) {
+
+    // Preferred path: UUID-based DOM lookup. The source markdown carries
+    // <span id="cr-anchor-{UUID}" class="finding-anchor">…</span> so the span
+    // is already the marked element; no substring search, no ambiguity.
+    if (anchorId) {
+      const el = document.getElementById("cr-anchor-" + anchorId);
+      if (el) marks = [el];
+    }
+
+    // Fallback: substring search + wrap, for findings without anchor-id
+    // (legacy or AI declined to assign UUID).
+    if (marks.length === 0 && anchorText) {
       const range = locateAnchorInDOM(anchorText);
       if (range) {
         try {

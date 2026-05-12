@@ -121,6 +121,7 @@ interface Finding {
   status: string;
   // Parsed inline tags (best-effort; missing tags become empty strings)
   anchor: string;       // [anchor: ...] payload — empty when absent
+  anchorId: string;     // [anchor-id: <UUID>] payload — preferred over anchor for ambiguity-free DOM lookup
   subProtocol: string;  // [sub-protocol: ...] payload — empty when absent
   round: string;        // [round: K] payload — empty when absent
   // The raw description body with inline tags stripped, for display
@@ -138,7 +139,7 @@ const extractTag = (text: string, key: string): string => {
 
 // Strip all known inline tags from the description so the displayed body is clean.
 const stripTags = (text: string): string =>
-  text.replace(/\[(?:anchor|sub-protocol|round|slug):\s*[^\]]*\]/g, "").trim();
+  text.replace(/\[(?:anchor|anchor-id|sub-protocol|round|slug|disposition-options):\s*[^\]]*\]/g, "").trim();
 
 const readTaskListForSlug = async (slug: string): Promise<Finding[]> => {
   let sessions: string[];
@@ -195,6 +196,7 @@ const readTaskListForSlug = async (slug: string): Promise<Finding[]> => {
               description: desc,
               status: typeof task.status === "string" ? task.status : "pending",
               anchor: extractTag(desc, "anchor"),
+              anchorId: extractTag(desc, "anchor-id"),
               subProtocol: extractTag(desc, "sub-protocol"),
               round: extractTag(desc, "round"),
               body: stripTags(desc),
