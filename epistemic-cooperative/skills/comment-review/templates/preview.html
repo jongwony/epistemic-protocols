@@ -305,10 +305,7 @@
     align-items: center;
   }
   .finding-item-meta .tag {
-    background: rgba(255, 127, 80, .12);
     color: #b04020;
-    padding: .05em .45em;
-    border-radius: 3px;
     font-weight: 500;
   }
   .finding-item.unanchored .sidebar-item-anchor {
@@ -316,43 +313,27 @@
     color: var(--muted);
     font-style: italic;
   }
-  /* Cursor: anchored findings scroll to anchor on click; unanchored findings
-     have no scroll target so cursor stays default. */
-  .finding-item.anchored { cursor: pointer; }
-  .finding-item.unanchored { cursor: default; }
-  /* Dismiss affordance: minimal one-click disposition channel for a finding.
-     Click POSTs a [disposition: Discarded] [task: <id>] comment to /feedback;
-     the next apply step closes the task. Per SKILL.md initial-form stance,
-     richer per-variant disposition pickers are deferred to a later iteration
-     once real-use evidence accumulates. */
-  .finding-item { position: relative; }
-  .finding-dismiss {
-    position: absolute;
-    top: .35em;
-    right: .35em;
-    background: transparent;
-    border: 1px solid var(--muted);
+  /* Sidebar findings and in-text coral anchors both open the response popup. */
+  .finding-item, .finding-anchor { cursor: pointer; }
+  /* Finding-response popup body section (shown only in finding-mode).
+     Anchor preview is hidden in finding-mode — body section already carries
+     the full finding context (subject + body), so the duplicate anchor line
+     would only add visual noise. */
+  #popup-finding-body {
+    display: none;
+    padding: .5em .65em;
+    margin-bottom: .4em;
+    max-height: 9em;
+    overflow-y: auto;
+    font-size: .82em;
     color: var(--muted);
-    width: 1.4em;
-    height: 1.4em;
-    line-height: 1;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: .9em;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: .55;
-    transition: opacity .15s, color .15s, border-color .15s;
+    border-left: 3px solid var(--finding-edge);
+    line-height: 1.45;
+    white-space: pre-wrap;
   }
-  .finding-dismiss:hover, .finding-dismiss:focus {
-    opacity: 1;
-    color: var(--finding-edge);
-    border-color: var(--finding-edge);
-    outline: none;
-  }
-  .finding-dismiss[disabled] { opacity: .25; cursor: progress; }
+  #popup.finding-mode #popup-finding-body { display: block; }
+  #popup.finding-mode #popup-anchor-preview { display: none; }
+  #popup.finding-mode #popup-delete { display: none !important; }
   #findings-empty {
     padding: 1.2em 1em;
     color: var(--muted);
@@ -445,7 +426,7 @@
     .sidebar-item-comment { color: #e0e0e0; }
     .sidebar-section-header { background: #1a1a1a; border-bottom-color: #333; color: #888; }
     .sidebar-section-header .count-pill { background: #2a2a2a; color: #ccc; }
-    .finding-item-meta .tag { background: rgba(255, 127, 80, .18); color: #ffb094; }
+    .finding-item-meta .tag { color: #ffb094; }
     #findings-empty { color: #888; }
   }
 
@@ -487,6 +468,7 @@
 
 <div id="popup">
   <div id="popup-anchor-preview"></div>
+  <div id="popup-finding-body"></div>
   <textarea id="popup-textarea" placeholder="Comment on this selection…"></textarea>
   <div id="popup-actions">
     <button id="popup-delete" class="danger" type="button" aria-label="Delete comment">Delete</button>
@@ -532,6 +514,7 @@ const contentText = content.innerText;
 // Selection-popup state
 const popup = document.getElementById("popup");
 const popupPreview = document.getElementById("popup-anchor-preview");
+const popupFindingBody = document.getElementById("popup-finding-body");
 const popupTextarea = document.getElementById("popup-textarea");
 const popupSubmit = document.getElementById("popup-submit");
 const popupCancel = document.getElementById("popup-cancel");
@@ -571,6 +554,25 @@ function positionPopupNear(rect) {
   const left = Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - popupWidth - 16);
   popup.style.top = (window.scrollY + rect.bottom + 8) + "px";
   popup.style.left = Math.max(16, left) + "px";
+}
+
+function truncateForPopup(text) {
+  if (!text) return "";
+  return text.length > 200 ? text.slice(0, 200) + "…" : text;
+}
+
+// Common popup-opening tail shared by all three entry points (handleSelection,
+// openEditPopup, openFindingPopup) — single point where mode toggles + show
+// class + focus ordering are guaranteed consistent.
+function showPopup({ rect, previewText, textareaValue, isEdit, isFinding, selectAfterFocus }) {
+  positionPopupNear(rect);
+  popupPreview.textContent = truncateForPopup(previewText);
+  popupTextarea.value = textareaValue;
+  setPopupMode(!!isEdit);
+  popup.classList.toggle("finding-mode", !!isFinding);
+  popup.classList.add("show");
+  popupTextarea.focus();
+  if (selectAfterFocus) popupTextarea.select();
 }
 
 // Wrap a range across element boundaries by walking its intersecting text nodes
@@ -693,19 +695,13 @@ function handleSelection() {
   };
 
   const anchorRect = tempMarks.length > 0 ? tempMarks[0].getBoundingClientRect() : range.getBoundingClientRect();
-  positionPopupNear(anchorRect);
-  popupPreview.textContent = text.length > 200 ? text.slice(0, 200) + "…" : text;
-  popupTextarea.value = "";
-  setPopupMode(false);
-  popup.classList.add("show");
   // Drop the live selection so the dashed pending mark is the only visible cue
   sel.removeAllRanges();
-  popupTextarea.focus();
+  showPopup({ rect: anchorRect, previewText: text, textareaValue: "" });
 }
 
-// Click an existing annotation to edit it. Append-only JSONL is preserved — the edit
-// resubmits with the same (anchor, context_before, context_after) tuple; the revision
-// consumer applies latest-timestamp-wins dedup on that tuple.
+// Edit preserves append-only JSONL: resubmits with the same (anchor, context_before,
+// context_after) tuple; the revision consumer applies latest-timestamp-wins dedup.
 function openEditPopup(markEl) {
   pending = {
     range: null,
@@ -715,14 +711,38 @@ function openEditPopup(markEl) {
     editingMark: markEl,
     tempMarks: [],
   };
-  positionPopupNear(markEl.getBoundingClientRect());
-  const anchorText = pending.anchor;
-  popupPreview.textContent = anchorText.length > 200 ? anchorText.slice(0, 200) + "…" : anchorText;
-  popupTextarea.value = markEl.dataset.comment || "";
-  setPopupMode(true);
-  popup.classList.add("show");
-  popupTextarea.focus();
-  popupTextarea.select();
+  showPopup({
+    rect: markEl.getBoundingClientRect(),
+    previewText: pending.anchor,
+    textareaValue: markEl.dataset.comment || "",
+    isEdit: true,
+    selectAfterFocus: true,
+  });
+}
+
+// Document-level findings have no in-text anchor — popup falls back to the
+// right side of the viewport, just below the sidebar header.
+function openFindingPopup(finding, anchorEl) {
+  const anchorText = finding.anchor || "(document-level finding)";
+  pending = {
+    range: null,
+    anchor: anchorText,
+    context_before: "",
+    context_after: "",
+    editingMark: null,
+    tempMarks: [],
+    findingId: finding.id, // submit handler appends [task: <id>] to the comment
+  };
+
+  const rect = anchorEl && anchorEl.isConnected
+    ? anchorEl.getBoundingClientRect()
+    : { left: window.innerWidth - 380, bottom: 90, top: 50, right: window.innerWidth - 40, width: 340, height: 0 };
+
+  const subject = finding.subject || "";
+  const body = finding.body || "";
+  popupFindingBody.textContent = subject && body ? subject + "\n\n" + body : (subject || body);
+  popupTextarea.placeholder = "Respond to this finding (auto-tagged with [task: " + finding.id + "])…";
+  showPopup({ rect, previewText: anchorText, textareaValue: "", isFinding: true });
 }
 
 content.addEventListener("click", (e) => {
@@ -730,6 +750,13 @@ content.addEventListener("click", (e) => {
   if (mark) {
     e.stopPropagation();
     openEditPopup(mark);
+    return;
+  }
+  const findingMark = e.target.closest(".finding-anchor");
+  if (findingMark && findingMark.dataset.findingId) {
+    e.stopPropagation();
+    const finding = FINDINGS.find((f) => f.id === findingMark.dataset.findingId);
+    if (finding) openFindingPopup(finding, findingMark);
   }
 });
 
@@ -740,6 +767,8 @@ function dismissPopup() {
   }
   popup.classList.remove("show");
   popup.classList.remove("edit-mode");
+  popup.classList.remove("finding-mode");
+  popupTextarea.placeholder = "Comment on this selection…";
   pending = null;
   const sel = window.getSelection();
   if (sel) sel.removeAllRanges();
@@ -795,12 +824,18 @@ async function submitFeedback() {
 
   // Edit case: send the original id so the new entry shares the dedup key with the
   // previous version. Create case: omit id so server mints a UUID.
+  // Finding-response mode: append [task: <id>] tag so the apply step recognizes
+  // this comment as a disposition signal against the named TaskList entry.
+  const taggedComment = captured.findingId
+    ? comment + " [task: " + captured.findingId + "]"
+    : comment;
+
   const reqBody = {
     slug: SLUG,
     anchor: captured.anchor,
     context_before: captured.context_before,
     context_after: captured.context_after,
-    comment,
+    comment: taggedComment,
   };
   if (captured.editingMark && captured.editingMark.dataset.id) {
     reqBody.id = captured.editingMark.dataset.id;
@@ -985,14 +1020,14 @@ function renderFindings() {
         }
       }
     }
+    // Tag the marked elements with the finding id so content-click handlers
+    // can reverse-lookup the finding from a clicked .finding-anchor span.
+    for (const m of marks) m.dataset.findingId = finding.id;
     findingMarks.set(finding.id, marks);
 
     const item = document.createElement("div");
     item.className = "sidebar-item finding-item " + (marks.length > 0 ? "anchored" : "unanchored");
-    item.setAttribute("role", marks.length > 0 ? "button" : "listitem");
-    if (marks.length > 0) {
-      item.setAttribute("tabindex", "0");
-    }
+    item.setAttribute("role", "button");
 
     const anchorEl = document.createElement("div");
     anchorEl.className = "sidebar-item-anchor";
@@ -1018,50 +1053,24 @@ function renderFindings() {
       metaEl.appendChild(round);
     }
 
-    // Dismiss affordance posts a [disposition: Discarded] [task: …] comment;
-    // the next apply step closes the task. Visual fade is optimistic — full removal
-    // happens at the round-boundary reload after TaskUpdate(completed).
-    const dismissBtn = document.createElement("button");
-    dismissBtn.type = "button";
-    dismissBtn.className = "finding-dismiss";
-    dismissBtn.title = "Dismiss this finding";
-    dismissBtn.setAttribute("aria-label", "Dismiss finding");
-    dismissBtn.textContent = "×";
-    dismissBtn.addEventListener("click", async (e) => {
-      e.stopPropagation();
-      dismissBtn.disabled = true;
-      try {
-        const res = await feedbackFetch("POST", {
-          slug: SLUG,
-          anchor: anchorText || "(document-level finding)",
-          context_before: "",
-          context_after: "",
-          comment: "[disposition: Discarded] [task: " + finding.id + "]",
-        });
-        if (!res.ok) throw new Error("HTTP " + res.status + ": " + (await res.text()));
-        item.style.opacity = "0.35";
-        item.style.pointerEvents = "none";
-      } catch (err) {
-        console.error("[finding-dismiss] failed:", err);
-        dismissBtn.disabled = false;
-        dismissBtn.title = "Dismiss failed: " + (err && err.message ? err.message : err);
-      }
-    });
-    item.appendChild(dismissBtn);
-
     item.appendChild(anchorEl);
     item.appendChild(bodyEl);
     if (metaEl.childNodes.length > 0) item.appendChild(metaEl);
 
-    if (marks.length > 0) {
-      item.addEventListener("click", () => focusFindingMarks(marks));
-      item.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          focusFindingMarks(marks);
-        }
-      });
-    }
+    // Both sidebar surfaces (findings + drag-comments) follow the same
+    // scroll-then-popup pattern so click semantics are uniform.
+    item.setAttribute("tabindex", "0");
+    const openResponse = () => {
+      if (marks.length > 0) focusFindingMarks(marks);
+      openFindingPopup(finding, marks.length > 0 ? marks[0] : null);
+    };
+    item.addEventListener("click", openResponse);
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openResponse();
+      }
+    });
     findingsList.appendChild(item);
   }
 
@@ -1135,11 +1144,12 @@ function renderSidebar() {
 
     item.appendChild(anchorEl);
     item.appendChild(commentEl);
-    item.addEventListener("click", () => focusMark(mark));
+    const openEdit = () => { focusMark(mark); openEditPopup(mark); };
+    item.addEventListener("click", openEdit);
     item.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        focusMark(mark);
+        openEdit();
       }
     });
     sidebarList.appendChild(item);
