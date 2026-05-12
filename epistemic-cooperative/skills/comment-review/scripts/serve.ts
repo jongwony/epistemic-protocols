@@ -13,7 +13,7 @@
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
 import { watch } from "node:fs";
-import { appendFile, readdir, readFile, stat } from "node:fs/promises";
+import { appendFile, readdir, readFile } from "node:fs/promises";
 import { basename, dirname, extname, resolve } from "node:path";
 import { homedir } from "node:os";
 
@@ -151,58 +151,62 @@ const readTaskListForSlug = async (slug: string): Promise<Finding[]> => {
   }
 
   const slugTag = `[slug: ${slug}]`;
-  const findings: Finding[] = [];
 
-  for (const sessionDir of sessions) {
-    const sessionPath = resolve(TASK_ROOT, sessionDir);
-    let stats: Awaited<ReturnType<typeof stat>>;
-    try {
-      stats = await stat(sessionPath);
-    } catch {
-      continue; // ignore unreadable entries
-    }
-    if (!stats.isDirectory()) continue;
-
-    let taskFiles: string[];
-    try {
-      taskFiles = await readdir(sessionPath);
-    } catch {
-      continue;
-    }
-
-    for (const file of taskFiles) {
-      if (!file.endsWith(".json")) continue;
-      const taskPath = resolve(sessionPath, file);
-      let raw: string;
+  // Sessions and per-session task files scan in parallel — pure I/O, trivially batchable.
+  // Per-session readdir failure (ENOTDIR for plain files, ENOENT for vanished entries)
+  // is treated as "no tasks here, skip" via the catch — no separate stat pre-check.
+  const perSession = await Promise.all(
+    sessions.map(async (sessionDir): Promise<Finding[]> => {
+      const sessionPath = resolve(TASK_ROOT, sessionDir);
+      let taskFiles: string[];
       try {
-        raw = await readFile(taskPath, "utf8");
+        taskFiles = await readdir(sessionPath);
       } catch {
-        continue; // task disappeared or unreadable — skip
+        return [];
       }
-      let task: TaskEntry;
-      try {
-        task = JSON.parse(raw) as TaskEntry;
-      } catch {
-        continue; // malformed JSON — skip
-      }
-      const desc = typeof task.description === "string" ? task.description : "";
-      if (!desc.includes(slugTag)) continue;
-      if (task.status === "completed" || task.status === "deleted") continue;
 
-      findings.push({
-        id: typeof task.id === "string" ? task.id : file.replace(/\.json$/, ""),
-        subject: typeof task.subject === "string" ? task.subject : "",
-        description: desc,
-        status: typeof task.status === "string" ? task.status : "pending",
-        anchor: extractTag(desc, "anchor"),
-        subProtocol: extractTag(desc, "sub-protocol"),
-        round: extractTag(desc, "round"),
-        body: stripTags(desc),
-      });
-    }
-  }
+      const perFile = await Promise.all(
+        taskFiles
+          .filter((f) => f.endsWith(".json"))
+          .map(async (file): Promise<Finding | null> => {
+            const taskPath = resolve(sessionPath, file);
+            let raw: string;
+            try {
+              raw = await readFile(taskPath, "utf8");
+            } catch {
+              return null; // task disappeared or unreadable
+            }
+            // Pre-parse fast path: skip JSON.parse for tasks not carrying this slug.
+            // Most session dirs hold tasks unrelated to the current draft.
+            if (!raw.includes(slugTag)) return null;
+            let task: TaskEntry;
+            try {
+              task = JSON.parse(raw) as TaskEntry;
+            } catch {
+              return null; // malformed JSON
+            }
+            const desc = typeof task.description === "string" ? task.description : "";
+            if (!desc.includes(slugTag)) return null;
+            if (task.status === "completed" || task.status === "deleted") return null;
 
-  return findings;
+            return {
+              id: typeof task.id === "string" ? task.id : file.replace(/\.json$/, ""),
+              subject: typeof task.subject === "string" ? task.subject : "",
+              description: desc,
+              status: typeof task.status === "string" ? task.status : "pending",
+              anchor: extractTag(desc, "anchor"),
+              subProtocol: extractTag(desc, "sub-protocol"),
+              round: extractTag(desc, "round"),
+              body: stripTags(desc),
+            };
+          }),
+      );
+
+      return perFile.filter((f): f is Finding => f !== null);
+    }),
+  );
+
+  return perSession.flat();
 };
 
 const renderPreview = async (slug: string) => {
@@ -263,19 +267,8 @@ const server = Bun.serve({
       });
     }
 
-    // /feedback POST handles two overloaded use cases — see SKILL.md
-    // §Sidepanel and Finding Visibility for the disposition convention.
-    //
-    //   1. Plain comment: comment text describes user edit intent. The next
-    //      apply step translates it into Edit/Write calls.
-    //   2. Disposition signal: comment text matches the pattern
-    //      `[disposition: <variant>] [task: <task-id>]`. The next apply step
-    //      recognizes the tag, calls TaskUpdate(status=completed) against
-    //      the named task, and (per the variant) translates into edits.
-    //
-    // Both cases share the same on-disk shape (one JSONL line per call). The
-    // server does not parse disposition tags; it only persists the comment.
-    // The next channel-loop AI iteration's apply step is the consumer.
+    // Server is tag-agnostic: persists every comment as one JSONL line; the apply
+    // step interprets `[disposition: …] [task: …]` tags downstream (see SKILL.md).
     if (url.pathname === "/feedback" && req.method === "POST") {
       let body: FeedbackBody;
       try {

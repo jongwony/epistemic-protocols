@@ -776,6 +776,16 @@ function showToast(msg, isError) {
   toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
 }
 
+// Single-source fetch wrapper — all /feedback writes (POST + DELETE) share URL,
+// headers, and JSON body shape. Per-site response/error handling stays at the call site.
+function feedbackFetch(method, body) {
+  return fetch("/feedback", {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 async function submitFeedback() {
   if (!pending) return dismissPopup();
   const comment = popupTextarea.value.trim();
@@ -797,11 +807,7 @@ async function submitFeedback() {
   }
 
   try {
-    const resp = await fetch("/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(reqBody),
-    });
+    const resp = await feedbackFetch("POST", reqBody);
     if (!resp.ok) throw new Error("server " + resp.status);
     const result = await resp.json();
     const id = result.id;
@@ -852,11 +858,7 @@ async function deleteFeedback() {
   }
 
   try {
-    const resp = await fetch("/feedback", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: SLUG, id }),
-    });
+    const resp = await feedbackFetch("DELETE", { slug: SLUG, id });
     if (!resp.ok) {
       let reason = "HTTP " + resp.status;
       try {
@@ -944,14 +946,10 @@ function truncateForDisplay(text, maxChars) {
   return compact.slice(0, maxChars - 1) + "…";
 }
 
-// Render findings: locate anchors, wrap with .finding-anchor marks, populate
-// the findings sub-section of the sidebar. Anchored findings are clickable
-// (scroll-to-anchor); unanchored findings are listed in the same panel but
-// without click target. Per SKILL.md, the red-dot dismiss UX is optional and
-// is deferred here — unanchored findings are visually distinguished by dashed
-// left border and italic text instead.
+// Render findings sidebar: anchored findings get a .finding-anchor in-text mark
+// (clickable scroll-to-anchor); unanchored findings render with dashed-border
+// styling (no in-text mark, no scroll target).
 function renderFindings() {
-  // Clear previous render
   while (findingsList.firstChild) findingsList.removeChild(findingsList.firstChild);
   findingMarks.clear();
 
@@ -960,9 +958,6 @@ function renderFindings() {
     findingsList.appendChild(findingsEmpty);
     return;
   }
-
-  let anchored = 0;
-  let unanchored = 0;
 
   for (const finding of FINDINGS) {
     const anchorText = finding.anchor || "";
@@ -985,9 +980,6 @@ function renderFindings() {
     item.setAttribute("role", marks.length > 0 ? "button" : "listitem");
     if (marks.length > 0) {
       item.setAttribute("tabindex", "0");
-      anchored++;
-    } else {
-      unanchored++;
     }
 
     const anchorEl = document.createElement("div");
@@ -1014,38 +1006,27 @@ function renderFindings() {
       metaEl.appendChild(round);
     }
 
-    // Dismiss affordance: one-click disposition signal per SKILL.md
-    // §Sidepanel and Finding Visibility. POSTs a [disposition: Discarded]
-    // [task: <task-id>] comment to /feedback; the next apply step closes
-    // the task and (per Discarded variant semantics) skips edit translation.
+    // Dismiss affordance posts a [disposition: Discarded] [task: …] comment;
+    // the next apply step closes the task. Visual fade is optimistic — full removal
+    // happens at the round-boundary reload after TaskUpdate(completed).
     const dismissBtn = document.createElement("button");
     dismissBtn.type = "button";
     dismissBtn.className = "finding-dismiss";
-    dismissBtn.title = "Dismiss this finding (Discarded disposition)";
+    dismissBtn.title = "Dismiss this finding";
     dismissBtn.setAttribute("aria-label", "Dismiss finding");
     dismissBtn.textContent = "×";
     dismissBtn.addEventListener("click", async (e) => {
       e.stopPropagation();
       dismissBtn.disabled = true;
       try {
-        const payload = {
+        const res = await feedbackFetch("POST", {
           slug: SLUG,
           anchor: anchorText || "(document-level finding)",
           context_before: "",
           context_after: "",
           comment: "[disposition: Discarded] [task: " + finding.id + "]",
-        };
-        const res = await fetch("/feedback", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
         });
-        if (!res.ok) {
-          const msg = await res.text();
-          throw new Error("HTTP " + res.status + ": " + msg);
-        }
-        // Visually fade the entry; a round-boundary reload will fully drop
-        // the entry once the next apply step runs TaskUpdate(completed).
+        if (!res.ok) throw new Error("HTTP " + res.status + ": " + (await res.text()));
         item.style.opacity = "0.35";
         item.style.pointerEvents = "none";
       } catch (err) {
@@ -1073,29 +1054,31 @@ function renderFindings() {
   }
 
   findingsCount.textContent = String(FINDINGS.length);
-  // Surface anchored vs document-level split in pre-empty state visually via
-  // the count pill alone; future enhancement could split into two sub-sections.
-  void anchored; void unanchored;
 }
 
-let findingPulseTimer = null;
-function focusFindingMarks(marks) {
+// Shared pulse: scroll first mark into view, clear stale .pulse, force reflow,
+// re-add .pulse, schedule removal. timerSlot.id is the per-class debounce handle.
+function pulseMarks(marks, className, timerSlot) {
   if (!marks || marks.length === 0) return;
   const first = marks[0];
   if (!first.isConnected) return;
   first.scrollIntoView({ behavior: "smooth", block: "center" });
-  document.querySelectorAll(".finding-anchor.pulse").forEach((el) => el.classList.remove("pulse"));
-  if (findingPulseTimer) clearTimeout(findingPulseTimer);
+  document.querySelectorAll("." + className + ".pulse").forEach((el) => el.classList.remove("pulse"));
+  if (timerSlot.id) clearTimeout(timerSlot.id);
   void first.offsetWidth;
   marks.forEach((m) => m.classList.add("pulse"));
-  findingPulseTimer = setTimeout(() => {
+  timerSlot.id = setTimeout(() => {
     marks.forEach((m) => m.classList.remove("pulse"));
   }, 800);
 }
 
-function updateTotalSidebarCount() {
+const findingPulseSlot = { id: null };
+function focusFindingMarks(marks) {
+  pulseMarks(marks, "finding-anchor", findingPulseSlot);
+}
+
+function updateTotalSidebarCount(commentsN) {
   const findingsN = Array.isArray(FINDINGS) ? FINDINGS.length : 0;
-  const commentsN = parseInt(commentsCount.textContent || "0", 10) || 0;
   const total = findingsN + commentsN;
   sidebarCount.textContent = String(total);
   countEl.textContent = String(total);
@@ -1113,7 +1096,7 @@ function renderSidebar() {
 
   const n = groups.size;
   commentsCount.textContent = String(n);
-  updateTotalSidebarCount();
+  updateTotalSidebarCount(n);
 
   // Clear list (preserve sidebarEmpty node by removing all children then conditionally re-adding)
   while (sidebarList.firstChild) sidebarList.removeChild(sidebarList.firstChild);
@@ -1151,7 +1134,7 @@ function renderSidebar() {
   }
 }
 
-let pulseTimer = null;
+const commentPulseSlot = { id: null };
 function focusMark(mark) {
   if (!mark || !mark.isConnected) return;
   // Clean orphaned pending marks before refocusing — popup may be open with a draft
@@ -1160,21 +1143,12 @@ function focusMark(mark) {
     removePendingMarks(pending.tempMarks);
     pending.tempMarks = [];
   }
-  mark.scrollIntoView({ behavior: "smooth", block: "center" });
-  // Clear any in-flight pulse so a fresh click always re-triggers the animation
-  document.querySelectorAll(".annotated.pulse").forEach((el) => el.classList.remove("pulse"));
-  if (pulseTimer) clearTimeout(pulseTimer);
-  // Force reflow before re-adding so the transition restarts
-  void mark.offsetWidth;
   // Pulse all marks in the same logical group (multi-mark comments span multiple elements)
   const markId = mark.dataset.markId;
   const groupMarks = markId
-    ? document.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+    ? Array.from(document.querySelectorAll('.annotated[data-mark-id="' + markId + '"]'))
     : [mark];
-  groupMarks.forEach((m) => m.classList.add("pulse"));
-  pulseTimer = setTimeout(() => {
-    groupMarks.forEach((m) => m.classList.remove("pulse"));
-  }, 800);
+  pulseMarks(groupMarks, "annotated", commentPulseSlot);
 }
 
 statusCount.addEventListener("click", () => {
@@ -1195,11 +1169,8 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// Initial render — findings come from server-injected TaskList data; comments
-// are session-state (no persisted drag-comments on fresh load). Findings are
-// rendered first so .finding-anchor marks exist before any subsequent comment
-// render walks the DOM. Auto-open the sidebar when there are open findings so
-// the user can recognize them without having to toggle the panel manually.
+// renderFindings must run before renderSidebar so .finding-anchor marks exist
+// when the sidebar walk reads .annotated.
 renderFindings();
 renderSidebar();
 if (Array.isArray(FINDINGS) && FINDINGS.length > 0) {
