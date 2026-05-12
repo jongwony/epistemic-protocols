@@ -34,7 +34,7 @@ The caller — whether the user invoking `/comment-review` directly or a composi
 Phase 0  : channel open (browser, rendered preview)
 Phase L  : loop iteration k
              Q (branch gate) :
-               ① apply + scan — apply queued JSONL comments NOW (edits this round) + run /inquire+/sublate+/gap+/contextualize audit, materialize findings into TaskList for next round's sidepanel (no audit-finding edits this round), return to browser
+               ① apply + scan — apply queued JSONL comments NOW (edits this round) + run /inquire → /sublate → /gap → /contextualize audit, materialize findings into TaskList for next round's sidepanel (no audit-finding edits this round), return to browser
                ② apply        — apply queued JSONL comments NOW (edits this round, partial; defer ambiguous), no audit, no new findings, return to browser
              user reads preview + sidepanel state in browser, drag-comments and/or disposes prior-round findings, then next chat turn answers the gate
 free-exit : user may end the review at any time by saying so (Phase 0 prose declares this once)
@@ -86,7 +86,7 @@ The sidepanel state line surfaces carryover (open findings the user can still di
 ```
 Q : Round {k+1} — Which round mode? (Answer after browser comment authoring + sidepanel disposition is complete)
   ① apply + scan — APPLY: translate this round's queued JSONL comments into edits NOW (queued comments include both fresh drag-comments and any sidepanel disposition signals carrying [task: …] tags, which also call TaskUpdate(completed)).
-                    SCAN: run /inquire+/sublate+/gap+/contextualize audit; for each finding, materialize a TaskList entry with the source-protocol disposition coproduct attached (no audit-finding edits this round). Findings appear in Round {k+2}'s sidepanel for user disposition.
+                    SCAN: run /inquire → /sublate → /gap → /contextualize audit; for each finding, materialize a TaskList entry with the source-protocol disposition coproduct attached (no audit-finding edits this round). Findings appear in Round {k+2}'s sidepanel for user disposition.
   ② apply        — APPLY only: translate this round's queued JSONL comments into edits NOW (partial; defer ambiguous). No scan, no new findings. Faster round suited for flow-state iteration after the user has already disposed prior-round findings via the sidepanel.
                     Implicit contract: the user has performed their own cognitive scan via drag-commenting and sidepanel disposition,
                     so the AI handles faithful translation only.
