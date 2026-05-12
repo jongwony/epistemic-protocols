@@ -34,3 +34,31 @@ Operationally: EP defines and protects authority-boundary visibility; the operat
 - Prosoche `/attend` Phase 2: gate interaction (risk classification, intent transmission, judgment surfacing) is epistemic substrate; gate-passage actions requiring harness permission or high-stake execution are non-epistemic substrate, delegated by handoff.
 
 > **Demoted detail**: Other architectural principles (Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload) live in `.claude/principles/architectural-principles.md` (axis_β = T2–T3, conditional invocation). Fetch via Read/Grep when authoring/verify-time inquiry warrants. See `.claude/principles/README.md` for the demotion ledger.
+
+## Tool-Aligned Cognitive Compromise (TACC)
+
+TACC names a realization-layer family: a set of crystallized compromise-points along the dimension `(Harness × Tools' affordance power) × (User's cognitive alignment cost)`. Members of the family describe how deeper cognitive and authority invariants inscribe under the current Harness × Tools schema; the family is **not** the origin of those invariants. A1 (Recognition over Recall) and A6 (Context-Question Separation) retain their invariant status — TACC describes their inscription form under structured-tool affordances, not their derivation. The family identity exists at the realization layer; the underlying invariants exist at the cognitive/authority layer.
+
+The family operates as a coexistence registry — members may live in `axioms.md`, `derived-principles.md`, or this file. TACC's contribution is naming the structural relation (sibling crystallizations across scales), not relocating member content.
+
+**Scale-stratified membership**:
+
+- **A1 Recognition over Recall** (semantic-gate scale) — invariant residence: `axioms.md`. Inscription form under AskUserQuestion: option array with differential-future-per-option requirement.
+
+- **A6 Context-Question Separation** (gate-layout scale) — invariant residence: `axioms.md`. Inscription form under separated text/modal affordance: analytical context as pre-gate text, question and options in the gate region.
+
+- **Differential Future Requirement** (option-set scale) — derived residence: `derived-principles.md`. Inscription form: each option occupies a decision-relevant differential-future position; cost-symmetric collapse and meta-action demotion apply.
+
+- **Full Taxonomy Confirmation** (gate-type scale) — derived residence: `derived-principles.md`. Inscription form: finite type sets surface with detection status, evidence, and falsification conditions across all members, not only the detected subset.
+
+- **PCME (Per-Round Cognitive Mobilization Equilibration)** (round scale) — new member, this file. Round determination operates on cognitive-cost homogeneity and dependency boundary, not cardinality. Bundle confidence-homogeneous decisions per round; route Standing-authority-resolved items via autonomous propagation; fork single high-cost decisions via protocol synthesis (turn-by-turn pattern). Verification-category gates (Katalepsis comprehension, Anamnesis Phase 2 recognition) are excluded per Differential Future Requirement's verification-gate exclusion.
+
+- **Recommendation Without Usurpation** (authority scale) — new member. AI surfaces a default option but does not auto-select; option-ordering reduces friction while user authority is preserved. Constitution gate integrity holds; the default is signal, not resolution.
+
+- **Free-Form Escape Hatch** (schema-completeness scale) — new member. Typed option schemas include a free-response path so finite enumerations do not foreclose user intent. Misclassification risk decreases without weakening the typed coproduct: free response is the canonical pathway for axes outside the surfaced taxonomy.
+
+- **Default by Ordering, Not Elision** (authority-preservation scale) — new member. Low-cost decisions remain active gates with friction reduced through option ordering rather than gate elision. The constitutive interaction is preserved; informed acceptance after recognizing differential futures is itself constitutive (per A5).
+
+- **Single Active Focus** (state-tracking scale) — new member. Visible focus is serialized even when the affordance permits parallel progress, reducing state-tracking cost. Parallel work may proceed underneath; the surfaced focus remains singular.
+
+**Operational consequence**: TACC family members compose at distinct scales, so a single protocol activation may exercise A1 at the option level, A6 at the layout level, PCME at the round level, and Recommendation Without Usurpation at the schema level concurrently. Compose by scale-pairing rather than by member-merging.
