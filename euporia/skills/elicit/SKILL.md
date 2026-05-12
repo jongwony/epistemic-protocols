@@ -26,7 +26,8 @@ Euporia(I) → pre-detect(I, S) → signal? →
 ── MORPHISM ──
 IntentSeed
   → detect(aporia, axis_undetermined)        -- verify abstract aporia exists
-  → access(externalized_substrate)            -- read substrate channels (codebase / rules / sessions / environment)
+  → access(externalized_substrate)            -- read external substrate channels (codebase / rules / sessions / environment)
+  → observe(utterance_ambiguity)              -- analyze I.utterance for in-text semantic ambiguity (Utterance channel; internal)
   → reverse_trace(coordinates)                -- infer user's externalized decision coordinates
   → surface(D[], cycle_emergent)              -- present cycle-emergent dimension projections
   → integrate(answer, I)                       -- update intent per user answer
@@ -49,7 +50,8 @@ DimensionProjection = { axis_inferred: String, coordinates: List(Coordinate), co
 Coordinate     = { name: String, default: Optional(Value), question: String, basis: Evidence }
 Evidence       = { source: SubstrateChannel, content: String }
 SubstrateChannel ∈ {Codebase, Rules, Session, Environment, Utterance}
-                 -- Utterance: in-text semantic ambiguity of I.utterance itself as evidence;
+                 -- Codebase / Rules / Session / Environment: sourced from S (ExternalizedSubstrate fields)
+                 -- Utterance: sourced from I.utterance (not a field of S; in-text semantic ambiguity of the IntentSeed itself);
                  --   citation MUST quote the actual utterance fragment, not paraphrase or attribute unstated mental models
 A              = UserAnswer ∈ {Provide(values), Defer(coords), Dismiss}
                  values         = Map(Coordinate, Value)
@@ -90,10 +92,11 @@ If user_judges_resolved(I'): terminate, return ResolvedEndpoint.
 If A = Dismiss + residual ≠ ∅: terminate with ResolvedEndpoint(residual annotated).
 Else: cycle_n += 1, return to Phase 1 (re-trace substrate with updated I).
 No fixed cycle cap; user esc available at every Phase 2.
-Convergence presentation (relay, extension-classified):
+Convergence presentation (relay, extension-classified; at termination):
   (a) Intent readback — plain single-sentence form of resolved I' assembled from coordinate values, in user-facing language;
   (b) Per-cycle coordinate trace — for each step ∈ history, show (D[step] → A[step] → I'[step]).
 Convergence is demonstrated, not asserted; the readback materializes I' as a recognizable target without adding a separate constitutive gate.
+Mid-cycle scope: Intent readback (a) also surfaces in Phase 2 from cycle_n ≥ 2 (see Phase 2 surfacing format); the per-cycle coordinate trace (b) is termination-only.
 
 ── CONVERGENCE ──
 resolved(I') = ∃ step ∈ history : user_judges_resolved(I'[step])
@@ -108,7 +111,7 @@ Phase 1 Utterance    (observe)      → Internal analysis of I.utterance for in-
 Phase 1 ReverseTrace (observe)      → Internal analysis (axis inference + coordinate construction)
 Phase 2 Qs           (constitution) → present (mandatory; cycle-emergent dimension options + cycle counter; Esc → loop termination)
 Phase 3              (track)        → Internal state update
-converge             (extension)    → TextPresent+Proceed (per-cycle coordinate trace; proceed with ResolvedEndpoint)
+converge             (extension)    → TextPresent+Proceed (intent readback + per-cycle coordinate trace; proceed with ResolvedEndpoint)
 
 ── MODE STATE ──
 Λ = { phase: Phase, I: IntentSeed, I': IntentSeed, S: ExternalizedSubstrate,
@@ -177,6 +180,12 @@ AI detects abstract aporia OR user calls `/elicit`. Detection is silent (Phase 0
 Gate predicate:
 ```
 aporia(I) ≡ ∃ requirement(r, I) : axis_undetermined(r) ∧ substrate_implicit(r)
+            -- substrate_implicit ranges over external SubstrateChannels
+            --   {Codebase, Rules, Session, Environment} for activation purposes.
+            -- Utterance is admissible as Evidence basis within Phase 1 dimension projections
+            --   once activated, but does not by itself satisfy substrate_implicit;
+            --   utterance-only aporia (axis-undetermined intent without external substrate signal)
+            --   routes to Aitesis (fact-supply layer), not Euporia.
 ```
 
 ### Priority
@@ -246,10 +255,11 @@ Analyze the intent seed for abstract aporia. Silent — no user interaction.
 
 Read substrate channels and reverse-trace dimension projections.
 
-1. **Substrate scan**: Read/Grep over the user's codebase, rules, recent sessions; Bash for read-only Environment queries (machine-setup metadata only: uname, pwd, tool versions, git config public fields). MUST NOT execute `env`, `printenv`, `set`, `echo $VAR`, or read `.env*` files. Additionally, the IntentSeed's utterance itself may serve as evidence when it carries in-text semantic ambiguity (Utterance channel) — citations quote the actual utterance fragment, never paraphrase or attribute unstated mental models. Tag each evidence record with its substrate channel (Codebase / Rules / Session / Environment / Utterance).
-2. **ReverseTrace**: From the intent and the substrate evidence, infer candidate dimensions whose coordinates are likely implicit in the substrate. Each `Coordinate` within the projection carries (name, default, question, basis: Evidence); each `DimensionProjection` carries (axis_inferred, coordinates, confidence).
-3. **Filter by confidence**: Surface dimensions whose substrate basis is concrete; defer low-confidence dimensions to later cycles.
-4. Package `(D[], context)` and proceed to Phase 2.
+1. **Substrate scan** (external channels): Read/Grep over the user's codebase, rules, recent sessions; Bash for read-only Environment queries (machine-setup metadata only: uname, pwd, tool versions, git config public fields). MUST NOT execute `env`, `printenv`, `set`, `echo $VAR`, or read `.env*` files. Tag each evidence record with its substrate channel (Codebase / Rules / Session / Environment).
+2. **Utterance analysis** (Utterance channel): Internal analysis of `I.utterance` for in-text semantic ambiguity. Citations quote the actual utterance fragment only; paraphrase and attribution of unstated mental models are outside the channel. Utterance evidence supplements external substrate evidence within Phase 1 dimension projections — it does not by itself trigger activation (see Gate predicate).
+3. **ReverseTrace**: From the intent and the substrate evidence, infer candidate dimensions whose coordinates are likely implicit in the substrate. Each `Coordinate` within the projection carries (name, default, question, basis: Evidence); each `DimensionProjection` carries (axis_inferred, coordinates, confidence).
+4. **Filter by confidence**: Surface dimensions whose substrate basis is concrete; defer low-confidence dimensions to later cycles.
+5. Package `(D[], context)` and proceed to Phase 2.
 
 **Scope restriction**: Read-only investigation. No test execution or file modifications. Substrate evidence must cite a specific source.
 
@@ -318,8 +328,10 @@ After integration:
 | Free response honored | User may answer beyond, redirect, or terminate at any Phase 2 | Full constitutive control |
 | Session immunity | Resolved or dismissed (utterance, substrate slice) → skip for session | Respects user's resolution or release |
 | Substrate read-only | Phase 1 substrate access uses read-only tools only | No mutation of user's externalized cognition during scan |
-| Utterance channel discipline | Utterance evidence quotes the actual utterance fragment; paraphrase or attribution of unstated mental models is excluded from the channel | Prevents AI from projecting unspoken user mental models as substrate evidence |
-| Convergence readback | At termination and at every Phase 2 from cycle_n ≥ 2, present I' as plain single-sentence readback alongside per-cycle trace | Provides recognizable target for `user_judges_resolved`; prevents implicit resolution assertion |
+| Utterance channel discipline | Utterance evidence quotes the actual utterance fragment only; paraphrase and attribution of unstated mental models are outside the channel | Prevents AI from projecting unspoken user mental models as substrate evidence |
+| Utterance-only activation guard | Utterance evidence supplements external substrate evidence; utterance-only signals do not satisfy the activation predicate | Prevents false-positive activation when no external substrate carries implicit coordinates |
+| Convergence readback (Phase 2, cycle_n ≥ 2) | At every Phase 2 from cycle_n ≥ 2, present I' as plain single-sentence readback (readback alone, no trace) | Provides recognizable target for `user_judges_resolved`; prevents implicit resolution assertion mid-cycle |
+| Convergence readback (termination) | At termination, present I' as readback alongside the per-cycle coordinate trace | Demonstrates convergence with full history; readback materializes the resolved endpoint as a recognizable sentence |
 | User esc anytime | Esc available at every Phase 2 | No fixed cycle cap |
 
 ## Rules
