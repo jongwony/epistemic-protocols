@@ -11,6 +11,7 @@
     --highlight-edge: #d4a017;
     --highlight-pending: #e8f4ff;
     --highlight-pending-edge: #2c7be5;
+    --finding-edge: #ff7f50; /* coral — distinct from yellow drag-comment highlight */
     --muted: #666;
     --bg: #fafafa;
     --sidebar-width: 320px;
@@ -110,6 +111,22 @@
   .annotated.pulse {
     box-shadow: 0 0 0 4px rgba(44, 123, 229, .35);
   }
+
+  /* Finding-anchor — TaskList-backed scan finding anchored in source markdown.
+     Uses an additive coral underline that may overlap the yellow drag-comment
+     highlight without obscuring it (border-bottom layer below the drag mark). */
+  .finding-anchor {
+    border-bottom: 2px solid var(--finding-edge);
+    padding: 1px 0;
+    cursor: help;
+    transition: box-shadow .25s ease;
+  }
+  .finding-anchor.pulse {
+    box-shadow: 0 0 0 4px rgba(255, 127, 80, .35);
+  }
+  /* When a span is both a drag comment and a finding anchor, both visual cues
+     stack: drag yellow + 💬 (existing), plus the coral border-bottom (this rule).
+     border-bottom of nested marks both render because each <mark> is its own box. */
 
   /* Popup */
   #popup {
@@ -252,6 +269,79 @@
     -webkit-box-orient: vertical;
   }
 
+  /* Findings section — TaskList-backed scan findings, distinct from comments.
+     Same toggle-with-sidebar behavior; sub-section header separates findings
+     from drag-comments inside the same panel. */
+  .sidebar-section-header {
+    padding: .55em 1em;
+    background: white;
+    border-bottom: 1px solid #eee;
+    font-size: .78em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sidebar-section-header .count-pill {
+    background: #eee;
+    color: #444;
+    padding: .1em .55em;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: .9em;
+  }
+  .finding-item .sidebar-item-anchor {
+    border-left-color: var(--finding-edge);
+  }
+  .finding-item-meta {
+    font-size: .72em;
+    color: var(--muted);
+    margin-top: .25em;
+    display: flex;
+    gap: .55em;
+    align-items: center;
+  }
+  .finding-item-meta .tag {
+    color: #b04020;
+    font-weight: 500;
+  }
+  .finding-item.unanchored .sidebar-item-anchor {
+    border-left-style: dashed;
+    color: var(--muted);
+    font-style: italic;
+  }
+  /* Sidebar findings and in-text coral anchors both open the response popup. */
+  .finding-item, .finding-anchor { cursor: pointer; }
+  /* Finding-response popup body section (shown only in finding-mode).
+     Anchor preview is hidden in finding-mode — body section already carries
+     the full finding context (subject + body), so the duplicate anchor line
+     would only add visual noise. */
+  #popup-finding-body {
+    display: none;
+    padding: .5em .65em;
+    margin-bottom: .4em;
+    max-height: 9em;
+    overflow-y: auto;
+    font-size: .82em;
+    color: var(--muted);
+    border-left: 3px solid var(--finding-edge);
+    line-height: 1.45;
+    white-space: pre-wrap;
+  }
+  #popup.finding-mode #popup-finding-body { display: block; }
+  #popup.finding-mode #popup-anchor-preview { display: none; }
+  #popup.finding-mode #popup-delete { display: none !important; }
+  #findings-empty {
+    padding: 1.2em 1em;
+    color: var(--muted);
+    font-size: .82em;
+    text-align: center;
+    font-style: italic;
+  }
+
   /* Status bar */
   #status {
     position: fixed;
@@ -334,6 +424,10 @@
     .sidebar-item:hover { background: #2a2a2a; }
     .sidebar-item-anchor { color: #aaa; }
     .sidebar-item-comment { color: #e0e0e0; }
+    .sidebar-section-header { background: #1a1a1a; border-bottom-color: #333; color: #888; }
+    .sidebar-section-header .count-pill { background: #2a2a2a; color: #ccc; }
+    .finding-item-meta .tag { color: #ffb094; }
+    #findings-empty { color: #888; }
   }
 
 </style>
@@ -351,10 +445,21 @@
   </div>
 </div>
 
-<aside id="sidebar" aria-label="Comments panel">
+<aside id="sidebar" aria-label="Findings and comments panel">
   <div id="sidebar-header">
-    <span><strong id="sidebar-count">0</strong> comments</span>
+    <span><strong id="sidebar-count">0</strong> items</span>
     <span style="font-size:.78em;">click to focus</span>
+  </div>
+  <div class="sidebar-section-header">
+    <span>Scan findings</span>
+    <span class="count-pill" id="findings-count">0</span>
+  </div>
+  <div id="findings-list">
+    <div id="findings-empty">No open findings — sidepanel populates after an apply + scan round.</div>
+  </div>
+  <div class="sidebar-section-header">
+    <span>Drag comments</span>
+    <span class="count-pill" id="comments-count">0</span>
   </div>
   <div id="sidebar-list">
     <div id="sidebar-empty">No comments yet — select text to add one.</div>
@@ -363,6 +468,7 @@
 
 <div id="popup">
   <div id="popup-anchor-preview"></div>
+  <div id="popup-finding-body"></div>
   <textarea id="popup-textarea" placeholder="Comment on this selection…"></textarea>
   <div id="popup-actions">
     <button id="popup-delete" class="danger" type="button" aria-label="Delete comment">Delete</button>
@@ -382,9 +488,21 @@
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script type="text/markdown" id="md-source">__MARKDOWN_CONTENT_PLACEHOLDER__</script>
+<script type="application/json" id="findings-data">__FINDINGS_PLACEHOLDER__</script>
 
 <script>
 const SLUG = __SLUG_PLACEHOLDER__;
+// Findings: TaskList-backed scan findings injected by serve.ts at render time.
+// Filtered to current slug (substring match on description tag) and excluding
+// completed entries. Per-finding shape: { id, subject, description, status,
+// anchor, subProtocol, round, body }. anchor/subProtocol/round are parsed from
+// inline tags in description; body is the description with all tags stripped.
+let FINDINGS = [];
+try {
+  FINDINGS = JSON.parse(document.getElementById("findings-data").textContent || "[]");
+} catch (e) {
+  console.error("[findings] failed to parse injected data:", e);
+}
 
 // Render markdown
 const sourceText = document.getElementById("md-source").textContent;
@@ -396,6 +514,7 @@ const contentText = content.innerText;
 // Selection-popup state
 const popup = document.getElementById("popup");
 const popupPreview = document.getElementById("popup-anchor-preview");
+const popupFindingBody = document.getElementById("popup-finding-body");
 const popupTextarea = document.getElementById("popup-textarea");
 const popupSubmit = document.getElementById("popup-submit");
 const popupCancel = document.getElementById("popup-cancel");
@@ -408,6 +527,14 @@ const sidebarList = document.getElementById("sidebar-list");
 const sidebarEmpty = document.getElementById("sidebar-empty");
 const sidebarCount = document.getElementById("sidebar-count");
 const statusCount = document.getElementById("status-count");
+const findingsList = document.getElementById("findings-list");
+const findingsEmpty = document.getElementById("findings-empty");
+const findingsCount = document.getElementById("findings-count");
+const commentsCount = document.getElementById("comments-count");
+
+// Per-finding mark refs: id -> array of <mark> elements (empty when anchor unresolved).
+// Used to scroll-to-anchor when the user clicks a sidebar finding entry.
+const findingMarks = new Map();
 
 let pending = null; // { range, anchor, context_before, context_after, editingMark, tempMarks }
 let markIdCounter = 0; // monotonic id assigned per saved mark group; bridges DOM <-> sidebar entry
@@ -427,6 +554,25 @@ function positionPopupNear(rect) {
   const left = Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - popupWidth - 16);
   popup.style.top = (window.scrollY + rect.bottom + 8) + "px";
   popup.style.left = Math.max(16, left) + "px";
+}
+
+function truncateForPopup(text) {
+  if (!text) return "";
+  return text.length > 200 ? text.slice(0, 200) + "…" : text;
+}
+
+// Common popup-opening tail shared by all three entry points (handleSelection,
+// openEditPopup, openFindingPopup) — single point where mode toggles + show
+// class + focus ordering are guaranteed consistent.
+function showPopup({ rect, previewText, textareaValue, isEdit, isFinding, selectAfterFocus }) {
+  positionPopupNear(rect);
+  popupPreview.textContent = truncateForPopup(previewText);
+  popupTextarea.value = textareaValue;
+  setPopupMode(!!isEdit);
+  popup.classList.toggle("finding-mode", !!isFinding);
+  popup.classList.add("show");
+  popupTextarea.focus();
+  if (selectAfterFocus) popupTextarea.select();
 }
 
 // Wrap a range across element boundaries by walking its intersecting text nodes
@@ -549,19 +695,13 @@ function handleSelection() {
   };
 
   const anchorRect = tempMarks.length > 0 ? tempMarks[0].getBoundingClientRect() : range.getBoundingClientRect();
-  positionPopupNear(anchorRect);
-  popupPreview.textContent = text.length > 200 ? text.slice(0, 200) + "…" : text;
-  popupTextarea.value = "";
-  setPopupMode(false);
-  popup.classList.add("show");
   // Drop the live selection so the dashed pending mark is the only visible cue
   sel.removeAllRanges();
-  popupTextarea.focus();
+  showPopup({ rect: anchorRect, previewText: text, textareaValue: "" });
 }
 
-// Click an existing annotation to edit it. Append-only JSONL is preserved — the edit
-// resubmits with the same (anchor, context_before, context_after) tuple; the revision
-// consumer applies latest-timestamp-wins dedup on that tuple.
+// Edit preserves append-only JSONL: resubmits with the same (anchor, context_before,
+// context_after) tuple; the revision consumer applies latest-timestamp-wins dedup.
 function openEditPopup(markEl) {
   pending = {
     range: null,
@@ -571,14 +711,38 @@ function openEditPopup(markEl) {
     editingMark: markEl,
     tempMarks: [],
   };
-  positionPopupNear(markEl.getBoundingClientRect());
-  const anchorText = pending.anchor;
-  popupPreview.textContent = anchorText.length > 200 ? anchorText.slice(0, 200) + "…" : anchorText;
-  popupTextarea.value = markEl.dataset.comment || "";
-  setPopupMode(true);
-  popup.classList.add("show");
-  popupTextarea.focus();
-  popupTextarea.select();
+  showPopup({
+    rect: markEl.getBoundingClientRect(),
+    previewText: pending.anchor,
+    textareaValue: markEl.dataset.comment || "",
+    isEdit: true,
+    selectAfterFocus: true,
+  });
+}
+
+// Document-level findings have no in-text anchor — popup falls back to the
+// right side of the viewport, just below the sidebar header.
+function openFindingPopup(finding, anchorEl) {
+  const anchorText = finding.anchor || "(document-level finding)";
+  pending = {
+    range: null,
+    anchor: anchorText,
+    context_before: "",
+    context_after: "",
+    editingMark: null,
+    tempMarks: [],
+    findingId: finding.id, // submit handler appends [task: <id>] to the comment
+  };
+
+  const rect = anchorEl && anchorEl.isConnected
+    ? anchorEl.getBoundingClientRect()
+    : { left: window.innerWidth - 380, bottom: 90, top: 50, right: window.innerWidth - 40, width: 340, height: 0 };
+
+  const subject = finding.subject || "";
+  const body = finding.body || "";
+  popupFindingBody.textContent = subject && body ? subject + "\n\n" + body : (subject || body);
+  popupTextarea.placeholder = "Respond to this finding (auto-tagged with [task: " + finding.id + "])…";
+  showPopup({ rect, previewText: anchorText, textareaValue: "", isFinding: true });
 }
 
 content.addEventListener("click", (e) => {
@@ -586,6 +750,13 @@ content.addEventListener("click", (e) => {
   if (mark) {
     e.stopPropagation();
     openEditPopup(mark);
+    return;
+  }
+  const findingMark = e.target.closest(".finding-anchor");
+  if (findingMark && findingMark.dataset.findingId) {
+    e.stopPropagation();
+    const finding = FINDINGS.find((f) => f.id === findingMark.dataset.findingId);
+    if (finding) openFindingPopup(finding, findingMark);
   }
 });
 
@@ -596,6 +767,8 @@ function dismissPopup() {
   }
   popup.classList.remove("show");
   popup.classList.remove("edit-mode");
+  popup.classList.remove("finding-mode");
+  popupTextarea.placeholder = "Comment on this selection…";
   pending = null;
   const sel = window.getSelection();
   if (sel) sel.removeAllRanges();
@@ -632,6 +805,16 @@ function showToast(msg, isError) {
   toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
 }
 
+// Single-source fetch wrapper — all /feedback writes (POST + DELETE) share URL,
+// headers, and JSON body shape. Per-site response/error handling stays at the call site.
+function feedbackFetch(method, body) {
+  return fetch("/feedback", {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 async function submitFeedback() {
   if (!pending) return dismissPopup();
   const comment = popupTextarea.value.trim();
@@ -641,23 +824,25 @@ async function submitFeedback() {
 
   // Edit case: send the original id so the new entry shares the dedup key with the
   // previous version. Create case: omit id so server mints a UUID.
+  // Finding-response mode: append [task: <id>] tag so the apply step recognizes
+  // this comment as a disposition signal against the named TaskList entry.
+  const taggedComment = captured.findingId
+    ? comment + " [task: " + captured.findingId + "]"
+    : comment;
+
   const reqBody = {
     slug: SLUG,
     anchor: captured.anchor,
     context_before: captured.context_before,
     context_after: captured.context_after,
-    comment,
+    comment: taggedComment,
   };
   if (captured.editingMark && captured.editingMark.dataset.id) {
     reqBody.id = captured.editingMark.dataset.id;
   }
 
   try {
-    const resp = await fetch("/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(reqBody),
-    });
+    const resp = await feedbackFetch("POST", reqBody);
     if (!resp.ok) throw new Error("server " + resp.status);
     const result = await resp.json();
     const id = result.id;
@@ -708,11 +893,7 @@ async function deleteFeedback() {
   }
 
   try {
-    const resp = await fetch("/feedback", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: SLUG, id }),
-    });
+    const resp = await feedbackFetch("DELETE", { slug: SLUG, id });
     if (!resp.ok) {
       let reason = "HTTP " + resp.status;
       try {
@@ -747,7 +928,182 @@ async function deleteFeedback() {
   }
 }
 
-// ── Sidebar: list-of-comments view + click-to-focus ──
+// ── Sidebar: findings + comments view + click-to-focus ──
+
+// Locate an anchor span in the rendered content. Walks text nodes once, builds a
+// flat string, finds the substring, then maps positions back to (node, offset)
+// pairs to construct a Range. Returns null when the anchor cannot be resolved
+// (text rewritten, anchor too short, or DOM does not span the requested length).
+function locateAnchorInDOM(anchorText) {
+  if (!anchorText || anchorText.length < 2) return null;
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+  const textNodes = [];
+  let combined = "";
+  let n;
+  while ((n = walker.nextNode())) {
+    textNodes.push({ node: n, offset: combined.length, length: n.textContent.length });
+    combined += n.textContent;
+  }
+  const idx = combined.indexOf(anchorText);
+  if (idx < 0) return null;
+  const endIdx = idx + anchorText.length;
+  let startNode = null, startOffset = 0;
+  let endNode = null, endOffset = 0;
+  for (const tn of textNodes) {
+    const nodeStart = tn.offset;
+    const nodeEnd = tn.offset + tn.length;
+    if (!startNode && idx >= nodeStart && idx <= nodeEnd) {
+      startNode = tn.node;
+      startOffset = idx - nodeStart;
+    }
+    if (endIdx > nodeStart && endIdx <= nodeEnd) {
+      endNode = tn.node;
+      endOffset = endIdx - nodeStart;
+      break;
+    }
+  }
+  if (!startNode || !endNode) return null;
+  const range = document.createRange();
+  try {
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+  } catch {
+    return null;
+  }
+  return range;
+}
+
+// Truncate body text for sidebar display while preserving readability.
+function truncateForDisplay(text, maxChars) {
+  if (!text) return "";
+  const compact = text.replace(/\s+/g, " ").trim();
+  if (compact.length <= maxChars) return compact;
+  return compact.slice(0, maxChars - 1) + "…";
+}
+
+// Render findings sidebar: anchored findings get a .finding-anchor in-text mark
+// (clickable scroll-to-anchor); unanchored findings render with dashed-border
+// styling (no in-text mark, no scroll target).
+function renderFindings() {
+  while (findingsList.firstChild) findingsList.removeChild(findingsList.firstChild);
+  findingMarks.clear();
+
+  if (!Array.isArray(FINDINGS) || FINDINGS.length === 0) {
+    findingsCount.textContent = "0";
+    findingsList.appendChild(findingsEmpty);
+    return;
+  }
+
+  for (const finding of FINDINGS) {
+    const anchorId = finding.anchorId || "";
+    const anchorText = finding.anchor || "";
+    let marks = [];
+
+    // Preferred path: UUID-based DOM lookup. The source markdown carries
+    // <span id="cr-anchor-{UUID}" class="finding-anchor">…</span> so the span
+    // is already the marked element; no substring search, no ambiguity.
+    if (anchorId) {
+      const el = document.getElementById("cr-anchor-" + anchorId);
+      if (el) marks = [el];
+    }
+
+    // Fallback: substring search + wrap, for findings without anchor-id
+    // (legacy or AI declined to assign UUID).
+    if (marks.length === 0 && anchorText) {
+      const range = locateAnchorInDOM(anchorText);
+      if (range) {
+        try {
+          marks = wrapRangeInMarks(range, "finding-anchor");
+        } catch (e) {
+          console.warn("[findings] wrap failed for finding", finding.id, e);
+          marks = [];
+        }
+      }
+    }
+    // Tag the marked elements with the finding id so content-click handlers
+    // can reverse-lookup the finding from a clicked .finding-anchor span.
+    for (const m of marks) m.dataset.findingId = finding.id;
+    findingMarks.set(finding.id, marks);
+
+    const item = document.createElement("div");
+    item.className = "sidebar-item finding-item " + (marks.length > 0 ? "anchored" : "unanchored");
+    item.setAttribute("role", "button");
+
+    const anchorEl = document.createElement("div");
+    anchorEl.className = "sidebar-item-anchor";
+    anchorEl.textContent = anchorText
+      ? truncateForDisplay(anchorText, 120)
+      : "Document-level finding";
+
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "sidebar-item-comment";
+    bodyEl.textContent = truncateForDisplay(finding.body || finding.subject || "", 200);
+
+    const metaEl = document.createElement("div");
+    metaEl.className = "finding-item-meta";
+    if (finding.subProtocol) {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "/" + finding.subProtocol;
+      metaEl.appendChild(tag);
+    }
+    if (finding.round) {
+      const round = document.createElement("span");
+      round.textContent = "round " + finding.round;
+      metaEl.appendChild(round);
+    }
+
+    item.appendChild(anchorEl);
+    item.appendChild(bodyEl);
+    if (metaEl.childNodes.length > 0) item.appendChild(metaEl);
+
+    // Both sidebar surfaces (findings + drag-comments) follow the same
+    // scroll-then-popup pattern so click semantics are uniform.
+    item.setAttribute("tabindex", "0");
+    const openResponse = () => {
+      if (marks.length > 0) focusFindingMarks(marks);
+      openFindingPopup(finding, marks.length > 0 ? marks[0] : null);
+    };
+    item.addEventListener("click", openResponse);
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openResponse();
+      }
+    });
+    findingsList.appendChild(item);
+  }
+
+  findingsCount.textContent = String(FINDINGS.length);
+}
+
+// Shared pulse: scroll first mark into view, clear stale .pulse, force reflow,
+// re-add .pulse, schedule removal. timerSlot.id is the per-class debounce handle.
+function pulseMarks(marks, className, timerSlot) {
+  if (!marks || marks.length === 0) return;
+  const first = marks[0];
+  if (!first.isConnected) return;
+  first.scrollIntoView({ behavior: "smooth", block: "center" });
+  document.querySelectorAll("." + className + ".pulse").forEach((el) => el.classList.remove("pulse"));
+  if (timerSlot.id) clearTimeout(timerSlot.id);
+  void first.offsetWidth;
+  marks.forEach((m) => m.classList.add("pulse"));
+  timerSlot.id = setTimeout(() => {
+    marks.forEach((m) => m.classList.remove("pulse"));
+  }, 800);
+}
+
+const findingPulseSlot = { id: null };
+function focusFindingMarks(marks) {
+  pulseMarks(marks, "finding-anchor", findingPulseSlot);
+}
+
+function updateTotalSidebarCount(commentsN) {
+  const findingsN = Array.isArray(FINDINGS) ? FINDINGS.length : 0;
+  const total = findingsN + commentsN;
+  sidebarCount.textContent = String(total);
+  countEl.textContent = String(total);
+}
 
 function renderSidebar() {
   const allMarks = content.querySelectorAll(".annotated");
@@ -760,8 +1116,8 @@ function renderSidebar() {
   }
 
   const n = groups.size;
-  sidebarCount.textContent = String(n);
-  countEl.textContent = String(n);
+  commentsCount.textContent = String(n);
+  updateTotalSidebarCount(n);
 
   // Clear list (preserve sidebarEmpty node by removing all children then conditionally re-adding)
   while (sidebarList.firstChild) sidebarList.removeChild(sidebarList.firstChild);
@@ -788,18 +1144,19 @@ function renderSidebar() {
 
     item.appendChild(anchorEl);
     item.appendChild(commentEl);
-    item.addEventListener("click", () => focusMark(mark));
+    const openEdit = () => { focusMark(mark); openEditPopup(mark); };
+    item.addEventListener("click", openEdit);
     item.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        focusMark(mark);
+        openEdit();
       }
     });
     sidebarList.appendChild(item);
   }
 }
 
-let pulseTimer = null;
+const commentPulseSlot = { id: null };
 function focusMark(mark) {
   if (!mark || !mark.isConnected) return;
   // Clean orphaned pending marks before refocusing — popup may be open with a draft
@@ -808,21 +1165,12 @@ function focusMark(mark) {
     removePendingMarks(pending.tempMarks);
     pending.tempMarks = [];
   }
-  mark.scrollIntoView({ behavior: "smooth", block: "center" });
-  // Clear any in-flight pulse so a fresh click always re-triggers the animation
-  document.querySelectorAll(".annotated.pulse").forEach((el) => el.classList.remove("pulse"));
-  if (pulseTimer) clearTimeout(pulseTimer);
-  // Force reflow before re-adding so the transition restarts
-  void mark.offsetWidth;
   // Pulse all marks in the same logical group (multi-mark comments span multiple elements)
   const markId = mark.dataset.markId;
   const groupMarks = markId
-    ? document.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+    ? Array.from(document.querySelectorAll('.annotated[data-mark-id="' + markId + '"]'))
     : [mark];
-  groupMarks.forEach((m) => m.classList.add("pulse"));
-  pulseTimer = setTimeout(() => {
-    groupMarks.forEach((m) => m.classList.remove("pulse"));
-  }, 800);
+  pulseMarks(groupMarks, "annotated", commentPulseSlot);
 }
 
 statusCount.addEventListener("click", () => {
@@ -843,8 +1191,14 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// Initial render — empty state on fresh load (no preloaded marks in template)
+// renderFindings must run before renderSidebar so .finding-anchor marks exist
+// when the sidebar walk reads .annotated.
+renderFindings();
 renderSidebar();
+if (Array.isArray(FINDINGS) && FINDINGS.length > 0) {
+  document.body.classList.add("sidebar-open");
+  statusCount.setAttribute("aria-expanded", "true");
+}
 
 // WebSocket hot reload
 function connectWS() {
