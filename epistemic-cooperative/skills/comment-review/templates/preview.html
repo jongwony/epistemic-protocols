@@ -11,6 +11,7 @@
     --highlight-edge: #d4a017;
     --highlight-pending: #e8f4ff;
     --highlight-pending-edge: #2c7be5;
+    --finding-edge: #ff7f50; /* coral — distinct from yellow drag-comment highlight */
     --muted: #666;
     --bg: #fafafa;
     --sidebar-width: 320px;
@@ -110,6 +111,22 @@
   .annotated.pulse {
     box-shadow: 0 0 0 4px rgba(44, 123, 229, .35);
   }
+
+  /* Finding-anchor — TaskList-backed scan finding anchored in source markdown.
+     Uses an additive coral underline that may overlap the yellow drag-comment
+     highlight without obscuring it (border-bottom layer below the drag mark). */
+  .finding-anchor {
+    border-bottom: 2px solid var(--finding-edge);
+    padding: 1px 0;
+    cursor: help;
+    transition: box-shadow .25s ease;
+  }
+  .finding-anchor.pulse {
+    box-shadow: 0 0 0 4px rgba(255, 127, 80, .35);
+  }
+  /* When a span is both a drag comment and a finding anchor, both visual cues
+     stack: drag yellow + 💬 (existing), plus the coral border-bottom (this rule).
+     border-bottom of nested marks both render because each <mark> is its own box. */
 
   /* Popup */
   #popup {
@@ -252,6 +269,98 @@
     -webkit-box-orient: vertical;
   }
 
+  /* Findings section — TaskList-backed scan findings, distinct from comments.
+     Same toggle-with-sidebar behavior; sub-section header separates findings
+     from drag-comments inside the same panel. */
+  .sidebar-section-header {
+    padding: .55em 1em;
+    background: white;
+    border-bottom: 1px solid #eee;
+    font-size: .78em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sidebar-section-header .count-pill {
+    background: #eee;
+    color: #444;
+    padding: .1em .55em;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: .9em;
+  }
+  .finding-item .sidebar-item-anchor {
+    border-left-color: var(--finding-edge);
+  }
+  .finding-item-meta {
+    font-size: .72em;
+    color: var(--muted);
+    margin-top: .25em;
+    display: flex;
+    gap: .55em;
+    align-items: center;
+  }
+  .finding-item-meta .tag {
+    background: rgba(255, 127, 80, .12);
+    color: #b04020;
+    padding: .05em .45em;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .finding-item.unanchored .sidebar-item-anchor {
+    border-left-style: dashed;
+    color: var(--muted);
+    font-style: italic;
+  }
+  /* Cursor: anchored findings scroll to anchor on click; unanchored findings
+     have no scroll target so cursor stays default. */
+  .finding-item.anchored { cursor: pointer; }
+  .finding-item.unanchored { cursor: default; }
+  /* Dismiss affordance: minimal one-click disposition channel for a finding.
+     Click POSTs a [disposition: Discarded] [task: <id>] comment to /feedback;
+     the next apply step closes the task. Per SKILL.md initial-form stance,
+     richer per-variant disposition pickers are deferred to a later iteration
+     once real-use evidence accumulates. */
+  .finding-item { position: relative; }
+  .finding-dismiss {
+    position: absolute;
+    top: .35em;
+    right: .35em;
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: var(--muted);
+    width: 1.4em;
+    height: 1.4em;
+    line-height: 1;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: .9em;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: .55;
+    transition: opacity .15s, color .15s, border-color .15s;
+  }
+  .finding-dismiss:hover, .finding-dismiss:focus {
+    opacity: 1;
+    color: var(--finding-edge);
+    border-color: var(--finding-edge);
+    outline: none;
+  }
+  .finding-dismiss[disabled] { opacity: .25; cursor: progress; }
+  #findings-empty {
+    padding: 1.2em 1em;
+    color: var(--muted);
+    font-size: .82em;
+    text-align: center;
+    font-style: italic;
+  }
+
   /* Status bar */
   #status {
     position: fixed;
@@ -334,6 +443,10 @@
     .sidebar-item:hover { background: #2a2a2a; }
     .sidebar-item-anchor { color: #aaa; }
     .sidebar-item-comment { color: #e0e0e0; }
+    .sidebar-section-header { background: #1a1a1a; border-bottom-color: #333; color: #888; }
+    .sidebar-section-header .count-pill { background: #2a2a2a; color: #ccc; }
+    .finding-item-meta .tag { background: rgba(255, 127, 80, .18); color: #ffb094; }
+    #findings-empty { color: #888; }
   }
 
 </style>
@@ -351,10 +464,21 @@
   </div>
 </div>
 
-<aside id="sidebar" aria-label="Comments panel">
+<aside id="sidebar" aria-label="Findings and comments panel">
   <div id="sidebar-header">
-    <span><strong id="sidebar-count">0</strong> comments</span>
+    <span><strong id="sidebar-count">0</strong> items</span>
     <span style="font-size:.78em;">click to focus</span>
+  </div>
+  <div class="sidebar-section-header">
+    <span>Scan findings</span>
+    <span class="count-pill" id="findings-count">0</span>
+  </div>
+  <div id="findings-list">
+    <div id="findings-empty">No open findings — sidepanel populates after an apply + scan round.</div>
+  </div>
+  <div class="sidebar-section-header">
+    <span>Drag comments</span>
+    <span class="count-pill" id="comments-count">0</span>
   </div>
   <div id="sidebar-list">
     <div id="sidebar-empty">No comments yet — select text to add one.</div>
@@ -382,9 +506,21 @@
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script type="text/markdown" id="md-source">__MARKDOWN_CONTENT_PLACEHOLDER__</script>
+<script type="application/json" id="findings-data">__FINDINGS_PLACEHOLDER__</script>
 
 <script>
 const SLUG = __SLUG_PLACEHOLDER__;
+// Findings: TaskList-backed scan findings injected by serve.ts at render time.
+// Filtered to current slug (substring match on description tag) and excluding
+// completed entries. Per-finding shape: { id, subject, description, status,
+// anchor, subProtocol, round, body }. anchor/subProtocol/round are parsed from
+// inline tags in description; body is the description with all tags stripped.
+let FINDINGS = [];
+try {
+  FINDINGS = JSON.parse(document.getElementById("findings-data").textContent || "[]");
+} catch (e) {
+  console.error("[findings] failed to parse injected data:", e);
+}
 
 // Render markdown
 const sourceText = document.getElementById("md-source").textContent;
@@ -408,6 +544,14 @@ const sidebarList = document.getElementById("sidebar-list");
 const sidebarEmpty = document.getElementById("sidebar-empty");
 const sidebarCount = document.getElementById("sidebar-count");
 const statusCount = document.getElementById("status-count");
+const findingsList = document.getElementById("findings-list");
+const findingsEmpty = document.getElementById("findings-empty");
+const findingsCount = document.getElementById("findings-count");
+const commentsCount = document.getElementById("comments-count");
+
+// Per-finding mark refs: id -> array of <mark> elements (empty when anchor unresolved).
+// Used to scroll-to-anchor when the user clicks a sidebar finding entry.
+const findingMarks = new Map();
 
 let pending = null; // { range, anchor, context_before, context_after, editingMark, tempMarks }
 let markIdCounter = 0; // monotonic id assigned per saved mark group; bridges DOM <-> sidebar entry
@@ -747,7 +891,215 @@ async function deleteFeedback() {
   }
 }
 
-// ── Sidebar: list-of-comments view + click-to-focus ──
+// ── Sidebar: findings + comments view + click-to-focus ──
+
+// Locate an anchor span in the rendered content. Walks text nodes once, builds a
+// flat string, finds the substring, then maps positions back to (node, offset)
+// pairs to construct a Range. Returns null when the anchor cannot be resolved
+// (text rewritten, anchor too short, or DOM does not span the requested length).
+function locateAnchorInDOM(anchorText) {
+  if (!anchorText || anchorText.length < 2) return null;
+  const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+  const textNodes = [];
+  let combined = "";
+  let n;
+  while ((n = walker.nextNode())) {
+    textNodes.push({ node: n, offset: combined.length, length: n.textContent.length });
+    combined += n.textContent;
+  }
+  const idx = combined.indexOf(anchorText);
+  if (idx < 0) return null;
+  const endIdx = idx + anchorText.length;
+  let startNode = null, startOffset = 0;
+  let endNode = null, endOffset = 0;
+  for (const tn of textNodes) {
+    const nodeStart = tn.offset;
+    const nodeEnd = tn.offset + tn.length;
+    if (!startNode && idx >= nodeStart && idx <= nodeEnd) {
+      startNode = tn.node;
+      startOffset = idx - nodeStart;
+    }
+    if (endIdx > nodeStart && endIdx <= nodeEnd) {
+      endNode = tn.node;
+      endOffset = endIdx - nodeStart;
+      break;
+    }
+  }
+  if (!startNode || !endNode) return null;
+  const range = document.createRange();
+  try {
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+  } catch {
+    return null;
+  }
+  return range;
+}
+
+// Truncate body text for sidebar display while preserving readability.
+function truncateForDisplay(text, maxChars) {
+  if (!text) return "";
+  const compact = text.replace(/\s+/g, " ").trim();
+  if (compact.length <= maxChars) return compact;
+  return compact.slice(0, maxChars - 1) + "…";
+}
+
+// Render findings: locate anchors, wrap with .finding-anchor marks, populate
+// the findings sub-section of the sidebar. Anchored findings are clickable
+// (scroll-to-anchor); unanchored findings are listed in the same panel but
+// without click target. Per SKILL.md, the red-dot dismiss UX is optional and
+// is deferred here — unanchored findings are visually distinguished by dashed
+// left border and italic text instead.
+function renderFindings() {
+  // Clear previous render
+  while (findingsList.firstChild) findingsList.removeChild(findingsList.firstChild);
+  findingMarks.clear();
+
+  if (!Array.isArray(FINDINGS) || FINDINGS.length === 0) {
+    findingsCount.textContent = "0";
+    findingsList.appendChild(findingsEmpty);
+    return;
+  }
+
+  let anchored = 0;
+  let unanchored = 0;
+
+  for (const finding of FINDINGS) {
+    const anchorText = finding.anchor || "";
+    let marks = [];
+    if (anchorText) {
+      const range = locateAnchorInDOM(anchorText);
+      if (range) {
+        try {
+          marks = wrapRangeInMarks(range, "finding-anchor");
+        } catch (e) {
+          console.warn("[findings] wrap failed for finding", finding.id, e);
+          marks = [];
+        }
+      }
+    }
+    findingMarks.set(finding.id, marks);
+
+    const item = document.createElement("div");
+    item.className = "sidebar-item finding-item " + (marks.length > 0 ? "anchored" : "unanchored");
+    item.setAttribute("role", marks.length > 0 ? "button" : "listitem");
+    if (marks.length > 0) {
+      item.setAttribute("tabindex", "0");
+      anchored++;
+    } else {
+      unanchored++;
+    }
+
+    const anchorEl = document.createElement("div");
+    anchorEl.className = "sidebar-item-anchor";
+    anchorEl.textContent = anchorText
+      ? truncateForDisplay(anchorText, 120)
+      : "Document-level finding";
+
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "sidebar-item-comment";
+    bodyEl.textContent = truncateForDisplay(finding.body || finding.subject || "", 200);
+
+    const metaEl = document.createElement("div");
+    metaEl.className = "finding-item-meta";
+    if (finding.subProtocol) {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "/" + finding.subProtocol;
+      metaEl.appendChild(tag);
+    }
+    if (finding.round) {
+      const round = document.createElement("span");
+      round.textContent = "round " + finding.round;
+      metaEl.appendChild(round);
+    }
+
+    // Dismiss affordance: one-click disposition signal per SKILL.md
+    // §Sidepanel and Finding Visibility. POSTs a [disposition: Discarded]
+    // [task: <task-id>] comment to /feedback; the next apply step closes
+    // the task and (per Discarded variant semantics) skips edit translation.
+    const dismissBtn = document.createElement("button");
+    dismissBtn.type = "button";
+    dismissBtn.className = "finding-dismiss";
+    dismissBtn.title = "Dismiss this finding (Discarded disposition)";
+    dismissBtn.setAttribute("aria-label", "Dismiss finding");
+    dismissBtn.textContent = "×";
+    dismissBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      dismissBtn.disabled = true;
+      try {
+        const payload = {
+          slug: SLUG,
+          anchor: anchorText || "(document-level finding)",
+          context_before: "",
+          context_after: "",
+          comment: "[disposition: Discarded] [task: " + finding.id + "]",
+        };
+        const res = await fetch("/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const msg = await res.text();
+          throw new Error("HTTP " + res.status + ": " + msg);
+        }
+        // Visually fade the entry; a round-boundary reload will fully drop
+        // the entry once the next apply step runs TaskUpdate(completed).
+        item.style.opacity = "0.35";
+        item.style.pointerEvents = "none";
+      } catch (err) {
+        console.error("[finding-dismiss] failed:", err);
+        dismissBtn.disabled = false;
+        dismissBtn.title = "Dismiss failed: " + (err && err.message ? err.message : err);
+      }
+    });
+    item.appendChild(dismissBtn);
+
+    item.appendChild(anchorEl);
+    item.appendChild(bodyEl);
+    if (metaEl.childNodes.length > 0) item.appendChild(metaEl);
+
+    if (marks.length > 0) {
+      item.addEventListener("click", () => focusFindingMarks(marks));
+      item.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          focusFindingMarks(marks);
+        }
+      });
+    }
+    findingsList.appendChild(item);
+  }
+
+  findingsCount.textContent = String(FINDINGS.length);
+  // Surface anchored vs document-level split in pre-empty state visually via
+  // the count pill alone; future enhancement could split into two sub-sections.
+  void anchored; void unanchored;
+}
+
+let findingPulseTimer = null;
+function focusFindingMarks(marks) {
+  if (!marks || marks.length === 0) return;
+  const first = marks[0];
+  if (!first.isConnected) return;
+  first.scrollIntoView({ behavior: "smooth", block: "center" });
+  document.querySelectorAll(".finding-anchor.pulse").forEach((el) => el.classList.remove("pulse"));
+  if (findingPulseTimer) clearTimeout(findingPulseTimer);
+  void first.offsetWidth;
+  marks.forEach((m) => m.classList.add("pulse"));
+  findingPulseTimer = setTimeout(() => {
+    marks.forEach((m) => m.classList.remove("pulse"));
+  }, 800);
+}
+
+function updateTotalSidebarCount() {
+  const findingsN = Array.isArray(FINDINGS) ? FINDINGS.length : 0;
+  const commentsN = parseInt(commentsCount.textContent || "0", 10) || 0;
+  const total = findingsN + commentsN;
+  sidebarCount.textContent = String(total);
+  countEl.textContent = String(total);
+}
 
 function renderSidebar() {
   const allMarks = content.querySelectorAll(".annotated");
@@ -760,8 +1112,8 @@ function renderSidebar() {
   }
 
   const n = groups.size;
-  sidebarCount.textContent = String(n);
-  countEl.textContent = String(n);
+  commentsCount.textContent = String(n);
+  updateTotalSidebarCount();
 
   // Clear list (preserve sidebarEmpty node by removing all children then conditionally re-adding)
   while (sidebarList.firstChild) sidebarList.removeChild(sidebarList.firstChild);
@@ -843,8 +1195,17 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// Initial render — empty state on fresh load (no preloaded marks in template)
+// Initial render — findings come from server-injected TaskList data; comments
+// are session-state (no persisted drag-comments on fresh load). Findings are
+// rendered first so .finding-anchor marks exist before any subsequent comment
+// render walks the DOM. Auto-open the sidebar when there are open findings so
+// the user can recognize them without having to toggle the panel manually.
+renderFindings();
 renderSidebar();
+if (Array.isArray(FINDINGS) && FINDINGS.length > 0) {
+  document.body.classList.add("sidebar-open");
+  statusCount.setAttribute("aria-expanded", "true");
+}
 
 // WebSocket hot reload
 function connectWS() {

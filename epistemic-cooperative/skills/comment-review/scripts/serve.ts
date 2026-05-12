@@ -13,8 +13,9 @@
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
 import { watch } from "node:fs";
-import { appendFile, readFile } from "node:fs/promises";
+import { appendFile, readdir, readFile, stat } from "node:fs/promises";
 import { basename, dirname, extname, resolve } from "node:path";
+import { homedir } from "node:os";
 
 const args = process.argv.slice(2);
 if (args.length === 0) {
@@ -89,14 +90,132 @@ const stripFrontmatter = (md: string) => {
   return m ? md.slice(m[0].length) : md;
 };
 
+// TaskList-backed finding store — read-only view onto the harness task store.
+// Per SKILL.md "TaskList File as Sync Medium": tasks live under
+// ~/.claude/tasks/<session-uuid>/<task-id>.json (per-session directories).
+// We scan every session subdirectory and filter entries whose description carries
+// the artifact slug tag, so findings created in earlier sessions remain visible
+// until completed (preserves hermeneutic cycle across sessions).
+//
+// Override the task root via COMMENT_REVIEW_TASK_ROOT for testing; defaults to
+// the harness-managed location.
+const TASK_ROOT = process.env.COMMENT_REVIEW_TASK_ROOT
+  ? resolve(process.env.COMMENT_REVIEW_TASK_ROOT)
+  : resolve(homedir(), ".claude", "tasks");
+
+interface TaskEntry {
+  id?: string;
+  subject?: string;
+  description?: string;
+  activeForm?: string;
+  status?: string;
+  blocks?: unknown;
+  blockedBy?: unknown;
+  owner?: string;
+}
+
+interface Finding {
+  id: string;
+  subject: string;
+  description: string;
+  status: string;
+  // Parsed inline tags (best-effort; missing tags become empty strings)
+  anchor: string;       // [anchor: ...] payload — empty when absent
+  subProtocol: string;  // [sub-protocol: ...] payload — empty when absent
+  round: string;        // [round: K] payload — empty when absent
+  // The raw description body with inline tags stripped, for display
+  body: string;
+}
+
+// Inline-tag parser: extracts `[key: value]` from description text.
+// Returns the payload string or "" when the tag is absent. Tag bodies may not
+// contain ']' (the inline format does not escape closing brackets).
+const extractTag = (text: string, key: string): string => {
+  const re = new RegExp("\\[" + key + ":\\s*([^\\]]*)\\]");
+  const m = text.match(re);
+  return m ? m[1].trim() : "";
+};
+
+// Strip all known inline tags from the description so the displayed body is clean.
+const stripTags = (text: string): string =>
+  text.replace(/\[(?:anchor|sub-protocol|round|slug):\s*[^\]]*\]/g, "").trim();
+
+const readTaskListForSlug = async (slug: string): Promise<Finding[]> => {
+  let sessions: string[];
+  try {
+    sessions = await readdir(TASK_ROOT);
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") return [];
+    console.error(`[tasks] readdir ${TASK_ROOT} failed: ${(e as Error).message}`);
+    return [];
+  }
+
+  const slugTag = `[slug: ${slug}]`;
+  const findings: Finding[] = [];
+
+  for (const sessionDir of sessions) {
+    const sessionPath = resolve(TASK_ROOT, sessionDir);
+    let stats: Awaited<ReturnType<typeof stat>>;
+    try {
+      stats = await stat(sessionPath);
+    } catch {
+      continue; // ignore unreadable entries
+    }
+    if (!stats.isDirectory()) continue;
+
+    let taskFiles: string[];
+    try {
+      taskFiles = await readdir(sessionPath);
+    } catch {
+      continue;
+    }
+
+    for (const file of taskFiles) {
+      if (!file.endsWith(".json")) continue;
+      const taskPath = resolve(sessionPath, file);
+      let raw: string;
+      try {
+        raw = await readFile(taskPath, "utf8");
+      } catch {
+        continue; // task disappeared or unreadable — skip
+      }
+      let task: TaskEntry;
+      try {
+        task = JSON.parse(raw) as TaskEntry;
+      } catch {
+        continue; // malformed JSON — skip
+      }
+      const desc = typeof task.description === "string" ? task.description : "";
+      if (!desc.includes(slugTag)) continue;
+      if (task.status === "completed" || task.status === "deleted") continue;
+
+      findings.push({
+        id: typeof task.id === "string" ? task.id : file.replace(/\.json$/, ""),
+        subject: typeof task.subject === "string" ? task.subject : "",
+        description: desc,
+        status: typeof task.status === "string" ? task.status : "pending",
+        anchor: extractTag(desc, "anchor"),
+        subProtocol: extractTag(desc, "sub-protocol"),
+        round: extractTag(desc, "round"),
+        body: stripTags(desc),
+      });
+    }
+  }
+
+  return findings;
+};
+
 const renderPreview = async (slug: string) => {
   const path = drafts.get(slug);
   if (!path) return null;
   const md = stripFrontmatter(await readFile(path, "utf8"));
+  const findings = await readTaskListForSlug(slug);
   // title goes into HTML context (escape & < > " '); slug goes into JS string literal context (JSON.stringify)
+  // findings goes into JS context (JSON.stringify with script-tag-safe escaping)
   return template
     .replaceAll("__TITLE_PLACEHOLDER__", escapeHtml(slug))
     .replaceAll("__SLUG_PLACEHOLDER__", JSON.stringify(slug))
+    .replace("__FINDINGS_PLACEHOLDER__", escapeForScriptTag(JSON.stringify(findings)))
     .replace("__MARKDOWN_CONTENT_PLACEHOLDER__", escapeForScriptTag(md));
 };
 
@@ -144,6 +263,19 @@ const server = Bun.serve({
       });
     }
 
+    // /feedback POST handles two overloaded use cases — see SKILL.md
+    // §Sidepanel and Finding Visibility for the disposition convention.
+    //
+    //   1. Plain comment: comment text describes user edit intent. The next
+    //      apply step translates it into Edit/Write calls.
+    //   2. Disposition signal: comment text matches the pattern
+    //      `[disposition: <variant>] [task: <task-id>]`. The next apply step
+    //      recognizes the tag, calls TaskUpdate(status=completed) against
+    //      the named task, and (per the variant) translates into edits.
+    //
+    // Both cases share the same on-disk shape (one JSONL line per call). The
+    // server does not parse disposition tags; it only persists the comment.
+    // The next channel-loop AI iteration's apply step is the consumer.
     if (url.pathname === "/feedback" && req.method === "POST") {
       let body: FeedbackBody;
       try {
