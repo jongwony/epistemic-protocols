@@ -535,10 +535,7 @@ describe('package.js CLI', () => {
     // merge time. Any additive change (new plugin, new reference doc, new
     // agent) only increases this count. A shrink indicates an unintended
     // regression (plugin removed or files accidentally excluded from the
-    // packager), which should fail. Baseline reset to 30 after the
-    // crystallize/rehydrate retire + /realign introduction net -1 plugin
-    // shrink with two references/hft-format.md files dropped — that shrink
-    // was intentional and the guard updated accordingly.
+    // packager), which should fail.
     assert.ok(
       bundle.files >= 30,
       `expected bundle.files >= 30 (regression guard), got ${bundle.files}`
