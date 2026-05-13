@@ -15,29 +15,34 @@ Define epistemic boundaries per decision through AI-guided classification. Type:
 ── FLOW ──
 Horismos(T, B_prior?) → Probe(T) → Bᵢ? →
   |Bᵢ| = 0: skip → deactivate
-  |Bᵢ| > 0: cycle_n=1, BoundaryEssence="", B = seed(B_prior) ∪ ∅, default=⊥, loop:
+  |Bᵢ| > 0: cycle_n=1, BoundaryEssence="", B = seed(B_prior) ∪ ∅, EssenceTrend=MixedTrend, default=AIAutonomous (Extension-default initial), loop:
     Phase 1 Ctx(T, cycle_n) [per-cycle re-scan] → (Sub-D[cycle_n], auto_resolved?) →
       auto_resolved: → Phase 3 (skip Phase 2 for this cycle)
       else:          → Phase 2
     Phase 2 Qc(Sub-D[cycle_n], BoundaryEssence, cycle_n, B_snapshot, default) → Stop → A
-    Phase 3 integrate(A, B, BoundaryEssence) → (B', BoundaryEssence', EssenceTrend', default', termination?) →
-      ImplicitTermination: → fill_residual(B', default') → emit DefinedBoundary → converge
+    Phase 3 parse(A) → (typed_A, termination?, override?) →
+      integrate(typed_A, B, BoundaryEssence) → (B', BoundaryEssence')                              -- classified-portion update only
+      ImplicitTermination: → finalize(B', residual, default_or_override) → DefinedBoundary → converge
+                            -- "default" is Λ.default_for_residual at entry to Phase 3 (the value Phase 2 surfaced); NOT re-derived
       ExplicitTermination: → Phase 4
       Esc:                 → ungraceful deactivate (residual untreated, BoundaryEssence finalized at current cycle_n)
-      else:                cycle_n += 1, loop
+      else:                → derive(EssenceTrend, history') → default' (for NEXT cycle) → refresh B'-snapshot → cycle_n += 1, loop
   Phase 4 (optional path) Qf(residual, {UserSupplies, AIAutonomous}) → Stop → bulk_classify → DefinedBoundary
                        Esc → ungraceful deactivate
 
 ── MORPHISM ──
 TaskScope, B_prior?
   → probe(task, context)                                           -- detect boundary-undefined domains
-  → seed(B_prior, B)                                               -- hermeneutic carry-over: optional prior BoundaryMap as starting B (seed entries mutable in subsequent cycles)
+  → seed(B_prior, B)                                               -- hermeneutic carry-over: optional prior BoundaryMap as starting B; seeded domains enter `context_resolved` partition with "prior classification" basis (entries mutable in subsequent cycles)
   → enrich(domains, codebase, cycle_n)                             -- per-cycle context collection (re-scan)
   → classify(domain, as_inquiry)                                   -- per-cycle domain classification (4-value preserved)
+  → integrate(typed_A, B, BoundaryEssence) → (B', BoundaryEssence')-- classified-portion update for current anchor; does NOT update default_for_residual
   → crystallize(Δessence, BoundaryEssence) → BoundaryEssence'      -- per-cycle essence delta integration (crystallized form of the responsibility boundary space)
-  → derive(EssenceTrend, BoundaryEssence, history) → default       -- per-cycle DefaultClassification for residual, derived from EssenceTrend
-  → snapshot(B, residual, default) → B_complete                    -- round-local complete BoundaryMap: classified entries ∪ (residual ↦ default)
-  → finalize(B_complete, default | FinalGateAnswer)                -- implicit-delegation (residual ↦ default) or explicit Phase 4 bulk classification at user-judged termination
+  → derive(EssenceTrend, history') → default'                      -- count-based EssenceTrend → DefaultClassification for NEXT cycle's residual (only runs on loop continuation)
+  → snapshot(B', residual, default') → B_complete'                 -- round-local complete BoundaryMap view for next cycle's Phase 2: classified entries ∪ (residual ↦ default')
+  → finalize(B', residual, default_at_surfacing | override | FinalGateAnswer)
+                                                                   -- ImplicitTermination: residual ↦ (default_at_surfacing | override); Phase 4: residual ↦ FinalGateAnswer
+                                                                   -- "default_at_surfacing" = Λ.default_for_residual visible in just-completed Phase 2 (NOT re-derived)
   → DefinedBoundary
 requires: boundary_undefined(T)            -- runtime checkpoint (Phase 0)
 deficit:  BoundaryUndefined                -- activation precondition (Layer 1/2)
@@ -59,19 +64,22 @@ Sub-D          = { domain: Domain, scan_summary: String, evidence: Set(Evidence)
 Δessence       = String                                       -- per-cycle boundary-essence delta produced at Phase 3 integration
 BoundaryEssence = String                                      -- accumulated boundary essence (crystallized form of the responsibility boundary space); initialized "" at Phase 0; updated as BoundaryEssence' = BoundaryEssence ⊕ Δessence at Phase 3
 EssenceTrend   ∈ {ExtensionTrend, ConstitutionTrend, MixedTrend}
-                                                              -- derived each Phase 3 from accumulated classification distribution (Λ.history) + BoundaryEssence text
-                                                              -- ExtensionTrend: AIPropose ∪ AIAutonomous dominant; ConstitutionTrend: UserSupplies dominant; MixedTrend: no dominant classification or insufficient cycles to commit a trend
-DefaultClassification : EssenceTrend → BoundaryClassification
-                                                              -- ExtensionTrend → AIAutonomous; ConstitutionTrend → UserSupplies; MixedTrend → AIAutonomous (project-profile Extension-default fallback)
+                                                              -- derived from count distribution of classified entries across Λ.history (count-based ONLY; no textual-lean interpretation — keeps derivation deterministic and relay-eligible)
+                                                              -- ExtensionTrend: count(AIPropose ∪ AIAutonomous) strictly dominant
+                                                              -- ConstitutionTrend: count(UserSupplies) strictly dominant
+                                                              -- MixedTrend: no strict dominance OR cycle_n < 2 (explicit single-cycle initialization rule — insufficient classification history to commit a non-fallback trend)
+DefaultClassification : EssenceTrend → {AIAutonomous, UserSupplies} ⊆ BoundaryClassification
+                                                              -- codomain restricted to the 2-value reachable subset (AIPropose and Dismissed are unreachable from this function)
+                                                              -- ExtensionTrend → AIAutonomous; ConstitutionTrend → UserSupplies; MixedTrend → AIAutonomous (Extension-default fallback)
 Qc             = Per-cycle boundary classification interaction [Tool: Constitution interaction]
 A              = User answer ∈ {UserSupplies(scope), AIPropose(scope), AIAutonomous(scope), Dismiss}
                  -- 4-value coproduct (per-cycle Phase 2 answer; presented intact per gate integrity invariant)
                  -- termination_intent surfaces via free-response affordance, NOT as 5th option
 TerminationIntent = parsed natural-language signal of user satisfaction
                   ∈ {ImplicitTermination(default_override?), ExplicitTermination}
-                                                              -- ImplicitTermination: commit current B_snapshot — residual ↦ DefaultClassification (or user-stated override) — emit DefinedBoundary directly
+                                                              -- ImplicitTermination: commit current B_snapshot — residual ↦ default_at_surfacing (the Λ.default_for_residual value visible in the just-completed Phase 2 surfacing; NOT re-derived in Phase 3) OR user-stated override — emit DefinedBoundary directly
                                                               -- ExplicitTermination: enter Phase 4 for bulk residual classification
-                                                              -- default_override: optional user-named BoundaryClassification overriding the AI-derived default
+                                                              -- default_override : BoundaryClassification — optional user-named alternative default overriding the surfaced default
 B              = BoundaryMap: Map(Domain, BoundaryClassification)
                  -- Always-complete after each Phase 2 round: classified entries (per-cycle answers + auto-resolved) ∪ residual entries provisionally mapped to current default_for_residual
                  -- Round-local terminator: each cycle's snapshot is a valid DefinedBoundary upon ImplicitTermination
@@ -82,8 +90,9 @@ Qf             = Final gate bulk classification interaction [Tool: Constitution 
 FinalGateAnswer = {UserSupplies, AIAutonomous} ⊆ BoundaryClassification        -- Phase 4 surfacing subset
                  -- Phase 4 UserSupplies: bulk-classify residual domains as user-retained (each residual domain becomes its own scope; lazy-binding — values or protocol invocation deferred to downstream activation)
                  -- Phase 4 AIAutonomous: bulk-classify residual as AI-delegated (semantically equivalent to per-cycle AIAutonomous(scope))
-DefinedBoundary = B where (ImplicitTermination ∨ Phase 4 completed ∨ residual = ∅) ∧ BoundaryEssence finalized
-                 -- Three graceful convergence paths: (i) Phase 3 ImplicitTermination (residual ↦ default), (ii) Phase 4 completed (residual ↦ FinalGateAnswer), (iii) Phase 1 substrate exhaustion → Phase 4
+DefinedBoundary = B' where (ImplicitTermination ∨ Phase 4 completed ∨ residual = ∅) ∧ BoundaryEssence finalized
+                 -- B' = post-final-cycle BoundaryMap (prime denotes temporal succession of the in-loop B state)
+                 -- Three graceful convergence paths: (i) Phase 3 ImplicitTermination (residual ↦ default_at_surfacing | override), (ii) Phase 4 completed (residual ↦ FinalGateAnswer), (iii) Phase 1 substrate exhaustion → Phase 4
 Phase          ∈ {0, 1, 2, 3, 4}
 
 ── PHASE TRANSITIONS ──
@@ -91,8 +100,10 @@ Phase 0: T, B_prior? → Probe(T) → seed(B_prior, B) → Bᵢ?                
 Phase 1: T, cycle_n → Ctx(T, cycle_n) → (Sub-D[cycle_n], auto_resolved?)                                      -- per-cycle context collection + auto-resolve check [Tool]
 Phase 2: Sub-D[cycle_n], BoundaryEssence, cycle_n, B_snapshot, default
        → Qc(Sub-D[cycle_n], BoundaryEssence, cycle_n, B_snapshot, default) → Stop → A                         -- per-cycle classification with complete B_snapshot + default visibility [Tool]
-Phase 3: A → derive(EssenceTrend, BoundaryEssence, history) → default'
-       → integrate(A, B, BoundaryEssence, default') → (B', BoundaryEssence', termination?)                    -- map + essence update + default derivation (track + sense)
+Phase 3: A → parse(A) → (typed_A, termination?, override?)
+       → integrate(typed_A, B, BoundaryEssence) → (B', BoundaryEssence')                                      -- classified-portion update only (does NOT modify Λ.default_for_residual)
+       → (only on loop continuation) derive(EssenceTrend, history') → default' → snapshot(B', residual, default') → B_complete'
+                                                                                                              -- next-cycle EssenceTrend + default + B_snapshot refresh (track + sense)
 Phase 4 (optional): residual, BoundaryEssence → Qf(residual, {UserSupplies, AIAutonomous}) → Stop → bulk_classify → DefinedBoundary
                                                                                                               -- final gate [Tool], reached via ExplicitTermination or Phase 1 substrate exhaustion
 
@@ -102,9 +113,9 @@ Phase 1 → Phase 2:  Sub-D[cycle_n] non-empty ∧ ¬auto_resolved              
 Phase 1 → Phase 3:  Sub-D[cycle_n] non-empty ∧ auto_resolved                                -- definitive assignment found in substrate, skip Phase 2
 Phase 1 → Phase 4:  Sub-D[cycle_n] empty (all signals exhausted)                            -- substrate-exhaustion path to explicit bulk classify
 Phase 2 → Phase 3:  A received                                                              -- per-cycle classification accepted
-Phase 3 → Phase 1:  ¬termination_intent ∧ ¬Esc → cycle_n += 1                               -- continue loop
-Phase 3 → converge (implicit): TerminationIntent = ImplicitTermination → fill_residual(B', default'_or_override) → emit DefinedBoundary
-                                                                                            -- round-local terminator: current B_snapshot committed
+Phase 3 → Phase 1:  ¬termination_intent ∧ ¬Esc → derive default' → cycle_n += 1             -- continue loop with next-cycle default
+Phase 3 → converge (implicit): TerminationIntent = ImplicitTermination → finalize(B', residual, default_at_surfacing | override) → emit DefinedBoundary
+                                                                                            -- round-local terminator: Phase 2-surfaced default committed (NOT re-derived)
 Phase 3 → Phase 4:  TerminationIntent = ExplicitTermination                                 -- user-judged satisfaction with explicit residual classification request
 Phase 3 → deactivate (ungraceful):  Esc                                                     -- residual untreated, BoundaryEssence finalized at current cycle_n
 Phase 4 → converge: bulk_classify(residual) completed                                       -- BoundaryMap + BoundaryEssence finalized
@@ -112,8 +123,8 @@ Phase 4 → deactivate (ungraceful):  Esc                                       
 
 ── LOOP ──
 J = {next, terminate_implicit, terminate_explicit, esc}
-  next:               ¬termination_intent ∧ ¬Esc → cycle_n += 1, Phase 3 → Phase 1 (per-cycle re-scan)
-  terminate_implicit: TerminationIntent = ImplicitTermination (parsed from Phase 2 free response) → Phase 3 → converge with residual filled by current default_for_residual (or user-stated override)
+  next:               ¬termination_intent ∧ ¬Esc → derive next-cycle default' (count-based) → cycle_n += 1, Phase 3 → Phase 1 (per-cycle re-scan)
+  terminate_implicit: TerminationIntent = ImplicitTermination (parsed from Phase 2 free response) → Phase 3 → converge with residual filled by default_at_surfacing (the Λ.default_for_residual value Phase 2 surfaced — NOT re-derived) or user-stated override
   terminate_explicit: TerminationIntent = ExplicitTermination (parsed from Phase 2 free response) → Phase 3 → Phase 4 (final gate)
   esc:                Esc → ungraceful deactivate (residual untreated)
 
@@ -133,17 +144,17 @@ BoundaryEssence is presented as separate session text artifact. Convergence is d
 
 ── CONVERGENCE ──
 converge iff (Phase 3 ImplicitTermination ∨ Phase 4 completed) ∧ ¬user_esc
-  Phase 3 ImplicitTermination: residual ↦ default_for_residual (or user-stated override) committed; emit DefinedBoundary directly from current B_snapshot
+  Phase 3 ImplicitTermination: residual ↦ default_at_surfacing (the Phase 2-surfaced default — NOT the re-derived value) or user-stated override; emit DefinedBoundary directly from current B_snapshot
   Phase 4 completed:           bulk_classify(residual) finished — reachable via Phase 3 ExplicitTermination OR Phase 1 substrate exhaustion
   user_esc:                    user exits via Esc key at any Phase 2 or Phase 4 (ungraceful, residual untreated, BoundaryEssence finalized at current cycle_n)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 Probe (sense)        → Internal analysis (heuristic boundary-undefined detection + session-context scan for prior BoundaryMap as B_prior seed)
+Phase 0 Probe (sense)        → Internal analysis (silent — no user output; heuristic boundary-undefined detection + session-context scan for prior BoundaryMap as B_prior seed; seed visibility deferred to Phase 2 cycle 1 surfacing)
 Phase 1 Ctx   (observe)      → Read, Grep, Glob (per-cycle re-scan: CLAUDE.md, boundaries.md, rules/, prior session context; Λ.D_history dedup)
-Phase 2 Qc    (constitution) → present (mandatory; per-cycle classification + Δessence + cycle_n + current B_snapshot + current default_for_residual with EssenceTrend basis + free-response termination affordance with implicit/explicit sub-signals; Esc → loop termination, not an Answer)
-Phase 3 derive (sense)       → Internal analysis (EssenceTrend derived from Λ.history distribution + BoundaryEssence text → DefaultClassification)
-Phase 3       (track)        → Internal state update (BoundaryMap + BoundaryEssence + EssenceTrend + default_for_residual; termination_intent parsing into ImplicitTermination/ExplicitTermination, with optional default override)
+Phase 2 Qc    (constitution) → present (mandatory; per-cycle classification + Δessence + cycle_n + current B_snapshot + current default_for_residual with count-distribution basis cite + cycle-1 seed notice when Λ.B_prior non-empty + free-response termination affordance with implicit/explicit sub-signals + ambiguity-confirmation relay when parse is uncertain; Esc → loop termination, not an Answer)
+Phase 3 parse  (sense)       → Internal analysis (TerminationIntent parsing into ImplicitTermination(override?) / ExplicitTermination / no-signal; ambiguous parse triggers one-turn relay confirmation before routing)
+Phase 3       (track)        → Internal state update (integrate(typed_A, B, BoundaryEssence) → B', BoundaryEssence'; on loop continuation only: derive(EssenceTrend, history') → default'; refresh B-snapshot for next cycle)
 Phase 4 Qf    (constitution) → present (residual bulk classification {UserSupplies, AIAutonomous}; reached via ExplicitTermination or substrate exhaustion; Esc → ungraceful exit at final gate)
 converge      (extension)    → TextPresent+Proceed (per-cycle trace + residual disposition trace + BoundaryEssence artifact; proceed with defined boundary)
 
@@ -157,7 +168,7 @@ converge      (extension)    → TextPresent+Proceed (per-cycle trace + residual
       boundary_essence: BoundaryEssence,               -- accumulated essence text
       essence_trend: EssenceTrend,                     -- ExtensionTrend | ConstitutionTrend | MixedTrend; updated each Phase 3
       default_for_residual: BoundaryClassification,    -- DefaultClassification derived from essence_trend; provisional residual disposition surfaced each Phase 2
-      context_resolved: Set(Domain),                   -- Phase 1 auto-resolved (Bᵣ-equivalent, per-cycle)
+      context_resolved: Set(Domain),                   -- Phase 1 auto-resolved (Bᵣ-equivalent, per-cycle) ∪ B_prior-seeded domains (Phase 0 init; basis: "prior classification" — entries mutable across cycles, may be re-surfaced by Phase 1 if a stale-prior signal is detected)
       user_responded: Set(Domain),                     -- Phase 2 4-value classification completed
       final_gate_classified: Set(Domain),              -- Phase 4 bulk classification completed
       dismissed: Set(Domain),
@@ -303,15 +314,15 @@ Only one domain anchored per cycle. Remaining undischarged domains accumulate in
 
 ### Phase 0: Boundary Existence Checkpoint (Silent)
 
-Verify task scope contains boundary-undefined signal and optionally seed a prior BoundaryMap. This phase is **silent** — no user interaction.
+Verify task scope contains boundary-undefined signal and optionally seed a prior BoundaryMap. This phase is **silent** — no user interaction and no user-visible output. Any user-facing notice about the seed is deferred to Phase 2 cycle 1.
 
 1. **Probe task scope** `T` for boundary-undefined signal: architecture choices, configuration preferences, quality standards, delegation scope, convention decisions, risk tolerance
 2. **Check assignment**: assess whether ownership signal is present (existence check, not exhaustive enumeration — full domain set is **cycle-emergent** via Phase 1 per-cycle re-scan)
-3. **Scan for B_prior seed**: inspect current session context for a prior BoundaryMap emitted by an earlier `/bound` invocation. If detected and the current task scope is a refinement or feedback iteration of the prior scope, bind `Λ.B_prior` to that BoundaryMap; otherwise leave `Λ.B_prior = ⊥`. The seed import is read-only — entries become mutable starting at cycle 1.
+3. **Scan for B_prior seed (scoped detection)**: inspect current session context for a prior BoundaryMap emitted by an earlier `/bound` invocation in this same session. The detection target is structurally a Horismos `DefinedBoundary` artifact (BoundaryMap structure: domain → BoundaryClassification entries with cited basis) emitted at a previous `/bound` convergence — NOT a `/recollect` recall artifact and NOT a hypomnesis store entry. `/recollect`-recalled classifications stay in the "Cross-session enrichment" advisory channel; they do not populate `Λ.B_prior`. If a `/bound` emit is detected AND the current task scope is a refinement or feedback iteration of the prior scope, bind `Λ.B_prior` to that BoundaryMap; otherwise leave `Λ.B_prior = ⊥`.
 4. If no boundary-undefined signal: present finding with reasoning for user confirmation before proceeding (Horismos not activated)
-5. If boundary-undefined signal present: initialize `cycle_n = 1`, `Λ.domains_touched = ∅`, `BoundaryEssence = ""`, `Λ.essence_trend = MixedTrend`, `Λ.default_for_residual = AIAutonomous` (Extension-default initial), `Λ.boundary_map = Λ.B_prior ∪ ∅` (seed if present, else empty) — proceed to Phase 1
+5. If boundary-undefined signal present: initialize `cycle_n = 1`, `BoundaryEssence = ""`, `Λ.essence_trend = MixedTrend`, `Λ.default_for_residual = AIAutonomous` (Extension-default initial), `Λ.boundary_map = Λ.B_prior ∪ ∅` (seed if present, else empty). When `Λ.B_prior ≠ ⊥`, also initialize the partition: `Λ.context_resolved = domain(Λ.B_prior)`, `Λ.domains_touched = domain(Λ.B_prior)` — seeded domains enter the `context_resolved` partition with basis "prior classification" so the MODE STATE partition invariant holds from Phase 0 onwards. Proceed to Phase 1.
 
-**Probe scope**: Current task scope, conversation history, CLAUDE.md rules, boundaries.md, project conventions, prior `/bound` emit in session text. Does NOT modify files or call external services.
+**Probe scope**: Current task scope, conversation history, CLAUDE.md rules, boundaries.md, project conventions, prior `/bound` convergence emit in session text. Does NOT modify files or call external services.
 
 **Per-cycle-emergent semantics**: Phase 0 records the existence signal only. Per-cycle re-scan (Phase 1) discovers domains incrementally, enabling user-judged termination at any cycle as the loop progresses.
 
@@ -319,9 +330,9 @@ Verify task scope contains boundary-undefined signal and optionally seed a prior
 
 Re-scan substrate for the current cycle and select one anchor domain (`Sub-D[cycle_n]`).
 
-1. **Per-cycle re-scan** — Call Read/Grep/Glob for boundary signals in CLAUDE.md, rules/, boundaries.md, project configuration. Skip domains already in `Λ.domains_touched` (single-source dedup — covers `Λ.D_history ∪ Λ.context_resolved ∪ Λ.user_responded ∪ Λ.dismissed ∪ Λ.residual` per the MODE STATE invariant).
+1. **Per-cycle re-scan** — Call Read/Grep/Glob for boundary signals in CLAUDE.md, rules/, boundaries.md, project configuration. Skip domains already in `Λ.domains_touched` (single-source dedup — covers `Λ.D_history ∪ Λ.context_resolved ∪ Λ.user_responded ∪ Λ.dismissed ∪ Λ.residual` per the MODE STATE invariant). **Stale-seed re-surface**: when a re-scan signal contradicts an existing `B_prior`-seeded entry in `Λ.context_resolved` (e.g., the current substrate shows the seed's classification no longer fits — new convention, deleted file, shifted scope), remove that entry from `Λ.context_resolved` and append the domain to the newly-surfaced set so anchor selection (step 2) and non-anchored accumulation (step 5) can re-process it; the seed's mutability provision applies. This is the mechanism that closes the feedback loop claimed by COMPOSITION's hermeneutic carry-over — stale seeds become candidates for re-classification, not invisible holdovers.
 2. **Anchor selection** — From newly-surfaced (not in `Λ.domains_touched`) domains:
-   - **Cycle 1**: AI Impact ordering selects highest-impact domain as `Sub-D[1]`. When `Λ.B_prior` is non-empty, Impact ordering may prefer domains where a prior classification appears stale relative to the current task scope (refinement target).
+   - **Cycle 1**: AI Impact ordering selects highest-impact domain as `Sub-D[1]`. When `Λ.B_prior` is non-empty, Impact ordering may prefer domains where a prior classification appears stale relative to the current task scope (refinement target — stale seeds re-surfaced via step 1's re-surface mechanism are candidate anchors).
    - **Cycle k≥2**: previous cycle's answer `A[cycle_n-1]` or free-response routes the substrate scan frame; the routed frame must narrow or refocus relative to the just-classified boundary's neighborhood (not duplicate the prior cycle's frame). Per-answer-type heuristics inform AI judgment but are not normative: `Dismiss` deprioritizes the topic cluster the dismissed domain belonged to; `UserSupplies`/`AIPropose`/`AIAutonomous` narrow toward adjacent unclassified domains in the same cluster. AI re-applies Impact ordering within the routed frame to select `Sub-D[cycle_n]`.
 3. **Context enrichment** — For the anchor domain, collect evidence (file/line citations, rule references, conflicting signals).
 4. **Auto-resolve check** — If anchor domain has definitive boundary assignment found in substrate: set `auto_resolved = true`, append to `Λ.context_resolved` and `Λ.boundary_map` (with cited basis), append anchor to `Λ.D_history` and `Λ.domains_touched`, signal `Phase 1 → Phase 3` (skip Phase 2 for this cycle).
@@ -340,14 +351,17 @@ Re-scan substrate for the current cycle and select one anchor domain (`Sub-D[cyc
 
 Present as text output:
 - **Cycle**: `cycle_n` (always visible)
+- **Prior BoundaryMap seeded** (cycle 1 only, when `Λ.B_prior ≠ ⊥`): list the (Domain → BoundaryClassification) entries imported from B_prior with their prior-classification basis. This is the user's first user-visible notice of the seed (Phase 0 was silent); presented BEFORE the anchor so the seed context is established for cycle 1's anchor selection.
 - **Anchor domain**: [Sub-D[cycle_n].domain.name] — [description]
 - **Substrate evidence**: [evidence cited from Read/Grep/Glob with file:line]
-- **Boundary essence so far** (`BoundaryEssence`): [accumulated crystallized form of the responsibility boundary space — empty at cycle 1 unless `Λ.B_prior` carried over, refined cumulatively]
+- **Boundary essence so far** (`BoundaryEssence`): [accumulated crystallized form of the responsibility boundary space — empty at cycle 1, refined cumulatively. The B_prior seed seeds the boundary_map but does NOT pre-populate BoundaryEssence — essence is re-crystallized from the current task scope.]
 - **Δessence proposed for this cycle**: [how this domain's classification refines the abstract responsibility boundary essence]
 - **Current BoundaryMap snapshot** (round-local complete view):
   - Classified entries: [list of (Domain → BoundaryClassification) for context_resolved ∪ user_responded ∪ dismissed]
   - Residual entries (provisional, ↦ default): [list of (Domain → default_for_residual)]
-- **Implicit-delegation default** (`default_for_residual`): [current BoundaryClassification] — derived from EssenceTrend = [ExtensionTrend | ConstitutionTrend | MixedTrend] (basis: [brief cite of essence trajectory and answer distribution])
+- **Implicit-delegation default** (`default_for_residual`): [current BoundaryClassification] — derived from EssenceTrend = [ExtensionTrend | ConstitutionTrend | MixedTrend].
+  - **Cycle 1 basis cite (mandatory format)**: when `cycle_n = 1`, the cite MUST read: "MixedTrend (cycle 1 initialization — no classification history; Extension-default fallback)". Do NOT fabricate a count distribution or essence-trajectory citation at cycle 1.
+  - **Cycle k ≥ 2 basis cite**: count distribution of classified entries (e.g., "2 × UserSupplies, 3 × AIAutonomous, 0 × AIPropose, 1 × Dismissed → AIAutonomous count dominant → ExtensionTrend → AIAutonomous"). Count distribution is the sole derivation basis (count-based only; no textual-lean interpretation).
 
 Then **present**:
 
@@ -381,37 +395,38 @@ If satisfied with the BoundaryMap snapshot above, you can end the loop now:
 
 ### Phase 3: Per-Cycle Integration + Essence Crystallization + Default Derivation
 
-After user response:
+After user response. Step ordering matters: termination parsing and the integrate step (classified-portion update) precede default re-derivation. ImplicitTermination commits with the default value that was visible in the just-completed Phase 2 surfacing (`default_at_surfacing`), NOT a re-derived value — the user's recognition must match the committed disposition.
 
-1. **Parse answer** — distinguish 4-value `BoundaryClassification` selection (for current anchor domain) from free-response `TerminationIntent` (with optional `default_override`). If both signals are present, the typed selection takes effect for the current anchor domain AND `TerminationIntent` advances to Phase 4 (Explicit) or converge (Implicit).
+0. **Snapshot the surfaced default** — `default_at_surfacing := Λ.default_for_residual` (the value Phase 2 just displayed). This is the value any ImplicitTermination will commit. Re-derivation in step 5 (if reached) writes a NEW `Λ.default_for_residual` intended for the NEXT cycle's Phase 2, never for this round's commit.
+1. **Parse answer** — distinguish 4-value `BoundaryClassification` selection (for current anchor domain) from free-response `TerminationIntent` (with optional `default_override`). If both signals are present, the typed selection takes effect for the current anchor domain AND `TerminationIntent` routes the loop.
    - Parsing rule for `TerminationIntent`:
-     - Free response signals satisfaction without an explicit Phase 4 request → `ImplicitTermination(default_override = none)`
+     - Free response signals satisfaction without an explicit residual-review request → `ImplicitTermination(default_override = none)`
      - Free response signals satisfaction plus a user-named `BoundaryClassification` as the alternative default → `ImplicitTermination(default_override = stated_classification)`
      - Free response signals satisfaction with an explicit request for residual bulk classification → `ExplicitTermination`
      - No satisfaction signal → no termination_intent
-2. **Update BoundaryMap** (classified portion):
-   - **UserSupplies(scope)**: Record anchor domain in `Λ.boundary_map` — downstream gates present open questions for user-provided values.
-   - **AIPropose(scope)**: Record domain as AI-proposes — downstream protocols expand Phase 1 candidate generation (ENRICH-AND-PRESENT).
-   - **AIAutonomous(scope)**: Record domain as AI-autonomous — downstream protocols may elide gates per RESOLVE-OR-PRESENT pattern.
-   - **Dismiss**: Mark domain dismissed; record default assumption used.
-3. **Crystallize Δessence** — append the cycle's `Δessence` to `Λ.essence_history`, then update `Λ.boundary_essence` by integrating the delta (textual refinement of the accumulated essence). The essence text is consumer-visible at Phase 4 and at convergence.
-4. **Derive EssenceTrend** — analyze `Λ.history` distribution (count of each `BoundaryClassification` across classified entries) plus `Λ.boundary_essence` textual lean:
-   - AIPropose ∪ AIAutonomous dominant or essence leans toward AI delegation → `ExtensionTrend`
-   - UserSupplies dominant or essence leans toward user authority → `ConstitutionTrend`
-   - No dominant classification or essence ambivalent or `cycle_n < 2` → `MixedTrend`
+   - **Ambiguity-confirmation relay**: if the free response is plausibly interpretable as either ImplicitTermination (commit residual to default) OR ExplicitTermination/continue-loop (review remaining) — for example "looks good but can we check the rest?" — DO NOT silently route. Present a one-turn relay confirmation surfacing the parsed intent: "I read this as [ImplicitTermination — committing residual as {default_at_surfacing}] / [ExplicitTermination — proceeding to Phase 4 for residual classification]. Correct?" The user's confirmation (or correction) routes the loop. One extra turn vs an irreversible commit on the wrong reading.
+2. **Update BoundaryMap (classified portion only)** — `integrate(typed_A, B, BoundaryEssence) → (B', BoundaryEssence')`. Apply the typed answer's classification to the current anchor domain in `Λ.boundary_map`. This step does NOT touch `Λ.default_for_residual` or `Λ.essence_trend`.
+   - **UserSupplies(scope)**: Record anchor in `Λ.boundary_map`; downstream gates present open questions for user-provided values.
+   - **AIPropose(scope)**: Record as AI-proposes; downstream protocols expand candidate generation (ENRICH-AND-PRESENT).
+   - **AIAutonomous(scope)**: Record as AI-autonomous; downstream protocols may elide gates (RESOLVE-OR-PRESENT).
+   - **Dismiss**: Mark dismissed; record default assumption.
+3. **Crystallize Δessence** — append `Δessence` to `Λ.essence_history`; update `Λ.boundary_essence` by integrating the delta.
+4. **Routing** (before any re-derivation):
+   - If `TerminationIntent = ImplicitTermination(override?)` after step 1 confirmation: `finalize(B', Λ.residual, default_at_surfacing | override)` — every residual domain in `Λ.residual` is committed with `default_at_surfacing` (the Phase 2-visible value) or `override` if user stated one. Emit DefinedBoundary, converge directly. Steps 5–7 below are SKIPPED.
+   - If `TerminationIntent = ExplicitTermination` after step 1 confirmation: proceed to Phase 4. Steps 5–7 below are SKIPPED (residual classification belongs to Phase 4, not to a next cycle's snapshot).
+   - If `Esc`: ungraceful deactivate. Steps 5–7 SKIPPED.
+   - Else (no termination signal): continue to step 5 (prepare next cycle's snapshot).
+5. **Derive next-cycle EssenceTrend** (count-based ONLY — no textual-lean interpretation): analyze `Λ.history` count distribution across classified entries.
+   - count(AIPropose ∪ AIAutonomous) strictly dominant → `ExtensionTrend`
+   - count(UserSupplies) strictly dominant → `ConstitutionTrend`
+   - No strict dominance OR `cycle_n < 2` (explicit single-cycle initialization rule — see Rule 11) → `MixedTrend`
    - Update `Λ.essence_trend`.
-5. **Derive DefaultClassification** — `Λ.default_for_residual ← DefaultClassification(Λ.essence_trend)`:
+6. **Derive next-cycle DefaultClassification** — `Λ.default_for_residual ← DefaultClassification(Λ.essence_trend)`:
    - `ExtensionTrend → AIAutonomous`
    - `ConstitutionTrend → UserSupplies`
-   - `MixedTrend → AIAutonomous` (project-profile Extension-default fallback)
-6. **Refresh boundary_map snapshot** — `Λ.boundary_map = classified_entries ∪ (Λ.residual ↦ Λ.default_for_residual)`. This is the round-local complete BoundaryMap. The next Phase 2 will surface this snapshot.
-7. **Append to history** — log `(Domain, A)` and append updated `BoundaryMap` snapshot to history.
-
-**Routing**:
-- If `TerminationIntent = ImplicitTermination(override?)` → commit current snapshot with `default_for_residual` (or override if stated) for every residual domain, emit DefinedBoundary, converge directly without Phase 4.
-- If `TerminationIntent = ExplicitTermination` → proceed to Phase 4 for bulk residual classification.
-- If `Esc` → ungraceful deactivate (final gate skipped, `Λ.residual` untreated; BoundaryEssence finalized at current `cycle_n`).
-- Else → `cycle_n += 1`, return to Phase 1.
+   - `MixedTrend → AIAutonomous` (Extension-default fallback)
+   This new `Λ.default_for_residual` is the value the NEXT cycle's Phase 2 will surface, NOT the value that just-committed any termination (which used `default_at_surfacing`).
+7. **Refresh next-cycle boundary_map snapshot** — `Λ.boundary_map = classified_entries ∪ (Λ.residual ↦ Λ.default_for_residual)`. Append `(Domain, A)` to `Λ.history`. `cycle_n += 1`, return to Phase 1.
 
 ### Phase 4 (Optional Path): Final Gate — Residual Bulk Classification (Constitution)
 
@@ -480,11 +495,13 @@ After Phase 4 user response:
 | Cycle counter visibility | `cycle_n` surfaced at every Phase 2 | User perceives signal density and decides when to terminate |
 | Essence visibility per cycle | `Δessence` and accumulated `BoundaryEssence` shown at Phase 2 | Periagoge crystallization made visible per cycle |
 | Round-local snapshot visibility | Complete `boundary_map` snapshot (classified ∪ residual ↦ default) surfaced each Phase 2 | User sees the exact state that ImplicitTermination would commit |
-| Default visibility with derivation cite | `default_for_residual` shown with EssenceTrend basis at every Phase 2 | ImplicitTermination becomes informed Constitution — user recognizes default before signaling termination |
+| Default visibility with derivation cite | `default_for_residual` shown with count-distribution basis at cycle k ≥ 2; at cycle 1 the cite explicitly states "MixedTrend (cycle 1 initialization)" | ImplicitTermination becomes informed Constitution — user recognizes default before signaling termination; cycle 1 fabrication blocked |
+| Surfaced-default commit invariant | ImplicitTermination commits with the default value visible in the just-completed Phase 2 (`default_at_surfacing`), never the re-derived value | Phase 3 re-derivation does not silently change what the user just accepted |
 | Free-response termination affordance (bifurcated) | Phase 2 prose includes both ImplicitTermination (commit snapshot with default) and ExplicitTermination (proceed to Phase 4) sub-signals | User-judged termination path while typed coproduct preserved (gate integrity invariant) |
-| Default override affordance | User may state alternative default in same satisfaction utterance (e.g., "accept but default to UserSupplies") | Override exercise preserves Recognition without expanding typed option set |
+| Ambiguity-confirmation relay | When the free response is plausibly readable as either ImplicitTermination or continue/Explicit, Phase 3 surfaces the parsed intent for one-turn confirmation before routing | One extra turn vs irreversible commit on misread intent |
+| Default override affordance | User may state alternative default classification in the same satisfaction utterance | Override exercise preserves Recognition without expanding typed option set |
 | Residual transparency | Phase 2 lists every residual domain with provisional default mapping; Phase 4 lists every residual for explicit classification | User sees both the count and the identity of domains under implicit delegation |
-| Hermeneutic seed visibility | When `Λ.B_prior` non-empty, Phase 0 logs the seed import; Phase 1 anchor selection may prefer stale prior entries for refinement | Cross-invocation feedback loop visible to user; refinement target made explicit |
+| Hermeneutic seed visibility (Phase 2 cycle 1) | When `Λ.B_prior` non-empty, the seed import is surfaced as a "Prior BoundaryMap seeded" notice at Phase 2 cycle 1 (Phase 0 stays silent); seeded domains enter `context_resolved`; Phase 1 stale-seed re-surface mechanism re-classifies entries whose prior fit no longer holds | Cross-invocation feedback loop visible at the first user-facing surfacing; partition invariant preserved; stale seeds become candidate anchors rather than invisible holdovers |
 | Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
 | Auto-resolve preferred | Context-resolved domains skip Phase 2 within their cycle | Minimizes user interaction |
 | Recognition over recall | Present options (per-cycle: UserSupplies/AIPropose/AIAutonomous/Dismiss; Phase 4: UserSupplies/AIAutonomous subset) | Bound by typed coproducts |
@@ -501,16 +518,18 @@ After Phase 4 user response:
 6. **Context resolution preferred**: Auto-resolve from existing config, rules, and conventions where possible within the cycle's anchor. Minimize user interaction to what truly requires human judgment.
 7. **One anchor per cycle**: Each Phase 2 cycle presents one anchor domain (`Sub-D[cycle_n]`); the PHASE TRANSITIONS edge `Phase 1 → Phase 2: Sub-D[cycle_n] non-empty ∧ ¬auto_resolved` binds the per-cycle cardinality. Surfaced-but-not-anchored domains accumulate into `Λ.residual` and are provisionally mapped to `Λ.default_for_residual` in the round-local snapshot; final disposition is committed by ImplicitTermination (default fill) or by Phase 4 explicit bulk classification.
 8. **Impact ordering**: Per-cycle anchor selected by Impact — highest-impact at cycle 1; previous answer or free-response routes the substrate scan frame at cycle k≥2, with Impact re-applied within the routed frame. Impact is relational to downstream protocol dependencies. (Detailed per-answer-type heuristics in Phase 1 prose.)
-9. **Per-decision boundary with hermeneutic carry-over**: Each invocation produces a fresh `BoundaryEssence` for the current task scope. A prior `BoundaryMap` detected in current session context may seed `Λ.B_prior` (Phase 0 step 3); seed entries are imported into the starting `boundary_map` but remain mutable across cycles. The seed enables a feedback loop where a downstream observation refines a prior BoundaryMap through re-invocation. Cross-session recall (hypomnesis or `/recollect`) remains heuristic input only and does not seed `B_prior`.
+9. **Per-decision boundary with hermeneutic carry-over**: Each invocation produces a fresh `BoundaryEssence` for the current task scope. A prior `BoundaryMap` detected in current session context as a Horismos `DefinedBoundary` emit (NOT a `/recollect` recall artifact, NOT a hypomnesis store entry) may seed `Λ.B_prior` (Phase 0 step 3); seeded entries are imported into the starting `boundary_map` AND into `Λ.context_resolved ∩ Λ.domains_touched` so the MODE STATE partition invariant holds from Phase 0. Seeded entries remain mutable across cycles; Phase 1's stale-seed re-surface mechanism (Phase 1 step 1) re-classifies entries whose prior fit no longer holds, closing the COMPOSITION feedback loop. Cross-session recall (hypomnesis or `/recollect`) remains advisory heuristic input on candidate classifications only and does not seed `B_prior`.
 10. **Context-Question Separation**: Analysis, evidence, rationale, the BoundaryMap snapshot, and the `default_for_residual` with derivation cite all appear as text before the gate; the question contains only the essential question, options carry only option-specific differential implications. Embedding context in question fields = protocol violation.
 11. **Convergence evidence**: At convergence (Phase 3 ImplicitTermination ∨ Phase 4 completed), present per-cycle trace (∀ k ∈ [1, cycle_n]: (Sub-D[k], Δessence[k], BoundaryClassification[k])) plus residual disposition trace — ImplicitTermination: (∀ d ∈ residual: (d, default_for_residual_or_override) with cited EssenceTrend basis); Phase 4 completion: (∀ d ∈ residual: (d, FinalGateAnswer(d))). BoundaryEssence as separate session text artifact. Convergence is demonstrated, not asserted.
 12. **Zero-signal surfacing**: If Phase 0 probe detects no boundary-undefined signal, present this finding with reasoning for user confirmation.
 13. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options.
-14. **Gate integrity** (Safeguard tier — revisitable as model capability evolves; revision triggers: model upgrade with demonstrated instruction-following improvement, sustained low violation rate across sessions, or successful compression PR demonstrating guard reducibility without outcome loss): The defined option sets (per-cycle 4-value `A`, Phase 4 2-value `FinalGateAnswer`) are presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation. Horismos-specific: the free-response termination affordance and its bifurcation into ImplicitTermination / ExplicitTermination sub-signals is positioned in Phase 2 surfacing prose (natural-language satisfaction signal guidance), not in the typed coproduct; Phase 3 parses `termination_intent` from free response and routes to either converge (Implicit) or Phase 4 (Explicit) — the affordance lives in prose rather than in the typed coproduct, so option-set integrity is preserved. Default override is free-response parsing into `ImplicitTermination(default_override)`, not an option-set extension.
+14. **Gate integrity** (Safeguard tier — revisitable as model capability evolves; revision triggers: model upgrade with demonstrated instruction-following improvement, sustained low violation rate across sessions, or successful compression PR demonstrating guard reducibility without outcome loss): The defined option sets (per-cycle 4-value `A`, Phase 4 2-value `FinalGateAnswer`) are presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation. Horismos-specific: the free-response termination affordance and its bifurcation into ImplicitTermination / ExplicitTermination sub-signals is positioned in Phase 2 surfacing prose (natural-language satisfaction signal guidance), not in the typed coproduct; Phase 3 parses `termination_intent` from free response and routes to either converge (Implicit) or Phase 4 (Explicit) — the affordance lives in prose rather than in the typed coproduct, so option-set integrity is preserved. Default override is free-response parsing into `ImplicitTermination(default_override)`, not an option-set extension. Ambiguous parses (response readable as either Implicit or Explicit/continue) trigger a one-turn relay confirmation before routing — see Rule 20.
 15. **Final gate UserSupplies — lazy-binding semantic**: Phase 4 `UserSupplies(domain)` records the disposition with the residual domain as scope. The `FinalGateAnswer` coproduct (subset of BoundaryClassification) contains no routing constructor — BoundaryMap entries carry only the typed disposition, and value provision or protocol invocation decisions occur when the user activates downstream protocols. User decision authority is preserved at the residual disposition.
 16. **Conjecture disclosure**: Per-cycle-emergent loop + essence crystallization + always-complete BoundaryMap snapshot is a structural-fit conjecture under accumulating use. Loop topology revision waits on variation-stable retention evidence accumulating across invocations.
 17. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 18. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
-19. **Default visibility — informed Constitution**: The `default_for_residual` and its derivation (EssenceTrend + brief basis) are surfaced at every Phase 2 round before the gate. ImplicitTermination is only legitimate Constitution when the user has recognized the default they are committing to. Silent default = uninformed delegation — AI exercises the residual disposition without the user recognizing what they are committing to, which collapses the Detection-with-Authority separation that distinguishes AI surfacing from user judgment. Override paths must be made reachable in the same prose (free-response "accept but default to X" parsed as `ImplicitTermination(default_override = X)`).
+19. **Default visibility — informed Constitution**: The `default_for_residual` and its derivation (count-distribution basis at cycle k ≥ 2; explicit "MixedTrend (cycle 1 initialization)" cite at cycle 1) are surfaced at every Phase 2 round before the gate. ImplicitTermination is only legitimate Constitution when the user has recognized the default they are committing to. Silent default = uninformed delegation — AI exercises the residual disposition without the user recognizing what they are committing to, which collapses the Detection-with-Authority separation that distinguishes AI surfacing from user judgment. The commit invariant: ImplicitTermination commits with `default_at_surfacing` (the value visible in the just-completed Phase 2), NEVER a Phase-3-re-derived value — Phase 3 re-derivation produces the NEXT cycle's default only. Override paths must be reachable in the same prose, parsed as `ImplicitTermination(default_override : BoundaryClassification)`.
+20. **Ambiguity-confirmation relay**: When Phase 3 step 1 parses a free response that is plausibly readable as either ImplicitTermination (commit residual to default) or ExplicitTermination/continue (review remaining or proceed to Phase 4), present a one-turn relay confirmation surfacing the parsed intent before routing: "I read this as [parsed intent]. Correct?" The user's confirmation or correction routes the loop. The cost is one turn; the avoided cost is an irreversible commit on misread intent. Does NOT apply when the parse is unambiguous.
+21. **Single-cycle MixedTrend (explicit design choice)**: When `cycle_n < 2`, EssenceTrend is forced to `MixedTrend` and `default_for_residual` resolves to `AIAutonomous` (Extension-default fallback) regardless of any single prior answer — a single classification is insufficient to commit a count-dominance trend. Consequence: single-cycle ImplicitTermination always commits residual to `AIAutonomous` unless the user supplies a `default_override`. This is an inscribed design choice for Recognition reliability (one observation cannot signal a trend); cycle 1 basis cite makes it explicit, and override reachability provides the escape hatch.
 
-**Cross-session enrichment**: Accumulated boundary preferences from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) serve as heuristic input for Phase 1 calibration proposals — per-decision freshness governs the actual classification. In parallel, when **`/recollect`** has been invoked this session, recalled context surfaces prior BoundaryMap classifications for structurally similar domains as classification candidates for Phase 1 — per-decision freshness governs evaluation. Constitution judgment remains with the user. **Distinction from hermeneutic carry-over (Rule 9)**: cross-session hypomnesis/recollect inputs are advisory heuristics on candidate classifications; `Λ.B_prior` is a within-session seed of an actual prior BoundaryMap into the starting `boundary_map`. The two operate at different layers (advisory vs structural seed).
+**Cross-session enrichment**: Accumulated boundary preferences from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) serve as heuristic input for Phase 1 calibration proposals — per-decision freshness governs the actual classification. In parallel, when **`/recollect`** has been invoked this session, recalled context surfaces prior BoundaryMap classifications for structurally similar domains as classification candidates for Phase 1 — per-decision freshness governs evaluation. Constitution judgment remains with the user. **Distinction from hermeneutic carry-over (Rule 9)**: cross-session hypomnesis/recollect inputs are advisory heuristics on candidate classifications; `Λ.B_prior` is a within-session seed of an actual prior Horismos `DefinedBoundary` emit into the starting `boundary_map` (structurally scoped to `/bound` convergence artifacts in session text, not `/recollect` recall). The two operate at different layers (advisory vs structural seed).
