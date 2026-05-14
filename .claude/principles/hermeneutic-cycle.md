@@ -38,6 +38,7 @@ Each surface operationalizes the same structural pattern at a different scale. C
 - **Closure visibility** — `Has-Cycle` vs `No-Cycle` profile state determines whether a decision can be relay-resolved (Extension-default) or requires Constitution.
 - **Substrate respect** — "skip with hermeneutic respect" acknowledges that an evidence-gate is part of the cycle; premature attempts violate substrate-first.
 - **Cross-version traceability** — Issue / PR inscriptions surviving across sessions are the substrate of the inter-version surface; severing them breaks the cycle's backward reach.
+- **Authoring placement (invariant / horizon test)** — At inscription time, content mapping to `preserves` / `invariant` blocks (stable references, productive prejudices) compiles to T1 auto-load; content mapping to `LOOP` / `CONVERGENCE` blocks (revisable interpretations, fusion-conditioned outputs) belongs in T2–T3 lazy-load or `docs/`. Per Tier Factorization, this prevents compiling horizons that should remain hermeneutically revisable. External research substrate for the test: issue #402.
 
 ## Naming
 
