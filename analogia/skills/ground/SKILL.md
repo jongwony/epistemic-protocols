@@ -70,7 +70,7 @@ If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
 If V = Dismiss: accept this correspondence as unresolved for this session; terminalize if all correspondences addressed.
 Max 3 mapping attempts per domain pair.
 Continue until: terminalized(R') OR attempts exhausted.
-Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.mappings, show (MappingUncertain(c) → validation_result(c)). Convergence is demonstrated, not asserted.
+Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.mappings, show (MappingUncertain(c) → validation_result(c)). When any abstract structure was flagged in Phase 1 step 3 as lacking a concrete correspondent in Sₜ, the trace appends a brief invitation for the user to supply the missing Sₜ correspondent if one can be identified — a free response within the existing turn, not a new gate or post-convergence morphism. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 terminalized(R') = all_addressed(R') ∨ user_esc
@@ -125,6 +125,7 @@ converge     (extension)       → TextPresent+Proceed (convergence evidence tra
 - **Aitesis** verifies context sufficiency for execution (factual: "do I have enough information?") — Analogia verifies structural correspondence between domains (relational: "does this abstract structure preserve when mapped to your context?")
 - **Katalepsis** verifies user comprehension after AI work — Analogia validates the structural mapping that precedes comprehension
 - **Epharmoge** checks post-execution applicability to context — Analogia checks pre-execution mapping validity between abstraction levels
+- **Periagoge** (`/induce`) forms a new abstraction from a cocone of concrete instances (no source abstraction Sₐ available — colimit-shaped input: `essence_sensed` over instances + `locator_absent(A)`) — Analogia validates the mapping from an existing Sₐ to a target Sₜ. Route colimit-shaped inputs to `/induce` for abstraction formation; Analogia remains scoped to mapping validation from a source abstraction to a concrete target.
 
 **Structural mapping distinction**: Analogia operates on the functor between domains — not the content of either domain (Aitesis), nor the framework choice (Prothesis), nor the comprehension state (Katalepsis). The operational test: if the uncertainty is about whether abstract structure A corresponds to concrete structure B, it's Analogia; if it's about whether enough context exists to execute, it's Aitesis; if it's about which framework to apply, it's Prothesis.
 
@@ -187,6 +188,8 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 - Phase 1 domain analysis confirms structural correspondence is trivial
 - No abstract framework is applied (output is purely concrete)
 - Colimit-shaped input detected (`essence_sensed` over concrete instances + `locator_absent(A)`) — route to `/induce` (Periagoge) for abstraction formation; Analogia's substitution interface fits mapping validation. `locator_absent(A)` is the shared cross-protocol predicate (Periagoge formal `¬located(A)`) — from Analogia's substitution-interface vantage it surfaces as a missing source abstraction Sₐ to substitute from
+- Framework selection is the primary deficit (no analytical framework chosen for the inquiry) — route to `/frame` (Prothesis); Analogia validates the mapping of an *existing* framework, Prothesis selects frameworks when none is yet chosen
+- Context insufficiency is the primary deficit (factual gaps in execution context — missing facts, missing user environment) — route to `/inquire` (Aitesis); Analogia checks *relational* correspondence between domains, Aitesis checks *factual* sufficiency for execution
 
 ### Mode Deactivation
 
@@ -305,16 +308,12 @@ After integration:
 4. **Structural Correspondence over Abstract Assertion**: When mapping is uncertain, construct explicit correspondences rather than assert mapping validity — silence is worse than a rejected mapping
 5. **Concrete instantiation required**: Every mapping presented must include at least one concrete example in the user's domain
 6. **Evidence-grounded**: Every correspondence must cite specific structural elements from both abstract and concrete domains
-7. **One at a time**: Present one correspondence per Phase 2 cycle; do not bundle multiple mappings
-8. **Validation respected**: User validation or dismissal is final for that correspondence in the current session
-9. **Convergence persistence**: Mode active until all identified correspondences are addressed or user Esc key
-10. **Progress visibility**: Every Phase 2 surfacing includes progress indicator `[N validated / M total]`
-11. **Early exit honored**: When user declares mapping sufficient, accept immediately regardless of remaining correspondences
-12. **Cross-protocol awareness**: Defer to Prothesis when framework selection is the primary deficit; defer to Aitesis when context insufficiency is the primary deficit; defer to Periagoge (`/induce`) when input is colimit-shaped (`essence_sensed` over concrete instances + `locator_absent(A)` — abstraction formation rather than mapping validation)
-13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
-14. **Convergence evidence**: Present transformation trace before declaring all_addressed(R'); per-correspondence evidence is required
-15. **Zero-gap surfacing**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
-16. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
-17. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
-18. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
-19. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+7. **Validation respected**: User validation or dismissal is final for that correspondence in the current session
+8. **Convergence persistence**: Mode active until all identified correspondences are addressed or user Esc key
+9. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+10. **Convergence evidence**: Present transformation trace before declaring all_addressed(R'); per-correspondence evidence is required
+11. **Zero-gap surfacing**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
+12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
+13. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
+14. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
+15. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
