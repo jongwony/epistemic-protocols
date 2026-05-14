@@ -260,30 +260,6 @@ The scan finds candidates; the narrative Qc enables recognition; the user consti
 
 3. **Guided recall orientation on Refine**: When initial candidates do not match, the protocol facilitates structured recognitive orientation — presenting concrete navigation through adjacent memory vectors rather than open-ended questions. The user's vague memory and the stored context are brought into productive contact through specific alternatives that enable recognition.
 
-## Distinction from Other Protocols
-
-| Protocol | Initiator | Deficit → Resolution | Focus |
-|----------|-----------|----------------------|-------|
-| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
-| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
-| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
-| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
-| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
-
-**Key differences**:
-**Anamnesis vs Aitesis**: Both involve information access. Aitesis discovers facts the user does not know (ContextInsufficient — "I need information"). Anamnesis verifies context the user vaguely knows exists (RecallAmbiguous — "I know this was discussed, but where?"). The phenomenological test: does the user have an empty intention seeking fulfillment (Anamnesis) or no intention at all regarding the topic (Aitesis)? When the user has an empty intention but the recalled content is wholly absent from stores, the protocol exits with NullMatch — the recall target may not exist in the stored context.
-
-**Composition `/recollect * /inquire`**: When recognized context needs further information enrichment, Anamnesis can compose with Aitesis — the emitted ClueVector_prose enters session text and becomes input substrate for downstream context inference. On NullMatch, Aitesis is seeded with the accumulated recall trace to search SSOT directly (INDEX may lack entries while SSOT retains the information).
-
-**Anamnesis vs Prothesis**: Prothesis selects analytical frameworks when none exist (FrameworkAbsent). Anamnesis locates prior discussions when the user has vague recall of their existence (RecallAmbiguous). If the user does not know a framework was ever discussed, it is not Anamnesis — it is Prothesis or Aitesis.
-
 ## Mode Activation
 
 ### Activation

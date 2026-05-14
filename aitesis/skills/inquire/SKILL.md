@@ -184,30 +184,6 @@ Within this hierarchy, the AI first collects contextual evidence via codebase ex
 
 Write is authorized for observation instrument setup (temporary test artifacts with mandatory cleanup). Cite-or-observe is the structural expression of the upper boundary — the adversarial guard against stopping at Inference when Evidence is achievable.
 
-## Distinction from Other Protocols
-
-| Protocol | Initiator | Deficit → Resolution | Focus |
-|----------|-----------|----------------------|-------|
-| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
-| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
-| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
-| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
-| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
-
-**Key differences**:
-- **Syneidesis** surfaces gaps at decision points for the user to judge (information flows AI→user) — Aitesis infers context the AI lacks before execution (information flows user→AI)
-
-**Heterocognitive distinction**: Aitesis monitors the AI's own context sufficiency (heterocognitive — "do I have enough context to execute?"), while Syneidesis monitors the user's decision quality (metacognitive — "has the user considered all angles?"). The operational test: if the information gap would be filled by the user providing context, it's Aitesis; if it would be filled by the user reconsidering their decision, it's Syneidesis.
-
-**Factual vs evaluative**: Aitesis uncertainties span multiple dimensions — factual (objectively correct answers discoverable from the environment), coherence (consistency among collected facts), and relevance (whether collected facts are relevant to the execution goal). Syneidesis gaps are evaluative — they require judgment about trade-offs and consequences. Phase 1 context collection exists because factual uncertainties may be partially resolved or enriched from the codebase. Coherence/CrossDomain and relevance dimensions are detected but routed to downstream protocols. Coherence/MemoryInternal contradictions are evidence-resolvable and follow the factual resolution path. Evaluative gaps cannot be self-resolved.
-
 ## Mode Activation
 
 ### Activation

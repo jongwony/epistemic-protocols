@@ -107,25 +107,6 @@ converge    (extension)  → TextPresent+Proceed (convergence evidence trace; pr
 
 **Comprehension over Explanation**: AI verifies user's understanding rather than lecturing. The goal is confirmed comprehension, not information transfer.
 
-## Distinction from Other Protocols
-
-| Protocol | Initiator | Deficit → Resolution | Focus |
-|----------|-----------|----------------------|-------|
-| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
-| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
-| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
-| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
-| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
-
-**Key difference**: AI work exists but the result remains ungrasped by the user. Katalepsis guides user to firm understanding through structured verification.
-
 ## Mode Activation
 
 ### Activation

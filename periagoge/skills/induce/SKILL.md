@@ -109,30 +109,6 @@ converge           (extension)   → TextPresent+Proceed (convergence evidence t
 
 **Dialectical Triangulation over Unilateral Proposal**: When an instance set has converged toward an unnamed essence but the abstraction has not located itself, neither AI nor user alone can crystallize the form. AI proposes a candidate paired with a personalized grounding example drawn from the user's own domain; the user shapes through Socratic moves — widening (Synagoge), narrowing (Diairesis), fusing with an adjacent abstraction, or reorienting onto an orthogonal axis. The abstraction turns toward its crystallized form through the exchange, not by unilateral AI assertion.
 
-## Distinction from Other Protocols
-
-| Protocol | Initiator | Deficit → Resolution | Focus |
-|----------|-----------|----------------------|-------|
-| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
-| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
-| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
-| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
-| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
-
-**Key differences**:
-
-- **Periagoge vs Analogia**: Directional dual. Analogia validates a given abstract structure against a concrete target (static substitution — given Sₐ, establish Sₐ → Sₜ correspondence). Periagoge forms a new abstraction from concrete instances (dynamic colimit — given {Iᵢ}, construct emergent abstraction). When the input carries `essence_sensed(A)` with `locator_absent(A)` (formal `¬located(A)`; manifests in Analogia as a missing source abstraction Sₐ), Analogia's substitution interface produces source-domain confabulation; Periagoge resolves that misfit by handling abstraction formation directly.
-- **Periagoge vs Prothesis**: Prothesis selects among candidate analytical frameworks (including cases where multiple candidates are already named). Periagoge forms a new abstraction from an instance cocone when no locator is available. Comparative analysis between already-named candidate readings — even with multiple instances or strong essence sensing — is Prothesis territory (frame selection), not Periagoge's colimit formation. Scope is specified by the operation kind, not by instance count.
-
-**Formation distinction**: Periagoge operates on the colimit — the emergent structure arising from a cocone of concrete instances. The operational test: Periagoge applies when concrete instances carry `essence_sensed(A)` and `locator_absent(A)`. Instance accumulation contributes evidence strength; the gate is essence signal plus locator gap.
-
 ## Mode Activation
 
 ### Activation

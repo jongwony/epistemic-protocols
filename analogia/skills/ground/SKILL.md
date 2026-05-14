@@ -103,34 +103,6 @@ converge     (extension)       → TextPresent+Proceed (convergence evidence tra
 
 **Structural Correspondence over Abstract Assertion**: When text contains abstract frameworks applied to a user's domain, validate that structure-preserving mappings exist between the abstract and concrete domains through explicit correspondences and concrete instantiations, rather than asserting that the abstraction applies. The purpose is to verify mapping adequacy, not to simplify the abstraction.
 
-## Distinction from Other Protocols
-
-| Protocol | Initiator | Deficit → Resolution | Focus |
-|----------|-----------|----------------------|-------|
-| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
-| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
-| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
-| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
-| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
-
-**Key differences**:
-- **Prothesis** selects analytical frameworks when none exist — Analogia validates whether a selected framework structurally maps to the user's concrete domain
-- **Aitesis** verifies context sufficiency for execution (factual: "do I have enough information?") — Analogia verifies structural correspondence between domains (relational: "does this abstract structure preserve when mapped to your context?")
-- **Katalepsis** verifies user comprehension after AI work — Analogia validates the structural mapping that precedes comprehension
-- **Epharmoge** checks post-execution applicability to context — Analogia checks pre-execution mapping validity between abstraction levels
-- **Periagoge** (`/induce`) forms a new abstraction from a cocone of concrete instances (no source abstraction Sₐ available — colimit-shaped input: `essence_sensed` over instances + `locator_absent(A)`) — Analogia validates the mapping from an existing Sₐ to a target Sₜ. Route colimit-shaped inputs to `/induce` for abstraction formation; Analogia remains scoped to mapping validation from a source abstraction to a concrete target.
-
-**Structural mapping distinction**: Analogia operates on the functor between domains — not the content of either domain (Aitesis), nor the framework choice (Prothesis), nor the comprehension state (Katalepsis). The operational test: if the uncertainty is about whether abstract structure A corresponds to concrete structure B, it's Analogia; if it's about whether enough context exists to execute, it's Aitesis; if it's about which framework to apply, it's Prothesis.
-
-See `references/best-practices.md` for user-language triggers and grounding scenarios.
-
 ## Mode Activation
 
 ### Activation

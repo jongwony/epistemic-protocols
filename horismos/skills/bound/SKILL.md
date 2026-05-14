@@ -194,31 +194,6 @@ Round-local BoundaryMap composition: each Phase 2 cycle produces a complete Boun
 
 **Multi-consumer architectural independence**: BoundaryMap is consumed by 5 downstream protocols — Aitesis as gate threshold, Prothesis as framework filter, Syneidesis as gap relevance filter, Prosoche as risk evaluation threshold, Euporia as substrate scope narrowing. This shared consumption is why Horismos requires independent protocol status rather than absorption into any single consumer; the boundary is a multi-consumer signal, not a private operation of a specific downstream. Independent invocation preserves the symmetric advisory relationship across all 5 consumers.
 
-## Distinction from Other Protocols
-
-| Protocol | Initiator | Deficit → Resolution | Focus |
-|----------|-----------|----------------------|-------|
-| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
-| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
-| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
-| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
-| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
-
-**Key differences**:
-
-**Horismos vs Aitesis**: Both are pre-execution heterocognitive protocols. Aitesis probes factual gaps (context insufficiency — "do I have enough information to execute?"), Horismos probes constitutive boundaries (ownership classification — "who decides what?"). Both share an Akinator-style functor (probe → enrich → ask → integrate), but the ontology differs: Aitesis uncertainties have factual answers discoverable from the environment, while Horismos domains require constitutive decisions about responsibility allocation. The operational test: if the answer exists somewhere in the environment, it is Aitesis; if the answer must be constituted by the user, it is Horismos.
-
-**Horismos vs Epitrope (deprecated)**: Epitrope produced a DelegationContract via scenario-based interview, accumulating an expertise profile across interactions. Horismos produces a BoundaryMap via direct per-decision classification. No scenario calibration, no accumulated profile, no team coordination (team coordination moved to Prosoche). Each invocation starts fresh for the current task scope.
-
-**Horismos vs Periagoge / Euporia (loop topology borrowing)**: Horismos's per-cycle-emergent loop borrows topology from Periagoge (in-process abstraction crystallization through dialectical iteration) and Euporia (cycle-emergent dimension surfacing with cycle counter visibility and user-judged termination). The borrowing is **topological only** — Horismos's runtime is independent of `/induce`/`/elicit` invocations, and identity is preserved through the formal block: deficit `BoundaryUndefined → DefinedBoundary`, 4-value `BoundaryClassification` per cycle plus 2-value `FinalGateAnswer` at Phase 4 (vs Periagoge's `Confirm/Widen/Narrow/Fuse/Reorient` move set), evidence-cited domain anchors (vs Euporia's substrate-traced coordinate values). The shared structure is the **loop carrier** (per-cycle re-scan, cycle counter visibility, user-judged termination, essence-style cumulative artifact); dialectical content remains specific to each source protocol.
-
 ## Mode Activation
 
 ### Activation
