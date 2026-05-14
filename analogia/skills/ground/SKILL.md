@@ -70,7 +70,7 @@ If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
 If V = Dismiss: accept this correspondence as unresolved for this session; terminalize if all correspondences addressed.
 Max 3 mapping attempts per domain pair.
 Continue until: terminalized(R') OR attempts exhausted.
-Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.mappings, show (MappingUncertain(c) → validation_result(c)). When any c was dismissed due to a Phase 1 gap flag (no Sₜ correspondent), the trace appends a brief invitation that a Proposal option structure can be registered on user request. Convergence is demonstrated, not asserted.
+Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.mappings, show (MappingUncertain(c) → validation_result(c)). When any abstract structure was flagged in Phase 1 step 3 as lacking a concrete correspondent in Sₜ, the trace appends a brief invitation for the user to supply the missing Sₜ correspondent if one can be identified — a free response within the existing turn, not a new gate or post-convergence morphism. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 terminalized(R') = all_addressed(R') ∨ user_esc
@@ -125,7 +125,7 @@ converge     (extension)       → TextPresent+Proceed (convergence evidence tra
 - **Aitesis** verifies context sufficiency for execution (factual: "do I have enough information?") — Analogia verifies structural correspondence between domains (relational: "does this abstract structure preserve when mapped to your context?")
 - **Katalepsis** verifies user comprehension after AI work — Analogia validates the structural mapping that precedes comprehension
 - **Epharmoge** checks post-execution applicability to context — Analogia checks pre-execution mapping validity between abstraction levels
-- **Periagoge** (`/induce`) forms a new abstraction from a cocone of concrete instances (no source abstraction Sₐ available — colimit-shaped input: `essence_sensed` over instances + `locator_absent(A)`) — Analogia substitutes between an existing Sₐ and a target Sₜ. Route colimit-shaped inputs to `/induce` for abstraction formation; Analogia remains scoped to mapping validation from a source abstraction to a concrete target.
+- **Periagoge** (`/induce`) forms a new abstraction from a cocone of concrete instances (no source abstraction Sₐ available — colimit-shaped input: `essence_sensed` over instances + `locator_absent(A)`) — Analogia validates the mapping from an existing Sₐ to a target Sₜ. Route colimit-shaped inputs to `/induce` for abstraction formation; Analogia remains scoped to mapping validation from a source abstraction to a concrete target.
 
 **Structural mapping distinction**: Analogia operates on the functor between domains — not the content of either domain (Aitesis), nor the framework choice (Prothesis), nor the comprehension state (Katalepsis). The operational test: if the uncertainty is about whether abstract structure A corresponds to concrete structure B, it's Analogia; if it's about whether enough context exists to execute, it's Aitesis; if it's about which framework to apply, it's Prothesis.
 
@@ -188,6 +188,8 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 - Phase 1 domain analysis confirms structural correspondence is trivial
 - No abstract framework is applied (output is purely concrete)
 - Colimit-shaped input detected (`essence_sensed` over concrete instances + `locator_absent(A)`) — route to `/induce` (Periagoge) for abstraction formation; Analogia's substitution interface fits mapping validation. `locator_absent(A)` is the shared cross-protocol predicate (Periagoge formal `¬located(A)`) — from Analogia's substitution-interface vantage it surfaces as a missing source abstraction Sₐ to substitute from
+- Framework selection is the primary deficit (no analytical framework chosen for the inquiry) — route to `/frame` (Prothesis); Analogia validates the mapping of an *existing* framework, Prothesis selects frameworks when none is yet chosen
+- Context insufficiency is the primary deficit (factual gaps in execution context — missing facts, missing user environment) — route to `/inquire` (Aitesis); Analogia checks *relational* correspondence between domains, Aitesis checks *factual* sufficiency for execution
 
 ### Mode Deactivation
 
