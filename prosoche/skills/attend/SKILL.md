@@ -241,30 +241,6 @@ Post-gate execution belongs to non-epistemic substrates. After Phase 3 records `
 
 When elevated-risk findings reach Phase 2, the epistemic part (intent transmission, evidence, judgment surfacing) is Prosoche's; the substrate part (whether the harness permits the action, whether the deploy succeeds, whether the comment reaches its audience) is delegated by handoff.
 
-## Distinction from Other Protocols
-
-| Protocol | Initiator | Deficit → Resolution | Focus |
-|----------|-----------|----------------------|-------|
-| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
-| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
-| Euporia | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
-| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
-| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
-
-**Key differences**:
-- **Aitesis** infers context the AI lacks *before* execution (factual uncertainties, User→AI) — Prosoche evaluates risk signals *during* execution (action assessment, AI→User). Aitesis asks "do I have enough context?" while Prosoche asks "is this action safe to execute?"
-- **Syneidesis** surfaces gaps in *decision quality* for user judgment — Prosoche surfaces risks in *execution actions* for user approval. Syneidesis operates at the decision layer; Prosoche operates at the execution layer.
-- **Epharmoge** evaluates *applicability* of completed results after execution — Prosoche evaluates *risk* of pending actions before they execute. Both are AI→User, but at different temporal points: Prosoche is pre-action, Epharmoge is post-completion.
-
-**Task-bounded execution**: Unlike daemon-model protocols that run continuously throughout a session, Prosoche materializes intent into a concrete task list at activation, processes each task through risk classification and delegation, and deactivates when all tasks are resolved (completed or halted). This makes Prosoche's scope explicit and its convergence deterministic.
-
 ## Mode Activation
 
 ### Activation

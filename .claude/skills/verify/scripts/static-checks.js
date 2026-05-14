@@ -372,7 +372,6 @@ function checkRequiredSections() {
 
   const requiredSections = [
     '## Definition',
-    '## Distinction from Other Protocols',
     '## Mode Activation',
     '## Protocol',
     '## Rules',
@@ -1397,35 +1396,7 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 4: Verify distinction table consistency across SKILL.md files
-  // Each protocol SKILL.md should reference all canonical protocol names in its distinction table
-  for (const relPath of PROTOCOL_FILES) {
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) continue;
-
-    const content = fs.readFileSync(fullPath, 'utf8');
-
-    // Check if file has a distinction table (look for the section)
-    if (!content.includes('Distinction from Other Protocols')) continue;
-
-    // Extract the table section
-    const tableMatch = content.match(/\| Protocol.*\|[\s\S]*?(?=\n\n|\n\*\*Key|\n##)/);
-    if (!tableMatch) continue;
-
-    const tableSection = tableMatch[0];
-
-    for (const protocolName of Object.keys(CANONICAL_PROTOCOLS)) {
-      if (!tableSection.includes(protocolName)) {
-        results.warn.push({
-          check: 'cross-ref-scan',
-          file: relPath,
-          message: `Distinction table missing protocol "${protocolName}"`
-        });
-      }
-    }
-  }
-
-  // Sub-check 5: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
+  // Sub-check 4: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
   // package.js PLUGINS, graph.json nodes, and marketplace.json plugins against filesystem ground truth
   {
     // Ground truth: directories containing .claude-plugin/plugin.json
@@ -1693,7 +1664,7 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 6: Verify edge types in graph.json match CLAUDE.md allowlist
+  // Sub-check 5: Verify edge types in graph.json match CLAUDE.md allowlist
   const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
   if (fs.existsSync(graphPath)) {
     try {

@@ -110,31 +110,6 @@ converge                (extension)    → TextPresent+Proceed (per-source dispo
 
 **Dialectical Vetting over Silent Trust**: Working context accumulated across a session carries silent decay — sources age, provenance chains lengthen, downstream concentration warps incidental claims into load-bearing premises, and cross-source contradictions hide behind topical proximity. Elenchus surfaces each suspect source against a deliberately posited antithesis before action; the user judges each disposition per source. The loop dissolves compounding context cost before it forces whole-system refactoring downstream.
 
-## Distinction from Other Protocols
-
-| Protocol | Initiator | Deficit → Resolution | Focus |
-|----------|-----------|----------------------|-------|
-| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
-| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
-| **Euporia** | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
-| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
-| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
-
-**Key differences**:
-
-- **Elenchus vs Aitesis**: Aitesis infers context insufficiency (missing context) and asks the user to supply it; the deficit is *absence*. Elenchus operates on already-collected context whose apparent sufficiency has become suspect through age, weak provenance, conflict, or high-leverage accumulation; the deficit is *contaminated/decayed presence*. Polarity is orthogonal — Aitesis fills gaps; Elenchus stress-tests fills.
-- **Elenchus vs Syneidesis**: Syneidesis surfaces decision-point gaps the user may have missed when committing to a decision; the audit is over the decision itself. Elenchus tests the *working context* feeding pre-execution sync; the audit is over the inputs, not the commit. Syneidesis follows commitment; Elenchus precedes it.
-- **Elenchus vs Euporia**: Euporia traces decision coordinates from intent through user-externalized substrate when the axis is undetermined. Elenchus operates when the axis is determined and a working context is committed — the question is not "where in your substrate does this intent resolve?" but "is the context I've collected actually robust against antithesis?"
-- **Elenchus vs Epharmoge**: Both surface a (item, standard) → audit → mismatch → user judgment → adapted item shape, but temporal posture is distinct. Epharmoge runs *post-execution* — does the result fit the application context? Elenchus runs *pre-execution* — does the working context survive antithesis before action? The two are stack-compatible; an Epharmoge-confirmed fit can become an Elenchus-suspect input in a later session as time and downstream concentration accumulate.
-- **Elenchus vs Katalepsis**: Both are User-initiated. Katalepsis verifies the user's comprehension of an AI-produced result (the user is the measurement target). Elenchus tests the working context whose downstream the user is about to commit to (the context is the measurement target). The wildcard `* → katalepsis` precondition automatically covers Elenchus.
-
 ## Mode Activation
 
 ### Activation

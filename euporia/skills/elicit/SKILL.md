@@ -136,33 +136,6 @@ converge             (extension)    → TextPresent+Proceed (intent readback + p
 
 Per cycle, the trio `(D[step], A[step], I'[step])` is recorded pairwise into `D_history`, `A_history`, and `I_history`. Partial-cycle termination via user Esc during Phase 1 — when `D[]` is computed before any `A` is recorded — discards the partial entry; the invariant `|D_history| = |A_history| = |I_history| = cycle_n` is restored at the termination boundary by decrementing `cycle_n` by 1.
 
-## Distinction from Other Protocols
-
-| Protocol | Initiator | Deficit → Resolution | Focus |
-|----------|-----------|----------------------|-------|
-| **Prothesis** | AI-guided | FrameworkAbsent → FramedInquiry | Perspective selection |
-| **Syneidesis** | AI-guided | GapUnnoticed → AuditedDecision | Decision-point gaps |
-| **Horismos** | AI-guided | BoundaryUndefined → DefinedBoundary | Epistemic boundary definition |
-| **Aitesis** | AI-guided | ContextInsufficient → InformedExecution | Context sufficiency sensing |
-| **Analogia** | AI-guided | MappingUncertain → ValidatedMapping | Abstract-concrete mapping validation |
-| **Periagoge** | AI-guided | AbstractionInProcess → CrystallizedAbstraction | In-process abstraction crystallization |
-| **Euporia** | Hybrid | AbstractAporia → ResolvedEndpoint | Extended-Mind reverse induction |
-| **Prosoche** | User-initiated | ExecutionBlind → SituatedExecution | Risk-assessed execution |
-| **Epharmoge** | AI-guided | ApplicationDecontextualized → ContextualizedExecution | Post-execution applicability |
-| **Elenchus** | User-initiated | ContextSuspect → VettedContext | Dialectical context vetting (pre-execution) |
-| **Anamnesis** | AI-guided | RecallAmbiguous → RecalledContext | Vague recall recognition |
-| **Katalepsis** | User-initiated | ResultUngrasped → VerifiedUnderstanding | Comprehension verification |
-
-**Key differences**:
-
-- **Euporia vs Periagoge**: Directional dual. Periagoge forms a new abstraction from a cocone of concrete instances (bottom-up direction — given {Iᵢ}, construct emergent abstraction). Euporia traces decision coordinates from intent through externalized substrate (top-down direction — given I, surface (D[], coordinates)). The two compose as orthogonal directions of the same dialectic substrate; they do not subsume one another.
-- **Euporia vs Aitesis**: Aitesis infers context insufficiency *before execution* and asks the user to supply missing facts (information flows user→AI, fact layer). Euporia operates on *abstract aporia* — intent whose axis is itself undetermined — and the answers are not facts but coordinate values implicit in the user's externalized substrate. Aitesis asks "what is X?", Euporia asks "where in your substrate does this intent's endpoint reside?" No suppression edge in graph.json — sequential composition is intended (fact-supply ⊥ coordinate-explication operate at distinct layers).
-- **Euporia vs Prothesis**: Prothesis selects among *named* analytical frameworks for a given inquiry. Euporia surfaces *unnamed* dimension projections traced from substrate, with axes emergent per cycle. When the inquiry's frames are already named and the operation is selection, Prothesis applies; when intent is axis-agnostic and dimensions must be reverse-traced from substrate, Euporia applies.
-- **Euporia vs Syneidesis**: Syneidesis surfaces decision-point gaps for the user to judge (decision-quality layer). Euporia surfaces dimension projections for the user to answer (coordinate-explication layer). The two are stack-compatible — Syneidesis can audit a Euporia-resolved endpoint for downstream gaps.
-- **Euporia vs Horismos**: Bidirectional advisory — Horismos → Euporia (BoundaryMap narrows substrate scope) and Euporia → Horismos (resolved coordinates inform downstream boundary). Same-session re-entry of either protocol after the other's convergence is permitted but treated as distinct activation; each invocation produces a fresh ResolvedEndpoint or BoundaryMap, with the prior instance becoming session evidence rather than auto-cycling input.
-
-**Reverse-induction distinction**: Euporia operates on the reverse-trace from intent to externalized substrate coordinates. The operational test: Euporia applies when the intent carries `axis_undetermined(I)` and the substrate contains implicit coordinates `substrate_implicit(I)`. The substrate is the *user's* externalized cognition — their codebase, their rules, their past sessions, their environment — not the AI's pre-trained knowledge. The protocol's distinguishing feature is reverse-tracing from extended mind, not domain-general inference. When the intent is axis-determined (a single axis-specific protocol covers it), defer to that protocol; Euporia is for axis-emergent aporia, not axis-fixed deficits.
-
 ## Mode Activation
 
 ### Activation
