@@ -99,26 +99,15 @@ Three separate rules manage cognitive load at runtime:
 
 These disciplines are complementary. A protocol can satisfy Context-Question Separation and Plain emit discipline while still increasing context-switch cost by scattering adjacent evidence across distant paragraphs or mixing unrelated findings into one decision round. Round-local salience bundling closes that gap without introducing measurement: the binding unit is the round-local judgment surface, not a quantified load score.
 
-## Pattern over Vocabulary
-
-The hermeneutic circle pattern is already structurally encoded in formal blocks — renaming blocks to philosophical terminology adds no structural value. Pattern recognition takes precedence over vocabulary transition.
-
-| Formal Block | Gadamerian Concept | Role |
-|---|---|---|
-| `preserves:` (MORPHISM) | Vorverständnis (pre-understanding) | Fixed reference point across the circle. Input is read-only; only understanding (output) evolves |
-| `invariant:` (MORPHISM) | Produktives Vorurteil (productive prejudice) | Directional constraint on the circle. "X over Y" pattern prevents degenerative interpretation |
-| `LOOP` | Hermeneutischer Zirkel (hermeneutic circle) | Part-whole reinterpretation via backward flow. Present in all 10 protocols |
-| `CONVERGENCE` | Horizontverschmelzung (horizon fusion condition) | Convergence condition for achieved understanding. Productive termination of the circle |
-| `Qs` gate | Horizon Fusion Point | Constitutive gate — user contributes new meaning, fusing horizons |
-| `Qc` gate | Horizon Navigation | Classificatory gate — path selection within existing understanding space |
+## Gate Runtime Semantics
 
 **Qc/Qs runtime distinction**: The Qc/Qs classification is a definition-time property of the gate — Qs expects constitutive response, Qc expects classificatory response. At runtime with Text+Stop realization, this distinction blurs: Qc gate responses can carry constitutive surplus (new meaning beyond the classification). The formal answer type (closed coproduct) captures the classification; the constitutive surplus is captured by Phase 3 `integrate` — a sense operation whose non-obvious interpretive contribution may be surfaced through Output Style `Basis:` marker when non-trivial (A2 Visibility).
 
 **Interpretive transparency architecture**: `Basis:` is a discretionary session-level annotation — it fires when AI interpretation transcends mechanical derivation, unlike the former `integrate-echo` which was a mandatory structural relay. The semantic boundary shifts from a deducibility test (augmentation not derivable from {input, context_structure}) to an observability criterion (cite specific evidence grounding the interpretation). This relocation from protocol-owned TOOL GROUNDING to the session-level observation layer follows the Session-level observer exception (Audience Reach) — the same architectural pattern governing nudge.
 
-**Primary circle** (intra-protocol): Each protocol's LOOP section encodes backward flow where partial resolution triggers whole re-interpretation, conditioned by `preserves:` (the text being interpreted remains fixed; only the interpretation evolves).
+The `Qs` gate's formal correspondence to Horizontverschmelzung (horizon fusion) and the cycle's structural pattern are catalogued in `.claude/principles/hermeneutic-cycle.md`.
 
-**Secondary pattern** (inter-protocol): Complementary pairs form Pre/Post cycles on the context fitness axis — Aitesis↔Epharmoge (context), Prothesis↔Analogia (structure). These cycles operate heuristically via Output Style nudge, driven by observed session conditions rather than graph.json structural edges.
+## Type Naming and Artifact Observability
 
 **Artifact-observability boundary** (type naming principle): Protocol input type names encode their temporal relationship to observable artifacts — the dividing line being Read/Grep observability:
 - **Aitesis** (Prospect): Pre-artifact. Context sufficiency is assessed before artifacts are produced. X cannot yet be Read/Grep'd.
@@ -127,7 +116,11 @@ The hermeneutic circle pattern is already structurally encoded in formal blocks 
 
 This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Result` (completed work product), `Text` (abstract structure carrier). The temporal encoding in type names provides protocol discrimination signal at SKILL.md load time, per A4 Semantic Autonomy.
 
+## Intra-Protocol Context Separation
+
 **Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. In Prothesis: `gather(context)` (Phase 1, meta) collects broad context to identify relevant perspectives; `inquire(parallel)` (Phase 3, object) collects perspective-specific evidence through each lens independently. The semantic separation exists in MORPHISM; TOOL GROUNDING realizes it operationally by specifying different collection targets per phase. Passing meta-context to object-level agents biases their investigation toward the lead agent's framing, undermining the epistemic value of independent perspective analysis.
+
+## Cross-Session Tertiary Pattern
 
 **Tertiary pattern** (cross-session, both halves operative): Anamnesis hypomnesis store persists session recall indices → next session's protocol Phase 0/1 detection is enriched by accumulated domain knowledge → better protocol execution produces richer insights → hypomnesis store deepens → spiral deepening. The storage half (Anamnesis hypomnesis write) and the consumption half (each consuming protocol's Phase 0/1 reading stored knowledge) together complete the cross-session pattern. Unlike Primary/Secondary which operate within a single session, Tertiary operates across session boundaries with persistent knowledge as the medium. Consumption-half is operative across all 11 consuming protocols as Cross-session enrichment paragraphs in SKILL.md prose. **Aitesis carries protocol-internal sophistication** — EvidenceSource fiber + `source: "memory:{path}"` tagging + staleness guard scoped to its empirical-evidence operation, grounded in `.claude/rules/axioms.md` A2 Cognitive Partnership Move's Citable axis (Extension/Relay basis = external source). **The other 10 consuming protocols use the simpler heuristic-input pattern** — Phase 0/1 may bias toward accumulated domain patterns, with protocol-specific pollution resistance (halt characteristics, gate judgment) per `.claude/principles/architectural-principles.md` Cross-Session Knowledge Composition Pollution caveat. The asymmetry is intentional: applying Aitesis-style evidence-source machinery uniformly would misclassify Constitution operations (where AI inference is the basis) as Extension. Operational-fidelity monitoring (whether enrichment improves Phase 0/1 detection vs. surfaces pollution) is the ongoing observation focus.
 

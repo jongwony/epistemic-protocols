@@ -16,7 +16,7 @@ Inter-protocol data flows as natural language in the session context — no stru
 
 ## Cross-Session Knowledge Composition
 
-Anamnesis's hypomnesis store persists session recall indices that enrich protocol detection in subsequent sessions. This is the session-boundary extension of Session Text Composition — where intra-session data flows through conversation context, cross-session data flows through the hypomnesis store. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision (Tertiary hermeneutic circle).
+Anamnesis's hypomnesis store persists session recall indices that enrich protocol detection in subsequent sessions. This is the session-boundary extension of Session Text Composition — where intra-session data flows through conversation context, cross-session data flows through the hypomnesis store. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision (Tertiary hermeneutic circle; see [`hermeneutic-cycle`](hermeneutic-cycle.md)).
 
 **Formal layer boundary**: Cross-session enrichment operates as a runtime heuristic inscribed in protocol operational prose, not as a formal phase step. PHASE TRANSITIONS and TOOL GROUNDING blocks remain unchanged — enrichment does not introduce new phase transitions or tool calls. This boundary is intentional: heuristic inputs influence detection sensitivity but do not alter the protocol's formal specification.
 

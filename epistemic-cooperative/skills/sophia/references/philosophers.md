@@ -116,7 +116,7 @@ handles this correctly: a user with D4=30 scores high similarity with Wittgenste
 ### Hermeneutics — How We Understand
 
 #### Gadamer (1900-2002)
-- **Tradition**: Philosophical hermeneutics
+- **Tradition**: Philosophical hermeneutics (see [`hermeneutic-cycle`](../../../../.claude/principles/hermeneutic-cycle.md))
 - **Core method**: Dialogue as fusion of horizons; understanding through conversation
 - **Dimension profile**: D1=55 D2=75 D3=95 D4=40 D5=60 D6=65
 - **Defining**: D3 (Dialogical — understanding IS dialogue)
