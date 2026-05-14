@@ -10,7 +10,7 @@ The hermeneutic cycle pattern is already structurally encoded in formal blocks �
 |---|---|---|
 | `preserves:` (MORPHISM) | Vorverständnis (pre-understanding) | Fixed reference point across the circle. Input is read-only; only understanding (output) evolves |
 | `invariant:` (MORPHISM) | Produktives Vorurteil (productive prejudice) | Directional constraint on the circle. "X over Y" pattern prevents degenerative interpretation |
-| `LOOP` | Hermeneutischer Zirkel (hermeneutic circle) | Part-whole reinterpretation via backward flow. Present in all 10 protocols |
+| `LOOP` | Hermeneutischer Zirkel (hermeneutic circle) | Part-whole reinterpretation via backward flow. Present in every protocol |
 | `CONVERGENCE` | Horizontverschmelzung (horizon fusion condition) | Convergence condition for achieved understanding. Productive termination of the circle |
 | `Qs` gate | Horizon Fusion Point | Constitutive gate — user contributes new meaning, fusing horizons |
 | `Qc` gate | Horizon Navigation | Classificatory gate — path selection within existing understanding space |
@@ -46,4 +46,4 @@ Each surface operationalizes the same structural pattern at a different scale. C
 
 ## Tier
 
-Lives in `.claude/principles/` (axis_β = T2–T3, lazy-load, authoring/verify-time invocation). axis_α inherits from referenced sources. Per Tier Factorization (`.claude/rules/architectural-principles.md`), this file names the family for authoring coherence; runtime detection is operationalized at each surface (LOOP blocks at runtime, hypomnesis store at session boundary, VCS at inter-version scale, Constitution gate per Phase 2).
+Lives in `.claude/principles/` (axis_β = T2–T3, lazy-load, authoring/verify-time invocation). Per Tier Factorization (`.claude/rules/architectural-principles.md`), this file names the family for authoring coherence; runtime detection is operationalized at each surface (LOOP blocks at runtime, hypomnesis store at session boundary, VCS at inter-version scale, Constitution gate per Phase 2).

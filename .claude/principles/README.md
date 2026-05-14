@@ -18,6 +18,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 | File | Source | Demoted sections |
 |------|--------|------------------|
 | `architectural-principles.md` | `.claude/rules/architectural-principles.md` | Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload |
+| `hermeneutic-cycle.md` | `docs/structural-specs.md` | Pattern over Vocabulary (Gadamerian formal-block mapping) + 6 surface catalog (Primary / Secondary / Tertiary / Inter-version / Inter-agent / Operational axis) |
 
 ## Demotion Ledger
 
@@ -32,6 +33,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 | Audience Reach (incl. Session-level observer exception, Bidirectional Reach) | `architectural-principles.md` | 2026-04-27 | T2-T3 — plugin encapsulation context, infrequent |
 | Utility Skills — Adversarial Anticipation Delegation | `architectural-principles.md` | 2026-04-27 | T3 — utility skill authoring guidance only |
 | Direction over Accumulated Workload | `architectural-principles.md` | 2026-04-27 | T2 — contributor authoring decision principle |
+| Pattern over Vocabulary (Gadamerian formal-block mapping + Primary/Secondary surfaces) | `structural-specs.md` | 2026-05-14 | T2-T3 — extracted to dedicated `hermeneutic-cycle.md` as canonical home; structural-specs slimmed to gate runtime semantics only |
 
 ## Philosophy
 
