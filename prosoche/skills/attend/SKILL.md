@@ -274,10 +274,6 @@ When Prosoche is active:
 - Loaded instructions and other protocol behaviors are retained
 - Prosoche adds a risk assessment layer, does not modify protocol logic
 
-**Protocol precedence**: Activation order position 8/10 (graph.json is authoritative source for information flow). Concern cluster: Execution.
-
-**Advisory relationships**: Receives from Aitesis (advisory: inferred context narrows execution risk assessment), Horismos (advisory: BoundaryMap adjusts risk assessment threshold), Elenchus (advisory: vetted context narrows risk-evaluation focus). Provides to Epharmoge (advisory: execution-time attention provides post-execution applicability context). Katalepsis is structurally last.
-
 ### Skip Conditions
 
 - Read-only / exploratory actions (Read, Grep, Glob, LS)

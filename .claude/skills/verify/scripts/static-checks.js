@@ -35,31 +35,6 @@ const PROTOCOL_FILES = protocolFiles({ projectRoot });
 const CANONICAL_PRECEDENCE = CANONICAL_PRECEDENCE_ARR.join(' → ');
 const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
 
-// PRECEDENCE_FILES = protocols listed in CANONICAL_PRECEDENCE (linear order)
-// + Katalepsis appended (structurally last). Anamnesis is excluded — recall
-// stands outside the precedence partial order. Order matches the canonical
-// presentation used by checkPrecedenceLinearExtension.
-//
-// Loud-fail: a missing protocol record yields an `undefined` skill segment,
-// producing paths like `horismos/skills/undefined/SKILL.md` that fs.existsSync
-// silently rejects. Throw at construction so the failure is attributable to
-// graph.json (which is the upstream input that decides isProtocol) rather
-// than surfacing later as "all checks pass on zero files" (PR #351 review H1).
-function _precedenceFile(dir) {
-  const rec = _protocolRecords.find(r => r.dir === dir);
-  if (!rec) {
-    throw new Error(
-      `[static-checks] PRECEDENCE_FILES: no protocol record for "${dir}". ` +
-      `Likely cause: graph.json failed to parse or "${dir}" missing from nodes.`
-    );
-  }
-  return `${dir}/skills/${rec.skill}/SKILL.md`;
-}
-const PRECEDENCE_FILES = [
-  ...CANONICAL_PRECEDENCE_ARR.map(name => _precedenceFile(name.toLowerCase())),
-  _precedenceFile('katalepsis'),
-];
-
 // Authoritative edge type allowlist — used by both graph-integrity and cross-ref-scan checks
 const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression']);
 
@@ -1296,65 +1271,7 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 3: Verify precedence template in **Protocol precedence** line
-  const precedenceList = CANONICAL_PRECEDENCE.split(' → ');
-  const precedenceCount = precedenceList.length;
-  for (const relPath of PRECEDENCE_FILES) {
-    const fullPath = path.join(projectRoot, relPath);
-    if (!fs.existsSync(fullPath)) continue;
-
-    const content = fs.readFileSync(fullPath, 'utf8');
-    const precedenceMatch = content.match(/\*\*Protocol precedence\*\*:(.+)/);
-    if (!precedenceMatch) {
-      results.fail.push({
-        check: 'cross-ref-scan',
-        file: relPath,
-        message: 'Missing **Protocol precedence** line in SKILL.md'
-      });
-      subCheckFailed = true;
-      continue;
-    }
-    const pLine = precedenceMatch[1];
-
-    // Derive expected position from CANONICAL_PRECEDENCE index
-    const dirName = relPath.split('/')[0];
-    const expectedIndex = precedenceList.findIndex(
-      name => name.toLowerCase() === dirName
-    );
-
-    if (expectedIndex >= 0) {
-      const expectedPosition = `position ${expectedIndex + 1}/${precedenceCount}`;
-      if (!pLine.includes(expectedPosition)) {
-        results.fail.push({
-          check: 'cross-ref-scan',
-          file: relPath,
-          message: `Wrong precedence position (expected: "${expectedPosition}")`
-        });
-        subCheckFailed = true;
-      }
-    } else {
-      // Cross-cutting protocol (not in CANONICAL_PRECEDENCE)
-      const hasCrossCutting = pLine.includes('Cross-cutting:') || pLine.includes('Structural constraint');
-      if (!hasCrossCutting) {
-        results.fail.push({
-          check: 'cross-ref-scan',
-          file: relPath,
-          message: 'Protocol not in CANONICAL_PRECEDENCE and missing Cross-cutting/Structural constraint marker'
-        });
-        subCheckFailed = true;
-      }
-    }
-
-    if (!pLine.includes('graph.json')) {
-      results.fail.push({
-        check: 'cross-ref-scan',
-        file: relPath,
-        message: 'Missing graph.json reference in **Protocol precedence** line'
-      });
-      subCheckFailed = true;
-    }
-  }
-
+  // Sub-check 3: Verify README workflow + CLAUDE.md cross-doc invariants
   for (const relPath of ['README.md', 'README_ko.md']) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;

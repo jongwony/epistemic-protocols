@@ -144,10 +144,6 @@ When Periagoge is active:
 - Periagoge completes before output dependent on the crystallized abstraction proceeds
 - Loaded instructions resume after crystallization or Esc
 
-**Protocol precedence**: Activation order position 5/10 (graph.json is authoritative source for information flow). Concern cluster: Analysis.
-
-**Advisory relationships**: Receives from Anamnesis (advisory: recalled adjacent abstractions provide Fuse candidates), Euporia (advisory: resolved endpoint may seed downstream abstraction). Provides to Katalepsis (precondition via wildcard: crystallized abstraction enables comprehension verification). Katalepsis is structurally last.
-
 ### Trigger Signals
 
 Heuristic evidence signals for in-process abstraction detection:
