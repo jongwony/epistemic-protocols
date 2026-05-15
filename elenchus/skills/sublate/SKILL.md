@@ -51,7 +51,7 @@ Disposition    = Confirmed                                   -- assumption survi
                | Deferred(re_trigger_condition: String)      -- next iteration on trigger
                | Conditional(measurement: String)            -- pending external measurement
                | Bounded(external_reference: String)         -- routed to other source-of-truth
-               | Routed(downstream_protocol: ProtocolId)     -- handed to /gap, /attend, /epharmoge, /bound
+               | Routed(downstream_protocol: ProtocolId)     -- handed off to a different protocol
 Qs             = Per-source disposition gate
 J              = Map(Source, Disposition)
 V              = VettedContext { dispositions: J, trace: Map(Source, Antithesis) }
@@ -137,10 +137,6 @@ When Elenchus is active:
 
 - Elenchus completes before action dependent on the vetted context proceeds
 - Loaded instructions resume after vetting or Esc
-
-**Protocol precedence**: Activation order position 10/10 (graph.json is authoritative source for information flow). Concern cluster: Verification (pre-execution posture; orthogonal to `/contextualize` which is post-execution). The `* → katalepsis` precondition wildcard automatically covers Elenchus.
-
-**Advisory relationships**: Receives from Aitesis (advisory: collected context provides audit substrate), Anamnesis (advisory: recalled prior context contributes audit candidates), Horismos (advisory: BoundaryMap narrows audit scope to in-scope sources). Provides to Syneidesis (advisory: vetted context sharpens gap detection), Prosoche (advisory: vetted context narrows risk-evaluation focus), Epharmoge (advisory: vetted pre-state contextualizes post-execution applicability check), Horismos (advisory: vetting findings inform downstream boundary definition).
 
 ### Triggers
 
@@ -265,7 +261,7 @@ options:
   - label: "Bounded([external_reference])"
     description: "The authoritative answer lives outside this session; downstream usage cites the external reference rather than the in-session source."
   - label: "Routed([downstream_protocol])"
-    description: "The challenge belongs to a different protocol family — handed to /gap, /attend, /epharmoge, or /bound for resolution."
+    description: "The challenge belongs to a different protocol family — handed off to the appropriate downstream protocol for resolution."
 Other: user composes a free-response disposition; AI maps the response to the closest coproduct variant or surfaces an Emergent disposition candidate.
 ```
 

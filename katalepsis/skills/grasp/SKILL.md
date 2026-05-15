@@ -134,10 +134,6 @@ At Phase 3, present comprehension verification via Cognitive Partnership Move (C
 - Katalepsis provides structured comprehension path
 - Loaded instructions resume after mode deactivation
 
-**Protocol precedence**: Structural constraint — always executes last (graph.json is authoritative source for information flow). Cross-cutting: requires all protocols to complete before verification.
-
-**Advisory relationships**: Receives from * (precondition: all protocol output required for comprehension verification). Katalepsis is structurally last.
-
 ### Triggers
 
 | Signal | Examples |
