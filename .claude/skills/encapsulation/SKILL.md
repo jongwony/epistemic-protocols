@@ -1,6 +1,6 @@
 ---
 name: encapsulation
-description: This skill should be used when the user asks to "audit plugin encapsulation", "check self-containment semantics", "find contributor-knowledge assumptions", or invokes /encapsulation. Reviews LLM-facing prose in this project's plugin SKILL.md files and plugin description metadata for Plugin Encapsulation compliance: prose that assumes contributor documentation knowledge or rephrases banned references to bypass deterministic checks. Project-local contributor tooling.
+description: "This skill should be used when the user asks to \"audit plugin encapsulation\", \"check self-containment semantics\", \"find contributor-knowledge assumptions\", or invokes /encapsulation. Reviews LLM-facing prose in this project's plugin SKILL.md files and plugin description metadata for Plugin Encapsulation compliance: prose that assumes contributor documentation knowledge or rephrases banned references to bypass deterministic checks. Project-local contributor tooling."
 allowed-tools: Read, Grep, Glob
 ---
 
