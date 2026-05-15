@@ -1,0 +1,35 @@
+{
+  "name": "elenchus",
+  "version": "0.1.10",
+  "description": "Vet working context by dialectical antithesis before action — /sublate (ἔλεγχος: cross-examination)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "elenchus"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Elenchus",
+    "shortDescription": "Vet working context by dialectical antithesis before action — /sublate (ἔλεγχος: cross-examination)",
+    "longDescription": "Vet working context by dialectical antithesis before action — /sublate (ἔλεγχος: cross-examination)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use elenchus for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

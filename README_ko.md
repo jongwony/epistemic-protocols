@@ -32,33 +32,26 @@ curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/s
 
 ### Codex
 
-Codex에 붙여넣고 실행하세요:
+이 레포지토리는 Codex 플러그인 marketplace이기도 합니다. GitHub에서 추가하려면:
 
-```text
-$skill-installer jongwony/epistemic-protocols 에서 다음 스킬들을 설치해 주세요:
-- prothesis/skills/frame
-- syneidesis/skills/gap
-- katalepsis/skills/grasp
-- aitesis/skills/inquire
-- horismos/skills/bound
-- analogia/skills/ground
-- periagoge/skills/induce
-- euporia/skills/elicit
-- prosoche/skills/attend
-- epharmoge/skills/contextualize
-- elenchus/skills/sublate
-- anamnesis/skills/recollect
-- epistemic-cooperative/skills/onboard
+```bash
+codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
 ```
 
-재시작 후 `$onboard`부터 시작하세요.
+로컬 checkout으로 개발 중이라면:
+
+```bash
+codex plugin marketplace add /path/to/epistemic-protocols
+```
+
+Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니다: 각 프로토콜은 독립 플러그인이고, `epistemic-cooperative`가 유틸리티 스킬을 담습니다. 빠른 추천은 `onboard`부터 시작하고, 필요한 체크포인트를 이미 알고 있다면 해당 프로토콜 플러그인을 설치하세요.
 
 <details>
 <summary>참고</summary>
 
-- 12개 프로토콜 + `onboard`를 설치합니다. `/report`, `/dashboard`, `/write`는 미포함.
-- 하나만 설치하려면 같은 `skill-installer` 패턴에 단일 path만 넣으세요.
-- Codex 지원 설치 세트의 소스 오브 트루스는 이 README입니다.
+- Codex marketplace는 [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json)에 있습니다.
+- 각 플러그인은 기존 Claude manifest 옆에 Codex manifest를 둡니다: `<plugin>/.codex-plugin/plugin.json`.
+- marketplace에는 12개 프로토콜 플러그인과 `epistemic-cooperative`가 포함됩니다.
 
 </details>
 

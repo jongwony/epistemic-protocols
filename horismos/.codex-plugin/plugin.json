@@ -1,0 +1,35 @@
+{
+  "name": "horismos",
+  "version": "1.11.2",
+  "description": "Define epistemic boundaries per decision — /bound (ὁρισμός: a bounding)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "horismos"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Horismos",
+    "shortDescription": "Define epistemic boundaries per decision — /bound (ὁρισμός: a bounding)",
+    "longDescription": "Define epistemic boundaries per decision — /bound (ὁρισμός: a bounding)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use horismos for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

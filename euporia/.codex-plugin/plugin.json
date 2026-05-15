@@ -1,0 +1,35 @@
+{
+  "name": "euporia",
+  "version": "0.2.13",
+  "description": "Resolve via Extended-Mind reverse induction — /elicit (εὐπορία: way through)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "euporia"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Euporia",
+    "shortDescription": "Resolve via Extended-Mind reverse induction — /elicit (εὐπορία: way through)",
+    "longDescription": "Resolve via Extended-Mind reverse induction — /elicit (εὐπορία: way through)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use euporia for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

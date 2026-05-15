@@ -1,0 +1,35 @@
+{
+  "name": "aitesis",
+  "version": "4.3.34",
+  "description": "Infer context insufficiency before execution — /inquire (αἴτησις: a requesting)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "aitesis"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Aitesis",
+    "shortDescription": "Infer context insufficiency before execution — /inquire (αἴτησις: a requesting)",
+    "longDescription": "Infer context insufficiency before execution — /inquire (αἴτησις: a requesting)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use aitesis for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}
