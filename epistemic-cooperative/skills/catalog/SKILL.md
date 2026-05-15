@@ -71,7 +71,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 |----------|---------|-------------|
 | Horismos | `/bound` | Unclear who decides what — ownership boundaries undefined |
 | Anamnesis | `/recollect` | Resolve vague recall into recognized context — /recollect (ἀνάμνησις: recollection) |
-| Katalepsis | `/grasp` | AI did work but you don't fully understand what or why |
+| Katalepsis | `/grasp` | AI did work and you need a fast path to understand, approve, explain, or modify it |
 
 ## Detail Mode
 

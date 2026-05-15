@@ -61,7 +61,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Elenchus `/sublate` | Verification | About to externalize a working context whose apparent sufficiency has decayed | Dialectical antithesis per source (provenance / counterfactual / cross-source consistency) before pre-execution sync |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
 | Anamnesis `/recollect` | Cross-cutting | Resolving vague recall of prior sessions or discussions | Cross-session state recovery via narrative recognition (Recognition over Retrieval) |
-| Katalepsis `/grasp` | Cross-cutting | Rapid core comprehension via categorical decomposition | Category-based grasp (problem/method/result/limits) for new knowledge, reviews, or AI-completed work |
+| Katalepsis `/grasp` | Cross-cutting | Rapid comprehension verification via intent-scented entry points | User-intent grasp for AI-completed work, reviews, plans, docs, or code changes |
 
 ## Phase Execution
 

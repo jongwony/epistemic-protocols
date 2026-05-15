@@ -99,10 +99,53 @@ A2's relay/constitution boundary also uses Husserlian vocabulary ("constitution"
 
 Demotion of philosophical vocabulary from `.claude/rules/` was scoped to rules/ only; protocol SKILL.md files were not in scope. For Anamnesis, the Husserlian terms are operational (not vindication), so cascade-to-SKILL.md would be unwarranted — this section captures the philosophical grounding for contributor reference without requiring operational rephrasing of the protocol.
 
+## §Katalepsis — Stoic Grasp and Learning-Science Boundary
+
+Katalepsis (`katalepsis/skills/grasp/SKILL.md`) uses the Stoic term
+`katalêpsis` for firm grasp. In Stoic epistemology, cognition is an assent to a
+cognitive impression: an impression grasped as truth-directed rather than merely
+received as appearance. The protocol preserves this structure by requiring the
+user to demonstrate understanding of an AI result instead of passively accepting
+an explanation.
+
+### Mapping to Katalepsis
+
+- **AI result** (`R`): the completed work that now presents itself to the user.
+- **Phantasia** (`P`): the user's current representation of that result.
+- **Verification question** (`Q`): the test that distinguishes grasp from fluent
+  recognition.
+- **VerifiedUnderstanding** (`P'`): the user's representation once it matches
+  the result closely enough for the selected intent entry points.
+
+Learning-science evidence supports the interaction shape: generation, retrieval
+practice, pretesting, and metacognitive checks all favor user production before
+answer delivery. This vindicates Katalepsis' "Comprehension over Explanation"
+principle and its Socratic verification loop.
+
+### Boundary Against General Skill Training
+
+The same evidence does not warrant widening Katalepsis into a general learning
+exercise protocol. Durable transfer depends on repeated practice, task
+variation, feedback, spacing, and learner context. Those conditions exceed the
+runtime endpoint `ResultUngrasped → VerifiedUnderstanding`, which concerns the
+user's grasp of a present AI result. Near-transfer probes may be appropriate
+when they verify the current result, but long-term skill development belongs in
+adjacent learning utilities such as `learning-opportunities` or `/onboard`.
+
+This boundary preserves the Stoic distinction between grasping a presented
+object and possessing a stable system of knowledge. Katalepsis operationalizes
+the former; it should not silently claim the latter.
+
 ## Citations
 
 - Clark, A., & Chalmers, D. (1998). The extended mind. *Analysis*, 58(1), 7-19.
 - Husserl, E. (1931). *Cartesian Meditations*, translated by Dorion Cairns. The Hague: Martinus Nijhoff, 1960. (Especially §§38-39 on passive and active synthesis.)
+- Stanford Encyclopedia of Philosophy. Stoicism. https://plato.stanford.edu/entries/stoicism/
+- Bertsch, S., Pesta, B. J., Wiscott, R., & McDaniel, M. A. (2007). The generation effect: A meta-analytic review. *Memory & Cognition*, 35, 201-210.
+- Roediger, H. L., & Karpicke, J. D. (2006). Test-enhanced learning: Taking memory tests improves long-term retention. *Psychological Science*, 17(3), 249-255.
+- Richland, L. E., Kornell, N., & Kao, L. S. (2009). The pretesting effect: Do unsuccessful retrieval attempts enhance learning? *Journal of Experimental Psychology: Applied*, 15(3), 243-257.
+- Pan, S. C., & Rickard, T. C. (2018). Transfer of test-enhanced learning: Meta-analytic review and synthesis. *Psychological Bulletin*, 144(7), 710-756.
+- Tankelevitch, L., Kewenig, V., Simkute, A., Scott, A. E., Sarkar, A., Sellen, A., & Rintel, S. (2024). The metacognitive demands and opportunities of generative AI. *CHI 2024*.
 
 ## Cross-references
 
