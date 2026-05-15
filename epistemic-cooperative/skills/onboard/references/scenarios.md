@@ -36,7 +36,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Quiz Q (design)**: You reference "the direction we agreed on" from a past session but have no specific pointer. How would you surface the right prior context for recognition — rather than asking Claude to guess?
 - Hint: The problem isn't missing external facts — it's that prior session context is vague and needs resolution into something recognizable. Cross-session state recovery lives here, not in `/inquire`.
 
-**Philosophy**: ἀνάμνησις (recollection) — Plato's theory of knowledge as recollection of what the soul already knew. Core principle: **Recognition over Retrieval**. Vague cues become concrete when candidates are surfaced as narratives for user recognition, not retrieved by keyword. Workflow position: cross-cutting — resolves prior context before any cluster proceeds. Game feel: "Something we talked about before..." → narrative candidates surface → you recognize the right one → grounded continuation.
+**Philosophy**: ἀνάμνησις (recollection) — Plato's theory of knowledge as recollection of what the soul already knew. Core principle: **Recognition over Retrieval**. Vague cues become concrete when candidates are surfaced as narratives for user recognition, not retrieved by keyword. Workflow position: cross-cutting — best invoked at session start. Once a downstream protocol (`/inquire`, `/frame`, `/gap`, etc.) has activated, advisory enrichment from `/recollect` no longer flows into it for that session — session-start recall is the practical ordering mechanism. Game feel: "Something we talked about before..." → narrative candidates surface → you recognize the right one → grounded continuation.
 
 ## Syneidesis `/gap`
 
@@ -223,3 +223,9 @@ When you say "find me that café we talked about — and check if it's open toda
 When you say "handle the email cleanup, and check it actually fits my inbox style after." `/attend` risk-classifies the cleanup actions (safe deletes vs judgment-needed archives) and executes safely, then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
 
 **Shape**: pre-execution risk gating → post-execution context-fit.
+
+### `/sublate * (downstream)` — Pre-execution vetting plus deficit-matched handoff
+
+When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each source via dialectical antithesis (provenance / counterfactual / cross-source); sources whose surfaced concern belongs to a different protocol family get **Routed** rather than refined in place. Typical handoffs: a gap surfaced in the user's decision → `/gap`, execution-time risk → `/attend`, post-execution applicability → `/contextualize`, undefined ownership → `/bound`. Pre-execution counterpart to `/contextualize` (which vets after the fact).
+
+**Shape**: per-source antithesis → disposition → handoff routing where the deficit belongs to another protocol family.

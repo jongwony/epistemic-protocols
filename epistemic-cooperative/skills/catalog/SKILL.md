@@ -62,8 +62,8 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
-| Epharmoge | `/contextualize` | Output is correct but may not fit the actual context |
-| Elenchus | `/sublate` | About to externalize a working context whose apparent sufficiency may have decayed |
+| Epharmoge | `/contextualize` | Output is correct but may not fit the actual context — post-execution |
+| Elenchus | `/sublate` | About to externalize a working context whose apparent sufficiency may have decayed — pre-execution |
 
 ### Cross-cutting
 
