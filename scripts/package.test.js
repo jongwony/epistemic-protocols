@@ -10,6 +10,7 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const zlib = require('zlib');
 const {
@@ -474,6 +475,114 @@ describe('generate-changelog.js CLI', () => {
     assert.ok(result.range);
     assert.ok('groups' in result);
     assert.ok('ungrouped' in result);
+  });
+});
+
+// ============================================================
+// anamnesis Codex session scan
+// ============================================================
+
+describe('anamnesis Codex session scan', () => {
+  it('finds Codex rollout JSONL in live and archived folder layouts', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-scan-'));
+    const liveId = '11111111-1111-4111-8111-111111111111';
+    const archivedId = '22222222-2222-4222-8222-222222222222';
+    const liveDir = path.join(tmp, 'sessions', '2026', '05', '16');
+    const archivedDir = path.join(tmp, 'archived_sessions');
+    const logsDir = path.join(tmp, 'logs');
+    fs.mkdirSync(liveDir, { recursive: true });
+    fs.mkdirSync(archivedDir, { recursive: true });
+    fs.mkdirSync(logsDir, { recursive: true });
+
+    fs.writeFileSync(path.join(tmp, 'session_index.jsonl'), [
+      JSON.stringify({ id: liveId, thread_name: 'Katalepsis contract work', updated_at: '2026-05-16T01:00:00Z' }),
+      JSON.stringify({ id: archivedId, thread_name: 'Archived grasp cleanup', updated_at: '2026-05-15T01:00:00Z' }),
+    ].join('\n') + '\n');
+    fs.writeFileSync(path.join(tmp, 'history.jsonl'), [
+      JSON.stringify({ session_id: archivedId, ts: 1770000000, text: 'katalepsis archived prompt' }),
+    ].join('\n') + '\n');
+
+    const liveSession = [
+      { timestamp: '2026-05-16T00:00:00Z', type: 'session_meta', payload: { id: liveId, timestamp: '2026-05-16T00:00:00Z', cwd: '/repo/epistemic-protocols', originator: 'Codex Desktop' } },
+      { timestamp: '2026-05-16T00:01:00Z', type: 'response_item', payload: { type: 'message', role: 'user', content: [{ type: 'input_text', text: 'Please inspect katalepsis candidate handling.' }] } },
+    ];
+    const archivedSession = [
+      { timestamp: '2026-05-15T00:00:00Z', type: 'session_meta', payload: { id: archivedId, timestamp: '2026-05-15T00:00:00Z', cwd: '/repo/epistemic-protocols', originator: 'Codex Desktop' } },
+      { timestamp: '2026-05-15T00:01:00Z', type: 'response_item', payload: { type: 'message', role: 'assistant', content: [{ type: 'output_text', text: 'The grasp protocol was checked.' }] } },
+    ];
+    fs.writeFileSync(
+      path.join(liveDir, `rollout-2026-05-16T00-00-00-${liveId}.jsonl`),
+      liveSession.map(JSON.stringify).join('\n') + '\n',
+    );
+    fs.writeFileSync(
+      path.join(archivedDir, `rollout-2026-05-15T00-00-00-${archivedId}.jsonl`),
+      archivedSession.map(JSON.stringify).join('\n') + '\n',
+    );
+    fs.writeFileSync(path.join(logsDir, 'hooks.log'), [
+      JSON.stringify({
+        timestamp: '2026-05-16T09:00:00+09:00',
+        event: 'PreToolUse',
+        session_id: liveId,
+        turn_id: '33333333-3333-4333-8333-333333333333',
+        transcript_path: path.join(liveDir, `rollout-2026-05-16T00-00-00-${liveId}.jsonl`),
+        cwd: '/repo/epistemic-protocols',
+        hook_event_name: 'PreToolUse',
+        model: 'gpt-5.5',
+        permission_mode: 'bypassPermissions',
+        tool_name: 'Bash',
+        tool_input: { command: 'true' },
+      }),
+    ].join('\n') + '\n');
+
+    const output = execFileSync(process.execPath, [
+      path.join(__dirname, '..', 'anamnesis', 'scripts', 'anamnesis.mjs'),
+      'scan',
+      'codex',
+      '--query', 'katalepsis',
+      '--cwd', '/repo/epistemic-protocols',
+      '--json',
+    ], {
+      encoding: 'utf8',
+      env: { ...process.env, ANAMNESIS_CODEX_HOME: tmp },
+    });
+    const result = JSON.parse(output);
+    assert.equal(result.scanned.rollout_files, 2);
+    assert.equal(result.scanned.hook_sessions, 1);
+    assert.deepEqual(
+      result.candidates.map((candidate) => candidate.session_id).sort(),
+      [archivedId, liveId].sort(),
+    );
+    assert.ok(result.candidates.every((candidate) => candidate.runtime === 'codex'));
+    assert.ok(result.candidates.every((candidate) => candidate.resume.includes('codex resume')));
+    assert.ok(result.candidates.some((candidate) => candidate.source === 'sessions'));
+    assert.ok(result.candidates.some((candidate) => candidate.source === 'archived_sessions'));
+    assert.ok(result.candidates.some((candidate) => candidate.hook_events.includes('PreToolUse')));
+  });
+
+  it('dispatches Codex hook payloads without invoking the Claude writer', () => {
+    const payload = {
+      timestamp: '2026-05-16T09:00:00+09:00',
+      event: 'PreToolUse',
+      session_id: '11111111-1111-4111-8111-111111111111',
+      turn_id: '33333333-3333-4333-8333-333333333333',
+      transcript_path: '/tmp/.codex/sessions/2026/05/16/rollout-2026-05-16T00-00-00-11111111-1111-4111-8111-111111111111.jsonl',
+      cwd: '/repo/epistemic-protocols',
+      hook_event_name: 'PreToolUse',
+      model: 'gpt-5.5',
+      permission_mode: 'bypassPermissions',
+      tool_name: 'Bash',
+      tool_input: { command: 'true' },
+    };
+
+    const output = execFileSync(process.execPath, [
+      path.join(__dirname, '..', 'anamnesis', 'scripts', 'anamnesis.mjs'),
+      'hook',
+      'write',
+    ], {
+      encoding: 'utf8',
+      input: JSON.stringify(payload) + '\n',
+    });
+    assert.equal(output, '');
   });
 });
 

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs\" hook write",
             "async": true
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs\" hook write",
             "async": true
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-subagent-hook.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs\" hook subagent",
             "async": true
           }
         ]
