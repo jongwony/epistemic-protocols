@@ -13,11 +13,12 @@ Achieve certain comprehension of AI work through structured verification, enabli
 
 ```
 ── FLOW ──
-R → U → I → E → Sₑ → B → Tᵣ → detect(E, B) → GT → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
+(R, U) → I → E → Sₑ → B → Tᵣ → detect(E, B) → GT → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
 
 ── MORPHISM ──
 Result
   → orient(result, user_signal)        -- infer likely comprehension intents from AI work and user's wording
+  → derive_entries(intent)             -- transform inferred intent into high-scent entry points
   → select(intent_entry_point)         -- user chooses the closest intent-scented entry point
   → materialize(artifact_basis)        -- derive concrete artifact anchors for the chosen intent
   → register(tasks)                   -- track selected entry points as tasks
@@ -31,10 +32,10 @@ invariant: Comprehension over Explanation
 
 ── TYPES ──
 R  = AI's result (the work output)
-U  = User signal about what feels ungrasped
-I  = ComprehensionIntent inferred from R and U
-E  = Intent-scented entry points for I
-Sₑ = User-selected entry point(s)
+U  = User signal about what feels ungrasped; may be ∅ on bare `/grasp`
+I  = ComprehensionIntent inferred from R and U; I ∈ {Orientation, Rationale, Impact, Approval, Transfer} ∪ Emergent
+E  = Intent-scented entry points derived from I
+Sₑ = List<EntryPoint>; singleton by default, ordered list when user names multiple distinct concerns
 B  = ArtifactBasis materialized from selected entry point(s)
 Tᵣ = Task registration for tracking
 P  = User's phantasia (current representation/understanding)
@@ -48,8 +49,8 @@ J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
 GT = Relevant gap types per entry point ⊆ {Expectation, Causality, Scope, Sequence} ∪ Emergent(E, B)
 
 ── PHASE TRANSITIONS ──
-Phase 0: (R, U) → Orient(R, U) → I → E                 -- intent orientation (silent)
-Phase 1: E → Qc(intent entry points) → Stop → Sₑ       -- entry point selection [Tool]
+Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E  -- intent orientation (silent)
+Phase 1: E → Qc(intent entry points) → Stop → Sₑ       -- entry point selection; default single, ordered multi when user names 2+ concerns [Tool]
 Phase 2: Sₑ → Materialize(Sₑ, R) → B → TaskCreate[selected] → Tᵣ  -- task registration [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → P → Δ  -- comprehension check [Tool]
        → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Emergent [Tool]
@@ -176,6 +177,7 @@ Entry points name what the user will be able to understand or do after verificat
 | **Impact** | User needs downstream effects or risk surface | "what could break or change later" |
 | **Approval** | User must decide whether the result is acceptable | "what I need to approve before using this" |
 | **Transfer** | User needs to explain, maintain, or modify the result | "how I would explain or change this next time" |
+| **Emergent** | User's concern does not fit the named intents but still asks for grasp of this result | Label names the user's desired grasp or next action, e.g. "regulatory implications I need to understand" |
 
 ## Artifact Basis Taxonomy
 
@@ -210,14 +212,14 @@ Comprehension gaps within each entry point:
 
 ### Phase 0: Orientation (Silent)
 
-Analyze the AI work result and the user's signal to infer likely comprehension intents:
+Analyze the AI work result and the user's signal to infer likely comprehension intents. Bare `/grasp` is valid: when `U = ∅`, Orient generates generic intent candidates from `R` alone and Phase 1 becomes the user's first signal-bearing turn.
 
 1. **Identify result shape**: Detect whether `R` is code, plan, document, analysis, model, or mixed artifact
-2. **Read user signal**: Extract the user's named concern, uncertainty, or desired use of the result
+2. **Read user signal**: Extract the user's named concern, uncertainty, or desired use of the result; if absent, mark `U = ∅` and continue from result shape
 3. **Infer intents**: Generate 2-3 high-scent entry points using Entry Point Taxonomy
 4. **Prepare basis hints**: Keep artifact categories as hidden grounding for each entry point
 
-**Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 entry point prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
+**Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 entry point prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. v2+ Katalepsis records are treated as entry-point evidence. v1 category-based records are weak hints only; do not directly map `Category` to `ComprehensionIntent`. This heuristic may bias detection toward previously observed patterns, but Phase 1 user selection remains constitutive.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expectation, Causality, Scope, Sequence}, the Gap Taxonomy warrants promotion to a new named type. When accumulated probe misclassifications across 3+ sessions cluster around a specific gap type's probe kind boundary (Qc vs Qs), that type's probe kind assignment warrants revision.
 
@@ -235,15 +237,16 @@ options:
     description: "[what the user will be able to understand or decide after choosing it]"
   - label: "[intent entry point C]"
     description: "[what the user will be able to understand or decide after choosing it]"
-Other: user states the entry point in their own words
 ```
+
+The user may also state the entry point in their own words; treat that response as an Emergent entry point when it remains within `ResultUngrasped → VerifiedUnderstanding`.
 
 **Design principles**:
 - Show max 3 entry points in the first question
 - Labels name user intent or outcome, not artifact taxonomy
 - Descriptions carry information scent: what this path will make clear and why it matters
 - Artifact basis may appear in surrounding context, not as the primary option label
-- If the user explicitly asks for multiple focus areas, accept multi-select and register ordered tasks
+- If the initial user signal or Phase 1 freeform response names 2+ distinct concerns, enable multi-select in a follow-up question or register the named concerns directly as an ordered task list
 
 ### Phase 2: Task Registration
 
