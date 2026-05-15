@@ -76,7 +76,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Elenchus](./elenchus) | `/sublate` | About to externalize a working context that may have decayed — vet it dialectically first |
 | [Horismos](./horismos) | `/bound` | You need to define what you know vs what AI should figure out |
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it |
-| [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need to actually understand them |
+| [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need a fast path to understand, approve, explain, or modify them |
 
 Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)
 

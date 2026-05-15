@@ -14,23 +14,23 @@ When AI completes complex work, users often can't grasp the full result (`Result
 
 ### The Solution
 
-**Comprehension over Explanation**: Rather than lecturing, AI structures verification through categorized entry points. Users select what to understand first, then AI confirms understanding through progressive questioning.
+**Comprehension over Explanation**: Rather than lecturing, AI first offers intent-scented entry points in the user's language. Users select the path closest to what they need to understand, decide, explain, or modify; then AI grounds that path in the artifact and verifies understanding through progressive questioning.
 
 ### Difference from Simple Explanation
 
 | Dimension | Simple Explanation | Katalepsis |
 |-----------|-------------------|------------|
 | Direction | AI talks, user listens | AI verifies, user confirms |
-| Entry point | AI decides what to explain | User selects focus areas |
+| Entry point | AI decides what to explain | User selects an intent-scented path |
 | Confirmation | Assumed after explanation | Verified through questions |
 | Progress | Undefined | Tracked via tasks |
 
 ## Protocol Flow
 
 ```
-Phase 0: Categorize   → Analyze AI work, extract change categories
-Phase 1: Entry Point  → Present categories, user selects (gate interaction)
-Phase 2: Register     → Create tasks for selected categories (TaskCreate)
+Phase 0: Orient       → Infer likely comprehension intents from the result and user signal
+Phase 1: Entry Point  → Present intent-scented paths, user selects (gate interaction)
+Phase 2: Ground       → Materialize artifact basis and create tasks (TaskCreate)
 Phase 3: Verify Loop  → Confirm understanding progressively (gate interaction + TaskUpdate)
 ```
 

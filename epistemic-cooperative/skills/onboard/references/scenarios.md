@@ -193,20 +193,20 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 ## Katalepsis `/grasp`
 
-**Situation**: You're about to meet a friend who's recommending a dense new book. You want to skim and "get it" before the conversation, but the book has 14 chapters and you have 30 minutes. Random sampling won't give you the core; you need the shape — problem / method / result / limits — fast.
+**Situation**: AI just produced a dense plan, document, or code change. You need to get oriented before you approve, explain, or modify it, but the first menu of artifact categories would slow you down because you do not yet know which part maps to your concern.
 
-**Intervention**: `/grasp` structures rapid comprehension by decomposing the target into categories (problem statement, approach, main findings, scope limitations), probing your grasp of each via Socratic questions, and identifying which category you can explain and which still feels fuzzy — so your 30 minutes maximize core understanding.
+**Intervention**: `/grasp` structures rapid comprehension by first offering intent-scented entry points such as what changed, why it matters, what needs approval, or what could break. After you pick the closest path, it grounds that path in the artifact and probes your grasp through Socratic questions.
 
-**Trial prompt**: "Let's practice: say 'Help me get the core of this book fast' and I'll show how /grasp decomposes by category and verifies comprehension"
+**Trial prompt**: "Let's practice: say 'Help me understand what I need to approve in this AI-generated plan' and I'll show how /grasp routes through an intent entry point before verifying comprehension"
 
 **Quiz Q (situation)**: You skimmed a long article and nodded along. A colleague asks you to summarize the main argument in one sentence and you freeze — you realize skimming wasn't the same as grasping.
 - A) Periagoge `/induce` — B) Prothesis `/frame` — C) Katalepsis `/grasp` — D) Syneidesis `/gap`
 - Answer: C
 
 **Quiz Q (design)**: After quickly consuming a complex explanation, how would you verify you actually grasped the core — rather than that you could nod along?
-- Hint: The problem isn't that the content is wrong — it's that your comprehension hasn't caught up. Categorical decomposition ("what / how / why / limits") is the test.
+- Hint: The problem isn't that the content is wrong — it's that your comprehension hasn't caught up. Start from the user's intended use of the result, then probe the artifact-grounded understanding.
 
-**Philosophy**: κατάληψις (grasping firmly, comprehension) — the Stoic criterion of truth through firm cognitive grasp. Core principle: **Comprehension over Approval**. Nodding along is not grasping. Categorical decomposition converts passive reception into active comprehension. Workflow position: cross-cutting, structurally last — requires completed content; without something to grasp, there is nothing to verify. Game feel: "I think I got it... but do I really?" → category-by-category probe → confirmed grasp or identified gap.
+**Philosophy**: κατάληψις (grasping firmly, comprehension) — the Stoic criterion of truth through firm cognitive grasp. Core principle: **Comprehension over Approval**. Nodding along is not grasping. Intent-scented entry points convert passive reception into active comprehension by letting the user recognize the path closest to their concern before artifact details appear. Workflow position: cross-cutting, structurally last — requires completed content; without something to grasp, there is nothing to verify. Game feel: "I think I got it... but do I really?" → choose the nearest intent path → artifact-grounded probe → confirmed grasp or identified gap.
 
 ## Composition Patterns
 

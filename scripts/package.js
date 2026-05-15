@@ -33,7 +33,7 @@ const PLUGINS = _records.map(r => ({ dir: r.dir, skill: r.skill }));
 const DESCRIPTION_OVERRIDES = {
   frame: 'Multi-perspective investigation — (FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry',
   gap: 'Gap surfacing before decisions — (GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision',
-  grasp: 'Comprehension verification after AI work — (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding',
+  grasp: 'Intent-scented comprehension verification — (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding',
   inquire: 'Infer context insufficiency before execution — (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution',
   attend: 'Evaluate execution-time risks — (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution',
   ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, Text) → ValidatedMapping',
