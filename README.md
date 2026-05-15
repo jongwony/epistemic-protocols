@@ -35,7 +35,7 @@ Then run `/onboard` — start with a quick recommendation based on your recent s
 This repository is also a Codex plugin marketplace. To add it from GitHub:
 
 ```bash
-codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
+curl -fsSL https://raw.githubusercontent.com/jongwony/epistemic-protocols/main/scripts/install-codex.sh | bash
 ```
 
 For local development from a checkout:
@@ -44,7 +44,7 @@ For local development from a checkout:
 codex plugin marketplace add /path/to/epistemic-protocols
 ```
 
-The Codex marketplace preserves the same plugin boundaries as Claude Code: each protocol is its own plugin, and `epistemic-cooperative` carries the utility skills. Start with `onboard` for a quick recommendation, or install a specific protocol plugin when you already know which checkpoint you need.
+The Codex marketplace preserves the same plugin boundaries as Claude Code: each protocol is its own plugin, and `epistemic-cooperative` carries the utility skills. Start with `onboard` for a quick recommendation, or add the local checkout when you are developing protocol changes.
 
 <details>
 <summary>Notes</summary>
@@ -55,19 +55,11 @@ The Codex marketplace preserves the same plugin boundaries as Claude Code: each 
 
 </details>
 
-### Other agent tools (Agent Skills standard)
+### Other agent tools
 
-Cursor, GitHub Copilot, Devin, OpenCode, Codex CLI, Gemini CLI, and others discover skills under `.agents/skills/<name>/SKILL.md` per the [Agent Skills specification](https://agentskills.io/specification). This repository ships a pre-materialized view of every protocol/utility skill at that path (relative symlinks back to the per-plugin source — no duplication). Cloning the repo is sufficient; no installer step is required.
+Protocol skill sources live in each plugin directory under `<plugin>/skills/<name>/SKILL.md`. The repository does not ship a pre-materialized `.agents/skills/` symlink view because Codex marketplace discovery can scan both plugin manifests and Agent Skills symlinks, producing duplicate skill entries.
 
-To regenerate after adding/renaming skills:
-
-```bash
-scripts/sync-agents-symlinks.sh
-```
-
-The `agents-symlinks-sync` static check fails the pre-commit if the materialized view drifts from the plugin sources.
-
-> Note: skill *discovery* via `.agents/skills/` is a verified cross-tool standard. Runtime *tool grounding* (host-specific tools referenced in `PHASE TRANSITIONS` / `TOOL GROUNDING` such as `Skill()`, `Task`, `AskUserQuestion`) varies by tool — protocol behavior in non-Claude-Code hosts is provisional pending accumulated cross-host use evidence.
+Hosts that need an [Agent Skills](https://agentskills.io/specification)-style view should materialize it outside the Codex marketplace checkout or use host-specific packaging. Runtime *tool grounding* still varies by tool, so protocol behavior in non-Claude-Code hosts is provisional pending accumulated cross-host use evidence.
 
 ## Protocols
 
