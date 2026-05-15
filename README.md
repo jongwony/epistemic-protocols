@@ -32,33 +32,26 @@ Then run `/onboard` — start with a quick recommendation based on your recent s
 
 ### Codex
 
-Paste in Codex and run:
+This repository is also a Codex plugin marketplace. To add it from GitHub:
 
-```text
-$skill-installer install these skills from jongwony/epistemic-protocols:
-- prothesis/skills/frame
-- syneidesis/skills/gap
-- katalepsis/skills/grasp
-- aitesis/skills/inquire
-- horismos/skills/bound
-- analogia/skills/ground
-- periagoge/skills/induce
-- euporia/skills/elicit
-- prosoche/skills/attend
-- epharmoge/skills/contextualize
-- elenchus/skills/sublate
-- anamnesis/skills/recollect
-- epistemic-cooperative/skills/onboard
+```bash
+codex plugin marketplace add https://github.com/jongwony/epistemic-protocols.git
 ```
 
-Restart Codex, then start with `$onboard`.
+For local development from a checkout:
+
+```bash
+codex plugin marketplace add /path/to/epistemic-protocols
+```
+
+The Codex marketplace preserves the same plugin boundaries as Claude Code: each protocol is its own plugin, and `epistemic-cooperative` carries the utility skills. Start with `onboard` for a quick recommendation, or install a specific protocol plugin when you already know which checkpoint you need.
 
 <details>
 <summary>Notes</summary>
 
-- This installs 12 protocols + `onboard`. `/report`, `/dashboard`, `/write` are not included.
-- To install a single skill, use the same `skill-installer` pattern with one path.
-- This README is the source of truth for the Codex-supported install set.
+- The Codex marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json).
+- Each plugin keeps its Codex manifest beside the existing Claude manifest: `<plugin>/.codex-plugin/plugin.json`.
+- The marketplace includes the 12 protocol plugins plus `epistemic-cooperative`.
 
 </details>
 

@@ -1,0 +1,35 @@
+{
+  "name": "syneidesis",
+  "version": "2.21.43",
+  "description": "Surface potential gaps at decision points — /gap (συνείδησις: knowing-together)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "syneidesis"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Syneidesis",
+    "shortDescription": "Surface potential gaps at decision points — /gap (συνείδησις: knowing-together)",
+    "longDescription": "Surface potential gaps at decision points — /gap (συνείδησις: knowing-together)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use syneidesis for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

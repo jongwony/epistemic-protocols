@@ -1,0 +1,35 @@
+{
+  "name": "prosoche",
+  "version": "1.6.49",
+  "description": "Route upstream epistemic deficits and evaluate execution-time risks — /attend (προσοχή: attention)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "prosoche"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Prosoche",
+    "shortDescription": "Route upstream epistemic deficits and evaluate execution-time risks — /attend (προσοχή: attention)",
+    "longDescription": "Route upstream epistemic deficits and evaluate execution-time risks — /attend (προσοχή: attention)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use prosoche for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

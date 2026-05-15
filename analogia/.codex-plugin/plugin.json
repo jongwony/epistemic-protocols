@@ -1,0 +1,35 @@
+{
+  "name": "analogia",
+  "version": "1.6.34",
+  "description": "Validate structural mapping between domains — /ground (ἀναλογία: a proportion)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "analogia"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Analogia",
+    "shortDescription": "Validate structural mapping between domains — /ground (ἀναλογία: a proportion)",
+    "longDescription": "Validate structural mapping between domains — /ground (ἀναλογία: a proportion)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use analogia for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

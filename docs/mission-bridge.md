@@ -18,7 +18,7 @@ Public-facing docs use a distilled version of that umbrella:
 - Make clear that the same checkpoint discipline also covers execution, verification, recall, and comprehension
 - Remain self-sufficient: a reader should not need contributor docs to understand what the project is for
 
-The README remains the source of truth for the Codex-supported install set. It is not the canonical source for the full machinery description.
+The README remains the source of truth for the Codex-supported distribution surfaces. It is not the canonical source for the full machinery description.
 
 ## Runtime Boundary
 

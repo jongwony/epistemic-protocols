@@ -1,0 +1,35 @@
+{
+  "name": "katalepsis",
+  "version": "1.23.34",
+  "description": "Achieve certain comprehension of AI work — /grasp (κατάληψις: a grasping firmly)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "katalepsis"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Katalepsis",
+    "shortDescription": "Achieve certain comprehension of AI work — /grasp (κατάληψις: a grasping firmly)",
+    "longDescription": "Achieve certain comprehension of AI work — /grasp (κατάληψις: a grasping firmly)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use katalepsis for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

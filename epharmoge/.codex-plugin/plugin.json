@@ -1,0 +1,35 @@
+{
+  "name": "epharmoge",
+  "version": "0.7.41",
+  "description": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "epharmoge"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Epharmoge",
+    "shortDescription": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)",
+    "longDescription": "Detect application-context mismatch after execution — /contextualize (ἐφαρμογή: an application)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use epharmoge for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

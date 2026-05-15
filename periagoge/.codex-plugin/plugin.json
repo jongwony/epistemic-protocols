@@ -1,0 +1,35 @@
+{
+  "name": "periagoge",
+  "version": "0.1.29",
+  "description": "Crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "periagoge"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Periagoge",
+    "shortDescription": "Crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
+    "longDescription": "Crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use periagoge for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}
