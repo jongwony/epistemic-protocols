@@ -39,8 +39,10 @@ Every TOOL GROUNDING line carries a parenthetical annotation classifying the ope
 
 | Annotation | Meaning | Tool Pattern |
 |------------|---------|--------------|
-| `(gate)` | User-facing interaction; stops execution, awaits response | TextPresent+Stop → present |
-| `(relay)` | Non-stopping text presentation; proceeds automatically | TextPresent+Proceed |
+| `(constitution)` | User-facing interaction where a constitutive user judgment is required | TextPresent+Stop → present |
+| `(extension)` | Relay-eligible presentation or auto-resolution where no constitutive surplus is required | TextPresent+Proceed |
+
+`(constitution)` / `(extension)` are the sole TOOL GROUNDING interaction annotations. `Qc` and `Qs` name gate shapes; they do not replace the annotation class.
 
 **Operation annotations** (tool-facing):
 
@@ -103,9 +105,67 @@ These disciplines are complementary. A protocol can satisfy Context-Question Sep
 
 **Qc/Qs runtime distinction**: The Qc/Qs classification is a definition-time property of the gate — Qs expects constitutive response, Qc expects classificatory response. At runtime with Text+Stop realization, this distinction blurs: Qc gate responses can carry constitutive surplus (new meaning beyond the classification). The formal answer type (closed coproduct) captures the classification; the constitutive surplus is captured by Phase 3 `integrate` — a sense operation whose non-obvious interpretive contribution may be surfaced through Output Style `Basis:` marker when non-trivial (A2 Visibility).
 
+**ConstitutionSurface<T>** names the typed pre-gate surface on which a Constitution interaction becomes meaningful:
+
+```
+ConstitutionSurface<T> = {
+  current_object: T,
+  pressure_map: Option(ProtocolNativeMap),
+  evidence: Set(Evidence),
+  residual_unknowns: Set(ResidualUnknown),
+  move_space: UserMoveCoproduct,
+  repair_paths: Set(RepairPath)
+}
+```
+
+Relationship to existing terms:
+
+- `Constitution` and `Extension` are TOOL GROUNDING interaction kinds.
+- `Qc` and `Qs` are gate shapes: classificatory vs constitutive response expectations.
+- `ConstitutionSurface<T>` is the structured user-facing surface placed before a `Qc` or `Qs` gate; it does not replace the gate, the interaction kind, or the user's move.
+- A pressure map belongs in this surface only when it is protocol-native and changes the next user judgment. Discovery pressure is bounded to residual unknowns that can materially alter that judgment, not general horizon exploration.
+
 **Interpretive transparency architecture**: `Basis:` is a discretionary session-level annotation — it fires when AI interpretation transcends mechanical derivation, unlike the former `integrate-echo` which was a mandatory structural relay. The semantic boundary shifts from a deducibility test (augmentation not derivable from {input, context_structure}) to an observability criterion (cite specific evidence grounding the interpretation). This relocation from protocol-owned TOOL GROUNDING to the session-level observation layer follows the Session-level observer exception (Audience Reach) — the same architectural pattern governing nudge.
 
-The `Qs` gate's formal correspondence to Horizontverschmelzung (horizon fusion) and the cycle's structural pattern are catalogued in `.claude/principles/hermeneutic-cycle.md`.
+The `Qs` gate's formal correspondence to Horizontverschmelzung (horizon fusion) and the cycle's structural pattern are catalogued in `.claude/principles/hermeneutic-cycle.md`. This correspondence is descriptive, not a guarantee that a gate or `ConstitutionSurface<T>` completes horizon fusion.
+
+## Resolution Meta-Contract
+
+Canonical protocol resolution names remain protocol-native: `ValidatedMapping`, `AuditedDecision`, `CrystallizedAbstraction`, `ResolvedEndpoint`, and peer names are not renamed to a generic terminal type. `DeficitResolved<D, R>` is a meta-contract that those canonical resolution types should satisfy when their formal surface is edited:
+
+```
+DeficitResolved<D, R> =
+  R where
+    morphism_completed(D → R)
+    ∧ completion_trace_declared(D → phase_operations → R)
+    ∧ residual_unknown_disposition_declared
+```
+
+Reference shapes:
+
+```
+ResidualDisposition ∈ {None, Declared, Deferred, Dismissed, Routed, Bounded}
+  -- closed disposition signal; each constructor has distinct downstream handling semantics
+
+ResidualUnknown = {
+  item: String,
+  status: ResidualDisposition,
+  reason: String,
+  downstream?: Reference
+}
+
+MorphismCompletionTrace<D, R> =
+  List(D instance → PhaseOperation → ResolutionEvidence)
+
+-- Carrier shape for materializing the predicate contract above.
+DeficitResolved<D, R> = {
+  result: R,
+  trace: MorphismCompletionTrace<D, R>,
+  residual: Map(ResidualUnknown.item, ResidualDisposition)
+}
+```
+
+`residual = ∅` is valid only when emptiness is declared. Silent absence of residuals is not equivalent to `None`. Resolution means morphism completion is traceable and residual unknown disposition is visible; it does not mean all unknowns are eliminated. Residual disposition is not a new user gate by default.
 
 ## Type Naming and Artifact Observability
 
