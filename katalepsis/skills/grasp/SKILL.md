@@ -82,13 +82,13 @@ If correct: emit continuation closure, then Aspect summary — show probed vs un
   User selects additional aspect → Resume with selected gap type.
   User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, emit side-branch continuation closure, resume current loop position.
 Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
-Continue until: all selected tasks completed OR user ESC.
+Continue until: all selected tasks completed OR user ESC/cancel.
 Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
-VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
+VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc ∨ user_cancel
 Deactivation: `all_tasks_completed` after convergence evidence, `user_esc`, and `user_cancel` each set `Λ.active := false`. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
 
 ── TOOL GROUNDING ──
