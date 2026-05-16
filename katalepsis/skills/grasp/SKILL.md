@@ -69,7 +69,7 @@ Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → P → Δ  -- c
        → Read(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
        → C(correct) if correct(A)                         -- verified-aspect continuation closure [Tool]
        → Qc(coverage) → Stop if correct(A)               -- aspect summary [Tool]
-       → converge → Λ.active := false if Katalepsis       -- convergence evidence is terminal; no downstream gate required
+       → converge → Λ.active := false if all_tasks_completed  -- convergence evidence is terminal; no downstream gate required
        → deactivate(user_esc | user_cancel) → Λ.active := false
 Turn boundary invariant: While `Λ.active = true` at turn end, the last user-facing shape must be a TerminalShape. Relay metadata `C(·)` may precede a terminal shape, but cannot be the sole final shape while active. The `converge` emission is `deactivation(all_tasks_completed)`, sets `Λ.active := false`, and is terminal without an additional gate.
 
