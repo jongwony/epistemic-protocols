@@ -44,7 +44,7 @@ materialized into lower-load labels, but the answer type is unchanged:
 | Use this | Confirm |
 | Broaden it | Widen |
 | Tighten it | Narrow |
-| Merge it with another concept | Fuse |
+| Fuse / Merge it | Fuse |
 | Change the axis | Reorient |
 | Drop this candidate | Dismiss |
 

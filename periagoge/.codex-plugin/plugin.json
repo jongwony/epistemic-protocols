@@ -1,7 +1,7 @@
 {
   "name": "periagoge",
   "version": "0.1.30",
-  "description": "Crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
+  "description": "Calibrate and crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Periagoge",
-    "shortDescription": "Crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
-    "longDescription": "Crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
+    "shortDescription": "Calibrate and crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
+    "longDescription": "Calibrate and crystallize in-process abstraction — /induce (περιαγωγή: turning-around)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

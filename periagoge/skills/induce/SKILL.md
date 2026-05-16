@@ -1,15 +1,15 @@
 ---
 name: induce
-description: "Crystallize in-process abstraction through dialectical triangulation. Proposes candidate abstractions with personalized grounding examples and shapes them via user widen/narrow/fuse/reorient moves when an instance set has converged toward an unnamed essence, producing crystallized abstraction. Type: (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction. Alias: Periagoge(περιαγωγή)."
+description: "Calibrate and crystallize in-process abstraction through dialectical triangulation. Proposes calibrated candidate abstractions with personalized grounding examples and shapes them via user widen/narrow/fuse/reorient moves when an instance set has converged toward an unnamed essence, producing crystallized abstraction. Type: (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction. Alias: Periagoge(περιαγωγή)."
 ---
 
 # Periagoge Protocol
 
-Crystallize in-process abstraction through AI-proposed candidate plus user dialectical triangulation. Type: `(AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction`.
+Calibrate and crystallize in-process abstraction through AI-proposed candidate plus user dialectical triangulation. Type: `(AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction`.
 
 ## Definition
 
-**Periagoge** (περιαγωγή): A dialogical act of turning an in-process abstraction toward its crystallized form, where AI detects when an instance set has converged toward an unnamed essence, proposes a candidate abstraction paired with a personalized grounding example drawn from the user's own domain, and shapes the candidate through the user's response — accept the candidate, broaden its scope, narrow it along a specific dimension, fuse it with an adjacent abstraction, or redirect onto an orthogonal axis — until the abstraction locates itself (the Greek dialectical vocabulary supplies the source terms, attributed in the footnote).[^1]
+**Periagoge** (περιαγωγή): A dialogical act of turning an in-process abstraction toward its crystallized form, where AI detects when an instance set has converged toward an unnamed essence, calibrates the user's in-process concept against that instance set, proposes a calibrated candidate abstraction paired with a personalized grounding example drawn from the user's own domain, and shapes the candidate through the user's response — accept the candidate, broaden its scope, narrow it along a specific dimension, fuse it with an adjacent abstraction, or redirect onto an orthogonal axis — until the abstraction locates itself (the Greek dialectical vocabulary supplies the source terms, attributed in the footnote).[^1]
 
 [^1]: The name draws a structural analogy from Plato *Republic* VII.518d, where περιαγωγή names the soul's turning-around toward the intelligible. The protocol borrows the turning-toward structure; it does not claim Platonic paideia. Synagoge (συναγωγή, collection) and Diairesis (διαίρεσις, division) are the twin dialectical moves described in *Phaedrus* 265d–266a; here they name user response families, not a claim to Platonic method.
 
@@ -17,7 +17,7 @@ Crystallize in-process abstraction through AI-proposed candidate plus user diale
 ── FLOW ──
 Periagoge(A) → Detect(A) → in_process? →
   true:  (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K →
-         Propose(Iᵢ, E, K, ctx) → (P, G, K) →
+         Propose(Iᵢ, E, K, ctx) → (P, G) →
          Qs(P, G, K, progress) → Stop → V → integrate(V, candidate) → candidate' →
          loop until crystallized(A) ∨ user_esc ∨ attempts_exhausted
   false: deactivate
@@ -25,7 +25,7 @@ Periagoge(A) → Detect(A) → in_process? →
 ── MORPHISM ──
 A
   → detect(instances, essence, locator)   -- verify in-process abstraction exists
-  → calibrate(user_concept, instances)    -- surface what instances preserve, sharpen, prune, and leave open
+  → calibrate(E, L?, Iᵢ, ctx)             -- surface what instances preserve, sharpen, prune, and leave open
   → propose(candidate, grounding, calibration)  -- AI generates candidate + personalized example + calibration map
   → triangulate(candidate, user_move)     -- user shapes via type-preserving materialized moves
   → integrate(V, candidate)               -- update candidate per user response
@@ -33,8 +33,8 @@ A
   → CrystallizedAbstraction
 requires: in_process(A)                    -- runtime checkpoint (Phase 0)
 deficit:  AbstractionInProcess              -- activation precondition (Layer 1/2)
-preserves: instance_set(A)                  -- Iᵢ read-only; calibration and candidate mutate across loop
-invariant: Calibrative Induction over Unilateral Correction
+preserves: instance_set(A)                  -- Iᵢ read-only; K computed per Phase 1 entry and recomputed on Phase 1 re-entry; candidate mutates per user move
+invariant: Calibrative Induction through Dialectical Triangulation over Unilateral Correction
 
 ── TYPES ──
 A              = AbstractionSeed (in-process state: instances + essence intuition + optional user concept label)
@@ -43,6 +43,8 @@ Iᵢ             = Set(Instance)                             -- instance set obs
 Instance       = { content: String, context: String }       -- concrete case observed
 E              = EssenceIntuition                           -- variation-stable core signal from conversation
 L              = Option(TentativeLabel)                     -- user-provided provisional name or concept, if any
+ctx            = DomainContext                              -- user's domain context gathered via Read, Grep, and conditional WebSearch in Phase 1
+Calibrate      = (Iᵢ, E, L?, ctx) → K
 K              = CalibrationMap { keeps, sharpens, prunes, open }
                  keeps     = supported core to preserve
                  sharpens  = under-specified decision-relevant structure
@@ -51,7 +53,7 @@ K              = CalibrationMap { keeps, sharpens, prunes, open }
 P              = CandidateAbstraction { name, structure, instance_map, provenance }
 G              = GroundingExample { scenario: String, domain: String, mapping: String }
                                                              -- personalized to user's own domain context
-Propose        = (Iᵢ, E, K, ctx) → (P, G, K)
+Propose        = (Iᵢ, E, K, ctx) → (P, G)
 V              = UserMove ∈ {Confirm, Widen(direction), Narrow(specializer), Fuse(adjacent), Reorient(axis), Dismiss}
                  direction    ∈ {upward, lateral}           -- Synagoge family; AI-proposed broadening (user Recognition mode)
                  specializer  = dimension to constrain      -- Diairesis family (user-directed specialization)
@@ -73,7 +75,7 @@ If no essence signal is detectable (neither user sensing language nor AI-inferra
 
 ── PHASE TRANSITIONS ──
 Phase 0: A → Detect(A) → in_process?                                       -- detection checkpoint (silent)
-Phase 1: (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K → Propose(Iᵢ, E, K, ctx) → (P, G, K)  -- calibration + candidate + grounding construction [Tool]
+Phase 1: (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K → Propose(Iᵢ, E, K, ctx) → (P, G); carry (P, G, K)  -- calibration + candidate + grounding construction [Tool]
 Phase 2: (P, G, K) → Qs(P, G, K, progress) → Stop → V                      -- triangulation Constitution interaction [Tool]
 Phase 3: V → integrate(V, candidate) → candidate'                          -- candidate update (track)
 
@@ -114,7 +116,7 @@ converge           (extension)   → TextPresent+Proceed (convergence evidence t
 
 ## Core Principle
 
-**Calibrative Induction through Dialectical Triangulation**: When an instance set has converged toward an unnamed essence but the abstraction has not located itself, neither AI nor user alone can crystallize the form. AI first shows how the instance set calibrates the user's in-process concept — what it preserves, sharpens, prunes, and leaves open — then proposes a candidate paired with a personalized grounding example drawn from the user's own domain. The user shapes the candidate through Socratic moves — widening (Synagoge), narrowing (Diairesis), fusing with an adjacent abstraction, or reorienting onto an orthogonal axis. The abstraction turns toward its crystallized form through the exchange, not by unilateral AI assertion.
+**Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: When an instance set has converged toward an unnamed essence but the abstraction has not located itself, neither AI nor user alone can crystallize the form. AI first shows how the instance set calibrates the user's in-process concept — what it preserves, sharpens, prunes, and leaves open — then proposes a candidate paired with a personalized grounding example drawn from the user's own domain. The user shapes the candidate through Socratic moves — widening (Synagoge), narrowing (Diairesis), fusing with an adjacent abstraction, or reorienting onto an orthogonal axis. The abstraction turns toward its crystallized form through the exchange, not by unilateral AI correction.
 
 ## Mode Activation
 
@@ -218,7 +220,7 @@ Analyze conversation state for in-process abstraction. This phase is **silent** 
 
 Generate a calibration map, candidate abstraction, and personalized grounding example.
 
-1. **Calibrate the seed** `K`: compare `(Iᵢ, E, L?)` against the user's context and sort the concept pressure into four fields: `keeps` (supported core to preserve), `sharpens` (decision-relevant structure needing clarity), `prunes` (unsupported overextension to release), and `open` (residual uncertainty that does not block crystallization).
+1. **Calibrate the seed** `K`: compare `(Iᵢ, E, L?)` against the user's context and sort the concept pressure into four fields: `keeps` (supported core to preserve), `sharpens` (decision-relevant structure needing clarity), `prunes` (unsupported overextension to release), and `open` (residual uncertainty that does not block crystallization). When `L?` is absent, calibrate on `E` alone: `sharpens` and `prunes` are relative to the inferred essence rather than to a user-named concept.
 2. **Synthesize candidate** `P`: from `(Iᵢ, E, K)`, construct a named abstraction with structure and instance-to-abstraction mapping. The candidate is a working hypothesis, not a claim.
 3. **Construct personalized grounding** `G`: call Read/Grep to collect evidence about the user's own domain context (codebase, configs, session history). The grounding example must be drawn from the user's domain — a scenario they recognize as theirs — not a generic textbook case.
    - When the user's domain is outside the current codebase (external API, academic field, professional practice), extend context collection to web search (WebSearch). Tag web evidence with `source: "web:{url}"` for traceability.
@@ -247,7 +249,7 @@ Present the calibration map and candidate as text output:
 Then **present**:
 
 ```
-Does this make the concept usable?
+Does this crystallize the concept enough to use?
 
 Options:
 1. **Confirm / Use this** — [what the crystallized abstraction enables downstream]
@@ -265,7 +267,7 @@ When Phase 1 surfaces no adjacent candidates, omit the Fuse option — dead sign
 - **Calibration before choice**: Show the preservation/sharpening/pruning/open map before the gate so the user evaluates the concept pressure, not just an AI label.
 - **Socratic shaping**: Each move (widen/narrow/fuse/reorient) is a recognized dialectical turn, not a free-form revision request.
 - **Progress visible**: Display attempt counter; attempt cap bounds generative refinement.
-- **Free response honored**: When the presented moves do not capture the user's shape, parse free response as candidate redirection.
+- **Free response honored**: When the presented moves do not capture the user's shape, parse free response as candidate redirection. If the user disputes `K` itself, absorb the correction through the existing UserMove/free-response path rather than adding a separate calibration-review constructor.
 
 ### Phase 3: Integration
 
@@ -310,7 +312,7 @@ After integration:
 1. **AI-guided, user-triangulated**: AI detects in-process abstraction and proposes candidates; crystallization requires user move via Cognitive Partnership Move (Constitution) (Phase 2).
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield before proceeding.
 3. **Calibration plus candidate plus grounding required**: Every Phase 2 surfacing pairs a calibration map, candidate abstraction, and personalized grounding example drawn from the user's own domain context.
-4. **Calibrative Induction over Unilateral Correction**: AI candidate is a working hypothesis, not a claim. Concept correction is mediated by the instance set surfaced through `K`; crystallization belongs to the user's move.
+4. **Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: AI candidate is a working hypothesis, not a claim. Concept correction is mediated by the instance set surfaced through `K`; crystallization belongs to the user's move.
 5. **Personalized grounding**: The grounding example must be recognizable to the user as theirs — drawn from their codebase, configs, session history, or stated domain. Generic textbook examples fail the personalization requirement.
 6. **Socratic move preservation**: Phase 2 options map to recognized dialectical families. Widen = Synagoge (upward or lateral). Narrow = Diairesis. Fuse = lateral Synagoge with adjacent abstraction. Reorient = orthogonal redirection. The vocabulary is operational, not ornamental.
 7. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal. The user may also name an adjacent abstraction via free response when Fuse is not presented (because Phase 1 surfaced no candidates) and they hold one in mind.
