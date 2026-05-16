@@ -51,13 +51,23 @@ Report:
 - Residual uncertainty when sources contradict or coverage is incomplete
 ```
 
-Launch via `Bash(run_in_background: true, timeout: 600000)`:
+Launch via `Bash(run_in_background: true, timeout: 1000000)`:
 
 ```bash
-codex exec --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" < /tmp/goal_research_${SUFFIX}.txt
+codex exec --skip-git-repo-check -m gpt-5.5 \
+  --config model_reasoning_effort="high" \
+  --config mcp_servers.tavily.tool_timeout_sec=900 \
+  < /tmp/goal_research_${SUFFIX}.txt
 ```
 
 Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-ensemble` does not apply here.
+
+The background Bash timeout controls the delegated Codex session envelope and
+must exceed the Tavily MCP per-call budget. The
+`mcp_servers.tavily.tool_timeout_sec=900` override controls the per-call MCP
+timeout for Tavily tools inside that delegated session, allowing long-form
+`tavily_research` calls to run for up to 15 minutes while still surfacing the
+raw timeout error if the call exceeds that limit.
 
 ## Phase 3: Collection
 
@@ -89,6 +99,6 @@ Acceptance criterion: a real Codex session was launched, its trace was returned 
 
 - Research question is embedded verbatim — no paraphrasing before passing to Codex.
 - Codex runs in background — main session is free until the completion notification arrives.
-- Failure modes (Codex missing, network failure, Tavily unavailable, timeout) are exposed as raw errors. The skill does not mask, retry, or fall back.
+- Failure modes (Codex missing, network failure, Tavily unavailable, delegated-session timeout, or Tavily MCP per-call timeout) are exposed as raw errors. The skill does not mask, retry, or fall back.
 - Always clean up the temp prompt file after reading the Codex output.
 - The skill is a delegation channel only — interpretation, follow-up questions, and downstream protocol routing belong to the main session after the trace returns.

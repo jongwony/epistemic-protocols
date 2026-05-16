@@ -222,6 +222,27 @@ describe('runtime contract view', () => {
 });
 
 // ============================================================
+// goal-research runtime contract
+// ============================================================
+
+describe('goal-research runtime contract', () => {
+  const REPO_ROOT = path.join(__dirname, '..');
+  const skillPath = path.join(REPO_ROOT, 'epistemic-cooperative', 'skills', 'goal-research', 'SKILL.md');
+
+  it('extends Tavily MCP tool-call timeout separately from the Codex session timeout', () => {
+    const skill = fs.readFileSync(skillPath, 'utf8');
+    const bashMs = Number(skill.match(/Bash\(run_in_background: true, timeout: (\d+)\)/)?.[1]);
+    const mcpSec = Number(skill.match(/--config mcp_servers\.tavily\.tool_timeout_sec=(\d+)/)?.[1]);
+    assert.ok(Number.isFinite(bashMs), 'Bash session timeout must be documented');
+    assert.ok(Number.isFinite(mcpSec), 'Tavily MCP per-call timeout must be configured');
+    assert.ok(bashMs > mcpSec * 1000, 'Bash envelope must exceed MCP per-call budget');
+    assert.equal(mcpSec, 900);
+    assert.match(skill, /per-call MCP\s+timeout/i);
+    assert.match(skill, /tavily_research/);
+  });
+});
+
+// ============================================================
 // artifact-self-containment detector liveness
 // ============================================================
 
