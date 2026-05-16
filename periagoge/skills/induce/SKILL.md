@@ -19,7 +19,8 @@ Periagoge(A) → Detect(A) → in_process? →
   true:  (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K →
          Propose(Iᵢ, E, K, ctx) → (P, G) →
          Qs(P, G, K, progress) → Stop → V → integrate(V, candidate) → candidate' →
-         loop until crystallized(A) ∨ user_esc ∨ attempts_exhausted
+         loop until crystallized(A) → declare(completion_trace, open_trace) → CrystallizedAbstraction
+         or user_esc ∨ attempts_exhausted → deactivate
   false: deactivate
 
 ── MORPHISM ──
@@ -30,7 +31,7 @@ A
   → triangulate(candidate, user_move)     -- user shapes via type-preserving materialized moves
   → integrate(V, candidate)               -- update candidate per user response
   → crystallize(abstraction)              -- convergence when confirmed
-  → declare(trace, open_disposition)       -- terminal evidence trace + nonblocking open-item disposition
+  → declare(trace, open_trace)             -- terminal evidence trace + open-item disposition
   → CrystallizedAbstraction
 requires: in_process(A)                    -- runtime checkpoint (Phase 0)
 deficit:  AbstractionInProcess              -- activation precondition (Layer 1/2)
@@ -55,8 +56,10 @@ OpenDisposition ∈ {None, Nonblocking, Deferred}
                  None        = no open calibration pressure remains; explicitly declared
                  Nonblocking = open item remains visible but does not block Confirm
                  Deferred    = user routes an open item to later work via free response
-OpenTrace      = { status: OpenDisposition, items: Map(String, OpenDisposition) }
+OpenItemDisposition ∈ {Nonblocking, Deferred}
+OpenTrace      = { status: OpenDisposition, items: Map(String, OpenItemDisposition) }
                  -- terminal disposition for K.open; empty open sets declare status None
+status(OpenTrace) = None if K.open = ∅; Deferred if ∃ item : items(item) = Deferred; otherwise Nonblocking
 P              = CandidateAbstraction { name, structure, instance_map, provenance }
 G              = GroundingExample { scenario: String, domain: String, mapping: String }
                                                              -- personalized to user's own domain context
@@ -69,7 +72,7 @@ V              = UserMove ∈ {Confirm, Widen(direction), Narrow(specializer), F
 Qs             = Shaping interaction with candidate + grounding [Tool: Constitution interaction]
 crystallized(A) = ∃ step ∈ history : V(step) = Confirm
 CompletionTrace = List<(A, K, P, V, candidate')>
-                 -- abstraction seed → calibration → candidate → user_move → candidate' evidence at convergence
+                 -- derived from Λ.history with A sourced from Λ.A and candidate' computed from each step's post-move candidate state
 CrystallizedAbstraction = P where confirmed(P) via Confirm move ∧ completion_trace_declared(CompletionTrace) ∧ open_disposition_declared(OpenTrace)
 
 ── A-BINDING ──
@@ -90,7 +93,7 @@ Phase 3: V → integrate(V, candidate) → candidate'                          -
 
 ── LOOP ──
 After Phase 3: evaluate user move.
-If V = Confirm: crystallize(candidate), terminate.
+If V = Confirm: crystallize(candidate), Λ.completion_trace := derive(Λ.history, Λ.A, candidate'), Λ.open_trace := derive(K.open, V, free_response), declare(Λ.completion_trace, Λ.open_trace), terminate.
 If V = Widen(direction): candidate' = widened(candidate, direction) via Synagoge → return to Phase 2.
 If V = Narrow(specializer): candidate' = narrowed(candidate, specializer) via Diairesis → return to Phase 2.
 If V = Fuse(adjacent): candidate' = fused(candidate, adjacent) via lateral Synagoge → return to Phase 1 (grounding recomputed).
@@ -98,10 +101,10 @@ If V = Reorient(axis): candidate' = orthogonal(axis) → return to Phase 1 (full
 If V = Dismiss: abandon candidate; if essence still sensed, return to Phase 1 with fresh candidate; else deactivate.
 Max 5 triangulation attempts per abstraction seed.
 Continue until: crystallized(A) ∨ user_esc ∨ attempts_exhausted.
-Convergence evidence: At crystallized(A), present transformation trace — for each step ∈ history, show (calibration → candidate → user_move → candidate') — plus OpenTrace for K.open: None when K.open is empty, Nonblocking when open items remain visible but do not block Confirm, and Deferred when the user routes an open item to later work via free response. Convergence is demonstrated, not asserted.
+Convergence evidence: At crystallized(A), present transformation trace — for each step ∈ history, show (calibration → candidate → user_move → candidate') — plus OpenTrace for K.open. OpenTrace status is None when K.open is empty, Deferred when any open item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-crystallized(A): see TYPES (V = Confirm in history; CompletionTrace and OpenTrace declared at convergence)
+crystallized(A): see TYPES (V = Confirm in history)
 progress(Λ) = |history| / max_attempts
 early_exit = user_esc ∨ attempts_exhausted
 
@@ -117,6 +120,7 @@ converge           (extension)   → TextPresent+Proceed (convergence evidence t
 Λ = { phase: Phase, A: AbstractionSeed, Iᵢ: Set(Instance), E: EssenceIntuition,
       calibration: Option(K), candidate: Option(P), grounding: Option(G),
       history: List<(P, G, K, V)>, attempts: Nat, crystallized: Option(P),
+      completion_trace: Option(CompletionTrace),
       open_trace: Option(OpenTrace),
       active: Bool, cause_tag: String }
 
@@ -283,7 +287,11 @@ When Phase 1 surfaces no adjacent candidates, omit the Fuse option — dead sign
 
 After user response:
 
-1. **Confirm**: Record `crystallized(P)` in Λ, derive `OpenTrace` from `K.open` and the existing user move, terminate with convergence evidence trace.
+1. **Confirm**: Record `crystallized(P)` in Λ, derive `CompletionTrace` from `Λ.history` with `A` sourced from `Λ.A` and `candidate'` computed from the post-move candidate state, derive `OpenTrace` from `K.open` and the Confirm response, assign both traces in Λ, terminate with convergence evidence trace.
+   - If `K.open = ∅`: `OpenTrace.status = None`, `OpenTrace.items = ∅`.
+   - If `K.open ≠ ∅` and the Confirm response has no explicit deferral signal for an open item: every open item defaults to `Nonblocking`, and `OpenTrace.status = Nonblocking`.
+   - If the Confirm response explicitly names or unambiguously points to an open item with deferral markers such as "defer", "later", "next", or "come back to": classify that item as `Deferred`; all other open items default to `Nonblocking`; `OpenTrace.status = Deferred` if any item is Deferred.
+   - Ambiguous or unnamed deferral text does not classify an item as Deferred; the item remains `Nonblocking` unless the response instead routes the candidate through an existing shaping move.
 2. **Widen(direction)**: Apply Synagoge — for `direction = upward`, generalize the candidate's scope; for `direction = lateral`, broaden sibling coverage. Return to Phase 2 with widened candidate (grounding may persist).
 3. **Narrow(specializer)**: Apply Diairesis — constrain the candidate along the specified dimension, excluding instances that fall outside. Return to Phase 2 with narrowed candidate.
 4. **Fuse(adjacent)**: Lateral Synagoge — merge candidate with named adjacent abstraction. Return to Phase 1 (grounding must be recomputed for fused structure).
@@ -334,7 +342,7 @@ After integration:
 12. **Cross-protocol awareness**: Defer to Analogia when a pre-existing abstract structure needs validation against a target.
 13. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields violates this separation.
 14. **Convergence evidence**: At crystallization, present transformation trace — for each step in history, show (calibration → candidate → user_move → candidate'). Per-step evidence is required.
-14a. **Open residual disposition**: `K.open` is not erased by Confirm. At convergence, declare `OpenTrace`: `None` for an empty open set, `Nonblocking` for open items the user confirms as not blocking crystallization, and `Deferred` for open items the user routes to later work through free response. This is terminal trace metadata, not a separate user gate.
+14a. **Open residual disposition**: `K.open` persists at convergence as `OpenTrace`: `None` for an empty open set, `Nonblocking` for open items that remain visible without blocking crystallization, and `Deferred` for open items explicitly routed to later work through free response. Bare Confirm defaults every open item to `Nonblocking`; explicit deferral requires an open-item name or unambiguous open-item reference adjacent to deferral language. `OpenTrace.status` aggregates item dispositions as `Deferred` when any item is Deferred, `Nonblocking` when all items are Nonblocking, and `None` only when `K.open = ∅`. This is terminal trace metadata, not a separate user gate.
 15. **Absorb Analogia misfit**: When `/ground` Phase 0 detects colimit-shaped input (`essence_sensed` + `locator_absent(A)`) and nudges here, absorb the misfit as valid Periagoge trigger. Before Phase 1, surface the routing rationale with the cited `/ground` detection basis ("colimit-shaped input detected: essence_sensed(A), locator_absent(A), [N supporting instances] — redirecting to abstraction crystallization") so the user can recognize the evidence that justified the redirect; the concrete instance count makes the routing rationale verifiable rather than vague.
 16. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant move (option-level entropy → 0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options. **Exception**: The Confirm/Dismiss pair is excluded from the entire preceding test (Extension resolution, cost-symmetric collapse, and off-axis pathway demotion) — user crystallization judgment is constitutive regardless of AI analysis entropy. Phase 2 remains Constitution even when only one shaping move appears analytically viable.
 17. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option like "Widen" into a concrete direction or pairing "Confirm" with "Use this" while preserving the UserMove coproduct) is distinct from mutation.
