@@ -19,3 +19,5 @@ docs/audit-delta-*.md
 # under .claire/worktrees/{branch}/{plugin}/{skill}-workspace/iteration-N/.
 # Regenerated on every eval run; never commit.
 .claire/
+
+.codex/
