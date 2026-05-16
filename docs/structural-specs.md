@@ -145,6 +145,7 @@ Reference shapes:
 
 ```
 ResidualDisposition ∈ {None, Declared, Deferred, Dismissed, Routed, Bounded}
+  -- closed disposition signal; each constructor has distinct downstream handling semantics
 
 ResidualUnknown = {
   item: String,
@@ -156,6 +157,7 @@ ResidualUnknown = {
 MorphismCompletionTrace<D, R> =
   List(D instance → PhaseOperation → ResolutionEvidence)
 
+-- Carrier shape for materializing the predicate contract above.
 DeficitResolved<D, R> = {
   result: R,
   trace: MorphismCompletionTrace<D, R>,
