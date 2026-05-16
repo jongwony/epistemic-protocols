@@ -19,3 +19,7 @@ docs/audit-delta-*.md
 # under .claire/worktrees/{branch}/{plugin}/{skill}-workspace/iteration-N/.
 # Regenerated on every eval run; never commit.
 .claire/
+
+# Codex runtime/eval workspace — local agent state and generated artifacts.
+# Machine-local and regenerable; never commit.
+.codex/
