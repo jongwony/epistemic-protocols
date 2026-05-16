@@ -225,22 +225,35 @@ jobs:
             </review>
 
             For each review finding that references a specific file path and line number,
-            post it as an inline PR review comment. Use jq to construct JSON and pipe via --input -
-            to avoid shell escaping issues:
+            post it as an inline PR review comment. Write Markdown bodies through a
+            single-quoted heredoc and load them with jq --rawfile; do not place Markdown
+            review text inside a double-quoted shell argument, because backticks in
+            Markdown trigger shell command substitution:
 
-            jq -n --arg body "<comment body>" --arg path "<file path>" \
+            body_file="$(mktemp)"
+            cat > "$body_file" <<'COMMENT_BODY_EOF'
+            <comment body>
+            COMMENT_BODY_EOF
+            jq -n --rawfile body "$body_file" --arg path "<file path>" \
               --arg commit_id "${{ steps.pr.outputs.sha }}" \
               --argjson line <line number> \
               '{body: $body, path: $path, commit_id: $commit_id, line: $line}' \
             | gh api repos/${{ github.repository }}/pulls/${{ steps.pr.outputs.number }}/comments --input -
+            rm -f "$body_file"
 
             Rules:
             - jq output MUST be a JSON object {}, never an array []
+            - Never pass Markdown review text via `--arg body "<...>"`
             - Only post findings whose line numbers appear in the PR diff
             - If a finding references a line outside the diff, include it in the summary comment instead
             - Preserve tags: [Category Theory], [Type Theory], [OpSem], [Gap: Type]
             - Preserve severity: Critical / Important / Suggestion
             - Skip duplicate or near-duplicate findings
             - Always post a summary comment at the end (even if inline comments were posted):
-              jq -n --arg body "<overview summary>" '{body: $body}' \
+              summary_file="$(mktemp)"
+              cat > "$summary_file" <<'SUMMARY_BODY_EOF'
+              <overview summary>
+              SUMMARY_BODY_EOF
+              jq -n --rawfile body "$summary_file" '{body: $body}' \
               | gh api repos/${{ github.repository }}/issues/${{ steps.pr.outputs.number }}/comments --input -
+              rm -f "$summary_file"
