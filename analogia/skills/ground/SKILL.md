@@ -13,14 +13,15 @@ Validate structural mapping between abstract and concrete domains through AI-gui
 
 ```
 ── FLOW ──
-Analogia(R) → Detect(R) → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → I(M, Sₜ) → V → R' → (loop until terminalized)
+Analogia(R) → Detect(R) → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → AssessFit(M, Sₐ, Sₜ) → I(M, F, Sₜ) → V → R' → (loop until terminalized)
 
 ── MORPHISM ──
 R
   → detect(R, context)                 -- infer mapping uncertainty
   → decompose(abstract, concrete)      -- identify source and target domains
   → construct(mapping, Sₐ→Sₜ)          -- build structural correspondences
-  → instantiate(mapping, target)       -- generate concrete examples
+  → assess_fit(mapping, Sₐ, Sₜ, context) -- sort correspondence adequacy before user validation
+  → instantiate(mapping, fit_map, target) -- generate concrete examples scoped by fit map
   → validate(instantiation, user)      -- user verifies mapping adequacy
   → terminalize(mapping, user)         -- make mapping status explicit in output
   → ValidatedMapping
@@ -39,13 +40,22 @@ Map      = Structure-preserving mapping construction: (Sₐ, Sₜ) → Set(Corre
 M        = Set(Correspondence)                                   -- mapping result
 Correspondence = { abstract: Component, concrete: Component, relation: String }
 Component = { name: String, structure: String }
-I        = Concrete instantiation: M × Sₜ → Example
-Example  = { scenario: String, mapping_trace: List<Correspondence> }
+AssessFit = Correspondence adequacy assessment: M × Sₐ × Sₜ × context → F
+F        = CorrespondenceFitMap { preserved, partial, missing, overextended, open }
+preserved = Set(Correspondence) where target structure preserves source relation
+partial  = Set(Correspondence) where correspondence exists but some structural dimensions lack evidence
+missing  = Set(Component) from Sₐ with no evidenced Sₜ correspondent
+overextended = Set(Correspondence) where source relation adds unsupported target constraints
+open     = Set(StructuralQuestion) where answer could change validation of M
+StructuralQuestion = { structure: Component, reason: String, evidence_needed: String }
+I        = Concrete instantiation: M × F × Sₜ → Example
+Example  = { scenario: String, mapping_trace: List<Correspondence>, fit_basis: F }
 V        = User validation ∈ {Confirm, Adjust(feedback), Dismiss}
 R'       = Updated output with explicit mapping status
 ValidatedMapping = R' where terminalized(R')
-terminalized(R') = all_addressed(R') ∨ user_esc
+terminalized(R') = (all_addressed(R') ∧ fit_disposition_declared(F)) ∨ user_esc
 all_addressed(R') = ∀ c ∈ M : confirmed(c) ∨ dismissed(c)
+fit_disposition_declared(F) = (F.missing ∪ F.open = ∅) ∨ bounded_residual_declared(F.missing ∪ F.open)
 
 ── R-BINDING ──
 bind(R) = explicit_arg ∪ current_output ∪ most_recent_output
@@ -59,8 +69,8 @@ If no relevant text exists: pause activation and request a grounding target befo
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → uncertain?                             -- mapping uncertainty checkpoint (silent)
-Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M               -- domain decomposition + mapping [Tool]
-Phase 2: M → I(M, Sₜ) → Qs(I, progress) → Stop → V             -- instantiation + validation [Tool]
+Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M → AssessFit(M, Sₐ, Sₜ) → F  -- domain decomposition + fit map [Tool]
+Phase 2: (M, F) → I(M, F, Sₜ) → Qs(I, F, progress) → Stop → V  -- instantiation + validation [Tool]
 Phase 3: V → integrate(V, R) → R'                               -- output update (sense)
 
 ── LOOP ──
@@ -70,7 +80,7 @@ If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
 If V = Dismiss: accept this correspondence as unresolved for this session; terminalize if all correspondences addressed.
 Max 3 mapping attempts per domain pair.
 Continue until: terminalized(R') OR attempts exhausted.
-Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.mappings, show (MappingUncertain(c) → validation_result(c)). When any abstract structure was flagged in Phase 1 step 3 as lacking a concrete correspondent in Sₜ, the trace appends a brief invitation for the user to supply the missing Sₜ correspondent if one can be identified — a free response within the existing turn, not a new gate or post-convergence morphism. Convergence is demonstrated, not asserted.
+Convergence evidence: At all_addressed(R'), present transformation trace — for each c ∈ Λ.mappings, show (MappingUncertain(c) → fit_classification(F, c) → validation_result(c)). When F.missing or F.open contains an abstract structure whose answer could change validation, the trace declares it as bounded residual mapping uncertainty and appends a brief invitation for the user to supply the missing Sₜ correspondent if one can be identified — a free response within the existing turn, not a new gate or post-convergence morphism. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 terminalized(R') = all_addressed(R') ∨ user_esc
@@ -90,7 +100,7 @@ converge     (extension)       → TextPresent+Proceed (convergence evidence tra
 Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,
       mappings: Set(Correspondence), confirmed: Set(Correspondence),
       dismissed: Set(Correspondence), remaining: Set(Correspondence),
-      instantiations: List<Example>,
+      fit_map: F, instantiations: List<Example>,
       validations: List<(Example, V)>, attempts: Nat, active: Bool,
       cause_tag: String }
 -- Invariant: mappings = confirmed ∪ dismissed ∪ remaining (pairwise disjoint)
@@ -193,7 +203,10 @@ Decompose abstract and concrete domains, then construct structural correspondenc
    - If correspondence is clear: add to confirmed candidates
    - If structural mismatch detected: flag as uncertain — include evidence
    - If no correspondent exists: flag as gap — the abstract structure may not apply
-4. Proceed to Phase 2 with mapping candidates
+4. **Assess fit** `F`: Sort the correspondence adequacy into preserved, partial, missing, overextended, and open
+   - `open` is limited to structural questions whose answer could change validation of the mapping
+   - Do not include general analogy ideas, background caveats, or future exploration horizons
+5. Proceed to Phase 2 with mapping candidates and fit map
 
 **Web context** (conditional): When source or target domain knowledge exists primarily outside the codebase (external APIs, academic domains, industry standards), extend context collection to web search.
 Web evidence is tagged with `source: "web:{url}"` for traceability.
@@ -204,15 +217,17 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 
 **Present** concrete instantiations for user validation via Cognitive Partnership Move (Constitution).
 
-**Selection criterion**: Choose the correspondence whose validation would maximally narrow the remaining mapping uncertainty. When priority is equal, prefer the correspondence with richer structural evidence.
+**Selection criterion**: Choose the correspondence whose validation would maximally narrow the remaining mapping uncertainty using `F`. Prioritize partial, overextended, missing-adjacent, or open-adjacent correspondences before already-preserved ones. When priority is equal, prefer the correspondence with richer structural evidence.
 
 **Surfacing format**:
 
 Present the mapping details as text output:
 - **Abstract**: [component from Sₐ with structural description]
 - **Concrete**: [proposed correspondence in Sₜ with evidence]
+- **Fit**: [preserved / partial / missing / overextended / open issue, in plain language]
 - **Example**: [concrete scenario demonstrating the mapping]
 - [If structural mismatch detected: flag and explain]
+- [If open issue could change validation: name the missing evidence or user-known fact]
 - **Progress**: [N validated / M total correspondences]
 
 Then **present**:
@@ -230,6 +245,7 @@ Other is always available — user can propose an alternative mapping or describ
 
 **Design principles**:
 - **Structural evidence**: Show what abstract structures are being mapped and why
+- **Fit map before choice**: Show only the correspondence-fit distinctions that matter for the current validation
 - **Concrete instantiation**: Always include at least one concrete example in user's domain
 - **Progress visible**: Display validation progress across all identified correspondences
 - **Actionable options**: Each option leads to a concrete next step
@@ -285,3 +301,4 @@ After integration:
 13. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 14. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 15. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+16. **Protocol-native pressure map**: Phase 1 produces a CorrespondenceFitMap before validation. The map is a pre-gate support object for correspondence adequacy, not a terminal status and not generic calibration. `open` may surface bounded discovery pressure only when the missing evidence could change the user's validation of the current mapping.
