@@ -48,14 +48,17 @@ P' = Updated phantasia (refined understanding)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
 GT = Relevant gap types per entry point ⊆ {Expectation, Causality, Scope, Sequence} ∪ Emergent(E, B)
 Cursor = ContinuationCursor { task: TaskId, entry_point: EntryPoint, aspect: Optional(GapType), resume_target: String }
-BranchArtifact = { kind: String, reference: String, return_pointer: Cursor }
+       -- resume_target is a short user-facing phase label, not a serialized cursor; structural position is task × entry_point × aspect
+BranchKind = {Proposal} ∪ Emergent(BranchKind)
+BranchArtifact = { kind: BranchKind, reference: TaskId, return_pointer: Cursor }
 ContinuationClosure = { verified: String, status: String, branch: Optional(BranchArtifact), return_pointer: Cursor, next_moves: List<String> }
                      -- relay metadata after evaluated answers or side-branch ejection; not a new gate
+C(·) = emit ContinuationClosure (relay; → TextPresent+Proceed)
 
 ── PHASE TRANSITIONS ──
 Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E  -- intent orientation (silent)
 Phase 1: E → Qc(intent entry points) → Stop → Sₑ       -- entry point selection; default single, ordered multi when user names 2+ concerns [Tool]
-Phase 2: Sₑ → Materialize(Sₑ, R) → B → TaskCreate[selected] → Tᵣ  -- task registration [Tool]
+Phase 2: Sₑ → Materialize(Sₑ, R) → B → TaskCreate[selected] → Tᵣ  -- task registration; initialize Λ.cursor from first current task, entry point, and active aspect before Phase 3 [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → P → Δ  -- comprehension check [Tool]
        → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Emergent [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
@@ -73,6 +76,7 @@ If correct: emit continuation closure, then Aspect summary — show probed vs un
   User selects "sufficient" → TaskUpdate completed, next pending task.
   User selects additional aspect → Resume with selected gap type.
   User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, emit side-branch continuation closure, resume current loop position.
+Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
 Continue until: all selected tasks completed OR user ESC.
 Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
 
@@ -111,7 +115,6 @@ converge    (extension)  → TextPresent+Proceed (convergence evidence trace; pr
   current: TaskId,
   cursor: ContinuationCursor,
   branchArtifacts: List<BranchArtifact>,
-  closure: Option(ContinuationClosure),
   phantasia: Understanding,
   detected: Map<TaskId, Set<GapType>>,
   probed: Map<TaskId, Set<GapType>>,
@@ -343,7 +346,7 @@ For each task (entry point):
        activeForm: "Archiving user proposal"
      })
      ```
-   - Append the created proposal to `Λ.branchArtifacts` with `return_pointer = Λ.cursor`.
+   - Append the created proposal to `Λ.branchArtifacts` with `kind = Proposal`, `reference = TaskId` returned by `TaskCreate[Proposal]`, and `return_pointer = Λ.cursor`.
    - Emit a continuation closure before resuming: side branch recorded, Katalepsis remains active, return pointer = current entry point/aspect, next move = resume the current comprehension check.
    - Return to comprehension loop immediately.
 
@@ -435,10 +438,10 @@ For each task (entry point):
 5. **Code grounding**: Reference specific code locations
 6. **User authority**: User's "I understand" is final
 7. **Proposal ejection**: When user answer `A` drifts from comprehension toward knowledge capture (suggesting changes/improvements to the system), acknowledge briefly, call TaskCreate to externalize the proposal, record only a branch reference for continuation, and return to verification. This preserves user-generated insights without converting the proposal into a comprehension task.
-7a. **Continuation cursor after side branches**: Proposal ejection and follow-up task creation do not close Katalepsis. After any side branch, emit a compact continuation closure: what was recorded, parent entry point/aspect, return pointer, and next comprehension move. Store the branch artifact outside the comprehension task set, but keep `Λ.cursor` visible enough for the user to recognize where verification resumes.
+7a. **Continuation cursor after side branches**: Proposal ejection and follow-up task creation do not close Katalepsis. After any side branch, emit a compact continuation closure: what was recorded, parent entry point/aspect, return pointer, and next comprehension move. Store the branch artifact outside the comprehension task set, but keep `Λ.cursor` visible enough for the user to recognize where verification resumes. Update `Λ.cursor` before every closure emission so the return pointer reflects the live resumption point.
 8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **Convergence evidence**: Present transformation trace before declaring all tasks completed; per-task evidence is required
-9a. **Post-answer closure**: After a correct answer or sufficient understanding signal, do not stop at bare acknowledgment. Emit verified aspect, current task status, and next available moves before coverage routing or task completion. This is relay metadata: it keeps the active loop legible without adding a new user gate.
+9a. **Post-answer closure**: Always emit verified aspect, current task status, and next available moves after a correct answer or sufficient understanding signal, before coverage routing or task completion. This is relay metadata: it keeps the active loop legible without adding a new user gate.
 10. **Zero-gap surfacing**: If Phase 3 analysis finds no comprehension gaps for an entry point, present this finding with reasoning for user confirmation before marking as self-evident
 11. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 12. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
