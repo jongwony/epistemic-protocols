@@ -13,12 +13,13 @@ Detect application-context mismatch after execution through AI-guided applicabil
 
 ```
 ── FLOW ──
-Epharmoge(R, X) → Eval(R, X) → Mᵢ? → Register(Mᵢ) → Q(Mᵢ[0]) → A → R' → Eval(R', X) → Mₑ? → (loop until contextualized)
+Epharmoge(R, X) → Eval(R, X) → Mᵢ? → AssessFit(R, X, Mᵢ) → F → Register(Mᵢ) → Q(F-scoped Mᵢ[0]) → A → R' → Eval(R', X) → Mₑ? → (loop until contextualized)
 
 ── MORPHISM ──
 (R, X)
   → evaluate(result, context)          -- detect applicability mismatch
-  → surface(mismatch, as_inquiry)      -- present mismatch with evidence
+  → assess_fit(result, context, mismatches) -- sort applicability fit before user judgment
+  → surface(fit_scoped_mismatch, as_inquiry) -- present mismatch with fit basis and evidence
   → adapt(result, direction)           -- adapt result to context
   → ContextualizedExecution
 requires: mismatch_detected(R, X)       -- runtime checkpoint (Phase 0)
@@ -35,23 +36,35 @@ Mismatch = { aspect: String, dimension: Dimension, description: String, evidence
 Dimension ∈ {Convention, Environment, Audience, Dependency} ∪ Emergent(Dimension)
 Origin ∈ {Initial, Emerged(aspect)}                            -- mismatch provenance: initial scan or spawned by adapting parent aspect
 Severity ∈ {Critical, Significant, Minor}                      -- Significant requires demonstrable behavioral impact (current-session task graph / downstream protocol activations); see Rule 17
+AssessFit = Applicability fit assessment: R × X × Set(Mismatch) → F
+F      = ApplicabilityFitMap { fits, conflicts, depends, adaptation_options, open }
+fits   = Set(AspectFit) where aspect(R) is warranted in X
+AspectFit = { aspect: String, evidence: String }
+conflicts = Set(Mismatch) where evidence shows result behavior or meaning conflicts with X
+depends = Set(ContextCondition) where fitness hinges on an observable but unverified condition that could change adaptation or dismissal
+ContextCondition = { condition: String, evidence: String, consequence: String }
+adaptation_options = Set(AdaptationOption) where each option is tied to a conflict or dependency
+AdaptationOption = { target: Mismatch ∪ ContextCondition, direction: String, effect: String }
+open   = Set(ApplicabilityQuestion) where the answer could materially change the next adaptation judgment
+ApplicabilityQuestion = { condition: String, reason: String, evidence_needed: String }
 Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial
 Mₑ     = Newly emerged mismatches from Eval(R', X)             -- origin = Emerged(adapted_aspect)
 Register = Mᵢ → Set(Task) [Tool: TaskCreate]                  -- mismatch registration as tracked tasks
-Q      = Applicability inquiry (gate interaction)
+Q      = Applicability inquiry over F-scoped mismatch (gate interaction)
 A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}
 R'     = Adapted result (contextualized output)
 ContextualizedExecution = R' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
-Phase 0: R → Eval(R, X) → Mᵢ?                                  -- applicability checkpoint (silent)
-Phase 1: Mᵢ → TaskCreate[all mismatches] → Qc(Mᵢ[0], evidence) → Stop → A  -- register all, surface first [Tool]
-Phase 2: A → adapt(A, R) → R' → TaskUpdate → Eval(R', X) → Mₑ? -- adaptation + update + re-scan [Tool]
+Phase 0: R → Eval(R, X) → Mᵢ? → AssessFit(R, X, Mᵢ) → F        -- applicability checkpoint + fit map (silent)
+Phase 1: (Mᵢ, F) → TaskCreate[all mismatches] → Qc(F-scoped Mᵢ[0], evidence) → Stop → A  -- register all mismatches, surface first with fit basis [Tool]
+Phase 2: A → adapt(A, R) → R' → TaskUpdate → Eval(R', X) → Mₑ? → AssessFit(R', X, Mₑ) → F' -- adaptation + update + re-scan [Tool]
 
 ── LOOP ──
 After Phase 2: re-scan R' against X for remaining AND newly emerged mismatches.
-If new mismatches from adaptation (Mₑ): TaskCreate → add to queue.
-If remaining non-empty: return to Phase 1 (next by severity).
+Recompute F over remaining and newly emerged mismatches before selecting the next surfaced mismatch.
+If new mismatches from adaptation (Mₑ): TaskCreate → add to queue when Mₑ ∈ F'.conflicts.
+If remaining non-empty: return to Phase 1 (next by severity, then fit-map relevance).
 If adjudicated(R', X): all tasks completed → convergence.
 User can exit at Phase 1 (early_exit option or Esc).
 Continue until: contextualized(R') OR user ESC.
@@ -70,6 +83,7 @@ progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress whe
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Eval   (sense)   → Internal analysis (no external tool)
+AssessFit (sense) → Internal analysis (no external tool)
 Qc     (constitution)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (transform) → Edit, Write (result adaptation based on user direction)
                     -- (transform): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
@@ -78,7 +92,7 @@ converge (extension)  → TextPresent+Proceed (convergence evidence trace; proce
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
-      state: Σ, active: Bool, cause_tag: String }
+      fit_map: F, state: Σ, active: Bool, cause_tag: String }
 Σ = { history: List<(Mismatch, A)>, scan_count: Nat }
 
 ── COMPOSITION ──
@@ -208,12 +222,15 @@ Evaluate result against application context. This phase is **silent** — no use
 
 1. **Scan result** `R` against context `X`: environment state, conventions, use case scope, temporal validity, user constraints
 2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)
-3. If all aspects warranted: present finding per Rule 14 before concluding (Epharmoge not activated)
-4. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity (per Rule 17 — behavioral-impact qualifier assessed against current-session task graph), `origin=Initial` — proceed to Phase 1
+3. **Assess fit**: Build `ApplicabilityFitMap` from warranted aspects, conflicts, dependencies, adaptation options, and bounded open questions
+4. If all aspects warranted: present finding per Rule 14 before concluding (Epharmoge not activated)
+5. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity (per Rule 17 — behavioral-impact qualifier assessed against current-session task graph), `origin=Initial`, and fit-map placement — proceed to Phase 1
 
 **Information source**: The result `R` itself compared against observable context `X`. NOT a re-scan of pre-execution context (non-circularity with Aitesis).
 
 **Scan scope**: Completed result, observable context (structure, conventions, constraints), session context. Does NOT re-execute or modify files.
+
+**Fit-map scope**: The map is pre-gate support for mismatch selection and adaptation direction. It may surface bounded open conditions only when the answer could change whether the result should be adapted or accepted as-is.
 
 ### Phase 1: Mismatch Surfacing
 
@@ -236,6 +253,7 @@ Present the mismatch findings as text output:
 - Done. One thing to verify about applicability:
   - **Mismatch**: [Specific mismatch description]
   - **Evidence**: [what in the result and what in the context diverge]
+  - **Fit basis**: [what already fits, what conflicts or depends, and any open condition that could change this adaptation decision]
   - **Progress**: [N completed / M total tasks] (M may increase on re-scan)
 
 Then **present**:
@@ -271,7 +289,8 @@ After user response:
 
 After adaptation — **re-scan**:
 - Re-evaluate `R'` against `X` for remaining AND **newly emerged** mismatches
-- If new mismatches (`Mₑ`) from adaptation: TaskCreate with `origin=Emerged(adapted_aspect)` → add to queue
+- Recompute `ApplicabilityFitMap` before selecting the next mismatch
+- If new mismatches (`Mₑ`) from adaptation: TaskCreate with `origin=Emerged(adapted_aspect)` when fit-map placement shows conflict → add to queue
 - If remaining tasks non-empty: return to Phase 1 (surface next mismatch by severity)
 - If all tasks completed: execution complete with contextualized result
 - Log `(Mismatch, A)` to `Σ.history`, increment `Σ.scan_count`
@@ -298,6 +317,7 @@ After adaptation — **re-scan**:
 | Mismatch cap | One mismatch per Phase 1 cycle, severity order | Prevents post-execution question overload |
 | Session immunity | Dismissed (aspect, description) → skip for session | Respects user's dismissal |
 | Progress visibility | Task list renders `[N addressed / M total]` in Phase 1 | User sees progress; total may grow on re-scan |
+| Fit-map cap | `depends`/`open` only when observable evidence could change adaptation or dismissal | Prevents broad contextual caveat lists |
 | Early exit | User can dismiss all at any Phase 1 | Full control over review depth |
 | Cross-protocol cooldown | `suppress(Epharmoge) if Aitesis.resolved_in_same_scope ∧ overlap(Aitesis.domains, Epharmoge.aspects)` | Prevents same-scope pre+post stacking |
 | Cooldown scope | Cooldown applies within recommendation chains only; direct `/contextualize` invocation is never suppressed | User authority preserved |
@@ -324,3 +344,5 @@ After adaptation — **re-scan**:
 17. **Significant requires demonstrable behavioral impact**: Severity = Significant requires that the mismatch produces a demonstrable behavioral consequence — downstream-decision impact, runtime divergence, gate-trajectory change. Structural-change extent (line count, file count, scope size) alone is insufficient grounds — categorize as Minor when behavioral impact is undemonstrated. This guards against false-positive gating arising from conflation of structural-change extent with applicability impact, where Rule 15 (Option-set relay test) would otherwise apply only ex post via user challenge
 18. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 19. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+20. **Applicability fit map is support only**: Use `ApplicabilityFitMap` to scope which mismatch is surfaced and which adaptation direction is practical. Do not present it as a separate gate, terminal object, or replacement for `ContextualizedExecution`.
+21. **Bounded discovery pressure**: `depends` and `open` entries require observable evidence plus a direct path to changing the user's next adaptation judgment. General caveats, interesting context, or future-session possibilities are omitted from the fit map.
