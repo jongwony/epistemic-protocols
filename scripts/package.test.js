@@ -8,7 +8,7 @@
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { execFileSync } = require('node:child_process');
+const { execFileSync, spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -483,6 +483,62 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('anamnesis Codex session scan', () => {
+  it('wires packaged hooks through the public Anamnesis proxy', () => {
+    const hooksConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'anamnesis', 'hooks', 'hooks.json'), 'utf8'));
+
+    assert.equal(
+      hooksConfig.hooks.SessionEnd[0].hooks[0].command,
+      'node "${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs" hook write',
+    );
+    assert.equal(
+      hooksConfig.hooks.PreCompact[0].hooks[0].command,
+      'node "${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs" hook write',
+    );
+    assert.equal(
+      hooksConfig.hooks.SubagentStop[0].hooks[0].command,
+      'node "${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs" hook subagent',
+    );
+  });
+
+  it('dispatches Claude hook write payloads to the hypomnesis writer', () => {
+    const payload = {
+      session_id: '11111111-1111-4111-8111-111111111111',
+      transcript_path: '/tmp/.claude/projects/example/session.jsonl',
+      hook_event_name: 'UnexpectedEvent',
+    };
+
+    const result = spawnSync(process.execPath, [
+      path.join(__dirname, '..', 'anamnesis', 'scripts', 'anamnesis.mjs'),
+      'hook',
+      'write',
+    ], {
+      encoding: 'utf8',
+      input: JSON.stringify(payload) + '\n',
+    });
+
+    assert.equal(result.status, 0);
+    assert.match(result.stderr, /\[hypomnesis-write\] unrecognized hook_event_name/);
+  });
+
+  it('dispatches Claude subagent hook payloads to the subagent capture script', () => {
+    const payload = {
+      session_id: '11111111-1111-4111-8111-111111111111',
+      transcript_path: '/tmp/.claude/projects/example/session.jsonl',
+    };
+
+    const result = spawnSync(process.execPath, [
+      path.join(__dirname, '..', 'anamnesis', 'scripts', 'anamnesis.mjs'),
+      'hook',
+      'subagent',
+    ], {
+      encoding: 'utf8',
+      input: JSON.stringify(payload) + '\n',
+    });
+
+    assert.equal(result.status, 0);
+    assert.match(result.stderr, /\[hypomnesis-subagent-hook\] agent_type field absent/);
+  });
+
   it('finds Codex rollout JSONL in live and archived folder layouts', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-scan-'));
     const liveId = '11111111-1111-4111-8111-111111111111';
