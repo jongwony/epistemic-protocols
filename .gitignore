@@ -20,4 +20,6 @@ docs/audit-delta-*.md
 # Regenerated on every eval run; never commit.
 .claire/
 
+# Codex runtime/eval workspace — local agent state and generated artifacts.
+# Machine-local and regenerable; never commit.
 .codex/

@@ -54,6 +54,8 @@ BranchArtifact = { kind: BranchKind, reference: TaskId, return_pointer: Cursor }
 ContinuationClosure = { verified: String, status: String, branch: Optional(BranchArtifact), return_pointer: Cursor, next_moves: List<String> }
                      -- relay metadata after evaluated answers or side-branch ejection; not a new gate
 C(·) = emit ContinuationClosure (relay; → TextPresent+Proceed)
+DeactivationCondition = { all_tasks_completed, user_esc, user_cancel }
+TerminalShape = { phase1_entry_selection, phase3_verification_probe, coverage_routing, deactivation(DeactivationCondition) }
 
 ── PHASE TRANSITIONS ──
 Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E  -- intent orientation (silent)
@@ -67,6 +69,9 @@ Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → P → Δ  -- c
        → Read(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
        → C(correct) if correct(A)                         -- verified-aspect continuation closure [Tool]
        → Qc(coverage) → Stop if correct(A)               -- aspect summary [Tool]
+       → converge → Λ.active := false if Katalepsis       -- convergence evidence is terminal; no downstream gate required
+       → deactivate(user_esc | user_cancel) → Λ.active := false
+Turn boundary invariant: While `Λ.active = true` at turn end, the last user-facing shape must be a TerminalShape. Relay metadata `C(·)` may precede a terminal shape, but cannot be the sole final shape while active. The `converge` emission is `deactivation(all_tasks_completed)`, sets `Λ.active := false`, and is terminal without an additional gate.
 
 ── LOOP ──
 After Phase 3 verification: Evaluate comprehension per gap type.
@@ -84,6 +89,7 @@ Convergence evidence: At all-tasks-completed, present transformation trace — f
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
 VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc
+Deactivation: `all_tasks_completed` after convergence evidence, `user_esc`, and `user_cancel` each set `Λ.active := false`. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -442,7 +448,7 @@ For each task (entry point):
 8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **Convergence evidence**: Present transformation trace before declaring all tasks completed; per-task evidence is required
 9a. **Post-answer closure**: Always emit verified aspect, current task status, and next available moves after a correct answer or sufficient understanding signal, before coverage routing or task completion. This is relay metadata: it keeps the active loop legible without adding a new user gate.
-9b. **Active-turn fail-closed**: While `Λ.active = true`, never terminate a turn as explanation-only. Every active invocation must end in one protocol-owned continuation shape: Phase 1 entry-point selection, Phase 3 verification probe, coverage routing after a correct or sufficient understanding signal, or an explicit deactivation condition. Plain summaries, file references, and context may ground these shapes, but they cannot be the final shape by themselves; this enforces existing Stop, coverage, and deactivation points without adding a user gate or changing `VerifiedUnderstanding`.
+9b. **Active-turn fail-closed**: While `Λ.active = true` at turn end, every response must end in one protocol-owned TerminalShape: Phase 1 entry-point selection, Phase 3 verification probe, coverage routing after a correct or sufficient understanding signal, or deactivation by `all_tasks_completed`, `user_esc`, or `user_cancel`. Plain summaries, file references, context, and relay metadata may ground these shapes, but they cannot be the final shape by themselves while active. This enforces existing Stop, coverage, and deactivation points without adding a user gate or changing `VerifiedUnderstanding`.
 10. **Zero-gap surfacing**: If Phase 3 analysis finds no comprehension gaps for an entry point, present this finding with reasoning for user confirmation before marking as self-evident
 11. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 12. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
