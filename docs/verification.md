@@ -30,6 +30,17 @@ node .claude/skills/verify/scripts/static-checks.js .
 20. **workflow-paths-sync**: Verifies `.github/workflows/claude-epistemic-review.yml` `on.pull_request.paths` declares every protocol plugin directory (derived from `PROTOCOL_FILES`). Prevents new protocols from silently missing the multi-perspective epistemic review trigger (Issue #258 pattern: `anamnesis/` and `periagoge/` omitted at workflow inception). Utility plugin `epistemic-cooperative/` is intentionally out of scope. Repair: add the missing `- '<plugin>/**'` entry under `paths`
 21. **language-purity**: Surfaces Korean characters (Hangul syllable block U+AC00–U+D7A3) in project text files at warn-level under a Stage 1 surface posture. Detection uses charCode range comparison so the verifier file remains self-pure under its own check. Whitelist preserves intentional Korean regions: `**/README_ko.md`, `**/README.md` (English README + Korean localization link), `.claude/skills/release/**`, `src/**` (landing-page i18n), `**/docs/` and root `docs/` (repo and per-plugin documentation), `**/references/` (plugin contributor references), `**/graph.json` (`satisfies` field is Korean by project convention), `design/**`, `examples/**`, `.claude/rules/editing-conventions.md`. Promotion from warn to fail is gated on Stage 2 retention evidence accumulating across multiple PRs and contributors
 
+## Review Criteria Not Yet Static Failures
+
+Use these checks during protocol edits and reviews. Do not promote them to static failure until a pilot protocol shows the criterion is stable with low false positives.
+
+- Canonical resolution names stay protocol-native; they should implement `DeficitResolved<D, R>` rather than be renamed to it.
+- Resolution definitions expose a completion trace: the terminal type should make the path from deficit through phase operations to resolution inspectable.
+- Residual unknowns are declared with disposition. Empty residuals must be explicitly declared; silent absence is not enough.
+- `ConstitutionSurface<T>` is a typed pre-gate surface before `Qc` or `Qs`, not a replacement for `Constitution`, `Extension`, `Qc`, or `Qs`.
+- Pressure maps must be protocol-native and decision-relevant. Discovery pressure is limited to bounded residual unknowns that could materially change the next user judgment.
+- These checks compile invariants only: do not freeze horizon content, philosophical lens choice, or broad exploratory context into runtime/static requirements.
+
 ## Packaging Transformations
 
 `scripts/package.js` applies non-trivial transforms when building release ZIPs:
