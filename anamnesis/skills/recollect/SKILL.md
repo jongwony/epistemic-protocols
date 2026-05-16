@@ -128,8 +128,8 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 --   Codex SSOT_codex        ↦ ~/.codex/sessions/**/rollout-*.jsonl ∪ ~/.codex/archived_sessions/rollout-*.jsonl (session JSONL, append-only)
 --   Codex INDEX_codex       ↦ ~/.codex/session_index.jsonl                                   (thread title + updated_at index)
 --   Codex HISTORY_codex     ↦ ~/.codex/history.jsonl                                         (prompt history index-lite)
---   Codex HOOK_LOG_codex    ↦ ~/.codex/logs/hooks.log                                        (hook archive: session_id, transcript_path, cwd, hook_event_name)
---   Anamnesis proxy         ↦ scripts/anamnesis.mjs scan codex                               (read-only schema adapter over Codex SSOT ∪ INDEX)
+--   Codex HOOK_LOG_codex    ↦ ~/.codex/logs/hooks.log                                        (hook archive written by scripts/anamnesis.mjs hook write)
+--   Anamnesis proxy         ↦ scripts/anamnesis.mjs hook write ∪ scan codex                  (Codex hook archive writer + read-only schema adapter)
 --   Claude slug-partitioned: prevents cwd-scattered INDEX; cross-cwd /recollect reaches one canonical location
 -- Candidate source binding:
 --   Claude: `Candidate.session_id` ← INDEX entry frontmatter `session_id`; `Candidate.cwd` ← INDEX entry frontmatter `cwd`; `Candidate.runtime` ← "claude"

@@ -485,6 +485,7 @@ describe('generate-changelog.js CLI', () => {
 describe('anamnesis Codex session scan', () => {
   it('wires packaged hooks through the public Anamnesis proxy', () => {
     const hooksConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'anamnesis', 'hooks', 'hooks.json'), 'utf8'));
+    const codexEvents = ['SessionStart', 'UserPromptSubmit', 'PreToolUse', 'PermissionRequest', 'PostToolUse', 'Stop'];
 
     assert.equal(
       hooksConfig.hooks.SessionEnd[0].hooks[0].command,
@@ -498,6 +499,12 @@ describe('anamnesis Codex session scan', () => {
       hooksConfig.hooks.SubagentStop[0].hooks[0].command,
       'node "${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs" hook subagent',
     );
+    for (const event of codexEvents) {
+      assert.equal(
+        hooksConfig.hooks[event][0].hooks[0].command,
+        'node "${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs" hook write',
+      );
+    }
   });
 
   it('dispatches Claude hook write payloads to the hypomnesis writer', () => {
@@ -615,7 +622,8 @@ describe('anamnesis Codex session scan', () => {
     assert.ok(result.candidates.some((candidate) => candidate.hook_events.includes('PreToolUse')));
   });
 
-  it('dispatches Codex hook payloads without invoking the Claude writer', () => {
+  it('records Codex hook payloads to the Codex hook archive', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-hook-log-'));
     const payload = {
       timestamp: '2026-05-16T09:00:00+09:00',
       event: 'PreToolUse',
@@ -636,9 +644,20 @@ describe('anamnesis Codex session scan', () => {
       'write',
     ], {
       encoding: 'utf8',
+      env: { ...process.env, ANAMNESIS_CODEX_HOME: tmp },
       input: JSON.stringify(payload) + '\n',
     });
     assert.equal(output, '');
+
+    const records = fs.readFileSync(path.join(tmp, 'logs', 'hooks.log'), 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+    assert.equal(records.length, 1);
+    assert.equal(records[0].event, 'PreToolUse');
+    assert.equal(records[0].session_id, payload.session_id);
+    assert.equal(records[0].transcript_path, payload.transcript_path);
+    assert.deepEqual(records[0].tool_input, payload.tool_input);
   });
 });
 

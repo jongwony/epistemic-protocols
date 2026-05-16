@@ -7,6 +7,7 @@
  */
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -58,15 +59,35 @@ function runNodeScript(relativeScript, args = [], input = "") {
   process.exit(result.status ?? 0);
 }
 
+function codexHome() {
+  return process.env.ANAMNESIS_CODEX_HOME ||
+    process.env.CODEX_HOME ||
+    path.join(os.homedir(), ".codex");
+}
+
+function writeCodexHookLog(payload) {
+  try {
+    const event = payload.event ?? payload.hook_event_name ?? "Unknown";
+    const record = {
+      timestamp: new Date().toISOString(),
+      event,
+      ...payload,
+    };
+    const logPath = path.join(codexHome(), "logs", "hooks.log");
+    fs.mkdirSync(path.dirname(logPath), { recursive: true });
+    fs.appendFileSync(logPath, JSON.stringify(record) + "\n", "utf8");
+  } catch {
+    // Hook execution is observational. Recording failure must not block Codex.
+  }
+}
+
 function hookWrite() {
   const raw = readStdin();
   const payload = parseJson(raw);
   const runtime = detectRuntime(payload);
 
   if (runtime === "codex") {
-    // Codex recall currently reads authoritative rollout JSONL plus
-    // session_index/history/hooks.log directly. No writer is required on hook
-    // lifecycle events, and hook execution must remain fast and fail-open.
+    writeCodexHookLog(payload);
     process.exit(0);
   }
 
@@ -77,7 +98,10 @@ function hookSubagent() {
   const raw = readStdin();
   const payload = parseJson(raw);
   const runtime = detectRuntime(payload);
-  if (runtime === "codex") process.exit(0);
+  if (runtime === "codex") {
+    writeCodexHookLog(payload);
+    process.exit(0);
+  }
   runNodeScript("hypomnesis-subagent-hook.mjs", [], raw);
 }
 
