@@ -19,7 +19,7 @@ Achieve certain comprehension of AI work through structured verification, enabli
 Result
   → orient(result, user_signal)        -- infer likely comprehension intents from AI work and user's wording
   → derive_entries(intent)             -- transform inferred intent into high-scent entry points
-  → assess_route(intents, entries, R, U, context) -- sort entry-point adequacy before user selection
+  → assess_route(intents, entries, R, U, context) -- annotate entry-point adequacy before user selection
   → select(intent_entry_point, route_map) -- user chooses the closest intent-scented entry point
   → materialize(artifact_basis)        -- derive concrete artifact anchors for the chosen intent
   → register(tasks)                   -- track selected entry points as tasks
@@ -36,17 +36,17 @@ R  = AI's result (the work output)
 U  = User signal about what feels ungrasped; may be ∅ on bare `/grasp`
 I  = ComprehensionIntent inferred from R and U; I ∈ {Orientation, Rationale, Impact, Approval, Transfer} ∪ Emergent
 E  = Intent-scented entry points derived from I
-Context = Observable comprehension context from R, U, and session context
+Context = Preprocessed observable comprehension context from R, U, and session context; used alongside raw R/U for different-grain route assessment
 AssessRoute = Entry-point adequacy assessment: I × E × R × U × Context → Fᵣ
 Fᵣ = ComprehensionRouteMap { likely_intent, entry_point, artifact_anchor, cheapest_probe, hidden_route, open }
 likely_intent = Map<EntryPoint, ComprehensionIntent>          -- inferred intent each entry point serves
-entry_point = Set(EntryPoint) carrying sufficient information scent for selection
-artifact_anchor = Map<EntryPoint, ArtifactBasis hint>          -- grounding anchor, not yet materialized
+entry_point = E                                                -- re-exposed; no filtering, creation, or suppression
+artifact_anchor = Map<EntryPoint, ArtifactBasis>                -- grounding anchor hint, not yet materialized
 cheapest_probe = Map<EntryPoint, ProbeTarget>                  -- lowest-cost aspect that would most reduce comprehension uncertainty
-hidden_route = Set(EntryPoint) derivable from R that U did not name -- comprehension routes outside the user's stated signal
+hidden_route ⊆ entry_point                                     -- routes derivable from R that U did not name; anchors remain available
 open = Set(RouteQuestion) where the answer could change which entry point the user selects
 RouteQuestion = { route: EntryPoint, reason: String, signal_needed: String }
-ProbeTarget = aspect or component to probe -- opacity-preserving: names the probe target, never the expected answer or reasoning path
+ProbeTarget = { focus: String, artifact_scope: Optional<String> } -- opacity-preserving: names the probe target, never the expected answer or reasoning path
 Sₑ = List<EntryPoint>; singleton by default, ordered list when user names multiple distinct concerns
 B  = ArtifactBasis materialized from selected entry point(s)
 Tᵣ = Task registration for tracking
@@ -70,8 +70,8 @@ DeactivationCondition = { all_tasks_completed, user_esc, user_cancel }
 TerminalShape = { phase1_entry_selection, phase3_verification_probe, coverage_routing, deactivation(DeactivationCondition) }
 
 ── PHASE TRANSITIONS ──
-Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E → AssessRoute(I, E, R, U) → Fᵣ  -- intent orientation + route map (silent)
-Phase 1: (E, Fᵣ) → Qc(intent entry points scoped by Fᵣ) → Stop → Sₑ       -- entry point selection; default single, ordered multi when user names 2+ concerns [Tool]
+Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E → AssessRoute(I, E, R, U, Context) → Fᵣ  -- intent orientation + route map (silent)
+Phase 1: Fᵣ → Present(entry_point enriched by route-adequacy metadata; hidden_route + open when non-empty) → Qc(intent entry points) → Stop → Sₑ       -- entry point selection; default single, ordered multi when user names 2+ concerns [Tool]
 Phase 2: Sₑ → Materialize(Sₑ, R) → B → TaskCreate[selected] → Tᵣ  -- task registration; initialize Λ.cursor from first current task, entry point, and active aspect before Phase 3 [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → P → Δ  -- comprehension check [Tool]
        → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Emergent [Tool]
@@ -107,7 +107,8 @@ Deactivation: `all_tasks_completed` after convergence evidence, `user_esc`, and 
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Orient (observe) → Internal analysis (Read for context if needed)
 Phase 0 AssessRoute (observe) → Internal analysis (entry-point adequacy; opacity-preserving — exposes selection scent, never probe answers)
-Phase 1 Qc  (constitution)   → present (entry point selection)
+Phase 1 Emit (extension) → TextPresent+Proceed (entry-point-fit distinctions, hidden routes, and bounded open questions from Fᵣ; omitted when empty)
+Phase 1 Qc  (constitution)   → present (entry point selection enriched by Fᵣ)
 Phase 2 B   (observe) → Internal analysis (artifact basis materialization)
 Phase 2 Tᵣ  (track)   → TaskCreate (entry point tracking)
 Phase 3 detect (sense) → Internal analysis (gap type relevance detection per entry point)
@@ -140,6 +141,7 @@ converge    (extension)  → TextPresent+Proceed (convergence evidence trace; pr
   probed: Map<TaskId, Set<GapType>>,
   active: Bool
 }
+State invariant: Λ.entryPoints = List(Λ.routeMap.entry_point); Λ.selected ⊆ Λ.routeMap.entry_point; every selected entry point has an artifact anchor in Λ.routeMap.artifact_anchor before Phase 2 materialization.
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
@@ -251,10 +253,11 @@ Analyze the AI work result and the user's signal to infer likely comprehension i
 2. **Read user signal**: Extract the user's named concern, uncertainty, or desired use of the result; if absent, mark `U = ∅` and continue from result shape
 3. **Infer intents**: Generate 2-3 high-scent entry points using Entry Point Taxonomy
 4. **Prepare basis hints**: Keep artifact categories as hidden grounding for each entry point
-5. **Assess route** `Fᵣ`: Sort the derived entry points into a ComprehensionRouteMap — likely intent, entry point, artifact anchor, cheapest probe target, hidden routes the signal did not name, and bounded open questions
+5. **Assess route** `Fᵣ`: Annotate the derived entry points with a ComprehensionRouteMap — likely intent, unchanged entry point set, artifact anchor hint, cheapest probe target, hidden-route marker, and bounded open questions
    - `cheapest_probe` names the probe target only; it never reveals the expected answer or reasoning path (Socratic opacity)
-   - `hidden_route` surfaces comprehension routes derivable from `R` that the user's signal did not name
+   - `hidden_route` marks entry points derivable from `R` that the user's signal did not name; because `hidden_route ⊆ entry_point`, selected hidden routes use the same artifact-anchor materialization path as other entries
    - `open` is limited to route questions whose answer could change which entry point the user selects; exclude general explanation ideas, background caveats, or future exploration horizons
+   - If `open = ∅`, no bounded route question is emitted; Phase 1 proceeds with entry-point selection enriched only by available route metadata
 
 **Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 entry point prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. v2+ Katalepsis records are treated as entry-point evidence. v1 category-based records are weak hints only; do not directly map `Category` to `ComprehensionIntent`. This heuristic may bias detection toward previously observed patterns, but Phase 1 user selection remains constitutive.
 
@@ -282,7 +285,7 @@ The user may also state the entry point in their own words; treat that response 
 - Show max 3 entry points in the first question
 - Labels name user intent or outcome, not artifact taxonomy
 - Descriptions carry information scent: what this path will make clear and why it matters
-- **Route map before choice**: Show only the entry-point-fit distinctions from `Fᵣ` that matter for the current selection; surface hidden routes and bounded open questions without revealing probe answers
+- **Route map before choice**: Present the `entry_point` option set enriched by `Fᵣ` route metadata; surface hidden routes and bounded open questions only when non-empty, without filtering options or revealing probe answers
 - Artifact basis may appear in surrounding context, not as the primary option label
 - If the initial user signal or Phase 1 freeform response names 2+ distinct concerns, enable multi-select in a follow-up question or register the named concerns directly as an ordered task list
 
@@ -472,4 +475,4 @@ For each task (entry point):
 11. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 12. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 13. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
-14. **Protocol-native route map**: Phase 0 produces a ComprehensionRouteMap before entry-point selection. The map is a pre-gate support object for entry-point adequacy, not a terminal status and not generic calibration. It classifies derived entry points; it does not create, suppress, or terminalize entry-point tasks, and `VerifiedUnderstanding` is unchanged. `hidden_route` surfaces comprehension routes the user did not name; `open` carries bounded discovery pressure only when the unknown could change which entry point the user selects. Socratic opacity is preserved — the map exposes why an entry point is useful, never the expected answer or reasoning path.
+14. **Protocol-native route map**: Phase 0 produces a ComprehensionRouteMap before entry-point selection. The map is a pre-gate support object for entry-point adequacy, not a terminal status and not generic calibration. It annotates derived entry points; it does not create, filter, suppress, or terminalize entry-point tasks, and `VerifiedUnderstanding` is unchanged. `hidden_route` marks entries the user did not name while preserving their artifact anchors; `open` carries bounded discovery pressure only when the unknown could change which entry point the user selects. Socratic opacity is preserved — the map exposes why an entry point is useful, never the expected answer or reasoning path.
