@@ -485,7 +485,6 @@ describe('generate-changelog.js CLI', () => {
 describe('anamnesis Codex session scan', () => {
   it('wires packaged hooks through the public Anamnesis proxy', () => {
     const hooksConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'anamnesis', 'hooks', 'hooks.json'), 'utf8'));
-    const codexEvents = ['SessionStart', 'UserPromptSubmit', 'PreToolUse', 'PermissionRequest', 'PostToolUse', 'Stop'];
 
     assert.equal(
       hooksConfig.hooks.SessionEnd[0].hooks[0].command,
@@ -499,12 +498,10 @@ describe('anamnesis Codex session scan', () => {
       hooksConfig.hooks.SubagentStop[0].hooks[0].command,
       'node "${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs" hook subagent',
     );
-    for (const event of codexEvents) {
-      assert.equal(
-        hooksConfig.hooks[event][0].hooks[0].command,
-        'node "${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs" hook write',
-      );
-    }
+    assert.deepEqual(
+      Object.keys(hooksConfig.hooks).sort(),
+      ['PreCompact', 'SessionEnd', 'SubagentStop'].sort(),
+    );
   });
 
   it('dispatches Claude hook write payloads to the hypomnesis writer', () => {
@@ -622,20 +619,18 @@ describe('anamnesis Codex session scan', () => {
     assert.ok(result.candidates.some((candidate) => candidate.hook_events.includes('PreToolUse')));
   });
 
-  it('records Codex hook payloads to the Codex hook archive', () => {
+  it('records Codex SessionEnd hook payloads to the Codex hook archive', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-hook-log-'));
     const payload = {
       timestamp: '2026-05-16T09:00:00+09:00',
-      event: 'PreToolUse',
+      event: 'SessionEnd',
       session_id: '11111111-1111-4111-8111-111111111111',
-      turn_id: '33333333-3333-4333-8333-333333333333',
       transcript_path: '/tmp/.codex/sessions/2026/05/16/rollout-2026-05-16T00-00-00-11111111-1111-4111-8111-111111111111.jsonl',
       cwd: '/repo/epistemic-protocols',
-      hook_event_name: 'PreToolUse',
+      hook_event_name: 'SessionEnd',
       model: 'gpt-5.5',
       permission_mode: 'bypassPermissions',
-      tool_name: 'Bash',
-      tool_input: { command: 'true' },
+      reason: 'other',
     };
 
     const output = execFileSync(process.execPath, [
@@ -654,10 +649,10 @@ describe('anamnesis Codex session scan', () => {
       .split('\n')
       .map((line) => JSON.parse(line));
     assert.equal(records.length, 1);
-    assert.equal(records[0].event, 'PreToolUse');
+    assert.equal(records[0].event, 'SessionEnd');
     assert.equal(records[0].session_id, payload.session_id);
     assert.equal(records[0].transcript_path, payload.transcript_path);
-    assert.deepEqual(records[0].tool_input, payload.tool_input);
+    assert.equal(records[0].reason, payload.reason);
   });
 });
 
