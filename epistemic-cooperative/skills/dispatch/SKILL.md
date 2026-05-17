@@ -12,10 +12,10 @@ Execute work units that have already been focused by `/triage` or supplied as ex
 ## Pipeline Overview
 
 ```
-                                                      ┌→ INSCRIBE  (Phase 5 — rejected branch)
+                                                      ┌→ INSCRIBE  (Phase 6 — rejected branch)
 DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK
  (silent) (gated)     (no intake)     (per-unit) (route topology)
-                                                      └→ COMPLY    (Phase 6 — compliant branch)
+                                                      └→ COMPLY    (Phase 7 — compliant branch)
 ```
 
 Phase 1 (BOUND) composes `/bound` for execution topology. Phase 2 loads the focused work units already present in session text. Phase 3 verifies each unit's premise before branch creation. Phase 4 executes the selected topology: linear sequence or parallel fanout. Phase 5 routes per PR; rejected and compliant branches are independent siblings dispatched from feedback classification.
@@ -235,7 +235,7 @@ Composition is sequential — each phase consumes the previous phase's output. P
 - **Out-of-scope expansion in Phase 7**: applying a "while you're here" review suggestion in the compliance loop. The suggestion belongs in a new issue.
 - **Effort cap omission**: deferring work units silently when cap is hit, leaving the queue state implicit. The next session has to re-derive the unattempted set.
 - **Skipping premise verification**: jumping from work-unit loading to branch creation without verifying that each unit's premise still holds in current code. This produces stale work or silent axis selection on multi-approach units.
-- **Substrate-uncited framing in commit/PR body**: assertions of necessity, intentionality, or constraint inserted into commit messages or PR descriptions without cited substrate evidence (file:line, rule reference, codebase precedent). Framing decisions must derive from cited substrate recorded in Phase 4 Step 0's PremiseTrace; assertion-only framing is a Step 0 substrate-trace gap symptom that surfaces in Phase 5 review or as user challenge requiring axis pivot. Operational test: for every assertion of necessity, intentionality, or constraint in the commit/PR text, the writer can point to a specific substrate citation that renders the assertion self-evident — if no such citation exists, the assertion is unfounded framing.
+- **Substrate-uncited framing in commit/PR body**: assertions of necessity, intentionality, or constraint inserted into commit messages or PR descriptions without cited substrate evidence (file:line, rule reference, codebase precedent). Framing decisions must derive from cited substrate recorded in Phase 3's PremiseTrace; assertion-only framing is a substrate-trace gap symptom that surfaces in Phase 5 review or as user challenge requiring axis pivot. Operational test: for every assertion of necessity, intentionality, or constraint in the commit/PR text, the writer can point to a specific substrate citation that renders the assertion self-evident — if no such citation exists, the assertion is unfounded framing.
 
 ## Operational checklist (per cycle)
 

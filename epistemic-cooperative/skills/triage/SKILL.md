@@ -179,12 +179,41 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 
 ## Rules
 
-1. **RawIssueSet scope**: Use `RawIssueSet`, not broad external-signal language, for the issue substrate. The concrete input is GitHub issues or pasted issue equivalents.
-2. **Work-unit formation, not execution**: `/triage` does not edit production files, create implementation branches, open PRs, or apply fixes.
-3. **IssueGroup default cardinality**: Default to `IssueGroup -> FocusedWorkUnit` one-to-one. Split only with cited execution-axis evidence.
-4. **Northstar fusion required**: Every ready work unit includes a fusion trace against the active project northstar. A summary without fusion is not a triaged work unit.
-5. **Session route authority**: Route choice belongs to the user in the current session. GitHub labels or project fields may record the choice but do not replace it.
-6. **InitialPrompt is the handoff artifact**: Dispatch and independent sessions consume initial prompts or focused work units, not raw issue lists.
-7. **No silent grouping**: Surface grouping candidates before forming work units. Similarity grouping is a user-recognized judgment, not a hidden classifier result.
-8. **Preserve issue provenance**: Every problem frame, work unit, and prompt cites the source issue numbers that contributed to it.
-9. **Blocked work stays visible**: If an issue group is blocked, stale, or needs-info, emit that as a work-unit disposition or re-triage note rather than dropping it.
+1. **RawIssueSet scope** (Architectural — substrate boundary): Use `RawIssueSet`, not broad external-signal language, for the issue substrate. The concrete input is GitHub issues or pasted issue equivalents.
+2. **Work-unit formation, not execution** (Architectural — role boundary): `/triage` does not edit production files, create implementation branches, open PRs, or apply fixes.
+3. **IssueGroup default cardinality** (Architectural — review-surface visibility): Default to `IssueGroup -> FocusedWorkUnit` one-to-one. Split only with cited execution-axis evidence.
+4. **Northstar fusion required** (Axiom anchor — Convergence Persistence): Every ready work unit includes a fusion trace against the active project northstar. A summary without fusion is not a triaged work unit.
+5. **Session route authority** (Axiom anchor — Detection with Authority): Route choice belongs to the user in the current session. GitHub labels or project fields may record the choice but do not replace it.
+6. **InitialPrompt is the handoff artifact** (Architectural — handoff specificity): Dispatch and independent sessions consume initial prompts or focused work units, not raw issue lists.
+7. **No silent grouping** (Derived — Surfacing over Deciding): Surface grouping candidates before forming work units. Similarity grouping is a user-recognized judgment, not a hidden classifier result.
+8. **Preserve issue provenance** (Architectural — provenance continuity): Every problem frame, work unit, and prompt cites the source issue numbers that contributed to it.
+9. **Blocked work stays visible** (Derived — Surfacing over Deciding): If an issue group is blocked, stale, or needs-info, emit that as a work-unit disposition or re-triage note rather than dropping it.
+
+## Distinction from Other Protocols
+
+| Protocol / Skill | Distinction |
+|---|---|
+| Dispatch `/dispatch` | Triage forms work units from raw issues and emits initial prompts. Dispatch consumes those prompts and executes the selected topology; it does not redo intake. |
+| Realign `/realign` | Realign inscribes or updates the project guide's direction line. Triage reads the current northstar and fuses issue groups against it; it does not rewrite the guide. |
+| Anamnesis `/recollect` | Recollect may enrich triage with prior session context before issue grouping. Triage uses recalled context only when it is surfaced in the current session. |
+| Periagoge `/induce` | Induce crystallizes an abstraction from converging instances. Triage applies the already-recognized work-unit abstraction to concrete GitHub issue substrate. |
+
+## Anti-patterns
+
+- **Scanning the entire backlog by default**: issue scope must be supplied, recoverable from session context, or requested from the user.
+- **Label-only grouping**: labels can seed grouping, but the work unit must be formed by shared problem pressure and cited issue evidence.
+- **Northstar-free summary**: a raw issue summary without preserved/transformed/dropped claims is not a triaged work unit.
+- **Dispatch leakage**: branch creation, file edits, PR creation, and review compliance belong to `/dispatch` or a normal execution session, not `/triage`.
+- **Silent split or merge**: changing work-unit cardinality without surfacing the grouping rationale hides the decision the user must recognize.
+- **Prompt as issue dump**: an initial prompt must state scope, exclusions, execution entry point, and verification expectations; it is not a pasted issue list.
+
+## Operational checklist (per cycle)
+
+- [ ] Phase 0 issue scope is explicit or requested from the user
+- [ ] Phase 1 RawIssueSet includes issue numbers and relevant comments / links / blockers
+- [ ] Phase 2 grouping map surfaced before work-unit formation
+- [ ] Phase 3 NormalizedProblemFrame records evidence, conflicts, missing context, and exclusions
+- [ ] Phase 4 NorthstarFusion records preserved / transformed / dropped claims
+- [ ] Phase 5 FocusedWorkUnit readiness and split rationale are explicit
+- [ ] Phase 6 InitialPrompt includes scope, out-of-scope clauses, execution instructions, and verification
+- [ ] Phase 7 route choice is selected by the user before dispatch handoff
