@@ -1,12 +1,12 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-Protocol learning, usage analysis, coverage dashboard, and configuration for Claude Code.
+Protocol learning, usage analysis, coverage dashboard, work-unit triage, and dispatch orchestration for Claude Code and Codex.
 
 > [한국어](./README_ko.md)
 
 ## What is Epistemic Cooperative?
 
-A utility plugin for epistemic protocol onboarding and analytics. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, and tracking usage across sessions.
+A utility plugin for epistemic protocol onboarding, analytics, and work orchestration. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, tracking usage across sessions, forming focused work units from issues, and dispatching selected work units into execution.
 
 ### Skills
 
@@ -17,6 +17,8 @@ A utility plugin for epistemic protocol onboarding and analytics. Unlike protoco
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | Protocol handbook — instant reference | Terminal-based protocol browser |
 | `/compose` | Protocol composition authoring | Generated composition SKILL.md file |
+| `/triage` | Work-unit triage from GitHub issues | Dispatchable initial prompts |
+| `/dispatch` | Focused work-unit execution | Branches, PRs, feedback inscriptions |
 
 ## Skills
 
@@ -122,6 +124,33 @@ Key features:
 - Catch-chain invariant verification
 - `/review`-pattern template output with pipeline context rules
 
+### /triage — Work-Unit Formation
+
+Groups a scoped GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and emits dispatchable initial prompts.
+
+```
+RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → INITIAL PROMPT → ROUTE
+```
+
+Key features:
+- similarity grouping by problem pressure rather than labels alone
+- `IssueGroup -> FocusedWorkUnit` one-to-one by default, with split only when the northstar fusion exposes distinct execution axes
+- route choice belongs to the current session: independent session, linear `/dispatch`, parallel `/dispatch`, or re-triage
+
+### /dispatch — Focused Work-Unit Execution
+
+Consumes focused work units or initial prompts from `/triage`, sets an execution topology contract with `/bound`, verifies each unit's premise, fans out branches/PRs, then loads review feedback and inscribes rejection traces into linked issues.
+
+```
+DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK
+```
+
+Key features:
+- no open-issue intake inside dispatch; route backlog discovery to `/triage`
+- premise verification before branch creation
+- linear or parallel fanout over selected work units
+- verbatim rejection feedback inscription for fresh-context continuity
+
 ## Architecture
 
 ```
@@ -132,7 +161,9 @@ epistemic-cooperative/
 │   ├── report/SKILL.md           # /report Growth Map
 │   ├── dashboard/SKILL.md        # /dashboard coverage dashboard
 │   ├── catalog/SKILL.md          # /catalog protocol handbook
-│   └── compose/SKILL.md          # /compose protocol composition authoring
+│   ├── compose/SKILL.md          # /compose protocol composition authoring
+│   ├── triage/SKILL.md           # /triage work-unit formation
+│   └── dispatch/SKILL.md         # /dispatch focused work-unit execution
 └── agents/
     ├── project-scanner.md         # Phase 1: project discovery
     ├── session-analyzer.md        # Phase 2: pattern extraction (parallel per project)
@@ -158,6 +189,8 @@ epistemic-cooperative/
 | Tracking protocol adoption over time | `/dashboard` |
 | Quick protocol reference | `/catalog` |
 | Building a multi-protocol composition workflow | `/compose` |
+| Turning related GitHub issues into focused work units | `/triage` |
+| Executing selected focused work units | `/dispatch` |
 
 ## Install
 
@@ -174,6 +207,8 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /dashboard
 /catalog
 /compose clarify → goal → bound → inquire
+/triage #41 #52 #60
+/dispatch <initial prompt>
 ```
 
 ## Author

@@ -1,24 +1,24 @@
 ---
 name: dispatch
-description: "Delegated parallel issue resolution via /dispatch. User sets a minimal delegation contract (or accepts profile-derived defaults); AI categorizes open issues by project mission/direction (read from the project guide) and evidence-accumulation status (whether substrate-cited locks are satisfied), fans out per-category sub-branches with per-category PRs, then loads review feedback and inscribes rejection traces to the linked issues so a fresh-context next session can re-enter without re-deriving the rejection. Reads the project's profile rule and editing conventions for personalization. Use when the user asks to 'resolve as many open issues as possible', 'process the open backlog', 'work through pending issues', or invokes /dispatch."
+description: "Execute focused work units via /dispatch. Consumes /triage initial prompts, sets topology, verifies premises, fans out branches/PRs, and inscribes rejection traces."
 ---
 
-# Dispatch: Delegated Parallel Issue Resolution
+# Dispatch: Focused Work-Unit Execution
 
-Crystallizes a delegated multi-issue workflow into a categorical-decomposition + per-category-PR pipeline with rejection-feedback inscription. Reads the project's personalization rules at activation; the workflow itself is universal.
+Execute work units that have already been focused by `/triage` or supplied as explicit initial prompts. Dispatch is an orchestration skill for execution topology, branch/PR fanout, verification, review loading, and rejection-trace inscription. It is not the owner of open-issue discovery or similarity grouping.
 
-**This is an orchestration skill, not a single-issue executor.** It composes `/bound` for delegation contract setup, classifies issues by **project mission/direction** (the project's stated direction read from its guide — `northstar` for short) and **evidence-accumulation status** (whether substrate-cited locks like "depends on #X" or "pilot data accumulating" are satisfied), fans out work into per-category sub-branches, then loads PR review feedback and inscribes rejection traces to the linked issues so the next fresh-context session can re-enter without re-deriving the rejection.
+**This is an execution skill, not an intake skill.** `/triage` forms `FocusedWorkUnit`s from `RawIssueSet`s by grouping related issues, fusing them with the `AGENTS.md` northstar in the current Codex session, and emitting dispatchable initial prompts. `/dispatch` consumes those prompts or work units and executes the selected route: independent handoff is outside dispatch, while linear and parallel dispatch are inside dispatch.
 
 ## Pipeline Overview
 
 ```
-                                                     ┌→ INSCRIBE  (Phase 6 — rejected branch)
-DETECT → BOUND → SCAN → CATEGORIZE → FANOUT → FEEDBACK
- (silent) (gated)              (per-cat loop)  (per-PR fork)
-                                                     └→ COMPLY    (Phase 7 — compliant branch)
+                                                      ┌→ INSCRIBE  (Phase 5 — rejected branch)
+DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK
+ (silent) (gated)     (no intake)     (per-unit) (route topology)
+                                                      └→ COMPLY    (Phase 6 — compliant branch)
 ```
 
-Phase 1 (BOUND) composes `/bound`. Phase 2-3 (SCAN, CATEGORIZE) run autonomously with northstar + evidence-accumulation axes. Phase 4 (FANOUT) executes per-category sub-branches sequentially, with each category gated on Step 0 premise verification before branch creation. Phase 5 routes per PR; Phase 6 (rejected branch) and Phase 7 (compliant branch) are independent siblings dispatched from Phase 5, not sequential phases.
+Phase 1 (BOUND) composes `/bound` for execution topology. Phase 2 loads the focused work units already present in session text. Phase 3 verifies each unit's premise before branch creation. Phase 4 executes the selected topology: linear sequence or parallel fanout. Phase 5 routes per PR; rejected and compliant branches are independent siblings dispatched from feedback classification.
 
 ## Personalization sources
 
@@ -27,7 +27,7 @@ Read at activation (semantic, not hardcoded paths):
 | Source | Purpose |
 |---|---|
 | Project profile rule | Extension-default vs Constitution-default; closure clauses for delegation contract |
-| Project guide (CLAUDE.md or equivalent) | Project northstar (mission/direction statement); used as a categorization axis |
+| Project guide (AGENTS.md, CLAUDE.md, or equivalent) | Project northstar (mission/direction statement); used to verify the work unit's fusion trace |
 | Project editing conventions | Branch naming pattern, commit message language, PR body language |
 | Harness rules (system prompt) | Branch restrictions, designated working branch, push policy |
 
@@ -37,24 +37,26 @@ Project-specific values are **read** from the above; the skill itself does not h
 
 Activation cues:
 
-- `/dispatch <scope>` slash command (Layer 1)
-- Multi-issue delegation utterance with open-set referent (Layer 2): "resolve as many open issues as possible", "process the backlog", "work through everything in milestone X"
+- `/dispatch <initial prompt>` slash command (Layer 1)
+- `/dispatch` after `/triage` has emitted one or more `FocusedWorkUnit`s or `InitialPrompt`s in the current session
+- User route choice from `/triage`: "run these linearly", "dispatch these in parallel", "execute work unit A"
 
 Pre-activation check:
 
-- Open issues exist (Phase 2 will surface count)
-- User intent is not single-issue (single-issue routes to direct execution)
-- No in-flight blocking work (uncommitted changes on base branch would conflict with sub-branch fanout)
+- At least one focused work unit or initial prompt is present
+- Route topology is explicit or can be resolved by Phase 1
+- No in-flight blocking work on the base branch would conflict with branch fanout
 
-If pre-activation fails: surface the scan result and invite the user to articulate scope or commit pending work before re-entry.
+If the user asks to process open issues or a backlog without a focused work unit, route to `/triage` first. If the worktree is blocked, surface the conflict and invite the user to commit, stash, or narrow the dispatch scope before re-entry.
 
 ## Phase 1: Bound (compose /bound)
 
 Compose `/bound` for the delegation contract. Domains to bound (minimum set):
 
-- **Issue selection**: User-supplies / AI-proposes / AI-autonomous
-- **PR strategy**: per-category bundle / single PR / per-issue PR
-- **Branch strategy**: single base / per-category sub-branch
+- **Work-unit selection**: User-supplies / AI-proposes from current-session triage output / AI-autonomous within a user-confirmed work-unit set
+- **Execution topology**: single unit / linear sequence / parallel fanout
+- **PR strategy**: per-work-unit PR / grouped PR / single PR
+- **Branch strategy**: single base / per-work-unit sub-branch
 - **Effort cap**: max issues / max time / dynamic-stop
 - **Conflict handling**: skip-with-surface / attempt-with-care
 - **Stage gating compliance**: substrate-cited locks (Out-of-scope clauses, "depends on #X" close-conditions, evidence-accumulation gates)
@@ -63,73 +65,64 @@ If the project's profile declares an Extension-default with a closure clause cov
 
 **Output**: BoundaryMap with at least the six domains above resolved.
 
-## Phase 2: Scan
+## Phase 2: Load Focused Work Units
 
-Enumerate open issues via the available GitHub interface (gh CLI, MCP `list_issues`, or equivalent). For each issue, capture:
+Read the selected `InitialPrompt`s or `FocusedWorkUnit`s from current session context. For each unit, capture:
 
-- `number`, `title`
-- `body` (full — needed for substrate-cited lock detection)
-- `labels`
-- Linked PRs (from cross-references in body or via search)
+- work-unit name
+- included issue numbers
+- normalized problem frame
+- northstar fusion trace
+- explicit out-of-scope claims
+- verification expectations
+- suggested route and rationale
 
-Check each issue body for substrate-cited locks:
+Do not enumerate open issues here. If the selected input only names a GitHub scope without a work-unit frame, stop and route to `/triage`.
 
-- Explicit "Out of scope" sections
-- "depends on #N" (close-condition references)
-- Evidence-accumulation gates ("pilot data accumulating", "evidence-collection modality" awaiting corroboration)
-- Condition-fired clauses (e.g., "Instance N awaiting", "trigger condition not yet observed")
+Check each work unit for substrate-cited locks inherited from triage:
 
-These are not skipped silently — they are **classified** in Phase 3.
+- explicit "Out of scope" sections
+- "depends on #N" close-condition references
+- evidence-accumulation gates
+- stale/superseded notes
+- needs-info or blocked readiness
 
-## Phase 3: Categorize
+These are not skipped silently. They are surfaced in Phase 3 before execution.
 
-Partition the IssueSet by project-northstar + evidence-accumulation alignment:
+## Phase 3: Premise Verification
 
-| Class | Disposition |
-|---|---|
-| **Aligned + actionable** | Substrate-cited locks not active, work scope clear → include |
-| **Substrate-locked** | Explicit "Out of scope" / "depends on #X" / evidence-gate not satisfied → skip with hermeneutic respect (premature attempt would violate the trigger condition the issue itself cited) |
-| **Stale or superseded** | Body assumptions no longer hold (referenced files moved, prerequisite already shipped) → skip with note |
-| **Pilot-data dependent** | Requires accumulated empirical observation → skip (the evidence-accumulation gate hasn't satisfied) |
+For each selected work unit, run a substrate trace before any branch / Edit / Write commences:
 
-For aligned+actionable issues, group into 3-6 categories by **character**. Category names must derive from project-northstar + evidence-accumulation axes — not arbitrary labels.
+- **Existence check**: Read/Grep the cited code locations or runtime surfaces to confirm the surfaced symptom or target still exists in current state.
+- **Fusion check**: Confirm the work unit still fits the `AGENTS.md` northstar trace supplied by `/triage`; if the northstar has changed, stop and request re-triage.
+- **Approach axis check**: when the initial prompt enumerates 2+ approach options, evaluate each option's substrate basis and select via:
+  - **Relay** if a single option dominates by substrate evidence — present the selection with cited basis.
+  - **Constitution gate** if 2+ options remain plausible under different value weightings.
 
-If the categorization is dominant (single clear partition), present it as **relay** with cited basis.
+**Output**: `PremiseTrace` per work unit: existence status, fusion status, axis selection, substrate citations.
 
-If contested (2-3 plausible partitions emerge), surface a **Constitution Qc gate**:
+Work units that fail premise verification do not progress to fanout. Reclassify them as stale, blocked, needs-info, or re-triage-needed with cited reason.
 
-- **Pre-gate text** (Context-Question Separation): list each candidate partition with cited rationale (which northstar axis prioritization → which categorization frame), the issue counts each partition produces, and the per-category-PR fanout pattern that follows.
-- **Gate options**: 2-3 options, one per candidate partition. Each option's label names the partition's organizing principle (the northstar axis emphasized).
-- **Differential future per option**: enumerate what categories + per-category-PR shape result from each option — different category frames produce different review-surface granularity.
-- **Free-response pathway**: user may articulate a partition not enumerated; this routes to re-classification under the user-supplied frame.
+## Phase 4: Fanout
 
-The gate body contains only the option labels with their differential implications; analytical context lives in the pre-gate text.
+Execute according to the bounded topology:
 
-**Output**: CategoryMap with per-category issue list + work-scope summary.
+- **Single unit**: create one branch and one PR unless the boundary contract says otherwise.
+- **Linear sequence**: execute work units one at a time, returning to base after each PR.
+- **Parallel fanout**: create independent per-work-unit branches only when write scopes are disjoint and the active runtime/tool policy authorizes parallel agent work.
 
-## Phase 4: Fanout (per-category execution loop)
+For each executable work unit:
 
-For each category, sequentially:
-
-0. **Premise verification**: For each issue in the category, run substrate trace before any branch / Edit / Write commences:
-   - **Existence check**: Read/Grep the cited code locations to confirm the surfaced symptom still reproduces in current state. If the symptom is no longer present, the issue's premise has drifted — reclassify it as Stale/Superseded (per Phase 3 taxonomy) with surfacing; the category proceeds with the failing issue removed.
-   - **Approach axis check**: when the issue body enumerates 2+ approach options (a/b/c style), evaluate each option's substrate basis (feasibility, codebase precedent, cost) and select via:
-     - **Relay** if a single option dominates by substrate evidence — present the selection with cited basis (file:line, codebase precedent, rule reference)
-     - **Constitution Qc gate** if 2+ options remain plausible under different value weightings — surface the alternatives with differential implications before commit
-   - **Output**: PremiseTrace per issue (existence_status, axis_selection, substrate_citations) — recorded in the PR body's verify summary so reviewer sees the substrate basis, not just the result.
-
-   Premise verification is a Phase 4 entry-gate, not a downstream check. Issues that fail Step 0 do not progress to Step 1; substrate-cited reclassification preserves the issue's visibility while preventing wasted Phase 4 work. If all issues in a category fail Step 0, the category produces no branch — surface a one-line skip record (not silent abandonment) alongside the SkippedSet.
-
-1. **Branch**: create sub-branch from base — `<base>-<category-slug>` or `<base>/<category-slug>` per the project editing-convention pattern
-2. **Execute**: inline work for all issues in the category (Edit, Write, Bash for verify-supporting commands)
+1. **Branch**: create sub-branch from base — `<base>-<work-unit-slug>` or `<base>/<work-unit-slug>` per the project editing-convention pattern
+2. **Execute**: inline work for the work unit (Edit, Write, Bash for verify-supporting commands)
 3. **Verify**: run the project's static check (typically a `node` invocation against `static-checks.js`) — ensure fail count is not increased, no new warns
-4. **Commit**: conventional message per the project editing convention (type + scope + description in the project's commit language); cite issue numbers for `closes` / `fixes`. **Framing assertions in the commit message must cite the substrate basis recorded in PremiseTrace** — phrases asserting necessity, intentionality, or constraint without cited evidence reflect a Step 0 substrate-trace gap.
+4. **Commit**: conventional message per the project editing convention; cite linked issue numbers when the work unit fully resolves them. **Framing assertions in the commit message must cite the substrate basis recorded in PremiseTrace**.
 5. **Push**: `git push -u origin <sub-branch>`
-6. **PR**: create with title + body per project conventions; reference linked issues; include category rationale, verify summary, and **PremiseTrace per actionable issue**.
+6. **PR**: create with title + body per project conventions; include work-unit name, included issues, northstar fusion summary, verify summary, and `PremiseTrace`.
 
-After each PR submission, return to base branch for the next category. Effort cap enforcement: if cap reached mid-fanout, defer remaining categories with explicit dynamic-stop record (not silent abandonment).
+After each PR submission in a linear route, return to base branch for the next work unit. Effort cap enforcement: if cap reached mid-fanout, defer remaining work units with explicit dynamic-stop record.
 
-**Substrate-cited skip surfacing**: For each Phase 3 skip class (substrate-locked / stale / pilot-data), include in the **first PR's body** (or a tracking issue) a brief table of skipped issues + cited reason — preserves the visibility that the dispatch did NOT silently drop them.
+**Substrate-cited skip surfacing**: For each skipped work unit, include a brief table of skipped unit + cited reason in the first PR body or a tracking comment. Dispatch must not silently drop a selected work unit.
 
 ## Phase 5: Feedback (post-PR loading)
 
@@ -183,73 +176,74 @@ Out-of-scope review suggestions are NOT applied here — they are tracked separa
 
 | Trigger | Effect |
 |---|---|
-| All categories executed + feedback inscribed | Return (PRBatch, InscriptionTrace, SkippedSet) — surface summary with merge-ready and rejected-and-inscribed counts |
-| Effort cap reached | Defer remaining categories with explicit dynamic-stop record; surface what remains and why |
+| All work units executed + feedback inscribed | Return (PRBatch, InscriptionTrace, SkippedSet) — surface summary with merge-ready and rejected-and-inscribed counts |
+| Effort cap reached | Defer remaining work units with explicit dynamic-stop record; surface what remains and why |
 | User Esc | Return to normal operation; partial state surfaced |
-| Phase 1 BoundaryMap incomplete (user declines / withdraws contract) | Return (∅, ∅, ∅) with the in-progress contract state surfaced; no scan / fanout commenced |
-| Phase 2 scan returns empty IssueSet | Return (∅, ∅, ∅) with explicit "no open issues in scope" surfacing; not a failure state |
-| All categories rejected post-feedback (merged = 0, rejected > 0) | Return (PRBatch, InscriptionTrace, SkippedSet) with merged = 0 surfaced explicitly; per-PR rejection inscriptions are the substantive output, not failure |
+| Phase 1 BoundaryMap incomplete (user declines / withdraws contract) | Return (∅, ∅, ∅) with the in-progress contract state surfaced; no fanout commenced |
+| Phase 2 finds no focused work unit | Return (∅, ∅, ∅) with explicit route-to-`/triage` surfacing; not a failure state |
+| All PRs rejected post-feedback (merged = 0, rejected > 0) | Return (PRBatch, InscriptionTrace, SkippedSet) with merged = 0 surfaced explicitly; per-PR rejection inscriptions are the substantive output, not failure |
 
 Final summary always includes:
 
 - Merged + auto-closed issues count
 - Compliant-with-fixes PR count + merge-ready status
 - Rejected PR count + linked-issue inscription count
-- Skipped issue count by class (substrate-locked / stale / pilot-data)
-- Deferred categories (effort cap)
+- Skipped work-unit count by class (blocked / stale / needs-info / re-triage-needed)
+- Deferred work units (effort cap)
 
 ## Rules
 
-1. **Boundary contract first** (Detection with Authority anchor): Phase 1 must complete before Phase 2. Categorizing without a delegation contract exercises silent constitutive authority — the categorization axes the AI chooses become unnegotiated authority.
-2. **Substrate-cited skip surfacing** (Derived — Surfacing over Deciding): Skip decisions on substrate-locked issues quote the lock condition verbatim from the issue body (the "Out of scope" sentence, "depends on #X" reference, or evidence-gate clause). Silent skip drops Recognition.
-3. **One PR per category** (Architectural — categorical-decomposition visibility): Each category produces exactly one PR. Bundling categories collapses the categorical-decomposition rationale and obscures per-category review surface.
-4. **Northstar-grounded categorization** (Architectural — alignment-basis visibility): Category names derive from project-northstar + evidence-accumulation axes. Numeric or arbitrary labels obscure the alignment basis and prevent the user from recognizing the partition rationale.
-5. **Inscription verbatim** (Derived — Convergence Evidence): Rejection feedback inscription quotes the review comment in full, not summarized. Paraphrase strips the rejection's specific axiom-violation nuance; without the verbatim trace, a fresh-context next session lacks the background to align on the issue's post-rejection direction and risks re-adopting the same flawed premise — a re-derivation loop. The verbatim quote terminates the loop by preserving the original rejection signal exactly.
-6. **Linked-issue identification** (Cross-protocol — continuity invariant): Phase 6 identifies all linked issues from PR body cite tags and inscribes to each. A single linked issue receiving inscription while a co-linked issue is silently dropped breaks continuity.
-7. **No silent rejection close** (Derived — Loop Continuity under Bounded Regret): Closing a rejected PR without inscription violates cross-session continuity. Inscribe first; close second.
-8. **Effort cap dynamic-stop record** (Derived — Loop Continuity under Bounded Regret): When effort cap forces deferral, record cause + remaining categories explicitly so the next session can resume without re-deriving the queue.
-9. **Out-of-scope feedback non-expansion** (Cross-protocol — scope discipline): Phase 7 applies only minor-fix scope. Out-of-scope review suggestions become new issues or trailing comments — never silent scope expansion.
-10. **Personalization read, not write** (Architectural — personalization boundary): This skill reads the project's profile and editing-convention rules. It does not write to those files. Profile changes belong to `/steer`.
+1. **Boundary contract first** (Detection with Authority anchor): Phase 1 must complete before Phase 2. Executing without topology and work-unit selection boundaries exercises silent constitutive authority.
+2. **No intake inside dispatch**: Dispatch consumes `FocusedWorkUnit`s or `InitialPrompt`s. Open issue discovery, similarity grouping, and northstar fusion belong to `/triage`.
+3. **Substrate-cited skip surfacing** (Derived — Surfacing over Deciding): Skip decisions quote the lock condition or premise failure from the work unit or linked issue substrate. Silent skip drops Recognition.
+4. **One PR per work unit by default** (Architectural — review-surface visibility): Each work unit produces exactly one PR unless the boundary contract explicitly chooses a grouped PR. Bundling unrelated work units obscures the review basis.
+5. **Northstar-fusion carry-through** (Architectural — alignment-basis visibility): PR bodies preserve the work unit's northstar fusion summary. Dispatch does not re-fuse the direction; it verifies that the supplied fusion still fits.
+6. **Inscription verbatim** (Derived — Convergence Evidence): Rejection feedback inscription quotes the review comment in full, not summarized. Paraphrase strips the rejection's specific axiom-violation nuance; without the verbatim trace, a fresh-context next session lacks the background to align on the issue's post-rejection direction and risks re-adopting the same flawed premise — a re-derivation loop. The verbatim quote terminates the loop by preserving the original rejection signal exactly.
+7. **Linked-issue identification** (Cross-protocol — continuity invariant): Phase 6 identifies all linked issues from PR body cite tags and inscribes to each. A single linked issue receiving inscription while a co-linked issue is silently dropped breaks continuity.
+8. **No silent rejection close** (Derived — Loop Continuity under Bounded Regret): Closing a rejected PR without inscription violates cross-session continuity. Inscribe first; close second.
+9. **Effort cap dynamic-stop record** (Derived — Loop Continuity under Bounded Regret): When effort cap forces deferral, record cause + remaining work units explicitly so the next session can resume without re-deriving the queue.
+10. **Out-of-scope feedback non-expansion** (Cross-protocol — scope discipline): Phase 7 applies only minor-fix scope. Out-of-scope review suggestions become new issues or trailing comments — never silent scope expansion.
+11. **Personalization read, not write** (Architectural — personalization boundary): This skill reads the project's profile and editing-convention rules. It does not write to those files. Profile changes belong to `/steer`; northstar re-inscription belongs to `/realign`.
 
 ## Distinction from Other Protocols
 
 | Protocol / Skill | Distinction |
 |---|---|
 | Horismos `/bound` | Composed by Dispatch Phase 1 (delegation contract). Bound handles a single boundary decision. Dispatch composes Bound at the head of a multi-step parallel workflow then drives execution + feedback inscription. |
-| Periagoge `/induce` | Implicitly used in Phase 3 (instance partition into named categories). Dispatch's categorization is bounded by northstar + hermeneutic-cycle axes; the full Periagoge crystallization with widen / narrow / fuse / reorient moves is not invoked. |
+| Triage `/triage` | Forms focused work units from raw GitHub issues through grouping, northstar fusion, and initial-prompt emission. Dispatch consumes those units and does not redo intake. |
+| Periagoge `/induce` | Used upstream to crystallize abstractions such as Work-Unit Triage. Dispatch does not perform abstraction formation; it executes already-focused units. |
 | Anamnesis `/recollect` | Optional Phase 0 enrichment: prior cycle's rejected feedback context can prime current Dispatch. Recall is utterance-bound; Dispatch is delegation-bound. |
 | Compose `/compose` | Compose authors composition SKILL.md files (build-time). Dispatch executes a delegation pipeline (run-time). |
 | Steer `/steer` | Steer rewrites the project's profile rule after detecting calibration drift. Dispatch reads that profile as a personalization source and does not modify it. |
-| Realign `/realign` | Realign rewrites the project guide's direction line via three-horizon fusion (inscribed direction × external signals × user pre-understanding). Dispatch reads that direction line as a categorization axis (the project northstar) and does not modify it. |
+| Realign `/realign` | Realign rewrites the project guide's direction line via three-horizon fusion. Dispatch reads that direction line as the project northstar, verifies supplied work-unit fusion against it, and does not modify it. |
 
 ## Composition
 
 Dispatch composes the following protocols at runtime:
 
 - **Phase 1**: `/bound` (Horismos) — delegation contract
-- **Phase 3**: `/induce` (Periagoge) — implicit, bounded categorization (no separate gate)
 - **Phase 0 enrichment (optional)**: `/recollect` (Anamnesis) — prior rejected feedback context
 
-Composition is sequential — each phase consumes the previous phase's output. Per-category execution within Phase 4 may itself invoke any protocol the per-issue work requires; those compositions are nested under the category's branch context.
+Composition is sequential — each phase consumes the previous phase's output. Per-work-unit execution within Phase 4 may itself invoke any protocol the work requires; those compositions are nested under the work-unit branch context.
 
 ## Anti-patterns
 
-- **Skipping Phase 1**: jumping to issue scan without delegation contract. The categorization axes the AI chooses become silent constitutive authority.
-- **Categorical labels without northstar grounding**: "Group 1 / Group 2" obscures the alignment basis and prevents the user from recognizing the partition rationale.
+- **Skipping Phase 1**: jumping to branch creation without delegation contract. The execution topology becomes silent constitutive authority.
+- **Open backlog intake inside dispatch**: asking dispatch to discover and group open issues. Route to `/triage` first so the user can recognize the work-unit boundary.
 - **Bundling rejected feedback into one summary inscription**: each linked issue receives its own inscription with its own redirection axes. A pooled summary loses per-issue specificity.
 - **Silent rejection close**: closing a rejected PR with only a one-line "frame rejected" comment without redirection inscription. The next session has nothing to enter from.
 - **Out-of-scope expansion in Phase 7**: applying a "while you're here" review suggestion in the compliance loop. The suggestion belongs in a new issue.
-- **Effort cap omission**: deferring categories silently when cap is hit, leaving the queue state implicit. The next session has to re-derive the unattempted set.
-- **Skipping Phase 4 Step 0 (premise verification)**: jumping from Phase 3 categorization to Phase 4 branch creation without verifying that each Aligned+actionable issue's premise still holds in current code. This produces stale-issue Phase 4 work (the symptom is gone but the AI applies a fix anyway) or silent axis selection on multi-approach issues.
+- **Effort cap omission**: deferring work units silently when cap is hit, leaving the queue state implicit. The next session has to re-derive the unattempted set.
+- **Skipping premise verification**: jumping from work-unit loading to branch creation without verifying that each unit's premise still holds in current code. This produces stale work or silent axis selection on multi-approach units.
 - **Substrate-uncited framing in commit/PR body**: assertions of necessity, intentionality, or constraint inserted into commit messages or PR descriptions without cited substrate evidence (file:line, rule reference, codebase precedent). Framing decisions must derive from cited substrate recorded in Phase 4 Step 0's PremiseTrace; assertion-only framing is a Step 0 substrate-trace gap symptom that surfaces in Phase 5 review or as user challenge requiring axis pivot. Operational test: for every assertion of necessity, intentionality, or constraint in the commit/PR text, the writer can point to a specific substrate citation that renders the assertion self-evident — if no such citation exists, the assertion is unfounded framing.
 
 ## Operational checklist (per cycle)
 
 - [ ] Phase 1 BoundaryMap complete (six domains minimum)
-- [ ] Phase 3 CategoryMap surfaces northstar-grounded category names
+- [ ] Phase 2 FocusedWorkUnit set loaded from session triage output or explicit initial prompts
 - [ ] Phase 3 SkippedSet surfaces substrate-cited reasons
-- [ ] Phase 4 Step 0 PremiseTrace recorded per actionable issue (existence check + approach axis selection)
-- [ ] Phase 4 each PR cites the issue + verify result + category rationale + PremiseTrace summary
+- [ ] Phase 3 PremiseTrace recorded per executable work unit (existence check + fusion check + approach axis selection)
+- [ ] Phase 4 each PR cites linked issues + verify result + northstar fusion summary + PremiseTrace summary
 - [ ] Phase 5 each PR's review state classified before Phase 6/7 dispatch
 - [ ] Phase 6 each rejected PR's linked issues received verbatim-quoted inscription
 - [ ] Phase 7 each compliant PR with minor fixes has the fix appended (no new PR)
