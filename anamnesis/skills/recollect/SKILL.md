@@ -56,6 +56,7 @@ MarkerProfile    = { coinage: Set(Token), actor: Set(Entity),
 Store            = SSOT ⊕ INDEX               -- see ── STORE TOPOLOGY ── block
 Scan             = (Store, Track, RecallTrace) → List(Candidate)
 Candidate        = { session_id: Optional(SessionId),
+                     runtime: Optional(String),
                      cwd: Optional(String),
                      topic: String,
                      keywords: Set(String),
@@ -116,20 +117,28 @@ NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (attempts = max ∨ enrichments exhau
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
 ── TOOL GROUNDING ──
--- Realization binding (Claude Code substrate), non-normative w.r.t. protocol essence — see ── SUBSTRATE AGNOSTICISM ──; any substrate satisfying morphism laws realizes Anamnesis.
+-- Realization binding (Claude Code + Codex local substrates), non-normative w.r.t. protocol essence — see ── SUBSTRATE AGNOSTICISM ──; any substrate satisfying morphism laws realizes Anamnesis.
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 -- Store binding:
---   {slug} = dirname(transcript_path) — Claude Code's project partition identifier
---   SSOT             ↦ ~/.claude/projects/{slug}/*.jsonl                                 (session JSONL, append-only)
---   INDEX_semantic   ↦ ~/.claude/projects/{slug}/hypomnesis/{session-id}/                (per-session recall index from SessionEnd/PreCompact)
---   INDEX_substitute ↦ ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl    (substitute channel capture from SubagentStop)
---   memory           ↦ ~/.claude/projects/{slug}/memory/                                 (user-curated insights)
---   slug-partitioned: prevents cwd-scattered INDEX; cross-cwd /recollect reaches one canonical location
--- Candidate source binding: `Candidate.session_id` ← INDEX entry frontmatter `session_id`; `Candidate.cwd` ← INDEX entry frontmatter `cwd` (Optional — absent for entries written before cwd capture was implemented)
+--   Claude {slug} = dirname(transcript_path) — Claude Code's project partition identifier
+--   Claude SSOT             ↦ ~/.claude/projects/{slug}/*.jsonl                                 (session JSONL, append-only)
+--   Claude INDEX_semantic   ↦ ~/.claude/projects/{slug}/hypomnesis/{session-id}/                (per-session recall index from SessionEnd/PreCompact)
+--   Claude INDEX_substitute ↦ ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl    (substitute channel capture from SubagentStop)
+--   Claude memory           ↦ ~/.claude/projects/{slug}/memory/                                 (user-curated insights)
+--   Claude slug-partitioned: prevents cwd-scattered INDEX; cross-cwd /recollect reaches one canonical location
+--   Codex SSOT              ↦ ~/.codex/sessions/**/rollout-*.jsonl and ~/.codex/archived_sessions/**/rollout-*.jsonl
+--   Codex INDEX_lite        ↦ ~/.codex/session_index.jsonl, ~/.codex/history.jsonl, ~/.codex/logs/hooks.log
+--   Codex rule: rollout JSONL is source of truth; INDEX_lite enriches title/prompt/hook metadata only and must not substitute for absent rollout content.
+-- Recall surface binding:
+--   surface ∈ {claude, codex, both}. The selected surface is a search scope, not a current-runtime identity claim.
+--   Claude evidence (`CLAUDE_PROJECT_DIR`, `CLAUDE_ENV_FILE`, `CLAUDE_PLUGIN_ROOT`, or plugin-injected `CODEX_COMPANION_SESSION_ID`) proves Claude store availability; it does not prove the user is recalling Claude work.
+--   `CODEX_COMPANION_SESSION_ID` is Claude companion evidence, not Codex runtime evidence.
+--   If the utterance names or strongly implies a surface, select that surface and disclose it. If the target is ambiguous, ask which recall surface to search: Claude store, Codex store, or both. When surface = both, merge/rank candidates with explicit source labels and do not collapse Claude and Codex session IDs into one namespace.
+-- Candidate source binding: `Candidate.runtime` ← `claude` for Claude store candidates and `codex` for Codex store candidates; `Candidate.session_id` ← Claude INDEX entry frontmatter `session_id` or Codex `session_meta.payload.id`; `Candidate.cwd` ← Claude INDEX entry frontmatter `cwd` or Codex `session_meta.payload.cwd` / `turn_context.payload.cwd` (Optional — absent for entries written before cwd capture was implemented)
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
-Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over SSOT ∪ INDEX)
-Phase 1 Scan_salience (observe)  → Read, Grep, Glob (MarkerProfile match over INDEX; SSOT fallback on degraded_scan)
+Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over SSOT ∪ INDEX; Codex scans rollout JSONL structurally before broad text fallback)
+Phase 1 Scan_salience (observe)  → Read, Grep, Glob (MarkerProfile match over INDEX; SSOT fallback on degraded_scan; Codex uses session title, prompt, cwd, and message text from rollout/index-lite fields)
 Phase 1 Scan_hybrid   (observe)  → union of above
 Phase 1 Rank        (sense)    → Internal analysis (conditional: haiku scoring for large candidate sets)
 Phase 2 Qc          (constitution)     → present (narrative Socratic candidate; mandatory)
@@ -339,22 +348,22 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
 
 1. **Track-dispatched scan strategy**:
    - **entropy track** (`InputType = StructuredIdentifier`): execute `scan_entropy` over `SSOT ∪ INDEX` — literal match on `IdentifierTuple.literal`; precision-thresholded (low-frequency, high-entropy identifiers win). URL path literals, explicit references, citation tokens dominate.
-   - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over `INDEX` (SSOT fallback on degraded_scan) — match against `MarkerProfile` (coinage / actor / temporal / emotional / cognitive / singularity); session context (Σ) supplies ranking signal within this track.
+   - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over `INDEX` (SSOT fallback on degraded_scan) — match against `MarkerProfile` where present, plus Codex title/prompt metadata and rollout session text; session context (Σ) supplies ranking signal within this track.
    - **hybrid track** (`InputType = Mixed`): union of entropy and salience results.
 
-   Tool realization (Claude Code substrate): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING. Track-internal ranking composes track-appropriate signals — entropy track: literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery.
+   Tool realization (Claude Code + Codex local substrates): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING. Resolve the recall surface as a search scope before scanning. Claude-host evidence proves the Claude store is available, but `CODEX_COMPANION_SESSION_ID` remains a Claude-session injection and must not be treated as Codex runtime evidence. If the utterance or session context strongly implies a surface, scan that surface and disclose it; if not, ask whether to search Claude store, Codex store, or both. Codex scanning reads rollout JSONL under live and archived session roots as SSOT, parses session metadata/message rows structurally, and then enriches matching candidates from `session_index.jsonl`, `history.jsonl`, and `logs/hooks.log` when present. When scanning both surfaces, merge/rank candidates with source labels and preserve separate Claude/Codex session-id namespaces. Track-internal ranking composes track-appropriate signals — entropy track: literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile/title/prompt overlap + temporal neighborhood + adjacent vector discovery.
 
 2. **Adaptive behavior based on trace ambiguity**:
-   - **High ambiguity**: Present hypomnesis store overview as orientation text (extension) — surface the store's structure and major topic clusters so the user can orient their recall. This is informational, not a gated interaction; the overview provides context for the subsequent targeted scan.
+   - **High ambiguity**: Present hypomnesis/session-store overview as orientation text (extension) — surface the Claude and Codex store structures and major topic clusters so the user can orient their recall. This is informational, not a gated interaction; the overview provides context for the subsequent targeted scan.
    - **Moderate ambiguity**: Broaden scan scope to include semantic similarity and temporal neighborhood.
    - **Low ambiguity**: Direct targeted scan using the dispatched track.
 
-3. **Rank candidates**: Ranking is track-internal. On the entropy track, precision (low occurrence in corpus) dominates; on the salience track, Σ-match + marker-profile overlap + temporal proximity compose the weight. Each candidate carries:
+3. **Rank candidates**: Ranking is track-internal and surface-aware. On the entropy track, precision (low occurrence in corpus) dominates; on the salience track, Σ-match + marker-profile/title/prompt overlap + temporal proximity compose the weight. Cross-surface ranking must label source and avoid overweighting one substrate merely because its index is denser. Each candidate carries:
    - Its core topic and narrative summary
    - Adjacent topics from the same session or time period
    - Confidence level based on trace alignment
 
-4. If `|C[]| = 0`: NullMatch pathway. Inform user what was searched and not found. Before declaring NullMatch, attempt at least one Socratic probe enrichment. After enrichment attempts exhausted: surface the search scope summary and the accumulated recall trace (keywords, temporal signals, user hints from probing), then offer Aitesis handoff — the recall INDEX (hypomnesis/) may lack the entry (lifecycle gap: SessionEnd did not fire; or pre-store: session predates hypomnesis implementation), but the SSOT (session JSONL) may still contain the information. The accumulated trace from Anamnesis probing becomes context seed for Aitesis to search SSOT directly.
+4. If `|C[]| = 0`: NullMatch pathway. Inform user what was searched and not found. Before declaring NullMatch, attempt at least one Socratic probe enrichment. After enrichment attempts exhausted: surface the search scope summary and the accumulated recall trace (keywords, temporal signals, user hints from probing), then offer Aitesis handoff — the recall INDEX may lack the entry (Claude lifecycle gap: SessionEnd did not fire; pre-store: session predates hypomnesis implementation; Codex: index-lite row absent while rollout JSONL remains available), but the SSOT (session JSONL) may still contain the information. The accumulated trace from Anamnesis probing becomes context seed for Aitesis to search SSOT directly.
 
 **Scope restriction**: Investigation uses Read, Grep, Glob exclusively.
 
@@ -372,8 +381,9 @@ Present the candidate as narrative text — the discussion's story, not just its
 - **Origin**: What prompted the discussion — the question or situation that started it
 - **Direction**: How the discussion developed — what path was taken, what was explored
 - **Outcome**: What was decided, produced, or concluded
-- **Session**: Full session ID for `claude --resume` verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`). Narrative uses short reference; this field provides the resumable identifier.
-- **Resume**: Copy-paste-ready invocation pairing the originating cwd with the session ID — `cd <cwd> && claude --resume <session_id>`. Claude Code resolves the project slug from invocation cwd, so both components are required; emit only the literal command, no narrative wrapper. Omit this field only when `Candidate.cwd` is absent or empty, and surface the omission to the user.
+- **Session**: Full runtime session/thread ID for verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`). Narrative uses short reference; this field provides the resumable identifier.
+- **Runtime**: `claude` for Claude store candidates; `codex` for Codex store candidates.
+- **Resume**: Copy-paste-ready invocation pairing the originating cwd with the session ID. For Claude candidates emit `cd <cwd> && claude --resume <session_id>`; for Codex candidates emit `cd <cwd> && codex resume <session_id>`. Emit only the literal command, no narrative wrapper. Omit this field only when `Candidate.cwd` or `Candidate.session_id` is absent or empty, and surface the omission to the user.
 - **Adjacent**: Other topics discussed nearby in the same time period — for Refine orientation
 - **Progress**: `[attempt N/3, M candidates in scope]`
 
@@ -393,7 +403,7 @@ Other is always available — maps to `Reorient`: user describes a fundamentally
 
 After user response:
 
-1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID for `--resume` verification), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), and — when `Candidate.cwd` is present and non-empty — a literal `cd <cwd> && claude --resume <session_id>` line built from `Candidate.cwd` and `Candidate.session_id` (the project slug derives from invocation cwd, so the command is the resumable handle); when `Candidate.cwd` is absent or empty, omit the line and note the omission in the prose. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition.
+1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full runtime session/thread ID for resume verification), runtime, topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), and — when `Candidate.cwd` and `Candidate.session_id` are present and non-empty — the runtime-specific resume line (`cd <cwd> && claude --resume <session_id>` for Claude; `cd <cwd> && codex resume <session_id>` for Codex) built from the candidate fields; when required fields are absent or empty, omit the line and note the omission in the prose. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition.
 
 2. **Refine**: Candidate not recognized but recall direction acknowledged. Initiate Socratic probing for recall deepening:
 
@@ -444,7 +454,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 9. **Context-Question Separation**: Present narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding context inside the question field violates this invariant.
 
-10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — lifecycle gap (SessionEnd did not fire), pre-store (session predates hypomnesis), missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis. INDEX may lack entries while SSOT retains the information.
+10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — Claude lifecycle gap (SessionEnd did not fire), Codex index-lite gap, pre-store (session predates hypomnesis), missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis. INDEX may lack entries while SSOT retains the information.
 
 11. **Probe-first NullMatch**: At least one Socratic probe enrichment precedes any NullMatch declaration — first scan returning zero → probe → enriched re-scan → NullMatch declaration only if still empty.
 
