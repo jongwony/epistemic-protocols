@@ -1,6 +1,6 @@
 {
   "name": "anamnesis",
-  "version": "0.4.40",
+  "version": "0.4.41",
   "description": "Resolve vague recall into recognized context — /recollect",
   "author": {
     "name": "Jongwon Choi",
@@ -15,6 +15,7 @@
     "anamnesis"
   ],
   "skills": "./skills/",
+  "hooks": "./hooks/codex-hooks.json",
   "interface": {
     "displayName": "Anamnesis",
     "shortDescription": "Resolve vague recall into recognized context — /recollect",

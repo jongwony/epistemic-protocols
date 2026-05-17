@@ -128,8 +128,8 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 --   Codex SSOT_codex        ↦ ~/.codex/sessions/**/rollout-*.jsonl ∪ ~/.codex/archived_sessions/rollout-*.jsonl (session JSONL, append-only)
 --   Codex INDEX_codex       ↦ ~/.codex/session_index.jsonl                                   (thread title + updated_at index)
 --   Codex HISTORY_codex     ↦ ~/.codex/history.jsonl                                         (prompt history index-lite)
---   Codex HOOK_LOG_codex    ↦ ~/.codex/logs/hooks.log                                        (hook archive written by scripts/anamnesis.mjs hook write)
---   Anamnesis proxy         ↦ scripts/anamnesis.mjs hook write ∪ scan codex                  (Codex hook archive writer + read-only schema adapter)
+--   Codex HOOK_LOG_codex    ↦ ~/.codex/logs/hooks.log                                        (optional PreCompact hook archive written by scripts/anamnesis.mjs hook write when Codex plugin hooks are enabled)
+--   Anamnesis proxy         ↦ scripts/anamnesis.mjs hook write ∪ scan codex                  (Codex PreCompact hook archive writer + read-only SSOT schema adapter)
 --   Claude slug-partitioned: prevents cwd-scattered INDEX; cross-cwd /recollect reaches one canonical location
 -- Candidate source binding:
 --   Claude: `Candidate.session_id` ← INDEX entry frontmatter `session_id`; `Candidate.cwd` ← INDEX entry frontmatter `cwd`; `Candidate.runtime` ← "claude"
@@ -363,7 +363,7 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
    - Adjacent topics from the same session or time period
    - Confidence level based on trace alignment
 
-4. If `|C[]| = 0`: NullMatch pathway. Inform user what was searched and not found. Before declaring NullMatch, attempt at least one Socratic probe enrichment. After enrichment attempts exhausted: surface the search scope summary and the accumulated recall trace (keywords, temporal signals, user hints from probing), then offer Aitesis handoff — the recall INDEX may lack the entry (lifecycle gap: SessionEnd did not fire; pre-store: session predates hypomnesis implementation; Codex: semantic hypomnesis absent while session JSONL remains available), but the SSOT (session JSONL) may still contain the information. The accumulated trace from Anamnesis probing becomes context seed for Aitesis to search SSOT directly.
+4. If `|C[]| = 0`: NullMatch pathway. Inform user what was searched and not found. Before declaring NullMatch, attempt at least one Socratic probe enrichment. After enrichment attempts exhausted: surface the search scope summary and the accumulated recall trace (keywords, temporal signals, user hints from probing), then offer Aitesis handoff — the recall INDEX may lack the entry (Claude lifecycle gap: SessionEnd did not fire; pre-store: session predates hypomnesis implementation; Codex: semantic hypomnesis is absent and PreCompact may never have fired, while session JSONL remains available), but the SSOT (session JSONL) may still contain the information. The accumulated trace from Anamnesis probing becomes context seed for Aitesis to search SSOT directly.
 
 **Scope restriction**: Investigation uses Read, Grep, Glob, and packaged read-only scan helpers exclusively.
 
@@ -454,7 +454,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 9. **Context-Question Separation**: Present narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding context inside the question field violates this invariant.
 
-10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — lifecycle gap (SessionEnd did not fire), pre-store (session predates hypomnesis), missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis. INDEX may lack entries while SSOT retains the information.
+10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — Claude lifecycle gap (SessionEnd did not fire), Codex compaction hook gap (PreCompact never fired or plugin hooks disabled), pre-store (session predates hypomnesis), missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis. INDEX may lack entries while SSOT retains the information.
 
 11. **Probe-first NullMatch**: At least one Socratic probe enrichment precedes any NullMatch declaration — first scan returning zero → probe → enriched re-scan → NullMatch declaration only if still empty.
 

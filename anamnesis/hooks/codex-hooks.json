@@ -1,0 +1,16 @@
+{
+  "description": "Anamnesis Codex hook archive writer — records compaction lifecycle hints for /recollect while SSOT scanning remains primary.",
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/anamnesis.mjs\" hook write",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
