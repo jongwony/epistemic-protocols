@@ -104,6 +104,7 @@ Details: `docs/verification.md`.
 - Any protocol change requires the relevant `plugin.json` version bump plus `/verify`.
 - Co-change patterns are tracked in `docs/co-change.md`.
 - When editing protocol prose, prefer positive predicates over negated anchoring, preserve composability while making morphism completion explicit, and verify the runtime contract view rather than source prose alone.
+- For protocol edits, run a semantic-closure sweep whenever changing terminal conditions, state transitions, or result types. Align TYPES, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, and Rules so every new condition has a type, guard, state update, termination path, and result equation. Static checks do not prove this; manually verify before commit.
 
 ## Delegation Notes
 
