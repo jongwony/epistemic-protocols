@@ -189,14 +189,9 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 8. **Preserve issue provenance** (Architectural — provenance continuity): Every problem frame, work unit, and prompt cites the source issue numbers that contributed to it.
 9. **Blocked work stays visible** (Derived — Surfacing over Deciding): If an issue group is blocked, stale, or needs-info, emit that as a work-unit disposition or re-triage note rather than dropping it.
 
-## Distinction from Other Protocols
+## Boundary Note
 
-| Protocol / Skill | Distinction |
-|---|---|
-| Dispatch `/dispatch` | Triage forms work units from raw issues and emits initial prompts. Dispatch consumes those prompts and executes the selected topology; it does not redo intake. |
-| Realign `/realign` | Realign inscribes or updates the project guide's direction line. Triage reads the current northstar and fuses issue groups against it; it does not rewrite the guide. |
-| Anamnesis `/recollect` | Recollect may enrich triage with prior session context before issue grouping. Triage uses recalled context only when it is surfaced in the current session. |
-| Periagoge `/induce` | Induce crystallizes an abstraction from converging instances. Triage applies the already-recognized work-unit abstraction to concrete GitHub issue substrate. |
+`/triage` reads GitHub issue substrate and emits focused work units. It may read the current northstar produced by `/realign`, but it does not rewrite the project guide. It hands selected initial prompts to `/dispatch`, but does not execute branches, PRs, or review compliance.
 
 ## Anti-patterns
 
