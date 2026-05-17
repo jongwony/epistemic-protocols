@@ -1,12 +1,12 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-프로토콜 학습, 사용 분석, 커버리지 대시보드, 설정 유틸리티.
+프로토콜 학습, 사용 분석, 커버리지 대시보드, work-unit triage, dispatch orchestration 유틸리티.
 
 > [English](./README.md)
 
 ## Epistemic Cooperative란?
 
-인식론적 프로토콜 온보딩과 분석을 위한 유틸리티 플러그인이다. 특정 결정 지점을 다루는 프로토콜과 달리, Epistemic Cooperative는 **진입점** 역할을 한다 — 체험 기반 프로토콜 학습을 안내하고, 근거 기반 분석 리포트를 생성하며, 세션 전반의 사용량을 추적한다.
+인식론적 프로토콜 온보딩, 분석, 작업 orchestration을 위한 유틸리티 플러그인이다. 특정 결정 지점을 다루는 프로토콜과 달리, Epistemic Cooperative는 **진입점** 역할을 한다 — 체험 기반 프로토콜 학습을 안내하고, 근거 기반 분석 리포트를 생성하며, 세션 전반의 사용량을 추적하고, 이슈에서 focused work unit을 형성해 선택된 unit을 실행으로 넘긴다.
 
 ### 스킬
 
@@ -17,6 +17,8 @@
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | 프로토콜 핸드북 — 즉시 참조 | 터미널 기반 프로토콜 브라우저 |
 | `/compose` | 프로토콜 합성 저작 | 합성 SKILL.md 파일 생성 |
+| `/triage` | GitHub 이슈 기반 work-unit triage | dispatchable initial prompt |
+| `/dispatch` | focused work-unit 실행 | 브랜치, PR, feedback inscription |
 
 ## 스킬
 
@@ -122,6 +124,33 @@ SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
 - Catch-chain 불변량 검증
 - `/review` 패턴 템플릿 출력 (pipeline context rules 포함)
 
+### /triage — Work-Unit Formation
+
+scoped GitHub `RawIssueSet`을 그룹화하고, 각 issue group을 공유 problem frame으로 normalize한 뒤, 현재 세션에서 active `AGENTS.md` northstar와 융합해 dispatchable initial prompt를 emit한다.
+
+```
+RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → INITIAL PROMPT → ROUTE
+```
+
+주요 특징:
+- label만이 아니라 problem pressure 기준으로 similarity grouping
+- 기본은 `IssueGroup -> FocusedWorkUnit` 1:1, northstar fusion 중 실행축이 갈라질 때만 split
+- route choice는 현재 세션에서 사용자가 결정: independent session, linear `/dispatch`, parallel `/dispatch`, re-triage
+
+### /dispatch — Focused Work-Unit Execution
+
+`/triage`가 만든 focused work unit 또는 initial prompt를 받아 `/bound`로 실행 topology 계약을 설정하고, 각 unit의 premise를 검증한 뒤 branch/PR로 fanout하고 review feedback을 linked issue에 inscribe한다.
+
+```
+DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK
+```
+
+주요 특징:
+- dispatch 내부에서 open issue intake를 하지 않음; backlog discovery는 `/triage`로 라우팅
+- branch 생성 전 premise verification
+- 선택된 work unit에 대한 linear 또는 parallel fanout
+- fresh-context continuity를 위한 verbatim rejection feedback inscription
+
 ## 아키텍처
 
 ```
@@ -132,7 +161,9 @@ epistemic-cooperative/
 │   ├── report/SKILL.md           # /report Growth Map
 │   ├── dashboard/SKILL.md        # /dashboard 커버리지 대시보드
 │   ├── catalog/SKILL.md          # /catalog 프로토콜 핸드북
-│   └── compose/SKILL.md          # /compose 프로토콜 합성 저작
+│   ├── compose/SKILL.md          # /compose 프로토콜 합성 저작
+│   ├── triage/SKILL.md           # /triage work-unit formation
+│   └── dispatch/SKILL.md         # /dispatch focused work-unit execution
 └── agents/
     ├── project-scanner.md         # Phase 1: 프로젝트 탐색
     ├── session-analyzer.md        # Phase 2: 패턴 추출 (프로젝트별 병렬)
@@ -158,6 +189,8 @@ epistemic-cooperative/
 | 시간 경과에 따른 프로토콜 채택 추적 | `/dashboard` |
 | 빠른 프로토콜 참조 | `/catalog` |
 | 다중 프로토콜 합성 워크플로우 구축 | `/compose` |
+| 관련 GitHub 이슈를 focused work unit으로 만들 때 | `/triage` |
+| 선택된 focused work unit을 실행할 때 | `/dispatch` |
 ## 사용법
 
 ```
@@ -166,6 +199,8 @@ epistemic-cooperative/
 /dashboard
 /catalog
 /compose clarify → goal → bound → inquire
+/triage #41 #52 #60
+/dispatch <initial prompt>
 ```
 
 ## 저자

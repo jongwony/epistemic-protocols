@@ -84,7 +84,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/dispatch` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration via session calibration drift audit, project guide direction line via three-horizon fusion, retrospective contract violation detection, and delegated parallel issue resolution with categorical decomposition + per-category PR + Wirkungsgeschichte feedback inscription |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/triage`, `/dispatch` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, and focused work-unit dispatch with PR fanout + rejection-trace inscription |
 
 **Three discovery modes coexist** (none replaces the others):
 
@@ -100,9 +100,10 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 - `/realign` — surface three horizons (the project guide's currently inscribed direction line, externally surfaced direction signals from a configured channel set, and the user's present pre-understanding elicited as a separate sub-step), compose a fusion candidate with a per-horizon transformation trace marking what was preserved / transformed / dropped in each horizon, shape the candidate through the dialectical widen / narrow / fuse / reorient / confirm / dismiss vocabulary inherited from `/induce`, and on user confirmation write the fused line back to the project guide direction line (rollback through the project's version control)
 
-**Delegated parallel work** (multi-issue dispatch):
+**Work-unit triage and dispatch**:
 
-- `/dispatch` — set a minimal delegation contract (composes `/bound`), categorize open issues by project direction and accumulated review-feedback context, fan out per-category sub-branches with per-category PRs, then load review feedback and inscribe rejection traces into linked issues so the next fresh-context session can re-enter without re-deriving the rejection's reasoning
+- `/triage` — read a scoped GitHub `RawIssueSet`, group related issues, normalize each group into a problem frame, fuse it with the `AGENTS.md` northstar in the current session, and emit dispatchable initial prompts with route choices
+- `/dispatch` — consume focused work units or initial prompts, set an execution topology contract (composes `/bound`), verify each unit's premise, fan out work-unit branches/PRs, then load review feedback and inscribe rejection traces into linked issues so the next fresh-context session can re-enter without re-deriving the rejection's reasoning
 
 ## Design
 
