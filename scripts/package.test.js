@@ -219,6 +219,45 @@ describe('runtime contract view', () => {
     const result = runArtifactSelfContainmentCheck();
     assert.deepEqual(result.fail, []);
   });
+
+  it('compiles Anamnesis Codex recall as read-only SSOT/index-lite scanning', () => {
+    const view = buildRuntimeContractViews().find((candidate) => candidate.plugin === 'anamnesis');
+    assert.ok(view, 'Anamnesis runtime view must be present');
+
+    const skill = view.transformedSkillMd;
+    assert.match(skill, /Codex SSOT\s+↦ ~\/\.codex\/sessions\/\*\*\/rollout-\*\.jsonl and ~\/\.codex\/archived_sessions\/\*\*\/rollout-\*\.jsonl/);
+    assert.match(skill, /Codex INDEX_lite\s+↦ ~\/\.codex\/session_index\.jsonl, ~\/\.codex\/history\.jsonl, ~\/\.codex\/logs\/hooks\.log/);
+    assert.match(skill, /rollout JSONL is source of truth/);
+    assert.match(skill, /index-lite row absent while rollout JSONL remains available/);
+    assert.match(skill, /runtime = claude when Claude-host env is present \(`CLAUDE_PROJECT_DIR`, `CLAUDE_ENV_FILE`, `CLAUDE_PLUGIN_ROOT`, or plugin-injected `CODEX_COMPANION_SESSION_ID`\); this is decisive evidence for the Claude store/);
+    assert.match(skill, /runtime = unresolved when Claude-host env is absent; do not infer Codex from skill load path alone/);
+    assert.match(skill, /Ask which recall surface to search: Claude store, Codex store, or both/);
+    assert.match(skill, /`CODEX_COMPANION_SESSION_ID` is a Claude-session injection, not Codex runtime evidence/);
+    assert.match(skill, /If Claude-host env is present, scan the Claude store first/);
+    assert.match(skill, /If Claude-host env is absent, ask the user which recall surface to search before scanning: Claude store, Codex store, or both/);
+    assert.match(skill, /`Candidate\.runtime` ← `claude` for Claude store candidates and `codex` for Codex store candidates/);
+    assert.match(skill, /codex resume <session_id>/);
+    assert.doesNotMatch(skill, /codex-recall-scan|anamnesis\.mjs|hook write/);
+    assert.ok(!view.packagedEntries.some((entry) => entry.includes('codex-recall-scan.mjs') || entry.includes('anamnesis.mjs')));
+  });
+
+  it('keeps the Claude Anamnesis hypomnesis hook contract unchanged', () => {
+    const hooksConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'anamnesis', 'hooks', 'hooks.json'), 'utf8'));
+
+    assert.equal(
+      hooksConfig.hooks.SessionEnd[0].hooks[0].command,
+      'node "${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs"',
+    );
+    assert.equal(
+      hooksConfig.hooks.PreCompact[0].hooks[0].command,
+      'node "${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-write.mjs"',
+    );
+    assert.equal(
+      hooksConfig.hooks.SubagentStop[0].hooks[0].command,
+      'node "${CLAUDE_PLUGIN_ROOT}/scripts/hypomnesis-subagent-hook.mjs"',
+    );
+    assert.deepEqual(Object.keys(hooksConfig.hooks).sort(), ['PreCompact', 'SessionEnd', 'SubagentStop'].sort());
+  });
 });
 
 // ============================================================
