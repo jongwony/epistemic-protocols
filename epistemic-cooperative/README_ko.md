@@ -126,13 +126,14 @@ SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
 
 ### /triage — Work-Unit Formation
 
-scoped GitHub `RawIssueSet`을 그룹화하고, 각 issue group을 공유 problem frame으로 normalize한 뒤, 현재 세션에서 active `AGENTS.md` northstar와 융합해 dispatchable initial prompt를 emit한다.
+GitHub `RawIssueSet`을 그룹화하고, 각 issue group을 공유 problem frame으로 normalize한 뒤, 현재 세션에서 active `AGENTS.md` northstar와 융합해 dispatchable initial prompt를 emit한다. 이슈 범위 없이 `/triage`만 호출하면 현재 repository의 open backlog에서 시작하고, full issue substrate를 읽기 전에 triage load를 판정한다.
 
 ```
 RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → INITIAL PROMPT → ROUTE
 ```
 
 주요 특징:
+- bare `/triage`는 open-backlog metadata intake를 먼저 수행한 뒤 issue load, repo load, mapping load, intent ambiguity로 small / medium / large posture를 판정한다.
 - label만이 아니라 problem pressure 기준으로 similarity grouping
 - 기본은 `IssueGroup -> FocusedWorkUnit` 1:1, northstar fusion 중 실행축이 갈라질 때만 split
 - route choice는 현재 세션에서 사용자가 결정: independent session, linear `/dispatch`, parallel `/dispatch`, re-triage
@@ -199,6 +200,7 @@ epistemic-cooperative/
 /dashboard
 /catalog
 /compose clarify → goal → bound → inquire
+/triage
 /triage #41 #52 #60
 /dispatch <initial prompt>
 ```

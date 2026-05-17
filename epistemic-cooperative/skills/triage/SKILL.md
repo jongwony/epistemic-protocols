@@ -12,7 +12,8 @@ Form executable work units from GitHub issue substrate. This skill does not exec
 `/triage` owns work-unit formation:
 
 ```
-RawIssueSet
+BacklogIntake
+  -> RawIssueSet
   -> IssueGroup
   -> NormalizedProblemFrame
   -> NorthstarFusion
@@ -27,7 +28,10 @@ RawIssueSet
 
 | Type | Meaning |
 |---|---|
+| `BacklogIntake` | The scale-aware intake step that binds an explicit issue scope or, when no scope is supplied, inspects the current repository's open GitHub issue backlog through lightweight metadata before deciding how much substrate to read. Scale is judged by triage load, not by a fixed issue-count threshold. |
 | `RawIssueSet` | The issue substrate read from GitHub: issue body, comments, labels, linked PRs, and explicitly cited blockers. Scope this narrowly to issues; do not call it external signals. |
+| `IntakeIntent` | The user-recognized purpose for a large backlog triage pass, such as finding dispatchable work, reducing stale backlog, preparing a milestone, de-duplicating reports, or surfacing blockers. |
+| `TriageLoad` | A metadata-grounded estimate of whether full substrate reading fits the next checkpoint: `IssueLoad × RepoLoad × MappingLoad × IntentAmbiguity`. |
 | `IssueGroup` | One or more raw issues that share a problem pressure: similar symptom, target behavior, conceptual request, affected surface, or blocked execution axis. |
 | `NormalizedProblemFrame` | A single problem statement reconstructed from the issue group, with duplicates collapsed and contradictions surfaced. |
 | `Northstar` | The inscribed direction line read from `AGENTS.md` or the active project guide, usually under `## Northstar`. This may have been produced by `/realign`. |
@@ -45,11 +49,36 @@ Accept one of:
 - The current session's issue set if the user has already surfaced raw issues
 - A user-supplied issue list pasted into the session
 
-If no scope is recoverable, ask for the issue scope. Do not silently scan the entire repository backlog.
+If no scope is recoverable, default to the current repository's open GitHub issue backlog. First perform a lightweight metadata pass, not a full substrate read:
+
+```bash
+gh issue list --state open --json number,title,labels,state,createdAt,updatedAt,assignees,milestone
+```
+
+If GitHub access is unavailable or the current repository cannot be identified, ask for the issue scope or pasted issue list.
+
+Classify the intake scale by `TriageLoad` before reading full issue bodies and comments:
+
+| Load axis | Signals to inspect from metadata and repo shape |
+|---|---|
+| `IssueLoad` | Open issue volume relative to the next checkpoint, recent arrival rate, title/body preview density when available, comment/dependency/link indicators, unlabeled or stale proportion, duplicate / needs-info candidates. |
+| `RepoLoad` | Repository surface area, number of independently deployable packages or runtime surfaces, verifier/test matrix breadth, known co-change requirements, ownership or component boundaries. |
+| `MappingLoad` | How clearly issue titles/labels map to code, docs, runtime, verifier, or protocol surfaces; whether many issues span several surfaces or lack enough metadata to map. |
+| `IntentAmbiguity` | Whether the current session has clarified the triage purpose: dispatchable work selection, stale backlog reduction, milestone/release preparation, duplicate consolidation, blocker surfacing, or another explicit intent. |
+
+Use the load axes to choose an intake posture:
+
+| Posture | Intake path |
+|---|---|
+| Small | Full-scan the bound open issues into `RawIssueSet`, then group. Use this only when `IssueLoad`, `RepoLoad`, `MappingLoad`, and `IntentAmbiguity` are all low enough that full substrate reading fits the next checkpoint. |
+| Medium | Build a metadata grouping map first, surface candidate clusters, then read full substrate only for confirmed clusters. Use this when full scan is plausible but one or more load axes would make silent reading too costly. |
+| Large | Call `/elicit` to crystallize `IntakeIntent`, convert that intent into a GitHub query/filter or cluster selection, then read full substrate only for the resulting slice. Use this whenever full substrate reading would exceed the next checkpoint or the triage purpose is unclear. |
+
+If the user explicitly asks for a full-backlog audit on a medium or large backlog, process metadata in checkpointed batches and surface progress between batches. Do not read all bodies/comments before the first grouping checkpoint.
 
 ## Phase 1: Read Raw Issues
 
-Read the full issue substrate for each issue in scope:
+Read the full issue substrate for each issue in the bound scope or confirmed cluster:
 
 - number, title, body, labels, state, author, timestamps
 - comments that contain reporter answers, prior triage notes, review feedback, or maintainer decisions
@@ -58,6 +87,8 @@ Read the full issue substrate for each issue in scope:
 
 Use the available GitHub interface (`gh`, MCP, or pasted issue text). Preserve issue numbers in every downstream artifact.
 
+For medium and large intake postures, metadata-only lists are provisional. They can seed `IssueGroup` candidates, but a candidate cannot become a `NormalizedProblemFrame`, `FocusedWorkUnit`, or `InitialPrompt` until the relevant full issue substrate has been read.
+
 ## Phase 2: Group Issues
 
 Propose `IssueGroup` candidates by problem pressure, not by label alone.
@@ -65,10 +96,15 @@ Propose `IssueGroup` candidates by problem pressure, not by label alone.
 Useful grouping signals:
 
 - same user-facing symptom or desired behavior
+- same issue type, impact, urgency, severity, or priority pressure
+- same component, owner, milestone, or affected runtime surface
 - same protocol, skill, runtime surface, or verifier surface
 - same missing decision or northstar tension
+- same stale, blocked, duplicate, or needs-info disposition
 - duplicate or near-duplicate requests
 - one issue's proposed fix depends on another issue's premise
+
+Labels can seed grouping, especially type / priority / severity / component labels, but they do not replace problem-pressure grouping.
 
 Surface the grouping map before moving to fusion. If grouping is contested, present 2-3 grouping alternatives with their downstream work-unit shape. The user may confirm, adjust, split, merge, or ask for re-triage.
 
@@ -179,15 +215,19 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 
 ## Rules
 
-1. **RawIssueSet scope** (Architectural — substrate boundary): Use `RawIssueSet`, not broad external-signal language, for the issue substrate. The concrete input is GitHub issues or pasted issue equivalents.
-2. **Work-unit formation, not execution** (Architectural — role boundary): `/triage` does not edit production files, create implementation branches, open PRs, or apply fixes.
-3. **IssueGroup default cardinality** (Architectural — review-surface visibility): Default to `IssueGroup -> FocusedWorkUnit` one-to-one. Split only with cited execution-axis evidence.
-4. **Northstar fusion required** (Axiom anchor — Convergence Persistence): Every ready work unit includes a fusion trace against the active project northstar. A summary without fusion is not a triaged work unit.
-5. **Session route authority** (Axiom anchor — Detection with Authority): Route choice belongs to the user in the current session. GitHub labels or project fields may record the choice but do not replace it.
-6. **InitialPrompt is the handoff artifact** (Architectural — handoff specificity): Dispatch and independent sessions consume initial prompts or focused work units, not raw issue lists.
-7. **No silent grouping** (Derived — Surfacing over Deciding): Surface grouping candidates before forming work units. Similarity grouping is a user-recognized judgment, not a hidden classifier result.
-8. **Preserve issue provenance** (Architectural — provenance continuity): Every problem frame, work unit, and prompt cites the source issue numbers that contributed to it.
-9. **Blocked work stays visible** (Derived — Surfacing over Deciding): If an issue group is blocked, stale, or needs-info, emit that as a work-unit disposition or re-triage note rather than dropping it.
+1. **Backlog intake default** (Architectural — usable entrypoint): A bare `/triage` call defaults to the current repository's open GitHub issue backlog through a lightweight metadata pass. Ask for scope only when repository issue access is unavailable or ambiguous.
+2. **RawIssueSet scope** (Architectural — substrate boundary): Use `RawIssueSet`, not broad external-signal language, for the issue substrate. The concrete input is GitHub issues or pasted issue equivalents.
+3. **Dynamic scale judgment** (Architectural — bounded attention): Classify small, medium, or large by `TriageLoad`, not by a fixed issue-count threshold. Issue count is only one signal inside `IssueLoad`.
+4. **Scale-aware substrate read** (Architectural — bounded attention): Small intake may be full-scanned; medium intake requires metadata-first cluster confirmation; large intake requires `IntakeIntent` via `/elicit` before full substrate reads.
+5. **Metadata is provisional** (Derived — evidence boundary): Metadata-only grouping cannot produce a work unit. Full issue substrate is required before normalization, northstar fusion, and prompt emission.
+6. **Work-unit formation, not execution** (Architectural — role boundary): `/triage` does not edit production files, create implementation branches, open PRs, or apply fixes.
+7. **IssueGroup default cardinality** (Architectural — review-surface visibility): Default to `IssueGroup -> FocusedWorkUnit` one-to-one. Split only with cited execution-axis evidence.
+8. **Northstar fusion required** (Axiom anchor — Convergence Persistence): Every ready work unit includes a fusion trace against the active project northstar. A summary without fusion is not a triaged work unit.
+9. **Session route authority** (Axiom anchor — Detection with Authority): Route choice belongs to the user in the current session. GitHub labels or project fields may record the choice but do not replace it.
+10. **InitialPrompt is the handoff artifact** (Architectural — handoff specificity): Dispatch and independent sessions consume initial prompts or focused work units, not raw issue lists.
+11. **No silent grouping** (Derived — Surfacing over Deciding): Surface grouping candidates before forming work units. Similarity grouping is a user-recognized judgment, not a hidden classifier result.
+12. **Preserve issue provenance** (Architectural — provenance continuity): Every problem frame, work unit, and prompt cites the source issue numbers that contributed to it.
+13. **Blocked work stays visible** (Derived — Surfacing over Deciding): If an issue group is blocked, stale, or needs-info, emit that as a work-unit disposition or re-triage note rather than dropping it.
 
 ## Boundary Note
 
@@ -195,8 +235,10 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 
 ## Anti-patterns
 
-- **Scanning the entire backlog by default**: issue scope must be supplied, recoverable from session context, or requested from the user.
+- **Count-threshold scale**: deciding small, medium, or large by a fixed issue count instead of `TriageLoad`.
+- **Unbounded backlog scan**: reading full bodies/comments for a medium or large intake posture before a metadata grouping checkpoint or `/elicit`-formed `IntakeIntent`.
 - **Label-only grouping**: labels can seed grouping, but the work unit must be formed by shared problem pressure and cited issue evidence.
+- **Metadata-only work units**: emitting normalized frames, focused work units, or initial prompts from titles/labels alone.
 - **Northstar-free summary**: a raw issue summary without preserved/transformed/dropped claims is not a triaged work unit.
 - **Dispatch leakage**: branch creation, file edits, PR creation, and review compliance belong to `/dispatch` or a normal execution session, not `/triage`.
 - **Silent split or merge**: changing work-unit cardinality without surfacing the grouping rationale hides the decision the user must recognize.
@@ -204,7 +246,10 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 
 ## Operational checklist (per cycle)
 
-- [ ] Phase 0 issue scope is explicit or requested from the user
+- [ ] Phase 0 issue scope is explicit, session-supplied, pasted, or defaulted to current open backlog through metadata intake
+- [ ] Phase 0 `TriageLoad` records `IssueLoad`, `RepoLoad`, `MappingLoad`, and `IntentAmbiguity`
+- [ ] Phase 0 intake posture is classified as small, medium, or large from `TriageLoad` before full substrate reads
+- [ ] Large intake has an `IntakeIntent` crystallized through `/elicit` before filtered full-substrate reads
 - [ ] Phase 1 RawIssueSet includes issue numbers and relevant comments / links / blockers
 - [ ] Phase 2 grouping map surfaced before work-unit formation
 - [ ] Phase 3 NormalizedProblemFrame records evidence, conflicts, missing context, and exclusions

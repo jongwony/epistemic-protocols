@@ -126,13 +126,14 @@ Key features:
 
 ### /triage — Work-Unit Formation
 
-Groups a scoped GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and emits dispatchable initial prompts.
+Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and emits dispatchable initial prompts. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
 
 ```
 RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → INITIAL PROMPT → ROUTE
 ```
 
 Key features:
+- bare `/triage` performs lightweight open-backlog metadata intake, then classifies small / medium / large posture from issue load, repo load, mapping load, and intent ambiguity
 - similarity grouping by problem pressure rather than labels alone
 - `IssueGroup -> FocusedWorkUnit` one-to-one by default, with split only when the northstar fusion exposes distinct execution axes
 - route choice belongs to the current session: independent session, linear `/dispatch`, parallel `/dispatch`, or re-triage
@@ -207,6 +208,7 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /dashboard
 /catalog
 /compose clarify → goal → bound → inquire
+/triage
 /triage #41 #52 #60
 /dispatch <initial prompt>
 ```
