@@ -30,8 +30,8 @@ BacklogIntake
 |---|---|
 | `BacklogIntake` | The scale-aware intake step that binds an explicit issue scope or, when no scope is supplied, inspects the current repository's open GitHub issue backlog through lightweight metadata before deciding how much substrate to read. Scale is judged by triage load, not by a fixed issue-count threshold. |
 | `RawIssueSet` | The issue substrate read from GitHub: issue body, comments, labels, linked PRs, and explicitly cited blockers. Scope this narrowly to issues; do not call it external signals. |
-| `IntakeIntent` | The user-recognized purpose for a large backlog triage pass, such as finding dispatchable work, reducing stale backlog, preparing a milestone, de-duplicating reports, or surfacing blockers. |
-| `TriageLoad` | A metadata-grounded estimate of whether full substrate reading fits the next checkpoint: `IssueLoad × RepoLoad × MappingLoad × IntentAmbiguity`. |
+| `IntakeIntent` | The user-recognized purpose for the triage pass, explicitly stated in the current session. |
+| `TriageLoad` | A metadata-grounded composite judgment spanning `IssueLoad`, `RepoLoad`, `MappingLoad`, and `IntentAmbiguity`. |
 | `IssueGroup` | One or more raw issues that share a problem pressure: similar symptom, target behavior, conceptual request, affected surface, or blocked execution axis. |
 | `NormalizedProblemFrame` | A single problem statement reconstructed from the issue group, with duplicates collapsed and contradictions surfaced. |
 | `Northstar` | The inscribed direction line read from `AGENTS.md` or the active project guide, usually under `## Northstar`. This may have been produced by `/realign`. |
@@ -71,7 +71,7 @@ Use the load axes to choose an intake posture:
 | Posture | Intake path |
 |---|---|
 | Small | Full-scan the bound open issues into `RawIssueSet`, then group. Use this only when `IssueLoad`, `RepoLoad`, `MappingLoad`, and `IntentAmbiguity` are all low enough that full substrate reading fits the next checkpoint. |
-| Medium | Build a metadata grouping map first, surface candidate clusters, then read full substrate only for confirmed clusters. Use this when full scan is plausible but one or more load axes would make silent reading too costly. |
+| Medium | Build a metadata grouping map first. Surface candidate clusters in Phase 2 before the user confirms selection, then read full substrate only for confirmed clusters. Use this when full scan is plausible but one or more load axes would make silent reading too costly. |
 | Large | Call `/elicit` to crystallize `IntakeIntent`, convert that intent into a GitHub query/filter or cluster selection, then read full substrate only for the resulting slice. Use this whenever full substrate reading would exceed the next checkpoint or the triage purpose is unclear. |
 
 If the user explicitly asks for a full-backlog audit on a medium or large backlog, process metadata in checkpointed batches and surface progress between batches. Do not read all bodies/comments before the first grouping checkpoint.
@@ -219,7 +219,7 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 2. **RawIssueSet scope** (Architectural — substrate boundary): Use `RawIssueSet`, not broad external-signal language, for the issue substrate. The concrete input is GitHub issues or pasted issue equivalents.
 3. **Dynamic scale judgment** (Architectural — bounded attention): Classify small, medium, or large by `TriageLoad`, not by a fixed issue-count threshold. Issue count is only one signal inside `IssueLoad`.
 4. **Scale-aware substrate read** (Architectural — bounded attention): Small intake may be full-scanned; medium intake requires metadata-first cluster confirmation; large intake requires `IntakeIntent` via `/elicit` before full substrate reads.
-5. **Metadata is provisional** (Derived — evidence boundary): Metadata-only grouping cannot produce a work unit. Full issue substrate is required before normalization, northstar fusion, and prompt emission.
+5. **Metadata is provisional** (Architectural — substrate boundary): Metadata-only grouping cannot produce a work unit. Full issue substrate is required before normalization, northstar fusion, and prompt emission.
 6. **Work-unit formation, not execution** (Architectural — role boundary): `/triage` does not edit production files, create implementation branches, open PRs, or apply fixes.
 7. **IssueGroup default cardinality** (Architectural — review-surface visibility): Default to `IssueGroup -> FocusedWorkUnit` one-to-one. Split only with cited execution-axis evidence.
 8. **Northstar fusion required** (Axiom anchor — Convergence Persistence): Every ready work unit includes a fusion trace against the active project northstar. A summary without fusion is not a triaged work unit.
