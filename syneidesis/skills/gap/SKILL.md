@@ -13,12 +13,13 @@ Surface unnoticed gaps at decision points through questions, enabling user to re
 
 ```
 ── FLOW ──
-Syneidesis(D, Σ) → Scan(D) → G → Sel(G, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
+Syneidesis(D, Σ) → Scan(D) → G → AssessGapPressure(D, G) → P → Sel(P, D) → Gₛ → Q(Gₛ) → J → A(J, D, Σ) → Σ'
 
 ── MORPHISM ──
 Decision
   → scan(decision, context)           -- identify gaps implicit in decision
-  → select(gaps, stakes)              -- prioritize by stakes
+  → assess_pressure(decision, gaps, context) -- classify why each detected gap deserves attention now
+  → select(gaps, pressure, stakes)    -- prioritize by pressure and stakes
   → surface(gap, as_question)         -- present gap as question
   → judge(user_response)              -- collect user judgment
   → AuditedDecision
@@ -33,7 +34,16 @@ Committed = committed(D) ≡ ∃ A : mutates_state(A) ∨ externally_visible(A) 
 Stakes = {Low, Med, High}
 G      = Gap ∈ {Procedural, Consideration, Assumption, Alternative} ∪ Emergent(G)
 Scan   = Detection: D → Set(G)                      -- gap identification
-Sel    = Selection: Set(G) × D → Gₛ                 -- prioritize by stakes
+Context = Observable decision context from session, codebase, and cited evidence
+AssessGapPressure = Gap pressure classification: D × Set(G) → P  -- Context is projected from D
+P      = GapPressureMap { load_bearing, cheap_to_settle, hidden_high_impact, nonblocking, queued }
+partition(P, G) = G = P.load_bearing ⊔ P.cheap_to_settle ⊔ P.hidden_high_impact ⊔ P.nonblocking ⊔ P.queued
+load_bearing = Set(G) whose resolution materially changes the decision
+cheap_to_settle = Set(G) settleable with one low-cost confirmation
+hidden_high_impact = Set(G) ⊆ G that Scan flagged low-confidence but decision-changing if real -- tightly capped (|hidden_high_impact| ≤ 1); admitted only when it could materially change the user's next judgment
+nonblocking = Set(G) compatible with proceed(Σ) this cycle
+queued = Set(G) routed to Σ.deferred for later review
+Sel    = Selection: P × D → Gₛ                     -- prioritize by pressure and stakes
 Gₛ     = Selected gaps (|Gₛ| ≤ 2)
 Q      = Question formation (assertion-free)
 J      = Judgment ∈ {Address(c), Dismiss, Probe}
@@ -43,13 +53,15 @@ A      = Adjustment: J × D × Σ → Σ'
 AuditedDecision = Σ' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
 
 ── PHASE TRANSITIONS ──
-Phase 0: D → committed?(D) → Scan(D) → G              -- checkpoint + detection (silent)
-Phase 1: G → TaskCreate[all gaps] → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register all, surface first [Tool]
+Phase 0: D → committed?(D) → Scan(D) → G → AssessGapPressure(D, G) → P  -- checkpoint + detection + pressure map (silent)
+Phase 1: (G, P) → TaskCreate[all gaps] + Σ.deferred ← P.queued → Sel(P, D) → Gₛ → Qs(Gₛ[0]) → Stop → J  -- register all, pressure-select, surface first [Tool]
 Phase 2: J → A(J, D, Σ) → TaskUpdate → Σ'           -- adjustment + task update [Tool]
 
 ── LOOP ──
 After Phase 2: re-scan for newly surfaced gaps from user response.
 If new gaps: TaskCreate → add to queue.
+Pending gaps are active registered gaps ∪ Σ.deferred; each cycle reclassifies pending gaps through AssessGapPressure(D, pending) before Sel.
+P.queued updates Σ.deferred at TaskCreate/TaskUpdate; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
 Continue until: all tasks completed OR user ESC.
 Mode remains active until convergence.
 Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
@@ -60,7 +72,9 @@ A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
 A(Probe, _, σ)      = σ { re-scan(expanded) }        -- additional verification round (depth varies by stakes)
 
 ── SELECTION RULE ──
-Sel(G, d) = take(priority_sort(G, stakes(d)), min(|G|, stakes(d) = High ? 2 : 1))
+Sel(P, d) = take(priority_sort(P.load_bearing ∪ P.cheap_to_settle ∪ P.hidden_high_impact, d), min(|P.load_bearing ∪ P.cheap_to_settle ∪ P.hidden_high_impact|, stakes(d) = High ? 2 : 1))
+priority_sort(S, d) = bucket order load_bearing → cheap_to_settle → hidden_high_impact; intra-bucket order follows evidence salience in d, then original Scan order
+-- pressure-ordered: load_bearing and cheap_to_settle lead; hidden_high_impact only within its tight cap; nonblocking and queued are carried outside this cycle's surfaced set
 
 ── CONTINUATION ──
 proceed(Σ) = ¬blocked(Σ)
@@ -70,11 +84,12 @@ proceed(Σ) = ¬blocked(Σ)
 Qs (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (track)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (observe) → Read, Grep (stored knowledge extraction: context for gap identification)
+AssessGapPressure (observe) → Internal analysis (selection-only classification over Scan output; surfaces why a gap is load-bearing while gap resolution remains the user's constitutive act)
 A (track)      → Internal state update (no external tool)
 converge (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
 
 ── MODE STATE ──
-Λ = { phase: Phase, state: Σ, active: Bool }
+Λ = { phase: Phase, state: Σ, pressureMapSnapshot: P, active: Bool }  -- snapshot supports audit trace only; recompute before every Sel
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
@@ -197,10 +212,22 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern that the named gap types fail to capture, the cost of maintaining the current taxonomy exceeds the cost of adding a named type — promote the Emergent cluster. Conversely, when a named type consistently yields zero detections across 3+ sessions, consider whether it remains a distinct gap category or has become observationally inert — consistently undetected despite applicable contexts.
 
+### Pressure Assessment (Silent)
+
+Per Phase 0 formal block, after Scan and before selection, classify the already-detected gaps `G` into a GapPressureMap `P`. This map is a selection-only classification over Scan output; it sorts the gaps Scan already found by why each deserves attention now:
+
+- **load_bearing**: resolving the gap materially changes the decision
+- **cheap_to_settle**: one low-cost confirmation settles it
+- **hidden_high_impact**: Scan flagged it low-confidence but it is decision-changing if real — admit at most one, and only when it could materially change the user's next judgment
+- **nonblocking** / **queued**: safe to carry through this cycle, or routed to the persistent deferred list for later review
+
+`hidden_high_impact` is the unknown-unknown surface and the highest over-application risk: cap it tightly so Syneidesis narrows the question set rather than making the user inspect every speculative gap. Each detected gap belongs to exactly one pressure bucket for the current cycle. The pressure map supports gap selection and question formation only; the endpoint `AuditedDecision` is unchanged.
+
 ### Surfacing
 
 Present the gap as text output:
 - **Gap**: [Specific gap description with evidence]
+- **Pressure**: [load-bearing / cheap-to-settle / hidden high-impact, in plain language — why this gap deserves attention now]
 - (rationale: [1-line why this gap matters for this decision])
 
 Then **present**:
@@ -285,3 +312,4 @@ Note: Esc key → unconditional loop termination (LOOP level). Constitution inte
 9. **Gate integrity** (Safeguard tier — revisitable as model capability evolves; revision triggers: model upgrade with demonstrated instruction-following improvement, sustained low violation rate across sessions, or successful compression PR demonstrating guard reducibility without outcome loss): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation. Future-revision tied to instruction-tuning trajectory (alignment-guard internalization).
 10. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 11. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+12. **Protocol-native pressure map**: Phase 0 produces a GapPressureMap before gap selection. The map is a pre-gate support object for gap selection and question formation, with no terminal-status or generic-calibration authority. It classifies already-detected gaps into exactly one current-cycle pressure bucket; gap tasks are sourced exclusively from Scan output, and `AuditedDecision` is unchanged. Surfacing over Deciding — the map justifies why a gap deserves attention now while gap resolution remains the user's constitutive act. `hidden_high_impact` is tightly capped (|hidden_high_impact| ≤ 1) and admitted only when the unknown could materially change the user's next judgment; the map must narrow the question set, never make the user inspect every possible gap.
