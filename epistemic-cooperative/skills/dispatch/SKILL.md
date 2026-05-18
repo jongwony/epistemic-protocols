@@ -112,6 +112,8 @@ Execute according to the bounded topology:
 - **Linear sequence**: execute work units one at a time, returning to base after each PR.
 - **Parallel fanout**: create independent per-work-unit branches only when write scopes are disjoint and the active runtime/tool policy authorizes parallel agent work.
 
+Carry the work-unit rationale trace forward through the cycle. Dispatch preserves the InitialPrompt's problem frame, northstar fusion summary, and selected route rationale, then adds the premise/fusion verification result from Phase 3 and any continuation links from Phase 6 or Phase 8.
+
 For each executable work unit:
 
 1. **Branch**: create sub-branch from base — `<base>-<work-unit-slug>` or `<base>/<work-unit-slug>` per the project editing-convention pattern
@@ -221,6 +223,7 @@ Final summary always includes:
 - Skipped work-unit count by class (blocked / stale / needs-info / re-triage-needed)
 - Deferred work units (effort cap)
 - Follow-up improvement issue count with created links, duplicate-skipped links, and draft-only or intentionally skipped candidate reasons
+- Cycle rationale trace: InitialPrompt source, northstar fusion summary, selected route rationale, premise/fusion verification result, and continuation links from rejection inscription or improvement capture
 
 ## Rules
 
@@ -237,7 +240,8 @@ Final summary always includes:
 11. **Post-cycle improvement capture only** (Derived — Loop Continuity under Bounded Regret): Improvement issues are created or drafted only after active fanout, Phase 6 inscription, Phase 7 compliance fixes, and dynamic-stop surfacing finish. Filing improvement work mid-cycle derails the bounded work-unit contract.
 12. **Improvement issues carry distinct substrate** (Cross-protocol — continuity invariant): Phase 6 preserves rejected current-work reasoning on linked issues with verbatim review evidence. Phase 8 records only durable workflow or protocol defects with separate substrate citation; a rejected PR qualifies for an additional improvement issue only when a distinct Dispatch or protocol defect is evidenced beyond the inscription.
 13. **Improvement issue de-duplication** (Derived — Surfacing over Deciding): Before creating a follow-up issue, search open issues for a covering candidate and record the created-or-skipped result in `ImprovementIssueTrace`. This duplicate check is scoped to verifying whether the candidate already has a covering open issue; backlog intake and similarity grouping belong to `/triage`.
-14. **Personalization read, not write** (Architectural — personalization boundary): This skill reads the project's profile and editing-convention rules. It does not write to those files. Profile changes belong to `/steer`; northstar re-inscription belongs to `/realign`.
+14. **Cycle rationale preservation** (Architectural — handoff specificity): Dispatch final summaries preserve the triage-supplied work rationale and the execution-time verification result. The summary records why this cycle ran, how the route was selected, and how execution verified the supplied northstar fusion.
+15. **Personalization read, not write** (Architectural — personalization boundary): This skill reads the project's profile and editing-convention rules. It does not write to those files. Profile changes belong to `/steer`; northstar re-inscription belongs to `/realign`.
 
 ## Distinction from Other Protocols
 
@@ -288,3 +292,4 @@ Composition is sequential — each phase consumes the previous phase's output. P
 - [ ] Phase 8 de-duplicates candidates against open issues before creation
 - [ ] Phase 8 records created, duplicate-skipped, draft-only, or intentionally skipped improvement candidates with reasons
 - [ ] Final summary surfaces merged / compliant-fix / rejected-inscribed / skipped / deferred / follow-up-improvement counts and links
+- [ ] Final summary preserves the InitialPrompt source, northstar fusion summary, selected route rationale, premise/fusion verification result, and continuation links
