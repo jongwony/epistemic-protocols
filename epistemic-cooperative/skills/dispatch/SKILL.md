@@ -1,24 +1,24 @@
 ---
 name: dispatch
-description: "Execute focused work units via /dispatch. Consumes /triage initial prompts, sets topology, verifies premises, fans out branches/PRs, and inscribes rejection traces."
+description: "Execute focused work units via /dispatch. Consumes /triage initial prompts, sets topology, verifies premises, fans out branches/PRs, inscribes rejection traces, and captures post-cycle improvement follow-ups."
 ---
 
 # Dispatch: Focused Work-Unit Execution
 
-Execute work units that have already been focused by `/triage` or supplied as explicit initial prompts. Dispatch is an orchestration skill for execution topology, branch/PR fanout, verification, review loading, and rejection-trace inscription. It is not the owner of open-issue discovery or similarity grouping.
+Execute work units that have already been focused by `/triage` or supplied as explicit initial prompts. Dispatch is an orchestration skill for execution topology, branch/PR fanout, verification, review loading, rejection-trace inscription, and terminal improvement-capture follow-up. It is not the owner of open-issue discovery or similarity grouping.
 
 **This is an execution skill, not an intake skill.** `/triage` forms `FocusedWorkUnit`s from `RawIssueSet`s by grouping related issues, fusing them with the `AGENTS.md` northstar in the current Codex session, and emitting dispatchable initial prompts. `/dispatch` consumes those prompts or work units and executes the selected route: independent handoff is outside dispatch, while linear and parallel dispatch are inside dispatch.
 
 ## Pipeline Overview
 
 ```
-                                                      ┌→ INSCRIBE  (Phase 6 — rejected branch)
-DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK
- (silent) (gated)     (no intake)     (per-unit) (route topology)
-                                                      └→ COMPLY    (Phase 7 — compliant branch)
+                                                      ┌→ INSCRIBE  (Phase 6 — rejected branch) ┐
+DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK                                  → CAPTURE → SUMMARY
+ (silent) (gated)     (no intake)     (per-unit) (route topology)                              (Phase 8)  (return)
+                                                      └→ COMPLY    (Phase 7 — compliant branch) ┘
 ```
 
-Phase 1 (BOUND) composes `/bound` for execution topology. Phase 2 loads the focused work units already present in session text. Phase 3 verifies each unit's premise before branch creation. Phase 4 executes the selected topology: linear sequence or parallel fanout. Phase 5 routes per PR; rejected and compliant branches are independent siblings dispatched from feedback classification.
+Phase 1 (BOUND) composes `/bound` for execution topology. Phase 2 loads the focused work units already present in session text. Phase 3 verifies each unit's premise before branch creation. Phase 4 executes the selected topology: linear sequence or parallel fanout. Phase 5 routes per PR; rejected and compliant branches are independent siblings dispatched from feedback classification. Phase 8 runs only after active fanout, rejection inscription, compliance fixes, and dynamic-stop handling have been surfaced.
 
 ## Personalization sources
 
@@ -60,10 +60,11 @@ Compose `/bound` for the delegation contract. Domains to bound (minimum set):
 - **Effort cap**: max issues / max time / dynamic-stop
 - **Conflict handling**: skip-with-surface / attempt-with-care
 - **Stage gating compliance**: substrate-cited locks (Out-of-scope clauses, "depends on #X" close-conditions, evidence-accumulation gates)
+- **Post-cycle improvement filing**: create GitHub follow-up issues / draft-only summary / skip unless user confirms
 
 If the project's profile declares an Extension-default with a closure clause covering ambiguity (e.g., "AI-autonomous bounded by [northstar + hermeneutic circle]"), Phase 1 may relay-resolve via cited profile. Otherwise, run Horismos cycles for explicit contract.
 
-**Output**: BoundaryMap with at least the six domains above resolved.
+**Output**: BoundaryMap with at least the domains above resolved.
 
 ## Phase 2: Load Focused Work Units
 
@@ -172,16 +173,45 @@ For each compliant PR with minor fixes:
 
 Out-of-scope review suggestions are NOT applied here — they are tracked separately as new issues or comments, never silently expanded into the current PR.
 
+## Phase 8: Post-cycle Improvement Capture
+
+Run this phase after active PR/review/dynamic-stop handling is complete, so the active fanout contract reaches closure before follow-up improvement work begins.
+
+Scan cycle artifacts for substrate-cited workflow or protocol defects:
+
+- `PremiseTrace`
+- `SkippedSet`
+- dynamic-stop records
+- verification warnings or failures
+- PR review comments
+- user corrections made during the cycle
+
+Filter candidates before filing anything:
+
+- Keep only durable improvement candidates with cited evidence from the cycle substrate.
+- Keep Dispatch workflow defects, protocol contract gaps, recurring verification/package warnings that materially affect dispatch work, or issue-body/branch-state drift patterns that should guide a future session.
+- Keep speculative chat impressions, one-off preferences without substrate evidence, and review rejections already handled by Phase 6 linked-issue inscription outside the filed follow-up set.
+- Preserve the personalization boundary: profile changes route to `/steer`; northstar re-inscription routes to `/realign`.
+
+For each remaining candidate:
+
+1. De-duplicate against open issues using the issue tracker search surface; this search is a narrow duplicate check, not backlog intake.
+2. If an open issue already covers the candidate, record the existing issue link and skip creation.
+3. If issue creation is allowed by the Phase 1 boundary, create one GitHub issue per durable candidate with observed evidence, affected surface, proposed direction, out-of-scope boundaries, and acceptance criteria.
+4. If issue creation is outside the Phase 1 boundary, surface a draft issue body or concise candidate record in the final summary instead of filing.
+
+**Output**: `ImprovementIssueTrace` containing created issue links, duplicate-skipped issue links, intentionally skipped candidates with reasons, and any draft-only candidates.
+
 ## Termination
 
 | Trigger | Effect |
 |---|---|
-| All work units executed + feedback inscribed | Return (PRBatch, InscriptionTrace, SkippedSet) — surface summary with merge-ready and rejected-and-inscribed counts |
+| All work units executed + feedback inscribed + improvement capture complete | Return (PRBatch, InscriptionTrace, SkippedSet, ImprovementIssueTrace) — surface summary with merge-ready, rejected-and-inscribed, and follow-up improvement counts |
 | Effort cap reached | Defer remaining work units with explicit dynamic-stop record; surface what remains and why |
 | User Esc | Return to normal operation; partial state surfaced |
-| Phase 1 BoundaryMap incomplete (user declines / withdraws contract) | Return (∅, ∅, ∅) with the in-progress contract state surfaced; no fanout commenced |
-| Phase 2 finds no focused work unit | Return (∅, ∅, ∅) with explicit route-to-`/triage` surfacing; not a failure state |
-| All PRs rejected post-feedback (merged = 0, rejected > 0) | Return (PRBatch, InscriptionTrace, SkippedSet) with merged = 0 surfaced explicitly; per-PR rejection inscriptions are the substantive output, not failure |
+| Phase 1 BoundaryMap incomplete (user declines / withdraws contract) | Return (∅, ∅, ∅, ∅) with the in-progress contract state surfaced; no fanout commenced |
+| Phase 2 finds no focused work unit | Return (∅, ∅, ∅, ∅) with explicit route-to-`/triage` surfacing; not a failure state |
+| All PRs rejected post-feedback (merged = 0, rejected > 0) | Return (PRBatch, InscriptionTrace, SkippedSet, ImprovementIssueTrace) with merged = 0 surfaced explicitly; per-PR rejection inscriptions are the substantive output, not failure |
 
 Final summary always includes:
 
@@ -190,6 +220,7 @@ Final summary always includes:
 - Rejected PR count + linked-issue inscription count
 - Skipped work-unit count by class (blocked / stale / needs-info / re-triage-needed)
 - Deferred work units (effort cap)
+- Follow-up improvement issue count with created links, duplicate-skipped links, and draft-only or intentionally skipped candidate reasons
 
 ## Rules
 
@@ -203,7 +234,10 @@ Final summary always includes:
 8. **No silent rejection close** (Derived — Loop Continuity under Bounded Regret): Closing a rejected PR without inscription violates cross-session continuity. Inscribe first; close second.
 9. **Effort cap dynamic-stop record** (Derived — Loop Continuity under Bounded Regret): When effort cap forces deferral, record cause + remaining work units explicitly so the next session can resume without re-deriving the queue.
 10. **Out-of-scope feedback non-expansion** (Cross-protocol — scope discipline): Phase 7 applies only minor-fix scope. Out-of-scope review suggestions become new issues or trailing comments — never silent scope expansion.
-11. **Personalization read, not write** (Architectural — personalization boundary): This skill reads the project's profile and editing-convention rules. It does not write to those files. Profile changes belong to `/steer`; northstar re-inscription belongs to `/realign`.
+11. **Post-cycle improvement capture only** (Derived — Loop Continuity under Bounded Regret): Improvement issues are created or drafted only after active fanout, Phase 6 inscription, Phase 7 compliance fixes, and dynamic-stop surfacing finish. Filing improvement work mid-cycle derails the bounded work-unit contract.
+12. **Improvement issues carry distinct substrate** (Cross-protocol — continuity invariant): Phase 6 preserves rejected current-work reasoning on linked issues with verbatim review evidence. Phase 8 records only durable workflow or protocol defects with separate substrate citation; a rejected PR qualifies for an additional improvement issue only when a distinct Dispatch or protocol defect is evidenced beyond the inscription.
+13. **Improvement issue de-duplication** (Derived — Surfacing over Deciding): Before creating a follow-up issue, search open issues for a covering candidate and record the created-or-skipped result in `ImprovementIssueTrace`. This duplicate check is scoped to verifying whether the candidate already has a covering open issue; backlog intake and similarity grouping belong to `/triage`.
+14. **Personalization read, not write** (Architectural — personalization boundary): This skill reads the project's profile and editing-convention rules. It does not write to those files. Profile changes belong to `/steer`; northstar re-inscription belongs to `/realign`.
 
 ## Distinction from Other Protocols
 
@@ -234,12 +268,15 @@ Composition is sequential — each phase consumes the previous phase's output. P
 - **Silent rejection close**: closing a rejected PR with only a one-line "frame rejected" comment without redirection inscription. The next session has nothing to enter from.
 - **Out-of-scope expansion in Phase 7**: applying a "while you're here" review suggestion in the compliance loop. The suggestion belongs in a new issue.
 - **Effort cap omission**: deferring work units silently when cap is hit, leaving the queue state implicit. The next session has to re-derive the unattempted set.
+- **Mid-fanout improvement filing**: turning a discovered workflow defect into a new issue before active work, rejection inscription, compliance fixes, or dynamic-stop surfacing finishes. Improvement capture is terminal, not an interruption.
+- **Duplicate improvement issue**: filing a follow-up without checking open issues for an existing candidate. The issue tracker becomes noisy and future sessions lose the intended continuation signal.
+- **Rejection-as-improvement duplication**: creating an improvement issue for rejected work that Phase 6 already inscribed into linked issues. Only separately evidenced workflow or protocol defects belong in Phase 8.
 - **Skipping premise verification**: jumping from work-unit loading to branch creation without verifying that each unit's premise still holds in current code. This produces stale work or silent axis selection on multi-approach units.
 - **Substrate-uncited framing in commit/PR body**: assertions of necessity, intentionality, or constraint inserted into commit messages or PR descriptions without cited substrate evidence (file:line, rule reference, codebase precedent). Framing decisions must derive from cited substrate recorded in Phase 3's PremiseTrace; assertion-only framing is a substrate-trace gap symptom that surfaces in Phase 5 review or as user challenge requiring axis pivot. Operational test: for every assertion of necessity, intentionality, or constraint in the commit/PR text, the writer can point to a specific substrate citation that renders the assertion self-evident — if no such citation exists, the assertion is unfounded framing.
 
 ## Operational checklist (per cycle)
 
-- [ ] Phase 1 BoundaryMap complete (six domains minimum)
+- [ ] Phase 1 BoundaryMap covers every domain listed in Phase 1
 - [ ] Phase 2 FocusedWorkUnit set loaded from session triage output or explicit initial prompts
 - [ ] Phase 3 SkippedSet surfaces substrate-cited reasons
 - [ ] Phase 3 PremiseTrace recorded per executable work unit (existence check + fusion check + approach axis selection)
@@ -247,4 +284,7 @@ Composition is sequential — each phase consumes the previous phase's output. P
 - [ ] Phase 5 each PR's review state classified before Phase 6/7 dispatch
 - [ ] Phase 6 each rejected PR's linked issues received verbatim-quoted inscription
 - [ ] Phase 7 each compliant PR with minor fixes has the fix appended (no new PR)
-- [ ] Final summary surfaces merged / compliant-fix / rejected-inscribed / skipped / deferred counts
+- [ ] Phase 8 scans PremiseTrace / SkippedSet / dynamic-stop / verification / review / user-correction artifacts for substrate-cited improvement candidates
+- [ ] Phase 8 de-duplicates candidates against open issues before creation
+- [ ] Phase 8 records created, duplicate-skipped, draft-only, or intentionally skipped improvement candidates with reasons
+- [ ] Final summary surfaces merged / compliant-fix / rejected-inscribed / skipped / deferred / follow-up-improvement counts and links
