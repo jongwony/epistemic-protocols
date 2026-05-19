@@ -19,6 +19,7 @@
 | `/compose` | 프로토콜 합성 저작 | 합성 SKILL.md 파일 생성 |
 | `/triage` | GitHub 이슈 기반 work-unit triage | dispatchable initial prompt |
 | `/dispatch` | focused work-unit 실행 | 브랜치, PR, feedback inscription |
+| `/forge` | 레퍼런스-grounded initial-prompt 형성 | 후속 세션/도구용 initial prompt |
 
 ## 스킬
 
@@ -152,6 +153,20 @@ DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK
 - 선택된 work unit에 대한 linear 또는 parallel fanout
 - fresh-context continuity를 위한 verbatim rejection feedback inscription
 
+### /forge — Reference-Grounded Initial-Prompt Formation
+
+대상 레퍼런스 문서(벤더 모델 prompt guide, Codex Goals 스펙)를 읽고, 사용자의 미명세 의도를 modality-aware IR로 역귀납한 뒤, canonical-external 동적 fetch + staleness guard로 레퍼런스에 grounding하고, 후속 세션/도구용 initial prompt를 projection한다.
+
+```
+ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft → InitialPrompt
+```
+
+주요 특징:
+- 벤더-무관 core(의도 IR + staleness 정책) + 인자화 adapter seam; Higgsfield·codex-goals 어댑터 동봉
+- core는 IR까지; 산출물 형태는 adapter-결정(core 승격 금지)
+- relay 슬롯 인용·constitution 슬롯 플래그된 채워진 초안 — 빈 질문 목록도 맹목 완성초안도 아님
+- 교차-adapter 추상은 의도적으로 유예된 colimit(triage-gated-vendor-harness의 형제), 누적 사용 전 미추출
+
 ## 아키텍처
 
 ```
@@ -164,7 +179,8 @@ epistemic-cooperative/
 │   ├── catalog/SKILL.md          # /catalog 프로토콜 핸드북
 │   ├── compose/SKILL.md          # /compose 프로토콜 합성 저작
 │   ├── triage/SKILL.md           # /triage work-unit formation
-│   └── dispatch/SKILL.md         # /dispatch focused work-unit execution
+│   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
+│   └── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
 └── agents/
     ├── project-scanner.md         # Phase 1: 프로젝트 탐색
     ├── session-analyzer.md        # Phase 2: 패턴 추출 (프로젝트별 병렬)
