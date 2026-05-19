@@ -63,7 +63,9 @@ Bind two inputs:
 - `ReferenceTarget` — an explicit reference (URL, vendor+model, "the Codex Goals doc"), or the reference the active adapter defaults to.
 - The user's intent utterance — the latent, under-determined creative or task intent.
 
-Select the adapter from the reference (Higgsfield model guide → Higgsfield adapter; Codex Goals / strong-`/goal` request → codex-goals adapter). If neither the reference nor an adapter is recoverable, ask for the reference and intent. Do not guess the reference.
+**Adapter selection (relay-first):** Select the adapter by relay when the reference or the user's request names or determines it — e.g., "/forge higgsfield: <intent>" or a Higgsfield model guide → `higgsfield`; "draft a /goal …" or the Codex Goals spec → `codex-goals`. Auto-include it; do not gate. Only when the adapter is genuinely ambiguous or unrecoverable, present the Adapter Index as a structured recognition choice (an AskUserQuestion over the indexed adapters) — never an unconditional prompt, never free-text, and never when relay determines the adapter. Do not guess the reference.
+
+After the adapter is selected, Read `adapters/<selected>.md`. The full adapter contract is progressively disclosed — loaded only on selection, not before.
 
 ## Phase 1: Resolve Intent (Core — Reverse-Induction)
 
@@ -100,25 +102,16 @@ Surface — present the filled draft as context (slots, bases, flags) before the
 
 `--ask-only` is an opt-in mode: emit only the surfaced contract slots as recognition questions and stop before projection. Default is the filled draft, not a bare question list.
 
-## Adapter: Higgsfield
+## Adapter Index
 
-- **Modality**: video only. The `mcp__higgsfield__generate_image` deny stands; the adapter scopes to video models and does not project image prompts.
-- **capabilities**: `mcp__higgsfield__models_explore` (`get` / `recommend`) for model constraints (resolution, duration, aspect, required parameters). Do not reimplement.
-- **fetch_guide_snapshot**: canonical-external web fetch tagged `web:{url}` with the staleness guard. Curated seed (per model/use):
-  - `higgsfield.ai/sora-2-prompt-guide`
-  - `higgsfield.ai/nano-banana-pro-prompt-guide`
-  - `higgsfield.ai/blog/seedance-prompting-guide`
-  - `higgsfield.ai/blog/Prompt-Guide-to-Cinematic-AI-Videos`
-  - `higgsfield.ai/blog/How-to-guides` (hub)
-  - Higgsfield surfaces are blog/product-page based, not API docs; strong canonical seeding is required.
-- **InitialPrompt**: a Higgsfield video prompt for a follow-up session.
+Adapter bodies are progressively disclosed: this index is always loaded; each adapter's full contract lives in `adapters/<name>.md` and is Read only after the adapter is selected (Phase 0).
 
-## Adapter: codex-goals
+| Adapter | Reference | InitialPrompt form |
+|---|---|---|
+| `higgsfield` | Higgsfield video model prompt guide (video-only; image generation denied) | a Higgsfield video prompt for a follow-up session |
+| `codex-goals` | OpenAI Codex Goals specification | a strong `/goal …` string for a follow-up Codex session |
 
-- **Reference**: the OpenAI Codex Goals specification — a strong Goal defines the six contract elements (outcome, verification surface, constraints, boundaries, iteration policy, blocked condition).
-- **fetch_guide_snapshot**: canonical-external web fetch of the Codex Goals doc with the staleness guard.
-- **derive_prompt_schema**: the six-element Goal contract.
-- **InitialPrompt**: a strong `/goal …` string for a follow-up Codex session, following `<desired end state> verified by <evidence> while preserving <constraints>. Use <allowed inputs>. Between iterations <next-action policy>. If blocked <report + unlock>.`
+Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch_guide_snapshot` / `derive_prompt_schema` / `project` / `validate`). New references plug in by adding an `adapters/<name>.md` file as accumulated prior — see Deferred Colimit; do not pre-build a registration framework.
 
 ## Rules
 
@@ -132,6 +125,7 @@ Surface — present the filled draft as context (slots, bases, flags) before the
 8. **Staleness guard** (Architectural — provenance continuity): reference evidence is staleness-guarded and tagged `web:{url}`. If staleness cannot be verified, fall back to the curated seed and mark the draft `stale-guide`; never present a stale reference silently.
 9. **Adapter accumulation, not top-down** (Architectural — empirical restraint): adapters are added per real use as accumulated prior. Forge ships exactly the Higgsfield and codex-goals adapters; do not build a multi-reference framework ahead of use.
 10. **Formation, not execution** (Architectural — role boundary): `/forge` does not run the downstream tool, create branches, or open PRs. It emits the initial prompt and stops.
+11. **Progressive-disclosure adapters** (Architectural — context economy + accumulation): adapter bodies are isolated `adapters/<name>.md` files loaded only after selection; the always-loaded Adapter Index carries name + reference + InitialPrompt form. Selection is relay when the reference or request determines the adapter, a structured recognition gate only on genuine ambiguity (never unconditional). Adapters accumulate as additive files — the deferred-colimit accumulation mechanism made physical; do not build a generalized adapter-registration framework ahead of use.
 
 ## Deferred Colimit (do not extract yet)
 
@@ -161,7 +155,7 @@ Candidate adapters (not yet realized — list only, do not build ahead of use):
 
 ## Operational checklist (per cycle)
 
-- [ ] Phase 0 reference and intent are bound; the adapter is selected from the reference
+- [ ] Phase 0 reference and intent bound; adapter selected by relay (structured recognition gate only on ambiguity); `adapters/<selected>.md` Read only after selection
 - [ ] Phase 1 intent reverse-induced into `CreativePromptIR`; heavy aporia escalated to `/elicit`
 - [ ] Phase 2 reference fetched with staleness metadata; hybrid seed + dynamic fetch + guard applied
 - [ ] Phase 3 six contract elements extracted; every slot partitioned relay vs constitution
