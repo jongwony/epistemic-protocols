@@ -54,7 +54,7 @@ Report:
 Launch via `Bash(run_in_background: true, timeout: 1000000)`:
 
 ```bash
-codex exec --skip-git-repo-check -m gpt-5.5 \
+codex exec --ephemeral --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="high" \
   --config mcp_servers.tavily.tool_timeout_sec=900 \
   < /tmp/goal_research_${SUFFIX}.txt
