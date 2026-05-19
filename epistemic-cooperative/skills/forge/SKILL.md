@@ -100,7 +100,7 @@ Surface — present the filled draft as context (slots, bases, flags) before the
 2. **Adjust flagged slots** — change one or more constitution slots, then re-project.
 3. **Regenerate** — re-fetch the reference or re-resolve intent and rebuild.
 
-`--ask-only` is an opt-in mode: emit only the surfaced contract slots as recognition questions and stop before projection. Default is the filled draft, not a bare question list.
+Default is the filled draft, not a bare question list.
 
 ## Adapter Index
 
@@ -129,7 +129,7 @@ Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch
 
 ## Deferred Colimit (do not extract yet)
 
-The cross-adapter abstraction — "reference-grounded initial-prompt formation" generalized over reference classes — is a **deliberately deferred colimit**. It is a sibling of the `triage-gated-vendor-harness` meta-pattern (a prescriptive core + per-instance realizations + accumulated prior). It is **not** extracted or named now.
+The cross-adapter abstraction — "reference-grounded initial-prompt formation" generalized over reference classes — is a **deliberately deferred colimit**. Its structure is a prescriptive core plus per-instance realizations plus accumulated prior. It is **not** extracted or named now.
 
 Trigger to extract the meta-pattern: a built first-reference instance plus accumulated prior from real use of a second instance, per the epistemic cost asymmetry (an unused abstraction costs more than a missing one) and instance-first methodology. Naming it before that is the over-generalization the methodology refuses.
 
@@ -142,16 +142,6 @@ Candidate adapters (not yet realized — list only, do not build ahead of use):
 ## Boundary Note
 
 `/forge` forms an initial prompt and stops. It reads a reference and surfaces intent; it does not execute the tool, run the Goal, generate the media, or open branches/PRs. Heavy intent aporia routes to `/elicit`; the reference-fetch move mirrors the `/inquire` canonical-external channel but forge owns the projection.
-
-## Anti-patterns
-
-- **Blank question list**: emitting the six contract elements as open questions instead of a filled draft with flagged slots.
-- **Blind full draft**: emitting a confident artifact that hides which slots were guessed (constitution slots must be flagged).
-- **Core promotion**: making "completion contract" or any adapter artifact form a core output type instead of an adapter projection.
-- **Silent stale reference**: presenting a fetched reference without the staleness guard or `stale-guide` flag.
-- **Top-down adapter framework**: building a multi-reference abstraction ahead of accumulated use, or naming the deferred colimit prematurely.
-- **Reference-free projection**: emitting a prompt not grounded in a fetched, provenance-tagged reference.
-- **Execution leakage**: running the tool, the Goal, or media generation inside `/forge`.
 
 ## Operational checklist (per cycle)
 
