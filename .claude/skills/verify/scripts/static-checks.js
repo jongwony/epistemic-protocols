@@ -2468,11 +2468,17 @@ function checkCodexManifestSync() {
     inSync++;
   }
 
-  if (inSync > 0) {
+  // Always leave a terminal result so a registered-but-clean check is
+  // distinguishable from one that never ran. Pass is suppressed only when
+  // this check itself pushed a fail (preserves pass/fail non-co-emission).
+  const sawFail = results.fail.some(f => f.check === 'codex-manifest-sync');
+  if (!sawFail) {
     results.pass.push({
       check: 'codex-manifest-sync',
       file: 'working tree',
-      message: `All ${inSync} codex manifests match their .claude-plugin/plugin.json version`,
+      message: inSync > 0
+        ? `All ${inSync} codex manifests match their .claude-plugin/plugin.json version`
+        : 'No .codex-plugin manifests present — nothing to sync',
     });
   }
 }
