@@ -25,7 +25,7 @@ The **core** is vendor-agnostic and stops at `ResolvedIntentIR` plus the validat
 
 ## Core / Seam / Adapter
 
-- **Core (vendor-agnostic)**: reverse-induce the user's under-determined intent into `CreativePromptIR`; extract the six contract elements the reference requires; partition slots into relay vs constitution; own the staleness policy, provenance, and generic validation.
+- **Core (vendor-agnostic)**: reverse-induce the user's under-determined intent into `ResolvedIntentIR`; extract the adapter-derived required slots (`ContractElements`) the reference's schema requires; partition slots into relay vs constitution; own the staleness policy, provenance, and generic validation.
 - **Vendor Adapter Contract (the seam)**: the narrow, parameterized interface every adapter satisfies. New references plug in by adding an adapter section — accumulated per real use, never built top-down.
 - **Adapters (concrete instances)**: `Higgsfield` and `codex-goals` ship now. Each owns reference discovery/fetch, the reference's prompt schema, the projection rendering, and unsupported-field degradation.
 
@@ -38,18 +38,19 @@ Each adapter provides, against a fixed contract:
 | `capabilities` | The reference's model/target constraints (resolution, duration, required fields, supported modalities). |
 | `fetch_guide_snapshot` | Acquire the reference text via canonical-external dynamic web fetch; produce a `GuideSnapshot` with staleness metadata. |
 | `derive_prompt_schema` | From the snapshot, derive the reference's prompt schema (the slots the artifact must fill). |
-| `project` | Render `CreativePromptIR` through the schema into a `VendorPromptDraft`. |
+| `project` | Render `ResolvedIntentIR` through the schema into a `VendorPromptDraft` (an adapter may first specialize it into a reference-specific IR such as `CreativePromptIR`). |
 | `validate` | Check the draft against `capabilities`; surface degraded or unsupported fields. |
 
-Narrowest seam contract: `CreativePromptIR × GuideSnapshot -> VendorPromptDraft`, carrying provenance and freshness. The core does not know "Seedance wants shot count first" or "a Goal needs a blocked-stop clause"; that lives in adapters.
+Narrowest seam contract: `ResolvedIntentIR × GuideSnapshot -> VendorPromptDraft`, carrying provenance and freshness. The core does not know "Seedance wants shot count first" or "a Goal needs a blocked-stop clause"; that lives in adapters.
 
 ## Types
 
 | Type | Meaning |
 |---|---|
 | `ReferenceTarget` | The authoritative document to ground against: a vendor model prompt guide, the Codex Goals spec, or another reference the active adapter recognizes. |
-| `ContractElements` | The six elements forge extracts that a reference requires to be applied: outcome, verification surface, constraints, boundaries, iteration policy, blocked condition. |
-| `CreativePromptIR` | The modality-aware intermediate representation of resolved intent: `{ intent{goal,audience?,mood?}, modality(image|video|audio|voice), scene?, visual?, motion?, audio?, params?, constraints{mustInclude?,mustAvoid?,references?} }`. Lossy-but-useful; it preserves intent and common coordinates, not cross-reference semantic equivalence. |
+| `ContractElements` | The reference-required slots forge extracts so the reference can be applied. The concrete slot set is adapter-derived from the reference's schema, not fixed by the core. |
+| `ResolvedIntentIR` | The core's vendor-agnostic resolved-intent IR: the user's intent plus the resolved coordinates the reference's required slots need, modality-tagged but not media-specific. Core output stops here; an adapter may require a more specific specialization. |
+| `CreativePromptIR` | An adapter-required specialization of `ResolvedIntentIR` for creative-media references (the Higgsfield-class adapter requires it): the modality-aware IR `{ intent{goal,audience?,mood?}, modality(image|video|audio|voice), scene?, visual?, motion?, audio?, params?, constraints{mustInclude?,mustAvoid?,references?} }`. Lossy-but-useful; preserves intent and common coordinates, not cross-reference semantic equivalence. The core never produces it; the creative-media adapter derives it from `ResolvedIntentIR`. |
 | `GuideSnapshot` | The fetched reference text plus staleness metadata: `{ url, retrieved_at, visible_updated_at|version, content_hash, canonicality_score }`. |
 | `RelaySlot` | A contract slot determined by the reference plus the user's stated intent. Forge auto-fills it with a cited basis. |
 | `ConstitutionSlot` | A contract slot requiring the user's judgment. Forge fills it with a proposed default and explicitly flags it for recognition. |
@@ -69,7 +70,7 @@ After the adapter is selected, Read `adapters/<selected>.md`. The full adapter c
 
 ## Phase 1: Resolve Intent (Core — Reverse-Induction)
 
-Reverse-induce the under-determined intent into `CreativePromptIR`. Surface only the coordinates the reference will require; do not interrogate coordinates the reference and stated intent already determine.
+Reverse-induce the under-determined intent into `ResolvedIntentIR`. Surface only the coordinates the reference will require; do not interrogate coordinates the reference and stated intent already determine.
 
 Use inline lightweight reverse-induction. When the intent carries heavy aporia (multi-axis, no stable coordinate basis), escalate to `/elicit` rather than forcing a thin IR, then resume Phase 2 with the resolved endpoint.
 
@@ -81,7 +82,7 @@ Staleness guard: record `{ url, retrieved_at, visible_updated_at|version, conten
 
 ## Phase 3: Extract Contract and Partition Slots (Core)
 
-Derive the reference's prompt schema and extract the six `ContractElements`. Partition every slot:
+Derive the reference's prompt schema and extract the adapter-derived required slots (`ContractElements`). Partition every slot:
 
 - `RelaySlot` — determined by reference plus stated intent → fill with a cited basis.
 - `ConstitutionSlot` — requires the user's judgment → fill with a proposed default, explicitly flagged.
@@ -146,9 +147,9 @@ Candidate adapters (not yet realized — list only, do not build ahead of use):
 ## Operational checklist (per cycle)
 
 - [ ] Phase 0 reference and intent bound; adapter selected by relay (structured recognition gate only on ambiguity); `adapters/<selected>.md` Read only after selection
-- [ ] Phase 1 intent reverse-induced into `CreativePromptIR`; heavy aporia escalated to `/elicit`
+- [ ] Phase 1 intent reverse-induced into `ResolvedIntentIR`; heavy aporia escalated to `/elicit`
 - [ ] Phase 2 reference fetched with staleness metadata; hybrid seed + dynamic fetch + guard applied
-- [ ] Phase 3 six contract elements extracted; every slot partitioned relay vs constitution
+- [ ] Phase 3 adapter-derived required slots extracted; every slot partitioned relay vs constitution
 - [ ] Phase 4 filled draft presented — relay slots cited, constitution slots flagged
 - [ ] InitialPrompt emitted with provenance, freshness, and `stale-guide` flag when applicable
 - [ ] Core output stopped at IR; artifact form kept in the adapter
