@@ -2413,6 +2413,77 @@ function checkWorkflowPathsSync() {
 }
 
 // ============================================================
+// Check 22: Codex Manifest Version Sync
+// ============================================================
+// Every plugin carries a canonical .claude-plugin/plugin.json (the one
+// package.js builds from) and may carry a .codex-plugin/plugin.json variant.
+// version-staleness only inspects the claude manifest, so a bump that touches
+// the claude manifest leaves the codex manifest silently drifted — the
+// recurring "version bump missed codex-plugin" pattern. walkFiles skips
+// dot-directories, so the codex manifest is also outside json-schema's reach;
+// this check is its only parse/version guard. Fail-level on purpose: the
+// forcing function must block at the same /verify gate the claude bump passes
+// through, not surface after the fact in a separate remediation PR.
+function checkCodexManifestSync() {
+  const seen = new Set();
+  let inSync = 0;
+  for (const record of _records) {
+    if (seen.has(record.dir)) continue;
+    seen.add(record.dir);
+
+    const codexPath = path.join(projectRoot, record.dir, '.codex-plugin', 'plugin.json');
+    if (!fs.existsSync(codexPath)) continue; // codex variant optional; equality enforced only when present
+
+    const codexRel = path.relative(projectRoot, codexPath);
+    let codexJson;
+    try {
+      codexJson = JSON.parse(fs.readFileSync(codexPath, 'utf8'));
+    } catch (e) {
+      results.fail.push({
+        check: 'codex-manifest-sync',
+        file: codexRel,
+        message: `Unparseable codex manifest: ${e.message}`,
+      });
+      continue;
+    }
+
+    const claudeVer = record.pluginJson.version;
+    const codexVer = codexJson.version;
+    if (!codexVer) {
+      results.fail.push({
+        check: 'codex-manifest-sync',
+        file: codexRel,
+        message: `Missing "version" — set it to "${claudeVer}" to match .claude-plugin/plugin.json`,
+      });
+      continue;
+    }
+    if (codexVer !== claudeVer) {
+      results.fail.push({
+        check: 'codex-manifest-sync',
+        file: codexRel,
+        message: `Version drift — codex "${codexVer}" != claude "${claudeVer}"; bump this file to "${claudeVer}" in the same commit as the claude version bump`,
+      });
+      continue;
+    }
+    inSync++;
+  }
+
+  // Always leave a terminal result so a registered-but-clean check is
+  // distinguishable from one that never ran. Pass is suppressed only when
+  // this check itself pushed a fail (preserves pass/fail non-co-emission).
+  const sawFail = results.fail.some(f => f.check === 'codex-manifest-sync');
+  if (!sawFail) {
+    results.pass.push({
+      check: 'codex-manifest-sync',
+      file: 'working tree',
+      message: inSync > 0
+        ? `All ${inSync} codex manifests match their .claude-plugin/plugin.json version`
+        : 'No .codex-plugin manifests present — nothing to sync',
+    });
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -2423,6 +2494,7 @@ try {
   checkRequiredSections();
   checkToolGrounding();
   checkVersionStaleness();
+  checkCodexManifestSync();
   checkGraphIntegrity();
   checkSpecVsImpl();
   checkMorphismAnatomy();
