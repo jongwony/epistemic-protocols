@@ -4,7 +4,7 @@ This file provides always-loaded guidance for coding agents when working in this
 
 ## Northstar
 
-Epistemic Protocols is a domain-free metalanguage of structured types and morphisms for human-AI collaboration: it constrains AI attention without bias, elicits unknowns into utterance, and reflexively re-forms misalignment within the loop — the loop dissolves compounding cost before it forces whole-system refactoring.
+Epistemic Protocols is a domain-free metalanguage of structured types and morphisms for human-AI collaboration: it reduces cognitive load by eliciting unknowns into utterance, constraining AI attention without bias, and resolving interaction deficits at their root within bounded loops before local misalignment hardens into system-wide rework.
 
 ## Project Overview
 
