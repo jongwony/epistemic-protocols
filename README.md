@@ -84,7 +84,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/triage`, `/dispatch` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, and focused work-unit dispatch with PR fanout + rejection-trace inscription |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/triage`, `/dispatch`, `/forge` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, focused work-unit dispatch with PR fanout + rejection-trace inscription, and reference-grounded initial-prompt formation |
 
 **Three discovery modes coexist** (none replaces the others):
 
@@ -104,6 +104,10 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 - `/triage` — read a scoped GitHub `RawIssueSet`, group related issues, normalize each group into a problem frame, fuse it with the `AGENTS.md` northstar in the current session, and emit dispatchable initial prompts with route choices
 - `/dispatch` — consume focused work units or initial prompts, set an execution topology contract (composes `/bound`), verify each unit's premise, fan out work-unit branches/PRs, then load review feedback and inscribe rejection traces into linked issues so the next fresh-context session can re-enter without re-deriving the rejection's reasoning
+
+**Reference-grounded prompt formation**:
+
+- `/forge` — read a target reference (vendor model prompt guide, Codex Goals spec), reverse-induce the user's under-determined intent into a modality-aware IR, ground it against the reference via canonical-external dynamic fetch with a staleness guard, and project a ready-to-use initial prompt for a follow-up session/tool; vendor-agnostic core + parameterized adapter seam (Higgsfield, codex-goals), with the cross-adapter abstraction held as a deliberately deferred colimit
 
 ## Design
 

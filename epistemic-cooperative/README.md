@@ -19,6 +19,7 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/compose` | Protocol composition authoring | Generated composition SKILL.md file |
 | `/triage` | Work-unit triage from GitHub issues | Dispatchable initial prompts |
 | `/dispatch` | Focused work-unit execution | Branches, PRs, feedback inscriptions |
+| `/forge` | Reference-grounded initial-prompt formation | Initial prompt for a follow-up session/tool |
 
 ## Skills
 
@@ -152,6 +153,20 @@ Key features:
 - linear or parallel fanout over selected work units
 - verbatim rejection feedback inscription for fresh-context continuity
 
+### /forge — Reference-Grounded Initial-Prompt Formation
+
+Reads a target reference document (a vendor model prompt guide, the Codex Goals spec), reverse-induces the user's under-determined intent into a modality-aware IR, grounds it against the reference via canonical-external dynamic fetch with a staleness guard, and projects a ready-to-use initial prompt for a follow-up session or tool.
+
+```
+ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft → InitialPrompt
+```
+
+Key features:
+- vendor-agnostic core (intent IR + staleness policy) + parameterized adapter seam; ships Higgsfield and codex-goals adapters
+- core stops at IR; artifact form is adapter-determined (no core promotion)
+- filled draft with relay slots cited and constitution slots flagged — not a blank question list, not a blind full draft
+- cross-adapter abstraction is a deliberately deferred colimit (sibling of triage-gated-vendor-harness), not extracted ahead of accumulated use
+
 ## Architecture
 
 ```
@@ -164,7 +179,8 @@ epistemic-cooperative/
 │   ├── catalog/SKILL.md          # /catalog protocol handbook
 │   ├── compose/SKILL.md          # /compose protocol composition authoring
 │   ├── triage/SKILL.md           # /triage work-unit formation
-│   └── dispatch/SKILL.md         # /dispatch focused work-unit execution
+│   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
+│   └── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
 └── agents/
     ├── project-scanner.md         # Phase 1: project discovery
     ├── session-analyzer.md        # Phase 2: pattern extraction (parallel per project)
