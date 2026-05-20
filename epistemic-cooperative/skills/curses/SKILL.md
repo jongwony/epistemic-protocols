@@ -119,14 +119,14 @@ this distinction. In cold-start sessions, the AI must proactively surface both
 interpretations before the user validates.
 
 Patterns that require dual-interpretation:
-- **D5 high + D6 high**: Could be "KK neglect via over-delegation" OR "deliberate
-  Extended Mind strategy with quality bridges"
-- **D2 high + D4 high**: Could be "cure-as-disease accumulation" OR "systematic
-  verification infrastructure that scales"
+- **D5 high + D6 high**: Could be "deliberate Extended Mind strategy with quality
+  bridges" OR "KK neglect via over-delegation"
+- **D2 high + D4 high**: Could be "systematic verification infrastructure that
+  scales" OR "cure-as-disease accumulation"
 
 For these dual-interpretation patterns specifically, retain a Constitution gate
-before downstream derivation: "This pattern admits two readings — [curse
-interpretation] or [strategy interpretation]. Which better describes your
+before downstream derivation: "This pattern admits two readings — [strategy
+interpretation] or [curse interpretation]. Which better describes your
 experience?" The user's intent here is project-profile category (a) — user IS
 the measurement target — and cannot be auto-resolved regardless of profile;
 downstream recommendations depend on this choice. Single-interpretation pairs
