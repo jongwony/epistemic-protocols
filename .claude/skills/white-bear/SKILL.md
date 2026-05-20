@@ -41,14 +41,18 @@ For each in-scope file, consider every prose sentence outside formal blocks and 
 
 A **White Bear signal** is a sentence in LLM-facing prose framed as a prohibition (do not, never, avoid, must not, should not, cannot) that admits a positive restatement preserving the directive's force. A sentence whose load-bearing meaning collapses without the prohibition (a safety boundary the LLM observes, a contract the LLM honors) remains compliant; the test is whether a positive restatement preserves both the directive's force and its meaning.
 
-**Cited preserved-prohibition carve-outs** (treat as compliant by purpose, surface only as `severity: low` if the rewrite preference is judgment-dependent):
+**Section-level placement** (per `safeguards.md §White Bear Avoidance` placement distinction):
+- **Runtime motivational prose** — Rules, Phase prose, agent system prompts. Apply White Bear avoidance at full strength; the load-bearing test below determines whether a prohibition stays.
+- **Diagnostic substrate** — `## Anti-patterns` sections, failure-case checklists, audit findings, review-vocabulary lists. Section role is naming failure modes for detection; negative or failure-case wording is the content. Treat as compliant by purpose. Surface findings only when a positive restatement would preserve both directive force *and* boundary meaning — usually `severity: low` for human triage rather than `high`.
+
+**Cited preserved-prohibition carve-outs** (runtime prose where the prohibition is load-bearing; treat as compliant by purpose, surface only as `severity: low` if the rewrite preference is judgment-dependent):
 - Prothesis Rule 14 — Phase 3 `Await` wait discipline (passive completion barrier vs active polling at the per-turn decision point)
 - Aitesis substrate boundary (legitimate inference vs substrate violation per inference)
 - Katalepsis Rule 11 — verification-gate 1-correct option design (comprehension verification vs decision-axis selection by purpose)
 - Prosoche Stop-as-Gate (subagent return path vs main-agent gate interaction at the `GATE_DETECTED` decision point)
 - Epharmoge Layer 2 auto-activation prohibition (deliberate user invocation vs AI speculative activation at protocol activation)
 
-For each candidate finding, prefer the rewrite that preserves the directive's meaning while satisfying the principle. Treat ambiguous cases as `severity: low` and surface them for human triage.
+For each candidate finding, prefer the rewrite that preserves the directive's meaning while satisfying the principle. The rewrite test: a positive restatement is valid when it preserves both directive force and boundary meaning. If neither in-place rewrite nor relocation to a diagnostic section preserves both, the original prohibition stays. Treat ambiguous cases as `severity: low` and surface them for human triage.
 
 ## Output
 
