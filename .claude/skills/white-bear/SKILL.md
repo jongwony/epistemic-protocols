@@ -43,7 +43,7 @@ A **White Bear signal** is a sentence in LLM-facing prose framed as a prohibitio
 
 **Section-level placement** (per `safeguards.md §White Bear Avoidance` placement distinction):
 - **Runtime motivational prose** — Rules, Phase prose, agent system prompts. Apply White Bear avoidance at full strength; the load-bearing test below determines whether a prohibition stays.
-- **Diagnostic substrate** — `## Anti-patterns` sections, failure-case checklists, audit findings, review-vocabulary lists. Section role is naming failure modes for detection; negative or failure-case wording is the content. Treat as compliant by purpose. Surface findings only when a positive restatement would preserve both directive force *and* diagnostic specificity — usually `severity: low` for human triage rather than `high`.
+- **Diagnostic substrate** — `## Anti-patterns` sections, failure-case checklists, audit findings, review-vocabulary lists. Section role is naming failure modes for detection; negative or failure-case wording is the content. Treat as compliant by purpose. Surface findings only when a positive restatement would preserve both directive force *and* boundary meaning — usually `severity: low` for human triage rather than `high`.
 
 **Cited preserved-prohibition carve-outs** (runtime prose where the prohibition is load-bearing; treat as compliant by purpose, surface only as `severity: low` if the rewrite preference is judgment-dependent):
 - Prothesis Rule 14 — Phase 3 `Await` wait discipline (passive completion barrier vs active polling at the per-turn decision point)
