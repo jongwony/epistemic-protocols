@@ -36,7 +36,7 @@ Each adapter provides, against a fixed contract:
 | Seam operation | Meaning |
 |---|---|
 | `capabilities` | The reference's model/target constraints (resolution, duration, required fields, supported modalities). |
-| `fetch_guide_snapshot` | Acquire the reference text via canonical-external dynamic web fetch; produce a `GuideSnapshot` with staleness metadata. |
+| `fetch_guide_snapshot` | Acquire the reference text via canonical-external retrieval — dynamic web fetch by default, or a local canonical mirror (a universally-deployed agent skill, an internal docs mirror, etc.) when the adapter binds to one. Produce a `GuideSnapshot` with staleness metadata. |
 | `derive_prompt_schema` | From the snapshot, derive the reference's prompt schema (the slots the artifact must fill). |
 | `project` | Render `ResolvedIntentIR` through the schema into a `VendorPromptDraft` (an adapter may first specialize it into a reference-specific IR such as `CreativePromptIR`). |
 | `validate` | Check the draft against `capabilities`; surface degraded or unsupported fields. |
@@ -76,9 +76,9 @@ Use inline lightweight reverse-induction. When the intent carries heavy aporia (
 
 ## Phase 2: Ground the Reference (Core — Canonical-External + Staleness)
 
-Call the adapter's `fetch_guide_snapshot`: acquire the reference via canonical-external dynamic web fetch. Default discovery is **hybrid** — a curated per-reference seed, fetched at runtime, accepted only if the staleness guard passes.
+Call the adapter's `fetch_guide_snapshot`: acquire the reference via canonical-external retrieval — dynamic web fetch by default, or a local canonical mirror when the adapter binds to one (a universally-deployed agent skill, an internal docs mirror, etc.). Default discovery is **hybrid** — a curated per-reference seed, resolved at runtime, accepted only if the staleness guard passes.
 
-Staleness guard: record `{ url, retrieved_at, visible_updated_at|version, content_hash, canonicality_score }` and cross-check at least one of: a changelog/version page, a visible page date, an API model/version list, or a canonical docs index. If stale or unverified, fall back to the curated seed and mark the draft `stale-guide`.
+Staleness guard: record `{ url, retrieved_at, visible_updated_at|version, content_hash, canonicality_score }` and cross-check at least one of: a changelog/version page, a visible page date, an API model/version list, or a canonical docs index. For local canonical mirrors, the mirror file's mtime serves as `visible_updated_at` and a content hash (when applicable) as `content_hash`; cross-check is the source's own version field, or — if absent — the mtime against a known-good threshold. If stale or unverified, fall back to the curated seed and mark the draft `stale-guide`.
 
 ## Phase 3: Extract Contract and Partition Slots (Core)
 
@@ -124,7 +124,7 @@ Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch
 5. **Recognition over Recall** (Axiom anchor — Recognition over Recall): forge emits a filled draft, not a blank question list. Relay slots are auto-filled with cited basis; constitution slots carry a proposed default explicitly flagged so the user recognizes and adjusts rather than recalls from blank.
 6. **Surfacing over Deciding** (Derived — Surfacing over Deciding): constitution slots are surfaced with their proposed defaults flagged; forge does not silently finalize a slot that requires the user's judgment. A blind full draft that hides which slots were guessed is an anti-pattern.
 7. **Context-Question Separation** (Axiom anchor — Context-Question Separation): the filled draft, slot bases, and flags are presented as text before the gate. The gate carries only Accept / Adjust flagged slots / Regenerate.
-8. **Staleness guard** (Architectural — provenance continuity): reference evidence is staleness-guarded and tagged `web:{url}`. If staleness cannot be verified, fall back to the curated seed and mark the draft `stale-guide`; never present a stale reference silently.
+8. **Staleness guard** (Architectural — provenance continuity): reference evidence is staleness-guarded and tagged `web:{url}` or `file:{path}` depending on the canonical-source substrate. If staleness cannot be verified, fall back to the curated seed and mark the draft `stale-guide`; never present a stale reference silently.
 9. **Adapter accumulation, not top-down** (Architectural — empirical restraint): adapters are added per real use as accumulated prior. The Adapter Index above is the authoritative list of currently-shipped adapters; do not build a multi-reference framework ahead of use.
 10. **Formation, not execution** (Architectural — role boundary): `/forge` does not run the downstream tool, create branches, or open PRs. It emits the initial prompt and stops.
 11. **Progressive-disclosure adapters** (Architectural — context economy + accumulation): adapter bodies are isolated `adapters/<name>.md` files loaded only after selection; the always-loaded Adapter Index carries name + reference + InitialPrompt form. Selection is relay when the reference or request determines the adapter, a structured recognition gate only on genuine ambiguity (never unconditional). Adapters accumulate as additive files — the deferred-colimit accumulation mechanism made physical; do not build a generalized adapter-registration framework ahead of use.
