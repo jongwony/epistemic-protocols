@@ -1,0 +1,17 @@
+# Adapter: gpt-image
+
+Progressively disclosed — Read only after the `gpt-image` adapter is selected in Phase 0. Satisfies the Vendor Adapter Contract; the core never learns these specifics.
+
+This adapter is a thin pointer. The canonical schema, parameter spec, use-case taxonomy, and prompting principles live in the codex imagegen skill at `$CODEX_HOME/skills/.system/imagegen/` — universally available across codex installations, codex-maintained. Inlining that content here would drift; the adapter delegates to the source instead.
+
+- **Modality**: image only — text-to-image and image edit. Video/audio out of scope (route to `higgsfield` for video).
+- **capabilities**: read from the source skill. Target model: OpenAI `gpt-image-2`. Constraints, sizes, quality enum, and unsupported-field routing (e.g., transparent background → `gpt-image-1.5`) live in `$CODEX_HOME/skills/.system/imagegen/references/image-api.md`. The adapter declares only that capabilities are source-derived; do not duplicate.
+- **fetch_guide_snapshot**: primary source is the filesystem path `$CODEX_HOME/skills/.system/imagegen/` — codex-maintained, filesystem-stable, available across all codex installations. Use the source directory's mtime as the freshness signal; no staleness web check is required when the local skill resolves. `GuideSnapshot.url` is `file://$CODEX_HOME/skills/.system/imagegen/SKILL.md` in this path. Web fallback only when the local skill is absent (codex not installed): `https://developers.openai.com/cookbook/examples/multimodal/image-gen-models-prompting-guide` and `https://developers.openai.com/api/docs/models/gpt-image-2`, with the standard staleness guard.
+- **derive_prompt_schema**: load schema and use-case taxonomy verbatim from `$CODEX_HOME/skills/.system/imagegen/SKILL.md` sections "Shared prompt schema" (labeled spec) and "Use-case taxonomy (exact slugs)". Do not paraphrase here — read at projection time so any upstream change to the schema or taxonomy propagates without an adapter edit.
+- **project**: derive the creative-media `CreativePromptIR` from the core `ResolvedIntentIR`, classify into a use-case slug from the source taxonomy, then render through the source's shared schema into a `VendorPromptDraft`. Relay slots (slug-determined fields, parameter enum) cited from the source; constitution slots (slug choice when intent is ambiguous, Specificity-policy augmentation level, size choice within constraints, quality tier, text-in-image presence) carry a proposed default explicitly flagged.
+- **validate**: check the draft against the source's stated capabilities (size constraints, ratio, pixel count, format/quality enum). Reject invented use-case slugs (must exist in the source taxonomy). Surface unsupported-field routing per the source (transparent → gpt-image-1.5 with a `routed` flag).
+- **InitialPrompt**: a labeled prompt block (using the source's shared schema) plus an API-parameter envelope, ready for codex built-in `image_gen`, codex CLI fallback (`scripts/image_gen.py`), or direct OpenAI `images.generate`. `/forge` emits and stops.
+
+## Source provenance
+
+The pointer-form adapter trades local inlining for source-availability coupling. Drift cost is paid by the source maintainer (codex), not by the adapter. If the source skill is later moved, renamed, or its schema is restructured, this adapter needs a path update — not a content update. That is the durable maintenance shape.

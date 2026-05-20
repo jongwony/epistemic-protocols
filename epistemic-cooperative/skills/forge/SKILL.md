@@ -110,6 +110,7 @@ Adapter bodies are progressively disclosed: this index is always loaded; each ad
 | Adapter | Reference | InitialPrompt form |
 |---|---|---|
 | `higgsfield` | Higgsfield video model prompt guide (video-only; image generation denied) | a Higgsfield video prompt for a follow-up session |
+| `gpt-image` | Codex imagegen skill at `$CODEX_HOME/skills/.system/imagegen/` (image-only; targets `gpt-image-2`; web cookbook fallback) | a `gpt-image-2` prompt block (using the source's shared schema) plus parameter envelope |
 | `codex-goals` | OpenAI Codex Goals specification | a strong `/goal …` string for a follow-up Codex session |
 
 Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch_guide_snapshot` / `derive_prompt_schema` / `project` / `validate`). New references plug in by adding an `adapters/<name>.md` file as accumulated prior — see Deferred Colimit; do not pre-build a registration framework.
