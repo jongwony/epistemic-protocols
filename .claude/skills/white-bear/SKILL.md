@@ -10,7 +10,7 @@ Review LLM-facing prose for compliance with the White Bear authoring principle: 
 
 ## Purpose
 
-Surface phrasing patterns that evoke the prohibited target through negative framing before they land on `main`. Findings are presented for review; the human author decides which to rewrite, mark as load-bearing, or dismiss.
+Surface prohibition-framed phrasing whose positive restatement would be followed more reliably, before it lands on `main`. Findings are presented for review; the human author decides which to rewrite, mark as load-bearing, or dismiss.
 
 ## Inputs
 
