@@ -24,13 +24,14 @@ the defining duty is that they read as one set. Visual consistency is a first-cl
 responsibility, not an afterthought.
 
 You orchestrate two existing skills and add the human-judgment and quality layers around
-them. You do **not** reimplement grounding, prompt-schema filling, or the codex runner.
+them. Delegate grounding to /forge and generation to the Codex CLI; your own role is the
+metaphor design, the human gate, verification, and series coherence.
 
 ```
 bind artifact + passage
   → (recommended) metaphor preview gate   ← human picks the visual idea cheaply
   → /forge   (grounding + gpt-image prompt block)        [DELEGATE]
-  → codex-plus:codex   (gpt-image-2 generation)          [DELEGATE]
+  → Codex CLI   (gpt-image-2 generation)                 [DELEGATE]
   → verify + enforce series coherence + report
 ```
 
@@ -109,8 +110,8 @@ codex exec --ephemeral --skip-git-repo-check -m gpt-5.5 \
 
 For multiple images, launch one background call per image in the same turn so they run in
 parallel. Each completion sends a notification — then read the output from the completed
-background task and `rm -f /tmp/image_companion_${SUFFIX}.txt`. Do not poll or sleep;
-wait for the notification.
+background task and `rm -f /tmp/image_companion_${SUFFIX}.txt`. Wait for the completion
+notification before reading output.
 
 Running in the background keeps Codex's verbose banner out of the main context. The model
 (`-m gpt-5.5`) is fixed by design — Codex substitutes its own internal image skill
@@ -127,7 +128,7 @@ companion set's contract (two brand colors + exactly one reserved accent for the
 emphasized moment).
 
 Then produce a Korean consolidated report using the template in
-`references/verification.md`: a SESSION_ID table, the per-image verdict, and any
+`references/verification.md`: a table with image, filename, and verdict, plus any
 non-fatal warnings (e.g., auth-token refresh notices, deprecation notices) so the user
 sees the full picture without reading raw codex output.
 

@@ -21,10 +21,9 @@ regenerate with a corrective note rather than shipping.
    stroke style consistent with the companion images.
 6. **Reads at a glance** — the single intended punchline is obvious without explanation.
 
-When a regeneration is needed, give codex a targeted corrective note (what specifically
-to change) rather than a full rewrite — this matches how the runs self-corrected in
-practice (e.g. "remove the stray 'ready'/'time' labels"; "use text-only labels, no
-brand-like icons").
+When a regeneration is needed, give codex a targeted corrective note naming what
+specifically to change, rather than a full rewrite — this matches how runs self-correct
+in practice.
 
 ## Korean consolidated report template
 

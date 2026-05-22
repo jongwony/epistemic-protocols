@@ -37,11 +37,9 @@ the structure, and **one** warm accent (amber/orange) is reserved for the single
 emphasized moment — the loss, the reveal, the punchline. Spending the accent on more than
 one thing per image dilutes the emphasis and breaks set consistency.
 
-The *specific* colors are per-artifact data, not part of the discipline. For the
-ring_alarm series the contract was: Amplitude purple `#6838b0`, Snowplow blue `#0060c8`,
-neutral grays on near-white, and amber reserved for the unsent/loss moment. A different
-artifact will have different brand colors — read them off the existing companion images
-and reuse them; only the "two + one-accent" *structure* is fixed.
+The *specific* colors are per-artifact data, not part of the discipline. Each artifact has
+its own brand colors — read them off the existing companion images and reuse them; only
+the "two + one-accent" *structure* is fixed.
 
 ### Fixed model (not a tunable)
 
