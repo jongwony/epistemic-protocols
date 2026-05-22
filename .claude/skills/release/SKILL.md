@@ -77,7 +77,7 @@ Draft narrative using this template (Korean, matching repo's PR body convention)
 ```
 > **Background**
 >
-> {experiential / contextual narrative — the lived origin and why this release matters; 1-3 paragraphs. No theme sentence here — Background is pure context.}
+> {experiential / contextual narrative — the lived origin and why this release matters; 1-3 paragraphs. Background IS pure context — the theme sentence belongs in the 무엇이 새로운가요? section below.}
 >
 > ---
 >
@@ -95,7 +95,14 @@ Draft narrative using this template (Korean, matching repo's PR body convention)
 {script-generated body, with its leading `# Epistemic Protocols vX` H1 line removed so it starts at `## Highlights`}
 ```
 
-The narrative splits into two blockquoted sections matching the repo's prior-release convention: a **Background** section (pure experiential/contextual narrative — the lived origin) and a **무엇이 새로운가요?** section that leads with the theme sentence and then the bullets. The two sections are separated by an in-blockquote divider (`> ---`), and a second in-blockquote divider closes the narrative before the script body. The script body's leading `# Epistemic Protocols vX` H1 is stripped: the GitHub release title already renders the version, so a body H1 would surface a duplicate title. After stripping, the body begins at `## Highlights`.
+The narrative splits into two blockquoted sections, matching the repo's prior-release convention:
+
+- **Background** — pure experiential/contextual narrative (the lived origin). The label is intentionally English `**Background**`: a grandfathered exception to the Korean-narrative convention, carried forward from earlier releases (`v2026.05.18`, `v2026.05.15`) for visual continuity. The change-section label `**무엇이 새로운가요?**` stays Korean.
+- **무엇이 새로운가요?** — leads with the theme sentence (`이번 릴리스의 핵심은 **{theme}** — ...`), then the change bullets.
+
+Both sections, and the close before the script body, are bounded by in-blockquote dividers (`> ---`). Each `> ---` must be preceded by a blank `>` line: in CommonMark a `---` placed flush against paragraph text parses as a setext H2 underline, which would render the preceding line as a heading instead of a divider — the blank `>` line keeps it a thematic break.
+
+The script body's leading `# Epistemic Protocols vX` H1 is stripped: the GitHub release title already renders the version, so a body H1 would surface a duplicate title. After stripping, the body begins at `## Highlights`.
 
 Emoji selection is descriptive: choose an emoji whose visual semantic matches the change class. The same change class may take different emoji across releases — match the release's framing, not a fixed table.
 
