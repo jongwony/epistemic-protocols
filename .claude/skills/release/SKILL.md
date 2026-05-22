@@ -75,18 +75,34 @@ After enumeration, draft narrative using the axis the agent judges best-fit; the
 Draft narrative using this template (Korean, matching repo's PR body convention):
 
 ```
-> 이번 릴리스의 핵심은 **{theme}** — {one sentence explaining why this release matters}.
+> **Background**
+>
+> {experiential / contextual narrative — the lived origin and why this release matters; 1-3 paragraphs. Background IS pure context — the theme sentence belongs in the 무엇이 새로운가요? section below.}
+>
+> ---
 >
 > **무엇이 새로운가요?**
+>
+> 이번 릴리스의 핵심은 **{theme}** — {one sentence summarizing the release}.
+>
 > - {emoji} **`/command`** 또는 **{feature name}** — {user-facing narrative, 1-2 sentences}
 > - {emoji} **...** — ...
 > - {emoji} **...** — ...
 > - {emoji} **...** — ...
+>
+> ---
 
----
-
-{script-generated body}
+{script-generated body, with its leading `# Epistemic Protocols vX` H1 line removed so it starts at `## Highlights`}
 ```
+
+The narrative splits into two blockquoted sections, matching the repo's prior-release convention:
+
+- **Background** — pure experiential/contextual narrative (the lived origin). The label is intentionally English `**Background**`: a grandfathered exception to the Korean-narrative convention, carried forward from earlier releases (`v2026.05.18`, `v2026.05.15`) for visual continuity. The change-section label `**무엇이 새로운가요?**` stays Korean.
+- **무엇이 새로운가요?** — leads with the theme sentence (`이번 릴리스의 핵심은 **{theme}** — ...`), then the change bullets.
+
+Both sections, and the close before the script body, are bounded by in-blockquote dividers (`> ---`). Each `> ---` must be preceded by a blank `>` line: in CommonMark a `---` placed flush against paragraph text parses as a setext H2 underline, which would render the preceding line as a heading instead of a divider — the blank `>` line keeps it a thematic break.
+
+The script body's leading `# Epistemic Protocols vX` H1 is stripped: the GitHub release title already renders the version, so a body H1 would surface a duplicate title. After stripping, the body begins at `## Highlights`.
 
 Emoji selection is descriptive: choose an emoji whose visual semantic matches the change class. The same change class may take different emoji across releases — match the release's framing, not a fixed table.
 
@@ -94,7 +110,7 @@ Emoji selection is descriptive: choose an emoji whose visual semantic matches th
 
 **Context** (emit before the gate, as text output):
 - Theme axis enumeration when generated in Phase 4 — condense to a labels-only form (axis names without per-axis 4-tuple) and reference the Phase 4 detail above when full re-surfacing would bloat the gate context; otherwise re-surface in full. Either form preserves Recognition that the user may select a different axis than the one the agent drafted from.
-- Full composed body preview: narrative draft + `---` + script-generated body
+- Full composed body preview: narrative draft (closed with `> ---` inside the blockquote) + script-generated body with its leading `# Epistemic Protocols vX` H1 stripped (begins at `## Highlights`)
 - Theme sentence and bullet selection rationale
 
 **Experiential elicitation** (emit as part of context):
@@ -122,7 +138,7 @@ This gate is mandatory even if the narrative seems obvious — theme choice and 
 
 ### Phase 6: Apply + surface
 
-- Compose final body: narrative + `---` + CI body
+- Compose final body: narrative (closed with `> ---` inside the blockquote) + CI body with its leading `# Epistemic Protocols vX` H1 stripped (begins at `## Highlights`) — prevents a duplicate title alongside the GitHub release title
 - `gh release edit <tag> --notes-file <tmp-path>`
 - Output draft URL with a note that the user publishes manually via GitHub web UI
 
