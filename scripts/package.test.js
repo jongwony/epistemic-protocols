@@ -206,7 +206,7 @@ describe('transformSkillMd', () => {
 describe('runtime contract view', () => {
   it('builds a packaged runtime view for every skill', () => {
     const views = buildRuntimeContractViews();
-    assert.equal(views.length, 31);
+    assert.equal(views.length, 32);
     for (const view of views) {
       assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one Skill.md entry`);
       assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed Skill.md`);
@@ -503,7 +503,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 31 skills plus bundle in dry-run', () => {
+  it('packages all 32 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -516,7 +516,7 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 32);
+    assert.equal(result.results.length, 33);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -537,6 +537,7 @@ describe('package.js CLI', () => {
         'goal-research.zip',
         'grasp.zip',
         'ground.zip',
+        'image-companion.zip',
         'induce.zip',
         'inquire.zip',
         'introspect.zip',
