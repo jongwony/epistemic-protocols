@@ -2,7 +2,7 @@
 name: image-companion
 description: >-
   A symbolic slide image for a document passage, consistent with the artifact's companion
-  images. Triggers on "이 부분 상징화", "슬라이드 다이어그램", or a request for a diagram/symbol.
+  images. Use when the user wants a diagram or visual symbol for a section.
   Composes /forge + Codex.
 skills:
   - epistemic-cooperative:forge
@@ -127,7 +127,7 @@ CJK/SQL/JOIN text appears, if it is not landscape, or if the palette breaks the
 companion set's contract (two brand colors + exactly one reserved accent for the single
 emphasized moment).
 
-Then produce a Korean consolidated report using the template in
+Then produce a consolidated report in the user's language using the template in
 `references/verification.md`: a table with image, filename, and verdict, plus any
 non-fatal warnings (e.g., auth-token refresh notices, deprecation notices) so the user
 sees the full picture without reading raw codex output.

@@ -25,22 +25,23 @@ When a regeneration is needed, give codex a targeted corrective note naming what
 specifically to change, rather than a full rewrite — this matches how runs self-correct
 in practice.
 
-## Korean consolidated report template
+## Consolidated report template
 
-After the image(s) pass, report to the user in Korean. Keep it scannable.
+After the image(s) pass, report to the user in their working language. Keep it scannable.
+The labels below are illustrative — render them in whatever language the user is using.
 
 ```
-## ◆ <묶음 이름> — 검증 결과
+## ◆ <set name> — verification
 
-| 이미지 | 파일 | 판정 |
+| image | file | verdict |
 |---|---|---|
-| <은유/역할> | <…-name.png> | 통과 / 재생성 N회 후 통과 |
+| <metaphor / role> | <…-name.png> | pass / pass after N regenerations |
 
-**판정 근거 (이미지별)**: <핵심 문구 verbatim 렌더 ✓ / CJK·SQL 부재 ✓ / landscape ✓ / 팔레트 정합 ✓>
+**Per-image basis**: <verbatim strings render ✓ / no CJK·SQL ✓ / landscape ✓ / palette consistent ✓>
 
-**시리즈 정렬**: <이 이미지가 동반 자산과 어떻게 한 세트로 읽히는지 한 줄>
+**Series fit**: <one line on how this image reads as one set with its companions>
 
-**비고 (비치명적)**: <자기교정 재시도 횟수와 이유 / MCP 토큰 갱신 경고(invalid_grant) / --full-auto deprecation 등 — 이미지 생성에는 무관>
+**Notes (non-fatal)**: <self-correction retries and why / MCP token-refresh warning (invalid_grant) / --full-auto deprecation — unrelated to image generation>
 ```
 
 The non-fatal notes matter: codex runs routinely emit an `invalid_grant` auth-token

@@ -11,10 +11,10 @@ blindly.
 
 ### In-image text: English / numeric only
 
-gpt-image-2 renders CJK glyphs unreliably — Korean text in the image often comes out
-garbled or invented. So keep every in-image string to short Latin/numeric tokens that
-the model renders cleanly, and add the Korean slide copy later in the deck, outside the
-image. List the exact strings as the `Text (verbatim)` field so forge constrains the
+gpt-image-2 renders CJK glyphs unreliably — Korean/Japanese/Chinese text in the image
+often comes out garbled or invented. So keep every in-image string to short Latin/numeric
+tokens that the model renders cleanly, and add the localized slide copy later in the deck,
+outside the image. List the exact strings as the `Text (verbatim)` field so forge constrains the
 model to them and nothing else.
 
 ### No SQL / JOIN / internal jargon in the image
