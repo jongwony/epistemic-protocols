@@ -1,6 +1,6 @@
 ---
 name: frame
-description: "Multi-perspective investigation. Recommends analytical lenses or assembles a team to analyze from selected viewpoints when the right framework is absent, producing a framed inquiry. Type: (FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry. Alias: Prothesis(πρόθεσις)."
+description: "Multi-perspective investigation. Recommends analytical lenses or assembles a team to analyze from selected viewpoints when the right framework is absent; factual lookup or verification routes to fact-finding delegation, while contested design/value judgment routes to lens-conditioned evidence plus synthesis. Type: (FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry. Alias: Prothesis(πρόθεσις)."
 ---
 
 # Prothesis Protocol
@@ -198,6 +198,9 @@ Command invocation activates mode until session end.
 - **Layer 1 (User-invocable)**: `/frame` slash command or description-matching input. Always available.
 - **Layer 2 (AI-guided)**: Purpose present but approach unspecified; multiple valid frameworks detected via in-protocol heuristics.
 
+**Trigger signals**:
+- Use fact-finding delegation when the task is primarily finding or verifying facts; use `/frame` when reasonable people could weigh contested design, value, interpretation, or scope differently and the work needs lens-conditioned evidence plus synthesis.
+
 ### Priority
 
 <system-reminder>
@@ -306,6 +309,8 @@ Optional dimension naming (apply when initial generation seems redundant):
 - Identify epistemic axes relevant to this inquiry
 - Dimensions remain revisable during perspective generation
 
+During perspective formulation, note whether each candidate lens depends on evidence from code/workspace, canonical external sources, instrumentation, or user-tacit context. This is only a channel-level need signal for later authorization; it does not select or name a concrete provider.
+
 **Pre-suggested perspective handling**: When the user supplies perspectives in U (e.g., naming specific agents, frameworks, or roles), treat these as **pre-confirmed base perspectives** (Pᵦ):
 
 - Pᵦ are **auto-included** in Pₛ — do not re-present them as selectable options
@@ -334,7 +339,7 @@ For each selected perspective in Pₛ, check whether available agents match the 
 
 Agent matching is heuristic: compare perspective focus description against agent `description` and `when to use` fields. Matching does not affect perspective selection (theoria) — it only determines execution assignment (praxis). "Placement over Prescription" invariant: /frame places perspectives; agent mapping realizes execution.
 
-**Operational cost**: Independent context collection multiplies tool calls by |Pₛ| compared to shared-context distribution. This is the cost of epistemic independence — each perspective's unique evidence discovery justifies the amplification. For Tier 2 (|Pₛ| ≥ 4): direct each perspective's initial investigation toward MBᵥ-relevant subdomain — full-codebase sweep per perspective is unnecessary when scope_constraint narrows the evidence space. The coordinator's spawn prompt Orientation field directs each perspective's initial investigation target.
+**Operational cost**: Independent context collection multiplies tool calls by |Pₛ| compared to shared-context distribution. This is the cost of epistemic independence — each perspective's unique evidence discovery justifies the amplification. Each perspective formulates any external research need through its own lens, so evidence differs by framework instead of collapsing into a shared fact list; that differentiated grounding raises cross-dialogue quality. For Tier 2 (|Pₛ| ≥ 4): direct each perspective's initial investigation toward MBᵥ-relevant subdomain — full-codebase sweep per perspective is unnecessary when scope_constraint narrows the evidence space. The coordinator's spawn prompt Orientation field directs each perspective's initial investigation target.
 
 **Team Setup**
 
@@ -343,7 +348,7 @@ Create an agent team and spawn perspective teammates:
 1. Call TeamCreate to create a team (e.g., `prothesis-inquiry`)
 2. For each selected perspective, call Task with `team_name` and `name` to spawn a teammate (agent-mapped or AI-generated)
 
-Teammates do not inherit the lead's conversation history. Each spawn prompt includes the Mission Brief and the perspective assignment — teammates independently collect evidence through their own lens via Read/Grep. Phase 1 context (G) is NOT passed to teammates: G serves meta-level perspective identification; each teammate's independent object-level investigation produces perspective-specific evidence that G's broad sweep would filter out.
+Teammates do not inherit the lead's conversation history. Each spawn prompt includes the Mission Brief, the perspective assignment, and any user- or orchestrator-supplied tool authorizations — teammates independently collect evidence through their own lens using available tools that serve the lens. Phase 1 context (G) is NOT passed to teammates: G serves meta-level perspective identification; each teammate's independent object-level investigation produces perspective-specific evidence that G's broad sweep would filter out.
 
 Each teammate receives the perspective prompt template:
 
@@ -354,10 +359,11 @@ You are a **[Perspective] Expert**.
 - Intent: {MBᵥ.inquiry_intent}
 - Deliverable: {MBᵥ.expected_deliverable}
 - Scope: {MBᵥ.scope_constraint} — constrain your analysis to this boundary
+- Tool authorizations: {user/orchestrator-supplied tool authorizations, or "None supplied"}
 
 Analyze from this epistemic standpoint:
 
-**Your Task**: Independently investigate the codebase through your lens. Use Read/Grep to collect perspective-specific evidence.
+**Your Task**: Independently investigate through your lens. Use any available tools, including utility skills, that serve your lens and respect the supplied authorizations. If your lens depends on external evidence, formulate the research need from that perspective rather than reusing a generic fact-finding query; differentiated evidence raises the quality of later cross-dialogue.
 **Orientation** (from Mission Brief): {MBᵥ-derived key terms, relevant directories, or domain anchors — minimal orientation without full Phase 1 context}
 **Question**: {original question verbatim}
 
@@ -487,6 +493,14 @@ After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅)
 ```markdown
 ## Framed Analysis
 
+### Bottom-line
+[One-sentence answer with the decisive reason]
+
+### Integrated Assessment
+[Synthesized answer with attribution to contributing perspectives]
+[Carry the single decisive reason before supporting detail]
+[Distinguish findings from isolated inquiry (R') vs. cross-dialogue refinement (Dᵣ)]
+
 ### Convergence (Shared Horizon)
 [Where perspectives agree—indicates robust finding]
 [Per convergence point: coordinator-assessed agreement strength (strong/moderate/weak) with basis from Dᵣ; when Dᵣ = ∅, label as "independent convergence" — strength not assessable without cross-dialogue]
@@ -495,10 +509,6 @@ After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅)
 [Where they disagree—different values, evidence standards, or scope]
 [Cross-dialogue resolution status per tension topic, if applicable]
 [If perspectives unexpectedly converged, note why distinct framing was nonetheless valuable]
-
-### Integrated Assessment
-[Synthesized answer with attribution to contributing perspectives]
-[Distinguish findings from isolated inquiry (R') vs. cross-dialogue refinement (Dᵣ)]
 
 ### Synthesis Basis
 [Per assessment claim: source perspective(s), evidence type (R' finding / Dᵣ agreement / Dᵣ divergence / synthesis constitution; omit Dᵣ types when Dᵣ = ∅), and whether claim combines multiple sources]
@@ -543,6 +553,7 @@ Heuristic criteria for Phase 4 trigger detection (Δ). Coordinator cites evidenc
 14. **Wait discipline**: During Phase 3 Await, the coordinator MUST NOT (a) re-prompt teammates regardless of interval duration — any re-prompt risks interrupting teammate mid-composition and inducing content revision rather than resolving apparent silence; (b) observe teammate state passively (TaskList reads, agent memory inspection, filesystem reads under team directories) as a basis for behavioral decisions before the completion signal arrives — passive observation defeats passive-wait semantics and becomes a post-hoc rationalization path disguised as "task tracking, not polling"; (c) proceed with partial R — Await converges only when all teammates in T have signaled completion, and partial collection without `user_esc` violates convergence persistence. Scope: Phase 3 inquiry wait only; Phase 4 hub-spoke step 4 content-bearing follow-ups are sent after peers have idled and are out of scope. Platform-specific delivery mechanics are documented in TOOL GROUNDING (Await entry); epistemic prose depends only on the existence of a completion signal, not on its platform form. Recovery from indefinite wait is user-initiated via `user_esc` per LOOP; any of (a)/(b)/(c) = protocol violation
 15. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 16. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+17. **Utility-agnostic tool authorization**: The protocol core detects evidence-channel need at the perspective level; concrete tool or utility binding is supplied only by explicit user instruction or an orchestrating utility skill and passed through to teammates without provider names originating in the core. Persistent teammates keep Phase 4 cross-dialogue available because they stay addressable for peer negotiation; delegating execution to stateless one-shot workers (e.g. ephemeral research sessions) trades that away — such workers complete and exit, so when synthesis needs peer dialogue or contradiction resolution, route those perspectives through persistent teammates that remain reachable through Phase 4.
 
 ## Adversarial Guards
 
