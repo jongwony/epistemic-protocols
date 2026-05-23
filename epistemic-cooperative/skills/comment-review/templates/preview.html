@@ -774,6 +774,10 @@ content.addEventListener("click", (e) => {
 });
 
 function dismissPopup() {
+  // Cancel any pending selection-settle timer explicitly. The removeAllRanges()
+  // below also re-fires selectionchange (which clears selSettle), but clearing it
+  // here makes the timer lifecycle self-documenting rather than implicit.
+  clearTimeout(selSettle);
   // Clean up pending temp marks before clearing state
   if (pending && pending.tempMarks && pending.tempMarks.length > 0) {
     removePendingMarks(pending.tempMarks);
