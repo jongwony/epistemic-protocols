@@ -12,7 +12,7 @@
 //
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
-import { watch } from "node:fs";
+import { existsSync, watch } from "node:fs";
 import { appendFile, readdir, readFile } from "node:fs/promises";
 import { basename, dirname, extname, resolve } from "node:path";
 import { homedir } from "node:os";
@@ -241,11 +241,29 @@ interface DeleteBody {
 
 const MAX_ID_LEN = 128;
 
+// Resolve the tailscale CLI: PATH lookup first (cross-platform). On macOS only,
+// fall back to the app-bundle CLI, since GUI / App Store builds ship it inside
+// the bundle rather than on PATH. The bundle fallback is darwin-scoped so the
+// platform-specific paths stay isolated from the generic PATH resolution.
+function tailscaleBin(): string | null {
+  const onPath = Bun.which("tailscale");
+  if (onPath) return onPath;
+  if (process.platform === "darwin") {
+    for (const p of [
+      "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
+      `${homedir()}/Applications/Tailscale.app/Contents/MacOS/Tailscale`,
+    ]) {
+      if (existsSync(p)) return p;
+    }
+  }
+  return null;
+}
+
 // When the tailscale CLI is present and the device is on a tailnet, return its
 // Tailscale IPv4 and MagicDNS name; otherwise null. Degrades silently on any
 // probe failure (CLI absent, logged out, unexpected JSON).
 function detectTailscale(): { ip: string; dnsName: string } | null {
-  const tsBin = Bun.which("tailscale");
+  const tsBin = tailscaleBin();
   if (!tsBin) return null;
   try {
     const proc = Bun.spawnSync([tsBin, "status", "--json"]);
