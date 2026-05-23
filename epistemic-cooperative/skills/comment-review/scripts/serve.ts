@@ -438,9 +438,45 @@ for (const [slug, path] of drafts) {
   });
 }
 
+// The server binds to 127.0.0.1 only, so a Tailscale IP:port cannot reach it
+// directly — `tailscale serve` (tailnet → loopback reverse proxy) is required.
+// Detect an active serve mapping for our port; otherwise print the exact enable
+// command (the port is OS-assigned, so it cannot be pre-configured). Degrades
+// silently when the tailscale CLI is absent or any probe fails.
+function tailscaleHint(port: number): string[] | null {
+  const tsBin = Bun.which("tailscale");
+  if (!tsBin) return null;
+  try {
+    const statusProc = Bun.spawnSync([tsBin, "status", "--json"]);
+    if (statusProc.exitCode !== 0) return null;
+    const dnsName = (JSON.parse(statusProc.stdout.toString())?.Self?.DNSName ?? "").replace(/\.$/, "");
+    if (!dnsName) return null; // tailscale present but device not on a tailnet
+
+    let served = false;
+    try {
+      const serveProc = Bun.spawnSync([tsBin, "serve", "status", "--json"]);
+      if (serveProc.exitCode === 0) {
+        const txt = serveProc.stdout.toString();
+        served = txt.includes(`127.0.0.1:${port}`) || txt.includes(`localhost:${port}`);
+      }
+    } catch { /* serve status unsupported on this version — fall through to hint */ }
+
+    if (served) return [`tailnet: https://${dnsName}/ (mobile-reachable via tailscale serve)`];
+    return [
+      `tailnet: not exposed. To reach from mobile over Tailscale, run:`,
+      `  tailscale serve --bg localhost:${port}`,
+      `  then open https://${dnsName}/`,
+    ];
+  } catch {
+    return null;
+  }
+}
+
 const url = `http://localhost:${server.port}/`;
 console.error(`serving at ${url}`);
 console.error(`drafts: ${[...drafts.keys()].join(", ")}`);
+const tsLines = tailscaleHint(server.port);
+if (tsLines) for (const line of tsLines) console.error(line);
 console.error("Ctrl-C to stop.");
 
 const opener = Bun.which("open") ?? Bun.which("xdg-open");
