@@ -12,7 +12,7 @@
 //
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
-import { watch } from "node:fs";
+import { existsSync, watch } from "node:fs";
 import { appendFile, readdir, readFile } from "node:fs/promises";
 import { basename, dirname, extname, resolve } from "node:path";
 import { homedir } from "node:os";
@@ -241,14 +241,57 @@ interface DeleteBody {
 
 const MAX_ID_LEN = 128;
 
+// Resolve the tailscale CLI: PATH lookup first (cross-platform). On macOS only,
+// fall back to the app-bundle CLI, since GUI / App Store builds ship it inside
+// the bundle rather than on PATH. The bundle fallback is darwin-scoped so the
+// platform-specific paths stay isolated from the generic PATH resolution.
+function tailscaleBin(): string | null {
+  const onPath = Bun.which("tailscale");
+  if (onPath) return onPath;
+  if (process.platform === "darwin") {
+    for (const p of [
+      "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
+      `${homedir()}/Applications/Tailscale.app/Contents/MacOS/Tailscale`,
+    ]) {
+      if (existsSync(p)) return p;
+    }
+  }
+  return null;
+}
+
+// When the tailscale CLI is present and the device is on a tailnet, return its
+// Tailscale IPv4 and MagicDNS name; otherwise null. Degrades silently on any
+// probe failure (CLI absent, logged out, unexpected JSON).
+function detectTailscale(): { ip: string; dnsName: string } | null {
+  const tsBin = tailscaleBin();
+  if (!tsBin) return null;
+  try {
+    const proc = Bun.spawnSync([tsBin, "status", "--json"]);
+    if (proc.exitCode !== 0) return null;
+    const self = JSON.parse(proc.stdout.toString())?.Self;
+    const ip = (self?.TailscaleIPs ?? []).find((a: string) => /^\d+\.\d+\.\d+\.\d+$/.test(a));
+    if (!ip) return null; // tailscale present but not connected to a tailnet
+    return { ip, dnsName: (self?.DNSName ?? "").replace(/\.$/, "") };
+  } catch {
+    return null;
+  }
+}
+
+// Loopback keeps drafts/feedback strictly local. When tailscale is detected we
+// bind to the tailnet interface instead, exposing the preview to the user's own
+// tailnet devices (e.g. mobile) — a deliberate widening from loopback-private to
+// tailnet-private, scoped to that single interface (not 0.0.0.0/all networks).
+const tailnet = detectTailscale();
+const bindHost = tailnet ? tailnet.ip : "127.0.0.1";
+
 const server = Bun.serve({
-  hostname: "127.0.0.1", // bind to loopback only — drafts and feedback are user-private
+  hostname: bindHost,
   port: 0,
   async fetch(req, srv) {
     const url = new URL(req.url);
 
     if (url.pathname === "/") {
-      return new Response(renderIndex(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      return new Response(renderIndex(), { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
     }
 
     if (url.pathname.startsWith("/preview/")) {
@@ -256,7 +299,7 @@ const server = Bun.serve({
       try {
         const html = await renderPreview(slug);
         if (!html) return new Response("not found", { status: 404 });
-        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
       } catch (e) {
         console.error(`[preview] render failed for slug=${slug}: ${(e as Error).message}`);
         return new Response("render failed", { status: 500 });
@@ -438,9 +481,15 @@ for (const [slug, path] of drafts) {
   });
 }
 
-const url = `http://localhost:${server.port}/`;
+// Bound to the tailnet IP, the device reaches its own address locally, so this
+// URL also opens on this machine — no separate localhost URL needed.
+const url = `http://${bindHost}:${server.port}/`;
 console.error(`serving at ${url}`);
 console.error(`drafts: ${[...drafts.keys()].join(", ")}`);
+if (tailnet) {
+  console.error(`tailnet: reachable from your tailnet devices (e.g. mobile) at ${url}`);
+  if (tailnet.dnsName) console.error(`  or via MagicDNS: http://${tailnet.dnsName}:${server.port}/`);
+}
 console.error("Ctrl-C to stop.");
 
 const opener = Bun.which("open") ?? Bun.which("xdg-open");

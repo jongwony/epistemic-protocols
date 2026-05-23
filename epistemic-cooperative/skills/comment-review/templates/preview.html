@@ -544,6 +544,19 @@ content.addEventListener("mouseup", () => {
   setTimeout(handleSelection, 0);
 });
 
+// Touch devices: a long-press selection ends with `selectionchange`, not a clean
+// `mouseup`, so the popup never opened on mobile. Debounce so it opens only after
+// the selection settles (after the user finishes dragging the selection handles).
+// `selectionchange` fires on selection only (not on scroll), so mobile scrolling
+// stays unaffected; `handleSelection` ends by collapsing the range, which re-fires
+// `selectionchange` as collapsed and is ignored by handleSelection's own guard.
+let selSettle = null;
+document.addEventListener("selectionchange", () => {
+  if (popup.classList.contains("show")) return; // a popup is already open
+  clearTimeout(selSettle);
+  selSettle = setTimeout(handleSelection, 450);
+});
+
 function setPopupMode(isEdit) {
   popupSubmit.textContent = isEdit ? "Update" : "Submit";
   popup.classList.toggle("edit-mode", !!isEdit);
@@ -761,6 +774,10 @@ content.addEventListener("click", (e) => {
 });
 
 function dismissPopup() {
+  // Cancel any pending selection-settle timer explicitly. The removeAllRanges()
+  // below also re-fires selectionchange (which clears selSettle), but clearing it
+  // here makes the timer lifecycle self-documenting rather than implicit.
+  clearTimeout(selSettle);
   // Clean up pending temp marks before clearing state
   if (pending && pending.tempMarks && pending.tempMarks.length > 0) {
     removePendingMarks(pending.tempMarks);
