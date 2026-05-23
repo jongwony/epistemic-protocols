@@ -248,7 +248,7 @@ const server = Bun.serve({
     const url = new URL(req.url);
 
     if (url.pathname === "/") {
-      return new Response(renderIndex(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      return new Response(renderIndex(), { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
     }
 
     if (url.pathname.startsWith("/preview/")) {
@@ -256,7 +256,7 @@ const server = Bun.serve({
       try {
         const html = await renderPreview(slug);
         if (!html) return new Response("not found", { status: 404 });
-        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
       } catch (e) {
         console.error(`[preview] render failed for slug=${slug}: ${(e as Error).message}`);
         return new Response("render failed", { status: 500 });
