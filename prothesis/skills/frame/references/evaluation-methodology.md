@@ -76,6 +76,8 @@ Evidence: [trace citation or repeated-session pattern]
 Disposition: [local issue / protocol patch / no action / needs more sessions]
 ```
 
+**Escalation threshold**: Escalate `local issue -> protocol patch` only when the same finding recurs across at least 3 independent sessions, or a structural proof ties it to a formal block (TYPES / MORPHISM / PHASE TRANSITIONS). Below that threshold, record it as a `local issue`. This mirrors the protocol's existing revision convention (named-trigger promotion across 3+ sessions), so a single striking session does not by itself justify a protocol-level change.
+
 Avoid verdicts that say only "violates agent-team best practice." The missing step is whether that practice applies to the Prothesis phase under evaluation.
 
 ## Worked Example: Isolation Value Is Scoped

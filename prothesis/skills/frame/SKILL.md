@@ -24,6 +24,7 @@ Inquiry
   → select(perspectives)                -- user chooses lenses via Cognitive Partnership Move (Constitution)
   → LensEstablished                     -- compositional handoff object; Mode 1 terminalizes via characterize(Pₛ)
   → spawn(team)                         -- assemble perspective team via TeamCreate
+  → authorize(tools)                    -- pass through user/orchestrator-supplied tool authorizations per perspective channel need ("None supplied" default)
   → inquire(parallel)                   -- isolated perspective analysis per teammate
   → await(notifications)                -- passive wait for teammate completion signals (see TOOL GROUNDING)
   → collect(results)                    -- finalize inquiry outputs, retain team
@@ -55,6 +56,7 @@ S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; P
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
 LensEstablished = Pₛ where lens selection complete  -- compositional handoff object; Mode 1 packages it into FramedInquiry, Mode 2 continues
 T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
+Auth   = Tool authorizations passed through to teammates per perspective channel need (user/orchestrator-supplied; "None supplied" default; core selects no provider)
 T_running = Team with inquiries in flight             -- intermediate state between dispatch and completion
 ∥I     = Parallel inquiry dispatch: T → T_running    -- per-teammate Inquiry(p) launched
 Await  = Passive completion barrier: T_running → R   -- see TOOL GROUNDING (Await entry) for realization
@@ -69,7 +71,7 @@ Dᵣ     = Set(DialogueReport)                          -- peer negotiation outp
 DialogueReport = { perspective, final_position, agreement: AgreementStrength, divergence, rationale }  -- divergence gates hub-spoke conditional
 AgreementStrength ∈ {strong, moderate, weak}  -- coordinator-assessed in Cross-Dialogue Outcomes (horizons fusion); strong: shared evidence + shared conclusion; moderate: shared conclusion, different evidence paths; weak: partial overlap, significant residual divergence
 Syn    = Synthesis: (R', Dᵣ) → (∩, D, A)             -- dual-input: provenance-preserving (Dᵣ = ∅ when Δₛ = ∅)
-L      = Lens { convergence: ∩, divergence: D, assessment: A }
+L      = Lens { convergence: ∩, divergence: D, assessment: A }  -- Bottom-line is a presentation-layer projection of A (decision-relevant summary surfaced first), not a field of L; Syn(R', Dᵣ) → (∩, D, A) unchanged
 O      = Output: L → UserVisible(L)                   -- full synthesis presentation as text output before routing question
 CountTier ∈ {single_modifier, domain_narrowing, escalation_candidate}  -- advisory metadata (does not branch LOOP); recorded in Lᵣ.tier for downstream reading
 DownstreamUse ∈ {protocol_route, scope_directive, context_binding}  -- protocol_route: lens names a downstream protocol invocation; scope_directive: lens narrows downstream resolution domain; context_binding: lens enriches downstream protocol's pre-execution context
@@ -100,7 +102,7 @@ Edge cases:
 Phase 0:  U → MB(U) → Qc(MB, M) → Stop → (MBᵥ, m)              -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]
-Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: extension | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → ∥Spawn[Task](T, Pₛ, MBᵥ) → ∥I[TaskCreate](T) → Await[IdleNotification](T_running) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + inquiry dispatch + wait + collection + preview [Tool]
+Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: extension | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → Authorize(Pₛ) → Auth → ∥Spawn[Task](T, Pₛ, MBᵥ, Auth) → ∥I[TaskCreate](T) → Await[IdleNotification](T_running) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + tool-authorization passthrough + inquiry dispatch + wait + collection + preview [Tool]
 Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Qc(routing) → Stop → J  -- triggers, cross-dialogue, synthesis, presentation & routing [Tool]
           J=wrap_up → PF Qc(select) → Stop → Ω → TeamDelete → TaskCreate(selected)  [Tool]
 
@@ -152,13 +154,14 @@ Sc (constitution)                → present (mandatory; multiSelect: true; lens
 Phase 3 AgentMap_auto (extension)  → TextPresent+Proceed (when agent_count(perspective) ≤ 1; auto-assign for 1 match, AI-generated for 0 matches; execution assignment correctable by team restructuring)
 Phase 3 AgentMap_select (constitution) → present (when agent_count(perspective) ≥ 2; user confirms agent-perspective mapping; option-set relay test applies)
 Phase 3 T (dispatch)     → TeamCreate tool (parallel topology: creates team with shared task list; fires after either AgentMap_auto or AgentMap_select resolves the perspective → agent mapping)
-∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates — each receives MBᵥ + perspective only; no Phase 1 context G passed)
+Phase 3 Authorize (extension) → TextPresent+Proceed (passthrough of user/orchestrator-supplied tool authorizations per perspective channel need into spawn prompts; "None supplied" default; core selects no provider — deterministic relay, bounded regret)
+∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates — each receives MBᵥ + perspective + tool authorizations (Auth); no Phase 1 context G passed)
 ∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination — dispatch phase)
 Await (sense)            → IdleNotification (passive wait: teammate SubagentStop events surface as coordinator idle notifications; teammate→coordinator message delivery occurs at coordinator turn boundary, not at teammate send time; async message-passing execution model; no coordinator poll per Rule 14)
 Phase 3 P (extension)        → TextPresent+Proceed (per-perspective epistemic contribution + key finding summaries)
 Phase 4 Δ (sense)        → Internal operation (trigger check per Trigger Detection Criteria; cite evidence per detected trigger)
 Phase 4 D? (dispatch)    → SendMessage tool (conditional topology: coordinator signals tension topic to peer pair → peer exchange → structured report → conditional hub-spoke; skip if Δₛ = ∅)
-Phase 4 O (extension)        → TextPresent+Proceed (full synthesis — convergence, divergence, integrated assessment)
+Phase 4 O (extension)        → TextPresent+Proceed (full synthesis — Bottom-line, Integrated Assessment, Convergence, Divergence, Synthesis Basis)
 Phase 4 Qc (constitution)        → present (routing only: extend/add_input/wrap_up/withdraw options; loop path + team lifecycle; Esc key → loop termination at LOOP level)
 PF Qc (constitution)             → present (multiSelect: preservation scope; knowledge preservation scope; in LOOP wrap_up path only)
 wrap_up TaskCreate (track) → TaskCreate (session-scoped: PF-selected findings, created after TeamDelete clears team context)
@@ -192,14 +195,13 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 
 ### Activation
 
+**Pre-activation routing**: Before accepting a `/frame` invocation, check the task shape. When the task is primarily finding or verifying facts, suggest fact-finding delegation instead; engage `/frame` when reasonable people could weigh contested design, value, interpretation, or scope differently and the work needs lens-conditioned evidence plus synthesis. This guard precedes activation — it decides whether to accept the invocation, not how the mode behaves once active.
+
 Command invocation activates mode until session end.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/frame` slash command or description-matching input. Always available.
 - **Layer 2 (AI-guided)**: Purpose present but approach unspecified; multiple valid frameworks detected via in-protocol heuristics.
-
-**Trigger signals**:
-- Use fact-finding delegation when the task is primarily finding or verifying facts; use `/frame` when reasonable people could weigh contested design, value, interpretation, or scope differently and the work needs lens-conditioned evidence plus synthesis.
 
 ### Priority
 
@@ -494,11 +496,10 @@ After cross-dialogue (R', Dᵣ), or directly from R' if no triggers (Dᵣ = ∅)
 ## Framed Analysis
 
 ### Bottom-line
-[One-sentence answer with the decisive reason]
+[The single decision-relevant takeaway in 1-2 sentences, surfaced first — the decisive answer, not the full reasoning]
 
 ### Integrated Assessment
-[Synthesized answer with attribution to contributing perspectives]
-[Carry the single decisive reason before supporting detail]
+[The full synthesized answer with attribution to contributing perspectives — the Bottom-line expanded with its supporting reasoning and detail]
 [Distinguish findings from isolated inquiry (R') vs. cross-dialogue refinement (Dᵣ)]
 
 ### Convergence (Shared Horizon)
