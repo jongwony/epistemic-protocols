@@ -241,8 +241,33 @@ interface DeleteBody {
 
 const MAX_ID_LEN = 128;
 
+// When the tailscale CLI is present and the device is on a tailnet, return its
+// Tailscale IPv4 and MagicDNS name; otherwise null. Degrades silently on any
+// probe failure (CLI absent, logged out, unexpected JSON).
+function detectTailscale(): { ip: string; dnsName: string } | null {
+  const tsBin = Bun.which("tailscale");
+  if (!tsBin) return null;
+  try {
+    const proc = Bun.spawnSync([tsBin, "status", "--json"]);
+    if (proc.exitCode !== 0) return null;
+    const self = JSON.parse(proc.stdout.toString())?.Self;
+    const ip = (self?.TailscaleIPs ?? []).find((a: string) => /^\d+\.\d+\.\d+\.\d+$/.test(a));
+    if (!ip) return null; // tailscale present but not connected to a tailnet
+    return { ip, dnsName: (self?.DNSName ?? "").replace(/\.$/, "") };
+  } catch {
+    return null;
+  }
+}
+
+// Loopback keeps drafts/feedback strictly local. When tailscale is detected we
+// bind to the tailnet interface instead, exposing the preview to the user's own
+// tailnet devices (e.g. mobile) — a deliberate widening from loopback-private to
+// tailnet-private, scoped to that single interface (not 0.0.0.0/all networks).
+const tailnet = detectTailscale();
+const bindHost = tailnet ? tailnet.ip : "127.0.0.1";
+
 const server = Bun.serve({
-  hostname: "127.0.0.1", // bind to loopback only — drafts and feedback are user-private
+  hostname: bindHost,
   port: 0,
   async fetch(req, srv) {
     const url = new URL(req.url);
@@ -438,45 +463,15 @@ for (const [slug, path] of drafts) {
   });
 }
 
-// The server binds to 127.0.0.1 only, so a Tailscale IP:port cannot reach it
-// directly — `tailscale serve` (tailnet → loopback reverse proxy) is required.
-// Detect an active serve mapping for our port; otherwise print the exact enable
-// command (the port is OS-assigned, so it cannot be pre-configured). Degrades
-// silently when the tailscale CLI is absent or any probe fails.
-function tailscaleHint(port: number): string[] | null {
-  const tsBin = Bun.which("tailscale");
-  if (!tsBin) return null;
-  try {
-    const statusProc = Bun.spawnSync([tsBin, "status", "--json"]);
-    if (statusProc.exitCode !== 0) return null;
-    const dnsName = (JSON.parse(statusProc.stdout.toString())?.Self?.DNSName ?? "").replace(/\.$/, "");
-    if (!dnsName) return null; // tailscale present but device not on a tailnet
-
-    let served = false;
-    try {
-      const serveProc = Bun.spawnSync([tsBin, "serve", "status", "--json"]);
-      if (serveProc.exitCode === 0) {
-        const txt = serveProc.stdout.toString();
-        served = txt.includes(`127.0.0.1:${port}`) || txt.includes(`localhost:${port}`);
-      }
-    } catch { /* serve status unsupported on this version — fall through to hint */ }
-
-    if (served) return [`tailnet: https://${dnsName}/ (mobile-reachable via tailscale serve)`];
-    return [
-      `tailnet: not exposed. To reach from mobile over Tailscale, run:`,
-      `  tailscale serve --bg localhost:${port}`,
-      `  then open https://${dnsName}/`,
-    ];
-  } catch {
-    return null;
-  }
-}
-
-const url = `http://localhost:${server.port}/`;
+// Bound to the tailnet IP, the device reaches its own address locally, so this
+// URL also opens on this machine — no separate localhost URL needed.
+const url = `http://${bindHost}:${server.port}/`;
 console.error(`serving at ${url}`);
 console.error(`drafts: ${[...drafts.keys()].join(", ")}`);
-const tsLines = tailscaleHint(server.port);
-if (tsLines) for (const line of tsLines) console.error(line);
+if (tailnet) {
+  console.error(`tailnet: reachable from your tailnet devices (e.g. mobile) at ${url}`);
+  if (tailnet.dnsName) console.error(`  or via MagicDNS: http://${tailnet.dnsName}:${server.port}/`);
+}
 console.error("Ctrl-C to stop.");
 
 const opener = Bun.which("open") ?? Bun.which("xdg-open");
