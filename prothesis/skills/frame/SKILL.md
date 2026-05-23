@@ -14,7 +14,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 ```
 ── FLOW ──
 Prothesis(U) → Q(MB(U), M) → (MBᵥ, m) → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → LensEstablished →
-  T(Pₛ) → ∥I(T) → Await(T_running) → R → Ω(T) → R' → P(R') → Δ(R') → Δₛ → D?(Δₛ, T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Q(routing) → J → FramedInquiry
+  T₀(Pₛ) → Authorize(Pₛ) → Auth → T(T₀, Pₛ, MBᵥ, Auth) → ∥I(T) → Await(T_running) → R → Ω(T) → R' → P(R') → Δ(R') → Δₛ → D?(Δₛ, T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Q(routing) → J → FramedInquiry
 
 ── MORPHISM ──
 Inquiry
@@ -23,8 +23,9 @@ Inquiry
   → propose(perspectives)               -- generate distinct analytical lenses from context
   → select(perspectives)                -- user chooses lenses via Cognitive Partnership Move (Constitution)
   → LensEstablished                     -- compositional handoff object; Mode 1 terminalizes via characterize(Pₛ)
-  → spawn(team)                         -- assemble perspective team via TeamCreate
+  → create(team)                        -- TeamCreate → T₀ (empty team shell, no members yet)
   → authorize(tools)                    -- pass through user/orchestrator-supplied tool authorizations per perspective channel need ("None supplied" default)
+  → spawn(team)                         -- spawn teammates into T₀ with MBᵥ + perspective + Auth → T
   → inquire(parallel)                   -- isolated perspective analysis per teammate
   → await(notifications)                -- passive wait for teammate completion signals (see TOOL GROUNDING)
   → collect(results)                    -- finalize inquiry outputs, retain team
@@ -55,7 +56,8 @@ Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
 LensEstablished = Pₛ where lens selection complete  -- compositional handoff object; Mode 1 packages it into FramedInquiry, Mode 2 continues
-T      = Team(Pₛ): TeamCreate → (∥ p∈Pₛ. Spawn(p)) -- agent team with shared task list
+T₀     = TeamCreate(Pₛ): empty team shell (no members yet)        -- created before authorize/spawn
+T      = Spawn(T₀, Pₛ, MBᵥ, Auth): (∥ p∈Pₛ. Spawn(p, MBᵥ, Auth)) -- teammates spawned into T₀, each receives MBᵥ + perspective + Auth; shared task list
 Auth   = Tool authorizations passed through to teammates per perspective channel need (user/orchestrator-supplied; "None supplied" default; core selects no provider)
 T_running = Team with inquiries in flight             -- intermediate state between dispatch and completion
 ∥I     = Parallel inquiry dispatch: T → T_running    -- per-teammate Inquiry(p) launched
@@ -102,7 +104,7 @@ Edge cases:
 Phase 0:  U → MB(U) → Qc(MB, M) → Stop → (MBᵥ, m)              -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]
-Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: extension | 2+: Qc(map) → Stop] → T[TeamCreate](Pₛ) → Authorize(Pₛ) → Auth → ∥Spawn[Task](T, Pₛ, MBᵥ, Auth) → ∥I[TaskCreate](T) → Await[IdleNotification](T_running) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + tool-authorization passthrough + inquiry dispatch + wait + collection + preview [Tool]
+Phase 3:  LensEstablished → AgentMap?(Pₛ) → [0/1: extension | 2+: Qc(map) → Stop] → T₀[TeamCreate](Pₛ) → Authorize(Pₛ) → Auth → ∥Spawn[Task](T₀, Pₛ, MBᵥ, Auth) → T → ∥I[TaskCreate](T) → Await[IdleNotification](T_running) → R → Ω[SendMessage](T) → R' → P(R')  -- agent mapping + tool-authorization passthrough + inquiry dispatch + wait + collection + preview [Tool]
 Phase 4:  R' → Δ(R') → Δₛ → D?(Δₛ)[SendMessage](T) → Dᵣ → Syn(R', Dᵣ) → L → O(L) → Qc(routing) → Stop → J  -- triggers, cross-dialogue, synthesis, presentation & routing [Tool]
           J=wrap_up → PF Qc(select) → Stop → Ω → TeamDelete → TaskCreate(selected)  [Tool]
 
@@ -153,9 +155,9 @@ Phase 0 Qc (constitution)        → present (combined: Q1=Mission Brief confirm
 Sc (constitution)                → present (mandatory; multiSelect: true; lens selection is epistemic choice; Esc key → loop termination at LOOP level)
 Phase 3 AgentMap_auto (extension)  → TextPresent+Proceed (when agent_count(perspective) ≤ 1; auto-assign for 1 match, AI-generated for 0 matches; execution assignment correctable by team restructuring)
 Phase 3 AgentMap_select (constitution) → present (when agent_count(perspective) ≥ 2; user confirms agent-perspective mapping; option-set relay test applies)
-Phase 3 T (dispatch)     → TeamCreate tool (parallel topology: creates team with shared task list; fires after either AgentMap_auto or AgentMap_select resolves the perspective → agent mapping)
+Phase 3 T₀ (dispatch)    → TeamCreate tool (parallel topology: creates empty team shell T₀ with shared task list; fires after either AgentMap_auto or AgentMap_select resolves the perspective → agent mapping)
 Phase 3 Authorize (extension) → TextPresent+Proceed (passthrough of user/orchestrator-supplied tool authorizations per perspective channel need into spawn prompts; "None supplied" default; core selects no provider — deterministic relay, bounded regret)
-∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates — each receives MBᵥ + perspective + tool authorizations (Auth); no Phase 1 context G passed)
+∥Spawn (dispatch)        → Task tool (parallel topology: team_name, name: spawn perspective teammates into T₀ → T — each receives MBᵥ + perspective + tool authorizations (Auth); no Phase 1 context G passed)
 ∥I (track)               → TaskCreate/TaskUpdate (parallel topology: shared task list for inquiry coordination — dispatch phase)
 Await (sense)            → IdleNotification (passive wait: teammate SubagentStop events surface as coordinator idle notifications; teammate→coordinator message delivery occurs at coordinator turn boundary, not at teammate send time; async message-passing execution model; no coordinator poll per Rule 14)
 Phase 3 P (extension)        → TextPresent+Proceed (per-perspective epistemic contribution + key finding summaries)
