@@ -2,6 +2,8 @@
 
 Not all agent-teams best practices apply uniformly across Prothesis phases. This reference table maps which BPs are active, intentionally restricted, or not yet applicable at each phase — preventing compliance frame mismatch when evaluating phase-specific sessions.
 
+Use [`evaluation-methodology.md`](./evaluation-methodology.md) for the multi-session evaluation method and hidden-assumption checks that determine how this table should be applied.
+
 | Best Practice | Phase 0-2 (Setup) | Phase 3 (Theoria) | Phase 4-5 (Cross-Dialogue + Synthesis + Routing) |
 |---------------|-------------------|-------------------|----------------------|
 | BP1: Context in spawn prompts | — | **Active** (Mission Brief in prompt) | — |
