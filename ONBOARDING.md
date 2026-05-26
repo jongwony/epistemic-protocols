@@ -48,7 +48,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `.claude/rules/axioms.md` — A1–A6 foundational principles; the north star (~10 min)
 - [ ] `.claude/rules/derived-principles.md` — logical consequences of axiom combinations
 - [ ] `.claude/rules/architectural-principles.md` — Epistemic Cost Topology (T1, per-turn); other architectural principles in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
-- [ ] `.claude/rules/safeguards.md` — Safeguard-tier principles (LESS important as models improve) (~5 min)
+- [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
 - [ ] `.claude/principles/README.md` — demotion zone overview, demotion ledger
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — what each of the 15 static checks enforces

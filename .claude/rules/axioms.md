@@ -103,7 +103,7 @@ Non-derivability from A1: Recognition over Recall (A1) constrains what is presen
 
 ## Gate Integrity (Operational Guards, Safeguard-tier)
 
-*Tier*: Safeguard (formerly A7 / Adversarial Anticipation). Reclassified per audit-2026-04-11 #241 resolution — see `safeguards.md §Adversarial Anticipation` for the tier trajectory analysis and empirical evidence. The operational guards below remain load-bearing for gate execution fidelity regardless of tier and are inlined here to remain accessible when `axioms.md` is loaded without `safeguards.md`.
+*Tier*: Safeguard (formerly A7 / Adversarial Anticipation). Reclassified per audit-2026-04-11 #241 resolution — see `.claude/principles/safeguards.md §Adversarial Anticipation` for the tier trajectory analysis and empirical evidence. The operational guards below remain load-bearing for gate execution fidelity regardless of tier and are inlined here to remain accessible when `axioms.md` is loaded without `.claude/principles/safeguards.md`.
 
 **Gate mutation taxonomy** (rationalization paths a protocol must anticipate):
 - **Option injection** — adding options not in the TYPES coproduct definition
