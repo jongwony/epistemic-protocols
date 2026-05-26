@@ -15,7 +15,7 @@ The factorization is realized by complementary mechanisms. File content typicall
 **Observed instances**:
 - Gate annotations: A2 §A5 coordination distinguishes Standing/Active authority (axis_α) from regret (axis_β) at the meta/design layer; the runtime annotation layer collapses to a single TOOL GROUNDING `(extension)`/`(constitution)` axis per A5 coextension — see `axioms.md`.
 - Principle classification: `.claude/rules/` (T1) versus `.claude/principles/` (T2–T3) directly realizes the factorization for prescriptive content.
-- Tier-changing moves: e-tier reclassification (Axiom → Safeguard) and o-tier compression (content reduction) operate as independent moves — see `safeguards.md` Adversarial Anticipation tier note.
+- Tier-changing moves: e-tier reclassification (Axiom → Safeguard) and o-tier compression (content reduction) operate as independent moves — see `.claude/principles/safeguards.md` Adversarial Anticipation tier note.
 
 Sibling concept to A5 (Interaction Kind Factorization): A5 factors gate operations into Extension/Constitution × bounded/unbounded; Tier Factorization factors tier classifications into axis_α × axis_β.
 

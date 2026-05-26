@@ -30,18 +30,18 @@ Surface prohibition-framed phrasing whose positive restatement would be followed
 - Formal blocks within SKILL.md files: regions delimited by `── FLOW ──`, `── MORPHISM ──`, `── TYPES ──`, `── PHASE TRANSITIONS ──`, `── LOOP ──`, `── TOOL GROUNDING ──`, `── MODE STATE ──`, `── COMPOSITION ──`, and any `── <NAME> ──` block. Formal definition layers where notation patterns are content.
 - Fenced code blocks (` ``` ... ``` `) — code is content, and example code attached to a definition is part of that definition.
 - Files under `docs/`, `CLAUDE.md`, `README*.md`, `*/references/*.md` — contributor documentation where examples serve human comprehension.
-- Files under `.claude/rules/` and `.claude/principles/` — rule prose admits intentional negative formulations as discriminant signals (operational test in `safeguards.md §White Bear Avoidance`). One-pass audit across these files would erase calibration signals at intentionally preserved decision points.
+- Files under `.claude/rules/` and `.claude/principles/` — rule prose admits intentional negative formulations as discriminant signals (operational test in `.claude/principles/safeguards.md §White Bear Avoidance`). One-pass audit across these files would erase calibration signals at intentionally preserved decision points.
 - Files under `.insights/`, `memory/` — session and context substrates outside this skill's audit surface.
 
 ## What to evaluate
 
-The principle prose is loaded into the session context by the Claude Code harness via `.claude/rules/safeguards.md §White Bear Avoidance`. Apply that definition directly; the prose is authoritative.
+Read `.claude/principles/safeguards.md §White Bear Avoidance` for the authoritative principle definition, then apply it directly. (This prose lives in the lazy-load `.claude/principles/` zone, so the harness does not auto-load it into session context; read it at invocation time.)
 
 For each in-scope file, consider every prose sentence outside formal blocks and code fences:
 
 A **White Bear signal** is a sentence in LLM-facing prose framed as a prohibition (do not, never, avoid, must not, should not, cannot) that admits a positive restatement preserving the directive's force. A sentence whose load-bearing meaning collapses without the prohibition (a safety boundary the LLM observes, a contract the LLM honors) remains compliant; the test is whether a positive restatement preserves both the directive's force and its meaning.
 
-**Section-level placement** (per `safeguards.md §White Bear Avoidance` placement distinction):
+**Section-level placement** (per `.claude/principles/safeguards.md §White Bear Avoidance` placement distinction):
 - **Runtime motivational prose** — Rules, Phase prose, agent system prompts. Apply White Bear avoidance at full strength; the load-bearing test below determines whether a prohibition stays.
 - **Diagnostic substrate** — `## Anti-patterns` sections, failure-case checklists, audit findings, review-vocabulary lists. Section role is naming failure modes for detection; negative or failure-case wording is the content. Treat as compliant by purpose. Surface findings only when a positive restatement would preserve both directive force *and* boundary meaning — usually `severity: low` for human triage rather than `high`.
 
