@@ -17,7 +17,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 
 | File | Source | Demoted sections |
 |------|--------|------------------|
-| `architectural-principles.md` | `.claude/rules/architectural-principles.md` | Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload |
+| `architectural-principles.md` | `.claude/rules/architectural-principles.md` | Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload |
 | `hermeneutic-cycle.md` | `docs/structural-specs.md` | Pattern over Vocabulary (Gadamerian formal-block mapping) + 6 surface catalog (Primary / Secondary / Tertiary / Inter-version / Inter-agent / Operational axis) |
 | `safeguards.md` | `.claude/rules/safeguards.md` (whole file relocated) | Actionable revision criterion, Literature Application Discipline, Rule Classification Framework, Adversarial Anticipation, White Bear Avoidance, Gate Type Soundness — all authoring/audit/verify-time; runtime-critical Gate Integrity guards were previously inlined into `axioms.md` |
 
@@ -36,6 +36,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 | Direction over Accumulated Workload | `architectural-principles.md` | 2026-04-27 | T2 — contributor authoring decision principle |
 | Pattern over Vocabulary (Gadamerian formal-block mapping + Primary/Secondary surfaces) | `structural-specs.md` | 2026-05-14 | T2-T3 — extracted to dedicated `hermeneutic-cycle.md` as canonical home; structural-specs slimmed to gate runtime semantics only |
 | Safeguards (whole file) | `safeguards.md` | 2026-05-27 | T2-T3 — every section is authoring/audit/verify-time (Rule Classification Framework methodology, Literature Application Discipline, Adversarial Anticipation authoring guards, Gate Type Soundness verify check); no per-turn runtime dependency after `axioms.md` inlined the Gate Integrity guards. White Bear's prior auto-load dependency converted to on-demand Read in `white-bear` SKILL.md |
+| Epistemic Cost Topology | `architectural-principles.md` | 2026-05-27 | Recurring framing-contamination: T1 auto-load made it top-of-mind, entering analyses as a one-sided cost-only prior (observed: surface-invariance pre-loaded into delegation prompts, biasing toward minimality before independent root-need assessment). Reverses prior deliberate T1 retention; non-reducible content (project-profile-calibration depends on the meta/execution asymmetry) → demoted, not deleted. |
 
 ## Philosophy
 

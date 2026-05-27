@@ -2,7 +2,11 @@
 
 Project structure decisions; independent of the axiom system.
 
-> **Demotion zone**: This file lives in `.claude/principles/` (lazy-load, not auto-loaded by Claude Code harness). Originally part of `.claude/rules/architectural-principles.md`. Demoted per Tier Factorization o-tier classification (T2-T3 sections — invoked at authoring/verify time, not per-turn). Fetch via Read/Grep when relevant. The Epistemic Cost Topology section remains in `.claude/rules/architectural-principles.md` (T1, per-turn invocation). See `.claude/principles/README.md`.
+> **Demotion zone**: This file lives in `.claude/principles/` (lazy-load, not auto-loaded by Claude Code harness). Originally part of `.claude/rules/architectural-principles.md`. Demoted per Tier Factorization o-tier classification (T2-T3 sections — invoked at authoring/verify time, not per-turn). Fetch via Read/Grep when relevant. **Epistemic Cost Topology was demoted here on 2026-05-27** (it had previously remained in `.claude/rules/` T1). Demotion rationale: T1 auto-load kept it top-of-mind and it recurrently contaminated framing by entering analyses as a one-sided cost-only prior — biasing toward minimality / surface-invariance before independent root-need assessment. Removed from per-turn load so it is consulted as a post-assessment weight at authoring / cost-weighing time, not a framing prior. This reverses the earlier deliberate T1 retention; content is non-reducible (project-profile-calibration depends on the meta/execution cost asymmetry), so it is demoted, not deleted. See `.claude/principles/README.md`.
+
+## Epistemic Cost Topology
+
+The epistemic meta-layer has a fundamentally different cost topology from the execution layer. In the execution layer (code, tests, docs), AI drives the marginal cost of completeness toward zero — pursuing completeness is correct. In the epistemic meta-layer (protocols, axioms, formal systems), unused protocols pollute cognitive space — the cost of an unused protocol exceeds the cost of a missing one. This asymmetry justifies empirical restraint as the correct posture for protocol creation, even when execution-layer intuitions suggest "why not create more?" Attempts to apply execution-domain completeness principles directly to the epistemic domain should be identified and the cost function difference surfaced.
 
 ## Unix Philosophy Homomorphism
 
