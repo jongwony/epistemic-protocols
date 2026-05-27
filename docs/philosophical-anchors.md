@@ -50,7 +50,7 @@ A5 *inherits* A2's constitution properties on its gated side, but the factorizat
 
 ## §Epistemic Cost Topology — Phenomenological Vindication
 
-The Epistemic Cost Topology architectural principle (see `.claude/rules/architectural-principles.md`) states that the epistemic meta-layer has a fundamentally different cost topology from the execution layer: unused protocols pollute cognitive space (cost > 0), while execution completeness is correct (cost → 0).
+The Epistemic Cost Topology architectural principle (see `.claude/principles/architectural-principles.md`) states that the epistemic meta-layer has a fundamentally different cost topology from the execution layer: unused protocols pollute cognitive space (cost > 0), while execution completeness is correct (cost → 0).
 
 ### Husserlian thematic/marginal distinction
 
@@ -151,7 +151,7 @@ the former; it should not silently claim the latter.
 
 - `.claude/rules/axioms.md` §A2 (main axiom; Constitution/Relay retained as operational terms, etymology lives here)
 - `.claude/rules/axioms.md` §A5 (main axiom; philosophical ground lives here)
-- `.claude/rules/architectural-principles.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
+- `.claude/principles/architectural-principles.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
 - `anamnesis/skills/recollect/SKILL.md` (runtime protocol using Husserlian "synthesis of identification" and "empty_intention" as load-bearing operational terms; phenomenological context lives here)
 
 ## Note on rules/ purity
