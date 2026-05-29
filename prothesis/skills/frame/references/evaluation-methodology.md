@@ -57,7 +57,7 @@ Token usage is only one cost surface. Also evaluate recognition burden, review b
 
 ### No Communication = Isolation Failure
 
-No communication is not automatically a failure. In Phase 3, isolation can be intentional because independent perspectives reduce premature convergence. Use the applicability table before applying cross-team communication expectations.
+No communication is not automatically a failure. In Phase 4 (inquiry), isolation can be intentional because independent perspectives reduce premature convergence. Use the applicability table before applying cross-team communication expectations.
 
 ### Static Snapshot Evaluation
 
