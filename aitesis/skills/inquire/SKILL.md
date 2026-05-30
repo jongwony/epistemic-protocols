@@ -14,7 +14,7 @@ Infer context insufficiency before execution through AI-guided inquiry. Type: `(
 ```
 ── FLOW ──
 Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
-  classify(Uᵢ', dimension) → [if off-diagonal] Qc → (Uᵣ', Uₑ, Uᵢ'', Uₙ) →
+  classify(Uᵢ', dimension) → [if off-diagonal] Qc → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) →
   Q(classify_result + Uₑ + Uᵢ'', priority) → A → X' → (loop until informed)
 -- Uₙ (non-actionable: CrossDomain coherence + detect-only dimensions): shown in classify summary with routing target
 -- Uᵢ'' (factual/user-dependent or coherence/MemoryInternal/user-dependent): Phase 2 question candidates
@@ -99,10 +99,13 @@ classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
 ReadOnlyAdmissible = { u : ReadOnlyVerifiable | coverage(u) ∧ support_integrity(u) }
                    -- refinement over ReadOnlyVerifiable (NOT a new Verifiability constructor): the subset of ReadOnlyVerifiable
                    --   items admissible for Step 3 direct resolution. coverage(u) ≡ ¬coverage_gap(u); support_integrity(u) ≡ ¬support_integrity_unverified(u).
-                   --   Failure of either predicate → reclassify EmpiricallyObservable (backward arc T4). Step₃ ReadOnlyVerify takes the ReadOnlyVerifiable-classified set (Uᵣ', incl. support_integrity-undetermined items) and enforces this predicate at resolution time; ReadOnlyAdmissible characterizes the resolution survivors, NOT a Step-3 input pre-filter.
+                   --   Failure of either predicate → reclassify EmpiricallyObservable (backward arc T4). Step₃ ReadOnlyVerify takes the ReadOnlyVerifiable-classified candidate set (Uᵣ'_candidates, incl. support_integrity-undetermined items) and enforces this predicate at resolution time; ReadOnlyAdmissible characterizes the resolution survivors (= Uᵣ'), NOT a Step-3 input pre-filter.
 ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalObservation = (Uᵢ', ObservationSpec) → Uₑ  -- dynamic evidence gathering
-Uᵣ'        = Read-only verified uncertainties    -- resolved (no Phase 2); excludes items routed via UserTacit override per Cite-or-observe rule
+Uᵣ'_candidates = ReadOnlyVerifiable-classified uncertainties (Step 2 output → Step 3 input)
+               -- includes support_integrity-undetermined items pending resolution-time enforcement; symmetric with Uₑ_candidates (transient set, NOT a MODE STATE partition bucket)
+               -- Step 3 partitions this set: survivors → Uᵣ' (read_only_resolved); admissibility failures → backward arc → EmpiricallyObservable
+Uᵣ'        = Read-only verified uncertainties    -- Step 3 survivors only (= ReadOnlyAdmissible) → read_only_resolved; resolved (no Phase 2); excludes items routed via UserTacit override per Cite-or-observe rule
 Uₑ_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, (EmpiricallyObservable, s)) ∧ s ≠ UserTacit }
               -- Phase 1 observation checkpoint; excludes Cite-or-observe cite-based UserTacit overrides (those route directly to Uᵢ'')
 Uₑ         = Empirically observed uncertainties    -- evidence attached, proceeds to Phase 2
@@ -125,10 +128,10 @@ branching_factor : Uncertainty → ℕ
 ── PHASE TRANSITIONS ──
 Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency checkpoint (silent)
 Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- Step 1: context collection [Tool]
-         Step₂ classify(Uᵢ', dimension) → (Uᵣ', Uₑ, Uᵢ'', Uₙ) → -- Step 2: epistemic classification (core act); Uₙ = non-actionable
+         Step₂ classify(Uᵢ', dimension) → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) → -- Step 2: epistemic classification (core act); Uₙ = non-actionable
          [if off-diagonal(scope, resolution)] Qc(scope_assessment, resolution_assessment) → Stop → Ac  -- Coherence 2D Constitution interaction [Tool]
          -- evaluation order: Qc resolves before Uₑ_candidates computation; reclassified MemoryInternal/EmpiricallyObservable enters Uₑ_candidates
-         Step₃ ReadOnlyVerify(Uᵣ') →     -- Step 3: read-only verification (CodeDerivable + CanonicalExternal); enforces admissibility (coverage ∧ support_integrity) at resolution time over the full ReadOnlyVerifiable-classified set (incl. support_integrity-undetermined items) — survivors = ReadOnlyAdmissible (resolve directly); failures take the backward arc below [Tool]
+         Step₃ ReadOnlyVerify(Uᵣ'_candidates) →     -- Step 3: read-only verification (CodeDerivable + CanonicalExternal); enforces admissibility (coverage ∧ support_integrity) at resolution time over the candidate set (incl. support_integrity-undetermined items) — survivors = ReadOnlyAdmissible = Uᵣ' (resolve directly, read_only_resolved); failures take the backward arc below [Tool]
            [if support_integrity_unverified(u) ∨ coverage_gap(u)] reclassify(u, EmpiricallyObservable) → goto Step₂  -- backward arc (T4): support-integrity/coverage failure re-enters classification (staleness = temporal sub-case of support_integrity_unverified)
          [if Uₑ_candidates ≠ ∅] Step₄ EmpiricalObservation(Uₑ_candidates) → Uₑ  -- Step 4: dynamic evidence gathering [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[cluster], progress) → Stop → A          -- uncertainty surfacing [Tool]; cluster = one coherent cluster (size ≤ 4)
@@ -350,7 +353,7 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
   - Emergent(_) → match observed deficit condition against candidate protocol deficit conditions
 - Store all results in `Λ.classify_results`
 
-**Step 3 — Read-only verification**: For ReadOnlyVerifiable-classified uncertainties (`Uᵣ'`, including items whose support_integrity was undetermined at Step 2). Step 3 enforces both admissibility axes *during* resolution — items confirmed to pass coverage ∧ support_integrity resolve directly (these survivors constitute ReadOnlyAdmissible); items discovered to fail either axis at resolution time are reclassified to EmpiricallyObservable via the backward arc and re-enter Step 2 (support_integrity failures already determinable at Step 2 were kicked there and never reach Step 3):
+**Step 3 — Read-only verification**: For the ReadOnlyVerifiable-classified candidate set (`Uᵣ'_candidates`, including items whose support_integrity was undetermined at Step 2). Step 3 enforces both admissibility axes *during* resolution — items confirmed to pass coverage ∧ support_integrity resolve directly (these survivors constitute ReadOnlyAdmissible, marked `Uᵣ'` / read_only_resolved); items discovered to fail either axis at resolution time are reclassified to EmpiricallyObservable via the backward arc and re-enter Step 2 (support_integrity failures already determinable at Step 2 were kicked there and never reach Step 3):
 - Targeted context lookup via Read/Grep — classification narrows search scope to specific files/locations that Step 1's broad sweep did not cover (e.g., spec files, config schemas identified by classify)
 - Scope re-verification: if targeted lookup reveals evidence scope ⊊ claim scope not detected at Step 2 (subtle coverage gap), apply the same split — covered portion resolved, uncovered portion reclassified separately
 - Resolved: mark as `Uᵣ'` (read_only_resolved), skip Phase 2
