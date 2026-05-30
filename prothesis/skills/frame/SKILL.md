@@ -251,7 +251,7 @@ AgentRef  = { name: String, type: String, perspective: Option(String) }
 
 ## Core Principle
 
-**Placement over Prescription**: AI places available perspectives before the user without prescribing which to adopt. User selects.
+**Placement over Prescription**: AI places available perspectives before the user and leaves which to adopt to the user's judgment. The user selects.
 
 ## Mode Activation
 
@@ -294,7 +294,7 @@ Construct a Mission Brief from the user's request and **present** it for confirm
 The coordinator infers the Mission Brief from U (the user's request):
 
 - **Inquiry Intent**: What is being investigated and why
-- **Expected Deliverable**: What form the output should take (e.g., code review, risk analysis, decision recommendation)
+- **Expected Deliverable**: What form the output should take, inferred from the inquiry's purpose and intended use
 - **Scope Constraint**: What is included and excluded from analysis
 
 Present the inferred Mission Brief as text output:
@@ -334,7 +334,7 @@ The recommendation matches mode to analytical demand — Recommend when the inqu
 
 Gather context sufficient to formulate distinct perspectives, **guided by MBᵥ**.
 
-MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and domains to investigate. Gathering intensity scales with MBᵥ complexity: narrow-scope inquiries with clear domain boundaries warrant targeted collection; broad or cross-domain inquiries warrant deeper investigation. Do not proceed to Phase 2 until context is established.
+MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and domains to investigate. Gathering intensity scales with MBᵥ complexity: narrow-scope inquiries with clear domain boundaries warrant targeted collection; broad or cross-domain inquiries warrant deeper investigation. Proceed to Phase 2 only after context is established.
 
 ### Phase 2: Prothesis (Perspective Placement)
 
@@ -346,7 +346,7 @@ After context gathering (Phase 1), **present** perspectives via Cognitive Partne
 
 Constitution presentation yields turn for user response.
 
-Each perspective is an **individual option**. Do not pre-combine perspectives into composite options (e.g., "All three", "1+2 only"). The user selects one or more perspectives directly.
+Each perspective is an **individual option**. Keep each option a single perspective so the user composes any combination directly. The user selects one or more perspectives directly.
 
 ```
 question: "Which lens(es) for this inquiry?"
@@ -377,7 +377,7 @@ During perspective formulation, note whether each candidate lens depends on evid
 
 **Pre-suggested perspective handling**: When the user supplies perspectives in U (e.g., naming specific agents, frameworks, or roles), treat these as **pre-confirmed base perspectives** (Pᵦ):
 
-- Pᵦ are **auto-included** in Pₛ — do not re-present them as selectable options
+- Pᵦ are **auto-included** in Pₛ; present only the AI-proposed novel perspectives as selectable options
 - Constitution interaction presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
 - State Pᵦ in the question text as context (e.g., "Base: [Pᵦ names]. Which additional lens(es)?")
 - AI must propose at least 1 novel perspective when Pᵦ ≠ ∅ — re-presenting known perspectives as options saturates the finite option space and structurally conceals unknown unknowns
@@ -406,7 +406,7 @@ The topology is a small **compositional algebra**: a finite set of working axes,
 
 **Pre-gate context, gate question** (Context-Question Separation, Rule 8): present the analysis — each axis's default, its basis (why it is the sensible starting point for this mission), and each value's epistemic trade-off — as text *before* the gate. The gate carries only the question and per-option differential implications.
 
-The dimension gate presents, for the surfaced axis, the generator values **enumerated with their differential implications** (e.g., `dialectical_debate` surfaces tensions earlier but costs cross-talk and needs persistent peers; `independent_aggregate` is cheaper and parallelizable but skips reconciliation). For the **interaction-mode axis only** (the sole composable axis), the gate additionally surfaces **relevant pre-composed composites** as recognizable options (e.g., `independent_aggregate ⨾ adversarial_refute`) so the user recognizes composites rather than recalling how to build them, plus a one-line ⨾/∥ affordance signalling that further composition is available; the scalar axes present generator values alone. The user's move is one of:
+The dimension gate presents, for the surfaced axis, the generator values **enumerated with the differential implication that distinguishes each** — the epistemic trade-off a knowledgeable user would weigh. For the **interaction-mode axis only** (the sole composable axis), the gate additionally surfaces the **relevant pre-composed composites** whose recognizability spares the user from reconstructing them, so the user recognizes composites rather than recalling how to build them, plus a one-line ⨾/∥ affordance signalling that further composition is available; the scalar axes present generator values alone. The user's move is one of:
 - **Select(value)** — adopt a generator value for the axis; auto-advance (relay) to the next unsurfaced axis
 - **Fuse(compose via op)** — combine values via ⨾ or ∥ into a composite topology (interaction-mode only — the sole composable axis; the ⨾/∥ affordance and this move are not offered on the scalar axes termination/independence/routing); auto-advance to the next unsurfaced axis
 - **Reorient(axis)** — reframe or replace the surfaced axis itself; the replaced axis is removed from the surfaced set and the topology, and the reoriented axis re-surfaces (no auto-advance)
@@ -483,7 +483,7 @@ respond with specific evidence or impact analysis.
 Do not initiate cross-dialogue unprompted.
 ```
 
-Multiple selections → parallel teammates (never sequential).
+Multiple selections → spawn the teammates in parallel.
 
 **TaskCreate per perspective** (mandatory): After spawning each perspective teammate, the coordinator MUST call TaskCreate for that perspective — one task per perspective. This enables progress tracking via TaskList/TaskUpdate during inquiry, and ensures team coordination is observable rather than implicit. The task subject should identify the perspective; the description should include the inquiry question and scope.
 
@@ -575,7 +575,7 @@ The coordinator explicitly checks R' for cross-dialogue triggers (per TYPES `Δ`
 
 **Routing concreteness**: Each routing option must be grounded in the specific Lens output. Generic descriptions without session-specific rationale fail the concreteness requirement (analogical application of Full Taxonomy Confirmation) — the AI has analyzed the Lens but presents generic action labels instead of concrete proposals. Exception: "Withdraw" retains its fixed description (no session-specific content needed for exit).
 
-**If no triggers**: Proceed to synthesis (step 6) with brief justification (e.g., "No contradictions, horizon intersections, or uncorroborated high-stakes findings detected"), then user review (step 7).
+**If no triggers**: Proceed to synthesis (step 6) with a brief justification naming the trigger types checked and found absent, then user review (step 7).
 
 Cross-dialogue precedes synthesis so the coordinator evaluates all perspectives before integration. Trigger detection is an explicit checkpoint — not incidental discovery during synthesis.
 
@@ -631,15 +631,15 @@ Heuristic criteria for Phase 5 trigger detection (Δ). Coordinator cites evidenc
 
 1. **Mission Brief confirmation**: Always present Mission Brief for confirmation via Cognitive Partnership Move (Constitution) before context gathering (Phase 0 → Phase 1 Constitution interaction). Pre-filled text (`/frame "text"`) still requires confirmation.
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
-3. **Epistemic Integrity (independence-before-contamination)**: The privileged DEFAULT topology preserves perspective independence: when the resolved DeliberationTopology's independence axis is `isolated` (the DT_default), each perspective forms its assessment without seeing the others until the reconciliation stage; `shared` relaxes this and MUST declare partial-Lens degradation. The invariant is independence-before-contamination, not any specific substrate — an agent team is one substrate realization (see TOOL GROUNDING), so the invariant wording does not bind to it. Main-agent direct analysis substituting for an isolated perspective = protocol violation. When the chosen substrate cannot preserve independence for a perspective, or cannot realize the elicited DT (e.g. plan-mode cannot host dialectical_debate per Rule 17), declare partial-Lens / topology degradation rather than silently binding an infeasible substrate. Mode 1 (recommend) is exempt — no execution (Pₛ selection only). Topology behavior per Rule 7
+3. **Epistemic Integrity (independence-before-contamination)**: The privileged DEFAULT topology preserves perspective independence: when the resolved DeliberationTopology's independence axis is `isolated` (the DT_default), each perspective forms its assessment without seeing the others until the reconciliation stage; `shared` relaxes this and MUST declare partial-Lens degradation. The invariant is independence-before-contamination, not any specific substrate — an agent team is one substrate realization (see TOOL GROUNDING), so the invariant wording does not bind to it. Each isolated perspective is formed in its own teammate context; routing one through main-agent direct analysis breaks independence-before-contamination. When the chosen substrate cannot preserve independence for a perspective, or cannot realize the elicited DT (e.g. plan-mode cannot host dialectical_debate per Rule 17), declare partial-Lens / topology degradation rather than silently binding an infeasible substrate. Mode 1 (recommend) is exempt — no execution (Pₛ selection only). Topology behavior per Rule 7
 4. **Synthesis Constraint**: Integration derives only from what perspectives provided; no new analysis. Synthesis constitution (horizons fusion) is integration, not analysis — explicitly marked in Synthesis Basis for verification
 5. **Verbatim Transmission**: Pass original question unchanged to each perspective
 6. **Sufficiency check**: After synthesis, output full Lens L as text O(L), then present routing options via Cognitive Partnership Move (Constitution) to confirm or extend analysis
 7. **Elicited deliberation topology parameterizes reconciliation (via total dispatch)**: The DeliberationTopology resolved in Phase 3 (Deliberation Design) parameterizes Phase 4-5 behavior through the total homomorphic `dispatch` over interaction-mode values (lifted to the whole 4-axis topology by `dispatch_DT`, which closes independence/routing via their scalar projections `iso`/`present` and injects termination as the interaction-mode dialogue bound) — every reachable value closes: interaction-mode generators/composites via `dispatch`, the scalar axes (independence/routing) via their projections, termination via bound-injection. Per-axis wiring: **independence** → Phase 4 (`isolated` strict isolation default; `shared` declares degradation per Rule 3); **interaction-mode + termination** → Phase 5 reconciliation; **routing** → Phase 5 presentation (`return_list` synthesize+present with the standard J gate; `deepen_on_finding` CONDITIONS that gate — recommends the existing `extend → deepen existing` option + advisory aitesis handoff on a surviving high-severity finding, adding no J constructor per Rule 13). Generator dispatch: `dispatch(independent_first_then_dialogue)` (DEFAULT) → conditional peer-to-peer negotiation (≤3 exchanges/pair) → structured report → conditional hub-spoke (Synthesizer) → user review via Cognitive Partnership Move (Constitution) — reproducing today's exact behavior; `dispatch(independent_aggregate)` → skip dialogue (Δₛ ≡ ∅, Syn over the static aggregate); `dispatch(dialectical_debate)` → unconditional peer negotiation (debate regardless of Δₛ); termination generators bound it (`bounded_rounds` ≤3/pair conditional; `single_pass`; `until_dry_ceiling`). Composite dispatch: `dispatch(A ⨾ B)` runs dispatch(A) then dispatch(B) over A's aggregate output; `dispatch(A ∥ B)` runs both in parallel and the two reconciliation tracks are fused by the existing Synthesis (Syn IS the join — no new merge operator), valid only when both branches are Syn-composable (else topology degradation per Rule 17) — e.g. `X ⨾ adversarial_refute` = stage X, then an adversarial pass over the aggregate, terminating until-dry (≥ K=1 empty pass) plus a hard ceiling. The operator set is extensible (each new op carries its own dispatch rule). Each non-default value carries a stated epistemic trade-off, surfaced at the Phase 3 design gate per Rule 8.
-8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation. Scope includes the **Phase 3 dimension gate**: each axis's default, basis, and per-value epistemic trade-offs are pre-gate text; the gate carries only the question and per-option (per-generator and per-composite) differential implications.
+8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. All analytical context belongs in the pre-gate text, keeping the question fields limited to the question and its options. Scope includes the **Phase 3 dimension gate**: each axis's default, basis, and per-value epistemic trade-offs are pre-gate text; the gate carries only the question and per-option (per-generator and per-composite) differential implications.
 9. **Convergence evidence**: Present transformation trace before declaring wrap_up (Mode 2) or recommend terminus (Mode 1); per-perspective contribution is the required evidence
 10. **Zero-result surfacing**: If Phase 2 generation yields no candidate frameworks, present the finding with reasoning for user confirmation
-11. **Concrete routing**: Phase 5 routing options must include session-specific rationale derived from L. Generic labels without Lens-grounded content = protocol violation (analogical application of Full Taxonomy Confirmation — session-grounded concreteness over generic labels)
+11. **Concrete routing**: Phase 5 routing options must include session-specific rationale derived from L (analogical application of Full Taxonomy Confirmation — session-grounded concreteness over generic labels)
 12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 13. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
 14. **Wait discipline**: During Phase 4 Await, the coordinator MUST NOT (a) re-prompt teammates regardless of interval duration — any re-prompt risks interrupting teammate mid-composition and inducing content revision rather than resolving apparent silence; (b) observe teammate state passively (TaskList reads, agent memory inspection, filesystem reads under team directories) as a basis for behavioral decisions before the completion signal arrives — passive observation defeats passive-wait semantics and becomes a post-hoc rationalization path disguised as "task tracking, not polling"; (c) proceed with partial R — Await converges only when all teammates in T have signaled completion, and partial collection without `user_esc` violates convergence persistence. Scope: Phase 4 inquiry wait only; Phase 5 hub-spoke step 4 content-bearing follow-ups are sent after peers have idled and are out of scope. Platform-specific delivery mechanics are documented in TOOL GROUNDING (Await entry); epistemic prose depends only on the existence of a completion signal, not on its platform form. Recovery from indefinite wait is user-initiated via `user_esc` per LOOP; any of (a)/(b)/(c) = protocol violation
