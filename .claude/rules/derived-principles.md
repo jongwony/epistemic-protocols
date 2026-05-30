@@ -94,3 +94,13 @@ A2's relay/constitution boundary establishes that Extension actions are legitima
 **Plan-level aggregation**: Compound unbounded-regret is superadditive — multiple irreversible decisions in one plan interact, and their aggregate regret exceeds the sum of individual gate-level risks. When compound regret crosses the plan-direction threshold, the user should judge the plan shape, not just individual items. The specific threshold is protocol-level implementation.
 
 **Dual failure mode**: False-positive gating — the dual of Surfacing over Deciding. Both corrupt the same detection boundary from opposite directions: Surfacing over Deciding addresses false negatives (silence where surfacing is needed), this principle addresses false positives (gates where continuation is needed).
+
+## Currency is not Support-Integrity
+
+Derived from A2 (Detection with Authority).
+
+Temporal currency (an artifact exists and is fresh in the current environment) does not establish support_integrity — that the artifact actually tracks the behavior or current reality it asserts. A current-but-unenforced artifact (a comment, doc, or note that claims a behavior with no enforcement channel coupling it to that behavior) is inference dressed as evidence: reading it is not relay (A2), because its basis is not authoritatively citable — the artifact could silently disagree with the behavior it describes. The direct-resolve (relay) path must therefore verify support_integrity (evidence→behavior coupling), not currency alone; evidence that is present and fresh but support-unlinked is routed to verification (observe the behavior) rather than auto-resolved.
+
+Operationally this distinguishes two defeater axes on the admissibility boundary (rebutting/undercutting, per Pollock — two kinds of defeater, not an exhaustive taxonomy of evidence defects): **coverage** (does the evidence span the whole claim?) and **support_integrity** (does the evidence track what it asserts?). Currency is a temporal sub-case of support_integrity, not a peer of it.
+
+This records the #464 stratified-complementation conclusion: deterministic evidence-discipline checks (the support-link test) belong in the detection / Extension / substrate layer, while constitutive human authority is preserved at the decision gates — absorption is by re-justifying and refining existing guards, not by promoting a mechanism into an axiom. This is contributor-layer guidance; it does not assert that every protocol already satisfies the distinction. Each protocol that commits evidence without a user gate (the "commit-form" protocols) materializes the runtime enforcement self-containedly in its own SKILL.md; Aitesis (`/inquire`) is the first such materialization.
