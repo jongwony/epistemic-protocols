@@ -1,6 +1,6 @@
 {
   "name": "aitesis",
-  "version": "4.3.35",
+  "version": "5.0.0",
   "description": "Infer context insufficiency before execution — /inquire (αἴτησις: a requesting)",
   "author": {
     "name": "Jongwon Choi",
