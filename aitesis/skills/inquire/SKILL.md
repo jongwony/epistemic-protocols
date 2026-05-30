@@ -15,7 +15,10 @@ Infer context insufficiency before execution through AI-guided inquiry. Type: `(
 ── FLOW ──
 Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
   classify(Uᵢ', dimension) → [if off-diagonal] Qc → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) →
+  ReadOnlyVerify(Uᵣ'_candidates) → (Uᵣ' resolved | admissibility-fail → reclassify EmpiricallyObservable) →
+  [if Uₑ_candidates ≠ ∅] EmpiricalObservation(Uₑ_candidates) → Uₑ →
   Q(classify_result + Uₑ + Uᵢ'', priority) → A → X' → (loop until informed)
+-- Uᵣ' (Step 3 survivors = read_only_resolved): skip Phase 2; ReadOnlyVerify failures rejoin Uₑ_candidates via backward arc (detail in PHASE TRANSITIONS)
 -- Uₙ (non-actionable: CrossDomain coherence + detect-only dimensions): shown in classify summary with routing target
 -- Uᵢ'' (factual/user-dependent or coherence/MemoryInternal/user-dependent): Phase 2 question candidates
 
