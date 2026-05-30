@@ -34,8 +34,11 @@ Phase 0: Mission Brief → 탐구 의도, 범위, 모드 확인 (gate interactio
 Phase 1: Gather        → 관점 형성을 위한 대상 맥락 수집
 Phase 2: Prothesis     → 관점 2-4개 제시 (gate interaction)
 --- Mode 1 (recommend) 여기서 종료: Pₛ + 분류 출력 ---
-Phase 3: Inquiry       → 선택된 관점별 에이전트 팀 분석 (TeamCreate + teammates)
-Phase 4: Synthesis     → 교차 대화 확인 → 수렴점/발산점 정리 → 통합 답변 + 라우팅
+Phase 3: Deliberation Design → 숙의 토폴로지 설계 — 관점들이 어떻게 조정되는가
+                               (interaction-mode, termination, independence, routing);
+                               기본값은 새 gate 없이 통과 (Mode 2 전용)
+Phase 4: Inquiry       → 선택된 관점별 에이전트 팀 분석 (TeamCreate + teammates)
+Phase 5: Synthesis & Routing → 교차 대화 확인 → 수렴점/발산점 정리 → 통합 답변 + 라우팅
 ```
 
 ## 사용 시점

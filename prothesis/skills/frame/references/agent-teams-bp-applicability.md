@@ -4,7 +4,7 @@ Not all agent-teams best practices apply uniformly across Prothesis phases. This
 
 Use [`evaluation-methodology.md`](./evaluation-methodology.md) for the multi-session evaluation method and hidden-assumption checks that determine how this table should be applied.
 
-| Best Practice | Phase 0-2 (Setup) | Phase 3 (Theoria) | Phase 4-5 (Cross-Dialogue + Synthesis + Routing) |
+| Best Practice | Phase 0-3 (Setup + Deliberation Design) | Phase 4 (Theoria) | Phase 5 (Cross-Dialogue + Synthesis + Routing) |
 |---------------|-------------------|-------------------|----------------------|
 | BP1: Context in spawn prompts | — | **Active** (Mission Brief in prompt) | — |
 | BP2: Distinct teammate roles | — | **Active** (perspective = role) | — |
@@ -12,7 +12,7 @@ Use [`evaluation-methodology.md`](./evaluation-methodology.md) for the multi-ses
 | BP4: Research-oriented tasks | — | **Active** (perspectives analyze) | — |
 | BP5: Scope-limited tasks | — | **Active** (1 perspective = 1 scope) | — |
 | BP6: Mid-flight monitoring | — | Optional (coordinator may check) | — |
-| BP7: Cross-dialogue | — | **Restricted** (strict isolation — no cross-dialogue) | **Active** (Phase 4 peer negotiation → structured report → conditional hub-spoke) |
+| BP7: Cross-dialogue | — | **Restricted** (strict isolation — no cross-dialogue) | **Active** (Phase 5 peer negotiation → structured report → conditional hub-spoke) |
 | BP8: Graceful shutdown | — | — | **Active** at terminal (Ω shutdown) |
 | BP9: Shared task list | — | **Active** (TaskCreate per perspective) | — |
 | BP10: Cross-team communication | — | **Restricted** (isolation required) | — |

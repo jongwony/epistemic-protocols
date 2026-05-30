@@ -34,8 +34,11 @@ Phase 0: Mission Brief → Confirm inquiry intent, scope, and mode (gate interac
 Phase 1: Gather        → Targeted context acquisition for perspective formulation
 Phase 2: Prothesis     → Present 2-4 perspectives (gate interaction)
 --- Mode 1 (recommend) terminates here with Pₛ + characterization ---
-Phase 3: Inquiry       → Agent team analysis per selected perspective (TeamCreate + teammates)
-Phase 4: Synthesis     → Cross-dialogue check → Convergence/divergence → Integrated answer + Routing
+Phase 3: Deliberation Design → Design the deliberation topology — how the perspectives reconcile
+                               (interaction-mode, termination, independence, routing); the default
+                               passes with zero new gates (Mode 2 only)
+Phase 4: Inquiry       → Agent team analysis per selected perspective (TeamCreate + teammates)
+Phase 5: Synthesis & Routing → Cross-dialogue check → Convergence/divergence → Integrated answer + Routing
 ```
 
 ## When to Use

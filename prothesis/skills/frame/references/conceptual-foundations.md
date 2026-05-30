@@ -20,13 +20,13 @@ When combined with Plan mode, Prothesis provides the **Deliberation** phase:
 **Minimal Enhancement Pattern**:
 When multiple perspectives converge on the same recommendation, present as unanimous recommendation to indicate high confidence.
 
-**Phase 3 Degradation**:
+**Phase 4 Degradation**:
 When Prothesis activates within an active plan mode session, the protocol adapts with available tools:
 
-- Phases 0–2: Execute normally (`AskUserQuestion` available in plan mode)
+- Phases 0–3: Execute normally (`AskUserQuestion` available in plan mode; Phase 3 Deliberation Design proceeds as topology elicitation). Plan mode can run elicitation but cannot host a non-aggregate topology — there are no persistent addressable peers for `dialectical_debate` or peer-negotiation modes. When the user elicits such a topology, declare topology-degradation (Rule 3 / Rule 17) and realize the closest aggregate behavior rather than silently binding an infeasible substrate.
 - Phase 1: `Explore` subagent available for context collection (`Task(subagent_type="Explore")`)
-- Phase 3: `Plan` subagent available per perspective (`Task(subagent_type="Plan")`); analysis isolation preserved — each perspective analyzed in a separate subagent context (no persistent identity or cross-dialogue capability; coordinator collects results and incorporates into plan output)
-- Phase 4: Coordinator performs Δ(R') trigger detection and Syn(R', ∅) synthesis — both internal operations. O(L) presents the partial Lens.
+- Phase 4: `Plan` subagent available per perspective (`Task(subagent_type="Plan")`); analysis isolation preserved — each perspective analyzed in a separate subagent context (no persistent identity or cross-dialogue capability; coordinator collects results and incorporates into plan output)
+- Phase 5: Coordinator performs Δ(R') trigger detection and Syn(R', ∅) synthesis — both internal operations. O(L) presents the partial Lens.
 - ExitPlanMode presents the partial Lens L: convergence from independent analysis, divergence as unresolved hypotheses, assessment from coordinator synthesis.
 
 **Quality trade-off (partial Lens)**: Without cross-dialogue:
@@ -35,7 +35,7 @@ When Prothesis activates within an active plan mode session, the protocol adapts
 - Assessment lacks Dᵣ refinement — the coordinator synthesizes from isolated outputs only
 - Trigger Detection Criteria still apply — the coordinator can identify contradictions and horizon intersections, but cannot initiate peer resolution
 
-This preserves Phase 0–2 epistemic value, Phase 3 analysis isolation, and Phase 4 synthesis capability via internal operations.
+This preserves Phase 0–3 epistemic value, Phase 4 analysis isolation, and Phase 5 synthesis capability via internal operations.
 
 ## Distinction from Socratic Method
 
@@ -74,9 +74,17 @@ If Prothesis were **user-initiated only**, it would require users to self-diagno
 
 This does not make Prothesis fully AI-autonomous. Layer 2 (AI-guided) detects the *condition*; the user retains *selection authority* via AskUserQuestion (Recognition over Recall). The AI says "here are the lenses"; the user says "I'll look through these ones." Detection is AI-guided; selection is user-authorized.
 
+### Deficit Identity: Framework Includes Form
+
+The absent "framework" that `FrameworkAbsent` names is not only *which* lens to apply but also *how* the resulting perspectives reconcile — the deliberation topology (the form). A user facing framework absence typically lacks both: they cannot name the right analytical lenses, and they cannot say whether those lenses should aggregate independently, debate, or refute one another. Both are facets of the same meta-ignorance — not knowing what one does not know about how to structure the inquiry.
+
+Designing the deliberation topology is therefore the **same** `FrameworkAbsent → FramedInquiry` deficit, not a new one. The framed object is a complete Method ⟨Lens, DeliberationTopology⟩ precisely because the framework was absent in both facets. The deficit type is unchanged; its content is widened to own the form alongside the lens.
+
+The AI-guided initiator pattern extends to form exactly as it does to lens. Just as the AI proposes candidate lenses (with the user selecting), the AI proposes a default topology plus its basis (with the user judging via the Phase 3 dimension gate). The user cannot self-diagnose the absence of a reconciliation structure for the same Dunning-Kruger reason they cannot self-diagnose lens absence: recognizing that multiple reconciliation forms exist requires the forms they lack. Detection of the form deficit is AI-guided; the topology is user-judged.
+
 ### Theoria-Praxis Boundary
 
-Prothesis Phases 0–4 constitute pure **theoria** (θεωρία) — contemplative inquiry that produces the Lens `L` as a theoretical artifact. The Lens reveals what different frameworks show; it changes nothing.
+Prothesis Phases 0–5 constitute pure **theoria** (θεωρία) — contemplative inquiry that produces the Lens `L` as a theoretical artifact. The Lens reveals what different frameworks show; it changes nothing.
 
 The transition from theoria to praxis occurs at the LOOP's routing step, when `J=wrap_up` completes with the Lens `L`. Output Style nudges may indicate downstream protocols based on what the Lens revealed. This is an **explicit boundary**: the user must choose to act on the Lens by following a nudge or proceeding with their own plan.
 
