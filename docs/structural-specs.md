@@ -178,7 +178,7 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 
 ## Intra-Protocol Context Separation
 
-**Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. In Prothesis: `gather(context)` (Phase 1, meta) collects broad context to identify relevant perspectives; `inquire(parallel)` (Phase 3, object) collects perspective-specific evidence through each lens independently. The semantic separation exists in MORPHISM; TOOL GROUNDING realizes it operationally by specifying different collection targets per phase. Passing meta-context to object-level agents biases their investigation toward the lead agent's framing, undermining the epistemic value of independent perspective analysis.
+**Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. In Prothesis: `gather(context)` (Phase 1, meta) collects broad context to identify relevant perspectives; `inquire(parallel)` (Phase 4, object) collects perspective-specific evidence through each lens independently. The semantic separation exists in MORPHISM; TOOL GROUNDING realizes it operationally by specifying different collection targets per phase. Passing meta-context to object-level agents biases their investigation toward the lead agent's framing, undermining the epistemic value of independent perspective analysis.
 
 ## Cross-Session Tertiary Pattern
 
@@ -214,7 +214,7 @@ The Extension entry's condition suffix records the predicate inline. Both halves
 Examples observed in current SKILL.md:
 
 - prothesis: `Phase 0 MB_from_arg (extension)` + `Phase 0 Qc (constitution)`
-- prothesis: `Phase 3 AgentMap_auto (extension)` + `Phase 3 AgentMap_select (constitution)`
+- prothesis: `Phase 4 AgentMap_auto (extension)` + `Phase 4 AgentMap_select (constitution)`
 - misuse: `Phase 0 scope_from_arg (extension)` + `Phase 0 scope_confirm (constitution)`
 - steer: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`
 - realign: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`
