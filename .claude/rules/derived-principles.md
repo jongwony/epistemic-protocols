@@ -97,7 +97,7 @@ A2's relay/constitution boundary establishes that Extension actions are legitima
 
 ## Currency is not Support-Integrity
 
-Derived from A2 (Detection with Authority) + the Evidence over Inference boundary (Aitesis Core Principle).
+Derived from A2 (Detection with Authority).
 
 Temporal currency (an artifact exists and is fresh in the current environment) does not establish support_integrity — that the artifact actually tracks the behavior or current reality it asserts. A current-but-unenforced artifact (a comment, doc, or note that claims a behavior with no enforcement channel coupling it to that behavior) is inference dressed as evidence: reading it is not relay (A2), because its basis is not authoritatively citable — the artifact could silently disagree with the behavior it describes. The direct-resolve (relay) path must therefore verify support_integrity (evidence→behavior coupling), not currency alone; evidence that is present and fresh but support-unlinked is routed to verification (observe the behavior) rather than auto-resolved.
 
