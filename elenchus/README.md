@@ -16,9 +16,9 @@ Elenchus runs before you commit your working context to an external sync — a m
 
 **Three dialectical patterns**:
 
-- **Pattern A — Source provenance audit**: thesis "X is verified" ↔ antithesis "X's verification path is provisional / inferred / stale"
+- **Pattern A — Source provenance audit**: thesis "X is verified for claim C" ↔ antithesis "X's verification path authorizes a different claim / is provisional / inferred / stale"
 - **Pattern B — Counterfactual gap forecasting**: thesis "Y holds in current conditions" ↔ antithesis "if condition Z replaces a current one, gap B opens at point P"
-- **Pattern C — Cross-source consistency check**: thesis "X₁ and X₂ name the same referent consistently" ↔ antithesis "X₁ and X₂ diverge at point Q"
+- **Pattern C — Cross-source consistency check**: thesis "X₁ and X₂ name the same referent and compatible claim-kind consistently" ↔ antithesis "X₁ and X₂ diverge at point Q"
 
 **Core principle**: Dialectical Vetting over Silent Trust — accumulated context carries silent decay; the loop dissolves compounding context cost before it forces whole-system refactoring downstream.
 
