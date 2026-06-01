@@ -49,7 +49,8 @@ Hint             = String   -- user recall context from Socratic probe
 InputType        ∈ {StructuredIdentifier, NaturalRecall, Mixed}      -- classified from V + Σ
 Track            ∈ {entropy, salience, hybrid}                       -- dispatched from InputType
 Source           = String   -- opaque: store location identifier (substrate-agnostic)
-IdentifierTuple  = { literal: String, source: Source, precision: ℝ[0,1] } -- entropy-track anchor
+IdentifierTuple  = { literal: String, source: Source, source_namespace: String, claim_kind: String, precision: ℝ[0,1] } -- entropy-track anchor
+                  -- source_namespace × claim_kind must authorize the recall claim before a literal match anchors ranking
 MarkerProfile    = { coinage: Set(Token), actor: Set(Entity),
                      temporal: Set(TimeRef), emotional: Set(Marker),
                      cognitive: Set(Marker), singularity: Set(Event) }  -- salience-track profile
@@ -159,12 +160,15 @@ laws:
 
 precision(t, corpus) = 1 / (1 + |occ(t, corpus \ {t.source})|)
 reject(t, θ) ≡ precision(t, corpus) < θ                                    -- derivable, not enumerated
+claim_kind(trace) = expected identifier category implied by the recall trace
+compatible_anchor(t, trace) ≡ source_namespace(t) authorizes claim_kind(trace)
 
 extractor registry:
   core (bootstrap) = { URL_literal, PathRef_literal, PR_literal, Issue_literal, Commit_literal, SessionID_literal }
                      -- semantic categories: URL_path group {URL_literal, PathRef_literal},
                      --                      ExplicitRef group {PR_literal, Issue_literal, Commit_literal},
                      --                      Citation group {SessionID_literal}  -- UUIDs as session citations
+                     -- each extractor records the source_namespace and claim_kind it authorizes for entropy anchoring
   plugin           = { domain-specific extractors conforming to laws }
 
 dispatch binding: InputType = StructuredIdentifier → Track = entropy
@@ -195,7 +199,7 @@ Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-
   INDEX_substitute = substitute channel raw message log -- append-only, primary capture, authoritative (loss non-recoverable)
 
 scan_{Track} : (Store, Trace) → List(Candidate)
-  scan_entropy(Store, trace)    = exact-match over IdentifierTuples        -- uses SSOT ∪ INDEX
+  scan_entropy(Store, trace)    = exact-match over IdentifierTuples where compatible_anchor(t, trace) -- uses SSOT ∪ INDEX
   scan_salience(Store, trace)   = MarkerProfile match (ranked by Σ)        -- INDEX-accelerated; SSOT fallback
   scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
 
@@ -224,7 +228,7 @@ from its semantic grounding, breaking the hermeneutic circle that local inscript
 
 ── KNOWN FAILURE MODES ──
 FalseAnchor       : extract(s) contains t with high precision but t ≠ recall_target
-                    -- cause: precision threshold locally calibrated but semantically wrong
+                    -- cause: precision threshold locally calibrated but semantically wrong, or source_namespace × claim_kind does not authorize this recall claim
                     -- detection: Qc Recognize=false despite scan_entropy match
 
 ExtractorLacking  : recall_target ∈ s ∧ ∄ extractor_i : recall_target ∈ extractor_i(s)
@@ -338,18 +342,18 @@ Detect empty intention and extract contextual trace. This phase is **silent** �
 Dispatch the scan on the classified `Track`, execute track-appropriate lookup over `Store = SSOT ⊕ INDEX`, then rank candidates.
 
 1. **Track-dispatched scan strategy**:
-   - **entropy track** (`InputType = StructuredIdentifier`): execute `scan_entropy` over `SSOT ∪ INDEX` — literal match on `IdentifierTuple.literal`; precision-thresholded (low-frequency, high-entropy identifiers win). URL path literals, explicit references, citation tokens dominate.
+   - **entropy track** (`InputType = StructuredIdentifier`): execute `scan_entropy` over `SSOT ∪ INDEX` — literal match on `IdentifierTuple.literal`, then apply `compatible_anchor(t, trace)` before the match can anchor ranking; precision-thresholded compatible identifiers win. URL path literals, explicit references, citation tokens dominate only within their authorized source_namespace × claim_kind.
    - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over `INDEX` (SSOT fallback on degraded_scan) — match against `MarkerProfile` (coinage / actor / temporal / emotional / cognitive / singularity); session context (Σ) supplies ranking signal within this track.
    - **hybrid track** (`InputType = Mixed`): union of entropy and salience results.
 
-   Tool realization (Claude Code substrate): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING. Track-internal ranking composes track-appropriate signals — entropy track: literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery.
+   Tool realization (Claude Code substrate): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING. Track-internal ranking composes track-appropriate signals — entropy track: source-namespace / claim-kind compatibility gates anchoring, then literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery.
 
 2. **Adaptive behavior based on trace ambiguity**:
    - **High ambiguity**: Present hypomnesis store overview as orientation text (extension) — surface the store's structure and major topic clusters so the user can orient their recall. This is informational, not a gated interaction; the overview provides context for the subsequent targeted scan.
    - **Moderate ambiguity**: Broaden scan scope to include semantic similarity and temporal neighborhood.
    - **Low ambiguity**: Direct targeted scan using the dispatched track.
 
-3. **Rank candidates**: Ranking is track-internal. On the entropy track, precision (low occurrence in corpus) dominates; on the salience track, Σ-match + marker-profile overlap + temporal proximity compose the weight. Each candidate carries:
+3. **Rank candidates**: Ranking is track-internal. On the entropy track, compatible anchors are ranked by precision (low occurrence in corpus); incompatible literal matches remain evidence in the trace but do not become anchors. On the salience track, Σ-match + marker-profile overlap + temporal proximity compose the weight. Each candidate carries:
    - Its core topic and narrative summary
    - Adjacent topics from the same session or time period
    - Confidence level based on trace alignment
@@ -430,7 +434,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 2. **Recognition over Retrieval**: Present structured narrative options with anticipatable post-selection state (Recognize / Refine / Reorient) — Constitution interaction requires turn yield before proceeding; recognition options enable user evaluation, not blank-canvas recall.
 
-3. **Input-typed dispatch and track-internal ranking**: Phase 1 scan dispatches by `InputType` (StructuredIdentifier → entropy track, NaturalRecall → salience track, Mixed → hybrid); ranking composes track-appropriate signals (entropy: literal precision via corpus rarity; salience: Σ-match + marker-profile overlap + temporal neighborhood). Σ-primary scan survives only as a ranking-layer special case within the salience track. Single-signal execution has structural blind spots regardless of track.
+3. **Input-typed dispatch and track-internal ranking**: Phase 1 scan dispatches by `InputType` (StructuredIdentifier → entropy track, NaturalRecall → salience track, Mixed → hybrid); ranking composes track-appropriate signals (entropy: source_namespace × claim_kind compatibility before literal precision via corpus rarity; salience: Σ-match + marker-profile overlap + temporal neighborhood). Σ-primary scan survives only as a ranking-layer special case within the salience track. Single-signal execution has structural blind spots regardless of track.
 
 4. **Narrative Qc presentation**: Phase 2 presents candidates as discussion narratives (origin → direction → outcome), not result summaries. Result-only presentation defeats recognition by forcing additional investigation.
 
