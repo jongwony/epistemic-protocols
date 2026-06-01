@@ -68,12 +68,20 @@ EvidenceSource ∈ {UserTacit, Instrumentation, CodeDerivable, CanonicalExternal
                -- (TestSuite, AsyncComms, HypomnesisIndex, RuntimeObservability, etc.)
                -- Emergent base promotion under variation-stable observed use
 Claim(u)       = { referent: String, scope: String, expected_source_kind: EvidenceSource }
+               -- expected_source_kind names the evidence CHANNEL a claim requires (which source-kind), a distinct axis from a claim's semantic category
 EvidenceRef(e) = { source: String, source_kind: EvidenceSource, referent: String, scope: String, observed_at: String, content: String }
-               -- normalized view over Evidence for ReadOnly admissibility; source_kind is the authority channel actually carried by the evidence
+               -- interpretive extraction over Evidence (base type {source, content}): source_kind/referent/scope are inferred from content, NOT deterministic normalization
+               -- A2: the extraction exercises epistemic authority — a mis-extraction surfaces at the Phase 2 classify summary (support_integrity:unverified), not treated as deterministic relay
 provenance_coupled(u, e) =
   referent(EvidenceRef(e)) = referent(Claim(u))
-  ∧ source_kind(EvidenceRef(e)) authorizes expected_source_kind(Claim(u))
-  ∧ scope(EvidenceRef(e)) ⊇ scope(Claim(u))
+  ∧ authorizes(source_kind(EvidenceRef(e)), expected_source_kind(Claim(u)))   -- grantor = evidence's source_kind; claim side = expected_source_kind
+  ∧ scope_subsumes(scope(EvidenceRef(e)), scope(Claim(u)))
+authorizes : EvidenceSource × EvidenceSource → Bool   -- self-contained (no shared cross-protocol relation; Anamnesis defines its own namespace witness independently)
+  authorizes(s, expected) ≡ s = expected
+               -- reflexive base: a source-kind authorizes a claim expecting that same kind.
+               -- cross-kind authorization (one kind standing in for another) is NOT granted here → defaults to non-authorizing; a richer policy
+               --   matrix is a documented future extension, deliberately deferred to stay minimal-structural (deferral, not a silent gap).
+scope_subsumes : String × String → Bool   -- path/tag-prefix subsumption: broader scope contains narrower (reused by coverage below)
 ValidSources : Verifiability → ℘(EvidenceSource)
   ValidSources(ReadOnlyVerifiable)    = {CodeDerivable, UserTacit, CanonicalExternal} ∪ Emergent(EvidenceSource)
   ValidSources(EmpiricallyObservable) = {Instrumentation, UserTacit}                  ∪ Emergent(EvidenceSource)
@@ -99,7 +107,7 @@ classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              --   (and inherit EvidenceSource via Factual reclassification)
              -- CrossDomain/Relevance/Emergent → detect + show routing target in classify summary (no EvidenceSource tag)
              -- ReadOnlyVerifiable direct-resolve admissibility = coverage ∧ support_integrity (both required):
-             --   coverage         : scope(evidence) ⊇ scope(claim)        -- rebutting axis: is the whole claim covered?
+             --   coverage         : scope_subsumes(scope(evidence), scope(claim))   -- rebutting axis: is the whole claim covered?
              --   support_integrity: ∃ e ∈ context(u): provenance_coupled(u,e)
              --                      ∧ link(evidence → asserted behavior/current reality) is verified, not silently desynced
              --                      -- undercutting axis: does this source-kind/referent/scope authorize this claim?
@@ -107,10 +115,13 @@ classify   = Uᵢ' → Σ(d: Dimension). Fiber(d)
              --     artifact (comment/doc asserting behavior with no enforcement channel) is current yet support-unlinked → fails support_integrity
              --   failure of either axis (¬coverage = coverage_gap; ¬support_integrity = support_integrity_unverified) → reclassify EmpiricallyObservable
              --   (rebutting/undercutting framing per Pollock: two kinds of defeater — not asserted exhaustive)
+support_integrity(u) ≡ (∃ e ∈ context(u): provenance_coupled(u, e)) ∧ evidence_behavior_linked(u)    -- undercutting axis; formal predicate (was comment-only)
+               -- context(u) = evidence accessor over base Uncertainty.context: Set(Evidence) (existing field, not new)
+               -- evidence_behavior_linked(u): evidence→behavior link verified (breaks-on-change), not silently desynced; currency ⊂ this (temporal sub-case)
 ReadOnlyAdmissible = { u : ReadOnlyVerifiable | coverage(u) ∧ support_integrity(u) }
                    -- refinement over ReadOnlyVerifiable (NOT a new Verifiability constructor): the subset of ReadOnlyVerifiable
                    --   items admissible for Step 3 direct resolution. coverage(u) ≡ ¬coverage_gap(u); support_integrity(u) ≡ ¬support_integrity_unverified(u)
-                   --   and includes provenance_coupled(u,e): a value's authority is bound to the source × claim pair it actually supports.
+                   --   where support_integrity(u) now requires ∃ e: provenance_coupled(u,e) ∧ link-verified — a refinement INTO support_integrity (not a third conjunct): a value's authority is bound to the source × claim pair it actually supports.
                    --   Failure of either predicate → reclassify EmpiricallyObservable (backward arc T4). Step₃ ReadOnlyVerify takes the ReadOnlyVerifiable-classified candidate set (Uᵣ'_candidates, incl. support_integrity-undetermined items) and enforces this predicate at resolution time; ReadOnlyAdmissible characterizes the resolution survivors (= Uᵣ'), NOT a Step-3 input pre-filter.
 ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalObservation = (Uᵢ', ObservationSpec) → Uₑ  -- dynamic evidence gathering
