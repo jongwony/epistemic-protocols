@@ -269,9 +269,7 @@ function detectTailscale(): { ip: string; dnsName: string } | null {
     const proc = Bun.spawnSync([tsBin, "status", "--json"]);
     if (proc.exitCode !== 0) return null;
     const status = JSON.parse(proc.stdout.toString());
-    // A logged-in-but-Stopped/disconnected daemon still reports stale TailscaleIPs
-    // that are not bound to any local interface; binding to them fails. Trust the
-    // tailnet IP only when the backend is actually connected, else fall back to loopback.
+    // Stopped/disconnected daemon still reports stale TailscaleIPs that aren't bound locally.
     if (status?.BackendState !== "Running") return null;
     const self = status?.Self;
     const ip = (self?.TailscaleIPs ?? []).find((a: string) => /^\d+\.\d+\.\d+\.\d+$/.test(a));
