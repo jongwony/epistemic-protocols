@@ -14,7 +14,7 @@ AI systems often discard vague recall signals (`RecallAmbiguous`) — the user s
 
 ### The Solution
 
-**Recognition over Retrieval**: AI scans SSOT (session JSONL) and the hypomnesis INDEX along Salience dimensions, presents ranked candidates as Socratic narrative fingerprints (origin → direction → outcome), and the user recognizes the match — or refines via Socratic probing over adjacent vectors, or reorients to an orthogonal recall dimension. Structured literal matches anchor ranking only when their source namespace and claim kind match the recall trace. Transforms vague recall into recognized context.
+**Recognition over Retrieval**: AI scans SSOT (session JSONL) and the hypomnesis INDEX along Salience dimensions, presents ranked candidates as Socratic narrative fingerprints (origin → direction → outcome), and the user recognizes the match — or refines via Socratic probing over adjacent vectors, or reorients to an orthogonal recall dimension. Structured literal matches anchor ranking only when their source namespace authorizes the recall trace's claim kind. Transforms vague recall into recognized context.
 
 ### Difference from Other Protocols
 
