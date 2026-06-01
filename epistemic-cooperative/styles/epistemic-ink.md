@@ -29,7 +29,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 | `present` (gate interaction) | `gate` |
 | Convergence evidence | `convergence` |
 | Phase transition | `phase-header` |
-| Progress tracking | `progress` |
+| Progress tracking | `cognitive-work` |
 
 **Output Style native elements**:
 
@@ -50,13 +50,13 @@ When the rendered vocabulary would require user Recall at first encounter, optio
 
 ## Ink Elements
 
-**Phase header** — emit as a level-2 heading with diamond prefix, phase number/title, and optional progress bracket:
+**Phase header** — emit as a level-2 heading with diamond prefix, phase number/title, and an optional bracket naming the current cognitive work (never a completion ratio):
 
-`## ◆ Phase N: Title [progress]`
+`## ◆ Phase N: Title [cognitive-work note]`
 
-**Progress bar** — emit a unicode block bar with ratio label:
+**Cognitive work** — when a protocol would otherwise show a progress ratio, name the cognitive work currently in play as short prose instead. State which kind of reasoning is active, in the user's everyday words. When more than one kind is active, name each as a distinct item rather than fusing them into a single blended label — the kinds are separate axes and stay separate, so the reader can tell them apart instead of reading a smear. Optionally note inline which kind just entered when recency carries decision-relevant meaning — name the kind that entered, phrased in the same prose without a fixed labelled scaffold; newly-entered marks the occasion, not a position in a sequence, so never render it as a round ordinal or turn count. This is a framing readout — the kind of work currently in play, a statusline not a progress meter. It does not render the loop's completion as a bar, percentage, or N-of-M tally; a protocol loop is non-linear, so a ratio would falsify it, and a soft judgment shown as a precise number is false precision. Progress bookkeeping is not emitted here — it stays in the session, reaching the durable record only when it is a commitment. Surface only the work actually active or newly entered, bundle it with its nearest evidence, and hold it to a few items so it offloads working memory rather than taxing it. Name each kind ad hoc from the current context — do not inscribe or reference a fixed catalog of kinds.
 
-▓▓▓▓▓▓▓░░░ N/M label
+Durable recording externalizes only the problem-to-solve and framing shifts; everything else — dependencies, sub-steps, granular progress — stays in session.
 
 **Gate** — how to render SKILL.md's `present` verb in Ink. The divider block below IS the gate: the `· {label} ─` top divider and terminal `──` bracket a structured choice region. Emit the region as terminal text and yield turn — that satisfies SKILL.md's `present(structured content) → yield turn → parse response` contract directly, with no tool call wrapper. Present all context, analysis, and evidence as text BEFORE the gate block; the gate block contains ONLY the question and numbered options. Always yield turn after emitting the gate:
 
@@ -77,7 +77,7 @@ Rendered shape:
 1. **Option** — summary (axis value)
    → rationale (one of: temporal, branch, side-effect)
 
-**Convergence** — emit dimension status between dividers, using ✓ for defined and ○ for pending:
+**Convergence** — emit each dimension's status between dividers, using ✓ for defined and ○ for pending. This is each dimension's resolution state — a framing readout, not a tally to sum. It is per-dimension and kind-separated; do not collapse it into a score or an "N/M done" fraction. Each line stands on its own as that dimension's resolution state.
 
 · Convergence ────────────────────────────
 ✓ Dimension: defined value

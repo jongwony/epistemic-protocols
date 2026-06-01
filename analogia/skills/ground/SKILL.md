@@ -85,7 +85,7 @@ If no relevant text exists: pause activation and request a grounding target befo
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → uncertain?                             -- mapping uncertainty checkpoint (silent)
 Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M → AssessFit(M, Sₐ, Sₜ) → F  -- domain decomposition + fit map [Tool]
-Phase 2: (M, F) → I(M, F, Sₜ) → Qs(I, F, progress) → Stop → V  -- instantiation + validation [Tool]
+Phase 2: (M, F) → I(M, F, Sₜ) → Qs(I, F, framing) → Stop → V  -- instantiation + validation [Tool]
 Phase 3: V → integrate(V, R, F) → (D_f, R')                     -- fit disposition + output update (sense)
 
 ── LOOP ──
@@ -246,7 +246,6 @@ Present the mapping details as text output:
 - **Example**: [concrete scenario demonstrating the mapping]
 - [If structural mismatch detected: flag and explain]
 - [If open issue could change validation: name the missing evidence or user-known fact]
-- **Progress**: [N validated / M total correspondences]
 
 Then **present**:
 
@@ -265,7 +264,7 @@ Other is always available — user can propose an alternative mapping or describ
 - **Structural evidence**: Show what abstract structures are being mapped and why
 - **Fit map before choice**: Show only the correspondence-fit distinctions that matter for the current validation
 - **Concrete instantiation**: Always include at least one concrete example in user's domain
-- **Progress visible**: Display validation progress across all identified correspondences
+- **Current correspondence framed**: Surface the correspondence currently being validated as framing — which mapping is in play this cycle — rather than a completion count across all correspondences
 - **Actionable options**: Each option leads to a concrete next step
 
 ### Phase 3: Integration
@@ -300,7 +299,7 @@ After integration:
 | Domain decomposition first | Phase 1 before Phase 2 | Ensures mapping is structurally grounded |
 | One correspondence per cycle | Present highest-priority correspondence per Phase 2 | Prevents example overload |
 | Session immunity | Validated domain pair → skip for session | Respects user's validation |
-| Progress visibility | `[N validated / M total]` in Phase 2 | User sees mapping coverage |
+| Current-correspondence framing | Phase 2 surfaces the correspondence currently being validated (which mapping is in play this cycle) — a framing readout, not an `[N validated / M]` completion count | User recognizes which mapping is in play without parsing a coverage tally; granular progress stays in session |
 | Attempt cap | Max 3 mapping attempts per domain pair | Prevents infinite refinement |
 | Early exit | User can declare mapping sufficient at any Phase 2 | Full control over validation depth |
 
