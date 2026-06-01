@@ -71,7 +71,7 @@ Claim(u)       = { referent: String, scope: String, expected_source_kind: Eviden
                -- expected_source_kind names the evidence CHANNEL a claim requires (which source-kind), a distinct axis from a claim's semantic category
 EvidenceRef(e) = { source: String, source_kind: EvidenceSource, referent: String, scope: String, observed_at: String, content: String }
                -- interpretive extraction over Evidence (base type {source, content}): source_kind/referent/scope are inferred from content, NOT deterministic normalization
-               -- A2: the extraction exercises epistemic authority — a mis-extraction surfaces at the Phase 2 classify summary (support_integrity:unverified), not treated as deterministic relay
+               -- this extraction exercises epistemic authority — a mis-extraction surfaces at the Phase 2 classify summary (support_integrity:unverified), not treated as deterministic relay
 provenance_coupled(u, e) =
   referent(EvidenceRef(e)) = referent(Claim(u))
   ∧ authorizes(source_kind(EvidenceRef(e)), expected_source_kind(Claim(u)))   -- grantor = evidence's source_kind; claim side = expected_source_kind
