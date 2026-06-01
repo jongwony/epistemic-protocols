@@ -16,9 +16,9 @@ Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, P
 
 **세 가지 변증법적 패턴**:
 
-- **Pattern A — Source provenance audit (출처 검증)**: 정 "X는 검증되어 있다" ↔ 반 "X의 검증 경로는 provisional / inferred / stale"
+- **Pattern A — Source provenance audit (출처 검증)**: 정 "X는 claim C에 대해 검증되어 있다" ↔ 반 "X의 검증 경로는 다른 claim을 권위화하거나 provisional / inferred / stale"
 - **Pattern B — Counterfactual gap forecasting (반사실적 공백 예측)**: 정 "현재 조건에서 Y가 성립" ↔ 반 "조건 Z가 현재 조건 하나를 대체하면 P 지점에서 공백 B가 발생"
-- **Pattern C — Cross-source consistency check (출처 간 일관성)**: 정 "X₁과 X₂는 같은 referent를 일관되게 가리킨다" ↔ 반 "X₁과 X₂는 Q 지점에서 diverge"
+- **Pattern C — Cross-source consistency check (출처 간 일관성)**: 정 "X₁과 X₂는 같은 referent와 호환되는 claim-kind를 일관되게 가리킨다" ↔ 반 "X₁과 X₂는 Q 지점에서 diverge"
 
 **핵심 원칙**: Silent Trust 대신 Dialectical Vetting — 누적된 맥락은 침묵 속에서 decay됩니다. 루프는 후속 작업이 전체 시스템 refactoring을 강제하기 전에 누적된 context cost를 해소합니다.
 

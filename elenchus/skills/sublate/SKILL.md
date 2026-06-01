@@ -37,7 +37,9 @@ Source         = { content: String, origin: Origin, observed_at: Timestamp, down
 Origin         ∈ {UserStatement, DocumentRead, ToolOutput, AIInference, ExternalAPI, PastSession} ∪ Emergent(Origin)
 identify       = WorkingContext → Set(Source)            -- silent selection per Source Identification Criteria
 S_high         = Set(Source)                              -- audit-candidate set; cardinality 0 yields trivial convergence
-ProvenanceTag  = { source: Source, evidence: VerificationPath, confidence: Float }
+ClaimRef       = { referent: String, claim_kind: String, scope: String, text: String }
+ProvenanceTag  = { source: Source, claim: ClaimRef, evidence: VerificationPath, confidence: Float }
+               -- claim-relative tag: the source's authority is recorded for the claim it authorizes, not for the source in general
 VerificationPath ∈ {DirectObserved, InferredFromN, ExternalCited, ProvisionalAssumption}
 FreshnessTag   = { source: Source, age: Duration, horizon: Duration, stale: Bool }
 LeverageTag    = { source: Source, downstream_count: Nat, branches: Set(Reference) }
@@ -83,7 +85,7 @@ early_exit = user_esc
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 identify        (sense)        → Internal analysis (high-leverage / age / chain / contradiction scan)
-Phase 1 ProvenanceTag   (observe)      → Read, Grep (verification of source origin and downstream references)
+Phase 1 ProvenanceTag   (observe)      → Read, Grep (verification of source origin, authorized claim, and downstream references)
 Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C antithesis generation per source)
 Phase 2 Qs              (constitution) → present (mandatory; per-source disposition slots; Esc → loop termination at LOOP level, not a Disposition)
 Phase 3 integrate       (track)        → Internal state update (Λ.dispositions, Λ.history)
@@ -182,10 +184,10 @@ Three patterns are inscribed. Each pattern pairs a current claim with a challeng
 
 ### Pattern A — Source Provenance Audit
 
-When a source claims authority, the challenge asks whether that authority is actually verified.
+When a source claims authority, the challenge asks whether that authority is actually verified for the claim it is grounding.
 
-- The source's current claim: "Source X is verified in the domain it claims to ground."
-- What would shake it: "Source X's verification path is provisional, inferred, cited but unread, or stale."
+- The source's current claim: "Source X is verified for claim C in the domain it claims to ground."
+- What would shake it: "Source X's verification path authorizes a different claim, or is provisional, inferred, cited but unread, or stale."
 - The user decides how to handle the source: keep the source as-is, rewrite the claim with a refinement, withdraw the source, wait for an external measurement to settle the question, or treat an outside source-of-truth as the authoritative reference for the claim.
 
 ### Pattern B — Counterfactual Gap Forecasting
@@ -198,10 +200,10 @@ When a source supports a conclusion under current conditions, the challenge chan
 
 ### Pattern C — Cross-Source Consistency Check
 
-When two sources point at the same referent but diverge, the challenge forces an explicit reconciliation.
+When two sources point at the same referent but diverge, the challenge forces an explicit reconciliation of referent and claim-kind.
 
-- The sources' current claim: "Sources X₁ and X₂ refer to the same referent consistently."
-- What would shake it: "X₁'s claim and X₂'s claim diverge at point Q — which source is the authoritative referent, and what reconciles the divergence?"
+- The sources' current claim: "Sources X₁ and X₂ refer to the same referent and compatible claim-kind consistently."
+- What would shake it: "X₁'s claim and X₂'s claim diverge at point Q — which source is authoritative for this claim, and what reconciles the divergence?"
 - The user decides how to handle the sources: keep the sources as-is, rewrite the claim with a refinement, withdraw one of the sources, treat an outside source-of-truth as the authoritative reference, or hand the question off to another protocol.
 
 ## Protocol
@@ -222,7 +224,7 @@ Analyze the working context and select audit-candidate sources. This phase is si
 
 Generate metadata triple plus dialectical antithesis per source.
 
-**Step 1 — Tagging**: For each `s ∈ S_high`, attach ProvenanceTag (verification path + confidence), FreshnessTag (age, horizon, stale flag), and LeverageTag (downstream_count, branches). Use Read and Grep to verify provenance against the source's claimed origin where the source's content cites verifiable artifacts.
+**Step 1 — Tagging**: For each `s ∈ S_high`, attach ProvenanceTag (authorized claim + verification path + confidence), FreshnessTag (age, horizon, stale flag), and LeverageTag (downstream_count, branches). Use Read and Grep to verify provenance against the source's claimed origin where the source's content cites verifiable artifacts. The ProvenanceTag binds authority to the claim's referent, claim_kind, and scope; reuse of the same source as authority for a different claim must surface through Pattern A or Pattern C rather than silently carrying over.
 
 **Step 2 — Antithesis positing**: For each tagged source, select the most applicable pattern (A, B, C, or Emergent) and construct an antithesis. The antithesis must:
 - Cite the source's claim verbatim, anchored to the originating sentence or artifact
@@ -303,3 +305,4 @@ Present transformation trace as text output, then proceed with the vetted contex
 12. **Substrate boundary**: Elenchus scope is the epistemic substrate — source identification, antithesis positing, disposition surfacing, and integration through Phase 0 to Phase 3. Post-vetting execution (the downstream action's substrate enforcement, harness permission, network/state mutation) belongs to native harnesses or specialized substrates, delegated by handoff after Phase 3 integration.
 13. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 14. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+15. **Claim-relative provenance**: ProvenanceTag records the claim a source authorizes. Pattern A tests source authority against that claim; Pattern C tests cross-source consistency only after referent and claim-kind compatibility are explicit. The tag classifies and surfaces the issue; disposition remains the user's Constitution judgment.
