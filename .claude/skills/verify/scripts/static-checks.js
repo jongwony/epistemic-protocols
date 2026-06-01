@@ -2274,6 +2274,76 @@ function checkEmitLoadDiscipline() {
 }
 
 // ============================================================
+// Check: Framing-Readout Enforcement (progress-glyph ban)
+// ============================================================
+// Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
+// framing readout, never a scalar progress meter) to an enforcement channel:
+//   (a) the unicode progress-bar glyphs ▓/░ must not appear in any core
+//       protocol SKILL.md or the Output Style — they only ever rendered a
+//       completion bar;
+//   (b) the Output Style must retain the categorical-ban guard sentence so the
+//       invariant cannot be silently deleted.
+// Scope mirrors checkEmitLoadDiscipline (core protocols + Output Style). Utility
+// skills (e.g. /dashboard) may legitimately render bars and are out of scope.
+function checkFramingReadoutEnforcement() {
+  const BAR_GLYPH = /[▓░]/;
+  const CHECK = 'framing-readout-enforcement';
+  let checked = 0;
+
+  for (const relPath of PROTOCOL_FILES) {
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) {
+      results.warn.push({ check: CHECK, file: relPath, message: `Protocol file not found: ${relPath}` });
+      continue;
+    }
+    checked++;
+    const content = fs.readFileSync(fullPath, 'utf8');
+    content.split('\n').forEach((line, idx) => {
+      if (BAR_GLYPH.test(line)) {
+        results.fail.push({
+          check: CHECK,
+          file: relPath,
+          message: `Progress-bar glyph (▓/░) at line ${idx + 1} — protocol surfacing is a framing readout, not a progress meter`,
+        });
+      }
+    });
+  }
+
+  const stylePath = 'epistemic-cooperative/styles/epistemic-ink.md';
+  const styleFull = path.join(projectRoot, stylePath);
+  if (!fs.existsSync(styleFull)) {
+    results.fail.push({ check: CHECK, file: stylePath, message: 'Missing Output Style source for framing-readout enforcement' });
+    return;
+  }
+  const styleContent = fs.readFileSync(styleFull, 'utf8');
+  styleContent.split('\n').forEach((line, idx) => {
+    if (BAR_GLYPH.test(line)) {
+      results.fail.push({
+        check: CHECK,
+        file: stylePath,
+        message: `Progress-bar glyph (▓/░) at line ${idx + 1} — the realization layer must not re-introduce a progress bar`,
+      });
+    }
+  });
+  const GUARD = 'bar, percentage, or N-of-M tally';
+  if (!styleContent.includes(GUARD)) {
+    results.fail.push({
+      check: CHECK,
+      file: stylePath,
+      message: `Missing categorical-ban guard ("${GUARD}") — the framing-readout invariant must remain inscribed`,
+    });
+  }
+
+  if (!results.fail.some(f => f.check === CHECK)) {
+    results.pass.push({
+      check: CHECK,
+      file: 'all core protocol SKILL.md files + Output Style',
+      message: `Framing-readout enforcement verified for ${checked} protocols (no progress-bar glyph; guard sentence inscribed)`,
+    });
+  }
+}
+
+// ============================================================
 // Check 19: Single-Axis Soundness
 // ============================================================
 // Enforces the unified Constitution/Extension annotation axis in TOOL GROUNDING.
@@ -2506,6 +2576,7 @@ try {
   checkGateTypeSoundness();
   checkArtifactSelfContainment();
   checkEmitLoadDiscipline();
+  checkFramingReadoutEnforcement();
   checkSingleAxisSoundness();
   checkWorkflowPathsSync();
   checkLanguagePurity();

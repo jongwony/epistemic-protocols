@@ -246,7 +246,7 @@ Present dimension projections as text output:
   - **Coordinates**: [coordinate names + question per coordinate]
   - **Substrate basis**: [evidence cited from substrate channels, including Utterance fragments when applicable]
   - **Default** (when substrate-derivable): [default value with citation]
-- **Resolution status**: [resolved coordinates so far / pending coordinates]
+- **In play this cycle**: [the coordinates still pending in the current cycle] — a framing readout of what remains open this cycle, not a resolved/total tally
 
 Then present per-coordinate answer slots (cycle-emergent — no fixed dialect; the slots reflect the actual coordinates of the current cycle):
 

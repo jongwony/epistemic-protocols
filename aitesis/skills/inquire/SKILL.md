@@ -157,7 +157,7 @@ Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- 
          Step₃ ReadOnlyVerify(Uᵣ'_candidates) →     -- Step 3: read-only verification (CodeDerivable + CanonicalExternal); enforces admissibility (coverage ∧ support_integrity) at resolution time over the candidate set (incl. support_integrity-undetermined items) — survivors = ReadOnlyAdmissible = Uᵣ' (resolve directly, read_only_resolved); failures take the backward arc below [Tool]
            [if support_integrity_unverified(u) ∨ coverage_gap(u)] reclassify(u, EmpiricallyObservable) → goto Step₂  -- backward arc (T4): support-integrity/coverage failure re-enters classification (staleness = temporal sub-case of support_integrity_unverified)
          [if Uₑ_candidates ≠ ∅] Step₄ EmpiricalObservation(Uₑ_candidates) → Uₑ  -- Step 4: dynamic evidence gathering [Tool]
-Phase 2: Qs(classify_result + Uₑ + Uᵢ''[cluster], progress) → Stop → A          -- uncertainty surfacing [Tool]; cluster = one coherent cluster (size ≤ 4)
+Phase 2: Qs(classify_result + Uₑ + Uᵢ''[cluster], framing) → Stop → A          -- uncertainty surfacing [Tool]; cluster = one coherent cluster (size ≤ 4)
 Phase 3: A → integrate(A, X) → X'                               -- prospect update (sense)
          [if A = Unknown(Partial)] auto_promote(uncertainty, next_source(ValidSources(v))) → goto Phase 1  -- backward arc (T2): user declines certainty → re-enter classification with next-preferred EvidenceSource
 
@@ -440,7 +440,6 @@ Present the classification results, uncertainty description, and evidence as tex
   - Any of these classifications to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]
-- **Progress**: [N resolved / M actionable uncertainties] (excludes non-actionable routed)
 
 Then **present**:
 
@@ -459,7 +458,7 @@ Option 4 is the typed `Unknown(Partial)` constructor (TYPES `A`): Phase 3 auto-p
 **Design principles**:
 - **Classification transparent**: Show classify results (dimension + verifiability) for all uncertainties — "visible by default, ask only on exception"
 - **Context collection transparent**: Show what evidence was collected and what remains uncertain
-- **Progress visible**: Display resolution progress across all identified uncertainties
+- **Current uncertainty framed**: Surface the uncertainty currently in play as framing — the kind of context being resolved this cycle — rather than a completion count across all uncertainties
 - **Actionable options**: Each option leads to a concrete next step
 - **Dismiss with default**: Always state what assumption will be used if dismissed
 
@@ -484,7 +483,7 @@ After integration:
 | Level | When | Format |
 |-------|------|--------|
 | Light | Marginal priority uncertainties only | Constitution interaction with Dismiss as default option |
-| Medium | Significant priority uncertainties, context collection partially resolved | Structured Constitution interaction with progress |
+| Medium | Significant priority uncertainties, context collection partially resolved | Structured Constitution interaction framing the current uncertainty |
 | Heavy | Critical priority, multiple unresolved uncertainties | Detailed evidence + collection results + classify results + resolution paths |
 
 ## UX Safeguards
@@ -495,7 +494,7 @@ After integration:
 | Context collection first | Phase 1 before Phase 2 | Enriches question quality before asking |
 | Uncertainty cap | One coherent cluster per Phase 2 cycle (size ≤ 4, default), priority order, per-item non-overlapping information-gain leverage; cluster size > 1 requires `Clustering basis: [decision frame] — per-item gain rationale: [item₁: reason₁; item₂: reason₂; ...]` cite (auditable parallel to Cite-or-observe); yields to Divergence-bounding when frame-first triggers fire — items whose answers depend on other cluster items form a compound question (forbidden — collapses decision space into 2ⁿ implicit states) | Prevents question overload while permitting shared-frame clusters |
 | Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
-| Progress visibility | `[N resolved / M actionable]` in Phase 2 | User sees progress on actionable (Factual + Coherence/MemoryInternal) uncertainties |
+| Current-uncertainty framing | Phase 2 surfaces the uncertainty currently in play (the kind of context being resolved this cycle) — a framing readout, not an `[N resolved / M]` completion count | User recognizes which context is being resolved without parsing a progress tally; granular progress stays in session |
 | Narrowing signal | Signal when `narrowing(Q, A)` shows diminishing returns | User can exit when remaining uncertainties are marginal |
 | Early exit | User can declare sufficient at any Phase 2 | Full control over inquiry depth |
 | Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context uncertainties ≠ Syneidesis decision gaps, so reverse suppression not needed) |

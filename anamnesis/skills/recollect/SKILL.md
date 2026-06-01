@@ -20,7 +20,7 @@ Anamnesis(V) → Detect(V) →
     Scan_{Track}(Store, trace(V)) → Rank(C[]) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
     |C[]| = 0 ∧ attempts > 0: NullMatch → inform(V, Σ) → deactivate
-    |C[]| > 0: Qc(C[top], evidence, progress) → Stop → R →
+    |C[]| > 0: Qc(C[top], evidence, framing) → Stop → R →
       Recognize(c): recall_complete(c) → emit(ClueVector_prose(c)) → converge
       Refine: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
       Reorient(d): rebind(V, d, Σ) → Phase 1                 -- orthogonal dimension shift
@@ -96,7 +96,7 @@ Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (
 Phase 1: V → Scan_{Track}(Store, trace(V)) → Rank(C[]) → C[ranked]  -- track-dispatched scan + rank [Tool]
            |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → Phase 1
            |C[ranked]| = 0 ∧ attempts > 0 → NullMatch → inform → deactivate
-Phase 2: C[top] → Qc(C[top], evidence, progress) → Stop → R    -- recognition gate [Tool]
+Phase 2: C[top] → Qc(C[top], evidence, framing) → Stop → R    -- recognition gate [Tool]
 Phase 3: R → integrate(R, V, Σ) →                                -- integration (sense)
            Recognize(c) → ClueVector_prose(c) → emit → converge
            Refine → Probe(V, Σ) → Qs(probe) → Stop → H          -- Socratic probing [Tool]
@@ -388,7 +388,7 @@ Present the candidate as narrative text — the discussion's story, not just its
 - **Session**: Full session ID for `claude --resume` verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`). Narrative uses short reference; this field provides the resumable identifier.
 - **Resume**: Copy-paste-ready invocation pairing the originating cwd with the session ID — `cd <cwd> && claude --resume <session_id>`. Claude Code resolves the project slug from invocation cwd, so both components are required; emit only the literal command, no narrative wrapper. Omit this field only when `Candidate.cwd` is absent or empty, and surface the omission to the user.
 - **Adjacent**: Other topics discussed nearby in the same time period — for Refine orientation
-- **Progress**: `[attempt N/3, M candidates in scope]`
+- **Framing**: how many recall tries remain before the cap, and the size of the candidate space still in scope — stated as the budget you reason with, not a numeric attempt fraction
 
 Then **present**:
 
@@ -465,7 +465,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 13. **Cross-LOOP narrative persistence**: Narrative format and adjacent vector enrichment persist across LOOP iterations; subsequent attempts reference prior candidates and explain the differential.
 
-14. **Progress visibility**: Every Phase 2 presentation includes progress indicator `[attempt N/3, M candidates in scope]`.
+14. **Framing-signal visibility**: Every Phase 2 presentation states the remaining recall-try budget and the candidate space still in scope as framing prose — the budget the user reasons with, not a numeric attempt fraction.
 
 15. **Substrate non-coupling**: Phase prose names epistemic operations only — tool and path bindings belong exclusively to TOOL GROUNDING.
 

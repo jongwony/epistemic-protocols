@@ -18,7 +18,7 @@ Calibrate and crystallize in-process abstraction through AI-proposed candidate p
 Periagoge(A) → Detect(A) → in_process? →
   true:  (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K →
          Propose(Iᵢ, E, K, ctx) → (P, G) →
-         Qs(P, G, K, progress) → Stop → V → integrate(V, candidate) → candidate' →
+         Qs(P, G, K, framing) → Stop → V → integrate(V, candidate) → candidate' →
          loop until crystallized(A) → declare(completion_trace, open_trace) → CrystallizedAbstraction
          or user_esc ∨ attempts_exhausted → deactivate
   false: deactivate
@@ -88,7 +88,7 @@ If no essence signal is detectable (neither user sensing language nor AI-inferra
 ── PHASE TRANSITIONS ──
 Phase 0: A → Detect(A) → in_process?                                       -- detection checkpoint (silent)
 Phase 1: (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K → Propose(Iᵢ, E, K, ctx) → (P, G); carry (P, G, K)  -- calibration + candidate + grounding construction [Tool]
-Phase 2: (P, G, K) → Qs(P, G, K, progress) → Stop → V                      -- triangulation Constitution interaction [Tool]
+Phase 2: (P, G, K) → Qs(P, G, K, framing) → Stop → V                      -- triangulation Constitution interaction [Tool]
 Phase 3: V → integrate(V, candidate) → candidate'                          -- candidate update (track)
 
 ── LOOP ──
@@ -258,7 +258,7 @@ Present the calibration map and candidate as text output:
 - **Instance map**: [how Iᵢ maps to the candidate's structure]
 - **Grounding example**: [scenario drawn from user's domain, with mapping to the candidate]
 - [If Fuse candidates exist: list adjacent abstractions with brief relation]
-- **Progress**: [attempt N of max 5]
+- **Budget**: how many refinement tries remain before the cap — the budget you reason with, stated as prose, not a numeric attempt fraction
 
 Then **present**:
 
@@ -280,7 +280,7 @@ When Phase 1 surfaces no adjacent candidates, omit the Fuse option — dead sign
 - **Personalized grounding**: Never use a generic example. The grounding must be drawn from the user's domain context so they can recognize it as theirs.
 - **Calibration before choice**: Show the preservation/sharpening/pruning/open map before the gate so the user evaluates the concept pressure, not just an AI label.
 - **Socratic shaping**: Each move (widen/narrow/fuse/reorient) is a recognized dialectical turn, not a free-form revision request.
-- **Progress visible**: Display attempt counter; attempt cap bounds generative refinement.
+- **Budget framing**: Display the attempt counter as a framing signal — the remaining refinement budget the user reasons with — bounded by the attempt cap; not a progress count.
 - **Free response honored**: When the presented moves do not capture the user's shape, parse free response as candidate redirection. If the user disputes `K` itself, absorb the correction through the existing UserMove/free-response path rather than adding a separate calibration-review constructor.
 
 ### Phase 3: Integration
@@ -321,7 +321,7 @@ After integration:
 | Socratic moves preserved | Phase 2 options map to dialectical families (Synagoge/Diairesis/Fuse/Reorient) | Each move has a recognized shape, not open-ended revision |
 | Session immunity | Crystallized or dismissed (Iᵢ, E) pair → skip for session | Respects user's crystallization or release |
 | Attempt cap | Max 5 triangulations per abstraction seed | Prevents infinite refinement; forces convergence or release |
-| Progress visibility | Attempt counter in Phase 2 surfacing | User sees remaining budget |
+| Budget framing | Attempt counter in Phase 2 surfacing — a framing signal, not a progress count | User sees remaining refinement budget |
 | Free response honored | Alternative abstraction via free response routes to Phase 1 | Supports reorient beyond presented axes |
 | Analogia misfit absorption | `/ground` colimit-detection nudge routes here | Prevents source-domain confabulation in substitution path |
 

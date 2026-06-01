@@ -101,7 +101,7 @@ AssessFit (sense) → Internal analysis (no external tool)
 Qc     (constitution)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (transform) → Edit, Write (result adaptation based on user direction)
                     -- (transform): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
-Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with progress visibility)
+Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with framing visibility)
 converge (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
 ── MODE STATE ──
@@ -268,7 +268,6 @@ Present the mismatch findings as text output:
   - **Mismatch**: [Specific mismatch description]
   - **Evidence**: [what in the result and what in the context diverge]
   - **Fit basis**: [what already fits, what conflicts or depends, and any open condition tied to this mismatch that could change this adaptation decision]
-  - **Progress**: [N completed / M total tasks] (M may increase on re-scan)
 
 Then **present**:
 
@@ -289,7 +288,7 @@ This is a contextual materialization of `Adapt(direction)` — the formal answer
 **Design principles**:
 - **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both `R` and `X`
 - **Post-execution natural**: Integrates with task completion flow ("Done. One thing to verify:")
-- **Progress visible**: Display resolution progress across all identified mismatches
+- **Current mismatch framed**: Surface the mismatch currently in play as framing — which applicability aspect is being judged this cycle — rather than a completion count across all mismatches
 - **Actionable options**: Each option leads to a concrete next step
 - **Dismiss with assumption**: Always state what fitness assumption is accepted if dismissed
 
@@ -312,7 +311,7 @@ After adaptation — **re-scan**:
 **Re-scan trigger**: Adaptation changes `R`, and changed `R'` may exhibit new mismatches not present in the original result. Always re-scan after each adaptation — any adaptation may introduce mismatches in dimensions unrelated to the original aspect.
 
 **Chain discovery**: When `Mₑ` emerges from an adaptation, the `origin = Emerged(parent_aspect)` field records the causal chain. This enables:
-- Progress visibility: user sees which adaptations spawned new mismatches
+- Chain visibility: user sees which adaptations spawned new mismatches (a framing signal — which adaptation opened which follow-on, not a progress count)
 - Convergence monitoring: chains that grow beyond 3 levels suggest a structural issue worth surfacing explicitly
 
 ## Intensity
@@ -330,7 +329,7 @@ After adaptation — **re-scan**:
 | Gate specificity | `activate(Epharmoge) only if correct(R) ∧ ∃ ¬warranted(a, R, X)` | Prevents false activation on well-fitting results |
 | Mismatch cap | One mismatch per Phase 1 cycle, severity order | Prevents post-execution question overload |
 | Session immunity | Dismissed (aspect, description) → skip for session | Respects user's dismissal |
-| Progress visibility | Task list renders `[N addressed / M total]` in Phase 1 | User sees progress; total may grow on re-scan |
+| Current-mismatch framing | Phase 1 surfaces the mismatch currently in play (which applicability aspect is being judged this cycle) — a framing readout, not an `[N addressed / M]` completion count | User recognizes which aspect is being judged without parsing a progress tally; granular progress stays in session |
 | Deterministic selection | `SelectNext` orders pending mismatches by severity, FitRank, then oldest registered task | Removes unordered Set indexing from user-facing surfacing |
 | Fit-map cap | `depends`/`open` only when observable evidence could change adaptation or dismissal | Prevents broad contextual caveat lists |
 | Early exit | User can dismiss all at any Phase 1 | Full control over review depth |
