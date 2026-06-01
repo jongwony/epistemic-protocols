@@ -38,6 +38,7 @@ Origin         ∈ {UserStatement, DocumentRead, ToolOutput, AIInference, Extern
 identify       = WorkingContext → Set(Source)            -- silent selection per Source Identification Criteria
 S_high         = Set(Source)                              -- audit-candidate set; cardinality 0 yields trivial convergence
 ClaimRef       = { referent: String, claim_kind: String, scope: String, text: String }
+               -- claim_kind = the SEMANTIC CATEGORY of claim the source is tested as authority for (a distinct axis from an evidence-channel kind); values are protocol-local (self-contained, no shared cross-protocol enum). text = claim verbatim, used by Pattern A's cite-claim-verbatim test
 ProvenanceTag  = { source: Source, claim: ClaimRef, evidence: VerificationPath, confidence: Float }
                -- claim-relative tag: the source's authority is recorded for the claim it authorizes, not for the source in general
 VerificationPath ∈ {DirectObserved, InferredFromN, ExternalCited, ProvisionalAssumption}
@@ -200,7 +201,7 @@ When a source supports a conclusion under current conditions, the challenge chan
 
 ### Pattern C — Cross-Source Consistency Check
 
-When two sources point at the same referent but diverge, the challenge forces an explicit reconciliation of referent and claim-kind.
+When two sources point at the same referent but diverge, the challenge forces an explicit reconciliation of referent and claim-kind. Candidate pairs are enumerated over sources SHARING THE SAME referent (not all pairwise combinations); for each such pair, claim-kind compatibility is tested before a divergence is flagged.
 
 - The sources' current claim: "Sources X₁ and X₂ refer to the same referent and compatible claim-kind consistently."
 - What would shake it: "X₁'s claim and X₂'s claim diverge at point Q — which source is authoritative for this claim, and what reconciles the divergence?"
@@ -305,4 +306,4 @@ Present transformation trace as text output, then proceed with the vetted contex
 12. **Substrate boundary**: Elenchus scope is the epistemic substrate — source identification, antithesis positing, disposition surfacing, and integration through Phase 0 to Phase 3. Post-vetting execution (the downstream action's substrate enforcement, harness permission, network/state mutation) belongs to native harnesses or specialized substrates, delegated by handoff after Phase 3 integration.
 13. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 14. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
-15. **Claim-relative provenance**: ProvenanceTag records the claim a source authorizes. Pattern A tests source authority against that claim; Pattern C tests cross-source consistency only after referent and claim-kind compatibility are explicit. The tag classifies and surfaces the issue; disposition remains the user's Constitution judgment.
+15. **Claim-relative provenance**: ProvenanceTag records the claim a source authorizes. Pattern A tests source authority against that claim; Pattern C enumerates candidate pairs over same-referent sources, then tests cross-source consistency only after referent and claim-kind compatibility are explicit. The tag classifies and surfaces the issue; disposition remains the user's Constitution judgment.
