@@ -77,7 +77,7 @@ Aitesis는 실행 전 컨텍스트 불충분을 추론해 정보이득 우선순
 | 화행(Searle): 발화수반력 유형 | 질문을 단일 "Inquiry(Constitution)"로 처리 — 발화수반력 유형화 없음 | **이탈** |
 | 함축(Grice): 양·관계 격률 | 불확실성 캡(클러스터 ≤4, L475)·Plain emit(L508)이 양·방식 격률을 *암묵적*으로 준수; 명시적 함축 모델 없음 | **부분(암묵)** |
 | grounding(Clark & Schaefer): 제시+수용 2단계 | Phase 2 제시 → 답 파싱 → Phase 3 통합. *수용/상호이해 확인 단계 부재* | **이탈/부분** |
-| 도출 편향(Mohanani): 앵커링·요구 고착 | Gate integrity·Option-set relay test(L502, L507)는 선택지 *조작*을 막으나, 질문 *표현*의 앵커링 debiasing은 없음 | **이탈** |
+| 도출 편향(Mohanani): 앵커링·요구 고착 | Option-set relay test·Gate integrity(L502, L507)는 선택지 *조작*을 막으나, 질문 *표현*의 앵커링 debiasing은 없음 | **이탈** |
 
 ### 충실한 지점
 - **부트스트랩 처리가 백미다.** Default-scan trigger(L250)는 Miyake & Norman의 비대칭에 대한 엔지니어링 해법이다 — 프로토콜이 단순 인용을 넘어 이론적 난점을 *구조로* 풀었다. 정보격차 게이트 술어(L219)도 Loewenstein의 격차 개념을 거의 문자 그대로 구현한다(단 동기·정서층은 의도적으로 범위 밖).
