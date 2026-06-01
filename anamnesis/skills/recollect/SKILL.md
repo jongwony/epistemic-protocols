@@ -49,8 +49,9 @@ Hint             = String   -- user recall context from Socratic probe
 InputType        ∈ {StructuredIdentifier, NaturalRecall, Mixed}      -- classified from V + Σ
 Track            ∈ {entropy, salience, hybrid}                       -- dispatched from InputType
 Source           = String   -- opaque: store location identifier (substrate-agnostic)
-IdentifierTuple  = { literal: String, source: Source, source_namespace: String, claim_kind: String, precision: ℝ[0,1] } -- entropy-track anchor
-                  -- source_namespace × claim_kind must authorize the recall claim before a literal match anchors ranking
+IdentifierTuple  = { literal: String, source: Source, source_namespace: String, precision: ℝ[0,1] } -- entropy-track anchor
+                  -- source_namespace determines which claim kinds it can authorize (via the registry); a literal anchors ranking only when its namespace authorizes the recall trace's claim kind
+                  -- claim_kind is NOT a tuple field — it is determined by source_namespace at scan time, so the writer materializes only source_namespace (the extractor's namespace), not a per-literal claim_kind
 MarkerProfile    = { coinage: Set(Token), actor: Set(Entity),
                      temporal: Set(TimeRef), emotional: Set(Marker),
                      cognitive: Set(Marker), singularity: Set(Event) }  -- salience-track profile
@@ -161,9 +162,11 @@ laws:
 precision(t, corpus) = 1 / (1 + |occ(t, corpus \ {t.source})|)
 reject(t, θ) ≡ precision(t, corpus) < θ                                    -- derivable, not enumerated
 claim_kind(trace) = expected identifier category implied by the recall trace
-compatible_anchor(t, trace) ≡ (source_namespace(t), claim_kind(trace)) ∈ AuthorizedPairs
-  where AuthorizedPairs = ⋃ᵢ extractor_i.authorized_pairs   -- each extractor declares the (source_namespace, claim_kind) pairs it grounds; the registry is the explicit witness
-  -- this authorizes-witness is defined LOCALLY (extractor registry), independent of Aitesis's reflexive authorizes: analogous structure, different concern (namespace × claim-kind compatibility, not evidence-channel authorization)
+compatible_anchor(t, trace) ≡ claim_kind(trace) ∈ AuthorizedClaimKinds(source_namespace(t))
+  where AuthorizedClaimKinds(ns) = { ck : (ns, ck) ∈ AuthorizedPairs }   -- a namespace determines the claim kinds it can anchor
+        AuthorizedPairs = ⋃ᵢ extractor_i.authorized_pairs                -- each extractor declares the (source_namespace, claim_kind) pairs it grounds; the registry is the explicit witness
+  -- the witness is defined LOCALLY (extractor registry), independent of Aitesis's reflexive authorizes: analogous structure, different concern (namespace → claim-kind authorization, not evidence-channel authorization)
+  -- the tuple carries source_namespace only; claim_kind(t) is not stored, removing the unused-field inconsistency and matching what the regex writer can materialize
 
 extractor registry:
   core (bootstrap) = { URL_literal, PathRef_literal, PR_literal, Issue_literal, Commit_literal, SessionID_literal }
@@ -234,7 +237,7 @@ from its semantic grounding, breaking the hermeneutic circle that local inscript
 
 ── KNOWN FAILURE MODES ──
 FalseAnchor       : extract(s) contains t with high precision but t ≠ recall_target
-                    -- cause: precision threshold locally calibrated but semantically wrong, or source_namespace × claim_kind does not authorize this recall claim
+                    -- cause: precision threshold locally calibrated but semantically wrong, or source_namespace does not authorize this recall claim's kind
                     -- detection: Qc Recognize=false despite scan_entropy match
 
 ExtractorLacking  : recall_target ∈ s ∧ ∄ extractor_i : recall_target ∈ extractor_i(s)

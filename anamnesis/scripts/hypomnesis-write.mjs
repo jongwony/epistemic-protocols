@@ -518,20 +518,23 @@ function extractCrossRefs(userMsgs, allTexts) {
 // spans during iteration and suppresses path_ref matches that fall inside them.
 // Reordering without updating the dedup logic will silently break URL-substring
 // dedup (path_ref would count github.com/foo/bar.ts on top of the matching URL).
+// `namespace` is the canonical source_namespace materialized into each IdentifierTuple
+// (entropy.md `source_namespace` column). It is the runtime witness for compatible_anchor:
+// the recall trace's claim_kind must be authorized by this namespace via the SKILL.md registry.
 const ENTROPY_EXTRACTORS = [
-  { name: "url", pattern: /\bhttps?:\/\/[^\s<>"'`)\]]+/g },
-  { name: "pr_ref", pattern: /\bPR\s*#\d+\b/gi },
-  { name: "issue_ref", pattern: /(?<![\w-])#\d{1,5}\b/g },
-  { name: "session_id", pattern: /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/g },
-  { name: "commit_sha", pattern: /(?<![\w-])[0-9a-f]{7,40}(?![\w-])/g },
-  { name: "path_ref", pattern: /\b[\w.-]+\/[\w./-]+\.\w{1,6}\b/g },
+  { name: "url", namespace: "url", pattern: /\bhttps?:\/\/[^\s<>"'`)\]]+/g },
+  { name: "pr_ref", namespace: "github_pr", pattern: /\bPR\s*#\d+\b/gi },
+  { name: "issue_ref", namespace: "github_issue", pattern: /(?<![\w-])#\d{1,5}\b/g },
+  { name: "session_id", namespace: "session", pattern: /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/g },
+  { name: "commit_sha", namespace: "git_commit", pattern: /(?<![\w-])[0-9a-f]{7,40}(?![\w-])/g },
+  { name: "path_ref", namespace: "fs_path", pattern: /\b[\w.-]+\/[\w./-]+\.\w{1,6}\b/g },
 ];
 
 function extractEntropyRefs(allTexts) {
   const refs = new Map();
   for (const text of allTexts) {
     const urlSpans = [];
-    for (const { name, pattern } of ENTROPY_EXTRACTORS) {
+    for (const { name, namespace, pattern } of ENTROPY_EXTRACTORS) {
       for (const match of text.matchAll(pattern)) {
         const literal = match[0];
         if (literal.length > 300) continue;
@@ -543,7 +546,7 @@ function extractEntropyRefs(allTexts) {
         if (existing) {
           existing.count += 1;
         } else {
-          refs.set(literal, { literal, source: name, count: 1 });
+          refs.set(literal, { literal, source: name, source_namespace: namespace, count: 1 });
         }
       }
     }
@@ -645,10 +648,10 @@ function buildEntropyMd(sessionId, date, refs) {
   if (refs.length === 0) {
     lines.push("No structured identifiers extracted.");
   } else {
-    lines.push("| literal | source | session_count |");
-    lines.push("|---------|--------|---------------|");
+    lines.push("| literal | source | source_namespace | session_count |");
+    lines.push("|---------|--------|------------------|---------------|");
     for (const r of refs) {
-      lines.push(`| \`${escMd(r.literal)}\` | ${r.source} | ${r.count} |`);
+      lines.push(`| \`${escMd(r.literal)}\` | ${r.source} | ${r.source_namespace} | ${r.count} |`);
     }
   }
   return lines.join("\n") + "\n";
