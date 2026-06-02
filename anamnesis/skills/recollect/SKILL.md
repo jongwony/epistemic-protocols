@@ -260,11 +260,6 @@ NullMatch₂        : scan_salience(Store, trace) = ∅ ∧ InputType = NaturalR
 MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
                     -- structural risk: recall target genuinely absent from Store
                     -- action: NullMatch pathway with full scope disclosure (principal failure mode)
-
-RecallDesync      : candidate correctly recognized (identity match) but recalled content desynced from current reality
-                    -- cause: store-currency ≠ current-reality fidelity — the INDEX entry is fresh and the discussion genuinely occurred, yet the recalled decision/path/convention has since been superseded, renamed, or revised
-                    -- detection: invisible to the recognition gate (Qc verifies identity, not current fidelity); surfaces only on downstream verification against current state
-                    -- mitigation: ClueVector_prose carries the currency≠fidelity caveat on emission (Phase 3 Recognize); recalled context routes to re-verification before commit, not auto-trust
 ```
 
 ## Core Principle
@@ -477,4 +472,4 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 16. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 17. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
-18. **Recalled context currency is not fidelity**: Recall constitutes identity (this WAS discussed or decided), not current-reality agreement (it still HOLDS). A candidate that is current in the store and correctly recognized may still be desynced from current reality (decision superseded, path renamed, convention revised) — the recognition gate verifies identity, not fidelity. ClueVector_prose emits with a currency≠fidelity caveat; RecalledContext is re-verified against current state before commit and is not handed to downstream protocols as confirmed current context. Currency is the temporal sub-case of fidelity, not a substitute (Pollock — one defeater kind, not an exhaustive taxonomy).
+18. **Recalled context currency is not fidelity**: Recall constitutes identity (this WAS discussed or decided), not current-reality agreement (it still HOLDS). A candidate that is current in the store and correctly recognized may still be desynced from current reality — the recognition gate verifies identity, not fidelity. ClueVector_prose emits with a currency≠fidelity caveat; RecalledContext is re-verified against current state before commit and is not handed to downstream protocols as confirmed current context. Currency is the temporal sub-case of fidelity, not a substitute.
