@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: "Convergence-paced code/PR review-resolve loop via /review-loop. Drives a pluggable review source (review-ensemble | codex), verifies each finding against the codebase (/inquire) and work-flow (/contextualize), auto-applies Mechanical fixes (Extension) and gates Judgment fixes by shared disposition (Constitution), applies via /attend risk classification, then re-reviews until the source verdict converges to approve. User-invoked via /review-loop."
+description: "Convergence-paced code/PR review-resolve loop via /review-loop. Drives a pluggable review source (review-ensemble | codex | code-review), verifies each finding against the codebase (/inquire) and work-flow (/contextualize), auto-applies Mechanical fixes (Extension) and gates Judgment fixes by shared disposition (Constitution), applies via /attend risk classification, then re-reviews until the source verdict converges to approve. User-invoked via /review-loop."
 skills:
   - aitesis:inquire
   - epharmoge:contextualize
@@ -16,12 +16,12 @@ A source-agnostic, convergence-paced review-resolve loop for code/PR diffs: it d
 ```
 /review-loop [source?] [scope?]
 
-source : { review-ensemble | codex }   -- optional; review source behind the (diff) → { findings[], verdict } interface
-                                        --   absent → Phase 0 surfaces the choice with a recognizable default
-scope  : PR number | (implicit)         -- optional; PR number, or implicit current-PR / working-tree detection
+source : { review-ensemble | codex | code-review }   -- optional; review source behind the (diff) → { findings[], verdict } interface
+                                                     --   absent → Phase 0 surfaces the choice with a recognizable default
+scope  : PR number | (implicit)                      -- optional; PR number, or implicit current-PR / working-tree detection
 ```
 
-The review source is pluggable: any source satisfying the `(diff) → { findings[], verdict }` interface can drive the loop. `review-ensemble` and `codex` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 surfaces the choice with the available default. When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
+The review source is pluggable: any source satisfying the `(diff) → { findings[], verdict }` interface can drive the loop. `review-ensemble`, `codex`, and `code-review` are the three sources documented in the Source Interface section; all are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 surfaces the choice with the available default. When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
 
 ## Pipeline Overview
 
@@ -112,12 +112,13 @@ Phase 5's re-review **is** round k+1's review — one source call per round, not
 
 Every source satisfies one abstraction: `(diff) → { findings[], verdict }`. A finding is `[severity] file:line — description`; the verdict is `approve | needs-attention`. A source whose native output is richer than this shape (e.g. a sectioned report) satisfies the interface through an **extraction step** in its adapter — the adapter maps the native output onto `{ findings[], verdict }`. The set of sources is open and extensible (Emergent) — new sources may be added as long as their adapter yields this interface.
 
-Review sources are **runtime-selected, not static frontmatter dependencies**: the frontmatter `skills:` list declares only the unconditionally-composed protocols (`/inquire`, `/contextualize`, `/attend`); sources are pluggable and called dynamically (`review-ensemble` via a `Skill` call when chosen; `codex` via a background CLI call), so they are intentionally not fixed `skills:` entries. Two sources are documented:
+Review sources are **runtime-selected, not static frontmatter dependencies**: the frontmatter `skills:` list declares only the unconditionally-composed protocols (`/inquire`, `/contextualize`, `/attend`); sources are pluggable and called dynamically (`review-ensemble` via a `Skill` call when chosen; `codex` via a background CLI call; `code-review` via a `Skill` call to the built-in), so they are intentionally not fixed `skills:` entries. Three sources are documented:
 
 | Source | Kind | Mechanics |
 |--------|------|-----------|
 | `review-ensemble` | composite (cross-model: codex + /frame) | Call via `Skill("review-ensemble", ...)` passing the detected scope. Its Phase 5 output is a **sectioned report**, not a flat array — the adapter extracts the interface from it: the Codex section is already `[severity] file:line — description`; /frame's Lens findings are extracted from its Convergence/Assessment prose; the unified verdict is read directly. |
 | `codex` | single model, background | Launch in background and collect on the completion notification (see below). |
+| `code-review` | single, Claude-native (built-in) | Call via `Skill("code-review", ...)` passing the detected scope; it runs its own multi-angle finder fan-out and returns a findings JSON array (`{ file, line, summary, failure_scenario }`, ranked most-severe-first, capped at 15) with **no verdict line** — the adapter derives the verdict (`[]` → approve, otherwise needs-attention) and maps each finding to `[severity] file:line — description` (severity from rank order). Claude-native, no external CLI, so it is available whenever the loop runs. |
 
 **`codex` source mechanics** (reuse review-ensemble's exact pattern):
 
