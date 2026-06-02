@@ -148,7 +148,7 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 
 | Condition | Action |
 |-----------|--------|
-| codex CLI not found | Fall back to the other source (`review-ensemble` if frame is available); if no source is available, note single-source limitation and stop |
+| Designated source not installed (codex CLI not found, or `prothesis:frame` absent for `review-ensemble`) | Surface which source is unavailable so the user recognizes it is not installed, and **ask** which available source to use instead — or whether to stop and install it; do not silently substitute. `code-review` is Claude-native and always available, so an alternative can always be offered |
 | No diff / no changes | Report and stop at Phase 0 (nothing to review) |
 | Source timeout (>300s) | Present partial findings collected so far, note the timeout, let the user decide whether to continue |
 | Source approves with no findings | Report converged immediately — verdict=approve at round 1, no edits needed |
