@@ -50,12 +50,12 @@ The loop is the skill's identity; the review source is a parameter behind it. Lo
 ## When NOT to Use
 
 - Reviewing a markdown artifact before fixation — that is `/comment-review` (this skill targets code/PR diffs)
-- Wanting a one-shot cross-model verdict with no resolution stage — that is `/review-ensemble` alone (it produces a VERDICT and stops; `/review-loop` is the loop that drives that verdict to approve)
+- Wanting a one-shot cross-model review with no apply phase — that is `/review-ensemble` alone (it surfaces findings and a verdict without applying fixes; `/review-loop` is the loop that drives those findings to approve)
 - Trivial single-line edits where a direct Edit is faster than a review loop
 
 ## Phase 0: Source Designation + Scope Detection
 
-**Source designation.** If a `source` argument is given, use it directly — this is relay (Extension): the user already decided. If `source` is absent, **ask** — an init Constitution gate: present the available sources as a choice with a recommended default (`review-ensemble` when the `prothesis:frame` skill AND the codex CLI are both available — cross-model coverage is the richer review — else `codex`, single-model but still independent), and let the user constitute the selection. The recommended default makes the choice Recognition-fast, but source selection determines the cost and coverage of every round, so the loop waits for the answer rather than proceeding on the default silently.
+**Source designation.** If a `source` argument is given, use it directly — this is relay (Extension): the user already decided. If `source` is absent, **ask** — an init Constitution gate: present the available sources as a choice with a recommended default (`review-ensemble` when the `prothesis:frame` skill is available — it handles a missing codex internally, degrading to single-model review, so cross-model coverage is the richer choice whenever frame is present — else `codex`, single-model but still independent), and let the user constitute the selection. The recommended default makes the choice Recognition-fast, but source selection determines the cost and coverage of every round, so the loop waits for the answer rather than proceeding on the default silently.
 
 **Scope detection** (mirrors review-ensemble Phase 1):
 
@@ -85,10 +85,10 @@ This phase is primarily relay — read-only codebase checks with cited basis. A 
 
 Classify each surviving finding:
 
-- **Mechanical** — typo, rename, mechanical symbol or format fix; deterministic, one correct edit, no design judgment. → **Extension**: auto-apply, no gate. Mechanical findings never trigger Stop — the loop continues (only Constitution warrants interruption).
+- **Mechanical** — typo, rename, mechanical symbol or format fix; deterministic, one correct edit, no design judgment. → **Extension**: auto-apply, no gate. Mechanical findings keep the loop running — only Constitution warrants interruption.
 - **Judgment** — multiple valid resolutions, a design tradeoff, or a change with irreversible divergence. → **Constitution**: the user's judgment constitutes the resolution.
 
-For Judgment findings, **cluster by shared disposition** — group findings that share the same resolution stance (apply / dismiss / defer / redesign) and present ONE scope-gate per cluster rather than one gate per finding. Follow context-question separation: present all analysis, evidence, and per-finding rationale as text BEFORE the gate; the gate itself carries only the question and the options with their differential implications. Each option must produce a materially different downstream trajectory — if two dispositions converge to the same trajectory, collapse them. Use plain everyday language in the user-facing emit.
+For Judgment findings, **cluster by shared disposition** — group findings that share the same resolution stance (apply / dismiss / defer) and present ONE scope-gate per cluster rather than one gate per finding. Follow context-question separation: present all analysis, evidence, and per-finding rationale as text BEFORE the gate; the gate itself carries only the question and the options with their differential implications. Each option must produce a materially different downstream trajectory — if two dispositions converge to the same trajectory, collapse them. Use plain everyday language in the user-facing emit.
 
 ## Phase 4: Apply
 
@@ -116,7 +116,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
 
 | Source | Kind | Mechanics |
 |--------|------|-----------|
-| `review-ensemble` | composite (cross-model: codex + /frame) | Call via `Skill("review-ensemble", ...)` passing the detected scope. Its Phase 5 output is a **sectioned report** (see review-ensemble Phase 5), not a flat array — the adapter extracts the interface from it: the Codex section is already `[severity] file:line — description`; /frame's Lens findings are extracted from its Convergence/Assessment prose; the unified verdict is read directly. |
+| `review-ensemble` | composite (cross-model: codex + /frame) | Call via `Skill("review-ensemble", ...)` passing the detected scope. Its Phase 5 output is a **sectioned report**, not a flat array — the adapter extracts the interface from it: the Codex section is already `[severity] file:line — description`; /frame's Lens findings are extracted from its Convergence/Assessment prose; the unified verdict is read directly. |
 | `codex` | single model, background | Launch in background and collect on the completion notification (see below). |
 
 **`codex` source mechanics** (reuse review-ensemble's exact pattern):
@@ -154,11 +154,11 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 
 ## Rules
 
-1. **Extension findings never trigger Stop** — Mechanical fixes auto-apply and the loop continues; only Constitution (Judgment) findings warrant interruption.
+1. **Extension findings keep the loop running** — Mechanical fixes auto-apply; only Constitution (Judgment) findings warrant interruption.
 2. **Context-question separation at every gate** — all analysis and evidence as pre-gate text; the gate carries only the question and options with differential implications.
 3. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the gates.
 4. **FULL re-review each round** — re-call the source over the updated diff; do not trust an incremental delta check to declare convergence.
-5. **Verify before apply** — a finding that fails support-integrity or context-fit is dropped with its cited basis, never applied.
+5. **Verify before apply** — a finding that fails support-integrity or context-fit is dropped with its cited basis; only support-integrity-passing findings proceed to apply.
 6. **`/attend` gates risky applies regardless of class** — a Mechanical edit still passes through `/attend` risk classification before it lands; risk is orthogonal to the Mechanical/Judgment axis.
 
 ## Deferred (v1.x stretch)
