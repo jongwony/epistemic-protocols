@@ -20,6 +20,7 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/triage` | Work-unit triage from GitHub issues | Dispatchable initial prompts |
 | `/dispatch` | Focused work-unit execution | Branches, PRs, feedback inscriptions |
 | `/forge` | Reference-grounded initial-prompt formation | Initial prompt for a follow-up session/tool |
+| `/review-loop` | Source-agnostic code/PR review-resolve loop to convergence | Applied fixes + convergence trace |
 
 ## Skills
 

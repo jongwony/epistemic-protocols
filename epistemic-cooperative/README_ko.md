@@ -20,6 +20,7 @@
 | `/triage` | GitHub 이슈 기반 work-unit triage | dispatchable initial prompt |
 | `/dispatch` | focused work-unit 실행 | 브랜치, PR, feedback inscription |
 | `/forge` | 레퍼런스-grounded initial-prompt 형성 | 후속 세션/도구용 initial prompt |
+| `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 (수렴까지) | 적용된 수정 + 수렴 trace |
 
 ## 스킬
 
