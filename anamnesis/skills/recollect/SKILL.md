@@ -74,6 +74,7 @@ R                = Recognition ∈ {Recognize(Candidate), Refine, Reorient(descr
 H                = Hint     -- answer from Socratic probe gate (Qs)
 ClueVector_prose = String
 RecalledContext  = session text containing ClueVector_prose
+               -- recall establishes IDENTITY (this WAS discussed/decided), not current-reality FIDELITY (it still HOLDS). Store-currency (the INDEX entry is fresh) ⊂ fidelity-to-current-reality: a recalled decision may be superseded, a recalled path renamed, a recalled convention revised. RecalledContext describes a PAST state; downstream consumers re-verify against current state before commit rather than treating it as confirmed current context.
 NullMatch        = predicate; canonical definition in ── CONVERGENCE ──
 Phase            ∈ {0, 1, 2, 3}
 
@@ -263,7 +264,7 @@ MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
 
 ## Core Principle
 
-**Recognition over Retrieval**: When a user has a vague memory of prior discussion or decision, verify the match between their recalled context and historical context through cognitive assistance — presenting narrative candidates for user recognition, rather than returning search results. The protocol function is context identity verification (Husserl's synthesis of identification: empty intention meets fulfilled re-presentation), not information retrieval.
+**Recognition over Retrieval**: When a user has a vague memory of prior discussion or decision, verify the match between their recalled context and historical context through cognitive assistance — presenting narrative candidates for user recognition, rather than returning search results. The protocol function is context identity verification (Husserl's synthesis of identification: empty intention meets fulfilled re-presentation), not information retrieval. Identity verification is not current-reality verification: recognizing that a context WAS discussed does not establish that it still HOLDS — recalled context is current in the store yet may be desynced from current reality, so it carries a currency≠fidelity caveat and is re-verified before commit.
 
 The scan finds candidates; the narrative Qc enables recognition; the user constitutes the identity match. Three constitutive distinctions from search/retrieval:
 
@@ -325,7 +326,7 @@ Heuristic signals for empty intention detection (not hard gates):
 
 | Trigger | Effect |
 |---------|--------|
-| recall_complete (Recognize) | Emit ClueVector_prose, proceed with recognized context |
+| recall_complete (Recognize) | Emit ClueVector_prose; proceed with the recognized context as recalled past context requiring re-verification against current state before commit (not confirmed current context) |
 | NullMatch (all attempts exhausted) | Surface search scope + accumulated trace, offer Aitesis handoff for SSOT search, deactivate |
 | User Esc key | Accept current state without further recall assistance |
 
@@ -406,7 +407,7 @@ Other is always available — maps to `Reorient`: user describes a fundamentally
 
 After user response:
 
-1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID for `--resume` verification), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), and — when `Candidate.cwd` is present and non-empty — a literal `cd <cwd> && claude --resume <session_id>` line built from `Candidate.cwd` and `Candidate.session_id` (the project slug derives from invocation cwd, so the command is the resumable handle); when `Candidate.cwd` is absent or empty, omit the line and note the omission in the prose. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition.
+1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID for `--resume` verification), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), and — when `Candidate.cwd` is present and non-empty — a literal `cd <cwd> && claude --resume <session_id>` line built from `Candidate.cwd` and `Candidate.session_id` (the project slug derives from invocation cwd, so the command is the resumable handle); when `Candidate.cwd` is absent or empty, omit the line and note the omission in the prose. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition. ClueVector_prose carries a currency≠fidelity caveat: it states that the context was recognized as a past discussion or decision, not that the recalled content is verified against current reality — downstream consumers (e.g., Aitesis composition) treat it as recalled-and-requiring-re-verification, not as confirmed current context.
 
 2. **Refine**: Candidate not recognized but recall direction acknowledged. Initiate Socratic probing for recall deepening:
 
@@ -471,3 +472,4 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 16. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 17. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+18. **Recalled context currency is not fidelity**: Recall constitutes identity (this WAS discussed or decided), not current-reality agreement (it still HOLDS). A candidate that is current in the store and correctly recognized may still be desynced from current reality — the recognition gate verifies identity, not fidelity. ClueVector_prose emits with a currency≠fidelity caveat; RecalledContext is re-verified against current state before commit and is not handed to downstream protocols as confirmed current context. Currency is the temporal sub-case of fidelity, not a substitute.
