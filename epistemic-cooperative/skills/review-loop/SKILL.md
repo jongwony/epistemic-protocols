@@ -17,11 +17,11 @@ A source-agnostic, convergence-paced review-resolve loop for code/PR diffs: it d
 /review-loop [source?] [scope?]
 
 source : { review-ensemble | codex | code-review }   -- optional; review source behind the (diff) → { findings[], verdict } interface
-                                                     --   absent → Phase 0 surfaces the choice with a recognizable default
+                                                     --   absent → Phase 0 asks which source to use (no default)
 scope  : PR number | (implicit)                      -- optional; PR number, or implicit current-PR / working-tree detection
 ```
 
-The review source is pluggable: any source satisfying the `(diff) → { findings[], verdict }` interface can drive the loop. `review-ensemble`, `codex`, and `code-review` are the three sources documented in the Source Interface section; all are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 surfaces the choice with the available default. When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
+The review source is pluggable: any source satisfying the `(diff) → { findings[], verdict }` interface can drive the loop. `review-ensemble`, `codex`, and `code-review` are the three sources documented in the Source Interface section; all are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
 
 ## Pipeline Overview
 
@@ -55,7 +55,7 @@ The loop is the skill's identity; the review source is a parameter behind it. Lo
 
 ## Phase 0: Source Designation + Scope Detection
 
-**Source designation.** If a `source` argument is given, use it directly — this is relay (Extension): the user already decided. If `source` is absent, **ask** — an init Constitution gate: present the available sources as a choice with a recommended default (`review-ensemble` when the `prothesis:frame` skill is available — it handles a missing codex internally, degrading to single-model review, so cross-model coverage is the richer choice whenever frame is present — else `codex`, single-model but still independent), and let the user constitute the selection. The recommended default makes the choice Recognition-fast, but source selection determines the cost and coverage of every round, so the loop waits for the answer rather than proceeding on the default silently.
+**Source designation.** If a `source` argument is given, use it directly — this is relay (Extension): the user already decided. If `source` is absent, **ask** — an init Constitution gate with no preselected default: present the available sources as a choice (`review-ensemble` for cross-model coverage when the `prothesis:frame` skill is available; `codex` for a single independent external model when the codex CLI is present; `code-review` for a Claude-native built-in review, always available), each with its coverage/cost trade-off, and let the user constitute the selection. Unless a `source` is named at invocation, the loop does not pick one on the user's behalf — source selection determines the cost and coverage of every round, so it waits for the answer.
 
 **Scope detection** (mirrors review-ensemble Phase 1):
 
