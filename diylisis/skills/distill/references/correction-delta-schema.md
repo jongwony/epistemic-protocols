@@ -42,11 +42,10 @@ corrected_in_session(item) ≡
     ∧ d.verification_status ≠ "provisional"
 ```
 
-The verdict drives disposition:
+The verdict is binary — a CorrectedKeep-or-complement partition:
 
 - **CorrectedKeep** — the predicate holds: a matching record carries `export_policy = KEEP` with a non-provisional status. The item is eligible for the KEEP disposition.
-- **CorrectedRoute / CorrectedDrop** — a matching record carries `export_policy = ROUTE` or `DROP`. The item takes that disposition.
-- **Unknown** — the ledger is absent, or no record matches `subject_ref = ref(item)`, or the only matching record is `provisional`. The item's provenance is undecided: it appends to the residual ledger with reason `unknown-provenance` and routes to the Gate for user judgment.
+- **Unknown** — every other ledger state: the ledger is absent, no record matches `subject_ref = ref(item)`, the only matching record is `provisional`, or the matching record carries a non-KEEP `export_policy` (ROUTE or DROP). The item's provenance is undecided: it appends to the residual ledger with reason `unknown-provenance` and routes to the Gate for user judgment. A ROUTE or DROP correction records the author's intent, but F3b grants no disposition from it — provenance authority is the KEEP hard line only; ROUTE and DROP dispositions are reached through F3a relevance or the Gate.
 
 ## The hard line
 
