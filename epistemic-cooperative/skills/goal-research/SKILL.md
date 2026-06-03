@@ -99,7 +99,7 @@ When the notification arrives:
    Reasoning items appear only if codex emits them (config-gated) — do not force them on. When extraction is empty the guard above prints the `turn.failed` / `error` events and raw banner lines from `$EVENTS_JSONL` so the failure is visible, not swallowed.
 2. Clean up the temp prompt file and the event stream (after the narrative is forwarded / any failure surfaced):
    ```bash
-   rm -f /tmp/goal_research_${SUFFIX}.txt "$EVENTS_JSONL"
+   rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl
    ```
 
 ## Phase 4: Output

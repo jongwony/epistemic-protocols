@@ -149,7 +149,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
    ```
 
    Reasoning items appear only if codex emits them (config-gated) — do not force them on. An empty extraction is a codex failure, not an approve verdict — the guard surfaces the raw events so a blank round cannot masquerade as convergence.
-4. Clean up both temp files each round (`rm -f /tmp/review_loop_codex_${SUFFIX}.txt "$EVENTS_JSONL"`) to prevent `/tmp` accumulation across rounds.
+4. Clean up both temp files each round (`rm -f /tmp/review_loop_codex_${SUFFIX}.txt /tmp/review_loop_codex_events_${SUFFIX}.jsonl` — literal paths, since `$EVENTS_JSONL` does not survive into this separate Bash call) to prevent `/tmp` accumulation across rounds.
 
 ## Convergence
 

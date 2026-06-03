@@ -167,8 +167,9 @@ After /frame completes (Lens L in context), the background Codex task will send 
 3. Record Lens L, the standard Codex narrative, and (when launched) the adversarial Codex narrative for aggregation — each labelled by source.
 4. Clean up the temp prompt files and event streams after reading (prevents `/tmp` accumulation across invocations):
    ```bash
+   # literal paths: the per-run event-stream shell vars do not survive into this separate Bash call, so spell them out.
    rm -f /tmp/ensemble_codex_review_${SUFFIX}.txt /tmp/ensemble_codex_adversarial_${SUFFIX}.txt \
-         "$EVENTS_JSONL" "$ADVERSARIAL_EVENTS_JSONL"
+         /tmp/ensemble_codex_review_events_${SUFFIX}.jsonl /tmp/ensemble_codex_adversarial_events_${SUFFIX}.jsonl
    ```
 
 If the Codex background task has not completed yet when /frame finishes, wait for the notification — do not poll or sleep.

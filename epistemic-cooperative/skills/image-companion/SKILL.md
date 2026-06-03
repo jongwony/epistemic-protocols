@@ -112,7 +112,8 @@ codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 \
 For multiple images, launch one background call per image in the same turn so they run in
 parallel — each with its own `${SUFFIX}`, hence its own `$EVENTS_JSONL`, so parallel streams
 never collide. Each completion sends a notification — then read that call's `$EVENTS_JSONL`
-and `rm -f /tmp/image_companion_${SUFFIX}.txt "$EVENTS_JSONL"`. Wait for the completion
+and `rm -f /tmp/image_companion_${SUFFIX}.txt /tmp/image_companion_events_${SUFFIX}.jsonl` (literal
+paths — `$EVENTS_JSONL` does not survive into a separate cleanup Bash call). Wait for the completion
 notification before reading output.
 
 On completion the JSONL event stream is already in `$EVENTS_JSONL` (redirected at launch).
