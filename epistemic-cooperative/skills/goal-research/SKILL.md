@@ -54,7 +54,7 @@ Report:
 Launch via `Bash(run_in_background: true, timeout: 1000000)`:
 
 ```bash
-codex exec --ephemeral --skip-git-repo-check -m gpt-5.5 \
+codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="high" \
   --config mcp_servers.tavily.tool_timeout_sec=900 \
   < /tmp/goal_research_${SUFFIX}.txt
@@ -74,7 +74,16 @@ raw timeout error if the call exceeds that limit.
 Wait for the background task completion notification — do not poll or sleep.
 
 When the notification arrives:
-1. Read the Codex output from the completed background task.
+1. Read the Codex output from the completed background task. With `--json` the captured output is a **JSONL event stream possibly interleaved with a non-JSON stderr banner**, not free text — save it to a file (referenced as `$EVENTS_JSONL`) and extract the codex `agent_message` narrative verbatim with the line below. That narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty) — **forward it verbatim to the presentation step; do NOT regex-parse it**.
+
+   ```bash
+   # Codex --json → agent_message narrative, verbatim (codex-cli 0.136.0 pinned).
+   # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
+   # All agent_message items in stream order; no tail. This narrative IS the research trace/answer.
+   jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL"
+   ```
+
+   Reasoning items appear only if codex emits them (config-gated) — do not force them on. Failure modes still surface as raw errors: a `turn.failed` / `error` event line, or a raw stderr banner line, is preserved in `$EVENTS_JSONL` for the user to read.
 2. Clean up the temp prompt file:
    ```bash
    rm -f /tmp/goal_research_${SUFFIX}.txt
@@ -82,7 +91,7 @@ When the notification arrives:
 
 ## Phase 4: Output
 
-Present the full Codex output as the call trace, preceded by a one-line scope header:
+Present the extracted Codex `agent_message` narrative as the call trace, preceded by a one-line scope header. Use the Phase 3 jq extraction (the `agent_message` narrative) as the trace body — do not dump the raw JSONL event stream:
 
 ```
 ## Goal Research Result
@@ -90,7 +99,7 @@ Present the full Codex output as the call trace, preceded by a one-line scope he
 Target: {research_question}
 
 --- Codex Trace ---
-{codex_full_output}
+{codex_process_narrative}
 ```
 
 Acceptance criterion: a real Codex session was launched, its trace was returned to the main session, and the temp file was cleaned up.

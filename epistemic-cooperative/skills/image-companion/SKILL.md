@@ -101,7 +101,7 @@ Launch via `Bash(run_in_background: true, timeout: 600000)`, with `--cd` pointin
 artifact's image directory so the PNG lands beside its companions:
 
 ```bash
-codex exec --ephemeral --skip-git-repo-check -m gpt-5.5 \
+codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="medium" \
   --sandbox workspace-write \
   --cd <artifact-image-dir> \
@@ -112,6 +112,31 @@ For multiple images, launch one background call per image in the same turn so th
 parallel. Each completion sends a notification — then read the output from the completed
 background task and `rm -f /tmp/image_companion_${SUFFIX}.txt`. Wait for the completion
 notification before reading output.
+
+With `--json` the captured output is a **JSONL event stream possibly interleaved with a
+non-JSON stderr banner**, not free text. Save it to a file (referenced as `$EVENTS_JSONL`)
+and extract the codex `agent_message` narrative verbatim with the line below. Forward that
+narrative verbatim to Step 4 — the PNG-confirmation and any in-message warnings you surface
+there are read from this narrative, not regex-parsed:
+
+```bash
+# Codex --json → agent_message narrative, verbatim (codex-cli 0.136.0 pinned).
+# -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
+# All agent_message items in stream order; no tail. The downstream step reads the narrative.
+jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL"
+```
+
+Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation)
+appear on the **non-JSON stderr banner lines** rather than inside `agent_message`. So
+ALSO grep the raw captured file for those warning strings, to catch what the narrative
+does not carry:
+
+```bash
+# Warnings that live on the non-JSON banner lines, not in agent_message:
+grep -iE 'invalid_grant|deprecat|--full-auto|warn' "$EVENTS_JSONL" || true
+```
+
+Reasoning items appear only if codex emits them (config-gated) — do not force them on.
 
 Running in the background keeps Codex's verbose banner out of the main context. The model
 (`-m gpt-5.5`) is fixed by design — Codex substitutes its own internal image skill
@@ -129,8 +154,10 @@ emphasized moment).
 
 Then produce a consolidated report in the user's language using the template in
 `references/verification.md`: a table with image, filename, and verdict, plus any
-non-fatal warnings (e.g., auth-token refresh notices, deprecation notices) so the user
-sees the full picture without reading raw codex output.
+non-fatal warnings (e.g., auth-token refresh notices, deprecation notices) — read from the
+extracted `agent_message` narrative (Step 3 jq line) AND from the Step 3 banner-warning
+grep over the raw `$EVENTS_JSONL` (some warnings ride the non-JSON stderr lines, not the
+narrative) — so the user sees the full picture without reading raw codex output.
 
 ## What stays fixed vs. what varies
 

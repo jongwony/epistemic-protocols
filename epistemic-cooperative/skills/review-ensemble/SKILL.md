@@ -68,7 +68,7 @@ End with: VERDICT: approve | needs-attention
 
 Run via `Bash(run_in_background: true, timeout: 300000)`:
 ```bash
-codex exec --ephemeral --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_review_${SUFFIX}.txt
+codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_review_${SUFFIX}.txt
 ```
 
 **Optional: codex-adversarial** — If the user requests adversarial review or the change is large/architectural, also launch an adversarial prompt in background using a distinct temp file `/tmp/ensemble_codex_adversarial_${SUFFIX}.txt` (same `SUFFIX`, different filename) so the adversarial runner does not overwrite or re-read the standard review prompt:
@@ -97,7 +97,7 @@ End with: VERDICT: approve | needs-attention
 
 Execute with `Bash(run_in_background: true, timeout: 300000)`:
 ```bash
-codex exec --ephemeral --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_adversarial_${SUFFIX}.txt
+codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_adversarial_${SUFFIX}.txt
 ```
 
 ### Step 2: Invoke /frame Mode 2 (foreground, interactive)
@@ -125,9 +125,18 @@ The Lens L output contains:
 
 After /frame completes (Lens L in context), the background Codex task will send a completion notification automatically. When the notification arrives:
 
-1. Read the Codex output from the completed background task
-2. Parse Codex findings: `[severity] file:line — description` format + VERDICT
-3. Record both Lens L and Codex findings for aggregation
+1. Read the Codex output from the completed background task. With `--json` the captured output is a **JSONL event stream possibly interleaved with a non-JSON stderr banner**, not free text. Save the captured output to a file (referenced as `$EVENTS_JSONL`), then extract the codex `agent_message` narrative verbatim with the line below.
+2. Extract the narrative and **forward it verbatim to the aggregation step — do NOT regex-parse it into findings/verdict**. The consuming agent (an LLM) reads the `[severity] file:line — description` findings and the closing `VERDICT:` line directly from the narrative; the `{findings[], verdict}` interface is satisfied by the agent reading the narrative, not by jq parsing.
+
+   ```bash
+   # Codex --json → agent_message narrative, verbatim (codex-cli 0.136.0 pinned).
+   # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
+   # All agent_message items in stream order; no tail. The downstream agent reads the narrative and judges.
+   jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL"
+   ```
+
+   Reasoning items appear only if codex emits them (config-gated) — do not force them on.
+3. Record both Lens L and Codex narrative for aggregation
 4. Clean up the temp prompt files after reading (prevents `/tmp` accumulation across invocations):
    ```bash
    rm -f /tmp/ensemble_codex_review_${SUFFIX}.txt /tmp/ensemble_codex_adversarial_${SUFFIX}.txt

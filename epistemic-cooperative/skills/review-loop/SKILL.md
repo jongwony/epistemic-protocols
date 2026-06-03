@@ -125,9 +125,18 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
 1. Write a review prompt to `/tmp/review_loop_codex_${SUFFIX}.txt` (generate `SUFFIX=$(openssl rand -hex 4)`), embedding the actual diff content so the model reviews exactly what changed. Ask for findings as `[severity] file:line — description` and a closing line `VERDICT: approve | needs-attention`.
 2. Launch via `Bash(run_in_background: true, timeout: 300000)`:
    ```bash
-   codex exec --ephemeral --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/review_loop_codex_${SUFFIX}.txt
+   codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/review_loop_codex_${SUFFIX}.txt
    ```
-3. Collect on the completion notification — do not poll or sleep. Parse the findings and the VERDICT.
+3. Collect on the completion notification — do not poll or sleep. With `--json` the captured output is a **JSONL event stream possibly interleaved with a non-JSON stderr banner**, not free text — save it to a file (referenced as `$EVENTS_JSONL`) and extract the codex `agent_message` narrative verbatim with the line below. **Forward that narrative verbatim to the loop — do NOT regex-parse it into findings/verdict**: the consuming agent (an LLM) reads the `[severity] file:line — description` findings and the closing `VERDICT:` line directly from the narrative, satisfying the `{findings[], verdict}` interface by reading, not by jq parsing.
+
+   ```bash
+   # Codex --json → agent_message narrative, verbatim (codex-cli 0.136.0 pinned).
+   # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
+   # All agent_message items in stream order; no tail. The downstream agent reads the narrative and judges.
+   jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL"
+   ```
+
+   Reasoning items appear only if codex emits them (config-gated) — do not force them on.
 4. Clean up the temp file after reading (`rm -f /tmp/review_loop_codex_${SUFFIX}.txt`) to prevent `/tmp` accumulation across rounds.
 
 ## Convergence
