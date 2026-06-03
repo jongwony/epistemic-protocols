@@ -137,7 +137,7 @@ progress(Λ) = 1 - measure(Λ) / measure(Λ_initial)
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect          (sense)        → Internal analysis (silent — heuristic scan for session-tethered residue; no user output)
 Phase 0 declare         (observe)      → Read, Grep (recipient, next_task, allowed_sources, scope, verification, stop from session context and project config)
-Phase 1 normalize       (observe)      → Read, Grep, Glob (resolve each surface token to a canonical reference; deterministic scrub runs as Extension)
+Phase 1 normalize       (observe)      → Read, Grep, Glob (resolve each surface token to a canonical reference; the read-only deictic scan runs as Extension)
 Phase 1 audit           (sense)        → Internal analysis (per-item self-containment classification: inline / stable-pointer / routed-residual)
 Phase 2 attest          (observe)      → Read (read-only consumption of the append-only CorrectionDelta ledger; absence yields Unknown)
 Phase 2 dispose         (track)        → Internal state update (Λ.dispositions, Λ.residual_ledger)
@@ -263,7 +263,7 @@ Verify the working context carries session-tethered residue, then declare the ha
 - **Stable-pointer** — the item names a stable reference the recipient can resolve (a path, a PR id, a command to run).
 - **Routed-residual** — the item cannot be made self-contained in this handoff; it is routed with a reason and appended to the residual ledger (`surfaced = false`). Routed-residual items are surfaced at the Gate before convergence — none reaches the recipient silently.
 
-**Scope restriction**: Read-only investigation (Read, Grep, Glob). The deterministic token scrub — token normalization, bare-identifier detection, and "as above"-style anchor detection — runs as an Extension (it proceeds without a gate); the items it cannot resolve become residual-ledger entries for the Gate.
+**Scope restriction**: Read-only investigation (Read, Grep, Glob). The read-only deictic scan — token normalization, bare-identifier detection, and "as above"-style anchor detection — runs as an Extension (it proceeds without a gate); the items it cannot resolve become residual-ledger entries for the Gate.
 
 ### Phase 2: Recipient-Relevance + Transformation-Provenance + Disposition
 
