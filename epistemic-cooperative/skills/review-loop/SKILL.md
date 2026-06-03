@@ -88,7 +88,9 @@ Classify each surviving finding:
 - **Mechanical** — typo, rename, mechanical symbol or format fix; deterministic, one correct edit, no design judgment. → **Extension**: auto-apply, no gate. Mechanical findings keep the loop running — only Constitution warrants interruption.
 - **Judgment** — multiple valid resolutions, a design tradeoff, or a change with irreversible divergence. → **Constitution**: the user's judgment constitutes the resolution.
 
-For Judgment findings, **cluster by shared disposition** — group findings that share the same resolution stance (apply / dismiss / defer) and present ONE scope-gate per cluster rather than one gate per finding. Follow context-question separation: present all analysis, evidence, and per-finding rationale as text BEFORE the gate; the gate itself carries only the question and the options with their differential implications. Each option must produce a materially different downstream trajectory — if two dispositions converge to the same trajectory, collapse them. Use plain everyday language in the user-facing emit.
+**Settled-policy check (before opening any disposition gate).** A finding whose disposition policy was already constituted in a prior round is **Extension by default**: a consistent application of that settled policy auto-applies as Mechanical, and any non-trivial side-effect (for example, an edit that touches a line outside the original diff hunk) is surfaced as a **relay line in the round trace**, not as a gate. The Extension/Constitution boundary for a finding moves with what is already decided — a prior round's direction and the PR's stated purpose can close an axis that would otherwise be live. A gate reopens only when a genuinely competing disposition (defer / separate follow-up / dismiss) is still live — one not already foreclosed by the PR's purpose or an established precedent. Re-gating the consistent propagation of settled policy is the over-gating failure mode.
+
+For Judgment findings whose axis remains live, **cluster by shared disposition** — group findings that share the same resolution stance (apply / dismiss / defer) and present ONE scope-gate per cluster rather than one gate per finding. Follow context-question separation: present all analysis, evidence, and per-finding rationale as text BEFORE the gate; the gate itself carries only the question and the options with their differential implications. Each option must produce a materially different downstream trajectory — if two dispositions converge to the same trajectory, collapse them. Use plain everyday language in the user-facing emit.
 
 ## Phase 4: Apply
 
@@ -166,7 +168,7 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 
 ## Rules
 
-1. **Extension findings keep the loop running** — Mechanical fixes auto-apply; only Constitution (Judgment) findings warrant interruption.
+1. **Extension findings keep the loop running** — Mechanical fixes auto-apply; only Constitution (Judgment) findings warrant interruption. A finding whose disposition policy was constituted in a prior round is Extension by default: its consistent application auto-applies and any side-effect is surfaced as a relay line in the round trace. A gate reopens only for a genuinely competing live disposition, not one foreclosed by the PR's purpose or a prior precedent — re-gating settled policy is the over-gating failure mode.
 2. **Context-question separation at every gate** — all analysis and evidence as pre-gate text; the gate carries only the question and options with differential implications.
 3. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the gates.
 4. **FULL re-review each round** — re-call the source over the updated diff; do not trust an incremental delta check to declare convergence.
