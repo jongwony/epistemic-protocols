@@ -148,9 +148,12 @@ user cannot name from within their own frame, yet whose filling is required for
 `P' ≅ R`. Gadamer supplies the dynamics: understanding advances through the
 *question* (Collingwood's logic of question and answer — to grasp something is to
 grasp the question it answers), and the *hermeneutic circle* lets the part revise
-the whole. When a Horizon probe lands, the user's frame expands (`P → P'`); the
-conditional `ReassessRoute` re-derivation (gated by `horizon_reframes(A)`) is that
-circle made operational — a part (one answer) revising the whole (the route map).
+the whole. When a Horizon probe lands, the user's frame expands (`P → P'`):
+surfacing the blind spot is what resolves the unknown. Katalepsis stops there — the
+surfaced edge is the *basis* for a fusion of horizons, but the fusion itself (a part
+revising the whole framing) belongs to Prothesis' synthesis layer, not to the
+comprehension loop. This keeps the part-revises-whole movement where it belongs and
+the Katalepsis loop strictly terminating.
 
 **Complementary to Prothesis, not duplicative.** Prothesis (`/frame`) already
 instantiates Gadamer's *Horizontverschmelzung* (fusion of horizons) at the

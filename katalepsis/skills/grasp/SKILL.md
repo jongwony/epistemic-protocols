@@ -13,8 +13,7 @@ Achieve certain comprehension of AI work through structured verification, enabli
 
 ```
 ── FLOW ──
-(R, U) → I → E → Fᵣ → Sₑ → B → Tᵣ → detect(E, B) → GT → P → Δ → Q → A → Q(coverage) → Tᵤ → P' → (loop until katalepsis)
-   back-edge: A → ReassessRoute(R, U, P') → Fᵣ' → E (re-enter Phase 1) when horizon_reframes(A); bounded to one re-derivation per task
+(R, U) → I → E → Fᵣ → Sₑ → B → Tᵣ → detect(E, B) → GT → P → Δ → Q → A → P' → Tᵤ → Q(coverage) → (loop until katalepsis)
 
 ── MORPHISM ──
 Result
@@ -25,7 +24,6 @@ Result
   → materialize(artifact_basis)        -- derive concrete artifact anchors for the chosen intent
   → register(tasks)                   -- track selected entry points as tasks
   → verify(comprehension)             -- Socratic probing per gap type
-  → reassess_route(R, U, P')          -- conditional back-edge: when a Horizon answer reframes (horizon_reframes(A)), re-derive the route map (Fᵣ') and re-enter at select(); bounded to one re-derivation per task
   → confirm(coverage)                 -- aspect coverage check per entry point
   → VerifiedUnderstanding
 requires: result_exists(R)              -- AI work output must exist in context
@@ -60,17 +58,15 @@ Aᵣ = User's reasoning behind misconception (via Cognitive Partnership Move (Co
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
-J_ref = ReframeRouting ∈ {continue_coverage, rederive_route}   -- after a Horizon hit: keep current coverage, or re-derive the route map
 GapType = {Expectation, Causality, Scope, Sequence, Horizon} ∪ Emergent(E, B)
 GT = Relevant gap types per entry point ⊆ GapType
 HC = HorizonCandidate { edge, anchors, failure_mode, probe_scenario }   -- a co-intended-but-unspoken edge the user did not name from within their framing; probe_scenario is the opacity-preserving scenario text, materialized at Phase 3 detection and consumed when the Qs probe is emitted, then discarded after A is received (it carries the scenario only — never the edge, answer, or rationale)
 admissible(HC) ≡ qualifies(HC) ∧ scarce(HC)
               -- false-positive guard: Horizon ∈ GT for an entry point only when some HC is admissible (else detect none)
-qualifies(HC) ≡ evidence_bound(HC, B) ∧ material(HC.failure_mode, P' ≅ R) ∧ unspoken(HC.edge, U ∪ prior A)
+qualifies(HC) ≡ evidence_bound(HC, B) ∧ material(HC.failure_mode) ∧ unspoken(HC.edge, U ∪ entry_point_labels ∪ prior A)
               ∧ ¬route_selection_question(HC.edge) ∧ ¬decision_gap(HC.edge)   -- the five non-scarcity guards
+              -- material(HC.failure_mode): leaving HC.edge unprobed is predicted to keep the achievable understanding short of R (P' ≇ R) — a counterfactual evaluated at detection against the current P and R, before A produces the realized P'
 scarce(HC) ≡ |{ HC' : qualifies(HC') for this entry_point }| ≤ 1   -- at most one qualifying Horizon candidate per entry point; if several weak candidates compete, detect none
-horizon_reframes(A) ≡ answers_horizon_probe(A) ∧ reframed(P', Fᵣ)   -- A answers a Horizon probe AND the answer shifts P' so the selected entry_point is no longer well-anchored to the user's intent; gates route re-derivation (J_ref = rederive_route), else continue_coverage
-Fᵣ' : ComprehensionRouteMap   -- temporal successor of Fᵣ (prime = succession per notation convention); the re-derived route map output of ReassessRoute, same structure as Fᵣ
 Cursor = ContinuationCursor { task: TaskId, entry_point: EntryPoint, aspect: Optional(GapType), resume_target: String }
        -- resume_target is a short user-facing phase label, not a serialized cursor; structural position is task × entry_point × aspect
 BranchKind = {Proposal} ∪ Emergent(BranchKind)
@@ -86,14 +82,14 @@ Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E → AssessR
 Phase 1: Fᵣ → Present(entry_point enriched by route-adequacy metadata; hidden_route + open when non-empty) → Qc(intent entry points) → Stop → Sₑ       -- entry point selection; default single, ordered multi when user names 2+ concerns [Tool]
 Phase 2: Sₑ → Materialize(Sₑ, R) → B → TaskCreate[selected] → Tᵣ  -- task registration; initialize Λ.cursor from first current task, entry point, and active aspect before Phase 3 [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → P → Δ  -- comprehension check [Tool]
-       → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Horizon/Emergent [Tool]
+       → Qs(HC) → Stop → A → P' → Tᵤ ; Λ.detected[current] += Horizon ; Λ.probed[current] += Horizon  if Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]  -- Horizon probe: fires immediately at detection (mandatory once), preempts the start-aspect selector; scenario-only, opacity-preserving (never the edge/answer/rationale, never a Horizon label); the answer is then evaluated as a normal probe answer (→ 3c eval → coverage), never a return to the start selector [Tool]
+       → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Emergent (Horizon handled by the preempting edge above) [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
        → C(branch) if proposal(A)                         -- side-branch continuation closure [Tool]
        → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
        → Read(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
        → C(correct) if correct(A)                         -- verified-aspect continuation closure [Tool]
        → Qc(coverage) → Stop if correct(A)               -- aspect summary [Tool]
-       → ReassessRoute(R, U, P') → Fᵣ' → Phase 1 if horizon_reframes(A)  -- hermeneutic-circle re-derivation: fires after the Horizon Qs answer, before the coverage gate, and is mutually exclusive with Qc(coverage); only when a Horizon hit makes the selected entry point stale (J_ref = rederive_route); else J_ref = continue_coverage; bounded to one re-derivation per task [Tool]
        → converge → Λ.active := false if all_tasks_completed  -- convergence evidence is terminal; no downstream gate required
        → deactivate(user_esc | user_cancel) → Λ.active := false
 Turn boundary invariant: While `Λ.active = true` at turn end, the last user-facing shape must be a TerminalShape. Relay metadata `C(·)` may precede a terminal shape, but cannot be the sole final shape while active. The `converge` emission is `deactivation(all_tasks_completed)`, sets `Λ.active := false`, and is terminal without an additional gate.
@@ -106,7 +102,6 @@ If correct: emit continuation closure, then Aspect summary — show probed vs un
   User selects "sufficient" → TaskUpdate completed, next pending task.
   User selects additional aspect → Resume with selected gap type.
   User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, emit side-branch continuation closure, resume current loop position.
-If a Horizon probe answer reveals the selected entry point is stale under the user's revised framing (`horizon_reframes(A)`): re-derive the route map (`Fᵣ'` via ReassessRoute) and re-enter Phase 1. Task reconciliation: completed tasks stay completed; in-progress and pending tasks are preserved and carried into the re-derived route, re-anchored to the new entry points, and `Λ.selected` is remapped onto `Λ.entryPoints'` (a stale reference whose task already completed is dropped). Convergence is evaluated only after every entry of `Fᵣ'` — including the preserved tasks — is processed. Termination guard: at most one route re-derivation per task, so a reframed route cannot itself trigger an unbounded re-derivation cascade.
 Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
 Continue until: all selected tasks completed OR user ESC/cancel.
 Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
@@ -127,7 +122,6 @@ Phase 2 B   (observe) → Internal analysis (artifact basis materialization)
 Phase 2 Tᵣ  (track)   → TaskCreate (entry point tracking)
 Phase 3 detect (sense) → Internal analysis (gap type relevance detection per entry point)
 Phase 3 Horizon (sense) → Internal analysis (admissible(HC) false-positive guard; opacity-preserving — never exposes the suspected edge, the answer, or the selection rationale)
-Phase 3 ReassessRoute (observe) → Internal analysis (conditional Fᵣ' re-derivation when horizon_reframes(A); reuses Phase 0 AssessRoute machinery, opacity-preserving). Transparency: the re-derivation itself is relay (Extension) — deterministic given A and the materialized basis — and exercises no constitutive authority; the constitutive choice is preserved downstream at the re-entered Phase 1 Qc, where the user re-selects the entry point against Fᵣ'
 Phase 3 Qs  (constitution)   → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
@@ -338,7 +332,7 @@ For each task (entry point):
 
 1. **TaskUpdate** to `in_progress`
 
-2. **Present overview**: Brief summary of the selected intent and its artifact basis, then show everyday aspect labels derived from detected gap types (GT) and let user select starting aspect:
+2. **Present overview**: Brief summary of the selected intent and its artifact basis, then show everyday aspect labels derived from detected gap types (`GT \ {Horizon}` — Horizon is never surfaced as a selectable aspect label; per Socratic opacity it is probed inline at detection, never offered in the start selector or any routing option) and let user select starting aspect:
 
    Present the detected aspects as text output:
    - What this path covers: [plain-language aspect list]
@@ -355,6 +349,8 @@ For each task (entry point):
    ```
 
    This lightweight `select_start` prevents AI-imposed framing on the first probe without requiring full pre-authorization of the detection set. User picks starting direction; remaining aspects surface in step 3d. Use everyday labels like "what changed", "why this path", "what it affects", or "what happens first"; keep raw gap-type names internal unless the user already uses that vocabulary.
+
+   **Horizon preemption (precedes the start selector)**: Before presenting the start-aspect selector above, check for a detected admissible Horizon: if `Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]`, fire the scenario-only `Qs` Horizon probe immediately (per the Horizon probe exception in step 3) — it preempts this selector and is mandatory once per admissible detection, never surfacing a Horizon label. On the answer, record `Λ.detected[current] += Horizon` and `Λ.probed[current] += Horizon`. The scenario answer is then evaluated per step 3c and the entry point proceeds to the coverage check (step 3d) — never back to this start selector; any remaining non-Horizon aspects surface through the coverage check (step 3d), consistent with the formal transition. If Horizon was the only detected gap (`GT \ {Horizon} = ∅`), the coverage check finds no remaining aspect and completes the entry point.
 
 3. **Verify comprehension** by **presenting** a Socratic probe via Cognitive Partnership Move (Constitution):
 
@@ -379,7 +375,9 @@ For each task (entry point):
 
    Estimated split: ~40–50% Type F (Expectation, Sequence → Qc probes), ~50–60% Type M (Causality, Scope, Horizon, Emergent → Qs probes). The split reflects that comprehension verification often involves causal and scope understanding, which resist reduction to finite option sets.
 
-   Then **present** the probe question with understanding-level options:
+   **Horizon probe exception**: a Horizon probe never uses the labeled understanding-level option template below — enumerating a `Correct understanding`/`Misconception` option would expose the edge before `A`. Present only the scenario as an open question (free-response; the "Other"-style open path is the entire probe), and never name the edge, the expected answer, or the rationale. Evaluate the free answer for whether the user independently reaches the edge.
+
+   Then **present** the probe question with understanding-level options (non-Horizon gap types):
    ```
    question: "[Essential verification question]"
    options:
@@ -506,4 +504,4 @@ For each task (entry point):
 12. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 13. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 14. **Protocol-native route map**: Phase 0 produces a ComprehensionRouteMap before entry-point selection. The map is a pre-gate support object for entry-point adequacy, not a terminal status and not generic calibration. It annotates derived entry points; it does not create, filter, suppress, or terminalize entry-point tasks, and `VerifiedUnderstanding` is unchanged. `hidden_route` marks entries the user did not name while preserving their artifact anchors; `open` carries bounded discovery pressure only when the unknown could change which entry point the user selects. Socratic opacity is preserved — the map exposes why an entry point is useful, never the expected answer or reasoning path.
-14a. **Horizon boundary**: `Horizon` is a named *comprehension* gap — the AI surfaces a co-intended-but-unspoken edge required for `P' ≅ R` — NOT a Prothesis synthesis construct (`Horizontverschmelzung` fuses multiple *perspectives*; Horizon operates within one user's comprehension of one result). It is detected at Phase 3 *inside* an already-selected entry point and preserves `Fᵣ`/`Sₑ`/`Λ.entryPoints` unless `horizon_reframes(A)` triggers a route re-derivation. It is `Qs`, opacity-preserving (never names the edge, answer, or rationale before `A`), capped at one candidate per entry point (`scarce`), and forbidden when the edge is merely speculative, an entry-point-selection pressure (`hidden_route`/`open`), or a decision gap (`/gap`). It enters the taxonomy under the Revision-threshold *unmeasurable-by-construction amendment* and carries a demotion review. When `horizon_reframes(A)` does fire, the route is fully re-derived rather than surgically augmented: a hermeneutic-circle reframe can shift which entry points are well-anchored across the whole map, not merely add one, so a single-entry-point insertion would under-capture the reframe; full re-derivation reuses the Phase 0 AssessRoute machinery instead of introducing a separate insertion path. Re-derivation is bounded to one per task (termination guard), and tasks are reconciled per LOOP (completed tasks stay completed; in-progress/pending tasks are preserved and carried into `Fᵣ'`).
+14a. **Horizon boundary**: `Horizon` is a named *comprehension* gap — the AI surfaces a co-intended-but-unspoken edge required for `P' ≅ R` — NOT a Prothesis synthesis construct (`Horizontverschmelzung` fuses multiple *perspectives*; Horizon operates within one user's comprehension of one result). It is detected at Phase 3 *inside* an already-selected entry point and preserves `Fᵣ`/`Sₑ`/`Λ.entryPoints`. It is `Qs`, opacity-preserving (never names the edge, answer, or rationale before `A`), capped at one candidate per entry point (`scarce`), and forbidden when the edge is merely speculative, an entry-point-selection pressure (`hidden_route`/`open`), or a decision gap (`/gap`). It enters the taxonomy under the Revision-threshold *unmeasurable-by-construction amendment* and carries a demotion review. **Surfacing, not fusion**: Katalepsis' role is to *surface* the Horizon edge — making the blind spot visible is what resolves the unknown, and that surfacing is the *basis* for a later fusion of horizons (`Horizontverschmelzung`), which belongs to Prothesis' synthesis layer. Katalepsis does not itself re-derive the route or re-frame the comprehension on a Horizon hit; the user's own reframing and any cross-perspective fusion are left to the user and to Prothesis. A surfaced Horizon answer is evaluated as a normal probe answer (step 3c) and proceeds to the coverage check — keeping the Katalepsis/Prothesis boundary sharp and the comprehension loop strictly terminating.
