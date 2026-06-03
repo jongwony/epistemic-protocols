@@ -208,6 +208,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: κατάληψις (grasping firmly, comprehension) — the Stoic criterion of truth through firm cognitive grasp. Core principle: **Comprehension over Approval**. Nodding along is not grasping. Intent-scented entry points convert passive reception into active comprehension by letting the user recognize the path closest to their concern before artifact details appear. Workflow position: cross-cutting, structurally last — requires completed content; without something to grasp, there is nothing to verify. Game feel: "I think I got it... but do I really?" → choose the nearest intent path → artifact-grounded probe → confirmed grasp or identified gap.
 
+## Diylisis `/distill`
+
+**Situation**: You wrote a handoff brief so a fresh session can resume your work tomorrow. It reads complete to you, but it leans on things only this session knows — a coined label like "v4", a "do it as above" anchor, a "Task #3" with no restoration data. A new session with no memory of today would stall on every one of those.
+
+**Intervention**: `/distill` declares a handoff contract (who resumes, what the next task is, what sources they may read), normalizes each session-local token to a stable reference, audits each item for whether it travels on its own, judges relevance and provenance, and surfaces whatever cannot be resolved. It emits a plain-language handoff plus a structured task-state block that rehydrates the dangling task ids — so a fresh agent executes from it without asking you to fill the gaps.
+
+**Trial prompt**: "Let's practice: say 'Turn my session notes into a handoff a fresh agent can run from' and I'll show how /distill normalizes the session-only references and surfaces what cannot be resolved"
+
+**Quiz Q (situation)**: You paste yesterday's working notes into a brand-new chat and ask it to continue. It immediately asks what "the earlier approach" means and which file "that config" was — the notes assumed context only the old session had.
+- A) Anamnesis `/recollect` — B) Diylisis `/distill` — C) Aitesis `/inquire` — D) Epharmoge `/contextualize`
+- Answer: B
+
+**Quiz Q (design)**: You're about to hand a plan to a fresh-context subagent that shares none of your session. How would you make the plan self-contained so the subagent executes it without needing your session?
+- Hint: The problem isn't vague recall of a past session (that's `/recollect`) or missing external facts (that's `/inquire`) — it's that your current context is tethered to references only this session can resolve, and a fresh recipient needs them distilled out.
+
+**Philosophy**: διύλισις (refining, distillation) — separating what transfers from what is session-bound residue. Core principle: **Portability over Author Familiarity**. A handoff reads complete to its author because the author silently shares the missing context; a fresh recipient has none of it. Workflow position: cross-cutting — invoked when a working context is about to transfer to a session with no shared ground. Game feel: "this is obvious to me — but would a stranger get it?" → normalize the session-only references → surface what cannot be resolved → portable handoff a zero-memory agent can run.
+
 ## Composition Patterns
 
 Real sessions rarely use a single protocol. Composition — invoking multiple protocols together — is often more valuable than any isolated call. Three patterns that appear most in practice:

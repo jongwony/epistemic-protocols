@@ -50,6 +50,8 @@ Present the interpreted chain with canonical protocol names, slash commands, and
 | Syneidesis | `/gap` | `gap` |
 | Prosoche | `/attend` | `attend` |
 | Epharmoge | `/contextualize` | `contextualize` |
+| Elenchus | `/sublate` | `sublate` |
+| Diylisis | `/distill` | `distill` |
 | Anamnesis | `/recollect` | `recollect` |
 | Katalepsis | `/grasp` | `grasp` |
 
