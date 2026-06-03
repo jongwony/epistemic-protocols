@@ -64,7 +64,7 @@ The loop is the skill's identity; the review source is a parameter behind it. Lo
 3. No PR: scope = working tree (`git diff HEAD`)
 4. No changes anywhere: ask the user what to review (stop here)
 
-Capture the full diff content (needed for the codex prompt) and diff stats for context.
+Capture the **resolved base SHA** (the merge-base or PR base commit the diff is taken against) and the changed-files list — this base SHA + file list is the **pointer** the codex prompt passes; codex re-derives the diff locally with its own git (read-only sandbox, no network), so the full diff content is not inlined. Also capture diff stats for context.
 
 **Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates.
 
@@ -122,10 +122,17 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
 
 **`codex` source mechanics** (reuse review-ensemble's exact pattern):
 
-1. Write a review prompt to `/tmp/review_loop_codex_${SUFFIX}.txt` (generate `SUFFIX=$(openssl rand -hex 4)`), embedding the actual diff content so the model reviews exactly what changed. Ask for findings as `[severity] file:line — description` and a closing line `VERDICT: approve | needs-attention`.
-2. Launch via `Bash(run_in_background: true, timeout: 300000)`. `--color never` + redirecting **stdout only** (no `2>&1`) keeps the events file pure JSONL — the codex banner stays on stderr:
+1. Write a review prompt to `/tmp/review_loop_codex_${SUFFIX}.txt` (generate `SUFFIX=$(openssl rand -hex 4)`), passing a **pointer** to the diff rather than inlining it, so codex fetches the live diff with its own git. Include a Pointers section:
+   ```
+   ## Pointers — read the diff yourself with your own tools
+   - Diff command: `git diff {base_sha}...HEAD`  (PR scope; for a working-tree scope use `git diff HEAD`)
+   - Changed files: {file_list}
+   Run the diff command in this repo to see exactly what changed — the diff is not inlined.
+   ```
+   Ask for findings as `[severity] file:line — description` and a closing line `VERDICT: approve | needs-attention`.
+2. Launch via `Bash(run_in_background: true, timeout: 300000)`. `--color never` + redirecting **stdout only** (no `2>&1`) keeps the events file pure JSONL — the codex banner stays on stderr. `--cd {repo_root}` points codex's own git/Read at the repo so it re-derives the diff against the orchestrator-supplied base SHA; `--sandbox read-only` is kept because `git diff` is a local read needing no network. If codex's git cannot resolve that base SHA the extraction comes back empty — the step-3 "empty extraction = codex failed" guard surfaces it:
    ```bash
-   codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/review_loop_codex_${SUFFIX}.txt > /tmp/review_loop_codex_events_${SUFFIX}.jsonl
+   codex exec --ephemeral --json --color never --skip-git-repo-check --cd {repo_root} -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/review_loop_codex_${SUFFIX}.txt > /tmp/review_loop_codex_events_${SUFFIX}.jsonl
    ```
 3. Collect on the completion notification — do not poll or sleep. The events file is pure JSONL; extract the codex `agent_message` narrative verbatim with the line below, then **forward it verbatim to the loop — do NOT regex-parse it into findings/verdict**: the consuming agent (an LLM) reads the `[severity] file:line — description` findings and the closing `VERDICT:` line directly from the narrative. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/review_loop_codex_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that as needs-attention; never converge on a blank.
 

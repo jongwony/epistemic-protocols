@@ -27,7 +27,7 @@ review-ensemble
 4. No PR: scope = working tree (`git diff HEAD`)
 5. No changes: ask the user what to review
 
-Record scope type, PR number, changed files list, and the **full diff content** (needed for Codex prompt in Phase 2).
+Record scope type, PR number, changed files list, and the **resolved base SHA** (the merge-base or PR base commit the diff is taken against, e.g. `gh pr view {NUMBER} --json baseRefOid -q .baseRefOid`, or `git merge-base HEAD @{u}` / the working-tree `HEAD` for an uncommitted-changes scope). The base SHA + changed-files list is the **pointer** the Codex prompt passes in Phase 2 — Codex re-derives the diff locally with its own git (read-only sandbox, no network), so the full diff content is not inlined.
 
 Also capture diff statistics for context:
 ```bash
@@ -44,7 +44,7 @@ Check `which codex 2>/dev/null`. If Codex CLI is not found, skip to Step 2 and n
 
 Generate a unique suffix for temp files: `SUFFIX=$(openssl rand -hex 4)`
 
-Write review prompt to `/tmp/ensemble_codex_review_${SUFFIX}.txt`, embedding the actual diff so Codex knows exactly what changed:
+Write review prompt to `/tmp/ensemble_codex_review_${SUFFIX}.txt`, passing a **pointer** to the diff (a git command + changed-files list) so Codex fetches the live diff with its own tools rather than reading an inlined copy:
 
 ```
 Review the following code changes for correctness, security, and edge cases.
@@ -52,9 +52,10 @@ Review the following code changes for correctness, security, and edge cases.
 Scope: {PR #{number} — {title} on branch {branch} | working tree changes}
 Diff statistics: {diff_stat_output}
 
---- Begin Diff ---
-{full_diff_content}
---- End Diff ---
+## Pointers — read the diff yourself with your own tools
+- Diff command: `git diff {base_sha}...HEAD`  (PR scope; for a working-tree scope use `git diff HEAD`)
+- Changed files: {file_list}
+Run the diff command in this repo to see exactly what changed — the diff is not inlined.
 
 Focus: logic errors, security vulnerabilities, missing error handling, edge cases, API contract violations.
 
@@ -68,8 +69,10 @@ End with: VERDICT: approve | needs-attention
 
 Run via `Bash(run_in_background: true, timeout: 300000)`. `--color never` + **stdout-only** redirect keeps the events file pure JSONL (the codex banner stays on stderr):
 ```bash
-codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_review_${SUFFIX}.txt > /tmp/ensemble_codex_review_events_${SUFFIX}.jsonl
+codex exec --ephemeral --json --color never --skip-git-repo-check --cd {repo_root} -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_review_${SUFFIX}.txt > /tmp/ensemble_codex_review_events_${SUFFIX}.jsonl
 ```
+
+`--cd {repo_root}` points Codex's own git/Read at the repo so it can run the diff command against the orchestrator-supplied base SHA; `--sandbox read-only` is kept because `git diff` is a local read needing no network. If Codex's git cannot resolve that base SHA, the diff (and hence the review) comes back empty — the existing "empty extraction = codex failed" guard in Phase 3 surfaces it.
 
 **Optional: codex-adversarial** — If the user requests adversarial review or the change is large/architectural, also launch an adversarial prompt in background using a distinct temp file `/tmp/ensemble_codex_adversarial_${SUFFIX}.txt` (same `SUFFIX`, different filename) so the adversarial runner does not overwrite or re-read the standard review prompt:
 
@@ -78,9 +81,10 @@ You are a skeptical reviewer. Challenge the implementation approach and design c
 
 Scope: {PR #{number} — {title} | working tree changes}
 
---- Begin Diff ---
-{full_diff_content}
---- End Diff ---
+## Pointers — read the diff yourself with your own tools
+- Diff command: `git diff {base_sha}...HEAD`  (PR scope; for a working-tree scope use `git diff HEAD`)
+- Changed files: {file_list}
+Run the diff command in this repo to see exactly what changed — the diff is not inlined.
 
 Question: Is this the right approach? What assumptions does it depend on? Where could this fail under real-world conditions? What second-order effects might occur?
 
@@ -97,7 +101,7 @@ End with: VERDICT: approve | needs-attention
 
 Execute with `Bash(run_in_background: true, timeout: 300000)`, to a **distinct** events file so it never collides with the standard-review stream:
 ```bash
-codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_adversarial_${SUFFIX}.txt > /tmp/ensemble_codex_adversarial_events_${SUFFIX}.jsonl
+codex exec --ephemeral --json --color never --skip-git-repo-check --cd {repo_root} -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_adversarial_${SUFFIX}.txt > /tmp/ensemble_codex_adversarial_events_${SUFFIX}.jsonl
 ```
 
 ### Step 2: Invoke /frame Mode 2 (foreground, interactive)
@@ -224,5 +228,5 @@ This mode loses /frame's perspective selection and Lens synthesis but preserves 
 - Codex runs independently — it does not see /frame's output and vice versa
 - Cross-model agreement is the primary confidence signal
 - Launch Codex BEFORE /frame to maximize parallelism
-- Always embed the actual diff in the Codex prompt — file names alone are insufficient for meaningful review
+- Pass the diff to Codex by pointer (base SHA + `git diff` command + changed-files list) and let it fetch the live diff with its own git via `--cd {repo_root}` — do not inline the full diff content (Codex re-derives it locally; if its git cannot resolve the base SHA the empty-extraction guard surfaces the failure)
 - If Codex is unavailable, /frame alone still provides multi-perspective value via Lens L
