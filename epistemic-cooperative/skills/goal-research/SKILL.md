@@ -83,12 +83,15 @@ When the notification arrives:
    # schema in use: item.completed events whose item.type is agent_message carry text at .item.text.
    # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
    # All agent_message items in stream order; no tail. This narrative IS the research trace/answer.
+   # Restate the path: shell vars do NOT persist across separate Bash calls — re-derive from ${SUFFIX}.
+   EVENTS_JSONL=/tmp/goal_research_events_${SUFFIX}.jsonl
    NARRATIVE=$(jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL")
    if [ -z "$NARRATIVE" ]; then
-     # codex failed before emitting agent_message (auth / timeout / crash): no silent blank —
-     # surface the raw stream for diagnosis BEFORE cleanup, and treat as failure (do not proceed blank).
+     # codex failed before emitting agent_message (auth / timeout / crash): surface the raw stream for
+     # diagnosis BEFORE cleanup, and FAIL the block (exit 1) so a blank narrative cannot pass as success.
      echo "Codex produced no agent_message — raw event stream follows:" >&2
      cat "$EVENTS_JSONL" >&2
+     exit 1
    fi
    printf '%s\n' "$NARRATIVE"
    ```

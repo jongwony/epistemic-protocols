@@ -135,11 +135,15 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
    # schema in use: item.completed events whose item.type is agent_message carry text at .item.text.
    # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
    # All agent_message items in stream order; no tail. The downstream agent reads the narrative and judges.
+   # Restate the path: shell vars do NOT persist across separate Bash calls — re-derive from ${SUFFIX}.
+   EVENTS_JSONL=/tmp/review_loop_codex_events_${SUFFIX}.jsonl
    NARRATIVE=$(jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL")
    if [ -z "$NARRATIVE" ]; then
-     # codex failed before emitting agent_message: surface the raw stream BEFORE cleanup, treat as needs-attention (do not converge on blank).
+     # codex failed before emitting agent_message: surface the raw stream BEFORE cleanup, and FAIL the
+     # block (exit 1) — an empty extraction is needs-attention, never a silent converge-on-blank.
      echo "Codex produced no agent_message — raw event stream follows:" >&2
      cat "$EVENTS_JSONL" >&2
+     exit 1
    fi
    printf '%s\n' "$NARRATIVE"
    ```

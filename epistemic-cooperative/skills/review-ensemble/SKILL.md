@@ -135,18 +135,26 @@ After /frame completes (Lens L in context), the background Codex task will send 
    # schema in use: item.completed events whose item.type is agent_message carry text at .item.text.
    # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
    # All agent_message items in stream order; no tail. The downstream agent reads the narrative and judges.
-   extract_narrative() {  # $1 = event file; emits the narrative, or surfaces the raw stream on empty
+   # Restate the paths: shell vars do NOT persist across separate Bash calls — re-derive from ${SUFFIX}.
+   EVENTS_JSONL=/tmp/ensemble_codex_review_events_${SUFFIX}.jsonl
+   ADVERSARIAL_EVENTS_JSONL=/tmp/ensemble_codex_adversarial_events_${SUFFIX}.jsonl
+   extract_narrative() {  # $1 = event file; narrative→stdout, raw stream→stderr + return 1 on empty
      local n; n=$(jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$1")
      if [ -z "$n" ]; then
        # codex failed before emitting agent_message (auth / timeout / crash): surface raw, do not aggregate a blank.
        echo "Codex produced no agent_message in $1 — raw event stream follows:" >&2
        cat "$1" >&2
+       return 1
      fi
      printf '%s\n' "$n"
    }
-   STANDARD_NARRATIVE=$(extract_narrative "$EVENTS_JSONL")
-   # Only if the adversarial path was launched:
-   ADVERSARIAL_NARRATIVE=$(extract_narrative "$ADVERSARIAL_EVENTS_JSONL")
+   STANDARD_NARRATIVE=$(extract_narrative "$EVENTS_JSONL") || echo "standard review extraction failed — see stderr above" >&2
+   # Adversarial: extract ONLY when that path was launched (its event file exists and is non-empty) —
+   # otherwise $ADVERSARIAL_EVENTS_JSONL points at a file that was never created and the call would
+   # emit a false missing-stream diagnostic plus a blank adversarial narrative.
+   if [ -s "$ADVERSARIAL_EVENTS_JSONL" ]; then
+     ADVERSARIAL_NARRATIVE=$(extract_narrative "$ADVERSARIAL_EVENTS_JSONL") || echo "adversarial extraction failed — see stderr above" >&2
+   fi
    ```
 
    Reasoning items appear only if codex emits them (config-gated) — do not force them on. An empty extraction is a codex failure, not an empty review — the guard surfaces the raw events so a blank narrative cannot enter aggregation invisibly.
