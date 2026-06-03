@@ -35,9 +35,12 @@ Each line is one object with these fields:
 F3b reads the ledger and applies one predicate per context item:
 
 ```
+effective_delta(item) ≡
+  the most-recent non-superseded d ∈ ledger with d.subject_ref = ref(item)
+  (∅ when the ledger is absent or carries no matching record)
+
 corrected_in_session(item) ≡
-  ∃ d ∈ ledger :
-    d.subject_ref = ref(item)
+  effective_delta(item) = d
     ∧ d.export_policy = "KEEP"
     ∧ d.verification_status ≠ "provisional"
 ```
