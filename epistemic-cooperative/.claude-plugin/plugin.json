@@ -1,7 +1,7 @@
 {
   "name": "epistemic-cooperative",
   "description": "Utility skills layered on top of the core 13 protocols — /catalog, /onboard, /probe, /report, /dashboard, /introspect, /sophia, /curses, /compose, /write, /comment-review, /review-ensemble, /review-loop, /goal-research, /steer, /realign, /misuse, /triage, /dispatch with post-cycle improvement capture, /forge, and /image-companion. See each skill's SKILL.md for details.",
-  "version": "2.22.6",
+  "version": "2.22.7",
   "outputStyles": "./styles/",
   "author": {
     "name": "Jongwon Choi",
