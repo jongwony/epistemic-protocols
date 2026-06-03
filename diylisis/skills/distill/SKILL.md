@@ -30,10 +30,10 @@ Diylisis(W, recipient?, next_task?) → Detect(W) → tethered? →
          Fail(blocking_items): append to residuals (reason: comprehension-gap), block fixed_point
          Pass:                 no new residual
        Gate Qd(disposition conflicts ∪ unknown-provenance ∪ unresolved residuals) → Stop → A    -- Constitution surfacing (both verdicts; residuals incl. comprehension-gap)
-    F6 loop: measure(unresolved anchors, stop, schema, residual) decreasing → fixed_point?
+    F6 loop: measure(unresolved anchors, stop, schema, residual, leaked drops) decreasing → fixed_point?  -- leak lint: DROP'd content absent from emit (minimality dual of F5)
          ¬fixed_point: pass_n += 1, loop (one-pass + bounded audit/lint)
          fixed_point: → F7
-    F7 emit(prose_channel, TaskStateBlock) → PortableHandoff → converge
+    F7 emit(prose_channel, TaskStateBlock) → PortableHandoff → converge                       -- leak_free: no DROP'd content in any emitted channel
 
 ── MORPHISM ──
 WorkingContext, recipient?, next_task?
@@ -45,7 +45,7 @@ WorkingContext, recipient?, next_task?
   → dispose(item) → Disposition                                               -- F3 KEEP(inline) | ROUTE(StableRef) | DROP
   → compress(kept) → minimal_complete                                          -- F4 remove only what leaves no contract or residual-ledger violation
   → gate(minimal_complete, contract) → zero_memory_verdict                     -- F5 comprehension against a fresh recipient standard; Fail re-enters blocking items as residuals, no author self-simulation
-  → settle(measure) → fixed_point                                             -- F6 bounded audit/lint loop on a monotone hygiene measure; fixed_point requires a Pass verdict
+  → settle(measure) → fixed_point                                             -- F6 bounded audit/lint loop on a monotone hygiene measure; fixed_point requires a Pass verdict ∧ leak_free (no DROP'd content in emit)
   → emit(prose_channel, TaskStateBlock)                                        -- F7 channel separation; the task-state channel never overrides prose authority
   → PortableHandoff
 requires: context_tethered(W)                -- runtime checkpoint (Phase 0)
@@ -91,10 +91,16 @@ Qd             = Residual + disposition-conflict gate [Tool: Constitution intera
 ZeroMemoryVerdict ∈ {Pass, Fail(blocking_items: Set(ContextItem))}  -- F5 comprehension verdict; Fail names the items a fresh recipient cannot resolve, which re-enter the residual ledger (reason: comprehension-gap) and block the fixed point
 TaskStateBlock = { schema_version: String; tasks: List({ id: String; subject: String; description: String;
                    restore_status: "pending"; source_ref: StableRef }) }  -- F7 structured channel; rehydrates dangling task identifiers
-measure(Λ)     = |unresolved_anchors| + |unmet_stop| + |schema_gaps| + |unsurfaced_residual|  -- F6 monotone hygiene measure, weakly decreasing per pass
-fixed_point(Λ) = (measure(Λ) = 0 ∨ (measure stable ∧ all residuals surfaced ∧ no disposition conflict)) ∧ zero_memory_verdict = Pass
+emit_candidate(Λ) = the candidate PortableHandoff channels before convergence: contract ∪ prose ∪ task_state ∪ residual_ledger  -- all four PortableHandoff channels (contract included — F7 emits it too); distinct from the F7 emit(·) action; this is the to-be-emitted content F6 lints
+tokens(X)      = the token content extracted from channels X (strings, not the structured objects)  -- projection Channels → Set(Token), so the ⊆ test below compares homogeneous token sets
+discriminating(d) = the session-local tokens that UNIQUELY identify a DROP'd item d — its distinctive content, not bare ids nor tokens shared with in-scope items  -- precision-bounded against false positives; when the boundary is uncertain, delegate the leak check to a fresh subagent (as F5 does) rather than let a common token block convergence
+leaked_drops(Λ) = { d ∈ Λ.dropped : discriminating(d) ≠ ∅ ∧ discriminating(d) ⊆ tokens(emit_candidate(Λ)) }  -- DROP'd content that survived into an emitted channel; the minimality dual of the F5 comprehension-gap (F5 catches missing, this catches leaked). The ≠ ∅ guard is load-bearing: a DROP whose discriminating set is empty (no unique identifying content) has nothing distinctly leakable or excisable, so the vacuous ∅ ⊆ tokens(...) must not count it as leaked — otherwise |leaked_drops| could never reach 0 and the loop would never converge (liveness trap)
+leak_free(Λ)   ≡ leaked_drops(Λ) = ∅
+measure(Λ)     = |unresolved_anchors| + |unmet_stop| + |schema_gaps| + |unsurfaced_residual| + |leaked_drops|  -- F6 monotone hygiene measure, weakly decreasing per pass
+fixed_point(Λ) = (measure(Λ) = 0 ∨ (measure stable ∧ all residuals surfaced ∧ leak_free(Λ) ∧ no disposition conflict)) ∧ zero_memory_verdict = Pass
 PortableHandoff = { contract: HandoffContract; prose: String; task_state: TaskStateBlock; residual_ledger: ResidualLedger }
-                 -- emitted when fixed_point(Λ) ∧ ¬user_esc ∧ every ResidualLedger entry surfaced
+                 -- emitted when fixed_point(Λ) ∧ ¬user_esc ∧ every ResidualLedger entry surfaced ∧ leak_free(Λ)
+                 -- residual_ledger here carries recipient-relevant residue only (Route-pending pointers); Drop- and Defer-resolved entries are released — their content + drop/re-trigger reason stay session-side in Λ.history, never emitted (Defer = released-not-retained per the Λ invariant; see Rule 12)
 Phase          ∈ {0, 1, 2, 3, 4}
 
 ── PHASE TRANSITIONS ──
@@ -118,25 +124,27 @@ Phase 1 → Phase 2:  SubstTable produced ∧ every item assigned a Grounding cl
 Phase 2 → Phase 3:  every item carries a Disposition or a surfaced unknown-provenance flag -- relevance + provenance discharged
 Phase 3 → Phase 4:  zero_memory_verdict produced ∧ A received                          -- comprehension evaluated (Pass or Fail) and residual answered; Pass gates convergence at Phase 4
 Phase 4 → Phase 1:  ¬fixed_point(Λ) → pass_n += 1                                      -- measure unsettled OR comprehension verdict not yet Pass, re-audit
-Phase 4 → converge: fixed_point(Λ) ∧ zero_memory_verdict = Pass ∧ every ResidualLedger entry surfaced  -- emit PortableHandoff across both channels
+Phase 4 → converge: fixed_point(Λ) ∧ zero_memory_verdict = Pass ∧ every ResidualLedger entry surfaced ∧ leak_free(Λ)  -- emit PortableHandoff across both channels; no DROP'd content leaks into emit
 Phase 3 → deactivate (ungraceful):  Esc                                               -- residual untreated, handoff not emitted
 
 ── LOOP ──
 J = {next_pass, converge, esc}
   next_pass:  ¬fixed_point(Λ) ∧ ¬Esc → pass_n += 1, Phase 4 → Phase 1 (bounded audit/lint re-scan)
-  converge:   fixed_point(Λ) ∧ every ResidualLedger entry surfaced → emit PortableHandoff
+  converge:   fixed_point(Λ) ∧ every ResidualLedger entry surfaced ∧ leak_free(Λ) → emit PortableHandoff
   esc:        Esc → ungraceful deactivate (residual untreated)
 
 One-pass + bounded audit/lint: the morphism runs once forward (F0→F7), then F6 re-audits against the monotone hygiene measure. Each pass weakly decreases `measure(Λ)`; the loop terminates at the fixed point, not on a felt sense that the handoff "reads complete."
 Provenance hard line: F3b never infers KEEP from appearance. A CorrectedKeep verdict requires an effective matching non-provisional KEEP CorrectionDelta; every other ledger state — absent, no match, provisional-only, or a non-KEEP delta — yields Unknown, which routes to the Gate as a Constitution question where the author decides KEEP, ROUTE, or DROP. Provenance authority covers the KEEP hard line only: ROUTE and DROP dispositions are reached through F3a relevance or the Gate, never defaulted from a provenance verdict.
 Silent-residual ban: every item classified as routed-residual at F2, every unresolved token at F1, every unknown-provenance item at F3b, and every comprehension-gap item at F5 enters the ResidualLedger with `surfaced = false` and must reach `surfaced = true` through the Gate before convergence.
 Comprehension hard line: F5's verdict gates the fixed point. A Fail re-enters its blocking items into the residual ledger (reason: comprehension-gap, `surfaced = false`) and keeps the loop off its fixed point; convergence requires a Pass verdict, so a handoff never emits while the zero-memory gate fails.
+Leak repair: when `leaked_drops > 0` the loop re-enters, and the repair is a targeted emit-channel revision — excise every leaked DROP'd item's discriminating content from all four emit channels — contract, prose, TaskStateBlock, and residual_ledger — then re-audit (contract excision = rewording the offending field; the contract itself is retained). Unlike the F5 repair, no item re-enters the residual ledger: a DROP was already user-decided at the Gate, so the defect is its content surviving the emit and the fix is excision from the candidate emit, not re-surfacing. Convergence is preserved because content that is load-bearing for an in-scope item belongs to that item's own KEEP/ROUTE record (retained on its own basis); only the DROP'd item's UNIQUE discriminating content is excised.
 Convergence evidence: At convergence, present the substitution table (surface_token → canonical_ref → confidence → unresolved?), the per-item disposition trace (KEEP/ROUTE/DROP with provenance basis), the surfaced residual ledger, and the emitted TaskStateBlock. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-converge iff fixed_point(Λ) ∧ every ResidualLedger entry surfaced ∧ ¬user_esc
-  fixed_point(Λ):  (measure(Λ) = 0, OR measure stable across a pass with all residuals surfaced and no open disposition conflict) ∧ zero_memory_verdict = Pass
+converge iff fixed_point(Λ) ∧ every ResidualLedger entry surfaced ∧ leak_free(Λ) ∧ ¬user_esc
+  fixed_point(Λ):  (measure(Λ) = 0, OR measure stable across a pass with all residuals surfaced, leak_free, and no open disposition conflict) ∧ zero_memory_verdict = Pass
   surfaced ledger: ∀ r ∈ ResidualLedger : r.surfaced = true (no silent residual reaches the recipient)
+  leak_free:       leaked_drops(Λ) = ∅ — no DROP'd item's discriminating content survives in any emitted channel (contract, prose, TaskStateBlock, residual ledger); the minimality dual of comprehension (F5 catches missing content, this catches leaked DROP content). Stated explicitly for emphasis though already entailed by fixed_point(Λ) (since |leaked_drops| ∈ measure), matching the surfaced-ledger and zero-memory-verdict emphasis pattern
   comprehension:   zero_memory_verdict = Pass (a Fail re-enters blocking items as residuals and forces another pass; no handoff emits on a Fail)
   user_esc:        user exits via Esc at the Phase 3 Gate (ungraceful, residual untreated, no PortableHandoff emitted)
 progress(Λ) = 1 - measure(Λ) / measure(Λ_initial)
@@ -151,8 +159,8 @@ Phase 2 attest          (observe)      → Read (read-only consumption of the ap
 Phase 2 dispose         (track)        → Internal state update (Λ.dispositions, Λ.residual_ledger)
 Phase 3 comprehension_gate (observe)   → Read, Task (lint checklist or fresh subagent against the zero-memory standard; author self-simulation excluded)
 Phase 3 Qd              (constitution) → present (mandatory; surfaced residuals + unknown-provenance items + disposition conflicts; Esc → loop termination at LOOP level, not an Answer)
-Phase 4 settle          (track)        → Internal state update (measure(Λ), fixed-point check, pass counter)
-converge                (extension)    → TextPresent+Proceed (substitution table + disposition trace + surfaced residual ledger + TaskStateBlock; proceed with PortableHandoff)
+Phase 4 settle          (track)        → Internal state update (measure(Λ) incl. leaked_drops, leak-lint, fixed-point check, pass counter)
+converge                (extension)    → TextPresent+Proceed (substitution table + disposition trace + surfaced residual ledger + TaskStateBlock; proceed with PortableHandoff — emit is leak_free, recipient ledger recipient-relevant only)
 
 ── MODE STATE ──
 Λ = { phase: Phase, W: WorkingContext,
@@ -169,15 +177,15 @@ converge                (extension)    → TextPresent+Proceed (substitution tab
       gated: Set(ContextItem),                            -- items surfaced at the Gate for user judgment (unknown-provenance ∪ conflict)
       residual_ledger: ResidualLedger,                    -- unresolved + unknown-provenance items; silent entry forbidden
       task_state: Option(TaskStateBlock),                 -- F7 structured channel
-      measure: Nat,                                        -- F6 monotone hygiene measure
+      measure: Nat,                                        -- F6 monotone hygiene measure (incl. |leaked_drops|)
       zero_memory_verdict: Option(ZeroMemoryVerdict),      -- F5 comprehension verdict; Fail re-enters blocking items as residuals and blocks fixed_point
       items_touched: Set(ContextItem),                     -- every item processed: the partition universe (= items(W) once all are disposed)
-      history: List<(ContextItem, Substitution, Disposition)>,
+      history: List<(ContextItem, Substitution, Disposition, drop_reason: Option(String))>,  -- drop_reason is the typed home for Rule 12's "preserved in Λ.history with its drop reason"; Null for non-DROP entries
       active: Bool, cause_tag: String }
 -- Invariant: items_touched = kept ∪ routed ∪ dropped (pairwise disjoint)
 --   terminal partition over Disposition = KEEP | ROUTE | DROP; the Gate answer Defer resolves to a dropped item carrying a re-trigger condition (released from this handoff, not retained)
 --   gated is the transient pre-resolution cell, empty at fixed point: every gated item resolves to a terminal disposition (Resolve → KEEP, Route → ROUTE, Drop/Defer → DROP)
---   residual_ledger is a cross-cutting surfacing record, not a partition cell and not emptied: every entry reaches surfaced = true before convergence and the surfaced ledger is carried into PortableHandoff as the audit trace
+--   residual_ledger is a cross-cutting surfacing record, not a partition cell and not emptied: every entry reaches surfaced = true before convergence. The full surfaced ledger is the session-side audit trace (retained in Λ.history); only its recipient-relevant projection (Route-pending) is carried into PortableHandoff. A Drop- or Defer-resolved entry is released from the emit (Defer = released-not-retained per the Defer invariant above; its re-trigger condition is kept session-side) — its content and reason stay session-side — so the emitted handoff never reproduces DROP'd content (enforced by leak_free: leaked_drops = ∅ at fixed point)
 -- Invariant: KEEP(item) ⇒ provenance(item) = CorrectedKeep ∨ user_resolved_at_gate(item) (no KEEP by inference — only via a matching non-provisional CorrectionDelta or an explicit user Resolve)
 
 ── COMPOSITION ──
@@ -316,10 +324,10 @@ Every residual reaches `surfaced = true` through this gate. The user's answer ma
 
 ### Phase 4: Audit/Lint Loop + Channel Emit
 
-**F6 — Bounded audit/lint loop**: Re-audit the handoff against the monotone hygiene measure — unresolved anchors, unmet stop conditions, schema gaps, unsurfaced residual. Each pass weakly decreases the measure. When the measure reaches zero (or stabilizes with all residuals surfaced and no open disposition conflict) and the comprehension verdict is Pass, the loop is at its fixed point. The loop terminates on the measure and the comprehension verdict, not on a felt sense of completeness.
+**F6 — Bounded audit/lint loop**: Re-audit the handoff against the monotone hygiene measure — unresolved anchors, unmet stop conditions, schema gaps, unsurfaced residual, and leaked DROP content (the discriminating content of any `Λ.dropped` item that survived into a candidate emit channel — contract, prose, TaskStateBlock, or residual ledger). The leak lint is the minimality dual of the F5 comprehension gate: F5 catches what is *missing* for the recipient, the leak lint catches what was *Dropped yet leaked* back into the emit. When it fires (`leaked_drops > 0`), the repair is a targeted excision — remove each leaked DROP'd item's discriminating content from the candidate emit channels, then re-audit; unlike an F5 Fail, nothing re-enters the residual ledger, since the DROP was already decided at the Gate. Each pass weakly decreases the measure. When the measure reaches zero (or stabilizes with all residuals surfaced, leak-free, and no open disposition conflict) and the comprehension verdict is Pass, the loop is at its fixed point. The loop terminates on the measure and the comprehension verdict, not on a felt sense of completeness.
 
 **F7 — Channel separation emit**: Emit the PortableHandoff across two channels:
-- **Prose channel** — the human-readable handoff: contract, distilled context, disposition trace, surfaced residual ledger. The prose channel carries authority.
+- **Prose channel** — the human-readable handoff: contract, distilled context, disposition trace, and the recipient-relevant residual ledger (Route-pending pointers). Drop- and Defer-resolved entries are released from the emit — their content and drop/re-trigger reason are retained session-side in `Λ.history`, not reproduced here. The prose channel carries authority.
 - **Schema-versioned TaskStateBlock** — the structured channel that rehydrates dangling task identifiers into restorable task state (schema_version, per-task id/subject/description/restore_status/source_ref). The task-state channel reconstructs task records the recipient can restore; it does not override the prose channel's authority. When stored task status reflects session bookkeeping rather than work completion, the restore_status is set to the recipient-restorable value (pending) rather than the stored value.
 
 After emit, trigger `converge` and present the convergence evidence trace.
@@ -343,6 +351,7 @@ After emit, trigger `converge` and present the convergence evidence trace.
 | Provenance hard line | CorrectedKeep reachable only via an effective matching non-provisional KEEP CorrectionDelta or a user Resolve at the Gate; ROUTE/DROP via F3a relevance or the Gate | Unknown provenance is surfaced for judgment, never defaulted to KEEP |
 | Zero-memory comprehension | F5 verifies against a fresh-recipient standard; a Fail re-enters blocking items as residuals and blocks the fixed point | A failed gate forces another pass; convergence requires a Pass verdict, so author self-simulation cannot pass items a fresh recipient could not resolve |
 | Monotone loop | F6 terminates on a weakly decreasing hygiene measure | Termination is measured, not felt |
+| Emit-time leak lint (minimality dual) | F6/F7 assert `leaked_drops = ∅`: no DROP'd discriminating content in any emitted channel (contract, prose, TaskStateBlock, residual ledger) | A surfaced-then-Dropped item cannot leak its content back into the handoff; the dual of the F5 completeness gate |
 | Channel separation | F7 emits prose (authoritative) + schema-versioned TaskStateBlock (restorable, non-overriding) | Structured task state rehydrates without usurping prose authority |
 | Convergence evidence | Substitution table + disposition trace + surfaced residual ledger + TaskStateBlock presented at convergence | Convergence is demonstrated, not asserted |
 
@@ -355,13 +364,14 @@ After emit, trigger `converge` and present the convergence evidence trace.
 5. **Deixis precedes grounding**: F1 normalizes each session-local token to a canonical reference before F2 audits self-containment, so every grounded item names a stable referent.
 6. **Silent-residual ban**: Every routed-residual (F2), every unresolved token (F1), every unknown-provenance item (F3b), and every comprehension-gap item (F5) enters the ResidualLedger with `surfaced = false` and reaches `surfaced = true` through the Gate before convergence. A residue the recipient cannot see is a portability failure surfaced as a hidden dependency.
 7. **Provenance hard line**: F3b reads the append-only CorrectionDelta ledger and grants **CorrectedKeep** only on an effective matching non-provisional `KEEP` record. Every other ledger state — absent, no matching record, provisional-only, or a non-KEEP delta — is **Unknown** and routes to the Gate for user judgment. Provenance authority is the KEEP hard line only: a CorrectedKeep verdict requires an explicit matching non-provisional KEEP delta, ROUTE and DROP dispositions come from F3a relevance or the Gate, and an Unknown item reaches any disposition only through a user answer at the Gate.
-8. **Minimal-complete, not minimal-aesthetic**: F4 retains exactly what the recipient needs to execute the declared next task, and preserves the surfaced residual-ledger trace (the record of what was surfaced and how the Gate resolved it — Resolve/Route retain the item, Drop/Defer release it). An item stays when its removal would break the contract or erase a surfaced ledger entry; brevity for its own sake is not the standard.
+8. **Minimal-complete, not minimal-aesthetic**: F4 retains exactly what the recipient needs to execute the declared next task. The surfaced residual-ledger trace (the record of what was surfaced and how the Gate resolved it — Resolve/Route retain the item, Drop/Defer release it) is preserved **session-side** (`Λ.residual_ledger` / `Λ.history`), not in the emit: the emitted handoff carries only the recipient-relevant residue, and a Drop/Defer-released entry is excised from it (per Rule 12, enforced by the leak lint). An item stays in the emit when its removal would break the contract or drop a still-recipient-relevant residual (a Route-pending pointer); a Defer-released entry, like a Drop, is excised from the emit (its re-trigger condition kept session-side); brevity for its own sake is not the standard.
 9. **Zero-memory comprehension gate**: F5 verifies against a fresh recipient with no session access, using a lint checklist or a fresh subagent. The author's own read is excluded as the verification channel, because an author silently shares the missing context and would pass items a fresh recipient could not resolve. A Fail verdict re-enters its blocking items into the residual ledger (reason: comprehension-gap) and blocks the fixed point: convergence requires a Pass verdict, so a failed comprehension forces another pass rather than emitting a handoff.
-10. **Monotone termination**: F6 loops until the hygiene measure (unresolved anchors, unmet stop, schema gaps, unsurfaced residual) reaches its fixed point with a Pass comprehension verdict. Termination is the measured fixed point conjoined with a passing zero-memory gate, not a felt sense that the handoff reads complete.
+10. **Monotone termination**: F6 loops until the hygiene measure (unresolved anchors, unmet stop, schema gaps, unsurfaced residual, leaked DROP content) reaches its fixed point with a Pass comprehension verdict. Termination is the measured fixed point conjoined with a passing zero-memory gate, not a felt sense that the handoff reads complete.
 11. **Channel separation**: F7 emits a prose channel (authoritative) and a schema-versioned TaskStateBlock (restorable task state). The task-state channel rehydrates dangling task identifiers into records the recipient can restore; it complements the prose channel and leaves prose as the authority.
-12. **Source-chain preservation**: W.items are read-only across the protocol. Substitution, grounding class, provenance verdict, and disposition annotate the working context; they never mutate the originating items. A DROP disposition removes an item from the emitted handoff but preserves it in `Λ.history` with its drop reason.
+12. **Source-chain preservation**: W.items are read-only across the protocol. Substitution, grounding class, provenance verdict, and disposition annotate the working context; they never mutate the originating items. A DROP disposition removes an item from the emitted handoff but preserves it in `Λ.history` with its drop reason. This removal includes the emitted residual-ledger section: a Drop-resolved residual entry contributes no content to `PortableHandoff.residual_ledger` — only its session-side audit (content + reason) is kept in `Λ.history`. The emit-time leak lint (F6/F7) enforces this: any DROP'd discriminating content present in an emitted channel is a `leaked_drops` defect that increments the hygiene measure and blocks the fixed point.
 13. **Context-Question Separation**: The substitution table, disposition trace, and residual-ledger entries appear as text output before the Gate; the Gate question contains only the surfaced item identifier and the four disposition options with their differential implications. Embedding context in the question fields is a protocol violation.
 14. **Gate integrity** (Safeguard tier): The Gate option set (`A ∈ {Resolve, Route, Drop, Defer}`) is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option with a concrete reference or condition while preserving the TYPES coproduct) is distinct from mutation.
 15. **Ledger read-only in v1**: F3b consumes the CorrectionDelta ledger read-only. The mechanism that records correction deltas during a session is a separate concern; this protocol reads the ledger that exists and treats its absence as Unknown provenance rather than as permission to KEEP.
 16. **Plain emit discipline**: User-facing emit (Phase 3 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token carries decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 17. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later passes.
+18. **Emit-time leak lint (minimality dual)**: Surfacing a DROP at the Gate is not the same as executing it in the emit. Before convergence, F6/F7 assert `leaked_drops = ∅` — no `Λ.dropped` item's discriminating content survives in any emitted channel (contract, prose, TaskStateBlock, or residual ledger). A surviving DROP increments the hygiene measure and blocks the fixed point. This is the minimality dual of the F5 comprehension gate: F5 catches content *missing* for the recipient; the leak lint catches content *Dropped yet leaked* back into the handoff. The emitted residual ledger carries recipient-relevant residue only (Route-pending); Drop- and Defer-resolved entries are released (Defer = released-not-retained), and the full DROP/surfacing audit trace stays session-side in `Λ.history`.
