@@ -58,7 +58,13 @@ Aᵣ = User's reasoning behind misconception (via Cognitive Partnership Move (Co
 Tᵤ = Task update (progress tracking)
 P' = Updated phantasia (refined understanding)
 J_cov = CoverageRouting ∈ {sufficient, aspect(GapType), proposal}
-GT = Relevant gap types per entry point ⊆ {Expectation, Causality, Scope, Sequence} ∪ Emergent(E, B)
+J_ref = ReframeRouting ∈ {continue_coverage, rederive_route}   -- after a Horizon hit: keep current coverage, or re-derive the route map
+GapType = {Expectation, Causality, Scope, Sequence, Horizon} ∪ Emergent(E, B)
+GT = Relevant gap types per entry point ⊆ GapType
+HC = HorizonCandidate { edge, anchors, failure_mode, probe_scenario }   -- a co-intended-but-unspoken edge the user did not name from within their framing
+admissible(HC) ≡ evidence_bound(HC, B) ∧ material(HC.failure_mode, P' ≅ R) ∧ unspoken(HC.edge, U ∪ prior A)
+              ∧ ¬route_selection_question(HC.edge) ∧ ¬decision_gap(HC.edge) ∧ scarce(HC)
+              -- false-positive guard: Horizon ∈ GT for an entry point only when some HC is admissible (else detect none)
 Cursor = ContinuationCursor { task: TaskId, entry_point: EntryPoint, aspect: Optional(GapType), resume_target: String }
        -- resume_target is a short user-facing phase label, not a serialized cursor; structural position is task × entry_point × aspect
 BranchKind = {Proposal} ∪ Emergent(BranchKind)
@@ -74,13 +80,14 @@ Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E → AssessR
 Phase 1: Fᵣ → Present(entry_point enriched by route-adequacy metadata; hidden_route + open when non-empty) → Qc(intent entry points) → Stop → Sₑ       -- entry point selection; default single, ordered multi when user names 2+ concerns [Tool]
 Phase 2: Sₑ → Materialize(Sₑ, R) → B → TaskCreate[selected] → Tᵣ  -- task registration; initialize Λ.cursor from first current task, entry point, and active aspect before Phase 3 [Tool]
 Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → P → Δ  -- comprehension check [Tool]
-       → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Emergent [Tool]
+       → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Horizon/Emergent [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
        → C(branch) if proposal(A)                         -- side-branch continuation closure [Tool]
        → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
        → Read(source) if eval(A, Aᵣ) requires           -- AI-determined reference [Tool]
        → C(correct) if correct(A)                         -- verified-aspect continuation closure [Tool]
        → Qc(coverage) → Stop if correct(A)               -- aspect summary [Tool]
+       → ReassessRoute(R, U, P') → Fᵣ' → Phase 1 if horizon_reframes(A)  -- hermeneutic-circle re-derivation: only when a Horizon hit makes the selected entry point stale (J_ref = rederive_route); else J_ref = continue_coverage [Tool]
        → converge → Λ.active := false if all_tasks_completed  -- convergence evidence is terminal; no downstream gate required
        → deactivate(user_esc | user_cancel) → Λ.active := false
 Turn boundary invariant: While `Λ.active = true` at turn end, the last user-facing shape must be a TerminalShape. Relay metadata `C(·)` may precede a terminal shape, but cannot be the sole final shape while active. The `converge` emission is `deactivation(all_tasks_completed)`, sets `Λ.active := false`, and is terminal without an additional gate.
@@ -112,6 +119,8 @@ Phase 1 Qc  (constitution)   → present (entry point selection enriched by Fᵣ
 Phase 2 B   (observe) → Internal analysis (artifact basis materialization)
 Phase 2 Tᵣ  (track)   → TaskCreate (entry point tracking)
 Phase 3 detect (sense) → Internal analysis (gap type relevance detection per entry point)
+Phase 3 Horizon (sense) → Internal analysis (admissible(HC) false-positive guard; opacity-preserving — never exposes the suspected edge, the answer, or the selection rationale)
+Phase 3 ReassessRoute (observe) → Internal analysis (conditional Fᵣ' re-derivation when horizon_reframes(A); reuses Phase 0 AssessRoute machinery, opacity-preserving)
 Phase 3 Qs  (constitution)   → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
@@ -236,12 +245,23 @@ Comprehension gaps within each entry point:
 | **Causality** | User doesn't understand why something happens | "Do you understand why this value comes from here?" | Non-obvious causal chains (architecture, dependency) |
 | **Scope** | User doesn't see full impact | "Did you notice this also affects Y?" | Cross-cutting impact (architecture, refactoring) |
 | **Sequence** | User doesn't understand execution order | "Do you see that A happens before B?" | Order-sensitive changes (initialization, dependency) |
+| **Horizon** | A co-intended but unspoken edge of the selected entry point the user did not name from within their framing, required for `P' ≅ R`; admitted only when the false-positive guard `admissible(HC)` passes | Scenario-based open probe that tests the edge without naming it | The unknown-unknown that drives the largest comprehension gains but the user cannot request; blind-spot verification inside the current entry point — not route selection (cf. `hidden_route`/`open`), not a decision gap (→ `/gap`) |
 | **Emergent** | Gap outside canonical types | Adapted to specific comprehension deficit | Must satisfy morphism `ResultUngrasped → VerifiedUnderstanding`; boundary: comprehension verification (in-scope) vs. decision gaps (→ `/gap`) |
 
 **Emergent gap detection**: Named types are working hypotheses, not exhaustive categories. Detect Emergent gaps when:
 - User's comprehension difficulty spans multiple named types (e.g., understanding both causality and scope simultaneously in a cross-cutting change)
 - User selects "Other" or pushes back on all presented gap types in the coverage check
 - The AI work involves domain-specific patterns where canonical comprehension dimensions are insufficient (e.g., concurrency reasoning, security implications)
+
+**Horizon gap detection** (false-positive guarded): A Horizon gap is the AI surfacing a co-intended-but-unspoken edge the user could not name from within their own framing — the unknown-unknown that often drives the largest comprehension gains yet that the user cannot request, because from inside their frame it is invisible. Because it originates with the AI (not the user), it is admitted ONLY when every guard condition holds (`admissible(HC)`), so it reveals real blind spots rather than manufacturing clever ones ("insight theater"):
+- **Evidence-bound**: the edge's `anchors` name concrete artifacts in `B`; pure speculation disqualifies it
+- **Material**: missing the edge makes `P' ≅ R` false — it is necessary for verified understanding, not merely interesting
+- **Unspoken**: absent from `U`, the entry-point labels, and the user's prior answers (otherwise it is not a horizon)
+- **Non-route**: not an entry-point-selection question (that is `hidden_route`/`open` at Phase 0/1)
+- **Non-decision**: not a decision or commitment gap (that is `/gap`)
+- **Scarcity**: at most one Horizon candidate per entry point; if several weak candidates compete, detect none
+
+**Socratic opacity (Horizon)**: the probe exposes only the scenario/question — never the suspected edge, the expected answer, or the selection rationale before `A` is received; it uses everyday scenario language and never the words "horizon"/"blind spot"/"unspoken edge"; `Horizon` is recorded only internally in `Λ.detected`/`Λ.probed`, never surfaced as a label. This is consistent with the intentional absence of the `Basis:` marker — surfacing the suspected blind spot would compromise probe authenticity.
 
 ## Protocol
 
@@ -261,7 +281,9 @@ Analyze the AI work result and the user's signal to infer likely comprehension i
 
 **Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 entry point prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. v2+ Katalepsis records are treated as entry-point evidence. v1 category-based records are weak hints only; do not directly map `Category` to `ComprehensionIntent`. This heuristic may bias detection toward previously observed patterns, but Phase 1 user selection remains constitutive.
 
-**Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expectation, Causality, Scope, Sequence}, the Gap Taxonomy warrants promotion to a new named type. When accumulated probe misclassifications across 3+ sessions cluster around a specific gap type's probe kind boundary (Qc vs Qs), that type's probe kind assignment warrants revision.
+**Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expectation, Causality, Scope, Sequence, Horizon}, the Gap Taxonomy warrants promotion to a new named type. When accumulated probe misclassifications across 3+ sessions cluster around a specific gap type's probe kind boundary (Qc vs Qs), that type's probe kind assignment warrants revision.
+
+**Unmeasurable-by-construction amendment**: The 3+-session clustering rule assumes the system can *observe* the candidate pattern. A pattern with no representational slot — no gap type, no recall-store category — can never accumulate the cluster; its absence is a silent failure (an unknown-unknown), not evidence of rarity. For such a category, a named *instrumentation* type may be added BEFORE 3 prior detections, but only when it (a) satisfies the morphism `ResultUngrasped → VerifiedUnderstanding`, (b) carries an explicit false-positive guard, and (c) defines a demotion review. `Horizon` is added under this amendment (its guard is `admissible(HC)`). **Demotion review**: after 3+ applicable Horizon opportunities, demote or revise `Horizon` if detections are consistently absent, are user-rejected as speculative, or fail to improve verified understanding. This keeps promotion falsifiable rather than permanent — the bootstrap exists to make the pattern measurable, and commits to reversing it if measurement shows no value.
 
 ### Phase 1: Intent-Scented Entry Point Selection
 
@@ -345,9 +367,10 @@ For each task (entry point):
    | **Sequence** | Qc (classificatory) | Answer space is enumerable — user selects from finite ordering options |
    | **Causality** | Qs (constitutive) | Causal reasoning requires model-discriminating options where the user’s own reasoning is diagnostic |
    | **Scope** | Qs (constitutive) | Impact enumeration requires user-generated content — scope awareness cannot be tested by selection alone |
+   | **Horizon** | Qs (constitutive) | The edge is not enumerable without leaking the blind spot; user-generated reasoning is diagnostic, and the scenario must test the edge without naming it |
    | **Emergent** | Qs (constitutive) | Unknown structure favors open response — no pre-enumerable answer space |
 
-   Estimated split: ~40–50% Type F (Expectation, Sequence → Qc probes), ~50–60% Type M (Causality, Scope, Emergent → Qs probes). The split reflects that comprehension verification often involves causal and scope understanding, which resist reduction to finite option sets.
+   Estimated split: ~40–50% Type F (Expectation, Sequence → Qc probes), ~50–60% Type M (Causality, Scope, Horizon, Emergent → Qs probes). The split reflects that comprehension verification often involves causal and scope understanding, which resist reduction to finite option sets.
 
    Then **present** the probe question with understanding-level options:
    ```
@@ -476,3 +499,4 @@ For each task (entry point):
 12. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 13. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 14. **Protocol-native route map**: Phase 0 produces a ComprehensionRouteMap before entry-point selection. The map is a pre-gate support object for entry-point adequacy, not a terminal status and not generic calibration. It annotates derived entry points; it does not create, filter, suppress, or terminalize entry-point tasks, and `VerifiedUnderstanding` is unchanged. `hidden_route` marks entries the user did not name while preserving their artifact anchors; `open` carries bounded discovery pressure only when the unknown could change which entry point the user selects. Socratic opacity is preserved — the map exposes why an entry point is useful, never the expected answer or reasoning path.
+14a. **Horizon boundary**: `Horizon` is a named *comprehension* gap — the AI surfaces a co-intended-but-unspoken edge required for `P' ≅ R` — NOT a Prothesis synthesis construct (`Horizontverschmelzung` fuses multiple *perspectives*; Horizon operates within one user's comprehension of one result). It is detected at Phase 3 *inside* an already-selected entry point and preserves `Fᵣ`/`Sₑ`/`Λ.entryPoints` unless `horizon_reframes(A)` triggers a route re-derivation. It is `Qs`, opacity-preserving (never names the edge, answer, or rationale before `A`), capped at one candidate per entry point (`scarce`), and forbidden when the edge is merely speculative, an entry-point-selection pressure (`hidden_route`/`open`), or a decision gap (`/gap`). It enters the taxonomy under the Revision-threshold *unmeasurable-by-construction amendment* and carries a demotion review.
