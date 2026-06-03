@@ -136,10 +136,52 @@ This boundary preserves the Stoic distinction between grasping a presented
 object and possessing a stable system of knowledge. Katalepsis operationalizes
 the former; it should not silently claim the latter.
 
+### Horizon Gap — Husserl's Empty Horizon and Gadamer's Hermeneutic Circle
+
+The `Horizon` gap type (added v2.4.0) grounds AI-initiated blind-spot surfacing
+in two phenomenological-hermeneutic sources. Husserl's *horizon* (Horizont):
+every act of understanding co-intends more than is given; the *empty horizon*
+(Leerhorizont) is the co-intended-but-unfulfilled region — extended by Iser's
+*Leerstellen* (the textual blanks a reader must fill, which drive the act of
+reading). A Horizon gap is exactly this: a co-intended edge of the result the
+user cannot name from within their own frame, yet whose filling is required for
+`P' ≅ R`. Gadamer supplies the dynamics: understanding advances through the
+*question* (Collingwood's logic of question and answer — to grasp something is to
+grasp the question it answers), and the *hermeneutic circle* lets the part revise
+the whole. When a Horizon probe lands, the user's frame expands (`P → P'`):
+surfacing the blind spot is what resolves the unknown. Katalepsis stops there — the
+surfaced edge is the *basis* for a fusion of horizons, but the fusion itself (a part
+revising the whole framing) belongs to Prothesis' synthesis layer, not to the
+comprehension loop. This keeps the part-revises-whole movement where it belongs and
+the Katalepsis loop strictly terminating.
+
+**Complementary to Prothesis, not duplicative.** Prothesis (`/frame`) already
+instantiates Gadamer's *Horizontverschmelzung* (fusion of horizons) at the
+multi-perspective synthesis layer, fusing distinct interpretive horizons into one
+assessment. Katalepsis' `Horizon` operates one layer down: a single user's
+comprehension of a single result. Rule 14a fixes this boundary so the two do not
+conflate.
+
+**Why a named type rather than a heuristic — and why falsifiable.** The recall
+store had no category that could record a horizon moment, so empirical clustering
+of the pattern was unobservable by construction — an unknown-unknowns *silent
+failure*, not evidence of rarity. The ordinary Revision threshold (promote only
+after 3+ observed clusters) is therefore a catch-22 here: it demands evidence the
+instrumentation cannot emit. Promotion is the instrument that makes the pattern
+visible. To keep this from becoming an unfalsifiable license for "insight
+theater," `Horizon` ships with a six-condition false-positive guard
+(`admissible(HC)`) and a demotion review under the *unmeasurable-by-construction
+amendment*: if, once measurable, the type proves consistently empty,
+user-rejected, or non-improving, it is demoted. The bootstrap is a falsifiable
+hypothesis, not a permanent commitment.
+
 ## Citations
 
 - Clark, A., & Chalmers, D. (1998). The extended mind. *Analysis*, 58(1), 7-19.
 - Husserl, E. (1931). *Cartesian Meditations*, translated by Dorion Cairns. The Hague: Martinus Nijhoff, 1960. (Especially §§38-39 on passive and active synthesis.)
+- Husserl, E. (1913). *Ideas: General Introduction to Pure Phenomenology*. (On horizon/Horizont and the empty horizon, Leerhorizont.)
+- Gadamer, H.-G. (1960). *Truth and Method*. (On the hermeneutic circle, fusion of horizons, and the logic of question and answer.)
+- Iser, W. (1978). *The Act of Reading: A Theory of Aesthetic Response*. (On Leerstellen — textual blanks/gaps that drive the reading act.)
 - Stanford Encyclopedia of Philosophy. Stoicism. https://plato.stanford.edu/entries/stoicism/
 - Bertsch, S., Pesta, B. J., Wiscott, R., & McDaniel, M. A. (2007). The generation effect: A meta-analytic review. *Memory & Cognition*, 35, 201-210.
 - Roediger, H. L., & Karpicke, J. D. (2006). Test-enhanced learning: Taking memory tests improves long-term retention. *Psychological Science*, 17(3), 249-255.
@@ -153,6 +195,7 @@ the former; it should not silently claim the latter.
 - `.claude/rules/axioms.md` §A5 (main axiom; philosophical ground lives here)
 - `.claude/principles/architectural-principles.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
 - `anamnesis/skills/recollect/SKILL.md` (runtime protocol using Husserlian "synthesis of identification" and "empty_intention" as load-bearing operational terms; phenomenological context lives here)
+- `prothesis/skills/frame/SKILL.md` (uses Gadamer's Horizontverschmelzung at the multi-perspective synthesis layer; Katalepsis' `Horizon` gap is the comprehension-layer complement — see §Katalepsis Horizon Gap)
 
 ## Note on rules/ purity
 
