@@ -148,18 +148,22 @@ After /frame completes (Lens L in context), the background Codex task will send 
      fi
      printf '%s\n' "$n"
    }
-   STANDARD_NARRATIVE=$(extract_narrative "$EVENTS_JSONL") || {
+   # Emit each narrative to stdout under a source label so the LLM actually RECEIVES it — a captured
+   # $(...) variable would vanish when this separate Bash call exits, so the block must PRINT, not capture.
+   echo "===== STANDARD CODEX REVIEW ====="
+   extract_narrative "$EVENTS_JSONL" || {
      # Standard review is MANDATORY: a blank narrative cannot enter aggregation. Abort here, BEFORE the
      # Step 4 cleanup, so $EVENTS_JSONL survives for diagnosis (the raw stream was already surfaced above).
      echo "standard review extraction failed — aborting; raw stream preserved in $EVENTS_JSONL" >&2
      exit 1
    }
-   # Adversarial is OPTIONAL: extract ONLY when that path was launched (its event file exists and is
+   # Adversarial is OPTIONAL: emit ONLY when that path was launched (its event file exists and is
    # non-empty) — otherwise $ADVERSARIAL_EVENTS_JSONL points at a file that was never created and the
-   # call would emit a false missing-stream diagnostic plus a blank adversarial narrative. Its failure
-   # is non-fatal: log and proceed with the standard review alone (do not abort).
+   # call would emit a false missing-stream diagnostic. Its failure is non-fatal: log and proceed with
+   # the standard review alone (do not abort).
    if [ -s "$ADVERSARIAL_EVENTS_JSONL" ]; then
-     ADVERSARIAL_NARRATIVE=$(extract_narrative "$ADVERSARIAL_EVENTS_JSONL") || echo "adversarial extraction failed — proceeding with standard review only" >&2
+     echo "===== ADVERSARIAL CODEX REVIEW ====="
+     extract_narrative "$ADVERSARIAL_EVENTS_JSONL" || echo "adversarial extraction failed — proceeding with standard review only" >&2
    fi
    ```
 
