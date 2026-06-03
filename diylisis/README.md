@@ -50,19 +50,9 @@ At the Gate, a surfaced residual or unknown-provenance item is answered with `Re
 
 F3b reads the `CorrectionDelta` ledger read-only. An item is corrected-in-session only when a matching record carries `export_policy = KEEP` with a non-provisional status. When the ledger is absent or carries no matching record, provenance is **Unknown** — the item is surfaced at the Gate for user judgment rather than defaulted to KEEP. This keeps a fresh recipient from inheriting an author's unverified belief as settled fact. See [`references/correction-delta-schema.md`](./skills/distill/references/correction-delta-schema.md) for the ledger schema and read contract.
 
-## Deterministic Hygiene Lint
-
-`skills/distill/scripts/hygiene-lint.mjs` is the F1 deictic-closure scrub: a deterministic, stdlib-only checker that detects deictic anchors ("as above", "the earlier one"), bare task identifiers ("Task #3", "#172"), and undefined coined-or-metric tokens ("v4", "max-combine", "queryValue 40"), then emits a substitution table and a residual list.
-
-```
-node skills/distill/scripts/hygiene-lint.mjs <file>   # lint a file
-node skills/distill/scripts/hygiene-lint.mjs --test    # run the embedded unit test
-```
-
 ## Known Limitations
 
 - **Ledger read-only in v1**: F3b consumes the `CorrectionDelta` ledger; the mechanism that records correction deltas during a session is a separate, deferred concern.
-- **Hygiene-lint precision**: the deterministic detector flags candidate tokens; canonical resolution is a human judgment at the Gate, not a linter inference.
 - **First wired surface**: plan-level handoff is the first wired surface for `/distill`; session-mid pruning and subagent handoff accrue as later surfaces.
 
 ## Install

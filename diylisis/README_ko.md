@@ -50,19 +50,9 @@ Gate에서, 표면화된 residual 또는 unknown-provenance 항목은 `Resolve |
 
 F3b는 `CorrectionDelta` 원장을 읽기 전용으로 소비합니다. 항목은 매칭 레코드가 비-잠정 상태로 `export_policy = KEEP`을 가질 때만 corrected-in-session입니다. 원장이 부재하거나 매칭 레코드가 없으면 출처는 **Unknown**이며 — 항목은 KEEP으로 기본 처리되지 않고 Gate에서 사용자 판정으로 표면화됩니다. 이는 새 수신자가 저자의 미검증 신념을 확정 사실로 물려받는 것을 방지합니다. 원장 스키마와 read contract는 [`references/correction-delta-schema.md`](./skills/distill/references/correction-delta-schema.md)를 참조하세요.
 
-## 결정적 위생 lint(Deterministic Hygiene Lint)
-
-`skills/distill/scripts/hygiene-lint.mjs`는 F1 지표-폐쇄 scrub입니다: 표준 라이브러리만 쓰는 결정적 체커로, 지표 anchor("as above", "the earlier one"), bare task 식별자("Task #3", "#172"), 미정의 coined-or-metric 토큰("v4", "max-combine", "queryValue 40")을 감지하여 치환표와 residual 목록을 산출합니다.
-
-```
-node skills/distill/scripts/hygiene-lint.mjs <file>   # 파일 lint
-node skills/distill/scripts/hygiene-lint.mjs --test    # 내장 단위 테스트 실행
-```
-
 ## 알려진 한계
 
 - **v1 원장 읽기 전용**: F3b는 `CorrectionDelta` 원장을 소비합니다. 세션 중 교정 델타를 기록하는 메커니즘은 별도의 후속 과제입니다.
-- **Hygiene-lint 정밀도**: 결정적 감지기는 후보 토큰을 표시합니다. canonical 해소는 linter 추론이 아니라 Gate에서의 사람 판단입니다.
 - **첫 wired 표면**: plan-level 핸드오프가 `/distill`의 첫 wired 표면입니다. 세션-중 pruning과 서브에이전트 핸드오프는 후속 표면으로 누적됩니다.
 
 ## 설치
