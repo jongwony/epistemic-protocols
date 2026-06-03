@@ -123,33 +123,16 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
 **`codex` source mechanics** (reuse review-ensemble's exact pattern):
 
 1. Write a review prompt to `/tmp/review_loop_codex_${SUFFIX}.txt` (generate `SUFFIX=$(openssl rand -hex 4)`), embedding the actual diff content so the model reviews exactly what changed. Ask for findings as `[severity] file:line — description` and a closing line `VERDICT: approve | needs-attention`.
-2. Launch via `Bash(run_in_background: true, timeout: 300000)`:
+2. Launch via `Bash(run_in_background: true, timeout: 300000)`. `--color never` + redirecting **stdout only** (no `2>&1`) keeps the events file pure JSONL — the codex banner stays on stderr:
    ```bash
-   EVENTS_JSONL=/tmp/review_loop_codex_events_${SUFFIX}.jsonl
-   codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/review_loop_codex_${SUFFIX}.txt > "$EVENTS_JSONL" 2>&1
+   codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/review_loop_codex_${SUFFIX}.txt > /tmp/review_loop_codex_events_${SUFFIX}.jsonl
    ```
-3. Collect on the completion notification — do not poll or sleep. On completion the JSONL event stream is already in `$EVENTS_JSONL` (redirected at launch); with `--json` it is a **JSONL event stream possibly interleaved with a non-JSON stderr banner**, not free text. Extract the codex `agent_message` narrative verbatim with the line below. **Forward that narrative verbatim to the loop — do NOT regex-parse it into findings/verdict**: the consuming agent (an LLM) reads the `[severity] file:line — description` findings and the closing `VERDICT:` line directly from the narrative, satisfying the `{findings[], verdict}` interface by reading, not by jq parsing.
+3. Collect on the completion notification — do not poll or sleep. The events file is pure JSONL; extract the codex `agent_message` narrative verbatim with the line below, then **forward it verbatim to the loop — do NOT regex-parse it into findings/verdict**: the consuming agent (an LLM) reads the `[severity] file:line — description` findings and the closing `VERDICT:` line directly from the narrative. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/review_loop_codex_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that as needs-attention; never converge on a blank.
 
    ```bash
-   # Codex --json event stream → agent_message narrative, verbatim. Extract per the JSONL
-   # schema in use: item.completed events whose item.type is agent_message carry text at .item.text.
-   # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
-   # All agent_message items in stream order; no tail. The downstream agent reads the narrative and judges.
-   # Restate the path: shell vars do NOT persist across separate Bash calls — re-derive from ${SUFFIX}.
-   EVENTS_JSONL=/tmp/review_loop_codex_events_${SUFFIX}.jsonl
-   NARRATIVE=$(jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL")
-   if [ -z "$NARRATIVE" ]; then
-     # codex failed before emitting agent_message: surface the raw stream BEFORE cleanup, and FAIL the
-     # block (exit 1) — an empty extraction is needs-attention, never a silent converge-on-blank.
-     echo "Codex produced no agent_message — raw event stream follows:" >&2
-     cat "$EVENTS_JSONL" >&2
-     exit 1
-   fi
-   printf '%s\n' "$NARRATIVE"
+   jq -r 'select(.type=="item.completed" and .item.type=="agent_message") | .item.text' /tmp/review_loop_codex_events_${SUFFIX}.jsonl
    ```
-
-   Reasoning items appear only if codex emits them (config-gated) — do not force them on. An empty extraction is a codex failure, not an approve verdict — the guard surfaces the raw events so a blank round cannot masquerade as convergence.
-4. Clean up both temp files each round (`rm -f /tmp/review_loop_codex_${SUFFIX}.txt /tmp/review_loop_codex_events_${SUFFIX}.jsonl` — literal paths, since `$EVENTS_JSONL` does not survive into this separate Bash call) to prevent `/tmp` accumulation across rounds.
+4. Clean up both temp files each round (`rm -f /tmp/review_loop_codex_${SUFFIX}.txt /tmp/review_loop_codex_events_${SUFFIX}.jsonl`) to prevent `/tmp` accumulation across rounds.
 
 ## Convergence
 

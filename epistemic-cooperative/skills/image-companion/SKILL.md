@@ -101,64 +101,39 @@ Launch via `Bash(run_in_background: true, timeout: 600000)`, with `--cd` pointin
 artifact's image directory so the PNG lands beside its companions:
 
 ```bash
-EVENTS_JSONL=/tmp/image_companion_events_${SUFFIX}.jsonl
-codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 \
+codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="medium" \
   --sandbox workspace-write \
   --cd <artifact-image-dir> \
-  < /tmp/image_companion_${SUFFIX}.txt > "$EVENTS_JSONL" 2>&1
+  < /tmp/image_companion_${SUFFIX}.txt \
+  > /tmp/image_companion_events_${SUFFIX}.jsonl 2>/tmp/image_companion_warn_${SUFFIX}.txt
 ```
 
-For multiple images, launch one background call per image in the same turn so they run in
-parallel — each with its own `${SUFFIX}`, hence its own `$EVENTS_JSONL`, so parallel streams
-never collide. Each completion sends a notification — then read that call's `$EVENTS_JSONL`
-and `rm -f /tmp/image_companion_${SUFFIX}.txt /tmp/image_companion_events_${SUFFIX}.jsonl` (literal
-paths — `$EVENTS_JSONL` does not survive into a separate cleanup Bash call). Wait for the completion
-notification before reading output.
+`--color never` + splitting the streams keeps the events file pure JSONL (stdout) and the codex
+banner — where the warnings ride — in its own warn file (stderr). For multiple images, launch one
+background call per image in the same turn so they run in parallel — each with its own `${SUFFIX}`,
+so parallel streams never collide. Each completion sends a notification — then read that call's
+events file and clean up its three temp files:
+`rm -f /tmp/image_companion_${SUFFIX}.txt /tmp/image_companion_events_${SUFFIX}.jsonl /tmp/image_companion_warn_${SUFFIX}.txt`.
+Wait for the completion notification before reading output.
 
-On completion the JSONL event stream is already in `$EVENTS_JSONL` (redirected at launch).
-With `--json` it is a **JSONL event stream possibly interleaved with a non-JSON stderr
-banner**, not free text. Extract the codex `agent_message` narrative verbatim with the line
-below. Forward that narrative verbatim to Step 4 — the PNG-confirmation and any in-message
-warnings you surface there are read from this narrative, not regex-parsed:
+The events file is pure JSONL. Extract the codex `agent_message` narrative verbatim with the line
+below and forward it to Step 4 — the PNG-confirmation and any in-message notes you surface there are
+read from this narrative, not regex-parsed. **If the extraction is empty, codex failed before
+answering** — read the raw events file `/tmp/image_companion_events_${SUFFIX}.jsonl` for the error
+and surface that instead of reporting a successful generation:
 
 ```bash
-# Codex --json event stream → agent_message narrative, verbatim. Extract per the JSONL
-# schema in use: item.completed events whose item.type is agent_message carry text at .item.text.
-# -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
-# All agent_message items in stream order; no tail. The downstream step reads the narrative.
-# Restate the path: shell vars do NOT persist across separate Bash calls — re-derive from ${SUFFIX}.
-EVENTS_JSONL=/tmp/image_companion_events_${SUFFIX}.jsonl
-NARRATIVE=$(jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL")
-if [ -z "$NARRATIVE" ]; then
-  # codex failed before emitting agent_message: surface the raw stream for diagnosis and FAIL the block
-  # (exit 1) so a blank narrative cannot be reported as a successful generation.
-  echo "Codex produced no agent_message — raw event stream follows:" >&2
-  cat "$EVENTS_JSONL" >&2
-  exit 1
-fi
-printf '%s\n' "$NARRATIVE"
+jq -r 'select(.type=="item.completed" and .item.type=="agent_message") | .item.text' /tmp/image_companion_events_${SUFFIX}.jsonl
 ```
 
-Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation)
-appear on the **non-JSON stderr banner lines** rather than inside `agent_message`. So
-ALSO grep the raw captured file for those warning strings, to catch what the narrative
-does not carry:
+Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation) ride the
+**stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to
+catch what the narrative does not carry:
 
 ```bash
-# Warnings that live on the non-JSON banner lines, not in agent_message.
-# Restate the path (shell vars do NOT persist across separate Bash calls), then guard file existence
-# first: a missing/empty $EVENTS_JSONL is a capture failure (diagnose it), NOT "no warnings" —
-# `|| true` alone would mask grep's exit-2 file-not-found as a clean scan.
-EVENTS_JSONL=/tmp/image_companion_events_${SUFFIX}.jsonl
-if [ ! -s "$EVENTS_JSONL" ]; then
-  echo "WARNING: \$EVENTS_JSONL missing or empty — codex capture failed; treat as a diagnostic failure, not 'no warnings'." >&2
-else
-  grep -iE 'invalid_grant|deprecat|--full-auto|warn' "$EVENTS_JSONL" || true
-fi
+grep -iE 'invalid_grant|deprecat|--full-auto|warn' /tmp/image_companion_warn_${SUFFIX}.txt || true
 ```
-
-Reasoning items appear only if codex emits them (config-gated) — do not force them on.
 
 Running in the background keeps Codex's verbose banner out of the main context. The model
 (`-m gpt-5.5`) is fixed by design — Codex substitutes its own internal image skill
@@ -177,9 +152,9 @@ emphasized moment).
 Then produce a consolidated report in the user's language using the template in
 `references/verification.md`: a table with image, filename, and verdict, plus any
 non-fatal warnings (e.g., auth-token refresh notices, deprecation notices) — read from the
-extracted `agent_message` narrative (Step 3 jq line) AND from the Step 3 banner-warning
-grep over the raw `$EVENTS_JSONL` (some warnings ride the non-JSON stderr lines, not the
-narrative) — so the user sees the full picture without reading raw codex output.
+extracted `agent_message` narrative (Step 3 jq line) AND from the Step 3 warn-file grep
+(some warnings ride the stderr banner, not the narrative) — so the user sees the full picture
+without reading raw codex output.
 
 ## What stays fixed vs. what varies
 

@@ -51,15 +51,14 @@ Report:
 - Residual uncertainty when sources contradict or coverage is incomplete
 ```
 
-Launch via `Bash(run_in_background: true, timeout: 1000000)`, redirecting the JSONL event
-stream to an explicit `$EVENTS_JSONL` file so Phase 3 has a concrete artifact to extract from:
+Launch via `Bash(run_in_background: true, timeout: 1000000)`. `--color never` + redirecting
+**stdout only** (no `2>&1`) keeps the events file pure JSONL — the codex banner stays on stderr:
 
 ```bash
-EVENTS_JSONL=/tmp/goal_research_events_${SUFFIX}.jsonl
-codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 \
+codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="high" \
   --config mcp_servers.tavily.tool_timeout_sec=900 \
-  < /tmp/goal_research_${SUFFIX}.txt > "$EVENTS_JSONL" 2>&1
+  < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl
 ```
 
 Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-ensemble` does not apply here.
@@ -76,27 +75,13 @@ raw timeout error if the call exceeds that limit.
 Wait for the background task completion notification — do not poll or sleep.
 
 When the notification arrives:
-1. On completion the JSONL event stream is already in `$EVENTS_JSONL` (redirected at launch). With `--json` it is a **JSONL event stream possibly interleaved with a non-JSON stderr banner**, not free text — extract the codex `agent_message` narrative verbatim with the line below. That narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty) — **forward it verbatim to the presentation step; do NOT regex-parse it**.
+1. The events file is pure JSONL (`--json` on stdout). Extract the codex `agent_message` narrative verbatim with the line below — that narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty), so **forward it verbatim to the presentation step; do NOT regex-parse it**. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/goal_research_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that instead of proceeding blank.
 
    ```bash
-   # Codex --json event stream → agent_message narrative, verbatim. Extract per the JSONL
-   # schema in use: item.completed events whose item.type is agent_message carry text at .item.text.
-   # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
-   # All agent_message items in stream order; no tail. This narrative IS the research trace/answer.
-   # Restate the path: shell vars do NOT persist across separate Bash calls — re-derive from ${SUFFIX}.
-   EVENTS_JSONL=/tmp/goal_research_events_${SUFFIX}.jsonl
-   NARRATIVE=$(jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL")
-   if [ -z "$NARRATIVE" ]; then
-     # codex failed before emitting agent_message (auth / timeout / crash): surface the raw stream for
-     # diagnosis BEFORE cleanup, and FAIL the block (exit 1) so a blank narrative cannot pass as success.
-     echo "Codex produced no agent_message — raw event stream follows:" >&2
-     cat "$EVENTS_JSONL" >&2
-     exit 1
-   fi
-   printf '%s\n' "$NARRATIVE"
+   jq -r 'select(.type=="item.completed" and .item.type=="agent_message") | .item.text' /tmp/goal_research_events_${SUFFIX}.jsonl
    ```
 
-   Reasoning items appear only if codex emits them (config-gated) — do not force them on. When extraction is empty the guard above prints the `turn.failed` / `error` events and raw banner lines from `$EVENTS_JSONL` so the failure is visible, not swallowed.
+   Reasoning items appear only if codex emits them (config-gated) — do not force them on.
 2. Clean up the temp prompt file and the event stream (after the narrative is forwarded / any failure surfaced):
    ```bash
    rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl
