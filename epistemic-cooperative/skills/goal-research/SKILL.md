@@ -51,13 +51,14 @@ Report:
 - Residual uncertainty when sources contradict or coverage is incomplete
 ```
 
-Launch via `Bash(run_in_background: true, timeout: 1000000)`:
+Launch via `Bash(run_in_background: true, timeout: 1000000)`. `--color never` + redirecting
+**stdout only** (no `2>&1`) keeps the events file pure JSONL — the codex banner stays on stderr:
 
 ```bash
-codex exec --ephemeral --skip-git-repo-check -m gpt-5.5 \
+codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="high" \
   --config mcp_servers.tavily.tool_timeout_sec=900 \
-  < /tmp/goal_research_${SUFFIX}.txt
+  < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl
 ```
 
 Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-ensemble` does not apply here.
@@ -74,15 +75,21 @@ raw timeout error if the call exceeds that limit.
 Wait for the background task completion notification — do not poll or sleep.
 
 When the notification arrives:
-1. Read the Codex output from the completed background task.
-2. Clean up the temp prompt file:
+1. The events file is pure JSONL (`--json` on stdout). Extract the codex `agent_message` narrative verbatim with the line below — that narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty), so **forward it verbatim to the presentation step; do NOT regex-parse it**. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/goal_research_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that instead of proceeding blank.
+
    ```bash
-   rm -f /tmp/goal_research_${SUFFIX}.txt
+   jq -r 'select(.type=="item.completed" and .item.type=="agent_message") | .item.text' /tmp/goal_research_events_${SUFFIX}.jsonl
+   ```
+
+   Reasoning items appear only if codex emits them (config-gated) — do not force them on.
+2. Clean up the temp prompt file and the event stream (after the narrative is forwarded / any failure surfaced):
+   ```bash
+   rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl
    ```
 
 ## Phase 4: Output
 
-Present the full Codex output as the call trace, preceded by a one-line scope header:
+Present the extracted Codex `agent_message` narrative as the call trace, preceded by a one-line scope header. Use the Phase 3 jq extraction (the `agent_message` narrative) as the trace body — do not dump the raw JSONL event stream:
 
 ```
 ## Goal Research Result
@@ -90,7 +97,7 @@ Present the full Codex output as the call trace, preceded by a one-line scope he
 Target: {research_question}
 
 --- Codex Trace ---
-{codex_full_output}
+{codex_process_narrative}
 ```
 
 Acceptance criterion: a real Codex session was launched, its trace was returned to the main session, and the temp file was cleaned up.

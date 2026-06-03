@@ -101,17 +101,39 @@ Launch via `Bash(run_in_background: true, timeout: 600000)`, with `--cd` pointin
 artifact's image directory so the PNG lands beside its companions:
 
 ```bash
-codex exec --ephemeral --skip-git-repo-check -m gpt-5.5 \
+codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="medium" \
   --sandbox workspace-write \
   --cd <artifact-image-dir> \
-  < /tmp/image_companion_${SUFFIX}.txt
+  < /tmp/image_companion_${SUFFIX}.txt \
+  > /tmp/image_companion_events_${SUFFIX}.jsonl 2>/tmp/image_companion_warn_${SUFFIX}.txt
 ```
 
-For multiple images, launch one background call per image in the same turn so they run in
-parallel. Each completion sends a notification — then read the output from the completed
-background task and `rm -f /tmp/image_companion_${SUFFIX}.txt`. Wait for the completion
-notification before reading output.
+`--color never` + splitting the streams keeps the events file pure JSONL (stdout) and the codex
+banner — where the warnings ride — in its own warn file (stderr). For multiple images, launch one
+background call per image in the same turn so they run in parallel — each with its own `${SUFFIX}`,
+so parallel streams never collide. Each completion sends a notification — then read that call's
+events file and clean up its three temp files:
+`rm -f /tmp/image_companion_${SUFFIX}.txt /tmp/image_companion_events_${SUFFIX}.jsonl /tmp/image_companion_warn_${SUFFIX}.txt`.
+Wait for the completion notification before reading output.
+
+The events file is pure JSONL. Extract the codex `agent_message` narrative verbatim with the line
+below and forward it to Step 4 — the PNG-confirmation and any in-message notes you surface there are
+read from this narrative, not regex-parsed. **If the extraction is empty, codex failed before
+answering** — read the raw events file `/tmp/image_companion_events_${SUFFIX}.jsonl` for the error
+and surface that instead of reporting a successful generation:
+
+```bash
+jq -r 'select(.type=="item.completed" and .item.type=="agent_message") | .item.text' /tmp/image_companion_events_${SUFFIX}.jsonl
+```
+
+Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation) ride the
+**stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to
+catch what the narrative does not carry:
+
+```bash
+grep -iE 'invalid_grant|deprecat|--full-auto|warn' /tmp/image_companion_warn_${SUFFIX}.txt || true
+```
 
 Running in the background keeps Codex's verbose banner out of the main context. The model
 (`-m gpt-5.5`) is fixed by design — Codex substitutes its own internal image skill
@@ -129,8 +151,10 @@ emphasized moment).
 
 Then produce a consolidated report in the user's language using the template in
 `references/verification.md`: a table with image, filename, and verdict, plus any
-non-fatal warnings (e.g., auth-token refresh notices, deprecation notices) so the user
-sees the full picture without reading raw codex output.
+non-fatal warnings (e.g., auth-token refresh notices, deprecation notices) — read from the
+extracted `agent_message` narrative (Step 3 jq line) AND from the Step 3 warn-file grep
+(some warnings ride the stderr banner, not the narrative) — so the user sees the full picture
+without reading raw codex output.
 
 ## What stays fixed vs. what varies
 
