@@ -66,9 +66,10 @@ Report only high-confidence findings. Ground all claims in the actual diff — d
 End with: VERDICT: approve | needs-attention
 ```
 
-Run via `Bash(run_in_background: true, timeout: 300000)`:
+Run via `Bash(run_in_background: true, timeout: 300000)`, redirecting the JSONL event stream to an explicit standard-review file:
 ```bash
-codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_review_${SUFFIX}.txt
+EVENTS_JSONL=/tmp/ensemble_codex_review_events_${SUFFIX}.jsonl
+codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_review_${SUFFIX}.txt > "$EVENTS_JSONL" 2>&1
 ```
 
 **Optional: codex-adversarial** — If the user requests adversarial review or the change is large/architectural, also launch an adversarial prompt in background using a distinct temp file `/tmp/ensemble_codex_adversarial_${SUFFIX}.txt` (same `SUFFIX`, different filename) so the adversarial runner does not overwrite or re-read the standard review prompt:
@@ -95,9 +96,10 @@ Report each finding as:
 End with: VERDICT: approve | needs-attention
 ```
 
-Execute with `Bash(run_in_background: true, timeout: 300000)`:
+Execute with `Bash(run_in_background: true, timeout: 300000)`, redirecting to a **distinct** adversarial event file so it never collides with the standard-review stream:
 ```bash
-codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_adversarial_${SUFFIX}.txt
+ADVERSARIAL_EVENTS_JSONL=/tmp/ensemble_codex_adversarial_events_${SUFFIX}.jsonl
+codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/ensemble_codex_adversarial_${SUFFIX}.txt > "$ADVERSARIAL_EVENTS_JSONL" 2>&1
 ```
 
 ### Step 2: Invoke /frame Mode 2 (foreground, interactive)
@@ -125,21 +127,34 @@ The Lens L output contains:
 
 After /frame completes (Lens L in context), the background Codex task will send a completion notification automatically. When the notification arrives:
 
-1. Read the Codex output from the completed background task. With `--json` the captured output is a **JSONL event stream possibly interleaved with a non-JSON stderr banner**, not free text. Save the captured output to a file (referenced as `$EVENTS_JSONL`), then extract the codex `agent_message` narrative verbatim with the line below.
-2. Extract the narrative and **forward it verbatim to the aggregation step — do NOT regex-parse it into findings/verdict**. The consuming agent (an LLM) reads the `[severity] file:line — description` findings and the closing `VERDICT:` line directly from the narrative; the `{findings[], verdict}` interface is satisfied by the agent reading the narrative, not by jq parsing.
+1. On completion each launched codex stream is already in its own event file (redirected at launch): the standard review in `$EVENTS_JSONL`, and — if the adversarial path ran — the adversarial stream in `$ADVERSARIAL_EVENTS_JSONL`. With `--json` each is a **JSONL event stream possibly interleaved with a non-JSON stderr banner**, not free text.
+2. Extract each narrative **independently** and **forward it verbatim to the aggregation step — do NOT regex-parse it into findings/verdict**. The consuming agent (an LLM) reads the `[severity] file:line — description` findings and the closing `VERDICT:` line directly from each narrative; the `{findings[], verdict}` interface is satisfied by the agent reading the narrative, not by jq parsing. Extract the standard stream, and the adversarial stream only when that path was launched — each into a clearly-labelled narrative so aggregation keeps source attribution:
 
    ```bash
-   # Codex --json → agent_message narrative, verbatim (codex-cli 0.136.0 pinned).
+   # Codex --json event stream → agent_message narrative, verbatim. Extract per the JSONL
+   # schema in use: item.completed events whose item.type is agent_message carry text at .item.text.
    # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
    # All agent_message items in stream order; no tail. The downstream agent reads the narrative and judges.
-   jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL"
+   extract_narrative() {  # $1 = event file; emits the narrative, or surfaces the raw stream on empty
+     local n; n=$(jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$1")
+     if [ -z "$n" ]; then
+       # codex failed before emitting agent_message (auth / timeout / crash): surface raw, do not aggregate a blank.
+       echo "Codex produced no agent_message in $1 — raw event stream follows:" >&2
+       cat "$1" >&2
+     fi
+     printf '%s\n' "$n"
+   }
+   STANDARD_NARRATIVE=$(extract_narrative "$EVENTS_JSONL")
+   # Only if the adversarial path was launched:
+   ADVERSARIAL_NARRATIVE=$(extract_narrative "$ADVERSARIAL_EVENTS_JSONL")
    ```
 
-   Reasoning items appear only if codex emits them (config-gated) — do not force them on.
-3. Record both Lens L and Codex narrative for aggregation
-4. Clean up the temp prompt files after reading (prevents `/tmp` accumulation across invocations):
+   Reasoning items appear only if codex emits them (config-gated) — do not force them on. An empty extraction is a codex failure, not an empty review — the guard surfaces the raw events so a blank narrative cannot enter aggregation invisibly.
+3. Record Lens L, the standard Codex narrative, and (when launched) the adversarial Codex narrative for aggregation — each labelled by source.
+4. Clean up the temp prompt files and event streams after reading (prevents `/tmp` accumulation across invocations):
    ```bash
-   rm -f /tmp/ensemble_codex_review_${SUFFIX}.txt /tmp/ensemble_codex_adversarial_${SUFFIX}.txt
+   rm -f /tmp/ensemble_codex_review_${SUFFIX}.txt /tmp/ensemble_codex_adversarial_${SUFFIX}.txt \
+         "$EVENTS_JSONL" "$ADVERSARIAL_EVENTS_JSONL"
    ```
 
 If the Codex background task has not completed yet when /frame finishes, wait for the notification — do not poll or sleep.

@@ -101,29 +101,38 @@ Launch via `Bash(run_in_background: true, timeout: 600000)`, with `--cd` pointin
 artifact's image directory so the PNG lands beside its companions:
 
 ```bash
+EVENTS_JSONL=/tmp/image_companion_events_${SUFFIX}.jsonl
 codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="medium" \
   --sandbox workspace-write \
   --cd <artifact-image-dir> \
-  < /tmp/image_companion_${SUFFIX}.txt
+  < /tmp/image_companion_${SUFFIX}.txt > "$EVENTS_JSONL" 2>&1
 ```
 
 For multiple images, launch one background call per image in the same turn so they run in
-parallel. Each completion sends a notification — then read the output from the completed
-background task and `rm -f /tmp/image_companion_${SUFFIX}.txt`. Wait for the completion
+parallel — each with its own `${SUFFIX}`, hence its own `$EVENTS_JSONL`, so parallel streams
+never collide. Each completion sends a notification — then read that call's `$EVENTS_JSONL`
+and `rm -f /tmp/image_companion_${SUFFIX}.txt "$EVENTS_JSONL"`. Wait for the completion
 notification before reading output.
 
-With `--json` the captured output is a **JSONL event stream possibly interleaved with a
-non-JSON stderr banner**, not free text. Save it to a file (referenced as `$EVENTS_JSONL`)
-and extract the codex `agent_message` narrative verbatim with the line below. Forward that
-narrative verbatim to Step 4 — the PNG-confirmation and any in-message warnings you surface
-there are read from this narrative, not regex-parsed:
+On completion the JSONL event stream is already in `$EVENTS_JSONL` (redirected at launch).
+With `--json` it is a **JSONL event stream possibly interleaved with a non-JSON stderr
+banner**, not free text. Extract the codex `agent_message` narrative verbatim with the line
+below. Forward that narrative verbatim to Step 4 — the PNG-confirmation and any in-message
+warnings you surface there are read from this narrative, not regex-parsed:
 
 ```bash
-# Codex --json → agent_message narrative, verbatim (codex-cli 0.136.0 pinned).
+# Codex --json event stream → agent_message narrative, verbatim. Extract per the JSONL
+# schema in use: item.completed events whose item.type is agent_message carry text at .item.text.
 # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
 # All agent_message items in stream order; no tail. The downstream step reads the narrative.
-jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL"
+NARRATIVE=$(jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL")
+if [ -z "$NARRATIVE" ]; then
+  # codex failed before emitting agent_message: surface the raw stream for diagnosis, do not report a blank success.
+  echo "Codex produced no agent_message — raw event stream follows:" >&2
+  cat "$EVENTS_JSONL" >&2
+fi
+printf '%s\n' "$NARRATIVE"
 ```
 
 Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation)
@@ -132,8 +141,14 @@ ALSO grep the raw captured file for those warning strings, to catch what the nar
 does not carry:
 
 ```bash
-# Warnings that live on the non-JSON banner lines, not in agent_message:
-grep -iE 'invalid_grant|deprecat|--full-auto|warn' "$EVENTS_JSONL" || true
+# Warnings that live on the non-JSON banner lines, not in agent_message.
+# Guard file existence first: a missing/empty $EVENTS_JSONL is a capture failure (diagnose it),
+# NOT "no warnings" — `|| true` alone would mask grep's exit-2 file-not-found as a clean scan.
+if [ ! -s "$EVENTS_JSONL" ]; then
+  echo "WARNING: \$EVENTS_JSONL missing or empty — codex capture failed; treat as a diagnostic failure, not 'no warnings'." >&2
+else
+  grep -iE 'invalid_grant|deprecat|--full-auto|warn' "$EVENTS_JSONL" || true
+fi
 ```
 
 Reasoning items appear only if codex emits them (config-gated) — do not force them on.

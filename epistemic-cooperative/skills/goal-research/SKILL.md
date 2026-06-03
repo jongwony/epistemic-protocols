@@ -51,13 +51,15 @@ Report:
 - Residual uncertainty when sources contradict or coverage is incomplete
 ```
 
-Launch via `Bash(run_in_background: true, timeout: 1000000)`:
+Launch via `Bash(run_in_background: true, timeout: 1000000)`, redirecting the JSONL event
+stream to an explicit `$EVENTS_JSONL` file so Phase 3 has a concrete artifact to extract from:
 
 ```bash
+EVENTS_JSONL=/tmp/goal_research_events_${SUFFIX}.jsonl
 codex exec --ephemeral --json --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="high" \
   --config mcp_servers.tavily.tool_timeout_sec=900 \
-  < /tmp/goal_research_${SUFFIX}.txt
+  < /tmp/goal_research_${SUFFIX}.txt > "$EVENTS_JSONL" 2>&1
 ```
 
 Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-ensemble` does not apply here.
@@ -74,19 +76,27 @@ raw timeout error if the call exceeds that limit.
 Wait for the background task completion notification — do not poll or sleep.
 
 When the notification arrives:
-1. Read the Codex output from the completed background task. With `--json` the captured output is a **JSONL event stream possibly interleaved with a non-JSON stderr banner**, not free text — save it to a file (referenced as `$EVENTS_JSONL`) and extract the codex `agent_message` narrative verbatim with the line below. That narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty) — **forward it verbatim to the presentation step; do NOT regex-parse it**.
+1. On completion the JSONL event stream is already in `$EVENTS_JSONL` (redirected at launch). With `--json` it is a **JSONL event stream possibly interleaved with a non-JSON stderr banner**, not free text — extract the codex `agent_message` narrative verbatim with the line below. That narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty) — **forward it verbatim to the presentation step; do NOT regex-parse it**.
 
    ```bash
-   # Codex --json → agent_message narrative, verbatim (codex-cli 0.136.0 pinned).
+   # Codex --json event stream → agent_message narrative, verbatim. Extract per the JSONL
+   # schema in use: item.completed events whose item.type is agent_message carry text at .item.text.
    # -R fromjson? skips non-JSON lines (the stderr banner interleaved into the captured stdout+stderr).
    # All agent_message items in stream order; no tail. This narrative IS the research trace/answer.
-   jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL"
+   NARRATIVE=$(jq -rR 'fromjson? | select(.type=="item.completed" and .item.type=="agent_message") | .item.text' "$EVENTS_JSONL")
+   if [ -z "$NARRATIVE" ]; then
+     # codex failed before emitting agent_message (auth / timeout / crash): no silent blank —
+     # surface the raw stream for diagnosis BEFORE cleanup, and treat as failure (do not proceed blank).
+     echo "Codex produced no agent_message — raw event stream follows:" >&2
+     cat "$EVENTS_JSONL" >&2
+   fi
+   printf '%s\n' "$NARRATIVE"
    ```
 
-   Reasoning items appear only if codex emits them (config-gated) — do not force them on. Failure modes still surface as raw errors: a `turn.failed` / `error` event line, or a raw stderr banner line, is preserved in `$EVENTS_JSONL` for the user to read.
-2. Clean up the temp prompt file:
+   Reasoning items appear only if codex emits them (config-gated) — do not force them on. When extraction is empty the guard above prints the `turn.failed` / `error` events and raw banner lines from `$EVENTS_JSONL` so the failure is visible, not swallowed.
+2. Clean up the temp prompt file and the event stream (after the narrative is forwarded / any failure surfaced):
    ```bash
-   rm -f /tmp/goal_research_${SUFFIX}.txt
+   rm -f /tmp/goal_research_${SUFFIX}.txt "$EVENTS_JSONL"
    ```
 
 ## Phase 4: Output
