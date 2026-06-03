@@ -18,6 +18,7 @@ const {
   protocolFiles,
   sourcePluginDirs,
   CANONICAL_PRECEDENCE: CANONICAL_PRECEDENCE_ARR,
+  CANONICAL_CLUSTERS,
 } = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
 
 const projectRoot = process.argv[2] || process.cwd();
@@ -33,7 +34,6 @@ const _protocolRecords = _records.filter(r => r.isProtocol);
 const PROTOCOL_FILES = protocolFiles({ projectRoot });
 
 const CANONICAL_PRECEDENCE = CANONICAL_PRECEDENCE_ARR.join(' → ');
-const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/grasp`)';
 
 // Authoritative edge type allowlist — used by both graph-integrity and cross-ref-scan checks
 const VALID_EDGE_TYPES = new Set(['precondition', 'advisory', 'suppression']);
@@ -1297,7 +1297,7 @@ function checkCrossRefScan() {
       message: 'CLAUDE.md missing Epistemic Concern Clusters table'
     },
     {
-      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis\)/,
+      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis, Diylisis\)/,
       message: 'CLAUDE.md initiator taxonomy missing protocol in the AI-guided set'
     },
   ];

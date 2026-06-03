@@ -21,6 +21,7 @@ const {
   generateReleaseNotes
 } = require('./package');
 const { runArtifactSelfContainmentCheck } = require('../.claude/skills/verify/scripts/artifact-self-containment');
+const { discoverPlugins } = require('./load-protocols');
 
 // ============================================================
 // parseFrontmatter
@@ -206,7 +207,7 @@ describe('transformSkillMd', () => {
 describe('runtime contract view', () => {
   it('builds a packaged runtime view for every skill', () => {
     const views = buildRuntimeContractViews();
-    assert.equal(views.length, 33);
+    assert.equal(views.length, 34);
     for (const view of views) {
       assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one Skill.md entry`);
       assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed Skill.md`);
@@ -392,6 +393,11 @@ describe('generateReleaseNotes', () => {
     { plugin: 'bundle', skill: 'epistemic-protocols-bundle', zip: 'epistemic-protocols-bundle.zip', files: 19, bytes: 5000 },
   ];
 
+  // Derived from the same canonical source package.js uses, so the curated-fallback
+  // count assertions below validate dynamic rendering instead of re-hardcoding a number.
+  const EXPECTED_PROTOCOL_COUNT = discoverPlugins({ projectRoot: path.join(__dirname, '..') })
+    .filter(r => r.isProtocol).length;
+
   it('generates 4-section structure', () => {
     const notes = generateReleaseNotes(mockResults);
     assert.ok(notes.includes('# Epistemic Protocols'));
@@ -448,11 +454,11 @@ describe('generateReleaseNotes', () => {
     assert.ok(prothesisPos < katalepsisPos, 'Katalepsis should be last');
   });
 
-  it('includes all 12 protocols in protocols table', () => {
+  it('includes all 13 protocols in protocols table', () => {
     const notes = generateReleaseNotes(mockResults);
     const protocolNames = [
       'Anamnesis', 'Horismos', 'Aitesis', 'Prothesis',
-      'Analogia', 'Periagoge', 'Euporia', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Elenchus', 'Katalepsis',
+      'Analogia', 'Periagoge', 'Euporia', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Elenchus', 'Diylisis', 'Katalepsis',
     ];
     for (const name of protocolNames) {
       assert.ok(notes.includes(name), `Expected ${name} in protocols table`);
@@ -471,13 +477,13 @@ describe('generateReleaseNotes', () => {
     assert.ok(notes.includes('### New'));
     assert.ok(notes.includes('### Fixed'));
     assert.ok(notes.includes('**prothesis**: Two-mode redesign'));
-    assert.ok(!notes.includes('### 12 Epistemic Protocols'));
+    assert.ok(!notes.includes(`### ${EXPECTED_PROTOCOL_COUNT} Epistemic Protocols`));
   });
 
   it('falls back to curated highlights when changelog groups empty', () => {
     const changelog = { groups: {}, ungrouped: [] };
     const notes = generateReleaseNotes(mockResults, { changelog });
-    assert.ok(notes.includes('### 12 Epistemic Protocols'));
+    assert.ok(notes.includes(`### ${EXPECTED_PROTOCOL_COUNT} Epistemic Protocols`));
   });
 });
 
@@ -503,7 +509,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 33 skills plus bundle in dry-run', () => {
+  it('packages all 34 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -516,7 +522,7 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 34);
+    assert.equal(result.results.length, 35);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -529,6 +535,7 @@ describe('package.js CLI', () => {
         'curses.zip',
         'dashboard.zip',
         'dispatch.zip',
+        'distill.zip',
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
         'forge.zip',
@@ -571,8 +578,6 @@ describe('package.js CLI', () => {
 // ============================================================
 // load-protocols Type signature regression guard
 // ============================================================
-
-const { discoverPlugins } = require('./load-protocols');
 
 describe('load-protocols Type signature extraction', () => {
   // Regression guard for PR #351 review T2: every active protocol's SKILL.md

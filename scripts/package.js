@@ -13,7 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
-const { discoverPlugins, protocolOrder } = require('./load-protocols');
+const { discoverPlugins, protocolOrder, CANONICAL_CLUSTERS } = require('./load-protocols');
 const projectRoot = path.resolve(__dirname, '..');
 
 // ============================================================
@@ -41,6 +41,7 @@ const DESCRIPTION_OVERRIDES = {
   elicit: 'Resolve via Extended-Mind reverse induction — (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × Substrate) → ResolvedEndpoint',
   bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution',
+  distill: 'Distill a session-tethered context into a portable handoff — (ContextTethered, AI, DISTILL, WorkingContext) → PortableHandoff',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   compose: 'Protocol composition authoring — build composition SKILL.md from protocol chains',
@@ -97,19 +98,26 @@ function validateProtocolTables() {
   }
 }
 
-// Curated first-release highlights (Phase A: no previous tag exists)
+// Curated first-release highlights (Phase A: no previous tag / empty-changelog fallback).
+// Drift-proof: the protocol count derives from PROTOCOL_ORDER and the cluster bullets are
+// parsed from CANONICAL_CLUSTERS (the single source also enforced against README by
+// static-checks). Per-protocol deficit → resolution lives in the Protocols table below,
+// so it is intentionally not duplicated in the cluster bullets here.
+const FIRST_RELEASE_PROTOCOL_COUNT = PROTOCOL_ORDER.filter(key => PROTOCOL_METADATA[key]).length;
+const FIRST_RELEASE_CLUSTER_BULLETS = CANONICAL_CLUSTERS
+  .split(' · ')
+  .map(seg => {
+    const m = seg.match(/^(.+?) \((.+)\)$/);
+    return m ? `- **${m[1]}**: ${m[2]}` : `- ${seg}`;
+  })
+  .join('\n');
 const FIRST_RELEASE_HIGHLIGHTS = `## Highlights
 
-### 12 Epistemic Protocols
+### ${FIRST_RELEASE_PROTOCOL_COUNT} Epistemic Protocols
 
 Structure human-AI interaction quality at every decision point. Each protocol resolves a typed deficit:
 
-- **Planning**: \`/inquire\` (context insufficiency), \`/elicit\` (axis-emergent reverse induction)
-- **Analysis**: \`/frame\` (absent frameworks), \`/ground\` (unmapped abstractions), \`/induce\` (in-process abstraction)
-- **Decision**: \`/gap\` (unnoticed gaps before action)
-- **Execution**: \`/attend\` (execution-time risk evaluation)
-- **Verification**: \`/contextualize\` (post-execution context mismatch), \`/sublate\` (pre-execution dialectical context vetting)
-- **Cross-cutting**: \`/bound\` (epistemic boundaries), \`/recollect\` (vague recall recognition), \`/grasp\` (comprehension verification)
+${FIRST_RELEASE_CLUSTER_BULLETS}
 
 ### Typed Deficit-Resolution System
 

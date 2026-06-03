@@ -17,6 +17,7 @@ on:
       - 'euporia/**'
       - 'elenchus/**'
       - 'anamnesis/**'
+      - 'diylisis/**'
 
 jobs:
   epistemic-review:
