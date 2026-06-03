@@ -62,6 +62,7 @@
 | Horismos (`/bound`) | 협업은 **공통기반**을 점증 구축하며 누가 무엇을 아는지는 **분산기억**으로 분담된다 → 무엇을 알고/무엇을 AI가 알아낼지의 경계 근거 | Clark & Brennan 1991; Wegner 1987; Cannon-Bowers/Salas/Converse 1993 |
 | Anamnesis (`/recollect`) | 재인은 **부호화 특수성** — 인출단서가 부호화 맥락과 겹칠 때 회상이 성립 (현상학적 근거는 cross-ref) | Tulving & Thomson 1973 + `docs/philosophical-anchors.md` §Anamnesis |
 | Katalepsis (`/grasp`) | 생성·인출연습·사전시험이 수동 수용보다 이해를 강화 (이미 근거화됨) | cross-ref `docs/philosophical-anchors.md` §Katalepsis |
+| Diylisis (`/distill`) | 작성자는 수신자의 결핍을 모델링 못 하고(지식의 저주) 자신의 검증된 지식·가정한 믿음을 분간 못 한다(출처 감시 실패·사후과잉확신) → 검증된 교정만 KEEP·나머지는 판단 회부하는 hygiene hard-line의 근거; 또 발화와 달리 텍스트는 탈맥락·자립적이어야 한다(구술→문어 전환) → 지시어 탈맥락화 | Camerer/Loewenstein/Weber 1989; Johnson/Hashtroudi/Lindsay 1993; Fischhoff 1975; Olson 1977 |
 
 ---
 
@@ -129,14 +130,19 @@
 - Wegner, D. M. (1987). Transactive memory: A contemporary analysis of the group mind. In B. Mullen & G. R. Goethals (Eds.), *Theories of Group Behavior* (pp. 185-208). Springer.
 - Cannon-Bowers, J. A., Salas, E., & Converse, S. (1993). Shared mental models in expert team decision making. In N. J. Castellan (Ed.), *Individual and Group Decision Making* (pp. 221-246). Erlbaum.
 - Tulving, E., & Thomson, D. M. (1973). Encoding specificity and retrieval processes in episodic memory. *Psychological Review*, 80(5), 352-373.
+- Camerer, C., Loewenstein, G., & Weber, M. (1989). The curse of knowledge in economic settings: An experimental analysis. *Journal of Political Economy*, 97(5), 1232-1254.
+- Johnson, M. K., Hashtroudi, S., & Lindsay, D. S. (1993). Source monitoring. *Psychological Bulletin*, 114(1), 3-28.
+- Fischhoff, B. (1975). Hindsight ≠ foresight: The effect of outcome knowledge on judgment under uncertainty. *Journal of Experimental Psychology: Human Perception and Performance*, 1(3), 288-299.
+- Olson, D. R. (1977). From utterance to text: The bias of language in speech and writing. *Harvard Educational Review*, 47(3), 257-281.
 
 ## 검증 상태 및 잔여 불확실성
 
 본 매핑은 Codex(`/goal`) + Tavily 외부 검증 세션으로 도출했다. **검증 강도**:
 
-- **외부 확인됨**(Verified): Aitesis, Analogia, Syneidesis, Prosoche, Epharmoge, Elenchus, Horismos, 인지부하 핵심 문헌, Tulving & Thomson — 이번 실행에서 소스를 외부 확인.
+- **외부 확인됨**(Verified): Aitesis, Analogia, Syneidesis, Prosoche, Epharmoge, Elenchus, Horismos, 인지부하 핵심 문헌, Tulving & Thomson — 이번 실행에서 소스를 외부 확인. Diylisis(`/distill`)의 4개 인용은 후속 세션에서 권위 출처(APA PsycNet·DOI·발행처·저자 CV)로 외부 확인.
 - **부분 확인**(Mostly): Euporia, Prothesis, Periagoge, Katalepsis — 핵심만 외부 확인, 일부는 학습지식 종합.
 - **재구성 주의**: 일부 서지의 권/호/페이지는 학습지식에서 재구성했다. **출판/공개 전 정전 항목의 정확한 pagination을 1차 출처로 spot-check 권장.**
+- **Diylisis 인용 주의 2건**(미래 편집자 보호): Fischhoff(1975)의 issue 번호 `3`은 다수 인용에서 누락되나 정확하다(저자 CV 확인); Olson(1977) 제목은 "The Bias of Language"이며 흔한 오기 "The literate bias of language"가 아니다(발행처·APA PsycNet 확인).
 
 **가장 약한 근거**: 결정피로(decision fatigue). Vohs et al.(2008) 원 결과는 관련 있으나 ego-depletion 자원 모델은 Hagger et al.(2016) 다수연구실 재현에서 확인되지 않았다. 선택과부하도 조건부(Scheibehenne et al. 2010 메타분석 평균효과 ≈ 0). → 이 둘은 정량 법칙이 아니라 설계 경고로만 사용.
 
