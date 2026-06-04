@@ -255,7 +255,7 @@ Present antitheses and disposition slots via Cognitive Partnership Move (Constit
 **Pre-gate text output** (Context-Question Separation): For each source in S_high, present as text output:
 - The source's content (verbatim or close paraphrase)
 - The tagging triple (provenance verdict, freshness verdict, leverage count)
-- The selected pattern (A, B, C, or Emergent) with its thesis ↔ antithesis pair
+- The selected pattern (A, B, C, D, or Emergent) with its thesis ↔ antithesis pair
 - The basis cited for the antithesis
 
 Then present a per-source disposition interaction. Each source receives its own slot; batching across sources is permitted when slot count ≤ 4, otherwise process sources in batches of up to 4.
