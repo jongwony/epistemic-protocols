@@ -149,7 +149,7 @@ Convergence is `verdict=approve`, OR zero new (non-refuted) findings on a full r
 
 ```
 Round {k} — source: {source} — verdict: {verdict}
-  Relay:   {findings the loop resolved autonomously — Extension}
+  Relay:   {findings the loop dispositioned autonomously — Extension}
              each entry: finding → [applied | dropped: basis | carried: reason]   (a side-effect rides inline as [side-effect: …] on an applied entry)
   Gated:   {findings that needed your judgment — Constitution, from a Judgment disposition or an orthogonal /attend risk gate}
              each entry: finding → [applied | dropped: basis | carried: reason]
