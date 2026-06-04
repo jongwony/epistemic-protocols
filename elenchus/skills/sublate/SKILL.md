@@ -21,7 +21,7 @@ W → identify(W) → S_high → tag(provenance, freshness, leverage) → S' →
 WorkingContext
   → identify(high_leverage_sources, S_high)    -- silent scan for sources warranting audit
   → tag(provenance, freshness, leverage)        -- attach metadata triple per source
-  → posit(antithesis per source)                -- Pattern A ∪ Pattern B ∪ Pattern C
+  → posit(antithesis per source)                -- Pattern A ∪ Pattern B ∪ Pattern C ∪ Pattern D
   → present(antitheses, disposition slots)      -- per-source Constitution interaction
   → judge(disposition per source)                -- closed coproduct response
   → emit(VettedContext with disposition table)
@@ -46,7 +46,7 @@ FreshnessTag   = { source: Source, age: Duration, horizon: Duration, stale: Bool
                -- currency only: a source can be fresh yet still not track the behavior its claim asserts (it documents intent with nothing enforcing the match). Freshness is necessary but not sufficient for trusting a source; the support-integrity challenge is posited per source in Pattern A (Source Provenance Audit).
 LeverageTag    = { source: Source, downstream_count: Nat, branches: Set(Reference) }
 S'             = Map(Source, ProvenanceTag × FreshnessTag × LeverageTag)
-Pattern        ∈ {ProvenanceAudit, CounterfactualGap, CrossSourceConsistency} ∪ Emergent(Pattern)
+Pattern        ∈ {ProvenanceAudit, CounterfactualGap, CrossSourceConsistency, InferenceFallacyAudit} ∪ Emergent(Pattern)
 Antithesis     = { source: Source, pattern: Pattern, thesis: String, antithesis: String, basis: String }
 A[]            = List(Antithesis)
 Disposition    = Confirmed                                   -- assumption survived antithesis
@@ -177,12 +177,15 @@ User-initiated activation triggers Phase 0's silent scan. The scan does not gate
 | Source age beyond horizon | Source's `observed_at + horizon(origin)` < now; horizon varies by origin (UserStatement and ToolOutput have shorter horizons than DocumentRead and PastSession) | Pattern A or B |
 | Provenance-chain length | The belief depends on an N-step inference chain rather than direct observation, citation, or measurement | Pattern A (provenance) |
 | Cross-source contradiction | Two collected sources nominally pointing at the same referent diverge in their content or implication | Pattern C (cross-source consistency) |
+| Inference-character conclusion | The source is itself a conclusion reached by inference (origin `AIInference`, or a conclusion beginning to function as a standing premise) | Pattern D (inference fallacy) |
 
-`N` (high-leverage threshold) and horizon defaults per origin are residual variables refined through accumulated use evidence. The four criteria are working hypotheses, not closed; an Emergent criterion may surface on use.
+`N` (high-leverage threshold) and horizon defaults per origin are residual variables refined through accumulated use evidence. The five criteria are working hypotheses, not closed; an Emergent criterion may surface on use.
 
 ## Patterns
 
-Three patterns are inscribed. Each pattern pairs a current claim with a challenge that would shake it; the AI surfaces both at Phase 1 Step 2 per source, and the user decides how to handle the source at Phase 2. A fourth Emergent pattern is permitted but not pre-named — it must satisfy `ContextSuspect → VettedContext` (the challenge must directly confront the source's claim, not stand as a side verification check).
+Four patterns are inscribed. Each pattern pairs a current claim with a challenge that would shake it; the AI surfaces both at Phase 1 Step 2 per source, and the user decides how to handle the source at Phase 2. A further Emergent pattern is permitted but not pre-named — it must satisfy `ContextSuspect → VettedContext` (the challenge must directly confront the source's claim, not stand as a side verification check).
+
+Patterns A, B, and C vet a source along the **source-vetting axis** (provenance authority, counterfactual robustness, cross-source agreement). Pattern D vets along the **reasoning axis** — whether the inference that produced a conclusion is itself sound — complementing the source-vetting patterns so that the inference, not only its source, is examined.
 
 ### Pattern A — Source Provenance Audit
 
@@ -208,6 +211,16 @@ When two sources point at the same referent but diverge, the challenge forces an
 - What would shake it: "X₁'s claim and X₂'s claim diverge at point Q — which source is authoritative for this claim, and what reconciles the divergence?"
 - The user decides how to handle the sources: keep the sources as-is, rewrite the claim with a refinement, withdraw one of the sources, treat an outside source-of-truth as the authoritative reference, or hand the question off to another protocol.
 
+### Pattern D — Inference Fallacy Audit
+
+When a source is itself a conclusion reached by inference — an `AIInference` origin, or any conclusion that is starting to be used as a standing premise — the challenge tests whether the conclusion's validity depends on a reasoning flaw rather than on the source it cites. The AI reverse-derives the flaw condition from a reasoning-fallacy archetype, instead of waiting for the user to supply a counter-condition.
+
+- The source's current claim: "Conclusion Y follows soundly from the basis observed."
+- What would shake it: "Y's validity rests on a reasoning archetype that does not hold." The archetype is described as a principle, not selected from a closed list: does the conclusion treat a point-in-time observation as a time-invariant law (a present coincidence read as permanent truth); generalize a standing rule from one or few observations; conclude from only the visible (surviving) sample; draw a conclusion that ignores the base rate; or read correlation as cause. These archetypes are a starting set for recognition, not an exhaustive catalog — an Emergent fallacy archetype is admitted whenever a conclusion's soundness rests on a reasoning move not named here.
+- The user decides how to handle the source: keep the conclusion as-is, rewrite it with its scope made conditional (the inference holds only within the stated bounds), withdraw the conclusion, set it aside until a measurement settles it, or hand the question off to another protocol.
+
+**Boundary with Pattern B**: Pattern B is a counterfactual the *user* frames — the user supplies condition Z and asks whether Y still holds. Pattern D is the AI *reverse-deriving* the flaw condition from a fallacy archetype, moving the discovery burden from the AI happening to pick the right counterfactual to an archetype-driven scan of the inference itself. A conclusion can pass Pattern B (no user-supplied condition shakes it) yet fail Pattern D (its soundness silently depends on treating the present as invariant).
+
 ## Protocol
 
 ### Phase 0: Source Identification (Silent)
@@ -228,7 +241,7 @@ Generate metadata triple plus dialectical antithesis per source.
 
 **Step 1 — Tagging**: For each `s ∈ S_high`, attach ProvenanceTag (authorized claim + verification path + confidence), FreshnessTag (age, horizon, stale flag), and LeverageTag (downstream_count, branches). Use Read and Grep to verify provenance against the source's claimed origin where the source's content cites verifiable artifacts. The ProvenanceTag binds authority to the claim's referent, claim_kind, and scope; reuse of the same source as authority for a different claim must surface through Pattern A or Pattern C rather than silently carrying over. For an audit-candidate source, provenance verification also asks whether the source actually tracks the behavior its claim asserts or merely documents it — a source that is fresh yet not tied to that behavior is posited against in Pattern A on that basis, not cleared by its freshness verdict alone. When enforcement coupling cannot be determined from the available tools, posit the gap as a Pattern A antithesis candidate with basis "enforcement coupling not observable from available tools" — neither skip it silently nor assert coupling with false confidence.
 
-**Step 2 — Antithesis positing**: For each tagged source, select the most applicable pattern (A, B, C, or Emergent) and construct an antithesis. The antithesis must:
+**Step 2 — Antithesis positing**: For each tagged source, select the most applicable pattern (A, B, C, D, or Emergent) and construct an antithesis. A source that is itself an inferred conclusion (origin `AIInference`, or a conclusion functioning as a standing premise) is a candidate for Pattern D, where the antithesis reverse-derives the inference's flaw condition from a fallacy archetype rather than from a user-supplied counter-condition. The antithesis must:
 - Cite the source's claim verbatim, anchored to the originating sentence or artifact
 - Name the dialectical challenge concretely (a verification gap, a counterfactual condition, a divergent sibling source)
 - Surface the basis for the challenge so the user can recognize the antithesis's evidence
@@ -301,7 +314,7 @@ Present transformation trace as text output, then proceed with the vetted contex
 6. **Convergence evidence**: Present transformation trace (source → antithesis → disposition) before declaring all sources vetted; per-source evidence is required, not asserted.
 7. **Source chain preservation**: W.sources is read-only across the protocol's lifetime. Antithesis and disposition annotate, never mutate, the source list. A Discarded disposition removes a source from downstream usage but preserves it in Λ.history with its withdrawal reason.
 8. **Loop continuity under bounded regret**: Deferred dispositions whose re-trigger condition has not been met let the loop continue. Only dispositions requiring genuinely viable alternative judgment paths — where the user's values determine the choice among options (Constitution-level entropy > 0) — warrant Phase 2 surfacing; relay-level operations (tagging, antithesis text construction, trace presentation) proceed inline.
-9. **Antithesis must be dialectical**: An antithesis names a concrete counter-claim (Pattern A: "X is unverified"), counter-condition (Pattern B: "in condition Z, Y fails"), or counter-source (Pattern C: "X₁ and X₂ diverge at Q"). Procedural queries ("have you checked X?") surface in `/inquire` or `/attend`, not here.
+9. **Antithesis must be dialectical**: An antithesis names a concrete counter-claim (Pattern A: "X is unverified"), counter-condition (Pattern B: "in condition Z, Y fails"), counter-source (Pattern C: "X₁ and X₂ diverge at Q"), or counter-inference (Pattern D: "Y's soundness rests on a fallacy archetype that fails here"). Procedural queries ("have you checked X?") surface in `/inquire` or `/attend`, not here.
 10. **Closed coproduct discipline**: Disposition is a closed coproduct of seven named variants plus Emergent. The Other option permits free-response, which the AI maps to the closest variant or surfaces as a candidate Emergent variant for that source — it does not bypass the coproduct.
 11. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic disposition variant into a concrete instance with parameters while preserving the TYPES coproduct structure) is distinct from mutation.
 12. **Substrate boundary**: Elenchus scope is the epistemic substrate — source identification, antithesis positing, disposition surfacing, and integration through Phase 0 to Phase 3. Post-vetting execution (the downstream action's substrate enforcement, harness permission, network/state mutation) belongs to native harnesses or specialized substrates, delegated by handoff after Phase 3 integration.
@@ -309,3 +322,4 @@ Present transformation trace as text output, then proceed with the vetted contex
 14. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 15. **Claim-relative provenance**: ProvenanceTag records the claim a source authorizes. Pattern A tests source authority against that claim; Pattern C enumerates candidate pairs over same-referent sources, then tests cross-source consistency only after referent and claim-kind compatibility are explicit. The tag classifies and surfaces the issue; disposition remains the user's Constitution judgment.
 16. **Currency is not support-integrity**: A source that is fresh and present is not thereby trusted — freshness is necessary but not sufficient for the claim a source grounds. When a source is current yet nothing ties it to the behavior its claim asserts, Pattern A must posit that gap as the antithesis (would the source break or fail if that behavior changed, or stay unchanged and silently wrong?) and surface it with cited basis; the full disposition coproduct stays available and the user constitutes the disposition, recording the basis on which freshness was or was not enough. The AI surfaces the support-integrity challenge; it does not decide it.
+17. **Inference-fallacy archetypes are principle, not closed catalog**: Pattern D seeds its antithesis from reasoning-fallacy archetypes stated as principles — the named archetypes (a present coincidence read as permanent truth, generalizing from few observations, surviving-sample-only reading, base-rate neglect, correlation-as-cause) are a starting set for recognition, never a closed enumeration, and an Emergent archetype is admitted whenever a conclusion's soundness rests on an unnamed reasoning move. Pattern D differs from Pattern B by direction: B vets a user-supplied counter-condition; D reverse-derives the flaw condition from an archetype, moving the discovery burden off the AI happening to pick the right counterfactual. A source qualifies for Pattern D when it is an inferred conclusion (origin `AIInference`, or a conclusion functioning as a standing premise); because sublate's unit is already `Source`, this is a pattern, not a new protocol.
