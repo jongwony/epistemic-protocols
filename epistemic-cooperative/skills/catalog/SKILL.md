@@ -73,6 +73,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Anamnesis | `/recollect` | Resolve vague recall into recognized context — /recollect (ἀνάμνησις: recollection) |
 | Diylisis | `/distill` | Handoff context to a fresh zero-memory session — distill out session-tethered references into a portable handoff |
 | Katalepsis | `/grasp` | AI did work and you need a fast path to understand, approve, explain, or modify it |
+| Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, and stopping are non-trivial — conduct the session's method before object-level work begins |
 
 ## Detail Mode
 

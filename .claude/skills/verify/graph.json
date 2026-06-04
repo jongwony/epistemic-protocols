@@ -3,7 +3,7 @@
   "nodes": [
     "horismos", "aitesis", "analogia",
     "periagoge", "euporia", "prothesis", "syneidesis", "prosoche", "epharmoge",
-    "elenchus", "katalepsis", "anamnesis", "diylisis"
+    "elenchus", "katalepsis", "anamnesis", "diylisis", "hyphegesis"
   ],
   "edge_types": {
     "precondition": {
@@ -56,6 +56,9 @@
     { "source": "elenchus", "target": "epharmoge", "type": "advisory", "satisfies": "vetted pre-state가 post-execution 적용성 검증 컨텍스트를 제공" },
     { "source": "elenchus", "target": "horismos", "type": "advisory", "satisfies": "vetted findings가 후속 경계 정의 정보를 제공" },
     { "source": "elenchus", "target": "diylisis", "type": "advisory", "satisfies": "vetted provenance가 distill F3b의 correction-delta read 컨텍스트를 제공" },
-    { "source": "horismos", "target": "diylisis", "type": "advisory", "satisfies": "경계 맵이 distill recipient-relevance 판정 범위를 좁힘" }
+    { "source": "horismos", "target": "diylisis", "type": "advisory", "satisfies": "경계 맵이 distill recipient-relevance 판정 범위를 좁힘" },
+    { "source": "prothesis", "target": "hyphegesis", "type": "advisory", "satisfies": "프레임의 심의 토폴로지(렌즈 범위)가 graph-scope 지휘 토폴로지를 시드" },
+    { "source": "horismos", "target": "hyphegesis", "type": "advisory", "satisfies": "경계 맵이 지휘 범위(어떤 이동이 in-scope)를 좁힘" },
+    { "source": "hyphegesis", "target": "prosoche", "type": "advisory", "satisfies": "지휘된 방법이 situated 실행으로 핸드오프" }
   ]
 }

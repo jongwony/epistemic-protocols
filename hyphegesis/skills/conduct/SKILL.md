@@ -1,0 +1,273 @@
+---
+name: conduct
+description: "Conduct the method of a session's epistemic work before object-level cognition begins. When a work prospect needs multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial, design a conduct topology over the protocol graph and hand off a method plan with in-session checkpoints; single-move work relays to that one protocol instead of conducting. Type: (MethodUnderdetermined, AI, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod. Alias: Hyphegesis(ὑφήγησις)."
+---
+
+# Hyphegesis Protocol
+
+Conduct how a session's epistemic work will be carried out — the order, independence, reconciliation, termination, and routing of its cognitive moves — when that method is underdetermined before object-level cognition begins. The morphism is **design THEN hand off**: Hyphegesis designs a conduct topology over the protocol graph and emits a method plan with in-session checkpoints, then stops; the substrate executes the moves. Type: `(MethodUnderdetermined, AI, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod`.
+
+## Definition
+
+**Hyphegesis** (ὑφήγησις: a leading-the-way, guiding from just ahead): A dialogical act of conducting a session's epistemic work — deciding how its multiple cognitive moves relate in order, independence, reconciliation, termination, and routing — when the method is underdetermined while the goal is clear. The protocol's lexical verb is `/conduct`. It activates only when the work needs two or more moves whose conduct is non-trivial (single-move work relays to that one protocol), designs the conduct topology impact-first (locking stable axes, deferring volatile ones to in-session checkpoints), surfaces substrate feasibility as a handoff annotation, and hands off a method plan that the substrate — not Hyphegesis — executes.
+
+```
+── FLOW ──
+Hyphegesis(WP) → MethodBrief(WP) → guard[relay-test, anti-self-application] →
+  [single-move ∨ trivial-conduct: relay-route(extension) → deactivate] |
+  [multi-move ∧ non-trivial:
+    Qc(brief, warrant) → continue →
+    MoveId(WP × PG) → Sc(MoveSet) → MS →
+    CT_default-relay → loop( AxisGate(impact-first axis·region) → VM → update(CT) → auto-advance ) until Sufficient → CT →
+    SubstrateHandoff(CT) → SH → converge(conduct trace) → ConductedMethod ]
+
+── MORPHISM ──
+WorkProspect × ProtocolGraph
+  → brief(method, conduction_warrant)         -- infer the work prospect's method-brief; judge whether conduction is warranted
+  → guard(relay_test, anti_self_application)  -- single-move work relays to that one protocol; Hyphegesis does not conduct Hyphegesis
+  → identify(moves)                           -- candidate cognitive moves over the protocol graph
+  → select(moves)                             -- user confirms the move set via Cognitive Partnership Move (Constitution)
+  → design(conduct_topology)                  -- impact/leverage-first: lock stable axes, defer volatile to in-session checkpoints; edge-local over move-regions
+  → annotate(substrate_feasibility)           -- per resolved topology, surface substrate realizability as a handoff annotation
+  → handoff(conducted_method)                 -- emit the method plan + in-session checkpoints, then stop (substrate executes)
+  → ConductedMethod
+requires: method_underdetermined(WP)           -- runtime checkpoint (Phase 0)
+deficit:  MethodUnderdetermined                -- activation precondition (Layer 1/2)
+preserves: WP                                  -- work prospect read-only
+invariant: Conduction over Substrate
+
+── TYPES ──
+WP     = WorkProspect: the work or goal facing object-level cognition, with its method (conduct plan) not yet determined
+PG     = ProtocolGraph: available protocols and move-neighbors (the dependency graph plus ad-hoc moves)
+Move   = CognitiveMove: a single cognitive step (protocol invocation | analysis pass | delegation) — the unit Hyphegesis arranges, always object-level (never another conduction)
+MS     = MoveSet: (WP × PG) → {Move₁ … Moveₙ}, n ≥ 2  -- n < 2 → guard relay, deactivation
+MethodBrief = AI-inferred summary of WP: { work_intent, expected_handoff, span }  -- span = invocation → next planned /compact or /clear (the design-time horizon; the user types the command)
+Warrant = ConductionWarrant ∈ {warranted, relay}  -- warranted = (moves ≥ 2 ∧ conduct non-trivial: ≥ 2 conduct-plans with differential futures); relay = single-move ∨ trivial (conduction entropy → 0)
+MoveRegion = a contiguous sub-graph of moves sharing one conduct treatment (e.g. an authoring region vs a verification region); the single region "whole" when order is not a dependency DAG
+axis   ∈ {order, independence, reconciliation, termination, routing}  -- FINITE seed; surfaced impact/leverage-first (most-constrained axis·region first), NOT a fixed sequence
+  Gen(order)          ∈ {single_move, sequential_chain, parallel_fan, dependency_dag}
+  Gen(independence)   ∈ {isolated, shared}                                          -- isolation before synthesis-contamination
+  Gen(reconciliation) ∈ {aggregate, dialectic, adversarial_refute, synthesis}       -- the only composable axis (⨾/∥)
+  Gen(termination)    ∈ {single_pass, bounded_rounds, until_dry_ceiling, until_goal_met}
+  Gen(routing)        ∈ {return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding}
+ResolvedValue⟨a⟩ = per-axis resolved value, axis-typed (composition is NOT axis-uniform):
+   ResolvedValue⟨reconciliation⟩ = Gen(reconciliation) ⊕ Compose(RVᵣ, RVᵣ, op)  -- the sole composable axis (the reconciliation-stage algebra)
+   ResolvedValue⟨order⟩ = Gen(order);  ResolvedValue⟨independence⟩ = Gen(independence);  ResolvedValue⟨termination⟩ = Gen(termination);  ResolvedValue⟨routing⟩ = Gen(routing)  -- SCALAR axes: Gen only (⨾/∥ have no meaning on an order shape, an isolation flag, a termination bound, or a routing flag)
+op     ∈ {⨾ sequential, ∥ parallel}             -- reconciliation-stage operators; extensible at operator level
+CT     = ConductTopology = Map(axis → Map(MoveRegion → ResolvedValue⟨axis⟩))  -- EDGE-LOCAL: when Gen(order) = dependency_dag, independence/reconciliation/routing resolve per move-region (non-uniform); uniform axes carry the single region "whole"
+CT_default = ⟨order: sequential_chain, independence: isolated, reconciliation: synthesis, termination: bounded_rounds, routing: return_to_user⟩ over the single region "whole"  -- the assembled tuple of per-axis Gen defaults; relay fast-path
+AxisGate = { axis, region, options, default, basis }  -- one surfaced per elicitation cycle, impact/leverage-first; reconciliation gate additionally offers ⨾/∥ composites
+Checkpoint = an in-session conductor re-entry point (plan | exec | verify, or a finer sub-topology point) where Constitution may re-fire  -- in-session ONLY; /compact and /clear are the span wall, never checkpoints
+CheckpointSet = ordered Set(Checkpoint)  -- Hyphegesis conducts to the LAST checkpoint, then downstream-delegates (multi-consumer-like)
+SH     = SubstrateHandoff: CT → FeasibilityAnnotation  -- substrate realizability surfaced as a handoff annotation (matter; composed in TOOL GROUNDING, not in phase prose)
+VM     = ConductMove ∈ {Select(value), Compose(via op), Reorient(axis), Sufficient}  -- per-cycle user move in the axis gate; Compose offered on the reconciliation axis only
+         Sufficient = a MOVE in the axis gate (NOT a separate gate) → converge elicitation (user Constitution declaration)
+ResidualAxis = { axis, region, status: ResidualDisposition, reason }  -- unresolved axis·region carries Gen default + a surfaced disposition; silent default-binding forbidden
+ResidualDisposition ∈ {Declared, Deferred, Dismissed}
+ConductedMethod = { topology: CT, move_assignment: Map(Move → ⟨axis-position, region⟩), checkpoints: CheckpointSet, substrate_handoff: SH, residuals: Set(ResidualAxis) }
+         -- the method PLAN; handed off (the substrate executes), with a conduct trace surfaced (completion evidence)
+
+── WP-BINDING ──
+bind(WP) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_prospect
+Priority: explicit_arg > colocated_expr > prev_user_turn > ai_identified_prospect
+
+/conduct "text"              → WP = "text"
+/conduct (alone)             → WP = the work prospect under discussion
+"how should I approach..."   → WP = the work named before the trigger
+AI-detected trigger          → WP = the multi-move prospect AI identified (Hybrid: user confirms at the Phase 0 guard gate)
+
+── PHASE TRANSITIONS ──
+Phase 0: WP → MethodBrief(WP) → guard[relay-test] → Qc(brief, conduction-warrant) → Stop → [warrant=relay: relay-route, deactivate | warrant=warranted: continue]   -- brief + warrant; relay-test result shown as pre-gate text [Tool]
+Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → MS                                                                                                          [Tool]
+Phase 2: MS → CT_default_relay(extension: present CT_default + basis as pre-gate text) → proceed-unless-redirected → loop( AxisGate(next axis·region, impact/leverage-first — most-constrained first: default + basis + per-value differential implications; [reconciliation axis ONLY: + ⨾/∥ composites + affordance]) → Stop → VM ∈ {Select | Compose(reconciliation only) | Reorient | Sufficient} → update(CT, surfaced_axes, checkpoints, elicitation_cycle) → [VM=Sufficient: exit | last axis·region surfaced ∧ ¬Sufficient: implicit-Sufficient(relay) | else: auto-advance(relay) to next axis·region] ) until Sufficient ∨ all-axes-resolved → unresolved axis·region → Gen default + ResidualAxis → CT → converge(topology trace)   -- impact-first design, Extension fast-path on default [Tool]
+Phase 3: CT → SubstrateFeasibility(extension) → SH → handoff[Agent](ConductedMethod) → deactivate   -- per-topology substrate realizability annotation, then hand off the plan (execution out of scope) [Tool]
+
+── LOOP ──
+After Phase 0 (Method Brief + Warrant):
+  warrant = relay     → relay-route to the single resolving protocol, emit it as the routing, deactivate (conduction not needed)
+  warrant = warranted → Phase 1 → Phase 2 → Phase 3
+  -- Esc key → terminate (no plan emitted)
+
+During Phase 2 (Conduct Design — topology elicitation):
+  Extension fast-path (entry): present CT_default + basis as pre-gate relay text and proceed-unless-redirected. The immediate-sufficiency path costs ZERO new turn-yields — the default topology resolves without opening the axis gate. The gate opens only when the user engages refinement.
+  When the user engages refinement, each cycle surfaces the single most decision-relevant UNSURFACED axis·region by impact/leverage — the most-constrained axis first (the one whose values most divide the downstream conduct-plans), NOT a fixed order. Stability is a separate lock/defer criterion: a high-impact axis that is stable is locked now; a high-impact axis that is volatile is routed to an in-session checkpoint for re-decision; a low-impact axis takes its Gen default. This defer-volatile rule is the design kernel. Each move integrates one ConductMove and updates MODE STATE:
+    VM = Select(value)  → record axis·region → Gen(value) in CT; surfaced_axes ∪= {axis}; elicitation_cycle += 1; auto-advance to next axis·region
+    VM = Compose(op)    → [reconciliation axis ONLY] record reconciliation → Compose(RVᵣ, RVᵣ, op) in CT; surfaced_axes ∪= {reconciliation}; elicitation_cycle += 1; auto-advance
+    VM = Reorient(axis) → remove the replaced axis from surfaced_axes and CT, re-surface the reframed axis; elicitation_cycle += 1 (does NOT auto-advance)
+    VM = Sufficient     → a move in the axis gate (NOT a separate gate): converge — unresolved axis·regions auto-resolve to Gen default + ResidualAxis → CT resolved → Phase 3
+    EXHAUSTION (all axis·regions surfaced ∧ ¬Sufficient) → implicit Sufficient (relay): converge with the now-complete CT → Phase 3
+  BOUND: the loop is bounded by user agency — the user's Sufficient move or Esc-Stop terminates it. The seed axis set is FINITE, so each unsurfaced axis·region auto-resolves to its Gen default, and the finite set guarantees a terminal. This is NOT loop-until-fixpoint.
+  converge(topology trace) → Phase 3. Esc key → tool-level termination (no plan emitted).
+
+After Phase 3 (Handoff):
+  Hyphegesis conducts to the LAST checkpoint in CheckpointSet, then downstream-delegates (multi-consumer-like) — execution and anything past the last in-session checkpoint belong to the substrate or to the routed protocol. The span ends at the next planned /compact or /clear, which the user types; Hyphegesis does not detect or emit that wall.
+  A checkpoint may re-open Constitution mid-execution (its conduct can change there), but the design goal is to settle the least-volatile axes first so re-decision is rare.
+
+Continue until convergence: warrant=relay deactivation, ConductedMethod handed off, or user Esc key.
+
+Convergence evidence: At handoff, present the per-move trace — for each Move, show (Move → its ⟨axis-position, region⟩ in CT) — AND the per-axis topology trace — for each resolved axis·region, show (axis·region → ConductMove → value, unresolved → Gen default + disposition) — AND the SubstrateHandoff annotations and the CheckpointSet. Convergence is demonstrated, not asserted.
+
+── TOOL GROUNDING ──
+-- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
+Phase 0 MethodBrief (sense)           → Internal analysis (infer the work prospect's method-brief + span from the session)
+Phase 0 guard (sense)                 → Internal analysis (relay-test: single-move ∨ trivial-conduct → relay; anti-self-application; no Λ mutation)
+Phase 0 relay_route (extension)       → TextPresent+Proceed (single-move resolution: route to that one protocol as the recommendation, deactivate)
+Phase 0 Qc (constitution)             → present (work prospect confirmation + conduction-warrant; relay-test result as pre-gate text; Esc key → loop termination at LOOP level)
+Phase 1 MoveId (observe)              → Read, Grep, Glob (the dependency graph + session context to identify candidate moves)
+Phase 1 Sc (constitution)            → present (MoveSet confirmation; multiSelect: true; Esc key → loop termination at LOOP level)
+Phase 2 CT_default_relay (extension)  → TextPresent+Proceed (entry fast-path: present CT_default + basis as pre-gate relay text; proceed-unless-redirected; mirrors Phase 0 relay)
+Phase 2 AxisGate (constitution)       → present (single axis·region gate, impact/leverage-first: default + basis + per-value differential implications; reconciliation axis ONLY additionally surfaces ⨾/∥ composites + a one-line affordance; moves {Select | Compose(reconciliation) | Reorient | Sufficient}; Esc key → loop termination at LOOP level)
+Phase 2 converge (extension)          → TextPresent+Proceed (topology trace: per resolved axis·region → ConductMove → value, unresolved → Gen default + disposition)
+Phase 3 SubstrateFeasibility (extension) → TextPresent+Proceed (per resolved topology value, surface substrate realizability as a handoff annotation; declare conduction-degradation when the substrate cannot realize the resolved topology)
+Phase 3 handoff (dispatch)            → Agent (hand the ConductedMethod plan to the substrate; the substrate executes — execution is out of scope)
+Λ (track)                             → TaskCreate/TaskUpdate (work prospect + framing shifts durable; per-axis bookkeeping stays in session)
+-- Substrate realization: inline | isolated-subagent | agent-team | dynamic-workflow | plan-mode are PEER substrates for the conducted moves. Topology→substrate feasibility (a non-epistemic substrate handoff — the protocol surfaces feasibility; the substrate enforces realizability): a dialectic reconciliation requires persistent addressable peers; a parallel_fan ⨾ adversarial_refute over a static aggregate is realizable by a stateless pipeline (e.g. a dynamic-workflow). Surface feasibility per resolved topology value as a delegated handoff annotation; when the substrate cannot realize the resolved topology, declare conduction-degradation rather than silently binding an infeasible substrate. The (constitution)/(extension) markers above remain the authoritative axis.
+
+── MODE STATE ──
+Λ = { phase: Phase, work_prospect: Option(WP), protocol_graph: Option(PG), move_set: Option(MS), topology: Option(CT), surfaced_axes: Set(axis), checkpoints: Option(CheckpointSet), elicitation_cycle: Nat, substrate_handoff: Option(SH), residuals: Set(ResidualAxis), active: Bool, cause_tag: String }
+Phase ∈ {0, 1, 2, 3}
+
+── COMPOSITION ──
+*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
+```
+
+## Core Principle
+
+**Conduction over Substrate**: When a session's epistemic work needs several cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial, the method of conducting them is underdetermined before object-level cognition begins — and that gap is substrate-invariant (it survives deleting every runtime noun: a wrong order, contamination before synthesis, no stopping criterion remain for any reasoner). Hyphegesis designs that method as a conduct topology over the protocol graph and hands off a plan; it does not execute the moves, and it never binds a substrate it cannot realize — when realizability fails it declares conduction-degradation rather than binding silently. Its identity is the deficit plus the operand (the protocol graph) plus the purpose (lock the stable, defer the volatile): the topology algebra is shared with `/frame` (which runs it over perspectives), and the impact-first interview loop is shared with `/bound`; Hyphegesis instantiates both over the session's whole move set.
+
+## Mode Activation
+
+### Activation
+
+**Pre-activation routing**: Before accepting a `/conduct` invocation, check the work shape. When the work resolves through a single protocol or a single move — its order, independence, reconciliation, termination, and routing are self-evident — suggest that one protocol directly (relay) rather than conducting. Engage `/conduct` when two or more moves are needed AND their conduct is non-trivial: more than one conduct-plan exists with a genuinely different downstream future. This guard precedes activation — it decides whether to accept the invocation.
+
+Command invocation activates mode until the conduct plan is handed off.
+
+**Activation layers**:
+- **Layer 1 (User-invocable)**: `/conduct` slash command or description-matching input. Always available.
+- **Layer 2 (AI-guided)**: A multi-move work prospect detected via in-protocol heuristics, where the conduct (order, independence, reconciliation, termination, routing) is non-trivial. The AI-detected path requires user confirmation at the Phase 0 guard gate (Hybrid initiator).
+
+### Priority
+
+<system-reminder>
+When Hyphegesis is active:
+
+**Supersedes**: Direct execution patterns that begin object-level work before the method is conducted
+(Conduct design must complete before the conducted moves begin)
+
+**Retained**: Safety boundaries, tool restrictions, user explicit instructions
+
+**Action**: Before the conducted work begins, present the conduct topology — impact-first, one axis·region at a time — via Cognitive Partnership Move (Constitution).
+</system-reminder>
+
+- Hyphegesis completes (hands off the plan) before the conducted moves begin
+- Loaded instructions resume after the method is conducted
+
+### Triggers
+
+| Signal | Detection |
+|--------|-----------|
+| Multi-move, non-trivial conduct | A work prospect needs two or more moves whose order, independence, reconciliation, termination, or routing genuinely divides the downstream plan (adversarial verification entangled with parallel work and synthesis; multiple protocols applied in a non-obvious order) |
+| Method-level meta-question | The user asks "how should I approach this whole thing?" rather than asking a single object-level question |
+| Migration / multi-stage investigation | Staged work where stages depend on each other and the dependency structure is itself a decision |
+
+**Qualifying condition**: Activate only when the method is genuinely underdetermined and multi-move. Large work scope or budget is *auxiliary* evidence that reinforces a multi-move trigger; it never triggers conduction on its own (it is substrate-adjacent). Small scope or single-move work does not warrant conduction.
+
+### Mode Deactivation
+
+| Trigger | Effect |
+|---------|--------|
+| Warrant = relay | Route to the single resolving protocol, deactivate (conduction not needed) |
+| ConductedMethod handed off | Emit the plan + checkpoints, hand off to the substrate, deactivate |
+| User Esc key | Return to normal operation; no plan emitted |
+
+## Protocol
+
+### Phase 0: Method Brief and Conduction Warrant
+
+Construct a Method Brief from the work prospect and **present** it for confirmation, together with the conduction-warrant judgment, via Cognitive Partnership Move (Constitution).
+
+The Method Brief infers, from the work prospect:
+- **Work intent**: what is to be accomplished and why
+- **Expected handoff**: what the conducted method should produce before the substrate takes over
+- **Span**: from this invocation (session start *or* mid-session) to the next planned `/compact` or `/clear`. This span is a design-time horizon — the natural end of a work chunk — not a runtime-detected event; the user types the command, so Hyphegesis never emits a "wall approaching" advisory.
+
+**Guard (relay-test)** runs before the gate and is shown as pre-gate text:
+- If the work resolves through a single move or a single protocol — conduction entropy → 0, the method is self-evident — present that one protocol as a relay route and **deactivate**. Conduction is not warranted.
+- **Anti-self-application**: Hyphegesis does not conduct Hyphegesis. The moves in a conduct plan are object-level protocols or analyses, never another conduction. Conducting the *build of* a protocol is object-level work (file edits, verification) and does not trip this guard; conducting "the conduction" does.
+
+Activation requires (a) two or more moves AND (b) their conduct (order, independence, reconciliation, termination, routing) is non-trivial — more than one conduct-plan with a different downstream future exists.
+
+### Phase 1: Move Identification
+
+Identify the candidate cognitive moves over the protocol graph, then **present** the move set via Cognitive Partnership Move (Constitution) with `multiSelect: true`.
+
+Read the dependency graph and the session to surface candidate moves (protocol invocations, analysis passes, delegations). Each move is an object-level step. The user confirms or edits the set; the set must contain two or more moves, or the guard relays.
+
+**Cross-session enrichment**: Prior conduct experiences accumulated in the hypomnesis store, and any context surfaced when `/recollect` has been invoked this session, bias the candidate move set toward move sequences the user has found productive for similar work. This is a heuristic input; the constitutive judgment remains with the user.
+
+### Phase 2: Conduct Design (Topology Elicitation)
+
+Lens-of-method established *which* moves. Conduct Design establishes *how* they relate — the **conduct topology** across five axes: order, independence, reconciliation, termination, routing.
+
+**Extension fast-path**: On entering Phase 2, first present `CT_default` and its basis as pre-gate relay text, then proceed unless the user redirects. A user who wants the default incurs **zero new turn-yields**. The axis gate (Constitution) opens only when the user engages refinement.
+
+**Elicitation cycle (impact/leverage-first)**: When the user engages refinement, each cycle surfaces the single most decision-relevant **unsurfaced** axis·region — the most-constrained axis first (the one whose values most divide the downstream conduct-plans), not a fixed sequence. This mirrors the most-constrained-variable heuristic. Stability is a *separate* lock/defer criterion layered on top of impact:
+- **high-impact ∧ stable** → lock the value now,
+- **high-impact ∧ volatile** → route it to an in-session checkpoint for re-decision rather than guessing now (the **defer-volatile kernel**),
+- **low-impact** → take the Gen default.
+
+Each axis has a defined downstream effect — no orphan axes:
+- **order** shapes the move sequence (`single_move`, `sequential_chain`, `parallel_fan`, `dependency_dag`),
+- **independence** prevents synthesis-contamination (`isolated` before reconciliation; `shared` relaxes it and declares degradation),
+- **reconciliation** combines separately-produced results (`aggregate`, `dialectic`, `adversarial_refute`, `synthesis`) — the only composable axis (⨾/∥),
+- **termination** sets the epistemic stop criterion (`single_pass`, `bounded_rounds`, `until_dry_ceiling`, `until_goal_met`),
+- **routing** sends each move's output onward (`return_to_user`, `chain_to_next`, `handoff_to_protocol`, `deepen_on_finding`).
+
+**Edge-local axes**: when `order` is `dependency_dag`, independence/reconciliation/routing are non-uniform across the move set — an authoring region may be `shared` while a verification region is `isolated`. The topology resolves these per **move-region**, not as one flat value; uniform axes carry the single region `whole`.
+
+**Pre-gate context, gate question** (Context-Question Separation): present each axis·region's default, its basis, and each value's epistemic trade-off as text *before* the gate. The gate carries only the question and per-option differential implications. For the **reconciliation axis only** (the sole composable axis), the gate additionally surfaces relevant ⨾/∥ composites as recognizable options plus a one-line composition affordance.
+
+**Matter is AI-proposed, not asked**: the AI scans the loaded environment (system prompt and available tools) and *proposes* the matter (which substrate could host each region), so the user's attention stays on the epistemic fork. Gates fire only for the epistemic-relevant decision — typically a single review-style fork (one-shot critique vs. back-and-forth debate) that simultaneously settles independence, reconciliation, and substrate for the verification region.
+
+The user's move is one of:
+- **Select(value)** — adopt a value for the axis·region; auto-advance to the next unsurfaced axis·region
+- **Compose(via op)** — combine reconciliation values via ⨾ or ∥ (reconciliation axis only); auto-advance
+- **Reorient(axis)** — reframe or replace the surfaced axis; the reoriented axis re-surfaces (no auto-advance)
+- **Sufficient** — declare the topology mission-sufficient; converge. A **move within the axis gate**, not a separate gate.
+
+**Termination (honest bound)**: the loop is bounded by user agency — a **Sufficient** move or Esc-Stop ends it. The finite axis set guarantees a terminal: surfacing the last axis·region without Sufficient converges by implicit Sufficient. Unresolved axis·regions auto-resolve to their Gen default with a surfaced residual disposition — silent default-binding is forbidden.
+
+**Checkpoints**: the conduct plan records a `CheckpointSet` — in-session re-entry points (plan → exec → verify, or finer points within that topology). Checkpoints are **in-session only**. `/compact` and `/clear` are the span wall, never checkpoints. Hyphegesis conducts to the last checkpoint, then downstream-delegates.
+
+### Phase 3: Substrate Handoff
+
+For the resolved topology, surface substrate feasibility as a handoff annotation, then hand off the `ConductedMethod` plan.
+
+The conduct topology is substrate-invariant; this phase composes it with the runtime. For each resolved topology value, state which substrate could realize it (inline, isolated-subagent, agent-team, dynamic-workflow, plan-mode) — for example, a `dialectic` reconciliation needs persistent addressable peers, while a `parallel_fan ⨾ adversarial_refute` over a static aggregate is realizable by a stateless pipeline. When the available substrate cannot realize the resolved topology, **declare conduction-degradation** rather than silently binding an infeasible substrate.
+
+Hyphegesis then hands off the plan and stops. It produces the method plan plus its checkpoints; the substrate — or the routed protocol — executes the moves. This is the completeness boundary: the protocol records the handoff and halts.
+
+## Rules
+
+1. **Conduction warrant (guard)**: Activate only when the method is genuinely underdetermined AND two or more moves are needed whose conduct is non-trivial. Single-move or self-evident work relays to that one protocol; conduction is not performed. Hyphegesis does not conduct Hyphegesis — conduct-plan moves are object-level, never another conduction.
+2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with a response opportunity; Constitution interaction requires turn yield before proceeding. Hyphegesis serves two recognition modes: externalizing the user's implicit method, and revealing context state the user structurally cannot see (the session's accumulated shape) — the latter is its irreplaceable value.
+3. **Design-time only**: Hyphegesis produces a method plan plus in-session checkpoints, then hands off. It has no runtime monitoring surface — it does not watch execution or emit runtime advisories. The span horizon (`/compact`, `/clear`) is user-controlled.
+4. **Impact/leverage-first design order**: Surface the most-constrained axis·region first (the one whose values most divide the downstream plan), not a fixed sequence. Stability is a separate lock/defer criterion: lock high-impact stable axes now; route high-impact volatile axes to an in-session checkpoint; default the low-impact ones. Defer-volatile is the kernel.
+5. **Independence before contamination (edge-local)**: The `isolated` value preserves each region's independence until reconciliation; `shared` relaxes it and MUST declare degradation. When `order = dependency_dag`, independence resolves per move-region, not as one flat value.
+6. **Conduction over Substrate (invariant)**: Phase prose names only epistemic conduction; substrate, agent realization, context-window, scheduler, and authentication live only in TOOL GROUNDING. The conduct form resolves substrate-independently, then composes feasibility at handoff; when the substrate cannot realize the resolved topology, declare conduction-degradation — never bind silently.
+7. **Span and checkpoints**: The span runs from invocation (session start or mid-session) to the next planned `/compact` or `/clear` — a design-time horizon the user types, never a runtime-detected wall. Checkpoints are in-session only; Hyphegesis conducts to the last checkpoint, then downstream-delegates (multi-consumer-like).
+8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Scope includes the Phase 2 axis gate: each axis·region's default, basis, and per-value trade-offs are pre-gate text; the gate carries only the question and per-option (per-value and per-composite) differential implications.
+9. **Convergence evidence**: Present the transformation trace before handoff — per-move assignment, per-axis·region topology trace (including defaulted axes with their disposition), substrate annotations, and the checkpoint set — as demonstrated evidence, not assertion.
+10. **Matter AI-propose**: The AI scans the loaded environment and proposes the matter (which substrate could host each region); gates fire only for the epistemic-relevant fork. A single review-style fork typically settles independence, reconciliation, and substrate for a region together.
+11. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
+12. **Option-set relay test (Extension classification)**: If analysis converges to a single dominant option (option-level entropy → 0), present the finding directly as Extension. Each Constitution option must be genuinely viable under different user value weightings.
+13. **Plain emit discipline**: User-facing emit (Phase 1 move surfacing, Phase 2 axis gates, convergence traces, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token carries decision-relevant meaning, not project-internal overhead. Formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
+14. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+
+## Adversarial Guards
+
+- **universal-dispatcher**: Hyphegesis sprawls into conducting every task, including single-move work. Guard: the Phase 0 relay-test deactivates on single-move or trivial-conduct work; warrant requires ≥2 moves with a non-trivial, branch-dividing conduct.
+- **meta-recursion**: Hyphegesis is asked to conduct its own conduction. Guard: anti-self-application — conduct-plan moves are object-level only; "conduct the conduction" is rejected.
+- **premature-lock**: a volatile high-impact axis is locked at design time on a guess. Guard: defer-volatile — route it to an in-session checkpoint instead of binding it before its determining evidence exists.
+- **silent-substrate-bind**: a resolved topology is bound to a substrate that cannot realize it. Guard: declare conduction-degradation at Phase 3 rather than binding silently.

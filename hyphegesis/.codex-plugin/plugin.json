@@ -1,0 +1,35 @@
+{
+  "name": "hyphegesis",
+  "version": "0.1.0",
+  "description": "Conduct the method of a session's epistemic work before object-level cognition — /conduct (ὑφήγησις: a leading-the-way)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "hyphegesis"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Hyphegesis",
+    "shortDescription": "Conduct the method of a session's epistemic work before object-level cognition — /conduct (ὑφήγησις: a leading-the-way)",
+    "longDescription": "Conduct the method of a session's epistemic work before object-level cognition — /conduct (ὑφήγησις: a leading-the-way)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use hyphegesis for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

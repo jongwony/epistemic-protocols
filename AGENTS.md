@@ -31,6 +31,7 @@ Canonical protocol pairs:
 | Elenchus | `/sublate` | ContextSuspect → VettedContext |
 | Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
 | Diylisis | `/distill` | ContextTethered → PortableHandoff |
+| Hyphegesis | `/conduct` | MethodUnderdetermined → ConductedMethod |
 
 Protocols grouped by primary concern, ordered by activation sequence within each cluster. Simultaneous activation follows cluster order; users can override. Information flow: `graph.json` (authoritative source).
 
@@ -43,13 +44,13 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 | Decision | `/gap` (Syneidesis) |
 | Execution | `/attend` (Prosoche) |
 | Verification | `/contextualize` (Epharmoge), `/sublate` (Elenchus) |
-| Cross-cutting | `/bound` (Horismos), `/recollect` (Anamnesis), `/distill` (Diylisis), `/grasp` (Katalepsis) |
+| Cross-cutting | `/bound` (Horismos), `/recollect` (Anamnesis), `/distill` (Diylisis), `/grasp` (Katalepsis), `/conduct` (Hyphegesis) |
 
 Edge types: `precondition` must complete before target; `advisory` provides useful context but is not required; `suppression` prevents stacking similar protocols.
 
 Initiator taxonomy:
 - **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis, Diylisis)
-- **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Euporia)
+- **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Euporia, Hyphegesis)
 - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche, Elenchus)
 
 ## Runtime Contract
