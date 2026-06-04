@@ -88,7 +88,7 @@ Classify each surviving finding:
 - **Mechanical** — typo, rename, mechanical symbol or format fix; deterministic, one correct edit, no design judgment. → **Extension**: auto-apply, no gate. Mechanical findings keep the loop running — only Constitution warrants interruption.
 - **Judgment** — multiple valid resolutions, a design tradeoff, or a change with irreversible divergence. → **Constitution**: the user's judgment constitutes the resolution.
 
-**Settled-policy check (before opening any disposition gate).** A finding whose disposition policy was already constituted in a prior round is **Extension by default**: a consistent application of that settled policy auto-applies as Mechanical, and any non-trivial side-effect (for example, an edit that touches a line outside the original diff hunk) is surfaced as a **relay line in the round trace**, not as a gate. The Extension/Constitution boundary for a finding moves with what is already decided — a prior round's direction and the PR's stated purpose can close an axis that would otherwise be live. A gate reopens only when a genuinely competing disposition (defer / separate follow-up / dismiss) is still live — one not already foreclosed by the PR's purpose or an established precedent. Re-gating the consistent propagation of settled policy is the over-gating failure mode.
+**Settled-policy check (before opening any disposition gate).** A finding whose disposition policy was already constituted in a prior round is **Extension by default**: a consistent application of that settled policy auto-resolves per the prior disposition (apply / dismiss / defer), and any non-trivial side-effect (for example, an edit that touches a line outside the original diff hunk) is surfaced as a **relay line in the round trace**, not as a gate. The Extension/Constitution boundary for a finding moves with what is already decided — a prior round's direction and the PR's stated purpose can close an axis that would otherwise be live. A gate reopens only when a genuinely competing disposition (defer / separate follow-up / dismiss) is still live — one not already foreclosed by the PR's purpose or an established precedent. Re-gating the consistent propagation of settled policy is the over-gating failure mode.
 
 For Judgment findings whose axis remains live, **cluster by shared disposition** — group findings that share the same resolution stance (apply / dismiss / defer) and present ONE scope-gate per cluster rather than one gate per finding. Follow context-question separation: present all analysis, evidence, and per-finding rationale as text BEFORE the gate; the gate itself carries only the question and the options with their differential implications. Each option must produce a materially different downstream trajectory — if two dispositions converge to the same trajectory, collapse them. Use plain everyday language in the user-facing emit.
 
@@ -96,7 +96,7 @@ For Judgment findings whose axis remains live, **cluster by shared disposition**
 
 For every fix that is going to land — Mechanical (auto-approved) or Judgment (user-approved at the Phase 3 gate) — call `/attend` to risk-classify the edit before applying it. A "Mechanical" edit can still be risky: it may touch an irreversibility, a security boundary, or an external / human-visible effect that the Mechanical/Judgment axis does not capture. `/attend`'s risk classification is orthogonal to the resolution class and gates the apply on risk grounds.
 
-Apply the approved, risk-cleared edits. When `/attend` does **not** clear an edit (it surfaces an irreversibility, a security boundary, or a high-stake effect), the edit is not applied silently: surface the risk as a Constitution decision — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward (re-entering the next round's disposition) until that decision lands. Where gate passage requires harness permission or high-stake execution, route that to the harness — surface it for approval, do not absorb the substrate decision into the loop.
+Apply the approved, risk-cleared edits. When `/attend` does **not** clear an edit (it surfaces an irreversibility, a security boundary, or a high-stake effect), the edit is not applied silently: surface the risk as a Constitution decision — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward until that decision lands. Carrying forward does not hold the finding as live in-loop state: the next round's full re-review re-detects it fresh, and only a deferral reason that is not re-derivable from the diff is externalized to the durable record — so recurrence surfaces as a fresh recognition gate, not a recalled carry. Where gate passage requires harness permission or high-stake execution, route that to the harness — surface it for approval, do not absorb the substrate decision into the loop.
 
 ## Phase 5: Re-review + Convergence
 
@@ -106,7 +106,7 @@ Re-call the source on the updated diff — a **FULL re-review each round**, not 
 - the re-review surfaces zero new non-refuted findings, OR
 - the user exits (free-response).
 
-Carried-forward findings — deferred at a prior disposition gate and still open — are not silently swallowed by a "zero new findings" convergence: at convergence, any still-open carried-forward findings are surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly.
+Carried-forward findings — deferred at a prior disposition gate and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly.
 
 Phase 5's re-review **is** round k+1's review — one source call per round, not a separate verdict-check followed by a fresh Phase 1 call. If the verdict is still `needs-attention`, the findings this re-review just produced become round k+1's input: increment the round counter and carry them into Phase 2 (verify) directly — do not re-call the source again at the next round's Phase 1. The re-review is full because a fix can introduce a regression a narrow incremental check would miss; only a full pass over the updated diff justifies declaring convergence.
 
@@ -149,11 +149,13 @@ Convergence is `verdict=approve`, OR zero new (non-refuted) findings on a full r
 
 ```
 Round {k} — source: {source} — verdict: {verdict}
-  Resolved (auto):   {Mechanical findings auto-applied}
+  Resolved (auto):   {Mechanical findings auto-applied; a side-effect rides inline as [side-effect: …]}
   Resolved (gated):  {Judgment findings applied after the disposition gate}
   Dropped at verify: {findings dropped, each with its cited basis}
-  Carried forward:   {findings deferred / still open}
+  Carried forward:   {deferral reasons — each finding re-detected fresh by next round's full re-review}
 ```
+
+The trace's lines partition by the loop's interruption axis: **relay** events — the loop acted autonomously and is reporting — are `Resolved (auto)`, `Dropped at verify`, and any side-effect of an auto-application; **gated** events — the loop needed or awaits your judgment — are `Resolved (gated)` and `Carried forward`. The interruption axis joins both Constitution sources: a Judgment-class disposition and an orthogonal `/attend` risk gate (a Mechanical edit blocked on risk lands in `Carried forward` even though its resolution class is Extension). Any relay-worthy event renders as a relay line; a side-effect rides as a relay annotation on the `Resolved (auto)` entry it came from, a corollary of "auto is relay" — not a separate slot. `Carried forward` records the deferral reason, not a live-held finding: each round's full re-review re-detects the finding, so recurrence surfaces as a fresh recognition gate.
 
 The per-round trace is a relay presentation — present it and proceed; it is not a gate. At convergence, the accumulated traces are the evidence that each finding reached a disposition — applied, dropped at verify, or explicitly surfaced as annotated residual.
 
@@ -168,7 +170,7 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 
 ## Rules
 
-1. **Extension findings keep the loop running** — Mechanical fixes auto-apply; only Constitution (Judgment) findings warrant interruption. A finding whose disposition policy was constituted in a prior round is Extension by default: its consistent application auto-applies and any side-effect is surfaced as a relay line in the round trace. A gate reopens only for a genuinely competing live disposition, not one foreclosed by the PR's purpose or a prior precedent — re-gating settled policy is the over-gating failure mode.
+1. **Extension findings keep the loop running** — Mechanical fixes auto-apply; only Constitution (Judgment) findings warrant interruption. A finding whose disposition policy was constituted in a prior round is Extension by default: its consistent application auto-resolves per the prior disposition (apply / dismiss / defer) and any side-effect rides as a relay annotation on its trace entry. A gate reopens only for a genuinely competing live disposition, not one foreclosed by the PR's purpose or a prior precedent — re-gating settled policy is the over-gating failure mode.
 2. **Context-question separation at every gate** — all analysis and evidence as pre-gate text; the gate carries only the question and options with differential implications.
 3. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the gates.
 4. **FULL re-review each round** — re-call the source over the updated diff; do not trust an incremental delta check to declare convergence.
