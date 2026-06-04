@@ -18,7 +18,7 @@ Hyphegesis(WP) → MethodBrief(WP) → guard[relay-test, anti-self-application] 
   [multi-move ∧ non-trivial:
     Qc(brief, warrant) → continue →
     MoveId(WP × PG) → Sc(MoveSet) → MS →
-    CT_default-relay → loop( AxisGate(impact-first axis·region) → VM → update(CT) → auto-advance ) until Sufficient → CT →
+    CT_default_relay → loop( AxisGate(impact-first axis·region) → VM → update(CT) → auto-advance ) until Sufficient → CT →
     SubstrateHandoff(CT) → SH → RecordDegradation(degradations) → converge(conduct trace) → ConductedMethod ]
 
 ── MORPHISM ──
