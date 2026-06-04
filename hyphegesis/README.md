@@ -55,4 +55,4 @@ Hyphegesis confirms the work brief, checks whether conduction is warranted (sing
 | termination | When does a move stop? | single_pass, bounded_rounds, until_dry_ceiling, until_goal_met |
 | routing | Where does each output go? | return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding |
 
-When `order` is `dependency_dag`, independence/reconciliation/routing resolve per move-region (an authoring region can be `shared` while a verification region is `isolated`).
+When `order` is `dependency_dag`, independence/reconciliation/routing/termination resolve per move-region (an authoring region can be `shared` while a verification region is `isolated`).

@@ -454,10 +454,10 @@ describe('generateReleaseNotes', () => {
     assert.ok(prothesisPos < katalepsisPos, 'Katalepsis should be last');
   });
 
-  it('includes all 13 protocols in protocols table', () => {
+  it('includes all 14 protocols in protocols table', () => {
     const notes = generateReleaseNotes(mockResults);
     const protocolNames = [
-      'Anamnesis', 'Horismos', 'Aitesis', 'Prothesis',
+      'Anamnesis', 'Horismos', 'Aitesis', 'Prothesis', 'Hyphegesis',
       'Analogia', 'Periagoge', 'Euporia', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Elenchus', 'Diylisis', 'Katalepsis',
     ];
     for (const name of protocolNames) {

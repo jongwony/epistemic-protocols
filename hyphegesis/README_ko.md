@@ -55,4 +55,4 @@ Hyphegesis는 작업 브리프를 확인하고, 지휘가 필요한지 점검하
 | termination | 이동은 언제 멈추는가? | single_pass, bounded_rounds, until_dry_ceiling, until_goal_met |
 | routing | 각 출력은 어디로 가는가? | return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding |
 
-`order`가 `dependency_dag`일 때 independence/reconciliation/routing은 move-region별로 해소됩니다(저작 권역은 `shared`, 검증 권역은 `isolated`처럼).
+`order`가 `dependency_dag`일 때 independence/reconciliation/routing/termination은 move-region별로 해소됩니다(저작 권역은 `shared`, 검증 권역은 `isolated`처럼).
