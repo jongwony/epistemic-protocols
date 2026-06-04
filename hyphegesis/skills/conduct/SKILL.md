@@ -19,7 +19,7 @@ Hyphegesis(WP) → MethodBrief(WP) → guard[relay-test, anti-self-application] 
     Qc(brief, warrant) → continue →
     MoveId(WP × PG) → Sc(MoveSet) → MS →
     CT_default-relay → loop( AxisGate(impact-first axis·region) → VM → update(CT) → auto-advance ) until Sufficient → CT →
-    SubstrateHandoff(CT) → SH → converge(conduct trace) → ConductedMethod ]
+    SubstrateHandoff(CT) → SH → RecordDegradation(degradations) → converge(conduct trace) → ConductedMethod ]
 
 ── MORPHISM ──
 WorkProspect × ProtocolGraph
@@ -83,7 +83,7 @@ AI-detected trigger          → WP = the multi-move prospect AI identified (Hyb
 Phase 0: WP → MethodBrief(WP) → guard[relay-test, anti-self-application] → Qc(brief, conduction-warrant) → Stop → [warrant=relay: relay-route, deactivate | warrant=warranted: continue]   -- brief + warrant; relay-test result shown as pre-gate text [Tool]
 Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → [|MS| < 2: relay-route, deactivate | MS]                                                                      [Tool]
 Phase 2: MS → CT_default_relay(extension: present CT_default + basis as pre-gate text) → proceed-unless-redirected → loop( AxisGate(next axis·region, impact/leverage-first — most-constrained first: default + basis + per-value differential implications; [reconciliation axis ONLY: + ⨾/∥ composites + affordance]) → Stop → VM ∈ {Select | Compose(reconciliation only) | Reorient | Sufficient} → update(CT, surfaced_axes, checkpoints, elicitation_cycle) → [VM=Sufficient: exit | last axis·region surfaced ∧ ¬Sufficient: implicit-Sufficient(relay) | else: auto-advance(relay) to next axis·region] ) until Sufficient ∨ all-axes-resolved → unresolved axis·region → Gen default + ResidualAxis → CT → converge(topology trace)   -- impact-first design, Extension fast-path on default [Tool]
-Phase 3: CT → SubstrateFeasibility(extension) → SH → handoff(ConductedMethod) → deactivate   -- per-topology substrate realizability annotation, then hand off the plan (execution out of scope) [Tool]
+Phase 3: CT → SubstrateFeasibility(extension) → SH → RecordDegradation(track) → handoff(ConductedMethod) → deactivate   -- per-topology substrate realizability annotation, record substrate_infeasible degradations, then hand off the plan (execution out of scope) [Tool]
 
 ── LOOP ──
 After Phase 0 (Method Brief + Warrant):
