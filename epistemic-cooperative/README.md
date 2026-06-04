@@ -20,6 +20,7 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/triage` | Work-unit triage from GitHub issues | Dispatchable initial prompts |
 | `/dispatch` | Focused work-unit execution | Branches, PRs, feedback inscriptions |
 | `/forge` | Reference-grounded initial-prompt formation | Initial prompt for a follow-up session/tool |
+| `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop to convergence | Applied fixes + convergence trace |
 
 ## Skills
@@ -168,6 +169,20 @@ Key features:
 - filled draft with relay slots cited and constitution slots flagged — not a blank question list, not a blind full draft
 - cross-adapter abstraction is a deliberately deferred colimit (sibling of triage-gated-vendor-harness), not extracted ahead of accumulated use
 
+### /reduced-space-test — Scoped Empirical Validation
+
+Validates an inference-uncertain proposition (does it behave / perform / transfer / hold value) inside a constraint-bounded stand-in space synchronized with the user, then carries the uncovered complement forward. The core act is decomposing the target↔surrogate equivalence claim into verifiable facets — not building the stand-in space.
+
+```
+ClaimIntake → ScopedClaimFrame → BoundedTestSpace → EmpiricalEvidence → ScopedResolution → CarriedResidual
+```
+
+Key features:
+- orchestration utility (composes `/bound` + `/inquire`, with a conditional `/elicit` or `/induce` front); no new protocol, no graph node
+- constraint sync is a Constitution interaction — the user's boundary constitutes the verifiable claim
+- scoped claim only — reduced failure probability within the tested conditions, never absolute equivalence
+- residual complement is a first-class output routed to a follow-up protocol
+
 ## Architecture
 
 ```
@@ -181,7 +196,8 @@ epistemic-cooperative/
 │   ├── compose/SKILL.md          # /compose protocol composition authoring
 │   ├── triage/SKILL.md           # /triage work-unit formation
 │   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
-│   └── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
+│   ├── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
+│   └── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
 └── agents/
     ├── project-scanner.md         # Phase 1: project discovery
     ├── session-analyzer.md        # Phase 2: pattern extraction (parallel per project)
@@ -209,6 +225,7 @@ epistemic-cooperative/
 | Building a multi-protocol composition workflow | `/compose` |
 | Turning related GitHub issues into focused work units | `/triage` |
 | Executing selected focused work units | `/dispatch` |
+| Validating an uncertain proposition in a bounded stand-in space | `/reduced-space-test` |
 
 ## Install
 

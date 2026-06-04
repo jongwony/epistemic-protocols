@@ -20,6 +20,7 @@
 | `/triage` | GitHub 이슈 기반 work-unit triage | dispatchable initial prompt |
 | `/dispatch` | focused work-unit 실행 | 브랜치, PR, feedback inscription |
 | `/forge` | 레퍼런스-grounded initial-prompt 형성 | 후속 세션/도구용 initial prompt |
+| `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 (수렴까지) | 적용된 수정 + 수렴 trace |
 
 ## 스킬
@@ -168,6 +169,20 @@ ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft
 - relay 슬롯 인용·constitution 슬롯 플래그된 채워진 초안 — 빈 질문 목록도 맹목 완성초안도 아님
 - 교차-adapter 추상은 의도적으로 유예된 colimit(triage-gated-vendor-harness의 형제), 누적 사용 전 미추출
 
+### /reduced-space-test — Scoped Empirical Validation
+
+추론만으로 불확실한 명제(동작/성능/전이/가치)를 사용자와 동기화한 constraint-bounded 대리 공간에서 검증하고, 미커버 여집합을 후속 프로토콜로 carry-forward한다. 핵심 행위는 목표↔대리 동등성 주장을 검증가능한 facet으로 분해하는 것 — 대리 공간을 "만드는" 것이 아니다.
+
+```
+ClaimIntake → ScopedClaimFrame → BoundedTestSpace → EmpiricalEvidence → ScopedResolution → CarriedResidual
+```
+
+주요 특징:
+- orchestration 유틸리티(`/bound` + `/inquire` 합성, 조건부 `/elicit`·`/induce` front); 새 프로토콜·graph 노드 없음
+- constraint sync는 Constitution 상호작용 — 사용자가 그은 경계가 검증가능한 claim을 구성
+- scoped claim 전용 — 절대 동등성이 아니라 정의된 조건 범위 내 실패확률 저감
+- residual 여집합은 1차 산출물로 후속 프로토콜에 라우팅
+
 ## 아키텍처
 
 ```
@@ -181,7 +196,8 @@ epistemic-cooperative/
 │   ├── compose/SKILL.md          # /compose 프로토콜 합성 저작
 │   ├── triage/SKILL.md           # /triage work-unit formation
 │   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
-│   └── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
+│   ├── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
+│   └── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
 └── agents/
     ├── project-scanner.md         # Phase 1: 프로젝트 탐색
     ├── session-analyzer.md        # Phase 2: 패턴 추출 (프로젝트별 병렬)
@@ -209,6 +225,7 @@ epistemic-cooperative/
 | 다중 프로토콜 합성 워크플로우 구축 | `/compose` |
 | 관련 GitHub 이슈를 focused work unit으로 만들 때 | `/triage` |
 | 선택된 focused work unit을 실행할 때 | `/dispatch` |
+| 불확실한 명제를 bounded 대리 공간에서 검증할 때 | `/reduced-space-test` |
 ## 사용법
 
 ```
