@@ -78,7 +78,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it |
 | [Diylisis](./diylisis) | `/distill` | You're handing a working context to a fresh session that shares none of it — distill out the session-tethered references first |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need a fast path to understand, approve, explain, or modify them |
-| [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping, and routing aren't obvious — conduct how the whole session's work runs before starting |
+| [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
 
 Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/distill`, `/grasp`, `/conduct`)
 

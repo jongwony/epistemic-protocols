@@ -64,11 +64,11 @@ VM     = ConductMove ∈ {Select(value), Compose(via op), Reorient(axis), Suffic
          Sufficient = a MOVE in the axis gate (NOT a separate gate) → converge elicitation (user Constitution declaration)
 ResidualAxis = { axis, region, status: ResidualDisposition, reason }  -- unresolved axis·region carries Gen default + a surfaced disposition; silent default-binding forbidden
 ResidualDisposition ∈ {Declared, Deferred, Dismissed}
-Degradation = { region: MoveRegion, kind, resolved_value, reason }  -- a surfaced acknowledgment that a resolved value relaxes an epistemic guarantee or cannot be realized; never silently bound
+Degradation = { region: MoveRegion, kind ∈ {independence_relaxed, substrate_infeasible}, resolved_value, reason }  -- a surfaced acknowledgment that a resolved value relaxes an epistemic guarantee or cannot be realized; never silently bound
    kind ∈ {independence_relaxed, substrate_infeasible}  -- independence_relaxed: selecting independence=shared at Phase 2 relaxes region isolation (epistemic); substrate_infeasible: the substrate cannot realize the resolved topology at Phase 3 (matter). Both flow into degradations
 ConductedMethod = { topology: CT, move_assignment: Map(Move → ⟨order_position, region⟩), checkpoints: CheckpointSet, substrate_handoff: SH, residuals: Set(ResidualAxis), degradations: Set(Degradation) }
          -- the method PLAN; handed off (the substrate executes), with a conduct trace surfaced (completion evidence)
-         -- order_position = the move's slot in the order topology (Gen(order) shape); the per-region axis values (independence/reconciliation/termination/routing) are read from CT[axis][region] — so all five resolved axis values per move are recoverable from ⟨order_position, region⟩ + CT
+         -- order_position = the move's slot in the order topology (Gen(order) shape); the per-region axis values (independence/reconciliation/termination/routing) are read from CT[axis][region] — so all five axis values per move are recoverable from ⟨order_position, region⟩ + CT: each is a settled ResolvedValue, or (for an unresolved axis·region) its Gen default tagged with a ResidualDisposition — recoverability returns ResolvedValue ⊕ ResidualDisposition, never an empty slot
 
 ── WP-BINDING ──
 bind(WP) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ ai_identified_prospect
@@ -81,9 +81,9 @@ AI-detected trigger          → WP = the multi-move prospect AI identified (Hyb
 
 ── PHASE TRANSITIONS ──
 Phase 0: WP → MethodBrief(WP) → guard[relay-test, anti-self-application] → Qc(brief, conduction-warrant) → Stop → [warrant=relay: relay-route, deactivate | warrant=warranted: continue]   -- brief + warrant; relay-test result shown as pre-gate text [Tool]
-Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → [|MS| < 2: relay-route, deactivate | MS]                                                                      [Tool]
+Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → [|MS| < 2: relay-route to the surviving move's protocol (reusing the Phase 0 relay emission), deactivate | MS]                                                                      [Tool]
 Phase 2: MS → CT_default_relay(extension: present CT_default + basis as pre-gate text) → proceed-unless-redirected → loop( AxisGate(next axis·region, impact/leverage-first — most-constrained first: default + basis + per-value differential implications; [reconciliation axis ONLY: + ⨾/∥ composites + affordance]) → Stop → VM ∈ {Select | Compose(reconciliation only) | Reorient | Sufficient} → update(CT, surfaced_axes, checkpoints, elicitation_cycle) → [VM=Sufficient: exit | last axis·region surfaced ∧ ¬Sufficient: implicit-Sufficient(relay) | else: auto-advance(relay) to next axis·region] ) until Sufficient ∨ all-axes-resolved → unresolved axis·region → Gen default + ResidualAxis → CT → converge(topology trace)   -- impact-first design, Extension fast-path on default [Tool]
-Phase 3: CT → SubstrateFeasibility(extension) → SH → RecordDegradation(track) → handoff(ConductedMethod) → deactivate   -- per-topology substrate realizability annotation, record substrate_infeasible degradations, then hand off the plan (execution out of scope) [Tool]
+Phase 3: CT → SubstrateFeasibility(extension) → SH → RecordDegradation(track) → converge(conduct trace) → handoff(ConductedMethod) → deactivate   -- per-topology substrate realizability annotation, record substrate_infeasible degradations, surface the conduct trace, then hand off the plan (execution out of scope) [Tool]
 
 ── LOOP ──
 After Phase 0 (Method Brief + Warrant):
@@ -171,7 +171,7 @@ When Hyphegesis is active:
 
 | Signal | Detection |
 |--------|-----------|
-| Multi-move, non-trivial conduct | A work prospect needs two or more moves whose order, independence, reconciliation, termination, or routing genuinely divides the downstream plan (adversarial verification entangled with parallel work and synthesis; multiple protocols applied in a non-obvious order) |
+| Multi-move, non-trivial conduct | A work prospect needs two or more moves whose order, independence, reconciliation, termination, or routing genuinely divides the downstream plan — more than one conduct-plan with a materially different downstream future exists |
 | Method-level meta-question | The user asks "how should I approach this whole thing?" rather than asking a single object-level question |
 | Migration / multi-stage investigation | Staged work where stages depend on each other and the dependency structure is itself a decision |
 
@@ -194,7 +194,7 @@ Construct a Method Brief from the work prospect and **present** it for confirmat
 The Method Brief infers, from the work prospect:
 - **Work intent**: what is to be accomplished and why
 - **Expected handoff**: what the conducted method should produce before the substrate takes over
-- **Span**: from this invocation (session start *or* mid-session) to the next planned `/compact` or `/clear`. This span is a design-time horizon — the natural end of a work chunk — not a runtime-detected event; the user types the command, so Hyphegesis never emits a "wall approaching" advisory.
+- **Span**: from this invocation (session start *or* mid-session) to the next planned `/compact` or `/clear`. This span is a design-time horizon — the natural end of a work chunk — not a runtime-detected event; the user types the command, and Hyphegesis stays design-time only — the span horizon is user-controlled, with runtime monitoring left to the substrate.
 
 **Guard (relay-test)** runs before the gate and is shown as pre-gate text:
 - If the work resolves through a single move or a single protocol — conduction entropy → 0, the method is self-evident — present that one protocol as a relay route and **deactivate**. Conduction is not warranted.
@@ -206,7 +206,7 @@ Activation requires (a) two or more moves AND (b) their conduct (order, independ
 
 Identify the candidate cognitive moves over the protocol graph, then **present** the move set via Cognitive Partnership Move (Constitution) with `multiSelect: true`.
 
-Read the dependency graph and the session to surface candidate moves (protocol invocations, analysis passes, delegations). Each move is an object-level step. The user confirms or edits the set; the set must contain two or more moves, or the guard relays.
+Read the dependency graph and the session to surface candidate moves (protocol invocations, analysis passes, delegations). Each move is an object-level step. The user confirms or edits the set; the set must contain two or more moves, or the guard relays to that single surviving move's protocol (as in Phase 0).
 
 **Cross-session enrichment**: Prior conduct experiences accumulated in the hypomnesis store, and any context surfaced when `/recollect` has been invoked this session, bias the candidate move set toward move sequences the user has found productive for similar work. This is a heuristic input; the constitutive judgment remains with the user.
 
@@ -228,11 +228,11 @@ Each axis has a defined downstream effect — no orphan axes:
 - **termination** sets the epistemic stop criterion (`single_pass`, `bounded_rounds`, `until_dry_ceiling`, `until_goal_met`),
 - **routing** sends each move's output onward (`return_to_user`, `chain_to_next`, `handoff_to_protocol`, `deepen_on_finding`).
 
-**Edge-local axes**: when `order` is `dependency_dag`, independence/reconciliation/routing/termination are non-uniform across the move set — an authoring region may be `shared` while a verification region is `isolated`. The topology resolves these per **move-region**, not as one flat value; `order` defines the regions (global), and uniform axes carry the single region `whole`.
+**Edge-local axes**: when `order` is `dependency_dag`, independence/reconciliation/routing/termination are non-uniform across the move set — each region may resolve these axes differently. The topology resolves them per **move-region** rather than as one flat value; `order` defines the regions (global), and uniform axes carry the single region `whole`.
 
-**Pre-gate context, gate question** (Context-Question Separation): present each axis·region's default, its basis, and each value's epistemic trade-off as text *before* the gate. The gate carries only the question and per-option differential implications. For the **reconciliation axis only** (the sole composable axis), the gate additionally surfaces relevant ⨾/∥ composites as recognizable options plus a one-line composition affordance.
+**Pre-gate context, gate question** (Context-Question Separation): present each axis·region's default, its basis, and each value's epistemic trade-off as text *before* the gate. The gate carries only the question and per-option differential implications. For the **reconciliation axis only** (the sole composable axis), the gate additionally surfaces relevant ⨾/∥ composites as recognizable options plus a one-line composition affordance. Only well-formed composites are offered, so composite validity is settled at selection — an ill-formed composite is never an option, which is why the degradation taxonomy needs no Phase-2 composite-incoherence kind.
 
-**The Phase 2 gate surfaces only the epistemic fork**: each axis·region gate asks the user only the epistemic decision — typically a single review-style fork (one-shot critique vs. back-and-forth debate) that settles the region's independence and reconciliation. Settling that fork fixes the region's isolation and how its results reconcile; the user is not asked how the region will be hosted. Realization belongs to the Phase 3 handoff seam (see Phase 3 and TOOL GROUNDING), not to this gate.
+**The Phase 2 gate surfaces only the epistemic fork**: each axis·region gate asks the user only the epistemic decision that settles the region's independence and reconciliation. Settling it fixes the region's isolation and how its results reconcile; the user is not asked how the region will be hosted. Realization belongs to the Phase 3 handoff seam (see Phase 3 and TOOL GROUNDING), not to this gate.
 
 The user's move is one of:
 - **Select(value)** — adopt a value for the axis·region; auto-advance to the next unsurfaced axis·region
@@ -240,15 +240,15 @@ The user's move is one of:
 - **Reorient(axis)** — reframe or replace the surfaced axis; the reoriented axis re-surfaces (no auto-advance)
 - **Sufficient** — declare the topology mission-sufficient; converge. A **move within the axis gate**, not a separate gate.
 
-**Termination (honest bound)**: the loop is bounded by user agency — a **Sufficient** move or Esc-Stop ends it. The finite axis set guarantees a terminal: surfacing the last axis·region without Sufficient converges by implicit Sufficient. Unresolved axis·regions auto-resolve to their Gen default with a surfaced residual disposition — silent default-binding is forbidden.
+**Termination (honest bound)**: the loop is bounded by user agency — a **Sufficient** move or Esc-Stop ends it. The finite axis set guarantees a terminal: surfacing the last axis·region without Sufficient converges by implicit Sufficient. Unresolved axis·regions auto-resolve to their Gen default and always surface that residual disposition, so the default-binding is visible in the trace rather than silent.
 
-**Checkpoints**: the conduct plan records a `CheckpointSet` — in-session re-entry points (plan → exec → verify, or finer points within that topology). Checkpoints are **in-session only**. `/compact` and `/clear` are the span wall, never checkpoints. Hyphegesis conducts to the last checkpoint, then downstream-delegates.
+**Checkpoints**: the conduct plan records a `CheckpointSet` — in-session re-entry points (plan → exec → verify, or finer points within that topology). Checkpoints are **in-session only**; `/compact` and `/clear` mark the span wall, which lies outside the checkpoint set. Hyphegesis conducts to the last checkpoint, then downstream-delegates.
 
 ### Phase 3: Substrate Handoff
 
 For the resolved topology, surface substrate feasibility as a handoff annotation, then hand off the `ConductedMethod` plan.
 
-The conduct topology is substrate-invariant; this phase — the form/matter **seam** — composes it with the runtime. Here, and only here, the AI proposes the matter: for each resolved topology value it proposes which substrate could realize the region — for example, a `dialectic` reconciliation needs persistent addressable peers, while a `parallel_fan ⨾ adversarial_refute` over a static aggregate is realizable by a stateless pipeline. This proposal is a handoff annotation surfaced at the seam, not a Phase 2 gate question. When the available substrate cannot realize the resolved topology, **declare conduction-degradation** — record a `Degradation{region, kind: substrate_infeasible, resolved_value, reason}` in `degradations` (a `(track)` Λ mutation; surfacing the annotation is the separate `(extension)` op) — rather than silently binding an infeasible substrate.
+The conduct topology is substrate-invariant; this phase — the form/matter **seam** — composes it with the runtime. Here, and only here, the AI proposes the matter: for each resolved topology value it proposes which substrate could realize the region, matching the region's realizability requirements (peer persistence, addressability, statefulness) against the available substrates. This proposal is a handoff annotation surfaced at the seam, not a Phase 2 gate question. When the available substrate cannot realize the resolved topology, **declare conduction-degradation** — record a `Degradation{region, kind: substrate_infeasible, resolved_value, reason}` in `degradations` (a `(track)` Λ mutation; surfacing the annotation is the separate `(extension)` op) — rather than silently binding an infeasible substrate.
 
 Hyphegesis then hands off the plan and stops. It produces the method plan plus its checkpoints; the substrate — or the routed protocol — executes the moves. This is the completeness boundary: the protocol records the handoff and halts.
 
