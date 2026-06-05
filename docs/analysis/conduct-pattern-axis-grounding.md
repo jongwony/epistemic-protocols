@@ -44,7 +44,7 @@ Active externalism과 parity principle — 두개골 외부 도구가 인지 과
 | **reconciliation** (integrative) | **P3 Judge Panel** | Dialectical inquiry / devil's advocacy (Schwenk 1990 meta-analysis; Schweiger et al. 1989); Mixture-of-Agents (Wang et al., arXiv:2406.04692); Replacing Judges with Juries / PoLL (Verga et al., arXiv:2404.18796); MT-Bench / LLM-as-judge (Zheng et al., arXiv:2306.05685) |
 | **termination** (stop rule) | **P4 Loop-until-dry** | Theoretical saturation, grounded theory (Glaser & Strauss 1967); Francis et al. 2009/2010 (K-consecutive stopping criterion); Reflexion (Shinn et al., arXiv:2303.11366); Self-Refine (Madaan et al., arXiv:2303.17651) |
 | **termination** (stop gate) | **P6 Completeness Critic** | Metacognition (Flavell 1979; Nelson & Narens 1990); Gawande, *The Checklist Manifesto* (2009); CoVe (arXiv:2309.11495); DeepSearchQA: Bridging the Comprehensiveness Gap for Deep Research Agents (Gupta et al., arXiv:2601.20975); Enterprise Deep Research (Salesforce, arXiv:2510.17797) |
-| **routing** | **P5 Multi-modal Sweep** | 동일 목표를 다른 경로(by-document, by-keyword, by-entity, by-time, by-source)로 탐색; FedSearch / federated retrieval (Callan 2000); 분산 정보 검색 (Shokouhi & Si 2011 survey); RAG routing / semantic dispatch (Lewis et al. arXiv:2005.11401) |
+| **routing** | **P5 Multi-modal Sweep** | 동일 목표를 다른 경로(by-document, by-keyword, by-entity, by-time, by-source)로 탐색; FedSearch / federated retrieval (Callan 2000); 분산 정보 검색 (Shokouhi & Si 2011 survey); retrieval-augmented generation (Lewis et al. arXiv:2005.11401) |
 | **cross-cutting overlay** (전 축) | **P7 No silent caps** | PRISMA/CONSORT/STROBE 보고 투명성 지침 (Moher et al. 2009; Page et al. 2021; Schulz et al. 2010; von Elm et al. 2007); Ioannidis 2010 (transparency meta-research); Kadavath et al. 2022 "Language Models (Mostly) Know What They Know" (arXiv:2207.05221); Selective prediction (El-Yaniv 2010); W3C PROV / data lineage |
 
 **P5 Multi-modal Sweep 교정 기록**: 집필 세션 초기 분류 order → codex 교정 후 **routing**으로 재분류.
@@ -248,7 +248,7 @@ codex의 5 생성질문 — 5축을 질문으로 재framing하고 disclosure(P7)
 - Kadavath, S. et al. (2022). Language Models (Mostly) Know What They Know.
   arXiv:2207.05221. https://arxiv.org/abs/2207.05221
 - Lewis, P. et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.
-  arXiv:2005.11401. https://arxiv.org/abs/2005.11401 (RAG routing / semantic dispatch)
+  arXiv:2005.11401. https://arxiv.org/abs/2005.11401 (retrieval-augmented generation / RAG)
 - Gupta, N. et al. (2026). DeepSearchQA: Bridging the Comprehensiveness Gap for Deep Research Agents.
   arXiv:2601.20975. https://arxiv.org/abs/2601.20975 (Google DeepMind)
 - Prabhakar, A. et al. (2025). Enterprise Deep Research: Steerable Multi-Agent Deep Research for
