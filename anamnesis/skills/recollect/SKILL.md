@@ -20,8 +20,9 @@ Anamnesis(V) → Detect(V) →
     Scan_{Track}(Store, trace(V)) → Rank(C[]) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
     |C[]| = 0 ∧ attempts > 0: NullMatch → inform(V, Σ) → deactivate
-    |C[]| > 0: Qc(C[top], evidence, framing) → Stop → R →
-      Recognize(c): recall_complete(c) → emit(ClueVector_prose(c)) → converge
+    |C[]| > 0: backtrace_parent(c) ∀ c ∈ C[] : fork_marker(c) → parent_pointer, parent_cwd   -- deterministic: a fork candidate's parent is recoverable from its own record, not inferred (mechanism in TOOL GROUNDING; ≠ user-described Reorient)
+               Qc(C[top], evidence, framing) → Stop → R →
+      Recognize(c): recall_complete(c) → emit(ClueVector_prose(c)) → converge      -- fork: emitted pointer = parent (or, when the parent record is absent, non-resumable + recoverable artifacts)
       Refine: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
       Reorient(d): rebind(V, d, Σ) → Phase 1                 -- orthogonal dimension shift
 
@@ -32,6 +33,7 @@ VagueRecall
   → dispatch(input_type)                 -- Track ∈ {entropy, salience, hybrid}
   → scan(Store, Track, recall_trace)     -- track-specific scan (see STORE TOPOLOGY)
   → rank(candidates, recall_trace)       -- order by relevance
+  → backtrace_parent(candidate)          -- when fork_marker: deterministic parent identification → parent_pointer, parent_cwd (recovered from the candidate's own record; ≠ user-described Reorient)
   → present(candidate, Socratic)         -- Socratic candidate presentation
   → recognize(candidate, user)           -- synthesis of identification (Husserl CM §§38-39)
   → emit(ClueVector_prose)               -- NL rendering to session text
@@ -64,6 +66,9 @@ Candidate        = { session_id: Optional(SessionId),
                      fingerprint: Prose,
                      cross_refs: List(Anchor),
                      confidence: ∈ {low, medium, high},
+                     fork_marker: Bool,                          -- true ⇒ the id is a sidechain/fork with no top-level SSOT (SidechainNoSSOT); its own id is not a valid resume handle. Invariants: fork_marker = false ⇒ parent_pointer = Null ∧ parent_cwd = Null ; parent_pointer = Null ⇒ parent_cwd = Null (parent_cwd requires parent_pointer; parent_pointer present with parent_cwd = Null is valid — parent identified but its cwd is unknown)
+                     parent_pointer: Optional(SessionId),        -- orchestrating parent session for a fork candidate, read directly from the fork's own record; the resumable handle when the parent's top-level SSOT still exists (Null ⇒ parent record absent → non-resumable)
+                     parent_cwd: Optional(String),               -- parent session's working directory, paired with parent_pointer to build the parent resume handle (Null ⇒ parent record absent, OR parent identified but its cwd metadata is unknown — parent transcript predates cwd capture)
                      resumption_hint: Optional(String) }
 Anchor           = String   -- opaque: memory path, URL, session ID, doc path
 Prose            = String   -- source-agnostic NL description
@@ -95,6 +100,7 @@ Edge cases:
 Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent)
            → Classify(V, Σ) → InputType → Track                  -- dispatch (silent)
 Phase 1: V → Scan_{Track}(Store, trace(V)) → Rank(C[]) → C[ranked]  -- track-dispatched scan + rank [Tool]
+           backtrace_parent(c) ∀ c ∈ C[ranked] : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the candidate's own record [Tool]
            |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → Phase 1
            |C[ranked]| = 0 ∧ attempts > 0 → NullMatch → inform → deactivate
 Phase 2: C[top] → Qc(C[top], evidence, framing) → Stop → R    -- recognition gate [Tool]
@@ -129,12 +135,15 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 --   memory           ↦ ~/.claude/projects/{slug}/memory/                                 (user-curated insights)
 --   slug-partitioned: prevents cwd-scattered INDEX; cross-cwd /recollect reaches one canonical location
 -- Candidate source binding: `Candidate.session_id` ← INDEX entry frontmatter `session_id`; `Candidate.cwd` ← INDEX entry frontmatter `cwd` (Optional — absent for entries written before cwd capture was implemented)
+-- Fork/sidechain binding (SidechainNoSSOT): `Candidate.fork_marker = true` ⇐ the recalled id appears as an `agent_id` in INDEX_substitute (~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl, appended by the SubagentStop hook) AND has no sibling top-level SSOT ~/.claude/projects/{slug}/{agent_id}.jsonl of its own — the fork's turns live only in the parent record + this capture, so `claude --resume <agent_id>` has no transcript to resume
+-- Parent back-trace (`backtrace_parent` ↦ `Candidate.parent_pointer`, `Candidate.parent_cwd`): deterministic, not heuristic — the substitute capture entry records `session_id` = the orchestrating parent's session id (the SubagentStop payload field), so `parent_pointer ← capture.session_id` is a direct read. The capture lives under the parent's slug by construction ({slug} = dirname of the parent transcript), so the parent is always same-slug — look only there. Resumability: if the parent's top-level SSOT ~/.claude/projects/{slug}/{parent_pointer}.jsonl still exists, `parent_pointer` is set and `parent_cwd ← that transcript's `cwd` field` when present (`parent_cwd = Null` if the parent transcript predates cwd capture — parent identified but cwd unknown); the full handle `cd <parent_cwd> && claude --resume <parent_pointer>` requires both components. If the parent SSOT has aged out, `parent_pointer = parent_cwd = Null` (non-resumable → surface the capture's recoverable artifacts). The native subagent transcript (captured verbatim as the `agent_transcript_path` field) is not relied on as a resume handle; the durable parent link is the capture's `session_id`.
 Phase 0 Detect      (sense)    → Internal analysis
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
 Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over SSOT ∪ INDEX)
 Phase 1 Scan_salience (observe)  → Read, Grep, Glob (MarkerProfile match over INDEX; SSOT fallback on degraded_scan)
 Phase 1 Scan_hybrid   (observe)  → union of above
 Phase 1 Rank        (sense)    → Internal analysis (conditional: haiku scoring for large candidate sets)
+Phase 1 backtrace_parent (observe) → Read (fork candidate only: read the orchestrating parent's session_id directly from the fork's substitute capture, then check parent SSOT existence for resumability; deterministic and citable to the capture entry — hence (observe); read-only)
 Phase 2 Qc          (constitution)     → present (narrative Socratic candidate; mandatory)
 Phase 3 integrate   (track)    → Internal state update
 Phase 3 Probe       (sense)    → Internal (gap detection)
@@ -208,12 +217,13 @@ Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-
   INDEX_substitute = substitute channel raw message log -- append-only, primary capture, authoritative (loss non-recoverable)
 
 scan_{Track} : (Store, Trace) → List(Candidate)
-  scan_entropy(Store, trace)    = exact-match over IdentifierTuples where compatible_anchor(t, trace) -- uses SSOT ∪ INDEX
+  scan_entropy(Store, trace)    = exact-match over IdentifierTuples where compatible_anchor(t, trace) (SSOT ∪ INDEX_semantic)
+                                  ∪ literal-id match over INDEX_substitute origin ids (a sidechain/derived id carries no IdentifierTuple, so a structured id is matched against the substitute channel directly; a hit whose id has no sibling top-level SSOT is the SidechainNoSSOT precondition)
                                 -- structural rejection (compatible_anchor filters ALL literal matches, distinct from low-precision miss): incompatible literals do NOT anchor but are retained in the recall trace as evidence; the scan routes to the salience track (hybrid) or NullMatch₁ recovery with the incompatibility noted — never a silent zero-candidate return
   scan_salience(Store, trace)   = MarkerProfile match (ranked by Σ)        -- INDEX-accelerated; SSOT fallback
   scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
 
-degraded_scan: INDEX_semantic = ∅ ⟹ scan'(SSOT, Track, trace)             -- SSOT guarantees semantic recall; cold start falls back to SSOT directly
+degraded_scan: INDEX_semantic = ∅ ⟹ scan'(SSOT, Track, trace) ∪ literal-id match over INDEX_substitute origin ids   -- SSOT guarantees semantic recall; cold start falls back to SSOT directly. INDEX_substitute is a separate primary channel (not derived from INDEX_semantic), so the sidechain/derived-id match persists under degraded mode — SidechainNoSSOT stays reachable when INDEX_semantic is empty
   -- partial INDEX (e.g., MarkerProfile? = ∅ while IdentifierTuples / Coinage / narrative present) is a normal mode and does NOT trigger total fallback; scan_salience returns empty for the missing component and ranking degrades gracefully
   -- INDEX_substitute loss non-recoverable (SSOT lacks subagent-channel messages); precondition for Cold-Start invariant (see Verification)
 
@@ -248,6 +258,11 @@ ExtractorLacking  : recall_target ∈ s ∧ ∄ extractor_i : recall_target ∈ 
 PartialExtract    : extract/detect produces well-formed but semantically partial INDEX from corrupted/truncated source
                     -- cause: continue-on-error parser tolerates malformed lines; anomalous shape logged but not write-gated
                     -- detection: invisible to reader without schema version field or observability log surface
+
+SidechainNoSSOT   : scan_entropy(Store, trace) ≠ ∅ via INDEX_substitute ∧ no top-level SSOT for the recalled id (the id is a sidechain/derived record)
+                    -- cause: the recalled id is a sidechain/derived record whose turns live in the originating record + the substitute channel; no top-level SSOT for the id ever existed — distinct from NullMatch₁ (pre-store/lifecycle gap): here the scan SUCCEEDS on the substitute channel, only the top-level SSOT is absent by design
+                    -- detection: the recalled id matches a substitute-channel record with no sibling top-level SSOT of its own (substrate mechanism in TOOL GROUNDING)
+                    -- recovery: the id is not independently resumable (no top-level record of its own); read the orchestrating parent from the substitute record (backtrace_parent → parent_pointer, parent_cwd) and offer the parent as the resumable candidate; when the parent's record has aged out, mark non-resumable and surface the recoverable artifacts (substitute record + memory)
 
 NullMatch₁        : scan_entropy(Store, trace) = ∅ ∧ InputType = StructuredIdentifier
                     -- cause: literal absent from SSOT/INDEX (pre-store, lifecycle gap)
@@ -352,7 +367,7 @@ Detect empty intention and extract contextual trace. This phase is **silent** �
 Dispatch the scan on the classified `Track`, execute track-appropriate lookup over `Store = SSOT ⊕ INDEX`, then rank candidates.
 
 1. **Track-dispatched scan strategy**:
-   - **entropy track** (`InputType = StructuredIdentifier`): execute `scan_entropy` over `SSOT ∪ INDEX` — literal match on `IdentifierTuple.literal`, then apply `compatible_anchor(t, trace)` before the match can anchor ranking; precision-thresholded compatible identifiers win. URL path literals, explicit references, citation tokens dominate only within their authorized source_namespace × claim_kind.
+   - **entropy track** (`InputType = StructuredIdentifier`): execute `scan_entropy` over `SSOT ∪ INDEX` — literal match on `IdentifierTuple.literal`, then apply `compatible_anchor(t, trace)` before the match can anchor ranking; precision-thresholded compatible identifiers win. URL path literals, explicit references, citation tokens dominate only within their authorized source_namespace × claim_kind. A structured id with no IdentifierTuple is additionally matched literally against `INDEX_substitute` origin ids (sidechain/derived records) — a hit whose id has no sibling top-level SSOT is the SidechainNoSSOT precondition (parent back-trace; see Phase 3 emission).
    - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over `INDEX` (SSOT fallback on degraded_scan) — match against `MarkerProfile` (coinage / actor / temporal / emotional / cognitive / singularity); session context (Σ) supplies ranking signal within this track.
    - **hybrid track** (`InputType = Mixed`): union of entropy and salience results.
 
@@ -386,8 +401,8 @@ Present the candidate as narrative text — the discussion's story, not just its
 - **Origin**: What prompted the discussion — the question or situation that started it
 - **Direction**: How the discussion developed — what path was taken, what was explored
 - **Outcome**: What was decided, produced, or concluded
-- **Session**: Full session ID for `claude --resume` verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`). Narrative uses short reference; this field provides the resumable identifier.
-- **Resume**: Copy-paste-ready invocation pairing the originating cwd with the session ID — `cd <cwd> && claude --resume <session_id>`. Claude Code resolves the project slug from invocation cwd, so both components are required; emit only the literal command, no narrative wrapper. Omit this field only when `Candidate.cwd` is absent or empty, and surface the omission to the user.
+- **Session**: Full session ID for identification and `claude --resume` verification (e.g., `session: abc12345-def6-7890-ghij-klmnopqrstuv`). Narrative uses short reference. For a non-fork candidate this id is the resumable identifier; for a fork candidate (`fork_marker = true`) it identifies the recognized session but is not itself resumable — the resumable handle is the back-traced parent (see Resume).
+- **Resume**: Copy-paste-ready invocation pairing the originating cwd with the session ID — `cd <cwd> && claude --resume <session_id>`. Claude Code resolves the project slug from invocation cwd, so both components are required; emit only the literal command, no narrative wrapper. Omit this field only when `Candidate.cwd` is absent or empty, and surface the omission to the user. **Fork candidate** (`fork_marker = true`): the fork id is not a valid resume handle (a fork has no top-level transcript, so `--resume <fork_id>` fails). When the parent was back-traced and both components are present (`parent_pointer` and `parent_cwd` non-empty), emit the parent's command instead — `cd <parent_cwd> && claude --resume <parent_pointer>` — and note it resumes the orchestrating parent, not the fork. When `parent_pointer` is present but `parent_cwd` is absent (parent identified but its cwd is unknown), omit the copy-paste command and surface the parent session id with a note to resume from the parent's own project directory. When the parent was not recovered (`parent_pointer = Null`), mark the candidate non-resumable and surface the recoverable artifacts (the substitute log path + any memory) rather than a broken command.
 - **Adjacent**: Other topics discussed nearby in the same time period — for Refine orientation
 - **Framing**: how many recall tries remain before the cap, and the size of the candidate space still in scope — stated as the budget you reason with, not a numeric attempt fraction
 
@@ -407,7 +422,7 @@ Other is always available — maps to `Reorient`: user describes a fundamentally
 
 After user response:
 
-1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID for `--resume` verification), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), and — when `Candidate.cwd` is present and non-empty — a literal `cd <cwd> && claude --resume <session_id>` line built from `Candidate.cwd` and `Candidate.session_id` (the project slug derives from invocation cwd, so the command is the resumable handle); when `Candidate.cwd` is absent or empty, omit the line and note the omission in the prose. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition. ClueVector_prose carries a currency≠fidelity caveat: it states that the context was recognized as a past discussion or decision, not that the recalled content is verified against current reality — downstream consumers (e.g., Aitesis composition) treat it as recalled-and-requiring-re-verification, not as confirmed current context.
+1. **Recognize(c)**: Mark candidate as recognized. Emit ClueVector_prose — natural language rendering of the recognized context to session text. ClueVector_prose includes: session reference (short form in narrative, full session ID for `--resume` verification), topic summary with narrative, key cross-references (memory paths, issue numbers, document pointers), and a resume handle built per the fork-aware rule: when the candidate is **not** a fork and `Candidate.cwd` is present and non-empty, emit a literal `cd <cwd> && claude --resume <session_id>` line (the project slug derives from invocation cwd, so the command is the resumable handle); when the candidate **is** a fork (`fork_marker = true`) with both `parent_pointer` and `parent_cwd` present, emit the back-traced parent's `cd <parent_cwd> && claude --resume <parent_pointer>` line (resuming the orchestrating parent, since the fork id itself is non-resumable); when `parent_pointer` is present but `parent_cwd` is absent, omit the copy-paste command and note the parent session id with the cwd-unknown caveat; when the parent was not recovered (`parent_pointer = Null`), omit the command, mark the context non-resumable, and surface the recoverable artifacts (substitute log path + memory); when `Candidate.cwd` is absent or empty for a non-fork candidate, omit the line and note the omission in the prose. This prose enters the session text and is naturally readable by any downstream protocol via Session Text Composition. ClueVector_prose carries a currency≠fidelity caveat: it states that the context was recognized as a past discussion or decision, not that the recalled content is verified against current reality — downstream consumers (e.g., Aitesis composition) treat it as recalled-and-requiring-re-verification, not as confirmed current context.
 
 2. **Refine**: Candidate not recognized but recall direction acknowledged. Initiate Socratic probing for recall deepening:
 
@@ -458,7 +473,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 9. **Context-Question Separation**: Present narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding context inside the question field violates this invariant.
 
-10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — lifecycle gap (SessionEnd did not fire), pre-store (session predates hypomnesis), missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis. INDEX may lack entries while SSOT retains the information.
+10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — lifecycle gap (SessionEnd did not fire), pre-store (session predates hypomnesis), missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis. INDEX may lack entries while SSOT retains the information. A successful-scan-but-no-resumable-SSOT case (the recalled id is a fork/sidechain) is NOT a NullMatch — the scan succeeds on the substitute channel — and is handled as SidechainNoSSOT by parent back-trace (Rule 19), not by this NullMatch handoff.
 
 11. **Probe-first NullMatch**: At least one Socratic probe enrichment precedes any NullMatch declaration — first scan returning zero → probe → enriched re-scan → NullMatch declaration only if still empty.
 
@@ -473,3 +488,4 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 16. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 17. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 18. **Recalled context currency is not fidelity**: Recall constitutes identity (this WAS discussed or decided), not current-reality agreement (it still HOLDS). A candidate that is current in the store and correctly recognized may still be desynced from current reality — the recognition gate verifies identity, not fidelity. ClueVector_prose emits with a currency≠fidelity caveat; RecalledContext is re-verified against current state before commit and is not handed to downstream protocols as confirmed current context. Currency is the temporal sub-case of fidelity, not a substitute.
+19. **Fork/sidechain resume integrity**: When a recalled id is a sidechain/fork with no top-level SSOT (SidechainNoSSOT — the scan succeeds on the substitute channel but no resumable main transcript ever existed), its own id is never offered as a `--resume` handle, because a fork `--resume` fails. The protocol back-traces the orchestrating parent (`backtrace_parent` → `parent_pointer`, `parent_cwd` — read deterministically from the fork's own capture, distinct from user-described Reorient) and offers the parent as the resumable candidate; when the parent's resumable record has aged out, the candidate is marked non-resumable and its recoverable artifacts (substitute log + memory) are surfaced instead of a broken command. Detection and back-trace are substrate-coupled and live in TOOL GROUNDING; the protocol essence names only the epistemic operation (Rule 15).
