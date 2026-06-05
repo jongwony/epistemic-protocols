@@ -29,8 +29,8 @@ cross-cutting overlay가 전 축에 걸치는 독립 차원이다. 패턴들은 
 
 인용: Clark, A. & Chalmers, D. (1998). "The Extended Mind." *Analysis* 58(1):7–19.
 Active externalism과 parity principle — 두개골 외부 도구가 인지 과정의 일부가 될 수 있음.
-프로젝트 내부 앵커: `docs/philosophical-anchors.md:180`
-(§A2 active externalism, §A5 확장 작업공간 유한용량).
+프로젝트 내부 앵커: `docs/philosophical-anchors.md` §A2 (active externalism),
+§A5 (확장 작업공간 유한용량).
 
 ---
 
@@ -44,13 +44,12 @@ Active externalism과 parity principle — 두개골 외부 도구가 인지 과
 | **reconciliation** (integrative) | **P3 Judge Panel** | Dialectical inquiry / devil's advocacy (Schwenk 1990 meta-analysis; Schweiger et al. 1989); Mixture-of-Agents (Wang et al., arXiv:2406.04692); Replacing Judges with Juries / PoLL (Verga et al., arXiv:2404.18796); MT-Bench / LLM-as-judge (Zheng et al., arXiv:2306.05685) |
 | **termination** (stop rule) | **P4 Loop-until-dry** | Theoretical saturation, grounded theory (Glaser & Strauss 1967); Francis et al. 2009/2010 (K-consecutive stopping criterion); Reflexion (Shinn et al., arXiv:2303.11366); Self-Refine (Madaan et al., arXiv:2303.17651) |
 | **termination** (stop gate) | **P6 Completeness Critic** | Metacognition (Flavell 1979; Nelson & Narens 1990); Gawande, *The Checklist Manifesto* (2009); CoVe (arXiv:2309.11495); DeepSearchQA: Bridging the Comprehensiveness Gap for Deep Research Agents (Google, arXiv:2601.20975); Enterprise Deep Research (Salesforce, arXiv:2510.17797) |
-| **cross-cutting overlay** (전 축) | **P7 No silent caps** | PRISMA/CONSORT/STROBE 보고 투명성 (Moher et al. 2009/2020); Ioannidis 2024 (transparency meta-research); Kadavath et al. 2022 "Language Models (Mostly) Know What They Know" (arXiv:2207.05221); Selective prediction (El-Yaniv 2010); W3C PROV / data lineage |
+| **routing** | **P5 Multi-modal Sweep** | 동일 목표를 다른 경로(by-document, by-keyword, by-entity, by-time, by-source)로 탐색; FedSearch / federated retrieval (Callan 2002); 분산 정보 검색 (Shokouhi & Si 2011 survey); RAG routing / semantic dispatch (Lewis et al. arXiv:2005.11401) |
+| **cross-cutting overlay** (전 축) | **P7 No silent caps** | PRISMA/CONSORT/STROBE 보고 투명성 지침 (Moher et al. 2009; Page et al. 2021; Schulz et al. 2010; von Elm et al. 2007); Ioannidis 2024 (transparency meta-research); Kadavath et al. 2022 "Language Models (Mostly) Know What They Know" (arXiv:2207.05221); Selective prediction (El-Yaniv 2010); W3C PROV / data lineage |
 
 **P5 Multi-modal Sweep 교정 기록**: 집필 세션 초기 분류 order → codex 교정 후 **routing**으로 재분류.
 경로 다양성(여러 탐색 경로 병렬 실행)이 차별자이며, 병렬 순서가 아님.
 이에 따라 P5 1차 축 = routing.
-
-| routing | **P5 Multi-modal Sweep** | 동일 목표를 다른 경로(by-document, by-keyword, by-entity, by-time, by-source)로 탐색; FedSearch / federated retrieval (Callan 2002); 분산 정보 검색 (Shokouhi & Si 2011 survey); RAG routing / semantic dispatch (Lewis et al. arXiv:2005.11401) |
 
 ---
 
@@ -106,8 +105,8 @@ codex가 자기 런타임 preflight binding ledger를 산출했다:
 | C2 (단일 쿼리 팩트 조회) | **clean** | Tavily MCP (`tavily_search`) |
 | C3 (교차모델계열 추론자) | **DEGRADATION** | 비-GPT 추론자 codex 런타임에서 도달 불가 |
 | M-inquire | **clean** | Aitesis (`/inquire`) skill 직접 바인딩 |
-| M-sublate | **partial** | Elenchus (`/sublate`) skill — 일부 제약 |
-| M-ground | **partial** | Analogia (`/ground`) skill — 일부 제약 |
+| M-sublate | **partial** | Elenchus (`/sublate`) — partial 사유 본 문서 미상술 |
+| M-ground | **partial** | Analogia (`/ground`) — partial 사유 본 문서 미상술 |
 | M-frame | **partial** | Prothesis (`/frame`) — 동일 GPT 계열 |
 
 **전체 판정: PARTIAL** (C3 = 유일한 DEGRADATION).
@@ -173,7 +172,7 @@ codex의 5 생성질문 — 5축을 질문으로 재framing하고 disclosure(P7)
 
 - `docs/analysis/conduct-grounding-spec.md` — 7패턴 정의, 5축 정의, conduct topology,
   preflight binding ledger, degradation 규율. 이 문서의 1차 소스.
-- `docs/philosophical-anchors.md:180` — §A2 active externalism, §A5 확장 작업공간 유한용량.
+- `docs/philosophical-anchors.md` §A2 (active externalism), §A5 (확장 작업공간 유한용량) —
   Extended Mind 프레임의 프로젝트 내부 앵커.
 - `docs/analysis/mattpocock-skills-extended-mind-grounding.md` — Extended Mind 좌표 프레임
   설계 선례; relay/constitution boundary, Epistemic Cost Topology.
@@ -201,9 +200,9 @@ codex의 5 생성질문 — 5축을 질문으로 재framing하고 disclosure(P7)
   An exercise in adversarial collaboration. *Psychological Science*, 12(4):269–275.
 - Schwenk, C.R. (1990). Effects of devil's advocacy and dialectical inquiry on decision making:
   A meta-analysis. *Organizational Behavior and Human Decision Processes*, 47(1):161–176.
-- Schweiger, D.M., Sandberg, W.R., & Ragan, J.W. (1989). Group approaches for improving strategic
-  decision making: A comparative analysis of dialectical inquiry, devil's advocacy, and consensus.
-  *Academy of Management Journal*, 32(1):745–772.
+- Schweiger, D.M., Sandberg, W.R., & Rechner, P.L. (1989). Experiential effects of dialectical
+  inquiry, devil's advocacy, and consensus approaches to strategic decision making.
+  *Academy of Management Journal*, 32(4):745–772.
 - Ioannidis, J.P.A. (2024). Meta-research: The art of getting it wrong. *Research Synthesis Methods*, 15(1):6–19.
   Transparency meta-research.
 - El-Yaniv, R. (2010). On the foundations of noise-free selective classification. *JMLR*, 11:1605–1641.
@@ -215,7 +214,13 @@ codex의 5 생성질문 — 5축을 질문으로 재framing하고 disclosure(P7)
 - Callan, J. (2002). Distributed information retrieval. In *Advances in Information Retrieval*. Springer.
 - Shokouhi, M. & Si, L. (2011). Federated search. *Foundations and Trends in Information Retrieval*, 5(1):1–102.
 - Moher, D. et al. (2009). Preferred reporting items for systematic reviews and meta-analyses:
-  The PRISMA statement. *PLOS Medicine*, 6(7):e1000097. (PRISMA/CONSORT/STROBE 보고 투명성)
+  The PRISMA statement. *PLOS Medicine*, 6(7):e1000097. (PRISMA 2009)
+- Page, M.J. et al. (2021). The PRISMA 2020 statement: An updated guideline for reporting
+  systematic reviews. *BMJ*, 372:n71. (PRISMA 2020)
+- Schulz, K.F., Altman, D.G. & Moher, D. (2010). CONSORT 2010 Statement: Updated guidelines for
+  reporting parallel group randomised trials. *BMJ*, 340:c332. (CONSORT 2010)
+- von Elm, E. et al. (2007). The Strengthening the Reporting of Observational Studies in
+  Epidemiology (STROBE) statement. *Lancet*, 370(9596):1453–1457. (STROBE 2007)
 
 **ML / AI**
 - Dhuliawala, S. et al. (2023). Chain-of-Verification Reduces Hallucination in Large Language Models.
