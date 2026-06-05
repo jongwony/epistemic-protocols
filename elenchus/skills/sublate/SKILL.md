@@ -9,7 +9,7 @@ Vet working context by dialectical antithesis before action through structured p
 
 ## Definition
 
-**Elenchus** (ἔλεγχος): A dialogical act of cross-examination — from the Socratic refutation tradition meaning "testing by argument" — resolving suspect working context into vetted context through provenance challenge, counterfactual gap forecasting, and cross-source consistency check before pre-execution sync. The protocol's lexical verb is `/sublate`. Each suspect source undergoes the motion of stating its current claim, surfacing what would shake it, and then deciding how to handle the source in light of that challenge (the Hegelian *Aufhebung* — preserve + negate + lift up — supplies the source vocabulary).
+**Elenchus** (ἔλεγχος): A dialogical act of cross-examination — from the Socratic refutation tradition meaning "testing by argument" — resolving suspect working context into vetted context through provenance challenge, counterfactual gap forecasting, cross-source consistency check, and inference-fallacy archetype scan before pre-execution sync. The protocol's lexical verb is `/sublate`. Each suspect source undergoes the motion of stating its current claim, surfacing what would shake it, and then deciding how to handle the source in light of that challenge (the Hegelian *Aufhebung* — preserve + negate + lift up — supplies the source vocabulary).
 
 ```
 ── FLOW ──
@@ -86,7 +86,7 @@ early_exit = user_esc
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 identify        (sense)        → Internal analysis (high-leverage / age / chain / contradiction scan)
+Phase 0 identify        (sense)        → Internal analysis (high-leverage / age / chain / contradiction / inference-character scan)
 Phase 1 ProvenanceTag   (observe)      → Read, Grep (verification of source origin, authorized claim, and downstream references)
 Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C/D antithesis generation per source)
 Phase 2 Qs              (constitution) → present (mandatory; per-source disposition slots; Esc → loop termination at LOOP level, not a Disposition)
@@ -151,6 +151,7 @@ When Elenchus is active:
 | Provenance concern | User questions verification status of a specific source |
 | Counterfactual concern | User varies a current condition and asks whether downstream still holds |
 | Cross-source friction | User notices two collected sources pointing at the same referent diverging |
+| Inference-soundness concern | User questions whether a conclusion's reasoning holds rather than the source it cites |
 
 **Qualifying condition**: Activate only when working context exists and the user signals an upcoming pre-execution sync or externalization. The protocol does not activate on freshly-arrived context with no audit-candidate sources — the silent scan at Phase 0 yields S_high = ∅, which converges trivially.
 
@@ -169,7 +170,7 @@ When Elenchus is active:
 
 ## Source Identification Criteria
 
-User-initiated activation triggers Phase 0's silent scan. The scan does not gate activation — its purpose is to *select which sources within the committed working context warrant audit*. The four criteria below guide source selection; sources matching one or more enter S_high.
+User-initiated activation triggers Phase 0's silent scan. The scan does not gate activation — its purpose is to *select which sources within the committed working context warrant audit*. The five criteria below guide source selection; sources matching one or more enter S_high.
 
 | Criterion | Condition | Pattern Hint |
 |-----------|-----------|--------------|
@@ -228,7 +229,7 @@ When a source is itself a conclusion reached by inference — an `AIInference` o
 Analyze the working context and select audit-candidate sources. This phase is silent — no user interaction.
 
 1. **Bind W**: the working context committed in the session — sources, claims, downstream references, and the pre-execution action under consideration
-2. **Apply Source Identification Criteria**: scan each source for high-leverage accumulation, age beyond horizon, provenance-chain length, and cross-source contradiction
+2. **Apply Source Identification Criteria**: scan each source for high-leverage accumulation, age beyond horizon, provenance-chain length, cross-source contradiction, and inference-character conclusion
 3. **Compose S_high**: the union of sources matching at least one criterion
 4. If S_high = ∅: emit empty VettedContext trivially and deactivate (no audit-candidate sources warrant vetting)
 5. If S_high ≠ ∅: proceed to Phase 1
@@ -243,7 +244,7 @@ Generate metadata triple plus dialectical antithesis per source.
 
 **Step 2 — Antithesis positing**: For each tagged source, select the most applicable pattern (A, B, C, D, or Emergent) and construct an antithesis. A source that is itself an inferred conclusion (origin `AIInference`, or a conclusion functioning as a standing premise) is a candidate for Pattern D, where the antithesis reverse-derives the inference's flaw condition from a fallacy archetype rather than from a user-supplied counter-condition. The antithesis must:
 - Cite the source's claim verbatim, anchored to the originating sentence or artifact
-- Name the dialectical challenge concretely (a verification gap, a counterfactual condition, a divergent sibling source)
+- Name the dialectical challenge concretely (a verification gap, a counterfactual condition, a divergent sibling source, or an inference-fallacy archetype condition)
 - Surface the basis for the challenge so the user can recognize the antithesis's evidence
 
 **Cross-session enrichment**: Anamnesis hypomnesis store, when invoked via `/recollect`, may surface prior antithesis-disposition pairs for adjacent sources; recalled patterns seed Phase 1 pattern selection but the constitutive judgment remains with the user.
@@ -297,7 +298,7 @@ At vetted(V), present the transformation trace before declaring convergence. For
 
 ```
 [Source identifier]
-  Pattern: A | B | C | Emergent(name)
+  Pattern: A | B | C | D | Emergent(name)
   Antithesis: [concrete antithesis text]
   Disposition: [chosen variant with parameters]
 ```
