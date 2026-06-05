@@ -193,11 +193,15 @@ codex의 5 생성질문 — 5축을 질문으로 재framing하고 disclosure(P7)
   *Psychological Bulletin*, 56(2):81–105. (MTMM)
 - Glaser, B.G. & Strauss, A.L. (1967). *The Discovery of Grounded Theory*. Aldine.
   Theoretical saturation.
-- Francis, J.J. et al. (2009). What is an adequate sample size? Operationalising data saturation for
-  theory-based interview studies. *Psychology & Health*, 25(10):1229–1245.
+- Francis, J.J. et al. (2010). What is an adequate sample size? Operationalising data saturation for
+  theory-based interview studies. *Psychology & Health*, 25(10):1229–1245. (online-first 2009)
   K-consecutive stopping criterion.
 - Mellers, B., Hertwig, R. & Kahneman, D. (2001). Do frequency representations eliminate conjunction effects?
   An exercise in adversarial collaboration. *Psychological Science*, 12(4):269–275.
+- Popper, K.R. (1959). *The Logic of Scientific Discovery*. London: Hutchinson.
+  (반증주의 / falsificationism; orig. *Logik der Forschung*, 1934)
+- Platt, J.R. (1964). Strong inference. *Science*, 146(3642):347–353.
+  (강한 추론 — 가설 반증을 통한 체계적 제거)
 - Schwenk, C.R. (1990). Effects of devil's advocacy and dialectical inquiry on decision making:
   A meta-analysis. *Organizational Behavior and Human Decision Processes*, 47(1):161–176.
 - Schweiger, D.M., Sandberg, W.R., & Rechner, P.L. (1989). Experiential effects of dialectical

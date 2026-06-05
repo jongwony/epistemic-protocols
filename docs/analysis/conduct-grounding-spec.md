@@ -37,14 +37,16 @@ the matter is left to the consumer.
 
 - **Recipient**: zero-memory fresh agent on any substrate with tool-description injection.
 - **Next task**: execute the conduct topology below to produce *source-grounded conduct-methodology
-  elements* — each of the seven patterns mapped onto a conduct axis with a cited source.
+  elements* — each of the seven patterns mapped onto a conduct axis (or identified as a cross-cutting
+  overlay spanning all axes) with a cited source; a given axis may carry no primary pattern.
 - **Allowed sources**: the seven pattern definitions (inline below, §Patterns), the epistemic-move
   definitions (§Moves), capability C1–C3 (§Capabilities), and the open web via C1/C2.
 - **Execution scope**: run the four-region pipeline; produce the grounded mapping. No file mutation
   required to produce the mapping itself. *(The pipeline is one instantiation of the temperament:
   this document provides both the temperament definition — frame · Patterns · Moves · Capabilities —
   and this canonical chain that uses it.)*
-- **Verification**: every pattern resolves to a conduct axis with a cited, retrievable source.
+- **Verification**: every pattern resolves to a conduct axis or a cross-cutting overlay with a cited,
+  retrievable source (an axis may have no primary pattern; the overlay spans all axes).
 - **Stop condition**: establishment (Region C) produced AND the mapping-base checkpoint passed.
 
 ## Capabilities (description-level; re-bound per substrate)
@@ -122,7 +124,8 @@ Extended Mind coordinate frame — the temperament above, instantiated for this 
 - **Region B — verification.** Sequential: **fact-grounding** (M-inquire, using **C2**) first, then
   **provenance audit** (M-sublate) on top of it. Context is **shared** by design — the facts prime
   the provenance audit (intended framing; see §Degradations). Routing → Region C.
-- **Region C — establishment.** Map the seven patterns onto conduct's five axes (M-ground), with the
+- **Region C — establishment.** Map the seven patterns onto conduct's five axes — each pattern onto an
+  axis or as a cross-cutting overlay, and an axis may carry no primary pattern (M-ground), with the
   Region-B-vetted sources as citations. Routing → Region D.
 - **Region D — final cross-check.** Independent re-verification by **C3** (a different-family
   reasoner). Routing → return to user.
