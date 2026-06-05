@@ -18,6 +18,7 @@ on:
       - 'elenchus/**'
       - 'anamnesis/**'
       - 'diylisis/**'
+      - 'hyphegesis/**'
 
 jobs:
   epistemic-review:

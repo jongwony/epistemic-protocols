@@ -225,6 +225,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: διύλισις (refining, distillation) — separating what transfers from what is session-bound residue. Core principle: **Portability over Author Familiarity**. A handoff reads complete to its author because the author silently shares the missing context; a fresh recipient has none of it. Workflow position: cross-cutting — invoked when a working context is about to transfer to a session with no shared ground. Game feel: "this is obvious to me — but would a stranger get it?" → normalize the session-only references → surface what cannot be resolved → portable handoff a zero-memory agent can run.
 
+## Hyphegesis `/conduct`
+
+**Situation**: You're about to start a big piece of work — a framework migration, a multi-stage investigation — and the goal is clear, but *how to run it* is not. Several moves are involved: gather context, frame perspectives, verify adversarially, synthesize. In what order? Which in isolation? How do their results reconcile? When do you stop? Started without deciding, the work drifts — wrong order, perspectives contaminated before synthesis, no stopping criterion.
+
+**Intervention**: `/conduct` checks the work is genuinely multi-move and non-trivial (single-move work relays straight to the one protocol that resolves it), identifies the candidate moves, then designs a conduct topology across five axes — order, independence, reconciliation, termination, routing — starting from the most decision-relevant axis. It locks the stable choices, defers the volatile ones to in-session checkpoints, surfaces which substrate can realize each part, and hands off a method plan you (or the substrate) execute.
+
+**Trial prompt**: "Let's practice: say 'I'm about to migrate this service across two framework versions — conduct how I should run the whole thing' and I'll show how /conduct designs the move topology before any object-level work starts"
+
+**Quiz Q (situation)**: You have a clear goal but five interdependent steps, and you keep second-guessing the order and whether to run them in isolation or let them see each other. You haven't started because the *method*, not the goal, is unsettled.
+- A) Prothesis `/frame` — B) Horismos `/bound` — C) Hyphegesis `/conduct` — D) Aitesis `/inquire`
+- Answer: C
+
+**Quiz Q (design)**: You face a multi-move task where the order, independence, and stopping criterion all genuinely divide the plan. How would you settle the method before starting, without locking choices that depend on what you'll only learn mid-way?
+- Hint: The problem isn't which perspectives to use for one inquiry (that's `/frame`) or who owns what (that's `/bound`) — it's how the whole session's moves relate. Settle the most-constrained axis first, lock what's stable, and defer the volatile choices to an in-session checkpoint.
+
+**Philosophy**: ὑφήγησις (leading from just ahead, guiding) — conducting the method of the work, not doing the work. Core principle: **Conduction over Substrate**. How a session's moves are ordered, isolated, reconciled, and stopped is substrate-invariant — it survives deleting every runtime noun — so the conduct form is designed independently and only then matched to a substrate, declaring degradation rather than binding one it cannot realize. Workflow position: cross-cutting, Hybrid initiator — conducts the session's whole move set before object-level cognition. Game feel: "I know what I want, but how do I run this?" → confirm it's multi-move → design the topology impact-first → hand off a method plan with checkpoints.
+
 ## Composition Patterns
 
 Real sessions rarely use a single protocol. Composition — invoking multiple protocols together — is often more valuable than any isolated call. Three patterns that appear most in practice:
