@@ -47,7 +47,8 @@ the matter is left to the consumer.
   and this canonical chain that uses it.)*
 - **Verification**: every pattern resolves to a conduct axis or a cross-cutting overlay with a cited,
   retrievable source (an axis may have no primary pattern; the overlay spans all axes).
-- **Stop condition**: establishment (Region C) produced AND the mapping-base checkpoint passed.
+- **Stop condition**: establishment (Region C) produced, the mapping-base checkpoint passed, AND the
+  Region D cross-reasoner check completed (or its infeasibility surfaced as a degradation per §Degradations).
 
 ## Capabilities (description-level; re-bound per substrate)
 
