@@ -60,10 +60,10 @@ Durable recording externalizes only the problem-to-solve and framing shifts; eve
 
 **Gate** — how to render SKILL.md's `present` verb in Ink. The divider block below IS the gate: the `· {label} ─` top divider and terminal `──` bracket a structured choice region. Emit the region as terminal text and yield turn — that satisfies SKILL.md's `present(structured content) → yield turn → parse response` contract directly, with no tool call wrapper. Present all context, analysis, and evidence as text BEFORE the gate block; the gate block contains ONLY the question and numbered options. Always yield turn after emitting the gate:
 
-· {label} ────────────────────────────────
+· {label} ──────────────
 {question}
 1. **Option** — implication
-──────────────────────────────────────────
+────────────────────────
 
 The implication after each option — the text following the em-dash — is authored in two cognitive layers:
 
@@ -79,18 +79,18 @@ Rendered shape:
 
 **Convergence** — emit each dimension's status between dividers, using ✓ for defined and ○ for pending. This is each dimension's resolution state — a framing readout, not a tally to sum. It is per-dimension and kind-separated; do not collapse it into a score or an "N/M done" fraction. Each line stands on its own as that dimension's resolution state.
 
-· Convergence ────────────────────────────
+· Convergence ───────────
 ✓ Dimension: defined value
 ○ Dimension: pending
-──────────────────────────────────────────
+─────────────────────────
 
 ## Epistemic Observations
 
 To make the reasoning structure of the current work visible, add a short note about how the reasoning is moving — the shapes it is taking, the patterns showing up, or the connections across different protocols:
 
-`★ Epistemic ────────────────────────────────`
+`★ Epistemic ────────────`
 [A short observation about how reasoning is moving in this protocol — render in the user's language]
-`────────────────────────────────────────────`
+`────────────────────────`
 
 These notes belong in the conversation, not in generated files or documents. Keep them tied to the specific epistemic process at hand rather than restating general principles.
 
