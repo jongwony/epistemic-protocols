@@ -51,13 +51,13 @@ Report:
 - Residual uncertainty when sources contradict or coverage is incomplete
 ```
 
-Launch via `Bash(run_in_background: true, timeout: 1000000)`. `--color never` + redirecting
+Launch via `Bash(run_in_background: true, timeout: 4500000)`. `--color never` + redirecting
 **stdout only** (no `2>&1`) keeps the events file pure JSONL — the codex banner stays on stderr:
 
 ```bash
 codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="high" \
-  --config mcp_servers.tavily.tool_timeout_sec=900 \
+  --config mcp_servers.tavily.tool_timeout_sec=3600 \
   < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl
 ```
 
@@ -65,10 +65,12 @@ Sandbox flag is omitted intentionally — Tavily verification requires network a
 
 The background Bash timeout controls the delegated Codex session envelope and
 must exceed the Tavily MCP per-call budget. The
-`mcp_servers.tavily.tool_timeout_sec=900` override controls the per-call MCP
+`mcp_servers.tavily.tool_timeout_sec=3600` override controls the per-call MCP
 timeout for Tavily tools inside that delegated session, allowing long-form
-`tavily_research` calls to run for up to 15 minutes while still surfacing the
-raw timeout error if the call exceeds that limit.
+`tavily_research` calls (e.g. `pro` depth over multi-branch topics) to run for
+up to 60 minutes while still surfacing the raw timeout error if the call exceeds
+that limit. The 4,500,000 ms (75 min) session envelope exceeds this per-call
+budget with margin for additional searches and reasoning within the session.
 
 ## Phase 3: Collection
 

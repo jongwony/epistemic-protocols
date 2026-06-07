@@ -237,7 +237,7 @@ describe('goal-research runtime contract', () => {
     assert.ok(Number.isFinite(bashMs), 'Bash session timeout must be documented');
     assert.ok(Number.isFinite(mcpSec), 'Tavily MCP per-call timeout must be configured');
     assert.ok(bashMs > mcpSec * 1000, 'Bash envelope must exceed MCP per-call budget');
-    assert.equal(mcpSec, 900);
+    assert.equal(mcpSec, 3600);
     assert.match(skill, /per-call MCP\s+timeout/i);
     assert.match(skill, /tavily_research/);
   });
