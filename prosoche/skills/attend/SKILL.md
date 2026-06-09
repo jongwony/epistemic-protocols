@@ -82,7 +82,7 @@ Convergence evidence: at emission, present the compilation trace — for each b 
 Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-situated(C) = emitted(G) ∧ (∀b∈Bₛ: ∃κ∈K compiled from b) ∧ (∀b∈Bₓ: declared_oos(b))
+situated(C) = emitted(G) ∧ handoff_recorded ∧ (∀b∈Bₛ: ∃κ∈K compiled from b) ∧ (∀b∈Bₓ: declared_oos(b))
 SituatedExecution = situated(C) ∨ no_compile ∨ user_esc
 -- The guarantee is compile-time: every loop-consumable boundary signal is either compiled into a
 -- verifiable condition or visibly dropped at the gate; every fast risk is visibly delegated.
