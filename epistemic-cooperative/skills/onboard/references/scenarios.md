@@ -142,20 +142,20 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 ## Prosoche `/attend`
 
-**Situation**: You ask Claude "clean up my Downloads folder for me." The folder holds hundreds of files — obvious junk (duplicate zips, old installers), probably-junk (unclear PDF scans), and things you actually need (tax receipts, signed contracts). Deleting everything is dangerous; doing nothing misses the point.
+**Situation**: You ask Claude to "work through my 200-photo album and build the yearbook layout" — an unattended run that will churn for an hour while you're away. You worry it might quietly declare victory halfway through, or wander into folders it was never meant to touch.
 
-**Intervention**: `/attend` classifies each action for risk (safe, elevated, gate-level), executes low-risk deletions autonomously (duplicate zips, cached installers), proposes elevated-risk items for you to approve or reject individually, and halts on gate-level items (anything that looks like a legal document). You end up with a cleaned folder — safely.
+**Intervention**: `/attend` reads the boundaries the job implies — which folders are fair game, what counts as done, how long it may run — and compiles each into a checkable condition (every album photo appears in the layout; nothing outside the album folder changed; at most N passes). You confirm the set, and it becomes the finish-line contract the autonomous run is held to. Anything that would need split-second blocking (like deleting originals) is named as out of its hands and left to your tool's permission prompts.
 
-**Trial prompt**: "Let's practice: say 'Clean up my Downloads folder' and I'll show how /attend classifies actions by risk and executes safely"
+**Trial prompt**: "Let's practice: describe a task you'd hand to an unattended run and I'll show how /attend compiles its boundaries into verifiable conditions"
 
-**Quiz Q (situation)**: You ask Claude to "archive old emails and keep important ones." Some are clearly newsletters, some look like receipts, some might be from your landlord. You want help — but silent bulk archiving would be a disaster.
+**Quiz Q (situation)**: You're about to let Claude run unattended overnight migrating hundreds of files, and you want certainty that "done" really means done — and that it stayed inside the folders you named.
 - A) Aitesis `/inquire` — B) Prosoche `/attend` — C) Syneidesis `/gap` — D) Horismos `/bound`
 - Answer: B
 
-**Quiz Q (design)**: You want Claude to act on a plan with mixed-risk actions — some safe, some reversible, some dangerous. How would you get the safe steps executed fast without giving up control over the risky ones?
-- Hint: The answer is not gating everything — it's letting the safe work flow while surfacing only the judgment moments.
+**Quiz Q (design)**: You want an autonomous run held to your boundaries without watching it work. How do you get protection that doesn't depend on supervision?
+- Hint: The answer is not watching harder — it's making each boundary checkable at the moment the run stops.
 
-**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of present-moment awareness during action. Core principle: **Attention over Automation**. Risk-classify → low-risk executes autonomously → elevated-risk surfaces for your judgment → safe execution without losing agency. Workflow position: Execution cluster — ready to act, execute with readiness- and risk-aware gating. Game feel: "Go ahead, but pause at anything that could bite" → tasks flow → gate appears exactly when it matters → you decide → execution resumes.
+**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of self-aware engagement, inscribed before autonomy begins. Core principle: **Attention over Automation**. Infer the boundaries → keep what is checkable at stop time → compile into verifiable conditions → confirm → hand off. Workflow position: Execution cluster — the compile step before an autonomous run. Game feel: "Here's the finish line and the fences — now go" → the run proceeds unattended → the stop-time check tells the truth → you trust the result.
 
 ## Epharmoge `/contextualize`
 
@@ -252,14 +252,14 @@ When you say "find me that café we talked about — and check if it's open toda
 
 **Shape**: empty intention → recognized prior context → grounded current fact.
 
-### `/attend * /contextualize` — Risk-aware execution plus context-fit check
+### `/attend * /contextualize` — Guardrail-compiled execution plus context-fit check
 
-When you say "handle the email cleanup, and check it actually fits my inbox style after." `/attend` risk-classifies the cleanup actions (safe deletes vs judgment-needed archives) and executes safely, then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
+When you say "run the inbox cleanup while I'm out, and check it actually fits my inbox style after." `/attend` compiles the cleanup's boundaries into verifiable conditions for the autonomous run (what counts as done, what must remain untouched), then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
 
-**Shape**: pre-execution risk gating → post-execution context-fit.
+**Shape**: pre-execution guardrail compilation → post-execution context-fit.
 
 ### `/sublate * (downstream)` — Pre-execution vetting plus deficit-matched handoff
 
-When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each source via dialectical antithesis (provenance / counterfactual / cross-source); sources whose surfaced concern belongs to a different protocol family get **Routed** rather than refined in place. Typical handoffs: a gap surfaced in the user's decision → `/gap`, execution-time risk → `/attend`, post-execution applicability → `/contextualize`, undefined ownership → `/bound`. Pre-execution counterpart to `/contextualize` (which vets after the fact). When a single source maps to multiple handoff targets, surface them in execution-order priority — pre-execution handoffs (`/bound`, `/gap`, `/attend`) precede post-execution ones (`/contextualize`).
+When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each source via dialectical antithesis (provenance / counterfactual / cross-source); sources whose surfaced concern belongs to a different protocol family get **Routed** rather than refined in place. Typical handoffs: a gap surfaced in the user's decision → `/gap`, an execution boundary needing compiled guardrails → `/attend`, post-execution applicability → `/contextualize`, undefined ownership → `/bound`. Pre-execution counterpart to `/contextualize` (which vets after the fact). When a single source maps to multiple handoff targets, surface them in execution-order priority — pre-execution handoffs (`/bound`, `/gap`, `/attend`) precede post-execution ones (`/contextualize`).
 
 **Shape**: per-source antithesis → disposition → handoff routing where the deficit belongs to another protocol family.

@@ -56,7 +56,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
 | Periagoge `/induce` | Analysis | Concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction | 3+ instances with essence intuition but no located abstraction; `/ground` misfit where colimit is forced into substitution |
 | Syneidesis `/gap` | Decision | Right before committing, checking for blind spots | Same file 3+ edits (different concerns), `excessive_changes` friction |
-| Prosoche `/attend` | Execution | Risk-classified execution — safe actions flow, risky ones gate | Mixed-risk plans (bulk safe work + judgment moments), upstream deficit signals, `wrong_file_edited` friction |
+| Prosoche `/attend` | Execution | Guardrail compilation — execution boundaries become verifiable goal conditions before an autonomous run | Imminent autonomous/unattended execution, stated done-criteria or budget cues, `wrong_file_edited` friction |
 | Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the accumulated conversation context | Mismatch against session-built constraints (user-aware context accumulation) |
 | Elenchus `/sublate` | Verification | About to externalize a working context whose apparent sufficiency has decayed | Dialectical antithesis per source (provenance / counterfactual / cross-source consistency) before pre-execution sync |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
@@ -343,7 +343,7 @@ Same format as Targeted Path Type 3.
 #### Feedback (both paths)
 
 Immediate feedback after each question:
-- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` checks *execution readiness* (Phase -1 upstream scan) and gates *execution risks* (what could go wrong when you act). `/gap` audits before action (decision quality), `/attend` ensures readiness + gates during action (execution safety)."
+- **Correct**: Reinforce with the core principle + why the distinction matters. "Correct — `/gap` surfaces blind spots at *decision points* (what you haven't considered), while `/attend` compiles *execution boundaries* (scope, budget, done-criteria) into verifiable conditions before an autonomous run. `/gap` audits before action (decision quality), `/attend` equips the run with guardrails (execution safety)."
 - **Incorrect** (reasoning inquiry → targeted correction):
   1. **Reasoning inquiry**: Present via gate interaction 2-3 reasoning hypotheses inferred from the user's wrong answer (context-specific, not templates). Do not reveal the correct answer. "Other" always available.
   2. **Targeted correction**: Using the user's stated reasoning, explain the distinction through the design axis that separates the confused pair. Directly address the reasoning — e.g., "You mentioned timing — that's the right axis. The key difference is *direction*: `/inquire` catches missing context *before* execution (User→AI), while `/contextualize` checks context fit *after* (AI→User)."
@@ -372,7 +372,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 5. **Advanced Usage** (bonus tips after main guide):
 
-   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/attend`, show the three-step chain: context → decision audit → risk-aware execution (inquire → gap → attend).
+   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/attend`, show the three-step chain: context → decision audit → guardrail compilation (inquire → gap → attend).
 
 6. **Continue exploring** (when MAP results contain unexplored protocols):
 
@@ -389,7 +389,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 **Distractor selection**: Choose protocols that share surface similarity with the correct answer:
 - `/elicit` ↔ `/gap`: both surface "something wrong" but different targets — `/elicit` reverse-traces decision coordinates from substrate before action (Planning: axis-undetermined intent), `/gap` audits blind spots at a decision point (Decision: "Am I overlooking something?")
 - `/elicit` ↔ `/inquire`: both about "unclear starting point" but different layers — Aitesis asks the user for facts (information layer), Euporia surfaces coordinate values from substrate (coordinate-explication layer)
-- `/gap` ↔ `/attend`: both about risk awareness but `/gap` audits decision quality before committing, `/attend` checks execution readiness (Phase -1 upstream scan) and gates execution-time risks
+- `/gap` ↔ `/attend`: both about risk awareness but `/gap` audits decision quality before committing, `/attend` compiles execution boundaries into verifiable goal conditions before an autonomous run
 - `/inquire` ↔ `/contextualize`: both about "context" but different timing (pre vs. post execution)
 - `/frame` ↔ `/ground`: both about structuring how to think about a problem, but different operations (lens selection vs. mapping validation)
 - `/bound` ↔ `/inquire`: both pre-execution and AI-directed, but different targets (ownership boundaries vs. missing context)

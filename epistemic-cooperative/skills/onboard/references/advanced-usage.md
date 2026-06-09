@@ -9,8 +9,8 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 | Chain | Frequency | Pattern |
 |-------|-----------|---------|
 | `/inquire` → `/gap` | Common | Inquire gathers missing context → Gap audits the decision now that context is complete |
-| `/inquire` → `/gap` → `/attend` | Observed | Three-step pre-execution: context → decision audit → risk classification |
-| `/dashboard` → `/inquire` → `/attend` | Observed | Analytics surface a question → inquire about it → risk-evaluate the conclusion |
+| `/inquire` → `/gap` → `/attend` | Observed | Three-step pre-execution: context → decision audit → guardrail compilation |
+| `/dashboard` → `/inquire` → `/attend` | Observed | Analytics surface a question → inquire about it → compile guardrails for the resulting execution |
 
 ## Multi-Protocol Sessions
 
@@ -54,5 +54,5 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 | Chain | Pattern |
 |-------|---------|
 | `/simplify` → `/contextualize` | Simplify code, then check if simplified version fits deployment context |
-| `/batch` → `/attend` | Batch operations planned, then execute with risk-aware gating |
+| `/batch` → `/attend` | Batch operations planned, then their boundaries compiled into verifiable conditions before the run |
 | Any built-in → `/gap` | After any execution, audit for overlooked gaps |
