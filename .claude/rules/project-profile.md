@@ -17,9 +17,8 @@ This project's Cognitive Partnership Move calibration profile (per `project-prof
 
 Floor (runtime-discovered, retry would change identity):
 - Katalepsis (`/grasp`): user IS the measurement target.
-- Prosoche `/attend` Phase 2: gate interaction over runtime-discovered risk patterns; gate-passage actions requiring substrate enforcement are delegated by handoff.
 
-Bounded zone (in-principle delegatable via contract-style Standing authority + post-deploy correction): Horismos BoundaryMap, Syneidesis decision pattern. Horismos / Syneidesis are protocol-internally grounded by Constitution checkpoints in their TOOL GROUNDING entries; profile-layer mention is for future migration visibility, not runtime enforcement.
+Bounded zone (in-principle delegatable via contract-style Standing authority + post-deploy correction): Horismos BoundaryMap, Syneidesis decision pattern, Prosoche compiled-condition set. Horismos / Syneidesis / Prosoche are protocol-internally grounded by Constitution checkpoints in their TOOL GROUNDING entries; profile-layer mention is for future migration visibility, not runtime enforcement. Prosoche moved from floor to bounded zone with the `/attend` compile-time redefinition: its gate confirms a condition set compiled from pre-committable boundary signal kinds, not runtime-discovered execution actions; enforcement inside the interval and fast-risk interception are non-epistemic substrate, delegated by handoff at emission.
 
 **Inscription-decision posture** (Emergent — outside the six profile variables): when correcting application drift, articulate the correction at the abstraction axis where it originated (response-level when sufficient), and leave rule-overlap open for model interpretation.
 
