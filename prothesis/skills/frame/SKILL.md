@@ -107,7 +107,7 @@ Q(MB, M) (confirm+select) = extern: Mission Brief confirmation + mode selection 
 G (observe)  = purpose: targeted context acquisition (guided by MBᵥ)
 S (select)  = extern: user choice boundary
 characterize = purpose: count-tier classification of Pₛ (relay; Mode 1)
-compile      = purpose: inquiry-spec compilation (relay; no user judgment beyond lens selection — entropy→0 once Pₛ is fixed)
+compile      = purpose: inquiry-spec compilation (relay; no user judgment beyond lens selection — the spec STRUCTURE is entropy→0 once Pₛ is fixed: which fields, which default values; PerspectiveDirective content is generated but derived from Pₛ + MBᵥ, introducing no new decision point)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -123,7 +123,7 @@ Phase 3 handoff (extension)      → TextPresent+STOP (emit the compiled FramedI
 -- Substrate realization: the inquiry spec is substrate-invariant; an agent-team, a dynamic-workflow, isolated subagents, plan-mode, and the main session are PEER substrates that may execute it — the substrate (or /conduct at arrangement time) owns the concrete execution tools, not frame. frame neither names nor binds a substrate — it surfaces the per-perspective channel-need and the /conduct arrangement reference as handoff annotations. Topology→substrate feasibility (e.g. a dialectical arrangement requires persistent addressable peers; an independent-aggregate ⨾ adversarial pass over a static aggregate is realizable by a stateless pipeline) is the substrate's to enforce — surfaced by /conduct at arrangement time and by the substrate at execution time, never bound by frame. The (constitution)/(extension) markers above are the authoritative axis.
 
 ── CATEGORICAL NOTE ──
-frame supplies analysis OBJECTS (lenses); /conduct is the ARRANGEMENT FUNCTOR over objects, generic in object type (objects = perspectives → multi-lens inquiry arrangement; objects = protocols → protocol-chain arrangement — the same functor, the same topology algebra). frame's framed object is an object (Mode 1 lens) or an object-plus-default-directive (Mode 2 spec), never an arrangement: the arrangement is the functor's action, attributed to /conduct. The trivial-default arrangement frame retains (DefaultDirective) is the degenerate case the functor need not be invoked for.
+frame supplies analysis OBJECTS (lenses); /conduct is the ARRANGEMENT FUNCTOR over objects, generic in object type (objects = perspectives → multi-lens inquiry arrangement; objects = protocols → protocol-chain arrangement — the same functor, the same topology algebra). frame's framed object is an object (Mode 1 lens) or an object-plus-default-directive (Mode 2 spec), never an arrangement: the arrangement is the functor's action, attributed to /conduct. The trivial-default arrangement frame retains (DefaultDirective) is the degenerate case the functor need not be invoked for — degenerate in the sense that no arrangement design remains (the directive is fixed and relay-compiled), not as /conduct's algebraic identity: it is a substrate-facing directive outside /conduct's reconciliation algebra, and any departure from it is arrangement design, which routes to /conduct.
 
 ── MODE STATE ──
 Λ = { phase: Phase, mode: Mode, mission_brief: Option(MBᵥ), perspectives: Option(Pₛ), inquiry_spec: Option(IS), recommended_lens: Option(Lᵣ), active: Bool }
