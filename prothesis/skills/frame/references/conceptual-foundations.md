@@ -1,41 +1,18 @@
 # Conceptual Foundations
 
-Design rationale and supplementary context for Prothesis protocol. These sections are not required for standard protocol execution — consult when deeper understanding of design decisions is needed.
+Design rationale and supplementary context for Prothesis (frame). These sections are not required for standard protocol execution — consult when deeper understanding of design decisions is needed.
 
-## Plan Mode Integration
+Since frame v7, frame is a **pure compiler / object supplier**: it selects analytical lenses and compiles a framed object — a lens recommendation (Mode 1) or an inquiry spec (Mode 2) — then hands off to the substrate and stops (frame Rule 3). It does not arrange the perspectives (that is `/conduct`'s arrangement functor) and does not execute the inquiry (that is the substrate's). The rationale below is written against that model.
 
-When combined with Plan mode, Prothesis provides the **Deliberation** phase:
+## Plan Mode as a Substrate
 
-**Per-Phase Application**:
-- Apply Prothesis at each planning domain or phase
-- Perspectives evaluate domain-specific considerations
-- Synthesis produces phase-scoped recommendations
+Plan mode is one **substrate** that can execute a frame-compiled inquiry spec — it is not a special frame phase. frame compiles the same spec regardless of which substrate will execute it; only realization differs.
 
-**Syneidesis Coordination** (following default ordering):
-- Prothesis generates recommendations (Deliberation)
-- Syneidesis surfaces unconfirmed assumptions (Gap)
-- User feedback triggers re-evaluation (Revision)
-- Explicit confirmation gates execution (Execution)
+- frame's Phases 0–3 (confirm Mission Brief + mode, gather context, select lens, compile-and-handoff) run identically in or out of plan mode — `AskUserQuestion` is available for the Phase 0 and Phase 2 gates, and Phase 3 is a relay emit of the compiled object.
+- When **plan mode is the executing substrate**, it realizes the spec with the subagents it affords (`Task(subagent_type="Explore")` for context, `Task(subagent_type="Plan")` per perspective), preserving the directive's `isolated` independence — each perspective analyzed in a separate subagent context.
+- **Feasibility limit**: plan mode has no persistent addressable peers, so it cannot host a non-aggregate reconciliation (a dialectical or peer-negotiation arrangement). When the arrangement requires that, `/conduct` (at arrangement time) or the substrate (at execution time) declares the topology-degradation and realizes the closest aggregate behavior, rather than silently binding an infeasible substrate. This feasibility judgment is the substrate's / `/conduct`'s, surfaced at the handoff seam — not frame's, and not a frame phase.
 
-**Minimal Enhancement Pattern**:
-When multiple perspectives converge on the same recommendation, present as unanimous recommendation to indicate high confidence.
-
-**Phase 4 Degradation**:
-When Prothesis activates within an active plan mode session, the protocol adapts with available tools:
-
-- Phases 0–3: Execute normally (`AskUserQuestion` available in plan mode; Phase 3 Deliberation Design proceeds as topology elicitation). Plan mode can run elicitation but cannot host a non-aggregate topology — there are no persistent addressable peers for `dialectical_debate` or peer-negotiation modes. When the user elicits such a topology, declare topology-degradation (Rule 3 / Rule 17) and realize the closest aggregate behavior rather than silently binding an infeasible substrate.
-- Phase 1: `Explore` subagent available for context collection (`Task(subagent_type="Explore")`)
-- Phase 4: `Plan` subagent available per perspective (`Task(subagent_type="Plan")`); analysis isolation preserved — each perspective analyzed in a separate subagent context (no persistent identity or cross-dialogue capability; coordinator collects results and incorporates into plan output)
-- Phase 5: Coordinator performs Δ(R') trigger detection and Syn(R', ∅) synthesis — both internal operations. O(L) presents the partial Lens.
-- ExitPlanMode presents the partial Lens L: convergence from independent analysis, divergence as unresolved hypotheses, assessment from coordinator synthesis.
-
-**Quality trade-off (partial Lens)**: Without cross-dialogue:
-- Convergence claims are based on independent convergence only (perspectives agree without knowing each other's positions)
-- Divergence claims are unresolved hypotheses — peers have not had the opportunity to narrow disagreement or identify shared ground
-- Assessment lacks Dᵣ refinement — the coordinator synthesizes from isolated outputs only
-- Trigger Detection Criteria still apply — the coordinator can identify contradictions and horizon intersections, but cannot initiate peer resolution
-
-This preserves Phase 0–3 epistemic value, Phase 4 analysis isolation, and Phase 5 synthesis capability via internal operations.
+The quality trade-off of an aggregate-only realization (independent convergence without peer-resolved divergence, synthesis from isolated outputs only) is a property of the *substrate's* execution of the spec, evaluated as a separate trace (see [`evaluation-methodology.md`](./evaluation-methodology.md)), not of frame's compilation.
 
 ## Distinction from Socratic Method
 
@@ -60,9 +37,9 @@ Three design choices in Prothesis break this failure chain at different stages:
 |---|---|---|
 | Framework absence → premature closure | Open-world trigger (`framework_absent(U)` gate) | Detects when problem space is not fully enumerated; activates before AI commits to a single framework |
 | Self-diagnosis impossible → meta-ignorance persists | AI-guided initiator | External detection bypasses the user's inability to recognize their own framework blindness |
-| Sequential analysis → anchoring cascade | Isolated teammate context | Physical context separation prevents earlier perspectives from contaminating later ones |
+| Sequential analysis → anchoring cascade | Isolated-context directive (substrate-enforced) | The compiled directive requires each perspective to be formed in an independent context, so earlier perspectives cannot contaminate later ones when the substrate executes |
 
-Each stage depends on the previous: without the open-world trigger, premature closure occurs silently; without AI-guided detection, the user cannot self-diagnose; without isolation, even correctly identified perspectives contaminate each other through shared context. The three choices form a defense-in-depth against single-framework fixation.
+Each stage depends on the previous: without the open-world trigger, premature closure occurs silently; without AI-guided detection, the user cannot self-diagnose; without the isolation directive, even correctly identified perspectives would contaminate each other through shared context at execution. The three choices form a defense-in-depth against single-framework fixation — the first two enacted by frame at compilation, the third compiled into the spec and enforced by the substrate.
 
 ### AI-Guided Initiator: Epistemological Basis
 
@@ -72,29 +49,29 @@ If Prothesis were **user-initiated only**, it would require users to self-diagno
 
 **AI-guided** is therefore not a convenience choice but an epistemological necessity. The AI can detect `framework_absent(U)` because it has access to the space of possible frameworks — the user cannot perform this detection because access to that space is exactly what they lack.
 
-This does not make Prothesis fully AI-autonomous. Layer 2 (AI-guided) detects the *condition*; the user retains *selection authority* via AskUserQuestion (Recognition over Recall). The AI says "here are the lenses"; the user says "I'll look through these ones." Detection is AI-guided; selection is user-authorized.
+This does not make Prothesis fully AI-autonomous. Layer 2 (AI-guided) detects the *condition*; the user retains *selection authority* via the Phase 2 gate (Recognition over Recall). The AI says "here are the lenses"; the user says "I'll look through these ones." Detection is AI-guided; selection is user-authorized.
 
-### Deficit Identity: Framework Includes Form
+### Deficit Identity: Framework Spans Lens and Form, frame Owns the Object
 
-The absent "framework" that `FrameworkAbsent` names is not only *which* lens to apply but also *how* the resulting perspectives reconcile — the deliberation topology (the form). A user facing framework absence typically lacks both: they cannot name the right analytical lenses, and they cannot say whether those lenses should aggregate independently, debate, or refute one another. Both are facets of the same meta-ignorance — not knowing what one does not know about how to structure the inquiry.
+The absent "framework" that `FrameworkAbsent` names is not only *which* lens to apply but also *how* the resulting perspectives reconcile — the arrangement (the form). A user facing framework absence typically lacks both: they cannot name the right analytical lenses, and they cannot say whether those lenses should aggregate independently, debate, or refute one another. Both are facets of the same meta-ignorance — not knowing what one does not know about how to structure the inquiry.
 
-Designing the deliberation topology is therefore the **same** `FrameworkAbsent → FramedInquiry` deficit, not a new one. The framed object is a complete Method ⟨Lens, DeliberationTopology⟩ precisely because the framework was absent in both facets. The deficit type is unchanged; its content is widened to own the form alongside the lens.
+frame resolves this deficit by **supplying the object and the trivial-default form, and delegating non-trivial form to `/conduct`**. The framed object is the lens (Mode 1) or the inquiry spec (Mode 2) — never an arrangement. Where the form is trivial, frame compiles the `DefaultDirective` (isolated, independent-then-conditional-dialogue, horizon-fusion) as a zero-gate relay; where the form is non-trivial, frame references `/conduct`, the **arrangement functor** that designs the topology over the perspectives. The deficit type is unchanged — `FrameworkAbsent → FramedInquiry` — but its resolution is factored: frame owns the object plus the default form, `/conduct` owns non-trivial arrangement, and the substrate owns execution.
 
-The AI-guided initiator pattern extends to form exactly as it does to lens. Just as the AI proposes candidate lenses (with the user selecting), the AI proposes a default topology plus its basis (with the user judging via the Phase 3 dimension gate). The user cannot self-diagnose the absence of a reconciliation structure for the same Dunning-Kruger reason they cannot self-diagnose lens absence: recognizing that multiple reconciliation forms exist requires the forms they lack. Detection of the form deficit is AI-guided; the topology is user-judged.
+The AI-guided initiator pattern still extends to form, but across two protocols. Just as the AI proposes candidate lenses (with the user selecting) at frame's Phase 2, the AI proposes a default form as a relay (no gate) — and when the user wants a non-trivial form, `/conduct`'s impact-first axis gates let the user judge it. The user cannot self-diagnose the absence of a reconciliation structure for the same Dunning-Kruger reason they cannot self-diagnose lens absence; detection of the form deficit is AI-guided, the default form is relayed, and any non-trivial form is user-judged at `/conduct`'s gates.
 
 ### Theoria-Praxis Boundary
 
-Prothesis Phases 0–5 constitute pure **theoria** (θεωρία) — contemplative inquiry that produces the Lens `L` as a theoretical artifact. The Lens reveals what different frameworks show; it changes nothing.
+frame's Phases 0–3 constitute pure **theoria** (θεωρία) — contemplative inquiry that produces the framed object (the lens recommendation `Lᵣ` or the inquiry spec `IS`) as a theoretical artifact. The framed object reveals which frameworks to apply and how, by default, to reconcile them; it changes nothing.
 
-The transition from theoria to praxis occurs at the LOOP's routing step, when `J=wrap_up` completes with the Lens `L`. Output Style nudges may indicate downstream protocols based on what the Lens revealed. This is an **explicit boundary**: the user must choose to act on the Lens by following a nudge or proceeding with their own plan.
+The transition from theoria to praxis occurs at the **handoff**: frame emits the framed object and stops; the substrate's execution of the spec (or the user's application of a Mode 1 lens) is the praxis. The handoff is the explicit boundary — the substrate, not frame, acts on the object.
 
-**Design principle** (Placement over Prescription): Prothesis places perspectives before the user; it does not prescribe action. Automatic transition from analysis to execution would violate this principle — the user might want to contemplate the Lens without acting, request additional perspectives, or reject the analysis entirely. Each of these is a valid outcome of theoria.
+**Design principle** (Placement over Prescription): Prothesis places perspectives before the user and compiles the object; it does not prescribe or perform action. frame executing the inquiry would violate this principle — the user might want to read the lens without executing, route the spec through a different substrate, request additional perspectives, or reject the framing entirely. Each is a valid outcome of theoria.
 
-**Structural enforcement**: The `J` routing enum (`extend`, `add_input`, `wrap_up`, `withdraw`) contains no direct execution option. There is no `J=execute` or `J=implement`. The primary structural path to praxis is through Output Style nudges, which themselves require user consent at the downstream protocol's own activation gate.
+**Structural enforcement**: frame's morphism terminates at `handoff → STOP`. There is no execute step, no synthesis step, and no post-handoff loop inside frame (the `executor-creep` and `arranger-creep` adversarial guards forbid frame from re-acquiring those). The structural path to praxis is the substrate's execution of the handed-off spec; Output Style nudges may point to downstream protocols, which themselves require user consent at their own activation gates.
 
 ## Parametric Nature
 
-The formula is **domain-agnostic**: instantiate C differently, derive different P-space. The structure `U → MB → G → C → P → S → I → Syn` applies wherever the open-world condition holds.
+The compilation is **domain-agnostic**: instantiate C differently, derive a different perspective space. The structure `U → MB → G → C → P → S → compile → handoff` applies wherever the open-world condition holds. Arrangement (`/conduct`) and execution (substrate) compose downstream of the handoff; frame's own structure ends at compile-and-hand-off.
 
 ## Specialization
 
@@ -102,11 +79,11 @@ When guaranteed coverage is required, Prothesis can be constrained:
 
 ```
 Prothesis(mandatory_baseline, optional_extension):
-  baseline ∪ AskUserQuestion(extension) → selected
-  T(selected) → ∥I(T) → Syn → L
+  baseline ∪ select(extension) → Pₛ
+  compile(Pₛ ⊕ ConductRef ⊕ DefaultDirective) → IS → handoff
 ```
 
-**Principle**: Mandatory baseline cannot be reduced by user selection; only extended.
+**Principle**: Mandatory baseline cannot be reduced by user selection; only extended. frame compiles the constrained lens set into the spec; the substrate executes it.
 
 ## Per-Message Application
 
@@ -128,7 +105,7 @@ False positive (unnecessary question) < False negative (missed perspective)
 
 | Trigger | Effect |
 |---------|--------|
-| Synthesis complete | Lens established; follow-ups continue within lens |
+| Framed object handed off | Lens recommendation or inquiry spec emitted; mode deactivates (frame does not loop after handoff) |
 | User starts unrelated topic | Re-evaluate for new Prothesis |
 
 ## Conditions

@@ -1,22 +1,22 @@
 # Prothesis — /frame (πρόθεσις)
 
-다관점 조사 — 렌즈 추천 또는 팀 분석 (πρόθεσις: 앞에 놓기)
+다관점 프레이밍 — 렌즈 추천 또는 substrate로 넘기는 컴파일된 inquiry 스펙 (πρόθεσις: 앞에 놓기)
 
 > [English](./README.md)
 
 ## Prothesis란?
 
-그리스어 πρόθεσις(앞에 놓기)의 현대적 재해석으로, **분석 렌즈를 추천하거나 다관점 조사를 위한 팀을 구성하여 프레임된 탐구를 생성**하는 프로토콜이다.
+그리스어 πρόθεσις(앞에 놓기)의 현대적 재해석으로, **분석 렌즈를 추천하거나 다관점 inquiry 스펙을 컴파일**한 뒤 substrate로 넘겨 실행시키는 프로토콜이다. frame은 분석 객체(렌즈)를 공급하며, 다관점 배열은 `/conduct`의 몫, inquiry 실행은 substrate의 몫이다.
 
 ### 핵심 문제
 
-사용자는 종종 질문에 적합한 분석 프레임워크가 부재한 상태다 (`FrameworkAbsent`). 열린 질문 "어떤 관점을 원하세요?"는 이미 답을 알아야 대답할 수 있다. 관점 선택을 넘어서, 복잡한 질문은 고유한 시점에서의 병렬 조사가 필요하다.
+사용자는 종종 질문에 적합한 분석 프레임워크가 부재한 상태다 (`FrameworkAbsent`). 열린 질문 "어떤 관점을 원하세요?"는 이미 답을 알아야 대답할 수 있다. 관점 선택을 넘어서, 복잡한 질문은 고유한 시점에서의 병렬 조사를 위한 스펙이 필요하며 — 그 스펙을 어떤 substrate가 실행한다.
 
 ### 해법
 
-**Recognition over Recall + Two Modes**:
-- **Recommend** (Mode 1): AI가 관점 옵션을 제시하고, 사용자가 선택하면, 관점 + 후속 프로토콜 추천을 출력한다. 경량 경로 — 팀 생성 없음. Phase 0에서 Mode 선택으로 진입.
-- **Inquire** (Mode 2): 전체 조사 — AI가 관점을 제시하고, 사용자가 선택하면, 에이전트 팀이 병렬로 조사하고, 발견 사항을 렌즈로 종합한다. 생애주기: 팀 구성 → 병렬 조사 → 교차 대화 → 종합 → 라우팅.
+**Recognition over Recall + Two Modes** (둘 다 출력을 컴파일해 handoff; 어느 쪽도 실행하지 않음):
+- **Recommend** (Mode 1): AI가 관점 옵션을 제시하고, 사용자가 선택하면, 렌즈 추천 + 후속 프로토콜 추천을 출력한다. 경량 경로 — inquiry 스펙 없음. Phase 0에서 Mode 선택으로 진입.
+- **Inquire** (Mode 2): AI가 관점을 제시하고, 사용자가 선택하면, frame이 전체 inquiry 스펙 — 렌즈 + 기본 격리/대화/합성 directive + 비자명 배열용 `/conduct` 참조 — 을 컴파일해 handoff한다. substrate(에이전트 팀, dynamic-workflow, 격리 subagent, plan mode, 또는 main 세션)가 이를 실행하며, frame은 handoff에서 정지한다.
 
 ### 소크라테스 방식과의 차이
 
@@ -33,12 +33,11 @@
 Phase 0: Mission Brief → 탐구 의도, 범위, 모드 확인 (gate interaction)
 Phase 1: Gather        → 관점 형성을 위한 대상 맥락 수집
 Phase 2: Prothesis     → 관점 2-4개 제시 (gate interaction)
---- Mode 1 (recommend) 여기서 종료: Pₛ + 분류 출력 ---
-Phase 3: Deliberation Design → 숙의 토폴로지 설계 — 관점들이 어떻게 조정되는가
-                               (interaction-mode, termination, independence, routing);
-                               기본값은 새 gate 없이 통과 (Mode 2 전용)
-Phase 4: Inquiry       → 선택된 관점별 에이전트 팀 분석 (TeamCreate + teammates)
-Phase 5: Synthesis & Routing → 교차 대화 확인 → 수렴점/발산점 정리 → 통합 답변 + 라우팅
+Phase 3: Compile & Handoff →
+  Mode 1 (recommend): 렌즈 분류(characterize) → 추천 출력 → STOP
+  Mode 2 (inquire):   inquiry 스펙 컴파일(렌즈 ⊕ /conduct 배열 참조 ⊕
+                      기본 격리/대화/합성 directive) → handoff → STOP
+--- frame은 실행하지 않음: substrate가 스펙을 실행하고, 비자명 배열은 /conduct로 라우팅 ---
 ```
 
 ## 사용 시점
