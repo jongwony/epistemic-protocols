@@ -31,7 +31,7 @@ const PLUGINS = _records.map(r => ({ dir: r.dir, skill: r.skill }));
 // claude.ai description overrides (originals exceed 200 chars)
 // Protocol overrides: compact Type-only format for Layer 0 reference
 const DESCRIPTION_OVERRIDES = {
-  frame: 'Multi-perspective investigation — (FrameworkAbsent, AI, SELECT, Inquiry) → FramedInquiry',
+  frame: 'Multi-perspective framing — (FrameworkAbsent, AI, DESIGN, Inquiry) → FramedInquiry',
   gap: 'Gap surfacing before decisions — (GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision',
   grasp: 'Intent-scented comprehension verification — (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding',
   inquire: 'Infer context insufficiency before execution — (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution',

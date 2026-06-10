@@ -47,6 +47,7 @@ Pᵦ     = Pre-confirmed base perspectives (user-supplied in U or at the Z zero-
 {P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2 when m=inquire)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
+         -- under-minimum guard (m=inquire ∧ |Pₛ| = 1): surface the two-lens minimum; responses: extend (re-present Sc) | consented m := recommend | Esc — no silent mode switch (mode was constituted in Phase 0)
 Z      = ZeroCandidate: {P₁...Pₙ} = ∅ ∧ Pᵦ = ∅   -- Phase 2 guard: no candidate frameworks to place; surfaced as a finding (Constitution); responses: modify(field) (the J_mb constructor) | supply(Pᵦ') (perspective supply, typed via Pᵦ enrichment) | Esc — no FramedInquiry is emitted from this branch
 LensEstablished = Pₛ where lens selection complete  -- the analysis object; Mode 1 packages it into Lᵣ, Mode 2 compiles it into IS
 -- framed object: the lens (Mode 1) or the inquiry spec (Mode 2). frame supplies the OBJECT and hands it off; the ARRANGEMENT over multiple objects is NOT produced here — it is /conduct's arrangement functor, and only the trivial default rides in DefaultDirective --
@@ -78,7 +79,7 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0:  U → MB(U) → Qc(MB, M) → Stop → (MBᵥ, m)              -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
-Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]; on Z (zero candidates) surface the finding → Stop → route per LOOP (modify | Pᵦ' supply | Esc)
+Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]; on Z (zero candidates) surface the finding → Stop → route per LOOP (modify | Pᵦ' supply | Esc); on under-minimum (m=inquire ∧ |sel| = 1) surface the minimum → Stop → route per LOOP
 Phase 3:  LensEstablished → [m=recommend: characterize(Pₛ) → Lᵣ | m=inquire: compile(Pₛ ⊕ ConductRef ⊕ DefaultDirective) → IS] → converge(transformation trace) → handoff(FramedInquiry) → STOP  -- compile the framed object + emit it as the terminal relay, then halt (no gate, no dispatch; substrate executes downstream)
 
 ── LOOP ──
@@ -95,7 +96,11 @@ During Phase 2 (Perspective Placement):
     modify(field) → re-present Q1(MB') → Stop → MBᵥ → re-enter Phase 1 (re-gather) → Phase 2
     supply(Pᵦ')   → Pᵦ := Pᵦ' (auto-included) → re-present Sc with ≥ 1 novel proposal
     Esc           → terminate (nothing compiled)
-  -- no FramedInquiry is emitted from Z; the result equation is unchanged (FramedInquiry requires LensEstablished)
+  m=inquire ∧ |sel(Sc)| = 1 → surface the two-lens minimum (a single lens fits Recommend; Inquire compiles a multi-perspective spec) → Stop:
+    extend         → re-present Sc (add perspectives; current selection retained)
+    m := recommend → consented mode switch (Λ.mode update) → LensEstablished → Phase 3 characterize path (Lᵣ)
+    Esc            → terminate (nothing compiled)
+  -- no FramedInquiry is emitted from Z or the under-minimum surfacing; the result equation is unchanged (FramedInquiry requires LensEstablished consistent with m)
 
 During Phase 3 (Compile & Handoff):
   m = recommend → characterize(Pₛ) = classify Pₛ by count tier (advisory metadata; all tiers terminate Mode 1, no branching):
@@ -124,6 +129,7 @@ Phase 0 Qc (constitution)        → present (combined: Q1=Mission Brief confirm
 G (observe)                      → Read, Glob, Grep (meta-scope context acquisition guided by MBᵥ to identify relevant perspectives; not passed to the substrate — each perspective independently collects object-scope evidence through its own lens at execution time)
 Sc (constitution)                → present (mandatory; multiSelect: true; lens selection is epistemic choice; Esc key → loop termination at LOOP level)
 Phase 2 Z zero_result (constitution) → present (zero-candidate finding + reasoning; responses: modify(field) | supply(Pᵦ') → Pᵦ enrichment | Esc)
+Phase 2 under_minimum (constitution) → present (m=inquire ∧ |sel| = 1: surface the two-lens minimum; responses: extend → re-present Sc | consented m := recommend → Phase 3 characterize | Esc)
 Phase 3 characterize (sense)     → Internal operation (perspective count-tier classification → Lᵣ { handoff, tier, downstream_use } packaging emitted as inj₁ FramedInquiry; Mode 1)
 Phase 3 compile (sense)          → Internal operation (assemble the InquirySpec: lens ⊕ per-perspective directive ⊕ channel-need ⊕ /conduct arrangement reference ⊕ default isolation/dialogue/synthesis directive; relay — no external tool, no user judgment beyond Pₛ; Mode 2)
 Phase 3 converge (extension)     → TextPresent+Proceed (convergence evidence trace: per-perspective contribution; Mode 2 additionally surfaces the spec directive + /conduct arrangement reference)
@@ -237,7 +243,7 @@ After context gathering (Phase 1), **present** perspectives via Cognitive Partne
 
 Constitution presentation yields turn for user response.
 
-Each perspective is an **individual option**. Keep each option a single perspective so the user composes any combination directly. The user selects one or more perspectives directly.
+Each perspective is an **individual option**. Keep each option a single perspective so the user composes any combination directly. The user selects one or more perspectives directly (Mode 2 requires at least two; an under-minimum selection surfaces the minimum with recovery options per LOOP — extend the selection, switch to Recommend with consent, or exit).
 
 ```
 question: "Which lens(es) for this inquiry?"
