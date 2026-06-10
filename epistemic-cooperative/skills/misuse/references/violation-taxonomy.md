@@ -94,10 +94,10 @@ Instance count is NOT a gate — it is evidence for sensing, not a precondition.
 
 ### Violation: `/frame` Over-extension (separate class, evidence-pending)
 
-- **Definition** — `/frame` remained active when `/induce` should have been handed off. The `/frame` skill produces 5+ converged perspectives, the user independently proposes a candidate name within or after the frame analysis, and no `/induce` invocation followed.
+- **Definition** — the post-`/frame` session continued elaborating when `/induce` should have been handed off. The framed analysis (substrate-executed from `/frame`'s compiled spec) reaches 5+ converged perspectives, the user independently proposes a candidate name within or after that analysis, and no `/induce` invocation followed.
 - **Detection signals**:
-  - `/frame` session reaches 5+ converged perspectives (perspective count visible in `/frame` output structure)
-  - User message after `/frame` synthesis contains a coined name pattern (a noun phrase the AI did not propose, used as if naming the synthesized abstraction)
+  - The framed analysis reaches 5+ converged perspectives (perspective count visible in the framed-analysis output structure)
+  - User message after the framed analysis contains a coined name pattern (a noun phrase the AI did not propose, used as if naming the synthesized abstraction)
   - No `/induce` invocation followed within the next several turns
 - **Status** — Pattern documented but **not in `/misuse` v1.0 detector scope**. Defer to a future expansion when accumulated cross-session retention evidence is available. Current v1.0 classifies this as Emergent and surfaces it only as AMBIGUOUS with note, not as a primary VIOLATION class.
 

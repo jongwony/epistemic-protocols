@@ -249,9 +249,9 @@ A session becomes write-worthy when it exhibits:
 
 ### Prothesis Protocol Pattern
 ```
-Context → Derive perspectives → User selects → Parallel inquiry (with Horizon Limits) → Synthesis
+Context → Derive perspectives → User selects → Compile inquiry spec → Handoff → substrate executes (isolated inquiry with Horizon Limits → synthesis)
 ```
-Reference: `/frame` — canonical implementation of multi-perspective epistemic analysis
+Reference: `/frame` — supplies the lens and the compiled spec; the executing substrate produces the multi-perspective analysis
 
 ### Incremental Refinement Loop
 ```
