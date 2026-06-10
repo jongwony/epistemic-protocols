@@ -11,7 +11,7 @@ Each perspective MUST be analyzed in an **isolated context** so that, before any
 - Confirmation bias from the main agent's prior reasoning
 - Anchoring on initial assumptions formed during context gathering
 
-The invariant is **independence-before-contamination**, stated as a property of the directive, not of any one substrate. A substrate that gives each perspective a fresh context — isolated subagents, an agent team's teammates, or a dynamic-workflow's parallel branches — satisfies it; routing a perspective through the main agent's running context (which retains full history) breaks it. When the executing substrate cannot give a perspective an independent context, the substrate — or `/conduct` at arrangement time — declares the partial-Lens / independence degradation rather than silently relaxing isolation.
+The invariant is **independence-before-contamination**, stated as a property of the directive, not of any one substrate. A substrate that gives each perspective a fresh context — isolated subagents, an agent team's teammates, or a dynamic-workflow's parallel branches — satisfies it; routing a perspective through the main agent's running context (which retains full history) breaks it. When the executing substrate cannot give a perspective an independent context, the substrate — or `/conduct` at arrangement time — declares the independence degradation rather than silently relaxing isolation.
 
 ## Non-default independence routes to /conduct
 
