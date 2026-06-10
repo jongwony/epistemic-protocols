@@ -43,11 +43,11 @@ MBᵥ    = Verified MissionBrief (user-confirmed)
 m      = Mode ∈ {recommend, inquire}              -- lens recommendation vs. full inquiry spec
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
 C      = Context (information for perspective formulation)
-Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in Pₛ)
+Pᵦ     = Pre-confirmed base perspectives (user-supplied in U or at the Z zero-result surfacing; auto-included in Pₛ)
 {P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2 when m=inquire)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
-Z      = ZeroCandidate: {P₁...Pₙ} = ∅ ∧ Pᵦ = ∅   -- Phase 2 guard: no candidate frameworks to place; surfaced as a finding (Constitution); responses route to existing constructors (J_mb = modify(field) | Pᵦ' supply | Esc) — no FramedInquiry is emitted from this branch
+Z      = ZeroCandidate: {P₁...Pₙ} = ∅ ∧ Pᵦ = ∅   -- Phase 2 guard: no candidate frameworks to place; surfaced as a finding (Constitution); responses: modify(field) (the J_mb constructor) | supply(Pᵦ') (perspective supply, typed via Pᵦ enrichment) | Esc — no FramedInquiry is emitted from this branch
 LensEstablished = Pₛ where lens selection complete  -- the analysis object; Mode 1 packages it into Lᵣ, Mode 2 compiles it into IS
 -- framed object: the lens (Mode 1) or the inquiry spec (Mode 2). frame supplies the OBJECT and hands it off; the ARRANGEMENT over multiple objects is NOT produced here — it is /conduct's arrangement functor, and only the trivial default rides in DefaultDirective --
 ConductRef = an advisory reference to /conduct for non-trivial arrangement (the prothesis→hyphegesis advisory edge): when the order, independence, reconciliation, termination, or routing of the perspectives is non-trivial, /conduct arranges them — frame names the reference, does not arrange
@@ -93,7 +93,7 @@ After Phase 0 (Mission Brief + Mode Selection):
 During Phase 2 (Perspective Placement):
   Z ({P₁...Pₙ} = ∅ ∧ Pᵦ = ∅) → present the zero-result finding with reasoning → Stop:
     modify(field) → re-present Q1(MB') → Stop → MBᵥ → re-enter Phase 1 (re-gather) → Phase 2
-    Pᵦ' supplied  → Pᵦ := Pᵦ' (auto-included) → re-present Sc with ≥ 1 novel proposal
+    supply(Pᵦ')   → Pᵦ := Pᵦ' (auto-included) → re-present Sc with ≥ 1 novel proposal
     Esc           → terminate (nothing compiled)
   -- no FramedInquiry is emitted from Z; the result equation is unchanged (FramedInquiry requires LensEstablished)
 
@@ -123,7 +123,7 @@ Phase 0 MB_from_arg (extension)  → TextPresent+Proceed (when user_invoked ∧ 
 Phase 0 Qc (constitution)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; when no explicit_arg; Esc key → loop termination at LOOP level)
 G (observe)                      → Read, Glob, Grep (meta-scope context acquisition guided by MBᵥ to identify relevant perspectives; not passed to the substrate — each perspective independently collects object-scope evidence through its own lens at execution time)
 Sc (constitution)                → present (mandatory; multiSelect: true; lens selection is epistemic choice; Esc key → loop termination at LOOP level)
-Phase 2 Z zero_result (constitution) → present (zero-candidate finding + reasoning; responses route to existing constructors — modify(field) | Pᵦ' supply | Esc; no new answer type)
+Phase 2 Z zero_result (constitution) → present (zero-candidate finding + reasoning; responses: modify(field) | supply(Pᵦ') → Pᵦ enrichment | Esc)
 Phase 3 characterize (sense)     → Internal operation (perspective count-tier classification → Lᵣ { handoff, tier, downstream_use } packaging emitted as inj₁ FramedInquiry; Mode 1)
 Phase 3 compile (sense)          → Internal operation (assemble the InquirySpec: lens ⊕ per-perspective directive ⊕ channel-need ⊕ /conduct arrangement reference ⊕ default isolation/dialogue/synthesis directive; relay — no external tool, no user judgment beyond Pₛ; Mode 2)
 Phase 3 converge (extension)     → TextPresent+Proceed (convergence evidence trace: per-perspective contribution; Mode 2 additionally surfaces the spec directive + /conduct arrangement reference)
