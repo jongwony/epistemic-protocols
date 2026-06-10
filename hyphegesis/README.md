@@ -43,7 +43,7 @@ Invoke `/conduct` at the start of (or partway into) a multi-move work prospect:
 /conduct migrate this service from framework v2 to v3
 ```
 
-Hyphegesis confirms the work brief, checks whether conduction is warranted (single-move work relays out), identifies the candidate moves, then designs the conduct topology one axis at a time — order, independence, reconciliation, termination, routing — starting from the most decision-relevant axis. It surfaces substrate feasibility as a handoff annotation and hands off the method plan with in-session checkpoints.
+Hyphegesis confirms the work brief, checks whether conduction is warranted (single-move work relays out), identifies the candidate moves, then designs the conduct topology one axis at a time — order, independence, reconciliation, termination, routing — starting from the most decision-relevant axis. It surfaces substrate feasibility as a handoff annotation and hands off the method plan with in-session checkpoints. A region whose results reconcile by synthesis and return to the user gets a **synthesis checkpoint** carrying a compiled Recognition brief — per-move outputs, convergences, divergences, private-gap slots, and fusion/output-shape candidates the substrate presents at fusion time, so the user recognizes the fusion choice instead of recalling it.
 
 ## Five Conduct Axes
 
