@@ -13,7 +13,7 @@ This ledger separates four claim-strength buckets that often get conflated in pr
 
 | Plugin | Normative contract | Runtime description metadata | Claude Code realization | Heuristic/advisory only |
 |--------|--------------------|------------------------------|-------------------------|-------------------------|
-| `prothesis` | `Skill.md` defines `/frame`, phase flow, synthesis gate, perspective typing | Short routing cue for framework/perspective selection | Main agent owns Phases 0-2; team routing appears only where `Skill.md` allows it | Perspective quality, synthesis depth, coverage of alternative lenses |
+| `prothesis` | `Skill.md` defines `/frame`, phase flow (0-3), lens selection, inquiry-spec compile + handoff | Short routing cue for framework/perspective selection | Main agent owns Phases 0-3 and stops at handoff; execution belongs to the substrate (no team routing inside frame) | Perspective quality, lens recommendation fit, inquiry-spec compile quality, coverage of alternative lenses |
 | `syneidesis` | `Skill.md` defines `/gap`, gap classes, gate outcomes | Short routing cue for unnoticed gaps before decisions | Main agent only; no Task delegation for user-facing gates | Which gaps are most decision-relevant, alternative salience |
 | `katalepsis` | `Skill.md` defines `/grasp`, intent-scented entry points, understanding verification, user confirmation | Short routing cue for comprehension verification | User-initiated verification in main agent | Depth of actual user understanding beyond the surfaced check |
 | `horismos` | `Skill.md` defines `/bound`, boundary classes, ownership map | Short routing cue for ownership/boundary questions | Main agent only; downstream advisory via graph | Boundary quality, ambiguity resolution quality |
