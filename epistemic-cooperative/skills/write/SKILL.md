@@ -28,13 +28,13 @@ Skip when:
 ## Workflow Overview
 
 ```
-RECOLLECT → PROTHESIS(Context→Perspective→Inquiry→Synthesis) → FORMAT → DRAFT → REFINE → VALIDATE → FINALIZE
+RECOLLECT → PROTHESIS(compile inquiry spec → handoff) → EXECUTE SPEC(this session as substrate) → FORMAT → DRAFT → REFINE → VALIDATE → FINALIZE
 ```
 
 | Phase | Tool | Decision Point |
 |-------|------|----------------|
 | Recollect | /recollect protocol | Prior session material recognition |
-| Prothesis | /frame protocol | Context-derived perspectives, parallel inquiry |
+| Prothesis | /frame protocol | Context-derived perspectives, compiled inquiry spec; this session executes the spec as the substrate |
 | Format | AskUserQuestion | Output type, language |
 | Draft | Write | — |
 | Refine | Edit (loop) | User feedback |
@@ -49,20 +49,20 @@ Invoke `/recollect` to surface prior session material relevant to the drafting t
 
 This phase is conditional: skip silently when the drafting topic has no prior session footprint (e.g., entirely new domain). Anamnesis's internal Phase 0 scan determines applicability.
 
-### 1-3. Prothesis Protocol (Multi-Perspective Analysis)
+### 1-3. Prothesis Protocol (Multi-Perspective Framing)
 
-Apply the Prothesis protocol (/frame) for epistemic analysis:
+Apply the Prothesis protocol (/frame, Mode 2) for epistemic analysis:
 
 ```
-Phase 0: G(U) → C              -- Context acquisition from session/topic
-Phase 1: C → {P₁...Pₙ}(C) → Pₛ -- Perspectives derived FROM context (not predefined)
-Phase 2: Pₛ → ∥I(Pₛ) → R       -- Parallel inquiry with Horizon Limits
-Phase 3: R → Syn(R) → L        -- Synthesis: convergence, divergence, assessment
+Phases 0-2: Mission Brief → context → lens selection   -- perspectives derived FROM context (not predefined)
+Phase 3:    compile(inquiry spec) → handoff → STOP     -- frame supplies the spec; it does not execute
+Execute:    this session, as the substrate, runs the spec — isolated per-perspective analysis,
+            dialogue triggers, horizon-fusion synthesis → framed analysis { convergence, divergence, assessment }
 ```
 
 **Key differences from standalone /frame**:
-- Continues automatically to Format phase after Synthesis
-- Lens L becomes input for content generation
+- After the handoff, this session (the executing substrate) runs the spec and continues automatically to Format
+- The framed analysis (the spec's synthesis output) becomes input for content generation
 
 Reference: `prothesis/skills/frame/SKILL.md`
 
@@ -134,7 +134,7 @@ Apply final edits. Optionally clean intermediate versions.
 
 This skill integrates with:
 - **/recollect** — Material recall (Phase 0)
-- **/frame** — Multi-perspective analysis (Phases 1-3)
+- **/frame** — Multi-perspective framing; the compiled spec is executed by this session (Phases 1-3)
 - **/gap** — Gap detection (Phase 7)
 
 ## Additional Resources

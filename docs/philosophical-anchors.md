@@ -151,14 +151,15 @@ grasp the question it answers), and the *hermeneutic circle* lets the part revis
 the whole. When a Horizon probe lands, the user's frame expands (`P → P'`):
 surfacing the blind spot is what resolves the unknown. Katalepsis stops there — the
 surfaced edge is the *basis* for a fusion of horizons, but the fusion itself (a part
-revising the whole framing) belongs to Prothesis' synthesis layer, not to the
-comprehension loop. This keeps the part-revises-whole movement where it belongs and
+revising the whole framing) belongs to the Prothesis pipeline — compiled into the
+inquiry spec's horizon-fusion directive by `/frame`, executed by the substrate — not
+to the comprehension loop. This keeps the part-revises-whole movement where it belongs and
 the Katalepsis loop strictly terminating.
 
 **Complementary to Prothesis, not duplicative.** Prothesis (`/frame`) already
-instantiates Gadamer's *Horizontverschmelzung* (fusion of horizons) at the
-multi-perspective synthesis layer, fusing distinct interpretive horizons into one
-assessment. Katalepsis' `Horizon` operates one layer down: a single user's
+instantiates Gadamer's *Horizontverschmelzung* (fusion of horizons) as the inquiry
+spec's horizon-fusion synthesis directive — compiled by `/frame`, executed by the
+substrate — fusing distinct interpretive horizons into one assessment. Katalepsis' `Horizon` operates one layer down: a single user's
 comprehension of a single result. Rule 14a fixes this boundary so the two do not
 conflate.
 
@@ -195,7 +196,7 @@ hypothesis, not a permanent commitment.
 - `.claude/rules/axioms.md` §A5 (main axiom; philosophical ground lives here)
 - `.claude/principles/architectural-principles.md` §Epistemic Cost Topology (principle statement only; phenomenological vindication lives here)
 - `anamnesis/skills/recollect/SKILL.md` (runtime protocol using Husserlian "synthesis of identification" and "empty_intention" as load-bearing operational terms; phenomenological context lives here)
-- `prothesis/skills/frame/SKILL.md` (uses Gadamer's Horizontverschmelzung at the multi-perspective synthesis layer; Katalepsis' `Horizon` gap is the comprehension-layer complement — see §Katalepsis Horizon Gap)
+- `prothesis/skills/frame/SKILL.md` (uses Gadamer's Horizontverschmelzung as the inquiry spec's horizon-fusion synthesis directive — compiled by `/frame`, executed by the substrate; Katalepsis' `Horizon` gap is the comprehension-layer complement — see §Katalepsis Horizon Gap)
 
 ## Note on rules/ purity
 

@@ -1,22 +1,22 @@
 # Prothesis — /frame (πρόθεσις)
 
-Multi-perspective investigation — lens recommendation or team analysis (πρόθεσις: placing before)
+Multi-perspective framing — lens recommendation or a compiled inquiry spec handed off to the substrate (πρόθεσις: placing before)
 
 > [한국어](./README_ko.md)
 
 ## What is Prothesis?
 
-A modern reinterpretation of Greek πρόθεσις (placing before) — a protocol that **recommends analytical lenses or assembles a team to investigate from multiple perspectives**, producing a framed inquiry.
+A modern reinterpretation of Greek πρόθεσις (placing before) — a protocol that **recommends analytical lenses or compiles a multi-perspective inquiry spec**, then hands it off to the substrate to execute. frame supplies the analysis object (the lens); arranging multiple perspectives is `/conduct`'s, executing the inquiry is the substrate's.
 
 ### The Core Problem
 
-Users often lack the analytical framework for their question (`FrameworkAbsent`). Open questions like "What perspective do you want?" require knowing the answer to answer. Beyond perspective selection, complex questions need parallel investigation from distinct viewpoints.
+Users often lack the analytical framework for their question (`FrameworkAbsent`). Open questions like "What perspective do you want?" require knowing the answer to answer. Beyond perspective selection, complex questions need a spec for parallel investigation from distinct viewpoints — a spec some substrate then executes.
 
 ### The Solution
 
-**Recognition over Recall + Two Modes**:
-- **Recommend** (Mode 1): AI presents perspective options; user selects; perspectives + downstream protocol suggestions are output. Lightweight — no team created. Selected via Mode choice in Phase 0.
-- **Inquire** (Mode 2): Full investigation — AI presents perspectives; user selects; an agent team investigates in parallel; findings are synthesized into a Lens. Lifecycle: team assembly → parallel investigation → cross-dialogue → synthesis → routing.
+**Recognition over Recall + Two Modes** (both compile an output and hand off; neither executes):
+- **Recommend** (Mode 1): AI presents perspective options; user selects; a lens recommendation + downstream protocol suggestions are output. Lightweight — no inquiry spec. Selected via Mode choice in Phase 0.
+- **Inquire** (Mode 2): AI presents perspectives; user selects; frame compiles a full inquiry spec — the lens, a default isolation/dialogue/synthesis directive, and a `/conduct` reference for non-trivial arrangement — and hands it off. The substrate (an agent team, a dynamic-workflow, isolated subagents, plan mode, or the main session) executes it; frame stops at handoff.
 
 ### Difference from Socratic Method
 
@@ -33,12 +33,11 @@ Users often lack the analytical framework for their question (`FrameworkAbsent`)
 Phase 0: Mission Brief → Confirm inquiry intent, scope, and mode (gate interaction)
 Phase 1: Gather        → Targeted context acquisition for perspective formulation
 Phase 2: Prothesis     → Present 2-4 perspectives (gate interaction)
---- Mode 1 (recommend) terminates here with Pₛ + characterization ---
-Phase 3: Deliberation Design → Design the deliberation topology — how the perspectives reconcile
-                               (interaction-mode, termination, independence, routing); the default
-                               passes with zero new gates (Mode 2 only)
-Phase 4: Inquiry       → Agent team analysis per selected perspective (TeamCreate + teammates)
-Phase 5: Synthesis & Routing → Cross-dialogue check → Convergence/divergence → Integrated answer + Routing
+Phase 3: Compile & Handoff →
+  Mode 1 (recommend): characterize the lens → emit the recommendation → STOP
+  Mode 2 (inquire):   compile the inquiry spec (lens ⊕ /conduct arrangement reference ⊕
+                      default isolation/dialogue/synthesis directive) → hand off → STOP
+--- frame does not execute: the substrate runs the spec; non-trivial arrangement routes to /conduct ---
 ```
 
 ## When to Use
@@ -61,7 +60,7 @@ claude plugin install prothesis@epistemic-protocols
 ## Usage
 
 ```
-/frame [your question]               # multi-perspective investigation
+/frame [your question]               # multi-perspective framing
 ```
 
 ## Author

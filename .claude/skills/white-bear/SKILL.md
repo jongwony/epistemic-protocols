@@ -46,7 +46,6 @@ A **White Bear signal** is a sentence in LLM-facing prose framed as a prohibitio
 - **Diagnostic substrate** — `## Anti-patterns` sections, failure-case checklists, audit findings, review-vocabulary lists. Section role is naming failure modes for detection; negative or failure-case wording is the content. Treat as compliant by purpose. Surface findings only when a positive restatement would preserve both directive force *and* boundary meaning — usually `severity: low` for human triage rather than `high`.
 
 **Cited preserved-prohibition carve-outs** (runtime prose where the prohibition is load-bearing; treat as compliant by purpose, surface only as `severity: low` if the rewrite preference is judgment-dependent):
-- Prothesis Rule 14 — Phase 4 `Await` wait discipline (passive completion barrier vs active polling at the per-turn decision point)
 - Aitesis substrate boundary (legitimate inference vs substrate violation per inference)
 - Katalepsis Rule 11 — verification-gate 1-correct option design (comprehension verification vs decision-axis selection by purpose)
 - Prosoche Stop-as-Gate (subagent return path vs main-agent gate interaction at the `GATE_DETECTED` decision point)

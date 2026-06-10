@@ -51,9 +51,7 @@ export const demoScenarios: DemoScenario[] = [
       { name: "Phase 0", description: "Mission Brief Gate" },
       { name: "Phase 1", description: "Context Gathering" },
       { name: "Phase 2", description: "Perspective Placement" },
-      { name: "Phase 3", description: "Deliberation Design" },
-      { name: "Phase 4", description: "Isolated Inquiry" },
-      { name: "Phase 5", description: "Cross-Dialogue Synthesis" },
+      { name: "Phase 3", description: "Compile & Handoff" },
     ],
     response: [
       { type: "label", text: "Phase 0 \u2014 Mission Brief + Mode Selection Gate" },
@@ -61,8 +59,8 @@ export const demoScenarios: DemoScenario[] = [
       { type: "question", text: "Inquiry intent \u2014 evaluate feasibility and approach for monolith decomposition" },
       { type: "question", text: "Expected deliverable \u2014 recommended architecture with migration strategy" },
       { type: "question", text: "Scope constraints \u2014 existing codebase, team capacity, timeline" },
-      { type: "gate", text: "Confirm brief? Mode: [Recommend] / [Inquire \u2014 spawn perspective team] \u2192" },
-      { type: "insight", text: "Inquire mode spawns independent analysts per perspective (ops, business, risk). Each investigates without shared context contamination." },
+      { type: "gate", text: "Confirm brief? Mode: [Recommend] / [Inquire \u2014 compile a multi-perspective inquiry spec] \u2192" },
+      { type: "insight", text: "Inquire mode compiles an inquiry spec \u2014 selected lenses, isolated independence, dialogue triggers, synthesis contract \u2014 then hands off and stops. The substrate (main session, subagents, or an agent team) executes it without shared-context contamination." },
     ],
   },
   {

@@ -26,7 +26,7 @@ The goal is clear, but *how to conduct the work* is not (`MethodUnderdetermined`
 | Diylisis | AI-guided | `ContextTethered → PortableHandoff` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
-Prothesis frames *which perspectives* for one inquiry; Hyphegesis conducts *how the whole session's moves* relate. The two share a topology algebra — Prothesis runs it over perspectives, Hyphegesis over the protocol graph.
+Prothesis frames *which perspectives* for one inquiry; Hyphegesis conducts *how the whole session's moves* relate. The two share a topology algebra — the same arrangement functor Hyphegesis runs over the protocol graph also arranges the perspectives Prothesis supplies.
 
 ## Install
 
