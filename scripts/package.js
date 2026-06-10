@@ -45,7 +45,6 @@ const DESCRIPTION_OVERRIDES = {
   conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, AI, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
-  compose: 'Protocol composition authoring — build composition SKILL.md from protocol chains',
   write: 'Multi-perspective blog drafting — transforms session insights into publishable content via iterative perspective-based refinement.',
   triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, and emit dispatchable initial prompts.',
   dispatch: 'Focused work-unit execution — consume /triage initial prompts, verify premises, fan out PRs, and inscribe rejection traces.',

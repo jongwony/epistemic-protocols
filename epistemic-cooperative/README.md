@@ -16,7 +16,6 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/report` | Growth Map with epistemic analysis | HTML artifact (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | Protocol handbook — instant reference | Terminal-based protocol browser |
-| `/compose` | Protocol composition authoring | Generated composition SKILL.md file |
 | `/triage` | Work-unit triage from GitHub issues | Dispatchable initial prompts |
 | `/dispatch` | Focused work-unit execution | Branches, PRs, feedback inscriptions |
 | `/forge` | Reference-grounded initial-prompt formation | Initial prompt for a follow-up session/tool |
@@ -104,29 +103,6 @@ Dashboard sections:
 
 Browse all protocols, compare by concern cluster, and view detailed scenarios. Text-only output with optional detail mode for per-protocol scenarios.
 
-### /compose — Protocol Composition Authoring
-
-Build composition SKILL.md files from protocol chains. Validates graph constraints, catalogs gates, proposes dispositions, and generates a pipeline template.
-
-```
-SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
-```
-
-| Phase | Description |
-|-------|-------------|
-| 0. Specify | Chain specification input and normalization |
-| 1. Validate | graph.json precondition/suppression validation |
-| 2. Catalog | TOOL GROUNDING entry extraction per protocol (Constitution/Extension classification) |
-| 3. Disposition | Composition-level gate disposition analysis |
-| 4. Generate | Composition SKILL.md template generation |
-
-Key features:
-- Graph-aware chain validation (preconditions, suppressions)
-- Automated gate inventory from TOOL GROUNDING entries
-- Composition-time disposition model (epistemic access × catch-chain × BoundaryMap)
-- Catch-chain invariant verification
-- `/review`-pattern template output with pipeline context rules
-
 ### /triage — Work-Unit Formation
 
 Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and emits dispatchable initial prompts. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
@@ -193,7 +169,6 @@ epistemic-cooperative/
 │   ├── report/SKILL.md           # /report Growth Map
 │   ├── dashboard/SKILL.md        # /dashboard coverage dashboard
 │   ├── catalog/SKILL.md          # /catalog protocol handbook
-│   ├── compose/SKILL.md          # /compose protocol composition authoring
 │   ├── triage/SKILL.md           # /triage work-unit formation
 │   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
 │   ├── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
@@ -222,7 +197,6 @@ epistemic-cooperative/
 | After running `/onboard` for deeper analysis | `/report` or `/dashboard` |
 | Tracking protocol adoption over time | `/dashboard` |
 | Quick protocol reference | `/catalog` |
-| Building a multi-protocol composition workflow | `/compose` |
 | Turning related GitHub issues into focused work units | `/triage` |
 | Executing selected focused work units | `/dispatch` |
 | Validating an uncertain proposition in a bounded stand-in space | `/reduced-space-test` |
@@ -241,7 +215,6 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /report
 /dashboard
 /catalog
-/compose clarify → goal → bound → inquire
 /triage
 /triage #41 #52 #60
 /dispatch <initial prompt>
