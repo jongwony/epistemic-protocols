@@ -201,7 +201,7 @@ Q2. Mode:
 2. **Inquire** — compile a full multi-perspective inquiry spec for the substrate
 ```
 
-**Pre-fill from explicit text**: `/frame "text"` → pre-fill from provided text, still confirm.
+**Pre-fill from explicit text**: `/frame "text"` → the MB is constructed from the provided text and takes the Phase 0 MB_from_arg Extension path (presented as relay text, then proceed — no Constitution stop); Phase 2 lens selection remains the downstream correction opportunity.
 
 **Combined question**: Mission Brief confirmation and Mode selection are combined into a single Cognitive Partnership Move (Constitution):
 - Q1 (Mission Brief): MB confirmation/modification (4 options)
@@ -328,13 +328,13 @@ The compiled `IS` carries:
 [Per claim: source perspective(s), evidence type, and whether the claim combines multiple sources; claims from synthesis (horizon fusion beyond direct perspective output) marked as such]
 ```
 
-**Handoff**: present the convergence-evidence trace as relay text, then hand off `FramedInquiry` and **stop**. This is the completeness boundary — frame records the handoff and halts; the substrate (an agent team, a dynamic-workflow, isolated subagents, plan-mode, or the main session) executes the spec. Substrate feasibility for the elicited arrangement is the substrate's to enforce, surfaced as a handoff annotation, never bound by frame.
+**Handoff**: present the convergence-evidence trace as relay text, then hand off `FramedInquiry` and **stop**. This is the completeness boundary — frame records the handoff and halts; the substrate (an agent team, a dynamic-workflow, isolated subagents, plan-mode, or the main session) executes the spec. Substrate feasibility for the spec's arrangement is the substrate's to enforce, surfaced as a handoff annotation, never bound by frame.
 
 **Revision threshold** (directive maintenance): When accumulated Emergent trigger detections across 3+ sessions cluster around a recognizable pattern outside the named types {Contradiction, Horizon Intersection, Uncorroborated High-Stakes}, the dialogue-trigger criteria warrant promotion to a new named trigger type. When accumulated false-positive triggers across 3+ sessions cluster around a specific named type, that type's heuristic warrants revision or demotion to Emergent.
 
 ## Rules
 
-1. **Mission Brief confirmation**: Always present the Mission Brief for confirmation via Cognitive Partnership Move (Constitution) before context gathering (Phase 0 → Phase 1). Pre-filled text (`/frame "text"`) still requires confirmation.
+1. **Mission Brief confirmation**: Present the Mission Brief for confirmation via Cognitive Partnership Move (Constitution) before context gathering (Phase 0 → Phase 1). When `user_invoked ∧ explicit_arg(U)` (e.g. `/frame "text"`), the Phase 0 MB_from_arg Extension entry applies per TOOL GROUNDING (the authoritative axis): the MB constructed from the provided text is presented as relay text and proceeds with `J_mb=confirm` + `m=ai_recommended_mode` defaults — Phase 2 lens selection remains the downstream Constitution correction opportunity.
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with a response opportunity; Constitution interaction requires turn yield before proceeding.
 3. **Object supplier, not arranger or executor (core invariant)**: frame yields the analysis object (the lens) and — in Mode 2 — a default arrangement directive, references `/conduct` for non-trivial arrangement, hands the framed object off to the substrate, and stops. frame does NOT elicit a topology (arrangement is `/conduct`'s functor) and does NOT execute the inquiry (spawn, isolated analysis, reconcile, synthesize belong to the substrate, of which the main session is one realization). The trivial-default arrangement (`DefaultDirective`: isolated, independent-then-conditional-dialogue, horizon-fusion) is the only arrangement frame compiles directly; any departure from it routes to `/conduct`. This is the Epistemic Completeness Boundary: frame's epistemic contribution is supplying and compiling the object; execution and non-trivial arrangement are delegated.
 4. **Independence-before-contamination (compiled directive)**: The `DefaultDirective` specifies `independence: isolated` — each perspective forms its assessment without seeing the others until reconciliation. frame compiles this requirement into the spec; the substrate enforces it. `shared` independence is a non-trivial arrangement that routes to `/conduct` (which records the relaxed-isolation degradation). Mode 1 is exempt — it ships a lens, no execution directive.
