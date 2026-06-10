@@ -53,7 +53,7 @@ Phase 3: Compile & Handoff →
 ## 사용법
 
 ```
-/frame [질문]                        # 다관점 조사
+/frame [질문]                        # 다관점 프레이밍
 ```
 
 ## 저자

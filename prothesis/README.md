@@ -60,7 +60,7 @@ claude plugin install prothesis@epistemic-protocols
 ## Usage
 
 ```
-/frame [your question]               # multi-perspective investigation
+/frame [your question]               # multi-perspective framing
 ```
 
 ## Author
