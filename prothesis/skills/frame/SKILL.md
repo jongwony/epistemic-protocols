@@ -47,6 +47,7 @@ Pᵦ     = Pre-confirmed base perspectives (user-supplied in U; auto-included in
 {P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ; |Pᵦ| + n ≥ 2 when m=inquire)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 2 when m=inquire; |Pₛ| ≥ 1 when m=recommend)
+Z      = ZeroCandidate: {P₁...Pₙ} = ∅ ∧ Pᵦ = ∅   -- Phase 2 guard: no candidate frameworks to place; surfaced as a finding (Constitution); responses route to existing constructors (J_mb = modify(field) | Pᵦ' supply | Esc) — no FramedInquiry is emitted from this branch
 LensEstablished = Pₛ where lens selection complete  -- the analysis object; Mode 1 packages it into Lᵣ, Mode 2 compiles it into IS
 -- framed object: the lens (Mode 1) or the inquiry spec (Mode 2). frame supplies the OBJECT and hands it off; the ARRANGEMENT over multiple objects is NOT produced here — it is /conduct's arrangement functor, and only the trivial default rides in DefaultDirective --
 ConductRef = an advisory reference to /conduct for non-trivial arrangement (the prothesis→hyphegesis advisory edge): when the order, independence, reconciliation, termination, or routing of the perspectives is non-trivial, /conduct arranges them — frame names the reference, does not arrange
@@ -77,7 +78,7 @@ Edge cases:
 ── PHASE TRANSITIONS ──
 Phase 0:  U → MB(U) → Qc(MB, M) → Stop → (MBᵥ, m)              -- combined MB confirmation + mode selection [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
-Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]
+Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]; on Z (zero candidates) surface the finding → Stop → route per LOOP (modify | Pᵦ' supply | Esc)
 Phase 3:  LensEstablished → [m=recommend: characterize(Pₛ) → Lᵣ | m=inquire: compile(Pₛ ⊕ ConductRef ⊕ DefaultDirective) → IS] → converge(transformation trace) → handoff(FramedInquiry) → STOP  -- compile the framed object + emit it as the terminal relay, then halt (no gate, no dispatch; substrate executes downstream)
 
 ── LOOP ──
@@ -88,6 +89,13 @@ After Phase 0 (Mission Brief + Mode Selection):
   J_mb = confirm       → proceed to Phase 1 with (MBᵥ, m)
   J_mb = modify(field) → re-present Q1(MB') → Stop → MBᵥ (m retained from initial selection)
   -- Esc key → terminate (nothing compiled yet)
+
+During Phase 2 (Perspective Placement):
+  Z ({P₁...Pₙ} = ∅ ∧ Pᵦ = ∅) → present the zero-result finding with reasoning → Stop:
+    modify(field) → re-present Q1(MB') → Stop → MBᵥ → re-enter Phase 1 (re-gather) → Phase 2
+    Pᵦ' supplied  → Pᵦ := Pᵦ' (auto-included) → re-present Sc with ≥ 1 novel proposal
+    Esc           → terminate (nothing compiled)
+  -- no FramedInquiry is emitted from Z; the result equation is unchanged (FramedInquiry requires LensEstablished)
 
 During Phase 3 (Compile & Handoff):
   m = recommend → characterize(Pₛ) = classify Pₛ by count tier (advisory metadata; all tiers terminate Mode 1, no branching):
@@ -115,6 +123,7 @@ Phase 0 MB_from_arg (extension)  → TextPresent+Proceed (when user_invoked ∧ 
 Phase 0 Qc (constitution)        → present (combined: Q1=Mission Brief confirmation, Q2=mode selection; when no explicit_arg; Esc key → loop termination at LOOP level)
 G (observe)                      → Read, Glob, Grep (meta-scope context acquisition guided by MBᵥ to identify relevant perspectives; not passed to the substrate — each perspective independently collects object-scope evidence through its own lens at execution time)
 Sc (constitution)                → present (mandatory; multiSelect: true; lens selection is epistemic choice; Esc key → loop termination at LOOP level)
+Phase 2 Z zero_result (constitution) → present (zero-candidate finding + reasoning; responses route to existing constructors — modify(field) | Pᵦ' supply | Esc; no new answer type)
 Phase 3 characterize (sense)     → Internal operation (perspective count-tier classification → Lᵣ { handoff, tier, downstream_use } packaging emitted as inj₁ FramedInquiry; Mode 1)
 Phase 3 compile (sense)          → Internal operation (assemble the InquirySpec: lens ⊕ per-perspective directive ⊕ channel-need ⊕ /conduct arrangement reference ⊕ default isolation/dialogue/synthesis directive; relay — no external tool, no user judgment beyond Pₛ; Mode 2)
 Phase 3 converge (extension)     → TextPresent+Proceed (convergence evidence trace: per-perspective contribution; Mode 2 additionally surfaces the spec directive + /conduct arrangement reference)
@@ -342,7 +351,7 @@ The compiled `IS` carries:
 6. **Verbatim transmission**: The per-perspective directive carries the original question unchanged; the substrate passes it to each perspective verbatim.
 7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. All analytical context belongs in the pre-gate text.
 8. **Convergence evidence**: Present the transformation trace before handoff (Mode 1 lens recommendation or Mode 2 inquiry spec); per-perspective contribution is the required evidence. The trace is relay (presented, then proceed) — there is no post-handoff sufficiency gate, because frame does not execute and has nothing to iterate.
-9. **Zero-result surfacing**: If Phase 2 generation yields no candidate frameworks, present the finding with reasoning for user confirmation.
+9. **Zero-result surfacing**: If Phase 2 generation yields no candidate frameworks (Z: {P₁...Pₙ} = ∅ ∧ Pᵦ = ∅), present the finding with reasoning. Responses route to existing paths — modify the Mission Brief (re-present Q1, re-gather), supply perspectives directly (enter as Pᵦ), or exit (terminate, nothing compiled); no FramedInquiry is emitted from this branch.
 10. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option (the Phase 2 lens options) must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options.
 11. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 12. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
