@@ -18,7 +18,7 @@ Operate from the working premise that this document contains at least one token 
 
 You will receive:
 
-- `handoff_text`: the full candidate handoff, inline. Review this text — the emit has not happened yet, so this inline copy is the artifact under review.
+- `handoff_text`: the full candidate handoff, inline. Review this text — the emit has not happened yet, so this inline copy is the artifact under review. The candidate carries its own contract section (allowed sources, execution scope, verification commands): judge reference resolvability against the sources and commands the document itself grants the recipient — a reference outside the document's own granted sources is a finding even when your tools could reach it.
 - `recipient_profile` and `next_task`: from the handoff contract. Resolvability is judged for THIS recipient.
 - `watchlist`: session-term watchlist — the protocol, skill, agent, and tool names active in the author session, plus the plugin/skill names whose instructions are loaded in that session's context, enumerated by the caller at dispatch time. These tokens often read as plain English words (verbs like "elicit", "inquire", "distill"), which is exactly how they slip through cooperative review: flag every occurrence used as a label, source marker, or section title without an in-document definition.
 
