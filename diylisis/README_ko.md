@@ -23,7 +23,7 @@
 - **F3b — 변환-출처(Transformation-provenance)**: append-only `CorrectionDelta` 원장(ledger)에 대해 각 항목을 검증합니다. KEEP은 매칭되는 비-잠정(non-provisional) 교정이 있을 때만 부여됩니다. 원장 부재 시 Unknown이 되어 Gate로 라우팅됩니다 — KEEP은 추론되지 않습니다.
 - **F3 — 처분(Disposition)**: KEEP(inline) | ROUTE(StableRef) | DROP.
 - **F4 — 압축 폐쇄**: 최소-완전(minimal-complete) 집합만 유지합니다 — 계약-상대적 완전성이지, 미적 간결성이 아닙니다.
-- **F5 — 이해 게이트**: refute 자세의 `zero-memory-refuter` subagent(fresh context, 세션 용어 watchlist, 근거 인용 verdict; 플러그인 에이전트 미지원 플랫폼에서는 동일 지시를 실은 generic fresh subagent → lint 체크리스트 순 폴백)로 zero-memory 수신자 기준에 대해 검증합니다. 저자 self-simulation은 배제됩니다.
+- **F5 — 이해 게이트**: refute 자세의 `zero-memory-refuter` subagent(fresh context, 세션 용어 watchlist, 근거 인용 verdict; subagent 미지원 시 lint 체크리스트 폴백)로 zero-memory 수신자 기준에 대해 검증합니다. 저자 self-simulation은 배제됩니다.
 - **F6 — 제한된 audit/lint 루프**: 약하게 감소하는 위생 척도에 따라 종료합니다. "완성된 느낌"이 아니라 척도로 종료합니다.
 - **F7 — 채널 분리**: prose 채널(권위)과, 댕글링 task 식별자를 복원하는 스키마 버전 `TaskStateBlock`을 산출합니다.
 
