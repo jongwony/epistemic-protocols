@@ -27,6 +27,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 function logErr(msg) {
   try { process.stderr.write(`[hypomnesis-write] ${msg}\n`); } catch {}
@@ -1065,8 +1066,12 @@ function main() {
 }
 
 export { extractCrossRefs, buildClueMd };
-import { pathToFileURL } from "node:url";
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+// realpath comparison so symlinked invocation (plugin cache) still runs main; import-detection is best-effort, fail-open to main.
+let isMain = true; // fail-open: a hook that cannot prove it is imported must run
+try {
+  isMain = !!process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url));
+} catch { isMain = true; }
+if (isMain) {
   try { main(); } catch (e) { logErr(`top-level: ${e.message}`); }
   process.exit(0);
 }
