@@ -377,7 +377,7 @@ growth_items: [{
 <!-- CARD: Horizon (replicate per protocol adoption opportunity) -->
 <div class="card horizon-card">
   <div class="card-title">/attend for Autonomous Pipelines</div>
-  <p>Your work trajectory points toward autonomous PR pipelines (git ops: 84 sessions). As execution becomes less human-gated, /attend becomes critical — risk assessment before autonomous execution prevents the 81 wrong_approach events from compounding in unattended workflows...</p>
+  <p>Your work trajectory points toward autonomous PR pipelines (git ops: 84 sessions). As execution becomes less human-gated, /attend becomes critical — compiling boundaries into verifiable goal conditions before autonomous execution prevents the 81 wrong_approach events from compounding in unattended workflows...</p>
   <div class="resume-cmd">cd ~/myproject && claude --resume a1b2c3d4</div>
 </div>
 

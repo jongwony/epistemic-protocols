@@ -48,7 +48,6 @@ A **White Bear signal** is a sentence in LLM-facing prose framed as a prohibitio
 **Cited preserved-prohibition carve-outs** (runtime prose where the prohibition is load-bearing; treat as compliant by purpose, surface only as `severity: low` if the rewrite preference is judgment-dependent):
 - Aitesis substrate boundary (legitimate inference vs substrate violation per inference)
 - Katalepsis Rule 11 — verification-gate 1-correct option design (comprehension verification vs decision-axis selection by purpose)
-- Prosoche Stop-as-Gate (subagent return path vs main-agent gate interaction at the `GATE_DETECTED` decision point)
 - Epharmoge Layer 2 auto-activation prohibition (deliberate user invocation vs AI speculative activation at protocol activation)
 
 For each candidate finding, prefer the rewrite that preserves the directive's meaning while satisfying the principle. The rewrite test: a positive restatement is valid when it preserves both directive force and boundary meaning. If neither in-place rewrite nor relocation to a diagnostic section preserves both, the original prohibition stays. Treat ambiguous cases as `severity: low` and surface them for human triage.

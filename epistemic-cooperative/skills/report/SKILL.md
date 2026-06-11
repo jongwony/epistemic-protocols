@@ -223,7 +223,7 @@ Apply the mapping tables below to match observed patterns to protocols.
 |---|---|---|---|
 | Same file edited 3+ times | Edit path frequency | **Syneidesis** `/gap` | Repeated edits without prior gap check |
 | Exploration ratio 3:1+ across multiple sessions | (Read+Grep+Glob) / (Edit+Write) threshold | **Prothesis** `/frame` | Sustained exploration without analytical framework |
-| Bash contains deploy/push/apply keywords | Bash input keyword match | **Prosoche** `/attend` | Executing without risk assessment |
+| Bash contains deploy/push/apply keywords | Bash input keyword match | **Prosoche** `/attend` | Risky execution without compiled guardrail conditions |
 | Vague first prompts ("improve", "optimize", "ideas for") | firstPrompt keyword match: short underspecified directives | **Euporia** `/elicit` | Goal coordinate aporia — reverse-induce endpoint from substrate |
 | Verification keywords in firstPrompt (user-authored text only) | firstPrompt keyword match: "explain", "what did you do", "help me understand", "verify", "check" | **Katalepsis** `/grasp` | Need to verify comprehension of results |
 
@@ -243,7 +243,7 @@ Applied only when facets data is available (Path A). Complements Primary and Sec
 | `wrong_approach` + rework situation | **Syneidesis** `/gap` | Approach gap undetected, accompanied by rework | Primary |
 | `excessive_changes` | **Syneidesis** `/gap` | Scope boundary gap undetected | Primary |
 | `context_loss` | **Aitesis** `/inquire` | Information loss due to insufficient context | Primary |
-| `wrong_file_edited` | **Prosoche** `/attend` | Execution risk not assessed | Primary |
+| `wrong_file_edited` | **Prosoche** `/attend` | Execution boundaries not compiled into verifiable conditions | Primary |
 | `buggy_code`, `api_errors`/`api_error`, `tool_errors`/`tool_error`/`tool_failure`/`tool_limitation`, `external_blocker`/`external_dependency`, `merge_conflict`, `minor_correction`, `excessive_verification`/`excessive_tool_calls`, `unrelated_environment_issue`/`deployment_gap`, `agent_*` | — | Infrastructure/environment friction — not epistemic deficit | Environmental |
 
 **Signal Type**: Primary = directly maps to protocol deficit. Environmental = reported only (no mapping).

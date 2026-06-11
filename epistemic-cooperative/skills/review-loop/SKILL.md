@@ -1,10 +1,9 @@
 ---
 name: review-loop
-description: "Convergence-paced code/PR review-resolve loop via /review-loop. Drives a pluggable review source (codex | code-review), verifies each finding against the codebase (/inquire) and work-flow (/contextualize), auto-applies Mechanical fixes (Extension) and gates Judgment fixes by shared disposition (Constitution), applies via /attend risk classification, then re-reviews until the source verdict converges to approve. User-invoked via /review-loop."
+description: "Convergence-paced code/PR review-resolve loop via /review-loop. Drives a pluggable review source (codex | code-review), verifies each finding against the codebase (/inquire) and work-flow (/contextualize), auto-applies Mechanical fixes (Extension) and gates Judgment fixes by shared disposition (Constitution), risk-screens applies (substrate risk → harness permission; epistemic risk → direct Constitution), then re-reviews until the source verdict converges to approve. User-invoked via /review-loop."
 skills:
   - aitesis:inquire
   - epharmoge:contextualize
-  - prosoche:attend
 ---
 
 # Review Loop
@@ -33,7 +32,7 @@ The review source is pluggable: any source satisfying the `(diff) → { findings
                           drop findings failing support-integrity / context-fit (cite basis)
   Phase 3  : classify  — Mechanical → Extension (auto)
                           Judgment   → cluster by shared disposition → Constitution scope-gate
-  Phase 4  : apply      — /attend risk classification → apply approved edits
+  Phase 4  : apply      — risk screen (substrate → harness permission; epistemic → Constitution) → apply approved edits
   Phase 5  : re-review  — source(diff') → verdict'
                verdict'=approve (or 0 new) → converge ; else round k+1: these findings → Phase 2 (re-review already done; no second source call)
   free-exit : user may end the loop at any time (declared once in Phase 0)
@@ -94,9 +93,11 @@ For Judgment findings whose axis remains live, **cluster by shared disposition**
 
 ## Phase 4: Apply
 
-For every fix that is going to land — Mechanical (auto-approved) or Judgment (user-approved at the Phase 3 gate) — call `/attend` to risk-classify the edit before applying it. A "Mechanical" edit can still be risky: it may touch an irreversibility, a security boundary, or an external / human-visible effect that the Mechanical/Judgment axis does not capture. `/attend`'s risk classification is orthogonal to the resolution class and gates the apply on risk grounds.
+For every fix that is going to land — Mechanical (auto-approved) or Judgment (user-approved at the Phase 3 gate) — screen the edit for risk before applying it. A "Mechanical" edit can still be risky: it may touch an irreversibility, a security boundary, or an external / human-visible effect that the Mechanical/Judgment axis does not capture. The risk screen is orthogonal to the resolution class and gates the apply on risk grounds.
 
-Apply the approved, risk-cleared edits. When `/attend` does **not** clear an edit (it surfaces an irreversibility, a security boundary, or a high-stake effect), the edit is not applied silently: surface the risk as a Constitution decision — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward until that decision lands. Carrying forward does not hold the finding as live in-loop state: the next round's full re-review re-detects it fresh, and only a deferral reason that is not re-derivable from the diff is externalized to the durable record — so recurrence surfaces as a fresh recognition gate, not a recalled carry. Where gate passage requires harness permission or high-stake execution, route that to the harness — surface it for approval, do not absorb the substrate decision into the loop.
+The screening venue splits by substrate. When applying the edit is itself a substrate action — a destructive operation, external communication, or production mutation — route it to the harness permission layer: surface what is about to run and let the harness gate the execution; the loop does not absorb that substrate decision. When the risk is an epistemic judgment call, surface it as a direct Constitution decision in the loop — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward until that decision lands. Carrying forward does not hold the finding as live in-loop state: the next round's full re-review re-detects it fresh, and only a deferral reason that is not re-derivable from the diff is externalized to the durable record — so recurrence surfaces as a fresh recognition gate, not a recalled carry.
+
+Apply the approved, risk-cleared edits.
 
 ## Phase 5: Re-review + Convergence
 
@@ -106,7 +107,7 @@ Re-call the source on the updated diff — a **FULL re-review each round**, not 
 - the re-review surfaces zero new non-refuted findings, OR
 - the user exits (free-response).
 
-Carried-forward findings — deferred at a prior disposition gate or `/attend` risk gate and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly.
+Carried-forward findings — deferred at a prior disposition gate or risk screen and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly.
 
 Phase 5's re-review **is** round k+1's review — one source call per round, not a separate verdict-check followed by a fresh Phase 1 call. If the verdict is still `needs-attention`, the findings this re-review just produced become round k+1's input: increment the round counter and carry them into Phase 2 (verify) directly — do not re-call the source again at the next round's Phase 1. The re-review is full because a fix can introduce a regression a narrow incremental check would miss; only a full pass over the updated diff justifies declaring convergence.
 
@@ -114,7 +115,7 @@ Phase 5's re-review **is** round k+1's review — one source call per round, not
 
 Every source satisfies one abstraction: `(diff) → { findings[], verdict }`. A finding is `[severity] file:line — description`; the verdict is `approve | needs-attention`. A source whose native output is richer than this shape (e.g. a sectioned report) satisfies the interface through an **extraction step** in its adapter — the adapter maps the native output onto `{ findings[], verdict }`. The set of sources is open and extensible (Emergent) — new sources may be added as long as their adapter yields this interface.
 
-Review sources are **runtime-selected, not static frontmatter dependencies**: the frontmatter `skills:` list declares only the unconditionally-composed protocols (`/inquire`, `/contextualize`, `/attend`); sources are pluggable and called dynamically (`codex` via a background CLI call; `code-review` via a `Skill` call to the built-in), so they are intentionally not fixed `skills:` entries. Two sources are documented:
+Review sources are **runtime-selected, not static frontmatter dependencies**: the frontmatter `skills:` list declares only the unconditionally-composed protocols (`/inquire`, `/contextualize`); sources are pluggable and called dynamically (`codex` via a background CLI call; `code-review` via a `Skill` call to the built-in), so they are intentionally not fixed `skills:` entries. Two sources are documented:
 
 | Source | Kind | Mechanics |
 |--------|------|-----------|
@@ -150,13 +151,13 @@ Convergence is `verdict=approve`, OR zero new (non-refuted) findings on a full r
 Round {k} — source: {source} — verdict: {verdict}
   Relay:   {findings the loop dispositioned autonomously — Extension}
              each entry: finding → [applied | dropped: basis | carried: reason]   (a side-effect rides inline as [side-effect: …] on an applied entry)
-  Gated:   {findings that needed your judgment — Constitution, from a Judgment disposition or an orthogonal /attend risk gate}
+  Gated:   {findings that needed your judgment — Constitution, from a Judgment disposition or an orthogonal risk screen}
              each entry: finding → [applied | dropped: basis | carried: reason]
 ```
 
 The slot is keyed by the loop's **interruption axis** — whether the loop acted autonomously (**Relay**, Extension) or needed your judgment (**Gated**, Constitution) — and the outcome of each finding (applied / dropped / carried) plus its cited basis rides inline as an annotation on the entry. Because the partition's first axis is interruption rather than outcome, every finding has exactly one home, and the per-round disposition reads off the slot directly.
 
-The interruption axis — not the resolution class — places each entry. A Mechanical edit blocked on an `/attend` risk gate sits under **Gated** because it needed your judgment, even though its resolution class is Extension; its Mechanical origin can ride as an inline note, and its outcome follows your decision — accept → `[applied]`, defer → `[carried: reason]`, drop → `[dropped: risk basis]`. A settled-policy auto-resolution sits under **Relay**, annotated by the prior disposition it applies — apply → `[applied]`, dismiss → `[dropped: prior-disposition basis]`, defer → `[carried: reason]`. Verify-stage drops are Relay `[dropped: verify basis]`; gated dismissals and `/attend` risk drops are Gated `[dropped: basis]`. A `[carried: reason]` records the deferral reason, not a live-held finding: each round's full re-review re-detects the finding, so recurrence surfaces as a fresh recognition gate.
+The interruption axis — not the resolution class — places each entry. A Mechanical edit blocked on a risk screen sits under **Gated** because it needed your judgment, even though its resolution class is Extension; its Mechanical origin can ride as an inline note, and its outcome follows your decision — accept → `[applied]`, defer → `[carried: reason]`, drop → `[dropped: risk basis]`. A settled-policy auto-resolution sits under **Relay**, annotated by the prior disposition it applies — apply → `[applied]`, dismiss → `[dropped: prior-disposition basis]`, defer → `[carried: reason]`. Verify-stage drops are Relay `[dropped: verify basis]`; gated dismissals and risk-screen drops are Gated `[dropped: basis]`. An edit routed to the harness permission layer rides as a relay annotation on its entry — the harness's grant or denial is the substrate's record, not a loop gate. A `[carried: reason]` records the deferral reason, not a live-held finding: each round's full re-review re-detects the finding, so recurrence surfaces as a fresh recognition gate.
 
 The per-round trace is a relay presentation — present it and proceed; it is not a gate. At convergence, the accumulated traces are the evidence that each finding reached a disposition — applied, dropped or dismissed, or explicitly surfaced as annotated residual.
 
@@ -171,12 +172,12 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 
 ## Rules
 
-1. **Extension findings keep the loop running** — Mechanical fixes auto-apply; only Constitution warrants interruption — a Judgment-class disposition or an orthogonal `/attend` risk gate (so a Mechanical edit blocked on risk can interrupt too). A finding whose disposition policy was constituted in a prior round is Extension by default: its consistent application auto-resolves per the prior disposition (apply / dismiss / defer) and any side-effect rides as a relay annotation on its trace entry. A gate reopens only for a genuinely competing live disposition, not one foreclosed by the PR's purpose or a prior precedent — re-gating settled policy is the over-gating failure mode.
+1. **Extension findings keep the loop running** — Mechanical fixes auto-apply; only Constitution warrants interruption — a Judgment-class disposition or an orthogonal epistemic risk screen (so a Mechanical edit blocked on risk can interrupt too). A finding whose disposition policy was constituted in a prior round is Extension by default: its consistent application auto-resolves per the prior disposition (apply / dismiss / defer) and any side-effect rides as a relay annotation on its trace entry. A gate reopens only for a genuinely competing live disposition, not one foreclosed by the PR's purpose or a prior precedent — re-gating settled policy is the over-gating failure mode.
 2. **Context-question separation at every gate** — all analysis and evidence as pre-gate text; the gate carries only the question and options with differential implications.
 3. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the gates.
 4. **FULL re-review each round** — re-call the source over the updated diff; do not trust an incremental delta check to declare convergence.
 5. **Verify before apply** — a finding that fails support-integrity or context-fit is dropped with its cited basis; only support-integrity-passing findings proceed to apply.
-6. **`/attend` gates risky applies regardless of class** — a Mechanical edit still passes through `/attend` risk classification before it lands; risk is orthogonal to the Mechanical/Judgment axis.
+6. **Risk screening gates risky applies regardless of class** — a Mechanical edit is still risk-screened before it lands; risk is orthogonal to the Mechanical/Judgment axis. The venue splits by substrate: destructive operations, external communication, and production mutation route to the harness permission layer; epistemic risk judgments surface as direct Constitution decisions in the loop.
 
 ## Deferred (v1.x stretch)
 
@@ -191,4 +192,4 @@ Out of v1 scope, recorded so the source interface stays forward-compatible:
 
 Sibling of `comment-review`: both are review-resolve loops, but `/review-loop` targets code/PR diffs where `/comment-review` targets markdown artifacts before fixation. Termination differs — `/review-loop` is convergence-paced (it ends when the source verdict reaches approve), where `/comment-review` is user-paced (rounds end when the user answers the branch gate). The judgment venue differs too — `/review-loop` gates Judgment findings through a disposition-cluster chat scope-gate, where `/comment-review` surfaces findings through a browser sidepanel.
 
-`/review-loop` drives pluggable review sources (`codex` directly, or the built-in `code-review`). It composes `/inquire` (codebase verification), `/contextualize` (work-flow fit), and `/attend` (apply-time risk classification).
+`/review-loop` drives pluggable review sources (`codex` directly, or the built-in `code-review`). It composes `/inquire` (codebase verification) and `/contextualize` (work-flow fit), and screens applies for risk directly — substrate risk routes to the harness permission layer, epistemic risk to an in-loop Constitution decision.

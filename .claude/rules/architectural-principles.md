@@ -27,6 +27,6 @@ Operationally: EP defines and protects authority-boundary visibility; the operat
 
 **Observed instances**:
 - A2 authority allocation: Standing authority implementation (system prompts, CI/CD, compose automation) is non-epistemic substrate; A2 governs the *visibility* of authority allocation within the epistemic substrate, not its operational realization.
-- Prosoche `/attend` Phase 2: gate interaction (risk classification, intent transmission, judgment surfacing) is epistemic substrate; gate-passage actions requiring harness permission or high-stake execution are non-epistemic substrate, delegated by handoff.
+- Prosoche `/attend`: boundary inference, velocity partition, condition compilation, and the compile-time confirmation gate are epistemic substrate; condition enforcement inside the execution interval, fast-risk pre-action interception, and workflow/HITL semantics are non-epistemic substrate, delegated by handoff at emission.
 
 > **Demoted detail**: Other architectural principles (Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload) live in `.claude/principles/architectural-principles.md` (axis_β = T2–T3, conditional invocation). Fetch via Read/Grep when authoring/verify-time inquiry warrants. See `.claude/principles/README.md` for the demotion ledger.

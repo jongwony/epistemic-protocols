@@ -1,7 +1,7 @@
 {
   "name": "prosoche",
-  "version": "1.6.50",
-  "description": "Route upstream epistemic deficits and evaluate execution-time risks — /attend (προσοχή: attention)",
+  "version": "2.0.2",
+  "description": "Compile slow/threshold execution risks into verifiable goal conditions — /attend (προσοχή: attention)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Prosoche",
-    "shortDescription": "Route upstream epistemic deficits and evaluate execution-time risks — /attend (προσοχή: attention)",
-    "longDescription": "Route upstream epistemic deficits and evaluate execution-time risks — /attend (προσοχή: attention)",
+    "shortDescription": "Compile slow/threshold execution risks into verifiable goal conditions — /attend (προσοχή: attention)",
+    "longDescription": "Compile slow/threshold execution risks into verifiable goal conditions — /attend (προσοχή: attention)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

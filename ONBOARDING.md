@@ -21,7 +21,7 @@ Protocols the Maintainer Dogfoods:
   /epharmoge:contextualize   ████████████████████  47x   post-execution applicability check
   /syneidesis:gap            ███████████████░░░░░  36x   pre-decision gap surfacing
   /task-workflow:ship        ██████████████░░░░░░  33x   commit + push + PR + task registration
-  /prosoche:attend           ██████████████░░░░░░  32x   execution-time risk evaluation
+  /prosoche:attend           ██████████████░░░░░░  32x   pre-execution guardrail compilation
   /task-workflow:task-run    ██████████████░░░░░░  32x   execute tracked tasks
   /aitesis:inquire           █████████░░░░░░░░░░░  21x   context insufficiency probing
   /gh-address-comments       ███████░░░░░░░░░░░░░  17x   PR feedback loop
@@ -63,7 +63,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/prothesis:frame` — assemble analytical lenses (category theory, type theory, operational semantics) for protocol-level changes
 - [ ] `/analogia:ground` — validate abstract-concrete mappings
 - [ ] `/epharmoge:contextualize` — post-execution applicability check against actual project context
-- [ ] `/prosoche:attend` — routes execution-time risks; stops on irreversible actions for approval
+- [ ] `/prosoche:attend` — compiles execution guardrails before an autonomous interval: infers boundary signals, partitions by velocity, emits verifiable stop-time conditions
 - [ ] [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) — one-shot commit + push + PR + task registration. Optional convenience; lives in the external `jongwony/ClaudePanel.spoon` plugin, not this repo. Plain `git push` + `gh pr create` also works.
 
 ## Contribution Workflow

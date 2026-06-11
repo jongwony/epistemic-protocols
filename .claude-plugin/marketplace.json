@@ -42,7 +42,7 @@
     {
       "name": "prosoche",
       "source": "./prosoche",
-      "description": "Route upstream epistemic deficits and evaluate execution-time risks — /attend (προσοχή: attention)"
+      "description": "Compile slow/threshold execution risks into verifiable goal conditions — /attend (προσοχή: attention)"
     },
     {
       "name": "epharmoge",

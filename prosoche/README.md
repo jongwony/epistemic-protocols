@@ -2,7 +2,7 @@
 
 > [한국어](./README_ko.md)
 
-Route upstream epistemic deficits and evaluate execution-time risks during AI operations.
+Compile slow/threshold execution risks into verifiable goal conditions before autonomous execution.
 
 ## Type Signature
 
@@ -12,38 +12,36 @@ Route upstream epistemic deficits and evaluate execution-time risks during AI op
 
 ## What It Does
 
-Prosoche scans for upstream epistemic deficits before task execution, routes to appropriate protocols when readiness gaps are detected, then materializes intent into tasks and classifies each for risk signals — irreversibility, human communication, security boundaries, prompt injection, external mutations, and scope escalation. Most tasks pass silently (p=Low); only elevated-risk tasks are surfaced for user judgment.
+Prosoche is a stateless guardrail compiler. Before an autonomous execution interval begins, it infers a boundary map from context (an upstream `/bound` output enriches the inference but is never required), partitions the risks by velocity, compiles the slow/threshold portion into verifiable predicates, and emits the confirmed set as coarse goal entries for a downstream completion-predicate enforcer (on Claude Code: `/goal`). Fast risks — anything requiring pre-action interception — are declared out of scope and delegated to the harness substrate.
 
-**Phase -1 (Sub-A0)**: Before materializing tasks, scans execution context against upstream deficit conditions (per `skills/attend/references/upstream-heuristics.md`). Only execution-blocking deficits are surfaced. When no deficits are detected, passes through transparently.
-
-**Core principle**: Attention over Automation — autonomy is preserved by default, interrupted only at genuine risk boundaries or unresolved upstream deficits.
+**Core principle**: Attention over Automation — execution risk gets attention before autonomy begins, not interruptions while it runs. The attention is inscribed into the conditions; nothing of Prosoche survives into the execution interval.
 
 ## When It Activates
 
 - User calls `/attend` (user-initiated only)
 
-## Risk Signal Taxonomy
+## Boundary Signal Taxonomy
 
-| Signal | Default Severity | Examples |
-|--------|-----------------|----------|
-| Irreversibility | Gate | `rm`, `git push`, `--force`, `DROP`, `deploy` |
-| HumanCommunication | Gate | `gh comment`, `slack message`, `email send` |
-| SecurityBoundary | Gate | `$(...)` in configs, `.env` access, credentials |
-| PromptInjection | Gate (no cache) | Instruction patterns in data fields |
-| ExternalMutation | Advisory | API writes, cache ops (Gate if production) |
-| ScopeEscalation | Advisory | Files outside task scope (Gate if irreversible+OOS) |
+| Kind | Context cues | Velocity |
+|------|--------------|----------|
+| ScopeConfinement | Permission grants, declared file/repo scope, sandbox limits | Slow |
+| Budget | Token/cost/iteration/time budgets | Slow |
+| CompletionThreshold | Stated done-criteria: tests pass, CI green, artifact exists | Slow |
+| Irreversibility | Reversibility constraints, production targets, deploy/push/delete intent | Split: end-state-checkable part Slow; pre-action part Fast → out of scope |
+| Emergent | Boundary pattern outside named kinds | Assessed per instance |
 
-## Session Approval Cache
+**Slow/threshold** risks are evaluable when the loop stops — they compile into executable predicates (exit status, test result, countable threshold, file-state assertion). **Fast** risks need interception before an action runs — a stop-time predicate structurally cannot catch them, so they are delegated, never simulated.
 
-When you approve an action, the pattern `(tool_name, target, env_context)` is cached for the session. Future matching actions pass silently. Exception: PromptInjection signals are never cached.
+## Composition
 
-Environment-aware: `("pulumi up", "auth-stack", "dev")` approved does NOT cache-hit for `("pulumi up", "auth-stack", "prod")`.
+Within a conducted workflow (`/conduct`), the execution-preparation chain is `/bound` → `/attend` → `/goal`: `/bound` defines the boundary map, `/attend` compiles its slow/threshold portion into verifiable conditions, `/goal` enforces them inside one bounded interval. `/attend` does not invoke `/goal` — emission is its epistemic endpoint, and starting the autonomous interval is the user's separate act. `/contextualize` and `/grasp` verify after the interval.
 
 ## Known Limitations
 
-- **Single-pass classification**: Risk signal classification (Phase 0) is single-pass. A false negative (especially PromptInjection) results in the task passing without re-evaluation.
-- **Classification accuracy**: A misclassified p=Low task bypasses Gate entirely. Prosoche classifies risk but does not execute; execution remains the caller's responsibility.
-- **Subagent Gate compliance**: Non-prosoche team agents receive Gate awareness via prompt injection, not system constraint. Compliance is non-guaranteed.
+- **Bounded platform claim**: the `/goal` leaf-executor characterization is verified against Claude Code v2.1.140 only; re-verify on harness version change.
+- **Inference is heuristic**: a boundary never uttered and never captured upstream will not be inferred; the confirmation gate is the correction point.
+- **Predicate coverage**: subjective quality bars do not compile; they surface as residuals, not prose conditions.
+- **No execution-time protection**: compile-time only — fast risks belong entirely to the pre-action substrate.
 
 ## Install
 
@@ -55,7 +53,7 @@ claude plugin install prosoche@epistemic-protocols
 ## Usage
 
 ```
-/attend [your task]    # Enable upstream readiness check + execution-time risk classification
+/attend [your task]    # Compile execution guardrails into verifiable goal conditions
 ```
 
 ## License
