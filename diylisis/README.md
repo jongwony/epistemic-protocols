@@ -23,7 +23,7 @@ The morphism runs F0 through F7 once forward, then re-audits against a monotone 
 - **F3b — Transformation-provenance**: attest each item against an append-only `CorrectionDelta` ledger. KEEP is granted only on a matching non-provisional correction; an absent ledger yields Unknown, which routes to the Gate — KEEP is never inferred.
 - **F3 — Disposition**: KEEP(inline) | ROUTE(StableRef) | DROP.
 - **F4 — Compression closure**: retain the minimal-complete set — contract-relative completeness, not aesthetic brevity.
-- **F5 — Comprehension gate**: verify against a zero-memory recipient via the refute-posture `zero-memory-refuter` subagent (fresh context, session-term watchlist, evidence-cited verdict; lint-checklist fallback); author self-simulation is excluded.
+- **F5 — Comprehension gate**: verify against a zero-memory recipient via the refute-posture `zero-memory-refuter` subagent (fresh context, session-term watchlist, evidence-cited verdict; falls back to an equivalently-instructed generic fresh subagent, then a lint checklist, on platforms without plugin agents); author self-simulation is excluded.
 - **F6 — Bounded audit/lint loop**: terminate on a weakly decreasing hygiene measure, not a felt sense of completeness.
 - **F7 — Channel separation**: emit a prose channel (authoritative) plus a schema-versioned `TaskStateBlock` that rehydrates dangling task identifiers.
 
