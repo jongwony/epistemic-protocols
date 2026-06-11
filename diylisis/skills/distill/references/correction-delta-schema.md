@@ -53,8 +53,8 @@ corrected_in_session(item) ≡
 
 The verdict is binary — a CorrectedKeep-or-complement partition:
 
-- **CorrectedKeep** — the predicate holds: a matching record carries `export_policy = KEEP` with a non-provisional status. The item is eligible for the KEEP disposition.
-- **Unknown** — every other ledger state: the ledger is absent, no record matches `subject_ref = ref(item)`, the only matching record is `provisional`, the matching record carries a non-KEEP `export_policy` (ROUTE or DROP), or the matching KEEP record is expired (reason recorded as `horizon-expired`, presented at the Gate as re-verification, not as undecided provenance). The item's provenance is undecided: it appends to the residual ledger with reason `unknown-provenance` and routes to the Gate for user judgment. A ROUTE or DROP correction records the author's intent, but F3b grants no disposition from it — provenance authority is the KEEP hard line only; ROUTE and DROP dispositions are reached through F3a relevance or the Gate.
+- **CorrectedKeep** — the predicate holds: a matching record carries `export_policy = KEEP` with a non-provisional status and an unlapsed `validity_horizon` (`¬expired(d)`). The item is eligible for the KEEP disposition.
+- **Unknown** — every other ledger state: the ledger is absent, no record matches `subject_ref = ref(item)`, the only matching record is `provisional`, the matching record carries a non-KEEP `export_policy` (ROUTE or DROP), or the matching KEEP record is expired (reason recorded as `horizon-expired`, presented at the Gate as re-verification, not as undecided provenance). The item's provenance is undecided: it appends to the residual ledger with reason `unknown-provenance` (`horizon-expired` for the expired case) and routes to the Gate for user judgment. A ROUTE or DROP correction records the author's intent, but F3b grants no disposition from it — provenance authority is the KEEP hard line only; ROUTE and DROP dispositions are reached through F3a relevance or the Gate.
 
 ## The hard line
 
