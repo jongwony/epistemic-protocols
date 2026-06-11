@@ -42,6 +42,8 @@ For each finding, recommend ONE advisory disposition from the protocol's Gate co
 - **Route** — the content is resolvable by a stable reference the recipient can fetch: name the concrete path, id, or command.
 - **Defer** — resolution is blocked on a named condition: state the condition. This includes the case where a load-bearing token has no nameable canonical reference or inline definition (condition: "no canonical reference identified").
 
+In the Findings table, the Advisory disposition cell carries exactly one tag — Resolve | Route | Drop | Defer — and nothing else; the named reference, path/id/command, or condition that the repair requires goes in the Repair note cell. The caller parses the tag cell directly into a typed value.
+
 ## Verdict Format
 
 Evidence-cited, never asserted:
@@ -50,6 +52,8 @@ Evidence-cited, never asserted:
 ## Zero-Memory Review
 
 ### Verdict: Fail | Pass
+
+### Realization: refuter-subagent | generic-subagent | lint-fallback
 
 ### Findings (when Fail)
 | Quoted token | Location | Category | Why unresolvable | Advisory disposition | Repair note |
@@ -61,6 +65,8 @@ Evidence-cited, never asserted:
 ```
 
 A Pass is valid only when every checklist category row records what was actually checked — including which references were verified by tool and how. A category sweep with empty "What was checked" cells, or a bare "all clear" without the sweep, is an invalid verdict and the caller will reject it.
+
+The Realization line names which realization produced this verdict: as the packaged refuter agent, write `refuter-subagent`. A generic subagent carrying these same instructions writes `generic-subagent`; an author-session lint pass writes `lint-fallback`.
 
 ## Boundaries
 
