@@ -50,6 +50,8 @@ Velocity       ∈ {Slow, Fast, Split}
                -- Split: carries both an end-state-checkable part and a pre-action part; normalized before partition
 Normalize      = B → B̂               -- velocity(b) = Split → b decomposes into bₛ (Slow, end-state-checkable part)
                                      --   and bₓ (Fast, pre-action part); Slow/Fast signals pass through unchanged
+                                     -- ambiguous velocity → conservatively classified Slow; both readings
+                                     --   surfaced in the Qc gate text (fail-visible, never silently classified)
 Partition      = B̂ → (Bₛ, Bₓ)        -- Bₛ = {b : velocity(b) = Slow}, Bₓ = {b : velocity(b) = Fast}
 Compile        = BoundarySignal → κ ∨ ρ   -- κ when a verifiable predicate exists; ρ otherwise
 κ              = CompiledCondition { subject: String, condition: VerifiablePredicate }
@@ -191,7 +193,7 @@ Inference heuristics map context cues to boundary signal kinds. Each inferred si
 | **Budget** | Token/cost/iteration/time budgets stated or implied | Slow | Countable threshold (iterations ≤ N, elapsed ≤ T) |
 | **CompletionThreshold** | Stated done-criteria: tests pass, CI green, citation present, artifact exists | Slow | Executable completion check (exit status, test result, file-state assertion) |
 | **Irreversibility** | Reversibility constraints, production targets, deploy/push/delete intent | Split | End-state-checkable part compiles Slow (e.g., no commits beyond branch X); pre-action interception part is Fast → out of scope |
-| **Emergent** | Boundary pattern outside named kinds | Assessed per instance | Compiled when a verifiable predicate exists; otherwise declared out of scope with its substrate |
+| **Emergent** | Boundary pattern outside named kinds | Assessed per instance | Compiled when a verifiable predicate exists; a slow signal lacking one surfaces as a residual (sharpen or accept as uncovered); a pre-action part is Fast → out of scope with its substrate |
 
 ### Risk Velocity Split
 
@@ -217,7 +219,7 @@ Classify each inferred signal by velocity. A signal carrying both an end-state-c
 
 When `Bₛ = ∅`: present the partition (everything was fast-velocity or no signals were inferred) and deactivate — there is nothing a stop-time predicate can guard, so emitting would manufacture false coverage.
 
-Partition failure mode is fail-visible: a signal whose velocity is ambiguous is surfaced in the Phase 2 gate text with both readings rather than silently classified.
+Partition failure mode is fail-visible: a signal whose velocity is ambiguous is conservatively routed to compilation (classified Slow at normalization) and surfaced in the Phase 2 gate text with both readings rather than silently classified.
 
 ### Phase 2: Condition Compilation and Confirmation
 
