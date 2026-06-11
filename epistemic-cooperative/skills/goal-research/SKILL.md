@@ -61,7 +61,7 @@ codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 \
   < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl
 ```
 
-Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-ensemble` does not apply here.
+Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-loop`'s codex source does not apply here.
 
 The background Bash timeout controls the delegated Codex session envelope and
 must exceed the Tavily MCP per-call budget. The

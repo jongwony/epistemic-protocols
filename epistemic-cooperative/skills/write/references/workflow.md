@@ -8,21 +8,21 @@ Detailed phase descriptions and content transformation rules for the write skill
 
 **Purpose**: Multi-perspective epistemic analysis before content generation.
 
-**Delegation**: These phases follow the Prothesis protocol (/frame) exactly.
+**Delegation**: frame (v7) compiles the inquiry spec and hands off; this session, as the executing substrate, runs the spec.
 
 ```
-Phase 0: G(U) → C              -- Context acquisition
-Phase 1: C → {P₁...Pₙ}(C) → Pₛ -- Perspectives derived FROM context
-Phase 2: Pₛ → ∥I(Pₛ) → R       -- Parallel inquiry with Horizon Limits
-Phase 3: R → Syn(R) → L        -- Synthesis: convergence, divergence, assessment
+Phases 0-2: Mission Brief → context → lens selection   -- perspectives derived FROM context
+Phase 3:    compile(inquiry spec) → handoff → STOP     -- frame supplies the spec; it does not execute
+Execute:    run the spec — isolated per-perspective analysis with Horizon Limits,
+            dialogue triggers, horizon-fusion synthesis → framed analysis
 ```
 
 **Key Protocol Elements**:
 - Perspectives derived from context (not predefined domain mappings)
-- Parallel inquiry includes explicit Horizon Limits per perspective
-- Synthesis produces Lens L = { convergence, divergence, assessment }
+- The spec's default directive keeps per-perspective analysis isolated, with explicit Horizon Limits
+- The spec's synthesis contract produces the framed analysis { convergence, divergence, assessment }
 
-**Subagent Prompt Template** (from Prothesis):
+**Subagent Prompt Template** (the spec's per-perspective directive):
 ```
 You are a **[Perspective] Expert**.
 
@@ -37,7 +37,7 @@ Provide:
 4. **Assessment**: Direct answer from this viewpoint
 ```
 
-**Boundary**: Synthesis complete → Lens L available.
+**Boundary**: spec executed, synthesis complete → framed analysis available.
 
 **Reference**: `prothesis/skills/frame/SKILL.md`
 
@@ -249,9 +249,9 @@ A session becomes write-worthy when it exhibits:
 
 ### Prothesis Protocol Pattern
 ```
-Context → Derive perspectives → User selects → Parallel inquiry (with Horizon Limits) → Synthesis
+Context → Derive perspectives → User selects → Compile inquiry spec → Handoff → substrate executes (isolated inquiry with Horizon Limits → synthesis)
 ```
-Reference: `/frame` — canonical implementation of multi-perspective epistemic analysis
+Reference: `/frame` — supplies the lens and the compiled spec; the executing substrate produces the multi-perspective analysis
 
 ### Incremental Refinement Loop
 ```

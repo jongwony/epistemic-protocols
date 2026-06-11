@@ -145,7 +145,7 @@ When combined with Plan mode, apply Syneidesis at **Phase boundaries**:
 | Implementation → Commit | Changed assumptions, deferred decisions |
 
 **Cycle**: [Deliberation → Gap → Revision → Execution]
-1. **Deliberation**: Plan mode analysis generates recommendations (Prothesis provides multi-perspective deliberation when active)
+1. **Deliberation**: Plan mode analysis generates recommendations (Prothesis supplies multi-perspective lenses when active)
 2. **Gap**: Syneidesis surfaces unconfirmed assumptions via Cognitive Partnership Move (Constitution)
 3. **Revision**: Integrate user response, re-evaluate if needed
 4. **Execution**: Only after explicit scope confirmation

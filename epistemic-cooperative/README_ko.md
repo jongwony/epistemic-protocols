@@ -16,7 +16,6 @@
 | `/report` | Growth Map — 인식론적 분석 | HTML 아티팩트 (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | 프로토콜 핸드북 — 즉시 참조 | 터미널 기반 프로토콜 브라우저 |
-| `/compose` | 프로토콜 합성 저작 | 합성 SKILL.md 파일 생성 |
 | `/triage` | GitHub 이슈 기반 work-unit triage | dispatchable initial prompt |
 | `/dispatch` | focused work-unit 실행 | 브랜치, PR, feedback inscription |
 | `/forge` | 레퍼런스-grounded initial-prompt 형성 | 후속 세션/도구용 initial prompt |
@@ -104,29 +103,6 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 
 모든 프로토콜을 탐색하고, 관심 클러스터별로 비교하며, 상세 시나리오를 확인한다. 텍스트 출력 전용, 프로토콜별 시나리오 상세 모드 제공.
 
-### /compose — 프로토콜 합성 저작
-
-프로토콜 체인에서 합성 SKILL.md 파일을 생성한다. 그래프 제약 조건을 검증하고, 게이트를 카탈로그화하고, 배치를 제안하고, 파이프라인 템플릿을 생성한다.
-
-```
-SPECIFY → VALIDATE → CATALOG → DISPOSITION → GENERATE
-```
-
-| 단계 | 설명 |
-|------|------|
-| 0. Specify | 체인 명세 입력 및 정규화 |
-| 1. Validate | graph.json precondition/suppression 검증 |
-| 2. Catalog | 프로토콜별 TOOL GROUNDING 항목 추출 (Constitution/Extension 분류) |
-| 3. Disposition | 합성 시점 게이트 배치 분석 |
-| 4. Generate | 합성 SKILL.md 템플릿 생성 |
-
-주요 특징:
-- 그래프 인식 체인 검증 (precondition, suppression)
-- TOOL GROUNDING 항목에서 자동 게이트 인벤토리
-- 합성 시점 배치 모델 (epistemic access × catch-chain × BoundaryMap)
-- Catch-chain 불변량 검증
-- `/review` 패턴 템플릿 출력 (pipeline context rules 포함)
-
 ### /triage — Work-Unit Formation
 
 GitHub `RawIssueSet`을 그룹화하고, 각 issue group을 공유 problem frame으로 normalize한 뒤, 현재 세션에서 active `AGENTS.md` northstar와 융합해 dispatchable initial prompt를 emit한다. 이슈 범위 없이 `/triage`만 호출하면 현재 repository의 open backlog에서 시작하고, full issue substrate를 읽기 전에 triage load를 판정한다.
@@ -193,7 +169,6 @@ epistemic-cooperative/
 │   ├── report/SKILL.md           # /report Growth Map
 │   ├── dashboard/SKILL.md        # /dashboard 커버리지 대시보드
 │   ├── catalog/SKILL.md          # /catalog 프로토콜 핸드북
-│   ├── compose/SKILL.md          # /compose 프로토콜 합성 저작
 │   ├── triage/SKILL.md           # /triage work-unit formation
 │   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
 │   ├── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
@@ -222,7 +197,6 @@ epistemic-cooperative/
 | `/onboard` 이후 더 깊은 분석이 필요할 때 | `/report` 또는 `/dashboard` |
 | 시간 경과에 따른 프로토콜 채택 추적 | `/dashboard` |
 | 빠른 프로토콜 참조 | `/catalog` |
-| 다중 프로토콜 합성 워크플로우 구축 | `/compose` |
 | 관련 GitHub 이슈를 focused work unit으로 만들 때 | `/triage` |
 | 선택된 focused work unit을 실행할 때 | `/dispatch` |
 | 불확실한 명제를 bounded 대리 공간에서 검증할 때 | `/reduced-space-test` |
@@ -233,7 +207,6 @@ epistemic-cooperative/
 /report
 /dashboard
 /catalog
-/compose clarify → goal → bound → inquire
 /triage
 /triage #41 #52 #60
 /dispatch <initial prompt>

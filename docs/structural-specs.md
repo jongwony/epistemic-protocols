@@ -27,7 +27,7 @@ All protocols share this structure within `Definition` code block:
 - `*` denotes the composition operator (categorical product on deficit/resolution). Distinct from graph.json `"source": "*"` wildcard (precondition scope)
 - `graph.json edges preserved`: precondition, advisory, and suppression edges remain enforced within composite execution. DAG ordering governs dimension detection sequence; suppression prevents co-activation of overlapping pairs
 - `Dimension resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition, not prescribed by the operator
-- Relationship to /compose skill: /compose is a gate-chain authoring tool (Standing authority, pre-committed pipeline); `*` is a runtime deficit product (Active authority, session-level)
+- `*` is a runtime deficit product (Active authority, session-level), distinct from pre-committed gate-chain pipelines (Standing authority)
 
 Static checks (`structure`, `tool-grounding`) validate this anatomy. New phases must appear in PHASE TRANSITIONS with `[Tool]` suffix AND in TOOL GROUNDING with concrete tool mapping.
 
@@ -178,7 +178,7 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 
 ## Intra-Protocol Context Separation
 
-**Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. In Prothesis: `gather(context)` (Phase 1, meta) collects broad context to identify relevant perspectives; `inquire(parallel)` (Phase 4, object) collects perspective-specific evidence through each lens independently. The semantic separation exists in MORPHISM; TOOL GROUNDING realizes it operationally by specifying different collection targets per phase. Passing meta-context to object-level agents biases their investigation toward the lead agent's framing, undermining the epistemic value of independent perspective analysis.
+**Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. In Prothesis: `gather(context)` (Phase 1, meta) collects broad context to identify relevant perspectives; object-scope evidence is collected per-perspective at substrate execution time, after the Phase 3 handoff — the compiled spec deliberately excludes the meta-context so each perspective collects through its own lens independently (the TOOL GROUNDING G entry's meta-scope note). Passing meta-context to object-level executors biases their investigation toward the lead agent's framing, undermining the epistemic value of independent perspective analysis.
 
 ## Cross-Session Tertiary Pattern
 
@@ -214,7 +214,6 @@ The Extension entry's condition suffix records the predicate inline. Both halves
 Examples observed in current SKILL.md:
 
 - prothesis: `Phase 0 MB_from_arg (extension)` + `Phase 0 Qc (constitution)`
-- prothesis: `Phase 4 AgentMap_auto (extension)` + `Phase 4 AgentMap_select (constitution)`
 - misuse: `Phase 0 scope_from_arg (extension)` + `Phase 0 scope_confirm (constitution)`
 - steer: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`
 - realign: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`

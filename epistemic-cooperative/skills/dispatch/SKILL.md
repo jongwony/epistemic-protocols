@@ -251,7 +251,6 @@ Final summary always includes:
 | Triage `/triage` | Forms focused work units from raw GitHub issues through grouping, northstar fusion, and initial-prompt emission. Dispatch consumes those units and does not redo intake. |
 | Periagoge `/induce` | Used upstream to crystallize abstractions such as Work-Unit Triage. Dispatch does not perform abstraction formation; it executes already-focused units. |
 | Anamnesis `/recollect` | Optional Phase 0 enrichment: prior cycle's rejected feedback context can prime current Dispatch. Recall is utterance-bound; Dispatch is delegation-bound. |
-| Compose `/compose` | Compose authors composition SKILL.md files (build-time). Dispatch executes a delegation pipeline (run-time). |
 | Steer `/steer` | Steer rewrites the project's profile rule after detecting calibration drift. Dispatch reads that profile as a personalization source and does not modify it. |
 | Realign `/realign` | Realign rewrites the project guide's direction line via three-horizon fusion. Dispatch reads that direction line as the project northstar, verifies supplied work-unit fusion against it, and does not modify it. |
 

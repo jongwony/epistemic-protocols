@@ -87,7 +87,7 @@ constraints concrete). You do not write the schema yourself — forge does.
 
 ## Step 3 — Generate via Codex CLI
 
-Call the Codex CLI directly, in the same form as `/review-ensemble` and `/goal-research`.
+Call the Codex CLI directly, in the same form as `/review-loop`'s codex source and `/goal-research`.
 This runs gpt-image-2 generation as an independent model call.
 
 Check `which codex 2>/dev/null`. If the Codex CLI is not found, surface the
