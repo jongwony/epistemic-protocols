@@ -52,8 +52,8 @@ Evidence-cited, never asserted:
 ### Verdict: Fail | Pass
 
 ### Findings (when Fail)
-| # | Quoted token | Location | Category | Why unresolvable | Advisory disposition + repair note |
-|---|--------------|----------|----------|------------------|------------------------------------|
+| # | Quoted token | Location | Category | Why unresolvable | Advisory disposition | Repair note |
+|---|--------------|----------|----------|------------------|----------------------|-------------|
 
 ### Category sweep (required for BOTH verdicts)
 | Category | Status | What was checked |
@@ -65,5 +65,6 @@ A Pass is valid only when every checklist category row records what was actually
 ## Boundaries
 
 - Report only — never edit a file.
+- Each Findings column maps to one typed field on the caller's side (advisory disposition and repair note are separate fields — keep them in separate columns). You have no item handles; the caller re-binds each row to its context item by quoted token + location, so keep both exact.
 - Judge resolvability for the declared recipient profile, not for yourself: tool access you have that the recipient lacks does not resolve a token.
 - Disposition authority stays with the user at the protocol Gate; you supply evidence and an advisory recommendation.
