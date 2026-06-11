@@ -66,6 +66,23 @@ const COINAGE_MAX_OUTPUT = 30;
 const MARKER_CAT_LIMIT = 30;
 const ENTROPY_MAX_OUTPUT = 40;
 const MARKER_EXTRACTION_METHOD = "haiku-marker-v1";
+// Evidence modes — derived BY CONSTRUCTION from each artifact's production
+// path (deterministic mjs metadata), never a Haiku judgment. The tier
+// measures the EVIDENTIAL STANDING of the content (who stands behind it:
+// user_constituted > attested > observed > inferred), NOT extractor
+// reliability (extraction_method's concern). Ordering is recall ranking
+// weight only, NEVER exclusion.
+// HARMONIZATION: cross_refs as a whole are mechanically extracted (observed); the per-ref channel field (user/transcript) is an orthogonal utterance-channel annotation, not an evidence-mode override.
+const EVIDENCE_MODES = Object.freeze({
+  clue: { initial_request: "user_constituted", key_utterances: "user_constituted",
+          topics: "inferred", keywords: "inferred", cross_refs: "observed" },
+  vector: "inferred",
+  narrative: "inferred",
+  entropy: "observed",
+  coinage: "observed",
+  markers: { coinage: "observed", actor: "attested", temporal: "attested",
+             emotional: "attested", cognitive: "attested", singularity: "attested" },
+});
 // Observed reason values in ~/.claude/logs/hooks.log (33 days, 1408 records):
 // other, prompt_input_exit, resume, clear. "compact" never observed — PreCompact
 // does not trigger SessionEnd; the two events are temporally independent.
@@ -415,8 +432,13 @@ function buildClueMd(sessionId, date, startedAt, lastTurnAt, cwd, data, crossRef
     `initial_request: "${esc(data.initial_request)}"`,
     "key_utterances:",
     ...data.key_utterances.map((u) => `  - "${esc(u)}"`),
-    "cross_refs:",
-    ...crossRefs.map((r) => `  - ${r}`),
+    ...(crossRefs.length === 0
+      ? ["cross_refs: []"]
+      : ["cross_refs:",
+         ...crossRefs.map((r) => `  - {kind: ${r.kind}, ref: "${esc(r.ref)}", channel: ${r.channel}}`)]),
+    "evidence_modes:",
+    ...Object.entries(EVIDENCE_MODES.clue).map(([field, mode]) => `  ${field}: ${mode}`),
+    `derived_from: ssot:${sessionId}`,
     "---",
     "",
     `Session started with: ${data.initial_request.slice(0, 200)}`,
@@ -435,6 +457,8 @@ function buildVectorMd(sessionId, date, data) {
     `session_id: ${sessionId}`,
     `date: ${date}`,
     `decisions: [${labels.map((l) => `"${esc(l)}"`).join(", ")}]`,
+    `evidence_mode: ${EVIDENCE_MODES.vector}`,
+    `derived_from: ssot:${sessionId}`,
     "---",
     "",
   ];
@@ -466,6 +490,11 @@ function buildNarrativeMd(sessionId, date, startedAt, lastTurnAt, cwd, topics, p
     `protocols_used: [${protocols.join(", ")}]`,
     "continuations: []",
     "forks: []",
+    // Re-indexing a pre-0.7 entry appends to narrative.md whose head
+    // frontmatter keeps the old schema — acceptable under per-artifact
+    // Null-neutral semantics.
+    `evidence_mode: ${EVIDENCE_MODES.narrative}`,
+    `derived_from: ssot:${sessionId}`,
     "---",
     "",
     `## ${startedAt.slice(0, 16)} — Initial Narrative`,
@@ -483,25 +512,47 @@ function esc(s) {
 }
 
 // --- Cross-refs extraction (deterministic) ---
+//
+// StructuredAnchor = { kind, ref, channel } — extends-edge sediment: a
+// context-adding annotation for a later reader, never an authorization.
+// kind reuses the ENTROPY_EXTRACTORS source_namespace vocabulary where
+// overlapping (github_issue, github_pr); "memory" is sediment-local.
+// StructuredAnchor is NOT an IdentifierTuple: no precision, no
+// compatible_anchor — shared value vocabulary, separate machinery.
+// Merge rules are order-independent: dedup key = ref; github_pr supersedes
+// github_issue; channel "user" supersedes "transcript".
+// Behavior preserved vs the pre-0.7 Set version: same regexes, same
+// normalization, same cap 10, same lexicographic sort; bonus — recovers the
+// PR-vs-issue distinction the old code discarded.
 
 function extractCrossRefs(userMsgs, allTexts) {
-  const refs = new Set();
+  const refs = new Map(); // ref -> { kind, ref, channel }
   const memRe = /(?:memory\/[\w_]+\.md|project_[\w_]+\.md|feedback_[\w_]+\.md)/g;
   const issueRe = /(?:PR |#)(\d{1,4})\b/g;
-  const texts = [
-    ...userMsgs.slice(0, 20).map((m) => m.text),
-    ...allTexts.slice(0, 20),
+  const add = (kind, ref, channel) => {
+    const prev = refs.get(ref);
+    if (!prev) { refs.set(ref, { kind, ref, channel }); return; }
+    if (prev.kind === "github_issue" && kind === "github_pr") prev.kind = "github_pr";
+    if (channel === "user") prev.channel = "user";
+  };
+  const channels = [
+    ["user", userMsgs.slice(0, 20).map((m) => m.text)],
+    ["transcript", allTexts.slice(0, 20)],
   ];
-  for (const t of texts) {
-    for (const m of t.matchAll(memRe)) {
-      const ref = m[0].startsWith("memory/") ? m[0] : `memory/${m[0]}`;
-      refs.add(ref);
-    }
-    for (const m of t.matchAll(issueRe)) {
-      refs.add(`#${m[1]}`);
+  for (const [channel, texts] of channels) {
+    for (const t of texts) {
+      for (const m of t.matchAll(memRe)) {
+        const ref = m[0].startsWith("memory/") ? m[0] : `memory/${m[0]}`;
+        add("memory", ref, channel);
+      }
+      for (const m of t.matchAll(issueRe)) {
+        add(m[0].startsWith("PR") ? "github_pr" : "github_issue", `#${m[1]}`, channel);
+      }
     }
   }
-  return [...refs].sort().slice(0, 10);
+  return [...refs.values()]
+    .sort((a, b) => a.ref.localeCompare(b.ref))
+    .slice(0, 10);
 }
 
 // --- v0.4.0 Two-Track Extension: deterministic extract / detect / coinage ---
@@ -640,6 +691,8 @@ function buildEntropyMd(sessionId, date, refs) {
     `date: ${date}`,
     `identifier_count: ${refs.length}`,
     `extractors: [${ENTROPY_EXTRACTORS.map((e) => e.name).join(", ")}]`,
+    `evidence_mode: ${EVIDENCE_MODES.entropy}`,
+    `derived_from: ssot:${sessionId}`,
     "---",
     "",
     "## Identifier Tuples",
@@ -678,6 +731,8 @@ function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extraction
     `marker_categories: [coinage, actor, temporal, emotional, cognitive, singularity]`,
     `marker_counts: ${JSON.stringify(counts)}`,
     `extraction_method: ${extractionMethod}`,
+    `evidence_modes: ${JSON.stringify(EVIDENCE_MODES.markers)}`,
+    `derived_from: ssot:${sessionId}`,
     "---",
     "",
     "## MarkerProfile",
@@ -725,6 +780,8 @@ function buildCoinageMd(sessionId, date, result, skipped, skipReason) {
     `corpus_sessions_sampled: ${result?.corpus_sessions_sampled ?? 0}`,
     `elapsed_ms: ${result?.elapsed_ms ?? 0}`,
     `threshold: ${COINAGE_PRECISION_THRESHOLD}`,
+    `evidence_mode: ${EVIDENCE_MODES.coinage}`,
+    `derived_from: ssot:${sessionId}`,
     "---",
     "",
     "## Zipf-Deviation Coinage Set",
@@ -1007,9 +1064,9 @@ function main() {
   }
 }
 
-try {
-  main();
-} catch (e) {
-  logErr(`top-level: ${e.message}`);
+export { extractCrossRefs, buildClueMd };
+import { pathToFileURL } from "node:url";
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try { main(); } catch (e) { logErr(`top-level: ${e.message}`); }
+  process.exit(0);
 }
-process.exit(0);
