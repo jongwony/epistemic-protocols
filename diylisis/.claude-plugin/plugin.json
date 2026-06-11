@@ -1,7 +1,7 @@
 {
   "name": "diylisis",
   "description": "Distill a session-tethered working context into a self-contained portable handoff — /distill (διύλισις: refining/distillation)",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
