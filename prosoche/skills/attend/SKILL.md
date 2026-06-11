@@ -15,19 +15,20 @@ Compile execution guardrails before autonomous execution: infer a boundary map f
 ── FLOW ──
 Prosoche(C) →
   Infer(C) → B →
-  Partition(B) → (Bₛ, Bₓ) →
+  Normalize(B) → B̂ →                            -- split signals decomposed (Slow part, Fast part)
+  Partition(B̂) → (Bₛ, Bₓ) →
     Bₓ ≠ ∅ → OOS(Bₓ)                            -- fast risks declared out of scope (relay)
     Bₛ = ∅ → no_compile → deactivate            -- nothing loop-consumable (relay)
-  ∀b∈Bₛ: Compile(b) → κ → K →
-  Qc(K) → Stop → V →
-    V = Adjust(d) → recompile(K, d) → Qc(K')
-    V = Confirm   → Emit(K)[TaskCreate] → G →
+  ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) →
+  Qc(K, R) → Stop → V →
+    V = Adjust(d) → recompile(K, R, d) → Qc(K', R')
+    V = Confirm   → Emit(K)[TaskCreate] → G →    -- accepted residuals recorded in trace, never emitted
   converge(compilation trace) → SituatedExecution
 
 ── MORPHISM ──
 ExecutionContext
   → infer(boundary_map)              -- advisory boundary signals from session context
-  → partition(velocity)              -- slow/threshold in scope; fast declared out of scope
+  → partition(velocity)              -- split signals decomposed; slow/threshold in scope; fast declared out of scope
   → compile(conditions)              -- each slow/threshold risk → verifiable predicate
   → confirm(condition_set)           -- user judges the compiled guardrails
   → emit(goal_entries)               -- coarse entries for the downstream enforcer; handoff recorded
@@ -43,17 +44,26 @@ ProtocolOutput = prior protocol's converged output in current session (e.g., a b
 B              = BoundaryMap = Set(BoundarySignal)   -- inferred from context; advisory input, never a precondition
 BoundarySignal = { kind: SignalKind, evidence: String, velocity: Velocity }
 SignalKind     ∈ {ScopeConfinement, Budget, CompletionThreshold, Irreversibility} ∪ Emergent(SignalKind)
-Velocity       ∈ {Slow, Fast}
+Velocity       ∈ {Slow, Fast, Split}
                -- Slow (threshold): violation is evaluable when an execution loop stops — a predicate over observable end-state
                -- Fast: requires pre-action interception at tool-call time — out of scope; harness substrate
-Partition      = B → (Bₛ, Bₓ)        -- Bₛ = {b : velocity(b) = Slow}, Bₓ = {b : velocity(b) = Fast}
-Compile        = BoundarySignal → κ
+               -- Split: carries both an end-state-checkable part and a pre-action part; normalized before partition
+Normalize      = B → B̂               -- velocity(b) = Split → b decomposes into bₛ (Slow, end-state-checkable part)
+                                     --   and bₓ (Fast, pre-action part); Slow/Fast signals pass through unchanged
+Partition      = B̂ → (Bₛ, Bₓ)        -- Bₛ = {b : velocity(b) = Slow}, Bₓ = {b : velocity(b) = Fast}
+Compile        = BoundarySignal → κ ∨ ρ   -- κ when a verifiable predicate exists; ρ otherwise
 κ              = CompiledCondition { subject: String, condition: VerifiablePredicate }
                -- subject: coarse framing of the work unit the condition guards (not a procedural step)
 VerifiablePredicate = an executable check with a determinate pass/fail outcome
                -- (command exit status, test result, countable threshold, file-state assertion)
                -- natural-language prose is not a predicate: it invites self-evaluation drift and false completion
+ρ              = Residual { signal: BoundarySignal, disposition: ResidualDisposition }
+ResidualDisposition ∈ {Sharpen, AcceptUncovered}
+               -- Sharpen: user supplies direction at Qc → recompile toward κ (an Adjust direction)
+               -- AcceptUncovered: Confirm over a remaining residual constitutes acceptance — remains
+               --   unguarded during the interval, recorded in the compilation trace, never emitted
 K              = Set(CompiledCondition)
+R              = Set(Residual)       -- slow signals lacking a verifiable predicate at compile time
 V              = Judgment ∈ {Confirm, Adjust(direction)}
 Emit           = K → G [Tool: TaskCreate]
 G              = goal entries: coarse task entries consumable by a downstream completion-predicate enforcer
@@ -62,45 +72,50 @@ SituatedExecution = (emitted(G) ∧ handoff_recorded) ∨ no_compile ∨ user_es
 
 ── PHASE TRANSITIONS ──
 Phase 0: C → Infer(C) → B                                  -- boundary inference (sense; evidence cited per signal)
-Phase 1: B → Partition(B) → (Bₛ, Bₓ)                       -- velocity partition (sense)
+Phase 1: B → Normalize(B) → B̂ → Partition(B̂) → (Bₛ, Bₓ)    -- split decomposition + velocity partition (sense)
            Bₓ ≠ ∅ → OOS(Bₓ)                                -- out-of-scope declaration, substrate named (extension)
            Bₛ = ∅ → no_compile → deactivate                -- nothing loop-consumable to compile (extension)
-Phase 2: ∀b∈Bₛ: Compile(b) → κ → K → Qc(K) → Stop → V      -- condition compilation + confirmation [Tool]
-           V = Adjust(d) → recompile(K, d) → re-present Qc(K')
-           V = Confirm   → Phase 3
+Phase 2: ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) → Qc(K, R) → Stop → V   -- compilation + confirmation [Tool]
+           V = Adjust(d) → recompile(K, R, d) → re-present Qc(K', R')   -- Sharpen rides as an Adjust direction
+           V = Confirm   → Phase 3                          -- Confirm over remaining ρ constitutes accepted_uncovered
 Phase 3: Emit(K) → G [TaskCreate] → converge(compilation trace) → deactivate   -- emission + handoff [Tool]
 
 ── LOOP ──
 Single pass with a bounded adjustment loop at Phase 2:
-  Qc(K) → Confirm → Phase 3 (terminal)
-  Qc(K) → Adjust(direction) → recompile → re-present
+  Qc(K, R) → Confirm → Phase 3 (terminal; remaining residuals become accepted_uncovered)
+  Qc(K, R) → Adjust(direction) → recompile → re-present (Sharpen moves a residual toward κ)
   Esc → deactivate (no emission)
 Stateless: Prosoche terminates at emission. No state survives into the execution interval —
 no session approvals, no per-action classification, no mid-execution checkpoint.
 Convergence evidence: at emission, present the compilation trace — for each b ∈ Bₛ:
-(b.kind, b.evidence) → κ.condition; for each b ∈ Bₓ: the out-of-scope declaration with its substrate.
+(b.kind, b.evidence) → κ.condition, or its accepted-uncovered residual disposition;
+for each b ∈ Bₓ: the out-of-scope declaration with its substrate.
 Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-situated(C) = emitted(G) ∧ handoff_recorded ∧ (∀b∈Bₛ: ∃κ∈K compiled from b) ∧ (∀b∈Bₓ: declared_oos(b))
+situated(C) = emitted(G) ∧ handoff_recorded
+              ∧ (∀b∈Bₛ: (∃κ∈K compiled from b) ∨ accepted_uncovered(b))
+              ∧ (∀b∈Bₓ: declared_oos(b))
 SituatedExecution = situated(C) ∨ no_compile ∨ user_esc
 -- The guarantee is compile-time: every loop-consumable boundary signal is either compiled into a
--- verifiable condition or visibly dropped at the gate; every fast risk is visibly delegated.
+-- verifiable condition or accepted as an uncovered residual at the gate — visibly, in the trace;
+-- every fast risk is visibly delegated.
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Infer        (sense)        → Internal analysis (boundary heuristics over session context; an upstream boundary map is read when present)
 Phase 0 evidence     (observe)      → Read, Grep (optional evidence gathering for boundary signals)
+Phase 1 Normalize    (sense)        → Internal analysis (split-signal decomposition into Slow/Fast parts)
 Phase 1 Partition    (sense)        → Internal analysis (velocity classification per signal)
 Phase 1 OOS          (extension)    → TextPresent+Proceed (fast-risk out-of-scope declaration with substrate handoff note)
 Phase 1 no_compile   (extension)    → TextPresent+Proceed (Bₛ = ∅: nothing to compile; deactivate)
-Phase 2 Qc           (constitution) → present (compiled condition set confirmation: Confirm / Adjust) [Tool]
+Phase 2 Qc           (constitution) → present (compiled condition set + residual disposition confirmation: Confirm / Adjust) [Tool]
 Phase 3 Emit         (track)        → TaskCreate (coarse goal entries: subject + condition; TodoWrite is the harness-equivalent realization) [Tool]
 converge             (extension)    → TextPresent+Proceed (compilation trace; handoff recorded; deactivate)
 
 ── MODE STATE ──
 Λ = { phase: Phase, boundary: Option(B), slow: Option(Set(BoundarySignal)), oos: Option(Set(BoundarySignal)),
-       compiled: Option(K), active: Bool, cause_tag: String }
+       compiled: Option(K), residuals: Option(R), active: Bool, cause_tag: String }
 -- Compile-time only: Λ exists from invocation to emission; nothing persists into the execution interval.
 
 ── COMPOSITION ──
@@ -195,7 +210,7 @@ Present the inferred map as text with per-signal evidence (the cue and where it 
 
 ### Phase 1: Velocity Partition
 
-Classify each inferred signal by velocity:
+Classify each inferred signal by velocity. A signal carrying both an end-state-checkable part and a pre-action part (e.g., Irreversibility) is first decomposed into those two parts; each part then routes as its own signal:
 
 1. **Slow/threshold** (`Bₛ`): violation evaluable at loop stop time → proceeds to compilation
 2. **Fast** (`Bₓ`): requires pre-action interception → declared out of scope as relay text, with the delegated substrate named (harness permission system, pre-action hook, HITL gate)
