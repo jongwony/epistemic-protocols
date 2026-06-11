@@ -320,7 +320,7 @@ Unknown-provenance items and items with conflicting dispositions are not silentl
 **Pre-gate text output** (Context-Question Separation): Present as text output before the gate:
 - The substitution table rows that resolved (surface_token → canonical_ref → confidence)
 - The per-item disposition trace for items already disposed (KEEP/ROUTE/DROP with provenance basis)
-- The residual ledger entries awaiting judgment (unresolved tokens, unknown-provenance items), each marked with its reason
+- The residual ledger entries awaiting judgment, each marked with its reason: unresolved tokens, unknown-provenance items, and comprehension-gap findings from F5 — the latter shown with their cited evidence (quoted token, location, category, why unresolvable, advisory disposition and repair note)
 
 Then present a per-item interaction for the surfaced residuals and unknown-provenance items:
 

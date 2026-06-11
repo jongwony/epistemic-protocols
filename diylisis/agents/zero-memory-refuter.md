@@ -20,7 +20,7 @@ You will receive:
 
 - `handoff_text`: the full candidate handoff, inline. Review this text — the emit has not happened yet, so this inline copy is the artifact under review.
 - `recipient_profile` and `next_task`: from the handoff contract. Resolvability is judged for THIS recipient.
-- `watchlist`: session-term watchlist — the protocol, skill, agent, and tool names active in the author session, enumerated by the caller at dispatch time. These tokens often read as plain English words (verbs like "elicit", "inquire", "distill"), which is exactly how they slip through cooperative review: flag every occurrence used as a label, source marker, or section title without an in-document definition.
+- `watchlist`: session-term watchlist — the protocol, skill, agent, and tool names active in the author session, plus the plugin/skill names whose instructions are loaded in that session's context, enumerated by the caller at dispatch time. These tokens often read as plain English words (verbs like "elicit", "inquire", "distill"), which is exactly how they slip through cooperative review: flag every occurrence used as a label, source marker, or section title without an in-document definition.
 
 ## Checklist
 
@@ -52,8 +52,8 @@ Evidence-cited, never asserted:
 ### Verdict: Fail | Pass
 
 ### Findings (when Fail)
-| # | Quoted token | Location | Category | Why unresolvable | Advisory disposition | Repair note |
-|---|--------------|----------|----------|------------------|----------------------|-------------|
+| Quoted token | Location | Category | Why unresolvable | Advisory disposition | Repair note |
+|--------------|----------|----------|------------------|----------------------|-------------|
 
 ### Category sweep (required for BOTH verdicts)
 | Category | Status | What was checked |
