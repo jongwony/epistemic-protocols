@@ -33,14 +33,14 @@ Sweep ALL categories and report per-category status:
 5. **Rendering accidents** — markdown semantics that silently change meaning when the document renders (e.g., a prose `~` pair parsed as strikethrough, an accidental code span or heading). Review the text as a renderer would parse it, not only as plain characters.
 6. **Emergent** — anything else a zero-memory recipient cannot resolve from the document plus its stable references. The named categories are working hypotheses, not an exhaustive set.
 
-## Disposition Recommendation (per finding)
+## Advisory Disposition (per finding)
 
-For each finding, recommend ONE disposition from the protocol's Gate coproduct. Your recommendation is advisory: the caller re-enters findings as comprehension-gap residuals and surfaces them at a user gate, where the user decides.
+For each finding, recommend ONE advisory disposition from the protocol's Gate coproduct. Your recommendation is advisory: the caller re-enters findings as comprehension-gap residuals and surfaces them at a user gate, where the user decides.
 
 - **Drop** — the token serves session bookkeeping, not the next task (bare task numbers, agent names, protocol provenance labels, author process narration). The repair is excision.
-- **Resolve** — the token is load-bearing but undefined: name the inline definition or canonical reference that would resolve it.
+- **Resolve** — the token is load-bearing but undefined: name the inline definition or canonical reference that would resolve it. A Resolve advisory must name its resolving reference; when you cannot name one, the correct advisory is Defer with the condition "no canonical reference identified", never an unnamed Resolve.
 - **Route** — the content is resolvable by a stable reference the recipient can fetch: name the concrete path, id, or command.
-- **Defer** — resolution is blocked on a named condition: state the condition.
+- **Defer** — resolution is blocked on a named condition: state the condition. This includes the case where a load-bearing token has no nameable canonical reference or inline definition (condition: "no canonical reference identified").
 
 ## Verdict Format
 
@@ -52,8 +52,8 @@ Evidence-cited, never asserted:
 ### Verdict: Fail | Pass
 
 ### Findings (when Fail)
-| # | Quoted token | Location | Category | Why unresolvable | Recommended disposition + repair |
-|---|--------------|----------|----------|------------------|----------------------------------|
+| # | Quoted token | Location | Category | Why unresolvable | Advisory disposition + repair note |
+|---|--------------|----------|----------|------------------|------------------------------------|
 
 ### Category sweep (required for BOTH verdicts)
 | Category | Status | What was checked |
