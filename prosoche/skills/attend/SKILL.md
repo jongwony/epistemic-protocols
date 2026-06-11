@@ -41,7 +41,10 @@ invariant: Attention over Automation
 ── TYPES ──
 C              = ExecutionContext { args: String?, prior: ProtocolOutput?, session: Context }
 ProtocolOutput = prior protocol's converged output in current session (e.g., a boundary map from a boundary-definition protocol)
-B              = BoundaryMap = Set(BoundarySignal)   -- inferred from context; advisory input, never a precondition
+B              = SignalMap = Set(BoundarySignal)     -- the inferred "boundary map" in prose; advisory input, never a precondition
+               -- distinct from /bound's BoundaryMap (Map(Domain, BoundaryClassification)): an upstream
+               --   BoundaryMap enters Phase 0 as inference evidence — domain classifications cue signal
+               --   kinds and evidence — it is never consumed structurally
 BoundarySignal = { kind: SignalKind, evidence: String, velocity: Velocity }
 SignalKind     ∈ {ScopeConfinement, Budget, CompletionThreshold, Irreversibility} ∪ Emergent(SignalKind)
 Velocity       ∈ {Slow, Fast, Split}
@@ -146,7 +149,8 @@ User calls `/attend` to declare execution intent for an upcoming autonomous exec
 
 Gate predicate:
 ```
-blind(C) ≡ ∃ b ∈ B : velocity(b) = Slow ∧ ¬compiled(b)
+blind(C) ≡ ∃ b ∈ Normalize(B) : velocity(b) = Slow ∧ ¬compiled(b)
+-- evaluated over the normalized map: a Split-only context still yields a Slow part that must compile
 ```
 
 **Activation layer**:
@@ -282,7 +286,7 @@ Prosoche is the compile step inside a conducted execution workflow. The composit
 8. **Transparency-grounded**: Every inferred signal cites its evidence; every partition decision, residual, and out-of-scope delegation is visible in pre-gate text or the compilation trace — surfaced and silent paths satisfy the same transparency invariant.
 9. **Recognition over Recall**: Present structured options with differential implications via Cognitive Partnership Move (Constitution); Constitution interactions yield turn before proceeding.
 10. **Context-Question Separation**: All analysis, evidence, and rationale appear as text output preceding the Constitution interaction; the question contains only the essential choice and option-specific differential implications.
-11. **Convergence evidence**: Present the compilation trace before deactivating — per-signal evidence (`signal → compiled condition` or `signal → out-of-scope substrate`) is required, not asserted.
+11. **Convergence evidence**: Present the compilation trace before deactivating — per-signal evidence (`signal → compiled condition`, `signal → accepted-uncovered residual`, or `signal → out-of-scope substrate`) is required, not asserted.
 12. **Option-set relay test**: When AI analysis converges to a single dominant option (option-level entropy → 0), present the finding directly as Extension. Each Constitution option must be genuinely viable under different user value weightings.
 13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct structure) is distinct from mutation.
 14. **Substrate boundary**: Prosoche scope is the epistemic substrate — boundary inference, velocity partition, condition compilation, compile-time confirmation. Enforcement inside the interval, pre-action interception, and workflow/HITL semantics belong to native harnesses or specialized substrates, delegated by handoff at emission.
