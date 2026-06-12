@@ -21,15 +21,17 @@ Each line is one object with these fields:
 | `original_claim_hash` | string \| null | Hash of the pre-correction claim text, for tamper-evidence |
 | `corrected_claim` | string | The corrected claim text |
 | `correction_basis_ref` | StableRef \| InlineEvidence | The evidence that grounds the correction |
-| `corrected_at` | timestamp | When the correction was recorded |
+| `corrected_at` | timestamp | When the correction was recorded (ISO 8601 UTC, `Z`-suffixed) |
 | `corrected_by` | "User" \| "Tool" \| "AI" | Who recorded the correction |
 | `supersedes` | string[] | `id`s of earlier records this correction revises |
-| `validity_horizon` | duration \| null | How long the correction's unattended KEEP standing holds. Expiry routes the item to the Gate for re-verification (reason: `horizon-expired`); it never removes or suppresses the delta |
+| `validity_horizon` | duration \| null | How long the correction's unattended KEEP standing holds (ISO 8601 duration, P-notation — e.g. `P7D`). Expiry routes the item to the Gate for re-verification (reason: `horizon-expired`); it never removes or suppresses the delta |
 | `horizon_basis_ref` | StableRef \| InlineEvidence \| null | Required when `validity_horizon` is set: the user-constituted content the horizon was transcribed from (Rule 20). Null on legacy records |
 | `export_policy` | "KEEP" \| "ROUTE" \| "DROP" | The disposition this correction carries into a handoff |
 | `verification_status` | "observed" \| "user_confirmed" \| "tool_confirmed" \| "provisional" | The confidence channel that settled the correction |
 
 `StableRef` is `{ kind: "path" | "url" | "id" | "command", locator: string }`. `InlineEvidence` is `{ content: string }`.
+
+**Temporal encoding.** `corrected_at` is an ISO 8601 UTC timestamp (`Z`-suffixed); `validity_horizon` is an ISO 8601 duration in P-notation (e.g. `P7D` for seven days); the expiry sum `corrected_at + validity_horizon` is evaluated in UTC.
 
 ## F3b read contract
 
@@ -42,7 +44,7 @@ effective_delta(item) ≡
 
 expired(d) ≡
   d.validity_horizon ≠ null ∧ now > d.corrected_at + d.validity_horizon
-  (now is fixed once per distillation invocation, at the Phase 0 ledger bind)
+  (now is the invocation constant, bound once into the protocol mode state at the Phase 0 ledger bind; the sum is evaluated in UTC)
 
 corrected_in_session(item) ≡
   effective_delta(item) = d
@@ -81,3 +83,5 @@ Counterexample: the model judging "credentials feel perishable, assign 7 days" i
 ## Supersession
 
 When a correction is itself later corrected, the newer record lists the older record's `id` in `supersedes`. F3b reads the effective correction as the most recent non-superseded record for a given `subject_ref`. A superseded record does not grant KEEP even if its own `export_policy` was KEEP.
+
+When the superseding record re-confirms a horizon-expired correction (a Gate Resolve under re-distillation), its fields are fixed by SKILL.md Rule 20, not inferred: `supersedes` lists the expired record's `id`; `subject_ref` and `claim_kind` carry over; `corrected_claim` restates the re-confirmed value positively; `correction_basis_ref` names the user's Resolve answer at the Gate; `corrected_at` is the invocation timestamp; `corrected_by` is `"User"`; `verification_status` is `"user_confirmed"`; `export_policy` is `"KEEP"`; a new `validity_horizon` (with `horizon_basis_ref`) is set only when the re-confirmation constituted a new basis.
