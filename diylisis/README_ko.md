@@ -48,11 +48,11 @@ Gate에서, 표면화된 residual 또는 unknown-provenance 항목은 `Resolve |
 
 ## 출처 하드라인(The Provenance Hard Line)
 
-F3b는 `CorrectionDelta` 원장을 읽기 전용으로 소비합니다. 항목은 매칭 레코드가 비-잠정 상태로 `export_policy = KEEP`을 가질 때만 corrected-in-session입니다. 원장이 부재하거나 매칭 레코드가 없으면 출처는 **Unknown**이며 — 항목은 KEEP으로 기본 처리되지 않고 Gate에서 사용자 판정으로 표면화됩니다. 이는 새 수신자가 저자의 미검증 신념을 확정 사실로 물려받는 것을 방지합니다. 원장 스키마와 read contract는 [`references/correction-delta-schema.md`](./skills/distill/references/correction-delta-schema.md)를 참조하세요.
+F3b는 `CorrectionDelta` 원장을 읽기 전용으로 소비합니다. 항목은 매칭 레코드가 비-잠정 상태로 `export_policy = KEEP`을 가지고 `validity_horizon`이 만료되지 않았을 때만 corrected-in-session입니다. 원장이 부재하거나 매칭 레코드가 없으면 출처는 **Unknown**이며 — 항목은 KEEP으로 기본 처리되지 않고 Gate에서 사용자 판정으로 표면화됩니다. 이는 새 수신자가 저자의 미검증 신념을 확정 사실로 물려받는 것을 방지합니다. 원장 스키마와 read contract는 [`references/correction-delta-schema.md`](./skills/distill/references/correction-delta-schema.md)를 참조하세요.
 
 ## 알려진 한계
 
-- **v1 원장 읽기 전용**: F3b는 `CorrectionDelta` 원장을 소비합니다. 세션 중 교정 델타를 기록하는 메커니즘은 별도의 후속 과제입니다.
+- **원장 쓰기는 re-distillation으로 한정**: F3b는 `CorrectionDelta` 원장을 읽기 전용으로 소비하고, F7 re-distillation emit이 원장에 append합니다(Rule 19). 세션 중 교정 델타를 기록하는 메커니즘은 별도의 후속 과제입니다.
 - **첫 wired 표면**: plan-level 핸드오프가 `/distill`의 첫 wired 표면입니다. 세션-중 pruning과 서브에이전트 핸드오프는 후속 표면으로 누적됩니다.
 
 ## 설치
