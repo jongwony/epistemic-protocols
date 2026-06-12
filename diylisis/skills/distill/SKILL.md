@@ -29,7 +29,7 @@ Diylisis(W, recipient?, next_task?) → Detect(W) → tethered? →
     F5 comprehension_gate(minimal_complete, contract) → zero_memory_verdict →                    -- lint checklist or fresh subagent; no self-simulation
          Fail(blocking_items): append to residuals (reason: comprehension-gap), block fixed_point
          Pass:                 no new residual
-       Gate Qd(disposition conflicts ∪ unknown-provenance ∪ unresolved residuals) → Stop → A    -- Constitution surfacing (both verdicts; residuals incl. comprehension-gap)
+       Gate Qd(disposition conflicts ∪ unknown-provenance ∪ horizon-expired ∪ unresolved residuals) → Stop → A    -- Constitution surfacing (both verdicts; residuals incl. comprehension-gap)
     F6 loop: measure(unresolved anchors, stop, schema, residual, leaked drops, unclean deltas) decreasing → fixed_point?  -- leak lint: DROP'd content absent from emit, incl. emit-ledger deltas under re-distillation (minimality dual of F5)
          ¬fixed_point: pass_n += 1, loop (one-pass + bounded audit/lint)
          fixed_point: → F7
@@ -88,7 +88,7 @@ Provenance     ∈ {CorrectedKeep, Unknown}  -- F3b verdict, a CorrectedKeep-or-
 Disposition    = KEEP(InlineEvidence) | ROUTE(StableRef) | DROP            -- F3 3-way coproduct
 ResidualLedger = Set({ item: ContextItem, reason: "unresolved" | "unknown-provenance" | "horizon-expired" | "comprehension-gap", surfaced: Bool })  -- silent residual forbidden: every entry must have surfaced = true before convergence
 A              = User answer ∈ {Resolve(canonical_ref), Route(StableRef), Drop, Defer(condition)}
-                 -- Gate coproduct for surfaced residuals and unknown-provenance items; presented intact
+                 -- Gate coproduct for surfaced residuals, unknown-provenance items, and horizon-expired items; presented intact
 Qd             = Residual + disposition-conflict gate [Tool: Constitution interaction]
 ZeroMemoryVerdict ∈ {Pass, Fail(blocking_items: Set(ContextItem))}  -- F5 comprehension verdict; Fail names the items a fresh recipient cannot resolve, which re-enter the residual ledger (reason: comprehension-gap) and block the fixed point. A multi-file handoff — one whose prose references a sibling handoff file the recipient must also read — is a Fail: a fresh recipient must execute from ONE self-contained handoff (Single Canonical Handoff invariant)
 TaskStateBlock = { schema_version: String; tasks: List({ id: String; subject: String; description: String;
@@ -119,7 +119,7 @@ Phase 2: (SubstTable, Grounding, ledger) → F3a relevance(item, contract.next_t
        → F3 dispose(item) → Disposition                                                          -- KEEP from CorrectedKeep (matching non-provisional unexpired KEEP delta); ROUTE/DROP from F3a relevance or the Gate; Unknown routes to Gate
 Phase 3: kept → F4 compress(kept) → minimal_complete                                             -- minimal-complete (track)
        → F5 comprehension_gate(minimal_complete, contract) → zero_memory_verdict                  [Tool: Read, Task]
-       → Qd(disposition conflicts ∪ unknown-provenance ∪ unresolved residuals) → Stop → A         [Tool: Constitution interaction]
+       → Qd(disposition conflicts ∪ unknown-provenance ∪ horizon-expired ∪ unresolved residuals) → Stop → A         [Tool: Constitution interaction]
 Phase 4: A, verdict → F6 settle(measure) → fixed_point?
        ¬fixed_point → Phase 1 (next pass); fixed_point → F7 emit(prose, TaskStateBlock, correction_ledger?) → PortableHandoff
 
@@ -164,7 +164,7 @@ Phase 1 audit           (sense)        → Internal analysis (per-item self-cont
 Phase 2 attest          (observe)      → Read (read-only consumption of the append-only CorrectionDelta ledger; absence yields Unknown)
 Phase 2 dispose         (track)        → Internal state update (Λ.dispositions, Λ.residual_ledger)
 Phase 3 comprehension_gate (observe)   → Read, Task (lint checklist or fresh subagent against the zero-memory standard; author self-simulation excluded)
-Phase 3 Qd              (constitution) → present (mandatory; surfaced residuals + unknown-provenance items + disposition conflicts; Esc → loop termination at LOOP level, not an Answer)
+Phase 3 Qd              (constitution) → present (mandatory; surfaced residuals + unknown-provenance items + horizon-expired items + disposition conflicts; Esc → loop termination at LOOP level, not an Answer)
 Phase 4 settle          (track)        → Internal state update (measure(Λ) incl. leaked_drops, leak-lint, fixed-point check, pass counter)
 converge                (extension)    → TextPresent+Proceed (substitution table + disposition trace + surfaced residual ledger + TaskStateBlock; proceed with PortableHandoff — emit is leak_free, recipient ledger recipient-relevant only). Under re-distillation the emit also realizes as Edit/Write: hygiene the one canonical handoff file in place + append each delta to its CorrectionDelta JSONL ledger — a deterministic application of the converged Λ to the existing file (still Extension per A2 Standing authority — the Phase 3 Gate constituted the settled Λ, so the Edit/Write is a deterministic relay of that judgment, not a fresh constitutive act), never a new versioned sibling
 
@@ -236,7 +236,7 @@ When Diylisis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 3, present surfaced residuals, unknown-provenance items, and disposition conflicts for user judgment via Cognitive Partnership Move (Constitution).
+**Action**: At Phase 3, present surfaced residuals, unknown-provenance items, horizon-expired items, and disposition conflicts for user judgment via Cognitive Partnership Move (Constitution).
 </system-reminder>
 
 - Diylisis completes before the handoff transfers to a fresh recipient
@@ -313,14 +313,14 @@ Unknown-provenance items and items with conflicting dispositions are not silentl
 
 **F5 — Comprehension gate (zero-memory standard)**: Verify the minimal-complete handoff against a fresh-recipient comprehension standard using a lint checklist or a fresh subagent. The author's own reading is excluded as the verification channel: an author silently shares the missing context and would pass items a fresh recipient cannot resolve, so a self-simulated read is a false pass. The gate asks whether a recipient with no session access can execute the next task from the handoff alone. A **Fail** verdict names the blocking items — those the fresh-recipient standard cannot resolve — and re-enters them into the residual ledger (reason: comprehension-gap, `surfaced = false`); a Fail blocks the fixed point, so the loop runs another pass and no handoff emits until the comprehension verdict is **Pass**. A **multi-file handoff** — one whose prose directs the recipient to also read a sibling handoff file (the supersede-chain symptom of re-distillation gone wrong) — is itself a Fail: portability requires one self-contained handoff, so the repair is to fold the sibling's still-relevant content into the single canonical handoff and stop emitting the sibling.
 
-**Gate (F3 + F5 surfacing, Constitution)**: Present surfaced residuals, unknown-provenance items, and disposition conflicts via Cognitive Partnership Move (Constitution). Constitution presentation yields turn for user response.
+**Gate (F3 + F5 surfacing, Constitution)**: Present surfaced residuals, unknown-provenance items, horizon-expired items, and disposition conflicts via Cognitive Partnership Move (Constitution). Constitution presentation yields turn for user response.
 
 **Pre-gate text output** (Context-Question Separation): Present as text output before the gate:
 - The substitution table rows that resolved (surface_token → canonical_ref → confidence)
 - The per-item disposition trace for items already disposed (KEEP/ROUTE/DROP with provenance basis)
 - The residual ledger entries awaiting judgment (unresolved tokens, unknown-provenance items), each marked with its reason
 
-Then present a per-item interaction for the surfaced residuals and unknown-provenance items:
+Then present a per-item interaction for the surfaced residuals, unknown-provenance items, and horizon-expired items:
 
 ```
 How should this surfaced item be handled in the portable handoff?
