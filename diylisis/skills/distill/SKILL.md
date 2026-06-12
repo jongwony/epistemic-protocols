@@ -126,7 +126,7 @@ Phase 4: A, verdict → F6 settle(measure) → fixed_point?
 Phase 0 → Phase 1:  context_tethered(W) = true ∧ HandoffContract declared              -- tethered residue present, contract premise set
 Phase 0 → deactivate: context_tethered(W) = false                                      -- handoff already self-contained
 Phase 1 → Phase 2:  SubstTable produced ∧ every item assigned a Grounding class        -- deixis normalized, self-containment audited
-Phase 2 → Phase 3:  every item carries a Disposition or a surfaced unknown-provenance flag -- relevance + provenance discharged
+Phase 2 → Phase 3:  every item carries a Disposition or a surfaced unknown-provenance / horizon-expired flag -- relevance + provenance discharged
 Phase 3 → Phase 4:  zero_memory_verdict produced ∧ A received                          -- comprehension evaluated (Pass or Fail) and residual answered; Pass gates convergence at Phase 4
 Phase 4 → Phase 1:  ¬fixed_point(Λ) → pass_n += 1                                      -- measure unsettled OR comprehension verdict not yet Pass, re-audit
 Phase 4 → converge: fixed_point(Λ) ∧ zero_memory_verdict = Pass ∧ every ResidualLedger entry surfaced ∧ leak_free(Λ)  -- emit PortableHandoff across its channels (prose + TaskStateBlock, plus the correction ledger under re-distillation); no DROP'd content leaks into emit
@@ -182,8 +182,8 @@ converge                (extension)    → TextPresent+Proceed (substitution tab
       kept: Set(ContextItem),                             -- F4 minimal-complete retained set
       routed: Set(ContextItem),                           -- ROUTE dispositions (StableRef-bound)
       dropped: Set(ContextItem),                          -- DROP dispositions
-      gated: Set(ContextItem),                            -- items surfaced at the Gate for user judgment (unknown-provenance ∪ conflict)
-      residual_ledger: ResidualLedger,                    -- unresolved + unknown-provenance items; silent entry forbidden
+      gated: Set(ContextItem),                            -- items surfaced at the Gate for user judgment (unknown-provenance ∪ horizon-expired ∪ conflict)
+      residual_ledger: ResidualLedger,                    -- entries across every reason (unresolved, unknown-provenance, horizon-expired, comprehension-gap); silent entry forbidden
       task_state: Option(TaskStateBlock),                 -- F7 structured channel
       emitted_deltas: List(CorrectionDelta),              -- re-distillation write side: the CorrectionDelta lines this pass appends to the emitted ledger. Populated at F6 settle as the prospective delta set the converged Λ will write (∅ when ¬redistillation), so the F6 leak lint and the measure leg |unclean_deltas| evaluate it non-vacuously before F7 commits the file write; each must satisfy ledger_emit_clean (pointer-clean, positively stated, horizon-grounded)
       measure: Nat,                                        -- F6 monotone hygiene measure (incl. |leaked_drops| and |unclean_deltas|)
