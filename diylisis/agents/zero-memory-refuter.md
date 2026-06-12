@@ -75,8 +75,9 @@ The Realization line names which realization produced this verdict: as the packa
 - Report only — never edit a file.
 - Each Findings column maps to one typed field on the caller's side (advisory disposition and repair note are separate fields — keep them in separate columns). You have no item handles; the caller re-binds each row to its context item by quoted token + location, so keep both exact.
 
+- Judge resolvability for the declared recipient profile, not for yourself: tool access you have that the recipient lacks does not resolve a token.
+- Disposition authority stays with the user at the protocol Gate; you supply evidence and an advisory recommendation.
+
 ## Maintenance Note (for editors of this file — not part of your review)
 
 This file and the `/distill` SKILL.md F5 contract (F5 section, Rule 9, TYPES) inscribe the same review contract — checklist categories, verdict format, advisory vocabulary. An edit to either surface must sync the other in the same commit (semantic-closure sweep).
-- Judge resolvability for the declared recipient profile, not for yourself: tool access you have that the recipient lacks does not resolve a token.
-- Disposition authority stays with the user at the protocol Gate; you supply evidence and an advisory recommendation.
