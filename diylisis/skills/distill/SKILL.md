@@ -305,7 +305,7 @@ An expired delta is not suppressed and loses nothing on disk: its unattended KEE
 - **ROUTE(StableRef)** — the item is carried by a stable reference the recipient resolves; reachable when F3a relevance routes it or when the user answers Route at the Gate.
 - **DROP** — the item does not serve the next task and is released; reachable when F3a relevance drops it or when the user answers Drop at the Gate.
 
-Unknown-provenance items and items with conflicting dispositions are not silently resolved; they enter `Λ.gated` and surface at the Phase 3 Gate.
+Unknown-provenance items, horizon-expired items, and items with conflicting dispositions are not silently resolved; they enter `Λ.gated` and surface at the Phase 3 Gate.
 
 ### Phase 3: Compression + Comprehension Gate + Residual Constitution
 
@@ -318,7 +318,7 @@ Unknown-provenance items and items with conflicting dispositions are not silentl
 **Pre-gate text output** (Context-Question Separation): Present as text output before the gate:
 - The substitution table rows that resolved (surface_token → canonical_ref → confidence)
 - The per-item disposition trace for items already disposed (KEEP/ROUTE/DROP with provenance basis)
-- The residual ledger entries awaiting judgment (unresolved tokens, unknown-provenance items), each marked with its reason
+- The residual ledger entries awaiting judgment (unresolved tokens, unknown-provenance items, horizon-expired items), each marked with its reason
 
 Then present a per-item interaction for the surfaced residuals, unknown-provenance items, and horizon-expired items:
 
@@ -375,7 +375,7 @@ After emit, trigger `converge` and present the convergence evidence trace.
 ## Rules
 
 1. **AI-detects, user-judges residual**: AI detects session-tethered residue, normalizes deixis, audits self-containment, and attests provenance; surfaced residuals and disposition conflicts require user judgment via Cognitive Partnership Move (Constitution) at Phase 3. AI detection is implicitly confirmed when the user engages with the surfaced residual.
-2. **Recognition over Recall**: Present surfaced residuals and unknown-provenance items as structured options with differential implications via Cognitive Partnership Move (Constitution); Constitution interaction yields turn before proceeding. The Gate binds to `A ∈ {Resolve, Route, Drop, Defer}` (per TYPES).
+2. **Recognition over Recall**: Present surfaced residuals, unknown-provenance items, and horizon-expired items as structured options with differential implications via Cognitive Partnership Move (Constitution); Constitution interaction yields turn before proceeding. The Gate binds to `A ∈ {Resolve, Route, Drop, Defer}` (per TYPES).
 3. **Portability over Author Familiarity**: A handoff is portable when no load-bearing reference depends on the author session. Resolve, route, or surface every session-tethered reference rather than shipping it as-is on the author's silent familiarity.
 4. **Contract is the premise**: F0 declares the recipient, next task, allowed sources, scope, verification, and stop condition before any relevance or minimality judgment. Recipient-relevance (F3a) judges against the declared next task; minimality (F4) is contract-relative completeness. Declare the contract first so these judgments have a premise.
 5. **Deixis precedes grounding**: F1 normalizes each session-local token to a canonical reference before F2 audits self-containment, so every grounded item names a stable referent.
