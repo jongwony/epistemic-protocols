@@ -81,7 +81,7 @@ Initiator taxonomy:
 - Node.js 22+ is required; CI pins Node 22.
 - Plugin code uses Node.js standard library only. The landing page under `src/` is an independent React/Vite/Tailwind sub-project with its own `package.json`.
 - Static checks: `node .claude/skills/verify/scripts/static-checks.js .`
-- Tests: `node --test scripts/package.test.js`
+- Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 - Packaging: `node scripts/package.js [--dry-run]`
 - Changelog: `node scripts/generate-changelog.js`
 - Installer: `scripts/install.sh`; `README.md` is the source of truth for the install set.

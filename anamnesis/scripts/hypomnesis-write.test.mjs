@@ -4,7 +4,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { extractCrossRefs, buildClueMd } from "./hypomnesis-write.mjs";
+import { extractCrossRefs, buildClueMd, buildMarkersMd } from "./hypomnesis-write.mjs";
 
 const msg = (text) => ({ text, ts: "2026-06-11T00:00:00Z" });
 
@@ -83,10 +83,26 @@ test("buildClueMd: evidence_modes block + derived_from present", () => {
   const md = buildClueMd("sid-3", "2026-06-11", "2026-06-11T00:00:00Z", "2026-06-11T01:00:00Z", "/tmp", clueData, []);
   const lines = md.split("\n");
   assert.ok(lines.includes("evidence_modes:"));
-  assert.ok(lines.includes("  initial_request: user_constituted"));
-  assert.ok(lines.includes("  key_utterances: user_constituted"));
+  assert.ok(lines.includes("  initial_request: attested"));
+  assert.ok(lines.includes("  key_utterances: attested"));
   assert.ok(lines.includes("  topics: inferred"));
   assert.ok(lines.includes("  keywords: inferred"));
   assert.ok(lines.includes("  cross_refs: observed"));
   assert.ok(lines.includes("derived_from: ssot:sid-3"));
+});
+
+const emptyMarkers = { actor: [], temporal: [], emotional: [], cognitive: [], singularity: [] };
+
+test("buildMarkersMd: evidence_modes is a multi-line YAML mapping (clue.md pattern), not inline JSON", () => {
+  const md = buildMarkersMd("sid-4", "2026-06-11", emptyMarkers, { coinage: [] }, "haiku");
+  const lines = md.split("\n");
+  assert.ok(lines.includes("evidence_modes:"));
+  assert.ok(lines.includes("  coinage: observed"));
+  assert.ok(lines.includes("  actor: attested"));
+  assert.ok(lines.includes("  temporal: attested"));
+  assert.ok(lines.includes("  emotional: attested"));
+  assert.ok(lines.includes("  cognitive: attested"));
+  assert.ok(lines.includes("  singularity: attested"));
+  assert.ok(!md.includes("evidence_modes: {"));
+  assert.ok(lines.includes("derived_from: ssot:sid-4"));
 });

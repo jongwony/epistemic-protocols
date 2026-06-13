@@ -75,7 +75,11 @@ const MARKER_EXTRACTION_METHOD = "haiku-marker-v1";
 // weight only, NEVER exclusion.
 // HARMONIZATION: cross_refs as a whole are mechanically extracted (observed); the per-ref channel field (user/transcript) is an orthogonal utterance-channel annotation, not an evidence-mode override.
 const EVIDENCE_MODES = Object.freeze({
-  clue: { initial_request: "user_constituted", key_utterances: "user_constituted",
+  // initial_request / key_utterances pass through Haiku extraction (lossy INDEX
+  // copy, same production path as markers) — attested, with the quote itself as
+  // the claimed witness. user_constituted is reserved for SSOT-grade paths where
+  // the user directly authors the artifact content; no such path exists here.
+  clue: { initial_request: "attested", key_utterances: "attested",
           topics: "inferred", keywords: "inferred", cross_refs: "observed" },
   vector: "inferred",
   narrative: "inferred",
@@ -732,7 +736,8 @@ function buildMarkersMd(sessionId, date, haikuMarkers, coinageResult, extraction
     `marker_categories: [coinage, actor, temporal, emotional, cognitive, singularity]`,
     `marker_counts: ${JSON.stringify(counts)}`,
     `extraction_method: ${extractionMethod}`,
-    `evidence_modes: ${JSON.stringify(EVIDENCE_MODES.markers)}`,
+    "evidence_modes:",
+    ...Object.entries(EVIDENCE_MODES.markers).map(([field, mode]) => `  ${field}: ${mode}`),
     `derived_from: ssot:${sessionId}`,
     "---",
     "",
@@ -1065,7 +1070,7 @@ function main() {
   }
 }
 
-export { extractCrossRefs, buildClueMd };
+export { extractCrossRefs, buildClueMd, buildMarkersMd };
 // realpath comparison so symlinked invocation (plugin cache) still runs main; import-detection is best-effort, fail-open to main.
 let isMain = true; // fail-open: a hook that cannot prove it is imported must run
 try {
