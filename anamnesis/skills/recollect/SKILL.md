@@ -57,6 +57,9 @@ IdentifierTuple  = { literal: String, source: Source, source_namespace: String, 
 MarkerProfile    = { coinage: Set(Token), actor: Set(Entity),
                      temporal: Set(TimeRef), emotional: Set(Marker),
                      cognitive: Set(Marker), singularity: Set(Event) }  -- salience-track profile
+DateAnchor       = String   -- ISO 8601 date; reference point for salience-track temporal normalization (e.g., session start). Optionality is carried at the use site (DateAnchor?)
+EvidenceMode     = {user_constituted, attested, observed, inferred}   -- totally ordered tier of the content's evidential STANDING (who stands behind it: user-authored verbatim > party-asserted with verbatim witness > mechanically present without assertion > LLM-synthesized) — NOT extractor reliability (that is extraction_method's concern). Assigned at write time by construction of each artifact's production path (deterministic metadata, never LLM-judged). Ranks recall weight only — NEVER suppresses/excludes; introduces no automatic effectivity (any downstream status change stays user-gated). Name correspondence with Diylisis verification_status / Origin (user_constituted ≈ UserStatement·user_confirmed; observed ≈ observed; inferred ≈ AIInference) is vocabulary-level only — self-contained, no shared cross-protocol relation (same independence precedent as compatible_anchor vs Aitesis authorizes).
+DerivedFrom      = String   -- "ssot:{session_id}" derivation pointer carried by non-user_constituted artifacts; per-item witness = the item's own verbatim anchor field (phrase_in_text / verbatim) when present
 Store            = SSOT ⊕ INDEX               -- see ── STORE TOPOLOGY ── block
 Scan             = (Store, Track, RecallTrace) → List(Candidate)
 Candidate        = { session_id: Optional(SessionId),
@@ -66,13 +69,19 @@ Candidate        = { session_id: Optional(SessionId),
                      fingerprint: Prose,
                      cross_refs: List(Anchor),
                      confidence: ∈ {low, medium, high},
+                     evidence_mode: Optional(EvidenceMode),       -- highest tier among the signals that matched this candidate at scan time; Null ⇒ INDEX entry predates evidence-mode capture — Null is NEUTRAL in ranking (no contribution), never a penalty
                      fork_marker: Bool,                          -- true ⇒ the id is a sidechain/fork with no top-level SSOT (SidechainNoSSOT); its own id is not a valid resume handle. Invariants: fork_marker = false ⇒ parent_pointer = Null ∧ parent_cwd = Null ; parent_pointer = Null ⇒ parent_cwd = Null (parent_cwd requires parent_pointer; parent_pointer present with parent_cwd = Null is valid — parent identified but its cwd is unknown)
                      parent_pointer: Optional(SessionId),        -- orchestrating parent session for a fork candidate, read directly from the fork's own record; the resumable handle when the parent's top-level SSOT still exists (Null ⇒ parent record absent → non-resumable)
                      parent_cwd: Optional(String),               -- parent session's working directory, paired with parent_pointer to build the parent resume handle (Null ⇒ parent record absent, OR parent identified but its cwd metadata is unknown — parent transcript predates cwd capture)
                      resumption_hint: Optional(String) }
-Anchor           = String   -- opaque: memory path, URL, session ID, doc path
+Anchor           = StructuredAnchor | LegacyAnchor      -- Candidate.cross_refs element; extends-edge sediment (context-adding annotation)
+StructuredAnchor = { kind: ∈ {memory, github_issue, github_pr}, ref: String, channel: ∈ {user, transcript} }
+                  -- the stored form tells a later reader WHAT kind of reference and from WHICH utterance channel; it confers NO effectivity — a structured anchor is never authoritative by form, it remains a recall clue requiring the same re-verification as any recalled context
+                  -- kind reuses the entropy source_namespace vocabulary where overlapping (github_issue, github_pr); memory is sediment-local. StructuredAnchor ≠ IdentifierTuple: no precision, no compatible_anchor authorization — shared value vocabulary, disjoint machinery (annotation vs anchoring)
+                  -- ref stores the canonicalized literal (issue/PR numbers normalized to "#N", memory paths prefixed "memory/"); canonical-form grep over INDEX is form-invariant (a search for "#309" hits ref: "#309") — the canonical form is the dedup key, so raw surface variants ("PR 309") collapse into it
+LegacyAnchor     = String   -- opaque: memory path, URL, session ID, doc path — entries written before structured anchors; read as kind-unknown extends edges, never rejected, no migration
 Prose            = String   -- source-agnostic NL description
-Rank             = List(Candidate) → List(Candidate)
+Rank             = List(Candidate) → List(Candidate)   -- track-primary signal dominates; evidence_mode is a secondary tie-break + confidence modulator only (never a filter; Null neutral)
 Probe            = (V, Σ) → List(SocraticQuestion)
 SocraticQuestion = { dimension: ∈ {temporal, associative, contextual}, question: String }
 R                = Recognition ∈ {Recognize(Candidate), Refine, Reorient(description)}
@@ -134,7 +143,7 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 --   INDEX_substitute ↦ ~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl    (substitute channel capture from SubagentStop)
 --   memory           ↦ ~/.claude/projects/{slug}/memory/                                 (user-curated insights)
 --   slug-partitioned: prevents cwd-scattered INDEX; cross-cwd /recollect reaches one canonical location
--- Candidate source binding: `Candidate.session_id` ← INDEX entry frontmatter `session_id`; `Candidate.cwd` ← INDEX entry frontmatter `cwd` (Optional — absent for entries written before cwd capture was implemented)
+-- Candidate source binding: `Candidate.session_id` ← INDEX entry frontmatter `session_id`; `Candidate.cwd` ← INDEX entry frontmatter `cwd` (Optional — absent for entries written before cwd capture was implemented); Candidate.cross_refs ← INDEX entry frontmatter cross_refs — inline-mapping items {kind, ref, channel} since v0.7.0 (StructuredAnchor); bare-string items in older entries are LegacyAnchor and remain valid (degraded read: kind unknown); Candidate.evidence_mode ← max tier over matched artifacts' frontmatter evidence_mode/evidence_modes (Optional — absent for pre-v0.7 entries)
 -- Fork/sidechain binding (SidechainNoSSOT): `Candidate.fork_marker = true` ⇐ the recalled id appears as an `agent_id` in INDEX_substitute (~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl, appended by the SubagentStop hook) AND has no sibling top-level SSOT ~/.claude/projects/{slug}/{agent_id}.jsonl of its own — the fork's turns live only in the parent record + this capture, so `claude --resume <agent_id>` has no transcript to resume
 -- Parent back-trace (`backtrace_parent` ↦ `Candidate.parent_pointer`, `Candidate.parent_cwd`): deterministic, not heuristic — the substitute capture entry records `session_id` = the orchestrating parent's session id (the SubagentStop payload field), so `parent_pointer ← capture.session_id` is a direct read. The capture lives under the parent's slug by construction ({slug} = dirname of the parent transcript), so the parent is always same-slug — look only there. Resumability: if the parent's top-level SSOT ~/.claude/projects/{slug}/{parent_pointer}.jsonl still exists, `parent_pointer` is set and `parent_cwd ← that transcript's `cwd` field` when present (`parent_cwd = Null` if the parent transcript predates cwd capture — parent identified but cwd unknown); the full handle `cd <parent_cwd> && claude --resume <parent_pointer>` requires both components. If the parent SSOT has aged out, `parent_pointer = parent_cwd = Null` (non-resumable → surface the capture's recoverable artifacts). The native subagent transcript (captured verbatim as the `agent_transcript_path` field) is not relied on as a resume handle; the durable parent link is the capture's `session_id`.
 Phase 0 Detect      (sense)    → Internal analysis
@@ -192,7 +201,7 @@ extractor registry:
 dispatch binding: InputType = StructuredIdentifier → Track = entropy
 
 ── SALIENCE MARKERS ──
-detect : Session × Anchor? → MarkerProfile     -- Anchor? = optional ISO date for temporal normalization (e.g., session start)
+detect : Session × DateAnchor? → MarkerProfile     -- DateAnchor? = optional ISO date for temporal normalization (e.g., session start)
 categories: { coinage, actor, temporal, emotional, cognitive, singularity }   -- working hypothesis (Emergent admitted)
 
 semantic invariants:
@@ -213,7 +222,7 @@ dispatch binding: InputType = NaturalRecall → Track = salience
 ── STORE TOPOLOGY ──
 Store = SSOT ⊕ INDEX ; memory/ = realization-layer adjunct (non-scanned, user-curated)
   SSOT             = authoritative session record (complete, append-only)
-  INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile?, Coinage, narrative) -- derived from SSOT, rebuildable, lossy; MarkerProfile? is conditional on successful Haiku extraction + validation (markers.md absent on extraction error or schema-validation failure)
+  INDEX_semantic   = per-session semantic extraction (IdentifierTuples, MarkerProfile?, Coinage, narrative) -- derived from SSOT, rebuildable, lossy; MarkerProfile? is conditional on successful Haiku extraction + validation (markers.md absent on extraction error or schema-validation failure); artifacts carry evidence-mode frontmatter (evidence_mode scalar for homogeneous files, evidence_modes map for clue/markers) derived by construction — legacy entries lack it (Candidate.evidence_mode = Null, neutral)
   INDEX_substitute = substitute channel raw message log -- append-only, primary capture, authoritative (loss non-recoverable)
 
 scan_{Track} : (Store, Trace) → List(Candidate)
@@ -222,6 +231,7 @@ scan_{Track} : (Store, Trace) → List(Candidate)
                                 -- structural rejection (compatible_anchor filters ALL literal matches, distinct from low-precision miss): incompatible literals do NOT anchor but are retained in the recall trace as evidence; the scan routes to the salience track (hybrid) or NullMatch₁ recovery with the incompatibility noted — never a silent zero-candidate return
   scan_salience(Store, trace)   = MarkerProfile match (ranked by Σ)        -- INDEX-accelerated; SSOT fallback
   scan_hybrid(Store, trace)     = scan_entropy ∪ scan_salience
+  evidence_mode(c) = max tier over matched signals' frontmatter evidence_mode(s); frontmatter absent ⇒ Null (legacy entry, neutral — partial-INDEX normal mode, no fallback trigger)
 
 degraded_scan: INDEX_semantic = ∅ ⟹ scan'(SSOT, Track, trace) ∪ literal-id match over INDEX_substitute origin ids   -- SSOT guarantees semantic recall; cold start falls back to SSOT directly. INDEX_substitute is a separate primary channel (not derived from INDEX_semantic), so the sidechain/derived-id match persists under degraded mode — SidechainNoSSOT stays reachable when INDEX_semantic is empty
   -- partial INDEX (e.g., MarkerProfile? = ∅ while IdentifierTuples / Coinage / narrative present) is a normal mode and does NOT trigger total fallback; scan_salience returns empty for the missing component and ranking degrades gracefully
@@ -371,17 +381,17 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
    - **salience track** (`InputType = NaturalRecall`): execute `scan_salience` over `INDEX` (SSOT fallback on degraded_scan) — match against `MarkerProfile` (coinage / actor / temporal / emotional / cognitive / singularity); session context (Σ) supplies ranking signal within this track.
    - **hybrid track** (`InputType = Mixed`): union of entropy and salience results.
 
-   Tool realization (Claude Code substrate): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING. Track-internal ranking composes track-appropriate signals — entropy track: source-namespace / claim-kind compatibility gates anchoring, then literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery.
+   Tool realization (Claude Code substrate): `Read/Grep/Glob` over the Store binding declared in TOOL GROUNDING. Track-internal ranking composes track-appropriate signals — entropy track: source-namespace / claim-kind compatibility gates anchoring, then literal precision (corpus rarity) dominates; salience track: Σ-match + marker-profile overlap + temporal neighborhood + adjacent vector discovery; in both tracks, evidence_mode then composes as a secondary tie-break and confidence modulator (never a filter; Null neutral).
 
 2. **Adaptive behavior based on trace ambiguity**:
    - **High ambiguity**: Present hypomnesis store overview as orientation text (extension) — surface the store's structure and major topic clusters so the user can orient their recall. This is informational, not a gated interaction; the overview provides context for the subsequent targeted scan.
    - **Moderate ambiguity**: Broaden scan scope to include semantic similarity and temporal neighborhood.
    - **Low ambiguity**: Direct targeted scan using the dispatched track.
 
-3. **Rank candidates**: Ranking is track-internal. On the entropy track, compatible anchors are ranked by precision (low occurrence in corpus); incompatible literal matches remain evidence in the trace but do not become anchors. On the salience track, Σ-match + marker-profile overlap + temporal proximity compose the weight. Each candidate carries:
+3. **Rank candidates**: Ranking is track-internal. On the entropy track, compatible anchors are ranked by precision (low occurrence in corpus); incompatible literal matches remain evidence in the trace but do not become anchors. On the salience track, Σ-match + marker-profile overlap + temporal proximity compose the weight. When the matched INDEX artifacts carry evidence-mode frontmatter, the mode acts as a secondary signal: it orders candidates whose track-primary relevance is equal and informs the confidence label. It never excludes a candidate; entries without the field (pre-capture) rank on track-primary signals alone — at no disadvantage: absence of the field is neutral, never a penalty (a legacy candidate is never ranked below an otherwise-equal mode-carrying candidate by mere absence). Each candidate carries:
    - Its core topic and narrative summary
    - Adjacent topics from the same session or time period
-   - Confidence level based on trace alignment
+   - Confidence level based on trace alignment, modulated by evidence mode when present (absence neutral)
 
 4. If `|C[]| = 0`: NullMatch pathway. Inform user what was searched and not found. Before declaring NullMatch, attempt at least one Socratic probe enrichment. After enrichment attempts exhausted: surface the search scope summary and the accumulated recall trace (keywords, temporal signals, user hints from probing), then offer Aitesis handoff — the recall INDEX (hypomnesis/) may lack the entry (lifecycle gap: SessionEnd did not fire; or pre-store: session predates hypomnesis implementation), but the SSOT (session JSONL) may still contain the information. The accumulated trace from Anamnesis probing becomes context seed for Aitesis to search SSOT directly.
 
@@ -459,7 +469,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 2. **Recognition over Retrieval**: Present structured narrative options with anticipatable post-selection state (Recognize / Refine / Reorient) — Constitution interaction requires turn yield before proceeding; recognition options enable user evaluation, not blank-canvas recall.
 
-3. **Input-typed dispatch and track-internal ranking**: Phase 1 scan dispatches by `InputType` (StructuredIdentifier → entropy track, NaturalRecall → salience track, Mixed → hybrid); ranking composes track-appropriate signals (entropy: source_namespace × claim_kind compatibility before literal precision via corpus rarity; salience: Σ-match + marker-profile overlap + temporal neighborhood). Σ-primary scan survives only as a ranking-layer special case within the salience track. Single-signal execution has structural blind spots regardless of track.
+3. **Input-typed dispatch and track-internal ranking**: Phase 1 scan dispatches by `InputType` (StructuredIdentifier → entropy track, NaturalRecall → salience track, Mixed → hybrid); ranking composes track-appropriate signals (entropy: source_namespace × claim_kind compatibility before literal precision via corpus rarity; salience: Σ-match + marker-profile overlap + temporal neighborhood). Σ-primary scan survives only as a ranking-layer special case within the salience track. Single-signal execution has structural blind spots regardless of track. Evidence mode composes as a track-internal secondary signal (tie-break + confidence), never as a filter; its absence is neutral.
 
 4. **Narrative Qc presentation**: Phase 2 presents candidates as discussion narratives (origin → direction → outcome), not result summaries. Result-only presentation defeats recognition by forcing additional investigation.
 
