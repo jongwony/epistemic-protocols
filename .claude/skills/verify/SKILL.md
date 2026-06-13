@@ -58,6 +58,7 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 - Emit load discipline (compiled-copy coverage for Context-Question Separation, Plain emit discipline, and Round-local salience bundling across all core protocol SKILL.md files, plus Output Style source coverage)
 - Framing-readout enforcement (Epistemic Ink invariant: protocol surfacing is a framing readout, not a progress meter — bans the ▓/░ progress-bar glyphs in every core protocol SKILL.md and the Output Style source, and requires the categorical-ban guard sentence to stay inscribed in the Output Style)
 - Language purity (warn-level Korean character detection across project text files; whitelist preserves intentional Korean regions: `**/README_ko.md`, `.claude/skills/release/`, `src/`, `docs/`, `.claude/rules/editing-conventions.md`)
+- Packaged-agent contract sync (each packaged agent with a `### Realization:` verdict anchor reconciled against its paired SKILL.md — realization set, advisory vocabulary, checklist categories; for an F5 zero-memory-verdict contract also the verdict-table column schema locked bidirectionally against the `EvidencedFinding`/`SweepTrace` TYPES records)
 
 ### Phase 2: Expert Review
 

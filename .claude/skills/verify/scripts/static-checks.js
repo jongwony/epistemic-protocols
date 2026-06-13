@@ -2554,6 +2554,327 @@ function checkCodexManifestSync() {
 }
 
 // ============================================================
+// Check 23: Packaged Agent ↔ SKILL.md Contract Sync
+// ============================================================
+// A plugin may ship a packaged subagent (`<plugin>/agents/*.md`) that a SKILL.md
+// phase dispatches and whose verdict the SKILL.md parses back into typed state.
+// When both surfaces inscribe the same review contract — the verdict's
+// realization value set, the advisory disposition vocabulary, and the reviewer's
+// checklist categories — an edit to one surface silently drifts from the other
+// (the diylisis zero-memory-refuter ↔ /distill F5 pattern, Issue #532). The
+// agent file's own Maintenance Note states the sync obligation; this check makes
+// it a forcing function at the /verify gate.
+//
+// Design (generic, not diylisis-pinned):
+//  - Opt-in by STRUCTURAL ANCHOR: an agent is contract-bearing iff its body
+//    carries a verdict `### Realization:` enumeration line. Utility scanner
+//    agents (epistemic-cooperative) lack it and are skipped — no false sync.
+//  - Pairing: the contract-bearing agent pairs with a SKILL.md in its OWN
+//    plugin whose TYPES block carries the matching enumerations.
+//  - Comparison is SYMMETRIC (drift = mismatch between the two surfaces), not
+//    against hardcoded token constants:
+//      (b) Realization values — agent `### Realization: a | b | c` must equal
+//          some TYPES `… ∈ {a, b, c}` enumeration (set-equality).
+//      (c) Advisory vocabulary — agent Advisory Disposition bold tags must
+//          equal some TYPES `… ∈ {…}` enumeration (set-equality; parenthesized
+//          constructor args stripped so `Resolve(ref)` normalizes to `Resolve`).
+//      (a) Checklist categories — each agent `## Checklist` category key must
+//          appear in the SKILL.md prose (CONTAINMENT — the SKILL side carries
+//          the categories as prose, not a delimited list).
+function checkPackagedAgentContractSync() {
+  const CHECK = 'packaged-agent-contract-sync';
+
+  // Parse every `LHS ∈ { … }` enumeration from a formal block into normalized
+  // token sets. Constructor args are stripped: `Resolve(canonical_ref)` → `Resolve`
+  // so `A` and `A_tag` lines both normalize to the same advisory vocabulary.
+  function parseEnumerations(typesBlock) {
+    const enums = [];
+    const re = /([A-Za-z_][\w]*)\s*∈\s*\{([^}]*)\}/g;
+    let m;
+    while ((m = re.exec(typesBlock)) !== null) {
+      const tokens = m[2]
+        .split(',')
+        .map(t => t.replace(/\(.*$/, '').trim())  // strip constructor args
+        // keep only atomic tag tokens; drops parse artifacts from nested
+        // type annotations (e.g. ZeroMemoryVerdict's `sweep: SweepTrace`) that
+        // are never a tag-set comparison target
+        .filter(t => /^[\w.-]+$/.test(t));
+      if (tokens.length) enums.push({ lhs: m[1], set: new Set(tokens) });
+    }
+    return enums;
+  }
+
+  function setEqual(a, b) {
+    if (a.size !== b.size) return false;
+    for (const x of a) if (!b.has(x)) return false;
+    return true;
+  }
+
+  // Extract the body of a `## Heading` markdown section up to the next `## `.
+  function extractMdSection(content, headingRe) {
+    const lines = content.split('\n');
+    let collecting = false;
+    const out = [];
+    for (const line of lines) {
+      if (!collecting) {
+        if (headingRe.test(line)) collecting = true;
+        continue;
+      }
+      if (/^##\s+/.test(line)) break;
+      out.push(line);
+    }
+    return out.join('\n');
+  }
+
+  // Return the header column names of the first markdown table under a heading
+  // matched by `headingRe`. Null when the heading or its table is absent. Used
+  // to read the agent's verdict-table column schema (the columns the F5 caller
+  // parses into typed state).
+  function tableColumns(content, headingRe) {
+    const lines = content.split('\n');
+    let inSection = false;
+    for (const line of lines) {
+      if (!inSection) {
+        if (headingRe.test(line)) inSection = true;
+        continue;
+      }
+      if (/^#{1,3}\s+/.test(line)) break; // left the section before a table
+      if (/^\s*\|.*\|\s*$/.test(line)) {
+        return line.split('|').slice(1, -1).map(c => c.trim()).filter(Boolean);
+      }
+    }
+    return null;
+  }
+
+  // Parse the field-name set of a record type `Name = { f1: T; f2: T }` (or a
+  // wrapped form such as `Name = List({ f1: T, f2: T })`) from a formal block.
+  // Null when the type is absent.
+  function parseRecordFields(block, typeName) {
+    const re = new RegExp(typeName + '\\s*=\\s*[^{]*\\{([^}]*)\\}');
+    const m = block.match(re);
+    if (!m) return null;
+    return new Set(
+      m[1].split(/[;,]/).map(s => s.split(':')[0].trim()).filter(Boolean)
+    );
+  }
+
+  // The F5 checklist-category contract is not a `##` heading — it lives in the
+  // F5 prose paragraph, Rule 9, and the EvidencedFinding TYPES line. Anchor the
+  // category-presence search to that corpus so a category cannot pass by
+  // matching unrelated prose elsewhere in the skill.
+  function f5Corpus(content) {
+    return content.split('\n')
+      .filter(l =>
+        /\*\*F5\b/.test(l) ||
+        /zero-memory comprehension gate/i.test(l) ||
+        /EvidencedFinding\s*=/.test(l)
+      )
+      .join('\n')
+      .toLowerCase();
+  }
+
+  // Discover plugins carrying packaged agents. Dedup by plugin dir (a plugin
+  // may surface multiple skill records).
+  const pluginDirs = [...new Set(_records.map(r => r.dir))];
+  let checkedPairs = 0;
+
+  for (const dir of pluginDirs) {
+    const agentsDir = path.join(projectRoot, dir, 'agents');
+    if (!fs.existsSync(agentsDir)) continue;
+
+    const agentFiles = fs.readdirSync(agentsDir, { withFileTypes: true })
+      .filter(e => e.isFile() && e.name.endsWith('.md'))
+      .map(e => path.join(agentsDir, e.name));
+
+    for (const agentPath of agentFiles) {
+      const agentRel = path.relative(projectRoot, agentPath);
+      const agentContent = fs.readFileSync(agentPath, 'utf8');
+
+      // Opt-in anchor: a verdict `### Realization:` enumeration line. The
+      // heading itself is the opt-in — capture the whole value and split on
+      // `|`, so a single-value realization (no pipe) still paints into a
+      // one-element set instead of being silently excluded.
+      const realizationLine = agentContent
+        .split('\n')
+        .map(l => l.match(/^###\s+Realization:\s*(.+)$/))
+        .find(Boolean);
+      if (!realizationLine) continue; // not a contract-bearing agent → skip
+
+      const agentRealization = new Set(
+        realizationLine[1].split('|').map(t => t.trim()).filter(Boolean)
+      );
+
+      // Advisory vocabulary from the agent's Advisory Disposition bold tags.
+      // Allow hyphenated tags (e.g. `Re-Route`) so a future compound tag is
+      // not silently dropped from the parsed set.
+      const advisorySection = extractMdSection(agentContent, /^##\s+Advisory Disposition/i);
+      const agentAdvisory = new Set(
+        [...advisorySection.matchAll(/^\s*-\s*\*\*([A-Za-z-]+)\*\*/gm)].map(x => x[1].trim())
+      );
+
+      // Checklist category keys from the agent's numbered checklist.
+      const checklistSection = extractMdSection(agentContent, /^##\s+Checklist/i);
+      const agentCategories = [...checklistSection.matchAll(/^\s*\d+\.\s*\*\*([^*]+)\*\*/gm)]
+        .map(x => x[1].trim());
+
+      // Pair with a SKILL.md in the SAME plugin whose TYPES enumerations cover
+      // the agent's realization values. _records carries every skill in the dir.
+      const skillRecords = _records.filter(r => r.dir === dir);
+      let paired = null;
+      let pairedEnums = null;
+      for (const rec of skillRecords) {
+        const skillContent = fs.readFileSync(rec.skillMdPath, 'utf8');
+        const typesBlock = extractFormalSection(skillContent, 'TYPES');
+        const enums = parseEnumerations(typesBlock);
+        if (enums.some(e => setEqual(e.set, agentRealization))) {
+          paired = { rec, skillContent, typesBlock };
+          pairedEnums = enums;
+          break;
+        }
+      }
+
+      if (!paired) {
+        results.fail.push({
+          check: CHECK,
+          file: agentRel,
+          message: `Contract-bearing agent (carries "### Realization: ${[...agentRealization].join(' | ')}") but no SKILL.md in ${dir}/ has a TYPES enumeration matching that realization value set — the verdict contract drifted from its paired skill, or the pairing broke. Sync the SKILL.md realization enumeration with the agent's Realization line.`,
+        });
+        continue;
+      }
+
+      const skillRel = path.relative(projectRoot, paired.rec.skillMdPath);
+      const localFails = [];
+
+      // F5 verdict-contract detection — the verdict-table schema (d) and the
+      // F5-anchored checklist corpus (a) are specific to the F5 zero-memory
+      // contract, so both are gated on this. A marker on either side opts the
+      // pairing in: the agent's Findings/Category-sweep verdict tables, or the
+      // SKILL.md EvidencedFinding/SweepTrace parse records. A future contract-
+      // bearing agent with a different verdict shape (no F5 marker either side)
+      // keeps the generic checks (realization/advisory/checklist) but is not held
+      // to the F5-specific schema or corpus.
+      const agentFindingsCols = tableColumns(agentContent, /^###\s+Findings/);
+      const agentSweepCols = tableColumns(agentContent, /^###\s+Category sweep/i);
+      const efFields = parseRecordFields(paired.typesBlock, 'EvidencedFinding');
+      const stFields = parseRecordFields(paired.typesBlock, 'SweepTrace');
+      const isF5VerdictContract = agentFindingsCols || agentSweepCols || efFields || stFields;
+
+      // (c) Advisory vocabulary — set-equality against some TYPES enumeration.
+      if (agentAdvisory.size === 0) {
+        localFails.push('agent Advisory Disposition section has no bold tag list — cannot verify advisory vocabulary');
+      } else if (!pairedEnums.some(e => setEqual(e.set, agentAdvisory))) {
+        localFails.push(
+          `advisory vocabulary drift — agent advisory tags {${[...agentAdvisory].sort().join(', ')}} match no TYPES enumeration in ${skillRel} ` +
+          `(present sets: ${pairedEnums.map(e => `${e.lhs}{${[...e.set].sort().join(',')}}`).join(' ')}). Sync the advisory coproduct.`
+        );
+      }
+
+      // (a) Checklist categories — containment in the paired SKILL.md, matched
+      // on the full stripped key (no first-two-words fallback) so a removed or
+      // renamed category cannot pass by coinciding with unrelated prose. For an
+      // F5 contract the search is anchored to the F5 contract corpus (not the
+      // whole document); a non-F5 pairing falls back to whole-document search so
+      // a future non-F5 agent's categories are not all reported missing.
+      if (agentCategories.length === 0) {
+        localFails.push('agent ## Checklist section has no numbered bold categories — cannot verify category coverage');
+      } else {
+        const corpus = isF5VerdictContract
+          ? f5Corpus(paired.skillContent)
+          : paired.skillContent.toLowerCase();
+        const missing = [];
+        for (const phrase of agentCategories) {
+          // Match the FULL category phrase (only a trailing parenthetical is
+          // stripped) — splitting on "without" would drop the qualifier, letting
+          // an agent-side rename of the qualifier pass against an unchanged corpus.
+          const key = phrase.toLowerCase().replace(/\s*\(.*$/, '').trim();
+          if (!corpus.includes(key)) {
+            missing.push(phrase);
+          }
+        }
+        if (missing.length) {
+          localFails.push(
+            `checklist category drift — ${missing.length} agent checklist categor${missing.length === 1 ? 'y' : 'ies'} ` +
+            `absent from ${skillRel}: ${missing.map(c => `"${c}"`).join(', ')}. ` +
+            `Reflect the category in the SKILL.md F5 contract (or remove it from the agent).`
+          );
+        }
+      }
+
+      // (d) Verdict-table column schema — the F5 zero-memory-verdict contract.
+      // Gated on isF5VerdictContract (computed above): the columns are locked
+      // bidirectionally against the SKILL.md records, so a rename/drop on either
+      // surface — including one side dropping its half of the contract — fails.
+      const FINDINGS_COLS = new Set(['Quoted token', 'Location', 'Category', 'Why unresolvable', 'Advisory disposition', 'Repair note']);
+      const SWEEP_COLS = new Set(['Category', 'Status', 'What was checked']);
+      const EF_EXPECTED = new Set(['item', 'quoted_token', 'location', 'category', 'why_unresolvable', 'advisory', 'repair_note']);
+      const ST_EXPECTED = new Set(['category', 'status', 'checked']);
+
+      if (isF5VerdictContract) {
+        if (!agentFindingsCols) {
+          localFails.push('agent declares an F5 verdict contract but has no `### Findings` table header — cannot verify the Findings column schema the caller parses');
+        } else if (!setEqual(new Set(agentFindingsCols), FINDINGS_COLS)) {
+          localFails.push(
+            `Findings table column drift — agent columns {${agentFindingsCols.join(', ')}} ` +
+            `do not match the locked F5 schema {${[...FINDINGS_COLS].join(', ')}}. ` +
+            `The caller parses these columns into EvidencedFinding fields; sync the table header.`
+          );
+        }
+
+        if (!agentSweepCols) {
+          localFails.push('agent declares an F5 verdict contract but has no `### Category sweep` table header — cannot verify the sweep column schema');
+        } else if (!setEqual(new Set(agentSweepCols), SWEEP_COLS)) {
+          localFails.push(
+            `Category sweep table column drift — agent columns {${agentSweepCols.join(', ')}} ` +
+            `do not match the locked F5 schema {${[...SWEEP_COLS].join(', ')}}. Sync the table header.`
+          );
+        }
+
+        // Lock the SKILL.md side too: the record types that define the parse
+        // contract must still declare the fields these columns map onto. Catches
+        // reverse drift (a TYPES field renamed/dropped while the agent table stays).
+        if (!efFields) {
+          localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no EvidencedFinding record — the Findings parse contract is undefined`);
+        } else if (!setEqual(efFields, EF_EXPECTED)) {
+          localFails.push(
+            `EvidencedFinding field drift in ${skillRel} — fields {${[...efFields].sort().join(', ')}} ` +
+            `do not match the locked set {${[...EF_EXPECTED].sort().join(', ')}}. The Findings columns parse into these fields; sync TYPES.`
+          );
+        }
+        if (!stFields) {
+          localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no SweepTrace record — the sweep parse contract is undefined`);
+        } else if (!setEqual(stFields, ST_EXPECTED)) {
+          localFails.push(
+            `SweepTrace field drift in ${skillRel} — fields {${[...stFields].sort().join(', ')}} ` +
+            `do not match the locked set {${[...ST_EXPECTED].sort().join(', ')}}. Sync TYPES.`
+          );
+        }
+      }
+
+      checkedPairs++;
+      if (localFails.length) {
+        for (const msg of localFails) {
+          results.fail.push({ check: CHECK, file: `${agentRel} ↔ ${skillRel}`, message: msg });
+        }
+      } else {
+        results.pass.push({
+          check: CHECK,
+          file: `${agentRel} ↔ ${skillRel}`,
+          message: `Contract in sync — realization ${agentRealization.size}, advisory ${agentAdvisory.size}, checklist ${agentCategories.length} categories all reconciled`,
+        });
+      }
+    }
+  }
+
+  if (checkedPairs === 0 && !results.fail.some(f => f.check === CHECK)) {
+    results.pass.push({
+      check: CHECK,
+      file: 'working tree',
+      message: 'No contract-bearing packaged agents found (no agent carries a "### Realization:" verdict anchor) — nothing to sync',
+    });
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -2565,6 +2886,7 @@ try {
   checkToolGrounding();
   checkVersionStaleness();
   checkCodexManifestSync();
+  checkPackagedAgentContractSync();
   checkGraphIntegrity();
   checkSpecVsImpl();
   checkMorphismAnatomy();
