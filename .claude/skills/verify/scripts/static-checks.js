@@ -2626,6 +2626,53 @@ function checkPackagedAgentContractSync() {
     return out.join('\n');
   }
 
+  // Return the header column names of the first markdown table under a heading
+  // matched by `headingRe`. Null when the heading or its table is absent. Used
+  // to read the agent's verdict-table column schema (the columns the F5 caller
+  // parses into typed state).
+  function tableColumns(content, headingRe) {
+    const lines = content.split('\n');
+    let inSection = false;
+    for (const line of lines) {
+      if (!inSection) {
+        if (headingRe.test(line)) inSection = true;
+        continue;
+      }
+      if (/^#{1,3}\s+/.test(line)) break; // left the section before a table
+      if (/^\s*\|.*\|\s*$/.test(line)) {
+        return line.split('|').slice(1, -1).map(c => c.trim()).filter(Boolean);
+      }
+    }
+    return null;
+  }
+
+  // Parse the field-name set of a record type `Name = { f1: T; f2: T }` (or a
+  // wrapped form such as `Name = List({ f1: T, f2: T })`) from a formal block.
+  // Null when the type is absent.
+  function parseRecordFields(block, typeName) {
+    const re = new RegExp(typeName + '\\s*=\\s*[^{]*\\{([^}]*)\\}');
+    const m = block.match(re);
+    if (!m) return null;
+    return new Set(
+      m[1].split(/[;,]/).map(s => s.split(':')[0].trim()).filter(Boolean)
+    );
+  }
+
+  // The F5 checklist-category contract is not a `##` heading — it lives in the
+  // F5 prose paragraph, Rule 9, and the EvidencedFinding TYPES line. Anchor the
+  // category-presence search to that corpus so a category cannot pass by
+  // matching unrelated prose elsewhere in the skill.
+  function f5Corpus(content) {
+    return content.split('\n')
+      .filter(l =>
+        /\*\*F5\b/.test(l) ||
+        /zero-memory comprehension gate/i.test(l) ||
+        /EvidencedFinding\s*=/.test(l)
+      )
+      .join('\n')
+      .toLowerCase();
+  }
+
   // Discover plugins carrying packaged agents. Dedup by plugin dir (a plugin
   // may surface multiple skill records).
   const pluginDirs = [...new Set(_records.map(r => r.dir))];
@@ -2643,10 +2690,13 @@ function checkPackagedAgentContractSync() {
       const agentRel = path.relative(projectRoot, agentPath);
       const agentContent = fs.readFileSync(agentPath, 'utf8');
 
-      // Opt-in anchor: a verdict `### Realization:` enumeration line.
+      // Opt-in anchor: a verdict `### Realization:` enumeration line. The
+      // heading itself is the opt-in — capture the whole value and split on
+      // `|`, so a single-value realization (no pipe) still paints into a
+      // one-element set instead of being silently excluded.
       const realizationLine = agentContent
         .split('\n')
-        .map(l => l.match(/^###\s+Realization:\s*(.+\|.+)$/))
+        .map(l => l.match(/^###\s+Realization:\s*(.+)$/))
         .find(Boolean);
       if (!realizationLine) continue; // not a contract-bearing agent → skip
 
@@ -2655,9 +2705,11 @@ function checkPackagedAgentContractSync() {
       );
 
       // Advisory vocabulary from the agent's Advisory Disposition bold tags.
+      // Allow hyphenated tags (e.g. `Re-Route`) so a future compound tag is
+      // not silently dropped from the parsed set.
       const advisorySection = extractMdSection(agentContent, /^##\s+Advisory Disposition/i);
       const agentAdvisory = new Set(
-        [...advisorySection.matchAll(/^\s*-\s*\*\*([A-Za-z]+)\*\*/gm)].map(x => x[1].trim())
+        [...advisorySection.matchAll(/^\s*-\s*\*\*([A-Za-z-]+)\*\*/gm)].map(x => x[1].trim())
       );
 
       // Checklist category keys from the agent's numbered checklist.
@@ -2693,6 +2745,20 @@ function checkPackagedAgentContractSync() {
       const skillRel = path.relative(projectRoot, paired.rec.skillMdPath);
       const localFails = [];
 
+      // F5 verdict-contract detection — the verdict-table schema (d) and the
+      // F5-anchored checklist corpus (a) are specific to the F5 zero-memory
+      // contract, so both are gated on this. A marker on either side opts the
+      // pairing in: the agent's Findings/Category-sweep verdict tables, or the
+      // SKILL.md EvidencedFinding/SweepTrace parse records. A future contract-
+      // bearing agent with a different verdict shape (no F5 marker either side)
+      // keeps the generic checks (realization/advisory/checklist) but is not held
+      // to the F5-specific schema or corpus.
+      const agentFindingsCols = tableColumns(agentContent, /^###\s+Findings/);
+      const agentSweepCols = tableColumns(agentContent, /^###\s+Category sweep/i);
+      const efFields = parseRecordFields(paired.typesBlock, 'EvidencedFinding');
+      const stFields = parseRecordFields(paired.typesBlock, 'SweepTrace');
+      const isF5VerdictContract = agentFindingsCols || agentSweepCols || efFields || stFields;
+
       // (c) Advisory vocabulary — set-equality against some TYPES enumeration.
       if (agentAdvisory.size === 0) {
         localFails.push('agent Advisory Disposition section has no bold tag list — cannot verify advisory vocabulary');
@@ -2703,16 +2769,25 @@ function checkPackagedAgentContractSync() {
         );
       }
 
-      // (a) Checklist categories — containment in SKILL.md prose.
+      // (a) Checklist categories — containment in the paired SKILL.md, matched
+      // on the full stripped key (no first-two-words fallback) so a removed or
+      // renamed category cannot pass by coinciding with unrelated prose. For an
+      // F5 contract the search is anchored to the F5 contract corpus (not the
+      // whole document); a non-F5 pairing falls back to whole-document search so
+      // a future non-F5 agent's categories are not all reported missing.
       if (agentCategories.length === 0) {
         localFails.push('agent ## Checklist section has no numbered bold categories — cannot verify category coverage');
       } else {
-        const skillLower = paired.skillContent.toLowerCase();
+        const corpus = isF5VerdictContract
+          ? f5Corpus(paired.skillContent)
+          : paired.skillContent.toLowerCase();
         const missing = [];
         for (const phrase of agentCategories) {
-          const key = phrase.toLowerCase().split(/\s+without\s+|\s*\(/)[0].trim();
-          const shortKey = key.split(/\s+/).slice(0, 2).join(' ');
-          if (!skillLower.includes(key) && !skillLower.includes(shortKey)) {
+          // Match the FULL category phrase (only a trailing parenthetical is
+          // stripped) — splitting on "without" would drop the qualifier, letting
+          // an agent-side rename of the qualifier pass against an unchanged corpus.
+          const key = phrase.toLowerCase().replace(/\s*\(.*$/, '').trim();
+          if (!corpus.includes(key)) {
             missing.push(phrase);
           }
         }
@@ -2721,6 +2796,56 @@ function checkPackagedAgentContractSync() {
             `checklist category drift — ${missing.length} agent checklist categor${missing.length === 1 ? 'y' : 'ies'} ` +
             `absent from ${skillRel}: ${missing.map(c => `"${c}"`).join(', ')}. ` +
             `Reflect the category in the SKILL.md F5 contract (or remove it from the agent).`
+          );
+        }
+      }
+
+      // (d) Verdict-table column schema — the F5 zero-memory-verdict contract.
+      // Gated on isF5VerdictContract (computed above): the columns are locked
+      // bidirectionally against the SKILL.md records, so a rename/drop on either
+      // surface — including one side dropping its half of the contract — fails.
+      const FINDINGS_COLS = new Set(['Quoted token', 'Location', 'Category', 'Why unresolvable', 'Advisory disposition', 'Repair note']);
+      const SWEEP_COLS = new Set(['Category', 'Status', 'What was checked']);
+      const EF_EXPECTED = new Set(['item', 'quoted_token', 'location', 'category', 'why_unresolvable', 'advisory', 'repair_note']);
+      const ST_EXPECTED = new Set(['category', 'status', 'checked']);
+
+      if (isF5VerdictContract) {
+        if (!agentFindingsCols) {
+          localFails.push('agent declares an F5 verdict contract but has no `### Findings` table header — cannot verify the Findings column schema the caller parses');
+        } else if (!setEqual(new Set(agentFindingsCols), FINDINGS_COLS)) {
+          localFails.push(
+            `Findings table column drift — agent columns {${agentFindingsCols.join(', ')}} ` +
+            `do not match the locked F5 schema {${[...FINDINGS_COLS].join(', ')}}. ` +
+            `The caller parses these columns into EvidencedFinding fields; sync the table header.`
+          );
+        }
+
+        if (!agentSweepCols) {
+          localFails.push('agent declares an F5 verdict contract but has no `### Category sweep` table header — cannot verify the sweep column schema');
+        } else if (!setEqual(new Set(agentSweepCols), SWEEP_COLS)) {
+          localFails.push(
+            `Category sweep table column drift — agent columns {${agentSweepCols.join(', ')}} ` +
+            `do not match the locked F5 schema {${[...SWEEP_COLS].join(', ')}}. Sync the table header.`
+          );
+        }
+
+        // Lock the SKILL.md side too: the record types that define the parse
+        // contract must still declare the fields these columns map onto. Catches
+        // reverse drift (a TYPES field renamed/dropped while the agent table stays).
+        if (!efFields) {
+          localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no EvidencedFinding record — the Findings parse contract is undefined`);
+        } else if (!setEqual(efFields, EF_EXPECTED)) {
+          localFails.push(
+            `EvidencedFinding field drift in ${skillRel} — fields {${[...efFields].sort().join(', ')}} ` +
+            `do not match the locked set {${[...EF_EXPECTED].sort().join(', ')}}. The Findings columns parse into these fields; sync TYPES.`
+          );
+        }
+        if (!stFields) {
+          localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no SweepTrace record — the sweep parse contract is undefined`);
+        } else if (!setEqual(stFields, ST_EXPECTED)) {
+          localFails.push(
+            `SweepTrace field drift in ${skillRel} — fields {${[...stFields].sort().join(', ')}} ` +
+            `do not match the locked set {${[...ST_EXPECTED].sort().join(', ')}}. Sync TYPES.`
           );
         }
       }
