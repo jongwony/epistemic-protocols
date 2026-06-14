@@ -136,9 +136,9 @@ Loop Phase 3 over clusters in evidential-strength order (highest-evidence first)
 
 ### Phase 4: Tier Resolution — Assemble Diff and Fit-Shape Check
 
-Assemble a profile diff from confirmed cluster implications:
+Assemble a profile diff from confirmed cluster implications. First **partition** the confirmed clusters by implication target: a cluster whose implication names a *settled direction* routes to the settled-directions delta (assembled below) and is excluded from profile translation; every other confirmed cluster routes to the profile diff. The two targets are disjoint per cluster — no cluster contributes to both, so a registry-only cluster never becomes a (spurious) profile-variable change.
 
-1. For each confirmed cluster, translate the cluster implication into a concrete profile variable change (or calibration result change, when the cluster's implication is structural rather than per-variable)
+1. For each confirmed cluster **routed to the profile diff** (i.e., not partitioned to the settled-directions delta), translate the cluster implication into a concrete profile variable change (or calibration result change, when the cluster's implication is structural rather than per-variable)
 2. Resolve cross-cluster conflicts where two or more clusters propose incompatible values for the same variable; when the conflict requires user judgment, surface it in Phase 5 alongside the candidate values
 3. Construct the diff representation: `before` (existing profile) → `after` (proposed profile), variable-by-variable, with provenance citing the confirming cluster(s)
 4. Fit-shape check — evaluate whether the assembled diff fits the project profile rule file structure (six variables + Floor / Bounded zone + calibration result). Mismatch signals:
@@ -251,7 +251,7 @@ SessionCalibrationMoves
   → scan(session, calibration_moves)    -- trial inscription start
   → classify(moves, drift_taxonomy)     -- trial inscription complete
   → present_per_cluster(cluster, V)     -- per-cluster validation
-  → assemble_diff(confirmed) ∧ assemble_settled_directions_delta(confirmed)  -- tier resolution (two disjoint outputs)
+  → partition(confirmed) → assemble_diff(profile_bound) ∧ assemble_settled_directions_delta(settled_direction_bound)  -- tier resolution: disjoint partition of confirmed clusters (profile-bound vs settled-direction), two disjoint outputs
   → fit_shape_check(diff)                -- operational-layer material detection
   → present_diff(approve, settled_directions_delta, mismatch_signals)  -- final Constitution interaction
   → [Approve: write(profile, layer, backup) ∧ (settled_directions_delta ≠ ∅ → write(registry)); RouteToOperationalLayer: (no write)]
@@ -343,7 +343,7 @@ Phase 2: Scope → Read(session_jsonl) → extract(M[]) → classify(M[]) → cl
 Phase 3: clusters → loop:
            present(cluster, evidence) → Qc(cluster) → Stop → V → integrate    -- per-cluster Constitution interaction [Tool]
            V = Stop → break loop
-Phase 4: confirmed_clusters → assemble_diff(P_existing) ∧ assemble_settled_directions_delta → (diff, delta) →
+Phase 4: confirmed_clusters → partition(profile_bound, settled_direction_bound) → assemble_diff(P_existing) ∧ assemble_settled_directions_delta → (diff, delta) →
            fit_shape_check(diff) → mismatch_signals                                -- tier resolution + fit-shape detection (sense)
 Phase 5: diff, delta, mismatch_signals → present(diff, delta, backup_path, mismatch_signals) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
            A = Approve → Write(backup) → Write(P_proposed) → [delta ≠ ∅: Write(registry)] → Append(steer_trials_md) → emit(UpdatedProjectProfile)
