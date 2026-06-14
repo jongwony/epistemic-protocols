@@ -254,13 +254,14 @@ SessionCalibrationMoves
   → partition(confirmed) → assemble_diff(profile_bound) ∧ assemble_settled_directions_delta(settled_direction_bound)  -- tier resolution: disjoint partition of confirmed clusters (profile-bound vs settled-direction), two disjoint outputs
   → fit_shape_check(diff)                -- operational-layer material detection
   → present_diff(approve, settled_directions_delta, mismatch_signals)  -- final Constitution interaction
-  → [Approve: write(profile, layer, backup) ∧ (settled_directions_delta ≠ ∅ → write(registry)); RouteToOperationalLayer: (no write)]
-                                          -- branch on disposition; write only on Approve; registry write gated on non-empty delta
+  → [Approve: write(profile, layer, backup) ∧ (settled_directions_delta ≠ ∅ → write(registry));
+     Reject: (no write); Defer: (no write); RouteToOperationalLayer: (no write)]
+                                          -- exhaustive branch on disposition; writes occur on Approve only; registry write gated on non-empty delta
                                           -- registry is project-scoped (the project guide), NOT layer-parameterized: a user_global profile run still writes the registry to the current project guide; rollback via version control, not a .bak
-  → append_index(layer)                   -- trial inventory append (both branches)
-  → emit(UpdatedProjectProfile | OperationalLayerRecommendation)
-                                          -- circular return (inscription) OR routing artifact
-  → UpdatedProjectProfile | OperationalLayerRecommendation
+  → [Approve | RouteToOperationalLayer: append_index(layer); Reject | Defer: (no append)]   -- trial inventory append on Approve and RouteToOperationalLayer only
+  → emit(UpdatedProjectProfile | NoUpdateNote | DiffArtifact | OperationalLayerRecommendation)
+                                          -- per disposition: Approve → UpdatedProjectProfile; Reject → NoUpdateNote; Defer → DiffArtifact (carries diff + settled_directions_markdown); RouteToOperationalLayer → OperationalLayerRecommendation
+  → UpdatedProjectProfile | NoUpdateNote | DiffArtifact | OperationalLayerRecommendation
 requires: calibration_drift_opaque(scope) ∧ scope_resolved(user)  -- activation precondition + Phase 0 confirmation
 deficit:  CalibrationDriftOpaque             -- activation precondition (user-invoked Layer 1)
 preserves: SessionHistory                    -- read-only audit; SessionCalibrationMoves are derived
@@ -365,7 +366,7 @@ Convergence evidence: per disposition, emit one of {UpdatedProjectProfile, NoUpd
 ── CONVERGENCE ──
 recognized = all clusters processed (each cluster has Confirm/Dismiss/Reorient verdict OR loop reached Stop)
 approved   = A ∈ {Approve, Reject, Defer, RouteToOperationalLayer}
-written    = A = Approve ∧ backup_created ∧ write_succeeded (profile, with a pre-write backup; plus the Settled Directions registry when settled_directions_delta ≠ ∅, rolled back through version control)
+written    = A = Approve ∧ (backup_created ∨ first_time_induction) ∧ write_succeeded (profile — pre-write backup when an existing profile is present, skipped on first-time induction where P_existing = P_∅; plus the Settled Directions registry when settled_directions_delta ≠ ∅, rolled back through version control)
 session_text(steer) ∋ {UpdatedProjectProfile | NoUpdateNote | DiffArtifact | OperationalLayerRecommendation}
 
 ── TOOL GROUNDING ──
