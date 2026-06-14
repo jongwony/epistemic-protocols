@@ -178,7 +178,7 @@ Settled Directions delta (when non-empty):
 Conflicting clusters (if any):
   <variable>: <candidate_a> vs <candidate_b> — needs user choice
 
-Backup target: <existing_profile_path>.bak.YYYYMMDD-HHMMSS
+Backup target (when an existing profile is present; skipped on first-time induction): <existing_profile_path>.bak.YYYYMMDD-HHMMSS
 Write target:  <existing_profile_path>
 Registry write target (when delta non-empty): <registry_path> (## Settled Directions, adjacent to Northstar; rollback via version control)
 ```
@@ -235,7 +235,7 @@ Steer(scope) → Phase0(scope, user_confirm) →
       Assemble(confirmed_clusters, P_existing) → (diff, settled_directions_delta) →
       fit_shape_check(diff) → mismatch_signals →
       present(diff, settled_directions_delta, backup_path, mismatch_signals) → Qc(approve) → Stop → A →
-        Approve: backup(P_existing) → write(P_proposed, layer) →
+        Approve: [P_existing ≠ P_∅: backup(P_existing)] → write(P_proposed, layer) →
                  [settled_directions_delta ≠ ∅: write(settled_directions_registry)] →
                  append_index(layer) → emit(UpdatedProjectProfile)
         Modify(adjustments): regenerate(diff, settled_directions_delta, adjustments) → re-present Phase5
@@ -297,8 +297,9 @@ MismatchSignal    ∈ {ProgrammaticTrigger, LayerMixing, BehavioralEnforcement} 
 MismatchSignals   = Set(MismatchSignal) — Phase 4 fit-shape check output; empty set when diff fits the project profile rule file structure; non-empty set lists all detected signals (compound mismatches are common, e.g., ProgrammaticTrigger + BehavioralEnforcement co-occurring)
 RecommendedLayer  ∈ {Hook(HookEvent), SystemPrompt, CI_CD, Settings, Other(String)}
 HookEvent         ∈ {SessionStart, SessionEnd, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SubagentStop, PreCompact, Notification}
-UpdatedProjectProfile = session text { layer, diff, settled_directions_delta, backup_path, write_path,
-                                       registry_write_path, index_entry_path }
+UpdatedProjectProfile = session text { layer, diff, settled_directions_delta, write_path, index_entry_path,
+                                       backup_path?, registry_write_path? }
+                    -- backup_path present unless first-time induction (P_existing = P_∅); registry_write_path present only when settled_directions_delta ≠ ∅
 NoUpdateNote      = session text { reviewed_clusters, dismissed_diff }
 DiffArtifact      = session text { diff_markdown, settled_directions_markdown, suggested_apply_path }
 OperationalLayerRecommendation = session text { mismatch_signals: MismatchSignals,
@@ -347,7 +348,7 @@ Phase 3: clusters → loop:
 Phase 4: confirmed_clusters → partition(profile_bound, settled_direction_bound) → assemble_diff(P_existing) ∧ assemble_settled_directions_delta → (diff, delta) →
            fit_shape_check(diff) → mismatch_signals                                -- tier resolution + fit-shape detection (sense)
 Phase 5: diff, delta, mismatch_signals → present(diff, delta, backup_path, mismatch_signals) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
-           A = Approve → Write(backup) → Write(P_proposed) → [delta ≠ ∅: Write(registry)] → Append(steer_trials_md) → emit(UpdatedProjectProfile)
+           A = Approve → [P_existing ≠ P_∅: Write(backup)] → Write(P_proposed) → [delta ≠ ∅: Write(registry)] → Append(steer_trials_md) → emit(UpdatedProjectProfile)
            A = Modify → regenerate(diff, delta) → Phase 5 re-entry
            A = Reject → emit(NoUpdateNote)
            A = Defer → emit(DiffArtifact)
@@ -366,7 +367,7 @@ Convergence evidence: per disposition, emit one of {UpdatedProjectProfile, NoUpd
 ── CONVERGENCE ──
 recognized = all clusters processed (each cluster has Confirm/Dismiss/Reorient verdict OR loop reached Stop)
 approved   = A ∈ {Approve, Reject, Defer, RouteToOperationalLayer}
-written    = A = Approve ∧ (backup_created ∨ first_time_induction) ∧ write_succeeded (profile — pre-write backup when an existing profile is present, skipped on first-time induction where P_existing = P_∅; plus the Settled Directions registry when settled_directions_delta ≠ ∅, rolled back through version control)
+written    = A = Approve ∧ (backup_created ∨ first_time_induction) ∧ write_succeeded ∧ (settled_directions_delta = ∅ ∨ registry_write_succeeded) (profile — pre-write backup when an existing profile is present, skipped on first-time induction where P_existing = P_∅; the Settled Directions registry write must also succeed when settled_directions_delta ≠ ∅, rolled back through version control)
 session_text(steer) ∋ {UpdatedProjectProfile | NoUpdateNote | DiffArtifact | OperationalLayerRecommendation}
 
 ── TOOL GROUNDING ──
