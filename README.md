@@ -86,7 +86,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/triage`, `/dispatch`, `/forge`, `/reduced-space-test` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, focused work-unit dispatch with PR fanout + rejection-trace inscription, reference-grounded initial-prompt formation, and scoped empirical validation |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/triage`, `/dispatch`, `/forge`, `/reduced-space-test`, `/claude-spawn` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, focused work-unit dispatch with PR fanout + rejection-trace inscription, reference-grounded initial-prompt formation, scoped empirical validation, and backgrounded remote-control session spawning for a conducted span |
 
 **Three discovery modes coexist** (none replaces the others):
 
@@ -114,6 +114,10 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 **Scoped empirical validation**:
 
 - `/reduced-space-test` — decompose a target↔surrogate equivalence claim into verifiable facets, bound a user-synchronized stand-in test space with its residual complement (composes `/bound`), capture evidence inside it (composes `/inquire`), and carry the uncovered complement forward; an orchestration utility that scopes the resulting claim to the tested conditions rather than asserting absolute equivalence, with no new protocol or graph node
+
+**Conducted-span execution substrate**:
+
+- `/claude-spawn` — spawn, list, or kill a backgrounded `claude --remote-control` tmux session as the execution substrate for a `/conduct`-designed single span; the session is reachable from the Claude app and runs under TCC-protected directories via tmux PTY inheritance; multi-span orchestration is out of scope (single span per invocation)
 
 ## Design
 
