@@ -202,18 +202,18 @@ How would you like to proceed with this diff?
 
 Options:
 1. Approve — write the proposed profile to <write_target>; create backup at <backup_path> first. When the settled-directions delta is non-empty, also write the Settled Directions registry at <registry_path> (rollback via version control)
-2. Modify — adjust specific variables before write (specify which and how)
+2. Modify — adjust specific profile variables and/or settled-direction clauses before write (specify which and how)
 3. Reject — discard the diff; the existing profile remains unchanged; emit NoUpdateNote
-4. Defer — emit the diff as a session-text artifact without writing; the user can apply manually later
+4. Defer — emit the diff and any settled-directions delta as a session-text artifact without writing; the user can apply manually later
 5. RouteToOperationalLayer — emit OperationalLayerRecommendation artifact (mismatch signal + recommended layer + realization template); rule file unchanged. Surface this option only when Phase 4 fit-shape check fired.
 ```
 
 After response:
 
 - **Approve** — execute write sequence: (i) create timestamped backup of existing profile file (or skip backup when existing file is absent), (ii) write the new profile to the target path, (iii) when the settled-directions delta is non-empty, write the `## Settled Directions` section — merging each clause into the existing section by identity, or creating the section adjacent to the Northstar/mission section when absent (registry rollback is through version control, no `.bak`), (iv) append a structured entry to the trial index (`steer-trials.md` at the same layer scope), (v) emit UpdatedProjectProfile session-text artifact with the diff trace, the settled-directions delta, the profile backup path for rollback, and the index entry path
-- **Modify** — accept the user's variable-level adjustments, regenerate the diff, re-present Phase 5 Constitution interaction
+- **Modify** — accept the user's adjustments to profile variables and/or settled-direction clauses, regenerate the diff and the settled-directions delta, re-present Phase 5 Constitution interaction
 - **Reject** — emit NoUpdateNote session-text artifact recording the reviewed clusters and dismissed diff; existing file unchanged; trial index untouched (no inscription to track)
-- **Defer** — emit the diff as a paste-ready markdown block AND keep the existing profile file unchanged for now; the user retains the audit work for manual application later (distinct from Reject, which discards the diff entirely); trial index untouched until the user manually applies the diff
+- **Defer** — emit the diff and any settled-directions delta as paste-ready markdown blocks AND keep both write targets unchanged for now; the user retains the audit work for manual application later (distinct from Reject, which discards the diff entirely); trial index untouched until the user manually applies the diff
 - **RouteToOperationalLayer** — emit OperationalLayerRecommendation session-text artifact recording: (i) the fit-shape mismatch signal that triggered the routing, (ii) the recommended operational layer per finding shape (hooks, system prompt, CI/CD, settings.json), (iii) a realization template (concrete trigger + behavior outline + scope) for downstream implementation. Append a structured entry to the trial index (`steer-trials.md` at the same layer scope) so the proposed routing is inventoried even when implementation is deferred to a downstream task. Existing rule file unchanged. Steer's role is to recognize the routing and emit the realization template; implementation belongs to a downstream task using the appropriate substrate tooling
 
 After integration, log the disposition. The rule file write (Approve) or the index inscription (Approve and RouteToOperationalLayer) is the Circular Return — the inscribed profile becomes the new prejudgment baseline for the next `/steer` invocation, and the trial index becomes the at-a-glance inventory of trials this project's `/steer` has produced.
@@ -238,7 +238,7 @@ Steer(scope) → Phase0(scope, user_confirm) →
         Approve: backup(P_existing) → write(P_proposed, layer) →
                  [settled_directions_delta ≠ ∅: write(settled_directions_registry)] →
                  append_index(layer) → emit(UpdatedProjectProfile)
-        Modify(adjustments): regenerate(diff, adjustments) → re-present Phase5
+        Modify(adjustments): regenerate(diff, settled_directions_delta, adjustments) → re-present Phase5
         Reject: emit(NoUpdateNote) → no write
         Defer: emit(DiffArtifact) → no write
         RouteToOperationalLayer: append_index(layer) → emit(OperationalLayerRecommendation)
@@ -254,8 +254,9 @@ SessionCalibrationMoves
   → assemble_diff(confirmed) ∧ assemble_settled_directions_delta(confirmed)  -- tier resolution (two disjoint outputs)
   → fit_shape_check(diff)                -- operational-layer material detection
   → present_diff(approve, settled_directions_delta, mismatch_signals)  -- final Constitution interaction
-  → [Approve: write(profile, layer, backup) ∧ (settled_directions_delta ≠ ∅ → write(registry, layer)); RouteToOperationalLayer: (no write)]
-                                          -- branch on disposition; write only on Approve; registry write gated on non-empty delta (registry rolls back via version control, not a .bak)
+  → [Approve: write(profile, layer, backup) ∧ (settled_directions_delta ≠ ∅ → write(registry)); RouteToOperationalLayer: (no write)]
+                                          -- branch on disposition; write only on Approve; registry write gated on non-empty delta
+                                          -- registry is project-scoped (the project guide), NOT layer-parameterized: a user_global profile run still writes the registry to the current project guide; rollback via version control, not a .bak
   → append_index(layer)                   -- trial inventory append (both branches)
   → emit(UpdatedProjectProfile | OperationalLayerRecommendation)
                                           -- circular return (inscription) OR routing artifact
@@ -298,7 +299,7 @@ HookEvent         ∈ {SessionStart, SessionEnd, UserPromptSubmit, PreToolUse, P
 UpdatedProjectProfile = session text { layer, diff, settled_directions_delta, backup_path, write_path,
                                        registry_write_path, index_entry_path }
 NoUpdateNote      = session text { reviewed_clusters, dismissed_diff }
-DiffArtifact      = session text { diff_markdown, suggested_apply_path }
+DiffArtifact      = session text { diff_markdown, settled_directions_markdown, suggested_apply_path }
 OperationalLayerRecommendation = session text { mismatch_signals: MismatchSignals,
                                                 recommended_layer: RecommendedLayer,
                                                 realization_template: String,
@@ -346,7 +347,7 @@ Phase 4: confirmed_clusters → assemble_diff(P_existing) ∧ assemble_settled_d
            fit_shape_check(diff) → mismatch_signals                                -- tier resolution + fit-shape detection (sense)
 Phase 5: diff, delta, mismatch_signals → present(diff, delta, backup_path, mismatch_signals) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
            A = Approve → Write(backup) → Write(P_proposed) → [delta ≠ ∅: Write(registry)] → Append(steer_trials_md) → emit(UpdatedProjectProfile)
-           A = Modify → regenerate(diff) → Phase 5 re-entry
+           A = Modify → regenerate(diff, delta) → Phase 5 re-entry
            A = Reject → emit(NoUpdateNote)
            A = Defer → emit(DiffArtifact)
            A = RouteToOperationalLayer → Append(steer_trials_md) → emit(OperationalLayerRecommendation)
@@ -354,11 +355,11 @@ Phase 5: diff, delta, mismatch_signals → present(diff, delta, backup_path, mis
 ── LOOP ──
 Phase 3 → Phase 4 → Phase 5 →
   Approve: write executed; converge
-  Modify: regenerate diff; Phase 5 re-entry
+  Modify: regenerate diff + delta; Phase 5 re-entry
   Reject: no write; converge with NoUpdateNote
   Defer: no write; converge with DiffArtifact
   RouteToOperationalLayer: no write; converge with OperationalLayerRecommendation
-Phase 5 Modify re-entry max 3 iterations. Exhausted: surface assembled diff as DiffArtifact (defer) → converge.
+Phase 5 Modify re-entry max 3 iterations. Exhausted: surface assembled diff + settled-directions delta as DiffArtifact (defer) → converge.
 Convergence evidence: per disposition, emit one of {UpdatedProjectProfile, NoUpdateNote, DiffArtifact, OperationalLayerRecommendation}.
 
 ── CONVERGENCE ──
