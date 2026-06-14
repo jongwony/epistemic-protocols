@@ -15,13 +15,11 @@ Resolve abstract aporia through Extended-Mind reverse induction. Type: `(Abstrac
 
 ```
 ── FLOW ──
-Euporia(I) → pre-detect(I, S) → signal? →
-  true:  Detect(I) → aporia? →
-           true:  (I, S, ctx) → Substrate access → ReverseTrace(I, S, ctx) → (D[], context) →
-                  Qs(D[], cycle_n) → Stop → A → integrate(A, I) → I' →
-                  loop until resolved(I') ∨ user_esc ∨ user_dismiss
-           false: deactivate
-  false: surface scan result, invite user to articulate or withdraw
+Euporia(I) → Detect(I, S) → aporia? →
+  true:  (I, S, ctx) → Substrate access → ReverseTrace(I, S, ctx) → (D[], context) →
+         Qs(D[], cycle_n) → Stop → A → integrate(A, I) → I' →
+         loop until resolved(I') ∨ user_esc ∨ user_dismiss
+  false: surface scan result; route to axis-specific protocol (axis-determined) or invite user to articulate or withdraw (substrate empty)
 
 ── MORPHISM ──
 IntentSeed
@@ -60,7 +58,7 @@ R              = ResolvedEndpoint { intent_resolved: I', residual: Set(Axis) }
                  -- residual = unresolved axes delegated to downstream protocols
 resolved(I')   = ∂(intent) ≈ 0 (user constitutive judgment)
 cycle_n        = Nat                            -- current cycle counter; surfaced at every Phase 2
-Phase          ∈ {-1, 0, 1, 2, 3}
+Phase          ∈ {0, 1, 2, 3}
 Axis           = String                         -- emergent label; examples: "intent", "goal", "form", "scope", "framework"
 Initiator      ∈ {UserInvoked, AIDetected}      -- bound at activation; informs Hybrid Phase 2 first-surface semantics
 Qs             = Cycle-emergent surfacing interaction with D[] + cycle counter [Tool: Constitution interaction]
@@ -75,12 +73,11 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
 "I want to..."             → I = utterance under discussion
 
 If no aporia signal is detectable (intent is fully axis-determined, or substrate is empty):
-pause activation and surface the scan result before Phase 0, inviting the user to either
-articulate further or withdraw.
+Phase 0 detection surfaces the scan result instead of proceeding to Phase 1, inviting the
+user to either articulate further or withdraw.
 
 ── PHASE TRANSITIONS ──
-Phase -1: I → pre-detect(aporia signal | substrate availability)     -- pre-activation scan; if no signal: surface result and invite user to articulate or withdraw before Phase 0
-Phase 0: I → Detect(I) → aporia?                                     -- detection checkpoint (silent)
+Phase 0: I → Detect(I, S) → aporia?                                  -- detection checkpoint; aporia=true → silent proceed to Phase 1; aporia=false → surface scan result (axis-determined → routing recommendation; substrate empty → invite articulate-or-withdraw), no activation
 Phase 1: (I, S, ctx) → Substrate access [Tool] → ReverseTrace [Internal] → (D[], context)
 Phase 2: (D[], cycle_n, initiator) → Qs(D[], cycle_n) → Stop → A     -- Constitution; cycle counter visible
                                                                        -- Hybrid contract: cycle_n=1 ∧ initiator=AIDetected → first surfacing = implicit confirm-or-decline
@@ -106,6 +103,7 @@ progress(Λ) = cycle_n (running counter; not bounded by a target)
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect       (sense)        → Internal analysis (no external tool)
+Phase 0 Surface      (extension)    → TextPresent+Proceed (aporia=false: surface scan result; routing recommendation when axis-determined, or invite articulate-or-withdraw when substrate empty; no activation, no constitutive gate)
 Phase 1 Substrate    (observe)      → Read, Grep, Bash (read-only substrate access — codebase / rules / session history / Environment queries: machine-setup metadata only — uname, pwd, version probes, git config public fields; MUST NOT execute env/printenv/set/echo $VAR or read .env* files)
 Phase 1 Utterance    (observe)      → Internal analysis of I.utterance for in-text semantic ambiguity (citation quotes actual utterance fragments only)
 Phase 1 ReverseTrace (observe)      → Internal analysis (axis inference + coordinate construction)
@@ -208,17 +206,19 @@ Euporia activates when (a) the user's intent is articulated as an utterance, (b)
 
 ## Protocol
 
-### Phase 0: Aporia Detection Checkpoint (Silent)
+### Phase 0: Aporia Detection Checkpoint
 
-Analyze the intent seed for abstract aporia. Silent — no user interaction.
+Analyze the intent seed for abstract aporia. Detection is silent on the aporia-confirmed path — it proceeds to Phase 1 with no user interaction; on no signal it surfaces the scan result before deactivating.
 
 1. Bind seed `I` per A-BINDING priority
 2. Check axis determination: scan utterance for axis-specific markers (intent verbs / goal nouns / abstraction signals / boundary phrases)
 3. Check substrate availability: confirm read-only access to codebase / rules / session history / environment
-4. If `aporia(I)` predicate satisfied: proceed to Phase 1 with `(I, S, ctx)`
-5. If intent is axis-determined: deactivate, surface routing recommendation to the matching axis-specific protocol
+4. If `aporia(I)` predicate satisfied: proceed to Phase 1 with `(I, S, ctx)` — silent, no user interaction
+5. If no aporia signal (predicate unsatisfied), surface the scan result and deactivate without proceeding to Phase 1:
+   - **Intent is axis-determined**: surface a routing recommendation to the matching axis-specific protocol
+   - **Substrate is empty**: surface the empty-substrate result and invite the user to articulate further or withdraw (fall back to direct execution or Aitesis)
 
-**Scope restriction**: Detection is silent. Does NOT modify files or call external services beyond read-only substrate scan.
+**Scope restriction**: Detection does NOT modify files or call external services beyond read-only substrate scan. The no-signal surface is a relay presentation — no constitutive gate.
 
 ### Phase 1: Substrate Access + Reverse Trace
 
