@@ -76,6 +76,8 @@ Use the load axes to choose an intake posture:
 
 If the user explicitly asks for a full-backlog audit on a medium or large backlog, process metadata in checkpointed batches and surface progress between batches. Do not read all bodies/comments before the first grouping checkpoint.
 
+**Load is not legible from labels.** `TriageLoad` sizes the *intake* (how much substrate to read now). It does not measure the *deliverable load* a unit imposes downstream — the human judgment its execution and review will demand. These are independent: a `refactor`/`enhancement` label does not imply low deliverable load. An audit or candidate-classification issue — one whose output is a *decision* (which candidates to act on, merge-vs-keep, discriminant-vs-removable) — carries high deliverable load because it spawns in-session judgment gates, even when its surface reads as mechanical. When ordering or routing units by reviewer cost, read deliverable load from what the issue *produces* (a mechanical edit vs a decision), not from its type label.
+
 ## Phase 1: Read Raw Issues
 
 Read the full issue substrate for each issue in the bound scope or confirmed cluster:
@@ -238,6 +240,7 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 - **Count-threshold scale**: deciding small, medium, or large by a fixed issue count instead of `TriageLoad`.
 - **Unbounded backlog scan**: reading full bodies/comments for a medium or large intake posture before a metadata grouping checkpoint or `/elicit`-formed `IntakeIntent`.
 - **Label-only grouping**: labels can seed grouping, but the work unit must be formed by shared problem pressure and cited issue evidence.
+- **Label-implies-load**: inferring low deliverable (execution/review) load from a `refactor`/mechanical label when the issue's output is a decision or candidate-classification that will spawn in-session judgment gates.
 - **Metadata-only work units**: emitting normalized frames, focused work units, or initial prompts from titles/labels alone.
 - **Northstar-free summary**: a raw issue summary without preserved/transformed/dropped claims is not a triaged work unit.
 - **Dispatch leakage**: branch creation, file edits, PR creation, and review compliance belong to `/dispatch` or a normal execution session, not `/triage`.
