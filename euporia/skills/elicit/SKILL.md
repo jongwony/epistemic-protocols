@@ -72,9 +72,10 @@ Priority: explicit_arg > recent_intent_seed > surfaced_aporia
 /elicit (alone)            → I = most recent intent seed in session
 "I want to..."             → I = utterance under discussion
 
-If no aporia signal is detectable (intent is fully axis-determined, or substrate is empty):
-Phase 0 detection surfaces the scan result instead of proceeding to Phase 1, inviting the
-user to either articulate further or withdraw.
+If no aporia signal is detectable, Phase 0 detection surfaces the scan result instead of
+proceeding to Phase 1: when the intent is fully axis-determined it routes to the matching
+axis-specific protocol; when the substrate is empty it invites the user to articulate
+further or withdraw.
 
 ── PHASE TRANSITIONS ──
 Phase 0: I → Detect(I, S) → aporia?                                  -- detection checkpoint; aporia=true → silent proceed to Phase 1; aporia=false → surface scan result (axis-determined → routing recommendation; substrate empty → invite articulate-or-withdraw), no activation
@@ -138,13 +139,13 @@ Per cycle, the trio `(D[step], A[step], I'[step])` is recorded pairwise into `D_
 
 ### Activation
 
-AI detects abstract aporia OR user calls `/elicit`. Detection is silent (Phase 0); dimension surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
+AI detects abstract aporia OR user calls `/elicit`. Detection is silent on the aporia-confirmed path (Phase 0); dimension surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
 
 **Hybrid confirmation contract**: For AI-detected activation paths, the first Phase 2 surfacing (cycle_n=1) serves as the user-confirmation moment — Esc at the first surface deactivates without coordinate state change, satisfying the Hybrid initiator's "AI-detected trigger path requires user confirmation" contract via implicit-acknowledge-or-decline at the first dimension surface. Phase 1 substrate scan precedes this confirmation under the substrate read-only constraint; no externalized state is mutated before user judgment.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/elicit` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Abstract aporia detected via in-protocol heuristics (axis-undetermined intent + substrate-implicit coordinates). Detection is silent.
+- **Layer 2 (AI-guided)**: Abstract aporia detected via in-protocol heuristics (axis-undetermined intent + substrate-implicit coordinates). Detection is silent on the aporia-confirmed path.
 
 **Abstract aporia** = intent is articulated as utterance but its decision coordinates are not axis-determined; the substrate carries implicit values that can be reverse-traced into surfaceable dimensions.
 
@@ -203,6 +204,7 @@ Euporia activates when (a) the user's intent is articulated as an utterance, (b)
 | user_judges_resolved(I') | Return ResolvedEndpoint with per-cycle coordinate trace |
 | User Esc | Return to normal operation; intent remains in-process |
 | Dismiss + residual | Return ResolvedEndpoint with residual axes annotated for downstream delegation |
+| No aporia signal at Phase 0 (axis-determined or substrate empty) | Surface scan result without activating — routing recommendation when axis-determined, articulate-or-withdraw invitation when substrate empty |
 
 ## Protocol
 
