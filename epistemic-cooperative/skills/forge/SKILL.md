@@ -27,7 +27,7 @@ The **core** is vendor-agnostic and stops at `ResolvedIntentIR` plus the validat
 
 - **Core (vendor-agnostic)**: reverse-induce the user's under-determined intent into `ResolvedIntentIR`; extract the adapter-derived required slots (`ContractElements`) the reference's schema requires; partition slots into relay vs constitution; own the staleness policy, provenance, and generic validation.
 - **Vendor Adapter Contract (the seam)**: the narrow, parameterized interface every adapter satisfies. New references plug in by adding an adapter section — accumulated per real use, never built top-down.
-- **Adapters (concrete instances)**: `Higgsfield`, `gpt-image`, and `codex-goals` ship now. Each owns reference discovery/fetch, the reference's prompt schema, the projection rendering, and unsupported-field degradation.
+- **Adapters (concrete instances)**: `Higgsfield`, `gpt-image`, `codex-goals`, and `claude-session` ship now. Each owns reference discovery/fetch, the reference's prompt schema, the projection rendering, and unsupported-field degradation.
 
 ### Vendor Adapter Contract (seam)
 
@@ -112,6 +112,7 @@ Adapter bodies are progressively disclosed: this index is always loaded; each ad
 | `higgsfield` | Higgsfield video model prompt guide (video-only; image generation denied) | a Higgsfield video prompt for a follow-up session |
 | `gpt-image` | Codex imagegen skill at `$CODEX_HOME/skills/.system/imagegen/` (image-only; targets `gpt-image-2`; web cookbook fallback) | a `gpt-image-2` prompt block (using the source's shared schema) plus parameter envelope |
 | `codex-goals` | OpenAI Codex Goals specification | a strong `/goal …` string for a follow-up Codex session |
+| `claude-session` | Claude prompting best-practices guide (model-axis: `prompting-claude-{model}`; first-party, reflexive) | a model-tailored handoff initial-prompt for a follow-up Claude session (`/remote-spawn` worktree or remote-control) |
 
 Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch_guide_snapshot` / `derive_prompt_schema` / `project` / `validate`). New references plug in by adding an `adapters/<name>.md` file as accumulated prior — see Deferred Colimit; do not pre-build a registration framework.
 
