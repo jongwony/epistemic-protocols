@@ -75,7 +75,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 5. **Test** — `node --test scripts/package.test.js`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)
 7. **Ship** — [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) for the one-shot flow if you have that external plugin installed, or fall back to plain `git push -u origin <branch>` + `gh pr create`; PR body language is Korean (hook-enforced)
-8. **Address review** — run `/lens-review` for the epistemic multi-perspective review (posts inline PR comments) and `/review-loop` for code review; use `/gh-address-comments` to respond to posted comments
+8. **Address review** — run `/lens-review` for the epistemic multi-perspective review (posts a single consolidated PR comment) and `/review-loop` for code review; use `/gh-address-comments` to respond to posted comments
 9. **Merge** — the maintainer merges manually via web after final review
 
 ## Conventions

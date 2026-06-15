@@ -36,7 +36,7 @@
 | 렌즈 패널 | 고정 (Category Theory / Type Theory / Operational Semantics + Gap) | 정의 시점에 고정; 런타임 파라미터 아님 |
 | 관점 배열 | 격리 분석 → 적대적 교차검증; 스킬이 substrate를 직접 기술 | frame은 관점 형성만(object-supplier 유지), 적대적 격리 검증은 스킬 내부에 기록 — /conduct로 배열을 위임하지 않음. 병렬 관점의 plausible-but-unchallenged 약점을 단일 적대 패스로 차단 |
 | confidence 임계 | ≥ 80% | 저신뢰 발견 사항 배제, trivial 변경(버전 범프 등)은 간략히 명시하고 skip |
-| 코멘트 게시 | `gh api repos/.../issues/{N}/comments` (통합 코멘트 1건) | 외부·사람이 보는 GitHub mutation = substrate write → harness permission이 게이트 |
+| 코멘트 게시 | `gh api repos/{owner}/{repo}/issues/{N}/comments` (통합 코멘트 1건) | 외부·사람이 보는 GitHub mutation = substrate write → harness permission이 게이트 |
 | Markdown body 전달 | heredoc → 임시 파일 → `gh api --input` / `jq --rawfile` | 백틱이 셸 command substitution을 유발하므로 double-quote 인자 직접 전달 금지 |
 
 ### API Endpoint 구분

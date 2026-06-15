@@ -110,7 +110,7 @@ This is a relay verify step — a deterministic cross-check of the review text a
 
 Post the findings back to the PR as a **single consolidated comment** — one comment carrying every finding, not one inline comment per diff line. This is a **substrate write** — an external, human-visible GitHub mutation — so it routes to the **harness permission layer**: surface what will be posted (the consolidated comment body) and let the harness gate the execution. The skill does not absorb that decision.
 
-`call` one comment via `gh api repos/{repo}/issues/{N}/comments` with `body`. The body lists every finding as text, each referencing its `path:line` so a reviewer can navigate to it — no inline line-targeting API is used, so no `commit_id` / `path` / `line` / `side` machinery is needed.
+`call` one comment via `gh api repos/{owner}/{repo}/issues/{N}/comments` with `body` (`{owner}` and `{repo}` are gh's repo placeholders, auto-filled from the current repo; the bare `repos/{repo}/...` form drops the owner segment and resolves wrong). The body lists every finding as text, each referencing its `path:line` so a reviewer can navigate to it — no inline line-targeting API is used, so no `commit_id` / `path` / `line` / `side` machinery is needed.
 
 Posting discipline:
 
