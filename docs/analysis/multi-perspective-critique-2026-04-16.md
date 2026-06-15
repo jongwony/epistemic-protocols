@@ -41,7 +41,7 @@
 - 강한 쪽:
   - `docs/verification.md`와 `static-checks.js`가 formal block 일관성, cross-reference, partition invariant, precedence, gate/type alignment 일부를 실제로 검사한다.
   - `anamnesis/hooks/hooks.json`와 관련 스크립트는 SessionEnd, PreCompact, SubagentStop 훅을 실제 자산으로 가진다.
-  - `docs/ci-review-pipeline.md`는 advisory-only limitation을 우회하기 위한 실제 CI 설계를 문서화한다.
+  - `docs/review-pipeline.md`는 advisory-only limitation을 우회하기 위한 실제 리뷰 파이프라인 설계를 문서화한다(원래의 CI 설계는 이후 스킬 기반 파이프라인으로 이관됨).
 - 약한 쪽:
   - `.claude/rules/architectural-principles.md`의 Session Text Composition은 프로토콜 간 전달을 구조화 데이터가 아니라 자연어 세션 문맥에 의존시킨다.
   - `prothesis/skills/frame/SKILL.md`는 `IdleNotification`, `SubagentStop`, abnormal termination ordering 같은 플랫폼 의미론을 전제하지만, 동일 파일의 Known Limitations에서 그 보장이 플랫폼별로 달라질 수 있음을 인정한다.

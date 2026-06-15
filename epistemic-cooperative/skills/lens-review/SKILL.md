@@ -114,7 +114,7 @@ Posting discipline:
 - Consolidate all surviving findings into the one comment body; defeated findings (Phase 2b) go in a clearly-labelled **refuted** section of the same comment, each with its refutation basis — recorded as already-refuted, not presented as actionable, so a human reviewer cannot mistake them for live findings.
 - Each finding line carries its `path:line`, the lens tag (the `/frame`-assigned lens name, or `[Gap: <type>]`), and the severity (Critical / Important / Suggestion).
 - Skip duplicate or near-duplicate findings.
-- Write the Markdown comment body through a file (e.g. a heredoc to a temp file) and load it with `gh api --input` / `jq --rawfile`; do not pass the Markdown body inside a double-quoted shell argument, because backticks in Markdown trigger shell command substitution. (`--input` makes `gh api` default to POST, so the comment is created, not listed.)
+- Write the Markdown comment body through a file (e.g. a heredoc to a temp file), then build the JSON request body from that file with `jq --rawfile` (so the body becomes `{"body": "<markdown>"}`) and feed that JSON to `gh api` via `--input -`; do not pass the Markdown body inside a double-quoted shell argument, because backticks in Markdown trigger shell command substitution, and do not `--input` the raw Markdown file directly because the endpoint requires a JSON object. (`--input` makes `gh api` default to POST, so the comment is created, not listed.)
 
 If the scope is a working tree (no PR), there is no PR to post to — present the findings in session text instead and note that posting requires a PR.
 

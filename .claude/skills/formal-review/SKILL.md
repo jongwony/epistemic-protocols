@@ -2,6 +2,9 @@
 name: formal-review
 description: "This skill should be used when the user asks to \"formal review\", \"formal lens review\", \"review this PR with the formal triple\", or invokes /formal-review. A fixed-lens multi-perspective PR review specialized for this repository's formally-structured protocol changes: it pins a Category Theory / Type Theory / Operational Semantics lens panel plus a gap scan over only the files changed in a PR, analyzes each lens in isolation, adversarially cross-verifies the findings, and posts the survivors as a single consolidated PR comment. Self-contained project specialization of the frame-driven /lens-review (epistemic-cooperative): it composes /frame for lens framing and /gap for the gap audit, but pins the panel here rather than letting /frame derive it. Project-local contributor tooling."
 allowed-tools: Bash, Read, Grep, Glob, Task, Skill
+skills:
+  - prothesis:frame
+  - syneidesis:gap
 ---
 
 # Formal Lens Review
@@ -120,7 +123,7 @@ Posting discipline:
 - Consolidate all surviving findings into the one comment body; defeated findings (Phase 2b) go in a clearly-labelled **refuted** section of the same comment, each with its refutation basis — recorded as already-refuted, not presented as actionable, so a human reviewer cannot mistake them for live findings.
 - Each finding line carries its `path:line`, the lens tag (`[Category Theory]` / `[Type Theory]` / `[OpSem]` / `[Gap: <type>]`), and the severity (Critical / Important / Suggestion).
 - Skip duplicate or near-duplicate findings.
-- Write the Markdown comment body through a file (e.g. a heredoc to a temp file) and load it with `gh api --input` / `jq --rawfile`; do not pass the Markdown body inside a double-quoted shell argument, because backticks in Markdown trigger shell command substitution. (`--input` makes `gh api` default to POST, so the comment is created, not listed.)
+- Write the Markdown comment body through a file (e.g. a heredoc to a temp file), then build the JSON request body from that file with `jq --rawfile` (so the body becomes `{"body": "<markdown>"}`) and feed that JSON to `gh api` via `--input -`; do not pass the Markdown body inside a double-quoted shell argument, because backticks in Markdown trigger shell command substitution, and do not `--input` the raw Markdown file directly because the endpoint requires a JSON object. (`--input` makes `gh api` default to POST, so the comment is created, not listed.)
 
 If the scope is a working tree (no PR), there is no PR to post to — present the findings in session text instead and note that posting requires a PR.
 
@@ -140,7 +143,7 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 
 Project-local specialization of the general `/lens-review` plugin skill (epistemic-cooperative). Both run the same one-pass isolated→adversarial→consolidated-comment pipeline; they differ only in lens selection:
 
-- `/formal-review` (this skill) **pins** the formal triple (category theory ∥ type theory ∥ operational semantics) plus a gap scan — the fixed panel this repository's protocol work always wants. Self-contained in the project skill layer; no plugin dependency.
+- `/formal-review` (this skill) **pins** the formal triple (category theory ∥ type theory ∥ operational semantics) plus a gap scan — the fixed panel this repository's protocol work always wants. Self-contained in the project skill layer — it composes `/frame` and `/gap`, but takes no dependency on the `/lens-review` plugin.
 - `/lens-review` (plugin) leaves the panel **frame-derived** — `/frame` selects the lenses that fit the diff. The general capability; this skill is its project-specific fixed-panel specialization.
 - `/review-loop` (plugin) is **convergence-paced** — it drives a review source and applies fixes to verdict-convergence, gating the judgment calls.
 - `/comment-review` (plugin) targets **markdown artifacts before fixation** and surfaces findings through a browser sidepanel, user-paced.
