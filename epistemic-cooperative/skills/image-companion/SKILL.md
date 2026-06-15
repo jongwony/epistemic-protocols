@@ -117,14 +117,15 @@ events file and clean up its three temp files:
 `rm -f /tmp/image_companion_${SUFFIX}.txt /tmp/image_companion_events_${SUFFIX}.jsonl /tmp/image_companion_warn_${SUFFIX}.txt`.
 Wait for the completion notification before reading output.
 
-The events file is pure JSONL. Extract the codex `agent_message` narrative verbatim with the line
-below and forward it to Step 4 — the PNG-confirmation and any in-message notes you surface there are
-read from this narrative, not regex-parsed. **If the extraction is empty, codex failed before
+The events file is pure JSONL. Extract the **final** codex `agent_message` narrative verbatim with the
+line below — codex streams progress messages before the final answer, so the line takes the last
+`agent_message` — and forward it to Step 4 — the PNG-confirmation and any in-message notes you surface
+there are read from this narrative, not regex-parsed. **If the extraction is empty, codex failed before
 answering** — read the raw events file `/tmp/image_companion_events_${SUFFIX}.jsonl` for the error
 and surface that instead of reporting a successful generation:
 
 ```bash
-jq -r 'select(.type=="item.completed" and .item.type=="agent_message") | .item.text' /tmp/image_companion_events_${SUFFIX}.jsonl
+jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' /tmp/image_companion_events_${SUFFIX}.jsonl
 ```
 
 Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation) ride the

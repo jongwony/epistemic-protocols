@@ -51,14 +51,15 @@ Report:
 - Residual uncertainty when sources contradict or coverage is incomplete
 ```
 
-Launch via `Bash(run_in_background: true, timeout: 4500000)`. `--color never` + redirecting
-**stdout only** (no `2>&1`) keeps the events file pure JSONL — the codex banner stays on stderr:
+Launch via `Bash(run_in_background: true, timeout: 4500000)`. `--color never` + splitting the
+streams (stdout to the events file, `2>` to a separate warn file, never `2>&1`) keeps the events
+file pure JSONL — the codex banner and any stderr warnings ride their own warn file:
 
 ```bash
 codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.5 \
   --config model_reasoning_effort="high" \
   --config mcp_servers.tavily.tool_timeout_sec=3600 \
-  < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl
+  < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl 2>/tmp/goal_research_warn_${SUFFIX}.txt
 ```
 
 Sandbox flag is omitted intentionally — Tavily verification requires network access, so the read-only sandbox used by `review-loop`'s codex source does not apply here.
@@ -77,16 +78,21 @@ budget with margin for additional searches and reasoning within the session.
 Wait for the background task completion notification — do not poll or sleep.
 
 When the notification arrives:
-1. The events file is pure JSONL (`--json` on stdout). Extract the codex `agent_message` narrative verbatim with the line below — that narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty), so **forward it verbatim to the presentation step; do NOT regex-parse it**. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/goal_research_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that instead of proceeding blank.
+1. The events file is pure JSONL (`--json` on stdout). Extract the **final** codex `agent_message` narrative verbatim with the line below — high-reasoning codex streams progress messages first, so the line takes the last `agent_message` — and since that narrative **is** the research trace/answer (findings with cited sources, verification status, residual uncertainty), **forward it verbatim to the presentation step; do NOT regex-parse it**. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/goal_research_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that instead of proceeding blank.
 
    ```bash
-   jq -r 'select(.type=="item.completed" and .item.type=="agent_message") | .item.text' /tmp/goal_research_events_${SUFFIX}.jsonl
+   jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' /tmp/goal_research_events_${SUFFIX}.jsonl
    ```
 
    Reasoning items appear only if codex emits them (config-gated) — do not force them on.
-2. Clean up the temp prompt file and the event stream (after the narrative is forwarded / any failure surfaced):
+
+   Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation) ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to catch what the narrative does not carry, and surface any hits alongside the trace:
    ```bash
-   rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl
+   grep -iE 'invalid_grant|deprecat|--full-auto|warn' /tmp/goal_research_warn_${SUFFIX}.txt || true
+   ```
+2. Clean up the temp prompt file, the event stream, and the warn file (after the narrative is forwarded / any failure surfaced):
+   ```bash
+   rm -f /tmp/goal_research_${SUFFIX}.txt /tmp/goal_research_events_${SUFFIX}.jsonl /tmp/goal_research_warn_${SUFFIX}.txt
    ```
 
 ## Phase 4: Output

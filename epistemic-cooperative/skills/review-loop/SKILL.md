@@ -134,16 +134,22 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
    Run the diff command in this repo to see exactly what changed — the diff is not inlined.
    ```
    Ask for findings as `[severity] file:line — description` and a closing line `VERDICT: approve | needs-attention`.
-2. Launch via `Bash(run_in_background: true, timeout: 300000)`. `--color never` + redirecting **stdout only** (no `2>&1`) keeps the events file pure JSONL — the codex banner stays on stderr. `--cd {repo_root}` points codex's own git/Read at the repo so it re-derives the diff against the orchestrator-supplied base SHA; `--sandbox read-only` is kept because `git diff` is a local read needing no network. If codex's git cannot resolve that base SHA the extraction comes back empty — the step-3 "empty extraction = codex failed" guard surfaces it:
+2. Launch via `Bash(run_in_background: true, timeout: 300000)`. `--color never` + splitting the streams (stdout to the events file, `2>` to a separate warn file, never `2>&1`) keeps the events file pure JSONL — the codex banner and any stderr warnings ride their own warn file. `--cd {repo_root}` points codex's own git/Read at the repo so it re-derives the diff against the orchestrator-supplied base SHA; `--sandbox read-only` is kept because `git diff` is a local read needing no network. If codex's git cannot resolve that base SHA the extraction comes back empty — the step-3 "empty extraction = codex failed" guard surfaces it:
    ```bash
-   codex exec --ephemeral --json --color never --skip-git-repo-check --cd {repo_root} -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/review_loop_codex_${SUFFIX}.txt > /tmp/review_loop_codex_events_${SUFFIX}.jsonl
+   codex exec --ephemeral --json --color never --skip-git-repo-check --cd {repo_root} -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/review_loop_codex_${SUFFIX}.txt > /tmp/review_loop_codex_events_${SUFFIX}.jsonl 2>/tmp/review_loop_codex_warn_${SUFFIX}.txt
    ```
-3. Collect on the completion notification — do not poll or sleep. The events file is pure JSONL; extract the codex `agent_message` narrative verbatim with the line below, then **forward it verbatim to the loop — do NOT regex-parse it into findings/verdict**: the consuming agent (an LLM) reads the `[severity] file:line — description` findings and the closing `VERDICT:` line directly from the narrative. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/review_loop_codex_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that as needs-attention; never converge on a blank.
+3. Collect on the completion notification — do not poll or sleep. The events file is pure JSONL; extract the **final** codex `agent_message` narrative verbatim with the line below — high-reasoning codex streams progress messages first, so the line takes the last `agent_message` — then **forward it verbatim to the loop — do NOT regex-parse it into findings/verdict**: the consuming agent (an LLM) reads the `[severity] file:line — description` findings and the closing `VERDICT:` line directly from the narrative. **If the extraction comes back empty, codex failed before answering** (auth / timeout / crash) — read the raw events file `/tmp/review_loop_codex_events_${SUFFIX}.jsonl` for the `turn.failed` / `error` events and surface that as needs-attention; never converge on a blank.
 
    ```bash
-   jq -r 'select(.type=="item.completed" and .item.type=="agent_message") | .item.text' /tmp/review_loop_codex_events_${SUFFIX}.jsonl
+   jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' /tmp/review_loop_codex_events_${SUFFIX}.jsonl
    ```
-4. Clean up both temp files each round (`rm -f /tmp/review_loop_codex_${SUFFIX}.txt /tmp/review_loop_codex_events_${SUFFIX}.jsonl`) to prevent `/tmp` accumulation across rounds.
+
+   Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation) ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to catch what the narrative does not carry, and surface any hits alongside the findings:
+
+   ```bash
+   grep -iE 'invalid_grant|deprecat|--full-auto|warn' /tmp/review_loop_codex_warn_${SUFFIX}.txt || true
+   ```
+4. Clean up all three temp files each round (`rm -f /tmp/review_loop_codex_${SUFFIX}.txt /tmp/review_loop_codex_events_${SUFFIX}.jsonl /tmp/review_loop_codex_warn_${SUFFIX}.txt`) to prevent `/tmp` accumulation across rounds.
 
 ## Convergence
 
