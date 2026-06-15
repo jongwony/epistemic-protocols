@@ -43,7 +43,7 @@
 
 | 용도 | Endpoint | 필수 필드 |
 |------|----------|-----------|
-| 통합 코멘트 | `issues/{number}/comments` | `body` |
+| 통합 코멘트 | `repos/{owner}/{repo}/issues/{number}/comments` | `body` |
 
 ### 게시 규율
 

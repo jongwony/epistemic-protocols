@@ -56,13 +56,13 @@ The skill's identity is the fixed lens panel applied once over a PR diff and pos
 1. PR number given as `scope`: scope = PR `{N}`
 2. No PR argument: `gh pr view --json number 2>/dev/null` to detect a current-branch PR; if found, scope = that PR
 3. No PR: scope = working tree
-4. No changes anywhere: report and stop (nothing to review)
+4. No changes anywhere — check with `git status --porcelain` (empty output), not `git diff HEAD`, so an untracked-only working tree is not mistaken for "no changes": report and stop (nothing to review)
 
 **Free-exit affordance (declared once).** Announce here, before the review begins: *"You can end this review at any time by saying so; I will stop and report what has been gathered."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later phases.
 
 ## Phase 1: Diff Preparation
 
-Fetch the diff for the resolved scope with your tools — `gh pr diff {N}` (PR scope) or `git diff HEAD` (working tree). The tool resolves the current PR/tree directly, so the diff is the single live source for both file fate and line-level evidence.
+Fetch the diff for the resolved scope with your tools — `gh pr diff {N}` (PR scope) or `git diff HEAD` (working tree). The tool resolves the current PR/tree directly, so the diff is the single live source for both file fate and line-level evidence. For a working-tree scope, `git diff HEAD` omits untracked (new, never-added) files; detect them with `git status --porcelain` and read each untracked file's content as added (`new file`) lines so an untracked-only change set is reviewed rather than silently skipped.
 
 Read **file fate** directly from the diff headers — this is authoritative:
 - `new file mode` → **Added**: created by this change; the body begins `--- /dev/null` / `+++ b/<path>` and the `+` lines are the file's initial content.
@@ -96,7 +96,7 @@ The diff headers are the authoritative source for file fate and the hunks carry 
 - **Severity** — Critical / Important / Suggestion
 - **Evidence-grounded rationale** — reference the actual changed code; confidence ≥ 80% (drop lower-confidence findings)
 
-**2b — Adversarial cross-verification.** Once the isolated findings are collected, run a single adversarial pass over the aggregate: each finding is challenged against the other lenses and against the diff evidence — does it survive a refutation attempt, or is it defeated (hallucinated, stale against the actual diff, context-inappropriate, or subsumed by another finding)? Substrate realization: a refutation pass — the main session, a dedicated adversarial subagent, or an independent model — that tries to refute each finding and records survival or defeat with cited basis. **Surviving** findings proceed to Phase 3; **defeated** findings are dropped from posting and listed in the Phase 4 summary with their refutation basis (a relay drop with cited basis, never a silent discard). This is a single verification pass, not a convergence loop — lens-review stays one-pass.
+**2b — Adversarial cross-verification.** Once the isolated findings are collected, run a single adversarial pass over the aggregate: each finding is challenged against the other lenses and against the diff evidence — does it survive a refutation attempt, or is it defeated (hallucinated, stale against the actual diff, context-inappropriate, or subsumed by another finding)? Substrate realization: a refutation pass — the main session, a dedicated adversarial subagent, or an independent model — that tries to refute each finding and records survival or defeat with cited basis. **Surviving** findings proceed to Phase 3; **defeated** findings do not proceed as surviving findings — they are recorded in the Phase 4 consolidated comment as refuted, with their refutation basis (a relay drop with cited basis, never a silent discard). This is a single verification pass, not a convergence loop — lens-review stays one-pass.
 
 If the changes are trivial (e.g. version bumps only), state that briefly and skip the full lens sweep and its adversarial pass.
 
@@ -114,7 +114,7 @@ Post the findings back to the PR as a **single consolidated comment** — one co
 
 Posting discipline:
 
-- Consolidate all surviving findings into the one comment body; defeated findings (Phase 2b) are listed there too with their refutation basis.
+- Consolidate all surviving findings into the one comment body; defeated findings (Phase 2b) go in a clearly-labelled **refuted** section of the same comment, each with its refutation basis — recorded as already-refuted, not presented as actionable, so a human reviewer cannot mistake them for live findings.
 - Each finding line carries its `path:line`, the lens tag (`[Category Theory]` / `[Type Theory]` / `[OpSem]` / `[Gap: <type>]`), and the severity (Critical / Important / Suggestion).
 - Skip duplicate or near-duplicate findings.
 - Write the Markdown comment body through a file (e.g. a heredoc to a temp file) and load it with `gh api --input` / `jq --rawfile`; do not pass the Markdown body inside a double-quoted shell argument, because backticks in Markdown trigger shell command substitution.
