@@ -21,7 +21,9 @@
 /lens-review [scope?]
   Phase 0  : scope 감지 (PR 번호 | 현재 브랜치 PR | 워킹 트리) + free-exit 고지 — SHA 핀닝 없음, 도구가 라이브로 fetch
   Phase 1  : diff 준비 — diff 라이브 fetch(gh pr diff {N} | git diff HEAD); 파일 fate(A/M/D/R)를 diff 헤더에서 판독 + diff 읽기 규약 명시
-  Phase 2  : 고정 렌즈 리뷰 — 변경 파일만, /frame(Category Theory ∥ Type Theory ∥ OpSem) + /gap(Procedural/Consideration/Assumption/Alternative)
+  Phase 2  : 고정 렌즈 리뷰 (격리 → 적대) — /frame이 렌즈 형성(Category Theory ∥ Type Theory ∥ OpSem) + /gap; substrate는 스킬이 직접 기술(/conduct 우회 아님)
+              2a 격리 분석 — 각 렌즈가 서로를 보지 않고 독립 분석(independence-before-contamination)
+              2b 적대적 교차검증 — 각 finding을 반박; 생존 → Phase 3, 패배 → Phase 4 summary(relay drop w/ basis)
   Phase 3  : 방향 오류 가드(verify) — 리뷰 텍스트 vs diff 헤더 fate 교차 검증; Added인데 deleted로 서술 → 경고 augment (relay)
   Phase 4  : 코멘트 게시 — diff 내 file:line을 참조하는 inline 코멘트 + summary 코멘트; substrate write → harness permission
 ```
@@ -32,6 +34,7 @@
 |------|------|------|
 | 파일 fate 판정 | diff 헤더(`new file mode` / `deleted file mode` / `rename from·to`)에서 직접 판독 | diff 방향 오독(Added를 deleted로 읽는 inversion)을 Phase 3에서 교차 검증하기 위한 authoritative source — SHA 핀닝 없이 라이브 diff만으로 충분 |
 | 렌즈 패널 | 고정 (Category Theory / Type Theory / Operational Semantics + Gap) | 정의 시점에 고정; 런타임 파라미터 아님 |
+| 관점 배열 | 격리 분석 → 적대적 교차검증; 스킬이 substrate를 직접 기술 | frame은 관점 형성만(object-supplier 유지), 적대적 격리 검증은 스킬 내부에 기록 — /conduct로 배열을 위임하지 않음. 병렬 관점의 plausible-but-unchallenged 약점을 단일 적대 패스로 차단 |
 | confidence 임계 | ≥ 80% | 저신뢰 발견 사항 배제, trivial 변경(버전 범프 등)은 간략히 명시하고 skip |
 | 코멘트 게시 | `gh api repos/.../pulls/{N}/comments` (inline) + `gh api repos/.../issues/{N}/comments` (summary) | 외부·사람이 보는 GitHub mutation = substrate write → harness permission이 게이트 |
 | Markdown body 전달 | heredoc → 임시 파일 → `gh api --input` / `jq --rawfile` | 백틱이 셸 command substitution을 유발하므로 double-quote 인자 직접 전달 금지 |

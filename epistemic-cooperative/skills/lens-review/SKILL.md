@@ -1,6 +1,6 @@
 ---
 name: lens-review
-description: "A fixed-lens multi-perspective PR review that posts findings as inline PR comments. Applies a fixed perspective panel — Category Theory (morphism coherence, composition, functor consistency), Type Theory (signature soundness, variance, type safety), Operational Semantics (evaluation order, phase transitions, state consistency) — plus a gap scan, over only the files changed in a PR, then posts inline + summary comments. Composes prothesis:frame for lens framing and syneidesis:gap for the gap audit. User-invoked via /lens-review. Sibling of /review-loop (which applies fixes to convergence) and /comment-review (markdown artifacts)."
+description: "A fixed-lens multi-perspective PR review that posts findings as inline PR comments. Applies a fixed perspective panel — Category Theory (morphism coherence, composition, functor consistency), Type Theory (signature soundness, variance, type safety), Operational Semantics (evaluation order, phase transitions, state consistency) — plus a gap scan, over only the files changed in a PR. Each lens analyzes in isolation (independence-before-contamination), then the findings are adversarially cross-verified before surviving ones are posted as inline + summary comments. Composes prothesis:frame for lens framing and syneidesis:gap for the gap audit; the isolated-then-adversarial substrate is described in the skill, not routed to /conduct. User-invoked via /lens-review. Sibling of /review-loop (which applies fixes to convergence) and /comment-review (markdown artifacts)."
 skills:
   - prothesis:frame
   - syneidesis:gap
@@ -27,8 +27,9 @@ When `scope` is omitted, Phase 0 detects it (current-branch PR, else working tre
 /lens-review [scope?]
   Phase 0  : scope detect (PR number | current-branch PR | working tree) + free-exit — no SHA pinning, tools fetch live
   Phase 1  : diff prep   — fetch diff live (gh pr diff {N} | git diff HEAD); read file fate (A/M/D/R) from diff headers; state diff-reading conventions
-  Phase 2  : fixed-lens review — changed files only, through /frame (Category Theory ∥ Type Theory ∥ OpSem) + /gap (Procedural/Consideration/Assumption/Alternative)
-                            each finding: file:line + lens tag + severity + evidence-grounded rationale, confidence ≥ 80%
+  Phase 2  : fixed-lens review (isolated → adversarial) — /frame forms lenses (Category Theory ∥ Type Theory ∥ OpSem) + /gap; substrate described in-skill (not /conduct)
+              2a isolated per-lens analysis (independence) — each finding: file:line + lens tag + severity + evidence-grounded rationale, confidence ≥ 80%
+              2b adversarial cross-verification — refute each finding; survive → Phase 3, defeated → Phase 4 summary (relay drop w/ basis)
   Phase 3  : direction-error guard (verify) — cross-check review text vs diff-header fate; Added-but-described-as-deleted → warning augment (relay)
   Phase 4  : post comments — inline PR review comments (file:line in diff) + summary comment; substrate write → harness permission
   free-exit : user may end the review at any time (declared once in Phase 0)
@@ -73,9 +74,11 @@ Read **file fate** directly from the diff headers — this is authoritative:
 
 The diff headers are the authoritative source for file fate and the hunks carry the line-level evidence; both feed Phase 2, and the fate read here is re-used by the Phase 3 direction-error guard.
 
-## Phase 2: Fixed-Lens Review
+## Phase 2: Fixed-Lens Review (isolated analysis → adversarial cross-verification)
 
-Review **only the changed files** from the fixed perspective panel. Call `/frame` (prothesis) to frame the three lenses, and `/gap` (syneidesis) for the gap audit; the lenses and gap dimensions are fixed at definition time:
+`/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here, in the skill, not routed to `/conduct`. Review **only the changed files**.
+
+**Lens framing.** Call `/frame` (prothesis) to frame the three fixed lenses, and `/gap` (syneidesis) for the gap audit; the lenses and gap dimensions are fixed at definition time:
 
 - **Category Theory** — morphism coherence, composition laws, functor consistency
 - **Type Theory** — type-signature soundness, variance, type safety
@@ -86,14 +89,16 @@ Review **only the changed files** from the fixed perspective panel. Call `/frame
   - **Assumption** — implicit assumptions needing explicit statement
   - **Alternative** — unexplored approaches
 
-Each finding carries:
+**2a — Isolated per-lens analysis (independence-before-contamination).** Analyze the changed files through each lens in **isolation**: every lens forms its findings without seeing the other lenses' findings, so a blind spot or bias in one lens cannot contaminate the others. Substrate realization (recorded here, executed by the substrate): run each lens as an isolated analysis — e.g. an isolated subagent per lens, briefed only with its single lens plus the diff — and collect the per-lens findings independently. Each finding carries:
 
 - **File path + line number** drawn from the diff (the line must appear in the diff)
 - **Tag** — `[Category Theory]`, `[Type Theory]`, `[OpSem]`, or `[Gap: <type>]`
 - **Severity** — Critical / Important / Suggestion
 - **Evidence-grounded rationale** — reference the actual changed code; confidence ≥ 80% (drop lower-confidence findings)
 
-If the changes are trivial (e.g. version bumps only), state that briefly and skip the full lens sweep.
+**2b — Adversarial cross-verification.** Once the isolated findings are collected, run a single adversarial pass over the aggregate: each finding is challenged against the other lenses and against the diff evidence — does it survive a refutation attempt, or is it defeated (hallucinated, stale against the actual diff, context-inappropriate, or subsumed by another finding)? Substrate realization: a refutation pass — the main session, a dedicated adversarial subagent, or an independent model — that tries to refute each finding and records survival or defeat with cited basis. **Surviving** findings proceed to Phase 3; **defeated** findings are dropped from posting and listed in the Phase 4 summary with their refutation basis (a relay drop with cited basis, never a silent discard). This is a single verification pass, not a convergence loop — lens-review stays one-pass.
+
+If the changes are trivial (e.g. version bumps only), state that briefly and skip the full lens sweep and its adversarial pass.
 
 ## Phase 3: Direction-Error Guard (Verify)
 
@@ -124,12 +129,13 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 ## Rules
 
 1. **Changed files only** — review the files in the Phase 1 diff and nothing else; the diff headers are authoritative for file fate, the hunks for line-level evidence.
-2. **Confidence ≥ 80%** — only report findings at or above the confidence threshold; trivial changes (e.g. version bumps) are stated briefly and skipped rather than padded with low-value findings.
-3. **Verify before post** — run the Phase 3 direction-error guard against the diff-header fate before any comment is posted; an Added-but-described-as-deleted file augments the review with a direction-misread warning.
-4. **Substrate writes route to harness permission** — posting PR comments is an external, human-visible GitHub mutation; surface what will be posted and let the harness gate the execution. The skill does not absorb that substrate decision.
-5. **Context-question separation at gates** — present all analysis and evidence as text before any gate; a gate carries only the question and the options with their differential implications.
-6. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the user-facing surface.
-7. **Only post findings whose lines appear in the diff** — out-of-diff findings go in the summary comment; preserve lens tags and severity on every posted finding; skip duplicates.
+2. **Isolated lenses, then adversarial cross-verification** — each lens forms its findings in isolation (independence-before-contamination); the aggregated findings then pass a single adversarial refutation pass before posting. Surviving findings proceed; defeated findings drop to the summary with cited basis. The isolated-then-adversarial substrate is described in this skill directly, not routed to `/conduct`.
+3. **Confidence ≥ 80%** — only report findings at or above the confidence threshold; trivial changes (e.g. version bumps) are stated briefly and skipped rather than padded with low-value findings.
+4. **Verify before post** — run the Phase 3 direction-error guard against the diff-header fate before any comment is posted; an Added-but-described-as-deleted file augments the review with a direction-misread warning.
+5. **Substrate writes route to harness permission** — posting PR comments is an external, human-visible GitHub mutation; surface what will be posted and let the harness gate the execution. The skill does not absorb that substrate decision.
+6. **Context-question separation at gates** — present all analysis and evidence as text before any gate; a gate carries only the question and the options with their differential implications.
+7. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the user-facing surface.
+8. **Only post findings whose lines appear in the diff** — out-of-diff findings go in the summary comment; preserve lens tags and severity on every posted finding; skip duplicates.
 
 ## Composition Lineage
 
