@@ -43,7 +43,7 @@
 
 | 용도 | Endpoint | 필수 필드 |
 |------|----------|-----------|
-| Inline review comment | `pulls/{number}/comments` | `body`, `path`, `commit_id`, `line` |
+| Inline review comment | `pulls/{number}/comments` | `body`, `path`, `commit_id`, `line`, `side` (`LEFT` for `-` 삭제 라인, `RIGHT` for 추가/문맥 라인 — 기본값 `RIGHT`) |
 | Summary comment | `issues/{number}/comments` | `body` |
 
 ### 게시 규율

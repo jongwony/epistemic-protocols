@@ -112,7 +112,7 @@ Post the findings back to the PR. This is a **substrate write** — an external,
 
 For each finding that references a file:line **present in the diff**, `call` an inline PR review comment:
 
-- `gh api repos/{repo}/pulls/{N}/comments` with `body`, `path`, `commit_id` (resolve the head SHA live at posting time via `gh pr view {N} --json headRefOid`), and `line`.
+- `gh api repos/{repo}/pulls/{N}/comments` with `body`, `path`, `commit_id` (resolve the head SHA live at posting time via `gh pr view {N} --json headRefOid`), `line`, and `side` — set `side` to `LEFT` for a finding on a deleted (`-`) line and `RIGHT` for an added or context line. GitHub defaults `side` to `RIGHT`, so a finding on a deleted line mis-targets or fails validation unless `side: LEFT` is set; derive it from the sign of the line the finding references.
 
 Then `call` a final summary comment via `gh api repos/{repo}/issues/{N}/comments` with `body`.
 
