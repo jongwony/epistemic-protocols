@@ -53,7 +53,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
 - [ ] `docs/verification.md` — what each of the 15 static checks enforces
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
-- [ ] `docs/ci-review-pipeline.md` — the three GitHub Actions workflows
+- [ ] `docs/review-pipeline.md` — the skill-based review flow (`/review-loop` for code review, `/lens-review` for epistemic review)
 
 ### Protocols to Use While Contributing
 - [ ] `/verify` — run before every commit; 15 static checks (json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync, gate-type-soundness)
@@ -75,7 +75,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 5. **Test** — `node --test scripts/package.test.js`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)
 7. **Ship** — [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) for the one-shot flow if you have that external plugin installed, or fall back to plain `git push -u origin <branch>` + `gh pr create`; PR body language is Korean (hook-enforced)
-8. **Address review** — `claude-code-review.yml` and `claude-epistemic-review.yml` post automated reviews; use `/gh-address-comments` to respond
+8. **Address review** — run `/lens-review` for the epistemic multi-perspective review (posts inline PR comments) and `/review-loop` for code review; use `/gh-address-comments` to respond to posted comments
 9. **Merge** — the maintainer merges manually via web after final review
 
 ## Conventions
