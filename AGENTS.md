@@ -8,9 +8,9 @@ Epistemic Protocols is a domain-free metalanguage of structured types and morphi
 
 ## Settled Directions
 
-Citable registry of conventions whose resolution direction is already constituted. The A5 option-set-level relay test (`.claude/rules/axioms.md`) cites a clause here to collapse settled-direction option-set entropy — a finding whose direction a clause below already determines is presented as relay, not gated. Maintained by `/steer`: a direction recurringly constituted the same way graduates into a clause here.
+Citable registry of conventions whose resolution direction is already constituted. The option-set relay test (in `.claude/rules/axioms.md`) cites a clause here to collapse settled-direction option-set entropy — a finding whose direction a clause below already determines is presented as relay, not gated. Maintained by `/steer`: a direction recurringly constituted the same way graduates into a clause here.
 
-- **Settled direction collapses the ask** (reversible forks only): when a reversible fork's direction is already determined by stated project goals, an established sibling convention, or a declared calibration, the option-set is settled — proceed or relay rather than re-asking the question those sources already answer. Basis: recurring same-direction constitution in calibration practice; first inscribed with the A5 settled-direction relay test (#538).
+- **Settled direction collapses the ask** (reversible forks only): when a reversible fork's direction is already determined by stated project goals, an established sibling convention, or a declared calibration, the option-set is settled — proceed or relay rather than re-asking the question those sources already answer. Basis: recurring same-direction constitution in calibration practice; first inscribed with the settled-direction relay test (#538).
 
 ## Project Overview
 
