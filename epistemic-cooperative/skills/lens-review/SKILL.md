@@ -25,11 +25,11 @@ When `scope` is omitted, Phase 0 detects it (current-branch PR, else working tre
 
 ```
 /lens-review [scope?]
-  Phase 0  : scope detect (PR number → gh pr diff | current-branch PR | working tree) + capture base SHA + changed files + free-exit
-  Phase 1  : diff prep   — name-status map (A/M/D/R, authoritative file fate) ∥ unified diff; state diff-reading conventions
+  Phase 0  : scope detect (PR number | current-branch PR | working tree) + free-exit — no SHA pinning, tools fetch live
+  Phase 1  : diff prep   — fetch diff live (gh pr diff {N} | git diff HEAD); read file fate (A/M/D/R) from diff headers; state diff-reading conventions
   Phase 2  : fixed-lens review — changed files only, through /frame (Category Theory ∥ Type Theory ∥ OpSem) + /gap (Procedural/Consideration/Assumption/Alternative)
                             each finding: file:line + lens tag + severity + evidence-grounded rationale, confidence ≥ 80%
-  Phase 3  : direction-error guard (verify) — cross-check review text vs name-status map; Added-but-described-as-deleted → warning augment (relay)
+  Phase 3  : direction-error guard (verify) — cross-check review text vs diff-header fate; Added-but-described-as-deleted → warning augment (relay)
   Phase 4  : post comments — inline PR review comments (file:line in diff) + summary comment; substrate write → harness permission
   free-exit : user may end the review at any time (declared once in Phase 0)
 ```
@@ -50,33 +50,28 @@ The skill's identity is the fixed lens panel applied once over a PR diff and pos
 
 ## Phase 0: Scope Detection + Free-Exit
 
-**Scope detection**:
+**Scope detection** — the skill runs interactively on the branch, so resolve the scope to a target the tools can fetch live; no base/head SHA pinning is needed (that was a CI-era requirement for headless reproducibility):
 
-1. PR number given as `scope`: scope = `gh pr diff {N}`; resolve `{N}` and the head SHA via `gh pr view {N} --json number,headRefOid,baseRefOid`
-2. No PR argument: `gh pr view --json number,headRefOid,baseRefOid,changedFiles 2>/dev/null` to detect a current-branch PR; if found, scope = its diff
-3. No PR: scope = working tree (`git diff HEAD`)
+1. PR number given as `scope`: scope = PR `{N}`
+2. No PR argument: `gh pr view --json number 2>/dev/null` to detect a current-branch PR; if found, scope = that PR
+3. No PR: scope = working tree
 4. No changes anywhere: report and stop (nothing to review)
-
-Capture the **resolved base SHA** (the PR base commit the diff is taken against) and the **changed-files list** — these anchor Phase 1's name-status map and the inline-comment commit_id in Phase 4.
 
 **Free-exit affordance (declared once).** Announce here, before the review begins: *"You can end this review at any time by saying so; I will stop and report what has been gathered."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later phases.
 
 ## Phase 1: Diff Preparation
 
-Produce two artifacts over the resolved scope:
+Fetch the diff for the resolved scope with your tools — `gh pr diff {N}` (PR scope) or `git diff HEAD` (working tree). The tool resolves the current PR/tree directly, so the diff is the single live source for both file fate and line-level evidence.
 
-1. **Name-status map** — `git diff --name-status {base}...HEAD` (PR scope; working tree → `git diff --name-status HEAD`). This map is **authoritative for file fate**:
-   - `A <path>` — Added: created by this PR; does NOT exist on the base branch
-   - `M <path>` — Modified: exists on both base and head; the diff shows the line-level changes
-   - `D <path>` — Deleted: exists on the base branch, removed by this PR
-   - `R<score> <old> <new>` — Renamed (old path replaced by new path)
+Read **file fate** directly from the diff headers — this is authoritative:
+- `new file mode` → **Added**: created by this change; the body begins `--- /dev/null` / `+++ b/<path>` and the `+` lines are the file's initial content.
+- `deleted file mode` → **Deleted**: removed by this change; the body begins `--- a/<path>` / `+++ /dev/null` and the `-` lines are the prior content removed.
+- `rename from <old>` / `rename to <new>` → **Renamed**.
+- otherwise → **Modified**.
 
-2. **Unified diff** — `gh pr diff {N}` (PR scope) or `git diff HEAD` (working tree). State the **diff-reading conventions** explicitly before reviewing:
-   - Lines starting with `+` are added by this PR; lines starting with `-` are removed; a leading space is unchanged context.
-   - For files marked `A` in the status map, the diff begins with `--- /dev/null` and `+++ b/<path>`; the `+` lines are the file's initial content.
-   - For files marked `D` in the status map, the diff begins with `--- a/<path>` and `+++ /dev/null`; the `-` lines are the file's prior content removed by this PR.
+**Diff-reading conventions**: lines starting with `+` are added; lines starting with `-` are removed; a leading space is unchanged context.
 
-The name-status map is the authoritative source for file fate; the unified diff carries the line-level evidence. Both feed Phase 2, and the map is re-used by the Phase 3 direction-error guard.
+The diff headers are the authoritative source for file fate and the hunks carry the line-level evidence; both feed Phase 2, and the fate read here is re-used by the Phase 3 direction-error guard.
 
 ## Phase 2: Fixed-Lens Review
 
@@ -102,9 +97,9 @@ If the changes are trivial (e.g. version bumps only), state that briefly and ski
 
 ## Phase 3: Direction-Error Guard (Verify)
 
-Before posting, cross-check the review text against the Phase 1 name-status map. For each file marked **Added** (`A`) in the map, if the review describes that file as deleted, that is a likely diff-direction inversion — the reviewer read the diff backwards. Surface a warning that augments the review (it does not replace the findings): a direction-misread notice listing each Added-but-described-as-deleted file, advising verification against the name-status map before treating those findings as legitimate.
+Before posting, cross-check the review text against the file fate read from the diff headers in Phase 1. For each **Added** file, if the review describes it as deleted, that is a likely diff-direction inversion — the reviewer read the diff backwards. Surface a warning that augments the review (it does not replace the findings): a direction-misread notice listing each Added-but-described-as-deleted file, advising verification against the diff headers before treating those findings as legitimate.
 
-This is a relay verify step — a deterministic cross-check of the review text against the authoritative fate map, presented and proceeded through; it does not gate.
+This is a relay verify step — a deterministic cross-check of the review text against the authoritative diff-header fate, presented and proceeded through; it does not gate.
 
 ## Phase 4: Post Comments
 
@@ -112,7 +107,7 @@ Post the findings back to the PR. This is a **substrate write** — an external,
 
 For each finding that references a file:line **present in the diff**, `call` an inline PR review comment:
 
-- `gh api repos/{repo}/pulls/{N}/comments` with `body`, `path`, `commit_id` (the resolved head SHA), and `line`.
+- `gh api repos/{repo}/pulls/{N}/comments` with `body`, `path`, `commit_id` (resolve the head SHA live at posting time via `gh pr view {N} --json headRefOid`), and `line`.
 
 Then `call` a final summary comment via `gh api repos/{repo}/issues/{N}/comments` with `body`.
 
@@ -128,9 +123,9 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 
 ## Rules
 
-1. **Changed files only** — review the files in the Phase 1 name-status map and nothing else; the name-status map is authoritative for file fate, the unified diff for line-level evidence.
+1. **Changed files only** — review the files in the Phase 1 diff and nothing else; the diff headers are authoritative for file fate, the hunks for line-level evidence.
 2. **Confidence ≥ 80%** — only report findings at or above the confidence threshold; trivial changes (e.g. version bumps) are stated briefly and skipped rather than padded with low-value findings.
-3. **Verify before post** — run the Phase 3 direction-error guard against the name-status map before any comment is posted; an Added-but-described-as-deleted file augments the review with a direction-misread warning.
+3. **Verify before post** — run the Phase 3 direction-error guard against the diff-header fate before any comment is posted; an Added-but-described-as-deleted file augments the review with a direction-misread warning.
 4. **Substrate writes route to harness permission** — posting PR comments is an external, human-visible GitHub mutation; surface what will be posted and let the harness gate the execution. The skill does not absorb that substrate decision.
 5. **Context-question separation at gates** — present all analysis and evidence as text before any gate; a gate carries only the question and the options with their differential implications.
 6. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the user-facing surface.

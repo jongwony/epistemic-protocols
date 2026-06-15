@@ -19,10 +19,10 @@
 
 ```
 /lens-review [scope?]
-  Phase 0  : scope 감지 (PR 번호 | 현재 브랜치 PR | 워킹 트리) + base SHA / 변경 파일 캡처 + free-exit 고지
-  Phase 1  : diff 준비 — name-status map(A/M/D/R, 파일 fate의 authoritative source) ∥ unified diff + diff 읽기 규약 명시
+  Phase 0  : scope 감지 (PR 번호 | 현재 브랜치 PR | 워킹 트리) + free-exit 고지 — SHA 핀닝 없음, 도구가 라이브로 fetch
+  Phase 1  : diff 준비 — diff 라이브 fetch(gh pr diff {N} | git diff HEAD); 파일 fate(A/M/D/R)를 diff 헤더에서 판독 + diff 읽기 규약 명시
   Phase 2  : 고정 렌즈 리뷰 — 변경 파일만, /frame(Category Theory ∥ Type Theory ∥ OpSem) + /gap(Procedural/Consideration/Assumption/Alternative)
-  Phase 3  : 방향 오류 가드(verify) — 리뷰 텍스트 vs name-status map 교차 검증; Added인데 deleted로 서술 → 경고 augment (relay)
+  Phase 3  : 방향 오류 가드(verify) — 리뷰 텍스트 vs diff 헤더 fate 교차 검증; Added인데 deleted로 서술 → 경고 augment (relay)
   Phase 4  : 코멘트 게시 — diff 내 file:line을 참조하는 inline 코멘트 + summary 코멘트; substrate write → harness permission
 ```
 
@@ -30,7 +30,7 @@
 
 | 항목 | 선택 | 근거 |
 |------|------|------|
-| 파일 fate 판정 | `git diff --name-status base...HEAD` (A/M/D/R) | diff 방향 오독(Added를 deleted로 읽는 inversion)을 Phase 3에서 교차 검증하기 위한 authoritative source |
+| 파일 fate 판정 | diff 헤더(`new file mode` / `deleted file mode` / `rename from·to`)에서 직접 판독 | diff 방향 오독(Added를 deleted로 읽는 inversion)을 Phase 3에서 교차 검증하기 위한 authoritative source — SHA 핀닝 없이 라이브 diff만으로 충분 |
 | 렌즈 패널 | 고정 (Category Theory / Type Theory / Operational Semantics + Gap) | 정의 시점에 고정; 런타임 파라미터 아님 |
 | confidence 임계 | ≥ 80% | 저신뢰 발견 사항 배제, trivial 변경(버전 범프 등)은 간략히 명시하고 skip |
 | 코멘트 게시 | `gh api repos/.../pulls/{N}/comments` (inline) + `gh api repos/.../issues/{N}/comments` (summary) | 외부·사람이 보는 GitHub mutation = substrate write → harness permission이 게이트 |
