@@ -54,7 +54,7 @@ Narrowest seam contract: `ResolvedIntentIR × GuideSnapshot -> VendorPromptDraft
 | `GuideSnapshot` | The fetched reference text plus staleness metadata: `{ url, retrieved_at, visible_updated_at|version, content_hash, canonicality_score }`. |
 | `RelaySlot` | A contract slot determined by the reference plus the user's stated intent. Forge auto-fills it with a cited basis. |
 | `ConstitutionSlot` | A contract slot requiring the user's judgment. Forge fills it with a proposed default and explicitly flags it for recognition. |
-| `VendorPromptDraft` | The adapter's projection of the IR through the reference schema, with provenance, freshness, and a `stale-guide` flag when the staleness guard did not pass. |
+| `VendorPromptDraft` | The adapter's projection of the IR through the reference schema, with provenance, freshness, a `stale-guide` flag when the staleness guard did not pass, and a `transport-unsafe` flag when the projected payload carries shell-active tokens or secret-substitution patterns hazardous across a shell-carrier handoff. |
 | `InitialPrompt` | The endpoint artifact: an initial prompt for a follow-up session or tool. Its form is adapter-determined (a Higgsfield video prompt; a Codex `/goal …` string). |
 
 ## Phase 0: Bind Reference and Intent
@@ -93,7 +93,9 @@ Core output stops here at `ResolvedIntentIR` plus the partitioned slots and the 
 
 The adapter projects the IR through the reference schema into a `VendorPromptDraft`, then `validate` checks it against `capabilities`.
 
-Present a ready-to-use draft with **every contract slot filled**. Relay slots show their cited basis; constitution slots show the proposed default with an explicit recognition flag. Then surface the artifact as the `InitialPrompt` for the follow-up session/tool, with provenance, freshness, and any `stale-guide` flag.
+Present a ready-to-use draft with **every contract slot filled**. Relay slots show their cited basis; constitution slots show the proposed default with an explicit recognition flag. Then surface the artifact as the `InitialPrompt` for the follow-up session/tool, with provenance, freshness, and any `stale-guide` or `transport-unsafe` flag.
+
+Emit the `InitialPrompt` transport-safely (Rule 12): the payload is a **literal opaque artifact**, so display it verbatim (fenced) for on-screen reading, recommend file-based handoff over inline shell args for injection, and surface any `transport-unsafe` flag `validate` raised.
 
 Surface — present the filled draft as context (slots, bases, flags) before the gate; the gate carries only:
 
@@ -129,6 +131,7 @@ Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch
 9. **Adapter accumulation, not top-down** (Architectural — empirical restraint): adapters are added per real use as accumulated prior. The Adapter Index above is the authoritative list of currently-shipped adapters; do not build a multi-reference framework ahead of use.
 10. **Formation, not execution** (Architectural — role boundary): `/forge` does not run the downstream tool, create branches, or open PRs. It emits the initial prompt and stops.
 11. **Progressive-disclosure adapters** (Architectural — context economy + accumulation): adapter bodies are isolated `adapters/<name>.md` files loaded only after selection; the always-loaded Adapter Index carries name + reference + InitialPrompt form. Selection is relay when the reference or request determines the adapter, a structured recognition gate only on genuine ambiguity (never unconditional). Adapters accumulate as additive files — the deferred-colimit accumulation mechanism made physical; do not build a generalized adapter-registration framework ahead of use.
+12. **Transport-safe handoff** (Architectural — handoff boundary): the `InitialPrompt` is a literal opaque payload that crosses transport boundaries the projection does not control — a markdown terminal render, a shell argument, a paste buffer. Display it **verbatim** (fenced) so document XML tags and special characters survive on-screen rendering instead of being interpreted as HTML and truncated. For injection into a shell carrier, recommend **file-based handoff** (Write the payload, the carrier reads the file) over inline shell args: `` ` ``, `$(`, `${`, and `'` undergo shell substitution, so a literal `$(…)` secret-fetch in the payload would execute and leak. The adapter's `validate` raises `transport-unsafe` when the payload carries such tokens; never present a `transport-unsafe` payload for inline injection silently.
 
 ## Deferred Colimit (do not extract yet)
 
@@ -154,5 +157,6 @@ Candidate adapters (not yet realized — list only, do not build ahead of use):
 - [ ] Phase 3 adapter-derived required slots extracted; every slot partitioned relay vs constitution
 - [ ] Phase 4 filled draft presented — relay slots cited, constitution slots flagged
 - [ ] InitialPrompt emitted with provenance, freshness, and `stale-guide` flag when applicable
+- [ ] InitialPrompt displayed verbatim and emitted transport-safely — file-based handoff recommended over inline shell args; `transport-unsafe` flag surfaced when applicable
 - [ ] Core output stopped at IR; artifact form kept in the adapter
 - [ ] No tool execution, branch, or PR performed
