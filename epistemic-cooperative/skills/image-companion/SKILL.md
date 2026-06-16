@@ -128,7 +128,7 @@ and surface that instead of reporting a successful generation:
 jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' /tmp/image_companion_events_${SUFFIX}.jsonl
 ```
 
-Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation) ride the
+Some codex warnings ride the
 **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to
 catch what the narrative does not carry:
 
