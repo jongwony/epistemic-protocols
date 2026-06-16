@@ -134,7 +134,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
    Run the diff command in this repo to see exactly what changed — the diff is not inlined.
    ```
    Ask for findings as `[severity] file:line — description` and a closing line `VERDICT: approve | needs-attention`.
-2. Launch via `Bash(run_in_background: true, timeout: 300000)`. `--color never` + splitting the streams (stdout to the events file, `2>` to a separate warn file, never `2>&1`) keeps the events file pure JSONL — the codex banner and any stderr warnings ride their own warn file. `--cd {repo_root}` points codex's own git/Read at the repo so it re-derives the diff against the orchestrator-supplied base SHA; `--sandbox read-only` is kept because `git diff` is a local read needing no network. If codex's git cannot resolve that base SHA the extraction comes back empty — the step-3 "empty extraction = codex failed" guard surfaces it:
+2. Launch via `Bash(run_in_background: true, timeout: 300000)`. `--color never` + splitting the streams (stdout to the events file, `2>` to a separate warn file) keeps the events file pure JSONL — the codex banner and any stderr warnings ride their own warn file. `--cd {repo_root}` points codex's own git/Read at the repo so it re-derives the diff against the orchestrator-supplied base SHA; `--sandbox read-only` is kept because `git diff` is a local read needing no network. If codex's git cannot resolve that base SHA the extraction comes back empty — the step-3 "empty extraction = codex failed" guard surfaces it:
    ```bash
    codex exec --ephemeral --json --color never --skip-git-repo-check --cd {repo_root} -m gpt-5.5 --config model_reasoning_effort="high" --sandbox read-only < /tmp/review_loop_codex_${SUFFIX}.txt > /tmp/review_loop_codex_events_${SUFFIX}.jsonl 2>/tmp/review_loop_codex_warn_${SUFFIX}.txt
    ```
@@ -144,7 +144,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
    jq -rs '[.[] | select(.type=="item.completed" and .item.type=="agent_message") | .item.text] | last // empty' /tmp/review_loop_codex_events_${SUFFIX}.jsonl
    ```
 
-   Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation) ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to catch what the narrative does not carry, and surface any hits alongside the findings:
+   Some codex warnings ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to catch what the narrative does not carry, and surface any hits alongside the findings:
 
    ```bash
    grep -iE 'invalid_grant|deprecat|--full-auto|warn' /tmp/review_loop_codex_warn_${SUFFIX}.txt || true

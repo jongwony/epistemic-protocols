@@ -52,7 +52,7 @@ Report:
 ```
 
 Launch via `Bash(run_in_background: true, timeout: 4500000)`. `--color never` + splitting the
-streams (stdout to the events file, `2>` to a separate warn file, never `2>&1`) keeps the events
+streams (stdout to the events file, `2>` to a separate warn file) keeps the events
 file pure JSONL — the codex banner and any stderr warnings ride their own warn file:
 
 ```bash
@@ -86,7 +86,7 @@ When the notification arrives:
 
    Reasoning items appear only if codex emits them (config-gated) — do not force them on.
 
-   Some codex warnings (e.g. `invalid_grant` auth-token failures, `--full-auto` deprecation) ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to catch what the narrative does not carry, and surface any hits alongside the trace:
+   Some codex warnings ride the **stderr banner**, not `agent_message` — the launch sent stderr to its own warn file. Grep that to catch what the narrative does not carry, and surface any hits alongside the trace:
    ```bash
    grep -iE 'invalid_grant|deprecat|--full-auto|warn' /tmp/goal_research_warn_${SUFFIX}.txt || true
    ```
