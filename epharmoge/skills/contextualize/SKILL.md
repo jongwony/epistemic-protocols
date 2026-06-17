@@ -1,6 +1,6 @@
 ---
 name: contextualize
-description: "Detect application-context mismatch after execution. Verifies applicability when correct output may not fit the actual context, producing contextualized execution. Type: (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution. Alias: Epharmoge(ἐφαρμογή)."
+description: "Detect application-context mismatch after execution. Verifies applicability when correct output may not fit the actual context, registering each mismatch through a fail-closed deficit-fit certificate before adaptation, producing contextualized execution. The transformative revalidation loop is non-monotone — adapting the result mutates the evaluation target and can breed emergent mismatches; re-scan is mandatory. Directional dual to Diylisis. Type: (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution. Alias: Epharmoge(ἐφαρμογή)."
 ---
 
 # Epharmoge Protocol
@@ -13,29 +13,61 @@ Detect application-context mismatch after execution through AI-guided applicabil
 
 ```
 ── FLOW ──
-Epharmoge(R, X) → Eval(R, X) → Mᵢ? → AssessFit(R, X, Mᵢ) → F → Register(Mᵢ) → SelectNext(pending, F, Σ) → Mₛ → Q(F-scoped Mₛ) → A → R' → Eval(R', X) → Mₑ? → Register(Mₑ) → AssessFit(R', X, pending) → F' → (loop: SelectNext → Q → A → adapt → re-scan until contextualized)
+Epharmoge(R, X) → Eval(R, X) → Mᵢ? →
+  Mᵢ = ∅: → deactivate (no aspect ¬warranted; execution stands as-is)
+  Mᵢ ≠ ∅: ∀m ∈ Mᵢ: bind_kind(m) → certify(m, graph.json) → keep(status = pass) → Mᵢ_passed →
+    Mᵢ_passed = ∅ ∧ no deferred-pending ∧ (∀ m ∈ Mᵢ : routed(aspect(m))) (every flagged aspect resolved to ROUTED via the typed routed(a) predicate — deferred mismatches first re-certify to pass→registered or route→Λ.routed): → emit routing recommendations (every flagged aspect routed to a sibling deficit) → deactivate (trivial convergence: adjudicated by routing, R unadapted)
+    Mᵢ_passed ≠ ∅: AssessFit(R, X, Mᵢ_passed) → F → Register(Mᵢ_passed) → SelectNext(pending, F, Σ) → Mₛ → Q(F-scoped Mₛ) → A → R' → Eval(R', X) → Mₑ? → ∀m ∈ Mₑ: bind_kind(m) → certify(m, graph.json) → keep(status = pass) → Mₑ_passed → Register(Mₑ_passed) → AssessFit(R', X, pending) → F' → (loop: SelectNext → Q → A → adapt → re-scan until contextualized)
 
 ── MORPHISM ──
 (R, X)
   → evaluate(result, context)          -- detect applicability mismatch
+  → bind_kind(mismatch) → certify(mismatch, registry) -- shared meta-backbone: bind each mismatch as a kind, certify deficit fit (fail-closed) at REGISTRATION, BEFORE it enters the pending/adaptation flow
   → assess_fit(result, context, mismatches) -- sort applicability fit before user judgment
   → surface(fit_scoped_mismatch, as_inquiry) -- present mismatch with fit basis and evidence
-  → adapt(result, direction)           -- adapt result to context
+  → adapt(result, direction)           -- adapt result to context (transformative revalidation: mutates Eval target → may breed Mₑ)
   → ContextualizedExecution
 requires: mismatch_detected(R, X)       -- runtime checkpoint (Phase 0)
-deficit:  ApplicationDecontextualized    -- activation precondition (Layer 1/2)
+deficit:  ApplicationDecontextualized    -- activation precondition (Layer 1/2); certificate.owner for in-scope mismatches
 preserves: X                             -- application context is fixed reference; morphism transforms R only
 invariant: Applicability over Correctness
+invariant: certificate-before-registration  -- DeficitFitCertificate.status = pass strictly precedes registering a mismatch into pending(Σ) (shared meta-backbone order, at registration of both Mᵢ and Mₑ)
+dual-axis:  transformative revalidation (NON-MONOTONE) -- adapting R' mutates the Eval(R, X) target, breeding emergent mismatches Mₑ; re-scan mandatory; progress(Λ) may regress. Opposite of distill's read-only-of-source monotone side (the contextualize ↔ distill boundary)
 
 ── TYPES ──
 R      = Result to be evaluated (source-agnostic: AI output, analysis conclusion, decision outcome, or any completed work product)
            -- Input type: morphism processes R uniformly; enumeration scopes the definition, not behavioral dispatch
 X      = Application context (environment, constraints, user situation)
 Eval   = Applicability evaluation: (R, X) → Set(Mismatch)
-Mismatch = { aspect: String, dimension: Dimension, description: String, evidence: String, severity: Severity, origin: Origin }
+Mismatch = { aspect: String, dimension: Dimension, description: String, evidence: String, severity: Severity, origin: Origin, kind_binding: KindBinding, certificate: DeficitFitCertificate }
+                 -- object_ref: the per-mismatch anchor the certificate evaluates and the value-space binds over (epharmoge-local instantiation of the shared backbone's object_ref)
 Dimension ∈ {Convention, Environment, Audience, Dependency} ∪ Emergent(Dimension)
 Origin ∈ {Initial, Emerged(aspect)}                            -- mismatch provenance: initial scan or spawned by adapting parent aspect
 Severity ∈ {Critical, Significant, Minor}                      -- Significant requires demonstrable behavioral impact (current-session task graph / downstream protocol activations); see Rule 12
+
+-- Shared meta-backbone (KIND dispatch, registration-time / cycle-emergent). One canonical schema; epharmoge-local instantiation ONLY for object_ref (= Mismatch), local_value_space (= the answer coproduct {Confirm, Adapt, Dismiss}), and guard routing targets.
+KindBinding    = { label: Axis, positive_predicate: String, evidence: Set(Evidence), origin ∈ {seed, emergent}, atomicity ∈ {atomic, non-atomic} }
+                 -- captures the mismatch as a kind; if atomicity = non-atomic (the mismatch bundles two distinct aspects) → split BEFORE certify (no registration, no surfacing on a compound mismatch)
+DeficitFitCertificate = { owner: Deficit, in_scope_if: String, route_if: List<RoutePair>, evidence: Set(Evidence), status ∈ {pass, route, ambiguous} }
+                 -- fail-closed: status ≠ pass BLOCKS registration into pending(Σ) AND surfacing this mismatch for answer. Generated at registration time (Phase 0 for Mᵢ, Phase 2 re-scan for Mₑ) by checking KindBinding.positive_predicate against the sibling-deficit registry (.claude/skills/verify/graph.json deficit/edge graph).
+                 -- owner = ApplicationDecontextualized when the mismatch is in-scope; status = pass iff the mismatch's positive_predicate fits ApplicationDecontextualized and no sibling deficit claims it
+                 -- status = route: a sibling deficit owns the mismatch (backward misfit) → emit RoutePair target, drop the mismatch from registration (it never enters pending(Σ))
+                 -- status = ambiguous: overlapping deficit fit → defer the mismatch (re-assess with narrowed scope or ask a one-turn narrow disambiguation); never register/surface under ambiguous fit
+RoutePair      = (route_if_predicate: String, target: Protocol)
+                 -- epharmoge-local guard routing targets — BACKWARD misfit the loop routes away rather than adapting in-place:
+                 --   an unnoticed decision gap rather than a context-fit question        → /gap        (GapUnnoticed)
+                 --   a missing pre-execution fact (no observable value, requires supply)  → /inquire    (ContextInsufficient)
+                 --   undefined convention/dependency ownership for the decision           → /bound      (BoundaryUndefined)
+                 --   portability to an absent zero-memory recipient (not present fit)      → /distill    (ContextTethered) -- the contextualize ↔ distill boundary guard
+Evidence       = { source: ContextChannel, content: String }
+ContextChannel ∈ {Result, Context, Convention, Environment, Session}  -- observable sources for the certificate's deficit-fit basis (R itself + observable X)
+V              = bind_value_space : Mismatch → ValueSpace       -- the mismatch's answer constructors; generated ONLY after certificate.status = pass; frozen for the cycle (relay / dead-signal test applied)
+ValueSpace     = the mismatch's answer coproduct (local_value_space; epharmoge-local instantiation point) = {Confirm, Adapt, Dismiss}
+Deficit        = the sibling-deficit label a mismatch may belong to (registry node in graph.json); owner = ApplicationDecontextualized for in-scope mismatches
+Protocol       = downstream protocol slash target a routed mismatch is handed to (e.g., /gap, /inquire, /bound, /distill)
+Axis           = String                                        -- emergent kind label; examples: "convention", "environment", "audience", "dependency"
+Mᵢ_passed = { m ∈ Mᵢ : certificate(m).status = pass }          -- initial mismatches that passed the fail-closed certificate at registration
+Mₑ_passed = { m ∈ Mₑ : certificate(m).status = pass }          -- emerged mismatches that passed the fail-closed certificate at re-scan registration
 AssessFit = Applicability fit assessment: R × X × Set(Mismatch) → F
            -- classifier over input_mismatches; does not generate new Mismatch objects
 F      = ApplicabilityFitMap { fit_justifications, conflicts, depends, adaptation_options, open }
@@ -60,54 +92,71 @@ FitRank = Conflict > Dependent > Open > Supported
 SelectNext = Set(Mismatch) × F × Σ → Mₛ
            -- priority: severity(Critical > Significant > Minor), then FitRank, then oldest registered task
 Mₛ     = Selected mismatch
-Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial
-Mₑ     = Newly emerged mismatches from Eval(R', X)             -- origin = Emerged(adapted_aspect)
-Register = Set(Mismatch) → Set(Task) [Tool: TaskCreate]       -- mismatch registration as tracked tasks
-pending(Σ) = Set(Mismatch) where registered task status ∉ {completed, dismissed}
+Mᵢ     = Identified mismatches from Eval(R, X)                 -- origin = Initial; each bind_kind'd + certified at registration (Phase 0)
+Mₑ     = Newly emerged mismatches from Eval(R', X)             -- origin = Emerged(adapted_aspect); each bind_kind'd + certified at re-scan registration (Phase 2)
+Register = Set(Mismatch)_passed → Set(Task) [Tool: TaskCreate] -- registration of ONLY certificate-passing mismatches as tracked tasks; status ≠ pass blocks registration (fail-closed)
+pending(Σ) = Set(Mismatch) where registered task status ∉ {completed, dismissed}  -- a routed/ambiguous mismatch never enters pending(Σ); only certificate-passing mismatches are registered
 Q      = Applicability inquiry over F-scoped mismatch (gate interaction)
-A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}
+A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}  -- A ∈ V; answer drawn from the mismatch's value-space (local_value_space = {Confirm, Adapt, Dismiss})
 R'     = Adapted result (contextualized output)
 ContextualizedExecution = R' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
+                 -- registered = certificate-passing mismatches only; routed/ambiguous mismatches are handed forward, not adapted in-place
 
 ── PHASE TRANSITIONS ──
-Phase 0: R → Eval(R, X) → Mᵢ? → AssessFit(R, X, Mᵢ) → F → Λ.fit_map := F  -- applicability checkpoint + fit map (silent)
-Phase 1: Mᵢ → TaskCreate[all initial mismatches] → pending(Σ) → SelectNext(pending, F, Σ) → Mₛ → Qc(F-scoped Mₛ, evidence) → Stop → A  -- register all initial mismatches, surface selected mismatch with fit basis [Tool]
-Phase 2: A → adapt(A, R) → R' → TaskUpdate → Eval(R', X) → Mₑ? → TaskCreate[all Mₑ] → pending(Σ) → AssessFit(R', X, pending) → F' → Λ.fit_map := F' -- adaptation + update + re-scan + recompute fit map [Tool]
+Phase 0: R → Eval(R, X) → Mᵢ? → ∀m ∈ Mᵢ: bind_kind(m) → certify(m, graph.json) → (status = pass) → Mᵢ_passed → AssessFit(R, X, Mᵢ_passed) → F → Λ.fit_map := F  -- applicability checkpoint + registration-time KIND dispatch (fail-closed) + fit map (silent); certify runs WITHIN Phase 0, at registration, not as a separate phase
+Phase 0 → route_away (mismatch-local): certify(m).status = route        -- a sibling deficit owns the mismatch (backward misfit) → emit RoutePair.target (/gap, /inquire, /bound, /distill), drop m from registration (m never enters pending(Σ)); scan continues with remaining mismatches
+Phase 0 → defer (mismatch-local): certify(m).status = ambiguous ∨ KindBinding.atomicity = non-atomic  -- overlapping deficit fit OR compound mismatch → split / narrow disambiguation, re-certify BEFORE registration (never register under ambiguity)
+Phase 0 → deactivate (all-routed): Mᵢ ≠ ∅ ∧ Mᵢ_passed = ∅ ∧ (∀ m ∈ Mᵢ : routed(aspect(m))) ∧ no deferred-pending ∧ pending(Σ) = ∅  -- mismatches WERE detected but EVERY one resolved to ROUTED (routed(a) is the typed predicate of CONVERGENCE — a is in Λ.routed via aspect(m) = a, NOT raw Mismatch-in-list membership) (handed to a sibling deficit) — no in-scope (ApplicationDecontextualized-owned) mismatch enters the adaptation loop → trivial convergence: emit the routing recommendations (/gap, /inquire, /bound, /distill) and deactivate without adapting R (R stands as-is for the in-scope check; contextualized(R) holds vacuously — adjudicated(R, X) with every aspect routed). DEFERRED mismatches (status = ambiguous ∨ atomicity = non-atomic) are NOT terminal and do NOT satisfy this path: they first re-certify via Phase 0 → defer (split / narrow-disambiguation) until each resolves to pass (→ registered into pending(Σ)) or route (→ Λ.routed); trivial convergence fires only once NONE remain deferred-pending and every flagged aspect is routed. Distinct from the zero-mismatch-detected case (Mᵢ = ∅, no aspect ¬warranted): here aspects WERE flagged but all belong to sibling deficits. The per-mismatch-certificate analogue of elicit's all-projections-routed exit
+Phase 1: Mᵢ_passed → TaskCreate[all certificate-passing initial mismatches] → pending(Σ) → SelectNext(pending, F, Σ) → Mₛ → Qc(F-scoped Mₛ, evidence) → Stop → A  -- register all certificate-passing initial mismatches, surface selected mismatch with fit basis [Tool]; reached only when Mᵢ_passed ≠ ∅
+Phase 2: A → adapt(A, R) → R' → TaskUpdate → Eval(R', X) → Mₑ? → ∀m ∈ Mₑ: bind_kind(m) → certify(m, graph.json) → (status = pass) → Mₑ_passed → TaskCreate[all Mₑ_passed] → pending(Σ) → AssessFit(R', X, pending) → F' → Λ.fit_map := F' -- adaptation (transformative revalidation, mutates Eval target) + update + re-scan + registration-time certify of emerged mismatches + recompute fit map [Tool]
+Phase 2 → route_away (mismatch-local): certify(m).status = route        -- an emerged mismatch a sibling deficit owns → emit RoutePair.target, drop m from registration; re-scan continues
+Phase 2 → defer (mismatch-local): certify(m).status = ambiguous ∨ KindBinding.atomicity = non-atomic  -- emerged compound/overlapping mismatch → split / re-certify BEFORE registration
 
 ── LOOP ──
+Transformative revalidation (NON-MONOTONE): this loop mutates the very object its detector evaluates. adapt produces R', and Eval(R', X) re-targets the detector at the mutated result — so an adaptation can BREED new mismatches Mₑ that did not exist before. This is the opposite of distill's read-only-of-source monotone side (the contextualize ↔ distill boundary). "Transformative revalidation" labels the ADAPT path; non-mutating adjudication (Dismiss, or routing a mismatch to a sibling deficit) is contextualize-internal — it does not mutate R — and is distinct from distill's read-only-of-source territory.
 After Phase 2: re-scan R' against X for remaining AND newly emerged mismatches.
-Register all newly emerged mismatches from adaptation (Mₑ); AssessFit classifies tracked mismatches but never suppresses them.
-Recompute F over pending(Σ) before selecting the next surfaced mismatch, even when Mₑ = ∅.
+Bind + certify each newly emerged mismatch at registration (fail-closed): only certificate-passing emerged mismatches (Mₑ_passed) are registered into pending(Σ); a routed mismatch is handed to its sibling deficit (/gap, /inquire, /bound, /distill), an ambiguous/compound one is split and re-certified before registration. AssessFit classifies tracked mismatches but never suppresses them.
+Recompute F over pending(Σ) before selecting the next surfaced mismatch, even when Mₑ_passed = ∅.
 If pending(Σ) non-empty: return to Phase 1 (SelectNext by severity, then FitRank, then oldest registered task).
 If adjudicated(R', X): all tasks completed → convergence.
+progress(Λ) MAY REGRESS: because re-scan over a mutated R' can register newly certified mismatches, the completed/total ratio is non-monotone — this is the signature of the transformative-revalidation side, not an error.
 User can exit at Phase 1 (early_exit option or Esc).
 Continue until: contextualized(R') OR user ESC.
 Mode remains active until convergence.
-Convergence evidence: At adjudicated(R', X), present transformation trace — for each (m, _) ∈ Λ.state.history, show (ApplicationDecontextualized(m) → adaptation_result(m)). Convergence is demonstrated, not asserted.
+Convergence evidence: At adjudicated(R', X), present transformation trace — for each (m, _) ∈ Λ.state.history, show (ApplicationDecontextualized(m) → adaptation_result(m)); routed mismatches show (ApplicationDecontextualized(m) → routed_to(RoutePair.target)). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 applicable(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X)
 warranted(a, R, X) = correct(R) ∧ fits(R, X)                -- correctness AND contextual fit required (not material conditional)
-adjudicated(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X) ∨ dismissed(a)
+adjudicated(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X) ∨ dismissed(a) ∨ routed(a)
+routed(a)          = ∃ m ∈ Λ.routed : aspect(m) = a    -- the mismatch on aspect a failed the certificate (status = route) and was handed to a sibling deficit; backward misfit is adjudicated by routing, not by in-place adaptation
 contextualized(R') = adjudicated(R', X) ∨ user_esc
+trivial convergence (all-routed): when Mᵢ ≠ ∅ but Mᵢ_passed = ∅ AND every flagged aspect resolved to ROUTED (∀ m ∈ Mᵢ : routed(aspect(m)), no deferred-pending, pending(Σ) = ∅), adjudicated(R, X) holds by the routed(a) disjunct for every flagged aspect (and warranted for the rest) — R is unadapted and contextualized(R) holds. This is the Phase 0 → deactivate (all-routed) path. DEFERRED mismatches do NOT satisfy this: they are not in Λ.routed, so the routed(a) disjunct does not cover them; a deferred mismatch first re-certifies (Phase 0 → defer) to pass (→ pending(Σ)) or route (→ Λ.routed) before any convergence claim. Distinct from the no-mismatch case (Mᵢ = ∅, every aspect warranted from the start) — here aspects were flagged but all belong to sibling deficits
+certificate gate:  every registered mismatch carried certificate.status = pass (fail-closed, at registration) — routed/ambiguous mismatches never entered pending(Σ), so a contextualized R' is assembled only from in-scope (ApplicationDecontextualized-owned), fit-certified adaptations; backward misfit was handed forward (/gap, /inquire, /bound, /distill), not adapted in-place
 -- stratification: applicable(R', X) ⊆ adjudicated(R', X)
 -- operational proxy: ∀ task completed ⟹ adjudicated(R', X) ⟹ contextualized(R')
-progress(Λ) = |completed_tasks| / |total_tasks|              -- may regress when re-scan discovers new mismatches
+progress(Λ) = |completed_tasks| / |total_tasks|              -- NON-MONOTONE: may regress when re-scan over the mutated R' registers newly certified mismatches (transformative-revalidation signature)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Eval   (sense)   → Internal analysis (no external tool)
+bind_kind (sense)   → Internal analysis (capture each detected mismatch as a KindBinding {label, positive_predicate, evidence, origin ∈ {seed, emergent}, atomicity}; non-atomic mismatch → split before certify)
+certify (extension) → Internal analysis (fail-closed DeficitFitCertificate; deterministic check of KindBinding.positive_predicate against the sibling-deficit registry .claude/skills/verify/graph.json: owner = ApplicationDecontextualized when in-scope; status = pass | route | ambiguous; basis = the registry deficit/edge fit, cited at the mismatch's Phase 1 surfacing. Runs at registration time — within Phase 0 for Mᵢ, within Phase 2 re-scan for Mₑ — BEFORE the mismatch enters pending(Σ))
 AssessFit (sense) → Internal analysis (no external tool)
 Qc     (constitution)    → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
 adapt  (transform) → Edit, Write (result adaptation based on user direction)
                     -- (transform): tool call that changes existing artifacts; medium-agnostic (files, analysis text, generated content)
-Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with framing visibility)
+route  (extension)   → TextPresent+Proceed (certificate.status = route → emit the matching RoutePair.target as a backward-misfit recommendation: decision gap → /gap, missing pre-execution fact → /inquire, undefined convention/dependency ownership → /bound, portability to an absent recipient → /distill; deterministic registry match, basis cited)
+Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with framing visibility; only certificate-passing mismatches are registered)
 converge (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
-      fit_map: F, state: Σ, active: Bool, cause_tag: String }
+      fit_map: F, state: Σ, active: Bool, cause_tag: String,
+      routed: List<(Mismatch, RoutePair.target)> }   -- backward-misfit mismatches handed forward (never entered pending(Σ))
 Σ = { history: List<(Mismatch, A)>, scan_count: Nat }
+                 -- each Mismatch in history carries its kind_binding + certificate (object_ref = Mismatch)
+-- Certificate invariant: ∀ m ∈ pending(Σ) : m.certificate.status = pass (fail-closed — routed/ambiguous mismatches never enter pending(Σ))
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
@@ -187,6 +236,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 |---------|--------|
 | All mismatch tasks completed (adapted or dismissed) | Proceed with contextualized result |
 | No mismatches detected (Phase 0 passes) | Execution stands as-is |
+| Mismatches detected but all routed (Mᵢ ≠ ∅ ∧ Mᵢ_passed = ∅ ∧ ∀ m ∈ Mᵢ : routed(aspect(m)) ∧ no deferred-pending ∧ pending(Σ) = ∅) | Trivial convergence — every flagged aspect belongs to a sibling deficit; emit the routing recommendations (/gap, /inquire, /bound, /distill) and deactivate without adapting R (adjudicated by routing, not in-place adaptation). DEFERRED mismatches (ambiguous / non-atomic) are NOT terminal — they re-certify (split / narrow-disambiguation) to pass or route before any convergence; only a fully-routed set fires this path. Distinct from the no-mismatch-detected row above: aspects WERE flagged but none is in-scope for adaptation |
 | User Esc key | Accept result without applicability review |
 
 ## Mismatch Identification
@@ -207,7 +257,7 @@ Mismatches are identified across named dimensions — working hypotheses for sys
 - User dismisses all named-dimension mismatches but the result still exhibits contextual misfit
 - The execution context involves domain-specific fitness criteria that resist classification into the four named dimensions
 
-Emergent mismatches must satisfy morphism `ApplicationDecontextualized → ContextualizedExecution`; boundary: contextual fit (in-scope) vs. decision gaps (→ `/gap`).
+Emergent mismatches must satisfy morphism `ApplicationDecontextualized → ContextualizedExecution`; the fail-closed deficit-fit certificate (Phase 0 / Phase 2 re-scan) enforces this at registration. Backward-misfit boundary (routed away, not adapted in-place): an unnoticed decision gap rather than a context-fit question → `/gap`; a missing pre-execution fact → `/inquire`; undefined convention/dependency ownership → `/bound`; portability to an absent zero-memory recipient (not fit to a present, observable context) → `/distill` (the contextualize ↔ distill boundary).
 
 Each mismatch is characterized by:
 
@@ -236,11 +286,19 @@ Evaluate result against application context. This phase is **silent** — no use
 
 1. **Scan result** `R` against context `X`: environment state, conventions, use case scope, temporal validity, user constraints
 2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)
-3. **Assess fit**: Build `ApplicabilityFitMap` from warranted aspect evidence, conflicts, dependencies, adaptation options, and bounded open questions
-4. If all aspects warranted: present finding per Rule 9 before concluding (Epharmoge not activated)
-5. If mismatches identified: record `Mᵢ` with aspect, description, evidence, severity (per Rule 12 — behavioral-impact qualifier assessed against current-session task graph), `origin=Initial`, and fit-map placement — proceed to Phase 1
+3. **Bind + certify each detected mismatch at registration (fail-closed)**: For each candidate mismatch, set `m.kind_binding = { label, positive_predicate, evidence, origin ∈ {seed, emergent}, atomicity }`; if `atomicity = non-atomic` (the mismatch bundles two distinct aspects), **split before certify**. Then `m.certificate = certify(m.kind_binding, registry)` where the registry is the sibling-deficit graph `.claude/skills/verify/graph.json`:
+   - **`status = pass`** — the mismatch's positive predicate fits `ApplicationDecontextualized` (certificate `owner = ApplicationDecontextualized`) and no sibling deficit claims it. The mismatch is eligible for registration.
+   - **`status = route`** — a sibling deficit owns the mismatch (backward misfit, not a context-fit question). Emit the matching `RoutePair.target` as a recommendation and **drop the mismatch from registration** (record it in `Λ.routed`); the scan continues with the remaining mismatches. Route targets: an unnoticed decision gap → `/gap` (GapUnnoticed); a missing pre-execution fact → `/inquire` (ContextInsufficient); undefined convention/dependency ownership → `/bound` (BoundaryUndefined); portability to an absent zero-memory recipient → `/distill` (ContextTethered, the contextualize ↔ distill boundary).
+   - **`status = ambiguous`** or `atomicity = non-atomic` — overlapping deficit fit OR compound mismatch → split or ask a one-turn narrow disambiguation, then re-certify **before** registration (never register under ambiguity).
+4. **Assess fit**: Build `ApplicabilityFitMap` over the certificate-passing mismatches (`Mᵢ_passed`) from warranted aspect evidence, conflicts, dependencies, adaptation options, and bounded open questions
+5. If all aspects warranted: present finding per Rule 9 before concluding (Epharmoge not activated)
+6. If certificate-passing mismatches remain: record `Mᵢ_passed` with aspect, description, evidence, severity (per Rule 12 — behavioral-impact qualifier assessed against current-session task graph), `origin=Initial`, kind_binding, certificate, and fit-map placement — proceed to Phase 1
 
 **Information source**: The result `R` itself compared against observable context `X`. NOT a re-scan of pre-execution context (non-circularity with Aitesis).
+
+**Registration-time certificate (not an up-front gate)**: The certificate fires per mismatch at registration — within Phase 0 for initial mismatches `Mᵢ`, within the Phase 2 re-scan for emerged mismatches `Mₑ` — analogous to elicit's per-projection certificate, NOT bound's dispatch-first up-front sync. Mismatch detection stays AI-side; there is no up-front kind gate. The certify step is relay (Extension — a deterministic registry check; basis cited at the mismatch's Phase 1 surfacing).
+
+**Backbone discipline**: the schema (KindBinding / DeficitFitCertificate / value-space binding) is ONE canonical definition shared across protocols; epharmoge instantiates only `object_ref` (= Mismatch), `local_value_space` (= the `{Confirm, Adapt, Dismiss}` coproduct), and the guard routing targets (the RoutePairs above). Same field names, same fail-closed statuses, same certificate-before-registration order.
 
 **Scan scope**: Completed result, observable context (structure, conventions, constraints), session context. Does NOT re-execute or modify files.
 
@@ -302,13 +360,13 @@ After user response:
 
 After adaptation — **re-scan**:
 - Re-evaluate `R'` against `X` for remaining AND **newly emerged** mismatches
-- Register all new mismatches (`Mₑ`) from adaptation with `origin=Emerged(adapted_aspect)`; do not filter them by fit-map category
-- Recompute `ApplicabilityFitMap` over all pending mismatches before selecting the next mismatch, even when `Mₑ = ∅`
+- **Bind + certify each emerged mismatch at registration (fail-closed)**: for each `m ∈ Mₑ`, set `m.kind_binding` and `m.certificate = certify(m.kind_binding, registry)` (same `.claude/skills/verify/graph.json` registry, same `pass | route | ambiguous` statuses as Phase 0). Register only certificate-passing emerged mismatches (`Mₑ_passed`) with `origin=Emerged(adapted_aspect)`; a `status = route` mismatch is recorded in `Λ.routed` and handed to its sibling deficit (`/gap`, `/inquire`, `/bound`, `/distill`), a `status = ambiguous`/non-atomic one is split and re-certified before registration. Do not filter the certificate-passing set by fit-map category.
+- Recompute `ApplicabilityFitMap` over all pending mismatches before selecting the next mismatch, even when `Mₑ_passed = ∅`
 - If remaining tasks non-empty: return to Phase 1 (surface next mismatch via `SelectNext`: severity, then FitRank, then oldest registered task)
 - If all tasks completed: execution complete with contextualized result
 - Log `(Mismatch, A)` to `Σ.history`, increment `Σ.scan_count`
 
-**Re-scan trigger**: Adaptation changes `R`, and changed `R'` may exhibit new mismatches not present in the original result. Always re-scan after each adaptation — any adaptation may introduce mismatches in dimensions unrelated to the original aspect.
+**Re-scan trigger (transformative revalidation — NON-MONOTONE)**: Adaptation MUTATES `R` into `R'`, and `Eval(R', X)` re-targets the detector at the mutated result, so changed `R'` may exhibit new mismatches not present in the original result. This is the transformative-revalidation / mutates-its-own-detector-target side of the dual axis — the opposite of distill's read-only-of-source monotone side. Always re-scan after each adaptation — any adaptation may introduce mismatches in dimensions unrelated to the original aspect; `progress(Λ)` may therefore regress (expected, not an error). Non-mutating adjudication (Dismiss, or routing a mismatch to a sibling deficit) does not mutate `R` and is contextualize-internal.
 
 **Chain discovery**: When `Mₑ` emerges from an adaptation, the `origin = Emerged(parent_aspect)` field records the causal chain. This enables:
 - Chain visibility: user sees which adaptations spawned new mismatches (a framing signal — which adaptation opened which follow-on, not a progress count)
@@ -336,6 +394,8 @@ After adaptation — **re-scan**:
 | Cross-protocol cooldown | `suppress(Epharmoge) if Aitesis.resolved_in_same_scope ∧ overlap(Aitesis.domains, Epharmoge.aspects)` | Prevents same-scope pre+post stacking |
 | Cooldown scope | Cooldown applies within recommendation chains only; direct `/contextualize` invocation is never suppressed | User authority preserved |
 | Natural integration | "Done. One thing to verify:" pattern | Fits completion flow, not interrogation |
+| Fail-closed deficit-fit certificate | `certificate.status = pass` strictly precedes registration into `pending(Σ)` (at registration of both `Mᵢ` and `Mₑ`); route → drop + hand forward, ambiguous/non-atomic → split + re-certify | A mismatch a sibling deficit owns never enters the adaptation loop; backward misfit is routed (`/gap`, `/inquire`, `/bound`, `/distill`) rather than adapted in-place |
+| Registration-time certificate (no up-front gate) | The certificate attaches per mismatch at registration time (Phase 0 for `Mᵢ`, Phase 2 re-scan for `Mₑ`), not once before the loop | Mismatch detection stays AI-side; analogous to elicit's per-projection certificate, not bound's dispatch-first up-front sync |
 
 ## Rules
 
@@ -354,4 +414,5 @@ After adaptation — **re-scan**:
 13. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 14. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 15. **Applicability fit map is support only**: Use `ApplicabilityFitMap` to scope which mismatch is surfaced and which adaptation direction is practical. It classifies already detected mismatches and must not create, suppress, or terminalize mismatch tasks.
-16. **All detected mismatches remain tracked**: Initial and emerged mismatches are registered before fit-map prioritization. Fit categories affect selection order and fit-basis wording only; they never remove a detected mismatch from convergence accounting.
+16. **All certificate-passing mismatches remain tracked**: Initial and emerged mismatches that pass the fail-closed deficit-fit certificate are registered before fit-map prioritization. Fit categories affect selection order and fit-basis wording only; they never remove a registered mismatch from convergence accounting. (The certificate is the one legitimate pre-registration filter — Rule 17; a routed/ambiguous mismatch is handed forward or split, distinct from fit-map suppression, which Rule 15 prohibits.)
+17. **Registration-time deficit-fit certificate, dual-axis transformative revalidation**: Before a detected mismatch enters `pending(Σ)`, it is dispatched through the shared meta-backbone pipeline — KindBinding → fail-closed DeficitFitCertificate → value-space, in that strict order, at registration of both `Mᵢ` (Phase 0) and `Mₑ` (Phase 2 re-scan). (a) **Registration-time, NOT dispatch-first**: the certificate attaches per mismatch at registration time — mismatch detection stays AI-side, there is no up-front kind gate. This is the cycle-emergent counterpart to elicit's per-projection certificate, distinct from bound's dispatch-first up-front sync (which exists only because BoundaryMap is a multi-consumer router). (b) **Fail-closed certificate**: `certificate.status = pass` strictly precedes registration and surfacing; `status = route` drops the mismatch and hands it to the sibling deficit's protocol — an unnoticed decision gap → `/gap`, a missing pre-execution fact → `/inquire`, undefined convention/dependency ownership → `/bound`, portability to an absent zero-memory recipient → `/distill`; `status = ambiguous` or `atomicity = non-atomic` splits / one-turn-disambiguates and re-certifies before registration. The certificate is generated by checking the mismatch's positive predicate against the sibling-deficit registry `.claude/skills/verify/graph.json`; the certify step is relay (Extension — deterministic registry check, basis cited at Phase 1 surfacing). (c) **Dual axis — transformative revalidation (NON-MONOTONE)**: contextualize sits on the transformative side of the dual axis. adapt MUTATES `R` into `R'`, `Eval(R', X)` re-targets the detector at the mutated result, and this can BREED emergent mismatches `Mₑ` that did not exist before — so re-scan is mandatory and `progress(Λ)` may regress. This is the opposite of distill's read-only-of-source monotone side (the contextualize ↔ distill boundary). "Transformative revalidation" labels the ADAPT path only; non-mutating adjudication (Dismiss, or routing a mismatch to a sibling deficit) is contextualize-internal and does not mutate `R`. (d) **Backbone discipline**: the schema is ONE canonical definition shared across protocols; epharmoge instantiates only `object_ref` (= Mismatch), `local_value_space` (= the `{Confirm, Adapt, Dismiss}` coproduct), and the guard routing targets — same field names, same fail-closed statuses, same certificate-before-registration order.
