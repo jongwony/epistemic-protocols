@@ -78,7 +78,7 @@ KindHypothesis = { label: Kind, positive_predicate: String, evidence: Set(Eviden
                                                               -- each named kind is a PRIOR (recognition seed), NOT a closed coproduct member (Rule 5: no fixed taxonomy)
 NamingPath     = free-response affordance for a kind not among the seeds (emergent capture; user names the kind, or extends/replaces a seed)
 Kind           = captured boundary kind (seed ∈ {direction/priority, scope, type/concept, ownership} | emergent)
-                 -- seeds empirically ordered: direction/priority (dominant in real use), scope, type/concept, ownership (usually a trailing tag). membership is NOT a first-class kind.
+                 -- seeds ordered by recognition salience (a design prior, not an empirical usage claim): direction/priority (most salient), scope, type/concept, ownership (trailing seed). membership is NOT a first-class kind.
                  -- object_ref(kind) : the anchor the loop classifies (= Domain for bound, every kind; bound-local instantiation point — the kind sets WHAT the Domain's boundary is about, not the anchor type)
 KindBinding    = { label: Kind, positive_predicate: String, evidence: Set(Evidence), origin ∈ {seed, emergent}, atomicity ∈ {atomic, non-atomic} }
                  -- captures the kind; if atomicity = non-atomic → split or route BEFORE certify (no value-space binding on a compound kind)
@@ -138,14 +138,15 @@ FinalGateDisposition = {UserSupplies, AIAutonomous} ⊆ BoundaryClassification  
 FinalGateAnswer = FinalGateDisposition                                                                          -- Phase 4 surfacing subset (the uniform residual-disposition subset of BoundaryClassification)
                  -- Phase 4 UserSupplies (kind-general): bulk-classify residual domains as user-retained (each residual domain becomes its own boundary; lazy-binding — values or protocol invocation deferred to downstream activation)
                  -- Phase 4 AIAutonomous (kind-general): bulk-classify residual as AI-settled (semantically equivalent to per-cycle AIAutonomous(boundary))
-DefinedBoundary = B' where (ImplicitTermination ∨ Phase 4 completed ∨ residual = ∅) ∧ BoundaryEssence finalized
-                 -- B' = post-final-cycle BoundaryMap (prime denotes temporal succession of the in-loop B state)
+DefinedBoundary = { map: B', kind: Kind } where (ImplicitTermination ∨ Phase 4 completed ∨ residual = ∅) ∧ BoundaryEssence finalized
+                 -- B' = post-final-cycle BoundaryMap (prime denotes temporal succession of the in-loop B state); kind = Λ.captured_kind, the boundary kind this map was produced over (constant across the loop)
+                 -- the emitted artifact carries the captured kind alongside B', NOT B' alone: object_ref(kind) = Domain does NOT encode the kind, so without this pairing the kind is unrecoverable from the map. The pairing (i) lets a later /bound invocation detecting this emit recover SeededPrior = { map: B', kind } so the kind-aware seed guard (kind(B_prior) = captured_kind) has a typed carrier to read, and (ii) lets the 9 downstream advisory consumers distinguish what a non-ownership map's dispositions settle rather than reading every map as ownership. A round-local snapshot paired with Λ.captured_kind is itself a valid DefinedBoundary.
                  -- Graceful convergence paths: (i) Phase 3 ImplicitTermination (residual ↦ default_at_surfacing | override), (ii) Phase 4 completed (residual ↦ FinalGateAnswer) — via ExplicitTermination or substrate exhaustion with residual remaining, (iii) substrate exhaustion with `residual = ∅` → DefinedBoundary directly (nothing for Phase 4 to classify)
 Phase          ∈ {0, 0b, 1, 2, 3, 4}
 
 ── PHASE TRANSITIONS ──
 Phase 0: T, B_prior? → Probe(T) → scan_B_prior(T) → Λ.B_prior → Bᵢ?                                           -- boundary existence checkpoint + optional hermeneutic-seed DETECTION (silent); detection binds Λ.B_prior but does NOT seed B — B does not exist yet (loop state, incl. boundary_map, is initialized at Phase 0b step 4 after the kind is captured and the certificate passes, since binding is gated on a passing certificate)
-Phase 0b: T, KindRouteMap → sync_kind_route(T) → Stop → captured_kind
+Phase 0b: T → sync_kind_route(T) → KindRouteMap → Stop → captured_kind
        → bind_kind(captured_kind) → KindBinding
        → certify(KindBinding, registry) → DeficitFitCertificate
        → (status = pass) bind_value_space → BoundaryClassification → init_loop_state(default_for(kind), B = seed_if_kind_match(Λ.B_prior, captured_kind) ∪ ∅)
@@ -164,19 +165,20 @@ Phase 0 → Phase 0b: boundary_undefined(T) = true                              
 Phase 0 → deactivate: boundary_undefined(T) = false                                         -- no undefined boundary signal
 Phase 0b → Phase 1: certificate.status = pass ∧ BoundaryClassification bound                               -- kind captured, fit certified, value-space frozen → enter the per-cycle loop
 Phase 0b → deactivate (route): certificate.status = route                                   -- a sibling deficit owns the kind → route_away(RoutePair.target), residual untreated (kind out-of-scope for bound)
+Phase 0b → deactivate (clean pre-loop abort): Esc                                           -- user exits at the kind-dispatch sync before loop-state init; no boundary_map / residual / cycle_n exists yet, so nothing to finalize and no DefinedBoundary is emitted (distinct from Phase 2/4 Esc, which finalizes BoundaryEssence at the current cycle_n)
 Phase 0b → Phase 0b (re-sync): certificate.status = ambiguous ∨ KindBinding.atomicity = non-atomic
                                                                                             -- overlapping deficit fit OR compound kind → split / route / one-turn narrow disambiguation, then re-certify BEFORE binding values (fail-closed; never bind under ambiguity)
 Phase 1 → Phase 2:  Sub-D[cycle_n] non-empty ∧ ¬auto_resolved                               -- per-cycle anchor domain surfaced, requires user judgment
 Phase 1 → Phase 3:  Sub-D[cycle_n] non-empty ∧ auto_resolved                                -- definitive assignment found in substrate, skip Phase 2
 Phase 1 → Phase 4:  Sub-D[cycle_n] empty ∧ Λ.residual ≠ ∅                                   -- substrate-exhaustion path to explicit bulk classify (residual remains)
-Phase 1 → converge: Sub-D[cycle_n] empty ∧ Λ.residual = ∅                                    -- substrate exhausted, every surfaced domain already classified → DefinedBoundary directly (no empty Phase 4 gate)
+Phase 1 → converge: Sub-D[cycle_n] empty ∧ Λ.residual = ∅ → DefinedBoundary = { map: Λ.boundary_map, kind: Λ.captured_kind }  (no fresh B' is integrated in this branch — emit the current complete boundary_map snapshot, complete by the round-local invariant, paired with the captured kind)                                    -- substrate exhausted, every surfaced domain already classified → DefinedBoundary directly (no empty Phase 4 gate)
 Phase 2 → Phase 3:  A received                                                              -- per-cycle classification accepted
 Phase 3 → Phase 1:  ¬termination_intent ∧ ¬Esc → derive default' → cycle_n += 1             -- continue loop with next-cycle default
 Phase 3 → converge (implicit): TerminationIntent = ImplicitTermination → finalize(B', residual, default_at_surfacing | override) → emit DefinedBoundary
                                                                                             -- round-local terminator: Phase 2-surfaced default committed (NOT re-derived)
 Phase 3 → Phase 4:  TerminationIntent = ExplicitTermination                                 -- user-judged satisfaction with explicit residual classification request
 Phase 3 → deactivate (ungraceful):  Esc                                                     -- residual untreated, BoundaryEssence finalized at current cycle_n
-Phase 4 → converge: bulk_classify(residual) completed                                       -- BoundaryMap + BoundaryEssence finalized
+Phase 4 → converge: bulk_classify(residual) completed → DefinedBoundary = { map: B', kind: Λ.captured_kind }                                       -- BoundaryMap + BoundaryEssence finalized
 Phase 4 → deactivate (ungraceful):  Esc                                                     -- final gate aborted, residual untreated, BoundaryEssence finalized at current cycle_n
 
 ── LOOP ──
@@ -213,6 +215,7 @@ converge iff (Phase 3 ImplicitTermination ∨ Phase 4 completed ∨ substrate_ex
   substrate_exhaustion_empty_residual: Phase 1 substrate exhausted (Sub-D empty) ∧ Λ.residual = ∅ — every surfaced domain already classified per-cycle, nothing remains for Phase 4 → emit DefinedBoundary directly (the `residual = ∅` terminal of the DefinedBoundary type)
   user_esc:                    user exits via Esc key at any Phase 2 or Phase 4 (ungraceful, residual untreated, BoundaryEssence finalized at current cycle_n)
   route_deactivate:            Phase 0b certificate.status = route → route_away(RoutePair.target), non-convergent exit (kind out-of-scope for bound; no DefinedBoundary emitted)
+  phase0b_esc:                 Phase 0b sync_kind_route Esc → clean pre-loop deactivate before loop-state init; no boundary_map / residual / cycle_n exists, nothing to finalize, no DefinedBoundary emitted — a non-convergent pre-loop exit (cf. route_deactivate; distinct from user_esc, the in-loop Phase 2/4 exit that finalizes BoundaryEssence)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -265,7 +268,7 @@ Round-local BoundaryMap composition: each Phase 2 cycle produces a complete Boun
 
 **Definition over Assumption**: When a decision's boundary — who decides, which way it should go, how wide it reaches, or which category frames it — is unsettled, explicitly define it rather than assuming a default. Each decision point deserves its own boundary definition. The purpose of boundary probing is to produce a shared BoundaryMap — a Transactive Memory directory that makes explicit who knows what, how each boundary is settled, and where calibration is needed.
 
-**Stigmergy signal principle**: BoundaryMap is a signal (TMS directory pointer), not a payload. It carries a settlement disposition per boundary — the signal exists in session context via Session Text Composition, and downstream behavior emerges from LLM reading the disposition in conversation context. The disposition records HOW each boundary value gets settled downstream (not who authored this `/bound` answer — Phase 2 is always user-classified), and its behavioral signal is the SAME for every boundary kind: **User-supplies** signals standard context collection (downstream gates present open questions); **AI-proposes** signals ENRICH-AND-PRESENT (expanded context collection with candidate generation); **AI-autonomous** signals RESOLVE-OR-PRESENT (expanded context collection with resolution attempt); **Dismiss** signals settle-by-default (proceed with the stated default — a committed disposition, not a skip). BoundaryMap and BoundaryEssence are output as separate session text artifacts; no structured data channel is required. No explicit receiver implementation is needed in downstream protocol definitions — the session context is the environment, and behavioral adjustment is the emergent response.
+**Stigmergy signal principle**: BoundaryMap is a signal (TMS directory pointer), not a payload. It carries a settlement disposition per boundary — the signal exists in session context via Session Text Composition, and downstream behavior emerges from LLM reading the disposition in conversation context. The disposition records HOW each boundary value gets settled downstream (not who authored this `/bound` answer — Phase 2 is always user-classified), and its behavioral signal is the SAME for every boundary kind: **User-supplies** signals standard context collection (downstream gates present open questions); **AI-proposes** signals ENRICH-AND-PRESENT (expanded context collection with candidate generation); **AI-autonomous** signals RESOLVE-OR-PRESENT (expanded context collection with resolution attempt); **Dismiss** signals settle-by-default (proceed with the stated default — a committed disposition, not a skip). The BoundaryMap (paired with its captured kind, per the DefinedBoundary = { map, kind } contract) and BoundaryEssence are output as separate session text artifacts; no structured data channel is required. No explicit receiver implementation is needed in downstream protocol definitions — the session context is the environment, and behavioral adjustment is the emergent response.
 
 **Multi-consumer architectural independence**: BoundaryMap is consumed by 9 downstream advisory consumers (per `graph.json`) — Aitesis as gate threshold, Prothesis as framework filter, Syneidesis as gap relevance filter, Prosoche as risk evaluation threshold, Euporia as substrate scope narrowing, Analogia as mapping-domain narrowing, Elenchus as high-leverage source narrowing, Diylisis as recipient-relevance narrowing, Hyphegesis (`/conduct`) as conduct scope narrowing — which moves are in-scope. This shared consumption is why Horismos requires independent protocol status rather than absorption into any single consumer; the boundary is a multi-consumer signal, not a private operation of a specific downstream. Independent invocation preserves the symmetric advisory relationship across all 9 consumers.
 
@@ -336,7 +339,8 @@ Heuristic signals for boundary-undefined domain detection (not hard gates):
 | Phase 1 substrate exhaustion with residual remaining → Phase 4 completed | Same as ExplicitTermination outcome; AI-detected via empty Sub-D rather than user-signaled |
 | Phase 1 substrate exhaustion with `residual = ∅` | Emit DefinedBoundary directly — every surfaced domain already classified per-cycle, nothing for Phase 4; BoundaryEssence finalized at current cycle_n |
 | Phase 0b certificate `status = route` | Route-away exit — a sibling deficit owns the captured kind; emit the `RoutePair.target` (e.g., `/inquire`, `/gap`, `/frame`, `/ground`), no DefinedBoundary; the loop never opens |
-| User Esc key | Ungraceful exit — residual untreated, BoundaryEssence finalized at current cycle_n |
+| User Esc key (Phase 2 / Phase 4, in-loop) | Ungraceful exit — residual untreated, BoundaryEssence finalized at current cycle_n |
+| User Esc key (Phase 0b, pre-loop) | Clean deactivate before the loop opens — no boundary_map / residual / cycle_n initialized yet, so nothing to finalize and no DefinedBoundary emitted (distinct from the in-loop Esc above) |
 
 ## Domain Identification
 
@@ -384,7 +388,7 @@ Verify task scope contains boundary-undefined signal and optionally seed a prior
 Before the per-cycle loop opens, **dispatch the boundary kind** through the shared meta-backbone pipeline (KindBinding → fail-closed DeficitFitCertificate → uniform settlement disposition). bound is **dispatch-first**: BoundaryMap is a multi-consumer router (9 downstream advisory consumers), so the kind must settle before any downstream consumer reads it — bound therefore carries an up-front sync rather than emerging the kind cycle-by-cycle.
 
 1. **Present the KindRouteMap (Constitution sync)** — Surface up to three recognizable kind hypotheses plus an emergent/naming free-response path. Each hypothesis carries a positive predicate, cited evidence, a differential future (what the loop classifies and how downstream consumers read it under this kind), and route-away conditions. The named kinds are **priors (recognition seeds), NOT a closed coproduct** (Rule 5: no fixed taxonomy) — the user may recognize a seed, name an emergent kind, or extend/replace a seed.
-   - **Seeds, empirically ordered** (recognition priors only): **direction/priority** (dominant in real use — which way a decision should go, what takes precedence), **scope** (how wide the decision reaches), **type/concept** (which category or concept frames the decision), **ownership** (who decides — user / AI / autonomous; usually a trailing tag). *membership is NOT a first-class kind.*
+   - **Seeds, ordered by recognition salience** (recognition priors only; the order is a design prior, not an empirical usage claim): **direction/priority** (the most salient prior — which way a decision should go, what takes precedence), **scope** (how wide the decision reaches), **type/concept** (which category or concept frames the decision), **ownership** (who decides — user / AI / autonomous; the least salient, a trailing seed). *membership is NOT a first-class kind.*
    - Capture the user's response as `Λ.captured_kind`.
 2. **Bind the kind** — `Λ.kind_binding = { label: captured_kind, positive_predicate, evidence, origin ∈ {seed, emergent}, atomicity }`. If `atomicity = non-atomic` (the captured kind bundles two distinct boundary concerns), **split or route before continuing** — re-surface the KindRouteMap with the split hypotheses; do NOT bind a value-space to a compound kind.
 3. **Certify deficit fit (fail-closed)** — `Λ.certificate = certify(kind_binding, registry)` where the registry is the documented sibling-deficit scopes — the deficit inventory + edge topology in `.claude/skills/verify/graph.json` read together with each sibling protocol's `deficit:` declaration (its SKILL.md `deficit:` line + the CLAUDE.md protocol-pair table). Check the captured kind's positive predicate against those sibling-deficit scopes:
@@ -545,7 +549,7 @@ After Phase 4 user response:
 1. Apply `FinalGateAnswer` to every residual domain (uniform or free-response-mixed).
 2. Move residual entries from `Λ.residual` to `Λ.final_gate_classified` and `Λ.final_gate_answers`.
 3. Append final-gate trace to history.
-4. Output finalized `BoundaryMap` AND `BoundaryEssence` as session text artifacts.
+4. Output the finalized DefinedBoundary — the `BoundaryMap` paired with its captured kind (`{ map, kind }`) — AND `BoundaryEssence` as session text artifacts, so a later `B_prior` detection and the downstream consumers can recover which kind the map settles.
 5. Trigger `converge` extension transition.
 
 ## Intensity
