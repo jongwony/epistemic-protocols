@@ -65,7 +65,7 @@ Initiator taxonomy:
 - `SKILL.md` must be self-contained. Do not require runtime readers to chase contributor-only docs, axiom identifiers, rule paths, design-philosophy documents, or mission/vision prose to understand the skill contract.
 - Prescriptive changes that affect protocol behavior must be compiled into the relevant `SKILL.md` Rules sections.
 - Claim-strength boundaries for runtime surfaces are tracked in `docs/runtime-dependency-ledger.md`.
-- Formal block anatomy is documented in `docs/structural-specs.md`.
+- The formal blocks are part of the runtime-normative `SKILL.md` contract — they type the prose and constitute protocol identity, not contributor spec. Their anatomy (a contributor guide *about* the blocks, distinct from the blocks themselves) is documented in `docs/structural-specs.md`.
 
 ## Progressive Disclosure
 
