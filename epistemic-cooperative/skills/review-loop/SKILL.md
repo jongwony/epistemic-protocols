@@ -72,13 +72,13 @@ Capture the **resolved base SHA** (the merge-base or PR base commit the diff is 
 2. **In-code design comments** adjacent to the changed hunks — the "why this is intentional" comments at the call sites being modified.
 3. *(Optional, secondary)* prior fresh-context session captures (e.g. anamnesis memory) when cheaply available — do not build machinery for this.
 
-Pass the bundle as **pointers, not copied content** — relevant rule-file paths plus the locations of the adjacent design comments to weight — consistent with the diff pointer: every documented source can read the repo itself, so a reference it dereferences avoids transcription cost and staleness, and bounding to the changed surface keeps the injected context small. This harvest is relay (a deterministic resolution with cited basis), not a gate. Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces.
+Pass the bundle as **pointers, not copied content** — relevant rule-file and project-guide paths plus the locations of the adjacent design comments to weight — consistent with the diff pointer: every documented source can read the repo itself, so a reference it dereferences avoids transcription cost and staleness, and bounding to the changed surface keeps the injected context small. This harvest is relay (a deterministic resolution with cited basis), not a gate. Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces.
 
 **Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates.
 
 ## Phase 1: Review
 
-Call the designated source over the current diff — together with the Phase 0 design-intent bundle — and obtain `{ findings[], verdict }`. Each finding carries the form `[severity] file:line — description`; `severity ∈ critical | high | medium | low | suggestion`; `verdict ∈ approve | needs-attention`. The per-source mechanics (how `codex` versus `code-review` produce this output) live in the Source Interface section below — Phase 1 only consumes the interface.
+Call the designated source over the current diff — together with the design-intent bundle — and obtain `{ findings[], verdict }`. Each finding carries the form `[severity] file:line — description`; `severity ∈ critical | high | medium | low | suggestion`; `verdict ∈ approve | needs-attention`. The per-source mechanics (how `codex` versus `code-review` produce this output) live in the Source Interface section below — Phase 1 only consumes the interface.
 
 ## Phase 2: Verify (against codebase + work-flow)
 
@@ -126,14 +126,14 @@ Phase 5's re-review **is** round k+1's review — one source call per round, not
 
 ## Source Interface
 
-Every source satisfies one abstraction: `(diff, design-intent) → { findings[], verdict }`. A finding is `[severity] file:line — description`; the verdict is `approve | needs-attention`. The `design-intent` input is the harvested bundle for the current changed surface (pointers to the changed-surface rules + adjacent design comments) — first resolved in the Phase 0 harvest and re-harvested before each full re-review (Phase 5) so a grown surface gets matching intent; each source's adapter is responsible for conveying it to its model so intent-explained findings are pre-filtered upstream — the input is source-agnostic, the conveyance is per-adapter. A source whose native output is richer than this shape (e.g. a sectioned report) satisfies the interface through an **extraction step** in its adapter — the adapter maps the native output onto `{ findings[], verdict }`. The set of sources is open and extensible (Emergent) — new sources may be added as long as their adapter accepts the design-intent input and yields this interface.
+Every source satisfies one abstraction: `(diff, design-intent) → { findings[], verdict }`. A finding is `[severity] file:line — description`; the verdict is `approve | needs-attention`. The `design-intent` input is the harvested bundle for the current changed surface (pointers to the changed-surface rules, project-guide design-rationale, and adjacent design comments) — first resolved in the Phase 0 harvest and re-harvested before each full re-review (Phase 5) so a grown surface gets matching intent; each source's adapter is responsible for conveying it to its model so intent-explained findings are pre-filtered upstream — the input is source-agnostic, the conveyance is per-adapter. A source whose native output is richer than this shape (e.g. a sectioned report) satisfies the interface through an **extraction step** in its adapter — the adapter maps the native output onto `{ findings[], verdict }`. The set of sources is open and extensible (Emergent) — new sources may be added as long as their adapter accepts the design-intent input and yields this interface.
 
 Review sources are **runtime-selected, not static frontmatter dependencies**: the frontmatter `skills:` list declares only the unconditionally-composed protocols (`/inquire`, `/contextualize`); sources are pluggable and called dynamically (`codex` via a background CLI call; `code-review` via a `Skill` call to the built-in), so they are intentionally not fixed `skills:` entries. Two sources are documented:
 
 | Source | Kind | Mechanics |
 |--------|------|-----------|
 | `codex` | single model, background | Launch in background and collect on the completion notification (see below). |
-| `code-review` | single, Claude-native (built-in) | Call via `Skill("code-review", ...)` passing the detected scope **and the Phase 0 design-intent bundle**; it runs its own multi-angle finder fan-out and returns a findings JSON array (`{ file, line, summary, failure_scenario }`, ranked most-severe-first, capped at 15) with **no verdict line** — the adapter derives the verdict (`[]` → approve, otherwise needs-attention) and maps each finding to `[severity] file:line — description` (severity from rank order). Claude-native and reading the same repo, it can resolve `CLAUDE.md` and code comments itself; the bundle still directs it to the changed-surface `.claude/rules/*.md` it would not otherwise weight. No external CLI, so it is available whenever the loop runs. |
+| `code-review` | single, Claude-native (built-in) | Call via `Skill("code-review", ...)` passing the detected scope **and the design-intent bundle**; it runs its own multi-angle finder fan-out and returns a findings JSON array (`{ file, line, summary, failure_scenario }`, ranked most-severe-first, capped at 15) with **no verdict line** — the adapter derives the verdict (`[]` → approve, otherwise needs-attention) and maps each finding to `[severity] file:line — description` (severity from rank order). Claude-native and reading the same repo, it can resolve `CLAUDE.md` and code comments itself; the bundle still directs it to the changed-surface `.claude/rules/*.md` it would not otherwise weight. No external CLI, so it is available whenever the loop runs. |
 
 **`codex` source mechanics**:
 
@@ -144,7 +144,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
    - Changed files: {file_list}
    Run the diff command in this repo to see exactly what changed — the diff is not inlined.
    ```
-   Also include a **Design-intent** section carrying the Phase 0 harvest as pointers (codex reads these files itself via `--cd`, read-only sandbox), so codex reads the documented intent before judging and does not spend findings refuting intentional, documented choices:
+   Also include a **Design-intent** section carrying the design-intent bundle as pointers (codex reads these files itself via `--cd`, read-only sandbox), so codex reads the documented intent before judging and does not spend findings refuting intentional, documented choices:
    ```
    ## Design intent — read these before flagging; do not spend findings merely refuting a documented choice the intent already explains
    - Project rules (read in full): {relevant_rule_paths}
