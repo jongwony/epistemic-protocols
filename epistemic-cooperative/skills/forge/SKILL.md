@@ -43,7 +43,7 @@ Each adapter provides, against a fixed contract:
 
 Narrowest seam contract: `ResolvedIntentIR × GuideSnapshot -> VendorPromptDraft`, carrying provenance and freshness. The core does not know "Seedance wants shot count first" or "a Goal needs a blocked-stop clause"; that lives in adapters.
 
-**Functor framing (Ektyposis realization)**: each adapter's `project` (`ResolvedIntentIR × GuideSnapshot → VendorPromptDraft → InitialPrompt`) is a structure-preserving realization of Ektyposis's `project_structure_preserving` morphism for that vendor/substrate — it maps the resolved-intent structure into the reference's native prompt schema, preserving structure rather than substituting a template, and declares unsupported fields as degradation (`validate`'s `stale-guide` / `transport-unsafe` / degraded-field flags) rather than silently approximating them. The `InitialPrompt` it yields is the `PromptArtifact` subtype of Ektyposis's `RealizedArtifact`; the prompt substrate is itself dereferencing-and-capable, so forge realizes the prompt family directly rather than relaying to `/distill`.
+**Functor framing (Ektyposis realization)**: each adapter's `project` (`ResolvedIntentIR × GuideSnapshot → VendorPromptDraft → InitialPrompt`) is a structure-preserving realization of Ektyposis's `project_structure_preserving` morphism for that vendor/substrate — it maps the resolved-intent structure into the reference's native prompt schema, preserving structure rather than substituting a template, and declares unsupported fields as degradation (`validate`'s `stale-guide` / `transport-unsafe` / degraded-field flags) rather than silently approximating them. The `InitialPrompt` it yields is the `PromptArtifact` subtype of Ektyposis's `RealizedArtifact`. The requested form is a substrate-native prompt, not a portable handoff, so this is a `/realize` case even when the follow-up consumer is itself a capable, dereferencing session: `/distill` may supply the carried context, but it does not replace the prompt projection when an `InitialPrompt` is the requested native artifact.
 
 ## Types
 
@@ -138,7 +138,7 @@ Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch
 
 ## Deferred Colimit (do not extract yet)
 
-The cross-adapter abstraction — "reference-grounded initial-prompt formation" generalized over reference classes — is a **deliberately deferred colimit**. Its structure is a prescriptive core plus per-instance realizations plus accumulated prior. It is **not** extracted or named now.
+The cross-adapter abstraction — "reference-grounded initial-prompt formation" generalized over reference classes — is a **deliberately deferred colimit**. Its structure is a prescriptive core plus per-instance realizations plus accumulated prior. It is **not** extracted or named now. (Scope note: the *projection morphism* `project_structure_preserving` is **already** named — by Ektyposis (`/realize`). What stays deferred is the **prompt-family adapter accumulation** across reference classes, not projection-as-such. forge realizes that morphism for the prompt family; it does not re-defer it.)
 
 Trigger to extract the meta-pattern: a built first-reference instance plus accumulated prior from real use of a second instance, per the epistemic cost asymmetry (an unused abstraction costs more than a missing one) and instance-first methodology. Naming it before that is the over-generalization the methodology refuses.
 

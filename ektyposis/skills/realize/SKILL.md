@@ -18,9 +18,9 @@ Secondary grounding, partial: Aristotle's hylomorphism (form actualized in matte
 ```
 ── FLOW ──
 Ektyposis(essence, target) → Detect(P) → projection_unformed? →
-  ¬unformed: → deactivate (already a terminal artifact, or no substrate projection is needed)
-  can_consume_portable_handoff_directly(target): → relay to /distill (a dereferencing, capability-compatible consumer reads the portable essence directly — no per-substrate projection)
-  unformed ∧ ¬can_consume_directly:  pass_n=1, loop:
+  ¬unformed: → deactivate (already a terminal artifact, or no target-native artifact is required)
+  direct_handoff_suffices(target, essence): → relay to /distill (the requested form is just a portable handoff a dereferencing, capability-compatible consumer reads directly — no native projection needed)
+  unformed ∧ ¬direct_handoff_suffices(target, essence):  pass_n=1, loop:
     F0 bind_essence(P) → (essence, target)                                     -- fix the functional role + the substrate
     F1 ground_target_reference(target) → (capabilities, primitive_inventory)   -- acquire the substrate's native artifact form + per-primitive availability [Tool: Read, WebFetch, WebSearch]
        derive_target_schema(TargetReference) → TargetSchema                    -- the structure the substrate's native artifact requires
@@ -59,7 +59,7 @@ ProtocolEssenceIR = PortableEssence specialized to a protocol SKILL.md — the o
                  where each Op is tagged one of {sense, observe, constitution, extension, track, transform}
 TargetReference = { substrate_id, native_artifact_form, capabilities: CapabilitySet, primitive_inventory: Map(Primitive, PrimitiveAvailability) }  -- the substrate to realize into; primitive_inventory is built at F1 grounding
 CapabilitySet  = the substrate's model/target capability set — what kinds of artifact it runs and what it can read or condition over (distinct from primitive_inventory, which is per-Primitive availability)
-Primitive      ∈ {codebase-read (Read/Grep/Glob), shell (Bash), file-write (Write/Edit), subagent (Task), transcript-store, structured-mode-state, web-fetch} ∪ Emergent(Primitive)  -- a capability the essence's morphism steps depend on
+Primitive      ∈ {source-read, execute-observe, persist-artifact, dispatch-subprocess, structured-state, web-fetch} ∪ Emergent(Primitive)  -- a capability the essence's morphism steps depend on; the named set is illustrative, not fixed to any one substrate class — each substrate's adapter enumerates its own (e.g. the forge Dia adapter maps these to a coding agent's Read/Grep/Glob, Bash, Write/Edit, Task, transcript stores)
 PrimitiveAvailability = Available | Unavailable(why: String)
 TargetSchema   = the structure the substrate's native artifact requires (its slot / section shape)  -- F1 derived from TargetReference
 EssenceElement ∈ {MorphismStep, GatePoint, AnswerConstructor, ConvergenceCondition, ToolGroundingOp, Invariant}  -- the structural units of the essence drawn from the ProtocolEssenceIR fields; the projection domain
@@ -67,24 +67,21 @@ TargetElement  = the substrate-native rendering of one EssenceElement (a section
 Projection     = Map(EssenceElement, TargetElement)  -- F2 structure-preserving map: each essence element rendered into the target's native form, preserving the structural relation rather than substituting a generic template
 Severity       ∈ {FAIL, DEGRADE}  -- FAIL: the unavailable primitive touches protocol identity or a convergence condition; DEGRADE: it only reduces evidence-richness or state-tracking
 DegradationEntry = { primitive: Primitive, why_unavailable: String, declared_degradation: String, severity: Severity }  -- one record of where Outcome Equivalence fails locally for this substrate
-DegradationLedger = List(DegradationEntry)  -- declare_unavailable_primitives output; the explicit record that replaces silent approximation. UnavailableInDia is its Dia specialization
+DegradationLedger = List(DegradationEntry)  -- declare_unavailable_primitives output; the explicit record that replaces silent approximation. Empty for a faithful realization (no primitive unavailable); a substrate's adapter may specialize it (e.g. the forge Dia adapter's UnavailableInDia)
 RealizationVerdict ∈ {Faithful, Degraded(DegradationLedger), Failed(DegradationLedger)}  -- F3 validate_realization output: Faithful = no unavailable primitive touched; Degraded = only DEGRADE entries; Failed = ≥1 FAIL entry
 unrealizable(e) ≡ ∃ d ∈ Λ.degradation_ledger : d declares e ∧ d.severity = FAIL  -- an EssenceElement whose required primitive is Unavailable and FAIL-classified: it cannot be carried into a TargetElement, so the realization is Failed and surfaces for Redirect
 A              = User answer ∈ {Accept, Adjust(EssenceElement), Redirect(reason)}  -- Phase 3 Gate coproduct
 RealizedArtifact = { substrate_id, artifact_body, structure_trace: Projection, degradation_ledger: DegradationLedger }  -- the RESOLUTION type; a TERMINAL substrate artifact, NOT a re-distillable PortableEssence (anti-circularity)
-PromptArtifact  = RealizedArtifact subtype for the prompt family (the forge realization); InitialPrompt and DiaRecipeInstruction sit under it  -- a substrate-specific subtype, NOT the core type
-InitialPrompt   = PromptArtifact for a follow-up session or tool (forge's endpoint form)
-DiaRecipeInstruction = PromptArtifact for the Dia substrate (a Chromium AI browser whose custom skill is a conditioning instruction over the current page/selection/tab context, not a chat message): { name, description, body }
-                 -- name → the Dia slash command without a leading "/"; description → the routing line; body → the conditioning instruction that: applies the protocol to the current Dia context (page/selection/tabs/web/chat); uses only Dia-visible evidence; declares the UnavailableInDia ledger; maintains a visible "protocol ledger" inline in the response (Dia has no structured MODE STATE); handles each Constitution gate as context-first → concise question + numbered options → stop and wait; continues from the visible ledger on follow-ups; emits the deficit → resolution trace at convergence
-UnavailableInDia = DegradationLedger specialized to the Dia substrate: entries { primitive, why_unavailable_in_dia, declared_degradation }  -- expected entries: codebase-read, shell, file-write, subagent, transcript/session stores (each Unavailable in Dia)
-can_consume_portable_handoff_directly(target) ≡ source_dereferencing(target) ∧ capability_compatible(target, essence)  -- the relay-to-distill predicate (Mode Activation Skip)
+RealizedArtifact subtypes are substrate-specific and defined per substrate (NOT in the core). PromptArtifact is one such subtype — the prompt family the forge utility realizes — with InitialPrompt its follow-up-session form. Each substrate's adapter defines its own RealizedArtifact subtype and degradation specialization: e.g. the forge Dia adapter defines DiaRecipeInstruction (a Dia browser custom-skill recipe) and UnavailableInDia (the Dia degradation ledger)
+target_native_artifact_required(target) ≡ the requested artifact is a substrate-native form other than the portable handoff itself (a prompt, recipe, goal string, browser skill, config, slide, …), so a projection is genuinely needed — the core activation axis
+direct_handoff_suffices(target, essence) ≡ the requested artifact is just the portable handoff itself ∧ source_dereferencing(target) ∧ capability_compatible(target, essence)  -- the relay-to-distill skip: a portable handoff a dereferencing, capability-compatible consumer can read directly → /distill suffices, no native projection
 source_dereferencing(target) ≡ the target can read the canonical source/repo the PortableEssence references (it dereferences pointers rather than needing them inlined)
 capability_compatible(target, essence) ≡ the target's primitive_inventory covers the essence's required primitives without degradation
 Phase          ∈ {0, 1, 2, 3, 4}
 
 ── PHASE TRANSITIONS ──
 Phase 0: essence, target → Detect(P) → projection_unformed?                               -- projection checkpoint (silent)
-       then can_consume_portable_handoff_directly(target)? → relay /distill (skip) | bind_essence(P) → (essence, target)
+       then direct_handoff_suffices(target, essence)? → relay /distill (skip) | bind_essence(P) → (essence, target)
 Phase 1: (essence, target) → F1 ground_target_reference(target) → (capabilities, primitive_inventory)   [Tool: Read, WebFetch, WebSearch]
        then derive_target_schema(TargetReference) → TargetSchema
 Phase 2: (essence, TargetSchema) → F2 project_structure_preserving(essence, TargetSchema) → Projection   -- each EssenceElement → TargetElement
@@ -93,9 +90,9 @@ Phase 3: (Projection, primitive_inventory) → F3 validate_realization → Reali
        → Q(Projection, DegradationLedger) → Stop → A                                       [Tool: Constitution interaction]
 Phase 4: A = Accept → F4 emit_realized_artifact(Projection, DegradationLedger) → RealizedArtifact
 
-Phase 0 → Phase 1:   projection_unformed(P) = true ∧ ¬can_consume_portable_handoff_directly(target) ∧ essence + target bound
-Phase 0 → relay:     can_consume_portable_handoff_directly(target) = true                 -- dereferencing, capability-compatible consumer → /distill, not /realize
-Phase 0 → deactivate: projection_unformed(P) = false                                      -- already a terminal artifact, or no substrate projection is needed
+Phase 0 → Phase 1:   projection_unformed(P) = true ∧ ¬direct_handoff_suffices(target, essence) ∧ essence + target bound
+Phase 0 → relay:     direct_handoff_suffices(target, essence) = true          -- requested form is a portable handoff to a dereferencing, capability-compatible consumer → /distill, not /realize
+Phase 0 → deactivate: projection_unformed(P) = false                                      -- already a terminal artifact, or no target-native artifact is required
 Phase 1 → Phase 2:   TargetSchema derived ∧ primitive_inventory built
 Phase 2 → Phase 3:   every EssenceElement projected to a TargetElement or unrealizable(e) (a declared FAIL the projection could not carry)
 Phase 3 → Phase 2:   A = Adjust(e) → re-project element e                                 -- structure choice revised
@@ -116,10 +113,10 @@ Degradation hard line: validate_realization classifies every unavailable-primiti
 Convergence evidence: At convergence, present the structure-preservation trace (each EssenceElement → TargetElement) and the DegradationLedger (each declared FAIL/DEGRADE with its basis). Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-converge iff realization_accepted(Λ) ∧ artifact_emitted(Λ) ∧ declared_degradation(Λ) ∧ structure_preserved(Λ) ∧ ¬user_esc
+converge iff realization_accepted(Λ) ∧ artifact_emitted(Λ) ∧ all_degradation_declared(Λ) ∧ structure_preserved(Λ) ∧ ¬user_esc
   realization_accepted(Λ): A = Accept at the Phase 3 Gate — a Faithful realization, or a Degraded realization the user accepted; a Failed realization (a declared FAIL) is accepted only when the user constitutes the FAIL gap as a known limitation rather than Redirecting
   artifact_emitted(Λ):     RealizedArtifact emitted with its structure-preservation trace and DegradationLedger
-  declared_degradation(Λ): ∀ unavailable primitive touched : a DegradationEntry exists (FAIL | DEGRADE) — no silent approximation
+  all_degradation_declared(Λ): ∀ unavailable primitive touched : a DegradationEntry exists (FAIL | DEGRADE) — no silent approximation; vacuously satisfied (empty ledger) for a faithful realization where no primitive is unavailable
   structure_preserved(Λ):  ∀ EssenceElement : a TargetElement carries it, or a DegradationEntry declares why it could not be carried
   user_esc:                user exits via Esc at the Phase 3 Gate (ungraceful, no RealizedArtifact emitted)
 progress(Λ) = |dom(Λ.projection)| / |EssenceElements|   -- structural coverage of the projection
@@ -127,7 +124,7 @@ progress(Λ) = |dom(Λ.projection)| / |EssenceElements|   -- structural coverage
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect            (sense)        → Internal analysis (silent — projection-unformed heuristic scan; no user output)
-Phase 0 relay_check       (observe)      → Read, Grep (determine whether the target can dereference the canonical source and is capability-compatible — the relay-to-distill predicate)
+Phase 0 relay_check       (observe)      → Read, Grep (determine the requested native form and whether a portable handoff would suffice for a dereferencing, capability-compatible consumer — the relay-to-distill skip)
 Phase 0 bind_essence      (observe)      → Read (read the PortableEssence / the /distill output / the canonical source; the source is read-only)
 Phase 1 ground_target_reference (observe) → Read, WebFetch, WebSearch (acquire the substrate's native artifact form, capabilities, and primitive inventory via canonical-external retrieval, staleness-guarded)
 Phase 1 derive_target_schema (sense)     → Internal analysis (derive the artifact's required structure from the target reference)
@@ -136,7 +133,7 @@ Phase 3 validate_realization (sense)     → Internal analysis (per-element chec
 Phase 3 declare_unavailable_primitives (track) → Internal state update (Λ.degradation_ledger, Λ.verdict; append each projected (EssenceElement, TargetElement, Severity?) to Λ.history — Severity for declared-degradation elements, None otherwise)
 Phase 3 Q                 (constitution) → present (mandatory when degradation is declared or a projection choice is open: structure trace + DegradationLedger + draft artifact, then Accept | Adjust | Redirect; a Faithful zero-degradation realization proceeds as relay; Esc → loop termination at LOOP level, not an Answer)
 Phase 4 emit_realized_artifact (track)   → Internal state update (Λ.artifact)
-converge                  (extension)    → TextPresent+Proceed (structure-preservation trace + DegradationLedger + the RealizedArtifact body; proceed — the Phase 3 Gate constituted acceptance, so the emit is a deterministic relay of that judgment). Where the substrate admits file emission the artifact may also realize as Write (a deterministic write of the accepted artifact); a substrate with no file/CLI import (Dia) emits the artifact as paste-ready text only
+converge                  (extension)    → TextPresent+Proceed (structure-preservation trace + DegradationLedger + the RealizedArtifact body; proceed — the Phase 3 Gate constituted acceptance, so the emit is a deterministic relay of that judgment). Where the substrate admits file emission the artifact may also realize as Write (a deterministic write of the accepted artifact); a substrate with no file/CLI import (e.g. a browser custom-skill store) emits the artifact as paste-ready text only
 
 ── MODE STATE ──
 Λ = { phase: Phase, P: RealizationProspect,
@@ -160,13 +157,13 @@ converge                  (extension)    → TextPresent+Proceed (structure-pres
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
-/distill → /realize composes (one direction): /distill yields the reference-tolerant PortableEssence (the hub) for a dereferencing consumer; /realize is the per-substrate spoke projecting that one essence into a non-reading or capability-degraded substrate's native artifact. /realize → /distill does not compose — a RealizedArtifact is terminal: re-derive from the canonical source, never re-distill a realized artifact (realize codomain ∩ distill domain = ∅).
-forge (the prompt-family realization) identifies its projection step with /realize's project_structure_preserving: each forge adapter's project (ResolvedIntentIR × GuideSnapshot → VendorPromptDraft → InitialPrompt) is a structure-preserving realization of this morphism for that vendor/substrate, and forge's InitialPrompt endpoint is the PromptArtifact subtype of RealizedArtifact.
+/distill → /realize composes (one direction): /distill yields the reference-tolerant PortableEssence (the hub); /realize is the per-substrate spoke projecting that one essence into any target substrate's native artifact form — a prompt, recipe, goal string, browser skill, config, slide deck, or other native form. /distill suffices on its own only when the requested form is a portable handoff a capable consumer reads directly (then /realize relays to /distill). /realize → /distill does not compose — a RealizedArtifact is terminal: re-derive from the canonical source, never re-distill a realized artifact (realize codomain ∩ distill domain = ∅).
+forge (the prompt-family realization) identifies its projection step with /realize's project_structure_preserving: each forge adapter's project (ResolvedIntentIR × GuideSnapshot → VendorPromptDraft → InitialPrompt) is a structure-preserving realization of this morphism for that vendor/substrate, and forge's InitialPrompt endpoint is the PromptArtifact subtype of RealizedArtifact. forge packages the prompt-family concerns around the projection (intent resolution, reference grounding, adapter selection, staleness, transport safety); the projection step itself is this morphism.
 ```
 
 ## Core Principle
 
-**Structure-Preserving Projection over Template Substitution** (with **Declared Degradation over Silent Approximation**): A portable epistemic essence is the functional role of a capability made substrate-agnostic — the kind of object `/distill` produces for a recipient that can dereference its pointers. But some substrates cannot dereference (they read no canonical source) or lack the primitives the essence's steps depend on (no codebase read, no shell, no file write, no subagent, no structured state). For such a substrate the essence cannot be handed over directly; it must be *realized* — projected into the substrate's own native artifact form. Ektyposis performs that projection by preserving structure: each structural element of the essence (each morphism step, gate, answer constructor, convergence condition, tool-grounding operation, invariant) is rendered into a corresponding element of the target artifact, so the realized artifact reproduces the essence's *role*, not a generic template that merely name-drops it. Where the substrate is missing a primitive the essence needs, the gap is **declared** — recorded as a degradation entry naming the primitive, why it is unavailable, and what is lost — rather than silently approximated. The declaration is the explicit record of exactly where **Outcome Equivalence** fails locally for this substrate: the cells where this realization cannot reproduce the outcome a fully-capable substrate would. A realization is faithful when its structure is preserved and its every gap is on the record; it fails when an unavailable primitive touches the essence's identity or a convergence condition and that failure is surfaced for the user's judgment rather than papered over.
+**Structure-Preserving Projection over Template Substitution** (with **Declared Degradation over Silent Approximation**): A portable epistemic essence is the functional role of a capability made substrate-agnostic — the kind of object `/distill` produces. To put that essence to work in a specific substrate whose native artifact form is its own — a vendor prompt, a goal string, a tool recipe, a browser custom-skill, a config, a slide deck, a model-tailored session prompt — the essence must be *realized*: projected into that substrate's native form. This is the core, **substrate-neutral** act; the target is any substrate, none privileged. (The one case that needs no projection is the degenerate one: the requested form is *just* the portable handoff and the consumer can read it directly — there `/distill` already suffices and `/realize` relays to it.) Ektyposis performs the projection by preserving structure: each structural element of the essence (each morphism step, gate, answer constructor, convergence condition, tool-grounding operation, invariant) is rendered into a corresponding element of the target artifact, so the realized artifact reproduces the essence's *role*, not a generic template that merely name-drops it. The substrates differ in how much they can carry: a capability-rich engine carries the essence almost intact (an empty or near-empty degradation ledger), while a constrained substrate — a browser skill with no codebase read, shell, file write, subagent, or structured state — forces real gaps. Wherever the substrate is missing a primitive the essence needs, that gap is **declared** — recorded as a degradation entry naming the primitive, why it is unavailable, and what is lost — rather than silently approximated. The declaration is the explicit record of exactly where **Outcome Equivalence** fails locally for this substrate: the cells where this realization cannot reproduce the outcome a fully-capable substrate would. Degradation is therefore a *validation outcome that ranges from empty to severe*, not the reason the protocol exists. A realization is faithful when its structure is preserved and its every gap is on the record; it fails when an unavailable primitive touches the essence's identity or a convergence condition and that failure is surfaced for the user's judgment rather than papered over.
 
 ## Mode Activation
 
@@ -176,16 +173,16 @@ AI detects an unformed projection — a portable essence that needs to become a 
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/realize` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided, confirm-gated)**: An unformed projection detected — a portable essence (typically a `/distill` output, or a canonical source already distilled) is about to be carried into a substrate that cannot consume it directly (a non-reading or capability-degraded substrate such as the Dia browser). Detection is silent (Phase 0); because Ektyposis is Hybrid, the AI-detected trigger surfaces a one-line confirmation before activating.
+- **Layer 2 (AI-guided, confirm-gated)**: An unformed projection detected — a portable essence (typically a `/distill` output, or a canonical source already distilled) is about to be put to work in a substrate whose native artifact form is its own (a vendor prompt, a goal string, a tool recipe, a browser custom-skill, a config, a model-tailored session prompt), and no realized artifact yet exists for it. Detection is silent (Phase 0); because Ektyposis is Hybrid, the AI-detected trigger surfaces a one-line confirmation before activating.
 
-**Projection unformed** = a portable essence has no realized artifact in the intended target substrate, and that substrate cannot consume the portable form directly.
+**Projection unformed** = a target-native artifact is required for the essence in the target substrate, and none yet exists. (The portability of the consumer is a *skip* condition, not part of the deficit — see the skip below.)
 
 Gate predicate:
 ```
-projection_unformed(P) ≡ ¬can_consume_portable_handoff_directly(P.target) ∧ ¬exists_realized_artifact(P.essence, P.target)
+projection_unformed(P) ≡ target_native_artifact_required(P.target) ∧ ¬exists_realized_artifact(P.essence, P.target)
 ```
 
-**Boundary (distill ↔ realize)**: `/distill` yields the reference-tolerant **PortableEssence** — the hub — for a recipient that can dereference its pointers (read the canonical source/repo) and is capability-compatible with the portable form. `/realize` is the per-substrate **spoke**: it projects that one essence into a substrate that *cannot* read the source or lacks the portable form's primitives. The discriminating axis is `can_consume_portable_handoff_directly(target) ≡ source_dereferencing(target) ∧ capability_compatible(target, essence)`: when it holds, the consumer reads the distilled handoff directly, so `/realize` **skips and relays to `/distill`** (a Claude session that can read the repo uses `/distill`, not `/realize`); when it fails — a non-dereferencing or capability-degraded substrate — `/realize` activates and projects. This is the complement of distill's contextualize-skip. The composition is one-directional: `/distill → /realize` (distill the source to a portable essence, then realize that essence into a substrate); `/realize → /distill` does not occur, because a realized artifact is a **terminal** substrate artifact — re-derive from the canonical source, never re-distill a realized output.
+**Boundary (distill ↔ realize)**: `/distill` yields the reference-tolerant **PortableEssence** — the hub. `/realize` is the per-substrate **spoke**: it projects that one essence into a target substrate's native artifact form. The boundary turns on the **requested form**, not on whether the substrate is "capable" or "degraded": `direct_handoff_suffices(target, essence) ≡ the requested artifact is just the portable handoff itself ∧ source_dereferencing(target) ∧ capability_compatible(target, essence)`. When it holds — the target only wants the portable handoff and a capable consumer can read it directly — `/realize` **skips and relays to `/distill`** (hand a capable Claude session a self-contained working context → `/distill`). When a *target-native form other than the portable handoff* is requested — a vendor prompt, a goal string, a browser skill, even a model-tailored Claude initial prompt for that same capable session — `/realize` activates and projects, because the consumer's ability to read a handoff does not supply the native artifact. The same substrate can therefore route to `/distill` for one requested form and `/realize` for another. This is the complement of distill's contextualize-skip. The composition is one-directional: `/distill → /realize` (distill the source to a portable essence, then realize that essence into a substrate); `/realize → /distill` does not occur, because a realized artifact is a **terminal** substrate artifact — re-derive from the canonical source, never re-distill a realized output.
 
 ### Priority
 
@@ -210,13 +207,13 @@ Heuristic signals for an unformed projection (not hard gates):
 
 | Signal | Inference |
 |--------|-----------|
-| Substrate cannot read the source | The intended consumer has no access to the canonical repo/source the portable essence points at — the handoff would dangle |
-| Missing-primitive substrate | The target lacks a primitive the essence's steps depend on (no codebase read, no shell, no file write, no subagent, no structured state) |
-| "Make a `<substrate>` skill/recipe of this" | An explicit request to render an essence into a named substrate's artifact form (a Dia skill, a vendor prompt, a tool recipe) |
-| Portable essence in hand, wrong audience | A `/distill` output exists but its recipient is a non-reading substrate, so the portable form will not transfer as-is |
+| "Make a `<substrate>` artifact of this" | An explicit request to render an essence into a named substrate's native form — a vendor prompt, a goal string, a tool recipe, a browser skill, a config |
+| Native form ≠ portable form | The target wants its own artifact shape (not just the portable handoff), so the essence must be projected, not handed over |
+| Portable essence in hand, native artifact wanted | A `/distill` output exists but the consumer needs a substrate-native artifact, so the portable form does not transfer as the substrate's own form |
+| Missing-primitive substrate | The target lacks a primitive the essence's steps depend on (no source read, no execution, no file write, no sub-process, no structured state) — a high-degradation realization |
 
 **Skip**:
-- The target can dereference the canonical source and is capability-compatible with the portable form → the consumer reads the distilled handoff directly → route to `/distill`, not `/realize` (the distill ↔ realize boundary)
+- The requested artifact is just the portable handoff itself and a dereferencing, capability-compatible consumer can read it directly → route to `/distill`, not `/realize` (the distill ↔ realize boundary)
 - A realized artifact already exists for this essence and substrate
 - The input is itself a realized (terminal) artifact — do not re-realize it; re-derive from the canonical source if a refresh is needed
 - Phase 0 detection finds no unformed projection
@@ -237,7 +234,7 @@ Heuristic signals for an unformed projection (not hard gates):
 Verify there is an unformed projection, run the relay-to-distill check, then bind the essence and the target. Detection is **silent**; binding is the first user-visible step (Hybrid: an AI-detected trigger surfaces a one-line confirmation first).
 
 1. **Detect the unformed projection** — establish that a portable essence needs a substrate artifact that does not yet exist. The scan is silent. If none is present, deactivate — silently when AI-initiated (Layer 2), or with a one-line acknowledgment when the user invoked `/realize` (Layer 1).
-2. **Run the relay-to-distill check** — evaluate `can_consume_portable_handoff_directly(target)`: does the target dereference the canonical source AND cover the portable form's required primitives? If yes, **relay to `/distill`** and do not activate `/realize` — the consumer reads the distilled handoff directly. Only a non-dereferencing or capability-degraded substrate proceeds.
+2. **Run the relay-to-distill check** — evaluate `direct_handoff_suffices(target, essence)`: is the requested artifact *just the portable handoff itself*, and can a dereferencing, capability-compatible consumer read it directly? If yes, **relay to `/distill`** and do not activate `/realize`. When a target-native form other than the portable handoff is requested — a prompt, recipe, goal, browser skill, config, or even a model-tailored initial prompt for a capable session — `/realize` proceeds, because the consumer's ability to read a handoff does not supply that native artifact.
 3. **Bind the essence** — fix the PortableEssence (its functional role). When the source is a protocol SKILL.md, the essence is a `ProtocolEssenceIR` — the `/distill` output over that SKILL.md, carrying name, slash command, deficit, resolution, requires/preserves, invariants, ordered morphism steps, gate points, answer constructors, convergence condition with its evidence requirement, and tool-grounding operations (each tagged sense/observe/constitution/extension/track/transform). The essence is read-only for the rest of the protocol.
 4. **Bind the target** — fix the `TargetReference`: the substrate, its native artifact form, and the inputs the next phase will turn into a primitive inventory.
 
@@ -245,7 +242,7 @@ Verify there is an unformed projection, run the relay-to-distill check, then bin
 
 ### Phase 1: Target Grounding + Schema Derivation
 
-**F1 — Ground the target reference**: Acquire the substrate's native artifact form, its capabilities, and its **primitive inventory** — for each primitive the essence's steps depend on (codebase read, shell, file write, subagent, transcript/session store, structured mode state, web fetch), record `Available` or `Unavailable(why)`. Grounding is canonical-external and staleness-guarded: prefer the substrate's own current specification of its artifact form over recalled assumptions, and mark the grounding stale if its currency cannot be verified.
+**F1 — Ground the target reference**: Acquire the substrate's native artifact form, its capabilities, and its **primitive inventory** — for each primitive the essence's steps depend on (source read, execution/observation, artifact persistence, sub-process dispatch, structured state, web fetch — the substrate's own inventory, whatever its kind), record `Available` or `Unavailable(why)`. Grounding is canonical-external and staleness-guarded: prefer the substrate's own current specification of its artifact form over recalled assumptions, and mark the grounding stale if its currency cannot be verified.
 
 **Derive the target schema**: From the grounded reference, derive the `TargetSchema` — the structure the substrate's native artifact requires (its slots/sections). This is the shape the projection must fill.
 
@@ -285,7 +282,7 @@ A `Failed` realization (a declared FAIL) biases strongly toward **Redirect**; Ac
 
 ### Phase 4: Artifact Emit
 
-**F4 — Emit the realized artifact**: On Accept, emit the `RealizedArtifact` — the substrate-native `artifact_body` plus its `structure_trace` (the projection) and its `degradation_ledger`. The artifact is **terminal**: it is the substrate's own form, not a re-distillable portable essence; do not re-realize or re-distill it (re-derive from the canonical source if a refresh is needed). Where the substrate admits file or programmatic emission, the artifact may also be written deterministically; where the substrate has no file/CLI import (the Dia browser, whose store is encrypted and cloud-synced with no file/CLI/deeplink import), the artifact is emitted as **paste-ready text** for manual application — the protocol produces the artifact, it does not automate ingestion.
+**F4 — Emit the realized artifact**: On Accept, emit the `RealizedArtifact` — the substrate-native `artifact_body` plus its `structure_trace` (the projection) and its `degradation_ledger`. The artifact is **terminal**: it is the substrate's own form, not a re-distillable portable essence; do not re-realize or re-distill it (re-derive from the canonical source if a refresh is needed). Where the substrate admits file or programmatic emission, the artifact may also be written deterministically; where the substrate has no file/CLI import (e.g. a browser custom-skill store such as the Dia browser's, encrypted and cloud-synced with no file/CLI/deeplink import), the artifact is emitted as **paste-ready text** for manual application — the protocol produces the artifact, it does not automate ingestion.
 
 After emit, trigger `converge` and present the convergence evidence trace (structure-preservation trace + DegradationLedger).
 
@@ -293,7 +290,7 @@ After emit, trigger `converge` and present the convergence evidence trace (struc
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Few essence elements, capability-compatible-but-non-reading substrate, no degradation | Brief structure trace; relay emit (no gate) |
+| Light | Few essence elements, a capability-rich substrate that carries the essence near-intact, no degradation | Brief structure trace; relay emit (no gate) |
 | Medium | Several elements, a handful of declared degradations (DEGRADE only) | Structure trace + DegradationLedger + draft artifact; one Constitution gate |
 | Heavy | Dense essence, multiple unavailable primitives including a FAIL touch, target schema uncertain | Full structure trace + DegradationLedger with FAIL/DEGRADE severities + multi-pass re-projection + Redirect option |
 
@@ -301,8 +298,8 @@ After emit, trigger `converge` and present the convergence evidence trace (struc
 
 | Rule | Structure | Effect |
 |------|-----------|--------|
-| Gate specificity | `activate(Ektyposis) only if ¬can_consume_portable_handoff_directly(target) ∧ ¬exists_realized_artifact(essence, target)` | Prevents false activation when `/distill` (a dereferencing consumer) suffices |
-| Relay-to-distill skip | Phase 0 relays to `/distill` when `can_consume_portable_handoff_directly(target)` holds | A dereferencing, capability-compatible consumer reads the portable handoff directly — no per-substrate projection |
+| Gate specificity | `activate(Ektyposis) only if target_native_artifact_required(target) ∧ ¬exists_realized_artifact(essence, target)` | Activates on the native-artifact axis, not on a substrate's "degradedness" |
+| Relay-to-distill skip | Phase 0 relays to `/distill` when `direct_handoff_suffices(target, essence)` holds | When the requested form is just a portable handoff a capable consumer reads directly, `/distill` suffices — no native projection |
 | Ground before project | F1 grounds the substrate's native form + primitive inventory before F2 projects | The projection fills the substrate's real structure, not an assumed one; missing primitives are known before they are needed |
 | Structure-preserving, not templated | F2 renders each essence element into a target element, preserving the structural relation | The realized artifact reproduces the essence's role, not a generic shell that name-drops it |
 | Declared-degradation ban on silence | F3 records every unavailable-primitive touch as a DegradationEntry (FAIL/DEGRADE); silent approximation is forbidden | The user sees exactly where Outcome Equivalence fails locally for this substrate |
@@ -318,7 +315,7 @@ After emit, trigger `converge` and present the convergence evidence trace (struc
 3. **Structure-Preserving Projection over Template Substitution**: Project each essence element into a corresponding target element, preserving the structural relation. A generic template that names the essence without reproducing its structure is not a realization. The essence preserved is the functional role (role-functionalist), not a Platonic inner nature — the same stance as Semantic Autonomy and Outcome Equivalence.
 4. **Declared Degradation over Silent Approximation**: Every primitive the essence needs but the substrate lacks is recorded in the DegradationLedger with its severity; the ledger is the explicit record of where Outcome Equivalence fails locally for this substrate. Approximating an unavailable primitive without declaring it is a protocol violation.
 5. **Validate before emit (FAIL/DEGRADE)**: F3 classifies every unavailable-primitive touch. A FAIL (touching protocol identity or a convergence condition) makes the realization Failed and surfaces for Redirect; a DEGRADE (reducing only evidence-richness or state-tracking) is recorded and the artifact stays emittable. Emitting a Failed realization as if faithful is forbidden.
-6. **Relay-to-distill activation skip**: `/realize` activates only for a substrate that cannot consume the portable handoff directly (`¬can_consume_portable_handoff_directly(target)`). When the target dereferences the canonical source and is capability-compatible, relay to `/distill` rather than projecting — the consumer reads the distilled handoff directly.
+6. **Relay-to-distill activation skip (form-parameterized)**: `/realize` relays to `/distill` only when the requested artifact is *just the portable handoff itself* and a dereferencing, capability-compatible consumer can read it directly (`direct_handoff_suffices`). It activates whenever a target-native form other than the portable handoff is requested — even for a capable consumer (e.g. a model-tailored initial prompt for a capable session is a realize case, not a distill case). The skip is a boundary heuristic against the `/distill` overlap, **not** the protocol's deficit: the deficit is `target_native_artifact_required`, not substrate "degradedness".
 7. **Anti-circularity (terminal artifact)**: A realize output is a **terminal substrate artifact**, not a re-distillable portable essence. Only `/distill → /realize` composes (one direction); `/realize → /distill` does not occur — re-derive from the canonical source, never re-realize a terminal artifact. `realize` codomain ∩ `distill` domain = ∅. The relation to `/distill` is **advisory** (complementary deficits), not suppression: distill produces the portable hub, realize projects it to a spoke substrate.
 8. **Ground the target reference**: Every realization grounds the substrate's native artifact form and primitive inventory (canonical-external, staleness-guarded) before projecting. A projection onto an assumed, ungrounded substrate structure is not a realization.
 9. **Convergence evidence**: At convergence, present the structure-preservation trace (each EssenceElement → TargetElement) and the DegradationLedger. "Realized" as bare assertion without the per-element trace and the declared gaps is a protocol violation.
