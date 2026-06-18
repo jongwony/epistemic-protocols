@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: "Convergence-paced code/PR review-resolve loop via /review-loop. Drives a pluggable review source (codex | code-review), verifies each finding against the codebase (/inquire) and work-flow (/contextualize), auto-applies Mechanical fixes (Extension) and gates Judgment fixes by shared disposition (Constitution), risk-screens applies (substrate risk → harness permission; epistemic risk → direct Constitution), then re-reviews until the source verdict converges to approve. User-invoked via /review-loop."
+description: "Convergence-paced code/PR review-resolve loop via /review-loop. Drives a pluggable review source (codex | code-review), passing it the design intent already captured for the changed surface (relevant project rules + adjacent design comments) so intentional documented choices are pre-filtered upstream, verifies each finding against the codebase (/inquire) and work-flow (/contextualize), auto-applies Mechanical fixes (Extension) and gates Judgment fixes by shared disposition (Constitution), risk-screens applies (substrate risk → harness permission; epistemic risk → direct Constitution), then re-reviews until the source verdict converges to approve. User-invoked via /review-loop."
 skills:
   - aitesis:inquire
   - epharmoge:contextualize
@@ -15,25 +15,26 @@ A source-agnostic, convergence-paced review-resolve loop for code/PR diffs: it d
 ```
 /review-loop [source?] [scope?]
 
-source : { codex | code-review }                     -- optional; review source behind the (diff) → { findings[], verdict } interface
+source : { codex | code-review }                     -- optional; review source behind the (diff, design-intent) → { findings[], verdict } interface
                                                      --   absent → Phase 0 asks which source to use (no default)
 scope  : PR number | (implicit)                      -- optional; PR number, or implicit current-PR / working-tree detection
 ```
 
-The review source is pluggable: any source satisfying the `(diff) → { findings[], verdict }` interface can drive the loop. `codex` and `code-review` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
+The review source is pluggable: any source satisfying the `(diff, design-intent) → { findings[], verdict }` interface can drive the loop. `codex` and `code-review` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
 
 ## Pipeline Overview
 
 ```
 /review-loop [source?] [scope?]
   Phase 0  : source designation (arg → relay | absent → ask) + scope detect (PR diff | working tree)
-  Phase 1  : review    — source(diff) → { findings[], verdict }
+                          + design-intent harvest (rules/comments for the changed surface → intent bundle)
+  Phase 1  : review    — source(diff, intent) → { findings[], verdict }
   Phase 2  : verify     — per finding: /inquire (vs codebase) + /contextualize (vs work-flow);
                           drop findings failing support-integrity / context-fit (cite basis)
   Phase 3  : classify  — Mechanical → Extension (auto)
                           Judgment   → cluster by shared disposition → Constitution scope-gate
   Phase 4  : apply      — risk screen (substrate → harness permission; epistemic → Constitution) → apply approved edits
-  Phase 5  : re-review  — source(diff') → verdict'
+  Phase 5  : re-review  — source(diff', intent) → verdict'
                verdict'=approve (or 0 new) → converge ; else round k+1: these findings → Phase 2 (re-review already done; no second source call)
   free-exit : user may end the loop at any time (declared once in Phase 0)
 ```
@@ -65,11 +66,19 @@ The loop is the skill's identity; the review source is a parameter behind it. Lo
 
 Capture the **resolved base SHA** (the merge-base or PR base commit the diff is taken against) and the changed-files list — this base SHA + file list is the **pointer** the codex prompt passes; codex re-derives the diff locally with its own git (read-only sandbox, no network), so the full diff content is not inlined. Also capture diff stats for context.
 
+**Design-intent harvest.** A review source reads the diff with fresh context: it does not know *why* a choice was made, so it spends high-severity findings refuting intent the project already documented. Alongside the diff pointer, resolve the **design intent already captured for the changed surface** and pass it to the source as context, so the source pre-filters findings that an intentional, documented choice already explains — shifting that refutation upstream into the review request instead of leaving Phase 2 to re-derive it every round. Harvest from these sources, in priority order, **bounded to what touches the changed files** (never the whole rules directory):
+
+1. **Project rules** — the `.claude/rules/*.md` files (and design-rationale sections of the root or changed-directory project guide, `CLAUDE.md` or `AGENTS.md`) whose scope intersects the changed surface: matched by path/filename correspondence to the changed files or directories, or by the rule's content referencing the changed components.
+2. **In-code design comments** adjacent to the changed hunks — the "why this is intentional" comments at the call sites being modified.
+3. *(Optional, secondary)* prior fresh-context session captures (e.g. anamnesis memory) when cheaply available — do not build machinery for this.
+
+Pass the bundle as **pointers, not copied content** — relevant rule-file and project-guide paths plus the locations of the adjacent design comments to weight — consistent with the diff pointer: every documented source can read the repo itself, so a reference it dereferences avoids transcription cost and staleness, and bounding to the changed surface keeps the injected context small. This harvest is relay (a deterministic resolution with cited basis), not a gate. Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces.
+
 **Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates.
 
 ## Phase 1: Review
 
-Call the designated source over the current diff and obtain `{ findings[], verdict }`. Each finding carries the form `[severity] file:line — description`; `severity ∈ critical | high | medium | low | suggestion`; `verdict ∈ approve | needs-attention`. The per-source mechanics (how `codex` versus `code-review` produce this output) live in the Source Interface section below — Phase 1 only consumes the interface.
+Call the designated source over the current diff — together with the design-intent bundle — and obtain `{ findings[], verdict }`. Each finding carries the form `[severity] file:line — description`; `severity ∈ critical | high | medium | low | suggestion`; `verdict ∈ approve | needs-attention`. The per-source mechanics (how `codex` versus `code-review` produce this output) live in the Source Interface section below — Phase 1 only consumes the interface.
 
 ## Phase 2: Verify (against codebase + work-flow)
 
@@ -113,18 +122,18 @@ Re-call the source on the updated diff — a **FULL re-review each round**, not 
 
 Carried-forward findings — deferred at a prior disposition gate or risk screen and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly.
 
-Phase 5's re-review **is** round k+1's review — one source call per round, not a separate verdict-check followed by a fresh Phase 1 call. If the verdict is still `needs-attention`, the findings this re-review just produced become round k+1's input: increment the round counter and carry them into Phase 2 (verify) directly — do not re-call the source again at the next round's Phase 1. The re-review is full because a fix can introduce a regression a narrow incremental check would miss; only a full pass over the updated diff justifies declaring convergence.
+Phase 5's re-review **is** round k+1's review — one source call per round, not a separate verdict-check followed by a fresh Phase 1 call. If the verdict is still `needs-attention`, the findings this re-review just produced become round k+1's input: increment the round counter and carry them into Phase 2 (verify) directly — do not re-call the source again at the next round's Phase 1. The re-review is full because a fix can introduce a regression a narrow incremental check would miss; only a full pass over the updated diff justifies declaring convergence. It also re-harvests the design-intent bundle for the current changed surface — Phase 4 may have grown the surface beyond the Phase 0 harvest — so the source judges the new surface with matching intent rather than a bundle that predates the apply.
 
 ## Source Interface
 
-Every source satisfies one abstraction: `(diff) → { findings[], verdict }`. A finding is `[severity] file:line — description`; the verdict is `approve | needs-attention`. A source whose native output is richer than this shape (e.g. a sectioned report) satisfies the interface through an **extraction step** in its adapter — the adapter maps the native output onto `{ findings[], verdict }`. The set of sources is open and extensible (Emergent) — new sources may be added as long as their adapter yields this interface.
+Every source satisfies one abstraction: `(diff, design-intent) → { findings[], verdict }`. A finding is `[severity] file:line — description`; the verdict is `approve | needs-attention`. The `design-intent` input is the harvested bundle for the current changed surface (pointers to the changed-surface rules, project-guide design-rationale, and adjacent design comments) — first resolved in the Phase 0 harvest and re-harvested before each full re-review (Phase 5) so a grown surface gets matching intent; each source's adapter is responsible for conveying it to its model so intent-explained findings are pre-filtered upstream — the input is source-agnostic, the conveyance is per-adapter. A source whose native output is richer than this shape (e.g. a sectioned report) satisfies the interface through an **extraction step** in its adapter — the adapter maps the native output onto `{ findings[], verdict }`. The set of sources is open and extensible (Emergent) — new sources may be added as long as their adapter accepts the design-intent input and yields this interface.
 
 Review sources are **runtime-selected, not static frontmatter dependencies**: the frontmatter `skills:` list declares only the unconditionally-composed protocols (`/inquire`, `/contextualize`); sources are pluggable and called dynamically (`codex` via a background CLI call; `code-review` via a `Skill` call to the built-in), so they are intentionally not fixed `skills:` entries. Two sources are documented:
 
 | Source | Kind | Mechanics |
 |--------|------|-----------|
 | `codex` | single model, background | Launch in background and collect on the completion notification (see below). |
-| `code-review` | single, Claude-native (built-in) | Call via `Skill("code-review", ...)` passing the detected scope; it runs its own multi-angle finder fan-out and returns a findings JSON array (`{ file, line, summary, failure_scenario }`, ranked most-severe-first, capped at 15) with **no verdict line** — the adapter derives the verdict (`[]` → approve, otherwise needs-attention) and maps each finding to `[severity] file:line — description` (severity from rank order). Claude-native, no external CLI, so it is available whenever the loop runs. |
+| `code-review` | single, Claude-native (built-in) | Call via `Skill("code-review", ...)` passing the detected scope **and the design-intent bundle**; it runs its own multi-angle finder fan-out and returns a findings JSON array (`{ file, line, summary, failure_scenario }`, ranked most-severe-first, capped at 15) with **no verdict line** — the adapter derives the verdict (`[]` → approve, otherwise needs-attention) and maps each finding to `[severity] file:line — description` (severity from rank order). Claude-native and reading the same repo, it can resolve `CLAUDE.md` and code comments itself; the bundle still directs it to the changed-surface `.claude/rules/*.md` it would not otherwise weight. No external CLI, so it is available whenever the loop runs. |
 
 **`codex` source mechanics**:
 
@@ -134,6 +143,14 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
    - Diff command: `git diff {base_sha}...HEAD`  (PR scope; for a working-tree scope use `git diff HEAD`)
    - Changed files: {file_list}
    Run the diff command in this repo to see exactly what changed — the diff is not inlined.
+   ```
+   Also include a **Design-intent** section carrying the design-intent bundle as pointers (codex reads these files itself via `--cd`, read-only sandbox), so codex reads the documented intent before judging and does not spend findings refuting intentional, documented choices:
+   ```
+   ## Design intent — read these before flagging; do not spend findings merely refuting a documented choice the intent already explains
+   - Project rules (read in full): {relevant_rule_paths}
+   - Project-guide rationale (read in full): {project_guide_paths}  (design-rationale sections of CLAUDE.md or AGENTS.md)
+   - Design comments to weight: {design_comment_locations}  (the "why this is intentional" comments adjacent to the changed hunks)
+   A finding whose only objection is that a choice looks wrong, when the documented intent above accounts for it, is intentional design — drop it or note the intent and downgrade rather than flagging high-severity. But intent excuses the design rationale, not a defect the design actually causes: if a documented choice still produces a real bug, regression, or security hole the intent does not prevent, flag it.
    ```
    Ask for findings as `[severity] file:line — description` and a closing line `VERDICT: approve | needs-attention`.
 2. Launch via `Bash(run_in_background: true, timeout: 300000)`. `--color never` + splitting the streams (stdout to the events file, `2>` to a separate warn file) keeps the events file pure JSONL — the codex banner and any stderr warnings ride their own warn file. `--cd {repo_root}` points codex's own git/Read at the repo so it re-derives the diff against the orchestrator-supplied base SHA; `--sandbox read-only` is kept because `git diff` is a local read needing no network. If codex's git cannot resolve that base SHA the extraction comes back empty — the step-3 "empty extraction = codex failed" guard surfaces it:
@@ -188,6 +205,7 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 4. **FULL re-review each round** — re-call the source over the updated diff; do not trust an incremental delta check to declare convergence.
 5. **Verify before apply** — a finding that fails support-integrity or context-fit is dropped with its cited basis; only support-integrity-passing findings proceed to apply.
 6. **Risk screening gates risky applies regardless of class** — a Mechanical edit is still risk-screened before it lands; risk is orthogonal to the Mechanical/Judgment axis. The venue splits by substrate: destructive operations, external communication, and production mutation route to the harness permission layer; epistemic risk judgments surface as direct Constitution decisions in the loop.
+7. **Pass design intent upstream** — alongside the diff pointer, harvest the design intent already captured for the changed surface (the relevant `.claude/rules/*.md` + design-rationale sections of the project guide (`CLAUDE.md` or `AGENTS.md`), plus the design comments adjacent to the changed hunks) and pass it to the source as context, bounded to the changed files, as pointers not copied content. The source then pre-filters findings that an intentional documented choice already explains, so that refutation happens upstream in the review request rather than being re-derived in Phase 2 each round; Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces. Documented intent pre-filters only findings whose objection is the choice itself — it never licenses suppressing a real defect the documented choice actually causes, which the source still flags. Because Phase 4 can grow the changed surface (completeness sweep or licensed scope expansion), the bundle is re-harvested for the current changed surface before each full re-review rather than frozen at the Phase 0 harvest.
 
 ## Deferred (v1.x stretch)
 
