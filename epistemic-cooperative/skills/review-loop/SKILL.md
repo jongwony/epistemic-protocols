@@ -41,6 +41,8 @@ The review source is pluggable: any source satisfying the `(diff, design-intent)
 
 The loop is the skill's identity; the review source is a parameter behind it. Loop control (verify → classify → apply → re-review) is fixed; the source that produces `{ findings[], verdict }` is swappable.
 
+**Scope:** the loop resolves every source-surfaced, verification-passing finding on the changed code — including pre-existing issues in touched files and methodology concerns — not only defects the diff introduced.
+
 ## When to Use
 
 - Driving code/PR review findings all the way to resolution and convergence (verdict=approve)
@@ -51,6 +53,7 @@ The loop is the skill's identity; the review source is a parameter behind it. Lo
 
 - Reviewing a markdown artifact before fixation — that is `/comment-review` (this skill targets code/PR diffs)
 - Wanting a one-shot review with no apply phase — call a source directly (the codex CLI or `/code-review`); for a cross-model composition, assemble it with `/conduct` (frame supplies the lenses, conduct arranges the review topology) — `/review-loop` is the loop that drives findings to approve
+- Wanting to resolve ONLY findings your PR's own changes introduced (not pre-existing issues surfaced in the touched files) — `/review-loop` drives the whole changed surface to convergence; for a PR-introduced-only pass, use a one-shot reviewer (the codex CLI or `/code-review`) and triage manually
 - Trivial single-line edits where a direct Edit is faster than a review loop
 
 ## Phase 0: Source Designation + Scope Detection
