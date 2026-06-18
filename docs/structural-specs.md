@@ -2,6 +2,12 @@
 
 Implementation-level specifications for SKILL.md formal blocks. These are descriptive references for protocol editing, not prescriptive principles.
 
+## Formal Blocks Are Runtime-Normative, Not Contributor Spec
+
+The `Definition` code blocks — FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, CONVERGENCE, and their peers — are **LLM-facing and runtime-normative**, and they are **constitutive of protocol identity**: they *type* the prose, fixing what each phase, gate, transition, and resolution means. A runtime model reads them to execute the protocol; they are part of the normative `SKILL.md` contract (per `CLAUDE.md` Runtime Contract: "`SKILL.md` carries the normative user contract"; and `.claude/rules/derived-principles.md` Zero-Shot Instruction Preference: "SKILL.md formal blocks (Definition code blocks) are LLM-facing by definition").
+
+The contributor-facing *prescriptive* surface is `.claude/rules/` plus `CLAUDE.md` (and exposition under `docs/`) — **never the formal blocks**. This document is the one contributor-facing artifact *about* the formal blocks: it documents their anatomy and editing conventions. Keep the two layers distinct — the anatomy guide is contributor-facing; the blocks it describes are runtime-normative. Do not classify a formal block as "contributor-facing spec" and drop or thin it when producing a reduced or single-shot realization of a protocol: removing a formal block removes the type that constitutes the protocol. The block governs *what* the protocol is; how its symbols are *rendered* to a user is a separate emit-layer concern (see §User-Facing Emit Load Disciplines below, and the Output Style's Vocabulary rendering).
+
 ## SKILL.md Formal Block Anatomy
 
 All protocols share this structure within `Definition` code block:
