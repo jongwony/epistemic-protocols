@@ -1,6 +1,6 @@
 ---
 name: steer
-description: "Project profile recalibration via session calibration drift audit. Scan session calibration moves for Constitution overapplication, Extension misapplication, and existing profile drift, present per-cluster evidence for user-constituted verdict, then write an updated user-global or project-local project-profile rule file via Circular Return. Use this skill whenever the user wants to 'recalibrate project profile', 'audit calibration drift', 'reinduce Cognitive Partnership Move defaults', 'steer project profile', or invokes /steer. Periagoge family — extends /induce with a writable rule inscription step for ProjectProfile."
+description: "Project profile recalibration via session calibration drift audit. Scan session calibration moves for Constitution overapplication, Extension misapplication, and existing profile drift, present per-cluster evidence for user-constituted verdict, then write an updated user-global or project-local project-profile rule file via Circular Return — and, when a direction has settled, inscribe a citable clause into the Settled Directions registry adjacent to the project Northstar. Use this skill whenever the user wants to 'recalibrate project profile', 'audit calibration drift', 'reinduce Cognitive Partnership Move defaults', 'steer project profile', or invokes /steer. Periagoge family — extends /induce with a writable rule inscription step for ProjectProfile and the Settled Directions registry."
 user_invocable: true
 ---
 
@@ -18,6 +18,8 @@ This skill is a Periagoge family extension. Generic Periagoge (`/induce`) crysta
 
 This skill stands in time-axis dual relationship to `/probe` (prospective fit recognition). Both refuse AI-side resolution and treat user recognition as the constitutive act. The writable persistence layer is what makes Steer useful for keeping the profile current as a project's needs change.
 
+Steer maintains a **second inscription target** alongside the profile: a **Settled Directions registry**. When a confirmed cluster shows that a resolution direction has been recurringly constituted the same way — observed practice consistently auto-resolves (relays) what the profile would gate — that direction has *settled*, and it graduates into a citable convention clause. Downstream gate decisions cite such a clause to present a finding as relay rather than re-gating a direction the project has already decided. The registry lives in the project guide (`AGENTS.md` / `CLAUDE.md`), in a `## Settled Directions` section placed adjacent to the project's Northstar/mission section (the section is created if absent). Both write targets are governed by the same Phase 5 final approval; the profile rolls back through a timestamped backup (when an existing profile is present) and the registry through version control (the project guide is git-tracked, matching the `/realign` convention for that file). A settled-directions clause is the output when a cluster's implication names a settled direction rather than a profile-variable value.
+
 Phase 3 per-cluster recognition is verification-category — the user verifies the AI's classification accuracy of an already-detected drift cluster, not a forward-trajectory selection. The Differential Future Requirement does not apply to the per-cluster verdict gate by the same logic that exempts Anamnesis Phase 2 recognition gates (past-identity synthesis, not future-trajectory commitment): a 1-correct option structure (was-drift / was-aligned) is legitimate by purpose because downstream diff assembly is a deterministic consequence of the verdict, not a user-selected trajectory. Phase 5 final approve gate IS forward-looking (write or not write) and follows the Differential Future Requirement.
 
 ## When to Use
@@ -27,6 +29,7 @@ Invoke this skill when:
 - The user wants to refresh `~/.claude/rules/project-profile.md` (user-global) or `.claude/rules/project-profile.md` (project-local) based on a recent session's calibration moves
 - The user wants empirical evidence about which Cognitive Partnership Move axes (Constitution / Extension / six profile variables) need recalibration
 - A target session contains enough calibration moves (gate interactions, auto-resolutions, agent boundary actions) to support a meaningful audit
+- A resolution direction has been constituted the same way often enough that re-gating it is over-gating, and the user wants it recorded as a citable Settled Directions clause adjacent to the project Northstar
 
 Skip when:
 - The deficit is forward-looking (use `/probe` for prospective deficit recognition)
@@ -41,7 +44,7 @@ Skip when:
 |-------|-----------|---------|-----------|--------|-------------|
 | `/probe` | Prospective (present situation) | Deficit recognition fit review | RECOGNIZE | ProtocolRoute or FitReviewNote | Session text |
 | `/induce` | In-process (instance set) | Abstraction crystallization | INDUCE | CrystallizedAbstraction | Session text |
-| `/steer` | Retrospective (target session) | Cognitive Partnership Move calibration drift | INDUCE extended with writable inscription, with routing to operational layer when finding shape mismatches | UpdatedProjectProfile, NoUpdateNote, DiffArtifact, or OperationalLayerRecommendation | Writable rule file (Approve disposition) or session text (other dispositions) |
+| `/steer` | Retrospective (target session) | Cognitive Partnership Move calibration drift | INDUCE extended with writable inscription, with routing to operational layer when finding shape mismatches | UpdatedProjectProfile, NoUpdateNote, DiffArtifact, or OperationalLayerRecommendation | Writable rule file + Settled Directions registry (Approve disposition) or session text (other dispositions) |
 
 The skill family coexists by operation and persistence — none replaces the others. Steer is for keeping the project profile current with observed practice; the other skills serve forward-looking or in-conversation needs.
 
@@ -133,9 +136,9 @@ Loop Phase 3 over clusters in evidential-strength order (highest-evidence first)
 
 ### Phase 4: Tier Resolution — Assemble Diff and Fit-Shape Check
 
-Assemble a profile diff from confirmed cluster implications:
+Assemble a profile diff from confirmed cluster implications. First **partition** the confirmed clusters by implication target: a cluster whose implication names a *settled direction* routes to the settled-directions delta (assembled below) and is excluded from profile translation; every other confirmed cluster routes to the profile diff. The two targets are disjoint per cluster — no cluster contributes to both, so a registry-only cluster never becomes a (spurious) profile-variable change.
 
-1. For each confirmed cluster, translate the cluster implication into a concrete profile variable change (or calibration result change, when the cluster's implication is structural rather than per-variable)
+1. For each confirmed cluster **routed to the profile diff** (i.e., not partitioned to the settled-directions delta), translate the cluster implication into a concrete profile variable change (or calibration result change, when the cluster's implication is structural rather than per-variable)
 2. Resolve cross-cluster conflicts where two or more clusters propose incompatible values for the same variable; when the conflict requires user judgment, surface it in Phase 5 alongside the candidate values
 3. Construct the diff representation: `before` (existing profile) → `after` (proposed profile), variable-by-variable, with provenance citing the confirming cluster(s)
 4. Fit-shape check — evaluate whether the assembled diff fits the project profile rule file structure (six variables + Floor / Bounded zone + calibration result). Mismatch signals:
@@ -145,7 +148,9 @@ Assemble a profile diff from confirmed cluster implications:
 
 When one or more signals fire, accumulate them into `mismatch_signals` (Set(MismatchSignal)) and carry it into Phase 5; the diff itself is still assembled (the user retains override authority — picking Approve forces prose inscription regardless of the recommendation).
 
-Phase 4 emits no surfacing. The assembled diff (with `mismatch_signals` set, possibly empty) becomes the input to Phase 5.
+Assemble the settled-directions delta in parallel with the profile diff. For each confirmed cluster whose implication names a *settled direction* — a resolution direction observed practice has constituted the same way often enough that re-gating it would be over-gating (commonly an ExtensionMisapplied cluster, where practice auto-resolves what the profile gates) — construct a `SettledDirection` clause: a one-line statement of the direction, the basis (the cluster evidence that settled it), and the originating cluster type. Clusters whose implication is a profile-variable value contribute to the profile diff, not the delta; the two outputs are disjoint per cluster. When no confirmed cluster names a settled direction, the delta is empty and the registry is left untouched at Phase 5.
+
+Phase 4 emits no surfacing. The assembled diff and settled-directions delta (with `mismatch_signals` set, possibly empty) become the input to Phase 5.
 
 ### Phase 5: Circular Return — Final Approve and Write
 
@@ -166,11 +171,16 @@ Calibration result delta:
   Before: <Extension-default | Constitution-default | mixed>
   After:  <new classification>
 
+Settled Directions delta (when non-empty):
+  <clause> — basis: <cluster evidence> (origin: <cluster type>)
+  ... (one line per settled-direction clause; merged into the registry by clause identity)
+
 Conflicting clusters (if any):
   <variable>: <candidate_a> vs <candidate_b> — needs user choice
 
-Backup target: <existing_profile_path>.bak.YYYYMMDD-HHMMSS
+Backup target (when an existing profile is present; skipped on first-time induction): <existing_profile_path>.bak.YYYYMMDD-HHMMSS
 Write target:  <existing_profile_path>
+Registry write target (when delta non-empty): <registry_path> (## Settled Directions, adjacent to Northstar; rollback via version control)
 ```
 
 When `mismatch_signals` is non-empty (Phase 4 fit-shape check fired one or more signals), surface them as text output between the diff presentation and the approval interaction:
@@ -191,19 +201,19 @@ Then present the final approval Constitution interaction:
 How would you like to proceed with this diff?
 
 Options:
-1. Approve — write the proposed profile to <write_target>; create backup at <backup_path> first
-2. Modify — adjust specific variables before write (specify which and how)
+1. Approve — write the proposed profile to <write_target>; create backup at <backup_path> first (skipped on first-time induction, when no existing profile is present). When the settled-directions delta is non-empty, also write the Settled Directions registry at <registry_path> (rollback via version control)
+2. Modify — adjust specific profile variables and/or settled-direction clauses before write (specify which and how)
 3. Reject — discard the diff; the existing profile remains unchanged; emit NoUpdateNote
-4. Defer — emit the diff as a session-text artifact without writing; the user can apply manually later
+4. Defer — emit the diff and any settled-directions delta as a session-text artifact without writing; the user can apply manually later
 5. RouteToOperationalLayer — emit OperationalLayerRecommendation artifact (mismatch signal + recommended layer + realization template); rule file unchanged. Surface this option only when Phase 4 fit-shape check fired.
 ```
 
 After response:
 
-- **Approve** — execute write sequence: (i) create timestamped backup of existing file (or skip backup when existing file is absent), (ii) write the new profile to the target path, (iii) append a structured entry to the trial index (`steer-trials.md` at the same layer scope), (iv) emit UpdatedProjectProfile session-text artifact with the diff trace, the backup path for rollback, and the index entry path
-- **Modify** — accept the user's variable-level adjustments, regenerate the diff, re-present Phase 5 Constitution interaction
+- **Approve** — execute write sequence: (i) create timestamped backup of existing profile file (or skip backup when existing file is absent), (ii) write the new profile to the target path, (iii) when the settled-directions delta is non-empty, write the `## Settled Directions` section — merging each clause into the existing section by identity, or creating the section adjacent to the Northstar/mission section when absent (registry rollback is through version control, no `.bak`), (iv) append a structured entry to the trial index (`steer-trials.md` at the same layer scope), (v) emit UpdatedProjectProfile session-text artifact with the diff trace, the settled-directions delta, the profile backup path for rollback (when present), the registry write path when the delta was non-empty, and the index entry path
+- **Modify** — accept the user's adjustments to profile variables and/or settled-direction clauses, regenerate the diff and the settled-directions delta, re-present Phase 5 Constitution interaction
 - **Reject** — emit NoUpdateNote session-text artifact recording the reviewed clusters and dismissed diff; existing file unchanged; trial index untouched (no inscription to track)
-- **Defer** — emit the diff as a paste-ready markdown block AND keep the existing profile file unchanged for now; the user retains the audit work for manual application later (distinct from Reject, which discards the diff entirely); trial index untouched until the user manually applies the diff
+- **Defer** — emit the diff and any settled-directions delta as paste-ready markdown blocks AND keep both write targets unchanged for now; the user retains the audit work for manual application later (distinct from Reject, which discards the diff entirely); trial index untouched until the user manually applies the diff
 - **RouteToOperationalLayer** — emit OperationalLayerRecommendation session-text artifact recording: (i) the fit-shape mismatch signal that triggered the routing, (ii) the recommended operational layer per finding shape (hooks, system prompt, CI/CD, settings.json), (iii) a realization template (concrete trigger + behavior outline + scope) for downstream implementation. Append a structured entry to the trial index (`steer-trials.md` at the same layer scope) so the proposed routing is inventoried even when implementation is deferred to a downstream task. Existing rule file unchanged. Steer's role is to recognize the routing and emit the realization template; implementation belongs to a downstream task using the appropriate substrate tooling
 
 After integration, log the disposition. The rule file write (Approve) or the index inscription (Approve and RouteToOperationalLayer) is the Circular Return — the inscribed profile becomes the new prejudgment baseline for the next `/steer` invocation, and the trial index becomes the at-a-glance inventory of trials this project's `/steer` has produced.
@@ -222,11 +232,13 @@ Steer(scope) → Phase0(scope, user_confirm) →
           Dismiss(cluster): record_dismissed(cluster) → next
           Reorient(cluster, implication'): record_modified(cluster, implication') → next
           Stop: break loop
-      Assemble(confirmed_clusters, P_existing) → diff →
+      Assemble(confirmed_clusters, P_existing) → (diff, settled_directions_delta) →
       fit_shape_check(diff) → mismatch_signals →
-      present(diff, backup_path, mismatch_signals) → Qc(approve) → Stop → A →
-        Approve: backup(P_existing) → write(P_proposed, layer) → append_index(layer) → emit(UpdatedProjectProfile)
-        Modify(adjustments): regenerate(diff, adjustments) → re-present Phase5
+      present(diff, settled_directions_delta, backup_path, mismatch_signals) → Qc(approve) → Stop → A →
+        Approve: [P_existing ≠ P_∅: backup(P_existing)] → write(P_proposed, layer) →
+                 [settled_directions_delta ≠ ∅: write(settled_directions_registry)] →
+                 append_index(layer) → emit(UpdatedProjectProfile)
+        Modify(adjustments): regenerate(diff, settled_directions_delta, adjustments) → re-present Phase5
         Reject: emit(NoUpdateNote) → no write
         Defer: emit(DiffArtifact) → no write
         RouteToOperationalLayer: append_index(layer) → emit(OperationalLayerRecommendation)
@@ -239,22 +251,24 @@ SessionCalibrationMoves
   → scan(session, calibration_moves)    -- trial inscription start
   → classify(moves, drift_taxonomy)     -- trial inscription complete
   → present_per_cluster(cluster, V)     -- per-cluster validation
-  → assemble_diff(confirmed)            -- tier resolution
+  → partition(confirmed) → assemble_diff(profile_bound) ∧ assemble_settled_directions_delta(settled_direction_bound)  -- tier resolution: disjoint partition of confirmed clusters (profile-bound vs settled-direction), two disjoint outputs
   → fit_shape_check(diff)                -- operational-layer material detection
-  → present_diff(approve, mismatch_signals)  -- final Constitution interaction
-  → [Approve: write(profile, layer, backup); RouteToOperationalLayer: (no write)]
-                                          -- branch on disposition; write only on Approve
-  → append_index(layer)                   -- trial inventory append (both branches)
-  → emit(UpdatedProjectProfile | OperationalLayerRecommendation)
-                                          -- circular return (inscription) OR routing artifact
-  → UpdatedProjectProfile | OperationalLayerRecommendation
+  → present_diff(approve, settled_directions_delta, mismatch_signals)  -- final Constitution interaction
+  → [Approve: write(profile, layer, backup) ∧ (settled_directions_delta ≠ ∅ → write(registry));
+     Reject: (no write); Defer: (no write); RouteToOperationalLayer: (no write)]
+                                          -- exhaustive over terminal dispositions; Modify(adjustments) re-enters Phase 5 (regenerate diff + delta), not a terminal branch; writes occur on Approve only; registry write gated on non-empty delta
+                                          -- registry is project-scoped (the project guide), NOT layer-parameterized: a user_global profile run still writes the registry to the current project guide; rollback via version control, not a .bak
+  → [Approve | RouteToOperationalLayer: append_index(layer); Reject | Defer: (no append)]   -- trial inventory append on Approve and RouteToOperationalLayer only
+  → emit(UpdatedProjectProfile | NoUpdateNote | DiffArtifact | OperationalLayerRecommendation)
+                                          -- per disposition: Approve → UpdatedProjectProfile; Reject → NoUpdateNote; Defer → DiffArtifact (carries diff + settled_directions_markdown); RouteToOperationalLayer → OperationalLayerRecommendation
+  → UpdatedProjectProfile | NoUpdateNote | DiffArtifact | OperationalLayerRecommendation
 requires: calibration_drift_opaque(scope) ∧ scope_resolved(user)  -- activation precondition + Phase 0 confirmation
 deficit:  CalibrationDriftOpaque             -- activation precondition (user-invoked Layer 1)
 preserves: SessionHistory                    -- read-only audit; SessionCalibrationMoves are derived
 invariant: Recognition over Profile-Mutation, Backup over Risk
-                                              -- ProjectProfileFile is mutated at Phase 5 Approve;
-                                              -- mutation is gated by Phase 5 Constitution final approve and
-                                              -- protected by mandatory pre-write timestamped backup
+                                              -- ProjectProfileFile and the Settled Directions registry are mutated at Phase 5 Approve;
+                                              -- both mutations are gated by the single Phase 5 Constitution final approve;
+                                              -- the profile write is protected by a pre-write timestamped backup when an existing profile is present (skipped on first-time induction), the registry write (when delta non-empty) by version-control rollback (the project guide is git-tracked)
 
 ── TYPES ──
 Scope             = { target_session: SessionId, layer: Layer, cross_session: Bool }
@@ -283,9 +297,11 @@ MismatchSignal    ∈ {ProgrammaticTrigger, LayerMixing, BehavioralEnforcement} 
 MismatchSignals   = Set(MismatchSignal) — Phase 4 fit-shape check output; empty set when diff fits the project profile rule file structure; non-empty set lists all detected signals (compound mismatches are common, e.g., ProgrammaticTrigger + BehavioralEnforcement co-occurring)
 RecommendedLayer  ∈ {Hook(HookEvent), SystemPrompt, CI_CD, Settings, Other(String)}
 HookEvent         ∈ {SessionStart, SessionEnd, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SubagentStop, PreCompact, Notification}
-UpdatedProjectProfile = session text { layer, diff, backup_path, write_path, index_entry_path }
+UpdatedProjectProfile = session text { layer, diff, settled_directions_delta, write_path, index_entry_path,
+                                       backup_path?, registry_write_path? }
+                    -- backup_path present unless first-time induction (P_existing = P_∅); registry_write_path present only when settled_directions_delta ≠ ∅
 NoUpdateNote      = session text { reviewed_clusters, dismissed_diff }
-DiffArtifact      = session text { diff_markdown, suggested_apply_path }
+DiffArtifact      = session text { diff_markdown, settled_directions_markdown, suggested_apply_path }
 OperationalLayerRecommendation = session text { mismatch_signals: MismatchSignals,
                                                 recommended_layer: RecommendedLayer,
                                                 realization_template: String,
@@ -300,6 +316,13 @@ TrialIndexEntry   = { date: ISO8601Date, disposition: A,
                       reevaluation: Optional(String),
                       status: TrialStatus }
 TrialStatus       ∈ {active, completed, retracted}
+SettledDirection  = { clause: String, basis: String, origin_cluster: DriftCluster }
+                    -- a resolution direction recurringly constituted the same way, promoted to a citable convention;
+                    -- cited by downstream gate decisions to present a finding as relay rather than re-gating it
+SettledDirectionsDelta = List(SettledDirection)
+                    -- registry change assembled in Phase 4 disjointly from the profile diff; the write step merges
+                    -- each clause by identity (new clause appended, matching clause revised) — no separate add/update branch;
+                    -- empty (∅) when no confirmed cluster names a settled direction → registry untouched
 Phase             ∈ {0, 1, 2, 3, 4, 5}
 
 ── SCOPE-BINDING ──
@@ -322,11 +345,11 @@ Phase 2: Scope → Read(session_jsonl) → extract(M[]) → classify(M[]) → cl
 Phase 3: clusters → loop:
            present(cluster, evidence) → Qc(cluster) → Stop → V → integrate    -- per-cluster Constitution interaction [Tool]
            V = Stop → break loop
-Phase 4: confirmed_clusters → assemble_diff(P_existing) → diff →
+Phase 4: confirmed_clusters → partition(profile_bound, settled_direction_bound) → assemble_diff(P_existing) ∧ assemble_settled_directions_delta → (diff, delta) →
            fit_shape_check(diff) → mismatch_signals                                -- tier resolution + fit-shape detection (sense)
-Phase 5: diff, mismatch_signals → present(diff, backup_path, mismatch_signals) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
-           A = Approve → Write(backup) → Write(P_proposed) → Append(steer_trials_md) → emit(UpdatedProjectProfile)
-           A = Modify → regenerate(diff) → Phase 5 re-entry
+Phase 5: diff, delta, mismatch_signals → present(diff, delta, backup_path, mismatch_signals) → Qc(approve) → Stop → A  -- final Constitution interaction [Tool]
+           A = Approve → [P_existing ≠ P_∅: Write(backup)] → Write(P_proposed) → [delta ≠ ∅: Write(registry)] → Append(steer_trials_md) → emit(UpdatedProjectProfile)
+           A = Modify → regenerate(diff, delta) → Phase 5 re-entry
            A = Reject → emit(NoUpdateNote)
            A = Defer → emit(DiffArtifact)
            A = RouteToOperationalLayer → Append(steer_trials_md) → emit(OperationalLayerRecommendation)
@@ -334,17 +357,17 @@ Phase 5: diff, mismatch_signals → present(diff, backup_path, mismatch_signals)
 ── LOOP ──
 Phase 3 → Phase 4 → Phase 5 →
   Approve: write executed; converge
-  Modify: regenerate diff; Phase 5 re-entry
+  Modify: regenerate diff + delta; Phase 5 re-entry
   Reject: no write; converge with NoUpdateNote
   Defer: no write; converge with DiffArtifact
   RouteToOperationalLayer: no write; converge with OperationalLayerRecommendation
-Phase 5 Modify re-entry max 3 iterations. Exhausted: surface assembled diff as DiffArtifact (defer) → converge.
+Phase 5 Modify re-entry max 3 iterations. Exhausted: surface assembled diff + settled-directions delta as DiffArtifact (defer) → converge.
 Convergence evidence: per disposition, emit one of {UpdatedProjectProfile, NoUpdateNote, DiffArtifact, OperationalLayerRecommendation}.
 
 ── CONVERGENCE ──
 recognized = all clusters processed (each cluster has Confirm/Dismiss/Reorient verdict OR loop reached Stop)
 approved   = A ∈ {Approve, Reject, Defer, RouteToOperationalLayer}
-written    = A = Approve ∧ backup_created ∧ write_succeeded
+written    = A = Approve ∧ (backup_created ∨ first_time_induction) ∧ write_succeeded ∧ (settled_directions_delta = ∅ ∨ registry_write_succeeded) (profile — pre-write backup when an existing profile is present, skipped on first-time induction where P_existing = P_∅; the Settled Directions registry write must also succeed when settled_directions_delta ≠ ∅, rolled back through version control)
 session_text(steer) ∋ {UpdatedProjectProfile | NoUpdateNote | DiffArtifact | OperationalLayerRecommendation}
 
 ── TOOL GROUNDING ──
@@ -360,11 +383,13 @@ Phase 3 present           (extension)    → TextPresent+Proceed (cluster eviden
 Phase 3 Qc                (constitution) → present (per-cluster verdict; constitutive user verdict per cluster; Active-authority required at every cluster)
 Phase 3 integrate         (track)        → Internal Λ update (cluster verdict recording)
 Phase 4 assemble_diff     (sense)        → Internal analysis (variable-level diff construction)
+Phase 4 assemble_delta    (sense)        → Internal analysis (settled-directions delta construction from confirmed clusters naming a settled direction; disjoint from the profile diff)
 Phase 4 fit_shape_check   (sense)        → Internal analysis (operational-layer material detection — programmatic-trigger / layer-mixing / behavioral-enforcement signals)
-Phase 5 present           (extension)    → TextPresent+Proceed (diff + backup path + mismatch_signals pre-gate)
+Phase 5 present           (extension)    → TextPresent+Proceed (diff + settled-directions delta + backup path(s) + mismatch_signals pre-gate)
 Phase 5 Qc                (constitution) → present (final approval; writable side effect with cross-session persistence; user authority required; option set extends to RouteToOperationalLayer when mismatch_signals is non-empty)
-Phase 5 backup            (transform)    → Write (timestamped backup file; Approve disposition only)
+Phase 5 backup            (transform)    → Write (timestamped backup of the existing profile; Approve disposition only; skipped on first-time induction when P_existing = P_∅)
 Phase 5 Write             (transform)    → Write (proposed profile to layer path; Approve disposition only)
+Phase 5 write_registry    (transform)    → Write (merge Settled Directions clauses into the `## Settled Directions` section of the project guide, adjacent to the Northstar/mission section, creating the section when absent; Approve disposition only, when settled_directions_delta ≠ ∅; rollback via version control, not a .bak)
 Phase 5 append_index      (transform)    → Write (append TrialIndexEntry to steer-trials.md at chosen layer; Approve and RouteToOperationalLayer dispositions only; create file on first entry)
 Phase 5 emit              (extension)    → TextPresent+Proceed (UpdatedProjectProfile or NoUpdateNote or DiffArtifact or OperationalLayerRecommendation, per disposition)
 converge                  (extension)    → TextPresent+Proceed (convergence evidence trace)
@@ -373,10 +398,12 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 Λ = { phase: Phase, scope: Scope, P_existing: ProjectProfile,
       moves: List(CalibrationMove), clusters: List(Cluster),
       cluster_verdicts: List<(Cluster, V)>,
-      diff: Optional(Diff), mismatch_signals: MismatchSignals,
+      diff: Optional(Diff), settled_directions_delta: SettledDirectionsDelta,
+      mismatch_signals: MismatchSignals,
       recommended_layer: Optional(RecommendedLayer),
       modify_iterations: Nat,
       backup_path: Optional(Path), write_path: Optional(Path),
+      registry_write_path: Optional(Path),
       index_path: Optional(Path), index_entry: Optional(TrialIndexEntry),
       disposition: Optional(A), active: Bool, cause_tag: String }
 
@@ -394,6 +421,8 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 **Write paths**:
 - Proposed profile: same path as the existing profile at the chosen layer
 - Backup: `<existing_profile_path>.bak.YYYYMMDD-HHMMSS` (timestamp ensures backups accumulate without overwrite); backup is created before the proposed profile write so rollback is `mv <backup_path> <existing_profile_path>`
+- Settled Directions registry: the project guide at the project root (`AGENTS.md` / `CLAUDE.md`), in a `## Settled Directions` section adjacent to the Northstar/mission section (section created when absent). Project-scoped — settled directions are project conventions — and written only when the settled-directions delta is non-empty
+- Registry rollback: through version control — the project guide is git-tracked, so rollback is `git checkout -- <registry_path>` (or `git revert` of the commit). No separate `.bak` file, matching the `/realign` convention for the same file
 - Trial index: `.claude/steer-trials.md` (project_local) or `~/.claude/steer-trials.md` (user_global). Lazy-loaded inventory file appended to on Approve and RouteToOperationalLayer dispositions; created on first entry. Reject and Defer leave it untouched.
 
 **First-time induction**: when the existing profile file is absent, Phase 1 treats `P_existing = P_∅` (empty profile). Phase 5 Approve writes the proposed profile without backup (nothing to back up). The emitted UpdatedProjectProfile artifact notes the first-time induction status. The trial index append still occurs.
@@ -405,19 +434,19 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 3. **Current-session default scope** — Default target session is the current session. Other sessions require explicit session_id argument or Phase 0 confirmation.
 4. **Cross-session evidence requires explicit confirmation** — Reading prior session calibration history beyond the target session requires explicit user confirmation per invocation.
 5. **Per-cluster verdict required** — Every non-empty cluster receives a Constitution verdict from the user before Phase 4 diff assembly proceeds.
-6. **Final approval required before write** — Write to the rule file executes only when Phase 5 Approve is selected. Reject and Defer dispositions emit session-text artifacts only; the rule file remains at its current contents.
-7. **Pre-write backup mandatory** — When the existing profile file is present, a timestamped backup is created before the proposed profile write. The backup path is surfaced in the Phase 5 Constitution interaction so the user knows the rollback target before approving.
+6. **Final approval required before write** — Both writes (the profile rule file and, when the settled-directions delta is non-empty, the Settled Directions registry) execute only when Phase 5 Approve is selected. Reject and Defer dispositions emit session-text artifacts only; both targets remain at their current contents.
+7. **Pre-write rollback safety mandatory** — Every write target has a surfaced rollback route before approval. The profile rule file gets a timestamped pre-write backup when an existing profile is present (skipped on first-time induction, where P_existing = P_∅), its path surfaced in the Phase 5 Constitution interaction. The Settled Directions registry rolls back through version control instead — the project guide is git-tracked, matching the `/realign` convention for that same file — so no `.bak` is created for it. The user knows every rollback route before approving.
 8. **Detection with Authority** — AI detects calibration drift candidates with cited move evidence and proposes its own verdict (Phase 3) and disposition (Phase 5) with rationale; the user constitutes per-cluster verdicts and the final approval. AI proposal IS what surfaces the AI's evidence-grounded reading before user constitution — the user evaluates a concrete position rather than constituting a verdict against undifferentiated cluster data. The verdict and approval acts remain the user's exclusive territory.
 9. **Recognition over Recall** — Present structured cluster evidence and verdict options via Cognitive Partnership Move (Constitution) and yield turn. Each cluster verdict option carries differential implication so the post-selection state is anticipatable. The Phase 5 final approval options carry differential downstream trajectories (write executed vs no-write artifact only vs deferred manual apply).
 10. **Context-Question Separation** — All cluster evidence and diff context is presented as text output before the Constitution interaction. The interaction contains only the verdict or approval options.
 11. **Convergence evidence** — Phase 5 emit produces a transformation trace: per cluster, show (cluster_evidence → user_verdict → diff_contribution); final disposition; backup path when written. Per-cluster evidence is required.
 12. **Periagoge family lineage** — Steer extends `/induce`'s morphism with a writable rule inscription step. The dialectical triangulation core is preserved (Phase 3 cluster verdicts and Phase 5 final approval realize the same Confirm / Dismiss / Reorient pattern as `/induce`'s widen / narrow / fuse / reorient / dismiss moves, narrowed to the audit-and-inscribe operation), but `/steer` adds a write step that crosses the `preserves`/`mutates` boundary that `/induce` itself respects. The lineage is operational extension on the output axis, not a type-narrowing specialization.
 13. **Coexistence with /probe** — Steer does not replace prospective fit recognition (`/probe`). The pair coexists by time axis and persistence layer: prospective fit recognition (session text, no inscription) versus retrospective calibration with writable rule inscription.
-14. **Out-of-scope** — Past protocol contract integrity audit lies outside Steer's territory. Prospective deficit fit recognition is `/probe` territory. In-conversation abstraction crystallization without rule inscription is `/induce` territory. Steer's scope is limited to project-profile rule layer recalibration based on observed Cognitive Partnership Move calibration.
+14. **Scope** — Steer's scope is project-profile rule layer recalibration **and** Settled Directions registry maintenance, both based on observed Cognitive Partnership Move calibration. The two inscription targets are the profile rule file (six variables + calibration result) and the `## Settled Directions` section of the project guide (adjacent to the Northstar/mission section); both are governed by the same Phase 5 final approval, with the profile protected by a timestamped backup and the registry by version-control rollback. Out-of-scope: past protocol contract integrity audit, prospective deficit fit recognition (`/probe` territory), and in-conversation abstraction crystallization without rule inscription (`/induce` territory). The registry write is the only Steer mutation that touches a top-level guidance document rather than a rule file — it is bounded to the `## Settled Directions` section and never edits the Northstar/mission prose or any other section. The sibling `/realign` owns the project guide's *direction line* (the Northstar/mission text itself); Steer owns the *settled-directions list* adjacent to it — distinct artifacts in the same document — and shares realign's version-control rollback convention for the shared file.
 15. **Provisional release modality** — This skill is released provisionally; architectural inscription (graph.json placement, advisory edges, formal lineage to /induce) is deferred pending accumulated cross-session use evidence.
 16. **Vocabulary discipline** — Output uses positive framing: "drift", "calibration", "fit", "recalibration", "induce", "steering". Output frames per-cluster verdicts as recognition acts and the final approval as a writable inscription. The skill describes evidence and diffs; verdicts and approvals belong to the user.
 17. **Routing to operational layer when finding shape mismatches** — When the Phase 4 fit-shape check detects that the assembled diff requires programmatic-trigger enforcement, mixes universal principle with specific instance and recognition mechanism, or has behavioral enforcement (rather than visibility) as its load-bearing requirement, surface RouteToOperationalLayer as a Phase 5 disposition. The operational layer (hooks, system prompts, CI/CD, settings.json) realizes Standing-authority delegation — calibration prose belongs to the epistemic substrate, while behavioral enforcement belongs to the operational substrate. Steer's role is to recognize the routing and emit a realization template (concrete trigger + behavior outline + scope); implementation belongs to a downstream task using the appropriate substrate tooling. The user retains override authority — selecting Approve forces prose inscription despite the routing recommendation.
-18. **Trial index inscription** — On Approve and RouteToOperationalLayer dispositions, append a structured TrialIndexEntry to `steer-trials.md` at the chosen layer (`.claude/steer-trials.md` for project_local, `~/.claude/steer-trials.md` for user_global). The entry records date, disposition type, mismatch signals (always present as a Set — empty for Approve, non-empty for RouteToOperationalLayer), realization references (rule file path or operational-layer artifact paths), origin context, falsification conditions (if specified), reevaluation cadence, and current status. The index file is lazy-loaded — its purpose is single-glance trial inventory across sessions, not per-turn enforcement. Reject and Defer dispositions do not append (no inscription to track yet). The index file is created on first entry; existing entries are not retroactively backfilled. Layer scope of the index matches the disposition's layer — index inscription does not cross layer boundaries.
+18. **Trial index inscription** — On Approve and RouteToOperationalLayer dispositions, append a structured TrialIndexEntry to `steer-trials.md` at the chosen layer (`.claude/steer-trials.md` for project_local, `~/.claude/steer-trials.md` for user_global). The entry records date, disposition type, mismatch signals (always present as a Set — the actual Phase 4 fit-shape signal set is recorded verbatim: empty when the diff fit cleanly, non-empty when fit-shape signals fired; thus non-empty for RouteToOperationalLayer and also non-empty for an Approve that overrode a routing recommendation, so the override is preserved rather than misrecorded as empty), realization references (profile rule file path, Settled Directions registry path when the delta was written, or operational-layer artifact paths), origin context, falsification conditions (if specified), reevaluation cadence, and current status. The index file is lazy-loaded — its purpose is single-glance trial inventory across sessions, not per-turn enforcement. Reject and Defer dispositions do not append (no inscription to track yet). The index file is created on first entry; existing entries are not retroactively backfilled. Layer scope of the index matches the disposition's layer — index inscription does not cross layer boundaries.
 
 ## UX Safeguards
 

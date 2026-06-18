@@ -233,6 +233,8 @@ Gate predicate:
 context_tethered(W) ≡ ∃ item(i, W) : depends_on_author_session(i) ∧ ¬resolvable_by_stable_ref(i)
 ```
 
+**Boundary (contextualize ↔ distill)**: distill closes a *portability* gap to an **absent zero-memory recipient** — it reads the source immutably (monotone) and builds a new self-contained artifact, preserving the source. When the deficit is instead *fit to an observable **present** context* (a correct result that mutates to fit a convention, environment, or audience — `ApplicationDecontextualized`, non-monotone), it is not a distill case → route to `/contextualize`. This is the complement of contextualize's `portability-to-an-absent-recipient → /distill` guard.
+
 ### Priority
 
 <system-reminder>
@@ -267,6 +269,7 @@ Heuristic signals for session-tethered residue detection (not hard gates):
 - The recipient shares the author session (same continuous context), so no portability gap exists
 - User explicitly says the residue is acceptable for the intended recipient
 - Phase 0 detection finds no session-tethered residue
+- The deficit is **fit to an observable present context** (a correct result that may not fit the convention, environment, or audience where it is applied — `ApplicationDecontextualized`), NOT portability to an absent zero-memory recipient → route to `/contextualize` (the contextualize ↔ distill boundary). Demarcation: target-context observability (observable present context → `/contextualize`; absent zero-memory recipient → distill), transform-target (the result mutates to fit → `/contextualize`; the source is preserved and a new portable artifact is built → distill), and monotonicity (non-monotone, mutation breeds new mismatches → `/contextualize`; monotone, read-only of the source → distill)
 
 ### Mode Deactivation
 

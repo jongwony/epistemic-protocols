@@ -6,6 +6,12 @@ This file provides always-loaded guidance for coding agents when working in this
 
 Epistemic Protocols is a domain-free metalanguage of structured types and morphisms for human-AI collaboration: it reduces cognitive load by eliciting unknowns into utterance, constraining AI attention without bias, and resolving interaction deficits at their root within bounded loops before local misalignment hardens into system-wide rework.
 
+## Settled Directions
+
+Citable registry of conventions whose resolution direction is already constituted. The option-set relay test (in `.claude/rules/axioms.md`) cites a clause here to collapse settled-direction option-set entropy — a finding whose direction a clause below already determines is presented as relay, not gated. Maintained by `/steer`: a direction recurringly constituted the same way graduates into a clause here.
+
+- **Settled direction collapses the ask** (reversible forks only): when a reversible fork's direction is already determined by stated project goals, an established sibling convention, or a declared calibration, the option-set is settled — proceed or relay rather than re-asking the question those sources already answer. Basis: recurring same-direction constitution in calibration practice; first inscribed with the settled-direction relay test (#538).
+
 ## Project Overview
 
 This repository packages epistemic dialogue protocols as plugin skills. Each protocol transforms a specific interaction deficit into a resolution object, for example **FrameworkAbsent → FramedInquiry** (`/frame`), **GapUnnoticed → AuditedDecision** (`/gap`), **ContextInsufficient → InformedExecution** (`/inquire`), **MappingUncertain → ValidatedMapping** (`/ground`), and **AbstractAporia → ResolvedEndpoint** (`/elicit`).
