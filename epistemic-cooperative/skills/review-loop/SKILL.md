@@ -148,6 +148,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
    ```
    ## Design intent — read these before flagging; do not spend findings merely refuting a documented choice the intent already explains
    - Project rules (read in full): {relevant_rule_paths}
+   - Project-guide rationale (read in full): {project_guide_paths}  (design-rationale sections of CLAUDE.md or AGENTS.md)
    - Design comments to weight: {design_comment_locations}  (the "why this is intentional" comments adjacent to the changed hunks)
    A finding whose only objection is that a choice looks wrong, when the documented intent above accounts for it, is intentional design — drop it or note the intent and downgrade rather than flagging high-severity. But intent excuses the design rationale, not a defect the design actually causes: if a documented choice still produces a real bug, regression, or security hole the intent does not prevent, flag it.
    ```
