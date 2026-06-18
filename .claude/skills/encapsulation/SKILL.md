@@ -6,7 +6,9 @@ allowed-tools: Read, Grep, Glob
 
 # Encapsulation Audit
 
-Review LLM-facing prose for compliance with Plugin Encapsulation: the runtime contract surface (`Skill.md` plus plugin description metadata) must be self-contained and intelligible without contributor documentation. Project-local contributor utility; emits structured findings without writing fixes.
+The project-local instance of the **semantic-audit engine** (`docs/audit-engine.md`). The shared mechanism — read-only Claude-judge review, the scope shape, severity calibration, self-application stance, and on-demand slash invocation — is defined in that engine document; read it for the parts this skill holds in common with its published siblings. Below is this instance's principle parameter and the one place its output schema extends the engine's base.
+
+This instance audits LLM-facing prose for Plugin Encapsulation: the runtime contract surface (`Skill.md` plus plugin description metadata) must be self-contained and intelligible without contributor documentation. Project-local — its principle is coupled to this repo's deterministic encapsulation check and contributor model, and so (unlike `white-bear` and `zero-shot`) it is not decouplable into a portable skill. Read-only: it emits structured findings and writes no fixes.
 
 ## Purpose
 
@@ -20,6 +22,8 @@ Surface encapsulation drift that the deterministic verify check (`artifact-self-
 
 ## Scope
 
+The engine's scope shape applies, specialized to the runtime contract surface this principle governs:
+
 **In scope** (the runtime contract surface where this principle applies):
 - `*/skills/*/SKILL.md` — protocol and utility skill prose (full document; the runtime contract surface)
 - `.claude-plugin/plugin.json` `description` field — plugin description metadata (discovery/routing layer)
@@ -32,9 +36,9 @@ Surface encapsulation drift that the deterministic verify check (`artifact-self-
 
 ## What to evaluate
 
-The principle: the packaged runtime contract is `Skill.md` plus plugin description metadata; the surface must be self-contained, with no external references (axiom identifiers, rule file paths, design-philosophy concepts, mission/vision docs) that require reading contributor documentation. The deterministic verify check covers literal pattern matches; this audit covers semantic encapsulation.
+**The principle.** The packaged runtime contract is `Skill.md` plus plugin description metadata; the surface must be self-contained, with no external references (axiom identifiers, rule file paths, design-philosophy concepts, mission/vision docs) that require reading contributor documentation. The deterministic verify check covers literal pattern matches; this audit covers semantic encapsulation.
 
-Two signal types:
+Two signal types — this instance extends the engine's single-failure-kind shape with a failure-kind dimension:
 
 **`contributor_assumption`** — a prose passage that assumes contributor documentation knowledge to be intelligible at the runtime contract surface. The reader of the runtime contract is the LLM agent acting on the protocol, plus the user invoking the skill — neither has read `.claude/rules/`, `.claude/principles/`, or `docs/`. Test: "Does this sentence remain intelligible when read with only the SKILL.md itself and standard background knowledge?" If a sentence references a project-internal concept by name without inline definition, and the concept is not defined elsewhere in the same SKILL.md, the sentence is a finding.
 
@@ -44,7 +48,7 @@ For each candidate finding, prefer the rewrite that carries the meaning into the
 
 ## Output
 
-Emit a single JSON object as the final assistant message.
+Emit a single JSON object as the final assistant message. This is the engine's base schema plus a failure-kind dimension (`by_signal` in the summary, `signal` on each finding):
 
 ```json
 {
@@ -68,7 +72,7 @@ Emit a single JSON object as the final assistant message.
 }
 ```
 
-Severity calibration:
+Severity calibration (per the engine):
 
 | Severity | Surface |
 |----------|---------|
@@ -88,8 +92,8 @@ This SKILL.md sits in `.claude/skills/`, which is project-local contributor tool
 |---------|-----------|---------------------|
 | `verify` `artifact-self-containment` | Deterministic literal pattern matching against BANNED tokens | Banned reference tokens leaking into the runtime surface |
 | `encapsulation` | Claude-judge semantic review of runtime-surface prose | Contributor-knowledge assumption; BANNED-bypass rephrasing |
-| `white-bear` | Sibling semantic audit | Negative-framing drift |
-| `zero-shot` | Sibling semantic audit | Few-shot anchoring drift |
+| `white-bear` | Sibling semantic audit (published, portable) | Negative-framing drift |
+| `zero-shot` | Sibling semantic audit (published, portable) | Few-shot anchoring drift |
 
 The verify check and this audit are complementary on the encapsulation axis: deterministic pattern matching catches token leaks; semantic review catches meaning leaks that survive token absence.
 
