@@ -26,7 +26,7 @@ const DEFAULT_PROJECT_ROOT = path.resolve(__dirname, '..');
 const CANONICAL_PRECEDENCE = [
   'Horismos', 'Aitesis', 'Prothesis',
   'Analogia', 'Periagoge', 'Euporia',
-  'Syneidesis', 'Prosoche', 'Epharmoge', 'Elenchus', 'Diylisis', 'Hyphegesis',
+  'Syneidesis', 'Prosoche', 'Epharmoge', 'Elenchus', 'Diylisis', 'Ektyposis', 'Hyphegesis',
 ];
 
 // Canonical workflow-cluster grouping — the single source of truth for which
@@ -35,7 +35,7 @@ const CANONICAL_PRECEDENCE = [
 // first-release highlights cluster bullets. When a protocol's cluster
 // membership changes, edit here once: both the verifier and the release-notes
 // generator read this one definition (no hand-curated duplicate to drift).
-const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/distill`, `/grasp`, `/conduct`)';
+const CANONICAL_CLUSTERS = 'Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/distill`, `/grasp`, `/conduct`, `/realize`)';
 
 // Per-call memoization cache. discoverPlugins() instantiates a fresh cache
 // so callers within a single process pay one read per plugin.json regardless

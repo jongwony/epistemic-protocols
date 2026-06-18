@@ -242,6 +242,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: ὑφήγησις (leading from just ahead, guiding) — conducting the method of the work, not doing the work. Core principle: **Conduction over Substrate**. How a session's moves are ordered, isolated, reconciled, and stopped is substrate-invariant — it survives deleting every runtime noun — so the conduct form is designed independently and only then matched to a substrate, declaring degradation rather than binding one it cannot realize. Workflow position: cross-cutting, Hybrid initiator — conducts the session's whole move set before object-level cognition. Game feel: "I know what I want, but how do I run this?" → confirm it's multi-move → design the topology impact-first → hand off a method plan with checkpoints.
 
+## Ektyposis `/realize`
+
+**Situation**: You have a portable essence — say a protocol distilled out of its SKILL.md — and you want it to run inside a substrate that can't read your repo: a Dia browser skill, a vendor's prompt recipe. Handing over the portable form fails, because that substrate dereferences nothing and lacks half the primitives the essence assumes (no codebase read, no shell, no file write, no subagent). Hand-writing the target artifact instead drifts into a generic template that name-drops the protocol without reproducing how it works — and silently drops the parts the substrate can't do.
+
+**Intervention**: `/realize` first checks whether the target could just read the distilled handoff directly (if so, it relays to `/distill`). For a non-reading or capability-degraded substrate, it grounds the substrate's native artifact form and its per-primitive availability, then projects each structural element of the essence — every step, gate, answer constructor, convergence condition — into that form, preserving the structure rather than substituting a template. Every primitive the essence needs but the substrate lacks is declared as a degradation (FAIL if it touches identity or convergence; DEGRADE if it only thins evidence or state) — the explicit record of where outcome equivalence breaks for this substrate. It emits a terminal substrate-native artifact with that ledger.
+
+**Trial prompt**: "Let's practice: say 'Turn this distilled protocol into a Dia browser skill' and I'll show how /realize projects each structural element into Dia's skill form and declares which primitives degrade"
+
+**Quiz Q (situation)**: You have a clean portable handoff of a protocol, and you want it to run as a custom skill inside a browser that can't see your repo and has no shell or file access. Pasting the handoff doesn't work — it assumes tools the browser doesn't have.
+- A) Diylisis `/distill` — B) Ektyposis `/realize` — C) Epharmoge `/contextualize` — D) Analogia `/ground`
+- Answer: B
+
+**Quiz Q (design)**: You must render a portable essence into a substrate that can't read its source and lacks several of its primitives. How would you produce a faithful artifact without silently papering over what the substrate can't do?
+- Hint: The problem isn't validating a mapping (that's `/ground`) or producing the portable noun (that's `/distill`) — it's projecting one essence into a specific substrate's native form, preserving structure and declaring every unavailable-primitive gap.
+
+**Philosophy**: ἐκτύπωσις (a modelling in relief, an impression) — forming the essence in a new substrate's matter. Core principle: **Structure-Preserving Projection over Template Substitution**, with **Declared Degradation over Silent Approximation**. What carries across substrates is the functional role (role functionalism / multiple realizability), the same stance as Semantic Autonomy and Outcome Equivalence; the realized artifact reproduces that role and records exactly where the substrate forces a gap. Workflow position: cross-cutting, Hybrid initiator — composes one-directionally after `/distill` (distill → realize); a realized artifact is terminal, never re-distilled. Game feel: "this works in Claude — now make it run *there*" → ground the substrate → project structure-preservingly → declare what degrades → terminal artifact.
+
 ## Composition Patterns
 
 Real sessions rarely use a single protocol. Composition — invoking multiple protocols together — is often more valuable than any isolated call. Three patterns that appear most in practice:

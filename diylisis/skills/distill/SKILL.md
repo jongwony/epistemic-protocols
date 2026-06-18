@@ -235,6 +235,8 @@ context_tethered(W) ≡ ∃ item(i, W) : depends_on_author_session(i) ∧ ¬reso
 
 **Boundary (contextualize ↔ distill)**: distill closes a *portability* gap to an **absent zero-memory recipient** — it reads the source immutably (monotone) and builds a new self-contained artifact, preserving the source. When the deficit is instead *fit to an observable **present** context* (a correct result that mutates to fit a convention, environment, or audience — `ApplicationDecontextualized`, non-monotone), it is not a distill case → route to `/contextualize`. This is the complement of contextualize's `portability-to-an-absent-recipient → /distill` guard.
 
+**Boundary (distill ↔ realize)**: distill yields the reference-tolerant `PortableHandoff` (the hub) for a recipient that can dereference the canonical source and is capability-compatible with the portable form. When the consumer instead *cannot* read the source or lacks the portable form's primitives — a non-dereferencing or capability-degraded substrate like the Dia browser — the per-substrate projection of that one essence into the substrate's native artifact is `/realize` (Ektyposis), not distill. The composition is one-directional (`/distill → /realize`) and a realized artifact is **terminal** — never re-distilled; re-derive from the canonical source instead. The relation is **advisory** (complementary deficits: distill produces the portable hub, realize projects the spoke), not suppression.
+
 ### Priority
 
 <system-reminder>

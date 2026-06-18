@@ -1,7 +1,7 @@
 {
-  "name": "diylisis",
-  "version": "0.4.13",
-  "description": "Distill a session-tethered working context into a self-contained portable handoff — /distill (διύλισις: refining/distillation)",
+  "name": "ektyposis",
+  "version": "0.1.0",
+  "description": "Realize a portable epistemic essence into a target substrate's native artifact — /realize (ἐκτύπωσις: a modelling in relief)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -12,13 +12,13 @@
   "keywords": [
     "epistemic-protocols",
     "skills",
-    "diylisis"
+    "ektyposis"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Diylisis",
-    "shortDescription": "Distill a session-tethered working context into a self-contained portable handoff — /distill (διύλισις: refining/distillation)",
-    "longDescription": "Distill a session-tethered working context into a self-contained portable handoff — /distill (διύλισις: refining/distillation)",
+    "displayName": "Ektyposis",
+    "shortDescription": "Realize a portable epistemic essence into a target substrate's native artifact — /realize (ἐκτύπωσις: a modelling in relief)",
+    "longDescription": "Realize a portable epistemic essence into a target substrate's native artifact — /realize (ἐκτύπωσις: a modelling in relief)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [
@@ -28,7 +28,7 @@
     ],
     "websiteURL": "https://github.com/jongwony/epistemic-protocols",
     "defaultPrompt": [
-      "Use diylisis for this task"
+      "Use ektyposis for this task"
     ],
     "brandColor": "#2563EB"
   }

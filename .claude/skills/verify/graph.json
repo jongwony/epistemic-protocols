@@ -1,9 +1,9 @@
 {
-  "version": "2.4.0",
+  "version": "2.5.0",
   "nodes": [
     "horismos", "aitesis", "analogia",
     "periagoge", "euporia", "prothesis", "syneidesis", "prosoche", "epharmoge",
-    "elenchus", "katalepsis", "anamnesis", "diylisis", "hyphegesis"
+    "elenchus", "katalepsis", "anamnesis", "diylisis", "hyphegesis", "ektyposis"
   ],
   "edge_types": {
     "precondition": {
@@ -59,6 +59,11 @@
     { "source": "horismos", "target": "diylisis", "type": "advisory", "satisfies": "경계 맵이 distill recipient-relevance 판정 범위를 좁힘" },
     { "source": "prothesis", "target": "hyphegesis", "type": "advisory", "satisfies": "frame이 공급하는 분석 객체(렌즈)를 conduct의 배열 functor가 소비 — 비자명 배열(순서·독립성·조정·종료·라우팅)은 conduct가 설계" },
     { "source": "horismos", "target": "hyphegesis", "type": "advisory", "satisfies": "경계 맵이 지휘 범위(어떤 이동이 in-scope)를 좁힘" },
-    { "source": "hyphegesis", "target": "prosoche", "type": "advisory", "satisfies": "지휘된 방법이 situated 실행으로 핸드오프" }
+    { "source": "hyphegesis", "target": "prosoche", "type": "advisory", "satisfies": "지휘된 방법이 situated 실행으로 핸드오프" },
+    { "source": "diylisis", "target": "ektyposis", "type": "advisory", "satisfies": "distill이 산출한 portable essence가 substrate projection의 입력을 제공 (상보적 결핍; suppression 아님)" },
+    { "source": "euporia", "target": "ektyposis", "type": "advisory", "satisfies": "해소된 endpoint가 실현할 본질의 좌표를 좁힘" },
+    { "source": "aitesis", "target": "ektyposis", "type": "advisory", "satisfies": "추론된 컨텍스트가 대상 기질 grounding 범위를 좁힘" },
+    { "source": "analogia", "target": "ektyposis", "type": "advisory", "satisfies": "검증된 매핑이 본질→기질 구조 보존 projection을 강화" },
+    { "source": "horismos", "target": "ektyposis", "type": "advisory", "satisfies": "경계 맵이 realize 범위(어떤 본질/기질이 in-scope)를 좁힘" }
   ]
 }

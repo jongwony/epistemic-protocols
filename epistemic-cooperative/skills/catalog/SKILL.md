@@ -23,7 +23,7 @@ Skip when:
 
 | Invocation | Behavior |
 |------------|----------|
-| `/catalog` | Overview: 14 protocols grouped by cluster, 1-line each + usage hints |
+| `/catalog` | Overview: 15 protocols grouped by cluster, 1-line each + usage hints |
 | `/catalog {cluster}` | Cluster detail: expanded protocol cards with scenarios |
 | `/catalog {command}` | Single protocol detail: full card from scenarios.md |
 
@@ -74,6 +74,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Diylisis | `/distill` | Handoff context to a fresh zero-memory session — distill out session-tethered references into a portable handoff |
 | Katalepsis | `/grasp` | AI did work and you need a fast path to understand, approve, explain, or modify it |
 | Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins |
+| Ektyposis | `/realize` | A portable essence must become a substrate's own artifact but the target can't read the source — project it into that substrate's native form, declaring what degrades |
 
 ## Detail Mode
 

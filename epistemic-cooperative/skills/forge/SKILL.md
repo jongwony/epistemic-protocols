@@ -7,7 +7,7 @@ description: "Reference-grounded initial-prompt formation. Reads a target refere
 
 Form a ready-to-use initial prompt by grounding the user's under-determined intent in an authoritative reference document. This skill does not run the downstream tool, open branches, or create PRs. It surfaces the user's intent coordinates, grounds them against a reference (dynamically fetched, staleness-guarded), and emits one initial prompt that bootstraps a follow-up session or tool invocation.
 
-**This is a projection utility, not a runtime executor and not a new epistemic protocol.** Forge introduces no new deficit. It realizes a known composite — surface under-determined intent coordinates (reverse-induction, the `/elicit` move) ∘ ground them against a canonical external reference (the `/inquire` canonical-external move) → thin projection. The output is an initial prompt the user carries into the next session or tool.
+**This is a projection utility, not a runtime executor and not a protocol of its own.** Forge introduces no deficit *of its own*; it **realizes the Ektyposis `/realize` core deficit (ProjectionUnformed → RealizedArtifact) for the prompt family** — forge's projection step *is* Ektyposis's `project_structure_preserving`, specialized to prompt substrates. It composes the intent-resolution move (reverse-induction, the `/elicit` move) ∘ the reference-grounding move (the `/inquire` canonical-external move), then projects the resolved intent into a target prompt substrate's native artifact. The output is an `InitialPrompt` — the prompt-family `PromptArtifact` subtype of Ektyposis's `RealizedArtifact` — the user carries into the next session or tool.
 
 ## Core Contract
 
@@ -43,6 +43,8 @@ Each adapter provides, against a fixed contract:
 
 Narrowest seam contract: `ResolvedIntentIR × GuideSnapshot -> VendorPromptDraft`, carrying provenance and freshness. The core does not know "Seedance wants shot count first" or "a Goal needs a blocked-stop clause"; that lives in adapters.
 
+**Functor framing (Ektyposis realization)**: each adapter's `project` (`ResolvedIntentIR × GuideSnapshot → VendorPromptDraft → InitialPrompt`) is a structure-preserving realization of Ektyposis's `project_structure_preserving` morphism for that vendor/substrate — it maps the resolved-intent structure into the reference's native prompt schema, preserving structure rather than substituting a template, and declares unsupported fields as degradation (`validate`'s `stale-guide` / `transport-unsafe` / degraded-field flags) rather than silently approximating them. The `InitialPrompt` it yields is the `PromptArtifact` subtype of Ektyposis's `RealizedArtifact`; the prompt substrate is itself dereferencing-and-capable, so forge realizes the prompt family directly rather than relaying to `/distill`.
+
 ## Types
 
 | Type | Meaning |
@@ -55,7 +57,7 @@ Narrowest seam contract: `ResolvedIntentIR × GuideSnapshot -> VendorPromptDraft
 | `RelaySlot` | A contract slot determined by the reference plus the user's stated intent. Forge auto-fills it with a cited basis. |
 | `ConstitutionSlot` | A contract slot requiring the user's judgment. Forge fills it with a proposed default and explicitly flags it for recognition. |
 | `VendorPromptDraft` | The adapter's projection of the IR through the reference schema, with provenance, freshness, a `stale-guide` flag when the staleness guard did not pass, and a `transport-unsafe` flag when the projected payload carries shell-active tokens or secret-substitution patterns hazardous across a shell-carrier handoff. |
-| `InitialPrompt` | The endpoint artifact: an initial prompt for a follow-up session or tool. Its form is adapter-determined (a Higgsfield video prompt; a Codex `/goal …` string). |
+| `InitialPrompt` | The endpoint artifact: an initial prompt for a follow-up session or tool — the `PromptArtifact` family, the prompt-substrate realization of Ektyposis's `RealizedArtifact`. Its form is adapter-determined (a Higgsfield video prompt; a Codex `/goal …` string). |
 
 ## Phase 0: Bind Reference and Intent
 
@@ -115,14 +117,15 @@ Adapter bodies are progressively disclosed: this index is always loaded; each ad
 | `gpt-image` | Codex imagegen skill at `$CODEX_HOME/skills/.system/imagegen/` (image-only; targets `gpt-image-2`; web cookbook fallback) | a `gpt-image-2` prompt block (using the source's shared schema) plus parameter envelope |
 | `codex-goals` | OpenAI Codex Goals specification | a strong `/goal …` string for a follow-up Codex session |
 | `claude-session` | Claude prompting best-practices guide (model-axis: `prompting-claude-{model}`; first-party, reflexive) | a model-tailored handoff initial-prompt for a follow-up Claude session (`/remote-spawn` worktree or remote-control) |
+| `dia` | Dia browser (The Browser Company) custom-skill surface — a conditioning instruction over page/selection/tab context; encrypted/cloud-synced store, no file/CLI/deeplink import | a paste-ready Dia custom-skill recipe (`DiaRecipeInstruction`: name + description + body) projected from a `ProtocolEssenceIR`, with an `UnavailableInDia` degradation ledger; the fullest forge realization of the Ektyposis `/realize` morphism |
 
 Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch_guide_snapshot` / `derive_prompt_schema` / `project` / `validate`). New references plug in by adding an `adapters/<name>.md` file as accumulated prior — see Deferred Colimit; do not pre-build a registration framework.
 
 ## Rules
 
-1. **No new deficit** (Architectural — role boundary): forge is a projection utility, not a protocol. It introduces no deficit→resolution morphism. It composes the `/elicit` and `/inquire` canonical-external moves and projects; it does not name a new epistemic deficit.
+1. **No deficit of its own; realizes Ektyposis** (Architectural — role boundary): forge is a projection utility, not a protocol. It names no deficit→resolution morphism *of its own*; instead it **realizes the Ektyposis `/realize` deficit (ProjectionUnformed → RealizedArtifact) for the prompt family** — forge's projection step is identified with Ektyposis's `project_structure_preserving`, specialized to prompt substrates. It composes the `/elicit` and `/inquire` canonical-external moves and projects; the epistemic deficit it discharges is Ektyposis's, not a new one. forge remains a utility, not a protocol.
 2. **Core stops at IR** (Architectural — boundary invariant): core output is `ResolvedIntentIR` plus the validated grounded reference. The artifact form is adapter-determined and must not be promoted to a core output type. Promoting a completion-contract form into the core re-imports the routable/provenance boundary that a separate research issue owns; keep contract-ness in the adapter.
-3. **Initial-prompt endpoint** (Architectural — handoff specificity): every adapter's projection endpoint is an initial prompt for a follow-up session or tool. This is a unifying role, not a shared output type.
+3. **Initial-prompt endpoint = PromptArtifact** (Architectural — handoff specificity): every adapter's projection endpoint is an initial prompt for a follow-up session or tool — the **`PromptArtifact`** family, the prompt-substrate realization of Ektyposis's `RealizedArtifact` (with `InitialPrompt` its follow-up-session form). This is a unifying role, not a shared output type: the real per-adapter forms remain those in the Adapter Index "InitialPrompt form" column.
 4. **Reference grounding required** (Axiom anchor — Detection with Authority): every projection grounds against a fetched reference with cited provenance. A projection without a grounded, provenance-tagged reference is not a forge output.
 5. **Recognition over Recall** (Axiom anchor — Recognition over Recall): forge emits a filled draft, not a blank question list. Relay slots are auto-filled with cited basis; constitution slots carry a proposed default explicitly flagged so the user recognizes and adjusts rather than recalls from blank.
 6. **Surfacing over Deciding** (Derived — Surfacing over Deciding): constitution slots are surfaced with their proposed defaults flagged; forge does not silently finalize a slot that requires the user's judgment. A blind full draft that hides which slots were guessed is an anti-pattern.
