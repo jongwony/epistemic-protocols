@@ -62,6 +62,7 @@ Initiator taxonomy:
 ## Runtime Contract
 
 - Runtime users interact with packaged `SKILL.md` files plus plugin metadata. Discovery metadata routes; `SKILL.md` carries the normative user contract.
+- `SKILL.md` formal blocks (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, CONVERGENCE) are LLM-facing and runtime-normative — they TYPE the prose and constitute the protocol's semantic identity. They are not contributor-only documentation; they are the specification layer executed at runtime.
 - `SKILL.md` must be self-contained. Do not require runtime readers to chase contributor-only docs, axiom identifiers, rule paths, design-philosophy documents, or mission/vision prose to understand the skill contract.
 - Prescriptive changes that affect protocol behavior must be compiled into the relevant `SKILL.md` Rules sections.
 - Claim-strength boundaries for runtime surfaces are tracked in `docs/runtime-dependency-ledger.md`.

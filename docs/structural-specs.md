@@ -2,6 +2,18 @@
 
 Implementation-level specifications for SKILL.md formal blocks. These are descriptive references for protocol editing, not prescriptive principles.
 
+## Formal Blocks: Audience and Role
+
+**SKILL.md formal blocks (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, CONVERGENCE, and related block types) are LLM-facing and runtime-normative.** They constitute the protocol's semantic identity — they TYPE the prose and carry the operational contract that runtime LLMs execute. Formal blocks are not contributor-only documentation; they are the specification layer read by both LLMs and contributors, inscribed once, and defined to be self-contained.
+
+Contributor-facing prescriptive specification surfaces are:
+- `.claude/rules/` — runtime principles (auto-loaded per turn)
+- `.claude/principles/` — lazy-loaded architectural principles
+- `CLAUDE.md` / `AGENTS.md` — project runtime contract and orientation
+- Editing conventions and verification rules in `docs/`
+
+The anatomy GUIDE in this document (the section below) is the only contributor-facing content ABOUT formal blocks — it explains how to author and verify them. The blocks themselves are runtime-normative, not contributor-documentation.
+
 ## SKILL.md Formal Block Anatomy
 
 All protocols share this structure within `Definition` code block:
