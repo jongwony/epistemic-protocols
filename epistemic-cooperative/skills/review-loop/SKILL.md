@@ -15,12 +15,12 @@ A source-agnostic, convergence-paced review-resolve loop for code/PR diffs: it d
 ```
 /review-loop [source?] [scope?]
 
-source : { codex | code-review }                     -- optional; review source behind the (diff) → { findings[], verdict } interface
+source : { codex | code-review }                     -- optional; review source behind the (diff, design-intent) → { findings[], verdict } interface
                                                      --   absent → Phase 0 asks which source to use (no default)
 scope  : PR number | (implicit)                      -- optional; PR number, or implicit current-PR / working-tree detection
 ```
 
-The review source is pluggable: any source satisfying the `(diff) → { findings[], verdict }` interface can drive the loop. `codex` and `code-review` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
+The review source is pluggable: any source satisfying the `(diff, design-intent) → { findings[], verdict }` interface can drive the loop. `codex` and `code-review` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
 
 ## Pipeline Overview
 
@@ -34,7 +34,7 @@ The review source is pluggable: any source satisfying the `(diff) → { findings
   Phase 3  : classify  — Mechanical → Extension (auto)
                           Judgment   → cluster by shared disposition → Constitution scope-gate
   Phase 4  : apply      — risk screen (substrate → harness permission; epistemic → Constitution) → apply approved edits
-  Phase 5  : re-review  — source(diff') → verdict'
+  Phase 5  : re-review  — source(diff', intent) → verdict'
                verdict'=approve (or 0 new) → converge ; else round k+1: these findings → Phase 2 (re-review already done; no second source call)
   free-exit : user may end the loop at any time (declared once in Phase 0)
 ```
