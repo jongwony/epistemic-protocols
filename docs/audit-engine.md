@@ -99,6 +99,10 @@ design).
 
 **Sync obligation.** When the engine scaffolding here changes (scope shape, output schema,
 severity calibration, self-application clause), update the compiled copies in the two
-published instances to match; `encapsulation` tracks this document by reference and needs no
-copy edit. Its principle parameter stays coupled to the repo's deterministic encapsulation
-check — keep them aligned when that check's BANNED patterns move.
+published instances to match. `encapsulation` references this document for the shared
+mechanism prose and needs no copy edit for that, but it embeds its own **extended copy** of
+the output schema (the base plus its `by_signal`/`signal` failure-kind dimension) and a
+specialized severity-calibration table — so a change to the engine's base output schema or
+severity calibration needs a matching `encapsulation` edit too. Its principle parameter also
+stays coupled to the repo's deterministic encapsulation check — keep them aligned when that
+check's BANNED patterns move.
