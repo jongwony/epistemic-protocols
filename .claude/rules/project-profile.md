@@ -1,15 +1,8 @@
 # Project Profile (epistemic-protocols)
 
-This project's Cognitive Partnership Move calibration profile (per `project-profile-calibration.md`):
+This project's Cognitive Partnership Move calibration profile (per `project-profile-calibration.md`).
 
-| Variable | Value | Rationale |
-|---|---|---|
-| Revision cost | Low | Markdown edit + `/verify` + commit |
-| Deploy fan-out | Low | Pre-broad-distribution; iterative release |
-| Dependency lock-in | None | Node.js stdlib only (plugin code); no external API contracts |
-| Runtime persistence | Low | Client AI session ephemeral |
-| Hermeneutic circle availability | High | Active dogfooding + post-deploy correction pipeline; revision pipeline cheap |
-| Notation maturity | High | Category-theoretic notation across SKILL.md formal blocks |
+**Aggregated low-cost profile** → **Extension-default** (see Calibration Result). The six-variable derivation is documentation-grade — not consulted as a table at runtime; the operative output is the Calibration Result below. Variable values (low-cost across the board): revision cost Low, deploy fan-out Low, dependency lock-in None, runtime persistence Low, hermeneutic-circle availability High, notation maturity High. Per-variable definitions and the aggregation rule: `project-profile-calibration.md §Profile Variables` + `§Calibration Rule`.
 
 ## Calibration Result
 
@@ -22,4 +15,8 @@ Bounded zone (in-principle delegatable via contract-style Standing authority + p
 
 **Inscription-decision posture** (Emergent — outside the six profile variables): when correcting application drift, articulate the correction at the abstraction axis where it originated (response-level when sufficient), and leave rule-overlap open for model interpretation.
 
-"In-principle delegatable" is a capability statement; operational realization (adding split `(extension)` TOOL GROUNDING entries for runtime-conditional specialization) is deferred to per-protocol future stages. Current SKILL.md TOOL GROUNDING `(constitution)` annotations remain runtime-authoritative.
+"In-principle delegatable" is a capability statement; its operational realization splits by `(extension)` kind:
+- **Standing-authority migration** — delegating a bounded-zone Constitution gate to a pre-committed rule (Horismos / Syneidesis / Prosoche) — stays deferred to per-protocol future stages pending accumulated use evidence.
+- **A5-collapse specialization** — a gate whose option-set reduces to a single dominant option (entropy→0, per the A5 option-set relay test) — is a distinct axis: it proceeds when its per-protocol evidence arrives, presented as relay, advancing independently of the Standing-authority deferral. No instance has landed yet; the first candidate (#557) proposes re-classifying the Anamnesis `/recollect` Phase 2 high-confidence single-candidate case from its current verification-category recognition gate to an Extension inline emit — pending implementation, so that Phase 2 gate still runs every cycle.
+
+Absent an arrived per-protocol stage of either kind, SKILL.md TOOL GROUNDING `(constitution)` annotations remain runtime-authoritative.
