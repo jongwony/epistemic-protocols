@@ -24,7 +24,7 @@ Anagoge(R) → attempts := 0 → Detect(R) →                             -- at
       |U[]| = 0 ∧ attempts < max: Rescope(R, Σ) → Stop → S → rebind(R, S) → Phase 1
       |U[]| = 0 ∧ attempts = max ∧ presented = ∅: NullMatch → inform(R, Σ) → fallback → deactivate   -- no unit ever assembled; the first empty traversal (attempts < max) already fired ≥1 Rescope
       |U[]| = 0 ∧ attempts = max ∧ presented ≠ ∅: surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units: a prior traversal assembled, so this is NOT NullMatch
-      |U[]| > 0: Qc(U[top], narrative, framing) → Stop → A →
+      |U[]| > 0: presented := presented ∪ {U[top]} → Qc(U[top], narrative, framing) → Stop → A →   -- record the assembled candidate (presented becomes the "ever-assembled" witness)
         Recognize(u): elevate_complete(u) → emit(HigherUnit_prose(u)) → converge
         Refine ∧ attempts < max: adjust(boundary ∨ traversal_scope) → Phase 1
         Reorient(d) ∧ attempts < max: rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1 / Phase 0
@@ -111,8 +111,8 @@ Phase 1: R → attempts := attempts + 1 →                            -- one in
            |U[ranked]| = 0 ∧ attempts < max → Rescope(R, Σ) → Qc → Stop → S → rebind(R, S) → Phase 1   -- empty traversal always Rescopes while budget remains
            |U[ranked]| = 0 ∧ attempts = max ∧ presented = ∅ → NullMatch → inform → fallback → deactivate   -- nothing ever assembled; ≥1 Rescope already fired (Rule 12 holds structurally)
            |U[ranked]| = 0 ∧ attempts = max ∧ presented ≠ ∅ → surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units (a prior traversal assembled) — NOT NullMatch
-           |U[ranked]| > 0 → Phase 2
-Phase 2: U[top] → Qc(U[top], narrative, framing) → Stop → A         -- recognition gate [Tool]
+           |U[ranked]| > 0 → presented := presented ∪ {U[top]} → Phase 2   -- record the assembled candidate before presenting
+Phase 2: U[top] → Qc(U[top], narrative, framing) → Stop → A         -- recognition gate [Tool]; presented already carries U[top] from the Phase 1 → Phase 2 edge
 Phase 3: A → integrate(A, R, Σ) →                                   -- integration (track); the cap bounds re-traversal — a Refine/Reorient proceeds while attempts < max, else surfaces the best candidate and deactivates
            Recognize(u) → HigherUnit_prose(u) → emit → converge
            Refine ∧ attempts < max → adjust(boundary ∨ traversal_scope) → Phase 1    -- boundary/scope adjustment (sense)
@@ -165,6 +165,7 @@ Phase 1 Rank          (sense)        → Internal analysis (recall alignment + i
 Phase 1 Rescope Qc    (constitution) → present (structured re-traversal navigation; mandatory on empty assembly before NullMatch)
 Phase 1/3 surface     (extension)    → TextPresent+Proceed (exhausted-with-units terminal, presented ≠ ∅: best candidate + traversal scope, then deactivate — reached from Phase 1 on an empty re-traversal at the cap, or from Phase 3 on a Refine/Reorient request at the cap)
 Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal, presented = ∅: traversal scope + broken-link notes + Anamnesis/Aitesis fallback offer, then deactivate)
+Phase 2 record        (track)        → Internal state update (presented := presented ∪ {U[top]} on entering the gate — the ever-assembled witness for NullMatch vs exhausted-with-units)
 Phase 2 Qc            (constitution) → present (narrative higher-unit candidate; mandatory)
 Phase 3 integrate     (track)        → Internal state update
 Phase 3 emit          (extension)    → TextPresent+Proceed (HigherUnit_prose)
@@ -172,7 +173,8 @@ converge              (extension)    → TextPresent+Proceed (convergence trace)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: RecallTrace, unit_type: UnitType,
-      units: List(HigherUnit), presented: Set(HigherUnit),
+      units: List(HigherUnit),
+      presented: Set(HigherUnit),   -- updated `presented := presented ∪ {U[top]}` on every Phase 1 → Phase 2 edge (a candidate reaching the gate); serves as the "ever-assembled" witness that discriminates NullMatch (presented = ∅) from the exhausted-with-units terminal (presented ≠ ∅), and supplies presented_best for that terminal's surface
       recognized: Optional(HigherUnit),
       rescopes: List(RescopeOption),
       attempts: Nat,   -- initialized 0 ONCE at activation (Λ init), preserved across Reorient re-entry to Phase 0; incremented once per traversal at Phase 1 start; cap (max 3) bounds the traversal count (empty-branch Rescope-vs-NullMatch and Phase 3 re-traversal-vs-surface both gate on it)
@@ -327,7 +329,7 @@ Traverse the deposit graph for the dispatched `UnitType`, assemble candidate hig
 
 ### Phase 2: Narrative Recognition (Constitution)
 
-**Present** the highest-ranked candidate higher unit as a narrative for user recognition via Cognitive Partnership Move (Constitution).
+**Present** the highest-ranked candidate higher unit as a narrative for user recognition via Cognitive Partnership Move (Constitution). Reaching this gate records the candidate: `presented := presented ∪ {U[top]}`. This makes `presented` the witness that *some* traversal assembled a unit, which later discriminates a true NullMatch (`presented = ∅`, nothing ever assembled) from the exhausted-with-units terminal (`presented ≠ ∅`) and supplies the best prior candidate for that terminal's surface.
 
 **Selection criterion**: Choose the candidate whose recognition would maximally resolve the user's granularity insufficiency. When rank is equal, prefer the richer, more connected unit.
 
