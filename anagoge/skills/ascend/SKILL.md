@@ -22,7 +22,8 @@ Anagoge(R) → attempts := 0 → Detect(R) →                             -- at
     Phase 1: attempts := attempts + 1 →                                   -- one increment per traversal, at traversal start
       Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → U[] →
       |U[]| = 0 ∧ attempts < max: Rescope(R, Σ) → Stop → S → rebind(R, S) → Phase 1
-      |U[]| = 0 ∧ attempts = max: NullMatch → inform(R, Σ) → fallback → deactivate
+      |U[]| = 0 ∧ attempts = max ∧ presented = ∅: NullMatch → inform(R, Σ) → fallback → deactivate   -- no unit ever assembled; the first empty traversal (attempts < max) already fired ≥1 Rescope
+      |U[]| = 0 ∧ attempts = max ∧ presented ≠ ∅: surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units: a prior traversal assembled, so this is NOT NullMatch
       |U[]| > 0: Qc(U[top], narrative, framing) → Stop → A →
         Recognize(u): elevate_complete(u) → emit(HigherUnit_prose(u)) → converge
         Refine ∧ attempts < max: adjust(boundary ∨ traversal_scope) → Phase 1
@@ -107,8 +108,9 @@ Phase 0: R → Detect(R) → supra_session(R)?                         -- granul
            → Classify(R, Σ) → UnitType                              -- dispatch (silent)
 Phase 1: R → attempts := attempts + 1 →                            -- one increment per traversal, at traversal start
            Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → U[ranked]  -- read-time inferred-edge traversal + assembly + rank [Tool]
-           |U[ranked]| = 0 ∧ attempts < max → Rescope(R, Σ) → Qc → Stop → S → rebind(R, S) → Phase 1
-           |U[ranked]| = 0 ∧ attempts = max → NullMatch → inform → fallback → deactivate
+           |U[ranked]| = 0 ∧ attempts < max → Rescope(R, Σ) → Qc → Stop → S → rebind(R, S) → Phase 1   -- empty traversal always Rescopes while budget remains
+           |U[ranked]| = 0 ∧ attempts = max ∧ presented = ∅ → NullMatch → inform → fallback → deactivate   -- nothing ever assembled; ≥1 Rescope already fired (Rule 12 holds structurally)
+           |U[ranked]| = 0 ∧ attempts = max ∧ presented ≠ ∅ → surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units (a prior traversal assembled) — NOT NullMatch
            |U[ranked]| > 0 → Phase 2
 Phase 2: U[top] → Qc(U[top], narrative, framing) → Stop → A         -- recognition gate [Tool]
 Phase 3: A → integrate(A, R, Σ) →                                   -- integration (track); the cap bounds re-traversal — a Refine/Reorient proceeds while attempts < max, else surfaces the best candidate and deactivates
@@ -123,15 +125,16 @@ Phase 1 → Phase 2 → Phase 3 →
   Refine: adjust unit boundary or traversal scope → Phase 1 (while attempts < max)
   Reorient: change unit type or recall dimension → Phase 1 (or Phase 0 on dimension change) (while attempts < max)
 
-Max 3 elevation attempts. `attempts` increments once per traversal, at the start of each Phase 1 traversal — a Rescope re-navigation and a Refine/Reorient re-entry both pass back through that single increment, so one traversal costs exactly one attempt (no double-count). The cap bounds the traversal count: a traversal that assembles nothing routes to Rescope while attempts < max, else to NullMatch; a Refine/Reorient re-traversal request proceeds while attempts < max, else surfaces the best candidate and deactivates. Exhausted (attempts = max), split by whether any unit assembled:
-  - no assembled unit (|U[]| = 0) → surface traversal scope + broken-link notes → NullMatch fallback → deactivate
-  - assembled-but-unrecognized units (|U[]| > 0) → surface the top-ranked candidate + traversal scope → deactivate
+Max 3 elevation attempts. `attempts` increments once per traversal, at the start of each Phase 1 traversal — a Rescope re-navigation and a Refine/Reorient re-entry both pass back through that single increment, so one traversal costs exactly one attempt (no double-count). The cap bounds the traversal count: a traversal that assembles nothing routes to Rescope while attempts < max; a Refine/Reorient re-traversal request proceeds while attempts < max, else surfaces the best candidate and deactivates. Exhausted (attempts = max), split by whether any unit was EVER assembled in this elevation (`presented`):
+  - nothing ever assembled (presented = ∅, current traversal also empty) → surface traversal scope + broken-link notes → NullMatch fallback → deactivate. Because every traversal was empty, the first one (at attempts < max) already fired a Rescope, so ≥1 Rescope always precedes NullMatch (Rule 12).
+  - a prior traversal assembled (presented ≠ ∅) — whether the final cycle is an empty re-traversal or a Refine/Reorient request → surface the best prior candidate + traversal scope → deactivate (exhausted-with-units, NOT NullMatch)
 Convergence evidence: (ScatteredDeposits → [edges traversed] → HigherUnit(recognized) → HigherUnit_prose).
 
 ── CONVERGENCE ──
 elevate_complete = Recognize(u) for some u ∈ U[]
-NullMatch = |U[]| = 0 ∧ attempts = max  -- no higher unit assembles at all (deposits too sparse, or inferred edges resolve only to not-yet-written targets)
-                                        -- the exhausted-WITH-units path (|U[]| > 0 ∧ attempts = max) is NOT NullMatch: it surfaces the top candidate and deactivates (see ── LOOP ──)
+NullMatch = |U[]| = 0 ∧ attempts = max ∧ presented = ∅  -- no higher unit assembles AT ALL across the whole elevation (deposits too sparse, or inferred edges resolve only to not-yet-written targets)
+                                        -- `presented = ∅` is load-bearing: it means every traversal was empty, so the first empty traversal (at attempts < max) already fired a Rescope — guaranteeing ≥1 Rescope precedes any NullMatch (Rule 12), even when earlier traversals consumed the budget
+                                        -- the exhausted-WITH-units path (presented ≠ ∅ ∧ attempts = max, whether reached by an empty re-traversal or a Refine/Reorient request) is NOT NullMatch: it surfaces the best prior candidate and deactivates (see ── LOOP ──)
 fallback(NullMatch) = offer Anamnesis (single-session resolution from an entry deposit)
                     ∨ offer Aitesis (when the cases must be newly found, not traversed)
 progress(Σ) = attempts: N/max, units_assembled: N, inferred_edges_followed: N
@@ -160,8 +163,8 @@ Phase 1 Traverse      (observe)      → Read, Grep, Glob (read entry-deposit an
 Phase 1 Assemble      (sense)        → Internal analysis (compose inferred-edge-connected deposits into typed higher units)
 Phase 1 Rank          (sense)        → Internal analysis (recall alignment + inferred-edge connectivity; conditional haiku scoring for large unit sets)
 Phase 1 Rescope Qc    (constitution) → present (structured re-traversal navigation; mandatory on empty assembly before NullMatch)
-Phase 3 surface       (extension)    → TextPresent+Proceed (exhausted-with-units terminal: top-ranked candidate + traversal scope, then deactivate)
-Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal: traversal scope + broken-link notes + Anamnesis/Aitesis fallback offer, then deactivate)
+Phase 1/3 surface     (extension)    → TextPresent+Proceed (exhausted-with-units terminal, presented ≠ ∅: best candidate + traversal scope, then deactivate — reached from Phase 1 on an empty re-traversal at the cap, or from Phase 3 on a Refine/Reorient request at the cap)
+Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal, presented = ∅: traversal scope + broken-link notes + Anamnesis/Aitesis fallback offer, then deactivate)
 Phase 2 Qc            (constitution) → present (narrative higher-unit candidate; mandatory)
 Phase 3 integrate     (track)        → Internal state update
 Phase 3 emit          (extension)    → TextPresent+Proceed (HigherUnit_prose)
@@ -285,8 +288,8 @@ Heuristic signals for granularity-insufficiency detection (not hard gates):
 | Trigger | Effect |
 |---------|--------|
 | elevate_complete (Recognize) | Emit HigherUnit_prose; proceed with the recognized higher unit as past trajectory requiring re-verification against current state before commit (not confirmed current context) |
-| NullMatch (attempts exhausted, no unit assembled) | Surface traversal scope + broken-link notes, offer Anamnesis (single-session) or Aitesis (newly-found cases) fallback, deactivate |
-| Exhausted with units (Refine/Reorient at attempts = max) | Surface the top-ranked candidate + traversal scope, deactivate — NOT NullMatch, since a unit did assemble |
+| NullMatch (attempts exhausted, nothing ever assembled: presented = ∅) | Surface traversal scope + broken-link notes, offer Anamnesis (single-session) or Aitesis (newly-found cases) fallback, deactivate (≥1 Rescope already fired, since every traversal was empty) |
+| Exhausted with units (attempts = max, presented ≠ ∅: a Refine/Reorient request, or an empty re-traversal after a prior assembly) | Surface the best prior candidate + traversal scope, deactivate — NOT NullMatch, since a unit did assemble |
 | Single-session misfire (Phase 0) | Defer to Anamnesis without entering the loop |
 | User Esc key | Accept current state without further elevation assistance |
 
@@ -318,7 +321,7 @@ Traverse the deposit graph for the dispatched `UnitType`, assemble candidate hig
    - **TopicCluster**: infer `topic`-role edges from shared keywords / memory-topic anchors to gather the fragments on one topic and read where the deposits attest the topic last stood.
    - **SedimentedConceptNode**: infer `concept`-role edges from shared concept / memory anchors to the already-sedimented concept node and the deposits that forged it (recognition only — no concept is formed here).
 4. **Rank candidate units**: order by recall-trace alignment and edge connectivity (a richly connected unit outranks a thin one). Each candidate carries its assembled shape, the edges traversed, and a confidence label.
-5. If `|U[]| = 0`: do NOT declare NullMatch yet. Present a **Rescope** navigation gate (Constitution) — structured options to widen the boundary, broaden the scope, or change the unit type — then re-traverse with the rebind. Only after rescope attempts are exhausted (attempt cap reached) declare NullMatch: surface the traversal scope and broken-link notes, then offer the fallback (Anamnesis single-session resolution from an entry deposit, or Aitesis if the cases must be newly found).
+5. If `|U[]| = 0`: do NOT declare NullMatch yet. While attempts remain, present a **Rescope** navigation gate (Constitution) — structured options to widen the boundary, broaden the scope, or change the unit type — then re-traverse with the rebind. Declare NullMatch only when the attempt cap is reached **and nothing was ever assembled in this elevation** (`presented = ∅`): surface the traversal scope and broken-link notes, then offer the fallback (Anamnesis single-session resolution from an entry deposit, or Aitesis if the cases must be newly found). If a prior traversal DID assemble a candidate (`presented ≠ ∅`) but this final traversal came back empty at the cap, that is the exhausted-with-units terminal — surface the best prior candidate + scope and deactivate, not NullMatch. Because a NullMatch requires every traversal to have been empty, the first empty traversal (below the cap) always fired a Rescope first, so at least one Rescope precedes any NullMatch.
 
 **Scope restriction**: Traversal uses Read, Grep, Glob exclusively. Cross-partition reads only — never cross-slug writes; Anagoge writes nothing.
 
@@ -402,7 +405,7 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 7. **One higher unit per cycle**: Present one highest-ranked candidate higher unit per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single elevation decision.
 
-8. **Convergence persistence and early exit**: Mode active until elevate_complete, NullMatch after exhausted attempts (no unit assembled), exhausted-with-units deactivation (a Refine/Reorient request at attempts = max surfaces the top-ranked candidate and deactivates rather than re-traversing), single-session misfire deferral, or user Esc; recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
+8. **Convergence persistence and early exit**: Mode active until elevate_complete, NullMatch after exhausted attempts (nothing ever assembled, presented = ∅), exhausted-with-units deactivation (attempts = max with presented ≠ ∅ — whether the final cycle is an empty re-traversal or a Refine/Reorient request — surfaces the best prior candidate and deactivates rather than re-traversing), single-session misfire deferral, or user Esc; recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
 
 9. **Convergence evidence**: Present the transformation trace (ScatteredDeposits → edges traversed → HigherUnit(recognized) → HigherUnit_prose) before declaring elevate_complete — convergence is demonstrated per-item, not asserted. The trace enumerates the edges followed and the deposits composing the unit.
 
@@ -410,7 +413,7 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 11. **NullMatch fallback diagnosis**: On NullMatch after exhausted Rescope, surface the traversal scope (partitions reached, edges followed) and broken-link notes, then offer the fallback — Anamnesis single-session resolution from an entry deposit, or Aitesis when the missing cases must be newly found. Sparse deposits and broken-link chains are reported as scope, not framed as protocol failure.
 
-12. **Rescope-first NullMatch**: At least one Rescope navigation gate precedes any NullMatch declaration — first traversal returning zero units → Rescope → re-traverse → NullMatch declaration only if still empty.
+12. **Rescope-first NullMatch**: At least one Rescope navigation gate precedes any NullMatch declaration. This is structurally guaranteed by the NullMatch guard `presented = ∅`: NullMatch requires that no traversal ever assembled a unit, so the first traversal was empty and — being below the cap — fired a Rescope before any NullMatch could be declared. A final empty traversal at the cap that follows a prior assembly (`presented ≠ ∅`) is the exhausted-with-units terminal, not NullMatch, so it does not need a fresh Rescope.
 
 13. **Substrate non-coupling**: Phase prose names epistemic operations only — tool, path, and deposit-index bindings (realization ⓐ) belong exclusively to TOOL GROUNDING; ⓑ/ⓒ are documented alternative realizations.
 
