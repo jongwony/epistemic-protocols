@@ -18,14 +18,16 @@ Elevate a vague recall to a higher-granularity unit through AI-guided deposit-gr
 ── FLOW ──
 Anagoge(R) → Detect(R) →
   single_session_suffices(R): defer-to-Anamnesis → deactivate
-  supra_session(R): Classify(R, Σ) → UnitType → Dispatch(UnitType) →
-    Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble(U[]) → Rank(U[]) →
-    |U[]| = 0 ∧ attempts < max: Rescope(R, Σ) → Stop → S → rebind(R, S) → re-traverse
-    |U[]| = 0 ∧ attempts = max: NullMatch → inform(R, Σ) → fallback → deactivate
-    |U[]| > 0: Qc(U[top], narrative, framing) → Stop → A →
-      Recognize(u): elevate_complete(u) → emit(HigherUnit_prose(u)) → converge
-      Refine: adjust(boundary ∨ traversal_scope) → Phase 1
-      Reorient(d): rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1/0
+  supra_session(R): Classify(R, Σ) → UnitType → Dispatch(UnitType) → attempts := 0 →
+    Phase 1: attempts := attempts + 1 →                                   -- one increment per traversal, at traversal start
+      Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → U[] →
+      |U[]| = 0 ∧ attempts < max: Rescope(R, Σ) → Stop → S → rebind(R, S) → Phase 1
+      |U[]| = 0 ∧ attempts = max: NullMatch → inform(R, Σ) → fallback → deactivate
+      |U[]| > 0: Qc(U[top], narrative, framing) → Stop → A →
+        Recognize(u): elevate_complete(u) → emit(HigherUnit_prose(u)) → converge
+        Refine ∧ attempts < max: adjust(boundary ∨ traversal_scope) → Phase 1
+        Reorient(d) ∧ attempts < max: rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1 / Phase 0
+        (Refine ∨ Reorient) ∧ attempts = max: surface(U[top], traversal_scope) → deactivate   -- exhausted-with-units terminal
 
 ── MORPHISM ──
 ScatteredDeposits × DepositGraph
@@ -33,10 +35,10 @@ ScatteredDeposits × DepositGraph
   → classify(unit_type)                -- UnitType ∈ {ConnectedSessionChain, TopicCluster, SedimentedConceptNode}
   → dispatch(unit_type)                -- select traversal shape for the dispatched type
   → traverse(Deposits, infer_edges)    -- INFER cross-partition edges at read-time from stored anchors + shared keywords/metadata; broken-link-tolerant
-  → assemble(candidate_units)          -- compose higher units of the dispatched type from the inferred-edge-connected deposits
+  → assemble(connected_subgraph)       -- compose higher units of the dispatched type from the inferred-edge-connected deposits
   → rank(units, recall_trace)          -- order by recall alignment + connectivity
   → present(unit, Socratic)            -- narrative presentation of one candidate higher unit
-  → recognize(unit, user)              -- synthesis of identification at the higher granularity
+  → recognize(unit, user)              -- user-constituted identification at the higher granularity
   → emit(HigherUnit_prose)             -- NL rendering to session text
   → HigherGranularityUnit
 requires: supra_session(R)              -- granularity checkpoint (Phase 0): single session would NOT resolve it
@@ -68,12 +70,14 @@ TopicCluster     = { topic: String, fragments: Set(Deposit), standing: Prose }
                   -- the cluster of fragments on one topic + where the deposits attest the topic last stood
 SedimentedConceptNode = { concept: String, forged_by: Set(Deposit), node: DepositRef }
                   -- an already-sedimented concept node + which deposits forged it (recognition-only; never formed here)
-Traverse         = (Set(Deposit), Set(TraversalEdge)) → Set(HigherUnit)   -- UnitType-dispatched inferred-edge-following assembly
-Assemble         = Set(Deposit) × Set(TraversalEdge) → Set(HigherUnit)    -- compose inferred-edge-connected deposits into typed units
+infer_edges      = (Set(Deposit), Σ) → Set(TraversalEdge)        -- read-time edge inference from stored anchors + shared keywords/session metadata; output is reconstructed, never read from a stored field
+Traverse         = (Set(Deposit), Set(TraversalEdge)) → (Set(Deposit), Set(TraversalEdge))   -- UnitType-dispatched read-time traversal: follow inferred edges to the connected sub-graph reachable from the entry deposits
+Assemble         = (Set(Deposit), Set(TraversalEdge)) → List(HigherUnit)  -- compose the inferred-edge-connected deposits of the traversed sub-graph into typed higher units
 Rank             = List(HigherUnit) → List(HigherUnit)           -- recall-alignment + inferred-edge-connectivity dominate
 Rescope          = (R, Σ) → List(RescopeOption)                  -- structured re-traversal navigation on empty assembly
 RescopeOption    = { dimension: ∈ {boundary, scope, unit_type}, option: String }
-S                = ScopeHint    -- user navigation answer from Rescope gate (Qc-rescope)
+ScopeHint        = RescopeOption  -- the dimension+option the user selects at the Rescope gate to re-navigate traversal
+S                = ScopeHint      -- user navigation answer from Rescope gate (Qc-rescope)
 A                = Recognition ∈ {Recognize(HigherUnit), Refine, Reorient(description)}
 Prose            = String       -- source-agnostic NL description
 HigherUnit_prose = String
@@ -88,10 +92,10 @@ Phase            ∈ {0, 1, 2, 3}
 bind(R) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ inbound_handoff
 Priority: explicit_arg > colocated_expr > prev_user_turn > inbound_handoff
 
-/ascend "text"              → R.trace = extract_trace("text", Σ)
-"the whole line of... "     → R.trace = extract_trace(text before trigger, Σ)
-/ascend (alone)             → R.trace = extract_trace(previous user message, Σ)
-inbound_handoff             → R.trace seeded from an upstream protocol's session text (e.g. Anamnesis entry deposit, Hyphegesis synthesis checkpoint)
+/ascend "text"              → R = extract_trace("text", Σ)
+"the whole line of... "     → R = extract_trace(text before trigger, Σ)
+/ascend (alone)             → R = extract_trace(previous user message, Σ)
+inbound_handoff             → R seeded from an upstream protocol's session text (e.g. Anamnesis entry deposit, Hyphegesis synthesis checkpoint)
 
 Edge cases:
 - Multiple vague references: bind to first, note others
@@ -100,23 +104,26 @@ Edge cases:
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → supra_session(R)?                         -- granularity trigger (silent)
-           → Classify(R, Σ) → UnitType                              -- dispatch (silent)
-Phase 1: R → Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble(U[]) → Rank(U[]) → U[ranked]  -- read-time inferred-edge assembly + rank [Tool]
-           |U[ranked]| = 0 ∧ attempts < max → Rescope(R, Σ) → Qc → Stop → S → rebind(R, S) → attempts := attempts + 1 → Phase 1
+           → Classify(R, Σ) → UnitType → attempts := 0             -- dispatch + counter init (silent)
+Phase 1: R → attempts := attempts + 1 →                            -- one increment per traversal, at traversal start
+           Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → U[ranked]  -- read-time inferred-edge traversal + assembly + rank [Tool]
+           |U[ranked]| = 0 ∧ attempts < max → Rescope(R, Σ) → Qc → Stop → S → rebind(R, S) → Phase 1
            |U[ranked]| = 0 ∧ attempts = max → NullMatch → inform → fallback → deactivate
+           |U[ranked]| > 0 → Phase 2
 Phase 2: U[top] → Qc(U[top], narrative, framing) → Stop → A         -- recognition gate [Tool]
-Phase 3: A → integrate(A, R, Σ) →                                   -- integration (track); attempts := attempts + 1 on any re-traversal branch (Refine/Reorient), cap evaluated at Phase 1 entry
+Phase 3: A → integrate(A, R, Σ) →                                   -- integration (track); the cap bounds re-traversal — a Refine/Reorient proceeds while attempts < max, else surfaces the best candidate and deactivates
            Recognize(u) → HigherUnit_prose(u) → emit → converge
-           Refine → adjust(boundary ∨ traversal_scope) → attempts := attempts + 1 → Phase 1    -- boundary/scope adjustment (sense)
-           Reorient(d) → rebind(UnitType ∨ recall_dimension, d, Σ) → attempts := attempts + 1 → Phase 1/0   -- orthogonal re-dispatch (sense)
+           Refine ∧ attempts < max → adjust(boundary ∨ traversal_scope) → Phase 1    -- boundary/scope adjustment (sense)
+           Reorient(d) ∧ attempts < max → rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1 / Phase 0   -- orthogonal re-dispatch (sense)
+           (Refine ∨ Reorient) ∧ attempts = max → surface(U[top], traversal_scope) → deactivate   -- exhausted-with-units terminal
 
 ── LOOP ──
 Phase 1 → Phase 2 → Phase 3 →
   Recognize: converge
-  Refine: adjust unit boundary or traversal scope → attempts := attempts + 1 → Phase 1
-  Reorient: change unit type or recall dimension → attempts := attempts + 1 → Phase 1 (or Phase 0 on dimension change)
+  Refine: adjust unit boundary or traversal scope → Phase 1 (while attempts < max)
+  Reorient: change unit type or recall dimension → Phase 1 (or Phase 0 on dimension change) (while attempts < max)
 
-Max 3 elevation attempts. `attempts` increments once per traversal/rescope cycle; the cap is evaluated at Phase 1 entry. Exhausted (attempts = max), split by whether any unit assembled:
+Max 3 elevation attempts. `attempts` increments once per traversal, at the start of each Phase 1 traversal — a Rescope re-navigation and a Refine/Reorient re-entry both pass back through that single increment, so one traversal costs exactly one attempt (no double-count). The cap bounds the traversal count: a traversal that assembles nothing routes to Rescope while attempts < max, else to NullMatch; a Refine/Reorient re-traversal request proceeds while attempts < max, else surfaces the best candidate and deactivates. Exhausted (attempts = max), split by whether any unit assembled:
   - no assembled unit (|U[]| = 0) → surface traversal scope + broken-link notes → NullMatch fallback → deactivate
   - assembled-but-unrecognized units (|U[]| > 0) → surface the top-ranked candidate + traversal scope → deactivate
 Convergence evidence: (ScatteredDeposits → [edges traversed] → HigherUnit(recognized) → HigherUnit_prose).
@@ -148,10 +155,13 @@ progress(Σ) = attempts: N/max, units_assembled: N, inferred_edges_followed: N
 -- Alternative realizations (documented, not active): ⓑ persisted-edge graph — if a future substrate stores cross-slug deposit pointers as first-class records, traversal could follow them directly rather than re-inferring at read-time; ⓒ a full Open Knowledge Federation link-graph store materializing edges as first-class records. ⓐ is chosen because it requires no schema beyond what Anamnesis already deposits and adds zero write surface.
 Phase 0 Detect        (sense)        → Internal analysis (supra-session granularity; distinguish from single-session Anamnesis)
 Phase 0 Classify      (sense)        → Internal analysis (UnitType detection from R + Σ)
+Phase 0 Dispatch      (sense)        → Internal analysis (select the traversal shape for the dispatched UnitType; deterministic indexed selection, entropy→0)
 Phase 1 Traverse      (observe)      → Read, Grep, Glob (read entry-deposit anchors + index keywords/metadata, then search cross-partition for shared anchors/keywords/metadata; read-only, read-time inference)
 Phase 1 Assemble      (sense)        → Internal analysis (compose inferred-edge-connected deposits into typed higher units)
 Phase 1 Rank          (sense)        → Internal analysis (recall alignment + inferred-edge connectivity; conditional haiku scoring for large unit sets)
 Phase 1 Rescope Qc    (constitution) → present (structured re-traversal navigation; mandatory on empty assembly before NullMatch)
+Phase 1 surface       (extension)    → TextPresent+Proceed (exhausted-with-units terminal: top-ranked candidate + traversal scope, then deactivate)
+Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal: traversal scope + broken-link notes + Anamnesis/Aitesis fallback offer, then deactivate)
 Phase 2 Qc            (constitution) → present (narrative higher-unit candidate; mandatory)
 Phase 3 integrate     (track)        → Internal state update
 Phase 3 emit          (extension)    → TextPresent+Proceed (HigherUnit_prose)
@@ -162,7 +172,7 @@ converge              (extension)    → TextPresent+Proceed (convergence trace)
       units: List(HigherUnit), presented: Set(HigherUnit),
       recognized: Optional(HigherUnit),
       rescopes: List(RescopeOption),
-      attempts: Nat,   -- incremented once per traversal/rescope cycle (Phase 1 rescope rebind, Phase 3 Refine/Reorient); cap (max 3) evaluated at Phase 1 entry
+      attempts: Nat,   -- initialized 0 at Phase 0; incremented once per traversal at Phase 1 start; cap (max 3) bounds the traversal count (empty-branch Rescope-vs-NullMatch and Phase 3 re-traversal-vs-surface both gate on it)
       active: Bool, cause_tag: String }
 
 ── GRAPH INVARIANTS ──
@@ -292,7 +302,7 @@ Detect granularity insufficiency, bind `R`, and classify the target unit type. T
    - **Moderate** (partial signal): proceed to Phase 1 with broader traversal scope
    - **High** (unit shape unclear): traverse the dispatched type first, hold Reorient ready if the shape misfits
 4. If `single_session_suffices(R)`: surface the finding (the recall resolves to one session) and defer to Anamnesis without Anagoge activation.
-5. If `supra_session(R)`: record `R` with extracted trace and `UnitType` — proceed to Phase 1.
+5. If `supra_session(R)`: record `R` with extracted trace and `UnitType`, initialize `attempts := 0` — proceed to Phase 1.
 
 **Scan scope**: Read-only over bound text, conversation context, and the deposit index.
 
@@ -365,7 +375,7 @@ After user response:
 
    **Refine vs Reorient test**: would the user's new description keep the same unit type and overlap the current candidate? Overlap + same type → Refine; different type or disjoint → Reorient.
 
-After integration: `elevate_complete` → present the convergence evidence trace (ScatteredDeposits → [edges traversed] → HigherUnit(recognized) → HigherUnit_prose emitted), proceed. Refine → Phase 1 with adjusted boundary/scope. Reorient → Phase 1/0 with re-dispatched unit type or rebuilt trace. On any re-traversal branch (Refine/Reorient), `attempts := attempts + 1`; the cap (max 3) is evaluated at Phase 1 entry — when exhausted, surface per the LOOP exhaustion split (top candidate + scope if any unit assembled, else NullMatch fallback) and deactivate. Log `(HigherUnit, A)` to history.
+After integration: `elevate_complete` → present the convergence evidence trace (ScatteredDeposits → [edges traversed] → HigherUnit(recognized) → HigherUnit_prose emitted), proceed. Refine → Phase 1 with adjusted boundary/scope (while attempts < max). Reorient → Phase 1 / Phase 0 with re-dispatched unit type or rebuilt trace (while attempts < max). `attempts` increments once per traversal at Phase 1 start; the cap (max 3) bounds re-traversal — when a Refine/Reorient request arrives at attempts = max, surface the top-ranked candidate + traversal scope (the exhausted-with-units terminal) and deactivate rather than re-traversing. Log `(HigherUnit, A)` to history.
 
 ## Intensity
 
