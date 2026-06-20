@@ -53,7 +53,7 @@ Phase 0 is silent — no surfacing. If detection fails (deficit is already clear
 
 ### Phase 1: Catalog Scan
 
-Scan the user's situation against the full catalog of 14 epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
+Scan the user's situation against the full catalog of 15 epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
 
 - A `deficit: DeficitName` matched against the situation
 - The `protocol: ProtocolId` that addresses that deficit
@@ -151,7 +151,7 @@ invariant: Recognition over Resolution
 
 ── TYPES ──
 U                = UserSituation { utterance: String, session_slice: Optional(Slice) }
-Catalog          = Set(DeficitEntry)               -- 14 named deficits + Emergent
+Catalog          = Set(DeficitEntry)               -- 15 named deficits + Emergent
 DeficitEntry     = { deficit: DeficitName, protocol: ProtocolId,
                      trigger_signal: String, reverse_evidence_template: String }
 Evidence         = String                           -- quoted or paraphrased situation evidence

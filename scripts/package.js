@@ -43,6 +43,7 @@ const DESCRIPTION_OVERRIDES = {
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution',
   distill: 'Distill a session-tethered context into a portable handoff — (ContextTethered, AI, DISTILL, WorkingContext) → PortableHandoff',
   conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, AI, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
+  ascend: 'Elevate a vague recall to a higher-granularity unit — (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   write: 'Multi-perspective blog drafting — transforms session insights into publishable content via iterative perspective-based refinement.',

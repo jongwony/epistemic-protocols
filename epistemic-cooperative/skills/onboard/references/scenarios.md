@@ -38,6 +38,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: ἀνάμνησις (recollection) — Plato's theory of knowledge as recollection of what the soul already knew. Core principle: **Recognition over Retrieval**. Vague cues become concrete when candidates are surfaced as narratives for user recognition, not retrieved by keyword. Workflow position: cross-cutting — best invoked at session start. Advisory enrichment from `/recollect` is most effective before downstream protocols' phases have progressed; once a downstream protocol's gate has been answered, its results are already shaped without that enrichment. Session-start recall is the practical ordering mechanism. Game feel: "Something we talked about before..." → narrative candidates surface → you recognize the right one → grounded continuation.
 
+## Anagoge `/ascend`
+
+**Situation**: You remember a whole *line* of work — a thread you kept returning to across many sessions, a topic you figured out in scattered pieces, or a concept you and Claude eventually named — but no single session is the answer. Recalling one session returns a fragment; the unit you actually mean stands above any one of them.
+
+**Intervention**: `/ascend` detects that the right resolution unit is supra-session, classifies which higher unit you mean (a connected-session chain, a topic cluster, or an already-sedimented concept node), reconstructs the deposit graph at read-time — discovering related deposits across sessions by shared anchors, keywords, and metadata — and presents the higher unit as a narrative — a chain as origin → development → arrival, a cluster as fragments + where the deposits attest the topic last stood, a concept node as the node + which deposits forged it — for you to recognize. It infers the connections at read-time and writes nothing.
+
+**Trial prompt**: "Let's practice: say 'Where did that whole refactor thread we kept coming back to end up?' and I'll show how /ascend elevates scattered sessions into the connected line."
+
+**Quiz Q (situation)**: You ask "where did everything we worked out about the caching strategy land?" — you remember it was spread across several sessions, not decided in one.
+- A) Anamnesis `/recollect` — B) Anagoge `/ascend` — C) Aitesis `/inquire` — D) Periagoge `/induce`
+- Answer: B
+
+**Quiz Q (design)**: You reference "that whole line of work on the auth migration" but it spanned a dozen sessions with no single locus. How would you surface the connected unit — rather than one session or a freshly-formed summary?
+- Hint: The problem isn't single-session recall (that's `/recollect`) or forming a new abstraction from instances (that's `/induce`) — it's that the right unit is the supra-session whole the deposits already imply, reconstructed at read-time from the anchors, keywords, and metadata the deposits already carry.
+
+**Philosophy**: ἀναγωγή (a leading-up) — the deliberate sibling of ἀνάμνησις: ana-mnesis recalls one prior context; ana-goge leads that recall *up* to the connected unit above it. Core principle: **Recognition over Aggregation**. The higher unit is recognized by reconstructing the connections at read-time from the anchors and keywords the deposits already carry, never fused or synthesized anew. Workflow position: cross-cutting — invoked when single-session recall keeps returning a fragment while you mean the larger unit. Game feel: "the whole thing we kept circling back to..." → the connected line/cluster/concept assembles from read-time inference → you recognize the unit → grounded continuation.
+
 ## Syneidesis `/gap`
 
 **Situation**: Claude gives you a neat checklist for "things to bring on the Busan trip." The list looks complete — clothes, toiletries, charger. You're about to close the tab, but you haven't thought about: medication, local transit card top-up, reservation confirmations saved offline, or weather contingencies.
