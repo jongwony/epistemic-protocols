@@ -21,7 +21,8 @@ Anamnesis(V) → Detect(V) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
     |C[]| = 0 ∧ attempts > 0: NullMatch → inform(V, Σ) → deactivate
     |C[]| > 0: backtrace_parent(c) ∀ c ∈ C[] : fork_marker(c) → parent_pointer, parent_cwd   -- deterministic: a fork candidate's parent is recoverable from its own record, not inferred (mechanism in TOOL GROUNDING; ≠ user-described Reorient)
-               Qc(C[top], evidence, framing) → Stop → R →
+               SingleObvious(C[]): emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension (relay): high-confidence single candidate, no turn yield; silence = Recognize, divergence in the next turn re-enters Refine/Reorient below (no re-activation machinery)
+               ¬SingleObvious(C[]): Qc(C[top], evidence, framing) → Stop → R →
       Recognize(c): recall_complete(c) → emit(ClueVector_prose(c)) → converge      -- fork: emitted pointer = parent (or, when the parent record is absent, non-resumable + recoverable artifacts)
       Refine: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
       Reorient(d): rebind(V, d, Σ) → Phase 1                 -- orthogonal dimension shift
@@ -34,8 +35,8 @@ VagueRecall
   → scan(Store, Track, recall_trace)     -- track-specific scan (see STORE TOPOLOGY)
   → rank(candidates, recall_trace)       -- order by relevance
   → backtrace_parent(candidate)          -- when fork_marker: deterministic parent identification → parent_pointer, parent_cwd (recovered from the candidate's own record; ≠ user-described Reorient)
-  → present(candidate, Socratic)         -- Socratic candidate presentation
-  → recognize(candidate, user)           -- synthesis of identification (Husserl CM §§38-39)
+  → present(candidate, Socratic)         -- Socratic candidate presentation; absorbed into the emit for SingleObvious (high-confidence single candidate) — Extension, no turn yield
+  → recognize(candidate, user)           -- synthesis of identification (Husserl CM §§38-39); for SingleObvious, realized as silence-default behind a divergence-only affordance (non-divergence constitutes recognition)
   → emit(ClueVector_prose)               -- NL rendering to session text
   → RecalledContext
 requires: empty_intention(V)              -- phenomenological trigger
@@ -85,6 +86,8 @@ Rank             = List(Candidate) → List(Candidate)   -- track-primary signal
 Probe            = (V, Σ) → List(SocraticQuestion)
 SocraticQuestion = { dimension: ∈ {temporal, associative, contextual}, question: String }
 R                = Recognition ∈ {Recognize(Candidate), Refine, Reorient(description)}
+SingleObvious    = predicate; SingleObvious(C[]) ≡ |C[]| = 1 ∧ confidence(C[top]) = high   -- Light-only Extension guard: the one candidate is the single dominant option (option-set entropy → 0 → relay), so Qc is absorbed into the emit; Medium (|C[]| ≥ 2) and Heavy (confidence < high) keep the Qc gate
+divergence_affordance = the mismatch channel folded into the non-yielding SingleObvious emit: names concrete adjacent candidates (Refine) AND offers an open free-response invitation (Reorient), keeping the full R = {Recognize, Refine, Reorient} coproduct reachable without a gate — Recognize is realized as silence-default
 H                = Hint     -- answer from Socratic probe gate (Qs)
 ClueVector_prose = String
 RecalledContext  = session text containing ClueVector_prose
@@ -112,15 +115,16 @@ Phase 1: V → Scan_{Track}(Store, trace(V)) → Rank(C[]) → C[ranked]  -- tra
            backtrace_parent(c) ∀ c ∈ C[ranked] : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the candidate's own record [Tool]
            |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → Phase 1
            |C[ranked]| = 0 ∧ attempts > 0 → NullMatch → inform → deactivate
-Phase 2: C[top] → Qc(C[top], evidence, framing) → Stop → R    -- recognition gate [Tool]
-Phase 3: R → integrate(R, V, Σ) →                                -- integration (sense)
+Phase 2: SingleObvious(C[ranked]) → emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension: high-confidence single candidate, no turn yield, no [Tool] Stop; silence = Recognize
+         ¬SingleObvious(C[ranked]) → C[top] → Qc(C[top], evidence, framing) → Stop → R    -- recognition gate [Tool]
+Phase 3: R → integrate(R, V, Σ) →                                -- integration (sense); a divergence after a SingleObvious emit enters here via Refine/Reorient on the next user turn
            Recognize(c) → ClueVector_prose(c) → emit → converge
            Refine → Probe(V, Σ) → Qs(probe) → Stop → H          -- Socratic probing [Tool]
                   → enrich(V, H) → Phase 1
            Reorient(d) → rebind(V, d, Σ) → Phase 1               -- orthogonal re-scan (sense)
 
 ── LOOP ──
-Phase 1 → Phase 2 → Phase 3 →
+Phase 1 → Phase 2 → Phase 3 →                              -- Phase 2 SingleObvious shortcut: emit ⊕ divergence affordance → converge (Extension, skips the Phase 3 gate; a divergence in the next turn → Refine/Reorient)
   Recognize: converge
   Refine: Socratic probing → enrich → Phase 1
   Reorient: rebind V with orthogonal description → Phase 1
@@ -129,7 +133,8 @@ Max 3 recall attempts. Exhausted: surface best candidate → deactivate.
 Convergence evidence: (VagueRecall → [enrichments] → Candidate(recognized) → ClueVector_prose).
 
 ── CONVERGENCE ──
-recall_complete = Recognize(c) for some c ∈ C[]
+recall_complete = Recognize(c) for some c ∈ C[]                                        -- gated path (¬SingleObvious)
+               ∨ SingleObvious(C[]) ∧ emitted(ClueVector_prose(C[top]) ⊕ divergence_affordance)   -- Extension path: the inline emit converges immediately (no turn yield); non-divergence (silence) realizes user-constituted recognition, a later divergence re-enters Refine/Reorient
 NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (attempts = max ∨ enrichments exhausted)
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
@@ -153,7 +158,8 @@ Phase 1 Scan_salience (observe)  → Read, Grep, Glob (MarkerProfile match over 
 Phase 1 Scan_hybrid   (observe)  → union of above
 Phase 1 Rank        (sense)    → Internal analysis (conditional: haiku scoring for large candidate sets)
 Phase 1 backtrace_parent (observe) → Read (fork candidate only: read the orchestrating parent's session_id directly from the fork's substitute capture, then check parent SSOT existence for resumability; deterministic and citable to the capture entry — hence (observe); read-only)
-Phase 2 Qc          (constitution)     → present (narrative Socratic candidate; mandatory)
+Phase 2 Qc          (constitution)     → present (narrative Socratic candidate; gated path — ¬SingleObvious: candidates ≥ 2 OR confidence < high)
+Phase 2 emit        (extension)    → TextPresent+Proceed (SingleObvious path only: high-confidence single candidate emitted inline with a divergence-only affordance, no turn yield, converge immediately). Relay basis: one dominant candidate collapses the recognition option set to a single option (Refine/Reorient are foils), so the option set is relay rather than a gate; this conditional Constitution→Extension specialization within Phase 2 is the sanctioned revision of Rule 12's Safeguard-tier mandatory-Qc tag, motivated by observed binary-confirm abandonment friction. It is the relay-collapse kind of (extension), NOT a Standing-authority migration.
 Phase 3 integrate   (track)    → Internal state update
 Phase 3 Probe       (sense)    → Internal (gap detection)
 Phase 3 Qs          (constitution)     → present (Socratic probing with structured navigation; mandatory on Refine)
@@ -303,7 +309,7 @@ The scan finds candidates; the narrative Qc enables recognition; the user consti
 
 ### Activation
 
-AI detects empty intention in user expression (Layer 2, silent Phase 0) OR user calls `/recollect` (Layer 1, always available). Recognition always requires user interaction at Phase 2 gate. On direct `/recollect`, bind `V` from current/recent context; if none recoverable, request the recall target before Phase 0.
+AI detects empty intention in user expression (Layer 2, silent Phase 0) OR user calls `/recollect` (Layer 1, always available). Recognition requires user interaction at the Phase 2 gate, except for a high-confidence single candidate — there the gate is absorbed into an inline Extension emit with a divergence-only affordance, and non-divergence (silence) constitutes recognition. On direct `/recollect`, bind `V` from current/recent context; if none recoverable, request the recall target before Phase 0.
 
 **Empty intention** — user has vague memory of prior context but cannot locate/specify it (knows-that ∃ something, not what/where).
 
@@ -321,7 +327,7 @@ When Anamnesis is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present narrative candidate for user recognition via Cognitive Partnership Move (Constitution).
+**Action**: At Phase 2, present the narrative candidate for user recognition — a Constitution gate when candidates ≥ 2 or confidence < high; for a high-confidence single candidate, an Extension inline emit with a divergence-only affordance (silence constitutes recognition).
 </system-reminder>
 
 Anamnesis completes before context-dependent work; loaded instructions resume after recall resolves or dismisses.
@@ -351,7 +357,7 @@ Heuristic signals for empty intention detection (not hard gates):
 
 | Trigger | Effect |
 |---------|--------|
-| recall_complete (Recognize) | Emit ClueVector_prose; proceed with the recognized context as recalled past context requiring re-verification against current state before commit (not confirmed current context) |
+| recall_complete (Recognize, or SingleObvious inline emit) | Emit ClueVector_prose; proceed with the recognized context as recalled past context requiring re-verification against current state before commit (not confirmed current context) |
 | NullMatch (all attempts exhausted) | Surface search scope + accumulated trace, offer Aitesis handoff for SSOT search, deactivate |
 | User Esc key | Accept current state without further recall assistance |
 
@@ -397,9 +403,9 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
 
 **Scope restriction**: Investigation uses Read, Grep, Glob exclusively.
 
-### Phase 2: Narrative Recognition (Constitution)
+### Phase 2: Narrative Recognition (Constitution; Extension on a high-confidence single candidate)
 
-**Present** the highest-priority candidate as a discussion narrative for user recognition via Cognitive Partnership Move (Constitution).
+**Present** the highest-priority candidate as a discussion narrative for user recognition. Branch on the candidate set: a **high-confidence single candidate** (`|C[]| = 1` at high confidence — `SingleObvious`) absorbs the gate into the presentation — emit the recognized context inline as **Extension** (no turn yield, converge immediately): essential output first (narrative + `Resume` handle + currency≠fidelity caveat), then a **divergence-only affordance** that names the concrete adjacent candidates (Refine) and invites an open redescription of the target (Reorient), keeping the full Recognize / Refine / Reorient set reachable. Silence (the user moving on) constitutes recognition; only divergence is explicit, and a divergence in the next turn continues into the existing Refine / Reorient paths (no gate, no re-activation step). One dominant candidate collapses the option set to a single option, so this is relay, not a gate. **Otherwise** (candidates ≥ 2, or confidence < high) the recognition gate runs as a Constitution interaction (turn yield). Both branches share the narrative format below.
 
 **Selection criterion**: Choose the candidate whose recognition would maximally resolve the user's empty intention. When priority is equal, prefer the candidate with richer narrative context and adjacent vectors.
 
@@ -416,7 +422,7 @@ Present the candidate as narrative text — the discussion's story, not just its
 - **Adjacent**: Other topics discussed nearby in the same time period — for Refine orientation
 - **Framing**: how many recall tries remain before the cap, and the size of the candidate space still in scope — stated as the budget you reason with, not a numeric attempt fraction
 
-Then **present**:
+For the **SingleObvious** path the inline emit renders the narrative format above as plain session text (narrative + `Resume` handle + currency≠fidelity caveat) and ends with the divergence-only affordance (named adjacents + open channel), no gate. **Gated path** (`¬SingleObvious`) — then **present**:
 
 ```
 Does this match the discussion you are recalling?
@@ -459,13 +465,13 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | High specificity trace, single obvious candidate | Abbreviated narrative (origin + outcome) + gate with Recognize default |
+| Light | High specificity trace, single obvious candidate (high confidence) | Recognized context folded inline — narrative (origin → outcome) + resume handle + currency≠fidelity caveat — in one non-yielding (Extension) emit, then converge immediately; divergence-only affordance (named adjacents + open channel), no confirmation gate |
 | Medium | Moderate specificity, 2-3 candidates in scope | Full narrative + adjacent vectors in Refine option |
 | Heavy | Low specificity, Refine path expected, high ambiguity trace | Full narrative + adjacent vectors + Socratic probing with structured navigation + hypomnesis overview on initial scan |
 
 ## Rules
 
-1. **AI-guided detection, user-constituted recognition**: AI detects empty intention, scans stores, and presents narrative candidates as recognition options; user identification via Cognitive Partnership Move (Constitution) at Phase 2 constitutes the identity match. Detection, presentation, and constitution are separate acts — AI detection is implicitly confirmed when the user engages with recognition (Phase 2 response, not Esc).
+1. **AI-guided detection, user-constituted recognition**: AI detects empty intention, scans stores, and presents narrative candidates as recognition options; user identification via Cognitive Partnership Move (Constitution) at Phase 2 constitutes the identity match. Detection, presentation, and constitution are separate acts — AI detection is implicitly confirmed when the user engages with recognition (Phase 2 response, not Esc). For a high-confidence single candidate (SingleObvious), recognition is constituted by non-divergence: the inline Extension emit carries a divergence-only affordance, and silence (the user moving on) realizes the identity match — the user's constitutive freedom is the divergence channel, not a forced confirm.
 
 2. **Recognition over Retrieval**: Present structured narrative options with anticipatable post-selection state (Recognize / Refine / Reorient) — Constitution interaction requires turn yield before proceeding; recognition options enable user evaluation, not blank-canvas recall.
 
@@ -487,11 +493,11 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 11. **Probe-first NullMatch**: At least one Socratic probe enrichment precedes any NullMatch declaration — first scan returning zero → probe → enriched re-scan → NullMatch declaration only if still empty.
 
-12. **Mandatory Qc, separate Qs and Qc** *(Safeguard tier — revisitable as instruction-following improves)*: Phase 2 Constitution interaction (Qc recognition) runs for every cycle including single high-confidence candidates — synthesis of identification is constitutive; confidence governs intensity (Light/Medium/Heavy), not whether the gate runs. On Refine, Socratic probing (Qs) and recognition (Qc) run as two distinct Constitution interactions — Qs deepens recall context first, Qc verifies identity second.
+12. **Conditional Qc, separate Qs and Qc** *(Safeguard tier — revisitable as instruction-following improves)*: Phase 2 runs the Constitution Qc gate when candidates ≥ 2 OR confidence < high (Medium / Heavy). A high-confidence single candidate (SingleObvious) instead **absorbs Qc into the presentation**: the recognized context is emitted inline as Extension (no turn yield) with a divergence-only affordance, and convergence is immediate — silence / the user moving on constitutes recognition, only divergence is explicit. One dominant candidate collapses the recognition option set to a single option (the others are foils), so the interaction is relay, not a gate; this absorption is the sanctioned revision of this rule's own Safeguard-tier tag, motivated by observed binary-confirm abandonment friction, and it does not touch Qs. On Refine (always gated), Socratic probing (Qs) and recognition (Qc) run as two distinct Constitution interactions — Qs deepens recall context first, Qc verifies identity second.
 
 13. **Cross-LOOP narrative persistence**: Narrative format and adjacent vector enrichment persist across LOOP iterations; subsequent attempts reference prior candidates and explain the differential.
 
-14. **Framing-signal visibility**: Every Phase 2 presentation states the remaining recall-try budget and the candidate space still in scope as framing prose — the budget the user reasons with, not a numeric attempt fraction.
+14. **Framing-signal visibility**: Every gated Phase 2 presentation and Refine probe states the remaining recall-try budget and the candidate space still in scope as framing prose — the budget the user reasons with, not a numeric attempt fraction. The SingleObvious inline emit converges immediately, so attempt-budget framing is moot there; its only forward branch is the divergence affordance.
 
 15. **Substrate non-coupling**: Phase prose names epistemic operations only — tool and path bindings belong exclusively to TOOL GROUNDING.
 
