@@ -53,6 +53,21 @@ Each entry records:
 - **Reevaluation**: `/steer` re-run at the earlier of {1-2 months post-installation, first falsification trigger}
 - **Status**: active
 
+### 2026-06-20 — [ProfileDriftConflict + Emergent] Migration-posture split + 6-variable table compression
+
+- **Disposition**: Approve
+- **Mismatch signals**: {} (Phase 4 fit-shape clean — narrative refinement of Calibration Result + table compression; no ProgrammaticTrigger / LayerMixing / BehavioralEnforcement)
+- **Recommended layer**: null
+- **Realization**:
+  - `.claude/rules/project-profile.md` — (1) migration-posture refined: operational realization splits by `(extension)` kind — Standing-authority migration (bounded-zone delegation) stays deferred; A5-collapse specialization (single-dominant-option per the A5 relay test) proceeds on per-protocol evidence, first instance Anamnesis `/recollect` Phase 2 high-confidence absorption (issue #557). (2) Six-variable table compressed to an inline value list + mechanism pointer (documentation-grade; not consulted as a table at runtime per log audit).
+- **Origin context**: Current session — `/contextualize` M4 false-positive (premise-check found the profile posture treated as authoritative was stale steer) + `~/.claude/logs/hooks.log` audit (827MB): "Extension-default" result live (1154 hits, 904 in PostToolUse decision contexts) while the 6-variable table surfaces only as `/steer` SKILL definition text, and `/steer` recalibration ran 0× against this profile in two months. Cluster: ProfileDriftConflict (migration posture) + Emergent (table-compression under Inscription Economics always-loaded cost).
+- **Falsification** (any one triggers re-evaluation):
+  - A future `/steer` recalibration needs the per-variable rationale that compression dropped (compression over-aggressive) → restore the table.
+  - The migration-posture split mis-routes a real Standing-authority migration as A5-collapse (or vice versa) at a per-protocol future stage.
+  - Compressing the 6 rows measurably shifts gate disposition away from Extension-default (the implicit-priming channel was load-bearing after all).
+- **Reevaluation**: next `/steer` invocation against a fresh session, or upon falsification trigger.
+- **Status**: active
+
 ## Completed / Retracted Trials
 
 (empty)
