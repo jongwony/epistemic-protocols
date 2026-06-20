@@ -16,9 +16,9 @@ Elevate a vague recall to a higher-granularity unit through AI-guided deposit-gr
 
 ```
 ── FLOW ──
-Anagoge(R) → Detect(R) →
+Anagoge(R) → attempts := 0 → Detect(R) →                             -- attempts initialized once, at activation (preserved on Reorient re-entry)
   single_session_suffices(R): defer-to-Anamnesis → deactivate
-  supra_session(R): Classify(R, Σ) → UnitType → Dispatch(UnitType) → attempts := 0 →
+  supra_session(R): Classify(R, Σ) → UnitType → Dispatch(UnitType) →
     Phase 1: attempts := attempts + 1 →                                   -- one increment per traversal, at traversal start
       Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → U[] →
       |U[]| = 0 ∧ attempts < max: Rescope(R, Σ) → Stop → S → rebind(R, S) → Phase 1
@@ -103,8 +103,8 @@ Edge cases:
 - Composition (/recollect → /ascend): single-session recall provides an entry deposit; /ascend traverses outward from it
 
 ── PHASE TRANSITIONS ──
-Phase 0: R → Detect(R) → supra_session(R)?                         -- granularity trigger (silent)
-           → Classify(R, Σ) → UnitType → attempts := 0             -- dispatch + counter init (silent)
+Phase 0: R → Detect(R) → supra_session(R)?                         -- granularity trigger (silent); attempts := 0 ONCE at activation (Λ init), preserved on Reorient re-entry to Phase 0 so the cap spans the whole elevation
+           → Classify(R, Σ) → UnitType                              -- dispatch (silent)
 Phase 1: R → attempts := attempts + 1 →                            -- one increment per traversal, at traversal start
            Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → U[ranked]  -- read-time inferred-edge traversal + assembly + rank [Tool]
            |U[ranked]| = 0 ∧ attempts < max → Rescope(R, Σ) → Qc → Stop → S → rebind(R, S) → Phase 1
@@ -160,7 +160,7 @@ Phase 1 Traverse      (observe)      → Read, Grep, Glob (read entry-deposit an
 Phase 1 Assemble      (sense)        → Internal analysis (compose inferred-edge-connected deposits into typed higher units)
 Phase 1 Rank          (sense)        → Internal analysis (recall alignment + inferred-edge connectivity; conditional haiku scoring for large unit sets)
 Phase 1 Rescope Qc    (constitution) → present (structured re-traversal navigation; mandatory on empty assembly before NullMatch)
-Phase 1 surface       (extension)    → TextPresent+Proceed (exhausted-with-units terminal: top-ranked candidate + traversal scope, then deactivate)
+Phase 3 surface       (extension)    → TextPresent+Proceed (exhausted-with-units terminal: top-ranked candidate + traversal scope, then deactivate)
 Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal: traversal scope + broken-link notes + Anamnesis/Aitesis fallback offer, then deactivate)
 Phase 2 Qc            (constitution) → present (narrative higher-unit candidate; mandatory)
 Phase 3 integrate     (track)        → Internal state update
@@ -172,7 +172,7 @@ converge              (extension)    → TextPresent+Proceed (convergence trace)
       units: List(HigherUnit), presented: Set(HigherUnit),
       recognized: Optional(HigherUnit),
       rescopes: List(RescopeOption),
-      attempts: Nat,   -- initialized 0 at Phase 0; incremented once per traversal at Phase 1 start; cap (max 3) bounds the traversal count (empty-branch Rescope-vs-NullMatch and Phase 3 re-traversal-vs-surface both gate on it)
+      attempts: Nat,   -- initialized 0 ONCE at activation (Λ init), preserved across Reorient re-entry to Phase 0; incremented once per traversal at Phase 1 start; cap (max 3) bounds the traversal count (empty-branch Rescope-vs-NullMatch and Phase 3 re-traversal-vs-surface both gate on it)
       active: Bool, cause_tag: String }
 
 ── GRAPH INVARIANTS ──
@@ -285,7 +285,8 @@ Heuristic signals for granularity-insufficiency detection (not hard gates):
 | Trigger | Effect |
 |---------|--------|
 | elevate_complete (Recognize) | Emit HigherUnit_prose; proceed with the recognized higher unit as past trajectory requiring re-verification against current state before commit (not confirmed current context) |
-| NullMatch (all attempts exhausted) | Surface traversal scope + broken-link notes, offer Anamnesis (single-session) or Aitesis (newly-found cases) fallback, deactivate |
+| NullMatch (attempts exhausted, no unit assembled) | Surface traversal scope + broken-link notes, offer Anamnesis (single-session) or Aitesis (newly-found cases) fallback, deactivate |
+| Exhausted with units (Refine/Reorient at attempts = max) | Surface the top-ranked candidate + traversal scope, deactivate — NOT NullMatch, since a unit did assemble |
 | Single-session misfire (Phase 0) | Defer to Anamnesis without entering the loop |
 | User Esc key | Accept current state without further elevation assistance |
 
@@ -302,7 +303,7 @@ Detect granularity insufficiency, bind `R`, and classify the target unit type. T
    - **Moderate** (partial signal): proceed to Phase 1 with broader traversal scope
    - **High** (unit shape unclear): traverse the dispatched type first, hold Reorient ready if the shape misfits
 4. If `single_session_suffices(R)`: surface the finding (the recall resolves to one session) and defer to Anamnesis without Anagoge activation.
-5. If `supra_session(R)`: record `R` with extracted trace and `UnitType`, initialize `attempts := 0` — proceed to Phase 1.
+5. If `supra_session(R)`: record `R` with extracted trace and `UnitType` — proceed to Phase 1. `attempts` is initialized to 0 once at activation (see MODE STATE); a Reorient dimension-change re-entry to Phase 0 preserves it so the cap spans the whole elevation rather than resetting.
 
 **Scan scope**: Read-only over bound text, conversation context, and the deposit index.
 
@@ -401,7 +402,7 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 7. **One higher unit per cycle**: Present one highest-ranked candidate higher unit per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single elevation decision.
 
-8. **Convergence persistence and early exit**: Mode active until elevate_complete, NullMatch after exhausted attempts, single-session misfire deferral, or user Esc; recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
+8. **Convergence persistence and early exit**: Mode active until elevate_complete, NullMatch after exhausted attempts (no unit assembled), exhausted-with-units deactivation (a Refine/Reorient request at attempts = max surfaces the top-ranked candidate and deactivates rather than re-traversing), single-session misfire deferral, or user Esc; recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
 
 9. **Convergence evidence**: Present the transformation trace (ScatteredDeposits → edges traversed → HigherUnit(recognized) → HigherUnit_prose) before declaring elevate_complete — convergence is demonstrated per-item, not asserted. The trace enumerates the edges followed and the deposits composing the unit.
 
