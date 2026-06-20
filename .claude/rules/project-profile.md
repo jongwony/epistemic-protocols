@@ -17,6 +17,6 @@ Bounded zone (in-principle delegatable via contract-style Standing authority + p
 
 "In-principle delegatable" is a capability statement; its operational realization splits by `(extension)` kind:
 - **Standing-authority migration** — delegating a bounded-zone Constitution gate to a pre-committed rule (Horismos / Syneidesis / Prosoche) — stays deferred to per-protocol future stages pending accumulated use evidence.
-- **A5-collapse specialization** — a gate whose option-set reduces to a single dominant option (entropy→0, per the A5 option-set relay test) — is a distinct axis: it proceeds when its per-protocol evidence arrives, presented as relay, and is not blocked by the Standing-authority deferral. First instance: the Anamnesis `/recollect` Phase 2 high-confidence single-candidate absorption.
+- **A5-collapse specialization** — a gate whose option-set reduces to a single dominant option (entropy→0, per the A5 option-set relay test) — is a distinct axis: it proceeds when its per-protocol evidence arrives, presented as relay, advancing independently of the Standing-authority deferral. First instance: the Anamnesis `/recollect` Phase 2 high-confidence single-candidate absorption.
 
 Absent an arrived per-protocol stage of either kind, SKILL.md TOOL GROUNDING `(constitution)` annotations remain runtime-authoritative.
