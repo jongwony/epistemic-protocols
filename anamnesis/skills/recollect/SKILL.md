@@ -21,7 +21,7 @@ Anamnesis(V) → Detect(V) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
     |C[]| = 0 ∧ attempts > 0: NullMatch → inform(V, Σ) → deactivate
     |C[]| > 0: backtrace_parent(c) ∀ c ∈ C[] : fork_marker(c) → parent_pointer, parent_cwd   -- deterministic: a fork candidate's parent is recoverable from its own record, not inferred (mechanism in TOOL GROUNDING; ≠ user-described Reorient)
-               SingleObvious(C[]): emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension (relay): high-confidence single candidate, no turn yield; silence = Recognize, divergence in the next turn re-enters Refine/Reorient below (no re-activation machinery)
+               SingleObvious(C[]): emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension (relay): high-confidence single candidate, no turn yield; silence = Recognize. Convergence is notional (inline skill prose persists), so a next-turn divergence re-engages via fresh re-detection (Layer 1/2 activation) — not an encoded transition out of the converged state — then routes to Refine/Reorient (no dedicated re-activation machinery added)
                ¬SingleObvious(C[]): Qc(C[top], evidence, framing) → Stop → R →
       Recognize(c): recall_complete(c) → emit(ClueVector_prose(c)) → converge      -- fork: emitted pointer = parent (or, when the parent record is absent, non-resumable + recoverable artifacts)
       Refine: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
@@ -69,7 +69,7 @@ Candidate        = { session_id: Optional(SessionId),
                      keywords: Set(String),
                      fingerprint: Prose,
                      cross_refs: List(Anchor),
-                     confidence: ∈ {low, medium, high},
+                     confidence: ∈ {low < medium < high},   -- totally ordered tier (cf. EvidenceMode); grounds the SingleObvious confidence = high guard and the confidence < high gate
                      evidence_mode: Optional(EvidenceMode),       -- highest tier among the signals that matched this candidate at scan time; Null ⇒ INDEX entry predates evidence-mode capture — Null is NEUTRAL in ranking (no contribution), never a penalty
                      fork_marker: Bool,                          -- true ⇒ the id is a sidechain/fork with no top-level SSOT (SidechainNoSSOT); its own id is not a valid resume handle. Invariants: fork_marker = false ⇒ parent_pointer = Null ∧ parent_cwd = Null ; parent_pointer = Null ⇒ parent_cwd = Null (parent_cwd requires parent_pointer; parent_pointer present with parent_cwd = Null is valid — parent identified but its cwd is unknown)
                      parent_pointer: Optional(SessionId),        -- orchestrating parent session for a fork candidate, read directly from the fork's own record; the resumable handle when the parent's top-level SSOT still exists (Null ⇒ parent record absent → non-resumable)
@@ -88,6 +88,7 @@ SocraticQuestion = { dimension: ∈ {temporal, associative, contextual}, questio
 R                = Recognition ∈ {Recognize(Candidate), Refine, Reorient(description)}
 SingleObvious    = predicate; SingleObvious(C[]) ≡ |C[]| = 1 ∧ confidence(C[top]) = high   -- Light-only Extension guard: the one candidate is the single dominant option (option-set entropy → 0 → relay), so Qc is absorbed into the emit; Medium (|C[]| ≥ 2) and Heavy (confidence < high) keep the Qc gate
 divergence_affordance = the mismatch channel folded into the non-yielding SingleObvious emit: names concrete adjacent candidates (Refine) AND offers an open free-response invitation (Reorient), keeping the full R = {Recognize, Refine, Reorient} coproduct reachable without a gate — Recognize is realized as silence-default
+emitted(x)       = predicate; the relay emit(x) has fired in session text — the Extension-path convergence witness (event predicate; satisfied by the non-yielding SingleObvious emit, no turn yield)
 H                = Hint     -- answer from Socratic probe gate (Qs)
 ClueVector_prose = String
 RecalledContext  = session text containing ClueVector_prose
@@ -117,14 +118,14 @@ Phase 1: V → Scan_{Track}(Store, trace(V)) → Rank(C[]) → C[ranked]  -- tra
            |C[ranked]| = 0 ∧ attempts > 0 → NullMatch → inform → deactivate
 Phase 2: SingleObvious(C[ranked]) → emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension: high-confidence single candidate, no turn yield, no [Tool] Stop; silence = Recognize
          ¬SingleObvious(C[ranked]) → C[top] → Qc(C[top], evidence, framing) → Stop → R    -- recognition gate [Tool]
-Phase 3: R → integrate(R, V, Σ) →                                -- integration (sense); a divergence after a SingleObvious emit enters here via Refine/Reorient on the next user turn
+Phase 3: R → integrate(R, V, Σ) →                                -- integration (sense); after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
            Recognize(c) → ClueVector_prose(c) → emit → converge
            Refine → Probe(V, Σ) → Qs(probe) → Stop → H          -- Socratic probing [Tool]
                   → enrich(V, H) → Phase 1
            Reorient(d) → rebind(V, d, Σ) → Phase 1               -- orthogonal re-scan (sense)
 
 ── LOOP ──
-Phase 1 → Phase 2 → Phase 3 →                              -- Phase 2 SingleObvious shortcut: emit ⊕ divergence affordance → converge (Extension, skips the Phase 3 gate; a divergence in the next turn → Refine/Reorient)
+Phase 1 → Phase 2 → Phase 3 →                              -- Phase 2 SingleObvious shortcut: emit ⊕ divergence affordance → converge (Extension, skips the Phase 3 gate; convergence is notional, so a next-turn divergence re-engages via fresh re-activation → Refine/Reorient)
   Recognize: converge
   Refine: Socratic probing → enrich → Phase 1
   Reorient: rebind V with orthogonal description → Phase 1
@@ -134,7 +135,7 @@ Convergence evidence: (VagueRecall → [enrichments] → Candidate(recognized) �
 
 ── CONVERGENCE ──
 recall_complete = Recognize(c) for some c ∈ C[]                                        -- gated path (¬SingleObvious)
-               ∨ SingleObvious(C[]) ∧ emitted(ClueVector_prose(C[top]) ⊕ divergence_affordance)   -- Extension path: the inline emit converges immediately (no turn yield); non-divergence (silence) realizes user-constituted recognition, a later divergence re-enters Refine/Reorient
+               ∨ SingleObvious(C[]) ∧ emitted(ClueVector_prose(C[top]) ⊕ divergence_affordance)   -- Extension path: the inline emit converges immediately (no turn yield); non-divergence (silence) realizes user-constituted recognition. Convergence is notional — a later divergence re-engages via fresh re-activation (Layer 1/2), not a transition out of the converged state
 NullMatch = |C[]| = 0 ∧ attempts > 0 ∧ (attempts = max ∨ enrichments exhausted)
 progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 
@@ -405,7 +406,7 @@ Dispatch the scan on the classified `Track`, execute track-appropriate lookup ov
 
 ### Phase 2: Narrative Recognition (Constitution; Extension on a high-confidence single candidate)
 
-**Present** the highest-priority candidate as a discussion narrative for user recognition. Branch on the candidate set: a **high-confidence single candidate** (`|C[]| = 1` at high confidence — `SingleObvious`) absorbs the gate into the presentation — emit the recognized context inline as **Extension** (no turn yield, converge immediately): essential output first (narrative + `Resume` handle + currency≠fidelity caveat), then a **divergence-only affordance** that names the concrete adjacent candidates (Refine) and invites an open redescription of the target (Reorient), keeping the full Recognize / Refine / Reorient set reachable. Silence (the user moving on) constitutes recognition; only divergence is explicit, and a divergence in the next turn continues into the existing Refine / Reorient paths (no gate, no re-activation step). One dominant candidate collapses the option set to a single option, so this is relay, not a gate. **Otherwise** (candidates ≥ 2, or confidence < high) the recognition gate runs as a Constitution interaction (turn yield). Both branches share the narrative format below.
+**Present** the highest-priority candidate as a discussion narrative for user recognition. Branch on the candidate set: a **high-confidence single candidate** (`|C[]| = 1` at high confidence — `SingleObvious`) absorbs the gate into the presentation — emit the recognized context inline as **Extension** (no turn yield, converge immediately): essential output first (narrative + `Resume` handle + currency≠fidelity caveat), then a **divergence-only affordance** that names the concrete adjacent candidates (Refine) and invites an open redescription of the target (Reorient), keeping the full Recognize / Refine / Reorient set reachable. Silence (the user moving on) constitutes recognition; only divergence is explicit. Convergence here is notional — the inline skill prose persists as a standing instruction, so a next-turn divergence re-engages the protocol through fresh empty-intention re-detection (Layer 1/2 activation), which routes to the existing Refine / Reorient handling — there is no encoded transition out of the converged state, and no dedicated re-activation machinery is added. One dominant candidate collapses the option set to a single option, so this is relay, not a gate. **Otherwise** (candidates ≥ 2, or confidence < high) the recognition gate runs as a Constitution interaction (turn yield). Both branches share the narrative format below.
 
 **Selection criterion**: Choose the candidate whose recognition would maximally resolve the user's empty intention. When priority is equal, prefer the candidate with richer narrative context and adjacent vectors.
 
@@ -422,7 +423,7 @@ Present the candidate as narrative text — the discussion's story, not just its
 - **Adjacent**: Other topics discussed nearby in the same time period — for Refine orientation
 - **Framing**: how many recall tries remain before the cap, and the size of the candidate space still in scope — stated as the budget you reason with, not a numeric attempt fraction
 
-For the **SingleObvious** path the inline emit renders the narrative format above as plain session text (narrative + `Resume` handle + currency≠fidelity caveat) and ends with the divergence-only affordance (named adjacents + open channel), no gate. **Gated path** (`¬SingleObvious`) — then **present**:
+For the **SingleObvious** path the inline emit renders the narrative format above as plain session text — the convergence trace folded in (narrative + `Resume` handle + currency≠fidelity caveat) — and ends with the divergence-only affordance (named adjacents + open channel), no gate. **Gated path** (`¬SingleObvious`) — then **present**:
 
 ```
 Does this match the discussion you are recalling?
@@ -485,7 +486,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 7. **Convergence persistence and early exit**: Mode active until recall_complete, NullMatch after exhausted attempts, or user Esc; user recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
 
-8. **Convergence evidence**: Present transformation trace (VagueRecall → enrichments → Candidate(recognized) → ClueVector_prose) before declaring recall_complete — convergence is demonstrated, not asserted.
+8. **Convergence evidence**: Present transformation trace (VagueRecall → enrichments → Candidate(recognized) → ClueVector_prose) before declaring recall_complete — convergence is demonstrated, not asserted. The SingleObvious Extension path folds this trace into its non-yielding inline emit (degenerate — a single candidate with no enrichments collapses the trace to VagueRecall → Candidate(recognized) → ClueVector_prose), satisfying this rule within the emit rather than via a separate Phase 3 step.
 
 9. **Context-Question Separation**: Present narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding context inside the question field violates this invariant.
 
