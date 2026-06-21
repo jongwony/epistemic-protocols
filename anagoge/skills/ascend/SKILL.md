@@ -372,7 +372,7 @@ For a **SedimentedConceptNode**:
 Common to all:
 - **Source & resume (per deposit)**: for every deposit named in the unit above, whatever its role in the unit (a chain's origin, line, and arrival deposits; a cluster's fragments; a concept's node and the deposits that forged it) — give where it came from (its partition slug + session id + the deposit's date) and a copy-paste command to jump back into that session (constructed per TOOL GROUNDING); when a deposit has no stored cwd, give its source and note it is not directly resumable rather than emitting a command that would fail. This lets the user re-enter any session the unit is built from, not just read that it exists.
 - **Traversal scope**: which partitions were reached, and any broken-link gaps (not-yet-written targets) noted as scope, not error
-- **Framing**: how many elevation tries remain before the cap, and how much of the deposit graph is still in scope — stated as the budget you reason with, not a numeric attempt fraction
+- **Framing**: how many elevation tries remain before the cap, and how much of the deposit graph is still in scope — stated as the budget you reason with, not a numeric attempt fraction. The SingleObvious inline emit converges immediately, so attempt-budget framing is moot there; its only forward branch is the divergence affordance.
 
 For the **SingleObvious** path the inline emit renders the narrative format above as plain session text — the convergence trace folded in (type-shaped narrative + per-deposit source + resume handle + currency≠fidelity caveat) — and ends with the divergence-only affordance (named adjacent boundary/scope adjustments + open channel), no gate. **Gated path** (`¬SingleObvious`) — then **present**:
 
