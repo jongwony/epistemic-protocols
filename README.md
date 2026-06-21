@@ -87,7 +87,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/triage`, `/dispatch`, `/forge`, `/reduced-space-test` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, focused work-unit dispatch with PR fanout + rejection-trace inscription, reference-grounded initial-prompt formation, and scoped empirical validation |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/triage`, `/dispatch`, `/forge`, `/reduced-space-test` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, focused work-unit dispatch with PR fanout + rejection-trace inscription, reference-grounded prompt-artifact formation, and scoped empirical validation |
 
 **Three discovery modes coexist** (none replaces the others):
 
@@ -110,7 +110,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 **Reference-grounded prompt formation**:
 
-- `/forge` — read a target reference (vendor model prompt guide, Codex Goals spec), reverse-induce the user's under-determined intent into a modality-aware IR, ground it against the reference via canonical-external dynamic fetch with a staleness guard, and project a ready-to-use initial prompt for a follow-up session/tool; vendor-agnostic core + parameterized adapter seam (Higgsfield, codex-goals), with the cross-adapter abstraction held as a deliberately deferred colimit
+- `/forge` — read a target reference (vendor model prompt guide, Codex Goals spec), reverse-induce the user's under-determined intent into a modality-aware IR, ground it against the reference via canonical-external dynamic fetch with a staleness guard, and project a ready-to-use prompt artifact (an initial prompt for a follow-up session/tool, or a standing custom-skill recipe); vendor-agnostic core + parameterized adapter seam (Higgsfield, gpt-image, codex-goals, claude-session, dia), with the cross-adapter abstraction held as a deliberately deferred colimit
 
 **Scoped empirical validation**:
 

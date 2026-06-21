@@ -1,24 +1,24 @@
 ---
 name: forge
-description: "Reference-grounded initial-prompt formation. Reads a target reference document (vendor prompt guide, Codex Goals spec), surfaces the user's under-determined contract coordinates, and projects a ready-to-use initial prompt for a follow-up session or tool. Use when the user asks to 'forge a prompt', 'turn this guide into a usable prompt', 'make a Higgsfield prompt', 'draft a /goal from this', or has latent intent that must be grounded in an external reference before a tool can run it."
+description: "Reference-grounded prompt-artifact formation. Reads a target reference document (vendor prompt guide, Codex Goals spec), surfaces the user's under-determined contract coordinates, and projects a ready-to-use prompt artifact — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe. Use when the user asks to 'forge a prompt', 'turn this guide into a usable prompt', 'make a Higgsfield prompt', 'draft a /goal from this', or has latent intent that must be grounded in an external reference before a tool can run it."
 ---
 
-# Forge: Reference-Grounded Initial-Prompt Formation
+# Forge: Reference-Grounded Prompt-Artifact Formation
 
-Form a ready-to-use initial prompt by grounding the user's under-determined intent in an authoritative reference document. This skill does not run the downstream tool, open branches, or create PRs. It surfaces the user's intent coordinates, grounds them against a reference (dynamically fetched, staleness-guarded), and emits one initial prompt that bootstraps a follow-up session or tool invocation.
+Form a ready-to-use prompt artifact by grounding the user's under-determined intent in an authoritative reference document. This skill does not run the downstream tool, open branches, or create PRs. It surfaces the user's intent coordinates, grounds them against a reference (dynamically fetched, staleness-guarded), and emits one prompt artifact — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe.
 
-**This is a projection utility, not a runtime executor and not a new epistemic protocol.** Forge introduces no new deficit. It realizes a known composite — surface under-determined intent coordinates (reverse-induction, the `/elicit` move) ∘ ground them against a canonical external reference (the `/inquire` canonical-external move) → thin projection. The output is an initial prompt the user carries into the next session or tool.
+**This is a projection utility, not a runtime executor and not a new epistemic protocol.** Forge introduces no new deficit. It realizes a known composite — surface under-determined intent coordinates (reverse-induction, the `/elicit` move) ∘ ground them against a canonical external reference (the `/inquire` canonical-external move) → thin projection. The output is a prompt artifact the user carries into the next session or tool.
 
 ## Core Contract
 
-`/forge` owns reference-grounded initial-prompt formation:
+`/forge` owns reference-grounded prompt-artifact formation:
 
 ```
 ReferenceIntake
   -> ResolvedIntentIR        (core: reverse-induce under-determined coordinates)
   -> GroundedReference       (core: canonical-external snapshot + staleness guard)
   -> VendorPromptDraft       (adapter: project IR through the reference schema)
-  -> InitialPrompt           (adapter: initial prompt for a follow-up session/tool)
+  -> PromptArtifact          (adapter: a prompt-family payload for a follow-up session/tool, or a standing custom-skill recipe)
 ```
 
 The **core** is vendor-agnostic and stops at `ResolvedIntentIR` plus the validated `GroundedReference`. The **adapter** owns the projection into a vendor-native artifact form. The core never learns vendor specifics; the adapter never re-derives intent.
@@ -27,7 +27,7 @@ The **core** is vendor-agnostic and stops at `ResolvedIntentIR` plus the validat
 
 - **Core (vendor-agnostic)**: reverse-induce the user's under-determined intent into `ResolvedIntentIR`; extract the adapter-derived required slots (`ContractElements`) the reference's schema requires; partition slots into relay vs constitution; own the staleness policy, provenance, and generic validation.
 - **Vendor Adapter Contract (the seam)**: the narrow, parameterized interface every adapter satisfies. New references plug in by adding an adapter section — accumulated per real use, never built top-down.
-- **Adapters (concrete instances)**: `Higgsfield`, `gpt-image`, `codex-goals`, and `claude-session` ship now. Each owns reference discovery/fetch, the reference's prompt schema, the projection rendering, and unsupported-field degradation.
+- **Adapters (concrete instances)**: `Higgsfield`, `gpt-image`, `codex-goals`, `claude-session`, and `dia` ship now. Each owns reference discovery/fetch, the reference's prompt schema, the projection rendering, and unsupported-field degradation.
 
 ### Vendor Adapter Contract (seam)
 
@@ -55,7 +55,7 @@ Narrowest seam contract: `ResolvedIntentIR × GuideSnapshot -> VendorPromptDraft
 | `RelaySlot` | A contract slot determined by the reference plus the user's stated intent. Forge auto-fills it with a cited basis. |
 | `ConstitutionSlot` | A contract slot requiring the user's judgment. Forge fills it with a proposed default and explicitly flags it for recognition. |
 | `VendorPromptDraft` | The adapter's projection of the IR through the reference schema, with provenance, freshness, a `stale-guide` flag when the staleness guard did not pass, and a `transport-unsafe` flag when the projected payload carries shell-active tokens or secret-substitution patterns hazardous across a shell-carrier handoff. |
-| `InitialPrompt` | The endpoint artifact: an initial prompt for a follow-up session or tool. Its form is adapter-determined (a Higgsfield video prompt; a Codex `/goal …` string). |
+| `PromptArtifact` | The endpoint artifact: a prompt-family payload — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe. Its form is adapter-determined (a Higgsfield video prompt; a Codex `/goal …` string; a Dia skill recipe). |
 
 ## Phase 0: Bind Reference and Intent
 
@@ -93,13 +93,13 @@ Core output stops here at `ResolvedIntentIR` plus the partitioned slots and the 
 
 The adapter projects the IR through the reference schema into a `VendorPromptDraft`, then `validate` checks it against `capabilities`.
 
-Present a ready-to-use draft with **every contract slot filled**. Relay slots show their cited basis; constitution slots show the proposed default with an explicit recognition flag. Then surface the artifact as the `InitialPrompt` for the follow-up session/tool, with provenance, freshness, and any `stale-guide` or `transport-unsafe` flag.
+Present a ready-to-use draft with **every contract slot filled**. Relay slots show their cited basis; constitution slots show the proposed default with an explicit recognition flag. Then surface the artifact as the `PromptArtifact` for the follow-up session/tool, with provenance, freshness, and any `stale-guide` or `transport-unsafe` flag.
 
-Emit the `InitialPrompt` transport-safely (Rule 12): the payload is a **literal opaque artifact**, so display it verbatim (fenced) for on-screen reading, recommend file-based handoff over inline shell args for injection, and surface any `transport-unsafe` flag `validate` raised.
+Emit the `PromptArtifact` transport-safely (Rule 12): the payload is a **literal opaque artifact**, so display it verbatim (fenced) for on-screen reading, recommend file-based handoff over inline shell args for injection, and surface any `transport-unsafe` flag `validate` raised.
 
 Surface — present the filled draft as context (slots, bases, flags) before the gate; the gate carries only:
 
-1. **Accept** — use this initial prompt as-is in the follow-up session/tool.
+1. **Accept** — use this prompt artifact as-is in the follow-up session/tool.
 2. **Adjust flagged slots** — change one or more constitution slots, then re-project.
 3. **Regenerate** — re-fetch the reference or re-resolve intent and rebuild.
 
@@ -109,12 +109,13 @@ Default is the filled draft, not a bare question list.
 
 Adapter bodies are progressively disclosed: this index is always loaded; each adapter's full contract lives in `adapters/<name>.md` and is Read only after the adapter is selected (Phase 0).
 
-| Adapter | Reference | InitialPrompt form |
+| Adapter | Reference | PromptArtifact form |
 |---|---|---|
 | `higgsfield` | Higgsfield video model prompt guide (video-only; image generation denied) | a Higgsfield video prompt for a follow-up session |
 | `gpt-image` | Codex imagegen skill at `$CODEX_HOME/skills/.system/imagegen/` (image-only; targets `gpt-image-2`; web cookbook fallback) | a `gpt-image-2` prompt block (using the source's shared schema) plus parameter envelope |
 | `codex-goals` | OpenAI Codex Goals specification | a strong `/goal …` string for a follow-up Codex session |
 | `claude-session` | Claude prompting best-practices guide (model-axis: `prompting-claude-{model}`; first-party, reflexive) | a model-tailored handoff initial-prompt for a follow-up Claude session (`/remote-spawn` worktree or remote-control) |
+| `dia` | Dia browser (The Browser Company) custom-skill surface — a conditioning instruction over page/selection/tab context; encrypted/cloud-synced store, no file/CLI/deeplink import | a paste-ready Dia custom-skill recipe (`DiaRecipeInstruction`: name + description + body) projecting the resolved intent, with a capability-gap degradation note for the primitives Dia lacks |
 
 Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch_guide_snapshot` / `derive_prompt_schema` / `project` / `validate`). New references plug in by adding an `adapters/<name>.md` file as accumulated prior — see Deferred Colimit; do not pre-build a registration framework.
 
@@ -122,20 +123,20 @@ Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch
 
 1. **No new deficit** (Architectural — role boundary): forge is a projection utility, not a protocol. It introduces no deficit→resolution morphism. It composes the `/elicit` and `/inquire` canonical-external moves and projects; it does not name a new epistemic deficit.
 2. **Core stops at IR** (Architectural — boundary invariant): core output is `ResolvedIntentIR` plus the validated grounded reference. The artifact form is adapter-determined and must not be promoted to a core output type. Promoting a completion-contract form into the core re-imports the routable/provenance boundary that a separate research issue owns; keep contract-ness in the adapter.
-3. **Initial-prompt endpoint** (Architectural — handoff specificity): every adapter's projection endpoint is an initial prompt for a follow-up session or tool. This is a unifying role, not a shared output type.
+3. **Prompt-artifact endpoint** (Architectural — handoff specificity): every adapter's projection endpoint is a `PromptArtifact` — a prompt-family payload (an initial prompt for a follow-up session or tool, or a standing custom-skill recipe). This is a unifying role, not a shared output type; the real per-adapter forms remain those in the Adapter Index "PromptArtifact form" column.
 4. **Reference grounding required** (Axiom anchor — Detection with Authority): every projection grounds against a fetched reference with cited provenance. A projection without a grounded, provenance-tagged reference is not a forge output.
 5. **Recognition over Recall** (Axiom anchor — Recognition over Recall): forge emits a filled draft, not a blank question list. Relay slots are auto-filled with cited basis; constitution slots carry a proposed default explicitly flagged so the user recognizes and adjusts rather than recalls from blank.
 6. **Surfacing over Deciding** (Derived — Surfacing over Deciding): constitution slots are surfaced with their proposed defaults flagged; forge does not silently finalize a slot that requires the user's judgment. A blind full draft that hides which slots were guessed is an anti-pattern.
 7. **Context-Question Separation** (Axiom anchor — Context-Question Separation): the filled draft, slot bases, and flags are presented as text before the gate. The gate carries only Accept / Adjust flagged slots / Regenerate.
 8. **Staleness guard** (Architectural — provenance continuity): reference evidence is staleness-guarded and tagged `web:{url}` or `file:{path}` depending on the canonical-source substrate. If staleness cannot be verified, fall back to the curated seed and mark the draft `stale-guide`; never present a stale reference silently.
 9. **Adapter accumulation, not top-down** (Architectural — empirical restraint): adapters are added per real use as accumulated prior. The Adapter Index above is the authoritative list of currently-shipped adapters; do not build a multi-reference framework ahead of use.
-10. **Formation, not execution** (Architectural — role boundary): `/forge` does not run the downstream tool, create branches, or open PRs. It emits the initial prompt and stops.
-11. **Progressive-disclosure adapters** (Architectural — context economy + accumulation): adapter bodies are isolated `adapters/<name>.md` files loaded only after selection; the always-loaded Adapter Index carries name + reference + InitialPrompt form. Selection is relay when the reference or request determines the adapter, a structured recognition gate only on genuine ambiguity (never unconditional). Adapters accumulate as additive files — the deferred-colimit accumulation mechanism made physical; do not build a generalized adapter-registration framework ahead of use.
-12. **Transport-safe handoff** (Architectural — handoff boundary): the `InitialPrompt` is a literal opaque payload that crosses transport boundaries the projection does not control — a markdown terminal render, a shell argument, a paste buffer. Display it **verbatim** (fenced) so document XML tags and special characters survive on-screen rendering instead of being interpreted as HTML and truncated. For injection into a shell carrier, recommend **file-based handoff** (Write the payload, the carrier reads the file) over inline shell args: `` ` ``, `$(`, and `${` undergo shell substitution and `'` can break out of a quoted argument, so a literal `$(…)` secret-fetch in the payload would execute and leak. A shell-carrier adapter's `validate` raises `transport-unsafe` when the payload carries such tokens — currently realized in `claude-session`, with other shell-carrier adapters adding the scan as they accumulate (Rule 9); never present a `transport-unsafe` payload for inline injection silently.
+10. **Formation, not execution** (Architectural — role boundary): `/forge` does not run the downstream tool, create branches, or open PRs. It emits the prompt artifact and stops.
+11. **Progressive-disclosure adapters** (Architectural — context economy + accumulation): adapter bodies are isolated `adapters/<name>.md` files loaded only after selection; the always-loaded Adapter Index carries name + reference + PromptArtifact form. Selection is relay when the reference or request determines the adapter, a structured recognition gate only on genuine ambiguity (never unconditional). Adapters accumulate as additive files — the deferred-colimit accumulation mechanism made physical; do not build a generalized adapter-registration framework ahead of use.
+12. **Transport-safe handoff** (Architectural — handoff boundary): the `PromptArtifact` is a literal opaque payload that crosses transport boundaries the projection does not control — a markdown terminal render, a shell argument, a paste buffer. Display it **verbatim** (fenced) so document XML tags and special characters survive on-screen rendering instead of being interpreted as HTML and truncated. For injection into a shell carrier, recommend **file-based handoff** (Write the payload, the carrier reads the file) over inline shell args: `` ` ``, `$(`, and `${` undergo shell substitution and `'` can break out of a quoted argument, so a literal `$(…)` secret-fetch in the payload would execute and leak. A shell-carrier adapter's `validate` raises `transport-unsafe` when the payload carries such tokens — currently realized in `claude-session`, with other shell-carrier adapters adding the scan as they accumulate (Rule 9); never present a `transport-unsafe` payload for inline injection silently.
 
 ## Deferred Colimit (do not extract yet)
 
-The cross-adapter abstraction — "reference-grounded initial-prompt formation" generalized over reference classes — is a **deliberately deferred colimit**. Its structure is a prescriptive core plus per-instance realizations plus accumulated prior. It is **not** extracted or named now.
+The cross-adapter abstraction — "reference-grounded prompt-artifact formation" generalized over reference classes — is a **deliberately deferred colimit**. Its structure is a prescriptive core plus per-instance realizations plus accumulated prior. It is **not** extracted or named now.
 
 Trigger to extract the meta-pattern: a built first-reference instance plus accumulated prior from real use of a second instance, per the epistemic cost asymmetry (an unused abstraction costs more than a missing one) and instance-first methodology. Naming it before that is the over-generalization the methodology refuses.
 
@@ -147,7 +148,7 @@ Candidate adapters (not yet realized — list only, do not build ahead of use):
 
 ## Boundary Note
 
-`/forge` forms an initial prompt and stops. It reads a reference and surfaces intent; it does not execute the tool, run the Goal, generate the media, or open branches/PRs. Heavy intent aporia routes to `/elicit`; the reference-fetch move mirrors the `/inquire` canonical-external channel but forge owns the projection.
+`/forge` forms a prompt artifact and stops. It reads a reference and surfaces intent; it does not execute the tool, run the Goal, generate the media, or open branches/PRs. Heavy intent aporia routes to `/elicit`; the reference-fetch move mirrors the `/inquire` canonical-external channel but forge owns the projection.
 
 ## Operational checklist (per cycle)
 
@@ -156,7 +157,7 @@ Candidate adapters (not yet realized — list only, do not build ahead of use):
 - [ ] Phase 2 reference fetched with staleness metadata; hybrid seed + dynamic fetch + guard applied
 - [ ] Phase 3 adapter-derived required slots extracted; every slot partitioned relay vs constitution
 - [ ] Phase 4 filled draft presented — relay slots cited, constitution slots flagged
-- [ ] InitialPrompt emitted with provenance, freshness, and `stale-guide` flag when applicable
-- [ ] InitialPrompt displayed verbatim and emitted transport-safely — file-based handoff recommended over inline shell args; `transport-unsafe` flag surfaced when applicable
+- [ ] PromptArtifact emitted with provenance, freshness, and `stale-guide` flag when applicable
+- [ ] PromptArtifact displayed verbatim and emitted transport-safely — file-based handoff recommended over inline shell args; `transport-unsafe` flag surfaced when applicable
 - [ ] Core output stopped at IR; artifact form kept in the adapter
 - [ ] No tool execution, branch, or PR performed
