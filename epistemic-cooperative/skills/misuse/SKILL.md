@@ -48,13 +48,13 @@ The skill family coexists by phenomenology — none replaces the others. Misuse 
 
 ### Phase 0: Scope Determination
 
-Determine the audit scope before scanning. Decisions:
+Resolve the audit scope before scanning. Decisions:
 
 - **Target protocols** — fixed at `/ground` and `/induce` for v1.0. Other protocols deferred pending accumulated use evidence.
 - **Session window** — default is the current session only. Cross-session scanning requires explicit user confirmation per Rule 4.
 - **Cross-project scope** — default off. Scanning across `~/.claude/projects/` requires explicit user confirmation.
 
-If the user's `/misuse` invocation does not specify scope, present a Constitution interaction soliciting scope before proceeding to Phase 1. If the user has already specified scope in the invocation, accept it and proceed.
+Resolve scope from the invocation argument; if none is given, apply the safe default — **current session only, cross-project off**. This default scope is read-only and privacy-local (`/misuse` preserves SessionHistory, Rule 6), and its selection is deterministic and citable (the safe default), so it is a **relay (Extension)**: surface the inferred scope to the user and proceed directly to Phase 1, without a scope-authorization gate. The Constitution interaction is **retained only for the cross-session / cross-project expansion** — the privacy-sensitive widening the user opts into. When the resolved scope is an expansion (cross-session or cross-project), present the widening for constitutive authorization before scanning; if the user declines, fall back to the safe default scope. This mirrors `/probe`'s Phase 0 — silent on the current-session default (its Rule 3), explicit confirmation only on cross-session expansion (its Rule 4).
 
 Phase 0 is otherwise silent — no surfacing of detection heuristics. If the user has no past `/ground` or `/induce` invocations in the chosen scope, deactivate with a brief no-op note (Phase 1 will be empty).
 
@@ -157,9 +157,13 @@ The artifact is observation-only. No automated rewrite, no automated reroute (Ru
 
 ```
 ── FLOW ──
-Misuse(scope) → Phase0(scope, user_confirm) →
-  empty(scope): deactivate(no-op note)
-  scoped(scope): Extract(scope) → I[] →
+Misuse(arg) → Phase0: scope_resolve(arg) → s →
+  default_scope(s): relay(surface s) → proceed                       -- Extension; safe read-only default, no gate
+  expansion(s):     present(widening) → Stop → R_scope →             -- Constitution privacy authorization [Tool]
+                      authorize: proceed with s
+                      decline:   s ← default_scope → proceed
+  empty(s): deactivate(no-op note)
+  scoped(s): Extract(s) → I[] →
     |I[]| = 0: deactivate(no-op note)
     |I[]| > 0: Classify(I[], Taxonomy) → C[] →
       Aggregate(C[]) → ranked(V[]) →
@@ -175,7 +179,7 @@ Misuse(scope) → Phase0(scope, user_confirm) →
 
 ── MORPHISM ──
 SessionHistory
-  → scope(audit_window)                  -- user-confirmed scope
+  → scope(audit_window)                  -- default_scope relayed (current-session); expansion user-confirmed
   → extract(invocations)                 -- /ground and /induce slash command extraction
   → classify(invocation, taxonomy)       -- per-invocation contract integrity check
   → aggregate(classifications)           -- cluster + rank
@@ -192,6 +196,11 @@ invariant: Recognition over Verdict-Assertion
 Scope            = { protocols: Set(ProtocolId), session_window: SessionWindow,
                      cross_project: Bool }
 SessionWindow    ∈ {current_session, named_session, time_range, all_sessions}
+default_scope    = (s: Scope) ⊢ s.session_window = current_session ∧ ¬s.cross_project
+                   -- safe, read-only, privacy-local default; relay-eligible (Extension)
+expansion        = (s: Scope) ⊢ ¬default_scope(s)
+                   -- cross-session ∨ cross-project widening; privacy-sensitive (Constitution gate)
+R_scope          = ScopeAuth ∈ {authorize, decline}   -- Phase 0 expansion-gate disposition (Constitution); decline falls back to default_scope
 Invocation       = { protocol: ProtocolId, session_id: SessionId,
                      turn_index: Int, argument: String }
 Triple           = { invocation: Invocation, pre_context: List(Turn),
@@ -214,7 +223,10 @@ Turn             = { role, content, timestamp }
 Phase            ∈ {0, 1, 2, 3, 4, 5}
 
 ── PHASE TRANSITIONS ──
-Phase 0: Scope → Confirm(user) → Phase 1                          -- silent unless scope unspecified
+Phase 0: arg → scope_resolve(arg) → s : Scope
+           default_scope(s) → relay(surface s) → Phase 1               -- Extension; no gate (safe read-only default)
+           expansion(s)     → present(widening) → Stop → R_scope → Phase 1   -- Constitution privacy authorization [Tool]
+                                authorize → scan s ; decline → s ← default_scope
 Phase 1: scope → session-analyzer(friction_pointers) → I[]        -- subagent extraction [Tool]
            |I[]| = 0 → emit(no-op note) → deactivate
            |I[]| > 0 → Phase 2
@@ -241,8 +253,11 @@ session_text(misuse) ∋ ViolationReview when reviewed > 0; empty no-op note whe
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 scope_from_arg (extension)     → TextPresent+Proceed (when scope specified by user; proceed with bound scope)
-Phase 0 scope_confirm  (constitution)  → present (when scope unspecified; constitutive scope authorization)
+Phase 0 scope_resolve        (sense)        → Internal analysis (resolve Scope from invocation arg; if none, apply default current_session ∧ ¬cross_project)
+Phase 0 scope_from_arg       (extension)    → TextPresent+Proceed (user-specified default_scope arg: current_session ∧ ¬cross_project; bind scope, relay)
+Phase 0 scope_default_relay  (extension)    → TextPresent+Proceed (scope unspecified → safe default current_session ∧ ¬cross_project; surface inferred scope, relay)
+Phase 0 scope_expand_confirm (constitution) → present (resolved scope is expansion(s): cross-session ∨ cross-project widening, whether arg-hinted or user-requested; constitutive privacy authorization; decline → fall back to default_scope)
+-- Phase 0 relay basis: default_scope(s) is read-only and privacy-local (SessionHistory preserved, Rule 6); its resolution is deterministic and citable (the safe default), so it is relay-eligible (Extension) per the A5 option-set relay test and the project Extension-default profile (project-profile.md). The (constitution) gate is retained only for the privacy-sensitive cross-session / cross-project widening, where the user constitutes authorization to read beyond the current session.
 Phase 1 extract        (extension)     → Agent(epistemic-cooperative:session-analyzer, mode=friction_pointers)
 Phase 1 read_misfit    (extension)     → Read (~/.claude/projects/{slug}/hypomnesis/{session-id}/misfit.md, opt-in)
 Phase 2 read_taxonomy  (extension)     → Read (references/violation-taxonomy.md)
@@ -274,7 +289,7 @@ The `~/.claude/projects/{slug}/hypomnesis/{session-id}/misfit.md` file (written 
 1. **Operation-grounded classification** — Surface shape (e.g., "N instances + slash command") is necessary but not sufficient for VIOLATION classification. The cognitive operation actually performed must be examined against the protocol's declared operation. Protocols are defined by cognitive operation, not by input shape (instance count is evidence, not gate).
 2. **Self-stereotype guard** — The classifier itself must not commit the same stereotype error it detects. Apply 2-step check (surface match → operation verification). On uncertain operation verification, classify as AMBIGUOUS, not VIOLATION. False-positive cost (eroded protocol use) exceeds false-negative cost (missed violation surfaced later).
 3. **Recognition is verification, not decision-axis** — Phase 4 Qc is structurally homologous to Anamnesis Phase 2 recognition gates: past-identity synthesis, not future-trajectory selection. The Differential Future Requirement (which mandates differential downstream trajectories among gate options) does not apply to verification gates whose option structure is determined by verification task requirements. A 1-correct option structure (was-violation / was-legitimate) is legitimate by purpose.
-4. **Cross-session opt-in, default off** — Default scope is current session. Reading other sessions or other projects requires explicit user confirmation in Phase 0. This matches `/probe` substrate policy and applies to both session JSONL reads and `misfit.md` reads.
+4. **Cross-session opt-in, default off; safe-default relay** — The current-session, cross-project-off default is a read-only, privacy-local scope; when scope is unspecified (or specified as this default), Phase 0 surfaces the inferred scope and proceeds (relay/Extension) — **no scope-authorization gate fires on the safe default**. Reading other sessions or other projects — the cross-session / cross-project expansion — requires explicit user confirmation in Phase 0 (the retained Constitution gate); a declined expansion falls back to the safe default. This mirrors `/probe`'s Phase 0 (silent on the current-session default per its Rule 3, explicit confirmation on cross-session expansion per its Rule 4) and applies to both session JSONL reads and `misfit.md` reads.
 5. **Extension / Constitution vocabulary** — Classification descriptions use the Cognitive Partnership Move vocabulary: Extension (relay-mode, citable basis, deterministic) and Constitution (gated-mode, AI-inference basis, multiple valid results). Older relay/gated phrasing is replaced by the current vocabulary throughout output.
 6. **Observation-only artifact** — Misuse never auto-rewrites past sessions, never auto-reroutes a past invocation to a different protocol, never produces a corrective action. Calibration metadata in Phase 5 is for future live-nudge design, not for present action.
 7. **Bounded review depth** — Phase 4 loop terminates at `min(|V[]|, 10)` candidates per session of `/misuse`. Audit fatigue erodes verdict quality; bounded review preserves recognition fidelity. The user can re-invoke `/misuse` for additional candidates.
