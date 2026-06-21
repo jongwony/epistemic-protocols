@@ -1,7 +1,7 @@
 {
   "name": "katalepsis",
   "description": "Verify understanding after AI work through intent-scented entry points — /grasp (κατάληψις: a grasping firmly)",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
