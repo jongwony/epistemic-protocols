@@ -1296,7 +1296,7 @@ function checkCrossRefScan() {
       message: 'CLAUDE.md missing Epistemic Concern Clusters table'
     },
     {
-      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis, Diylisis\)/,
+      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anagoge, Anamnesis, Diylisis\)/,
       message: 'CLAUDE.md initiator taxonomy missing protocol in the AI-guided set'
     },
   ];

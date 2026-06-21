@@ -1,7 +1,7 @@
 {
-  "name": "anamnesis",
-  "version": "0.8.1",
-  "description": "Resolve vague recall into recognized context — /recollect",
+  "name": "anagoge",
+  "version": "0.1.4",
+  "description": "Elevate a vague recall to a higher-granularity unit — /ascend",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -12,23 +12,22 @@
   "keywords": [
     "epistemic-protocols",
     "skills",
-    "anamnesis"
+    "anagoge"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Anamnesis",
-    "shortDescription": "Resolve vague recall into recognized context — /recollect",
-    "longDescription": "Resolve vague recall into recognized context — /recollect",
+    "displayName": "Anagoge",
+    "shortDescription": "Elevate a vague recall to a higher-granularity unit — /ascend",
+    "longDescription": "Elevate a vague recall to a higher-granularity unit — /ascend",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [
       "Interactive",
-      "Read",
-      "Write"
+      "Read"
     ],
     "websiteURL": "https://github.com/jongwony/epistemic-protocols",
     "defaultPrompt": [
-      "Use anamnesis for this task"
+      "Use anagoge for this task"
     ],
     "brandColor": "#2563EB"
   }

@@ -207,7 +207,7 @@ describe('transformSkillMd', () => {
 describe('runtime contract view', () => {
   it('builds a packaged runtime view for every skill', () => {
     const views = buildRuntimeContractViews();
-    assert.equal(views.length, 34);
+    assert.equal(views.length, 37);
     for (const view of views) {
       assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one Skill.md entry`);
       assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed Skill.md`);
@@ -454,10 +454,10 @@ describe('generateReleaseNotes', () => {
     assert.ok(prothesisPos < katalepsisPos, 'Katalepsis should be last');
   });
 
-  it('includes all 14 protocols in protocols table', () => {
+  it('includes all 15 protocols in protocols table', () => {
     const notes = generateReleaseNotes(mockResults);
     const protocolNames = [
-      'Anamnesis', 'Horismos', 'Aitesis', 'Prothesis', 'Hyphegesis',
+      'Anamnesis', 'Anagoge', 'Horismos', 'Aitesis', 'Prothesis', 'Hyphegesis',
       'Analogia', 'Periagoge', 'Euporia', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Elenchus', 'Diylisis', 'Katalepsis',
     ];
     for (const name of protocolNames) {
@@ -509,7 +509,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 34 skills plus bundle in dry-run', () => {
+  it('packages all 37 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -522,10 +522,11 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 35);
+    assert.equal(result.results.length, 38);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
+        'ascend.zip',
         'attend.zip',
         'bound.zip',
         'catalog.zip',
@@ -561,6 +562,8 @@ describe('package.js CLI', () => {
         'steer.zip',
         'sublate.zip',
         'triage.zip',
+        'white-bear.zip',
+        'zero-shot.zip',
       ].sort(),
     );
     // Lower-bound invariant: baseline reflects the current plugin set at

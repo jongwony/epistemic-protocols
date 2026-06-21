@@ -21,6 +21,8 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/forge` | Reference-grounded initial-prompt formation | Initial prompt for a follow-up session/tool |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop to convergence | Applied fixes + convergence trace |
+| `/white-bear` | Prose audit — positive rationale over prohibition | JSON findings (read-only) |
+| `/zero-shot` | Prose audit — principle statement over anchoring examples | JSON findings (read-only) |
 
 ## Skills
 

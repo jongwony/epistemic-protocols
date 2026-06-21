@@ -61,6 +61,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Elenchus `/sublate` | Verification | About to externalize a working context whose apparent sufficiency has decayed | Dialectical antithesis per source (provenance / counterfactual / cross-source consistency) before pre-execution sync |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
 | Anamnesis `/recollect` | Cross-cutting | Resolving vague recall of prior sessions or discussions | Cross-session state recovery via narrative recognition (Recognition over Retrieval) |
+| Anagoge `/ascend` | Cross-cutting | A vague recall whose right unit is supra-session — a connected line of work, topic cluster, or already-sedimented concept across many sessions | Read-time deposit-graph reconstruction (discover related deposits by shared anchors/keywords/metadata); higher-unit recognition (Recognition over Aggregation) |
 | Katalepsis `/grasp` | Cross-cutting | Rapid comprehension verification via intent-scented entry points | User-intent grasp for AI-completed work, reviews, plans, docs, or code changes |
 | Diylisis `/distill` | Cross-cutting | Distilling a session-tethered working context into a self-contained portable handoff for a fresh zero-memory recipient | Handoff brief / fresh-context subagent dispatch / resumable plan with undefined jargon, deictic anchors, or dangling task ids |
 | Hyphegesis `/conduct` | Cross-cutting | Conducting the method of a multi-move work prospect before object-level cognition — order, independence, reconciliation, termination, routing | Multi-move work with non-trivial conduct (migrations, staged investigations, entangled adversarial/parallel/synthesis); "how should I approach this whole thing?" meta-questions |
@@ -80,7 +81,7 @@ Do NOT present the full protocol catalog upfront. Start with a concise welcome a
 
 **If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 14 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
+**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 15 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
 - Text: Post-catalog path selection
 - Options:
   - Quick recommendation
@@ -99,7 +100,7 @@ Then **Gate #2**:
 - Options:
   - Pre-execution (Planning) — /bound, /inquire, /elicit
   - Analysis/Decision — /frame, /ground, /induce, /gap
-  - Execution/Verification/Understanding — /attend, /contextualize, /sublate, /recollect, /distill, /conduct, /grasp
+  - Execution/Verification/Understanding — /attend, /contextualize, /sublate, /recollect, /ascend, /distill, /conduct, /grasp
 
 **Gate #3** (Targeted only, session source):
 - Text: Session source selection
