@@ -56,8 +56,9 @@ Anchor           = StructuredAnchor | LegacyAnchor   -- what a deposit STORES in
 StructuredAnchor = { kind: ∈ {memory, github_issue, github_pr}, ref: String, channel: ∈ {user, transcript} }
                   -- the ONLY structured anchor kinds the substrate stores; NOT a cross-slug deposit pointer
 LegacyAnchor     = String               -- a bare-string cross_ref from older deposits (pre-StructuredAnchor)
-Deposit          = { slug: String, sid: String, topic: String,
-                     fingerprint: Prose, cross_refs: List(Anchor) }          -- one partition-local sediment unit; cross_refs are STORED, partition-local, exactly what Anamnesis writes
+Deposit          = { slug: String, sid: String, cwd: Optional(String), date: Optional(String),
+                     topic: String, fingerprint: Prose, cross_refs: List(Anchor) }          -- one partition-local sediment unit; cross_refs are STORED, partition-local, exactly what Anamnesis writes
+                  -- cwd, date are STORED in the deposit's own frontmatter (the same fields Anamnesis writes): cwd pairs with sid to build the resume handle, date dates the source. Optional ⇒ absent in deposits written before the field was captured (cwd-absent ⇒ source surfaced but non-resumable)
 DepositGraph     = (Set(Deposit), Set(TraversalEdge))    -- STRUCTURAL TYPE; the edge set is RECONSTRUCTED at read-time, not pre-materialized; invariants in ── GRAPH INVARIANTS ──
 TraversalEdge    = { from: DepositRef, to: DepositRef, kind: ∈ {chain, topic, concept, plain} }
                   -- `kind` and `to` are INFERRED at traversal time from stored anchors + shared keywords/session metadata + Σ — NEVER read from a stored field
@@ -81,6 +82,8 @@ ScopeHint        = RescopeOption  -- the dimension+option the user selects at th
 S                = ScopeHint      -- user navigation answer from Rescope gate (Qc-rescope)
 A                = Recognition ∈ {Recognize(HigherUnit), Refine, Reorient(description)}
 Prose            = String       -- source-agnostic NL description
+SourceLocator    = { slug: String, sid: String, date: Optional(String) }   -- per-deposit provenance shown to the user so a surfaced deposit is traceable to its origin: partition slug + session id + the deposit's frontmatter date
+ResumeHandle     = String       -- copy-paste re-entry command for a deposit's session (construction binding in TOOL GROUNDING) — or a non-resumable note when cwd is absent
 HigherUnit_prose = String
 HigherGranularityUnit = session text containing HigherUnit_prose
                -- elevation establishes the UNIT (these deposits form THIS higher whole), not current-reality FIDELITY:
@@ -112,9 +115,9 @@ Phase 1: R → attempts := attempts + 1 →                            -- one in
            |U[ranked]| = 0 ∧ attempts = max ∧ presented = ∅ → NullMatch → inform → fallback → deactivate   -- nothing ever assembled; ≥1 Rescope already fired (Rule 12 holds structurally)
            |U[ranked]| = 0 ∧ attempts = max ∧ presented ≠ ∅ → surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units (a prior traversal assembled) — NOT NullMatch
            |U[ranked]| > 0 → presented := presented ∪ {U[top]} → Phase 2   -- record the assembled candidate before presenting
-Phase 2: U[top] → Qc(U[top], narrative, framing) → Stop → A         -- recognition gate [Tool]; presented already carries U[top] from the Phase 1 → Phase 2 edge
+Phase 2: U[top] → Qc(U[top], narrative ⊕ per-deposit ⟨SourceLocator, ResumeHandle⟩, framing) → Stop → A   -- recognition gate [Tool]; presented already carries U[top] from the Phase 1 → Phase 2 edge; each surfaced deposit carries its source + resume handle
 Phase 3: A → integrate(A, R, Σ) →                                   -- integration (track); the cap bounds re-traversal — a Refine/Reorient proceeds while attempts < max, else surfaces the best candidate and deactivates
-           Recognize(u) → HigherUnit_prose(u) → emit → converge
+           Recognize(u) → HigherUnit_prose(u) → emit → converge   -- HigherUnit_prose carries each composing deposit's SourceLocator + ResumeHandle
            Refine ∧ attempts < max → adjust(boundary ∨ traversal_scope) → Phase 1    -- boundary/scope adjustment (sense)
            Reorient(d) ∧ attempts < max → rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1 / Phase 0   -- orthogonal re-dispatch (sense)
            (Refine ∨ Reorient) ∧ attempts = max → surface(U[top], traversal_scope) → deactivate   -- exhausted-with-units terminal
@@ -148,6 +151,10 @@ progress(Σ) = attempts: N/max, units_assembled: N, inferred_edges_followed: N
 --   Deposit.cross_refs   ↦ clue.md StructuredAnchor list (kind ∈ {memory, github_issue, github_pr} + legacy bare strings) — STORED, partition-local; these are NOT cross-slug deposit pointers
 --   Deposit.fingerprint  ↦ narrative.md (origin/outcome prose)
 --   Deposit.topic        ↦ clue.md frontmatter topics[0]
+--   Deposit.sid / Deposit.cwd / Deposit.date ↦ clue.md (and narrative.md) frontmatter session_id / cwd / date — the same fields Anamnesis writes; cwd, date are Optional (absent in deposits predating their capture)
+--   SourceLocator        ↦ { slug = the deposit's partition dirname, sid = frontmatter session_id, date = frontmatter date } — surfaced per deposit so the user can trace it to its origin
+--   ResumeHandle         ↦ `cd <Deposit.cwd> && claude --resume <Deposit.sid>` (Claude Code resolves the project slug from invocation cwd, so BOTH cwd and sid are required); Deposit.cwd absent/empty ⇒ omit the command and surface the SourceLocator + a non-resumable note (mirrors the Anamnesis recollect Resume binding)
+--   DepositRef (a surfaced node) ↦ a DepositRef carries slug + sid only; build its SourceLocator/ResumeHandle by dereferencing slug + sid to the deposit dir (~/.claude/projects/{slug}/hypomnesis/{sid}/) and reading date/cwd from its clue.md frontmatter — same fields and same cwd-absent ⇒ non-resumable rule as a full Deposit (SedimentedConceptNode.node is the surfaced DepositRef)
 --   TraversalEdge.kind / TraversalEdge.to ↦ inferred at traversal time, not stored
 --   Traversal start      ↦ entry deposits; read their stored cross_refs anchors ({memory, github_issue, github_pr} + legacy) and INDEX keywords/metadata,
 --                          then DISCOVER related deposits across partitions by READ-TIME SEARCH (Read/Grep/Glob over `~/.claude/projects/*/hypomnesis/`) for shared anchors / keywords / session metadata
@@ -163,12 +170,12 @@ Phase 1 Traverse      (observe)      → Read, Grep, Glob (read entry-deposit an
 Phase 1 Assemble      (sense)        → Internal analysis (compose inferred-edge-connected deposits into typed higher units)
 Phase 1 Rank          (sense)        → Internal analysis (recall alignment + inferred-edge connectivity; conditional haiku scoring for large unit sets)
 Phase 1 Rescope Qc    (constitution) → present (structured re-traversal navigation; mandatory on empty assembly before NullMatch)
-Phase 1/3 surface     (extension)    → TextPresent+Proceed (exhausted-with-units terminal, presented ≠ ∅: best candidate + traversal scope, then deactivate — reached from Phase 1 on an empty re-traversal at the cap, or from Phase 3 on a Refine/Reorient request at the cap)
+Phase 1/3 surface     (extension)    → TextPresent+Proceed (exhausted-with-units terminal, presented ≠ ∅: best candidate — each composing deposit with its source + resume, per Rule 19 — + traversal scope, then deactivate — reached from Phase 1 on an empty re-traversal at the cap, or from Phase 3 on a Refine/Reorient request at the cap)
 Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal, presented = ∅: traversal scope + broken-link notes + Anamnesis/Aitesis fallback offer, then deactivate)
 Phase 2 record        (track)        → Internal state update (presented := presented ∪ {U[top]} on entering the gate — the ever-assembled witness for NullMatch vs exhausted-with-units)
-Phase 2 Qc            (constitution) → present (narrative higher-unit candidate; mandatory)
+Phase 2 Qc            (constitution) → present (narrative higher-unit candidate incl. per-deposit SourceLocator + ResumeHandle; mandatory)
 Phase 3 integrate     (track)        → Internal state update
-Phase 3 emit          (extension)    → TextPresent+Proceed (HigherUnit_prose)
+Phase 3 emit          (extension)    → TextPresent+Proceed (HigherUnit_prose, incl. per-deposit SourceLocator + ResumeHandle)
 converge              (extension)    → TextPresent+Proceed (convergence trace)
 
 ── MODE STATE ──
@@ -291,7 +298,7 @@ Heuristic signals for granularity-insufficiency detection (not hard gates):
 |---------|--------|
 | elevate_complete (Recognize) | Emit HigherUnit_prose; proceed with the recognized higher unit as past trajectory requiring re-verification against current state before commit (not confirmed current context) |
 | NullMatch (attempts exhausted, nothing ever assembled: presented = ∅) | Surface traversal scope + broken-link notes, offer Anamnesis (single-session) or Aitesis (newly-found cases) fallback, deactivate (≥1 Rescope already fired, since every traversal was empty) |
-| Exhausted with units (attempts = max, presented ≠ ∅: a Refine/Reorient request, or an empty re-traversal after a prior assembly) | Surface the best prior candidate + traversal scope, deactivate — NOT NullMatch, since a unit did assemble |
+| Exhausted with units (attempts = max, presented ≠ ∅: a Refine/Reorient request, or an empty re-traversal after a prior assembly) | Surface the best prior candidate (each composing deposit with its source + resume, per Rule 19) + traversal scope, deactivate — NOT NullMatch, since a unit did assemble |
 | Single-session misfire (Phase 0) | Defer to Anamnesis without entering the loop |
 | User Esc key | Accept current state without further elevation assistance |
 
@@ -354,6 +361,7 @@ For a **SedimentedConceptNode**:
 - **Connections found**: which shared concept anchors connected the forging deposits
 
 Common to all:
+- **Source & resume (per deposit)**: for every deposit named in the unit above, whatever its role in the unit (a chain's origin, line, and arrival deposits; a cluster's fragments; a concept's node and the deposits that forged it) — give where it came from (its partition slug + session id + the deposit's date) and a copy-paste command to jump back into that session (constructed per TOOL GROUNDING); when a deposit has no stored cwd, give its source and note it is not directly resumable rather than emitting a command that would fail. This lets the user re-enter any session the unit is built from, not just read that it exists.
 - **Traversal scope**: which partitions were reached, and any broken-link gaps (not-yet-written targets) noted as scope, not error
 - **Framing**: how many elevation tries remain before the cap, and how much of the deposit graph is still in scope — stated as the budget you reason with, not a numeric attempt fraction
 
@@ -373,7 +381,7 @@ Other is always available — maps to `Reorient`: the user means a fundamentally
 
 After user response:
 
-1. **Recognize(u)**: Mark the unit as recognized. Emit `HigherUnit_prose` — natural-language rendering of the recognized higher unit to session text: the unit's shape (chain line / cluster fragments / concept node), the deposits composing it, the edges traversed, and key cross-references. This prose enters session text and is readable by any downstream protocol via Session Text Composition. `HigherUnit_prose` carries a currency≠fidelity caveat: it states that the deposits form this higher unit as a past trajectory, not that the unit's content is verified against current reality — downstream consumers treat it as elevated-and-requiring-re-verification, not as confirmed current context.
+1. **Recognize(u)**: Mark the unit as recognized. Emit `HigherUnit_prose` — natural-language rendering of the recognized higher unit to session text: the unit's shape (chain line / cluster fragments / concept node), the deposits composing it — each with its source (partition slug + session id + the deposit's date) and a copy-paste resume command (constructed per TOOL GROUNDING, or a non-resumable note when the deposit has no stored cwd) so the user can re-enter any of those sessions — the edges traversed, and key cross-references. This prose enters session text and is readable by any downstream protocol via Session Text Composition. `HigherUnit_prose` carries a currency≠fidelity caveat: it states that the deposits form this higher unit as a past trajectory, not that the unit's content is verified against current reality — downstream consumers treat it as elevated-and-requiring-re-verification, not as confirmed current context.
 
 2. **Refine**: Unit recognized as close but mis-bounded. Adjust the unit boundary (add/drop a deposit at the edge) or the traversal scope (widen/narrow which partitions to reach), re-enter Phase 1 with the adjustment.
 
@@ -428,3 +436,5 @@ After integration: `elevate_complete` → present the convergence evidence trace
 17. **Elevated unit currency is not fidelity**: Elevation constitutes the unit (these deposits form this higher whole), not current-reality agreement (it still holds). A correctly recognized higher unit may still be desynced from current reality — the recognition gate verifies the unit, not its fidelity. `HigherUnit_prose` emits with a currency≠fidelity caveat; the elevated unit is re-verified against current state before commit and is not handed to downstream protocols as confirmed current context.
 
 18. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing the narrative to the dispatched UnitType, or pairing "Recognize" with a unit-specific label, while preserving the Recognition coproduct) is distinct from mutation.
+
+19. **Per-deposit source and resume handle**: Every deposit surfaced to the user — in the Phase 2 narrative, in the Phase 3 `HigherUnit_prose` emit, and in the exhausted-with-units terminal surface (which exposes the best prior candidate's composing deposits) — carries its source (partition slug + session id + the deposit's date) and a copy-paste resume command that re-enters that session; a deposit whose cwd was never captured is surfaced with its source and a non-resumable note rather than a command that would fail. This lets the user jump back into any session the higher unit is built from, not just read that it exists. The frontmatter-field and command-construction bindings are substrate-coupled and live in TOOL GROUNDING (Rule 13); the protocol essence names only the epistemic operation — surface each composing deposit's origin and a re-entry handle.
