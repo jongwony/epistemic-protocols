@@ -1,6 +1,6 @@
 ---
 name: forge
-description: "Reference-grounded prompt-artifact formation. Reads a target reference document (vendor prompt guide, Codex Goals spec), surfaces the user's under-determined contract coordinates, and projects a ready-to-use initial prompt for a follow-up session or tool. Use when the user asks to 'forge a prompt', 'turn this guide into a usable prompt', 'make a Higgsfield prompt', 'draft a /goal from this', or has latent intent that must be grounded in an external reference before a tool can run it."
+description: "Reference-grounded prompt-artifact formation. Reads a target reference document (vendor prompt guide, Codex Goals spec), surfaces the user's under-determined contract coordinates, and projects a ready-to-use prompt artifact — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe. Use when the user asks to 'forge a prompt', 'turn this guide into a usable prompt', 'make a Higgsfield prompt', 'draft a /goal from this', or has latent intent that must be grounded in an external reference before a tool can run it."
 ---
 
 # Forge: Reference-Grounded Prompt-Artifact Formation
@@ -27,7 +27,7 @@ The **core** is vendor-agnostic and stops at `ResolvedIntentIR` plus the validat
 
 - **Core (vendor-agnostic)**: reverse-induce the user's under-determined intent into `ResolvedIntentIR`; extract the adapter-derived required slots (`ContractElements`) the reference's schema requires; partition slots into relay vs constitution; own the staleness policy, provenance, and generic validation.
 - **Vendor Adapter Contract (the seam)**: the narrow, parameterized interface every adapter satisfies. New references plug in by adding an adapter section — accumulated per real use, never built top-down.
-- **Adapters (concrete instances)**: `Higgsfield`, `gpt-image`, `codex-goals`, and `claude-session` ship now. Each owns reference discovery/fetch, the reference's prompt schema, the projection rendering, and unsupported-field degradation.
+- **Adapters (concrete instances)**: `Higgsfield`, `gpt-image`, `codex-goals`, `claude-session`, and `dia` ship now. Each owns reference discovery/fetch, the reference's prompt schema, the projection rendering, and unsupported-field degradation.
 
 ### Vendor Adapter Contract (seam)
 
@@ -136,7 +136,7 @@ Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch
 
 ## Deferred Colimit (do not extract yet)
 
-The cross-adapter abstraction — "reference-grounded initial-prompt formation" generalized over reference classes — is a **deliberately deferred colimit**. Its structure is a prescriptive core plus per-instance realizations plus accumulated prior. It is **not** extracted or named now.
+The cross-adapter abstraction — "reference-grounded prompt-artifact formation" generalized over reference classes — is a **deliberately deferred colimit**. Its structure is a prescriptive core plus per-instance realizations plus accumulated prior. It is **not** extracted or named now.
 
 Trigger to extract the meta-pattern: a built first-reference instance plus accumulated prior from real use of a second instance, per the epistemic cost asymmetry (an unused abstraction costs more than a missing one) and instance-first methodology. Naming it before that is the over-generalization the methodology refuses.
 

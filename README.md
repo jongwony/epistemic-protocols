@@ -110,7 +110,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 
 **Reference-grounded prompt formation**:
 
-- `/forge` — read a target reference (vendor model prompt guide, Codex Goals spec), reverse-induce the user's under-determined intent into a modality-aware IR, ground it against the reference via canonical-external dynamic fetch with a staleness guard, and project a ready-to-use prompt artifact (an initial prompt for a follow-up session/tool, or a standing custom-skill recipe); vendor-agnostic core + parameterized adapter seam (Higgsfield, codex-goals), with the cross-adapter abstraction held as a deliberately deferred colimit
+- `/forge` — read a target reference (vendor model prompt guide, Codex Goals spec), reverse-induce the user's under-determined intent into a modality-aware IR, ground it against the reference via canonical-external dynamic fetch with a staleness guard, and project a ready-to-use prompt artifact (an initial prompt for a follow-up session/tool, or a standing custom-skill recipe); vendor-agnostic core + parameterized adapter seam (Higgsfield, gpt-image, codex-goals, claude-session, dia), with the cross-adapter abstraction held as a deliberately deferred colimit
 
 **Scoped empirical validation**:
 

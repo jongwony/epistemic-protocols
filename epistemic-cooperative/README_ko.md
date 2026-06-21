@@ -18,7 +18,7 @@
 | `/catalog` | 프로토콜 핸드북 — 즉시 참조 | 터미널 기반 프로토콜 브라우저 |
 | `/triage` | GitHub 이슈 기반 work-unit triage | dispatchable initial prompt |
 | `/dispatch` | focused work-unit 실행 | 브랜치, PR, feedback inscription |
-| `/forge` | 레퍼런스-grounded initial-prompt 형성 | 후속 세션/도구용 initial prompt |
+| `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 (수렴까지) | 적용된 수정 + 수렴 trace |
 | `/white-bear` | 프로즈 감사 — 금지 대신 긍정적 근거 | JSON findings (읽기 전용) |
@@ -133,16 +133,16 @@ DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK
 - 선택된 work unit에 대한 linear 또는 parallel fanout
 - fresh-context continuity를 위한 verbatim rejection feedback inscription
 
-### /forge — Reference-Grounded Initial-Prompt Formation
+### /forge — Reference-Grounded Prompt-Artifact Formation
 
-대상 레퍼런스 문서(벤더 모델 prompt guide, Codex Goals 스펙)를 읽고, 사용자의 미명세 의도를 modality-aware IR로 역귀납한 뒤, canonical-external 동적 fetch + staleness guard로 레퍼런스에 grounding하고, 후속 세션/도구용 initial prompt를 projection한다.
+대상 레퍼런스 문서(벤더 모델 prompt guide, Codex Goals 스펙)를 읽고, 사용자의 미명세 의도를 modality-aware IR로 역귀납한 뒤, canonical-external 동적 fetch + staleness guard로 레퍼런스에 grounding하고, 후속 세션/도구용 prompt artifact(후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe)를 projection한다.
 
 ```
-ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft → InitialPrompt
+ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft → PromptArtifact
 ```
 
 주요 특징:
-- 벤더-무관 core(의도 IR + staleness 정책) + 인자화 adapter seam; Higgsfield·codex-goals 어댑터 동봉
+- 벤더-무관 core(의도 IR + staleness 정책) + 인자화 adapter seam; Higgsfield·gpt-image·codex-goals·claude-session·dia 어댑터 동봉
 - core는 IR까지; 산출물 형태는 adapter-결정(core 승격 금지)
 - relay 슬롯 인용·constitution 슬롯 플래그된 채워진 초안 — 빈 질문 목록도 맹목 완성초안도 아님
 - 교차-adapter 추상은 의도적으로 유예된 colimit(triage-gated-vendor-harness의 형제), 누적 사용 전 미추출
@@ -173,7 +173,7 @@ epistemic-cooperative/
 │   ├── catalog/SKILL.md          # /catalog 프로토콜 핸드북
 │   ├── triage/SKILL.md           # /triage work-unit formation
 │   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
-│   ├── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
+│   ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
 │   └── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
 └── agents/
     ├── project-scanner.md         # Phase 1: 프로젝트 탐색

@@ -18,7 +18,7 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/catalog` | Protocol handbook — instant reference | Terminal-based protocol browser |
 | `/triage` | Work-unit triage from GitHub issues | Dispatchable initial prompts |
 | `/dispatch` | Focused work-unit execution | Branches, PRs, feedback inscriptions |
-| `/forge` | Reference-grounded initial-prompt formation | Initial prompt for a follow-up session/tool |
+| `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop to convergence | Applied fixes + convergence trace |
 | `/white-bear` | Prose audit — positive rationale over prohibition | JSON findings (read-only) |
@@ -133,16 +133,16 @@ Key features:
 - linear or parallel fanout over selected work units
 - verbatim rejection feedback inscription for fresh-context continuity
 
-### /forge — Reference-Grounded Initial-Prompt Formation
+### /forge — Reference-Grounded Prompt-Artifact Formation
 
-Reads a target reference document (a vendor model prompt guide, the Codex Goals spec), reverse-induces the user's under-determined intent into a modality-aware IR, grounds it against the reference via canonical-external dynamic fetch with a staleness guard, and projects a ready-to-use initial prompt for a follow-up session or tool.
+Reads a target reference document (a vendor model prompt guide, the Codex Goals spec), reverse-induces the user's under-determined intent into a modality-aware IR, grounds it against the reference via canonical-external dynamic fetch with a staleness guard, and projects a ready-to-use prompt artifact — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe.
 
 ```
-ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft → InitialPrompt
+ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft → PromptArtifact
 ```
 
 Key features:
-- vendor-agnostic core (intent IR + staleness policy) + parameterized adapter seam; ships Higgsfield and codex-goals adapters
+- vendor-agnostic core (intent IR + staleness policy) + parameterized adapter seam; ships Higgsfield, gpt-image, codex-goals, claude-session, and dia adapters
 - core stops at IR; artifact form is adapter-determined (no core promotion)
 - filled draft with relay slots cited and constitution slots flagged — not a blank question list, not a blind full draft
 - cross-adapter abstraction is a deliberately deferred colimit (sibling of triage-gated-vendor-harness), not extracted ahead of accumulated use
@@ -173,7 +173,7 @@ epistemic-cooperative/
 │   ├── catalog/SKILL.md          # /catalog protocol handbook
 │   ├── triage/SKILL.md           # /triage work-unit formation
 │   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
-│   ├── forge/SKILL.md            # /forge reference-grounded initial-prompt formation
+│   ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
 │   └── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
 └── agents/
     ├── project-scanner.md         # Phase 1: project discovery
