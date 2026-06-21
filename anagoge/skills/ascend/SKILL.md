@@ -24,11 +24,13 @@ Anagoge(R) → attempts := 0 → Detect(R) →                             -- at
       |U[]| = 0 ∧ attempts < max: Rescope(R, Σ) → Stop → S → rebind(R, S) → Phase 1
       |U[]| = 0 ∧ attempts = max ∧ presented = ∅: NullMatch → inform(R, Σ) → fallback → deactivate   -- no unit ever assembled; the first empty traversal (attempts < max) already fired ≥1 Rescope
       |U[]| = 0 ∧ attempts = max ∧ presented ≠ ∅: surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units: a prior traversal assembled, so this is NOT NullMatch
-      |U[]| > 0: presented := presented ∪ {U[top]} → Qc(U[top], narrative, framing) → Stop → A →   -- record the assembled candidate (presented becomes the "ever-assembled" witness)
-        Recognize(u): elevate_complete(u) → emit(HigherUnit_prose(u)) → converge
-        Refine ∧ attempts < max: adjust(boundary ∨ traversal_scope) → Phase 1
-        Reorient(d) ∧ attempts < max: rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1 / Phase 0
-        (Refine ∨ Reorient) ∧ attempts = max: surface(U[top], traversal_scope) → deactivate   -- exhausted-with-units terminal
+      |U[]| > 0: presented := presented ∪ {U[top]} →   -- record the assembled candidate (presented becomes the "ever-assembled" witness)
+        SingleObvious(U[]): emit(HigherUnit_prose(U[top]) ⊕ divergence_affordance) → elevate_complete(U[top]) → converge   -- Extension (relay): one densely-connected high-confidence unit, no turn yield; silence = Recognize. Convergence is notional (inline skill prose persists), so a next-turn divergence re-engages via fresh re-detection (Layer 1/2 activation) — not an encoded transition out of the converged state — then routes to Refine/Reorient
+        ¬SingleObvious(U[]): Qc(U[top], narrative, framing) → Stop → A →
+          Recognize(u): elevate_complete(u) → emit(HigherUnit_prose(u)) → converge
+          Refine ∧ attempts < max: adjust(boundary ∨ traversal_scope) → Phase 1
+          Reorient(d) ∧ attempts < max: rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1 / Phase 0
+          (Refine ∨ Reorient) ∧ attempts = max: surface(U[top], traversal_scope) → deactivate   -- exhausted-with-units terminal
 
 ── MORPHISM ──
 ScatteredDeposits × DepositGraph
@@ -38,8 +40,8 @@ ScatteredDeposits × DepositGraph
   → traverse(Deposits, infer_edges)    -- INFER cross-partition edges at read-time from stored anchors + shared keywords/metadata; broken-link-tolerant
   → assemble(connected_subgraph)       -- compose higher units of the dispatched type from the inferred-edge-connected deposits
   → rank(units, recall_trace)          -- order by recall alignment + connectivity
-  → present(unit, Socratic)            -- narrative presentation of one candidate higher unit
-  → recognize(unit, user)              -- user-constituted identification at the higher granularity
+  → present(unit, Socratic)            -- narrative presentation of one candidate higher unit; absorbed into the emit for SingleObvious (single densely-connected high-confidence unit) — Extension, no turn yield
+  → recognize(unit, user)              -- user-constituted identification at the higher granularity; for SingleObvious, realized as silence-default behind a divergence-only affordance (non-divergence constitutes recognition)
   → emit(HigherUnit_prose)             -- NL rendering to session text
   → HigherGranularityUnit
 requires: supra_session(R)              -- granularity checkpoint (Phase 0): single session would NOT resolve it
@@ -81,6 +83,10 @@ RescopeOption    = { dimension: ∈ {boundary, scope, unit_type}, option: String
 ScopeHint        = RescopeOption  -- the dimension+option the user selects at the Rescope gate to re-navigate traversal
 S                = ScopeHint      -- user navigation answer from Rescope gate (Qc-rescope)
 A                = Recognition ∈ {Recognize(HigherUnit), Refine, Reorient(description)}
+confidence       = HigherUnit → {low < medium < high}   -- Rank-assigned label (recall-trace alignment + inferred-edge connectivity strength); grounds the SingleObvious confidence = high guard and the confidence < high gate
+SingleObvious    = predicate; SingleObvious(U[]) ≡ |U[]| = 1 ∧ confidence(U[top]) = high   -- Light-only Extension guard: the one densely-connected unit is the single dominant option (option-set entropy → 0 → relay), so Qc is absorbed into the emit; Medium (|U[]| ≥ 2) and Heavy (confidence < high) keep the Qc gate
+divergence_affordance = the mismatch channel folded into the non-yielding SingleObvious emit: names the concrete adjacent boundary/scope adjustments (Refine) AND offers an open free-response invitation (Reorient), keeping the full A = {Recognize, Refine, Reorient} coproduct reachable without a gate — Recognize is realized as silence-default
+emitted(x)       = predicate; the relay emit(x) has fired in session text — the Extension-path convergence witness (event predicate; satisfied by the non-yielding SingleObvious emit, no turn yield)
 Prose            = String       -- source-agnostic NL description
 SourceLocator    = { slug: String, sid: String, date: Optional(String) }   -- per-deposit provenance shown to the user so a surfaced deposit is traceable to its origin: partition slug + session id + the deposit's frontmatter date
 ResumeHandle     = String       -- copy-paste re-entry command for a deposit's session (construction binding in TOOL GROUNDING) — or a non-resumable note when cwd is absent
@@ -115,15 +121,16 @@ Phase 1: R → attempts := attempts + 1 →                            -- one in
            |U[ranked]| = 0 ∧ attempts = max ∧ presented = ∅ → NullMatch → inform → fallback → deactivate   -- nothing ever assembled; ≥1 Rescope already fired (Rule 12 holds structurally)
            |U[ranked]| = 0 ∧ attempts = max ∧ presented ≠ ∅ → surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units (a prior traversal assembled) — NOT NullMatch
            |U[ranked]| > 0 → presented := presented ∪ {U[top]} → Phase 2   -- record the assembled candidate before presenting
-Phase 2: U[top] → Qc(U[top], narrative ⊕ per-deposit ⟨SourceLocator, ResumeHandle⟩, framing) → Stop → A   -- recognition gate [Tool]; presented already carries U[top] from the Phase 1 → Phase 2 edge; each surfaced deposit carries its source + resume handle
-Phase 3: A → integrate(A, R, Σ) →                                   -- integration (track); the cap bounds re-traversal — a Refine/Reorient proceeds while attempts < max, else surfaces the best candidate and deactivates
+Phase 2: SingleObvious(U[ranked]) → emit(HigherUnit_prose(U[top]) ⊕ per-deposit ⟨SourceLocator, ResumeHandle⟩ ⊕ divergence_affordance) → elevate_complete(U[top]) → converge   -- Extension: single densely-connected high-confidence unit, no turn yield, no [Tool] Stop; silence = Recognize
+         ¬SingleObvious(U[ranked]) → U[top] → Qc(U[top], narrative ⊕ per-deposit ⟨SourceLocator, ResumeHandle⟩, framing) → Stop → A   -- recognition gate [Tool]; presented already carries U[top] from the Phase 1 → Phase 2 edge; each surfaced deposit carries its source + resume handle
+Phase 3: A → integrate(A, R, Σ) →                                   -- integration (track); the cap bounds re-traversal — a Refine/Reorient proceeds while attempts < max, else surfaces the best candidate and deactivates; after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
            Recognize(u) → HigherUnit_prose(u) → emit → converge   -- HigherUnit_prose carries each composing deposit's SourceLocator + ResumeHandle
            Refine ∧ attempts < max → adjust(boundary ∨ traversal_scope) → Phase 1    -- boundary/scope adjustment (sense)
            Reorient(d) ∧ attempts < max → rebind(UnitType ∨ recall_dimension, d, Σ) → Phase 1 / Phase 0   -- orthogonal re-dispatch (sense)
            (Refine ∨ Reorient) ∧ attempts = max → surface(U[top], traversal_scope) → deactivate   -- exhausted-with-units terminal
 
 ── LOOP ──
-Phase 1 → Phase 2 → Phase 3 →
+Phase 1 → Phase 2 → Phase 3 →                              -- Phase 2 SingleObvious shortcut: emit ⊕ divergence affordance → converge (Extension, skips the Phase 3 gate; convergence is notional, so a next-turn divergence re-engages via fresh re-activation → Refine/Reorient)
   Recognize: converge
   Refine: adjust unit boundary or traversal scope → Phase 1 (while attempts < max)
   Reorient: change unit type or recall dimension → Phase 1 (or Phase 0 on dimension change) (while attempts < max)
@@ -134,7 +141,8 @@ Max 3 elevation attempts. `attempts` increments once per traversal, at the start
 Convergence evidence: (ScatteredDeposits → [edges traversed] → HigherUnit(recognized) → HigherUnit_prose).
 
 ── CONVERGENCE ──
-elevate_complete = Recognize(u) for some u ∈ U[]
+elevate_complete = Recognize(u) for some u ∈ U[]                                        -- gated path (¬SingleObvious)
+                ∨ SingleObvious(U[]) ∧ emitted(HigherUnit_prose(U[top]) ⊕ divergence_affordance)   -- Extension path: the inline emit converges immediately (no turn yield); non-divergence (silence) realizes user-constituted recognition. Convergence is notional — a later divergence re-engages via fresh re-activation (Layer 1/2), not a transition out of the converged state
 NullMatch = |U[]| = 0 ∧ attempts = max ∧ presented = ∅  -- no higher unit assembles AT ALL across the whole elevation (deposits too sparse, or inferred edges resolve only to not-yet-written targets)
                                         -- `presented = ∅` is load-bearing: it means every traversal was empty, so the first empty traversal (at attempts < max) already fired a Rescope — guaranteeing ≥1 Rescope precedes any NullMatch (Rule 12), even when earlier traversals consumed the budget
                                         -- the exhausted-WITH-units path (presented ≠ ∅ ∧ attempts = max, whether reached by an empty re-traversal or a Refine/Reorient request) is NOT NullMatch: it surfaces the best prior candidate and deactivates (see ── LOOP ──)
@@ -173,7 +181,8 @@ Phase 1 Rescope Qc    (constitution) → present (structured re-traversal naviga
 Phase 1/3 surface     (extension)    → TextPresent+Proceed (exhausted-with-units terminal, presented ≠ ∅: best candidate — each composing deposit with its source + resume, per Rule 19 — + traversal scope, then deactivate — reached from Phase 1 on an empty re-traversal at the cap, or from Phase 3 on a Refine/Reorient request at the cap)
 Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal, presented = ∅: traversal scope + broken-link notes + Anamnesis/Aitesis fallback offer, then deactivate)
 Phase 2 record        (track)        → Internal state update (presented := presented ∪ {U[top]} on entering the gate — the ever-assembled witness for NullMatch vs exhausted-with-units)
-Phase 2 Qc            (constitution) → present (narrative higher-unit candidate incl. per-deposit SourceLocator + ResumeHandle; mandatory)
+Phase 2 Qc            (constitution) → present (narrative higher-unit candidate incl. per-deposit SourceLocator + ResumeHandle; gated path — ¬SingleObvious: candidate units ≥ 2 OR confidence < high)
+Phase 2 emit          (extension)    → TextPresent+Proceed (SingleObvious path only: single densely-connected high-confidence unit emitted inline with its per-deposit SourceLocator + ResumeHandle and a divergence-only affordance, no turn yield, converge immediately). Relay basis: one dominant higher unit collapses the recognition option set to a single option (Refine/Reorient are foils), so the option set is relay rather than a gate; this conditional Constitution→Extension specialization within Phase 2 is the sanctioned revision of Rule 7's Safeguard-tier mandatory-gate tag, motivated by observed binary-confirm abandonment friction. It is the relay-collapse kind of (extension), NOT a Standing-authority migration.
 Phase 3 integrate     (track)        → Internal state update
 Phase 3 emit          (extension)    → TextPresent+Proceed (HigherUnit_prose, incl. per-deposit SourceLocator + ResumeHandle)
 converge              (extension)    → TextPresent+Proceed (convergence trace)
@@ -247,7 +256,7 @@ The traversal reconstructs the connected deposits at read-time; the narrative Qc
 
 ### Activation
 
-AI detects granularity insufficiency in user expression (Layer 2, silent Phase 0) OR user calls `/ascend` (Layer 1, always available). Recognition always requires user interaction at the Phase 2 gate. On direct `/ascend`, bind `R` from current/recent context; if none recoverable, request the recall target before Phase 0.
+AI detects granularity insufficiency in user expression (Layer 2, silent Phase 0) OR user calls `/ascend` (Layer 1, always available). Recognition requires user interaction at the Phase 2 gate, except for a single densely-connected high-confidence unit — there the gate is absorbed into an inline Extension emit with a divergence-only affordance, and non-divergence (silence) constitutes recognition. On direct `/ascend`, bind `R` from current/recent context; if none recoverable, request the recall target before Phase 0.
 
 **Granularity insufficiency** — the user senses a whole line of work, topic, or concept across many sessions, but the right resolution unit is supra-session (no single session is the answer).
 
@@ -265,7 +274,7 @@ When Anagoge is active:
 
 **Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
-**Action**: At Phase 2, present the candidate higher unit as a narrative for user recognition via Cognitive Partnership Move (Constitution).
+**Action**: At Phase 2, present the candidate higher unit as a narrative for user recognition — a Constitution gate when candidate units ≥ 2 or confidence < high; for a single densely-connected high-confidence unit, an Extension inline emit with a divergence-only affordance (silence constitutes recognition).
 </system-reminder>
 
 Anagoge completes before connected-unit-dependent work; loaded instructions resume after elevation resolves or dismisses.
@@ -296,7 +305,7 @@ Heuristic signals for granularity-insufficiency detection (not hard gates):
 
 | Trigger | Effect |
 |---------|--------|
-| elevate_complete (Recognize) | Emit HigherUnit_prose; proceed with the recognized higher unit as past trajectory requiring re-verification against current state before commit (not confirmed current context) |
+| elevate_complete (Recognize, or SingleObvious inline emit) | Emit HigherUnit_prose; proceed with the recognized higher unit as past trajectory requiring re-verification against current state before commit (not confirmed current context) |
 | NullMatch (attempts exhausted, nothing ever assembled: presented = ∅) | Surface traversal scope + broken-link notes, offer Anamnesis (single-session) or Aitesis (newly-found cases) fallback, deactivate (≥1 Rescope already fired, since every traversal was empty) |
 | Exhausted with units (attempts = max, presented ≠ ∅: a Refine/Reorient request, or an empty re-traversal after a prior assembly) | Surface the best prior candidate (each composing deposit with its source + resume, per Rule 19) + traversal scope, deactivate — NOT NullMatch, since a unit did assemble |
 | Single-session misfire (Phase 0) | Defer to Anamnesis without entering the loop |
@@ -334,9 +343,9 @@ Traverse the deposit graph for the dispatched `UnitType`, assemble candidate hig
 
 **Scope restriction**: Traversal uses Read, Grep, Glob exclusively. Cross-partition reads only — never cross-slug writes; Anagoge writes nothing.
 
-### Phase 2: Narrative Recognition (Constitution)
+### Phase 2: Narrative Recognition (Constitution; Extension on a single densely-connected high-confidence unit)
 
-**Present** the highest-ranked candidate higher unit as a narrative for user recognition via Cognitive Partnership Move (Constitution). Reaching this gate records the candidate: `presented := presented ∪ {U[top]}`. This makes `presented` the witness that *some* traversal assembled a unit, which later discriminates a true NullMatch (`presented = ∅`, nothing ever assembled) from the exhausted-with-units terminal (`presented ≠ ∅`) and supplies the best prior candidate for that terminal's surface.
+**Present** the highest-ranked candidate higher unit as a narrative for user recognition. Reaching this point records the candidate: `presented := presented ∪ {U[top]}` — the witness that *some* traversal assembled a unit, which later discriminates a true NullMatch (`presented = ∅`, nothing ever assembled) from the exhausted-with-units terminal (`presented ≠ ∅`) and supplies the best prior candidate for that terminal's surface. Branch on the candidate set: a **single densely-connected high-confidence unit** (`|U[]| = 1` at high confidence — `SingleObvious`) absorbs the gate into the presentation — emit the recognized higher unit inline as **Extension** (no turn yield, converge immediately): essential output first (type-shaped narrative + each composing deposit's source + resume handle + currency≠fidelity caveat), then a **divergence-only affordance** that names the concrete adjacent boundary/scope adjustments (Refine) and invites an open redescription of the unit type or recall dimension (Reorient), keeping the full Recognize / Refine / Reorient set reachable. Silence (the user moving on) constitutes recognition; only divergence is explicit. Convergence here is notional — the inline skill prose persists as a standing instruction, so a next-turn divergence re-engages the protocol through fresh granularity-insufficiency re-detection (Layer 1/2 activation), which routes to the existing Refine / Reorient handling — there is no encoded transition out of the converged state, and no dedicated re-activation machinery is added. One dominant higher unit collapses the option set to a single option, so this is relay, not a gate. **Otherwise** (candidate units ≥ 2, or confidence < high) the recognition gate runs as a Constitution interaction (turn yield). Both branches share the narrative format below.
 
 **Selection criterion**: Choose the candidate whose recognition would maximally resolve the user's granularity insufficiency. When rank is equal, prefer the richer, more connected unit.
 
@@ -365,7 +374,7 @@ Common to all:
 - **Traversal scope**: which partitions were reached, and any broken-link gaps (not-yet-written targets) noted as scope, not error
 - **Framing**: how many elevation tries remain before the cap, and how much of the deposit graph is still in scope — stated as the budget you reason with, not a numeric attempt fraction
 
-Then **present**:
+For the **SingleObvious** path the inline emit renders the narrative format above as plain session text — the convergence trace folded in (type-shaped narrative + per-deposit source + resume handle + currency≠fidelity caveat) — and ends with the divergence-only affordance (named adjacent boundary/scope adjustments + open channel), no gate. **Gated path** (`¬SingleObvious`) — then **present**:
 
 ```
 Is this the higher unit you were reaching for?
@@ -395,13 +404,13 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Clear unit shape, single densely-connected candidate | Abbreviated narrative (origin + arrival, or topic + standing) + gate with Recognize default |
+| Light | Clear unit shape, single densely-connected candidate (high confidence) | Recognized higher unit folded inline — abbreviated type-shaped narrative (origin + arrival, or topic + standing) + per-deposit source + resume handle + currency≠fidelity caveat — in one non-yielding (Extension) emit, then converge immediately; divergence-only affordance (named adjacent boundary/scope adjustments + open channel), no confirmation gate |
 | Medium | Moderate signal, 2-3 candidate units in scope | Full type-shaped narrative + traversal scope |
 | Heavy | Unit shape unclear, Reorient likely, sparse/broken edges | Full narrative + traversal scope + broken-link notes + Rescope navigation on empty assembly |
 
 ## Rules
 
-1. **AI-guided detection, user-constituted recognition**: AI detects granularity insufficiency, traverses the deposit graph, and presents the candidate higher unit as a recognition option; user identification via Cognitive Partnership Move (Constitution) at Phase 2 constitutes the unit's identity. Detection, traversal, and constitution are separate acts — AI detection is implicitly confirmed when the user engages with recognition (Phase 2 response, not Esc).
+1. **AI-guided detection, user-constituted recognition**: AI detects granularity insufficiency, traverses the deposit graph, and presents the candidate higher unit as a recognition option; user identification via Cognitive Partnership Move (Constitution) at Phase 2 constitutes the unit's identity. Detection, traversal, and constitution are separate acts — AI detection is implicitly confirmed when the user engages with recognition (Phase 2 response, not Esc). For a single densely-connected high-confidence unit (SingleObvious), recognition is constituted by non-divergence: the inline Extension emit carries a divergence-only affordance, and silence (the user moving on) realizes the unit's identity — the user's constitutive freedom is the divergence channel, not a forced confirm.
 
 2. **Recognition over Aggregation**: The higher unit is recognized by reconstructing the connections between deposits at read-time from their stored anchors plus shared keywords/metadata — Anagoge never fuses, synthesizes, or forms a new whole, and writes nothing. Present structured narrative options with anticipatable post-selection state (Recognize / Refine / Reorient); Constitution interaction requires turn yield before proceeding.
 
@@ -413,11 +422,11 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 6. **Broken-link tolerance**: An inferred edge to a missing target is not-yet-written knowledge, never an error — skip it and surface its absence as a traversal-scope note. A thin assembly from broken links routes to Rescope, then NullMatch fallback, not to a failure.
 
-7. **One higher unit per cycle**: Present one highest-ranked candidate higher unit per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single elevation decision.
+7. **One higher unit per cycle; conditional recognition gate** *(Safeguard tier — revisitable as instruction-following improves)*: Present one highest-ranked candidate higher unit per Phase 2 cycle — single-candidate presentation keeps recognition focus on a single elevation decision. The recognition gate runs as a Constitution interaction (turn yield) when 2+ candidate units are in scope OR confidence < high (¬SingleObvious); a single densely-connected unit at high confidence (SingleObvious: `|U[]| = 1 ∧ confidence(U[top]) = high`) instead **absorbs the gate into the presentation** — the higher unit is emitted inline as Extension (no turn yield) with its per-deposit source + resume handle and a divergence-only affordance, and convergence is immediate (silence / the user moving on constitutes recognition, only divergence is explicit). One dominant higher unit collapses the recognition option set to a single option (Refine/Reorient are foils), so the interaction is relay, not a gate; this absorption is the sanctioned revision of this rule's own Safeguard-tier mandatory-gate tag, motivated by observed binary-confirm abandonment friction.
 
 8. **Convergence persistence and early exit**: Mode active until elevate_complete, NullMatch after exhausted attempts (nothing ever assembled, presented = ∅), exhausted-with-units deactivation (attempts = max with presented ≠ ∅ — whether the final cycle is an empty re-traversal or a Refine/Reorient request — surfaces the best prior candidate and deactivates rather than re-traversing), single-session misfire deferral, or user Esc; recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
 
-9. **Convergence evidence**: Present the transformation trace (ScatteredDeposits → edges traversed → HigherUnit(recognized) → HigherUnit_prose) before declaring elevate_complete — convergence is demonstrated per-item, not asserted. The trace enumerates the edges followed and the deposits composing the unit.
+9. **Convergence evidence**: Present the transformation trace (ScatteredDeposits → edges traversed → HigherUnit(recognized) → HigherUnit_prose) before declaring elevate_complete — convergence is demonstrated per-item, not asserted. The trace enumerates the edges followed and the deposits composing the unit. The SingleObvious Extension path folds this trace into its non-yielding inline emit (the edges followed and composing deposits rendered inline), satisfying this rule within the emit rather than via a separate Phase 3 step.
 
 10. **Boundary discipline (vs adjacent protocols)**: Defer to Anamnesis when one session resolves the recall; to Aitesis (`/inquire`) when the cases must be newly found rather than traversed from existing deposits; to Periagoge (`/induce`) when the user wants to FORM a new concept rather than RECOGNIZE an already-sedimented one (SedimentedConceptNode is recognition-only); to Euporia (`/elicit`) when the user wants to reverse-trace decision intent rather than locate a remembered unit. A Hyphegesis (`/conduct`) synthesis checkpoint may route INTO Anagoge to elevate scattered cross-worker results into a connected-session unit.
 
