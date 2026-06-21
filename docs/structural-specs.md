@@ -220,7 +220,7 @@ The Extension entry's condition suffix records the predicate inline. Both halves
 Examples observed in current SKILL.md:
 
 - prothesis: `Phase 0 MB_from_arg (extension)` + `Phase 0 Qc (constitution)`
-- misuse: `Phase 0 scope_from_arg (extension)` + `Phase 0 scope_confirm (constitution)`
+- misuse: `Phase 0 scope_from_arg (extension)` + `Phase 0 scope_default_relay (extension)` + `Phase 0 scope_expand_confirm (constitution)` (Constitution fires on the expansion branch — cross-session / cross-project — not on the safe current-session default, which relays)
 - steer: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`
 - realign: `Phase 0 scope_from_arg (extension)` + `Phase 0 Qc (constitution)`
 
