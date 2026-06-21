@@ -161,7 +161,7 @@ Misuse(arg) → Phase0: scope_resolve(arg) → s →
   default_scope(s): relay(surface s) → proceed                       -- Extension; safe read-only default, no gate
   expansion(s):     present(widening) → Stop → R_scope →             -- Constitution privacy authorization [Tool]
                       authorize: proceed with s
-                      decline:   s ← default_scope → proceed
+                      decline:   s ← safe_default → proceed
   empty(s): deactivate(no-op note)
   scoped(s): Extract(s) → I[] →
     |I[]| = 0: deactivate(no-op note)
@@ -198,9 +198,11 @@ Scope            = { protocols: Set(ProtocolId), session_window: SessionWindow,
 SessionWindow    ∈ {current_session, named_session, time_range, all_sessions}
 default_scope    = (s: Scope) ⊢ s.session_window = current_session ∧ ¬s.cross_project
                    -- safe, read-only, privacy-local default; relay-eligible (Extension)
+safe_default     = { protocols: {ground, induce}, session_window: current_session, cross_project: false }
+                   -- the canonical Scope satisfying default_scope(·); Phase 0 decline-fallback value
 expansion        = (s: Scope) ⊢ ¬default_scope(s)
                    -- cross-session ∨ cross-project widening; privacy-sensitive (Constitution gate)
-R_scope          = ScopeAuth ∈ {authorize, decline}   -- Phase 0 expansion-gate disposition (Constitution); decline falls back to default_scope
+R_scope          = ScopeAuth ∈ {authorize, decline}   -- Phase 0 expansion-gate disposition (Constitution); decline falls back to safe_default
 Invocation       = { protocol: ProtocolId, session_id: SessionId,
                      turn_index: Int, argument: String }
 Triple           = { invocation: Invocation, pre_context: List(Turn),
@@ -226,7 +228,7 @@ Phase            ∈ {0, 1, 2, 3, 4, 5}
 Phase 0: arg → scope_resolve(arg) → s : Scope
            default_scope(s) → relay(surface s) → Phase 1               -- Extension; no gate (safe read-only default)
            expansion(s)     → present(widening) → Stop → R_scope → Phase 1   -- Constitution privacy authorization [Tool]
-                                authorize → scan s ; decline → s ← default_scope
+                                authorize → scan s ; decline → s ← safe_default
 Phase 1: scope → session-analyzer(friction_pointers) → I[]        -- subagent extraction [Tool]
            |I[]| = 0 → emit(no-op note) → deactivate
            |I[]| > 0 → Phase 2
@@ -256,8 +258,8 @@ session_text(misuse) ∋ ViolationReview when reviewed > 0; empty no-op note whe
 Phase 0 scope_resolve        (sense)        → Internal analysis (resolve Scope from invocation arg; if none, apply default current_session ∧ ¬cross_project)
 Phase 0 scope_from_arg       (extension)    → TextPresent+Proceed (user-specified default_scope arg: current_session ∧ ¬cross_project; bind scope, relay)
 Phase 0 scope_default_relay  (extension)    → TextPresent+Proceed (scope unspecified → safe default current_session ∧ ¬cross_project; surface inferred scope, relay)
-Phase 0 scope_expand_confirm (constitution) → present (resolved scope is expansion(s): cross-session ∨ cross-project widening, whether arg-hinted or user-requested; constitutive privacy authorization; decline → fall back to default_scope)
--- Phase 0 relay basis: default_scope(s) is read-only and privacy-local (SessionHistory preserved, Rule 6); its resolution is deterministic and citable (the safe default), so it is relay-eligible (Extension) per the A5 option-set relay test and the project Extension-default profile (project-profile.md). The (constitution) gate is retained only for the privacy-sensitive cross-session / cross-project widening, where the user constitutes authorization to read beyond the current session.
+Phase 0 scope_expand_confirm (constitution) → present (resolved scope is expansion(s): cross-session ∨ cross-project widening, whether arg-hinted or user-requested; constitutive privacy authorization; decline → fall back to safe_default)
+-- Phase 0 relay basis: default_scope(s) is read-only and privacy-local (SessionHistory preserved, Rule 6); its resolution is deterministic and citable (the safe default), so it is relay-eligible (Extension) per the A5 option-set relay test and the project Extension-default profile. The (constitution) gate is retained only for the privacy-sensitive cross-session / cross-project widening, where the user constitutes authorization to read beyond the current session.
 Phase 1 extract        (extension)     → Agent(epistemic-cooperative:session-analyzer, mode=friction_pointers)
 Phase 1 read_misfit    (extension)     → Read (~/.claude/projects/{slug}/hypomnesis/{session-id}/misfit.md, opt-in)
 Phase 2 read_taxonomy  (extension)     → Read (references/violation-taxonomy.md)
