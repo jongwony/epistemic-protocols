@@ -36,6 +36,7 @@ Canonical protocol pairs:
 | Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
 | Elenchus | `/sublate` | ContextSuspect → VettedContext |
 | Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
+| Anagoge | `/ascend` | RecallGranularityInsufficient → HigherGranularityUnit |
 | Diylisis | `/distill` | ContextTethered → PortableHandoff |
 | Hyphegesis | `/conduct` | MethodUnderdetermined → ConductedMethod |
 
@@ -50,12 +51,12 @@ Protocols grouped by primary concern, ordered by activation sequence within each
 | Decision | `/gap` (Syneidesis) |
 | Execution | `/attend` (Prosoche) |
 | Verification | `/contextualize` (Epharmoge), `/sublate` (Elenchus) |
-| Cross-cutting | `/bound` (Horismos), `/recollect` (Anamnesis), `/distill` (Diylisis), `/grasp` (Katalepsis), `/conduct` (Hyphegesis) |
+| Cross-cutting | `/bound` (Horismos), `/recollect` (Anamnesis), `/ascend` (Anagoge), `/distill` (Diylisis), `/grasp` (Katalepsis), `/conduct` (Hyphegesis) |
 
 Edge types: `precondition` must complete before target; `advisory` provides useful context but is not required; `suppression` prevents stacking similar protocols.
 
 Initiator taxonomy:
-- **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anamnesis, Diylisis)
+- **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anagoge, Anamnesis, Diylisis)
 - **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Euporia, Hyphegesis)
 - **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche, Elenchus)
 

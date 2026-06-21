@@ -1,9 +1,9 @@
 {
-  "version": "2.4.0",
+  "version": "2.5.0",
   "nodes": [
     "horismos", "aitesis", "analogia",
     "periagoge", "euporia", "prothesis", "syneidesis", "prosoche", "epharmoge",
-    "elenchus", "katalepsis", "anamnesis", "diylisis", "hyphegesis"
+    "elenchus", "katalepsis", "anamnesis", "anagoge", "diylisis", "hyphegesis"
   ],
   "edge_types": {
     "precondition": {
@@ -59,6 +59,10 @@
     { "source": "horismos", "target": "diylisis", "type": "advisory", "satisfies": "경계 맵이 distill recipient-relevance 판정 범위를 좁힘" },
     { "source": "prothesis", "target": "hyphegesis", "type": "advisory", "satisfies": "frame이 공급하는 분석 객체(렌즈)를 conduct의 배열 functor가 소비 — 비자명 배열(순서·독립성·조정·종료·라우팅)은 conduct가 설계" },
     { "source": "horismos", "target": "hyphegesis", "type": "advisory", "satisfies": "경계 맵이 지휘 범위(어떤 이동이 in-scope)를 좁힘" },
-    { "source": "hyphegesis", "target": "prosoche", "type": "advisory", "satisfies": "지휘된 방법이 situated 실행으로 핸드오프" }
+    { "source": "hyphegesis", "target": "prosoche", "type": "advisory", "satisfies": "지휘된 방법이 situated 실행으로 핸드오프" },
+    { "source": "anamnesis", "target": "anagoge", "type": "advisory", "satisfies": "단일 세션 회상이 elevation이 순회할 진입 deposit을 제공" },
+    { "source": "hyphegesis", "target": "anagoge", "type": "advisory", "satisfies": "conduct synthesis checkpoint가 흩어진 cross-worker 결과를 connected-session 단위로 elevate하도록 라우팅" },
+    { "source": "anagoge", "target": "aitesis", "type": "advisory", "satisfies": "elevated 상위 단위가 컨텍스트 추론 범위를 좁힘" },
+    { "source": "anagoge", "target": "periagoge", "type": "advisory", "satisfies": "recognized sedimented 개념 노드가 Fuse 후보를 제공" }
   ]
 }

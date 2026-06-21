@@ -51,7 +51,7 @@ The Codex marketplace preserves the same plugin boundaries as Claude Code: each 
 
 - The Codex marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json).
 - Each plugin keeps its Codex manifest beside the existing Claude manifest: `<plugin>/.codex-plugin/plugin.json`.
-- The marketplace includes the 14 protocol plugins plus `epistemic-cooperative`.
+- The marketplace includes the 15 protocol plugins plus `epistemic-cooperative`.
 
 </details>
 
@@ -76,11 +76,12 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Elenchus](./elenchus) | `/sublate` | About to externalize a working context that may have decayed — vet it dialectically first |
 | [Horismos](./horismos) | `/bound` | You need to define what you know vs what AI should figure out |
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it |
+| [Anagoge](./anagoge) | `/ascend` | You vaguely remember a whole line of work, topic, or concept spread across many sessions — not any one session |
 | [Diylisis](./diylisis) | `/distill` | You're handing a working context to a fresh session that shares none of it — distill out the session-tethered references first |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need a fast path to understand, approve, explain, or modify them |
 | [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
 
-Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/distill`, `/grasp`, `/conduct`)
+Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/distill`, `/grasp`, `/conduct`)
 
 ## Utilities
 
@@ -149,6 +150,7 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 | Epharmoge | ἐφαρμογή | Application, fitting |
 | Elenchus | ἔλεγχος | Cross-examination, refutation |
 | Anamnesis | ἀνάμνησις | Recollection |
+| Anagoge | ἀναγωγή | A leading-up |
 | Diylisis | διύλισις | Refining, distillation |
 | Hyphegesis | ὑφήγησις | Leading the way, guiding from ahead |
 
