@@ -1,139 +1,109 @@
-# Periagoge Decompose Recovery Move (C3b)
+# Decompose Recovery — a composition, not a Periagoge move
 
-Design note for the Decompose move added to `/induce`. Resolves the central
-design decision: how a multi-way partition of the instance set coexists with
-Periagoge's `preserves: instance_set(A)` invariant.
+Design note for the wrong-fusion recovery problem (C3b) and its **corrected**
+resolution. An earlier draft of this note proposed Decompose as a new `/induce`
+(Periagoge) move; that was wrong. This note records why, and the corrected shape:
+**decompose is an object-level `/ground ; /induce` composition, not a move.**
 
-## The gap
+## The gap (C3b) — still real
 
-Periagoge can FORM one abstraction from an instance set and shape it through
+Periagoge forms ONE abstraction from an instance set and shapes it through
 Confirm / Widen / Narrow / Fuse / Reorient / Dismiss. None of these splits the
-set into multiple abstractions:
+set into multiple abstractions. So when an abstraction turns out to be a *wrong
+fusion of dissimilar instances forced under one form* — the failure mode Acton
+(over-generalized `Node`), Cantrill (leaky abstraction), and Metz ("the wrong
+abstraction") converge on — recovery requires going *backward* to the concrete
+instances and re-forming, often into *multiple* abstractions. Metz's prescription
+is exactly: re-introduce duplication, inline the form back into every instance,
+and let the *right (possibly multiple)* abstractions emerge.
 
-- **Narrow** trims one abstraction along a dimension and *drops* the instances
-  that fall outside (one shape survives, the excluded instances are unaccounted).
-- **Dismiss** drops the candidate and re-proposes ONE fresh candidate over the
-  *same* set.
-- **Reorient** changes the axis but still yields ONE candidate.
+Detection of the wrong abstraction is already covered: grounding it against its
+instances via `/ground` (Analogia) surfaces the misfit as a `CorrespondenceFitMap`
+with `overextended` / `missing` cells (C3a). The genuine gap was the *recovery*
+(split + re-form). The question this note answers is **where that recovery lives**.
 
-So when the real problem is *"this set is actually two or more distinct essences
-forced under one form"* — the wrong-abstraction failure mode (Acton's
-over-generalized `Node`, Cantrill's leaky abstraction, Metz's "wrong
-abstraction") — there is no move. The recovery Metz prescribes is exactly
-re-introducing duplication: inline the abstracted form back into every instance,
-then let the *right (possibly multiple)* abstractions emerge. Periagoge had no
-operator for that. **Decompose is that operator.**
+## The correction: decompose is a composition, not a move
 
-Detection of a wrong abstraction is already covered: grounding it against its
-instances via `/ground` (Analogia) surfaces the misfit as a
-CorrespondenceFitMap with `overextended` / `missing` cells (C3a). Flagging is not
-fixing — splitting the set and forming multiple new abstractions is a *formation*
-operation, so it belongs in `/induce`, not `/ground` (C3b).
+The first draft made Decompose a 7th `UserMove` inside `/induce` and then gave
+that move child state, sequencing, recursion, terminalization, and a generalized
+terminal type (`DecomposedResolution`). That was a category error. Decompose
+factors cleanly into operations that **already exist**, with no residual
+primitive that belongs inside `/induce`:
 
-## Central design decision: partition vs. the read-only invariant
+- **Detect the misfit / evidence the split boundary** → `/ground`. Its
+  `CorrespondenceFitMap` (`preserved` vs `overextended`/`missing`) supplies the
+  evidence for the partition. (`/ground` evidences the boundary; it does not, by
+  itself, constitute the cell assignment — see next.)
+- **Constitute the cell assignment** → a Constitution **boundary-checkpoint**.
+  The coherent child-cell boundary is a *user judgment* (which instances form
+  which rival essence), so it is a gate. This checkpoint lives in a `/conduct`
+  (Hyphegesis) recipe, not inside `/induce`.
+- **Re-form each cell** → a normal `/induce` activation per cell. Periagoge's
+  `A-BINDING` already accepts an explicit instance cluster/subset of any
+  cardinality as its seed, so a cell is just a smaller seed. No new machinery.
 
-`MORPHISM` line: `preserves: instance_set(A)  -- Iᵢ read-only`. Decompose
-partitions `Iᵢ`, which naively breaks read-only. Two approaches:
+So the recovery is the composition **`/ground` (detect) → `/conduct` (host the
+constitutive split checkpoint) → `/induce` per cell (re-form)**, sequenced through
+session text (A5 composition scope). `/induce` itself needs **no change** and
+reverts to its six-move, single-terminal shape.
 
-1. **Mutate `Iᵢ` in place** — partition the parent's set directly.
-2. **Derive child seeds** — Decompose spawns `k` child `AbstractionSeed`s, each
-   carrying a *read-only* instance subset (a partition cell of `Iᵢ`); the parent
-   `Iᵢ` is never mutated, preserved as provenance.
+## Why the move-form was wrong (and what it cost)
 
-**Decision: approach 2 (child seeds).** Rationale:
+Making Decompose a move, then giving it `child_queue` / sequential child
+processing / recursion / `decompose_resolved`, turned an *object-level split* into
+a *mini-orchestrator* inside `/induce`. Once orchestration lives in the move, the
+"obvious next questions" become queue order, focus, branching, child state, and
+span — and those are **control-level** questions. The fused move structurally
+*generated* a drift from the object level (transforming abstractions) up to the
+control level (governing what the session attends to). The reflexive irony: the
+Decompose *implementation* was itself a wrong fusion — dissimilar concerns
+(detect / orchestrate / form) forced under one move — and its own cure is its own
+prescription: cut it back into `/ground` / `/conduct` / `/induce`.
 
-- It *preserves* the invariant rather than breaking it. Read-only is a per-seed
-  property; Decompose instantiates it `k` times over disjoint subsets instead of
-  mutating the existing set. `preserves: instance_set(A)` holds unchanged — the
-  parent set stays intact; partition derives *new* read-only seeds.
-- It matches Periagoge's own structure: every `AbstractionSeed` already has a
-  read-only `Iᵢ`. A child is just a new seed over a subset — no new mechanism.
-- It mirrors Metz exactly. The instances (the "callers") are the source of
-  truth, preserved; the *abstraction over them* is what gets released and
-  re-formed. The parent abstraction is marked `decomposed`; each cell re-forms.
-- Category-theoretic reading: Periagoge forms a colimit over an instance cocone.
-  Decompose recognizes the cocone was actually a coproduct of `k` sub-cocones and
-  forms the colimit of each. The diagram (instances) does not change; the
-  grouping into one-vs-many colimits does.
+This also restores the constraint stated in
+`periagoge-calibrative-induction-morphism.md`: **keep `CrystallizedAbstraction` as
+the only convergence object.** Per-cell recovery yields several
+`CrystallizedAbstraction`s (multiplicity), not a new terminal type.
 
-## Reconciled ripples
+## The object / control stratum boundary
 
-- **`crystallized(A)` / convergence (now possibly `k` crystallizations).** A
-  decomposed parent does not crystallize; it resolves into `k` children. New
-  predicate `decompose_resolved(A) = status(A)=decomposed ∧ ∀ child :
-  terminalized(child)`. Terminal type generalizes to `CrystallizedAbstraction |
-  DecomposedResolution`. Children are processed *sequentially* (one Phase-2 gate
-  at a time, like Analogia's one-correspondence-per-cycle): pop a child, rebind
-  `Λ.A` to it (resetting candidate/calibration/history/attempts), run Phase 1–3
-  to its own crystallization or dismissal, pop the next.
+- **Decompose is object-level**: it transforms *abstractions* (instances,
+  essences, candidates).
+- **Span / focus / navigation governance is control-level**: it transforms *what
+  the session attends to* across a growing graph of abstraction work.
 
-- **Session immunity (was counterproductive).** A crystallized `(Iᵢ, E)` pair is
-  skipped for the session — which would *block* re-examination after `/ground`
-  reveals it was wrong. Reconciled: a new fit-misfit signal **lifts** immunity on
-  that pair (new evidence unsettles a settled form). Immunity still holds for
-  re-entry without new misfit evidence. The parent pair gains a third terminal
-  status, `decomposed`, so the wrongly-fused single form is not re-proposed as
-  one; the child pairs are new `(Iᵢ⁽ʲ⁾, Eⱼ)` pairs by construction and are not
-  blocked.
+These are different strata and must not be conflated. The need to govern attention
+across many nodes arises from multi-node work in general (fuse, ascend, parallel
+threads) — not from decompose specifically — so it is a **separate inquiry**, not
+a tail of decompose. A candidate control-level protocol (`SpanOverloaded →
+FocusedSpan`, a salience/span governor that constitutes attention and hands a work
+prospect to `/conduct`, never storing graph state or running moves) is deferred to
+its own design pass. The decisive test for whether it is a legitimate EP protocol
+vs. substrate: can its deficit→resolution be written as constituting *salience*
+(epistemic), or only as *managing graph state* (substrate, per the Epistemic
+Completeness Boundary)? That test is out of scope here.
 
-- **Attempt cap.** Per-seed (max 5). Children are new seeds → each gets its own
-  budget. Decompose counts as one move on the parent. Recursion (a child itself
-  decomposing) is **structurally bounded**: every cell satisfies `|Iᵢ⁽ʲ⁾| < |Iᵢ|`
-  (k ≥ 2, cells nonempty), so a singleton cannot decompose; depth ≤ `|Iᵢ| − 1`.
-  No artificial recursion cap needed.
+## Map nodes ≈ distill, conditionally
 
-- **Interaction with existing moves.** Narrow keeps one shape and *drops* outside
-  instances; Decompose keeps *every* instance and re-homes each into a sibling.
-  Dismiss re-proposes one over the same set; Decompose says the *set itself* was
-  heterogeneous. Decompose is a genuine peer option on the decision axis (its
-  fork-into-k-children trajectory is structurally distinct), so it satisfies the
-  Differential Future Requirement.
+If the recovery composition is later driven over many nodes, a node is **backed
+by** a `/distill` PortableHandoff *only when it must cross a boundary* (compaction,
+session branch, delegation) — not identical to a distill output. A live in-session
+node is a lightweight reference; forcing every node through `/distill` would
+over-externalize (Task Externalization Boundary). Edges (parent/child from a split,
+sibling from a fuse) are framing-shift records, not contained in any single node.
 
-- **Conditional presentation (dead-signal suppression).** Like Fuse, Decompose is
-  presented only when Phase 1 surfaces a misfit boundary partitioning `Iᵢ` into
-  ≥2 coherent cells. A misfit that only trims scope is Narrow, not Decompose.
+## Scope of the corresponding PR
 
-## Trigger coupling to Analogia
+- `/induce` (`periagoge/skills/induce/SKILL.md`) reverts to its six-move,
+  single-terminal shape — **no net change**. No `plugin.json` bump.
+- This note is the durable record of the corrected concept.
+- The `/conduct` recovery recipe (ground → boundary-checkpoint → induce-per-cell)
+  and the control-level span/focus governor are **separate follow-ups**, each on
+  its own footing.
 
-The misfit input is Analogia's `CorrespondenceFitMap`
-(`analogia/skills/ground/SKILL.md`): grounding an abstraction (`Sₐ`) against its
-own instances (`Sₜ`) and finding `overextended` / `missing` correspondences. The
-partition boundary is `preserved`-cell instances vs. `overextended`/`missing`-cell
-instances, generalized to `k` cells. The boundary is AI-detected with cited basis
-(Detection with Authority); the decision to split and the cell assignment are
-user-constituted (Constitution).
+## Provenance
 
-This closes the **detect (`/ground`) ⇄ recover (`/induce`)** loop. The trigger is
-absorbed on the Periagoge side (Phase 0 + Trigger Signals + Skip reconciliation);
-Analogia is *cited* as the input source, not modified, keeping the change within
-the "extend `/induce`" mandate. Standing orchestration of the loop is `/conduct`
-(Hyphegesis) territory — named as the composition vehicle, not built here.
-
-## Naming within the dialectical scheme
-
-User-facing: **Decompose** ("Split it"). Formal family: the collection-preserving
-form of **Diairesis** — cutting at the natural joints (κατ' ἄρθρα, *Phaedrus*
-265e) into multiple kinds — distinct from Narrow's single-branch
-specialization-Diairesis. Periagoge is fundamentally a Synagoge (collection)
-protocol; Decompose is its Diairesis recovery: un-collecting an over-collected one
-back into its natural many.
-
-## Companion-surface scope
-
-The runtime-normative move set lives in `periagoge/skills/induce/SKILL.md` alone.
-Surfaces examined and deliberately left unchanged:
-
-- `docs/analysis/periagoge-calibrative-induction-morphism.md` — a dated writeup of
-  a *different* change whose thesis ("keep `CrystallizedAbstraction` as the only
-  convergence object") is specific to that change; injecting Decompose would
-  distort it.
-- `epistemic-cooperative/skills/onboard/references/scenarios.md` — beginner-facing
-  tutorial covering the core forward moves; a recovery move would not aid intro.
-- `epistemic-cooperative/skills/{realign,steer}/SKILL.md` — Periagoge-family
-  specializations on *constitutively-fixed* instance axes (three named horizons;
-  one session's calibration moves) where Decompose is structurally inapplicable;
-  their explicit closed six-move enumerations stay true.
-- `epistemic-cooperative/skills/catalog/SKILL.md` — one-line description, no move
-  enumeration.
-- No per-protocol `graph.json` exists under `periagoge/` — the COMPOSITION block's
-  `graph.json` reference self-voids.
+Reached through this session's design dialogue plus three independent Codex
+(gpt-5.5, xhigh) consults that converged on: decompose = `/ground;/induce`
+composition; the fused move as the structural source of the control-level drift;
+and the governor as legitimate only as a narrow salience/span protocol.
