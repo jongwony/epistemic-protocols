@@ -1,6 +1,6 @@
 ---
 name: induce
-description: "Calibrate and crystallize in-process abstraction through dialectical triangulation. Proposes calibrated candidate abstractions with personalized grounding examples and shapes them via user widen/narrow/fuse/reorient moves when an instance set has converged toward an unnamed essence, producing crystallized abstraction. Type: (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction. Alias: Periagoge(περιαγωγή)."
+description: "Calibrate and crystallize in-process abstraction through dialectical triangulation. Proposes calibrated candidate abstractions with personalized grounding examples and shapes them via user widen/narrow/fuse/reorient/decompose moves when an instance set has converged toward an unnamed essence — decompose splitting a wrongly-fused instance set into multiple abstractions when grounding reveals a misfit — producing crystallized abstraction. Type: (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction. Alias: Periagoge(περιαγωγή)."
 ---
 
 # Periagoge Protocol
@@ -9,9 +9,9 @@ Calibrate and crystallize in-process abstraction through AI-proposed candidate p
 
 ## Definition
 
-**Periagoge** (περιαγωγή): A dialogical act of turning an in-process abstraction toward its crystallized form, where AI detects when an instance set has converged toward an unnamed essence, calibrates the user's in-process concept against that instance set, proposes a calibrated candidate abstraction paired with a personalized grounding example drawn from the user's own domain, and shapes the candidate through the user's response — accept the candidate, broaden its scope, narrow it along a specific dimension, fuse it with an adjacent abstraction, or redirect onto an orthogonal axis — until the abstraction locates itself (the Greek dialectical vocabulary supplies the source terms, attributed in the footnote).[^1]
+**Periagoge** (περιαγωγή): A dialogical act of turning an in-process abstraction toward its crystallized form, where AI detects when an instance set has converged toward an unnamed essence, calibrates the user's in-process concept against that instance set, proposes a calibrated candidate abstraction paired with a personalized grounding example drawn from the user's own domain, and shapes the candidate through the user's response — accept the candidate, broaden its scope, narrow it along a specific dimension, fuse it with an adjacent abstraction, redirect onto an orthogonal axis, or — when grounding reveals the set was a wrong fusion of dissimilar instances — decompose it along the misfit boundary into multiple abstractions — until the abstraction locates itself (the Greek dialectical vocabulary supplies the source terms, attributed in the footnote).[^1]
 
-[^1]: The name draws a structural analogy from Plato *Republic* VII.518d, where περιαγωγή names the soul's turning-around toward the intelligible. The protocol borrows the turning-toward structure; it does not claim Platonic paideia. Synagoge (συναγωγή, collection) and Diairesis (διαίρεσις, division) are the twin dialectical moves described in *Phaedrus* 265d–266a; here they name user response families, not a claim to Platonic method.
+[^1]: The name draws a structural analogy from Plato *Republic* VII.518d, where περιαγωγή names the soul's turning-around toward the intelligible. The protocol borrows the turning-toward structure; it does not claim Platonic paideia. Synagoge (συναγωγή, collection) and Diairesis (διαίρεσις, division) are the twin dialectical moves described in *Phaedrus* 265d–266a; here they name user response families, not a claim to Platonic method. Decompose realizes the collection-preserving form of Diairesis — cutting at the natural joints (κατ' ἄρθρα, *Phaedrus* 265e) into multiple kinds — distinct from Narrow's single-branch specialization-Diairesis.
 
 ```
 ── FLOW ──
@@ -19,7 +19,8 @@ Periagoge(A) → Detect(A) → in_process? →
   true:  (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K →
          Propose(Iᵢ, E, K, ctx) → (P, G) →
          Qs(P, G, K, framing) → Stop → V → integrate(V, candidate) → candidate' →
-         loop until crystallized(A) → declare(completion_trace, open_trace) → CrystallizedAbstraction
+         V = Decompose(boundary)? → {A₁..Aₖ} := decompose(A, boundary) → triangulate each child seed (re-enter Phase 1 per cell) →
+         loop until crystallized(A) ∨ decompose_resolved(A) → declare(completion_trace ∪ decomposition_trace, open_trace) → CrystallizedAbstraction | DecomposedResolution
          or user_esc ∨ attempts_exhausted → deactivate
   false: deactivate
 
@@ -30,12 +31,13 @@ A
   → propose(candidate, grounding, calibration)  -- AI generates candidate + personalized example + calibration map
   → triangulate(candidate, user_move)     -- user shapes via type-preserving materialized moves
   → integrate(V, candidate)               -- update candidate per user response
+  → decompose(A, boundary)                -- recovery branch: partition Iᵢ at a grounding-detected misfit into k child seeds, each a read-only instance subset (parent Iᵢ preserved); re-enter Phase 1 per child
   → crystallize(abstraction)              -- convergence when confirmed
-  → declare(trace, open_trace)             -- terminal evidence trace + open-item disposition
-  → CrystallizedAbstraction
+  → declare(trace, open_trace)             -- terminal evidence trace + open-item disposition (+ decomposition_trace when a seed was decomposed)
+  → CrystallizedAbstraction | DecomposedResolution
 requires: in_process(A)                    -- runtime checkpoint (Phase 0)
 deficit:  AbstractionInProcess              -- activation precondition (Layer 1/2)
-preserves: instance_set(A)                  -- Iᵢ read-only; K computed per Phase 1 entry and recomputed on Phase 1 re-entry; candidate mutates per user move
+preserves: instance_set(A)                  -- Iᵢ read-only across all moves including Decompose: Decompose derives child seeds A₁..Aₖ each carrying a read-only instance subset (a partition of Iᵢ), parent Iᵢ preserved as provenance — no in-place mutation; K computed per Phase 1 entry and recomputed on Phase 1 re-entry; candidate mutates per user move
 invariant: Calibrative Induction through Dialectical Triangulation over Unilateral Correction
 
 ── TYPES ──
@@ -64,9 +66,10 @@ P              = CandidateAbstraction { name, structure, instance_map, provenanc
 G              = GroundingExample { scenario: String, domain: String, mapping: String }
                                                              -- personalized to user's own domain context
 Propose        = (Iᵢ, E, K, ctx) → (P, G)
-V              = UserMove ∈ {Confirm, Widen(direction), Narrow(specializer), Fuse(adjacent), Reorient(axis), Dismiss}
+V              = UserMove ∈ {Confirm, Widen(direction), Narrow(specializer), Decompose(boundary), Fuse(adjacent), Reorient(axis), Dismiss}
                  direction    ∈ {upward, lateral}           -- Synagoge family; AI-proposed broadening (user Recognition mode)
-                 specializer  = dimension to constrain      -- Diairesis family (user-directed specialization)
+                 specializer  = dimension to constrain      -- Diairesis family (user-directed single-branch specialization; keeps one shape, drops outside instances)
+                 boundary     = Partition(Iᵢ)               -- collection-preserving Diairesis (cut at the joints); keeps every instance, re-homes each into a sibling seed
                  adjacent     = neighboring abstraction ref  -- lateral Synagoge with user-named reference (user Production mode)
                  axis         = orthogonal dimension         -- full redirection
 Qs             = Shaping interaction with candidate + grounding [Tool: Constitution interaction]
@@ -74,6 +77,18 @@ crystallized(A) = ∃ step ∈ history : V(step) = Confirm
 CompletionTrace = List<(A, K, P, V, candidate')>
                  -- derived from Λ.history with A sourced from Λ.A and candidate' computed from each step's post-move candidate state
 CrystallizedAbstraction = P where confirmed(P) via Confirm move ∧ completion_trace_declared(CompletionTrace) ∧ open_disposition_declared(OpenTrace)
+Boundary       = Partition(Iᵢ) = {Iᵢ⁽¹⁾, …, Iᵢ⁽ᵏ⁾}        -- k ≥ 2 disjoint nonempty cells covering Iᵢ; derived from the misfit (preserved cell vs overextended/missing cell(s))
+misfit_signal(A) = ∃ instance ∈ Iᵢ : instance ∈ overextended(F) ∪ missing-adjacent(F)  -- F = Analogia CorrespondenceFitMap over (Sₐ = candidate/crystallized abstraction, Sₜ = Iᵢ); see analogia/skills/ground/SKILL.md
+decompose      = (A, boundary) → {A₁, …, Aₖ}              -- each Aⱼ = AbstractionSeed { Iᵢ⁽ʲ⁾ (read-only subset), Eⱼ (essence refined to the cell), L? }; parent A.Iᵢ untouched
+children(A)    = {A₁, …, Aₖ} from decompose(A, boundary)  -- stored in Λ.child_queue (pending) ∪ Λ.child_results (done)
+SeedStatus     ∈ {triangulating, crystallized, released, decomposed}   -- released = candidate dropped via Dismiss (Phase 3 "Release the candidate")
+decompose_resolved(A) = status(A) = decomposed ∧ ∀ child ∈ children(A) : terminalized(child)
+terminalized(child)   = crystallized(child) ∨ released(child) ∨ decompose_resolved(child) ∨ user_esc(child)
+DismissRecord  = { seed: A, released: String }            -- a child dropped without crystallization
+DecompositionTrace    = { parent: A, boundary: Boundary, children: List<(A, ChildResolution)> }
+ChildResolution       ∈ CompletionTrace ∪ DismissRecord ∪ DecompositionTrace   -- per child: crystallized trace, dismissal, or nested decomposition
+DecomposedResolution  = { trace: DecompositionTrace } where decompose_resolved(A) ∧ decomposition_trace_declared(DecompositionTrace)
+                 -- terminal for a decomposed seed: the set of child crystallizations (dismissed children carry no P)
 
 ── A-BINDING ──
 bind(A) = explicit_arg ∪ recent_instance_cluster ∪ surfaced_essence
@@ -86,25 +101,28 @@ Priority: explicit_arg > recent_instance_cluster > surfaced_essence
 If no essence signal is detectable (neither user sensing language nor AI-inferrable core pattern): pause activation and surface the scan result before Phase 0, inviting the user to either name what feels in-process or withdraw.
 
 ── PHASE TRANSITIONS ──
-Phase 0: A → Detect(A) → in_process?                                       -- detection checkpoint (silent)
-Phase 1: (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K → Propose(Iᵢ, E, K, ctx) → (P, G); carry (P, G, K)  -- calibration + candidate + grounding construction [Tool]
-Phase 2: (P, G, K) → Qs(P, G, K, framing) → Stop → V                      -- triangulation Constitution interaction [Tool]
-Phase 3: V → integrate(V, candidate) → candidate'                          -- candidate update (track)
+Phase 0: A → Detect(A) → in_process?                                       -- detection checkpoint (silent); absorbs an Analogia fit-misfit signal on an existing abstraction as a Decompose trigger
+Phase 1: (Iᵢ, E, L?) → Calibrate(Iᵢ, E, L?, ctx) → K → Propose(Iᵢ, E, K, ctx) → (P, G); detect candidate boundary b? (instance fault line via prunes/instance_map or absorbed /ground misfit); carry (P, G, K, b?)  -- calibration + candidate + grounding + optional boundary [Tool]
+Phase 2: (P, G, K, b?) → Qs(P, G, K, b?, framing) → Stop → V              -- triangulation Constitution interaction; Decompose option present only when b? ≠ ∅ [Tool]
+Phase 3: V → integrate(V, candidate) → candidate'; V = Decompose(boundary) → {A₁..Aₖ} := decompose(A, boundary), enqueue children, status(A) := decomposed  -- candidate update or decompose fork (track)
 
 ── LOOP ──
 After Phase 3: evaluate user move.
 If V = Confirm: crystallize(candidate), Λ.completion_trace := derive(Λ.history, Λ.A, candidate'), Λ.open_trace := derive(K.open, V, free_response), declare(Λ.completion_trace, Λ.open_trace), terminate.
 If V = Widen(direction): candidate' = widened(candidate, direction) via Synagoge → return to Phase 2.
 If V = Narrow(specializer): candidate' = narrowed(candidate, specializer) via Diairesis → return to Phase 2.
+If V = Decompose(boundary): {A₁..Aₖ} := decompose(Λ.A, boundary) via collection-preserving Diairesis (parent Iᵢ read-only; each child carries a read-only cell); status(Λ.A) := decomposed; enqueue {A₁..Aₖ} → process child seeds sequentially: pop child Aⱼ, rebind (Λ.A := Aⱼ, reset candidate/calibration/history/attempts for the child), return to Phase 1 forming a fresh candidate over the cell; on child crystallize or dismiss, record child resolution and pop next; when child_queue empties, declare decomposition_trace and terminate.
 If V = Fuse(adjacent): candidate' = fused(candidate, adjacent) via lateral Synagoge → return to Phase 1 (grounding recomputed).
 If V = Reorient(axis): candidate' = orthogonal(axis) → return to Phase 1 (full recompute).
 If V = Dismiss: abandon candidate; if essence still sensed, return to Phase 1 with fresh candidate; else deactivate.
 Max 5 triangulation attempts per abstraction seed.
-Continue until: crystallized(A) ∨ user_esc ∨ attempts_exhausted.
-Convergence evidence: At crystallized(A), present transformation trace — for each step ∈ history, show (calibration → candidate → user_move → candidate') — plus OpenTrace for K.open. OpenTrace status is None when K.open is empty, Deferred when any open item is routed to later work, and Nonblocking otherwise. Convergence is demonstrated, not asserted.
+Decompose recursion is structurally bounded: each cell satisfies |Iᵢ⁽ʲ⁾| < |Iᵢ| (k ≥ 2, cells nonempty), so a singleton cell cannot decompose; depth ≤ |Iᵢ| − 1. No separate recursion cap; the per-seed attempt cap (5) applies to each child independently.
+Continue until: crystallized(A) ∨ decompose_resolved(A) ∨ user_esc ∨ attempts_exhausted.
+Convergence evidence: At crystallized(A), present transformation trace — for each step ∈ history, show (calibration → candidate → user_move → candidate') — plus OpenTrace for K.open. OpenTrace status is None when K.open is empty, Deferred when any open item is routed to later work, and Nonblocking otherwise. At decompose_resolved(A), present the DecompositionTrace — the parent fused form, the misfit boundary that justified the split (citing the overextended/missing instances), and for each child its own transformation trace or dismissal — demonstrating the recovery morphism per child. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 crystallized(A): see TYPES (V = Confirm in history)
+decompose_resolved(A): see TYPES (status decomposed ∧ all children terminalized)
 progress(Λ) = |history| / max_attempts
 early_exit = user_esc ∨ attempts_exhausted
 
@@ -112,16 +130,22 @@ early_exit = user_esc ∨ attempts_exhausted
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect     (sense)   → Internal analysis (no external tool)
 Phase 1 Calibrate+Propose (observe) → Read, Grep (user's domain context for personalized grounding); WebSearch (conditional: cross-domain adjacent abstractions)
+Phase 1 boundary detect (observe) → derive candidate partition from calibration prunes/instance_map or absorbed /ground CorrespondenceFitMap (overextended/missing); citable misfit basis (relay input to the Phase 2 split decision)
 Phase 2 Qs         (constitution)    → present calibration map + candidate + grounding (mandatory; Esc key → loop termination at LOOP level, not a UserMove)
+Phase 2 Decompose  (constitution)    → present proposed partition cells (instance membership + rival essence per cell) within the gate; the split is user-constituted (multiple valid partitions); conditional on boundary ≠ ∅
 Phase 3            (track)   → Internal state update
-converge           (extension)   → TextPresent+Proceed (convergence evidence trace + open disposition; proceed with crystallized abstraction)
+converge           (extension)   → TextPresent+Proceed (convergence evidence trace + open disposition + decomposition_trace when decomposed; proceed with crystallized abstraction(s))
 
 ── MODE STATE ──
 Λ = { phase: Phase, A: AbstractionSeed, Iᵢ: Set(Instance), E: EssenceIntuition,
       calibration: Option(K), candidate: Option(P), grounding: Option(G),
+      boundary: Option(Boundary), seed_status: SeedStatus,
+      parent_seed: Option(AbstractionSeed), child_queue: List<AbstractionSeed>,
+      child_results: List<(AbstractionSeed, ChildResolution)>,
       history: List<(P, G, K, V)>, attempts: Nat, crystallized: Option(P),
       completion_trace: Option(CompletionTrace),
       open_trace: Option(OpenTrace),
+      decomposition_trace: Option(DecompositionTrace),
       active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
@@ -130,7 +154,7 @@ converge           (extension)   → TextPresent+Proceed (convergence evidence t
 
 ## Core Principle
 
-**Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: When an instance set has converged toward an unnamed essence but the abstraction has not located itself, neither AI nor user alone can crystallize the form. AI first shows how the instance set calibrates the user's in-process concept — what it preserves, sharpens, prunes, and leaves open — then proposes a candidate paired with a personalized grounding example drawn from the user's own domain. The user shapes the candidate through Socratic moves — widening (Synagoge), narrowing (Diairesis), fusing with an adjacent abstraction, or reorienting onto an orthogonal axis. The abstraction turns toward its crystallized form through the exchange, not by unilateral AI correction.
+**Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: When an instance set has converged toward an unnamed essence but the abstraction has not located itself, neither AI nor user alone can crystallize the form. AI first shows how the instance set calibrates the user's in-process concept — what it preserves, sharpens, prunes, and leaves open — then proposes a candidate paired with a personalized grounding example drawn from the user's own domain. The user shapes the candidate through Socratic moves — widening (Synagoge), narrowing (Diairesis), fusing with an adjacent abstraction, or reorienting onto an orthogonal axis. When grounding reveals the instance set was a wrong fusion of dissimilar instances, the user can decompose it — the collection-preserving form of Diairesis — splitting the set at its natural joints into multiple abstractions rather than forcing one. The abstraction turns toward its crystallized form through the exchange, not by unilateral AI correction.
 
 ## Mode Activation
 
@@ -177,6 +201,7 @@ Heuristic evidence signals for in-process abstraction detection:
 | Essence intuition language | User phrases such as "something about these cases...", "the pattern I'm seeing...", "these all have...", "why do these keep happening..." |
 | Locator gap | Name, scope, or positional claim remains unsettled for the emerging abstraction |
 | Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (essence signal + `locator_absent(A)`) and nudges to `/induce` |
+| Analogia fit-misfit redirect | `/ground` reports `overextended`/`missing` correspondences on an *existing* abstraction over its own instances — the instance set splits into ≥2 coherent cells (Decompose recovery trigger) |
 | Adjacent abstraction surfacing | Recall yields neighboring abstractions, suggesting a fuse or specialize move is imminent |
 
 **Cross-session enrichment**: Accumulated abstraction formation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides Fuse candidates for Phase 1 — previously crystallized abstractions in adjacent domains become lateral Synagoge targets. When `/recollect` has been invoked in session, recalled adjacent abstractions enter the candidate construction pool as fuse-reference. Heuristic input may bias toward previously observed patterns; constitutive judgment remains with the user.
@@ -187,7 +212,7 @@ Heuristic evidence signals for in-process abstraction detection:
 - User explicitly names the abstraction without in-process signals
 - `/ground` substitution is the actual need (abstract structure exists; validate against concrete target)
 - Comparative analysis between already-named candidate readings or frames — defer to Prothesis (frame selection) or Syneidesis (gap in decision); this is not colimit formation regardless of instance count
-- Same (instance set, essence) pair was crystallized or dismissed in current session (session immunity)
+- Same (instance set, essence) pair was crystallized, dismissed, or decomposed in current session (session immunity) — **unless** a new Analogia fit-misfit signal is present on that pair: a misfit is new evidence that the prior crystallization was wrong, so it lifts immunity and re-opens the pair for recovery (Decompose). Immunity still holds for re-entry without new misfit evidence
 
 ### Canonical Invocation Scenarios
 
@@ -213,6 +238,7 @@ The operational test: "Is the user operation *forming a new abstraction from obs
 | Trigger | Effect |
 |---------|--------|
 | User confirms candidate | Crystallize and proceed |
+| All child seeds terminalize after Decompose | Declare the decomposition trace (per-child crystallization/dismissal) and proceed |
 | User Esc key | Return to normal operation; abstraction remains in-process |
 | Attempt cap reached (5 triangulations) | Surface remaining candidate with explicit unresolved status, deactivate |
 
@@ -227,6 +253,7 @@ Analyze conversation state for in-process abstraction. This phase is **silent** 
 3. **Check locator absence**: if a name plus scope plus position is already settled, skip (no turning needed)
 4. If essence_sensed ∧ ¬located: proceed to Phase 1 with `(Iᵢ, E, L?)`
 5. If Analogia misfit signal is present (colimit-shaped input forced into substitution): absorb the misfit as valid Periagoge trigger without re-confirmation
+6. If an Analogia **fit-misfit** signal is present on an *existing* abstraction — a CorrespondenceFitMap over (Sₐ = a candidate or already-crystallized abstraction, Sₜ = its instances) reporting `overextended`/`missing` correspondences that partition `Iᵢ` into ≥2 coherent cells: bind the seed to that abstraction's instance set and enter the recovery path — the misfit is a valid Decompose trigger. A fit-misfit signal lifts session immunity on the affected `(Iᵢ, E)` pair (see Skip): new misfit evidence unsettles a prior crystallization, so re-examination is not blocked
 
 **Scope restriction**: Detection is silent. Does NOT modify files or call external services.
 
@@ -239,7 +266,8 @@ Generate a calibration map, candidate abstraction, and personalized grounding ex
 3. **Construct personalized grounding** `G`: call Read/Grep to collect evidence about the user's own domain context (codebase, configs, session history). The grounding example must be drawn from the user's domain — a scenario they recognize as theirs — not a generic textbook case.
    - When the user's domain is outside the current codebase (external API, academic field, professional practice), extend context collection to web search (WebSearch). Tag web evidence with `source: "web:{url}"` for traceability.
 4. **Check adjacent abstractions**: if recall (Anamnesis hypomnesis store or in-session history) surfaces neighboring abstractions, note them as Fuse candidates for Phase 2.
-5. Package `(P, G, K)` with Fuse candidates and proceed to Phase 2.
+4a. **Check for a misfit boundary** `b`: if the calibration `prunes`/`instance_map` reveals a *subset* of instances that systematically resist the candidate's essence (a coherent rival essence, not mere scope to trim), or an absorbed `/ground` CorrespondenceFitMap places instances in `overextended`/`missing`, derive a candidate partition of `Iᵢ` into ≥2 coherent cells. This boundary, when present, makes the Decompose option available in Phase 2. A misfit that does not partition into ≥2 coherent cells (just scope to trim) is Narrow territory, not Decompose — leave `b` empty (dead-signal suppression).
+5. Package `(P, G, K, b?)` with Fuse candidates and proceed to Phase 2.
 
 **Scope restriction**: Read-only investigation (Read, Grep, WebSearch). No test execution or file modifications.
 
@@ -258,6 +286,7 @@ Present the calibration map and candidate as text output:
 - **Instance map**: [how Iᵢ maps to the candidate's structure]
 - **Grounding example**: [scenario drawn from user's domain, with mapping to the candidate]
 - [If Fuse candidates exist: list adjacent abstractions with brief relation]
+- [If a misfit boundary surfaces: name the proposed cells with their instance membership and the rival essence each cell carries — the split the user would be constituting]
 - **Budget**: how many refinement tries remain before the cap — the budget you reason with, stated as prose, not a numeric attempt fraction
 
 Then **present**:
@@ -268,13 +297,14 @@ Does this crystallize the concept enough to use?
 Options:
 1. **Confirm / Use this** — [what the crystallized abstraction enables downstream]
 2. **Widen / Broaden it** — [how upward or lateral scope expansion reshapes the candidate]
-3. **Narrow / Tighten it** — [what dimension specializes or what to exclude]
-4. **Fuse / Merge it** — [which adjacent abstraction to explicitly pull in for merge] *(presented only when Phase 1 surfaces adjacent candidates; otherwise omitted)*
-5. **Reorient / Change the axis** — [what orthogonal axis to pursue instead]
-6. **Dismiss / Drop this candidate** — [what assumption about this essence is released]
+3. **Narrow / Tighten it** — [what dimension specializes or what to exclude — keeps one shape, drops the instances outside it]
+4. **Decompose / Split it** — [which cells the instance set splits into and the rival essence each carries — keeps every instance, re-forms each cell into its own abstraction] *(presented only when Phase 1 surfaces a misfit boundary; otherwise omitted)*
+5. **Fuse / Merge it** — [which adjacent abstraction to explicitly pull in for merge] *(presented only when Phase 1 surfaces adjacent candidates; otherwise omitted)*
+6. **Reorient / Change the axis** — [what orthogonal axis to pursue instead]
+7. **Dismiss / Drop this candidate** — [what assumption about this essence is released]
 ```
 
-When Phase 1 surfaces no adjacent candidates, omit the Fuse option — dead signal suppression. Free response is always available — the user may name an adjacent abstraction for fusion, propose an alternative abstraction, specify a dimension not captured by the presented moves, or describe a shape the options do not cover.
+When Phase 1 surfaces no adjacent candidates, omit the Fuse option; when Phase 1 surfaces no misfit boundary, omit the Decompose option — dead signal suppression. Free response is always available — the user may name an adjacent abstraction for fusion, propose an alternative abstraction, propose a split the AI did not detect, specify a dimension not captured by the presented moves, or describe a shape the options do not cover.
 
 **Design principles**:
 - **Personalized grounding**: Never use a generic example. The grounding must be drawn from the user's domain context so they can recognize it as theirs.
@@ -294,14 +324,16 @@ After user response:
    - Ambiguous or unnamed deferral text does not classify an item as Deferred; the item remains `Nonblocking` unless the response instead routes the candidate through an existing shaping move.
 2. **Widen(direction)**: Apply Synagoge — for `direction = upward`, generalize the candidate's scope; for `direction = lateral`, broaden sibling coverage. Return to Phase 2 with widened candidate (grounding may persist).
 3. **Narrow(specializer)**: Apply Diairesis — constrain the candidate along the specified dimension, excluding instances that fall outside. Return to Phase 2 with narrowed candidate.
-4. **Fuse(adjacent)**: Lateral Synagoge — merge candidate with named adjacent abstraction. Return to Phase 1 (grounding must be recomputed for fused structure).
-5. **Reorient(axis)**: Abandon current axis, restart along orthogonal dimension. Return to Phase 1 (full recompute).
-6. **Dismiss**: Release the candidate. If essence is still sensed, return to Phase 1 with fresh candidate proposal; else deactivate.
+4. **Decompose(boundary)**: Collection-preserving Diairesis — partition `Iᵢ` along the misfit boundary into `k` child seeds `{A₁..Aₖ}`, each carrying a read-only instance subset and an essence refined to its cell (the parent `Iᵢ` is never mutated — it is preserved as provenance). Mark the parent seed `decomposed`, enqueue the children, and process them sequentially: each child re-enters Phase 1 with a fresh candidate over its cell and triangulates to its own crystallization or dismissal. The parent converges when every child terminalizes (`decompose_resolved`). Distinct from Narrow: Narrow keeps one shape and drops the instances outside it; Decompose keeps every instance and re-homes each into a sibling abstraction.
+5. **Fuse(adjacent)**: Lateral Synagoge — merge candidate with named adjacent abstraction. Return to Phase 1 (grounding must be recomputed for fused structure).
+6. **Reorient(axis)**: Abandon current axis, restart along orthogonal dimension. Return to Phase 1 (full recompute).
+7. **Dismiss**: Release the candidate. If essence is still sensed, return to Phase 1 with fresh candidate proposal; else deactivate.
 
 After integration:
 - Log `(P, G, K, V)` to history
 - Increment attempts counter
 - Check attempt cap (max 5) — if exceeded, surface unresolved candidate with explicit status and deactivate
+- On Decompose, the parent seed's triangulation ends and child processing begins; each child seed carries its own history and attempts counter (reset on rebind), so the attempt cap (max 5) applies per seed. Recursion is structurally bounded — each cell is strictly smaller than its parent set, so a singleton cell cannot decompose.
 
 ## Intensity
 
@@ -318,8 +350,11 @@ After integration:
 | Gate specificity | `activate(Periagoge) only if essence_sensed ∧ ¬located` | Prevents false activation on settled abstractions or essence-less inputs; instance count is evidence-for-essence, not a gate |
 | Calibration map | Phase 1 sorts concept pressure into Keeps / Sharpens / Prunes / Open | Lets instances correct the concept without AI overriding the user |
 | Personalized grounding | Phase 1 requires grounding drawn from user's own domain context | Prevents generic textbook examples that fail to trigger recognition |
-| Socratic moves preserved | Phase 2 options map to dialectical families (Synagoge/Diairesis/Fuse/Reorient) | Each move has a recognized shape, not open-ended revision |
-| Session immunity | Crystallized or dismissed (Iᵢ, E) pair → skip for session | Respects user's crystallization or release |
+| Socratic moves preserved | Phase 2 options map to dialectical families (Synagoge/Diairesis/Fuse/Reorient; Decompose = collection-preserving Diairesis) | Each move has a recognized shape, not open-ended revision |
+| Decompose dead-signal suppression | Phase 2 omits Decompose unless Phase 1 surfaces a misfit boundary partitioning Iᵢ into ≥2 coherent cells | Prevents offering a split when the set coheres or only needs trimming (Narrow) |
+| Instance-set immutability under split | Decompose derives child seeds with read-only instance subsets; parent Iᵢ never mutated | Preserves the `preserves: instance_set(A)` invariant across the recovery move |
+| Narrow vs Decompose distinction | Narrow keeps one shape and drops outside instances; Decompose keeps all instances and re-homes each into a sibling | The two division moves stay distinct, not conflated |
+| Session immunity | Crystallized, dismissed, or decomposed (Iᵢ, E) pair → skip for session, unless a new fit-misfit signal lifts it | Respects user's crystallization or release; new misfit evidence re-opens for recovery |
 | Attempt cap | Max 5 triangulations per abstraction seed | Prevents infinite refinement; forces convergence or release |
 | Budget framing | Attempt counter in Phase 2 surfacing — a framing signal, not a progress count | User sees remaining refinement budget |
 | Free response honored | Alternative abstraction via free response routes to Phase 1 | Supports reorient beyond presented axes |
@@ -331,9 +366,10 @@ After integration:
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield before proceeding.
 3. **Calibration plus candidate plus grounding required**: Every Phase 2 surfacing pairs a calibration map, candidate abstraction, and personalized grounding example drawn from the user's own domain context — recognizable to the user as theirs (codebase, configs, session history, or stated domain), not a generic textbook example.
 4. **Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: AI candidate is a working hypothesis, not a claim. Concept correction is mediated by the instance set surfaced through `K`; crystallization belongs to the user's move.
-5. **Socratic move preservation**: Phase 2 options map to recognized dialectical families (Synagoge / Diairesis / Fuse / Reorient — per-move mapping in Phase 3 Integration); the vocabulary is operational, not ornamental.
+5. **Socratic move preservation**: Phase 2 options map to recognized dialectical families (Synagoge / Diairesis / Fuse / Reorient — and Decompose as collection-preserving Diairesis; per-move mapping in Phase 3 Integration); the vocabulary is operational, not ornamental.
 6. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal. The user may also name an adjacent abstraction via free response when Fuse is not presented (because Phase 1 surfaced no candidates) and they hold one in mind.
 6a. **Fuse dead-signal suppression**: Phase 2 omits the Fuse option when Phase 1 surfaces no adjacent abstraction candidates. Free response remains the channel for user-proposed fusion targets.
+6b. **Decompose dead-signal suppression**: Phase 2 omits the Decompose option unless Phase 1 surfaces a misfit boundary that partitions the instance set into ≥2 coherent cells. A misfit that only trims scope is Narrow, not Decompose. Free response remains the channel for a user-proposed split when no boundary was auto-detected.
 7. **Convergence persistence**: Mode active until crystallized, Esc, or attempt cap.
 8. **Cross-protocol awareness**: Defer to Analogia when a pre-existing abstract structure needs validation against a target.
 9. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Keeping context in the pre-gate text lets each option's differential implication stand alone, so the question arrives with the analysis already absorbed.
@@ -345,3 +381,6 @@ After integration:
 14. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 15. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 16. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Plain emit discipline).
+17. **Decompose recovery (collection-preserving Diairesis)**: When grounding (or in-session calibration) reveals that the instance set is a wrong fusion of dissimilar instances, Decompose partitions `Iᵢ` at the misfit boundary into `k` child seeds — each carrying a read-only instance subset and a cell-refined essence — and triangulates each to its own crystallization. The parent `Iᵢ` is never mutated; partition derives new read-only seeds, preserving `preserves: instance_set(A)`. Distinct from Narrow (keeps one shape, drops outside instances) and Dismiss (drops the candidate, re-proposes one over the same set): Decompose keeps every instance and re-homes each into a sibling abstraction. The boundary is AI-detected with cited basis — the `overextended`/`missing` instances from Analogia's CorrespondenceFitMap (`analogia/skills/ground/SKILL.md`) or the calibration `prunes`/`instance_map` fault line — while the decision to split and the cell assignment are user-constituted (Constitution). Decompose is a genuine peer option on the decision axis (its fork-into-k-children trajectory is structurally distinct), so the Differential Future Requirement is satisfied; it is presented intact as a defined option subject to dead-signal suppression (Rule 6b), not an injection.
+18. **Misfit lifts session immunity**: A crystallized, dismissed, or decomposed `(Iᵢ, E)` pair is immune to re-proposal for the session, **except** when a new Analogia fit-misfit signal is present on that pair. The misfit is new evidence that the prior form was wrong, so it re-opens the pair for Decompose recovery; immunity otherwise holds. The detect↔recover loop (flag a wrong abstraction via `/ground`, recover via `/induce` Decompose) is composed through session text; when standing orchestration of the loop is wanted, `/conduct` (Hyphegesis) is the composition vehicle — not built into this protocol.
+19. **Decompose convergence evidence**: At `decompose_resolved(A)`, present the decomposition trace — the parent fused form, the misfit boundary that justified the split (citing the `overextended`/`missing` instances), and each child's own transformation trace or dismissal — demonstrating the recovery morphism per child. This is a relay presentation (no gate); the per-child crystallizations remain the user's constitutive moves.
