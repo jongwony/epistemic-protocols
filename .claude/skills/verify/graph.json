@@ -64,6 +64,7 @@
     { "source": "anamnesis", "target": "anagoge", "type": "advisory", "satisfies": "단일 세션 회상이 elevation이 순회할 진입 deposit을 제공" },
     { "source": "hyphegesis", "target": "anagoge", "type": "advisory", "satisfies": "conduct synthesis checkpoint가 흩어진 cross-worker 결과를 connected-session 단위로 elevate하도록 라우팅" },
     { "source": "hyphegesis", "target": "periagoge", "type": "advisory", "satisfies": "decompose-recovery 레시피가 per-cell 재형성을 위해 각 셀을 periagoge 활성화로 라우팅 (다중 CrystallizedAbstraction, 융합 아님)" },
+    { "source": "hyphegesis", "target": "diylisis", "type": "advisory", "satisfies": "handoff_to_span 라우팅이 span 벽을 넘는 출력의 portability를 distill에 위임 (composition — conduct는 라우팅, distill은 distill; cognition은 단일 span 유지)" },
     { "source": "anagoge", "target": "aitesis", "type": "advisory", "satisfies": "elevated 상위 단위가 컨텍스트 추론 범위를 좁힘" },
     { "source": "anagoge", "target": "periagoge", "type": "advisory", "satisfies": "recognized sedimented 개념 노드가 Fuse 후보를 제공" }
   ]
