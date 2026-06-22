@@ -103,9 +103,16 @@ sibling from a fuse) are framing-shift records, not contained in any single node
 - `/induce` (`periagoge/skills/induce/SKILL.md`) reverts to its six-move,
   single-terminal shape — **no net change**. No `plugin.json` bump.
 - This note is the durable record of the corrected concept.
-- The `/conduct` recovery recipe (ground → boundary-checkpoint → induce-per-cell)
-  and the control-level span/focus governor are **separate follow-ups**, each on
-  its own footing.
+- **Now implemented (follow-up PR)**: the `/conduct` recovery recipe (ground →
+  cell-assignment checkpoint → induce-per-cell) is realized as a documented
+  *instance* of the existing `/conduct` topology algebra (`hyphegesis/skills/conduct/SKILL.md`,
+  *Recipe: Decompose Recovery*), and `/ground` (Analogia) is strengthened to serve
+  the detection leg — self-grounding recognition + a derived split-vs-trim partition
+  reading (`analogia/skills/ground/SKILL.md`). Two advisory graph edges
+  (`analogia → hyphegesis`, `hyphegesis → periagoge`) wire the composition.
+- The control-level span/focus governor remains a **separate concern** (verdict:
+  KILL / FOLD into `/conduct`, per the stratum boundary above) — not part of this
+  object-level recovery.
 
 ## Provenance
 
