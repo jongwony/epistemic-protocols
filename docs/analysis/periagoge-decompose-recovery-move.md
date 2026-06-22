@@ -77,11 +77,17 @@ across many nodes arises from multi-node work in general (fuse, ascend, parallel
 threads) — not from decompose specifically — so it is a **separate inquiry**, not
 a tail of decompose. A candidate control-level protocol (`SpanOverloaded →
 FocusedSpan`, a salience/span governor that constitutes attention and hands a work
-prospect to `/conduct`, never storing graph state or running moves) is deferred to
-its own design pass. The decisive test for whether it is a legitimate EP protocol
-vs. substrate: can its deficit→resolution be written as constituting *salience*
-(epistemic), or only as *managing graph state* (substrate, per the Epistemic
-Completeness Boundary)? That test is out of scope here.
+prospect to `/conduct`, never storing graph state or running moves) was taken to
+its own design pass. **Verdict: KILL / FOLD into `/conduct`.** Stress-tested with
+adversarial review charged to *refute* the kill, `FocusedSpan` is not a distinct
+resolution object but a salience-annotated WorkProspect: it passes the
+epistemic-vs-substrate test (constituting salience is epistemic) but fails
+distinctness — salience-selection folds into `/conduct` Phase 0/1, the
+cross-session graph into `/recollect` + `/ascend`, and "in-view" is the context
+window (substrate). The recommended realization is a `/conduct` Phase 1 refinement
+(present a large/cross-graph candidate set salience-ranked against the session
+aim), not a new protocol. Full analysis: `docs/analysis/governor-span-focus-kill-test.md`
+(branch `governor-followup`).
 
 ## Map nodes ≈ distill, conditionally
 
