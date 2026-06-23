@@ -17,7 +17,7 @@ Users often lack the analytical framework for their question (`FrameworkAbsent`)
 **Recognition over Recall + Substrate-Correspondence** (frame forms lenses and hands off; it never isolates, executes, arranges, or synthesizes):
 - For each selected lens, frame declares a **`substrate_need`** (the authoritative abstract persona/capability the lens requires — never a concrete agent) plus **`binding_hints`** (an advisory, enumerated shortlist of candidate substrates; prefer skill-bundled agents). The hints exist because hosts otherwise default to `general-purpose` and miss specialized agents.
 - **LensReturn**: a single lens (or lenses needing no specialized substrate) returns directly as the detailed lens(es) — no synthesis, no convergence claim.
-- **SubstrateCorrespondence**: ≥2 lenses with specialized substrate needs become lens↔substrate pairs, handed off **with a `/conduct` nudge** that carries the isolation + arrangement + reconciliation + synthesis apparatus. `/conduct` designs that arrangement and the substrate (an agent team, a dynamic-workflow, isolated subagents, or plan mode) runs each lens in isolation and may then claim convergence (the main session is a substrate only as an orchestrator that elects isolated executors, never isolating lenses inline in its own context); frame nudges `/conduct` and stops at handoff.
+- **SubstrateCorrespondence**: ≥2 lenses with at least one specialized substrate need become lens↔substrate pairs, handed off **with a `/conduct` nudge** that carries the isolation + arrangement + reconciliation + synthesis apparatus. `/conduct` designs that arrangement and the substrate (an agent team, a dynamic-workflow, isolated subagents, or plan mode) runs each lens in isolation and may then claim convergence (the main session is a substrate only as an orchestrator that elects isolated executors, never isolating lenses inline in its own context); frame nudges `/conduct` and stops at handoff.
 
 ### Difference from Socratic Method
 
@@ -37,7 +37,7 @@ Phase 2: Prothesis     → Present 2-4 perspectives (gate interaction); single l
 Phase 3: Bind Substrate & Handoff →
   bind_substrate: per lens, declare substrate_need (authoritative) + binding_hints (advisory) + channel_need
   single lens ∨ no specialized substrate → LensReturn (detailed lens(es)) → STOP
-  ≥2 lenses with specialized substrate needs        → SubstrateCorrespondence (lens↔substrate pairs)
+  ≥2 lenses with at least one specialized substrate need        → SubstrateCorrespondence (lens↔substrate pairs)
                                           ⊕ /conduct nudge → hand off → STOP
 --- frame does not isolate, arrange, execute, or synthesize: the isolation + arrangement +
     synthesis apparatus is /conduct's to design (via the nudge) and the isolated substrate's to run ---

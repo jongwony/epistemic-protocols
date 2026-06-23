@@ -14,7 +14,7 @@ Evaluate a frame run as a phase-scoped protocol trace, not as a generic agent-te
 Minimum frame trace record:
 
 - input deficit: whether the user actually presented `FrameworkAbsent`
-- coproduct branch: `LensReturn` (single lens ∨ no specialized substrate) or `SubstrateCorrespondence` (≥2 lenses with specialized substrate needs) — discriminated by substrate availability, not a user mode choice
+- coproduct branch: `LensReturn` (single lens ∨ no specialized substrate) or `SubstrateCorrespondence` (≥2 lenses with at least one specialized substrate need) — discriminated by substrate availability, not a user mode choice
 - phase path: Phase 0 through handoff (Phase 3)
 - perspective set: options presented, selected perspectives, and rationale
 - framed output: for `LensReturn`, the detailed lens(es) + per-perspective directive; for `SubstrateCorrespondence`, the lens↔substrate pairs — each lens's `substrate_need` (authoritative) + `binding_hints` (advisory), per-perspective directive, channel-need annotation, and the `/conduct` nudge that carries the form
