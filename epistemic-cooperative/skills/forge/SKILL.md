@@ -27,7 +27,7 @@ The **core** is vendor-agnostic and stops at `ResolvedIntentIR` plus the validat
 
 - **Core (vendor-agnostic)**: reverse-induce the user's under-determined intent into `ResolvedIntentIR`; extract the adapter-derived required slots (`ContractElements`) the reference's schema requires; partition slots into relay vs constitution; own the staleness policy, provenance, and generic validation.
 - **Vendor Adapter Contract (the seam)**: the narrow, parameterized interface every adapter satisfies. New references plug in by adding an adapter section — accumulated per real use, never built top-down.
-- **Adapters (concrete instances)**: `Higgsfield`, `gpt-image`, `codex-goals`, `claude-session`, and `dia` ship now. Each owns reference discovery/fetch, the reference's prompt schema, the projection rendering, and unsupported-field degradation.
+- **Adapters (concrete instances)**: `Higgsfield`, `gpt-image`, `codex-goals`, and `claude-session` ship now. Each owns reference discovery/fetch, the reference's prompt schema, the projection rendering, and unsupported-field degradation.
 
 ### Vendor Adapter Contract (seam)
 
@@ -55,7 +55,7 @@ Narrowest seam contract: `ResolvedIntentIR × GuideSnapshot -> VendorPromptDraft
 | `RelaySlot` | A contract slot determined by the reference plus the user's stated intent. Forge auto-fills it with a cited basis. |
 | `ConstitutionSlot` | A contract slot requiring the user's judgment. Forge fills it with a proposed default and explicitly flags it for recognition. |
 | `VendorPromptDraft` | The adapter's projection of the IR through the reference schema, with provenance, freshness, a `stale-guide` flag when the staleness guard did not pass, and a `transport-unsafe` flag when the projected payload carries shell-active tokens or secret-substitution patterns hazardous across a shell-carrier handoff. |
-| `PromptArtifact` | The endpoint artifact: a prompt-family payload — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe. Its form is adapter-determined (a Higgsfield video prompt; a Codex `/goal …` string; a Dia skill recipe). |
+| `PromptArtifact` | The endpoint artifact: a prompt-family payload — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe. Its form is adapter-determined (a Higgsfield video prompt; a Codex `/goal …` string). |
 
 ## Phase 0: Bind Reference and Intent
 
@@ -115,7 +115,6 @@ Adapter bodies are progressively disclosed: this index is always loaded; each ad
 | `gpt-image` | Codex imagegen skill at `$CODEX_HOME/skills/.system/imagegen/` (image-only; targets `gpt-image-2`; web cookbook fallback) | a `gpt-image-2` prompt block (using the source's shared schema) plus parameter envelope |
 | `codex-goals` | OpenAI Codex Goals specification | a strong `/goal …` string for a follow-up Codex session |
 | `claude-session` | Claude prompting best-practices guide (model-axis: `prompting-claude-{model}`; first-party, reflexive) | a model-tailored handoff initial-prompt for a follow-up Claude session (`/remote-spawn` worktree or remote-control) |
-| `dia` | Dia browser (The Browser Company) custom-skill surface — a conditioning instruction over page/selection/tab context; encrypted/cloud-synced store, no file/CLI/deeplink import | a paste-ready Dia custom-skill recipe (`DiaRecipeInstruction`: name + description + body) projecting the resolved intent, with a capability-gap degradation note for the primitives Dia lacks |
 
 Each adapter file satisfies the Vendor Adapter Contract (`capabilities` / `fetch_guide_snapshot` / `derive_prompt_schema` / `project` / `validate`). New references plug in by adding an `adapters/<name>.md` file as accumulated prior — see Deferred Colimit; do not pre-build a registration framework.
 

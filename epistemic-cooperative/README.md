@@ -142,7 +142,7 @@ ReferenceIntake → ResolvedIntentIR → GroundedReference → VendorPromptDraft
 ```
 
 Key features:
-- vendor-agnostic core (intent IR + staleness policy) + parameterized adapter seam; ships Higgsfield, gpt-image, codex-goals, claude-session, and dia adapters
+- vendor-agnostic core (intent IR + staleness policy) + parameterized adapter seam; ships Higgsfield, gpt-image, codex-goals, and claude-session adapters
 - core stops at IR; artifact form is adapter-determined (no core promotion)
 - filled draft with relay slots cited and constitution slots flagged — not a blank question list, not a blind full draft
 - cross-adapter abstraction is a deliberately deferred colimit (sibling of triage-gated-vendor-harness), not extracted ahead of accumulated use
