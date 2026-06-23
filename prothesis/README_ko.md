@@ -1,22 +1,23 @@
 # Prothesis — /frame (πρόθεσις)
 
-다관점 프레이밍 — 렌즈 추천 또는 substrate로 넘기는 컴파일된 inquiry 스펙 (πρόθεσις: 앞에 놓기)
+다관점 프레이밍 — 상세 렌즈, 또는 격리 실행을 위해 넘기는 렌즈↔substrate 쌍 (πρόθεσις: 앞에 놓기)
 
 > [English](./README.md)
 
 ## Prothesis란?
 
-그리스어 πρόθεσις(앞에 놓기)의 현대적 재해석으로, **분석 렌즈를 추천하거나 다관점 inquiry 스펙을 컴파일**한 뒤 substrate로 넘겨 실행시키는 프로토콜이다. frame은 분석 객체(렌즈)를 공급하며, 다관점 배열은 `/conduct`의 몫, inquiry 실행은 substrate의 몫이다.
+그리스어 πρόθεσις(앞에 놓기)의 현대적 재해석으로, **분석 렌즈를 사용자 앞에 놓고, 선택된 각 렌즈마다 그 렌즈가 필요로 하는 substrate를 선언**한 뒤 렌즈↔substrate 쌍을 넘기는 **순수 렌즈 형성 도구**다. frame은 분석 객체(렌즈)와 그 substrate 필요 + channel 필요를 형성한 뒤, isolation + 배열(arrangement) + reconciliation + 합성(synthesis) 장치를 위해 `/conduct`를 넛지한다 — 그 장치는 `/conduct`가 설계하고 격리된 substrate가 실행한다. frame은 isolation을 실현하지도, 자기 컨텍스트 안에서 다관점 결과를 합성하지도 않는다 — 수렴(convergence)은 렌즈들을 진정한 격리 상태에서 실행한 substrate만이 주장할 수 있다.
 
 ### 핵심 문제
 
-사용자는 종종 질문에 적합한 분석 프레임워크가 부재한 상태다 (`FrameworkAbsent`). 열린 질문 "어떤 관점을 원하세요?"는 이미 답을 알아야 대답할 수 있다. 관점 선택을 넘어서, 복잡한 질문은 고유한 시점에서의 병렬 조사를 위한 스펙이 필요하며 — 그 스펙을 어떤 substrate가 실행한다.
+사용자는 종종 질문에 적합한 분석 프레임워크가 부재한 상태다 (`FrameworkAbsent`). 열린 질문 "어떤 관점을 원하세요?"는 이미 답을 알아야 대답할 수 있다. 관점 선택을 넘어서, 복잡한 질문은 고유한 시점에서의 격리 조사가 필요하며 — 한 컨텍스트가 모든 관점을 추론한 뒤 "수렴했다"고 주장하면 그 합의는 구조적으로 보장된 것(합의로 포장된 편향)이다. 따라서 진정한 다관점 작업은 각 렌즈가 자기 substrate에서 실행될 것을 요구한다.
 
 ### 해법
 
-**Recognition over Recall + Two Modes** (둘 다 출력을 컴파일해 handoff; 어느 쪽도 실행하지 않음):
-- **Recommend** (Mode 1): AI가 관점 옵션을 제시하고, 사용자가 선택하면, 렌즈 추천 + 후속 프로토콜 추천을 출력한다. 경량 경로 — inquiry 스펙 없음. Phase 0에서 Mode 선택으로 진입.
-- **Inquire** (Mode 2): AI가 관점을 제시하고, 사용자가 선택하면, frame이 전체 inquiry 스펙 — 렌즈 + 기본 격리/대화/합성 directive + 비자명 배열용 `/conduct` 참조 — 을 컴파일해 handoff한다. substrate(에이전트 팀, dynamic-workflow, 격리 subagent, plan mode, 또는 main 세션)가 이를 실행하며, frame은 handoff에서 정지한다.
+**Recognition over Recall + Substrate-Correspondence** (frame은 렌즈를 형성하고 handoff할 뿐, isolation도 실행도 배열도 합성도 하지 않음):
+- 선택된 각 렌즈마다 frame은 **`substrate_need`**(그 렌즈가 필요로 하는 권위적 추상 페르소나/역량 — 구체 에이전트는 절대 바인딩하지 않음)와 **`binding_hints`**(권고적·열거형 후보 substrate 목록; skill 번들 에이전트 우선)를 선언한다. 힌트가 필요한 이유: 그렇지 않으면 호스트는 `general-purpose`로 기본 폴백하며 전문화된 에이전트를 놓친다.
+- **LensReturn**: 단일 렌즈(또는 전문화된 substrate가 불필요한 렌즈들)는 상세 렌즈로 직접 반환된다 — 합성 없음, 수렴 주장 없음.
+- **SubstrateCorrespondence**: 적어도 하나가 전문 substrate를 필요로 하는 ≥2개 렌즈는 렌즈↔substrate 쌍이 되어, isolation + 배열 + reconciliation + 합성 장치를 담은 **`/conduct` 넛지와 함께** 넘겨진다. `/conduct`가 그 배열을 설계하고 substrate(에이전트 팀, dynamic-workflow, 격리 subagent, 또는 plan mode)가 각 렌즈를 격리 상태에서 실행한 뒤 수렴을 주장할 수 있다 (main 세션이 substrate일 때는 격리 실행자를 선출하는 오케스트레이터로서만 가능하며, 자기 컨텍스트 안에서 렌즈를 인라인으로 격리하지 않는다); frame은 `/conduct`를 넛지하고 handoff에서 정지한다.
 
 ### 소크라테스 방식과의 차이
 
@@ -30,14 +31,16 @@
 ## 프로토콜 흐름
 
 ```
-Phase 0: Mission Brief → 탐구 의도, 범위, 모드 확인 (gate interaction)
+Phase 0: Mission Brief → 탐구 의도, 범위 확인 (gate interaction; 모드 질문 없음)
 Phase 1: Gather        → 관점 형성을 위한 대상 맥락 수집
-Phase 2: Prothesis     → 관점 2-4개 제시 (gate interaction)
-Phase 3: Compile & Handoff →
-  Mode 1 (recommend): 렌즈 분류(characterize) → 추천 출력 → STOP
-  Mode 2 (inquire):   inquiry 스펙 컴파일(렌즈 ⊕ /conduct 배열 참조 ⊕
-                      기본 격리/대화/합성 directive) → handoff → STOP
---- frame은 실행하지 않음: substrate가 스펙을 실행하고, 비자명 배열은 /conduct로 라우팅 ---
+Phase 2: Prothesis     → 관점 2-4개 제시 (gate interaction); 단일 렌즈도 유효
+Phase 3: Bind Substrate & Handoff →
+  bind_substrate: 렌즈마다 substrate_need(권위적) + binding_hints(권고적) + channel_need 선언
+  단일 렌즈 ∨ 전문 substrate 불필요 → LensReturn(상세 렌즈) → STOP
+  적어도 하나가 전문 substrate를 필요로 하는 ≥2개 렌즈   → SubstrateCorrespondence(렌즈↔substrate 쌍)
+                                     ⊕ /conduct 넛지 → handoff → STOP
+--- frame은 isolation도 배열도 실행도 합성도 하지 않음: isolation + 배열 + 합성 장치는
+    /conduct가 (넛지를 통해) 설계하고 격리된 substrate가 실행하는 몫 ---
 ```
 
 ## 사용 시점

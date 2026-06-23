@@ -1,22 +1,23 @@
 # Prothesis — /frame (πρόθεσις)
 
-Multi-perspective framing — lens recommendation or a compiled inquiry spec handed off to the substrate (πρόθεσις: placing before)
+Multi-perspective framing — detailed lens(es), or lens↔substrate pairs handed off for isolated execution (πρόθεσις: placing before)
 
 > [한국어](./README_ko.md)
 
 ## What is Prothesis?
 
-A modern reinterpretation of Greek πρόθεσις (placing before) — a protocol that **recommends analytical lenses or compiles a multi-perspective inquiry spec**, then hands it off to the substrate to execute. frame supplies the analysis object (the lens); arranging multiple perspectives is `/conduct`'s, executing the inquiry is the substrate's.
+A modern reinterpretation of Greek πρόθεσις (placing before) — a **pure lens-formation tool** that **places analytical lenses before the user, then for each selected lens declares the substrate it needs** and hands the lens↔substrate pairs off. frame forms the analysis object (the lens) plus its substrate need + channel need, then nudges `/conduct` for the isolation + arrangement + reconciliation + synthesis apparatus — which `/conduct` designs and the isolated substrate runs. frame never realizes isolation and never synthesizes a multi-perspective result in its own context: convergence is claimable only by a substrate that ran the lenses in genuine isolation.
 
 ### The Core Problem
 
-Users often lack the analytical framework for their question (`FrameworkAbsent`). Open questions like "What perspective do you want?" require knowing the answer to answer. Beyond perspective selection, complex questions need a spec for parallel investigation from distinct viewpoints — a spec some substrate then executes.
+Users often lack the analytical framework for their question (`FrameworkAbsent`). Open questions like "What perspective do you want?" require knowing the answer to answer. Beyond perspective selection, complex questions need isolated investigation from distinct viewpoints — and if one context reasons every perspective and then claims they "converge," the agreement is structurally guaranteed (bias dressed up as consensus). Genuine multi-perspective work therefore requires each lens to run in its own substrate.
 
 ### The Solution
 
-**Recognition over Recall + Two Modes** (both compile an output and hand off; neither executes):
-- **Recommend** (Mode 1): AI presents perspective options; user selects; a lens recommendation + downstream protocol suggestions are output. Lightweight — no inquiry spec. Selected via Mode choice in Phase 0.
-- **Inquire** (Mode 2): AI presents perspectives; user selects; frame compiles a full inquiry spec — the lens, a default isolation/dialogue/synthesis directive, and a `/conduct` reference for non-trivial arrangement — and hands it off. The substrate (an agent team, a dynamic-workflow, isolated subagents, plan mode, or the main session) executes it; frame stops at handoff.
+**Recognition over Recall + Substrate-Correspondence** (frame forms lenses and hands off; it never isolates, executes, arranges, or synthesizes):
+- For each selected lens, frame declares a **`substrate_need`** (the authoritative abstract persona/capability the lens requires — never a concrete agent) plus **`binding_hints`** (an advisory, enumerated shortlist of candidate substrates; prefer skill-bundled agents). The hints exist because hosts otherwise default to `general-purpose` and miss specialized agents.
+- **LensReturn**: a single lens (or lenses needing no specialized substrate) returns directly as the detailed lens(es) — no synthesis, no convergence claim.
+- **SubstrateCorrespondence**: ≥2 lenses with at least one specialized substrate need become lens↔substrate pairs, handed off **with a `/conduct` nudge** that carries the isolation + arrangement + reconciliation + synthesis apparatus. `/conduct` designs that arrangement and the substrate (an agent team, a dynamic-workflow, isolated subagents, or plan mode) runs each lens in isolation and may then claim convergence (the main session is a substrate only as an orchestrator that elects isolated executors, never isolating lenses inline in its own context); frame nudges `/conduct` and stops at handoff.
 
 ### Difference from Socratic Method
 
@@ -30,14 +31,16 @@ Users often lack the analytical framework for their question (`FrameworkAbsent`)
 ## Protocol Flow
 
 ```
-Phase 0: Mission Brief → Confirm inquiry intent, scope, and mode (gate interaction)
+Phase 0: Mission Brief → Confirm inquiry intent and scope (gate interaction; no mode question)
 Phase 1: Gather        → Targeted context acquisition for perspective formulation
-Phase 2: Prothesis     → Present 2-4 perspectives (gate interaction)
-Phase 3: Compile & Handoff →
-  Mode 1 (recommend): characterize the lens → emit the recommendation → STOP
-  Mode 2 (inquire):   compile the inquiry spec (lens ⊕ /conduct arrangement reference ⊕
-                      default isolation/dialogue/synthesis directive) → hand off → STOP
---- frame does not execute: the substrate runs the spec; non-trivial arrangement routes to /conduct ---
+Phase 2: Prothesis     → Present 2-4 perspectives (gate interaction); single lens is valid
+Phase 3: Bind Substrate & Handoff →
+  bind_substrate: per lens, declare substrate_need (authoritative) + binding_hints (advisory) + channel_need
+  single lens ∨ no specialized substrate → LensReturn (detailed lens(es)) → STOP
+  ≥2 lenses with at least one specialized substrate need        → SubstrateCorrespondence (lens↔substrate pairs)
+                                          ⊕ /conduct nudge → hand off → STOP
+--- frame does not isolate, arrange, execute, or synthesize: the isolation + arrangement +
+    synthesis apparatus is /conduct's to design (via the nudge) and the isolated substrate's to run ---
 ```
 
 ## When to Use
