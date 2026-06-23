@@ -8,7 +8,7 @@ user_invocable: true
 
 Deficit Recognition Probe — when the user is uncertain which epistemic deficit (and therefore which protocol) fits the current situation, surface AI-generated multi-hypothesis candidates with reverse-evidence conditions, and route on user-constituted recognition. Type: `(DeficitUnrecognized, AI, RECOGNIZE, UserSituation) → ProtocolRoute`.
 
-Invoke directly with `/probe` when the user wants a fit review across the protocol catalog before committing to a single protocol invocation.
+Invoke directly with `/probe` when the user wants a fit review across the protocol catalog before committing to a single protocol invocation. The AI may also surface these hypotheses on its own when it detects genuine deficit-ambiguity — offered as a low-confidence horizon for the user's fusion, not a covert frame (Rule 1); explicit invocation is one entry, not the only one.
 
 ## Definition
 
@@ -49,7 +49,7 @@ Detect that the user's situation admits ambiguous deficit framing. Heuristics:
 - The session shows a pattern that maps to two or more candidate deficits with comparable plausibility
 - The user explicitly invokes `/probe`
 
-Phase 0 is silent — no surfacing. If detection fails (deficit is already clearly named), deactivate.
+Phase 0 detection is silent — internal analysis, no output of its own. On a positive detection the protocol may proceed to surface the hypothesis horizon (Phase 1–2) without waiting for an explicit `/probe`, provided the surface is horizon-marked (Rule 1). If detection fails (the deficit is already clearly named with confidence), deactivate without surfacing.
 
 ### Phase 1: Catalog Scan
 
@@ -94,7 +94,7 @@ Which hypothesis fits your present situation?
 Free response — the disposition is constituted by the user's natural utterance.
 Recognition / Redirect / Dismiss / Narrow scope / Stop are all reachable via free response;
 Phase 3 parses the utterance into the corresponding R coproduct constructor.
-The hypothesis surface above carries the full deficit space; no typed selection is required.
+The hypothesis surface above offers a candidate horizon of the deficit space — open to your recognition, redirection, or transcendence; no typed selection is required.
 ```
 
 The disposition field belongs to the user. AI does not score, rank, or pre-resolve the choice. Free response preserves the user's implicit freedom to respond beyond any anticipated typed options — this freedom is inherent in conversation turn structure: gated does not mean unstructured; it means the user's response is constitutive (Rule 12 Recognition over Recall and Rule 14 Context-Question Separation, both inscribed in this SKILL.md).
@@ -140,11 +140,11 @@ UserSituation
                                       -- enumerate candidate hypotheses as Set(CoverageEntry); set-valued coverage
                                       --   (multi-protocol projection within a hypothesis is structurally distinct
                                       --    from inter-protocol composition defined in the COMPOSITION block)
-  → present(H[], multi_hypothesis)    -- hypothesis surface IS the constitutive output; deficit-space disclosure precedes user judgment
+  → present(H[], multi_hypothesis)    -- surface offered as one horizon for the user's fusion (marked: low-confidence + per-entry reverse-evidence + transcendable); the user's recognition, not the surface, is constitutive
   → recognize(h, user)                -- user adopts h.coverage as a whole; refinable via Narrow(CoverageSubset)
   → emit(ProtocolRoute | FitReviewNote)   -- ProtocolRoute carries target_coverage as Set(CoverageEntry)
   → ProtocolRoute | FitReviewNote
-requires: vague_deficit(U)             -- activation precondition (Layer 1 only)
+requires: vague_deficit(U)             -- activation precondition: a detected vague deficit; on detection the surface may follow as a marked horizon (Rule 1), invoked or AI-initiated
 deficit:  DeficitUnrecognized          -- activation precondition
 preserves: Catalog                     -- catalog read-only; U is rebindable on Narrow
 invariant: Recognition over Resolution
@@ -251,8 +251,8 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 
 ## Rules
 
-1. **User-invoked only** — Probe activates only on explicit `/probe` invocation. AI auto-surfacing is structurally forbidden; Layer 1/Layer 2 separation is enforced.
-2. **Opt-in, default off** — No sticky activation, no background scanning, no implicit re-activation across turns. The user explicitly activates each session.
+1. **Horizon-marked surfacing (not invocation-gated)** — Probe surfaces its hypotheses on explicit `/probe` invocation OR when the AI detects genuine deficit-ambiguity (Phase 0) and offers the surface as *one horizon for the user's fusion of horizons*. AI-initiated surfacing is licensed precisely by the marking already inscribed elsewhere — low-confidence dialogic form (Rule 11), per-entry reverse-evidence (Rule 5), free-response transcendence (Rule 8), and user-held disposition (Rule 6) — which together render the framing visible *as* framing, so a surfaced hypothesis cannot covertly install itself as the user's own fore-understanding. Still forbidden: *unmarked* surfacing (presenting the set as the settled deficit-space or the answer rather than a transcendable horizon), and sticky/background re-activation (Rule 2). The user's recognition stays the constitutive act; AI surfacing aids the fusion, it does not perform it.
+2. **No sticky mode — per-occasion surfacing** — Probe has no persistent activation: no always-on background loop, no implicit carry-over re-activation across turns, no sticky session state. AI-initiated surfacing (Rule 1) fires per-occasion on a genuine ambiguity detected in the present turn and then rests; it is not a standing scanner. Each surfacing — invoked or AI-initiated — is a fresh, self-contained occasion.
 3. **Current-session default scope** — Default evidence window is the present session. Cross-session evidence is opt-in only.
 4. **All-time scope requires explicit confirmation** — Cross-session recall (reading prior `misfit.md` records or session history beyond the current session) requires an explicit Active-authority confirmation; never default behavior.
 5. **Multi-hypothesis required** — Minimum two alternatives with distinct reverse-evidence conditions per hypothesis. Singleton high-confidence framing collapses Probe into Resolution; this is forbidden. Anti-singleton guard operates at hypothesis level (`|H[]| ≥ 2`). Each hypothesis carries set-valued coverage (`|coverage| ≥ 1`; `|coverage| ≥ 2` represents intra-hypothesis multi-protocol projection — structurally distinct from inter-protocol composition defined in the `── COMPOSITION ──` block). The reverse-evidence requirement applies per CoverageEntry within `Hypothesis.coverage`. **Two-level cardinality**: A single hypothesis with `|coverage| = 2` does NOT satisfy this guard — `|H[]| ≥ 2` requires at minimum two distinct Hypothesis records, each with its own coverage. The `|H[]| ≥ 2` guard operates on hypothesis count; `|coverage| ≥ 1` on per-hypothesis projection.
