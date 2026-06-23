@@ -43,7 +43,7 @@ Invoke `/conduct` at the start of (or partway into) a multi-move work prospect:
 /conduct migrate this service from framework v2 to v3
 ```
 
-Hyphegesis confirms the work brief, checks whether conduction is warranted (single-move work relays out), identifies the candidate moves, then designs the conduct topology one axis at a time — order, independence, reconciliation, termination, routing — starting from the most decision-relevant axis. It surfaces substrate feasibility as a handoff annotation and hands off the method plan with in-session checkpoints. A region whose results reconcile by synthesis and return to the user gets a **synthesis checkpoint** carrying a compiled Recognition brief — per-move outputs, convergences, divergences, private-gap slots, and fusion/output-shape candidates the substrate presents at fusion time, so the user recognizes the fusion choice instead of recalling it.
+Hyphegesis confirms the work brief, checks whether conduction is warranted (single-move work relays out), identifies the candidate moves — presenting a large or cross-graph set **salience-ranked against the session aim** so binding the move set is a recognition of the accumulated shape rather than a recall from a graph the user no longer holds in view — then designs the conduct topology one axis at a time — order, independence, reconciliation, termination, routing — starting from the most decision-relevant axis. It surfaces substrate feasibility as a handoff annotation and hands off the method plan with in-session checkpoints. A region whose results reconcile by synthesis — and go to a consumer that cannot re-derive the fusion shape (the user, or a future span via `handoff_to_span`) — gets a **synthesis checkpoint** carrying a compiled Recognition brief — per-move outputs, convergences, divergences, private-gap slots, and fusion/output-shape candidates the substrate presents at fusion time, so the user recognizes the fusion choice instead of recalling it.
 
 ## Five Conduct Axes
 
@@ -53,6 +53,8 @@ Hyphegesis confirms the work brief, checks whether conduction is warranted (sing
 | independence | Do moves see each other before reconciliation? | isolated, shared |
 | reconciliation | How are separately-produced results combined? | aggregate, dialectic, adversarial_refute, synthesis |
 | termination | When does a move stop? | single_pass, bounded_rounds, until_dry_ceiling, until_goal_met |
-| routing | Where does each output go? | return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding |
+| routing | Where does each output go? | return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding, handoff_to_span |
 
 When `order` is `dependency_dag`, independence/reconciliation/routing/termination resolve per move-region (an authoring region can be `shared` while a verification region is `isolated`).
+
+`handoff_to_span` routes a move's output **across the span wall** to a context-less future span (post `/compact`, `/clear`, or a new session) and delegates its portability to `/distill` at the handoff seam — composition, not absorption: `/conduct` stays single-span in its cognition and only its output bridges, while the far-side compile-back stays outside `/conduct`'s scope.

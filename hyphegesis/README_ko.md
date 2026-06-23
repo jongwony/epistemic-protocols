@@ -43,7 +43,7 @@ claude plugin install hyphegesis@epistemic-protocols
 /conduct 이 서비스를 프레임워크 v2에서 v3으로 마이그레이션
 ```
 
-Hyphegesis는 작업 브리프를 확인하고, 지휘가 필요한지 점검하며(단일 이동 작업은 relay로 빠짐), 후보 이동들을 식별한 뒤, 지휘 토폴로지를 한 번에 한 축씩 설계합니다 — 순서, 독립성, 화해, 종료, routing — 가장 결정-관련성 높은 축부터. 기질 실현가능성을 핸드오프 주석으로 표면화하고, 세션 내 체크포인트와 함께 방법 계획을 핸드오프합니다. 결과가 종합(synthesis)으로 화해되어 사용자에게 돌아오는 영역에는 **종합 체크포인트**가 등록되고, 컴파일된 Recognition brief가 함께 실립니다 — 이동별 산출물, 수렴, 발산, 비공개-맥락 gap 슬롯, 융합/출력-형태 후보를 기질이 융합 시점에 제시해, 사용자가 융합 선택을 떠올리는(recall) 대신 인식(recognize)하게 합니다.
+Hyphegesis는 작업 브리프를 확인하고, 지휘가 필요한지 점검하며(단일 이동 작업은 relay로 빠짐), 후보 이동들을 식별합니다 — 크거나 누적 그래프에 걸친 집합은 **세션 목표에 대해 salience-ranked로** 제시해, 이동 집합 확정이 사용자가 더 이상 머릿속에 두지 못하는 그래프로부터의 recall이 아니라 누적된 형태의 recognition이 되도록 합니다 — 그 뒤 지휘 토폴로지를 한 번에 한 축씩 설계합니다 — 순서, 독립성, 화해, 종료, routing — 가장 결정-관련성 높은 축부터. 기질 실현가능성을 핸드오프 주석으로 표면화하고, 세션 내 체크포인트와 함께 방법 계획을 핸드오프합니다. 결과가 종합(synthesis)으로 화해되고 그 출력이 융합 형태를 재유도할 수 없는 소비자(사용자, 또는 `handoff_to_span`을 통한 미래 span)로 가는 영역에는 **종합 체크포인트**가 등록되고, 컴파일된 Recognition brief가 함께 실립니다 — 이동별 산출물, 수렴, 발산, 비공개-맥락 gap 슬롯, 융합/출력-형태 후보를 기질이 융합 시점에 제시해, 사용자가 융합 선택을 떠올리는(recall) 대신 인식(recognize)하게 합니다.
 
 ## 다섯 지휘 축
 
@@ -53,6 +53,8 @@ Hyphegesis는 작업 브리프를 확인하고, 지휘가 필요한지 점검하
 | independence | 화해 전에 이동들이 서로를 보는가? | isolated, shared |
 | reconciliation | 분리 산출된 결과를 어떻게 통합하는가? | aggregate, dialectic, adversarial_refute, synthesis |
 | termination | 이동은 언제 멈추는가? | single_pass, bounded_rounds, until_dry_ceiling, until_goal_met |
-| routing | 각 출력은 어디로 가는가? | return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding |
+| routing | 각 출력은 어디로 가는가? | return_to_user, chain_to_next, handoff_to_protocol, deepen_on_finding, handoff_to_span |
 
 `order`가 `dependency_dag`일 때 independence/reconciliation/routing/termination은 move-region별로 해소됩니다(저작 권역은 `shared`, 검증 권역은 `isolated`처럼).
+
+`handoff_to_span`은 이동의 출력을 **span 벽 너머** 맥락을 공유하지 않는 미래 span(`/compact`, `/clear`, 또는 새 세션 이후)으로 라우팅하고, 그 portability를 핸드오프 seam에서 `/distill`에 위임합니다 — 흡수가 아니라 composition: `/conduct`의 cognition은 단일 span을 유지하고 출력만 다리를 건너며, 반대편의 compile-back은 `/conduct`의 범위 밖에 둡니다.
