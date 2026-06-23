@@ -65,7 +65,7 @@ Deposit          = { slug: String, sid: String, cwd: Optional(String), date: Opt
                   -- cwd, date are STORED in the deposit's own frontmatter (the same fields Anamnesis writes): cwd pairs with sid to build the resume handle, date dates the source. Optional ⇒ absent in deposits written before the field was captured (cwd-absent ⇒ source surfaced but non-resumable)
 SSOT             = the deposit's authoritative session record (complete, append-only) the INDEX entry is DERIVED FROM   -- a Deposit is a LOSSY INDEX projection of its SSOT; evidential claims resolve against SSOT, never the deposit files alone
 EvidentialClaim  = a reading SURFACED to the user as fact: origin attribution, coinage/temporal timing, a quoted decision or utterance   -- index-only ⇒ provisional; settled only once Confirm-ed against SSOT
-Confirm          = (EvidentialClaim, SSOT) → {confirmed, corrected, unattested}   -- read the authoritative source for the deposit's session before surfacing the claim; index-only stays provisional
+Confirm          = (EvidentialClaim, SSOT) → {confirmed, corrected, unattested}   -- read the authoritative source for the deposit's session before surfacing the claim; the result governs how the claim surfaces: confirmed ⇒ assert as settled fact; corrected ⇒ assert the SSOT value, discard the index reading; unattested ⇒ never assert as fact — surface provisional or omit. Index-only (unconfirmed) stays provisional.
 DepositGraph     = (Set(Deposit), Set(TraversalEdge))    -- STRUCTURAL TYPE; the edge set is RECONSTRUCTED at read-time, not pre-materialized; invariants in ── GRAPH INVARIANTS ──
 TraversalEdge    = { from: DepositRef, to: DepositRef, kind: ∈ {chain, topic, concept, plain} }
                   -- `kind` and `to` are INFERRED at traversal time from stored anchors + shared keywords/session metadata + Σ — NEVER read from a stored field
@@ -182,9 +182,9 @@ Phase 0 Detect        (sense)        → Internal analysis (supra-session granul
 Phase 0 Classify      (sense)        → Internal analysis (UnitType detection from R + Σ)
 Phase 0 Dispatch      (sense)        → Internal analysis (select the traversal shape for the dispatched UnitType; deterministic indexed selection, entropy→0)
 Phase 1 Traverse      (observe)      → Read, Grep, Glob (read entry-deposit anchors + index keywords/metadata, then search cross-partition for shared anchors/keywords/metadata; read-only, read-time inference)
-Phase 1 Confirm       (observe)      → Read, Grep (read the deposit's authoritative session transcript ~/.claude/projects/{slug}/{sid}.jsonl to confirm an evidential claim before it is surfaced; index-only readings stay provisional)
 Phase 1 Assemble      (sense)        → Internal analysis (compose inferred-edge-connected deposits into typed higher units)
 Phase 1 Rank          (sense)        → Internal analysis (recall alignment + inferred-edge connectivity; conditional haiku scoring for large unit sets)
+Phase 1 Confirm       (observe)      → Read, Grep (after Rank, before any surfacing: read the deposit's authoritative session transcript ~/.claude/projects/{slug}/{sid}.jsonl to confirm an evidential claim before it is surfaced; index-only readings stay provisional)
 Phase 1 Rescope Qc    (constitution) → present (structured re-traversal navigation; mandatory on empty assembly before NullMatch)
 Phase 1/3 surface     (extension)    → TextPresent+Proceed (exhausted-with-units terminal, presented ≠ ∅: best candidate — each composing deposit with its source + resume, per Rule 19 — + traversal scope, then deactivate — reached from Phase 1 on an empty re-traversal at the cap, or from Phase 3 on a Refine/Reorient request at the cap)
 Phase 1 NullMatch inform (extension) → TextPresent+Proceed (exhausted-no-unit terminal, presented = ∅: traversal scope + broken-link notes + Anamnesis/Aitesis fallback offer, then deactivate)
