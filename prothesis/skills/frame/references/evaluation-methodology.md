@@ -1,11 +1,11 @@
 # Prothesis Evaluation Methodology
 
-This reference defines how to evaluate Prothesis (frame) when its specialized epistemic behavior differs from generic agent-team best-practice compliance. Since frame v7, frame is a pure compiler — it supplies the lens and compiles an inquiry spec, then hands off and stops (frame Rule 3). Evaluation therefore separates **two distinct concerns**:
+This reference defines how to evaluate Prothesis (frame) when its specialized epistemic behavior differs from generic agent-team best-practice compliance. Since frame v8, frame is a pure object supplier / substrate-binder — it supplies the lens, declares each lens's `substrate_need` (authoritative) with `binding_hints` (advisory), then hands off and stops (frame Rule 3), and **never synthesizes a multi-perspective result in its own context** (frame Rule 5). Evaluation therefore separates **two distinct concerns**:
 
-1. **frame's compilation quality** — did frame surface the load-bearing perspectives, keep the user's recognition burden low, compile a coherent default directive, and route non-trivial arrangement to `/conduct`? This is what frame owns.
-2. **the substrate's realization** — when a Mode 2 spec is executed, did the substrate honor the directive (isolation, conditional reconciliation, synthesis-without-flattening)? This is the substrate's, not frame's, and is evaluated as a separate trace.
+1. **frame's object-supply quality** — did frame surface the load-bearing perspectives, keep the user's recognition burden low, declare a coherent per-lens substrate need with useful binding hints, compile a coherent default directive, route non-trivial arrangement to `/conduct`, and avoid any inline convergence/synthesis? This is what frame owns.
+2. **the substrate's realization** — when a `SubstrateCorrespondence` handoff is executed, did the substrate honor the directive (genuine isolation, conditional reconciliation, synthesis-without-flattening) — and is any convergence claim grounded in lenses that actually ran in isolation? This is the substrate's, not frame's, and is evaluated as a separate trace.
 
-Use this together with [`agent-teams-bp-applicability.md`](./agent-teams-bp-applicability.md), which marks which agent-team best practices the *substrate* applies when executing a frame-compiled spec.
+Use this together with [`agent-teams-bp-applicability.md`](./agent-teams-bp-applicability.md), which marks which agent-team best practices the *substrate* applies when executing a frame `SubstrateCorrespondence` handoff.
 
 ## Evaluation Unit
 
@@ -14,24 +14,26 @@ Evaluate a frame run as a phase-scoped protocol trace, not as a generic agent-te
 Minimum frame trace record:
 
 - input deficit: whether the user actually presented `FrameworkAbsent`
-- selected mode: Recommend or Inquire
+- coproduct branch: `LensReturn` (single lens ∨ no specialized substrate) or `SubstrateCorrespondence` (≥2 lenses with substrate needs) — discriminated by substrate availability, not a user mode choice
 - phase path: Phase 0 through handoff (Phase 3)
 - perspective set: options presented, selected perspectives, and rationale
-- compiled output: for Recommend, the lens recommendation (`Lᵣ`) with its count tier; for Inquire, the inquiry spec (`IS`) — its lens, default directive, `/conduct` arrangement reference, and channel-need annotation
-- routing fit: whether the framed object pointed to the next appropriate protocol/substrate and whether non-trivial arrangement was correctly routed to `/conduct`
+- framed output: for `LensReturn`, the detailed lens(es) + per-perspective directive; for `SubstrateCorrespondence`, the lens↔substrate pairs — each lens's `substrate_need` (authoritative) + `binding_hints` (advisory), the default directive, `/conduct` arrangement reference, and channel-need annotation
+- routing fit: whether the framed object pointed to the next appropriate protocol/substrate, whether each lens's substrate need was well-targeted (and binding hints preferred skill-bundled agents over `general-purpose`), and whether non-trivial arrangement was correctly routed to `/conduct`
+- inline-synthesis check: did frame avoid reasoning all lenses in its own context and presenting a "convergence"? Any inline multi-perspective synthesis is a `false-convergence` defect
 - verification signals: user recognition, follow-up correction, review findings, or downstream protocol fit
 
-When a Mode 2 spec is executed, record the substrate realization as a *separate* trace: isolation fidelity, which dialogue triggers fired, and synthesis quality. Do not attribute substrate realization defects to frame's compilation (or vice versa).
+When a `SubstrateCorrespondence` handoff is executed, record the substrate realization as a *separate* trace: isolation fidelity, which dialogue triggers fired, and synthesis quality. Do not attribute substrate realization defects to frame's object supply (or vice versa).
 
 ## Multi-Session Method
 
 Do not judge the whole protocol from one execution path. Sample across at least these shapes before making a protocol-level claim:
 
-- Recommend mode with a lightweight framing request
-- Inquire mode with distinct selected perspectives (evaluate the compiled spec)
+- `LensReturn` with a lightweight framing request (single lens, or no specialized substrate)
+- `SubstrateCorrespondence` with distinct selected perspectives carrying substrate needs (evaluate the lens↔substrate pairs)
 - high-ambiguity request where perspective selection is the main value
-- high-complexity request where the directive + `/conduct` routing is the main value
+- high-complexity request where the per-lens substrate need + directive + `/conduct` routing is the main value
 - a case where the arrangement is non-trivial and frame correctly hands off to `/conduct`
+- a multi-lens case where the temptation to synthesize inline is high — frame must emit `SubstrateCorrespondence` and make no convergence claim of its own
 
 Session-level findings may justify a local patch, but claims about frame as a protocol require cross-session recurrence or a structural proof tied to the formal block.
 
@@ -41,8 +43,9 @@ Generic agent-team best practices are evidence only after it is established that
 
 | Criterion | Evaluation question |
 |---|---|
-| Layer attribution | Is the observed behavior frame's (compilation) or the substrate's (execution)? Do not score frame on execution it no longer owns. |
-| Epistemic purpose | Does frame's output help resolve `FrameworkAbsent` into `FramedInquiry` — a usable lens (Mode 1) or a coherent inquiry spec (Mode 2)? |
+| Layer attribution | Is the observed behavior frame's (object supply) or the substrate's (execution + synthesis)? Do not score frame on execution it no longer owns. |
+| Epistemic purpose | Does frame's output help resolve `FrameworkAbsent` into `FramedInquiry` — a usable detailed lens (`LensReturn`) or a coherent set of lens↔substrate pairs (`SubstrateCorrespondence`)? |
+| No inline synthesis | Did frame refrain from reasoning all lenses in its own context and presenting a convergence? Any inline multi-perspective synthesis is a `false-convergence` defect, not a quality output. |
 | Directive warrant | Does the compiled default directive specify isolation + reconciliation + synthesis that *would* integrate findings without flattening perspective differences when executed? |
 | Arrangement routing | When the arrangement (order, independence, reconciliation, termination, routing) is non-trivial, did frame route to `/conduct` rather than re-eliciting a topology itself (arranger-creep)? |
 | Recognition burden | Did the user need only to recognize suitable perspectives, or were they forced to invent the framework? |
@@ -56,7 +59,7 @@ Completeness is not sufficient evidence of quality. A frame output is good when 
 
 ### Session Representativeness
 
-A single trace is not representative by default. Mode, stakes, ambiguity, and selected perspectives change the relevant evaluation criteria. Treat one-session critiques as instance findings unless the same failure recurs or the formal block makes the defect inevitable.
+A single trace is not representative by default. Coproduct branch (`LensReturn` vs `SubstrateCorrespondence`), stakes, ambiguity, and selected perspectives change the relevant evaluation criteria. Treat one-session critiques as instance findings unless the same failure recurs or the formal block makes the defect inevitable.
 
 ### Cost = Tokens
 
@@ -76,7 +79,7 @@ Use this shape for review notes:
 
 ```text
 Scope: [phase/mode/session set]
-Layer: [frame compilation / substrate realization]
+Layer: [frame object supply / substrate realization]
 Finding: [observed behavior]
 Protocol relevance: [effect on FrameworkAbsent -> FramedInquiry]
 Evidence: [trace citation or repeated-session pattern]
