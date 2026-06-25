@@ -81,6 +81,8 @@ Rendered shape:
 
 **Channel boundary — text gate vs genuine tool call.** Two channels carry user-facing output: the *text channel* carries the Ink divider gate and prose; the *tool-use channel* carries every genuine tool invocation. Each interaction travels exactly one. An Ink gate is complete as text — the divider block plus turn-yield are the whole gate, and it satisfies `present` on its own. A genuine tool call — AskUserQuestion, or any tool a skill's SKILL.md directs — travels the tool-use channel, so it reaches the user as a rendered tool call; its call syntax (e.g., function-call XML) is that channel's payload, while the message text stays prose. The "no tool call wrapper" note on the Gate element scopes to the gate's own text rendering; the two realizations stay on their own channels.
 
+**AskUserQuestion header width.** When a skill-directed tool call uses AskUserQuestion, size each `header` to fit within roughly 12 display columns — about 6 characters for Korean or other double-width scripts, which render two columns each — so the header chip displays whole.
+
 **Convergence** — emit each dimension's status between dividers, using ✓ for defined and ○ for pending. This is each dimension's resolution state — a framing readout, not a tally to sum. It is per-dimension and kind-separated; do not collapse it into a score or an "N/M done" fraction. Each line stands on its own as that dimension's resolution state.
 
 · Convergence ───────────
