@@ -70,7 +70,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 
 ### Phase 0: Entry (Path Selection)
 
-Do NOT present the full protocol catalog upfront. Start with a concise welcome and path selection.
+Begin with a concise welcome and path selection, reserving the full catalog for the Browse-all path.
 
 **Gate #1**:
 - Text: Path selection prompt
@@ -154,7 +154,7 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 3. Tie-break: `/elicit` > `/gap` > `/frame`
 4. **Fallback**: If no signals detected (no sessions, sparse metadata), recommend `/elicit`
 
-**Output**: Present recommendation as a single sentence. Do NOT present multiple recommendations or a ranked list.
+**Output**: Present exactly one recommendation as a single sentence.
 
 Format: Present as a single sentence stating which protocol is most likely to help right now.
 
@@ -169,7 +169,7 @@ Format: Present as a single sentence stating which protocol is most likely to he
 Fallback (no session data): State that no patterns were detected, then cite the protocol's core value proposition from Data Sources "When to Use."
 
 **Rules**:
-- Evidence is maximum 2 lines. Never expand into a report-style analysis.
+- Evidence is maximum 2 lines — a focused cue.
 - Do not show confidence scores or numbers.
 - Do not quote session content verbatim.
 
@@ -216,7 +216,7 @@ Scenario: /X (Protocol Name)
 Expected outcome: [e.g., reduced rework, clearer direction]
 ```
 
-**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a situation could plausibly map to multiple protocols (e.g., "exploration" could be `/elicit` or `/frame`), do NOT use it as a scenario — reserve it for Phase 5 quiz material instead. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
+**Clarity rule**: Scenarios must present **clear-cut** protocol fits where the mapping is unambiguous. If a situation could plausibly map to multiple protocols (e.g., "exploration" could be `/elicit` or `/frame`), reserve it for Phase 5 quiz material instead of using it as a scenario. The scenario phase builds confidence through recognition; the quiz phase builds discrimination through ambiguity.
 
 **Anti-pattern**: Scenarios must be self-contained (situation + intervention) with unambiguous protocol fit. Ambiguous patterns belong in Phase 5 quiz.
 
@@ -417,7 +417,7 @@ Quick path targets 3-4 calls. Targeted path targets 6-12 calls.
 ## Rules
 
 1. **Value before learning**: Quick path proves value in under 3 minutes. Learning (scenarios, quizzes) is available but not the default entry.
-2. **One at a time**: Quick path shows 1 recommendation, 1 evidence card, 1 trial. Never present multiple recommendations or ranked lists.
+2. **One at a time**: Quick path shows exactly 1 recommendation, 1 evidence card, 1 trial.
 3. **Onboarding Pool**: `/elicit`, `/gap`, `/frame` are the unified recommendation set for both Quick path auto-recommend and Targeted path fallback. User-initiated protocols (`/grasp`, `/attend`) and specialized protocols (`/contextualize`) are excluded. When pool is exhausted in Quick path, transition to Targeted path.
 4. **Experience over analysis**: This skill teaches through doing. Analytical output (HTML reports, pattern evidence tables) belongs in `/report`.
 5. **Privacy**: Never transmit session data externally. All analysis runs locally.

@@ -147,7 +147,7 @@ This gate is mandatory even if the narrative seems obvious — theme choice and 
 1. **Tag before narrative**: CI must create the draft first. Narrative prepends to the script-generated body (Highlights/Protocols/Assets sections from `scripts/package.js`); the skill does not replace or regenerate those sections.
 2. **Korean narrative**: matches the repo's PR body language convention.
 3. **Terminal operation bounded to body edit**: the skill's terminal operation is `gh release edit <tag> --notes-file <path>` against the existing draft. Release creation is owned by CI (via tag push trigger); publish-to-public is owned by the user via the GitHub web UI.
-4. **Theme over item list**: the narrative answers "why this release matters"; the auto-generated section already enumerates what changed. Do not duplicate the commit list inside the narrative.
+4. **Theme over item list**: the narrative answers "why this release matters"; the auto-generated section already enumerates what changed.
 5. **3-4 bullets max**: more dilutes impact. If fewer than 3 user-facing changes exist, propose skipping the narrative entirely (patch-only releases do not need it).
 6. **No draft republish on existing body**: if the draft already has a narrative (check for leading `>` blockquote in fetched body), ask before overwriting.
 7. **Failure surfacing**: if CI fails, do not attempt narrative drafting — surface the failure to the user and stop.

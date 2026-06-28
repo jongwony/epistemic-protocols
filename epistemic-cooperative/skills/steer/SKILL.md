@@ -430,7 +430,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 ## Rules
 
 1. **User-invoked only** — Steer activates only on explicit `/steer` invocation. Layer 1/Layer 2 separation is enforced: only the user-invocable layer activates this skill.
-2. **Opt-in, default off** — No sticky activation, no background scanning, no implicit re-activation across turns. The user explicitly activates each session.
+2. **Opt-in, default off** — Activation is fully user-driven and per-invocation: each run begins on an explicit /steer call and the skill stays dormant between invocations. The user explicitly activates each session.
 3. **Current-session default scope** — Default target session is the current session. Other sessions require explicit session_id argument or Phase 0 confirmation.
 4. **Cross-session evidence requires explicit confirmation** — Reading prior session calibration history beyond the target session requires explicit user confirmation per invocation.
 5. **Per-cluster verdict required** — Every non-empty cluster receives a Constitution verdict from the user before Phase 4 diff assembly proceeds.

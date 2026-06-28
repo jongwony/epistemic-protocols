@@ -5,7 +5,7 @@ description: "Work-unit triage for GitHub issues. Groups raw issues, fuses each 
 
 # Triage: Work-Unit Formation
 
-Form executable work units from GitHub issue substrate. This skill does not execute the work, open branches, or create PRs. It reads raw issues, groups related issues, fuses each group with the project's inscribed northstar and the user's current-session judgment, and emits one or more initial prompts that can be routed to an independent session, linear `/dispatch`, or parallel `/dispatch`.
+Form executable work units from GitHub issue substrate, handing execution — branches, PRs, applied fixes — to /dispatch or a normal session. It reads raw issues, groups related issues, fuses each group with the project's inscribed northstar and the user's current-session judgment, and emits one or more initial prompts that can be routed to an independent session, linear `/dispatch`, or parallel `/dispatch`.
 
 ## Core Contract
 
@@ -74,7 +74,7 @@ Use the load axes to choose an intake posture:
 | Medium | Build a metadata grouping map first. Surface candidate clusters in Phase 2 before the user confirms selection, then read full substrate only for confirmed clusters. Use this when full scan is plausible but one or more load axes would make silent reading too costly. |
 | Large | Call `/elicit` to crystallize `IntakeIntent`, convert that intent into a GitHub query/filter or cluster selection, then read full substrate only for the resulting slice. Use this whenever full substrate reading would exceed the next checkpoint or the triage purpose is unclear. |
 
-If the user explicitly asks for a full-backlog audit on a medium or large backlog, process metadata in checkpointed batches and surface progress between batches. Do not read all bodies/comments before the first grouping checkpoint.
+If the user explicitly asks for a full-backlog audit on a medium or large backlog, process metadata in checkpointed batches and surface progress between batches. Defer full body/comment reads until after the first grouping checkpoint.
 
 **Load is not legible from labels.** `TriageLoad` sizes the *intake* (how much substrate to read now). It does not measure the *deliverable load* a unit imposes downstream — the human judgment its execution and review will demand. These are independent: a `refactor`/`enhancement` label does not imply low deliverable load. An audit or candidate-classification issue — one whose output is a *decision* (which candidates to act on, merge-vs-keep, discriminant-vs-removable) — carries high deliverable load because it spawns in-session judgment gates, even when its surface reads as mechanical. When ordering or routing units by reviewer cost, read deliverable load from what the issue *produces* (a mechanical edit vs a decision), not from its type label.
 
@@ -213,7 +213,7 @@ Present the work units and ask the user to choose a route:
 3. **Parallel dispatch** — pass independent work units to `/dispatch` in parallel.
 4. **Re-triage** — revise grouping, fusion, or work-unit boundaries.
 
-If the user chooses dispatch, hand off only the selected `InitialPrompt` or work-unit set. Do not re-scan open issues inside `/dispatch`.
+If the user chooses dispatch, hand off only the selected `InitialPrompt` or work-unit set; `/dispatch` consumes it as-is without re-scanning open issues.
 
 ## Rules
 

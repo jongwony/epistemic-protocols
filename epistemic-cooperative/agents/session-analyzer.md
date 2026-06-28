@@ -139,7 +139,7 @@ Detect user correction and backtracking patterns from session JSONL. These serve
 
 **Detection approach** (semantic classification by you as a multilingual model):
 
-You natively understand multilingual conversational cues; do not rely on a literal keyword table. Locate user messages via Grep on `"role":"user"`, then read each candidate message and classify by intent:
+Classify by semantic intent, using your native multilingual understanding of conversational cues. Locate user messages via Grep on `"role":"user"`, then read each candidate message and classify by intent:
 
 | Signal | Semantic intent |
 |--------|-----------------|

@@ -102,4 +102,4 @@ When a cluster name or protocol command/name is provided as argument:
 3. **Static overview, dynamic detail** — the Protocol Catalog tables above are embedded and authoritative. Detail mode reads scenarios.md at runtime for richer content.
 4. **Argument normalization** — accept case-insensitive input; strip `/` prefix; match against both protocol names and commands.
 5. **Graceful fallback** — unrecognized arguments get closest-match suggestions plus the full overview.
-6. **Distinction from /onboard** — catalog is passive reference (read and go); onboard is active learning (scenario, trial, quiz). Never redirect to onboard unless the user explicitly asks for guided learning.
+6. **Distinction from /onboard** — catalog is passive reference (read and go); onboard is active learning (scenario, trial, quiz). Redirect to /onboard only when the user explicitly asks for guided learning.
