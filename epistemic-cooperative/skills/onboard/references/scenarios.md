@@ -259,6 +259,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: ὑφήγησις (leading from just ahead, guiding) — conducting the method of the work, not doing the work. Core principle: **Conduction over Substrate**. How a session's moves are ordered, isolated, reconciled, and stopped is substrate-invariant — it survives deleting every runtime noun — so the conduct form is designed independently and only then matched to a substrate, declaring degradation rather than binding one it cannot realize. Workflow position: cross-cutting, Hybrid initiator — conducts the session's whole move set before object-level cognition. Game feel: "I know what I want, but how do I run this?" → confirm it's multi-move → design the topology impact-first → hand off a method plan with checkpoints.
 
+## Diairesis `/delimit`
+
+**Situation**: You have a large body of work — a Linear project, a milestone set, a sprawling issue tree — that clearly won't fit one execution span. Before you can conduct *how* to run it, you have to decide *where to cut it* into units. Cut into pieces that are too big and a single span can't finish one; too small and you fan out spans that barely do anything; across a dependency seam and two units fight over the same work. The goal is known; the granularity of the cut is not.
+
+**Intervention**: `/delimit` reads the external work-breakdown structure read-only (it never copies or owns it — the WBS stays the single source of truth), scans it for natural joints — milestone boundaries, dependency seams, deliverable edges — and searches for the cut-set whose every unit fits one span. It surfaces the highest-leverage uncut region's proposed cut one at a time, with a fit verdict (Fits / Overflows / Underfills), and you settle it: accept the cut, move it to a different joint, split a unit that overflows, or merge one that underfills. When you say the partition is complete, it cuts the rest at their natural joints, checks the four invariants — each unit fits one span, every cut on a joint, complete coverage, no orphaned work — and emits a WorkUnitMap that flows straight into `/conduct`.
+
+**Trial prompt**: "Let's practice: say 'I've got a Linear project that's way too big for one session — delimit it into execution-sized units' and I'll show how /delimit finds the natural joints and proposes the cut-set before any conducting starts"
+
+**Quiz Q (situation)**: You have a clear goal and a big issue tree, but you can't tell where one executable chunk should end and the next begin — some candidate units look too big for a single run, others too thin to bother. You haven't started because the *cut*, not the goal or the order, is unsettled.
+- A) Hyphegesis `/conduct` — B) Horismos `/bound` — C) Diairesis `/delimit` — D) Aitesis `/inquire`
+- Answer: C
+
+**Quiz Q (design)**: You face a multi-span body of work and need to partition it into units before conducting. How do you decide where the cuts fall so each unit fits one span and no work is orphaned, without ordering the units yet?
+- Hint: The problem isn't who decides what (that's `/bound`) or how the units run in sequence (that's `/conduct`, the dual) — it's where to cut. Find the natural joints, fit each candidate unit against one span, and let the user settle each cut; ordering comes after.
+
+**Philosophy**: διαίρεσις (division, a cutting-apart) — marking where the work divides, not sequencing the pieces. Core principle: **Delimit over Order**. The cut into units is settled before the units are ordered; sequencing them is `/conduct`'s work, so the two are duals across one seam — cut, then conduct. The external WBS is referenced, never owned (**Reference over Ownership**), so the WorkUnitMap sees downstream changes instead of going stale. Workflow position: cross-cutting, Hybrid initiator — partitions a work body before its method is conducted. Game feel: "this is too big for one go — where do I cut it?" → find the joints → settle each cut → emit a WorkUnitMap for `/conduct`.
+
 ## Composition Patterns
 
 Real sessions rarely use a single protocol. Composition — invoking multiple protocols together — is often more valuable than any isolated call. Three patterns that appear most in practice:

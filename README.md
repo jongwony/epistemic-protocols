@@ -51,7 +51,7 @@ The Codex marketplace preserves the same plugin boundaries as Claude Code: each 
 
 - The Codex marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json).
 - Each plugin keeps its Codex manifest beside the existing Claude manifest: `<plugin>/.codex-plugin/plugin.json`.
-- The marketplace includes the 15 protocol plugins plus `epistemic-cooperative`.
+- The marketplace includes the 16 protocol plugins plus `epistemic-cooperative`.
 
 </details>
 
@@ -80,8 +80,9 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Diylisis](./diylisis) | `/distill` | You're handing a working context to a fresh session that shares none of it — distill out the session-tethered references first |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need a fast path to understand, approve, explain, or modify them |
 | [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
+| [Diairesis](./diairesis) | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces isn't obvious — partition it at its natural joints before conducting |
 
-Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/distill`, `/grasp`, `/conduct`)
+Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/distill`, `/grasp`, `/delimit`, `/conduct`)
 
 ## Utilities
 
@@ -153,6 +154,7 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 | Anagoge | ἀναγωγή | A leading-up |
 | Diylisis | διύλισις | Refining, distillation |
 | Hyphegesis | ὑφήγησις | Leading the way, guiding from ahead |
+| Diairesis | διαίρεσις | Division, partition |
 
 </details>
 
