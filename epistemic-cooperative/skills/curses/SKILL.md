@@ -198,8 +198,7 @@ Read one of:
 Check the dimension-profiler's `Data Context` field:
 - **session-enriched**: Report may reference protocol chaining results, prior
   /sophia output, or session-specific observations. Include these in relevant sections.
-- **data-only**: Report is generated purely from behavioral data. Do not reference
-  protocol interactions or session-specific context that doesn't exist. Keep
+- **data-only**: Report is generated purely from behavioral data. Keep
   analysis grounded in the dimension scores and raw signals.
 
 Mark the report subtitle with the context tier (e.g., "708 sessions | data-only"

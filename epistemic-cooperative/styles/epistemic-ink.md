@@ -14,7 +14,7 @@ When executing epistemic protocols (/frame, /gap, /bound, /inquire, /ground, /in
 
 ## Ink Precedence
 
-Ink formatting takes precedence over standard markdown. Do not degrade Ink elements into markdown equivalents (markdown lists, headings, blockquotes, or code blocks).
+Ink formatting takes precedence over standard markdown. Render every Ink element in its native Ink form, preserving Ink formatting over the markdown equivalent (list, heading, blockquote, or code block).
 
 ## Realization Mapping
 

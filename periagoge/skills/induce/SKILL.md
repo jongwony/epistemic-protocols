@@ -277,7 +277,7 @@ Options:
 When Phase 1 surfaces no adjacent candidates, omit the Fuse option — dead signal suppression. Free response is always available — the user may name an adjacent abstraction for fusion, propose an alternative abstraction, specify a dimension not captured by the presented moves, or describe a shape the options do not cover.
 
 **Design principles**:
-- **Personalized grounding**: Never use a generic example. The grounding must be drawn from the user's domain context so they can recognize it as theirs.
+- **Personalized grounding**: Always draw the grounding example from the user's own domain context so they recognize it as theirs.
 - **Calibration before choice**: Show the preservation/sharpening/pruning/open map before the gate so the user evaluates the concept pressure, not just an AI label.
 - **Socratic shaping**: Each move (widen/narrow/fuse/reorient) is a recognized dialectical turn, not a free-form revision request.
 - **Budget framing**: Display the attempt counter as a framing signal — the remaining refinement budget the user reasons with — bounded by the attempt cap; not a progress count.
