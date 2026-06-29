@@ -5,7 +5,7 @@ description: "Protocol handbook — instant reference for when to use each epist
 
 # Catalog Skill
 
-Instant reference handbook for 15 epistemic protocols. Browse by cluster, look up by command, or find the right protocol for a situation.
+Instant reference handbook for 16 epistemic protocols. Browse by cluster, look up by command, or find the right protocol for a situation.
 
 ## When to Use
 

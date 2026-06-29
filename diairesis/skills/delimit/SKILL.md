@@ -95,7 +95,7 @@ J = {next, sufficient, esc}
   sufficient: TerminationIntent = Sufficient (parsed from Phase 2 free response) → Phase 3 → converge with residual filled by autonomous_pack (each remaining region cut at its natural joints, Extension-default) — surfaced for recognition before emit
   esc:        Esc → ungraceful deactivate (residual uncut)
 
-Per-cycle re-scan: Phase 1 re-reads the WBS each cycle; `Λ.regions_touched` is the dedup source — no region surfaced twice.
+Per-cycle re-scan: Phase 1 re-reads the WBS each cycle; the anchor is drawn from `Λ.residual` and a `Λ.committed` (settled) region is never re-surfaced — no region cut twice. Dedup is against `Λ.committed`, not `Λ.regions_touched` (= committed ∪ residual, which includes pending residual and so must not gate re-surfacing).
 Cycle 1 anchor: the highest-leverage region — the one whose cut most constrains the rest of the partition (typically the largest Overflows region or a hard dependency seam).
 Cycle k≥2 anchor: the cut settled at cycle k-1 routes the next scan toward the regions adjacent to it; AI re-applies leverage ordering within that frame.
 
@@ -133,7 +133,7 @@ converge (extension)         → TextPresent+Proceed (per-unit cut trace + resid
       cycle_n: Nat,
       joints: Set(Joint),                   -- accumulated candidate cut points (Phase 1 scan union)
       cut_set: CutSet,                       -- the accumulating partition (committed cuts)
-      regions_touched: Set(Region),         -- every region surfaced across cycles (dedup source)
+      regions_touched: Set(Region),         -- every region created across cycles = committed ∪ residual (coverage bookkeeping; dedup is against committed)
       committed: Set(Region),               -- regions whose cut the user settled (Phase 2) or autonomous_pack completed
       residual: Set(Region),                -- uncut regions still pending (filled by autonomous_pack at termination)
       work_unit_map: WorkUnitMap,           -- the accumulating result: reference entries only
@@ -244,7 +244,7 @@ Verify the work body needs a cut and bind the external WBS read-only. This phase
 
 Re-scan the WBS for the current cycle, find the natural joints, and run the packing search.
 
-1. **Per-cycle re-scan** — read the external WBS (Read/Grep/Glob over the Linear/issue tree, plan, or project config) for natural joints in the current frame: milestone boundaries, dependency seams, deliverable edges, or an emergent joint the seeds do not name. Skip regions already in `Λ.regions_touched` (dedup). Composes `/bound` — where a cut could fall is a boundary question, and a prior BoundaryMap narrows the joint candidates.
+1. **Per-cycle re-scan** — read the external WBS (Read/Grep/Glob over the Linear/issue tree, plan, or project config) for natural joints in the current frame: milestone boundaries, dependency seams, deliverable edges, or an emergent joint the seeds do not name. Skip regions already in `Λ.committed` (a settled region is never re-surfaced); the anchor is the highest-leverage region in `Λ.residual`. Composes `/bound` — where a cut could fall is a boundary question, and a prior BoundaryMap narrows the joint candidates.
 2. **Packing search** — run `pack(joints, horizon, lifecycle)`: propose a cut-set by fitting each candidate region against the span budget (horizon × lifecycle). The search seeks the cut-set satisfying the four invariants — each unit Fits, every cut on a joint, coverage complete, no orphan.
 3. **Anchor selection** — surface the highest-leverage uncut region as `Anchor[cycle_n]`: the region whose cut most constrains the rest of the partition (a large Overflows region, or a hard dependency seam). Pair it with the proposed cut and its `SpanFit` (composing `/distill`'s zero-memory carriability as the Fits predicate — a unit Fits when its work is carriable by one self-contained span handoff).
 4. **Emit the cycle's exit signal**: if no region surfaces (substrate exhausted) and `residual = ∅`, converge directly; if substrate exhausted and `residual ≠ ∅`, autonomous-pack the residual and converge; else surface the anchor for Phase 2.
