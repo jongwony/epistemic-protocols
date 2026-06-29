@@ -35,7 +35,7 @@ You will receive:
    a. Glob `session_jsonl_glob` to get all JSONL paths on disk.
    b. **Single grep** with alternation pattern across all JSONL paths:
       ```
-      command-name|"skill":"(frame|gap|grasp|inquire|attend|contextualize|bound|ground|induce|elicit|recollect|sublate|distill|delimit|prothesis:|syneidesis:|katalepsis:|aitesis:|prosoche:|epharmoge:|horismos:|analogia:|periagoge:|euporia:|anamnesis:|elenchus:|diylisis:|diairesis:)
+      command-name|"skill":"(frame|gap|grasp|inquire|attend|contextualize|bound|ground|induce|elicit|recollect|sublate|distill|delimit|conduct|ascend|prothesis:|syneidesis:|katalepsis:|aitesis:|prosoche:|epharmoge:|horismos:|analogia:|periagoge:|euporia:|anamnesis:|elenchus:|diylisis:|diairesis:|hyphegesis:|anagoge:)
       ```
       This captures both slash commands (`<command-name>` tags) and Skill tool invocations (`"skill":"<name>"`) in one pass, pre-filtering to protocol skills only.
    c. **Map** matches to protocol names:
@@ -53,6 +53,8 @@ You will receive:
       - `sublate`, `elenchus:sublate` → Elenchus
       - `distill`, `diylisis:distill` → Diylisis
       - `delimit`, `diairesis:delimit` → Diairesis
+      - `conduct`, `hyphegesis:conduct` → Hyphegesis
+      - `ascend`, `anagoge:ascend` → Anagoge
    d. **De-duplicate**: Group matches by source file path (= session_id), then de-duplicate protocol names within each group. Same session + same protocol = 1 usage event.
 
 3. **Gate interaction scan**: From session JSONL paths (same as step 2a), grep for gate interaction patterns:
