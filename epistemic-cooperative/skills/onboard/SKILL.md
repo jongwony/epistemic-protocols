@@ -65,7 +65,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Katalepsis `/grasp` | Cross-cutting | Rapid comprehension verification via intent-scented entry points | User-intent grasp for AI-completed work, reviews, plans, docs, or code changes |
 | Diylisis `/distill` | Cross-cutting | Distilling a session-tethered working context into a self-contained portable handoff for a fresh zero-memory recipient | Handoff brief / fresh-context subagent dispatch / resumable plan with undefined jargon, deictic anchors, or dangling task ids |
 | Hyphegesis `/conduct` | Cross-cutting | Conducting the method of a multi-move work prospect before object-level cognition — order, independence, reconciliation, termination, routing | Multi-move work with non-trivial conduct (migrations, staged investigations, entangled adversarial/parallel/synthesis); "how should I approach this whole thing?" meta-questions |
-| Diairesis `/delimit` | Cross-cutting | Delimiting a large body of work into right-sized execution units — where to cut so each unit fits one span, at natural joints, with complete coverage and no orphans | A multi-span project / milestone set / issue tree whose cut into executable units is unclear; "how do I break this down?" partition questions before conducting |
+| Diairesis `/delimit` | Cross-cutting | Delimiting a large body of work into right-sized execution units — where to cut so each unit fits one span, at natural joints, with complete coverage (no work orphaned) | A multi-span project / milestone set / issue tree whose cut into executable units is unclear; "how do I break this down?" partition questions before conducting |
 
 ## Phase Execution
 

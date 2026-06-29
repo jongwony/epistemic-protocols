@@ -14,7 +14,7 @@ The work is known, but *where to slice it into units* is not (`GranularityUnderd
 
 ### The Solution
 
-**Delimit over Order**: Diairesis reads the external WBS read-only, scans it for natural joints, and searches for the cut-set whose every unit fits one span, whose cuts fall at the work's joints, whose units cover the whole body, and which orphans no work. It presents each candidate cut for the user to settle and emits a WorkUnitMap. It **marks the cuts but does not order them** — sequencing the units is `/conduct`'s work. The two are duals across one seam: **cut, then conduct**.
+**Delimit over Order**: Diairesis reads the external WBS read-only, scans it for natural joints, and searches for the cut-set whose every unit fits one span, whose cuts fall at the work's joints, and whose units cover the whole body with no work orphaned. It presents each candidate cut for the user to settle and emits a WorkUnitMap. It **marks the cuts but does not order them** — sequencing the units is `/conduct`'s work. The two are duals across one seam: **cut, then conduct**.
 
 ### Difference from Other Protocols
 
@@ -43,15 +43,14 @@ Invoke `/delimit` over a large body of work before it is conducted:
 /delimit cut this Linear project into execution-sized units
 ```
 
-Diairesis binds the external WBS read-only, scans it for natural joints (milestone boundaries, dependency seams, deliverable edges), and runs the packing search — proposing a cut-set whose units each fit one span. It surfaces the highest-leverage uncut region's proposed cut one at a time, with its span-fit verdict (Fits / Overflows / Underfills) and the current cut-set, for you to settle: accept the cut, move it to a different joint, split a unit that overflows, or merge one that underfills. When you signal the partition is complete, it cuts the remaining regions at their natural joints, asserts the four packing invariants — each unit fits one span, every cut on a joint, coverage complete, no work orphaned — and emits the WorkUnitMap, which flows to `/conduct` as its work prospect.
+Diairesis binds the external WBS read-only, scans it for natural joints (milestone boundaries, dependency seams, deliverable edges), and runs the packing search — proposing a cut-set whose units each fit one span. It surfaces the highest-leverage uncut region's proposed cut one at a time, with its span-fit verdict (Fits / Overflows / Underfills) and the current cut-set, for you to settle: accept the cut, move it to a different joint, split a unit that overflows, or merge one that underfills. When you signal the partition is complete, it cuts the remaining regions at their natural joints, asserts the three packing invariants — each unit fits one span, every cut on a joint, and coverage complete with no work orphaned — and emits the WorkUnitMap, which flows to `/conduct` as its work prospect.
 
-## Four Packing Invariants
+## Three Packing Invariants
 
 | Invariant | Meaning |
 |-----------|---------|
 | span_fit | Each unit fits one execution span (horizon × context lifecycle) |
 | natural_joint | Every cut falls at a natural joint, never mid-seam |
-| coverage_complete | The units cover the whole body (HARD convergence gate) |
-| no_orphan | No work lands outside every unit (HARD convergence gate) |
+| coverage_complete | The units cover the whole body with no work left outside any unit — full coverage, no orphan (HARD convergence gate) |
 
 The WorkUnit is an **execution-cut view** over the WBS: it references issue ids and floats between milestone and issue granularity, but never copies or owns the WBS's state. The external WBS stays the single source of truth — the WorkUnitMap carries a reference, not a snapshot, so downstream WBS changes are seen, never stale.

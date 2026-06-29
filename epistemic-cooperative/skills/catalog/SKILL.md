@@ -75,7 +75,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Diylisis | `/distill` | Handoff context to a fresh zero-memory session — distill out session-tethered references into a portable handoff |
 | Katalepsis | `/grasp` | AI did work and you need a fast path to understand, approve, explain, or modify it |
 | Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins |
-| Diairesis | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces is unclear — partition it at natural joints (each unit fits one span, complete coverage, no orphans) before conducting |
+| Diairesis | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces is unclear — partition it at natural joints (each unit fits one span, complete coverage with no orphans) before conducting |
 
 ## Detail Mode
 
