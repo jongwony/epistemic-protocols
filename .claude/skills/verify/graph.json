@@ -3,7 +3,8 @@
   "nodes": [
     "horismos", "aitesis", "analogia",
     "periagoge", "euporia", "prothesis", "syneidesis", "prosoche", "epharmoge",
-    "elenchus", "katalepsis", "anamnesis", "anagoge", "diylisis", "hyphegesis"
+    "elenchus", "katalepsis", "anamnesis", "anagoge", "diylisis", "hyphegesis",
+    "diairesis"
   ],
   "edge_types": {
     "precondition": {
@@ -65,6 +66,10 @@
     { "source": "hyphegesis", "target": "anagoge", "type": "advisory", "satisfies": "conduct synthesis checkpoint가 흩어진 cross-worker 결과를 connected-session 단위로 elevate하도록 라우팅" },
     { "source": "hyphegesis", "target": "periagoge", "type": "advisory", "satisfies": "decompose-recovery 레시피가 per-cell 재형성을 위해 각 셀을 periagoge 활성화로 라우팅 (다중 CrystallizedAbstraction, 융합 아님)" },
     { "source": "hyphegesis", "target": "diylisis", "type": "advisory", "satisfies": "handoff_to_span 라우팅이 span 벽을 넘는 출력의 portability를 distill에 위임 (composition — conduct는 라우팅, distill은 distill; cognition은 단일 span 유지)" },
+    { "source": "aitesis", "target": "diairesis", "type": "advisory", "satisfies": "수집된 컨텍스트가 절단 가능한 WBS 범위를 충족시켜 분할을 가능케 함 (scope 부족 시 delimit이 inquire로 route-away)" },
+    { "source": "horismos", "target": "diairesis", "type": "advisory", "satisfies": "경계 맵이 절단이 떨어질 joint 후보(어디서 자를 수 있는가)를 좁힘" },
+    { "source": "diairesis", "target": "diylisis", "type": "advisory", "satisfies": "단위별 span-fit 판정을 distill의 zero-memory carriability에 위임 (한 단위가 한 self-contained span 핸드오프로 운반 가능하면 Fits)" },
+    { "source": "diairesis", "target": "hyphegesis", "type": "advisory", "satisfies": "WorkUnitMap(절단된 실행 단위 집합)이 conduct의 WorkProspect로 흐름 — diairesis는 자르고, conduct는 배열·지휘 (cut, then conduct 쌍대)" },
     { "source": "anagoge", "target": "aitesis", "type": "advisory", "satisfies": "elevated 상위 단위가 컨텍스트 추론 범위를 좁힘" },
     { "source": "anagoge", "target": "periagoge", "type": "advisory", "satisfies": "recognized sedimented 개념 노드가 Fuse 후보를 제공" }
   ]

@@ -1,0 +1,9 @@
+{
+  "name": "diairesis",
+  "description": "Delimit a large body of work into right-sized execution units before its method is conducted — /delimit (διαίρεσις: a division)",
+  "version": "0.1.1",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  }
+}
