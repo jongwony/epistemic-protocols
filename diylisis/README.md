@@ -17,7 +17,7 @@ A working session's context window inevitably accumulates session-tethered resid
 The morphism runs F0 through F7 once forward, then re-audits against a monotone hygiene measure until it reaches a fixed point:
 
 - **F0 — Handoff contract**: declare recipient, next task, allowed sources, scope, verification, stop condition, and **handoff durability** (`OneShot` | `ExternalVersioned` | `DurableRepo`). The premise for relevance and minimality; durability conditionalizes the correction ledger.
-- **F1 — Deictic closure**: normalize each session-local token to a canonical reference. Runs before grounding so each grounded item names a stable referent. Emits `surface_token → canonical_ref → confidence → unresolved?`. A **secret-redaction sweep** runs first — secret-shaped content (credentials, tokens, keys, `$(...)` command-substitution refs) is intercepted to a placeholder before disposition (the real protection), so a secret never flows through as an ordinary KEPT item and its value never reaches a fresh recipient. Should a secret value nevertheless reach the emit candidate (an F1 miss, or a redacted value copied downstream), the **F6 emit-scan** backstops it — it appends a `redacted-load-bearing` residual routed to the Gate, so a secret value in emit blocks convergence until the Gate removes it (carried by the residual ledger, not a separate secret measure leg; the DROP'd-content leak lint is a distinct backstop). A command-substitution form keeps its retrieval command (only the resolved value is redacted), and a load-bearing secret surfaces at the Gate to be routed to a secret store or supplied out-of-band.
+- **F1 — Deictic closure**: normalize each session-local token to a canonical reference. Runs before grounding so each grounded item names a stable referent. Emits `surface_token → canonical_ref → confidence → unresolved?`.
 - **F2 — Grounding closure**: audit each item for self-containment — inline, stable-pointer, or routed-residual. No residual is dropped silently.
 - **F3a — Recipient-relevance**: judge each item against the declared next task.
 - **F3b — Transformation-provenance**: a ternary verdict — **CorrectedKeep** (a matching non-provisional unexpired `KEEP` `CorrectionDelta`, DurableRepo only), **ObservedKeep** (no correction record and a durable, directly-observable source coupled to the value by support-integrity — KEPT directly, no ledger, no Gate), or **Unknown** (no observable basis and no delta → Gate). Ordinary source-backed state is ObservedKeep, so an absent ledger no longer routes every item to the Gate; KEEP is never inferred from appearance, and a correction-requiring claim still needs the ledger or a Gate Resolve.
@@ -33,6 +33,8 @@ The morphism runs F0 through F7 once forward, then re-audits against a monotone 
 
 - User calls `/distill` (Layer 1, always available)
 - AI detects session-tethered residue before a context handoff — a handoff brief, a fresh-context subagent dispatch, a resumable plan (Layer 2, silent detection)
+
+`/distill` assumes a **secret-free working context** — stripping secrets (credentials, tokens, keys) is a separate concern handled upstream by a dedicated redaction agent, not part of the distill morphism.
 
 ## Disposition Coproduct
 
@@ -59,7 +61,7 @@ The artifact's label honestly reflects the rigor actually applied — a lower ti
 | Tier | Label | What it runs |
 |------|-------|--------------|
 | (a) | **Quick handoff draft** | Plain Markdown only — no F5 gate, no audit, no ledger. Makes **no** PortableHandoff claim. |
-| (b) | **Certified light /distill** | One F5 pass (incl. the prose-only deletion test) + one leak / durable-pointer audit + the secret-redaction sweep; no ledger unless real corrections exist. |
+| (b) | **Certified light /distill** | One F5 pass (incl. the prose-only deletion test) + one leak / durable-pointer audit; no ledger unless real corrections exist. |
 | (c) | **Heavy /distill** | Full refuter + watchlist + residual Gate + `CorrectionDelta` ledger + leak lint + convergence evidence + re-distillation (the DurableRepo path). |
 
 **Honest-label rule**: the formal `converge` transition fires at any tier that reaches a fixed point with a Pass verdict — tier (b) included, so a certified-light handoff formally converges and emits a legitimate `PortableHandoff`. The assurance **label** "converged /distill" is narrower: it is reserved for the tier-(c) full-assurance fixed point with a Pass verdict. A skipped-refuter artifact (tier (a)) is a **draft / degraded handoff** — never a `PortableHandoff`, never "converged /distill". Tier (b) is the floor for the PortableHandoff claim.
