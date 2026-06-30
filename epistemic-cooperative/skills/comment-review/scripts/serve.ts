@@ -13,7 +13,7 @@
 //
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
-import { existsSync, statSync, watch } from "node:fs";
+import { closeSync, constants, existsSync, fstatSync, openSync, readFileSync, watch } from "node:fs";
 import { appendFile, readdir, readFile, realpath } from "node:fs/promises";
 import { basename, dirname, extname, resolve, sep } from "node:path";
 import { homedir } from "node:os";
@@ -353,15 +353,26 @@ const serveSiblingAsset = async (assetPath: string, referer: string | null): Pro
   if (canonFile !== canonDir && !canonFile.startsWith(canonDir + sep)) {
     return new Response("not found", { status: 404 }); // escaped the artifact directory
   }
-  let st: ReturnType<typeof statSync>;
+  // Open through a handle with O_NOFOLLOW and read from the pinned fd — NOT by re-resolving the
+  // path string. This closes the time-of-check/time-of-use window: if the final component is
+  // swapped to a symlink after the realpath/containment check, the O_NOFOLLOW open fails (ELOOP)
+  // rather than following it outside the directory. A legitimate symlink that was already inside
+  // the dir at check time still works because realpath() resolved it to its real in-dir target,
+  // and we open that resolved target (not the symlink). (A post-check swap of an *intermediate*
+  // directory to a symlink is out of scope for this local single-user tool's trust model.)
+  let fd: number;
   try {
-    st = statSync(canonFile);
+    fd = openSync(canonFile, constants.O_RDONLY | constants.O_NOFOLLOW);
   } catch {
-    return new Response("not found", { status: 404 });
+    return new Response("not found", { status: 404 }); // missing, or final component is now a symlink
   }
-  if (!st.isFile()) return new Response("not found", { status: 404 }); // no directories
-  const ct = ASSET_MIME[extname(canonFile).toLowerCase()] || "application/octet-stream";
-  return new Response(Bun.file(canonFile), { headers: { "Content-Type": ct, "Cache-Control": "no-store" } });
+  try {
+    if (!fstatSync(fd).isFile()) return new Response("not found", { status: 404 }); // no directories/specials
+    const ct = ASSET_MIME[extname(canonFile).toLowerCase()] || "application/octet-stream";
+    return new Response(readFileSync(fd), { headers: { "Content-Type": ct, "Cache-Control": "no-store" } });
+  } finally {
+    closeSync(fd);
+  }
 };
 
 const server = Bun.serve({
