@@ -1,6 +1,6 @@
 ---
 name: comment-review
-description: "Review markdown artifacts before fixation (publish/commit/deposit/merge) via /inquire × /sublate × /gap × /contextualize through a channel-first browser preview loop. Each round mode is `apply + scan` (apply queued comments now + scan to surface findings into the next round's sidepanel) or `apply` (apply only). User-invoked via /comment-review."
+description: "Review markdown or HTML artifacts before fixation (publish/commit/deposit/merge) via /inquire × /sublate × /gap × /contextualize through a channel-first browser preview loop. Markdown renders via marked; HTML serves directly through a Shadow DOM. Each round mode is `apply + scan` (apply queued comments now + scan to surface findings into the next round's sidepanel) or `apply` (apply only). User-invoked via /comment-review."
 skills:
   - aitesis:inquire
   - elenchus:sublate
@@ -10,7 +10,7 @@ skills:
 
 # Comment Review: Inquiry × Source Vetting × Gap Audit × Application-Fit Pipeline
 
-Take any markdown artifact from drafted state to fixation-ready through four reviews — factual verifiability, source vetting, decision quality, application fit — bound to a **channel-first feedback loop with TaskList-backed sidepanel finding visibility**. On invocation the skill opens a browser preview of the rendered artifact (Vorverständnis layer) and surfaces the loop's branch gate; the user reads the rendered preview first, then chooses how to advance each round. Every loop iteration presents a 2-option branch gate (`apply + scan` / `apply`) before the user returns to the browser for the next round. Both options apply this round's queued JSONL comments as edits NOW; `apply + scan` additionally runs the sub-protocol audit, materializing each finding (with its disposition affordance) into the TaskList for the NEXT round's sidepanel. `apply` skips the scan and partially consumes (faithful translation of unambiguous comment intent; ambiguous comments deferred to a future `apply + scan` round). The judgment venue for sub-protocol findings moves from in-round chat to next-round sidepanel — Constitution semantics preserved, timing shifted across the round boundary. "Wait and add more comments" is implicit in not yet answering the gate. Termination is a free-response pathway available at any time.
+Take any markdown or HTML artifact from drafted state to fixation-ready through four reviews — factual verifiability, source vetting, decision quality, application fit — bound to a **channel-first feedback loop with TaskList-backed sidepanel finding visibility**. The render substrate is keyed off the file extension: markdown (`.md`) renders through marked; HTML (`.html`/`.htm`) serves the raw file directly through a Shadow DOM. On invocation the skill opens a browser preview of the rendered artifact (Vorverständnis layer) and surfaces the loop's branch gate; the user reads the rendered preview first, then chooses how to advance each round. Every loop iteration presents a 2-option branch gate (`apply + scan` / `apply`) before the user returns to the browser for the next round. Both options apply this round's queued JSONL comments as edits NOW; `apply + scan` additionally runs the sub-protocol audit, materializing each finding (with its disposition affordance) into the TaskList for the NEXT round's sidepanel. `apply` skips the scan and partially consumes (faithful translation of unambiguous comment intent; ambiguous comments deferred to a future `apply + scan` round). The judgment venue for sub-protocol findings moves from in-round chat to next-round sidepanel — Constitution semantics preserved, timing shifted across the round boundary. "Wait and add more comments" is implicit in not yet answering the gate. Termination is a free-response pathway available at any time.
 
 Unlike domain-specific editorial wrappers, `/comment-review` is agnostic about *what kind of artifact* is being reviewed — blog drafts, plan documents, crystallized handoffs, design docs, and changeset descriptions are all valid targets. The caller supplies the fixation event (what commits this artifact to downstream consumers) and the application context (where the fixed artifact will operate). The four protocols then specialize their scopes accordingly.
 
@@ -19,7 +19,7 @@ Unlike domain-specific editorial wrappers, `/comment-review` is agnostic about *
 ```
 /comment-review(artifact_path, fixation_event D, application_context)
 
-artifact_path        : String | List<String>                      -- path to markdown file(s)
+artifact_path        : String | List<String>                      -- path to markdown or HTML file(s); render mode keys off the extension
 fixation_event D     : Irreversible(String) | Reversible(String)  -- committed action; tag drives /gap stakes default
                                                                    --   Irreversible (stakes=High default): publish, deposit, merge
                                                                    --   Reversible   (stakes=Medium default): commit-to-execution, approve-pending-revise
@@ -45,6 +45,7 @@ free-exit : user may end the review at any time by saying so (Phase 0 prose decl
 ## When to Use
 
 - Any markdown artifact approaching a fixation event
+- Any HTML artifact approaching a fixation event (rendered design page, exported report, standalone `.html` deliverable) — anchored by element-level CSS selector instead of text span
 - Editorial iteration over multiple turns is expected
 - Asynchronous comment-style feedback fits the review rhythm better than chat-gate dispositions
 - Factual claims, named references, or external attributions warrant pre-fixation verification
@@ -190,19 +191,23 @@ The browser channel is opened once in Phase 0 and remains live across all loop i
 
 ### Server + Browser Behavior
 
-The Bun server renders each artifact on demand, accepts comment POSTs, and broadcasts file-change notifications over a WebSocket. Each artifact slug is its filename without extension; comments append to `feedback-{slug}.jsonl` next to the source. See `scripts/serve.ts` for endpoint and watcher details.
+The Bun server renders each artifact on demand, accepts comment POSTs, and broadcasts file-change notifications over a WebSocket. Each artifact slug is its filename without extension; comments append to `feedback-{slug}.jsonl` next to the source. The server picks the render mode from the file extension (`.html`/`.htm` → HTML; everything else → markdown) and injects it into the preview page. See `scripts/serve.ts` for endpoint and watcher details.
+
+**Render modes**:
+- **Markdown** (marked) — the source markdown is rendered into the light DOM as a published-style artifact; frontmatter is stripped so only the body shows.
+- **HTML** (Shadow DOM) — the raw `.html` file is served *as the artifact itself* through an open Shadow DOM (`attachShadow({mode:'open'})`, `shadowRoot.innerHTML = rawHtml`). The Shadow DOM gives CSS isolation from the review chrome, renders inert any `<script>` inserted via `innerHTML` (innerHTML never executes scripts — safe by construction), and keeps selector-click working because it is the same document. marked is not used in HTML mode; the file passes through raw and untouched.
 
 In the browser (one tab per artifact):
-- Markdown renders fully (marked.js) as a published-style artifact — no raw syntax visible
-- Drag-to-select any span and a popup appears at the selection
-- Type a comment, ⌘Enter (or Submit) sends it as `{slug, anchor, context_before, context_after, comment}`
-- The selected span is marked with a yellow highlight + 💬 marker
+- The artifact renders as above — no raw markdown syntax in markdown mode; the page rendered as authored in HTML mode
+- **Anchor a comment**: markdown — drag-to-select any text span; HTML — click any element (the element becomes the anchor, identified by a unique CSS selector / DOM path)
+- Type a comment, ⌘Enter (or Submit) sends it as `{slug, anchor, context_before, context_after, comment}` (markdown) or `{slug, anchor, anchor_kind:"selector", selector, comment}` (HTML)
+- The anchored target is marked: markdown — yellow text highlight + 💬; HTML — an outline + 💬 on the element in place
 - A right-side fixed sidepanel renders open scan findings for this artifact (see Sidepanel and Finding Visibility below)
-- When the source markdown changes (a round applied edits), the page auto-reloads while preserving scroll position; the sidepanel refreshes from the TaskList store at the same boundary
+- When the source file changes (a round applied edits), the page auto-reloads while preserving scroll position; the sidepanel refreshes from the TaskList store at the same boundary, and HTML findings re-resolve their selectors against the freshly rendered Shadow DOM
 
 ### Sidepanel and Finding Visibility
 
-The browser channel renders a right-side fixed panel adjacent to the artifact preview. The panel lists open scan findings from PRIOR `apply + scan` rounds (this round's scan step materializes findings into the panel for the NEXT round's display, never the current round's). Each finding is a one-line entry with a single status marker. Findings with a resolvable text anchor in the source markdown render an extra in-text marker — a coral underline distinct from the yellow drag-comment highlight — and clicking the sidepanel entry scrolls the preview to the anchor. Findings without a resolvable anchor (e.g., procedural gaps from `/gap`, document-level dispositions from `/sublate`) appear in the sidepanel only, visually distinguished (e.g., dashed-left-border italic).
+The browser channel renders a right-side fixed panel adjacent to the artifact preview. The panel lists open scan findings from PRIOR `apply + scan` rounds (this round's scan step materializes findings into the panel for the NEXT round's display, never the current round's). Each finding is a one-line entry with a single status marker. Findings with a resolvable anchor render an extra in-place marker and clicking the sidepanel entry scrolls the preview to it: in markdown mode the anchor is a rendered text span marked with a coral underline; in HTML mode the anchor is a CSS selector resolved against the Shadow DOM and the matched element gets a coral outline. The marker is distinct from the comment highlight, and clicking the entry scrolls to and pulses the anchor. Findings without a resolvable anchor (e.g., procedural gaps from `/gap`, document-level dispositions from `/sublate`) appear in the sidepanel only, visually distinguished (e.g., dashed-left-border italic).
 
 The sidepanel surfaces findings + offers a unified **response popup** as the single browser-side write affordance. Clicking a sidepanel entry — or its in-text coral anchor — opens the response popup pre-loaded with the finding's full content (subject + body) above an empty textarea. The user types a free-form response and submits; the comment is automatically tagged with `[task: <task-id>]` so the next apply step recognizes it as a disposition signal against the named TaskList entry. Anchored findings additionally scroll to and pulse the in-text mark when the popup opens.
 
@@ -225,6 +230,15 @@ When a scan finding has a text-anchored target in the source markdown, the AI re
 
 The TaskList entry's description records `[anchor-id: {UUID}]` (in addition to or in place of `[anchor: <text>]`). preview.html prefers `document.getElementById("cr-anchor-{UUID}")` over substring search when `anchor-id` is present — eliminating the substring-match ambiguity for repeated phrases by construction. The wrap is an invisible source mutation: semantic content unchanged, marked.js renders the span transparently, the existing `.finding-anchor` CSS supplies the coral underline. Findings without resolvable anchors (e.g., `/gap`'s document-level procedural gaps) carry no `anchor-id` and continue to surface in the sidepanel's document-level section.
 
+### HTML Anchoring (element-level, selector-based)
+
+The anchor data model is a tagged union keyed by `anchor_kind`:
+
+- **`anchor_kind: "text"`** (markdown; the default when the field is absent — existing markdown JSONL stays backward-compatible) — the anchor is a rendered text span, located by substring + surrounding context as above.
+- **`anchor_kind: "selector"`** (HTML) — the anchor is a single element. On a click in the Shadow DOM, preview.html computes a **unique CSS selector / DOM path** for the clicked element (a unique `#id` when one exists, otherwise a `tag:nth-of-type(n)` child chain up to the shadow root) and posts it as both `anchor` and `selector` with `anchor_kind:"selector"`. The element is marked in place (outline + 💬); on reload, marks re-apply by re-querying the stored selectors against the freshly rendered Shadow DOM.
+
+**Apply-step edit-back fixation in selector mode**: the HTML file *is* the artifact — edits land directly in the `.html`. When the apply step processes a selector-anchored comment, the AI locates the target element in the source `.html` by its CSS selector (the same selector captured at click time) and edits that element directly. This is the same edit-back apply pipeline as markdown (locate the anchor, translate comment intent into an Edit/Write call) — only the locate step differs: CSS selector resolution in the `.html` rather than text substring match in the `.md`. This behavior is AI-performed per this contract; serve.ts persists the selector but performs no edit itself.
+
 ### TaskList File as Sync Medium
 
 Sidepanel state lives in `~/.claude/tasks/<session-uuid>/<task-id>.json`, the harness-managed task store. Each scan finding materializes as one task entry (`{id, subject, description, activeForm, status, blocks, blockedBy}`); the sidepanel reads the store at round-boundary reload, filters entries by the current artifact slug (substring match against `description`), and excludes entries where `status == completed`. No new endpoint, broadcast channel, or storage system is introduced — the existing file-based task store is the single source of truth for finding lifecycle, and the existing `/feedback` POST endpoint is the single user-write channel for both fresh comments and disposition signals.
@@ -233,12 +247,12 @@ Per-session structure caveat: tasks are stored under a session-UUID directory. T
 
 ### JSONL Consumption Timing
 
-Each JSONL line: `{slug, anchor, context_before, context_after, comment, timestamp, source_offset?}`. `context_before` + `context_after` (60 chars each) disambiguate repeated anchors. `source_offset` (optional integer) records the source-markdown byte offset when the browser can derive it — used when rendered text diverges from source (marked.js strips emphasis markers, link text drops URL parts, code block fences become `<pre>`). The `comment` field doubles as the disposition channel: comments containing `[disposition: <variant>] [task: <task-id>]` tags are treated as disposition signals against the named TaskList entry; comments without those tags are treated as plain edit intents.
+Each JSONL line: `{slug, anchor, anchor_kind?, selector?, context_before, context_after, comment, timestamp, source_offset?}`. `anchor_kind` (`"text" | "selector"`, absent ⇒ `"text"`) and `selector` (the CSS selector / DOM path, present only in selector mode) form the HTML tagged-union anchor; markdown lines omit both and stay byte-identical to the legacy shape. `context_before` + `context_after` (60 chars each) disambiguate repeated text anchors (markdown). `source_offset` (optional integer) records the source-markdown byte offset when the browser can derive it — used when rendered text diverges from source (marked.js strips emphasis markers, link text drops URL parts, code block fences become `<pre>`). The `comment` field doubles as the disposition channel: comments containing `[disposition: <variant>] [task: <task-id>]` tags are treated as disposition signals against the named TaskList entry; comments without those tags are treated as plain edit intents.
 
 An `apply + scan` round runs **apply step first, then scan step** within a single round-mode commitment:
 
 **Apply step** (always first — operates on this round's queued JSONL):
-1. **At the start of the apply step (immediately after the user answers the round-mode gate), Read `feedback-{slug}.jsonl` afresh** — any prior in-session Read of this file (e.g., the pre-gate queue-size prose) is informational only and does not substitute for this Read, since the browser may have appended lines between the pre-gate prose and the gate answer. Then, for each line, locate the anchor in the source markdown using surrounding context (skipping lines that are pure tombstones from edits).
+1. **At the start of the apply step (immediately after the user answers the round-mode gate), Read `feedback-{slug}.jsonl` afresh** — any prior in-session Read of this file (e.g., the pre-gate queue-size prose) is informational only and does not substitute for this Read, since the browser may have appended lines between the pre-gate prose and the gate answer. Then, for each line, locate the anchor in the source artifact (skipping lines that are pure tombstones from edits): text-mode lines (markdown) locate by substring + surrounding context; selector-mode lines (`anchor_kind:"selector"`, HTML) locate the element in the source `.html` by the recorded CSS selector (edit-back fixation — see HTML Anchoring above).
 2. Classify each line:
    - **Disposition signal** (comment matches `[disposition: <variant>] [task: <task-id>]`): call `TaskUpdate(status=completed)` against the named task and, when the variant implies an edit (e.g., `Revised`, `Address`), translate the variant's semantics into a concrete Edit/Write call. `Discarded`/`Dismiss`/`Confirmed`/`Bounded`/`Routed` close the task without an edit.
    - **Address-via-comment** (free comment optionally carrying `[task: <task-id>]`): translate the comment intent into an Edit/Write call; if the link tag is present, additionally call `TaskUpdate(status=completed)` against the named task.
@@ -321,7 +335,7 @@ Suffix-replay rules (apply within a single `apply + scan` round's scan step — 
 1. **Composition, not absorption** — each sub-protocol remains independently invocable. `/comment-review` orchestrates; it does not duplicate sub-protocol gate definitions.
 2. **Scope differentiation is structural** — the two suppression edges fire only on same-scope co-activation. This pipeline keeps scopes distinct via the named 4-scope + Emergent clause. Chains that collapse scopes would re-trigger suppression and violate this rule.
 3. **Emergent attribution priority** — boundary cases resolve by Factual > Decision > Application priority; remaining ambiguity is surfaced as an `origin: ambiguous` marker in the session text trace (not as a struct field on sub-protocol types) so both protocols detect the finding at their respective gates. This composition-level `origin` (scope attribution) is distinct from Epharmoge's internal `Origin ∈ {Initial, Emerged(aspect)}` struct (within-protocol mismatch provenance) — shared name, non-overlapping domain.
-4. **Channel is the skill's identity** — opened in Phase 0, persisted across iterations. The rendered preview is the user's first input layer (Vorverständnis); markdown rendering visibility is itself a review surface, not merely a feedback collection mechanism. Missing bun runtime is a hard prerequisite failure (install hint then exit) — there is no degraded-mode fallback. Headless environments invoke `/inquire`, `/gap`, `/contextualize` directly; `/comment-review` without channel would be a different skill.
+4. **Channel is the skill's identity** — opened in Phase 0, persisted across iterations. The rendered artifact is the user's first input layer (Vorverständnis); the render substrate is the artifact as it will be consumed — marked for markdown, direct Shadow-DOM render for HTML — and that rendered surface is itself a review surface, not merely a feedback collection mechanism (rendering visibility — markdown cadence, HTML layout/CSS — is where applicability mismatches become visible). Missing bun runtime is a hard prerequisite failure (install hint then exit) — there is no degraded-mode fallback. Headless environments invoke `/inquire`, `/gap`, `/contextualize` directly; `/comment-review` without channel would be a different skill.
 5. **Feedback consumption is single-shot per comment with latest-timestamp dedup, on a fresh Read each apply** — both round modes archive consumed lines at the apply step (clear comments + disposition signals translated; ambiguous/conflicting comments deferred). The apply step's input is a fresh Read of `feedback-{slug}.jsonl` taken when the user answers the round-mode gate; any prior in-session Read of this file is informational only and does not seed consumption, since the browser may have appended lines between any earlier Read and the gate answer. `apply + scan` and `apply` archive identically at the apply-step level; the difference is whether a scan step also runs after. Each comment is consumed exactly once across the loop's lifetime. Entries sharing `(anchor, context_before, context_after)` keep only the latest timestamp at the moment of consumption.
 6. **Caller-supplied signature is required** — `fixation_event D` and `application_context` must be explicit. When omitted, the skill infers defaults from the artifact path; if inference yields no confident match, the skill asks the user. Silent assumption of domain-specific defaults (e.g., "publish") would re-impose bias the composition is designed to avoid.
 7. **Termination is user-explicit and free-response** — convergence is reached when the user signals exit at any time (declared once in Phase 0). The materialized view records which sub-protocols were invoked across all `apply + scan` rounds, so any sub-protocol omission (e.g., user exits before any `apply + scan` round ran) is auditable rather than silent. The loop branch gate carries no `end` option per Differential Future Requirement (meta-actions surface as free-response pathways, not peer options).
@@ -331,9 +345,9 @@ Suffix-replay rules (apply within a single `apply + scan` round's scan step — 
 
 ## Bundled Resources
 
-- `scripts/serve.ts` — Bun-based live server; `bun scripts/serve.ts <artifact.md> [more...]`. Handles GET/POST/WebSocket; `node:fs.watch` triggers reload broadcasts.
-- `templates/preview.html` — interactive markdown preview with selection-anchored comment popup, WebSocket hot-reload client, dark-mode support.
-- `templates/marked.min.js` — bundled marked.js markdown renderer.
+- `scripts/serve.ts` — Bun-based live server; `bun scripts/serve.ts <artifact.md|artifact.html> [more...]`. Picks the render mode from the file extension and injects it into the preview; handles GET/POST/WebSocket; `node:fs.watch` triggers reload broadcasts.
+- `templates/preview.html` — interactive preview with anchored comment popup, WebSocket hot-reload client, dark-mode support. Renders markdown via marked into the light DOM (text-span anchoring) or raw HTML through a Shadow DOM (element-click CSS-selector anchoring).
+- `templates/marked.min.js` — bundled marked.js markdown renderer (markdown mode only; not used in HTML mode).
 
 ## Composition Lineage
 

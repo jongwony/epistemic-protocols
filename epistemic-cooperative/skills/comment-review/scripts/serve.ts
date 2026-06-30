@@ -1,11 +1,12 @@
 #!/usr/bin/env bun
 // @ts-nocheck — Bun runtime resolves node:* and Bun globals natively; skip TS-LSP noise.
-// comment-review channel-loop server (Bun): live preview + selection-anchored feedback channel.
+// comment-review channel-loop server (Bun): live preview + anchored feedback channel.
 //
-// Usage: bun scripts/serve.ts <draft.md> [<draft.md> ...]
+// Usage: bun scripts/serve.ts <draft.md|draft.html> [more...]
 //
-// Renders each draft as an interactive markdown preview. The user selects text in the
-// browser and attaches a comment via a Medium/Hypothes.is-style popup. Each comment
+// Renders each artifact as an interactive preview — markdown via marked, or HTML served
+// directly through a Shadow DOM. The user anchors a comment (drag-to-select text in markdown,
+// click-an-element in HTML) via a Medium/Hypothes.is-style popup. Each comment
 // POSTs to /feedback and appends to feedback-{slug}.jsonl in the draft's directory.
 // A WebSocket pushes 'reload' messages whenever the source markdown changes, so the
 // next /comment-review iteration's edits appear immediately without manual refresh.
@@ -19,7 +20,7 @@ import { homedir } from "node:os";
 
 const args = process.argv.slice(2);
 if (args.length === 0) {
-  console.error("usage: bun scripts/serve.ts <draft.md> [<draft.md> ...]");
+  console.error("usage: bun scripts/serve.ts <draft.md|draft.html> [more...]");
   process.exit(1);
 }
 
@@ -27,7 +28,7 @@ if (args.length === 0) {
 const unknownFlags = args.filter((a) => a.startsWith("-"));
 if (unknownFlags.length > 0) {
   console.error(`unknown flag(s): ${unknownFlags.join(", ")}`);
-  console.error("usage: bun scripts/serve.ts <draft.md> [<draft.md> ...]");
+  console.error("usage: bun scripts/serve.ts <draft.md|draft.html> [more...]");
   process.exit(1);
 }
 
@@ -75,8 +76,8 @@ const renderIndex = () => {
   code{background:#f3f3f3;padding:.1em .3em;border-radius:3px;font-family:ui-monospace,monospace;font-size:.9em}
 </style>
 </head><body><h1>comment-review drafts</h1><ul>${items}</ul>
-<p>Select text in the rendered draft and leave a comment in the popup. Each comment appends to
-<code>feedback-{slug}.jsonl</code> next to the source markdown. The next <code>/comment-review</code>
+<p>Select text (markdown) or click an element (HTML) in the rendered draft and leave a comment in the popup. Each comment appends to
+<code>feedback-{slug}.jsonl</code> next to the source file. The next <code>/comment-review</code>
 turn ingests these as <code>&lt;feedback&gt;</code>-anchored directives.</p>
 </body></html>`;
 };
@@ -214,20 +215,29 @@ const readTaskListForSlug = async (slug: string): Promise<Finding[]> => {
 const renderPreview = async (slug: string) => {
   const path = drafts.get(slug);
   if (!path) return null;
-  const md = stripFrontmatter(await readFile(path, "utf8"));
+  // Render mode keys off the file extension: .html/.htm render the raw file through a
+  // Shadow DOM (CSS-isolated, innerHTML-inserted scripts inert); everything else renders
+  // as markdown via marked. Frontmatter is stripped for markdown only — HTML passes raw.
+  const ext = extname(path).toLowerCase();
+  const renderMode = ext === ".html" || ext === ".htm" ? "html" : "markdown";
+  const raw = await readFile(path, "utf8");
+  const body = renderMode === "markdown" ? stripFrontmatter(raw) : raw;
   const findings = await readTaskListForSlug(slug);
   // title goes into HTML context (escape & < > " '); slug goes into JS string literal context (JSON.stringify)
   // findings goes into JS context (JSON.stringify with script-tag-safe escaping)
   return template
     .replaceAll("__TITLE_PLACEHOLDER__", escapeHtml(slug))
     .replaceAll("__SLUG_PLACEHOLDER__", JSON.stringify(slug))
+    .replace("__RENDER_MODE_PLACEHOLDER__", JSON.stringify(renderMode))
     .replace("__FINDINGS_PLACEHOLDER__", escapeForScriptTag(JSON.stringify(findings)))
-    .replace("__MARKDOWN_CONTENT_PLACEHOLDER__", escapeForScriptTag(md));
+    .replace("__MARKDOWN_CONTENT_PLACEHOLDER__", escapeForScriptTag(body));
 };
 
 interface FeedbackBody {
   slug: string;
   anchor: string;
+  anchor_kind?: "text" | "selector"; // tagged union; absent ⇒ "text" (markdown backward-compatible)
+  selector?: string;                 // CSS selector / DOM path when anchor_kind === "selector"
   context_before?: string;
   context_after?: string;
   comment: string;
@@ -339,6 +349,14 @@ const server = Bun.serve({
       if (body.comment.length > MAX_COMMENT_LEN) return new Response(`comment exceeds ${MAX_COMMENT_LEN} chars`, { status: 413 });
       if ((body.context_before?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_before exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
       if ((body.context_after?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_after exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
+      // Optional anchor tagged union: HTML clients send anchor_kind="selector" + the selector
+      // string; markdown clients omit both (defaults to "text" downstream). selector reuses the
+      // anchor length cap. anchor stays non-empty for both modes (selector mode sends it in anchor too).
+      if (body.anchor_kind != null && body.anchor_kind !== "text" && body.anchor_kind !== "selector") {
+        return new Response('anchor_kind must be "text" or "selector"', { status: 400 });
+      }
+      if (body.selector != null && !isStr(body.selector)) return new Response("selector must be string", { status: 400 });
+      if ((body.selector?.length ?? 0) > MAX_ANCHOR_LEN) return new Response(`selector exceeds ${MAX_ANCHOR_LEN} chars`, { status: 413 });
       const draft = drafts.get(body.slug);
       if (!draft) return new Response("unknown slug", { status: 400 });
       // Edit case: client supplies the original id so the new entry shares the dedup key
@@ -356,6 +374,9 @@ const server = Bun.serve({
         id,
         slug: body.slug,
         anchor: body.anchor,
+        // Persisted only when present so existing markdown lines stay byte-identical.
+        ...(body.anchor_kind != null ? { anchor_kind: body.anchor_kind } : {}),
+        ...(body.selector != null ? { selector: body.selector } : {}),
         context_before: body.context_before ?? "",
         context_after: body.context_after ?? "",
         comment: body.comment,
