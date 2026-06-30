@@ -44,14 +44,14 @@ For local development from a checkout:
 codex plugin marketplace add /path/to/epistemic-protocols
 ```
 
-The Codex marketplace preserves the same plugin boundaries as Claude Code: each protocol is its own plugin, and `epistemic-cooperative` carries the utility skills. Start with `onboard` for a quick recommendation, or add the local checkout when you are developing protocol changes.
+The Codex marketplace preserves the same plugin boundaries as Claude Code: each protocol is its own plugin, `epistemic-cooperative` carries the utility skills, and `apokrypsis` carries the upstream secret-redaction pass. Start with `onboard` for a quick recommendation, or add the local checkout when you are developing protocol changes.
 
 <details>
 <summary>Notes</summary>
 
 - The Codex marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json).
 - Each plugin keeps its Codex manifest beside the existing Claude manifest: `<plugin>/.codex-plugin/plugin.json`.
-- The marketplace includes the 16 protocol plugins plus `epistemic-cooperative`.
+- The marketplace includes the 16 protocol plugins plus `epistemic-cooperative` and `apokrypsis`.
 
 </details>
 
@@ -89,6 +89,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`) · Analysis (`/frame`, `/grou
 | Plugin | Command | Purpose |
 |--------|---------|---------|
 | [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/write`, `/steer`, `/realign`, `/misuse`, `/triage`, `/dispatch`, `/forge`, `/reduced-space-test` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, multi-perspective blog drafting, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, focused work-unit dispatch with PR fanout + rejection-trace inscription, reference-grounded prompt-artifact formation, and scoped empirical validation |
+| [Apokrypsis](./apokrypsis) | `/redact` | Redact secret-shaped values from a working context before it is emitted or distilled — a front-door redaction pass with an emit-scan backstop, keyed per (item, location), preserving command-substitution retrieval pointers and routing load-bearing secrets out-of-band. The upstream pass that earns `/distill`'s secret-free-context assumption (a specialized plugin, not a graph-node protocol) |
 
 **Three discovery modes coexist** (none replaces the others):
 

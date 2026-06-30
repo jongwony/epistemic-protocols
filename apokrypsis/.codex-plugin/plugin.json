@@ -1,0 +1,35 @@
+{
+  "name": "apokrypsis",
+  "version": "0.1.0",
+  "description": "Redact secret-shaped values from a working context before it is emitted or distilled — /redact (ἀπόκρυψις: a concealment)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "apokrypsis"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Apokrypsis",
+    "shortDescription": "Redact secret-shaped values from a working context before it is emitted or distilled — /redact (ἀπόκρυψις: a concealment)",
+    "longDescription": "Redact secret-shaped values from a working context before it is emitted or distilled — /redact (ἀπόκρυψις: a concealment)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use apokrypsis for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

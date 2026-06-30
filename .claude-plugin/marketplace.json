@@ -88,6 +88,11 @@
       "name": "diairesis",
       "source": "./diairesis",
       "description": "Delimit a large body of work into right-sized execution units before its method is conducted — /delimit (διαίρεσις: a division)"
+    },
+    {
+      "name": "apokrypsis",
+      "source": "./apokrypsis",
+      "description": "Redact secret-shaped values from a working context before it is emitted or distilled — /redact (ἀπόκρυψις: a concealment)"
     }
   ]
 }
