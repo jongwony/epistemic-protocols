@@ -1,7 +1,7 @@
 {
   "name": "apokrypsis",
   "description": "Redact secret-shaped values from a working context before it is emitted or distilled — /redact (ἀπόκρυψις: a concealment)",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"

@@ -1,6 +1,6 @@
 {
   "name": "apokrypsis",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Redact secret-shaped values from a working context before it is emitted or distilled — /redact (ἀπόκρυψις: a concealment)",
   "author": {
     "name": "Jongwon Choi",
