@@ -520,7 +520,11 @@ try {
 
 // Render the artifact. `root` is the query/anchor surface: the light-DOM #content in
 // markdown mode, the shadow root in html mode.
-const sourceText = document.getElementById("md-source").textContent;
+// serve.ts escaped </script as <\/script to embed the body safely inside this host
+// <script> tag; reverse it before consuming so the artifact's own <script> closers parse
+// correctly (otherwise innerHTML sees <\/script>, the inner script never closes, and the
+// rest of the document is swallowed). Applies to both modes — the escape is mode-agnostic.
+const sourceText = document.getElementById("md-source").textContent.replace(/<\\\/script/gi, "</script");
 const content = document.getElementById("content");
 let shadowRoot = null;
 let root = content;

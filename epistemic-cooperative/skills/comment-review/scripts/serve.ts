@@ -357,6 +357,15 @@ const server = Bun.serve({
       }
       if (body.selector != null && !isStr(body.selector)) return new Response("selector must be string", { status: 400 });
       if ((body.selector?.length ?? 0) > MAX_ANCHOR_LEN) return new Response(`selector exceeds ${MAX_ANCHOR_LEN} chars`, { status: 413 });
+      // Tagged-union integrity: selector mode requires a non-empty selector, and a selector
+      // only belongs to selector mode (markdown omits both). Reject inconsistent records so a
+      // malformed POST cannot persist an entry that apply-back cannot resolve by selector.
+      if (body.anchor_kind === "selector" && (body.selector == null || body.selector.length === 0)) {
+        return new Response('anchor_kind "selector" requires a non-empty selector', { status: 400 });
+      }
+      if (body.selector != null && body.anchor_kind !== "selector") {
+        return new Response('selector requires anchor_kind "selector"', { status: 400 });
+      }
       const draft = drafts.get(body.slug);
       if (!draft) return new Response("unknown slug", { status: 400 });
       // Edit case: client supplies the original id so the new entry shares the dedup key
