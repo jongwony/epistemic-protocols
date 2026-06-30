@@ -219,9 +219,13 @@
   body.sidebar-open #sidebar { transform: translateX(0); }
   /* HTML mode: no sidepanel / scan finding-flow — review is in-place anchored commenting. */
   body.cr-html-mode #sidebar, body.cr-html-mode #status-count { display: none; }
-  /* HTML renders the page at its authored viewport — drop the 760px markdown reading-width box
-     so full-page / responsive HTML is reviewed at full width (raw-render fidelity). */
-  body.cr-html-mode #main { max-width: none; padding-left: 0; padding-right: 0; }
+  /* HTML renders at the authored viewport: drop the 760px reading-width box + all #main padding,
+     and hide the top nav chrome (it pushed the artifact down and broke 100vh / top-aligned /
+     fixed layouts). Full-page 100vh / fixed-position fidelity is still bounded by Shadow-DOM
+     rendering — a sandboxed iframe (see Deferred hardening) would give a true nested viewport;
+     the bottom status pill remains a minimal fixed overlay. */
+  body.cr-html-mode #main { max-width: none; padding: 0; }
+  body.cr-html-mode header { display: none; }
   #sidebar-header {
     padding: .75em 1em;
     border-bottom: 1px solid #eee;

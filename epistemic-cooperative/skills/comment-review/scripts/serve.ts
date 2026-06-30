@@ -13,7 +13,7 @@
 //
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
-import { closeSync, constants, existsSync, fstatSync, openSync, readFileSync, watch } from "node:fs";
+import { closeSync, constants, existsSync, fstatSync, openSync, readFileSync, statSync, watch } from "node:fs";
 import { appendFile, readdir, readFile, realpath } from "node:fs/promises";
 import { basename, dirname, extname, resolve, sep } from "node:path";
 import { homedir } from "node:os";
@@ -353,13 +353,23 @@ const serveSiblingAsset = async (assetPath: string, referer: string | null): Pro
   if (canonFile !== canonDir && !canonFile.startsWith(canonDir + sep)) {
     return new Response("not found", { status: 404 }); // escaped the artifact directory
   }
-  // Open through a handle with O_NOFOLLOW and read from the pinned fd — NOT by re-resolving the
-  // path string. This closes the time-of-check/time-of-use window: if the final component is
-  // swapped to a symlink after the realpath/containment check, the O_NOFOLLOW open fails (ELOOP)
-  // rather than following it outside the directory. A legitimate symlink that was already inside
-  // the dir at check time still works because realpath() resolved it to its real in-dir target,
-  // and we open that resolved target (not the symlink). (A post-check swap of an *intermediate*
-  // directory to a symlink is out of scope for this local single-user tool's trust model.)
+  // Close the time-of-check/time-of-use window by verifying the OPENED object's identity, not a
+  // re-resolved path string. Capture the contained file's identity (device + inode) now, open a
+  // handle, then require the fd's identity to match — a swap of canonFile between the check and
+  // the read yields a different fd identity → 404, instead of letting the read follow the swapped
+  // path outside the directory. We read from the pinned fd, never by re-resolving the path.
+  // O_NOFOLLOW is defense-in-depth for the final component (a swapped-in symlink fails with ELOOP).
+  // A legitimate symlink that was already inside the dir at check time still works, because
+  // realpath() resolved it to its real in-dir target — that target is what we stat and open.
+  // (A post-check swap of an *intermediate* directory is out of scope for this local single-user tool.)
+  let id: { dev: number; ino: number };
+  try {
+    const s0 = statSync(canonFile);
+    if (!s0.isFile()) return new Response("not found", { status: 404 }); // no directories/specials
+    id = { dev: s0.dev, ino: s0.ino };
+  } catch {
+    return new Response("not found", { status: 404 });
+  }
   let fd: number;
   try {
     fd = openSync(canonFile, constants.O_RDONLY | constants.O_NOFOLLOW);
@@ -367,7 +377,10 @@ const serveSiblingAsset = async (assetPath: string, referer: string | null): Pro
     return new Response("not found", { status: 404 }); // missing, or final component is now a symlink
   }
   try {
-    if (!fstatSync(fd).isFile()) return new Response("not found", { status: 404 }); // no directories/specials
+    const s1 = fstatSync(fd);
+    if (!s1.isFile() || s1.dev !== id.dev || s1.ino !== id.ino) {
+      return new Response("not found", { status: 404 }); // swapped between check and open
+    }
     const ct = ASSET_MIME[extname(canonFile).toLowerCase()] || "application/octet-stream";
     return new Response(readFileSync(fd), { headers: { "Content-Type": ct, "Cache-Control": "no-store" } });
   } finally {
