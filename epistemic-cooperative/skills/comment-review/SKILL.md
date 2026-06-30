@@ -195,11 +195,11 @@ The Bun server renders each artifact on demand, accepts comment POSTs, and broad
 
 **Render modes**:
 - **Markdown** (marked) — the source markdown is rendered into the light DOM as a published-style artifact; frontmatter is stripped so only the body shows.
-- **HTML** (Shadow DOM) — the raw `.html` file is served *as the artifact itself* through an open Shadow DOM (`attachShadow({mode:'open'})`, `shadowRoot.innerHTML = rawHtml`). The Shadow DOM gives CSS isolation from the review chrome, renders inert any `<script>` inserted via `innerHTML` (innerHTML never executes scripts — safe by construction), and keeps selector-click working because it is the same document. marked is not used in HTML mode; the file passes through raw and untouched.
+- **HTML** (Shadow DOM) — the raw `.html` file is served *as the artifact itself* through an open Shadow DOM (`attachShadow({mode:'open'})`, `shadowRoot.innerHTML = rawHtml`). The Shadow DOM gives CSS isolation from the review chrome, renders inert any `<script>` inserted via `innerHTML` (innerHTML never executes scripts — safe by construction), and keeps selector-based anchoring working because it is the same document. marked is not used in HTML mode; the file passes through raw and untouched.
 
 In the browser (one tab per artifact):
 - The artifact renders as above — no raw markdown syntax in markdown mode; the page rendered as authored in HTML mode
-- **Anchor a comment**: markdown — drag-to-select any text span; HTML — click any element (the element becomes the anchor, identified by a unique CSS selector / DOM path)
+- **Anchor a comment**: markdown — drag-to-select any text span; HTML — right-click any element (left-click stays free for the page's own links/buttons); on hover the target element is outlined and its CSS selector shows live before you commit. The element becomes the anchor, identified by a unique CSS selector / DOM path
 - Type a comment, ⌘Enter (or Submit) sends it as `{slug, anchor, context_before, context_after, comment}` (markdown) or `{slug, anchor, anchor_kind:"selector", selector, comment}` (HTML)
 - The anchored target is marked: markdown — yellow text highlight + 💬; HTML — an outline + 💬 on the element in place
 - A right-side fixed sidepanel renders open scan findings for this artifact (see Sidepanel and Finding Visibility below)
@@ -211,7 +211,7 @@ The browser channel renders a right-side fixed panel adjacent to the artifact pr
 
 The sidepanel surfaces findings + offers a unified **response popup** as the single browser-side write affordance. Clicking a sidepanel entry — or its in-text coral anchor — opens the response popup pre-loaded with the finding's full content (subject + body) above an empty textarea. The user types a free-form response and submits; the comment is automatically tagged with `[task: <task-id>]` so the next apply step recognizes it as a disposition signal against the named TaskList entry. Anchored findings additionally scroll to and pulse the in-text mark when the popup opens.
 
-- **Click finding entry (or its coral underline)** → response popup opens with finding context + textarea
+- **Click the finding's sidebar entry, or its in-artifact coral mark (left-click in markdown, right-click in HTML)** → response popup opens with finding context + textarea
 - **Submit response** → comment posted to `/feedback` with `[task: <id>]` auto-appended; the next apply step translates the comment into edits and calls `TaskUpdate(status=completed)`
 - **Cancel popup** → no submission; finding stays open
 - **Close without responding** → ask in chat ("mark task &lt;id&gt; done"); the AI calls `TaskUpdate(status=completed)` directly
@@ -235,9 +235,9 @@ The TaskList entry's description records `[anchor-id: {UUID}]` (in addition to o
 The anchor data model is a tagged union keyed by `anchor_kind`:
 
 - **`anchor_kind: "text"`** (markdown; the default when the field is absent — existing markdown JSONL stays backward-compatible) — the anchor is a rendered text span, located by substring + surrounding context as above.
-- **`anchor_kind: "selector"`** (HTML) — the anchor is a single element. On a click in the Shadow DOM, preview.html computes a **unique CSS selector / DOM path** for the clicked element (a unique `#id` when one exists, otherwise a `tag:nth-of-type(n)` child chain up to the shadow root) and posts it as both `anchor` and `selector` with `anchor_kind:"selector"`. The element is marked in place (outline + 💬); on reload, marks re-apply by re-querying the stored selectors against the freshly rendered Shadow DOM.
+- **`anchor_kind: "selector"`** (HTML) — the anchor is a single element. The comment trigger is **right-click** (the native context menu is suppressed) so left-click stays free for the page's own links/buttons; hovering an element outlines it and shows its computed CSS selector live in a light-DOM chip before the user commits. On right-click in the Shadow DOM, preview.html computes a **unique CSS selector / DOM path** for the targeted element (a unique `#id` when one exists, otherwise a `tag:nth-of-type(n)` child chain up to the shadow root) and posts it as both `anchor` and `selector` with `anchor_kind:"selector"`. The element is marked in place (outline + 💬); on reload, marks re-apply by re-querying the stored selectors against the freshly rendered Shadow DOM.
 
-**Apply-step edit-back fixation in selector mode**: the HTML file *is* the artifact — edits land directly in the `.html`. When the apply step processes a selector-anchored comment, the AI locates the target element in the source `.html` by its CSS selector (the same selector captured at click time) and edits that element directly. This is the same edit-back apply pipeline as markdown (locate the anchor, translate comment intent into an Edit/Write call) — only the locate step differs: CSS selector resolution in the `.html` rather than text substring match in the `.md`. This behavior is AI-performed per this contract; serve.ts persists the selector but performs no edit itself.
+**Apply-step edit-back fixation in selector mode**: the HTML file *is* the artifact — edits land directly in the `.html`. When the apply step processes a selector-anchored comment, the AI locates the target element in the source `.html` by its CSS selector (the same selector captured at right-click time) and edits that element directly. This is the same edit-back apply pipeline as markdown (locate the anchor, translate comment intent into an Edit/Write call) — only the locate step differs: CSS selector resolution in the `.html` rather than text substring match in the `.md`. This behavior is AI-performed per this contract; serve.ts persists the selector but performs no edit itself.
 
 ### TaskList File as Sync Medium
 
@@ -346,7 +346,7 @@ Suffix-replay rules (apply within a single `apply + scan` round's scan step — 
 ## Bundled Resources
 
 - `scripts/serve.ts` — Bun-based live server; `bun scripts/serve.ts <artifact.md|artifact.html> [more...]`. Picks the render mode from the file extension and injects it into the preview; handles GET/POST/WebSocket; `node:fs.watch` triggers reload broadcasts.
-- `templates/preview.html` — interactive preview with anchored comment popup, WebSocket hot-reload client, dark-mode support. Renders markdown via marked into the light DOM (text-span anchoring) or raw HTML through a Shadow DOM (element-click CSS-selector anchoring).
+- `templates/preview.html` — interactive preview with anchored comment popup, WebSocket hot-reload client, dark-mode support. Renders markdown via marked into the light DOM (drag-select text anchoring) or raw HTML through a Shadow DOM (right-click element → CSS-selector anchoring, with hover outline + live selector chip).
 - `templates/marked.min.js` — bundled marked.js markdown renderer (markdown mode only; not used in HTML mode).
 
 ## Composition Lineage

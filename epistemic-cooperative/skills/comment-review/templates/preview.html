@@ -539,6 +539,9 @@ if (RENDER_MODE === "html") {
     ".cr-anno{outline:2px solid #d4a017;outline-offset:1px;cursor:help;}" +
     '.cr-anno::after{content:"💬";font-size:.7em;vertical-align:super;margin-left:2px;}' +
     ".cr-finding{outline:2px solid #ff7f50;outline-offset:1px;cursor:pointer;}" +
+    // Hover-target hint: declared after cr-anno/cr-finding so it wins while hovering an
+    // already-marked element; thin dashed blue is distinct from the solid mark outlines.
+    ".cr-hover{outline:1px dashed #2c7be5;outline-offset:1px;cursor:context-menu;}" +
     ".cr-pulse{box-shadow:0 0 0 4px rgba(44,123,229,.45);}" +
     ".cr-finding-pulse{box-shadow:0 0 0 4px rgba(255,127,80,.45);}";
   shadowRoot.appendChild(shadowStyle);
@@ -579,10 +582,23 @@ let markIdCounter = 0; // monotonic id assigned per saved mark group; bridges DO
 
 let selSettle = null; // markdown-only selection-settle timer (cleared in dismissPopup)
 if (RENDER_MODE === "html") {
-  // Element-level anchoring: a click inside the shadow root sees the real target
-  // (events are retargeted to the host only after they cross the boundary). One handler
-  // routes edit / finding-response / new-comment by the clicked element's marks.
-  root.addEventListener("click", handleElementClick);
+  // Element-level anchoring. Right-click (contextmenu) is the comment trigger so left-click
+  // stays free for the page's own interactivity (links, buttons). A right-click inside the
+  // shadow root sees the real target (events retarget to the host only after they cross the
+  // boundary); the handler routes edit / finding-response / new-comment by the target's marks.
+  root.addEventListener("contextmenu", handleContextMenu);
+  // Hover preview: outline the element under the cursor + show its live CSS selector before
+  // the user commits. The chip lives in the light DOM so the shadow boundary cannot clip it.
+  selectorChip = document.createElement("div");
+  selectorChip.id = "cr-selector-chip";
+  selectorChip.style.cssText =
+    "position:fixed;bottom:10px;left:10px;z-index:1400;max-width:60vw;padding:.3em .6em;" +
+    "border-radius:4px;background:rgba(20,30,50,.92);color:#cfe3ff;font:12px ui-monospace,Menlo,monospace;" +
+    "white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;display:none;" +
+    "box-shadow:0 2px 8px rgba(0,0,0,.25);";
+  document.body.appendChild(selectorChip);
+  root.addEventListener("mouseover", handleHover);
+  content.addEventListener("mouseleave", clearHover);
 } else {
   content.addEventListener("mouseup", () => {
     // Let the selection settle before reading it
@@ -814,6 +830,8 @@ function openFindingPopup(finding, anchorEl) {
 
 let htmlMarkIdCounter = 0;
 const htmlPulseSlot = { id: null };
+let hoverEl = null;       // html mode: element currently outlined under the cursor
+let selectorChip = null;  // html mode: light-DOM chip showing the live CSS selector on hover
 
 // CSS.escape with a conservative fallback for ids carrying special chars.
 function cssEscape(s) {
@@ -905,8 +923,10 @@ function openEditPopupHtml(el) {
   });
 }
 
-// Single shadow-root click router: edit existing comment → respond to finding → new comment.
-function handleElementClick(e) {
+// Shadow-root right-click router: suppress the native menu, then edit existing comment →
+// respond to finding → new comment. Left-click is intentionally left free for the page.
+function handleContextMenu(e) {
+  e.preventDefault(); // suppress the native context menu — right-click is the comment trigger
   const target = e.target;
   if (!target || target.nodeType !== Node.ELEMENT_NODE) return;
   const annoEl = target.closest(".cr-anno");
@@ -926,6 +946,26 @@ function handleElementClick(e) {
   if (!selector) return;
   e.stopPropagation();
   openSelectorPopup(target, selector);
+}
+
+// Hover preview (html mode): outline the element under the cursor and show its live selector.
+function handleHover(e) {
+  const t = e.target;
+  if (!t || t.nodeType !== Node.ELEMENT_NODE || t === hoverEl) return;
+  if (hoverEl) hoverEl.classList.remove("cr-hover");
+  hoverEl = t;
+  hoverEl.classList.add("cr-hover");
+  if (selectorChip) {
+    selectorChip.textContent = cssPath(t, root) || "(no selector)";
+    selectorChip.style.display = "block";
+  }
+}
+
+// Clear the hover outline + chip when the cursor leaves the artifact.
+function clearHover() {
+  if (hoverEl) hoverEl.classList.remove("cr-hover");
+  hoverEl = null;
+  if (selectorChip) selectorChip.style.display = "none";
 }
 
 content.addEventListener("click", (e) => {
