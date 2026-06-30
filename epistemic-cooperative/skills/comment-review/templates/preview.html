@@ -526,8 +526,10 @@ let shadowRoot = null;
 let root = content;
 if (RENDER_MODE === "html") {
   // Raw HTML served through an open Shadow DOM: CSS-isolated from the review chrome,
-  // innerHTML-inserted scripts are inert (never executed), selector-click works because
-  // it is the same document. marked is not used in html mode.
+  // selector-click works because it is the same document. innerHTML does not run <script>
+  // tags, but this is NOT a JS sandbox — inline event handlers (onerror/onload), <iframe>,
+  // and active subresources still execute/load in this same-origin page; review trusted
+  // HTML only. marked is not used in html mode.
   shadowRoot = content.attachShadow({ mode: "open" });
   shadowRoot.innerHTML = sourceText;
   root = shadowRoot;
@@ -1450,7 +1452,10 @@ function renderSidebar() {
 
     item.appendChild(anchorEl);
     item.appendChild(commentEl);
-    const openEdit = () => { focusMark(mark); openEditPopup(mark); };
+    // html comments carry a CSS-selector anchor — edit through the selector-aware popup so
+    // the resubmit preserves anchor_kind/selector (markdown openEditPopup would drop both,
+    // downgrading the latest JSONL entry to text-mode and breaking selector apply-back).
+    const openEdit = () => { focusMark(mark); (RENDER_MODE === "html" ? openEditPopupHtml : openEditPopup)(mark); };
     item.addEventListener("click", openEdit);
     item.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
