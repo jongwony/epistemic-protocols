@@ -217,6 +217,8 @@
     overflow: hidden;
   }
   body.sidebar-open #sidebar { transform: translateX(0); }
+  /* HTML mode: no sidepanel / scan finding-flow — review is in-place anchored commenting. */
+  body.cr-html-mode #sidebar, body.cr-html-mode #status-count { display: none; }
   #sidebar-header {
     padding: .75em 1em;
     border-bottom: 1px solid #eee;
@@ -537,6 +539,10 @@ if (RENDER_MODE === "html") {
   shadowRoot = content.attachShadow({ mode: "open" });
   shadowRoot.innerHTML = sourceText;
   root = shadowRoot;
+  // HTML review is in-place anchored commenting (right-click comment + edit-back); the
+  // sub-protocol scan / sidepanel finding-flow is a markdown-mode feature, so hide the
+  // sidepanel + its toggle (CSS below) and no-op the populate paths (renderFindings/renderSidebar).
+  document.body.classList.add("cr-html-mode");
   // Mark/finding visuals must live inside the shadow root — the chrome's light-DOM
   // stylesheet does not pierce the boundary. Outline-based marks avoid re-flowing the
   // artifact (no <mark> wrapping); element-level anchoring marks the element in place.
@@ -1278,6 +1284,7 @@ function truncateForDisplay(text, maxChars) {
 // (clickable scroll-to-anchor); unanchored findings render with dashed-border
 // styling (no in-text mark, no scroll target).
 function renderFindings() {
+  if (RENDER_MODE === "html") return; // html mode suppresses the scan finding-flow (no sidepanel, no in-place finding marks)
   while (findingsList.firstChild) findingsList.removeChild(findingsList.firstChild);
   findingMarks.clear();
 
@@ -1417,11 +1424,10 @@ function updateTotalSidebarCount(commentsN) {
 }
 
 function renderSidebar() {
-  // html comments are in-place .cr-anno elements in the shadow root; markdown comments
-  // are .annotated <mark> wrappers in the light DOM.
-  const allMarks = RENDER_MODE === "html"
-    ? root.querySelectorAll(".cr-anno")
-    : content.querySelectorAll(".annotated");
+  // The sidebar is markdown-mode only — html mode hides it and surfaces comments in-place
+  // (the .cr-anno outline + 💬 on the element itself, applied by markHtmlElement on submit).
+  if (RENDER_MODE === "html") return;
+  const allMarks = content.querySelectorAll(".annotated");
   // Group by markId so multi-mark logical comments collapse to one sidebar row.
   // First-seen mark per group is the canonical scroll/focus target.
   const groups = new Map();
