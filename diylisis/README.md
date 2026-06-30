@@ -61,7 +61,7 @@ The artifact's label honestly reflects the rigor actually applied — a lower ti
 | Tier | Label | What it runs |
 |------|-------|--------------|
 | (a) | **Quick handoff draft** | Plain Markdown only — no F5 gate, no audit, no ledger. Makes **no** PortableHandoff claim. |
-| (b) | **Certified light /distill** | One F5 pass (incl. the prose-only deletion test) + one leak / durable-pointer audit; no ledger unless real corrections exist. |
+| (b) | **Certified light /distill** | One F5 pass (incl. the prose-only deletion test) + one leak / durable-pointer audit; no CorrectionDelta ledger (that is the DurableRepo / tier-(c) path) — a correction surfaces at the Gate. |
 | (c) | **Heavy /distill** | Full refuter + watchlist + residual Gate + `CorrectionDelta` ledger + leak lint + convergence evidence + re-distillation (the DurableRepo path). |
 
 **Honest-label rule**: the formal `converge` transition fires at any tier that reaches a fixed point with a Pass verdict — tier (b) included, so a certified-light handoff formally converges and emits a legitimate `PortableHandoff`. The assurance **label** "converged /distill" is narrower: it is reserved for the tier-(c) full-assurance fixed point with a Pass verdict. A skipped-refuter artifact (tier (a)) is a **draft / degraded handoff** — never a `PortableHandoff`, never "converged /distill". Tier (b) is the floor for the PortableHandoff claim.
