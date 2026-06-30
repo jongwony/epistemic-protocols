@@ -21,12 +21,12 @@ Apokrypsis(W, next_task?) → Detect(W) → secret_present(W)? →
   none(W):     → relay(already secret-free; nothing to redact) (extension) → deactivate
   present:     init_loop_state: pass_n=1, sites=∅, redactions=∅, residual=∅, candidate=overlay(W), history=∅, loop:
     Phase 1 Scan(W) → sites = ⋃_item secret_locations(item) → classify(sites) → SecretKinds          -- per (item, location) detection + kind assignment
-    Phase 2 Redact(sites) → ∀ s ∈ sites : scrub(candidate, value(s), kind(s)) → (redactions, candidate') (transform) →   -- each detected value → placeholder at EVERY occurrence (a copy at an unkeyed location is scrubbed by the same find-replace of the known value); a command-substitution form keeps its retrieval command, only a separately-inlined resolved value is scrubbed; partition load_bearing → residual (surfaced = false)
+    Phase 2 Redact(sites) → ∀ s ∈ sites, value_site(s) : scrub(candidate, value(s), kind(s)) → (redactions, candidate') (transform) →   -- each value site → placeholder at EVERY occurrence (a copy at an unkeyed location is scrubbed by the same find-replace of the known value); a command-substitution locus is preserved (retrieval command kept, not scrubbed), only a separately-inlined resolved value (a distinct value site) is scrubbed; partition load_bearing → residual (surfaced = false)
     Phase 3 Gate(unsurfaced residual) →
       residual = ∅:           → (no load-bearing secret) skip gate (relay) → Phase 4
       residual ≠ ∅:           → Qc(per load-bearing secret) → Stop → A → integrate(A) → residual'     -- Constitution: Route / Supply / Drop out-of-band routing; VALUE never shown — surfaced by kind + location + placeholder
     Phase 4 Settle: emit_scan(candidate) →                                                            -- backstop: re-verify the ACTUAL candidate; deterministically scrub any straggling copy of a DETECTED value
-      ∃ s ∈ sites : value(s) ⊆ tokens(candidate): → scrub(candidate, value(s), kind(s)) → re-verify   -- a re-materialized / incompletely-scrubbed copy of a known value: positive find-replace (terminating), append Redaction for the location; never a classifier re-run
+      ∃ s ∈ sites : value_site(s) ∧ value(s) ⊆ tokens(candidate): → scrub(candidate, value(s), kind(s)) → re-verify   -- a re-materialized / incompletely-scrubbed copy of a known VALUE (value site only): positive find-replace (terminating), append Redaction for the location; never a classifier re-run
       redaction_complete ∧ emit_clean ∧ residuals_surfaced: → emit RedactedContext → converge
       else:                   → loop (pass_n += 1)
 ```
@@ -54,7 +54,8 @@ Secret         ∈ {Credential, Token, ApiKey, PrivateKey, Password, CommandSubs
 secret_shaped(x) ≡ x matches a secret pattern — a credential / token / api-key / private-key / password literal or assignment, or a command-substitution secret reference (a $(...) form, a backtick substitution, or a shell variable expansion that resolves to a secret) — content whose VALUE must never reach an emit channel or a downstream recipient
 secret_locations(item) = { loc : the content of item at loc is secret_shaped }  -- the sub-item locations within one item that carry a secret VALUE; a multi-secret item has |secret_locations| > 1, each keyed separately by location
 SecretSite     = (item: ContextItem, location: String, kind: Secret)  -- one detected secret locus; sites = ⋃_item { (item, loc, kind) : loc ∈ secret_locations(item) }
-value(s)       = the secret VALUE tokens at site s, read read-only from the session-side source W  -- NEVER stored in Λ nor emitted; computed transiently to (a) drive scrub and (b) drive the emit-scan subset test. A secret-shaped site has non-empty value by construction (no vacuous-∅ subset, so no liveness trap)
+value_site(s)  ≡ s.kind ≠ CommandSubstitutionRef  -- a site carrying an in-context secret VALUE (scrubbed at the front door). A CommandSubstitutionRef site is a retrieval LOCUS, not a value: it is preserved as a grounded pointer, never scrubbed; any separately-inlined resolved value is itself a distinct value site detected at its own location
+value(s)       = the secret VALUE tokens at a VALUE site s, read read-only from the session-side source W  -- NEVER stored in Λ nor emitted; computed transiently to (a) drive scrub and (b) drive the emit-scan subset test. A value site has non-empty value by construction (no vacuous-∅ subset, so no liveness trap); a CommandSubstitutionRef locus is NOT a value site — its secret is out-of-band behind the retrieval command, so it carries no in-context value to scrub or scan
 placeholder(s) = "[REDACTED:" ++ kind(s) ++ "@" ++ location(s) ++ "]"  -- the literal replacing a secret value: encodes kind + location for recipient recognition, never the value (an output-format token, pinned for recognizability)
 scrub(candidate, v, kind) = replace EVERY occurrence of the known value v in candidate with placeholder ∧ append a Redaction for each scrubbed location  -- a deterministic find-replace of a positively-known value; it cannot re-miss (it is not a re-run of the secret_shaped classifier), so it terminates and catches a copy of v at an unkeyed location
 Redaction      = { item: ContextItem, secret_kind: Secret, placeholder: String, location: String }  -- one interception, keyed by (item, location) so multiple secrets in one item are each recorded; the secret VALUE replaced by placeholder, recorded by kind + location ONLY (NO value field — the value is never reproduced)
@@ -67,7 +68,8 @@ Disposition    ∈ {Route, Supply, Drop}  -- the per-secret gate answer for a lo
                  -- Drop: the next task does not actually need this secret (the hypothesis revised); release it (the placeholder remains as a marker, the value is already scrubbed)
 Residual       = { site: SecretSite, disposition: Option(Disposition), locus: Option(String), surfaced: Bool }  -- the load-bearing routing queue; silent residual forbidden: every entry must reach surfaced = true with a disposition before convergence; keyed per (item, loc) via site so a multi-secret item's load-bearing secrets stay DISTINCT entries
 redacted(Λ, item, loc) ≡ ∃ r ∈ Λ.redactions : r.item = item ∧ r.location = loc  -- the secret VALUE at (item, loc) was scrubbed to a placeholder; per (item, location), so a 2nd secret in the same item is keyed separately
-unredacted_sites(Λ) = { s ∈ Λ.sites : ¬redacted(Λ, s.item, s.location) }  -- detected sites not yet scrubbed
+settled(Λ, s)  ≡ ¬value_site(s) ∨ redacted(Λ, s.item, s.location)  -- a site is handled per its kind: a VALUE site by scrubbing its value (redacted); a CommandSubstitutionRef LOCUS by preservation (Phase 2 keeps the retrieval command — no value scrub is forced at the locus). A bare $(vault read …) with no inlined value is settled by preservation, so convergence is reachable
+unredacted_sites(Λ) = { s ∈ Λ.sites : ¬settled(Λ, s) }  -- detected sites not yet handled (a preserved command-substitution locus is already settled, never counted unredacted)
 unsurfaced_residual(Λ) = { r ∈ Λ.residual : ¬r.surfaced }  -- load-bearing secrets not yet routed at the gate
 fixed_point(Λ) ≡ redaction_complete(Λ) ∧ emit_clean(Λ) ∧ residuals_surfaced(Λ)  -- the convergence conjunction; settle's target
 RedactedContext = { candidate: Overlay(W), redactions: RedactionLedger, dispositions: Set(Residual) }  -- the result: the context rendered through the redaction overlay (every detected value replaced by a placeholder), the interception record (by kind + location), and each load-bearing secret's settled out-of-band disposition. The secret-free context /distill consumes
@@ -81,12 +83,12 @@ Phase 0: W → Detect(W) → secret_present(W)?                                 
 Phase 0 → deactivate (relay): ¬secret_present(W) → present "already secret-free; nothing to redact" as relay, deactivate (extension)
 Phase 0 → Phase 1: secret_present(W) = true → init loop state (pass_n = 1, sites = ∅, redactions = ∅, residual = ∅, candidate = overlay(W), history = ∅)
 Phase 1: W → Scan(W) → sites = ⋃_item secret_locations(item) → classify(sites) → SecretKinds        -- per (item, location) detection + kind assignment [Tool: Read, Grep, Glob]
-Phase 2: sites → ∀ s ∈ sites : scrub(candidate, value(s), kind(s)) → (redactions, candidate') ∧ partition load_bearing → residual  -- each detected value scrubbed at every occurrence; command-substitution retrieval command preserved; a load-bearing site appends a residual (surfaced = false)
+Phase 2: sites → ∀ s ∈ sites, value_site(s) : scrub(candidate, value(s), kind(s)) → (redactions, candidate') ∧ preserve command-substitution loci ∧ partition load_bearing → residual  -- value sites scrubbed at every occurrence; command-substitution loci preserved (retrieval command kept); a load-bearing site appends a residual (surfaced = false)
 Phase 3: unsurfaced residual → Qc(per load-bearing secret over Disposition) → Stop → A               -- per-secret out-of-band routing gate [Tool: Constitution interaction]
 Phase 3 → Phase 4 (relay): residual = ∅ → no load-bearing secret to surface → skip the gate (extension)
 Phase 3 → Phase 4: integrate(A) → residual' (surfaced = true, disposition bound)                     -- the value never shown; surfaced by kind + location + placeholder; append (site, kind, A) to history
 Phase 4: candidate → Settle: emit_scan(candidate) → measure progress → fixed_point?                  -- backstop: re-verify the ACTUAL candidate for any resident copy of a DETECTED value
-Phase 4 → Phase 4 (scrub): ∃ s ∈ sites : value(s) ⊆ tokens(candidate) → scrub(candidate, value(s), kind(s)) → append Redaction for the location → re-verify  -- a re-materialized / incompletely-scrubbed copy: deterministic find-replace of a KNOWN value (terminating); NOT a classifier re-run, which could not relocate an undetected value
+Phase 4 → Phase 4 (scrub): ∃ s ∈ sites : value_site(s) ∧ value(s) ⊆ tokens(candidate) → scrub(candidate, value(s), kind(s)) → append Redaction for the location → re-verify  -- a re-materialized / incompletely-scrubbed copy (value site only): deterministic find-replace of a KNOWN value (terminating); NOT a classifier re-run, which could not relocate an undetected value
 Phase 4 → Phase 1 (next pass): ¬fixed_point ∧ candidate changed enough to re-scan → re-scan → pass_n += 1
 Phase 4 → converge: redaction_complete ∧ emit_clean ∧ residuals_surfaced → emit RedactedContext
 Phase n → deactivate (ungraceful): user Esc at Phase 3 → the surfaced load-bearing secret untreated; no RedactedContext emitted (the detected values are already scrubbed in the candidate, but the routing is unsettled)
@@ -95,7 +97,7 @@ Phase n → deactivate (ungraceful): user Esc at Phase 3 → the surfaced load-b
 ```
 ── LOOP ──
 J = {scrub, next_pass, converge, esc}
-  scrub:     ∃ s ∈ sites : value(s) ⊆ tokens(candidate) → deterministically scrub the resident copy (find-replace the known value) → re-verify (Phase 4 self-edge)
+  scrub:     ∃ s ∈ sites : value_site(s) ∧ value(s) ⊆ tokens(candidate) → deterministically scrub the resident copy (find-replace the known value) → re-verify (Phase 4 self-edge)
   next_pass: ¬fixed_point ∧ the candidate changed enough to warrant a re-scan → Phase 4 → Phase 1, pass_n += 1
   converge:  redaction_complete ∧ emit_clean ∧ residuals_surfaced → emit RedactedContext, deactivate
   esc:       user Esc at the Phase 3 gate → ungraceful deactivate (the surfaced load-bearing secret's routing unsettled; no RedactedContext)
@@ -112,8 +114,8 @@ Convergence evidence: at convergence, present the transformation trace — per r
 ```
 ── CONVERGENCE ──
 converge iff redaction_complete ∧ emit_clean ∧ residuals_surfaced ∧ ¬user_esc
-  redaction_complete: ∀ item, ∀ loc ∈ secret_locations(item) : redacted(Λ, item, loc)               -- every detected site scrubbed to a placeholder, i.e. unredacted_sites(Λ) = ∅
-  emit_clean:         ∄ s ∈ Λ.sites : value(s) ⊆ tokens(candidate)                                   -- no DETECTED secret VALUE survives anywhere in the candidate output (the backstop's fixed point; reachable because scrub removes every occurrence of a known value)
+  redaction_complete: ∀ s ∈ Λ.sites : settled(Λ, s)                                                  -- every detected site handled: a value site scrubbed to a placeholder, a command-substitution locus preserved as a grounded pointer; i.e. unredacted_sites(Λ) = ∅
+  emit_clean:         ∄ s ∈ Λ.sites : value_site(s) ∧ value(s) ⊆ tokens(candidate)                   -- no DETECTED secret VALUE survives anywhere in the candidate (the backstop's fixed point; scanned over value sites only — a preserved command-substitution locus carries no in-context value; reachable because scrub removes every occurrence of a known value)
   residuals_surfaced: unsurfaced_residual(Λ) = ∅ ∧ ∀ r ∈ Λ.residual : r.disposition ≠ ⊥             -- every load-bearing secret routed out-of-band, none silently dropped
   user_esc:           user exits via Esc at a Phase 3 gate (ungraceful; the surfaced load-bearing secret's routing untreated, no RedactedContext)
 progress(Λ) = |unredacted_sites(Λ)| + |unsurfaced_residual(Λ)|  -- monotone hygiene measure, weakly decreasing per pass: Phase 2/4 scrubbing drives |unredacted_sites| → 0 (each scrub removes a known value at every occurrence, so emit_clean is restored within the settle step, not deferred to a residual), and gate routing drives |unsurfaced_residual| → 0. No separate secret / emit measure leg, so no double-count
@@ -250,7 +252,7 @@ Detect every secret locus and classify it.
 Scrub every detected value and partition the load-bearing secrets.
 
 1. **Scrub each detected value** — for each site, `scrub(candidate, value(s), kind(s))`: replace **every** occurrence of that value in the candidate (never in the source, which stays read-only) with the placeholder `[REDACTED:{kind}@{location}]`, and append a `Redaction{item, secret_kind, placeholder, location}` per scrubbed location — by kind and location only, **never** a value field. Scrubbing every occurrence of the known value means a copy at a second, unkeyed location is removed by the same front-door pass.
-2. **Preserve the retrieval locus** — for a command-substitution form (`$(vault read …)`, a backtick substitution, a secret-resolving variable expansion), the form *is* the retrieval locus: keep it as a grounded pointer and scrub only a separately-inlined resolved value. The recipient re-obtains the secret out-of-band through the preserved command.
+2. **Preserve the retrieval locus** — for a command-substitution form (`$(vault read …)`, a backtick substitution, a secret-resolving variable expansion), the form *is* the retrieval locus: keep it as a grounded pointer and scrub only a separately-inlined resolved value. The recipient re-obtains the secret out-of-band through the preserved command. Preserving the locus is how a command-substitution site is *settled* — it carries no in-context value, so no value scrub is forced at the locus and convergence stays reachable; a separately-inlined resolved value is a distinct value site, scrubbed normally.
 3. **Partition load-bearing** — a scrubbed secret the declared `next_task` plausibly needs (the AI's hypothesis) appends a `Residual{site, surfaced = false}` carrying its location + placeholder, so it surfaces at the Phase 3 gate. A secret the next task does not need carries no residual — its placeholder simply remains.
 
 **Scope restriction**: Internal transform over the candidate overlay. No store write, no transmission. This is an Extension operation — the scrub is deterministic given the detection; the only Constitution interaction is the gate below.
@@ -286,7 +288,7 @@ Options:
 
 Re-verify the actual candidate and decide convergence.
 
-1. **Emit-scan** — for every detected site, test whether its value tokens are still present anywhere in the candidate (`value(s) ⊆ tokens(candidate)`). A hit means a copy of a *detected* value survived — an incompletely-scrubbed or re-materialized occurrence.
+1. **Emit-scan** — for every detected **value** site (a command-substitution locus carries no in-context value and is preserved, so it is not scanned), test whether its value tokens are still present anywhere in the candidate (`value(s) ⊆ tokens(candidate)`). A hit means a copy of a *detected* value survived — an incompletely-scrubbed or re-materialized occurrence.
 2. **Deterministically scrub the straggler** — if the emit-scan finds a resident value, `scrub(candidate, value(s), kind(s))` it (find-replace the known value at every occurrence) and append a `Redaction` for the location. This is positive and terminating — it removes the value, never re-runs the classifier. It does **not** route to the gate: scrubbing a copy of an already-detected secret introduces no new out-of-band routing decision.
 3. **Measure progress** — `progress(Λ) = |unredacted_sites| + |unsurfaced_residual|`, weakly decreasing per pass. Scrubbing drives `|unredacted_sites| → 0` and restores `emit_clean` within the settle step; gate routing drives `|unsurfaced_residual| → 0`.
 4. **Route**:

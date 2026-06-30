@@ -19,7 +19,7 @@
 - **Scan + Classify** — 모든 secret을 `(item, location)` 단위로 감지하고(한 item이 둘 이상의 secret을 담을 수 있으며 각각 별도로 keying), 종류별로 분류합니다: Credential, Token, ApiKey, PrivateKey, Password, CommandSubstitutionRef, 또는 명명된 집합이 포괄하지 못하는 emergent 형태.
 - **Redact (front door)** — 각 secret 값을 candidate에서(소스가 아니라) placeholder `[REDACTED:{kind}@{location}]`로 치환합니다. command-substitution 형태(`$(vault read …)`)의 경우 그 형태 자체가 retrieval locus이므로, grounded 포인터로 보존하고 별도로 inline된 해소 값만 redaction합니다.
 - **Out-of-band 처분 게이트** — **load-bearing** secret(선언된 next task가 실제로 필요로 하는 것)은 — 값이 아니라 kind·location·placeholder로 — 표면화하여 사용자가 라우팅하게 합니다: **Route**(안정 retrieval 포인터로), **Supply**(사용 시점 out-of-band 공급), 또는 **Drop**. 필요한 secret은 결코 조용히 drop되지 않습니다.
-- **Emit-scan backstop** — *실제* candidate 산출물에서 빠져나간 값이 있는지 재검사합니다(감지 누락, 또는 redaction 이후 하류로 복사된 값). 포착된 값은 같은 게이트로 라우팅되며, 결코 조용히 재-redaction하지 않습니다 — 결정론적 재-redaction은 front door가 이미 놓친 바로 그 secret을 다시 놓칠 것이기 때문입니다.
+- **Emit-scan backstop** — *실제* candidate 산출물에 **이미 감지된** 값의 잔여 카피(불완전 scrub 또는 재구체화된 occurrence)가 남아 있는지 재검사하여 결정론적으로 scrub합니다(알려진 값을 find-replace — 종료 보장). backstop은 의도를 산출물에 대조해 검증할 뿐 감지를 **확장하지 않습니다** — secret으로 한 번도 분류되지 않은 값은 두 계층 모두의 사정권 밖이며, 조용히 처리됨으로 간주하지 않고 Known Limitation으로 정직하게 표면화합니다.
 
 **핵심 원리**: Value Never Emitted — secret 값은 어떤 산출 채널에도 도달하지 않으며, secret은 오직 kind·location·placeholder로만 표면화되고 값으로는 결코 표면화되지 않습니다. 그리고 Conceal over Erase — 값은 감추되 retrieval locus는 보존하므로, load-bearing secret은 소실되지 않고 out-of-band로 라우팅됩니다.
 

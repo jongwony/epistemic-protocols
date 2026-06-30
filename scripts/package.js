@@ -50,6 +50,7 @@ const DESCRIPTION_OVERRIDES = {
   write: 'Multi-perspective blog drafting — transforms session insights into publishable content via iterative perspective-based refinement.',
   triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, and emit dispatchable initial prompts.',
   dispatch: 'Focused work-unit execution — consume /triage initial prompts, verify premises, fan out PRs, and inscribe rejection traces.',
+  redact: 'Redact secret-shaped values upstream of distill — (SecretExposed, AI, REDACT, WorkingContext) → RedactedContext',
 };
 
 const EXCLUDE_NAMES = new Set([
