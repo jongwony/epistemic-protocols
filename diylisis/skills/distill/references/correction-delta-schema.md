@@ -33,7 +33,7 @@ Each line is one object with these fields:
 | `export_policy` | "KEEP" \| "ROUTE" \| "DROP" | The disposition this correction carries into a handoff |
 | `verification_status` | "observed" \| "user_confirmed" \| "tool_confirmed" \| "provisional" | The confidence channel that settled the correction |
 
-`StableRef` is `{ kind: "path" | "url" | "id" | "command", locator: string }`. `InlineEvidence` is `{ content: string }`.
+`StableRef` is `{ kind: "path" | "url" | "id" | "command", locator: string, lifetime: "durable" | "volatile" }`. `InlineEvidence` is `{ content: string }`.
 
 **Temporal encoding.** `corrected_at` is an ISO 8601 UTC timestamp (`Z`-suffixed); `validity_horizon` is an ISO 8601 duration in P-notation (e.g. `P7D` for seven days); the expiry sum `corrected_at + validity_horizon` is evaluated in UTC.
 
@@ -90,7 +90,7 @@ F3b never infers KEEP from how settled an item *looks*. KEEP is reachable exactl
 Worked example — a user states "these creds rotate every Friday", so a 7-day horizon is transcribed:
 
 ```json
-{"id": "cd-0042", "subject_ref": {"kind": "path", "locator": ".env.staging"}, "claim_kind": "credential-value", "original_ref": null, "original_claim_hash": null, "corrected_claim": "Staging DB credentials are the values in .env.staging as of 2026-06-05", "correction_basis_ref": {"content": "User: rotated staging creds this morning"}, "corrected_at": "2026-06-05T10:12:00Z", "corrected_by": "User", "supersedes": [], "validity_horizon": "P7D", "horizon_basis_ref": {"content": "User: these creds rotate every Friday"}, "export_policy": "KEEP", "verification_status": "user_confirmed"}
+{"id": "cd-0042", "subject_ref": {"kind": "path", "locator": ".env.staging", "lifetime": "durable"}, "claim_kind": "credential-value", "original_ref": null, "original_claim_hash": null, "corrected_claim": "Staging DB credentials are the values in .env.staging as of 2026-06-05", "correction_basis_ref": {"content": "User: rotated staging creds this morning"}, "corrected_at": "2026-06-05T10:12:00Z", "corrected_by": "User", "supersedes": [], "validity_horizon": "P7D", "horizon_basis_ref": {"content": "User: these creds rotate every Friday"}, "export_policy": "KEEP", "verification_status": "user_confirmed"}
 ```
 
 Counterexample: the model judging "credentials feel perishable, assign 7 days" is forbidden — no temporal indexical was constituted.
