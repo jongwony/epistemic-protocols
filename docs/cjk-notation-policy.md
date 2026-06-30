@@ -1,5 +1,15 @@
 # CJK / Non-Latin Notation Policy (issue #564)
 
+> **SUPERSEDED — decided on main (2026-06-28, commit `dd6b208` / PR #583).** Issue #564
+> shipped via **fork (b): drop the idiom entirely** — `hermeneutic-cycle.md:30` now reads
+> `**Inter-version surface** — VCS history …` with the `(온고지신 / 溫故知新)` idiom removed,
+> the English gloss carrying the meaning. This doc recommended **fork (a) romanize**
+> (`Ongojisin (lit. …)`); the shipped choice was (b), the fork this doc argued against.
+> Retained as the design-rationale record (the project's inter-version-surface value
+> preserves rejection traces), **not** an open decision. The generalized **Non-Latin
+> notation policy** sketched below remains an unshipped proposal the maintainer may
+> adopt independently of the now-closed line-30 fix.
+
 > Design for #564: `.claude/principles/hermeneutic-cycle.md:30` carries the idiom
 > **온고지신 / 溫故知新**, which the `language-purity` static check flags. The fix is
 > not mechanical — the term is an intended concept name — so a policy is needed that

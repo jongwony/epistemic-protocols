@@ -5,6 +5,23 @@
 > verifies each proposed fix against the current spec and re-scopes the issue to the
 > one genuinely-open residual.
 
+> **Re-verified 2026-06-30 against current HEAD (post-#591, distill now stable).** distill
+> churned twice while this pass ran: #590 (conditional correction ledger + ObservedKeep /
+> CorrectedKeep split) and **#591 — now MERGED** (`3ac802f`: prose-only deletion test
+> "Change C" + assurance tiering; secret-redaction was dropped to a separate agent). No open
+> distill PR remains, so the protocol is stable as of this check. **Result: fix#3(b)
+> disposition-drift remains genuinely open through both.** #591's prose-only deletion test
+> (F5 checklist category 6) is a *prose-channel sufficiency* test — "can the recipient execute
+> from prose alone, ignoring task-state / ledger / affordances?" — **orthogonal** to fix#3(b)'s
+> *disposition-accuracy* check ("does the emit falsely claim a DROP'd item was done?"). A prose
+> sentence "all feedback (D1–D5) reflected" with D2 actually DROP'd passes Change C
+> (self-contained, executable) yet is still the false disposition claim fix#3(b) targets.
+> `measure(Λ)` still carries 6 legs with **no `disposition_drift` leg**; the F3 Gate's
+> "disposition conflict" remains a *disposition-assignment* collision, not this emit-accuracy
+> check. fix#1 / fix#2 stay CLOSED. **Caveat**: distill grew through #591 — the §"Spec-edit
+> sketch" line refs are stale (current: `measure` ~L125, F5 ~L352, the new leg sits in the
+> Rule 9 / Rule 12 neighborhood); re-derive at implementation time.
+
 ## Premise check: two of the three fixes already landed
 
 #524 named one observed convergence carrying two session-tethered defects, and traced
