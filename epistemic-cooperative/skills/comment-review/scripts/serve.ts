@@ -224,13 +224,13 @@ const renderPreview = async (slug: string) => {
   const body = renderMode === "markdown" ? stripFrontmatter(raw) : raw;
   const findings = await readTaskListForSlug(slug);
   // title goes into HTML context (escape & < > " '); slug goes into JS string literal context (JSON.stringify)
-  // findings goes into JS context (JSON.stringify with script-tag-safe escaping)
+  // findings + body go into JS context (JSON.stringify + script-tag-safe escaping; client JSON.parse reverses it losslessly)
   return template
     .replaceAll("__TITLE_PLACEHOLDER__", escapeHtml(slug))
     .replaceAll("__SLUG_PLACEHOLDER__", JSON.stringify(slug))
     .replace("__RENDER_MODE_PLACEHOLDER__", JSON.stringify(renderMode))
     .replace("__FINDINGS_PLACEHOLDER__", escapeForScriptTag(JSON.stringify(findings)))
-    .replace("__MARKDOWN_CONTENT_PLACEHOLDER__", escapeForScriptTag(body));
+    .replace("__MARKDOWN_CONTENT_PLACEHOLDER__", escapeForScriptTag(JSON.stringify(body)));
 };
 
 interface FeedbackBody {

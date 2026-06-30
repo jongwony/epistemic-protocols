@@ -496,7 +496,7 @@
 
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script type="text/markdown" id="md-source">__MARKDOWN_CONTENT_PLACEHOLDER__</script>
+<script type="application/json" id="md-source">__MARKDOWN_CONTENT_PLACEHOLDER__</script>
 <script type="application/json" id="findings-data">__FINDINGS_PLACEHOLDER__</script>
 
 <script>
@@ -520,11 +520,11 @@ try {
 
 // Render the artifact. `root` is the query/anchor surface: the light-DOM #content in
 // markdown mode, the shadow root in html mode.
-// serve.ts escaped </script as <\/script to embed the body safely inside this host
-// <script> tag; reverse it before consuming so the artifact's own <script> closers parse
-// correctly (otherwise innerHTML sees <\/script>, the inner script never closes, and the
-// rest of the document is swallowed). Applies to both modes — the escape is mode-agnostic.
-const sourceText = document.getElementById("md-source").textContent.replace(/<\\\/script/gi, "</script");
+// The body is transported as a JSON string (escapeForScriptTag-protected, same as the
+// findings payload): JSON.parse reverses it losslessly — a real </script> in the artifact
+// survives, and a literal <\/script> already present in the source is not corrupted. Used
+// by both modes (marked.parse for markdown, shadowRoot.innerHTML for html).
+const sourceText = JSON.parse(document.getElementById("md-source").textContent);
 const content = document.getElementById("content");
 let shadowRoot = null;
 let root = content;
@@ -587,6 +587,9 @@ let pending = null; // { range, anchor, context_before, context_after, editingMa
 let markIdCounter = 0; // monotonic id assigned per saved mark group; bridges DOM <-> sidebar entry
 
 let selSettle = null; // markdown-only selection-settle timer (cleared in dismissPopup)
+// Declared before the html-mode init block (which assigns it) to avoid a temporal-dead-zone
+// ReferenceError; the hover handlers below also read it.
+let selectorChip = null;  // html mode: light-DOM chip showing the live CSS selector on hover
 if (RENDER_MODE === "html") {
   // Element-level anchoring. Right-click (contextmenu) is the comment trigger so left-click
   // stays free for the page's own interactivity (links, buttons). A right-click inside the
@@ -837,7 +840,7 @@ function openFindingPopup(finding, anchorEl) {
 let htmlMarkIdCounter = 0;
 const htmlPulseSlot = { id: null };
 let hoverEl = null;       // html mode: element currently outlined under the cursor
-let selectorChip = null;  // html mode: light-DOM chip showing the live CSS selector on hover
+// selectorChip is declared earlier (before the html-mode init block) to avoid a TDZ error.
 
 // CSS.escape with a conservative fallback for ids carrying special chars.
 function cssEscape(s) {
