@@ -26,7 +26,7 @@ Apokrypsis(W, next_task?) → Detect(W) → secret_present(W)? →
       residual = ∅:           → (no load-bearing secret) skip gate (relay) → Phase 4
       residual ≠ ∅:           → Qc(per load-bearing secret) → Stop → A → integrate(A) → residual'     -- Constitution: Route / Supply / Drop out-of-band routing; VALUE never shown — surfaced by kind + location + placeholder
     Phase 4 Settle: emit_scan(candidate) →                                                            -- backstop: re-verify the ACTUAL candidate; deterministically scrub any straggling copy of a DETECTED value
-      ∃ s ∈ sites : value_site(s) ∧ occurs(value(s), candidate): → scrub(candidate, s) → re-verify   -- a re-materialized / incompletely-scrubbed copy of a known VALUE (value site only): positive find-replace (terminating), append Redaction for the location; never a classifier re-run
+      ∀ s ∈ sites : value_site(s) ∧ occurs(value(s), candidate): → scrub(candidate, s) → re-verify   -- a re-materialized / incompletely-scrubbed copy of a known VALUE (value site only): positive find-replace (terminating), append Redaction for the location; never a classifier re-run
       redaction_complete ∧ emit_clean ∧ residuals_surfaced: → emit RedactedContext → converge
       else:                   → loop (pass_n += 1)
 ```
@@ -37,7 +37,7 @@ WorkingContext
   → scan(secret_shaped) → SecretSites                  -- per (item, location) detection: a multi-secret item yields multiple sites, each keyed separately
   → classify(SecretSites) → SecretKinds                -- Credential | Token | ApiKey | PrivateKey | Password | CommandSubstitutionRef ∪ Emergent(Secret)
   → redact(SecretSites) → RedactionLedger              -- THE FRONT DOOR: scrub each detected value to a placeholder at EVERY occurrence (the value is never stored in the ledger nor reproduced); a command-substitution form keeps its retrieval command as a grounded pointer — only a separately-inlined resolved value is scrubbed, distinguishing the secret value from the retrieval locus
-  → route(load_bearing) → DispositionLedger            -- a needed secret is surfaced and routed out-of-band (vault pointer / out-of-band supply), never silently dropped; the VALUE is never emitted
+  → route(load_bearing) → dispositions: Set(Residual)  -- a needed secret is surfaced and routed out-of-band (vault pointer / out-of-band supply), never silently dropped; the VALUE is never emitted
   → settle(emit_scan) → fixed_point                    -- THE BACKSTOP: re-verify the actual candidate and deterministically scrub any straggling copy of a DETECTED value (positive find-replace of a known value — terminating). A value never classified as a secret is out of reach of both layers (Known Limitation), not silently claimed-handled
   → RedactedContext
 requires: secret_present(W)                             -- runtime checkpoint (Phase 0); sole activation precondition
@@ -89,7 +89,7 @@ Phase 3: unsurfaced residual → Qc(per load-bearing secret over Disposition) �
 Phase 3 → Phase 4 (relay): residual = ∅ → no load-bearing secret to surface → skip the gate (extension)
 Phase 3 → Phase 4: integrate(A) → residual' (surfaced = true, disposition bound)                     -- the value never shown; surfaced by kind + location + placeholder; append (site, kind, A) to history
 Phase 4: candidate → Settle: emit_scan(candidate) → measure progress → fixed_point?                  -- backstop: re-verify the ACTUAL candidate for any resident copy of a DETECTED value
-Phase 4 → Phase 4 (scrub): ∃ s ∈ sites : value_site(s) ∧ occurs(value(s), candidate) → scrub(candidate, s) → append Redaction for the location → re-verify  -- a re-materialized / incompletely-scrubbed copy (value site only): deterministic find-replace of a KNOWN value (terminating); NOT a classifier re-run, which could not relocate an undetected value
+Phase 4 → Phase 4 (scrub): ∀ s ∈ sites : value_site(s) ∧ occurs(value(s), candidate) → scrub(candidate, s) → append Redaction for the location → re-verify  -- a re-materialized / incompletely-scrubbed copy (value site only): deterministic find-replace of a KNOWN value (terminating); NOT a classifier re-run, which could not relocate an undetected value
 Phase 4 → Phase 1 (next pass): ¬fixed_point ∧ candidate changed enough to re-scan → re-scan → pass_n += 1
 Phase 4 → converge: redaction_complete ∧ emit_clean ∧ residuals_surfaced → emit RedactedContext
 Phase n → deactivate (ungraceful): user Esc at Phase 3 → the surfaced load-bearing secret untreated; no RedactedContext emitted (the detected values are already scrubbed in the candidate, but the routing is unsettled)
@@ -98,14 +98,14 @@ Phase n → deactivate (ungraceful): user Esc at Phase 3 → the surfaced load-b
 ```
 ── LOOP ──
 J = {scrub, next_pass, converge, esc}
-  scrub:     ∃ s ∈ sites : value_site(s) ∧ occurs(value(s), candidate) → deterministically scrub the resident copy (find-replace the known value) → re-verify (Phase 4 self-edge)
+  scrub:     ∀ s ∈ sites : value_site(s) ∧ occurs(value(s), candidate) → deterministically scrub the resident copy (find-replace the known value) → re-verify (Phase 4 self-edge)
   next_pass: ¬fixed_point ∧ the candidate changed enough to warrant a re-scan → Phase 4 → Phase 1, pass_n += 1
   converge:  redaction_complete ∧ emit_clean ∧ residuals_surfaced → emit RedactedContext, deactivate
   esc:       user Esc at the Phase 3 gate → ungraceful deactivate (the surfaced load-bearing secret's routing unsettled; no RedactedContext)
 
 Two-layer defense: the Phase 2 front-door redaction is the real protection — it scrubs each detected value at EVERY occurrence, so the candidate carries placeholders, not values. The Phase 4 emit-scan is the backstop — it re-verifies the ACTUAL candidate output and catches a straggling copy of a detected value (an incompletely-scrubbed or re-materialized occurrence), scrubbing it deterministically. The backstop verifies what was intended against what the output actually contains; it does not extend detection.
 
-Termination (no liveness trap): a backstop scrub is a deterministic find-replace of a positively-KNOWN value — it removes every occurrence in one step and strictly decreases the resident-value set, so it terminates. This is categorically different from re-running the secret-pattern classifier on undetected content, which could re-miss; the backstop never does that. A value that was never classified as a secret (a true detection miss) is therefore out of reach of both layers — see Known Limitations; it is surfaced as a residual risk, never silently claimed-handled.
+Termination (no liveness trap): a backstop scrub is a deterministic find-replace of a positively-KNOWN value — it removes every owned occurrence in one step and strictly decreases the resident-value set, so it terminates. The emit-scan scrubs EVERY value site whose value still occurs, so a surviving occurrence is always cleared by the site OWNING its location — the global emit_clean check and the owner-local scrub stay aligned, with no occurrence stranded at a non-owning site that cannot clear it. This is categorically different from re-running the secret-pattern classifier on undetected content, which could re-miss; the backstop never does that. A value that was never classified as a secret (a true detection miss) is therefore out of reach of both layers — see Known Limitations; it is surfaced as a residual risk, never silently claimed-handled.
 
 Single-count discipline: a load-bearing secret is carried by |unsurfaced_residual| until the gate routes it; a straggling copy is removed by the deterministic scrub within the settle step (it never accrues a separate residual or a separate measure leg), so the measure cannot double-count and stays weakly decreasing.
 
