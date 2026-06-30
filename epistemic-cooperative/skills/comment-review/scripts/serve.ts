@@ -1,25 +1,26 @@
 #!/usr/bin/env bun
 // @ts-nocheck — Bun runtime resolves node:* and Bun globals natively; skip TS-LSP noise.
-// comment-review channel-loop server (Bun): live preview + selection-anchored feedback channel.
+// comment-review channel-loop server (Bun): live preview + anchored feedback channel.
 //
-// Usage: bun scripts/serve.ts <draft.md> [<draft.md> ...]
+// Usage: bun scripts/serve.ts <draft.md|draft.html> [more...]
 //
-// Renders each draft as an interactive markdown preview. The user selects text in the
-// browser and attaches a comment via a Medium/Hypothes.is-style popup. Each comment
+// Renders each artifact as an interactive preview — markdown via marked, or HTML served
+// directly through a Shadow DOM. The user anchors a comment (drag-to-select text in markdown,
+// click-an-element in HTML) via a Medium/Hypothes.is-style popup. Each comment
 // POSTs to /feedback and appends to feedback-{slug}.jsonl in the draft's directory.
 // A WebSocket pushes 'reload' messages whenever the source markdown changes, so the
 // next /comment-review iteration's edits appear immediately without manual refresh.
 //
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
-import { existsSync, watch } from "node:fs";
-import { appendFile, readdir, readFile } from "node:fs/promises";
-import { basename, dirname, extname, resolve } from "node:path";
+import { closeSync, constants, existsSync, fstatSync, openSync, readFileSync, statSync, watch } from "node:fs";
+import { appendFile, readdir, readFile, realpath } from "node:fs/promises";
+import { basename, dirname, extname, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 
 const args = process.argv.slice(2);
 if (args.length === 0) {
-  console.error("usage: bun scripts/serve.ts <draft.md> [<draft.md> ...]");
+  console.error("usage: bun scripts/serve.ts <draft.md|draft.html> [more...]");
   process.exit(1);
 }
 
@@ -27,7 +28,7 @@ if (args.length === 0) {
 const unknownFlags = args.filter((a) => a.startsWith("-"));
 if (unknownFlags.length > 0) {
   console.error(`unknown flag(s): ${unknownFlags.join(", ")}`);
-  console.error("usage: bun scripts/serve.ts <draft.md> [<draft.md> ...]");
+  console.error("usage: bun scripts/serve.ts <draft.md|draft.html> [more...]");
   process.exit(1);
 }
 
@@ -52,7 +53,7 @@ try {
   process.exit(1);
 }
 
-const escapeForScriptTag = (s: string) => s.replace(/<\/script/gi, "<\\/script");
+const escapeForScriptTag = (s: string) => s.replace(/<\/(script)/gi, "<\\/$1");
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
@@ -75,8 +76,8 @@ const renderIndex = () => {
   code{background:#f3f3f3;padding:.1em .3em;border-radius:3px;font-family:ui-monospace,monospace;font-size:.9em}
 </style>
 </head><body><h1>comment-review drafts</h1><ul>${items}</ul>
-<p>Select text in the rendered draft and leave a comment in the popup. Each comment appends to
-<code>feedback-{slug}.jsonl</code> next to the source markdown. The next <code>/comment-review</code>
+<p>Select text (markdown) or click an element (HTML) in the rendered draft and leave a comment in the popup. Each comment appends to
+<code>feedback-{slug}.jsonl</code> next to the source file. The next <code>/comment-review</code>
 turn ingests these as <code>&lt;feedback&gt;</code>-anchored directives.</p>
 </body></html>`;
 };
@@ -214,20 +215,29 @@ const readTaskListForSlug = async (slug: string): Promise<Finding[]> => {
 const renderPreview = async (slug: string) => {
   const path = drafts.get(slug);
   if (!path) return null;
-  const md = stripFrontmatter(await readFile(path, "utf8"));
+  // Render mode keys off the file extension: .html/.htm render the raw file through a
+  // Shadow DOM (CSS-isolated, innerHTML-inserted scripts inert); everything else renders
+  // as markdown via marked. Frontmatter is stripped for markdown only — HTML passes raw.
+  const ext = extname(path).toLowerCase();
+  const renderMode = ext === ".html" || ext === ".htm" ? "html" : "markdown";
+  const raw = await readFile(path, "utf8");
+  const body = renderMode === "markdown" ? stripFrontmatter(raw) : raw;
   const findings = await readTaskListForSlug(slug);
   // title goes into HTML context (escape & < > " '); slug goes into JS string literal context (JSON.stringify)
-  // findings goes into JS context (JSON.stringify with script-tag-safe escaping)
+  // findings + body go into JS context (JSON.stringify + script-tag-safe escaping; client JSON.parse reverses it losslessly)
   return template
     .replaceAll("__TITLE_PLACEHOLDER__", escapeHtml(slug))
     .replaceAll("__SLUG_PLACEHOLDER__", JSON.stringify(slug))
+    .replace("__RENDER_MODE_PLACEHOLDER__", JSON.stringify(renderMode))
     .replace("__FINDINGS_PLACEHOLDER__", escapeForScriptTag(JSON.stringify(findings)))
-    .replace("__MARKDOWN_CONTENT_PLACEHOLDER__", escapeForScriptTag(md));
+    .replace("__MARKDOWN_CONTENT_PLACEHOLDER__", escapeForScriptTag(JSON.stringify(body)));
 };
 
 interface FeedbackBody {
   slug: string;
   anchor: string;
+  anchor_kind?: "text" | "selector"; // tagged union; absent ⇒ "text" (markdown backward-compatible)
+  selector?: string;                 // CSS selector / DOM path when anchor_kind === "selector"
   context_before?: string;
   context_after?: string;
   comment: string;
@@ -287,6 +297,98 @@ function detectTailscale(): { ip: string; dnsName: string } | null {
 const tailnet = detectTailscale();
 const bindHost = tailnet ? tailnet.ip : "127.0.0.1";
 
+// ── Static sibling-asset serving for rendered HTML artifacts ──
+// Relative URLs in an HTML artifact (`<link href="x.css">`, `<img src="img/y.png">`) resolve
+// under /preview/..., so a /preview/ request that is NOT a known slug is a sibling asset. We
+// serve it READ-ONLY and STRICTLY SCOPED to the requesting artifact's OWN directory:
+//   - the artifact is identified by the Referer page (/preview/{slug}); single-draft fallback otherwise
+//   - reject ".." path segments and NUL before touching the filesystem
+//   - resolve against the artifact dir, then realpath() both and assert the canonical file stays
+//     inside the canonical artifact dir — this defeats path traversal AND symlink escape
+// Anything that resolves outside the artifact dir → 404. GET/HEAD only, no directory listing, no write.
+const ASSET_MIME: Record<string, string> = {
+  ".css": "text/css", ".js": "text/javascript", ".mjs": "text/javascript",
+  ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
+  ".svg": "image/svg+xml", ".webp": "image/webp", ".avif": "image/avif", ".ico": "image/x-icon",
+  ".woff": "font/woff", ".woff2": "font/woff2", ".ttf": "font/ttf", ".otf": "font/otf",
+  ".json": "application/json", ".map": "application/json", ".txt": "text/plain", ".csv": "text/csv",
+  ".mp4": "video/mp4", ".webm": "video/webm", ".mp3": "audio/mpeg", ".pdf": "application/pdf",
+};
+
+// Resolve which artifact directory a sibling-asset request belongs to, via the Referer page.
+const artifactDirFromReferer = (referer: string | null): string | null => {
+  let slug: string | null = null;
+  if (referer) {
+    try {
+      const rp = new URL(referer).pathname;
+      if (rp.startsWith("/preview/")) {
+        const s = decodeURIComponent(rp.slice("/preview/".length));
+        if (drafts.has(s)) slug = s;
+      }
+    } catch { /* malformed referer → ignore */ }
+  }
+  // Fallback: exactly one artifact served → its directory is unambiguous even without a Referer.
+  if (!slug && drafts.size === 1) slug = [...drafts.keys()][0];
+  return slug ? dirname(drafts.get(slug)!) : null;
+};
+
+const serveSiblingAsset = async (assetPath: string, referer: string | null): Promise<Response> => {
+  const dir = artifactDirFromReferer(referer);
+  if (!dir) return new Response("not found", { status: 404 });
+  // Fast-fail traversal/NUL defense before any filesystem access.
+  if (!assetPath || assetPath.includes("\0") || assetPath.split("/").includes("..")) {
+    return new Response("not found", { status: 404 });
+  }
+  const requested = resolve(dir, assetPath);
+  // Canonicalize both sides (follows symlinks) and require containment — defeats residual
+  // traversal and any symlink that points outside the artifact directory.
+  let canonDir: string;
+  let canonFile: string;
+  try {
+    canonDir = await realpath(dir);
+    canonFile = await realpath(requested);
+  } catch {
+    return new Response("not found", { status: 404 }); // missing target or broken symlink
+  }
+  if (canonFile !== canonDir && !canonFile.startsWith(canonDir + sep)) {
+    return new Response("not found", { status: 404 }); // escaped the artifact directory
+  }
+  // Close the time-of-check/time-of-use window by verifying the OPENED object's identity, not a
+  // re-resolved path string. Capture the contained file's identity (device + inode) now, open a
+  // handle, then require the fd's identity to match — a swap of canonFile between the check and
+  // the read yields a different fd identity → 404, instead of letting the read follow the swapped
+  // path outside the directory. We read from the pinned fd, never by re-resolving the path.
+  // O_NOFOLLOW is defense-in-depth for the final component (a swapped-in symlink fails with ELOOP).
+  // A legitimate symlink that was already inside the dir at check time still works, because
+  // realpath() resolved it to its real in-dir target — that target is what we stat and open.
+  // A post-check swap of an *intermediate* directory is also caught: the opened object's inode would
+  // differ from the captured one → 404. The only residual is dev+ino reuse, which is not attacker-controllable.
+  let id: { dev: number; ino: number };
+  try {
+    const s0 = statSync(canonFile);
+    if (!s0.isFile()) return new Response("not found", { status: 404 }); // no directories/specials
+    id = { dev: s0.dev, ino: s0.ino };
+  } catch {
+    return new Response("not found", { status: 404 });
+  }
+  let fd: number;
+  try {
+    fd = openSync(canonFile, constants.O_RDONLY | constants.O_NOFOLLOW);
+  } catch {
+    return new Response("not found", { status: 404 }); // missing, or final component is now a symlink
+  }
+  try {
+    const s1 = fstatSync(fd);
+    if (!s1.isFile() || s1.dev !== id.dev || s1.ino !== id.ino) {
+      return new Response("not found", { status: 404 }); // swapped between check and open
+    }
+    const ct = ASSET_MIME[extname(canonFile).toLowerCase()] || "application/octet-stream";
+    return new Response(readFileSync(fd), { headers: { "Content-Type": ct, "Cache-Control": "no-store" } });
+  } finally {
+    closeSync(fd);
+  }
+};
+
 const server = Bun.serve({
   hostname: bindHost,
   port: 0,
@@ -298,15 +400,22 @@ const server = Bun.serve({
     }
 
     if (url.pathname.startsWith("/preview/")) {
-      const slug = decodeURIComponent(url.pathname.slice("/preview/".length));
-      try {
-        const html = await renderPreview(slug);
-        if (!html) return new Response("not found", { status: 404 });
-        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
-      } catch (e) {
-        console.error(`[preview] render failed for slug=${slug}: ${(e as Error).message}`);
-        return new Response("render failed", { status: 500 });
+      const seg = decodeURIComponent(url.pathname.slice("/preview/".length));
+      // A known slug renders the artifact preview; anything else under /preview/ is a sibling
+      // asset request from a rendered HTML page (relative URLs resolve here) — served read-only,
+      // scoped to that artifact's own directory.
+      if (drafts.has(seg)) {
+        try {
+          const html = await renderPreview(seg);
+          if (!html) return new Response("not found", { status: 404 });
+          return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+        } catch (e) {
+          console.error(`[preview] render failed for slug=${seg}: ${(e as Error).message}`);
+          return new Response("render failed", { status: 500 });
+        }
       }
+      if (req.method !== "GET" && req.method !== "HEAD") return new Response("method not allowed", { status: 405 });
+      return await serveSiblingAsset(seg, req.headers.get("referer"));
     }
 
     if (url.pathname === "/marked.min.js") {
@@ -339,6 +448,23 @@ const server = Bun.serve({
       if (body.comment.length > MAX_COMMENT_LEN) return new Response(`comment exceeds ${MAX_COMMENT_LEN} chars`, { status: 413 });
       if ((body.context_before?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_before exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
       if ((body.context_after?.length ?? 0) > MAX_CONTEXT_LEN) return new Response(`context_after exceeds ${MAX_CONTEXT_LEN} chars`, { status: 413 });
+      // Optional anchor tagged union: HTML clients send anchor_kind="selector" + the selector
+      // string; markdown clients omit both (defaults to "text" downstream). selector reuses the
+      // anchor length cap. anchor stays non-empty for both modes (selector mode sends it in anchor too).
+      if (body.anchor_kind != null && body.anchor_kind !== "text" && body.anchor_kind !== "selector") {
+        return new Response('anchor_kind must be "text" or "selector"', { status: 400 });
+      }
+      if (body.selector != null && !isStr(body.selector)) return new Response("selector must be string", { status: 400 });
+      if ((body.selector?.length ?? 0) > MAX_ANCHOR_LEN) return new Response(`selector exceeds ${MAX_ANCHOR_LEN} chars`, { status: 413 });
+      // Tagged-union integrity: selector mode requires a non-empty selector, and a selector
+      // only belongs to selector mode (markdown omits both). Reject inconsistent records so a
+      // malformed POST cannot persist an entry that apply-back cannot resolve by selector.
+      if (body.anchor_kind === "selector" && (body.selector == null || body.selector.length === 0)) {
+        return new Response('anchor_kind "selector" requires a non-empty selector', { status: 400 });
+      }
+      if (body.selector != null && body.anchor_kind !== "selector") {
+        return new Response('selector requires anchor_kind "selector"', { status: 400 });
+      }
       const draft = drafts.get(body.slug);
       if (!draft) return new Response("unknown slug", { status: 400 });
       // Edit case: client supplies the original id so the new entry shares the dedup key
@@ -356,6 +482,9 @@ const server = Bun.serve({
         id,
         slug: body.slug,
         anchor: body.anchor,
+        // Persisted only when present so existing markdown lines stay byte-identical.
+        ...(body.anchor_kind != null ? { anchor_kind: body.anchor_kind } : {}),
+        ...(body.selector != null ? { selector: body.selector } : {}),
         context_before: body.context_before ?? "",
         context_after: body.context_after ?? "",
         comment: body.comment,

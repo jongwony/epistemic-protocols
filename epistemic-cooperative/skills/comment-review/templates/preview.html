@@ -217,6 +217,15 @@
     overflow: hidden;
   }
   body.sidebar-open #sidebar { transform: translateX(0); }
+  /* HTML mode: no sidepanel / scan finding-flow — review is in-place anchored commenting. */
+  body.cr-html-mode #sidebar, body.cr-html-mode #status-count { display: none; }
+  /* HTML renders at the authored viewport: drop the 760px reading-width box + all #main padding,
+     and hide the top nav chrome (it pushed the artifact down and broke 100vh / top-aligned /
+     fixed layouts). Full-page 100vh / fixed-position fidelity is still bounded by Shadow-DOM
+     rendering — a sandboxed iframe (see Deferred hardening) would give a true nested viewport;
+     the bottom status pill remains a minimal fixed overlay. */
+  body.cr-html-mode #main { max-width: none; padding: 0; }
+  body.cr-html-mode header { display: none; }
   #sidebar-header {
     padding: .75em 1em;
     border-bottom: 1px solid #eee;
@@ -496,11 +505,16 @@
 
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script type="text/markdown" id="md-source">__MARKDOWN_CONTENT_PLACEHOLDER__</script>
+<script type="application/json" id="md-source">__MARKDOWN_CONTENT_PLACEHOLDER__</script>
 <script type="application/json" id="findings-data">__FINDINGS_PLACEHOLDER__</script>
 
 <script>
 const SLUG = __SLUG_PLACEHOLDER__;
+// Render substrate: "markdown" → marked.parse into the light DOM; "html" → raw file
+// served through an open Shadow DOM (CSS-isolated from this review chrome; scripts
+// inserted via innerHTML are inert). Anchoring is text-selection in markdown mode,
+// element-click → unique CSS selector in html mode.
+const RENDER_MODE = __RENDER_MODE_PLACEHOLDER__;
 // Findings: TaskList-backed scan findings injected by serve.ts at render time.
 // Filtered to current slug (substring match on description tag) and excluding
 // completed entries. Per-finding shape: { id, subject, description, status,
@@ -513,12 +527,49 @@ try {
   console.error("[findings] failed to parse injected data:", e);
 }
 
-// Render markdown
-const sourceText = document.getElementById("md-source").textContent;
+// Render the artifact. `root` is the query/anchor surface: the light-DOM #content in
+// markdown mode, the shadow root in html mode.
+// The body is transported as a JSON string (escapeForScriptTag-protected, same as the
+// findings payload): JSON.parse reverses it losslessly — a real </script> in the artifact
+// survives, and a literal <\/script> already present in the source is not corrupted. Used
+// by both modes (marked.parse for markdown, shadowRoot.innerHTML for html).
+const sourceText = JSON.parse(document.getElementById("md-source").textContent);
 const content = document.getElementById("content");
-content.innerHTML = marked.parse(sourceText);
-// Cache once — innerText forces layout reflow per access (expensive on long drafts)
-const contentText = content.innerText;
+let shadowRoot = null;
+let root = content;
+if (RENDER_MODE === "html") {
+  // Raw HTML served through an open Shadow DOM: CSS-isolated from the review chrome,
+  // selector-click works because it is the same document. innerHTML does not run <script>
+  // tags, but this is NOT a JS sandbox — inline event handlers (onerror/onload), <iframe>,
+  // and active subresources still execute/load in this same-origin page; review trusted
+  // HTML only. marked is not used in html mode.
+  shadowRoot = content.attachShadow({ mode: "open" });
+  shadowRoot.innerHTML = sourceText;
+  root = shadowRoot;
+  // HTML review is in-place anchored commenting (right-click comment + edit-back); the
+  // sub-protocol scan / sidepanel finding-flow is a markdown-mode feature, so hide the
+  // sidepanel + its toggle (CSS below) and no-op the populate paths (renderFindings/renderSidebar).
+  document.body.classList.add("cr-html-mode");
+  // Mark/finding visuals must live inside the shadow root — the chrome's light-DOM
+  // stylesheet does not pierce the boundary. Outline-based marks avoid re-flowing the
+  // artifact (no <mark> wrapping); element-level anchoring marks the element in place.
+  const shadowStyle = document.createElement("style");
+  shadowStyle.textContent =
+    ".cr-anno{outline:2px solid #d4a017;outline-offset:1px;cursor:help;}" +
+    '.cr-anno::after{content:"💬";font-size:.7em;vertical-align:super;margin-left:2px;}' +
+    ".cr-finding{outline:2px solid #ff7f50;outline-offset:1px;cursor:pointer;}" +
+    // Hover-target hint: declared after cr-anno/cr-finding so it wins while hovering an
+    // already-marked element; thin dashed blue is distinct from the solid mark outlines.
+    ".cr-hover{outline:1px dashed #2c7be5;outline-offset:1px;cursor:context-menu;}" +
+    ".cr-pulse{box-shadow:0 0 0 4px rgba(44,123,229,.45);}" +
+    ".cr-finding-pulse{box-shadow:0 0 0 4px rgba(255,127,80,.45);}";
+  shadowRoot.appendChild(shadowStyle);
+} else {
+  content.innerHTML = marked.parse(sourceText);
+}
+// Cache once — innerText forces layout reflow per access (expensive on long drafts).
+// Only the markdown text-selection flow reads it; html mode anchors by selector.
+const contentText = RENDER_MODE === "html" ? "" : content.innerText;
 
 // Selection-popup state
 const popup = document.getElementById("popup");
@@ -548,23 +599,46 @@ const findingMarks = new Map();
 let pending = null; // { range, anchor, context_before, context_after, editingMark, tempMarks }
 let markIdCounter = 0; // monotonic id assigned per saved mark group; bridges DOM <-> sidebar entry
 
-content.addEventListener("mouseup", () => {
-  // Let the selection settle before reading it
-  setTimeout(handleSelection, 0);
-});
+let selSettle = null; // markdown-only selection-settle timer (cleared in dismissPopup)
+// Declared before the html-mode init block (which assigns it) to avoid a temporal-dead-zone
+// ReferenceError; the hover handlers below also read it.
+let selectorChip = null;  // html mode: light-DOM chip showing the live CSS selector on hover
+if (RENDER_MODE === "html") {
+  // Element-level anchoring. Right-click (contextmenu) is the comment trigger so left-click
+  // stays free for the page's own interactivity (links, buttons). A right-click inside the
+  // shadow root sees the real target (events retarget to the host only after they cross the
+  // boundary); the handler routes edit / finding-response / new-comment by the target's marks.
+  root.addEventListener("contextmenu", handleContextMenu);
+  // Hover preview: outline the element under the cursor + show its live CSS selector before
+  // the user commits. The chip lives in the light DOM so the shadow boundary cannot clip it.
+  selectorChip = document.createElement("div");
+  selectorChip.id = "cr-selector-chip";
+  selectorChip.style.cssText =
+    "position:fixed;bottom:10px;left:10px;z-index:1400;max-width:60vw;padding:.3em .6em;" +
+    "border-radius:4px;background:rgba(20,30,50,.92);color:#cfe3ff;font:12px ui-monospace,Menlo,monospace;" +
+    "white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;display:none;" +
+    "box-shadow:0 2px 8px rgba(0,0,0,.25);";
+  document.body.appendChild(selectorChip);
+  root.addEventListener("mouseover", handleHover);
+  content.addEventListener("mouseleave", clearHover);
+} else {
+  content.addEventListener("mouseup", () => {
+    // Let the selection settle before reading it
+    setTimeout(handleSelection, 0);
+  });
 
-// Touch devices: a long-press selection ends with `selectionchange`, not a clean
-// `mouseup`, so the popup never opened on mobile. Debounce so it opens only after
-// the selection settles (after the user finishes dragging the selection handles).
-// `selectionchange` fires on selection only (not on scroll), so mobile scrolling
-// stays unaffected; `handleSelection` ends by collapsing the range, which re-fires
-// `selectionchange` as collapsed and is ignored by handleSelection's own guard.
-let selSettle = null;
-document.addEventListener("selectionchange", () => {
-  if (popup.classList.contains("show")) return; // a popup is already open
-  clearTimeout(selSettle);
-  selSettle = setTimeout(handleSelection, 450);
-});
+  // Touch devices: a long-press selection ends with `selectionchange`, not a clean
+  // `mouseup`, so the popup never opened on mobile. Debounce so it opens only after
+  // the selection settles (after the user finishes dragging the selection handles).
+  // `selectionchange` fires on selection only (not on scroll), so mobile scrolling
+  // stays unaffected; `handleSelection` ends by collapsing the range, which re-fires
+  // `selectionchange` as collapsed and is ignored by handleSelection's own guard.
+  document.addEventListener("selectionchange", () => {
+    if (popup.classList.contains("show")) return; // a popup is already open
+    clearTimeout(selSettle);
+    selSettle = setTimeout(handleSelection, 450);
+  });
+}
 
 function setPopupMode(isEdit) {
   popupSubmit.textContent = isEdit ? "Update" : "Submit";
@@ -755,6 +829,11 @@ function openFindingPopup(finding, anchorEl) {
     tempMarks: [],
     findingId: finding.id, // submit handler appends [task: <id>] to the comment
   };
+  // In html mode a finding's anchor is a CSS selector — record it on the disposition line.
+  if (RENDER_MODE === "html" && finding.anchor) {
+    pending.anchor_kind = "selector";
+    pending.selector = finding.anchor;
+  }
 
   const rect = anchorEl && anchorEl.isConnected
     ? anchorEl.getBoundingClientRect()
@@ -767,7 +846,152 @@ function openFindingPopup(finding, anchorEl) {
   showPopup({ rect, previewText: anchorText, textareaValue: "", isFinding: true });
 }
 
+// ── HTML mode: element-level anchoring (selector-based) ──
+// All html-mode marks are in-place class toggles on the artifact's own elements,
+// kept inside the shadow root; nothing wraps or re-flows the artifact.
+
+let htmlMarkIdCounter = 0;
+const htmlPulseSlot = { id: null };
+let hoverEl = null;       // html mode: element currently outlined under the cursor
+// selectorChip is declared earlier (before the html-mode init block) to avoid a TDZ error.
+
+// CSS.escape with a conservative fallback for ids carrying special chars.
+function cssEscape(s) {
+  return (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+}
+
+// Compute a unique CSS selector for `el` within `r` (a shadow root or element).
+// Prefers a unique #id; otherwise builds a tag:nth-of-type(n) child chain to the root.
+function cssPath(el, r) {
+  if (!el || el.nodeType !== Node.ELEMENT_NODE) return "";
+  if (el.id && r.querySelectorAll("#" + cssEscape(el.id)).length === 1) return "#" + cssEscape(el.id);
+  const parts = [];
+  let cur = el;
+  while (cur && cur.nodeType === Node.ELEMENT_NODE && cur !== r) {
+    if (cur.id && r.querySelectorAll("#" + cssEscape(cur.id)).length === 1) {
+      parts.unshift("#" + cssEscape(cur.id));
+      break;
+    }
+    const tag = cur.tagName.toLowerCase();
+    const parent = cur.parentNode;
+    const sibs = parent ? Array.from(parent.children).filter((s) => s.tagName === cur.tagName) : [cur];
+    parts.unshift(sibs.length > 1 ? tag + ":nth-of-type(" + (sibs.indexOf(cur) + 1) + ")" : tag);
+    if (!parent || parent === r || parent.nodeType !== Node.ELEMENT_NODE) break;
+    cur = parent;
+  }
+  return parts.join(" > ");
+}
+
+// Scroll an html-mode element into view and pulse it (clears stale pulses in the shadow root).
+function pulseHtml(el, className) {
+  if (!el || !el.isConnected) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (htmlPulseSlot.id) clearTimeout(htmlPulseSlot.id);
+  root.querySelectorAll(".cr-pulse, .cr-finding-pulse").forEach((e) => e.classList.remove("cr-pulse", "cr-finding-pulse"));
+  void el.offsetWidth;
+  el.classList.add(className);
+  htmlPulseSlot.id = setTimeout(() => el.classList.remove(className), 800);
+}
+
+// Mark an element as a saved comment anchor (outline + 💬), carrying the dataset the
+// sidebar + edit/delete flows read.
+function markHtmlElement(el, selector, comment, id) {
+  if (!el) return;
+  el.classList.add("cr-anno");
+  el.dataset.anchor = selector;
+  el.dataset.selector = selector;
+  el.dataset.anchorKind = "selector";
+  el.dataset.comment = comment;
+  el.dataset.id = id || "";
+  if (!el.dataset.markId) el.dataset.markId = "h" + (++htmlMarkIdCounter);
+  el.title = comment;
+}
+
+// New-comment popup for a freshly clicked element; the selector is the anchor.
+function openSelectorPopup(el, selector) {
+  pending = {
+    range: null,
+    anchor: selector,
+    anchor_kind: "selector",
+    selector: selector,
+    context_before: "",
+    context_after: "",
+    editingMark: null,
+    tempMarks: [],
+    selectorTarget: el, // element to mark on successful submit
+  };
+  showPopup({ rect: el.getBoundingClientRect(), previewText: selector, textareaValue: "" });
+}
+
+// Edit popup for an already-annotated html element.
+function openEditPopupHtml(el) {
+  const selector = el.dataset.selector || el.dataset.anchor || "";
+  pending = {
+    range: null,
+    anchor: selector,
+    anchor_kind: "selector",
+    selector: selector,
+    context_before: "",
+    context_after: "",
+    editingMark: el,
+    tempMarks: [],
+  };
+  showPopup({
+    rect: el.getBoundingClientRect(),
+    previewText: selector,
+    textareaValue: el.dataset.comment || "",
+    isEdit: true,
+    selectAfterFocus: true,
+  });
+}
+
+// Shadow-root right-click router: suppress the native menu, then edit existing comment →
+// respond to finding → new comment. Left-click is intentionally left free for the page.
+function handleContextMenu(e) {
+  e.preventDefault(); // suppress the native context menu — right-click is the comment trigger
+  const target = e.target;
+  if (!target || target.nodeType !== Node.ELEMENT_NODE) return;
+  const annoEl = target.closest(".cr-anno");
+  if (annoEl) {
+    e.stopPropagation();
+    openEditPopupHtml(annoEl);
+    return;
+  }
+  const findingEl = target.closest("[data-finding-id]");
+  if (findingEl && findingEl.dataset.findingId) {
+    e.stopPropagation();
+    const finding = FINDINGS.find((f) => f.id === findingEl.dataset.findingId);
+    if (finding) openFindingPopup(finding, findingEl);
+    return;
+  }
+  const selector = cssPath(target, root);
+  if (!selector) return;
+  e.stopPropagation();
+  openSelectorPopup(target, selector);
+}
+
+// Hover preview (html mode): outline the element under the cursor and show its live selector.
+function handleHover(e) {
+  const t = e.target;
+  if (!t || t.nodeType !== Node.ELEMENT_NODE || t === hoverEl) return;
+  if (hoverEl) hoverEl.classList.remove("cr-hover");
+  hoverEl = t;
+  hoverEl.classList.add("cr-hover");
+  if (selectorChip) {
+    selectorChip.textContent = cssPath(t, root) || "(no selector)";
+    selectorChip.style.display = "block";
+  }
+}
+
+// Clear the hover outline + chip when the cursor leaves the artifact.
+function clearHover() {
+  if (hoverEl) hoverEl.classList.remove("cr-hover");
+  hoverEl = null;
+  if (selectorChip) selectorChip.style.display = "none";
+}
+
 content.addEventListener("click", (e) => {
+  if (RENDER_MODE === "html") return; // html clicks are handled on the shadow root
   const mark = e.target.closest(".annotated");
   if (mark) {
     e.stopPropagation();
@@ -891,6 +1115,9 @@ async function submitFeedback() {
     context_after: captured.context_after,
     comment: taggedComment,
   };
+  // html mode carries the element selector as a tagged-union anchor (markdown omits both).
+  if (captured.anchor_kind) reqBody.anchor_kind = captured.anchor_kind;
+  if (captured.selector) reqBody.selector = captured.selector;
   if (captured.editingMark && captured.editingMark.dataset.id) {
     reqBody.id = captured.editingMark.dataset.id;
   }
@@ -902,17 +1129,30 @@ async function submitFeedback() {
     const id = result.id;
 
     if (captured.editingMark) {
-      // Update comment text on all marks in the same logical group
-      const markId = captured.editingMark.dataset.markId;
-      const marks = markId
-        ? content.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
-        : [captured.editingMark];
-      for (const mark of marks) {
-        mark.dataset.comment = comment;
-        mark.title = comment;
-        if (id) mark.dataset.id = id;
+      if (RENDER_MODE === "html") {
+        // html edit: the annotated element itself is the mark — update it in place.
+        const el = captured.editingMark;
+        el.dataset.comment = comment;
+        el.title = comment;
+        if (id) el.dataset.id = id;
+      } else {
+        // Update comment text on all marks in the same logical group
+        const markId = captured.editingMark.dataset.markId;
+        const marks = markId
+          ? content.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+          : [captured.editingMark];
+        for (const mark of marks) {
+          mark.dataset.comment = comment;
+          mark.title = comment;
+          if (id) mark.dataset.id = id;
+        }
       }
       showToast("✓ updated");
+    } else if (RENDER_MODE === "html" && captured.selectorTarget) {
+      // html new comment: mark the clicked element (outline + 💬) in place.
+      markHtmlElement(captured.selectorTarget, captured.selector || captured.anchor, comment, id);
+      captured.selectorTarget = null;
+      showToast("✓ saved");
     } else if (captured.tempMarks && captured.tempMarks.length > 0 && captured.tempMarks[0].parentNode) {
       promotePendingMarks(captured.tempMarks, captured.anchor, captured.context_before, captured.context_after, comment, id);
       captured.tempMarks = []; // do not unwrap on dismiss
@@ -963,17 +1203,29 @@ async function deleteFeedback() {
       throw new Error(result.reason || "server did not confirm deletion");
     }
 
-    // Unwrap ALL marks sharing the same markId — preserves multi-mark groups
-    const marks = markId
-      ? content.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
-      : [editedMark];
-    for (const mark of marks) {
-      const parent = mark.parentNode;
-      if (!parent) continue;
-      while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
-      parent.removeChild(mark);
+    if (RENDER_MODE === "html") {
+      // html: drop the annotation class + dataset, leaving the element itself intact.
+      editedMark.classList.remove("cr-anno");
+      delete editedMark.dataset.comment;
+      delete editedMark.dataset.anchor;
+      delete editedMark.dataset.selector;
+      delete editedMark.dataset.anchorKind;
+      delete editedMark.dataset.id;
+      delete editedMark.dataset.markId;
+      editedMark.removeAttribute("title");
+    } else {
+      // Unwrap ALL marks sharing the same markId — preserves multi-mark groups
+      const marks = markId
+        ? content.querySelectorAll('.annotated[data-mark-id="' + markId + '"]')
+        : [editedMark];
+      for (const mark of marks) {
+        const parent = mark.parentNode;
+        if (!parent) continue;
+        while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+        parent.removeChild(mark);
+      }
+      content.normalize();
     }
-    content.normalize();
     dismissPopup();
     renderSidebar();
     showToast("✓ deleted");
@@ -1039,6 +1291,7 @@ function truncateForDisplay(text, maxChars) {
 // (clickable scroll-to-anchor); unanchored findings render with dashed-border
 // styling (no in-text mark, no scroll target).
 function renderFindings() {
+  if (RENDER_MODE === "html") return; // html mode suppresses the scan finding-flow (no sidepanel, no in-place finding marks)
   while (findingsList.firstChild) findingsList.removeChild(findingsList.firstChild);
   findingMarks.clear();
 
@@ -1053,24 +1306,37 @@ function renderFindings() {
     const anchorText = finding.anchor || "";
     let marks = [];
 
-    // Preferred path: UUID-based DOM lookup. The source markdown carries
-    // <span id="cr-anchor-{UUID}" class="finding-anchor">…</span> so the span
-    // is already the marked element; no substring search, no ambiguity.
-    if (anchorId) {
-      const el = document.getElementById("cr-anchor-" + anchorId);
-      if (el) marks = [el];
-    }
+    if (RENDER_MODE === "html") {
+      // html: the finding anchor is a CSS selector resolved inside the shadow root.
+      // The element is marked in place (coral outline); no wrapping span.
+      if (anchorText) {
+        let el = null;
+        try { el = root.querySelector(anchorText); } catch (e) { el = null; }
+        if (el) {
+          el.classList.add("cr-finding");
+          marks = [el];
+        }
+      }
+    } else {
+      // Preferred path: UUID-based DOM lookup. The source markdown carries
+      // <span id="cr-anchor-{UUID}" class="finding-anchor">…</span> so the span
+      // is already the marked element; no substring search, no ambiguity.
+      if (anchorId) {
+        const el = document.getElementById("cr-anchor-" + anchorId);
+        if (el) marks = [el];
+      }
 
-    // Fallback: substring search + wrap, for findings without anchor-id
-    // (legacy or AI declined to assign UUID).
-    if (marks.length === 0 && anchorText) {
-      const range = locateAnchorInDOM(anchorText);
-      if (range) {
-        try {
-          marks = wrapRangeInMarks(range, "finding-anchor");
-        } catch (e) {
-          console.warn("[findings] wrap failed for finding", finding.id, e);
-          marks = [];
+      // Fallback: substring search + wrap, for findings without anchor-id
+      // (legacy or AI declined to assign UUID).
+      if (marks.length === 0 && anchorText) {
+        const range = locateAnchorInDOM(anchorText);
+        if (range) {
+          try {
+            marks = wrapRangeInMarks(range, "finding-anchor");
+          } catch (e) {
+            console.warn("[findings] wrap failed for finding", finding.id, e);
+            marks = [];
+          }
         }
       }
     }
@@ -1149,6 +1415,11 @@ function pulseMarks(marks, className, timerSlot) {
 
 const findingPulseSlot = { id: null };
 function focusFindingMarks(marks) {
+  if (!marks || marks.length === 0) return;
+  if (RENDER_MODE === "html") {
+    pulseHtml(marks[0], "cr-finding-pulse");
+    return;
+  }
   pulseMarks(marks, "finding-anchor", findingPulseSlot);
 }
 
@@ -1160,6 +1431,9 @@ function updateTotalSidebarCount(commentsN) {
 }
 
 function renderSidebar() {
+  // The sidebar is markdown-mode only — html mode hides it and surfaces comments in-place
+  // (the .cr-anno outline + 💬 on the element itself, applied by markHtmlElement on submit).
+  if (RENDER_MODE === "html") return;
   const allMarks = content.querySelectorAll(".annotated");
   // Group by markId so multi-mark logical comments collapse to one sidebar row.
   // First-seen mark per group is the canonical scroll/focus target.
@@ -1198,7 +1472,10 @@ function renderSidebar() {
 
     item.appendChild(anchorEl);
     item.appendChild(commentEl);
-    const openEdit = () => { focusMark(mark); openEditPopup(mark); };
+    // html comments carry a CSS-selector anchor — edit through the selector-aware popup so
+    // the resubmit preserves anchor_kind/selector (markdown openEditPopup would drop both,
+    // downgrading the latest JSONL entry to text-mode and breaking selector apply-back).
+    const openEdit = () => { focusMark(mark); (RENDER_MODE === "html" ? openEditPopupHtml : openEditPopup)(mark); };
     item.addEventListener("click", openEdit);
     item.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -1218,6 +1495,11 @@ function focusMark(mark) {
   if (pending && pending.tempMarks && pending.tempMarks.length > 0) {
     removePendingMarks(pending.tempMarks);
     pending.tempMarks = [];
+  }
+  if (RENDER_MODE === "html") {
+    // html comments are single in-place elements — pulse the element directly.
+    pulseHtml(mark, "cr-pulse");
+    return;
   }
   // Pulse all marks in the same logical group (multi-mark comments span multiple elements)
   const markId = mark.dataset.markId;
