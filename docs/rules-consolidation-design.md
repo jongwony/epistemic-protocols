@@ -2,11 +2,13 @@
 
 ## Executive Summary
 
-Issue #434 proposes consolidating the `## Rules` sections across seven epistemic protocols (Periagoge, Epharmoge, Analogia, Prothesis, Syneidesis, Katalepsis, Elenchus) to reduce contributor-doc duplication and improve maintainability. This design operationalizes the re-baseline tracker from PR #580, derives a per-protocol implementation strategy, and resolves the Tier-5 annotation drift.
+Issue #434 asks two things: re-baseline the `## Rules` classifications against current state (measurement — done by PR #580), and **decide which protocols still benefit from consolidation** (disposition — the open decision). PR #580 ranks the seven by payoff/risk but presupposes all seven eventually run. This doc resolves the prior question PR #580 leaves open: **how far should the batch go at all?**
 
-**Key Decision**: Consolidate via a **phased Track-B-ordered sequence of seven small PRs**, each moving protocol-native bodies into Phase prose and Distinction sections, while keeping all endpoint + runtime-contract semantics and axiom anchors unchanged.
+**Key Decision**: **Targeted subset.** Run standalone consolidation PRs for only the top three — Epharmoge → Periagoge → Analogia (where a heavy Tier-3/Tier-4 body actually exists and risk is Low–Med) — and drop the bottom four (Elenchus, Katalepsis, Prothesis, Syneidesis) to **opportunistic ride-along**: consolidate only when the file is already being edited for other reasons. Two structural findings (below) cap the batch's upside and argue against running all seven as standing work.
 
-**Tier-5 Action**: Add `(Safeguard tier)` annotation to the three protocols missing it (Analogia 13, Prothesis 12, Katalepsis 11) and inline the Actionable revision criterion on `Gate integrity` across all seven.
+**Tier-5 Action** (survives regardless of disposition): add the `(Safeguard tier)` annotation to the three protocols missing it (Analogia 13, Prothesis 12, Katalepsis 11) and inline the Actionable revision criterion on `Gate integrity`. Runnable as a single cross-protocol sweep PR even if every body-migration is declined.
+
+> **Premise verification (live HEAD, this revision).** The doc's load-bearing facts were re-checked against the current SKILL.md files, not trusted from the tracker: top-level rule counts match live for all seven (16/18/17/15/13/15/18); the Tier-5 annotation drift is exactly current — `(Safeguard tier)` present in Periagoge/Epharmoge/Syneidesis/Elenchus, missing in Analogia (13)/Prothesis (12)/Katalepsis (11), rule numbers confirmed. One stale reference found: **issue #434 cites the framework at `.claude/rules/safeguards.md`; it actually lives at `.claude/principles/safeguards.md`** (PR #580 and this doc use the correct path).
 
 ---
 
@@ -59,6 +61,26 @@ Katalepsis **exception**: correctly carries **no** `Option-set relay test` rule 
 | **Total** | | **119** | 112 | 7 sub-letters |
 
 **Premise validation** (#434): counts diverge from both #372 targets and #434's creation-time snapshot — mechanical count targets mislead; current state is the source of truth.
+
+---
+
+## Two findings that bound the decision
+
+### Finding 1 — the reduction ceiling is structural, and low
+
+The **common spine** (above) recurs near-verbatim across all seven candidates *and* the four already-consolidated precedents (Aitesis / Prosoche / Anamnesis / Horismos) — duplicated ~11× across the suite. That looks like the largest consolidation target in the repo, but it is not addressable:
+
+- The spine is **already minimal** per protocol (each entry is a 1–2 line axiom/derived/safeguard anchor — Tiers 1/2/5). There is no body to migrate.
+- Extracting the spine into one shared doc is **forbidden by the runtime contract**: *"SKILL.md must be self-contained. Do not require runtime readers to chase contributor-only docs, axiom identifiers, rule paths …"* (CLAUDE.md → Runtime Contract). The 11× duplication is the **intended** cost of self-containment, not waste to collapse.
+
+So the entire reduction surface is the Tier-3 paragraph bodies + Tier-4 cross-protocol rules — and that surface is thin: genuinely heavy only at Epharmoge (rule 17, the meta-backbone certificate), tapering to one or two bodies (Syneidesis, Elenchus) or colliding with load-bearing invariants (Katalepsis 9b, Prothesis 3–6) below the top three.
+
+### Finding 2 — the batch fights the project's actual cadence
+
+1. **Drift treadmill, empirically demonstrated.** Current counts diverge from **both** prior snapshots — #372 targets *and* #434's creation-time snapshot — for **every** protocol. This is the third re-baseline of the same tracker (#372 → #434 → PR #580), each invalidated by unrelated protocol work before it could be executed. A standing seven-PR batch is a moving target: any protocol edited for other reasons re-drifts its row before its consolidation PR lands.
+2. **Opportunistic consolidation is the revealed practice.** The most recent candidate-touching commit on `main`, `ee08fe7` (white-bear audit: prohibition → positive grounding), restated a Periagoge body **as a ride-along** — outside any #434 batch, when that audit was already touching those files. The project already refines protocol bodies piecemeal at edit time; the batch tracker is not how the actual reduction has been happening.
+
+Together: the batch's standing cost (re-drift maintenance, seven reviews) is paid against a ceiling Finding 1 caps low, while the project's own cadence already captures the same gains opportunistically at lower cost. This is what moves the disposition from "all seven" to "top three now, rest opportunistic."
 
 ---
 
@@ -301,70 +323,55 @@ Testing:
 
 ## Acceptance Criteria (from #434)
 
-1. **Current-state classification replaces stale #372 targets** — this design operationalizes the re-baseline tracker, making it the new baseline for consolidation work.
+1. **Current-state classification replaces stale #372 targets** — PR #580's re-baseline (premise-checked current above) supplies the measurement; this doc's disposition decision (targeted subset) sets which consolidation work actually proceeds.
 2. **Each protocol preserves endpoint + runtime contract** — all proposed moves keep the protocol's essential behavior unchanged.
 3. **No rule removed merely for duplicating contributor docs** — reduction is in moving bodies to prose sections, not deleting rule structure. Runtime self-containment wins.
 4. **Safeguard-tier rules retain actionable revision criterion where still needed** — Tier-5 annotation drift is fixed uniformly; all seven protocols document the criterion.
 
 ---
 
-## Design Forks
+## Disposition — the decision #434 leaves open
 
-### Fork A: Sequential PRs (RECOMMENDED)
+PR #580 ranks *order*; the open question is *how far the batch goes*. Three dispositions:
 
-**Decision**: Open seven separate PRs in Track-B order (Epharmoge → Periagoge → Analogia → Elenchus → Katalepsis → Prothesis → Syneidesis), each self-contained with before/after counts, verification, and Tier-5 fixes.
+- **(A) Full batch** — run Track C for all seven, one PR per protocol, in ranked order. Uniform framework application across the suite.
+- **(B) Decline the batch** — keep PR #580 as the reference tracker; consolidate only opportunistically (ride-along). No standalone consolidation PRs.
+- **(C) Targeted subset** — run the high-payoff, low-risk PRs now; drop the rest to opportunistic. Converts PR #580's ranking into a cut line.
 
-**Rationale**:
-- Each PR is reviewable as a standalone consolidation decision.
-- Track-B ordering prioritizes high-payoff, low-risk protocols first.
-- Katalepsis/Prothesis tail can be deferred if behavior verification reveals issues.
-- Syneidesis remains optional.
+The two findings above settle this against (A): the reduction ceiling is structural and low (Finding 1), and a standing seven-PR batch fights the project's drift cadence (Finding 2). (B) under-captures the one genuinely heavy payoff (Epharmoge rule 17). **(C) is the fit** — capture the real reduction at the top, refuse the treadmill below it.
 
-**Effort**: ~40–50 person-hours (one protocol per ~6–8 hours, including body rewriting, Distinction extraction, verification).
+## Recommendation — (C) Targeted subset
 
-**Risk**: Low; each protocol's consolidation is reversible and localized.
+Run **only the Track B top three** as standalone PRs now — **Epharmoge → Periagoge → Analogia** (all Low/Med risk, where a heavy Tier-3/Tier-4 body actually exists) — and **drop the bottom four to opportunistic ride-along**:
 
-**Next step**: Open Epharmoge PR first (Rank 1); unblock Periagoge (Rank 2) in parallel review; sequence remaining PRs based on review feedback.
+- **Epharmoge** (lead): rules 16/17 are the heaviest bodies in the set; the largest single reduction in the repo. Clear win.
+- **Periagoge**: clean Distinction extraction (rules 8/11) + four architectural bodies. Low risk, no load-bearing collision.
+- **Analogia**: rule 16a cross-protocol body + fit-map (16); #434 notes fit-map work already in flight, so this rides an existing edit surface.
+- **Elenchus / Katalepsis / Prothesis / Syneidesis → opportunistic only.** Katalepsis and Prothesis carry High behavior-preservation risk (9b fail-closed; core-invariant guards) for modest payoff; Syneidesis is already lean (one body); Elenchus is behavior-sensitive (antithesis Patterns A–D). Consolidate each *only* when it is already being edited — the `ee08fe7` pattern.
 
-### Fork B: Batched PR (High-risk alternative)
+This cut is not imposed on the sources — it is **latent in both**: #434's own per-protocol language ("Epharmoge and Periagoge: highest …"; "Analogia/Syneidesis: opportunistic only"; Katalepsis/Prothesis "handle carefully / avoid broad churn"; Elenchus "include only if …"), and PR #580's risk-discounted Track B order. This doc's contribution is to treat the rank-4 boundary as a **disposition cut** (do-now vs opportunistic), not merely a running order.
 
-**Decision**: Consolidate all seven in a single mega-PR.
+**Sub-decision (only if PRs run): packaging.** Use one PR per protocol, not a single mega-PR — each consolidation stays independently reviewable and behavior-verifiable, and a high-risk protocol (Katalepsis, Prothesis) cannot block the rest. The mega-PR's only draw (one merge point) is outweighed by lost per-protocol rollback.
 
-**Rationale**:
-- Single merge point; no cascading reviews.
-- Ensures all Tier-5 annotations happen together.
+**The Tier-5 sweep runs regardless of the cut** — see Tier-5 section. It is mechanical, near-zero-risk, and independent of body-migration; recommended as one cross-protocol PR even under (B).
 
-**Risk**:
-- Difficult to review; hard to isolate behavior changes if verification fails.
-- If high-risk protocols (Katalepsis, Prothesis) reveal issues, entire PR blocks.
-- Rollback requires reverting all seven simultaneously.
+## Open fork for the human
 
-**Verdict**: Not recommended. Sequential PRs allow behavioral verification per protocol.
+1. **Disposition**: (A) full seven-PR batch / **(C) targeted subset — Epharmoge, Periagoge, Analogia now; rest opportunistic (recommended)** / (B) decline the batch entirely (opportunistic-only).
+2. **Tier-5 annotation sweep**: run the `(Safeguard tier)` + Actionable-criterion normalization as one cross-protocol PR regardless of (1)? (recommended yes — independent, mechanical.)
+3. **PR #580 reconciliation**: PR #580 is an OPEN tracker PR. On adopting (C), either (i) merge PR #580 as the measurement record and let this doc sit beside it as the decision record, or (ii) fold PR #580's Track-A tables into this doc and close #580. Recommended **(i) merge as-is** — premise-checked accurate above; the two split cleanly into *measurement* (#580) and *decision* (this doc), and copying the tables here would duplicate and re-stale them.
 
----
+## Spec-edit sketch
 
-## Implementation Roadmap
+This is a **decision doc — no SKILL.md edits land from it directly.** It scopes the work the human authorizes:
 
-1. **Phase 1 (Week 1)**: Open Epharmoge PR (Rank 1); concurrent preparation of Periagoge PR (Rank 2)
-2. **Phase 2 (Week 2)**: Merge Epharmoge; open Periagoge; prepare Analogia + Elenchus
-3. **Phase 3 (Week 3)**: Merge Periagoge; open Analogia + Elenchus in parallel; prepare Katalepsis verification
-4. **Phase 4 (Week 4)**: Merge Analogia + Elenchus; open Katalepsis with rigorous behavior review (9b fail-closed, A5 exclusion)
-5. **Phase 5 (Week 5)**: Merge Katalepsis; open Prothesis with guard-section migration plan + behavior verification
-6. **Phase 6 (Week 6)**: Merge Prothesis; Syneidesis optional (if momentum/resources permit)
-7. **Closeout**: Update #434 tracker; close issue once all seven are merged
-
----
-
-## Recommendation
-
-**RECOMMEND FORK A (Sequential PRs, Track-B ordered)**. Each consolidation is self-contained, reviewable, and verifiable. Tier-5 annotation fixes normalize the pattern uniformly. The sequential approach allows behavior verification per protocol and keeps high-risk consolidations (Katalepsis, Prothesis) in the tail, where lessons from earlier PRs inform their review.
-
-**Key evidence**:
-- Track-B ranking prioritizes payoff/risk ratio; Epharmoge leads with highest payoff, lowest risk.
-- Tier-5 annotation drift is real (3 of 7 missing annotation); uniform fix grounds future Safeguard decisions.
-- Per-protocol implementation plans are concrete (each specifies Phase prose moves, Distinction sections, Tier-5 action); ready to execute.
-
-**Next step**: Open Epharmoge PR following the template above; unblock Periagoge in parallel.
+1. **If (C)** — three standalone consolidation PRs, in order, each per the per-protocol PR template above (before/after count, the Track-A table, *"endpoint and morphism semantics unchanged,"* patch `plugin.json` bump, `static-checks.js` fail 0, plus `node --test scripts/package.test.js` since runtime-contract views shift):
+   - PR-1 **Epharmoge**: rules 16/17 bodies → Phase prose; rule 6 (Non-circularity vs Aitesis) → Distinction section.
+   - PR-2 **Periagoge**: rules 3/4/5/10a bodies → Phase prose; rules 8/11 → Distinction section.
+   - PR-3 **Analogia**: rule 16 fit-map body → Phase prose; rule 16a → Distinction; coordinate with the in-flight fit-map work to avoid a re-drift collision.
+2. **Tier-5 sweep PR** (independent): add `(Safeguard tier)` to `Gate integrity` in Analogia/Prothesis/Katalepsis; inline the Actionable revision criterion across all seven. One PR; patch bumps on each edited `plugin.json`.
+3. **Per migration, run the semantic-closure sweep** — a body moved from `## Rules` to Phase prose must keep its invariant assertion reachable (the 1-liner stays in Rules, the elaboration moves); verify the runtime-contract view, not source prose alone, so no invariant silently drops.
+4. **Declined four** (Elenchus/Katalepsis/Prothesis/Syneidesis): no PR; record in PR #580's Status table as `opportunistic — consolidate at next edit`, so the disposition is durable and the next editor of those files knows to ride along.
 
 ---
 
@@ -375,7 +382,7 @@ Testing:
 - `.claude/rules/axioms.md` — A1–A6 axiom anchors
 - `.claude/rules/derived-principles.md` — Derived principle anchors
 - `.claude/principles/architectural-principles.md` — Per-protocol Core Principles
-- PR #580 (rules-consolidation-rebaseline.md) — re-baseline tracker (superseded by this design doc)
+- PR #580 (rules-consolidation-rebaseline.md) — re-baseline tracker; the **measurement source** this doc consumes by reference (Track-A tables, counts, Tier-5 drift). Layer split: PR #580 = measurement, this doc = disposition decision.
 
 ---
 
