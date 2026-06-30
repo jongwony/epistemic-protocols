@@ -13,9 +13,9 @@
 //
 // Stop with Ctrl-C. No port collision: Bun.serve(port: 0) lets the OS pick.
 
-import { existsSync, watch } from "node:fs";
-import { appendFile, readdir, readFile } from "node:fs/promises";
-import { basename, dirname, extname, resolve } from "node:path";
+import { existsSync, statSync, watch } from "node:fs";
+import { appendFile, readdir, readFile, realpath } from "node:fs/promises";
+import { basename, dirname, extname, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 
 const args = process.argv.slice(2);
@@ -297,6 +297,73 @@ function detectTailscale(): { ip: string; dnsName: string } | null {
 const tailnet = detectTailscale();
 const bindHost = tailnet ? tailnet.ip : "127.0.0.1";
 
+// ── Static sibling-asset serving for rendered HTML artifacts ──
+// Relative URLs in an HTML artifact (`<link href="x.css">`, `<img src="img/y.png">`) resolve
+// under /preview/..., so a /preview/ request that is NOT a known slug is a sibling asset. We
+// serve it READ-ONLY and STRICTLY SCOPED to the requesting artifact's OWN directory:
+//   - the artifact is identified by the Referer page (/preview/{slug}); single-draft fallback otherwise
+//   - reject ".." path segments and NUL before touching the filesystem
+//   - resolve against the artifact dir, then realpath() both and assert the canonical file stays
+//     inside the canonical artifact dir — this defeats path traversal AND symlink escape
+// Anything that resolves outside the artifact dir → 404. GET/HEAD only, no directory listing, no write.
+const ASSET_MIME: Record<string, string> = {
+  ".css": "text/css", ".js": "text/javascript", ".mjs": "text/javascript",
+  ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
+  ".svg": "image/svg+xml", ".webp": "image/webp", ".avif": "image/avif", ".ico": "image/x-icon",
+  ".woff": "font/woff", ".woff2": "font/woff2", ".ttf": "font/ttf", ".otf": "font/otf",
+  ".json": "application/json", ".map": "application/json", ".txt": "text/plain", ".csv": "text/csv",
+  ".mp4": "video/mp4", ".webm": "video/webm", ".mp3": "audio/mpeg", ".pdf": "application/pdf",
+};
+
+// Resolve which artifact directory a sibling-asset request belongs to, via the Referer page.
+const artifactDirFromReferer = (referer: string | null): string | null => {
+  let slug: string | null = null;
+  if (referer) {
+    try {
+      const rp = new URL(referer).pathname;
+      if (rp.startsWith("/preview/")) {
+        const s = decodeURIComponent(rp.slice("/preview/".length));
+        if (drafts.has(s)) slug = s;
+      }
+    } catch { /* malformed referer → ignore */ }
+  }
+  // Fallback: exactly one artifact served → its directory is unambiguous even without a Referer.
+  if (!slug && drafts.size === 1) slug = [...drafts.keys()][0];
+  return slug ? dirname(drafts.get(slug)!) : null;
+};
+
+const serveSiblingAsset = async (assetPath: string, referer: string | null): Promise<Response> => {
+  const dir = artifactDirFromReferer(referer);
+  if (!dir) return new Response("not found", { status: 404 });
+  // Fast-fail traversal/NUL defense before any filesystem access.
+  if (!assetPath || assetPath.includes("\0") || assetPath.split("/").includes("..")) {
+    return new Response("not found", { status: 404 });
+  }
+  const requested = resolve(dir, assetPath);
+  // Canonicalize both sides (follows symlinks) and require containment — defeats residual
+  // traversal and any symlink that points outside the artifact directory.
+  let canonDir: string;
+  let canonFile: string;
+  try {
+    canonDir = await realpath(dir);
+    canonFile = await realpath(requested);
+  } catch {
+    return new Response("not found", { status: 404 }); // missing target or broken symlink
+  }
+  if (canonFile !== canonDir && !canonFile.startsWith(canonDir + sep)) {
+    return new Response("not found", { status: 404 }); // escaped the artifact directory
+  }
+  let st: ReturnType<typeof statSync>;
+  try {
+    st = statSync(canonFile);
+  } catch {
+    return new Response("not found", { status: 404 });
+  }
+  if (!st.isFile()) return new Response("not found", { status: 404 }); // no directories
+  const ct = ASSET_MIME[extname(canonFile).toLowerCase()] || "application/octet-stream";
+  return new Response(Bun.file(canonFile), { headers: { "Content-Type": ct, "Cache-Control": "no-store" } });
+};
+
 const server = Bun.serve({
   hostname: bindHost,
   port: 0,
@@ -308,15 +375,22 @@ const server = Bun.serve({
     }
 
     if (url.pathname.startsWith("/preview/")) {
-      const slug = decodeURIComponent(url.pathname.slice("/preview/".length));
-      try {
-        const html = await renderPreview(slug);
-        if (!html) return new Response("not found", { status: 404 });
-        return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
-      } catch (e) {
-        console.error(`[preview] render failed for slug=${slug}: ${(e as Error).message}`);
-        return new Response("render failed", { status: 500 });
+      const seg = decodeURIComponent(url.pathname.slice("/preview/".length));
+      // A known slug renders the artifact preview; anything else under /preview/ is a sibling
+      // asset request from a rendered HTML page (relative URLs resolve here) — served read-only,
+      // scoped to that artifact's own directory.
+      if (drafts.has(seg)) {
+        try {
+          const html = await renderPreview(seg);
+          if (!html) return new Response("not found", { status: 404 });
+          return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+        } catch (e) {
+          console.error(`[preview] render failed for slug=${seg}: ${(e as Error).message}`);
+          return new Response("render failed", { status: 500 });
+        }
       }
+      if (req.method !== "GET" && req.method !== "HEAD") return new Response("method not allowed", { status: 405 });
+      return await serveSiblingAsset(seg, req.headers.get("referer"));
     }
 
     if (url.pathname === "/marked.min.js") {
