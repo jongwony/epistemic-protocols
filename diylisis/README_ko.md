@@ -23,7 +23,7 @@
 - **F3b — 변환-출처(Transformation-provenance)**: 3분할 verdict — **CorrectedKeep**(매칭되는 비-잠정 미만료 `KEEP` `CorrectionDelta`, DurableRepo 전용), **ObservedKeep**(교정 기록이 없고, support-integrity로 값과 결합된 durable·직접 관측 가능 출처 — 원장 없이, Gate 없이 직접 KEEP), **Unknown**(관측 기반도 delta도 없음 → Gate). 평범한 출처-기반 상태는 ObservedKeep이므로 원장 부재가 더 이상 모든 항목을 Gate로 보내지 않습니다. KEEP은 외관으로 추론되지 않으며, correction이 필요한 주장은 여전히 원장 또는 Gate Resolve가 필요합니다.
 - **F3 — 처분(Disposition)**: KEEP(inline) | ROUTE(StableRef) | DROP.
 - **F4 — 압축 폐쇄**: 최소-완전(minimal-complete) 집합만 유지합니다 — 계약-상대적 완전성이지, 미적 간결성이 아닙니다.
-- **F5 — 이해 게이트**: refute 자세의 `zero-memory-refuter` subagent(fresh context, 세션 용어 watchlist, 근거 인용 verdict; 플랫폼 사다리: named agent → generic fresh subagent → lint 체크리스트, lint 단계는 fresh-context 격리가 없는 약화된 실현)로 zero-memory 수신자 기준에 대해 검증합니다. 저자 self-simulation은 배제됩니다.
+- **F5 — 이해 게이트**: refute 자세의 `zero-memory-refuter` subagent(fresh context, 세션 용어 watchlist, 근거 인용 verdict; 플랫폼 사다리: named agent → generic fresh subagent → lint 체크리스트, lint 단계는 fresh-context 격리가 없는 약화된 실현)로 zero-memory 수신자 기준에 대해 검증합니다. 저자 self-simulation은 배제됩니다. **prose-only 삭제 테스트**를 포함합니다: TaskStateBlock, correction ledger, 네이티브 task-state, 모든 agent-specific affordance를 무시했을 때, next task가 prose 채널 + allowed sources만으로 여전히 실행 가능해야 하며 — 그렇지 않으면 게이트가 Fail합니다.
 - **F6 — 제한된 audit/lint 루프**: 약하게 감소하는 위생 척도에 따라 종료합니다. "완성된 느낌"이 아니라 척도로 종료합니다.
 - **F7 — 채널 분리**: prose 채널(권위)과, 댕글링 task 식별자를 복원하는 스키마 버전 `TaskStateBlock`을 산출합니다.
 
@@ -33,6 +33,8 @@
 
 - 사용자가 `/distill` 호출 (Layer 1, 항상 가용)
 - AI가 맥락 핸드오프 직전 세션-결박 잔여물을 감지 — 핸드오프 브리프, fresh-context 서브에이전트 디스패치, 재개 가능한 plan (Layer 2, 무음 감지)
+
+`/distill`은 **secret-free 작업 맥락**을 전제합니다 — secret(credential, token, key) 제거는 전용 redaction 에이전트가 상류에서 처리하는 별개 관심사이며, distill morphism의 일부가 아닙니다.
 
 ## 처분 Coproduct
 
@@ -51,6 +53,18 @@ Gate에서, 표면화된 residual 또는 unknown-provenance 항목은 `Resolve |
 F3b는 항목의 *외관*으로 KEEP을 추론하지 않습니다. KEEP은 정확히 세 경로로만 도달합니다: **CorrectedKeep** — 매칭 `CorrectionDelta`가 비-잠정 상태로 `export_policy = KEEP`을 가지고 `validity_horizon`이 만료되지 않음(DurableRepo 전용; 원장의 권위로, 교정·이견·노후·user-구성 주장에 한정); **ObservedKeep** — 교정 기록이 없고, support-integrity로 값과 결합된 durable·직접 관측 가능 출처(파일 읽기, 명령 출력, PR/이슈 URL, durable stable-ref)로 원장·Gate 없이 직접 KEEP; 또는 Gate에서의 사용자 **Resolve**. 관측 기반도 delta도 없는 항목은 **Unknown** — KEEP으로 기본 처리되지 않고 Gate에서 사용자 판정으로 표면화됩니다. ObservedKeep은 저자의 미검증 신념이 아니라 수신자가 재관측 가능한 외부 기반에 대한 relay이므로, (단순 currency가 아닌) support-integrity가 기준이며 불확실/이견 기반은 보수적으로 Unknown입니다. **correction이 필요한 주장은 여전히 원장이 필요하다는** 하드라인은 유지됩니다: 관측 출처에서 벗어난 주장은 ObservedKeep이 될 수 없습니다. 원장 스키마와 read contract는 [`references/correction-delta-schema.md`](./skills/distill/references/correction-delta-schema.md)를 참조하세요.
 
 교정 원장은 **핸드오프 내구성에 조건적**입니다: `DurableRepo`(durable·재증류 in-repo 핸드오프 — CorrectedKeep이 도달 가능한 유일 모드)에서만 유지됩니다. `OneShot`(일시적, 일회용)은 원장을 두지 않고, `ExternalVersioned`(Notion, Linear 등 외부 버전 저장소)는 외부 시스템의 네이티브 히스토리에 위임하며 그 버전 핸들을 provenance 포인터로 기록합니다. 이는 ObservedKeep과 짝을 이뤄, 일상적 일시·외부 대상 핸드오프의 흔한 gate storm을 무너뜨립니다.
+
+## 보증 등급(Assurance Tiers)
+
+산출물의 라벨은 실제 적용된 엄밀성만큼만 정직하게 반영합니다 — 낮은 등급이 높은 등급의 주장을 빌리지 않습니다:
+
+| 등급 | 라벨 | 실행 내용 |
+|------|------|-----------|
+| (a) | **Quick handoff draft** | 평문 Markdown만 — F5 게이트·감사·원장 없음. PortableHandoff 주장을 **하지 않음**. |
+| (b) | **Certified light /distill** | F5 1회 통과(prose-only 삭제 테스트 포함) + leak / durable-pointer 감사 1회; `CorrectionDelta` 원장 없음 — 원장은 DurableRepo(tier c) 경로이며, correction이 필요한 주장은 Gate로 surface. |
+| (c) | **Heavy /distill** | 전체 refuter + watchlist + residual Gate + `CorrectionDelta` 원장 + leak lint + 수렴 증거 + re-distillation(DurableRepo 경로). |
+
+**정직 라벨 규칙**: 형식적 `converge` 전이는 Pass verdict로 고정점에 도달한 어떤 등급에서도 발생합니다 — tier (b) 포함, 즉 certified-light 핸드오프도 형식적으로 수렴하여 정당한 `PortableHandoff`를 산출합니다. 다만 보증 **라벨** "converged /distill"은 더 좁아서, 전체 보증 추적을 거친 tier-(c)의 Pass-verdict 고정점에만 허용됩니다. refuter를 건너뛴 산출물(tier (a))은 **draft / degraded handoff**이며 — `PortableHandoff`도 "converged /distill"도 아닙니다. tier (b)가 PortableHandoff 주장의 하한입니다.
 
 ## 알려진 한계
 

@@ -33,7 +33,8 @@ Sweep ALL categories and report per-category status:
 3. **Deictic anchors** — "as above", "the earlier one", "that file": references resolved by session position rather than by stable reference.
 4. **Unresolvable references** — paths, ids, commands, URLs the recipient cannot resolve. Verify resolvability with your tools where they reach (Read/Glob a path, Grep an id); a reference you cannot verify and the document does not ground is a finding.
 5. **Rendering accidents** — markdown semantics that silently change meaning when the document renders (e.g., a prose `~` pair parsed as strikethrough, an accidental code span or heading). Review the text as a renderer would parse it, not only as plain characters.
-6. **Emergent** — anything else a zero-memory recipient cannot resolve from the document plus its stable references. The named categories are working hypotheses, not an exhaustive set.
+6. **Prose-channel sufficiency (prose-only deletion test)** — mentally delete the TaskStateBlock, the correction ledger, any native task-state record, and every agent-specific affordance from the handoff, then confirm the next task is STILL executable from the prose channel plus the contract's allowed sources alone. A load-bearing instruction that survives only in the task-state block, the ledger, or an affordance — not restated in prose — is a finding: the task-state channel rehydrates dangling identifiers, it never holds authority the prose lacks. Advise Resolve (restate the load-bearing content in prose).
+7. **Emergent** — anything else a zero-memory recipient cannot resolve from the document plus its stable references. The named categories are working hypotheses, not an exhaustive set.
 
 ## Advisory Disposition (per finding)
 
