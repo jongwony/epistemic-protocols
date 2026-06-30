@@ -361,7 +361,8 @@ const serveSiblingAsset = async (assetPath: string, referer: string | null): Pro
   // O_NOFOLLOW is defense-in-depth for the final component (a swapped-in symlink fails with ELOOP).
   // A legitimate symlink that was already inside the dir at check time still works, because
   // realpath() resolved it to its real in-dir target — that target is what we stat and open.
-  // (A post-check swap of an *intermediate* directory is out of scope for this local single-user tool.)
+  // A post-check swap of an *intermediate* directory is also caught: the opened object's inode would
+  // differ from the captured one → 404. The only residual is dev+ino reuse, which is not attacker-controllable.
   let id: { dev: number; ino: number };
   try {
     const s0 = statSync(canonFile);
