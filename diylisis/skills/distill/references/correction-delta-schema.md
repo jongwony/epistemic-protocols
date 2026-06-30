@@ -1,10 +1,14 @@
 # CorrectionDelta Ledger Schema and F3b Read Contract
 
-This reference defines the append-only `CorrectionDelta` ledger that the F3b transformation-provenance phase reads, and the contract by which F3b decides whether an item is corrected-in-session. F3b consumes the ledger read-only; the F7 re-distillation emit appends to it (Rule 19).
+This reference defines the append-only `CorrectionDelta` ledger that the F3b transformation-provenance phase reads, and the contract by which F3b decides an item's provenance. F3b consumes the ledger read-only; the F7 re-distillation emit appends to it (Rule 19).
+
+**The ledger is conditional on `handoff_durability` (Change A).** It is maintained only under `handoff_durability = DurableRepo` (a durable, re-distilled in-repo handoff). Under `OneShot` (temporary, used once) and `ExternalVersioned` (a Notion/Linear/externally-versioned target) no ledger is maintained — `Λ.ledger = Unknown` — so `CorrectedKeep` is unreachable in those modes; a correction-requiring claim is handled by ObservedKeep against an external version handle (ExternalVersioned) or by a Gate Resolve (OneShot).
+
+**The F3b verdict is ternary (Change B): `CorrectedKeep | ObservedKeep | Unknown`.** This reference owns the `CorrectedKeep`/`Unknown` ledger-read contract below; `ObservedKeep` — KEEP from a durable, directly-observable source with support-integrity and *no* correction record — is defined in SKILL.md (`observable_basis`, Rule 7) and summarized here for the partition.
 
 ## Storage format
 
-The ledger is a JSON Lines (JSONL) file: one `CorrectionDelta` object per line, append-only, in correction order. A conventional location is a per-session file such as `~/.claude/.write/correction-delta-<session>.jsonl`. When no ledger file exists for the session, F3b treats provenance as `Unknown` and routes the item to the Gate.
+The ledger is a JSON Lines (JSONL) file: one `CorrectionDelta` object per line, append-only, in correction order. A conventional location is a per-session file such as `~/.claude/.write/correction-delta-<session>.jsonl`. It is maintained only under `DurableRepo`. When no ledger file exists (or the mode keeps none), F3b does **not** route every item to the Gate: an item with a durable observable basis is `ObservedKeep` (KEPT directly), and only an item with no observable basis and no delta is `Unknown` and routes to the Gate.
 
 Append-only means a correction is never edited in place. A later correction that revises an earlier one references the earlier record's `id` in its `supersedes` array; the earlier record stays on disk.
 
@@ -44,23 +48,34 @@ effective_delta(item) ≡
 
 expired(d) ≡
   d.validity_horizon ≠ null ∧ now > d.corrected_at + d.validity_horizon
-  (now is the invocation constant, bound once into the protocol mode state at the Phase 0 ledger bind; the sum is evaluated in UTC)
+  (now is the invocation constant, bound once into the protocol mode state at Phase 0 — independent of the conditional ledger bind, only evaluated under DurableRepo where deltas exist; the sum is evaluated in UTC)
 
 corrected_in_session(item) ≡
   effective_delta(item) = d
     ∧ d.export_policy = "KEEP"
     ∧ d.verification_status ≠ "provisional"
     ∧ ¬expired(d)
+  (reachable only under DurableRepo — effective_delta = ∅ in the other modes)
+
+observable_basis(item) ≡        # defined in SKILL.md; summarized here for the partition
+  durable_observable_source(item) ∧ support_integrity(item)
+  where durable_observable_source(item) ≡
+      ( grounding(item) = Inline(e) ∧ origin(item) ∈ {DocumentRead, ToolOutput} )   # a file read, a command's captured output
+    ∨ ( grounding(item) = StablePointer(r) ∧ r.lifetime = durable )                 # a path, a PR/issue url, a stable id
+  and support_integrity(item) ≡ the kept value is recipient-verifiable (a verification command, a
+      resolvable url/id, or the inline observed content directly evidencing the claim) — not mere
+      currency; an uncertain or contested basis is conservatively false (→ Unknown → Gate)
 ```
 
-The verdict is binary — a CorrectedKeep-or-complement partition:
+The verdict is ternary — `CorrectedKeep | ObservedKeep | Unknown`:
 
-- **CorrectedKeep** — the predicate holds: a matching record carries `export_policy = KEEP` with a non-provisional status and an unlapsed `validity_horizon` (`¬expired(d)`). The item is eligible for the KEEP disposition.
-- **Unknown** — every other ledger state: the ledger is absent, no record matches `subject_ref = ref(item)`, the only matching record is `provisional`, the matching record carries a non-KEEP `export_policy` (ROUTE or DROP), or the matching KEEP record is expired (reason recorded as `horizon-expired`, presented at the Gate as re-verification, not as undecided provenance). The item's provenance is undecided: it appends to the residual ledger with reason `unknown-provenance` (`horizon-expired` for the expired case) and routes to the Gate for user judgment. A ROUTE or DROP correction records the author's intent, but F3b grants no disposition from it — provenance authority is the KEEP hard line only; ROUTE and DROP dispositions are reached through F3a relevance or the Gate.
+- **CorrectedKeep** — `corrected_in_session(item)` holds (DurableRepo only): a matching record carries `export_policy = KEEP` with a non-provisional status and an unlapsed `validity_horizon` (`¬expired(d)`). The ledger's KEEP authority, reserved for corrected, disputed, stale, or user-constituted claims. The item is eligible for the KEEP disposition.
+- **ObservedKeep** — `effective_delta(item) = ∅ ∧ observable_basis(item)`: no correction record AND a durable, directly-observable source coupled to the kept value by support-integrity. The item is **KEPT directly — no ledger, no Gate**. This is the default path for ordinary source-backed state and the move that collapses the common-case gate storm.
+- **Unknown** — every remaining state: the matching record is `provisional`, carries a non-KEEP `export_policy` (ROUTE or DROP), or is an expired KEEP record (reason `horizon-expired`, presented at the Gate as re-verification — never silently re-asserted as ObservedKeep); OR there is no delta and no observable basis (an AIInference, a bare in-session UserStatement, or a contested basis, reason `unknown-provenance`). The item appends to the residual ledger and routes to the Gate for user judgment. A ROUTE or DROP correction records the author's intent, but F3b grants no disposition from it — provenance authority is the KEEP hard line only; ROUTE and DROP dispositions are reached through F3a relevance or the Gate.
 
 ## The hard line
 
-F3b never infers KEEP from how settled an item looks. KEEP is reachable only two ways: a matching non-provisional `CorrectionDelta` with `export_policy = KEEP`, or a user `Resolve` answer at the Gate. Absence of evidence is `Unknown`, surfaced for judgment — not silent retention. This keeps a fresh recipient from inheriting an author's unverified belief as a settled fact. An expired KEEP record likewise grants nothing: its unattended authority lapses and the item is surfaced for re-verification — expiry is a question, never a silent retention or a silent deletion.
+F3b never infers KEEP from how settled an item *looks*. KEEP is reachable exactly three ways: a matching non-provisional `CorrectionDelta` with `export_policy = KEEP` (CorrectedKeep); a durable, directly-observable source coupled to the item by support-integrity, with no correction record (ObservedKeep); or a user `Resolve` answer at the Gate. The ObservedKeep path is not "inferring KEEP from appearance" — it is relay against an external, recipient-re-observable basis (a file read, a command's output, a resolvable url/id), which is exactly what distinguishes it from an author's unverified belief. A claim with no such observable basis and no delta is `Unknown`, surfaced for judgment — not silent retention. This keeps a fresh recipient from inheriting an author's unverified belief as a settled fact while letting ordinary source-backed state through without a gate storm. The hard line that a **correction-requiring claim still needs the ledger** holds: a claim that diverges from its observable source (corrected, disputed, stale) has a contested or absent observable basis, so it cannot be ObservedKeep — it is held by a CorrectionDelta (DurableRepo) or surfaced at the Gate. An expired KEEP record grants nothing: its unattended authority lapses and the item is surfaced for re-verification (never silently re-asserted as ObservedKeep) — expiry is a question, never a silent retention or a silent deletion.
 
 ## Validity horizon
 
@@ -68,7 +83,7 @@ F3b never infers KEEP from how settled an item looks. KEEP is reachable only two
 
 **Basis requirement.** A set horizon carries `horizon_basis_ref` — the stable reference or inline evidence naming the constituted content the horizon was transcribed from. A horizon without a basis is not `ledger_emit_clean`: the F6 `unclean_deltas` measure leg counts it and blocks the fixed point until the delta is rewritten with its basis (or the horizon removed).
 
-**Expiry consequence.** When `now > corrected_at + validity_horizon` (with `now` fixed once per distillation invocation, at the Phase 0 ledger bind), the delta's unattended KEEP authority lapses: F3b yields Unknown and the item surfaces at the Gate as a re-verification question (reason: `horizon-expired`). Expiry never removes, suppresses, or rewrites the delta, and never demotes the item to DROP.
+**Expiry consequence.** When `now > corrected_at + validity_horizon` (with `now` fixed once per distillation invocation, at Phase 0 — independent of the conditional ledger bind; only evaluated under DurableRepo where deltas exist), the delta's unattended KEEP authority lapses: F3b yields Unknown and the item surfaces at the Gate as a re-verification question (reason: `horizon-expired`). Expiry never removes, suppresses, or rewrites the delta, and never demotes the item to DROP.
 
 **Legacy null-basis records.** A read delta carrying a `validity_horizon` without `horizon_basis_ref` (legacy/foreign) is still evaluated for expiry — the conservative direction, since expiry only routes to the Gate; the basis requirement binds the write side this protocol emits.
 
