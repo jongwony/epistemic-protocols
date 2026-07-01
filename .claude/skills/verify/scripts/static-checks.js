@@ -340,6 +340,93 @@ function checkCrossReference() {
 }
 
 // ============================================================
+// Check: Routing Index Contract
+// ============================================================
+// CLAUDE.md/AGENTS.md indexes the protocol catalog rather than mirroring it: it
+// must keep a "## Protocol Index" section that routes to the authoritative sources
+// (/catalog, graph.json, per-protocol SKILL.md, README) instead of re-inscribing
+// the catalog inline. This is the lightweight successor to the removed
+// CLAUDE.md-content mirror checks (checkCrossRefScan) — it enforces the routing
+// *contract* (structure + pointers), not mirrored content, so catalog drift is
+// caught without re-creating the co-change chain the mirror checks imposed.
+function checkRoutingIndexContract() {
+  const check = 'routing-index-contract';
+  const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
+
+  if (!fs.existsSync(claudeMdPath)) {
+    results.warn.push({
+      check,
+      file: 'CLAUDE.md',
+      message: 'CLAUDE.md not found, skipping routing-index contract check'
+    });
+    return;
+  }
+
+  const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
+  let failed = false;
+
+  // Contract 1: an H2 "## Protocol Index" section must be present — matched
+  // line-anchored and exactly at H2, so an inline mention in prose or an `###`
+  // subheading cannot satisfy the contract. Its routing pointers are then checked
+  // WITHIN that section (sliced to the next H2 or end of file), so an incidental
+  // mention elsewhere in the file (e.g. `SKILL.md` in the Runtime Contract prose)
+  // cannot satisfy the contract on its own.
+  const headingMatch = claudeMd.match(/^##[ \t]+Protocol Index[ \t]*$/m);
+  if (!headingMatch) {
+    results.fail.push({
+      check,
+      file: 'CLAUDE.md',
+      message: 'Missing "## Protocol Index" H2 section — the routing index is the successor to the removed inline protocol catalog'
+    });
+    failed = true;
+  } else {
+    const afterHeading = claudeMd.slice(headingMatch.index + headingMatch[0].length);
+    const nextH2 = afterHeading.search(/\n##[ \t]/);
+    const section = nextH2 === -1 ? afterHeading : afterHeading.slice(0, nextH2);
+    const requiredPointers = [
+      { label: '/catalog', pattern: /\/catalog/ },
+      { label: 'graph.json', pattern: /graph\.json/ },
+      { label: 'per-protocol SKILL.md', pattern: /SKILL\.md/ },
+      { label: 'README', pattern: /README/ },
+    ];
+    for (const { label, pattern } of requiredPointers) {
+      if (!pattern.test(section)) {
+        results.fail.push({
+          check,
+          file: 'CLAUDE.md',
+          message: `Protocol Index missing routing pointer to authoritative source: ${label}`
+        });
+        failed = true;
+      }
+    }
+  }
+
+  // Contract 2 (warn): the removed inline catalog must not be reintroduced —
+  // re-inscribing it would restore the mirror/co-change cost the index removed.
+  const catalogRegressions = [
+    { label: '"## Protocol Reference" heading', pattern: /^##[ \t]+Protocol Reference[ \t]*$/m },
+    { label: '"Concern | Protocols" cluster table', pattern: /\|\s*Concern\s*\|\s*Protocols\s*\|/ },
+  ];
+  for (const { label, pattern } of catalogRegressions) {
+    if (pattern.test(claudeMd)) {
+      results.warn.push({
+        check,
+        file: 'CLAUDE.md',
+        message: `Inline protocol catalog reintroduced (${label}) — route to /catalog, graph.json, SKILL.md, README instead of mirroring the catalog`
+      });
+    }
+  }
+
+  if (!failed) {
+    results.pass.push({
+      check,
+      file: 'CLAUDE.md',
+      message: 'Routing index contract satisfied'
+    });
+  }
+}
+
+// ============================================================
 // Check 5: Required Sections in Protocols
 // ============================================================
 function checkRequiredSections() {
@@ -1206,33 +1293,14 @@ function checkMorphismAnatomy() {
 // Check 11: Cross-Reference Scan (Protocol Name & Deficit Consistency)
 // ============================================================
 function checkCrossRefScan() {
-  const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
-  if (!fs.existsSync(claudeMdPath)) {
-    results.warn.push({
-      check: 'cross-ref-scan',
-      file: 'CLAUDE.md',
-      message: 'CLAUDE.md not found, skipping cross-reference scan'
-    });
-    return;
-  }
-
-  const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
   let subCheckFailed = false;
 
-  // Sub-check 1: Verify each canonical deficit → resolution pair appears in CLAUDE.md
-  for (const [name, { deficit, resolution }] of Object.entries(CANONICAL_PROTOCOLS)) {
-    const deficitPattern = `${deficit} → ${resolution}`;
-    if (!claudeMd.includes(deficitPattern)) {
-      results.fail.push({
-        check: 'cross-ref-scan',
-        file: 'CLAUDE.md',
-        message: `Missing canonical deficit pair "${deficitPattern}" for ${name}`
-      });
-      subCheckFailed = true;
-    }
-  }
+  // CLAUDE.md is a routing index, not a content mirror: its deficit → resolution
+  // pairs, cluster table, and initiator taxonomy were replaced by pointers to the
+  // authoritative sources (per-protocol SKILL.md, graph.json, /catalog, README), so
+  // the scan enforces those sources directly and no longer reads CLAUDE.md content.
 
-  // Sub-check 2: Verify each protocol SKILL.md contains its own correct deficit → resolution pair
+  // Sub-check 1: Verify each protocol SKILL.md contains its own correct deficit → resolution pair
   for (const relPath of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;
@@ -1270,7 +1338,7 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 3: Verify README workflow + CLAUDE.md cross-doc invariants
+  // Sub-check 2: Verify README workflow canonical-clusters invariant
   for (const relPath of ['README.md', 'README_ko.md']) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;
@@ -1286,33 +1354,7 @@ function checkCrossRefScan() {
     }
   }
 
-  const claudeRequirements = [
-    {
-      pattern: /ordered by activation sequence within each cluster/,
-      message: 'CLAUDE.md missing cluster activation sequence description'
-    },
-    {
-      pattern: /\| Concern \| Protocols \|/,
-      message: 'CLAUDE.md missing Epistemic Concern Clusters table'
-    },
-    {
-      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anagoge, Anamnesis, Diylisis\)/,
-      message: 'CLAUDE.md initiator taxonomy missing protocol in the AI-guided set'
-    },
-  ];
-
-  for (const requirement of claudeRequirements) {
-    if (!requirement.pattern.test(claudeMd)) {
-      results.fail.push({
-        check: 'cross-ref-scan',
-        file: 'CLAUDE.md',
-        message: requirement.message
-      });
-      subCheckFailed = true;
-    }
-  }
-
-  // Sub-check 4: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
+  // Sub-check 3: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
   // package.js PLUGINS, graph.json nodes, and marketplace.json plugins against filesystem ground truth
   {
     // Ground truth: directories containing .claude-plugin/plugin.json
@@ -1580,7 +1622,7 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 5: Verify edge types in graph.json match CLAUDE.md allowlist
+  // Sub-check 4: Verify edge types in graph.json match the valid edge-type allowlist
   const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
   if (fs.existsSync(graphPath)) {
     try {
@@ -1592,20 +1634,9 @@ function checkCrossRefScan() {
             results.fail.push({
               check: 'cross-ref-scan',
               file: 'graph.json',
-              message: `Edge type "${edgeType}" not in CLAUDE.md allowlist: ${[...VALID_EDGE_TYPES].join(', ')}`
+              message: `Edge type "${edgeType}" not in valid edge-type allowlist: ${[...VALID_EDGE_TYPES].join(', ')}`
             });
             subCheckFailed = true;
-          }
-        }
-
-        // Also check CLAUDE.md documents all edge types actually used
-        for (const edgeType of usedEdgeTypes) {
-          if (!claudeMd.includes(edgeType)) {
-            results.warn.push({
-              check: 'cross-ref-scan',
-              file: 'CLAUDE.md',
-              message: `Edge type "${edgeType}" used in graph.json but not documented in CLAUDE.md`
-            });
           }
         }
       }
@@ -2830,6 +2861,7 @@ try {
   checkSpecVsImpl();
   checkMorphismAnatomy();
   checkCrossRefScan();
+  checkRoutingIndexContract();
   checkOnboardSync();
   checkCatalogSync();
   checkPrecedenceLinearExtension();
