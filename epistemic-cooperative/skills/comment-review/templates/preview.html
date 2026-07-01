@@ -530,7 +530,7 @@ try {
 // Render the artifact. `root` is the query/anchor surface: the light-DOM #content in
 // markdown mode, the shadow root in html mode.
 // The body is transported as a JSON string (escapeForScriptTag-protected, same as the
-// findings payload): JSON.parse reverses it losslessly — a real </script> in the artifact
+// findings payload): JSON.parse reverses it losslessly — a real <\/script> in the artifact
 // survives, and a literal <\/script> already present in the source is not corrupted. Used
 // by both modes (marked.parse for markdown, shadowRoot.innerHTML for html).
 const sourceText = JSON.parse(document.getElementById("md-source").textContent);
@@ -539,8 +539,8 @@ let shadowRoot = null;
 let root = content;
 if (RENDER_MODE === "html") {
   // Raw HTML served through an open Shadow DOM: CSS-isolated from the review chrome,
-  // selector-click works because it is the same document. innerHTML does not run <script>
-  // tags, but this is NOT a JS sandbox — inline event handlers (onerror/onload), <iframe>,
+  // selector-click works because it is the same document. innerHTML does not run script
+  // elements, but this is NOT a JS sandbox — inline event handlers (onerror/onload), iframes,
   // and active subresources still execute/load in this same-origin page; review trusted
   // HTML only. marked is not used in html mode.
   shadowRoot = content.attachShadow({ mode: "open" });
