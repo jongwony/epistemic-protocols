@@ -14,7 +14,7 @@ Citable registry of conventions whose resolution direction is already constitute
 
 ## Protocol Index
 
-This file is a routing index, not a content mirror: it points to where each protocol fact lives so a running conversation can fetch it on demand. Do not re-inscribe the protocol catalog here — when protocols change, the sources below change and this index does not.
+This section indexes the protocol catalog rather than mirroring it: it points to where each protocol fact lives so a running conversation can fetch it on demand. Do not re-inscribe the protocol catalog here — when protocols change, the sources below change and this index does not. (The rest of this file still explains the repo's machinery and holds the maintainer-facing umbrella statement, per `docs/mission-bridge.md`.)
 
 This repository packages epistemic dialogue protocols as plugin skills; each transforms a specific interaction deficit into a resolution object (e.g. **FrameworkAbsent → FramedInquiry** via `/frame`).
 
