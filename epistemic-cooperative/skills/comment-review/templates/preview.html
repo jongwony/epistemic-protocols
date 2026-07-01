@@ -226,6 +226,14 @@
      the bottom status pill remains a minimal fixed overlay. */
   body.cr-html-mode #main { max-width: none; padding: 0; }
   body.cr-html-mode header { display: none; }
+  /* HTML artifacts are authored against the browser default (white page, dark text), not the
+     review app's OS-driven dark theme. Force a light base for the rendered artifact regardless of
+     prefers-color-scheme, so a transparent-bodied page shows white (not the dark canvas) and
+     inherited text stays dark and readable. The body element is dropped by the Shadow-DOM fragment
+     injection, so the artifact's own body colors do not apply; a light base makes the fallback
+     match the browser default. (Pages that style body/html explicitly still need the deferred
+     iframe rendering for full fidelity.) */
+  body.cr-html-mode { background: #fff; color: #1a2233; }
   #sidebar-header {
     padding: .75em 1em;
     border-bottom: 1px solid #eee;
