@@ -54,7 +54,7 @@ Narrowest seam contract: `ResolvedIntentIR × GuideSnapshot -> VendorPromptDraft
 | `GuideSnapshot` | The fetched reference text plus staleness metadata: `{ url, retrieved_at, visible_updated_at|version, content_hash, canonicality_score }`. |
 | `RelaySlot` | A contract slot determined by the reference plus the user's stated intent. Forge auto-fills it with a cited basis. |
 | `ConstitutionSlot` | A contract slot requiring the user's judgment. Forge fills it with a proposed default and explicitly flags it for recognition. |
-| `VendorPromptDraft` | The adapter's projection of the IR through the reference schema, with provenance, freshness, a `stale-guide` flag when the staleness guard did not pass, and a `transport-unsafe` flag when the projected payload carries shell-active tokens or secret-substitution patterns hazardous across a shell-carrier handoff. |
+| `VendorPromptDraft` | The adapter's projection of the IR through the reference schema, with provenance, freshness, a `stale-guide` flag when the staleness guard did not pass, a `transport-unsafe` flag when the projected payload carries shell-active tokens or secret-substitution patterns hazardous across a shell-carrier handoff, and a `reasoning-echo-unsafe` flag (adapter-raised) when the payload or the target's inherited output-style instructs a model to reproduce its internal reasoning against a model whose page flags that as refusal-triggering. |
 | `PromptArtifact` | The endpoint artifact: a prompt-family payload — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe. Its form is adapter-determined (a Higgsfield video prompt; a Codex `/goal …` string). |
 
 ## Phase 0: Bind Reference and Intent
