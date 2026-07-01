@@ -365,20 +365,24 @@ function checkRoutingIndexContract() {
   const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
   let failed = false;
 
-  // Contract 1: the Protocol Index section must be present, and its routing
-  // pointers are checked WITHIN that section — an incidental mention elsewhere in
-  // the file (e.g. SKILL.md in the Runtime Contract prose) must not satisfy the
-  // contract on its own.
-  const idxMatch = claudeMd.match(/##\s+Protocol Index\b([\s\S]*?)(?=\n##\s|$)/);
-  if (!idxMatch) {
+  // Contract 1: an H2 "## Protocol Index" section must be present — matched
+  // line-anchored and exactly at H2, so an inline mention in prose or an `###`
+  // subheading cannot satisfy the contract. Its routing pointers are then checked
+  // WITHIN that section (sliced to the next H2 or end of file), so an incidental
+  // mention elsewhere in the file (e.g. `SKILL.md` in the Runtime Contract prose)
+  // cannot satisfy the contract on its own.
+  const headingMatch = claudeMd.match(/^##[ \t]+Protocol Index[ \t]*$/m);
+  if (!headingMatch) {
     results.fail.push({
       check,
       file: 'CLAUDE.md',
-      message: 'Missing "## Protocol Index" section — the routing index is the successor to the removed inline protocol catalog'
+      message: 'Missing "## Protocol Index" H2 section — the routing index is the successor to the removed inline protocol catalog'
     });
     failed = true;
   } else {
-    const section = idxMatch[1];
+    const afterHeading = claudeMd.slice(headingMatch.index + headingMatch[0].length);
+    const nextH2 = afterHeading.search(/\n##[ \t]/);
+    const section = nextH2 === -1 ? afterHeading : afterHeading.slice(0, nextH2);
     const requiredPointers = [
       { label: '/catalog', pattern: /\/catalog/ },
       { label: 'graph.json', pattern: /graph\.json/ },
@@ -400,7 +404,7 @@ function checkRoutingIndexContract() {
   // Contract 2 (warn): the removed inline catalog must not be reintroduced —
   // re-inscribing it would restore the mirror/co-change cost the index removed.
   const catalogRegressions = [
-    { label: '"## Protocol Reference" heading', pattern: /^##\s+Protocol Reference\s*$/m },
+    { label: '"## Protocol Reference" heading', pattern: /^##[ \t]+Protocol Reference[ \t]*$/m },
     { label: '"Concern | Protocols" cluster table', pattern: /\|\s*Concern\s*\|\s*Protocols\s*\|/ },
   ];
   for (const { label, pattern } of catalogRegressions) {
