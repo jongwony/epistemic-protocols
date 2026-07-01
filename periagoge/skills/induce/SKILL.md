@@ -132,6 +132,8 @@ converge           (extension)   → TextPresent+Proceed (convergence evidence t
 
 **Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: When an instance set has converged toward an unnamed essence but the abstraction has not located itself, neither AI nor user alone can crystallize the form. AI first shows how the instance set calibrates the user's in-process concept — what it preserves, sharpens, prunes, and leaves open — then proposes a candidate paired with a personalized grounding example drawn from the user's own domain. The user shapes the candidate through Socratic moves — widening (Synagoge), narrowing (Diairesis), fusing with an adjacent abstraction, or reorienting onto an orthogonal axis. The abstraction turns toward its crystallized form through the exchange, not by unilateral AI correction.
 
+**First-class citizen (everyday-language lens)**: In software-engineering terms, locating the abstraction is promoting a recurring concept to a *first-class citizen* — lifting it from scattered ad-hoc handling (a condition added at the nearest call site) to a named unit the system manages, references, and composes. Periagoge names the *act* — turning an instance set toward its crystallized form; "first-class" names the *resulting status* the promotion confers, where the unit is carried forward, routed, and composed rather than re-derived in place. The two are the same arrow's ends: use "first-class" as the plain-language handle for the promoted unit's standing, and Periagoge for the promotion itself.
+
 ## Mode Activation
 
 ### Activation
