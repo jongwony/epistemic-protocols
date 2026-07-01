@@ -1535,7 +1535,7 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 5: Verify edge types in graph.json match CLAUDE.md allowlist
+  // Sub-check 4: Verify edge types in graph.json match the valid edge-type allowlist
   const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
   if (fs.existsSync(graphPath)) {
     try {
@@ -1547,20 +1547,9 @@ function checkCrossRefScan() {
             results.fail.push({
               check: 'cross-ref-scan',
               file: 'graph.json',
-              message: `Edge type "${edgeType}" not in CLAUDE.md allowlist: ${[...VALID_EDGE_TYPES].join(', ')}`
+              message: `Edge type "${edgeType}" not in valid edge-type allowlist: ${[...VALID_EDGE_TYPES].join(', ')}`
             });
             subCheckFailed = true;
-          }
-        }
-
-        // Also check CLAUDE.md documents all edge types actually used
-        for (const edgeType of usedEdgeTypes) {
-          if (!claudeMd.includes(edgeType)) {
-            results.warn.push({
-              check: 'cross-ref-scan',
-              file: 'CLAUDE.md',
-              message: `Edge type "${edgeType}" used in graph.json but not documented in CLAUDE.md`
-            });
           }
         }
       }

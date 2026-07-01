@@ -18,7 +18,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 8. **graph-integrity**: graph.json node/edge validation — edge-type allowlist, edge-reference check, node-directory existence, orphaned node detection (SKILL.md presence), isolated node detection (no edges), precondition DAG acyclicity (Kahn's algorithm)
 9. **spec-vs-impl**: TYPES definitions cross-referenced against PHASE TRANSITIONS and prose — detects rename drift, dead types, and resolution type mismatches
 10. **morphism-anatomy**: SKILL.md Definition block formal integrity — FLOW → MORPHISM → TYPES section order, MORPHISM source object distinct from canonical deficit (deficit belongs in `requires:` precondition), required clauses (`requires`/`deficit`/`preserves`/`invariant`) all present, MORPHISM chain terminates in canonical resolution, Type signature exposes `deficit → resolution` pattern
-11. **cross-ref-scan**: Protocol name and deficit → resolution pair consistency across CLAUDE.md and all SKILL.md files, distinction table completeness, graph.json edge type allowlist verification
+11. **cross-ref-scan**: Protocol name and deficit → resolution pair consistency across all SKILL.md files, distinction table completeness, graph.json edge type allowlist verification
 12. **onboard-sync**: Onboard SKILL.md Data Sources table, protocol count, Phase 0 category groupings, `references/scenarios.md` scenario blocks, `references/workflow.md` slash commands — all cross-checked against `PROTOCOL_FILES`
 13. **precedence-linear-extension**: Verifies CANONICAL_PRECEDENCE total order is a valid linear extension of graph.json precondition partial order
 14. **partition-invariant**: Verifies MODE STATE pairwise disjoint partition invariants — universe set and partition members exist as MODE STATE fields
