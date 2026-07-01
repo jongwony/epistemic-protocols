@@ -20,7 +20,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 
 | To route to | Source |
 |---|---|
-| Which protocol fits a situation; cluster grouping; command and when-to-use lookup | `/catalog` (protocol handbook) |
+| Which protocol fits a situation; command and when-to-use lookup; browse by cluster | `/catalog` (protocol handbook — browse view; canonical clusters live in README / `scripts/load-protocols.js`) |
 | Authoritative dependency graph — nodes and `precondition` / `advisory` / `suppression` edges | `.claude/skills/verify/graph.json` |
 | A protocol's normative contract, deficit → resolution type, and initiator classification (AI-guided / Hybrid / User-initiated) | that protocol's `skills/*/SKILL.md` (distinction table + Rule #1) |
 | Public navigation hub, canonical protocol table, concern-cluster workflow | `README.md` / `README_ko.md` |
