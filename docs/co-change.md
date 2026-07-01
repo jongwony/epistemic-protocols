@@ -11,7 +11,7 @@ Protocol modifications require synchronized edits across multiple files. Any pro
 | Any protocol change | `plugin.json` version bump, then `/verify` |
 | Dependent protocol interface wording in utility skills | Utility plugin `plugin.json` minor bump when catalog/onboard/reporting text now assumes a changed runtime interface in another protocol |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
-| New skill added to existing plugin | `SKILL.md`, `plugin.json` (version + description), `marketplace.json` description, `package.js` (PLUGINS + FIRST_RELEASE_HIGHLIGHTS) |
+| New skill added to existing plugin | `SKILL.md`, `plugin.json` (version + description), `marketplace.json` description, `package.js` (`FIRST_RELEASE_HIGHLIGHTS` — hand-curated; `PLUGINS` is derived from `discoverPlugins()`, no manual edit) |
 | New protocol added | All of the above, plus: `.claude/skills/verify/graph.json` (add the protocol node + its edges — protocol classification is graph-derived, so this gates recognition as a protocol), `scripts/load-protocols.js` (`CANONICAL_PRECEDENCE`, `CANONICAL_CLUSTERS` — hardcoded canonical lists; `PROTOCOL_FILES`/`CANONICAL_PROTOCOLS` are derived from filesystem/SKILL.md, no manual edit), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), catalog SKILL.md, README.md + README_ko.md |
 | Precedence change | ALL SKILL.md precedence descriptions, README.md + README_ko.md (concern-cluster workflow), `graph.json` |
 | Initiator taxonomy change | ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
