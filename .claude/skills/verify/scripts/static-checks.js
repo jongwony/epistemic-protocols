@@ -1206,33 +1206,14 @@ function checkMorphismAnatomy() {
 // Check 11: Cross-Reference Scan (Protocol Name & Deficit Consistency)
 // ============================================================
 function checkCrossRefScan() {
-  const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
-  if (!fs.existsSync(claudeMdPath)) {
-    results.warn.push({
-      check: 'cross-ref-scan',
-      file: 'CLAUDE.md',
-      message: 'CLAUDE.md not found, skipping cross-reference scan'
-    });
-    return;
-  }
-
-  const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
   let subCheckFailed = false;
 
-  // Sub-check 1: Verify each canonical deficit → resolution pair appears in CLAUDE.md
-  for (const [name, { deficit, resolution }] of Object.entries(CANONICAL_PROTOCOLS)) {
-    const deficitPattern = `${deficit} → ${resolution}`;
-    if (!claudeMd.includes(deficitPattern)) {
-      results.fail.push({
-        check: 'cross-ref-scan',
-        file: 'CLAUDE.md',
-        message: `Missing canonical deficit pair "${deficitPattern}" for ${name}`
-      });
-      subCheckFailed = true;
-    }
-  }
+  // CLAUDE.md is a routing index, not a content mirror: its deficit → resolution
+  // pairs, cluster table, and initiator taxonomy were replaced by pointers to the
+  // authoritative sources (per-protocol SKILL.md, graph.json, /catalog, README), so
+  // the scan enforces those sources directly and no longer reads CLAUDE.md content.
 
-  // Sub-check 2: Verify each protocol SKILL.md contains its own correct deficit → resolution pair
+  // Sub-check 1: Verify each protocol SKILL.md contains its own correct deficit → resolution pair
   for (const relPath of PROTOCOL_FILES) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;
@@ -1270,7 +1251,7 @@ function checkCrossRefScan() {
     }
   }
 
-  // Sub-check 3: Verify README workflow + CLAUDE.md cross-doc invariants
+  // Sub-check 2: Verify README workflow canonical-clusters invariant
   for (const relPath of ['README.md', 'README_ko.md']) {
     const fullPath = path.join(projectRoot, relPath);
     if (!fs.existsSync(fullPath)) continue;
@@ -1286,33 +1267,7 @@ function checkCrossRefScan() {
     }
   }
 
-  const claudeRequirements = [
-    {
-      pattern: /ordered by activation sequence within each cluster/,
-      message: 'CLAUDE.md missing cluster activation sequence description'
-    },
-    {
-      pattern: /\| Concern \| Protocols \|/,
-      message: 'CLAUDE.md missing Epistemic Concern Clusters table'
-    },
-    {
-      pattern: /\*\*AI-guided\*\*: AI evaluates condition and guides the process \(Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anagoge, Anamnesis, Diylisis\)/,
-      message: 'CLAUDE.md initiator taxonomy missing protocol in the AI-guided set'
-    },
-  ];
-
-  for (const requirement of claudeRequirements) {
-    if (!requirement.pattern.test(claudeMd)) {
-      results.fail.push({
-        check: 'cross-ref-scan',
-        file: 'CLAUDE.md',
-        message: requirement.message
-      });
-      subCheckFailed = true;
-    }
-  }
-
-  // Sub-check 4: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
+  // Sub-check 3: Array completeness — cross-check PROTOCOL_FILES, CANONICAL_PROTOCOLS,
   // package.js PLUGINS, graph.json nodes, and marketplace.json plugins against filesystem ground truth
   {
     // Ground truth: directories containing .claude-plugin/plugin.json

@@ -12,9 +12,9 @@ Protocol modifications require synchronized edits across multiple files. Any pro
 | Dependent protocol interface wording in utility skills | Utility plugin `plugin.json` minor bump when catalog/onboard/reporting text now assumes a changed runtime interface in another protocol |
 | New plugin added | `marketplace.json` (plugins array), plugin directory with `plugin.json` |
 | New skill added to existing plugin | `SKILL.md`, `plugin.json` (version + description), `marketplace.json` description, `package.js` (PLUGINS + FIRST_RELEASE_HIGHLIGHTS), CLAUDE.md (architecture, plugin section, delegation, static checks if applicable) |
-| New protocol added | All of the above, plus: CLAUDE.md (overview, architecture, plugins, precedence, workflow, delegation), `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_CLUSTERS`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), catalog SKILL.md, README.md + README_ko.md |
-| Precedence change | CLAUDE.md (precedence section + concern cluster table), ALL SKILL.md precedence descriptions, `graph.json` |
-| Initiator taxonomy change | CLAUDE.md (initiator taxonomy), ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
+| New protocol added | All of the above, plus: `static-checks.js` (`PROTOCOL_FILES`, `PRECEDENCE_FILES`, `CANONICAL_PRECEDENCE`, `CANONICAL_CLUSTERS`, `CANONICAL_PROTOCOLS` in `checkCrossRefScan`), ALL existing SKILL.md (precedence descriptions + distinction tables), onboard (`SKILL.md` Data Sources + `references/scenarios.md` + `references/workflow.md`), catalog SKILL.md, README.md + README_ko.md |
+| Precedence change | ALL SKILL.md precedence descriptions, README.md + README_ko.md (concern-cluster workflow), `graph.json` |
+| Initiator taxonomy change | ALL SKILL.md (distinction tables + Rule #1), READMEs, `review-checklists.md` |
 | Protocol nudge pattern change | Output Style nudge section, plugin.json version bumps |
 | Convergence-awareness nudge wording | epistemic-ink.md (Protocol Nudge), `.claude/principles/architectural-principles.md` (Dual Advisory Layer), `.claude/rules/derived-principles.md` (Full Taxonomy) |
 | Gate interaction pattern change | ALL SKILL.md Rules + PHASE TRANSITIONS + TOOL GROUNDING + phase prose + plugin.json version bumps |

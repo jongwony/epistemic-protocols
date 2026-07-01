@@ -12,54 +12,18 @@ Citable registry of conventions whose resolution direction is already constitute
 
 - **Settled direction collapses the ask** (reversible forks only): when a reversible fork's direction is already determined by stated project goals, an established sibling convention, or a declared calibration, the option-set is settled — proceed or relay rather than re-asking the question those sources already answer. Basis: recurring same-direction constitution in calibration practice; first inscribed with the settled-direction relay test (#538).
 
-## Project Overview
+## Protocol Index
 
-This repository packages epistemic dialogue protocols as plugin skills. Each protocol transforms a specific interaction deficit into a resolution object, for example **FrameworkAbsent → FramedInquiry** (`/frame`), **GapUnnoticed → AuditedDecision** (`/gap`), **ContextInsufficient → InformedExecution** (`/inquire`), **MappingUncertain → ValidatedMapping** (`/ground`), and **AbstractAporia → ResolvedEndpoint** (`/elicit`).
+This file is a routing index, not a content mirror: it points to where each protocol fact lives so a running conversation can fetch it on demand. Do not re-inscribe the protocol catalog here — when protocols change, the sources below change and this index does not.
 
-The detailed protocol inventory lives in per-protocol `README.md` files, where present, and `skills/*/SKILL.md`. The dependency graph is authoritative in `.claude/skills/verify/graph.json`.
+This repository packages epistemic dialogue protocols as plugin skills; each transforms a specific interaction deficit into a resolution object (e.g. **FrameworkAbsent → FramedInquiry** via `/frame`).
 
-## Protocol Reference
-
-Canonical protocol pairs:
-
-| Protocol | Slash | Deficit → Resolution |
-|---|---|---|
-| Prothesis | `/frame` | FrameworkAbsent → FramedInquiry |
-| Syneidesis | `/gap` | GapUnnoticed → AuditedDecision |
-| Katalepsis | `/grasp` | ResultUngrasped → VerifiedUnderstanding |
-| Horismos | `/bound` | BoundaryUndefined → DefinedBoundary |
-| Aitesis | `/inquire` | ContextInsufficient → InformedExecution |
-| Analogia | `/ground` | MappingUncertain → ValidatedMapping |
-| Periagoge | `/induce` | AbstractionInProcess → CrystallizedAbstraction |
-| Euporia | `/elicit` | AbstractAporia → ResolvedEndpoint |
-| Prosoche | `/attend` | ExecutionBlind → SituatedExecution |
-| Epharmoge | `/contextualize` | ApplicationDecontextualized → ContextualizedExecution |
-| Elenchus | `/sublate` | ContextSuspect → VettedContext |
-| Anamnesis | `/recollect` | RecallAmbiguous → RecalledContext |
-| Anagoge | `/ascend` | RecallGranularityInsufficient → HigherGranularityUnit |
-| Diylisis | `/distill` | ContextTethered → PortableHandoff |
-| Hyphegesis | `/conduct` | MethodUnderdetermined → ConductedMethod |
-| Diairesis | `/delimit` | GranularityUnderdetermined → WorkUnitMap |
-
-Protocols grouped by primary concern, ordered by activation sequence within each cluster. Simultaneous activation follows cluster order; users can override. Information flow: `graph.json` (authoritative source).
-
-### Epistemic Concern Clusters
-
-| Concern | Protocols |
+| To route to | Source |
 |---|---|
-| Planning | `/inquire` (Aitesis), `/elicit` (Euporia) |
-| Analysis | `/frame` (Prothesis), `/ground` (Analogia), `/induce` (Periagoge) |
-| Decision | `/gap` (Syneidesis) |
-| Execution | `/attend` (Prosoche) |
-| Verification | `/contextualize` (Epharmoge), `/sublate` (Elenchus) |
-| Cross-cutting | `/bound` (Horismos), `/recollect` (Anamnesis), `/ascend` (Anagoge), `/distill` (Diylisis), `/grasp` (Katalepsis), `/delimit` (Diairesis), `/conduct` (Hyphegesis) |
-
-Edge types: `precondition` must complete before target; `advisory` provides useful context but is not required; `suppression` prevents stacking similar protocols.
-
-Initiator taxonomy:
-- **AI-guided**: AI evaluates condition and guides the process (Prothesis, Syneidesis, Horismos, Aitesis, Analogia, Periagoge, Epharmoge, Anagoge, Anamnesis, Diylisis)
-- **Hybrid**: Both user signal and AI detection can initiate; AI-detected trigger path requires user confirmation (Euporia, Hyphegesis, Diairesis)
-- **User-initiated**: User signals awareness of a deficit; no AI-guided activation (Katalepsis, Prosoche, Elenchus)
+| Which protocol fits a situation; cluster grouping; command and when-to-use lookup | `/catalog` (protocol handbook) |
+| Authoritative dependency graph — nodes and `precondition` / `advisory` / `suppression` edges | `.claude/skills/verify/graph.json` |
+| A protocol's normative contract, deficit → resolution type, and initiator classification (AI-guided / Hybrid / User-initiated) | that protocol's `skills/*/SKILL.md` (distinction table + Rule #1) |
+| Public navigation hub, canonical protocol table, concern-cluster workflow | `README.md` / `README_ko.md` |
 
 ## Runtime Contract
 
