@@ -340,6 +340,89 @@ function checkCrossReference() {
 }
 
 // ============================================================
+// Check: Routing Index Contract
+// ============================================================
+// CLAUDE.md/AGENTS.md indexes the protocol catalog rather than mirroring it: it
+// must keep a "## Protocol Index" section that routes to the authoritative sources
+// (/catalog, graph.json, per-protocol SKILL.md, README) instead of re-inscribing
+// the catalog inline. This is the lightweight successor to the removed
+// CLAUDE.md-content mirror checks (checkCrossRefScan) — it enforces the routing
+// *contract* (structure + pointers), not mirrored content, so catalog drift is
+// caught without re-creating the co-change chain the mirror checks imposed.
+function checkRoutingIndexContract() {
+  const check = 'routing-index-contract';
+  const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
+
+  if (!fs.existsSync(claudeMdPath)) {
+    results.warn.push({
+      check,
+      file: 'CLAUDE.md',
+      message: 'CLAUDE.md not found, skipping routing-index contract check'
+    });
+    return;
+  }
+
+  const claudeMd = fs.readFileSync(claudeMdPath, 'utf8');
+  let failed = false;
+
+  // Contract 1: the Protocol Index section must be present, and its routing
+  // pointers are checked WITHIN that section — an incidental mention elsewhere in
+  // the file (e.g. SKILL.md in the Runtime Contract prose) must not satisfy the
+  // contract on its own.
+  const idxMatch = claudeMd.match(/##\s+Protocol Index\b([\s\S]*?)(?=\n##\s|$)/);
+  if (!idxMatch) {
+    results.fail.push({
+      check,
+      file: 'CLAUDE.md',
+      message: 'Missing "## Protocol Index" section — the routing index is the successor to the removed inline protocol catalog'
+    });
+    failed = true;
+  } else {
+    const section = idxMatch[1];
+    const requiredPointers = [
+      { label: '/catalog', pattern: /\/catalog/ },
+      { label: 'graph.json', pattern: /graph\.json/ },
+      { label: 'per-protocol SKILL.md', pattern: /SKILL\.md/ },
+      { label: 'README', pattern: /README/ },
+    ];
+    for (const { label, pattern } of requiredPointers) {
+      if (!pattern.test(section)) {
+        results.fail.push({
+          check,
+          file: 'CLAUDE.md',
+          message: `Protocol Index missing routing pointer to authoritative source: ${label}`
+        });
+        failed = true;
+      }
+    }
+  }
+
+  // Contract 2 (warn): the removed inline catalog must not be reintroduced —
+  // re-inscribing it would restore the mirror/co-change cost the index removed.
+  const catalogRegressions = [
+    { label: '"## Protocol Reference" heading', pattern: /^##\s+Protocol Reference\s*$/m },
+    { label: '"Concern | Protocols" cluster table', pattern: /\|\s*Concern\s*\|\s*Protocols\s*\|/ },
+  ];
+  for (const { label, pattern } of catalogRegressions) {
+    if (pattern.test(claudeMd)) {
+      results.warn.push({
+        check,
+        file: 'CLAUDE.md',
+        message: `Inline protocol catalog reintroduced (${label}) — route to /catalog, graph.json, SKILL.md, README instead of mirroring the catalog`
+      });
+    }
+  }
+
+  if (!failed) {
+    results.pass.push({
+      check,
+      file: 'CLAUDE.md',
+      message: 'Routing index contract satisfied'
+    });
+  }
+}
+
+// ============================================================
 // Check 5: Required Sections in Protocols
 // ============================================================
 function checkRequiredSections() {
@@ -2774,6 +2857,7 @@ try {
   checkSpecVsImpl();
   checkMorphismAnatomy();
   checkCrossRefScan();
+  checkRoutingIndexContract();
   checkOnboardSync();
   checkCatalogSync();
   checkPrecedenceLinearExtension();

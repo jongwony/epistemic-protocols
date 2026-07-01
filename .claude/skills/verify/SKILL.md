@@ -52,6 +52,7 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 - Spec-vs-impl drift (TYPES definitions ↔ PHASE TRANSITIONS/prose usage, resolution type consistency)
 - Morphism anatomy (FLOW → MORPHISM → TYPES order; deficit-as-precondition; required clauses requires/deficit/preserves/invariant; canonical resolution target; Type signature)
 - Cross-reference scan (protocol name + deficit → resolution consistency across SKILL.md, README concern-cluster invariant, cross-enumeration completeness, edge type allowlist)
+- Routing index contract (CLAUDE.md/AGENTS.md keeps a `## Protocol Index` routing to `/catalog`, `graph.json`, per-protocol `SKILL.md`, README; warns if the inline protocol catalog is reintroduced)
 - Onboard sync, precedence linear extension, partition invariant, catalog sync
 - Gate type soundness (warning-level safeguard for coproduct/prose option alignment)
 - Artifact self-containment (runtime-contract view: packaged `Skill.md` + plugin description metadata + packaged support references). Severity-aware BANNED patterns: strict patterns (mission-bridge, axioms, derived-principles, architectural-principles, meta-principle, safeguards, A1-A7 identifiers, `.claude/`, `docs/`) surface as fail; expansion patterns (project-profile, editing-conventions, `principles/`, design-philosophy concepts — `Stage 1/2`, `Tier Factorization`, `Deficit Empiricism`, `Wirkungsgeschichte`, `Horizontverschmelzung`, `Zuhandenheit`) surface as warn under Stage 1 posture
