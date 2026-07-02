@@ -128,7 +128,7 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    construction. Fall back to a fork only when a fix rides on loop context the brief
    cannot carry. Stay inline for a trivial few-line batch, and for substrate-risky edits
    routed to the harness permission layer (those remain parent-executed).
-3. **Hand forward to the designated substrate**: verify the side-effect (diff moved as
+3. **Hand forward to the designated source**: verify the side-effect (diff moved as
    briefed), then Phase 5's full re-review by the designated source re-judges the updated
    surface — the loop's own convergence check remains the final reviewer of the delegated
    writing.
