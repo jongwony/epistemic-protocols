@@ -111,7 +111,28 @@ For every fix that is going to land — Mechanical (auto-approved) or Judgment (
 
 The screening venue splits by substrate. When applying the edit is itself a substrate action — a destructive operation, external communication, or production mutation — route it to the harness permission layer: surface what is about to run and let the harness gate the execution; the loop does not absorb that substrate decision. When the risk is an epistemic judgment call, surface it as a direct Constitution decision in the loop — the user chooses to accept-the-risk-and-apply, defer, or drop — and the finding is carried forward until that decision lands. Carrying forward does not hold the finding as live in-loop state: the next round's full re-review re-detects it fresh, and only a deferral reason that is not re-derivable from the diff is externalized to the durable record — so recurrence surfaces as a fresh recognition gate, not a recalled carry.
 
-Apply the approved, risk-cleared edits.
+**Apply executor (tiered).** Applying is execution, not judgment — the judgment already
+landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
+
+1. **Adversarial change-point scan (inherit tier, before handoff)**: the session driving
+   the loop adversarially scans each planned edit site before delegating — does the fix
+   interact with adjacent code, break an invariant the finding did not mention, or recur
+   at unswept sites? The scan compiles the self-contained fix brief: each fix
+   file:line-anchored with its verified basis and fix direction, plus any licensed
+   completeness-sweep predicate with its candidate sites enumerated at scan time — each
+   site semantically verified and risk-screened per site (Rule 6) before it enters the
+   brief; a site the writer discovers beyond the brief is returned for screening, never
+   written unbriefed.
+2. **Write on the low-cost tier**: hand the brief to a fresh subagent on the low-cost
+   executor tier — a role, not a model name: the running harness's configuration (its
+   tier registry or agent config) resolves the concrete model — the normal case, since
+   the brief is self-contained by construction. Fall back to a fork only when a fix
+   rides on loop context the brief cannot carry. Stay inline for a trivial few-line batch, and for substrate-risky edits
+   routed to the harness permission layer (those remain parent-executed).
+3. **Hand forward to the designated source**: verify the side-effect (diff moved as
+   briefed), then Phase 5's full re-review by the designated source re-judges the updated
+   surface — the loop's own convergence check remains the final reviewer of the delegated
+   writing.
 
 **Completeness sweep on apply.** When an applied fix instantiates a predicate or pattern that plausibly recurs across multiple sites in the artifact — a vocabulary rename, a guard that must hold at every mention of a symbol, a stale predicate repeated in several blocks — scan the artifact for all sites of that predicate and apply the fix consistently in the **same apply pass**, rather than waiting for later rounds to re-surface them piecemeal. **Over-reach guard**: verify each candidate site actually instantiates the same predicate (a semantic match, not a superficial string match) before applying, and risk-screen each swept site the same way — a swept edit is still an apply that lands, so Rule 6's risk screen applies per site, not only to the originally-flagged edit; sites swept beyond the originally-flagged one ride as relay annotations on the trace entry. The Phase 5 full re-review still catches any miss, so the sweep is an efficiency move, not a correctness dependency.
 
@@ -209,6 +230,10 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 5. **Verify before apply** — a finding that fails support-integrity or context-fit is dropped with its cited basis; only support-integrity-passing findings proceed to apply.
 6. **Risk screening gates risky applies regardless of class** — a Mechanical edit is still risk-screened before it lands; risk is orthogonal to the Mechanical/Judgment axis. The venue splits by substrate: destructive operations, external communication, and production mutation route to the harness permission layer; epistemic risk judgments surface as direct Constitution decisions in the loop.
 7. **Pass design intent upstream** — alongside the diff pointer, harvest the design intent already captured for the changed surface (the relevant `.claude/rules/*.md` + design-rationale sections of the project guide (`CLAUDE.md` or `AGENTS.md`), plus the design comments adjacent to the changed hunks) and pass it to the source as context, bounded to the changed files, as pointers not copied content. The source then pre-filters findings that an intentional documented choice already explains, so that refutation happens upstream in the review request rather than being re-derived in Phase 2 each round; Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces. Documented intent pre-filters only findings whose objection is the choice itself — it never licenses suppressing a real defect the documented choice actually causes, which the source still flags. Because Phase 4 can grow the changed surface (completeness sweep or licensed scope expansion), the bundle is re-harvested for the current changed surface before each full re-review rather than frozen at the Phase 0 harvest.
+8. **Tiered apply** — the inherit-tier session adversarially scans the change points and
+   compiles the fix brief; a low-cost subagent writes the fixes (fork only when
+   context-bound; inline only for trivial batches or parent-held risky edits); the
+   side-effect is verified before the Phase 5 re-review closes the loop.
 
 ## Deferred (v1.x stretch)
 
