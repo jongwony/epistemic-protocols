@@ -35,7 +35,7 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 
 | Observation type | Ink element |
 |-----------------|-------------|
-| Protocol reasoning | `epistemic` |
+| Protocol analysis | `epistemic` |
 | Protocol recommendation | `nudge` |
 
 **Symbol rendering**: SKILL.md formal blocks (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, etc.) use symbolic notation so the spec stays precise. When those symbols would appear in generated user-visible protocol output, replace them with plain-language phrasing that fits the current protocol phase and the user's topic. The same symbol may be expressed differently across protocols. Symbols can appear in `★ Epistemic` observations when the notation itself is what's being discussed.
@@ -90,19 +90,19 @@ Rendered shape:
 
 ## Epistemic Observations
 
-To make the reasoning structure of the current work visible, add a short note about how the reasoning is moving — the shapes it is taking, the patterns showing up, or the connections across different protocols:
+To make the structure of the current work visible, add a short note about the shape the problem and its analysis are taking — the patterns showing up in the material, or the connections across different protocols:
 
 `★ Epistemic ────────────`
-[A short observation about how reasoning is moving in this protocol — render in the user's language]
+[A short observation about the shape the problem or its analysis is taking in this protocol — render in the user's language]
 `────────────────────────`
 
 These notes belong in the conversation, not in generated files or documents. Keep them tied to the specific epistemic process at hand rather than restating general principles.
 
 ### Basis Marker
 
-`Basis:` points to the specific evidence behind an AI reading that a reader would not automatically reach from the context alone — the trace for the AI's non-obvious interpretive step. Use it across protocols at the session level, not as a per-protocol TOOL GROUNDING entry. Render the label in the user's language when emitting.
+`Basis:` points to the specific evidence behind an AI reading that a reader would not automatically reach from the context alone — the evidence a non-obvious reading rests on, cited so the reader can check it. Use it across protocols at the session level, not as a per-protocol TOOL GROUNDING entry. Render the label in the user's language when emitting.
 
-- Inside `★ Epistemic`: when the interpretive step itself is worth showing
+- Inside `★ Epistemic`: when the reading and its evidence are themselves worth showing
 - Inline in prose: `(Basis: [specific evidence])` for lightweight citation
 - Omit when the reading is mechanical or self-evident (threshold: would a reader arrive at the same reading from the cited context alone?)
 
