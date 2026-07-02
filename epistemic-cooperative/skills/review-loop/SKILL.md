@@ -123,10 +123,11 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    site semantically verified and risk-screened per site (Rule 6) before it enters the
    brief; a site the writer discovers beyond the brief is returned for screening, never
    written unbriefed.
-2. **Write on the low-cost tier**: hand the brief to a low-cost fresh subagent
-   (`model: sonnet`) — the normal case, since the brief is self-contained by
-   construction. Fall back to a fork only when a fix rides on loop context the brief
-   cannot carry. Stay inline for a trivial few-line batch, and for substrate-risky edits
+2. **Write on the low-cost tier**: hand the brief to a fresh subagent on the low-cost
+   executor tier — a role, not a model name: the running harness's configuration (its
+   tier registry or agent config) resolves the concrete model — the normal case, since
+   the brief is self-contained by construction. Fall back to a fork only when a fix
+   rides on loop context the brief cannot carry. Stay inline for a trivial few-line batch, and for substrate-risky edits
    routed to the harness permission layer (those remain parent-executed).
 3. **Hand forward to the designated source**: verify the side-effect (diff moved as
    briefed), then Phase 5's full re-review by the designated source re-judges the updated
