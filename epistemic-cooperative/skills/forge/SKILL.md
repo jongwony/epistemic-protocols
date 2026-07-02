@@ -54,7 +54,7 @@ Narrowest seam contract: `ResolvedIntentIR × GuideSnapshot -> VendorPromptDraft
 | `GuideSnapshot` | The fetched reference text plus staleness metadata: `{ url, retrieved_at, visible_updated_at|version, content_hash, canonicality_score }`. |
 | `RelaySlot` | A contract slot determined by the reference plus the user's stated intent. Forge auto-fills it with a cited basis. |
 | `ConstitutionSlot` | A contract slot requiring the user's judgment. Forge fills it with a proposed default and explicitly flags it for recognition. |
-| `VendorPromptDraft` | The adapter's projection of the IR through the reference schema, with provenance, freshness, a `stale-guide` flag when the staleness guard did not pass, and a `transport-unsafe` flag when the projected payload carries shell-active tokens or secret-substitution patterns hazardous across a shell-carrier handoff. |
+| `VendorPromptDraft` | The adapter's projection of the IR through the reference schema, with provenance, freshness, a `stale-guide` flag when the staleness guard did not pass, a `model-fallback` flag when no per-model page exists for the resolved model (the draft is built on the general layer only), a `transport-unsafe` flag when the projected payload carries shell-active tokens or secret-substitution patterns hazardous across a shell-carrier handoff, and a `reasoning-echo-unsafe` flag (adapter-raised) when the payload or the target's inherited output-style instructs a model to reproduce its internal reasoning against a model whose page flags that as refusal-triggering. |
 | `PromptArtifact` | The endpoint artifact: a prompt-family payload — an initial prompt for a follow-up session or tool, or a standing custom-skill recipe. Its form is adapter-determined (a Higgsfield video prompt; a Codex `/goal …` string). |
 
 ## Phase 0: Bind Reference and Intent
@@ -93,7 +93,7 @@ Core output stops here at `ResolvedIntentIR` plus the partitioned slots and the 
 
 The adapter projects the IR through the reference schema into a `VendorPromptDraft`, then `validate` checks it against `capabilities`.
 
-Present a ready-to-use draft with **every contract slot filled**. Relay slots show their cited basis; constitution slots show the proposed default with an explicit recognition flag. Then surface the artifact as the `PromptArtifact` for the follow-up session/tool, with provenance, freshness, and any `stale-guide` or `transport-unsafe` flag.
+Present a ready-to-use draft with **every contract slot filled**. Relay slots show their cited basis; constitution slots show the proposed default with an explicit recognition flag. Then surface the artifact as the `PromptArtifact` for the follow-up session/tool, with provenance, freshness, and any `stale-guide`, `model-fallback`, `transport-unsafe`, or `reasoning-echo-unsafe` flag.
 
 Emit the `PromptArtifact` transport-safely (Rule 12): the payload is a **literal opaque artifact**, so display it verbatim (fenced) for on-screen reading, recommend file-based handoff over inline shell args for injection, and surface any `transport-unsafe` flag `validate` raised.
 
@@ -156,7 +156,7 @@ Candidate adapters (not yet realized — list only, do not build ahead of use):
 - [ ] Phase 2 reference fetched with staleness metadata; hybrid seed + dynamic fetch + guard applied
 - [ ] Phase 3 adapter-derived required slots extracted; every slot partitioned relay vs constitution
 - [ ] Phase 4 filled draft presented — relay slots cited, constitution slots flagged
-- [ ] PromptArtifact emitted with provenance, freshness, and `stale-guide` flag when applicable
+- [ ] PromptArtifact emitted with provenance, freshness, and `stale-guide` / `model-fallback` / `reasoning-echo-unsafe` flags when applicable
 - [ ] PromptArtifact displayed verbatim and emitted transport-safely — file-based handoff recommended over inline shell args; `transport-unsafe` flag surfaced when applicable
 - [ ] Core output stopped at IR; artifact form kept in the adapter
 - [ ] No tool execution, branch, or PR performed
