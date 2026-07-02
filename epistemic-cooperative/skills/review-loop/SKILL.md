@@ -119,7 +119,10 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    interact with adjacent code, break an invariant the finding did not mention, or recur
    at unswept sites? The scan compiles the self-contained fix brief: each fix
    file:line-anchored with its verified basis and fix direction, plus any licensed
-   completeness-sweep predicate (risk-screened at the predicate level).
+   completeness-sweep predicate with its candidate sites enumerated at scan time — each
+   site semantically verified and risk-screened per site (Rule 6) before it enters the
+   brief; a site the writer discovers beyond the brief is returned for screening, never
+   written unbriefed.
 2. **Write on the low-cost tier**: hand the brief to a low-cost fresh subagent
    (`model: sonnet`) — the normal case, since the brief is self-contained by
    construction. Fall back to a fork only when a fix rides on loop context the brief
