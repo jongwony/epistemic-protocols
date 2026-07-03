@@ -6,7 +6,7 @@ This document records an emergent observation about how Probe's Phase 1 candidat
 
 ## Background
 
-Probe (`/probe`, `epistemic-cooperative:probe`) is itself released provisionally pending accumulated cross-session use evidence (CLAUDE.md §Plugins). Its Phase 1 scans the user situation against the catalog of epistemic deficits and constructs candidate hypotheses, often classifying each candidate's downstream remediation as either *surgical* (deterministic 1–2 line edit) or *design* (decision-bearing structural change).
+Probe (`/probe`, `epistemic-cooperative:probe`) is itself released provisionally pending accumulated cross-session use evidence. Its Phase 1 scans the user situation against the catalog of epistemic deficits and constructs candidate hypotheses, often classifying each candidate's downstream remediation as either *surgical* (deterministic 1–2 line edit) or *design* (decision-bearing structural change).
 
 That classification is itself an inference Probe makes. When it is wrong, the downstream PR/commit plan is mis-scoped: a candidate flagged "surgical" may land an interim patch that needs to be unwound by a later redesign round, while a candidate flagged "design" may sit in a deferred queue when a one-line edit would have closed it cleanly.
 
@@ -53,7 +53,7 @@ Under these grounds, the well-defined endpoint requires changes to TYPES, FLOW b
 
 ### Resolution
 
-Commit `a58c6fc` is preserved as a valid surface-consistency minimum-diff — it does not introduce regressions and remains green under static checks. It is **not** the well-defined endpoint. L4a is reclassified into the tier-3 redesign cluster (Task #21) and will be absorbed when ProtocolRoute is unified into a single type. No revert is performed (force-push avoidance, audit-trail preservation).
+Commit `a58c6fc` is preserved as a valid surface-consistency minimum-diff — it does not introduce regressions and remains green under static checks. It is **not** the well-defined endpoint. L4a is reclassified into the tier-3 redesign cluster (ProtocolRoute single-type unification, alongside T2/L1/L2/L3/L8 from the same PR #288 review round) and will be absorbed when ProtocolRoute is unified into a single type. No revert is performed (force-push avoidance, audit-trail preservation).
 
 ## Hypothesis (pre-corroboration)
 
@@ -86,4 +86,4 @@ This refinement is not yet inscribed in `probe/SKILL.md`. Inscription requires a
 
 - Instance: PR #288, commit `a58c6fc` (`fix(probe): MORPHISM target widen + Λ session-immunity field`).
 - Probe specification: `epistemic-cooperative/skills/probe/SKILL.md`.
-- Tier-3 redesign task: TaskList #21 (ProtocolRoute single-type unification).
+- Tier-3 redesign cluster: ProtocolRoute single-type unification (T2 Stop→Exit naming, L1 Recognize materialization, L2 Stop option handling, L3 Dismiss/Stop peer collapse, L4a MORPHISM codomain, L8 `|H[]|=1` escape — all from the PR #288 review round).

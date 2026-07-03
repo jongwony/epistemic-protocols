@@ -2,7 +2,7 @@
 
 ## About This Project
 
-Epistemic Protocols is a Claude Code plugin marketplace for epistemic dialogue — 10 protocols that structure specific decision points in human–AI interaction. See `CLAUDE.md` for the protocol map and architecture.
+Epistemic Protocols is a Claude Code plugin marketplace for epistemic dialogue — protocols that structure specific decision points in human–AI interaction. Run `/catalog` for the protocol handbook (browse by cluster, command lookup); see `CLAUDE.md` for architecture.
 
 Contributors here design, refine, and verify the protocols themselves. This guide is for you.
 
@@ -44,19 +44,19 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] Run `node --test scripts/package.test.js` to confirm the packaging tests pass
 
 ### Core Docs to Read (in order)
-- [ ] `CLAUDE.md` — architecture, protocol table, precedence, CI summary (~15 min)
-- [ ] `.claude/rules/axioms.md` — A1–A6 foundational principles; the north star (~10 min)
+- [ ] `CLAUDE.md` — Northstar, Settled Directions registry, Protocol Index routing table, Runtime Contract, verification commands (~15 min)
+- [ ] `.claude/rules/axioms.md` — A1–A6 foundational principles + Gate Integrity (Safeguard tier); the north star (~10 min)
 - [ ] `.claude/rules/derived-principles.md` — logical consequences of axiom combinations
-- [ ] `.claude/rules/architectural-principles.md` — Epistemic Cost Topology (T1, per-turn); other architectural principles in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
+- [ ] `.claude/rules/architectural-principles.md` — Epistemic Completeness Boundary (T1, per-turn); Tier Factorization and other architectural principles — including Epistemic Cost Topology — live in `.claude/principles/architectural-principles.md` (T2-T3, lazy-load)
 - [ ] `.claude/principles/safeguards.md` — Safeguard-tier principles (LESS important as models improve); demoted from `.claude/rules/` (authoring/verify-time, not per-turn) (~5 min)
 - [ ] `.claude/principles/README.md` — demotion zone overview, demotion ledger
 - [ ] `docs/structural-specs.md` — SKILL.md Formal Block Anatomy (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, LOOP, TOOL GROUNDING, MODE STATE, COMPOSITION)
-- [ ] `docs/verification.md` — what each of the 15 static checks enforces
+- [ ] `docs/verification.md` — what each static check enforces
 - [ ] `docs/co-change.md` — ripple patterns (protocol change → plugin.json version bump → /verify)
 - [ ] `docs/review-pipeline.md` — the skill-based review flow (`/review-loop` for code review, `/lens-review` for epistemic review)
 
 ### Protocols to Use While Contributing
-- [ ] `/verify` — run before every commit; 15 static checks (json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync, gate-type-soundness)
+- [ ] `/verify` — run before every commit; static checks per `docs/verification.md`'s check inventory
 - [ ] `/syneidesis:gap` — surface gaps before committing to a design decision
 - [ ] `/aitesis:inquire` — when a redesign feels under-specified
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
@@ -71,7 +71,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 1. **Scope** — read the rule file(s) for the area you're touching (`axioms.md` / `derived-principles.md` / `architectural-principles.md`); run `/horismos:bound` if multiple domains are in play
 2. **Design** — `/syneidesis:gap` before locking in a direction; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
 3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `docs/co-change.md`)
-4. **Verify** — `/verify` must pass all 15 static checks
+4. **Verify** — `/verify` must pass all static checks
 5. **Test** — `node --test scripts/package.test.js`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)
 7. **Ship** — [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) for the one-shot flow if you have that external plugin installed, or fall back to plain `git push -u origin <branch>` + `gh pr create`; PR body language is Korean (hook-enforced)
@@ -101,7 +101,7 @@ Two principles to internalize before your first PR:
 3. Read `.claude/rules/axioms.md`
 4. Run `/verify` to confirm your environment
 5. Pick a protocol whose `SKILL.md` interests you and read it alongside `docs/structural-specs.md`
-6. Browse recent merged PRs (#227–#235) to see the actual pattern of contribution
+6. Browse recent merged PRs to see the actual pattern of contribution
 
 <!-- INSTRUCTION FOR CLAUDE: A new contributor to epistemic-protocols just
 pasted this guide. You're their onboarding buddy for an axiom-heavy,

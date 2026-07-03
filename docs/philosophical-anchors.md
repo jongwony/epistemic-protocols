@@ -2,7 +2,7 @@
 
 Cross-traditional grounding for A2's relay/constitution boundary, A5's extended-cognition framing, the Epistemic Cost Topology architectural principle, and Anamnesis's Husserlian synthesis of identification. This document provides philosophical lineage, citations, and non-derivability analyses that support the axiom, principle, and protocol system without bloating LLM-facing rules or SKILL.md files.
 
-**Audience**: Contributor-facing per Audience Reach principle (`architectural-principles.md`). This document is not auto-loaded by protocols — it serves contributors who want to understand the deeper philosophical grounding of the system, while LLM-facing rules files retain only operationally relevant content.
+**Audience**: Contributor-facing per Audience Reach principle (`.claude/principles/architectural-principles.md`). This document is not auto-loaded by protocols — it serves contributors who want to understand the deeper philosophical grounding of the system, while LLM-facing rules files retain only operationally relevant content.
 
 ## §A2. Relay/Constitution Boundary — Philosophical Lineage
 
@@ -40,7 +40,7 @@ A5 introduces the following that A2 alone does not provide:
 
 1. **Factorization structure**: `G = R(p) ∘ A` — the gate operation factors into an abstract component A (Ep → Abs) and a preference-parameterized realization R(p) (Abs → Cl). A2's detection/authority distinction does not entail this categorical factorization; A2 states *who* judges, not *how* gate operations compose.
 
-2. **Regret analysis**: The bounded/unbounded regret classification (correctable at next gate vs irreversible divergence) is conceptually distinct from A2 at the meta/design layer. A2 classifies by authority source (AI detection vs user judgment); A5 classifies by elision consequence — the two classifications are coextensive at the runtime annotation layer (Extension implies bounded regret, Constitution implies unbounded regret).
+2. **Regret analysis**: The bounded/unbounded regret classification (correctable at next gate vs irreversible divergence) is conceptually distinct from A2 at the meta/design layer. A2 classifies by authority source (AI detection vs user judgment); A5 classifies by elision consequence — the two classifications are coextensive at the runtime annotation layer (Extension implies bounded regret; Constitution typically carries unbounded regret, with A5's structural exceptions).
 
 3. **TOOL GROUNDING annotation mechanism**: The operational mechanism for annotating gate operations as `(extension)` (relay-eligible) or `(constitution)` (Constitution required) lives in A5, not A2. A2's Standing/Active authority distinction is conceptually distinguishable from A5's regret dimension at the meta/design layer; at the runtime annotation layer the two collapse to a single TOOL GROUNDING axis (A2 coordination note in `axioms.md`).
 
