@@ -42,8 +42,8 @@ Each surface operationalizes the same structural pattern at a different scale. C
 
 ## Naming
 
-"Hermeneutic cycle", "hermeneutic circle", and "Hermeneutischer Zirkel" are synonyms. Default to "hermeneutic cycle" in prose; "Hermeneutischer Zirkel" when explicitly mapping to `LOOP` block; profile-variable form `hermeneutic_circle_availability` preserved as identifier convention. "Tertiary hermeneutic circle" is the historic label for the inter-session surface (`.claude/principles/architectural-principles.md:19`) — new prose prefers "Tertiary surface" or names the scale (Cross-Session Knowledge Composition).
+"Hermeneutic cycle", "hermeneutic circle", and "Hermeneutischer Zirkel" are synonyms. Default to "hermeneutic cycle" in prose; "Hermeneutischer Zirkel" when explicitly mapping to `LOOP` block; profile-variable form `hermeneutic_circle_availability` preserved as identifier convention. "Tertiary hermeneutic circle" is the historic label for the inter-session surface (`.claude/principles/architectural-principles.md §Cross-Session Knowledge Composition`) — new prose prefers "Tertiary surface" or names the scale (Cross-Session Knowledge Composition).
 
 ## Tier
 
-Lives in `.claude/principles/` (axis_β = T2–T3, lazy-load, authoring/verify-time invocation). Per Tier Factorization (`.claude/rules/architectural-principles.md`), this file names the family for authoring coherence; runtime detection is operationalized at each surface (LOOP blocks at runtime, hypomnesis store at session boundary, VCS at inter-version scale, Constitution gate per Phase 2).
+Lives in `.claude/principles/` (axis_β = T2–T3, lazy-load, authoring/verify-time invocation). Per Tier Factorization (`.claude/principles/architectural-principles.md §Tier Factorization`), this file names the family for authoring coherence; runtime detection is operationalized at each surface (LOOP blocks at runtime, hypomnesis store at session boundary, VCS at inter-version scale, Constitution gate per Phase 2).

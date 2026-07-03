@@ -1,6 +1,6 @@
 # Outcome Equivalence — Realization-Failure History
 
-Historical record of realization-completeness failures for `derived-principles.md §Outcome Equivalence`. The rules layer carries the abstract falsifiability statement; concrete instances live here (grounded exposition per Design Placement).
+Historical record of realization-completeness failures for `.claude/principles/outcome-equivalence.md` (demoted from `derived-principles.md` on 2026-07-03). The principles layer now carries the abstract falsifiability statement; concrete instances live here (grounded exposition per Design Placement).
 
 ## Instance 1: Prothesis v6 `Await` / SubagentStop (refuted → resolved)
 
