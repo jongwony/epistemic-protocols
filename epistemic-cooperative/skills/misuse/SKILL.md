@@ -279,7 +279,7 @@ converge               (extension)     → TextPresent+Proceed (convergence trac
       active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Misuse composes downstream when the user wants to act on confirmed violations (e.g., re-invoke /induce on a Sₐ-confabulation case). Composition target is determined at runtime by user disposition outside this skill (Rule 6 forbids automated reroute), not by static graph.json edges.
+*: product — (D₁ × D₂) → (R₁ × R₂). Misuse composes downstream when the user wants to act on confirmed violations (e.g., re-invoke /induce on a Sₐ-confabulation case). Composition target is determined at runtime by user disposition outside this skill (Rule 6 forbids automated reroute), not by statically registered dependency edges.
 ```
 
 ## Storage Reference

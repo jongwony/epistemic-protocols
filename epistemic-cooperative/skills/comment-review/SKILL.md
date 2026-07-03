@@ -112,7 +112,7 @@ To keep commenting / disposing, do not yet answer the gate — keep drag-comment
 
 ## Scope Differentiation (Suppression Bypass)
 
-The composition includes two suppression edges from graph.json:
+The composition includes two registered suppression edges:
 - `syneidesis ⊣ aitesis` — same-scope Aitesis suppression
 - `aitesis ⊣ epharmoge` — same-scope pre+post stacking prevention
 
@@ -124,7 +124,7 @@ Both fire only on same-scope co-activation. This composition keeps scopes struct
 - `/gap` — decision quality w.r.t. fixation event D (decision layer, pre-fixation temporal zone, distinct dimension)
 - `/contextualize` — application fit of fixed artifact against `application_context` (post-fixation temporal zone)
 
-**Suppression analysis for `/sublate`**: graph.json declares advisory edges `aitesis → elenchus` (collected context provides audit substrate), `elenchus → syneidesis` (vetted context sharpens gap detection), and `elenchus → epharmoge` (vetted pre-state contextualizes post-execution check). No suppression edge involving Elenchus exists; `/sublate`'s scope (source-decay layer) does not collide with `/inquire`'s factual-presence scope, `/gap`'s decision-point scope, or `/contextualize`'s post-execution scope.
+**Suppression analysis for `/sublate`**: The registered advisory edges are `aitesis → elenchus` (collected context provides audit substrate), `elenchus → syneidesis` (vetted context sharpens gap detection), and `elenchus → epharmoge` (vetted pre-state contextualizes post-execution check). No suppression edge involving Elenchus exists; `/sublate`'s scope (source-decay layer) does not collide with `/inquire`'s factual-presence scope, `/gap`'s decision-point scope, or `/contextualize`'s post-execution scope.
 
 **Emergent clause**: Named scopes are working hypotheses per the Full Taxonomy Confirmation principle. Runtime boundary cases — where a finding could legitimately belong to more than one scope — resolve by **attribution priority**: Factual > Source-Vetting > Decision > Application. When a finding remains ambiguous after priority assessment, record under both scopes with `origin: ambiguous` annotation and surface at the first applicable sub-protocol surfacing gate in the pipeline. Silent attribution drift is a protocol violation; explicit dual-record preserves auditability.
 
