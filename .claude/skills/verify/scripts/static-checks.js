@@ -2935,10 +2935,13 @@ function checkFormalBlocksRule() {
 // "Gate Integrity (Operational Guards, Safeguard-tier)" — reclassified from
 // A7/Adversarial Anticipation per audit-2026-04-11 #241 resolution). Verifies
 // each core protocol SKILL.md carries a Gate integrity rule tagged
-// "(Safeguard tier)" whose body states the mutation-taxonomy kernel
-// (type-preserving materialization vs. injection/deletion/substitution), so
-// runtime enforcement of gate fidelity does not depend on contributor-only
-// axioms.md alone.
+// "(Safeguard tier)" whose body states the invariant kernel phrase
+// ("type-preserving materialization"), so runtime enforcement of gate
+// fidelity does not depend on contributor-only axioms.md alone. The mutation
+// taxonomy itself (injection/deletion/substitution) is deliberately NOT
+// word-anchored: copies specialize it in per-protocol vocabulary (e.g.
+// euporia phrases mutations as partial omission of cycle coordinates), so
+// the check anchors on the kernel phrase only.
 //
 // Exemption list: all 16 core protocols currently carry this rule (added
 // in the EP-02 enforcement cycle). Kept EMPTY on purpose: add a relPath

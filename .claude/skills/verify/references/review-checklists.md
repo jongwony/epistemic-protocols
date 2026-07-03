@@ -204,22 +204,26 @@ After all three perspectives complete, synthesize findings:
 ## Subagent Spawn Pattern
 
 ```javascript
-// Parallel spawn pattern for LLM review
+// Parallel spawn pattern for LLM review.
+// Resolve the review targets per invocation: the protocol SKILL.md files
+// changed in the current diff (e.g. `git diff --name-only <base>...HEAD --
+// '*/skills/*/SKILL.md'`) — never a hardcoded protocol list.
+const changedProtocolFiles = [/* resolved from the current diff */];
 const perspectives = [
   {
     name: 'type-category-theory',
     prompt: TYPE_THEORY_PROMPT,
-    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'horismos/skills/bound/SKILL.md']
+    files: changedProtocolFiles
   },
   {
     name: 'instruction-design',
     prompt: INSTRUCTION_DESIGN_PROMPT,
-    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'horismos/skills/bound/SKILL.md', 'CLAUDE.md']
+    files: [...changedProtocolFiles, 'CLAUDE.md']
   },
   {
     name: 'claude-code-ecosystem',
     prompt: CLAUDE_CODE_ECOSYSTEM_PROMPT,
-    files: ['prothesis/skills/frame/SKILL.md', 'syneidesis/skills/gap/SKILL.md', 'horismos/skills/bound/SKILL.md', 'CLAUDE.md']
+    files: [...changedProtocolFiles, 'CLAUDE.md']
   }
 ];
 
