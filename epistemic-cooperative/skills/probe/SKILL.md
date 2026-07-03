@@ -242,7 +242,7 @@ converge            (extension)    → TextPresent+Proceed (convergence trace)
       active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Probe composes downstream into the recognized protocol when the user selects Recognize or Redirect — composition target is determined at runtime by user disposition, not by static graph.json edges.
+*: product — (D₁ × D₂) → (R₁ × R₂). Probe composes downstream into the recognized protocol when the user selects Recognize or Redirect — composition target is determined at runtime by user disposition, not by statically registered dependency edges.
 ```
 
 ## Storage Reference
