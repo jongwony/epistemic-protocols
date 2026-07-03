@@ -344,7 +344,7 @@ Heuristic signals for empty intention detection (not hard gates):
 | Failed self-recall | User attempts to reference prior context but trails off, hedges, or uses approximation language |
 | Cognitive effort signals | User pauses mid-reference, self-corrects, or expresses frustration at not finding a prior discussion |
 
-**Cross-session enrichment**: Prior recall indices persisted in the hypomnesis store provide starting points for Phase 1 contextual scan — previously successful recall paths may guide initial search scope. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior recall indices persisted in the hypomnesis store (prior-session recall indices) provide starting points for Phase 1 contextual scan — previously successful recall paths may guide initial search scope. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
 
 **Skip**:
 - User provides specific reference (file path, session ID, issue number, exact quote)

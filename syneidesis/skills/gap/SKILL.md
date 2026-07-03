@@ -208,7 +208,7 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 - Reversible + Any impact → Low stakes
 - Time pressure → stakes ↑ one level
 
-**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed gap type weighting during scanning; the constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed gap type weighting during scanning; the constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern that the named gap types fail to capture, the cost of maintaining the current taxonomy exceeds the cost of adding a named type — promote the Emergent cluster. Conversely, when a named type consistently yields zero detections across 3+ sessions, consider whether it remains a distinct gap category or has become observationally inert — consistently undetected despite applicable contexts.
 

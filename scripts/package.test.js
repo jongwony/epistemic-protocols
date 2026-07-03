@@ -290,6 +290,141 @@ describe('artifact-self-containment detector liveness', () => {
 });
 
 // ============================================================
+// enforcement-check detector liveness (checks 25/26/27)
+// ============================================================
+// static-checks.js is a run-to-completion script (no module exports), so
+// these liveness tests execute it as a subprocess and parse its JSON
+// output. Non-zero exit is expected here: each test deliberately breaks a
+// live file to prove the detector fires, then restores it. Only the target
+// check's fail entries are asserted — other checks reacting to the
+// temporary mutation are irrelevant to liveness.
+// IMPORTANT: these tests mutate live files. Never run this test file
+// concurrently with a static protocol verification run (see CLAUDE.md
+// Verification note); run them sequentially.
+
+function runStaticChecksSubprocess() {
+  const REPO_ROOT = path.join(__dirname, '..');
+  const scriptPath = path.join(
+    REPO_ROOT, '.claude', 'skills', 'verify', 'scripts', 'static-checks.js'
+  );
+  try {
+    const stdout = execFileSync(process.execPath, [scriptPath, REPO_ROOT], {
+      encoding: 'utf8',
+      maxBuffer: 32 * 1024 * 1024,
+    });
+    return JSON.parse(stdout);
+  } catch (err) {
+    // Exit code 1 means checks ran and some failed — the expected liveness
+    // path; stdout still carries the full JSON results. Anything else
+    // (crash, unparseable output) propagates as a loud test failure.
+    if (err.stdout) {
+      try {
+        return JSON.parse(err.stdout);
+      } catch {
+        throw err;
+      }
+    }
+    throw err;
+  }
+}
+
+describe('enforcement-check detector liveness', () => {
+  const REPO_ROOT = path.join(__dirname, '..');
+  const CORE_SKILL_MD = path.join(REPO_ROOT, 'aitesis', 'skills', 'inquire', 'SKILL.md');
+  const INK_STYLE_MD = path.join(
+    REPO_ROOT, 'epistemic-cooperative', 'styles', 'epistemic-ink.md'
+  );
+
+  function restoreOrDie(filePath, backup, label) {
+    try {
+      fs.writeFileSync(filePath, backup);
+    } catch (restoreErr) {
+      process.stderr.write(
+        `\n\n!!! LIVENESS TEST FAILED TO RESTORE ${label} !!!\n` +
+        `Manual recovery required: git checkout ${path.relative(REPO_ROOT, filePath)}\n` +
+        `Original restore error: ${restoreErr && restoreErr.message}\n\n`
+      );
+      throw restoreErr;
+    }
+  }
+
+  it('formal-blocks-rule fires when the rule label is mangled in a core SKILL.md', () => {
+    const LABEL = '**Formal blocks are runtime-normative**';
+    const backup = fs.readFileSync(CORE_SKILL_MD, 'utf8');
+    assert.ok(backup.includes(LABEL), 'precondition: rule label present in pristine file');
+    try {
+      fs.writeFileSync(
+        CORE_SKILL_MD,
+        backup.replace(LABEL, '**Formal blocks are runtime-MANGLED**')
+      );
+
+      const result = runStaticChecksSubprocess();
+      const fails = result.fail.filter(
+        f => f.check === 'formal-blocks-rule' && /aitesis/.test(f.file)
+      );
+      assert.ok(
+        fails.length >= 1,
+        `expected ≥1 formal-blocks-rule fail for aitesis after mangling the rule label, ` +
+        `got ${fails.length}. If 0: detector is silently no-op (liveness failure). ` +
+        `Fails: ${JSON.stringify(result.fail)}`
+      );
+    } finally {
+      restoreOrDie(CORE_SKILL_MD, backup, 'aitesis SKILL.md');
+    }
+  });
+
+  it('gate-integrity-rule fires when the mutation-taxonomy kernel is mangled in its entry', () => {
+    // The Gate integrity Rules entry states the kernel with a capital T
+    // ("Type-preserving materialization"); the earlier prose occurrence is
+    // lowercase, so this exact-case replace targets the entry body only.
+    const ENTRY_KERNEL = 'Type-preserving materialization';
+    const backup = fs.readFileSync(CORE_SKILL_MD, 'utf8');
+    assert.ok(backup.includes(ENTRY_KERNEL), 'precondition: entry kernel present in pristine file');
+    try {
+      fs.writeFileSync(
+        CORE_SKILL_MD,
+        backup.replace(ENTRY_KERNEL, 'Type-MANGLED materialization')
+      );
+
+      const result = runStaticChecksSubprocess();
+      const fails = result.fail.filter(
+        f => f.check === 'gate-integrity-rule' && /aitesis/.test(f.file)
+      );
+      assert.ok(
+        fails.length >= 1,
+        `expected ≥1 gate-integrity-rule fail for aitesis after mangling the kernel phrase, ` +
+        `got ${fails.length}. If 0: detector is silently no-op (liveness failure). ` +
+        `Fails: ${JSON.stringify(result.fail)}`
+      );
+    } finally {
+      restoreOrDie(CORE_SKILL_MD, backup, 'aitesis SKILL.md');
+    }
+  });
+
+  it('gate-firing-anchor fires when a kernel phrase is deleted from the Ink element', () => {
+    const KERNEL = 'an uncited skip is not a relay but a silent gate omission';
+    const backup = fs.readFileSync(INK_STYLE_MD, 'utf8');
+    assert.ok(backup.includes(KERNEL), 'precondition: kernel phrase present in pristine file');
+    try {
+      fs.writeFileSync(INK_STYLE_MD, backup.replace(KERNEL, ''));
+
+      const result = runStaticChecksSubprocess();
+      const fails = result.fail.filter(f => f.check === 'gate-firing-anchor');
+      assert.ok(
+        fails.length >= 1,
+        `expected ≥1 gate-firing-anchor fail after deleting a kernel phrase, ` +
+        `got ${fails.length}. If 0: detector is silently no-op (liveness failure). ` +
+        `Fails: ${JSON.stringify(result.fail)}`
+      );
+      const namesDeletedKernel = fails.some(f => f.message && f.message.includes(KERNEL));
+      assert.ok(namesDeletedKernel, 'fail message should name the deleted kernel phrase');
+    } finally {
+      restoreOrDie(INK_STYLE_MD, backup, 'epistemic-ink.md');
+    }
+  });
+});
+
+// ============================================================
 // createZip
 // ============================================================
 

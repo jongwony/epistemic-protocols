@@ -247,7 +247,7 @@ Generate metadata triple plus dialectical antithesis per source.
 - Name the dialectical challenge concretely (a verification gap, a counterfactual condition, a divergent sibling source, or an inference-fallacy archetype condition)
 - Surface the basis for the challenge so the user can recognize the antithesis's evidence
 
-**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 1 pattern selection; the constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 1 pattern selection; the constitutive judgment remains with the user.
 
 ### Phase 2: Per-Source Disposition Constitution Interaction
 

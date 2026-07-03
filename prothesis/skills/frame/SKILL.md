@@ -220,7 +220,7 @@ MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and
 
 After context gathering (Phase 1), **present** perspectives via Cognitive Partnership Move (Constitution) as a multi-select confirmation.
 
-**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 2 perspective formulation; the constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 2 perspective formulation; the constitutive judgment remains with the user.
 
 Constitution presentation yields turn for user response.
 

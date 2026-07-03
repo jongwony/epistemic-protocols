@@ -197,7 +197,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Structural mismatch indicators | Abstract assumptions that may not hold in the concrete domain |
 | Self-grounding (abstraction vs its own instances) | A located/named abstraction is checked against the instances it claims to subsume (wrong-fusion suspicion) — Sₐ = the abstraction, Sₜ = its own members. Distinct from the colimit route-away case (locator absent → /induce); here the abstraction already has a name and is tested for whether it fuses dissimilar instances |
 
-**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 1 domain decomposition; the constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 1 domain decomposition; the constitutive judgment remains with the user.
 
 **Skip**:
 - Output is already domain-specific with concrete instantiations

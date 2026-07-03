@@ -2856,7 +2856,7 @@ function checkPackagedAgentContractSync() {
 // (Formal blocks are LLM-facing and constitutive of protocol identity).
 //
 // Exemption list: all 16 core protocols currently carry this rule (added
-// in the EP-02 enforcement cycle). Kept EMPTY on purpose: add a relPath
+// in the compiled-copy enforcement family (checks 25–26)). Kept EMPTY on purpose: add a relPath
 // only when a recorded decision exempts a protocol — never pre-populate.
 const FORMAL_BLOCKS_EXEMPTIONS = [];
 
@@ -2870,10 +2870,10 @@ const FORMAL_BLOCKS_EXEMPTIONS = [];
 // following unrelated content.
 const NEXT_ENTRY_OR_SECTION = /^(?:\d+\.\s|#{1,6}\s|\*\*)/m;
 
-function boundedEntryBody(content, labelMatch, bound) {
+function boundedEntryBody(content, labelMatch, bound, nextPattern = NEXT_ENTRY_OR_SECTION) {
   const bodyStart = labelMatch.index + labelMatch[0].length;
   const bounded = content.slice(bodyStart, bodyStart + bound);
-  const next = NEXT_ENTRY_OR_SECTION.exec(bounded);
+  const next = nextPattern.exec(bounded);
   return next ? bounded.slice(0, next.index) : bounded;
 }
 
@@ -2944,7 +2944,7 @@ function checkFormalBlocksRule() {
 // the check anchors on the kernel phrase only.
 //
 // Exemption list: all 16 core protocols currently carry this rule (added
-// in the EP-02 enforcement cycle). Kept EMPTY on purpose: add a relPath
+// in the compiled-copy enforcement family (checks 25–26)). Kept EMPTY on purpose: add a relPath
 // only when a recorded decision exempts a protocol — never pre-populate.
 const GATE_INTEGRITY_EXEMPTIONS = [];
 
@@ -3015,6 +3015,83 @@ function checkGateIntegrityRule() {
 }
 
 // ============================================================
+// Check 27: Gate Firing Precondition Kernel Anchor
+// ============================================================
+// The Output Style source (epistemic-cooperative/styles/epistemic-ink.md)
+// carries the "Gate firing precondition" element — the rendering-layer rule
+// that decides WHETHER a gate exists before the divider block decides how
+// one looks. This check pins the element's three load-bearing kernel
+// phrases:
+//   1. "fires as classified" — protocol classification controls by default;
+//   2. "an uncited skip is not a relay but a silent gate omission" — a
+//      relay collapse carries a citation obligation at the point of use;
+//   3. "never overrides a protocol's TOOL GROUNDING classification" — the
+//      outside-protocol reversibility test stays subordinate to protocol
+//      classification.
+// Kernel-anchored: the surrounding phrasing is free to evolve; only the
+// kernel phrases are pinned. Each kernel must appear inside the element's
+// own bounded body (label line to the next Ink element label or heading),
+// not merely anywhere in the file, so a gutted element still fails even if
+// a kernel survives elsewhere.
+function checkGateFiringAnchor() {
+  const CHECK = 'gate-firing-anchor';
+  const REL_PATH = 'epistemic-cooperative/styles/epistemic-ink.md';
+  const LABEL_PATTERN = /^\*\*Gate firing precondition\*\*/m;
+  // Element boundary: a column-0 bold label opening the next capitalized
+  // Ink element, or a Markdown heading. The element's own bullet lines
+  // start with "- " and therefore do not terminate the body. Bound
+  // calibrated against the current element body (~2.9k chars); 6000 leaves
+  // comfortable margin while still cutting off a runaway scan if the
+  // boundary pattern ever fails to match.
+  const NEXT_INK_ELEMENT_OR_HEADING = /^(?:\*\*[A-Z]|#{1,6}\s)/m;
+  const ELEMENT_BOUND = 6000;
+  const KERNELS = [
+    'fires as classified',
+    'an uncited skip is not a relay but a silent gate omission',
+    "never overrides a protocol's TOOL GROUNDING classification",
+  ];
+
+  const fullPath = path.join(projectRoot, REL_PATH);
+  if (!fs.existsSync(fullPath)) {
+    results.fail.push({
+      check: CHECK,
+      file: REL_PATH,
+      message: `Output Style source not found: ${REL_PATH}`,
+    });
+    return;
+  }
+
+  const content = fs.readFileSync(fullPath, 'utf8');
+  const labelMatch = LABEL_PATTERN.exec(content);
+  if (!labelMatch) {
+    results.fail.push({
+      check: CHECK,
+      file: REL_PATH,
+      message: 'Missing Ink element label: "**Gate firing precondition**"',
+    });
+    return;
+  }
+
+  const elementBody = boundedEntryBody(content, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
+  const missing = KERNELS.filter(kernel => !elementBody.includes(kernel));
+  for (const kernel of missing) {
+    results.fail.push({
+      check: CHECK,
+      file: REL_PATH,
+      message: `"Gate firing precondition" element present but missing kernel phrase within its bounded body: "${kernel}"`,
+    });
+  }
+
+  if (missing.length === 0) {
+    results.pass.push({
+      check: CHECK,
+      file: REL_PATH,
+      message: `Gate firing precondition element verified — all ${KERNELS.length} kernel phrases anchored within the element body`,
+    });
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -3044,6 +3121,7 @@ try {
   checkLanguagePurity();
   checkFormalBlocksRule();
   checkGateIntegrityRule();
+  checkGateFiringAnchor();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
