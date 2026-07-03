@@ -29,7 +29,7 @@ All protocols share this structure within `Definition` code block:
 ```
 
 **COMPOSITION block details**:
-- Universal: present in all protocol SKILL.md files with identical text
+- Coverage: present in all protocol SKILL.md files except anagoge (`anagoge/skills/ascend/SKILL.md` carries no COMPOSITION block), with identical text across the files that carry it
 - `*` denotes the composition operator (categorical product on deficit/resolution). Distinct from graph.json `"source": "*"` wildcard (precondition scope)
 - `registered dependency edges preserved`: precondition, advisory, and suppression edges (registered in `graph.json`) remain enforced within composite execution. DAG ordering governs dimension detection sequence; suppression prevents co-activation of overlapping pairs
 - `Dimension resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition, not prescribed by the operator
