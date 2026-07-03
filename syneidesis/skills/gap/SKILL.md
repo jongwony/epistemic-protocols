@@ -92,7 +92,7 @@ converge (extension)   → TextPresent+Proceed (convergence evidence trace; proc
 Λ = { phase: Phase, state: Σ, pressureMapSnapshot: P, active: Bool }  -- snapshot supports audit trace only; recompute before every Sel
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -119,7 +119,7 @@ When Syneidesis is active:
 **Supersedes**: Risk assessment and decision gating rules in loaded instructions
 (e.g., verification tiers, reversibility checks, approval requirements)
 
-**Retained**: Safety boundaries, secrets handling, deny-paths, user explicit instructions
+**Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
 **Action**: At decision points, present potential gaps via Cognitive Partnership Move (Constitution).
 </system-reminder>
@@ -208,7 +208,7 @@ Per Phase 0 formal block. **Stakes mapping** (from modulating factors):
 - Reversible + Any impact → Low stakes
 - Time pressure → stakes ↑ one level
 
-**Cross-session enrichment**: Repeated gap patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust gap type weighting during scanning — frequently surfaced gap categories receive higher detection sensitivity. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior gap categories the user has frequently overlooked in comparable decisions, further adjusting detection weights toward those blind spots. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed gap type weighting during scanning; the constitutive judgment remains with the user.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern that the named gap types fail to capture, the cost of maintaining the current taxonomy exceeds the cost of adding a named type — promote the Emergent cluster. Conversely, when a named type consistently yields zero detections across 3+ sessions, consider whether it remains a distinct gap category or has become observationally inert — consistently undetected despite applicable contexts.
 
@@ -279,7 +279,7 @@ Constitution presentation yields turn for user response.
 | Interpretive uncertainty | Ask whether gap exists before surfacing |
 | Naming/structure decisions | Offer alternatives with rationale |
 
-**UX rationale**: Task list renders persistently in UI with progress indicator. User sees total gap count upfront. Dependencies visible via blocking relationships.
+**UX rationale**: Task list renders persistently in UI, keeping gaps visible across the session. Dependencies visible via blocking relationships.
 
 **Re-scan trigger**: User response may reveal new gaps (e.g., "Yes, backed up" → "Where?" precision gap). Always re-scan after each response.
 
@@ -308,7 +308,7 @@ Note: Esc key → unconditional loop termination (LOOP level). Constitution inte
 5. **Context-Question Separation**: Output analysis, evidence, and rationale as text before presenting the gate; the gate contains the essential question and option-specific differential implications only. Embedding context in question fields = protocol violation.
 6. **Convergence evidence**: Present convergence audit trace before declaring all tasks completed; per-gap evidence is required.
 7. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation.
-8. **Option-set relay test**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
+8. **Option-set relay test (Extension classification)**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
 9. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 10. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 11. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.

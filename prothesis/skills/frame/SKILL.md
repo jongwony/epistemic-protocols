@@ -138,7 +138,7 @@ Phase ∈ {0, 1, 2, 3}
 -- no mode field (frame has no user-chosen mode): the framed output is discriminated at Phase 3 by substrate availability (LensReturn vs SubstrateCorrespondence), not by a Phase 0 choice. The section name is the cross-protocol structural-state slot, not a "mode" toggle.
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -218,9 +218,9 @@ MBᵥ.inquiry_intent and MBᵥ.scope_constraint direct which files, systems, and
 
 ### Phase 2: Prothesis (Perspective Placement)
 
-After context gathering (Phase 1), **present** perspectives via Cognitive Partnership Move (Constitution) with `multiSelect: true`.
+After context gathering (Phase 1), **present** perspectives via Cognitive Partnership Move (Constitution) as a multi-select confirmation.
 
-**Cross-session enrichment**: Prior framing experiences accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) guide Phase 2 perspective formulation bidirectionally — previously effective analytical lenses for similar domains provide starting hypotheses (exploitation), while prior coverage gaps (unaddressed horizon limits) signal domains where novel perspectives should be prioritized (exploration). In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior framework or perspective preferences, biasing the Phase 2 framework candidate set toward lenses the user has already found productive in this line of work. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 2 perspective formulation; the constitutive judgment remains with the user.
 
 Constitution presentation yields turn for user response.
 
@@ -228,7 +228,7 @@ Each perspective is an **individual option**. Keep each option a single perspect
 
 ```
 question: "Which lens(es) for this inquiry?"
-multiSelect: true
+selection: multiple
 options:
   - label: "[Perspective A]"
     description: "[distinctive analytical contribution - 1 line]"
@@ -316,7 +316,7 @@ The `SubstrateCorrespondence` handoff carries, per lens:
 9. **Convergence evidence**: Present the transformation trace before handoff (detailed lens(es) via `LensReturn`, or lens↔substrate pairs via `SubstrateCorrespondence`); per-perspective contribution is the required evidence. The trace demonstrates convergence-of-framing only — never a synthesized convergence of the inquiry's findings, which frame does not produce. The trace is relay (presented, then proceed) — there is no post-handoff sufficiency gate, because frame does not execute and has nothing to iterate.
 10. **Zero-result surfacing**: If Phase 2 generation yields no candidate frameworks (Z: {P₁...Pₙ} = ∅ ∧ Pᵦ = ∅), present the finding with reasoning. Responses route to existing paths — modify the Mission Brief (re-present Q1, re-gather), supply perspectives directly (enter as Pᵦ), or exit (terminate, nothing compiled); no FramedInquiry is emitted from this branch.
 11. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option (the Phase 2 lens options) must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options.
-12. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
+12. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 13. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 14. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text or convergence traces.
 15. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Plain emit discipline).
