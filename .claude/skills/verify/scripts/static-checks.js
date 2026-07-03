@@ -2856,7 +2856,7 @@ function checkPackagedAgentContractSync() {
 // (Formal blocks are LLM-facing and constitutive of protocol identity).
 //
 // Exemption list: all 16 core protocols currently carry this rule (added
-// in the EP-02 enforcement cycle). Kept EMPTY on purpose: add a relPath
+// in the compiled-copy enforcement family (checks 25–26)). Kept EMPTY on purpose: add a relPath
 // only when a recorded decision exempts a protocol — never pre-populate.
 const FORMAL_BLOCKS_EXEMPTIONS = [];
 
@@ -2944,7 +2944,7 @@ function checkFormalBlocksRule() {
 // the check anchors on the kernel phrase only.
 //
 // Exemption list: all 16 core protocols currently carry this rule (added
-// in the EP-02 enforcement cycle). Kept EMPTY on purpose: add a relPath
+// in the compiled-copy enforcement family (checks 25–26)). Kept EMPTY on purpose: add a relPath
 // only when a recorded decision exempts a protocol — never pre-populate.
 const GATE_INTEGRITY_EXEMPTIONS = [];
 

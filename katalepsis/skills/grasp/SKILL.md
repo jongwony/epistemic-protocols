@@ -280,7 +280,7 @@ Analyze the AI work result and the user's signal to infer likely comprehension i
    - `open` is limited to route questions whose answer could change which entry point the user selects; exclude general explanation ideas, background caveats, or future exploration horizons
    - If `open = ∅`, no bounded route question is emitted; Phase 1 proceeds with entry-point selection enriched only by available route metadata
 
-**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 0 entry point prioritization; the constitutive judgment remains with the user. v2+ Katalepsis records are treated as entry-point evidence; v1 category-based records are weak hints only and do not directly map `Category` to `ComprehensionIntent`.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 0 entry point prioritization; the constitutive judgment remains with the user. v2+ Katalepsis records are treated as entry-point evidence; v1 category-based records are weak hints only and do not directly map `Category` to `ComprehensionIntent`.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expectation, Causality, Scope, Sequence, Horizon}, the Gap Taxonomy warrants promotion to a new named type. When accumulated probe misclassifications across 3+ sessions cluster around a specific gap type's probe kind boundary (Qc vs Qs), that type's probe kind assignment warrants revision.
 

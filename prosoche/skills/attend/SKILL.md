@@ -175,7 +175,7 @@ When Prosoche is active:
 
 ### Cross-Session Enrichment
 
-Repeated risk patterns accumulated in Anamnesis's hypomnesis store, and any context surfaced when `/recollect` has been invoked this session, enrich Phase 0 boundary inference — past incidents and recurring failure modes specific to this user and codebase bias which signals are inferred. This is a heuristic input; constitutive judgment remains with the user at Phase 2.
+Repeated risk patterns accumulated in Anamnesis's hypomnesis store (prior-session recall indices), and any context surfaced when `/recollect` has been invoked this session, enrich Phase 0 boundary inference — past incidents and recurring failure modes specific to this user and codebase bias which signals are inferred. This is a heuristic input; constitutive judgment remains with the user at Phase 2.
 
 **Revision threshold**: When Emergent boundary signals across 3+ sessions cluster around a recognizable pattern outside the named kinds, the Boundary Signal Taxonomy warrants a new named kind. Named kinds are working hypotheses, not exhaustive categories.
 

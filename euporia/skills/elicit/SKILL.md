@@ -265,7 +265,7 @@ When Euporia is active:
 | Multi-axis dependency | intent's resolution depends on coordinates spanning multiple axes that no single axis-specific protocol covers |
 | Aporia language | utterance such as "I want to ... but I'm not sure how to ..." or open-ended action statements without endpoint constraint |
 
-**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed the substrate scan; the constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed the substrate scan; the constitutive judgment remains with the user.
 
 **Skip**:
 - Intent is fully axis-determined (a single axis-specific protocol covers it)

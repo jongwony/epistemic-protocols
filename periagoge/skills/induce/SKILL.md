@@ -179,7 +179,7 @@ Heuristic evidence signals for in-process abstraction detection:
 | Analogia misfit redirect | `/ground` Phase 0 detects colimit-shaped input (essence signal + `locator_absent(A)`) and nudges to `/induce` |
 | Adjacent abstraction surfacing | Recall yields neighboring abstractions, suggesting a fuse or specialize move is imminent |
 
-**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 1 Fuse candidates; the constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store (prior-session recall indices), when present, may seed Phase 1 Fuse candidates; the constitutive judgment remains with the user.
 
 **Skip**:
 - No essence signal detectable (neither user sensing language nor AI-inferrable core pattern)
