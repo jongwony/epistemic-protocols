@@ -2,19 +2,6 @@
 
 Project structure decisions; independent of the axiom system.
 
-## Tier Factorization
-
-Tier-classified artifacts in this project factor into a product of two orthogonal axes: an **epistemological** axis (axis_α — derivation status, model-improvement trajectory) and an **operational** axis (axis_β — invocation frequency, load-bearing strength). Neither dimension subsumes the other; the same artifact carries both annotations independently, and movement along one axis is independent of movement along the other.
-
-The factorization is realized by complementary mechanisms. File content typically carries axis_α — `axioms.md` carries the Axiom-tier classification by what it contains. Directory location or annotation typically carries axis_β — `.claude/rules/` realizes the auto-loaded T1 zone (per-turn invocation), `.claude/principles/` realizes the lazy-loaded T2–T3 zone (per-authoring or per-verify invocation). The same axis_α value can occupy either zone depending on observed invocation frequency. Lazy-load mechanisms operate on axis_β alone; demoted content retains its axis_α classification.
-
-**Observed instances**:
-- Gate annotations: A2 §A5 coordination distinguishes Standing/Active authority (axis_α) from regret (axis_β) at the meta/design layer; the runtime annotation layer collapses to a single TOOL GROUNDING `(extension)`/`(constitution)` axis per A5 coextension — see `axioms.md`.
-- Principle classification: `.claude/rules/` (T1) versus `.claude/principles/` (T2–T3) directly realizes the factorization for prescriptive content.
-- Tier-changing moves: e-tier reclassification (Axiom → Safeguard) and o-tier compression (content reduction) operate as independent moves — see `.claude/principles/safeguards.md` Adversarial Anticipation tier note.
-
-Sibling concept to A5 (Interaction Kind Factorization): A5 factors gate operations into Extension/Constitution × bounded/unbounded; Tier Factorization factors tier classifications into axis_α × axis_β.
-
 ## Epistemic Completeness Boundary
 
 EP principles govern the epistemic substrate — the domain of human-AI dialogue where authority, judgment, framing, and recognition are constituted. Their completeness claim terminates at substrate boundaries: physical safety, harness permission, credential policy, and high-stake action execution belong to native harnesses or specialized plugins, not to EP protocols.
@@ -29,4 +16,4 @@ Operationally: EP defines and protects authority-boundary visibility; the operat
 - A2 authority allocation: Standing authority implementation (system prompts, CI/CD, compose automation) is non-epistemic substrate; A2 governs the *visibility* of authority allocation within the epistemic substrate, not its operational realization.
 - Prosoche `/attend`: boundary inference, velocity partition, condition compilation, and the compile-time confirmation gate are epistemic substrate; condition enforcement inside the execution interval, fast-risk pre-action interception, and workflow/HITL semantics are non-epistemic substrate, delegated by handoff at emission.
 
-> **Demoted detail**: Other architectural principles (Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload) live in `.claude/principles/architectural-principles.md` (axis_β = T2–T3, conditional invocation). Fetch via Read/Grep when authoring/verify-time inquiry warrants. See `.claude/principles/README.md` for the demotion ledger.
+> **Demoted detail**: Tier Factorization and other architectural principles (Epistemic Cost Topology, Unix Philosophy Homomorphism, Session Text Composition, Cross-Session Knowledge Composition, Dual Advisory Layer, Coexistence over Mirroring, Three-Tier Termination, Audience Reach, Utility Skills delegation, Direction over Accumulated Workload) live in `.claude/principles/architectural-principles.md` (axis_β = T2–T3, conditional invocation). Fetch via Read/Grep when authoring/verify-time inquiry warrants. See `.claude/principles/README.md` for the demotion ledger.

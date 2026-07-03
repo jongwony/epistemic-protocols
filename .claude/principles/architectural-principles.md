@@ -2,7 +2,20 @@
 
 Project structure decisions; independent of the axiom system.
 
-> **Demotion zone**: This file lives in `.claude/principles/` (lazy-load, not auto-loaded by Claude Code harness). Originally part of `.claude/rules/architectural-principles.md`. Demoted per Tier Factorization o-tier classification (T2-T3 sections — invoked at authoring/verify time, not per-turn). Fetch via Read/Grep when relevant. **Epistemic Cost Topology was demoted here on 2026-05-27** (it had previously remained in `.claude/rules/` T1). Demotion rationale: T1 auto-load kept it top-of-mind and it recurrently contaminated framing by entering analyses as a one-sided cost-only prior — biasing toward minimality / surface-invariance before independent root-need assessment. Removed from per-turn load so it is consulted as a post-assessment weight at authoring / cost-weighing time, not a framing prior. This reverses the earlier deliberate T1 retention; content is non-reducible (project-profile-calibration depends on the meta/execution cost asymmetry), so it is demoted, not deleted. See `.claude/principles/README.md`.
+> **Demotion zone** (last updated 2026-07-03): lazy-load, not auto-loaded by the Claude Code harness. Originally part of `.claude/rules/architectural-principles.md`. Per-section demotion dates and rationale: `.claude/principles/README.md` Demotion Ledger.
+
+## Tier Factorization
+
+Tier-classified artifacts in this project factor into a product of two orthogonal axes: an **epistemological** axis (axis_α — derivation status, model-improvement trajectory) and an **operational** axis (axis_β — invocation frequency, load-bearing strength). Neither dimension subsumes the other; the same artifact carries both annotations independently, and movement along one axis is independent of movement along the other.
+
+The factorization is realized by complementary mechanisms. File content typically carries axis_α — `axioms.md` carries the Axiom-tier classification by what it contains. Directory location or annotation typically carries axis_β — `.claude/rules/` realizes the auto-loaded T1 zone (per-turn invocation), `.claude/principles/` realizes the lazy-loaded T2–T3 zone (per-authoring or per-verify invocation). The same axis_α value can occupy either zone depending on observed invocation frequency. Lazy-load mechanisms operate on axis_β alone; demoted content retains its axis_α classification.
+
+**Observed instances**:
+- Gate annotations: A2 §A5 coordination distinguishes Standing/Active authority (axis_α) from regret (axis_β) at the meta/design layer; the runtime annotation layer collapses to a single TOOL GROUNDING `(extension)`/`(constitution)` axis per A5 coextension — see `axioms.md`.
+- Principle classification: `.claude/rules/` (T1) versus `.claude/principles/` (T2–T3) directly realizes the factorization for prescriptive content.
+- Tier-changing moves: e-tier reclassification (Axiom → Safeguard) and o-tier compression (content reduction) operate as independent moves — see `.claude/principles/safeguards.md` Adversarial Anticipation tier note.
+
+Sibling concept to A5 (Interaction Kind Factorization): A5 factors gate operations into Extension/Constitution × bounded/unbounded; Tier Factorization factors tier classifications into axis_α × axis_β.
 
 ## Epistemic Cost Topology
 

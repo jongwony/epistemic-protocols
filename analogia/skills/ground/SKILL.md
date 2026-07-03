@@ -145,7 +145,7 @@ converge     (extension)       → TextPresent+Proceed (convergence evidence tra
 -- Invariant (always holds): partition_reading = Some(PartitionReading) ⟹ self_grounding. Steady-state converse (after Phase 1 computes the reading for the current F): self_grounding ⟹ partition_reading = Some(...) with verdict ∈ {Split, Trim, Hold}. Before Phase 1 computes it — Phase 0, or a Phase 1 re-entry via Adjust until recompute — partition_reading = None even under self_grounding (Pending). So None means ¬self_grounding OR not-yet-computed-for-current-F; the verdict Hold (no-misfit) stays a distinct value, never conflated with the Option None
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -197,7 +197,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Structural mismatch indicators | Abstract assumptions that may not hold in the concrete domain |
 | Self-grounding (abstraction vs its own instances) | A located/named abstraction is checked against the instances it claims to subsume (wrong-fusion suspicion) — Sₐ = the abstraction, Sₜ = its own members. Distinct from the colimit route-away case (locator absent → /induce); here the abstraction already has a name and is tested for whether it fuses dissimilar instances |
 
-**Cross-session enrichment**: Accumulated mapping validation history from Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) provides starting points for Phase 1 domain decomposition — previously validated correspondences may guide initial structural analysis. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior domain mappings the user has worked with, providing structural correspondence candidates that Phase 1 can evaluate against the current abstract–concrete pair. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 1 domain decomposition; the constitutive judgment remains with the user.
 
 **Skip**:
 - Output is already domain-specific with concrete instantiations
@@ -351,7 +351,7 @@ After integration:
 10. **Convergence evidence**: Present transformation trace before declaring terminalized(R', F, D_f); per-correspondence evidence is required
 11. **Zero-gap surfacing**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
 12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
-13. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
+13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 14. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 15. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 16. **Protocol-native pressure map**: Phase 1 produces a CorrespondenceFitMap before validation. The map is a pre-gate support object for correspondence adequacy, not a terminal status and not generic calibration. `open` may surface bounded discovery pressure only when the missing evidence could change the user's validation of the current mapping. Missing/open residuals are declared through Phase 3 fit disposition metadata without adding a user gate.

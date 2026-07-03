@@ -164,7 +164,7 @@ converge (extension)  → TextPresent+Proceed (convergence evidence trace; proce
 -- Certificate invariant: ∀ m ∈ pending(Σ) : m.certificate.status = pass (fail-closed — routed/ambiguous mismatches never enter pending(Σ))
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Mismatch-domain resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Mismatch-domain resolution emergent via session context.
 certificate-before-registration ∘ transformative-revalidation: the fail-closed certificate order composes with the NON-MONOTONE loop — when a Confirm/Adapt answer mutates R and Eval(R', X) breeds emergent mismatches Mₑ, EACH Mₑ is independently bind_kind'd + certified at re-scan registration (Phase 2) before it can enter pending(Σ). So only in-scope (ApplicationDecontextualized-owned) Mₑ_passed register, even as R mutates across cycles; the certificate gate holds under mutation-induced revalidation. Dual to elicit's "Monotonicity ∘ shared-backbone": elicit composes the order with an IMMUTABLE substrate, contextualize with a MUTATING R — both preserve certificate-before-commit.
 ```
 
@@ -225,7 +225,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 | Scope overflow | Result addresses more or less than the observed use case requires |
 | Temporal context | Result applies to a version, state, or phase that may have shifted |
 
-**Cross-session enrichment**: Repeated mismatch patterns accumulated in Anamnesis's hypomnesis store (session recall indices written by the SessionEnd/PreCompact hook) may adjust Phase 0 scan priority — known mismatch types are checked first. In parallel, when **`/recollect`** has been invoked this session, the recalled context surfaces prior application-context mismatch patterns observed in comparable deliverables, strengthening current mismatch detection by situating Phase 0 scans against the user's recurring convention and environment drifts. This is a heuristic input that may bias detection toward previously observed patterns; constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed the Phase 0 scan; the constitutive judgment remains with the user.
 
 **Revision threshold**: The mismatch's kind label is an open emergent type (Axis); the listed domains are only the illustrative example set. When accumulated mismatch detections across 3+ sessions cluster around a recurring domain outside the current examples, that domain warrants adding to the example set. When a cited example consistently mis-fires (3+ sessions of classification false negatives clustered on it), it warrants rewording or dropping from the examples. Neither move changes the type — the taxonomy stays open; only the detection scent is recalibrated.
 

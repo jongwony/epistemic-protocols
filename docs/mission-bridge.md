@@ -4,11 +4,9 @@ This document keeps the repo's mission/vision wording aligned across maintainer-
 
 ## Canonical Umbrella
 
-The maintainer-facing source of truth lives in [CLAUDE.md](../CLAUDE.md):
+The maintainer-facing source of truth is the **Northstar** section of [CLAUDE.md](../CLAUDE.md) — read it there rather than mirrored here, so this bridge document never drifts from the live statement.
 
-> Epistemic Protocols is a layered system for human-AI collaboration: it inserts structured checkpoints at decision points so misalignment is surfaced early, judged explicitly, and adapted before it compounds into expensive downstream work.
-
-This statement is intentionally broader than the README hook. It is the canonical umbrella for repo-level mission and vision edits within maintainer/contributor documentation. It is not a runtime or user-facing canonical contract.
+That statement is intentionally broader than the README hook. It is the canonical umbrella for repo-level mission and vision edits within maintainer/contributor documentation. It is not a runtime or user-facing canonical contract.
 
 ## Public Contract
 

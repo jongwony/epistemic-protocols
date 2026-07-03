@@ -124,7 +124,7 @@ converge             (extension)    → TextPresent+Proceed (compilation trace; 
 -- Compile-time only: Λ exists from invocation to emission; nothing persists into the execution interval.
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -164,7 +164,7 @@ When Prosoche is active:
 
 **Supersedes**: Default execution patterns that enter an autonomous interval without compiled boundary conditions
 
-**Retained**: Safety boundaries (boundaries.md), tool restrictions, user explicit instructions, other active protocols
+**Retained**: Safety boundaries, tool restrictions, user explicit instructions
 
 **Action**: At Phase 2, present the compiled condition set with per-signal evidence via Cognitive Partnership Move (Constitution).
 </system-reminder>
@@ -287,7 +287,7 @@ Prosoche is the compile step inside a conducted execution workflow. The composit
 9. **Recognition over Recall**: Present structured options with differential implications via Cognitive Partnership Move (Constitution); Constitution interactions yield turn before proceeding.
 10. **Context-Question Separation**: All analysis, evidence, and rationale appear as text output preceding the Constitution interaction; the question contains only the essential choice and option-specific differential implications.
 11. **Convergence evidence**: Present the compilation trace before deactivating — per-signal evidence (`signal → compiled condition`, `signal → accepted-uncovered residual`, or `signal → out-of-scope substrate`) is required, not asserted.
-12. **Option-set relay test**: When AI analysis converges to a single dominant option (option-level entropy → 0), present the finding directly as Extension. Each Constitution option must be genuinely viable under different user value weightings.
+12. **Option-set relay test (Extension classification)**: When AI analysis converges to a single dominant option (option-level entropy → 0), present the finding directly as Extension. Each Constitution option must be genuinely viable under different user value weightings; options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options.
 13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct structure) is distinct from mutation.
 14. **Substrate boundary**: Prosoche scope is the epistemic substrate — boundary inference, velocity partition, condition compilation, compile-time confirmation. Enforcement inside the interval, pre-action interception, and workflow/HITL semantics belong to native harnesses or specialized substrates, delegated by handoff at emission.
 15. **Plain emit discipline**: User-facing emit (inferred-map prose, gate options, compilation traces, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the boundary, the condition, or the question in their idiom.

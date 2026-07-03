@@ -40,107 +40,11 @@ node ${SKILL_DIR}/scripts/static-checks.js ${PROJECT_ROOT}
 }
 ```
 
-**Checks performed**:
-- JSON schema validation (plugin.json required fields, version format)
-- Unicode notation consistency (→ not ->, ∥, ∩)
-- Directive verb enforcement (`call` not `invoke`/`use` for tools)
-- Cross-reference integrity (CLAUDE.md `references/` pointers resolve to source files)
-- Required sections in protocols (Definition, Mode Activation, Protocol, Rules)
-- Tool grounding consistency (TOOL GROUNDING ↔ PHASE TRANSITIONS)
-- Version staleness detection (content changes without version bump)
-- Graph integrity (node/edge validation, orphaned nodes, isolated nodes, DAG acyclicity)
-- Spec-vs-impl drift (TYPES definitions ↔ PHASE TRANSITIONS/prose usage, resolution type consistency)
-- Morphism anatomy (FLOW → MORPHISM → TYPES order; deficit-as-precondition; required clauses requires/deficit/preserves/invariant; canonical resolution target; Type signature)
-- Cross-reference scan (protocol name + deficit → resolution consistency across SKILL.md, README concern-cluster invariant, cross-enumeration completeness, edge type allowlist)
-- Routing index contract (CLAUDE.md/AGENTS.md keeps a `## Protocol Index` routing to `/catalog`, `graph.json`, per-protocol `SKILL.md`, README; warns if the inline protocol catalog is reintroduced)
-- Onboard sync, precedence linear extension, partition invariant, catalog sync
-- Gate type soundness (warning-level safeguard for coproduct/prose option alignment)
-- Artifact self-containment (runtime-contract view: packaged `Skill.md` + plugin description metadata + packaged support references). Severity-aware BANNED patterns: strict patterns (mission-bridge, axioms, derived-principles, architectural-principles, meta-principle, safeguards, A1-A7 identifiers, `.claude/`, `docs/`) surface as fail; expansion patterns (project-profile, editing-conventions, `principles/`, design-philosophy concepts — `Stage 1/2`, `Tier Factorization`, `Deficit Empiricism`, `Wirkungsgeschichte`, `Horizontverschmelzung`, `Zuhandenheit`) surface as warn under Stage 1 posture
-- Emit load discipline (compiled-copy coverage for Context-Question Separation, Plain emit discipline, and Round-local salience bundling across all core protocol SKILL.md files, plus Output Style source coverage)
-- Framing-readout enforcement (Epistemic Ink invariant: protocol surfacing is a framing readout, not a progress meter — bans the ▓/░ progress-bar glyphs in every core protocol SKILL.md and the Output Style source, and requires the categorical-ban guard sentence to stay inscribed in the Output Style)
-- Language purity (warn-level Korean character detection across project text files; whitelist preserves intentional Korean regions: `**/README_ko.md`, `.claude/skills/release/`, `src/`, `docs/`, `.claude/rules/editing-conventions.md`)
-- Packaged-agent contract sync (each packaged agent with a `### Realization:` verdict anchor reconciled against its paired SKILL.md — realization set, advisory vocabulary, checklist categories; for an F5 zero-memory-verdict contract also the verdict-table column schema locked bidirectionally against the `EvidencedFinding`/`SweepTrace` TYPES records)
+**Checks performed**: Structural conformance (JSON schema, Unicode notation, directive verbs, required sections, morphism anatomy, gate-type soundness), cross-reference and routing integrity (cross-reference integrity and scan, routing-index contract, onboard/catalog sync, graph integrity, precedence linear extension, partition invariant), drift prevention (version staleness, codex-manifest sync, spec-vs-impl drift, single-axis soundness, emit-load discipline, framing-readout enforcement, language purity), and packaging/contract sync (artifact self-containment, packaged-agent contract sync). The authoritative check inventory is the script itself (`scripts/static-checks.js`); the prose inventory is `docs/verification.md`.
 
 ### Phase 2: Expert Review
 
-Spawn parallel Task subagents for LLM-based review. Each perspective analyzes independently.
-
-**Perspective 1: Type Design**
-
-```
-Spawn Task subagent with prompt:
-
-You are a Type Theory Expert analyzing protocol type design.
-
-**Soundness check**:
-- Type signatures: well-formed domain/codomain
-- State machines: transition totality
-- Flow consistency: types match phase transitions
-- Tool grounding: TOOL GROUNDING ↔ PHASE TRANSITIONS consistency
-
-**Tool Grounding check**:
-- External operations (dispatch) have corresponding [Tool] notation in PHASE TRANSITIONS
-- Internal operations marked with "no external tool"
-- Escape behavior semantics match protocol context (fallback/Silence/cancel)
-
-**Necessity check**:
-- Cardinality constraints (|P| ≥ 2): prose sufficient given Esc interrupt?
-- Refinement types: marginal benefit for LLM interpretation?
-- Principle: no type checker exists; social enforcement via prose is primary
-
-Files: prothesis/skills/frame/SKILL.md, syneidesis/skills/gap/SKILL.md, horismos/skills/bound/SKILL.md
-
-Focus on Definition sections (FLOW, TYPES, PHASES, TOOL GROUNDING). Output JSON with findings array.
-```
-
-**Perspective 2: Specification Clarity**
-
-```
-Spawn Task subagent with prompt:
-
-You are a Specification Clarity Expert analyzing LLM interpretability.
-
-**LLM behavior modification**:
-- Activation clarity: trigger conditions unambiguous
-- Priority conflicts: supersession domain overlap
-- Instruction parsability: rules actionable without implicit reasoning
-- Tool binding clarity: TOOL GROUNDING section readable and actionable
-
-**Notation complexity**:
-- Flow formulas: understandable at a glance?
-- Standard notation preferred (|P| ≥ 2) over custom constructors (Set²⁺)
-- Section structure: FLOW → TYPES → PHASES → TOOL GROUNDING → STATE sufficient?
-- [Tool] notation in PHASE TRANSITIONS: adds clarity or noise?
-
-Principle: specification is for human/LLM comprehension, not compiler verification.
-
-Files: prothesis/skills/frame/SKILL.md, syneidesis/skills/gap/SKILL.md, horismos/skills/bound/SKILL.md, CLAUDE.md
-
-Focus on Definition, Mode Activation, Priority, Rules, TOOL GROUNDING sections. Output JSON with findings array.
-```
-
-**Perspective 3: Claude Code Ecosystem**
-
-```
-Spawn Task subagent with prompt:
-
-You are a Claude Code Ecosystem Expert.
-
-**Pattern validation**:
-- Gate mandates enforced (structured presentation + turn yield, not unstructured bypass)
-- Epistemic transitions correctly typed (deficit → resolved type signatures)
-- User agency preserved (no automatic decisions)
-
-**False positive filtering** (dismiss concerns from other perspectives):
-- "Automatic intensity reduction" → not needed (gate interaction provides control)
-- "Automatic deactivation" → not needed (user can interrupt via Esc)
-- "Topic boundary detection" → context-dependent (model judgment acceptable)
-- "Type-level cardinality" → prose sufficient (low violation cost, Esc recovery)
-
-Files: prothesis/skills/frame/SKILL.md, syneidesis/skills/gap/SKILL.md, horismos/skills/bound/SKILL.md, CLAUDE.md
-
-Focus on Mode Activation, Rules, UX patterns. Output JSON with findings and filtered arrays.
-```
+Spawn parallel Task subagents for LLM-based review — one per perspective (Type Theory / Category Theory, Instruction Design, Claude Code Ecosystem). Load each subagent's prompt template from `references/review-checklists.md` (single source of truth; do not duplicate the templates here — see Review Checklists below). Each template samples the protocols changed in the current diff, falling back to a representative sample when the diff is not protocol-scoped.
 
 All three subagents run in parallel. Collect results before proceeding.
 
@@ -210,8 +114,8 @@ Consult `references/criteria.md` for detailed severity definitions and decision 
 ## Review Checklists
 
 Consult `references/review-checklists.md` for:
-- Type Design expert prompt template
-- Specification Clarity expert prompt template
+- Type Theory / Category Theory expert prompt template
+- Instruction Design expert prompt template
 - Claude Code Ecosystem expert prompt template
 - Known issues checklist
 - Synthesis template
@@ -247,7 +151,7 @@ Most common pattern: invoke `/verify` before `/commit` command.
 
 All checks passed.
 
-- Static checks: 16 pass, 0 fail, 0 warn
+- Static checks: all checks pass (0 fail, 0 warn)
 - Type/Category review: No issues
 - Instruction Design review: No issues
 
@@ -260,11 +164,11 @@ Ready to commit.
 ## Verification Results
 
 ### Critical (1 issue)
-- State machine totality: prothesis.md:10 - Undefined transition when |perspectives(C)| < 2
+- State machine totality: prothesis/skills/frame/SKILL.md - Undefined transition when |perspectives(C)| < 2
 
 ### Concerns (2 issues)
-- Categorical terminology: prothesis.md:35 - limit/colimit may not match intended semantics
-- Directive verb: prothesis/skills/frame/SKILL.md:32 - "Invoke AskUserQuestion" should be "call"
+- Categorical terminology: prothesis/skills/frame/SKILL.md - limit/colimit may not match intended semantics
+- Directive verb: prothesis/skills/frame/SKILL.md - "Invoke AskUserQuestion" should be "call"
 
 ### Notes (1 observation)
 - Version: prothesis plugin.json version not bumped since last change

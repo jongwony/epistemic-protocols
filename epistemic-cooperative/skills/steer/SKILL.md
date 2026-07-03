@@ -408,7 +408,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
       disposition: Optional(A), active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Steer composes with `/probe` upstream when a probe disposition routes to /steer (e.g., GapUnnoticed in calibration practice → /steer for retrospective inscription). Steer composes with `/induce` laterally when an in-conversation abstraction crystallization references the project profile (the crystallized abstraction may be inscribed to the rule layer via a subsequent /steer invocation). graph.json edges are absent by design — Steer is a utility skill, not a 13th core protocol.
+*: product — (D₁ × D₂) → (R₁ × R₂). Steer composes with `/probe` upstream when a probe disposition routes to /steer (e.g., GapUnnoticed in calibration practice → /steer for retrospective inscription). Steer composes with `/induce` laterally when an in-conversation abstraction crystallization references the project profile (the crystallized abstraction may be inscribed to the rule layer via a subsequent /steer invocation). registered dependency edges are absent by design — Steer is a utility skill, not a core protocol.
 ```
 
 ## Storage Reference

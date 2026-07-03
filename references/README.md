@@ -9,9 +9,8 @@
 | 도메인 | 파일 | EP와의 관계 |
 |--------|------|------------|
 | 인지심리학 | `cognitive-psychology.md` | Mechanism — "어떻게 작동하는가" |
-| 인식론/철학 | `epistemology.md` | Justification — "왜 이렇게 하는가" |
-| 카테고리 이론 | `category-theory.md` | Structure — "어떻게 연결되는가" |
-| 현상학 | `phenomenology.md` | Description — "무엇이 일어나는가" |
+
+인식론/철학(Justification)·카테고리 이론(Structure)·현상학(Description) 도메인은 아직 별도 문서로 작성되지 않았다. 현재 해당 근거는 `docs/philosophical-anchors.md`(철학적 계보·인용)가 부분적으로 담당한다.
 
 ## 설계 원칙
 

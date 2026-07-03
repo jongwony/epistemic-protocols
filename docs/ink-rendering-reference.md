@@ -29,8 +29,8 @@ Claude Code terminal rendering pipeline has 2-stage unknown HTML handling for `<
 - User reported "I thought /ground had finished": same mechanism. Phase 2 gate invisible, so the Phase 1 plain-text table appeared as final output, creating the illusion of convergence.
 
 **Related**:
-- PR #232 (jongwony/epistemic-protocols): minimal hotfix via epistemic-ink.md line 27 prose clarification. Commit 011171e. Branch `hotfix/ink-rendering-ambiguity`.
-- Option S (follow-up): schema marker complete removal from epistemic-ink.md for structural prevention of recurrence.
+- PR #232 (jongwony/epistemic-protocols): minimal hotfix via epistemic-ink.md § Epistemic Protocol Formatting prose clarification. Commit 011171e. Branch `hotfix/ink-rendering-ambiguity`.
+- Option S (follow-up, executed): schema markers were fully removed from epistemic-ink.md — the Output Style now describes Ink elements without literal `<Ink element="...">` wrapper syntax, closing the recurrence surface structurally rather than by prose clarification alone.
 - Binary evidence: `<Ink element` string absent in Claude Code 2.1.94 through 2.1.100 (5 versions), strings extraction confirmed.
 - Cross-verified chain: binary (95%) → marked upstream 18.0.0 Track A (~98%) → live Track B (~99.9%) — all converging on the schema-marker hypothesis.
 

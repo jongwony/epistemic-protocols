@@ -1,17 +1,17 @@
 # Project Profile (epistemic-protocols)
 
-This project's Cognitive Partnership Move calibration profile (per `project-profile-calibration.md`).
+This project's Cognitive Partnership Move calibration profile (per `.claude/principles/project-profile-calibration.md`).
 
-**Aggregated low-cost profile** → **Extension-default** (see Calibration Result). The six-variable derivation is documentation-grade — not consulted as a table at runtime; the operative output is the Calibration Result below. Variable values (low-cost across the board): revision cost Low, deploy fan-out Low, dependency lock-in None, runtime persistence Low, hermeneutic-circle availability High, notation maturity High. Per-variable definitions and the aggregation rule: `project-profile-calibration.md §Profile Variables` + `§Calibration Rule`.
+**Aggregated low-cost profile** → **Extension-default** (see Calibration Result). The six-variable derivation is documentation-grade — not consulted as a table at runtime; the operative output is the Calibration Result below. Variable values (low-cost across the board): revision cost Low, deploy fan-out Low, dependency lock-in None, runtime persistence Low, hermeneutic-circle availability High, notation maturity High. Per-variable definitions and the aggregation rule: `.claude/principles/project-profile-calibration.md §Profile Variables` + `§Calibration Rule`.
 
 ## Calibration Result
 
-**Extension-default** for ambiguous gates. Constitution preserved at the floor of the epistemic substrate per `project-profile-calibration.md §Scope Boundary` (aligned with `architectural-principles.md §Epistemic Completeness Boundary`).
+**Extension-default** for ambiguous gates. Constitution preserved at the floor of the epistemic substrate per `.claude/principles/project-profile-calibration.md §Scope Boundary` (aligned with `architectural-principles.md §Epistemic Completeness Boundary`).
 
 Floor (runtime-discovered, retry would change identity):
 - Katalepsis (`/grasp`): user IS the measurement target.
 
-Bounded zone (in-principle delegatable via contract-style Standing authority + post-deploy correction): Horismos BoundaryMap, Syneidesis decision pattern, Prosoche compiled-condition set. Horismos / Syneidesis / Prosoche are protocol-internally grounded by Constitution checkpoints in their TOOL GROUNDING entries; profile-layer mention is for future migration visibility, not runtime enforcement. Prosoche moved from floor to bounded zone with the `/attend` compile-time redefinition: its gate confirms a condition set compiled from pre-committable boundary signal kinds, not runtime-discovered execution actions; enforcement inside the interval and fast-risk interception are non-epistemic substrate, delegated by handoff at emission.
+Bounded zone (in-principle delegatable via contract-style Standing authority + post-deploy correction): Horismos BoundaryMap, Syneidesis decision pattern, Prosoche compiled-condition set. Horismos / Syneidesis / Prosoche are protocol-internally grounded by Constitution checkpoints in their TOOL GROUNDING entries; profile-layer mention is for future migration visibility, not runtime enforcement. Prosoche moved from floor to bounded zone with the `/attend` compile-time redefinition (rationale: `.claude/principles/project-profile-calibration.md §Scope Boundary`); enforcement-interception handoff: `.claude/rules/architectural-principles.md §Epistemic Completeness Boundary`.
 
 **Inscription-decision posture** (Emergent — outside the six profile variables): when correcting application drift, articulate the correction at the abstraction axis where it originated (response-level when sufficient), and leave rule-overlap open for model interpretation.
 

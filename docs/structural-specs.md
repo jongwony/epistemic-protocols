@@ -31,7 +31,7 @@ All protocols share this structure within `Definition` code block:
 **COMPOSITION block details**:
 - Universal: present in all protocol SKILL.md files with identical text
 - `*` denotes the composition operator (categorical product on deficit/resolution). Distinct from graph.json `"source": "*"` wildcard (precondition scope)
-- `graph.json edges preserved`: precondition, advisory, and suppression edges remain enforced within composite execution. DAG ordering governs dimension detection sequence; suppression prevents co-activation of overlapping pairs
+- `registered dependency edges preserved`: precondition, advisory, and suppression edges (registered in `graph.json`) remain enforced within composite execution. DAG ordering governs dimension detection sequence; suppression prevents co-activation of overlapping pairs
 - `Dimension resolution emergent via session context`: dimension interaction (shared codomain discovery, cross-resolution) occurs through Session Text Composition, not prescribed by the operator
 - `*` is a runtime deficit product (Active authority, session-level), distinct from pre-committed gate-chain pipelines (Standing authority)
 

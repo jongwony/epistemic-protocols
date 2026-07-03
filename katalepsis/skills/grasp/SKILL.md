@@ -154,7 +154,7 @@ converge    (extension)  → TextPresent+Proceed (convergence evidence trace; pr
 State invariant: Λ.entryPoints = List(Λ.routeMap.entry_point); Λ.selected ⊆ Λ.routeMap.entry_point; every selected entry point has an artifact anchor in Λ.routeMap.artifact_anchor before Phase 2 materialization.
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Dimension resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -280,7 +280,7 @@ Analyze the AI work result and the user's signal to infer likely comprehension i
    - `open` is limited to route questions whose answer could change which entry point the user selects; exclude general explanation ideas, background caveats, or future exploration horizons
    - If `open = ∅`, no bounded route question is emitted; Phase 1 proceeds with entry-point selection enriched only by available route metadata
 
-**Cross-session enrichment**: Verified understanding domains surfaced via Anamnesis's hypomnesis store may adjust Phase 0 entry point prioritization — areas with established comprehension receive lower priority while novel or previously-failed comprehension areas are flagged. v2+ Katalepsis records are treated as entry-point evidence. v1 category-based records are weak hints only; do not directly map `Category` to `ComprehensionIntent`. This heuristic may bias detection toward previously observed patterns, but Phase 1 user selection remains constitutive.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 0 entry point prioritization; the constitutive judgment remains with the user. v2+ Katalepsis records are treated as entry-point evidence; v1 category-based records are weak hints only and do not directly map `Category` to `ComprehensionIntent`.
 
 **Revision threshold**: When accumulated Emergent gap detections across 3+ sessions cluster around a recognizable pattern outside the named types {Expectation, Causality, Scope, Sequence, Horizon}, the Gap Taxonomy warrants promotion to a new named type. When accumulated probe misclassifications across 3+ sessions cluster around a specific gap type's probe kind boundary (Qc vs Qs), that type's probe kind assignment warrants revision.
 
@@ -292,7 +292,7 @@ Analyze the AI work result and the user's signal to infer likely comprehension i
 
 ```
 question: "What would help you get oriented fastest?"
-multiSelect: false
+selection: single
 options:
   - label: "[intent entry point A]"
     description: "[what the user will be able to understand or decide after choosing it]"
@@ -500,7 +500,7 @@ For each task (entry point):
 9a. **Post-answer closure**: Always emit verified aspect, current task status, and next available moves after a correct answer or sufficient understanding signal, before coverage routing or task completion. This is relay metadata: it keeps the active loop legible without adding a new user gate.
 9b. **Active-turn fail-closed**: While `Λ.active = true` at turn end, every response must end in one protocol-owned TerminalShape: Phase 1 entry-point selection, Phase 3 verification probe, coverage routing after a correct or sufficient understanding signal, or deactivation by `all_tasks_completed`, `user_esc`, or `user_cancel`. Plain summaries, file references, context, and relay metadata may ground these shapes, but they cannot be the final shape by themselves while active. This enforces existing Stop, coverage, and deactivation points without adding a user gate or changing `VerifiedUnderstanding`.
 10. **Zero-gap surfacing**: If Phase 3 analysis finds no comprehension gaps for an entry point, present this finding with reasoning for user confirmation before marking as self-evident
-11. **Gate integrity**: The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation
+11. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 12. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 13. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 14. **Protocol-native route map**: Phase 0 produces a ComprehensionRouteMap before entry-point selection. The map is a pre-gate support object for entry-point adequacy, not a terminal status and not generic calibration. It annotates derived entry points; it does not create, filter, suppress, or terminalize entry-point tasks, and `VerifiedUnderstanding` is unchanged. `hidden_route` marks entries the user did not name while preserving their artifact anchors; `open` carries bounded discovery pressure only when the unknown could change which entry point the user selects. Socratic opacity is preserved — the map exposes why an entry point is useful, never the expected answer or reasoning path.

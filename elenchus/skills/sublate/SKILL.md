@@ -107,7 +107,7 @@ converge                (extension)    → TextPresent+Proceed (per-source dispo
 }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). graph.json edges preserved. Pattern resolution emergent via session context.
+*: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Pattern resolution emergent via session context.
 ```
 
 ## Core Principle
@@ -247,7 +247,7 @@ Generate metadata triple plus dialectical antithesis per source.
 - Name the dialectical challenge concretely (a verification gap, a counterfactual condition, a divergent sibling source, or an inference-fallacy archetype condition)
 - Surface the basis for the challenge so the user can recognize the antithesis's evidence
 
-**Cross-session enrichment**: Anamnesis hypomnesis store, when invoked via `/recollect`, may surface prior antithesis-disposition pairs for adjacent sources; recalled patterns seed Phase 1 pattern selection but the constitutive judgment remains with the user.
+**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 1 pattern selection; the constitutive judgment remains with the user.
 
 ### Phase 2: Per-Source Disposition Constitution Interaction
 

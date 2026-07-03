@@ -4,7 +4,7 @@
 
 **Audience**: Contributor-facing. 런타임 자동 로드 없음. 사용자가 "왜 이 메커니즘인가?"를 물을 때, 또는 새 프로토콜 설계·기존 프로토콜 개선 시 참조.
 
-**관계**: 정당화(왜 이렇게 하는가)는 `epistemology.md`, 기술(무엇이 일어나는가)·현상학적 근거는 `phenomenology.md`와 `docs/philosophical-anchors.md`, 구조(어떻게 연결되는가)는 `category-theory.md`가 담당. 이 문서는 그 사이의 **작동 메커니즘** 층이다. Anamnesis의 Husserl 현상학과 Katalepsis의 Stoic grasp은 `docs/philosophical-anchors.md`에 이미 근거화되어 있어 여기서는 인지심리학 메커니즘 층만 보강하고 cross-ref한다.
+**관계**: 정당화(왜 이렇게 하는가)·기술(무엇이 일어나는가)·현상학적 근거는 `docs/philosophical-anchors.md`가 담당한다(인식론/카테고리 이론/현상학 도메인 문서는 아직 별도로 작성되지 않았다 — `references/README.md` 참조). 이 문서는 인지심리학 **작동 메커니즘** 층을 담당한다. Anamnesis의 Husserl 현상학과 Katalepsis의 Stoic grasp은 `docs/philosophical-anchors.md`에 이미 근거화되어 있어 여기서는 인지심리학 메커니즘 층만 보강하고 cross-ref한다.
 
 ---
 
