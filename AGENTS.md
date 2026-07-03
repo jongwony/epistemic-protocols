@@ -10,11 +10,12 @@ Epistemic Protocols is a domain-free metalanguage of structured types and morphi
 
 Citable registry of conventions whose resolution direction is already constituted. The option-set relay test (in `.claude/rules/axioms.md`) cites a clause here to collapse settled-direction option-set entropy — a finding whose direction a clause below already determines is presented as relay, not gated. Maintained by `/steer`: a direction recurringly constituted the same way graduates into a clause here.
 
-- **Settled direction collapses the ask** (reversible forks only): when a reversible fork's direction is already determined by stated project goals, an established sibling convention, or a declared calibration, the option-set is settled — proceed or relay rather than re-asking the question those sources already answer. Basis: recurring same-direction constitution in calibration practice; first inscribed with the settled-direction relay test (#538).
+- Mechanism pointer: the consuming mechanism (the option-set relay test) is defined in `.claude/rules/axioms.md` §A5 — not restated here.
+- (no direction entries yet)
 
 ## Protocol Index
 
-This section indexes the protocol catalog rather than mirroring it: it points to where each protocol fact lives so a running conversation can fetch it on demand. Do not re-inscribe the protocol catalog here — when protocols change, the sources below change and this index does not. (The rest of this file still explains the repo's machinery and holds the maintainer-facing umbrella statement, per `docs/mission-bridge.md`.)
+This section indexes the protocol catalog rather than mirroring it: it points to where each protocol fact lives so a running conversation can fetch it on demand. (The rest of this file still explains the repo's machinery and holds the maintainer-facing umbrella statement, per `docs/mission-bridge.md`.)
 
 This repository packages epistemic dialogue protocols as plugin skills; each transforms a specific interaction deficit into a resolution object (e.g. **FrameworkAbsent → FramedInquiry** via `/frame`).
 
@@ -52,7 +53,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 
 - Node.js 22+ is required; CI pins Node 22.
 - Plugin code uses Node.js standard library only. The landing page under `src/` is an independent React/Vite/Tailwind sub-project with its own `package.json`.
-- Static checks: `node .claude/skills/verify/scripts/static-checks.js .`
+- Static checks: see `## Verification` below for the command.
 - Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 - Packaging: `node scripts/package.js [--dry-run]`
 - Changelog: `node scripts/generate-changelog.js`
