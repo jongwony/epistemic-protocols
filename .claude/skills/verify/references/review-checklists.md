@@ -11,11 +11,7 @@ You are a **Type Theory and Category Theory Expert**.
 
 Analyze the protocol definitions for mathematical soundness.
 
-**Files to examine**:
-- prothesis/skills/frame/SKILL.md (Definition section)
-- syneidesis/skills/gap/SKILL.md (Definition section)
-- horismos/skills/bound/SKILL.md (Definition section)
-- katalepsis/skills/grasp/SKILL.md (Definition section)
+**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Definition section of each
 
 **Checklist**:
 
@@ -51,14 +47,6 @@ Analyze the protocol definitions for mathematical soundness.
 ```
 ```
 
-### Known Issues to Check
-
-| Issue | Location | Expected Fix |
-|-------|----------|--------------|
-| limit/colimit semantics | prothesis.md:35-37 | Replace with lattice meet/join |
-| Undefined failure case | prothesis.md:10 | Add `\|perspectives(C)\| < 2` fallback |
-| Empty scan undefined | syneidesis.md | Add empty result handling |
-
 ## Instruction Design Perspective
 
 ### Prompt Template
@@ -68,12 +56,7 @@ You are an **Instruction Design Expert**.
 
 Analyze the protocol instructions for consistency and completeness.
 
-**Files to examine**:
-- prothesis/skills/frame/SKILL.md (Mode Activation, Priority sections)
-- syneidesis/skills/gap/SKILL.md (Mode Activation, Priority sections)
-- horismos/skills/bound/SKILL.md (Mode Activation, Priority sections)
-- katalepsis/skills/grasp/SKILL.md (Mode Activation, Priority sections)
-- CLAUDE.md (Axioms)
+**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Priority sections of each, plus `.claude/rules/axioms.md`
 
 **Checklist**:
 
@@ -113,14 +96,6 @@ Analyze the protocol instructions for consistency and completeness.
 ```
 ```
 
-### Known Issues to Check
-
-| Issue | Location | Expected Fix |
-|-------|----------|--------------|
-| Retained set asymmetry | Both Priority sections | Unify safety baseline |
-| Dual-mode precedence | prothesis.md:60 | Add explicit ordering clause |
-| Follow-up perspective shift | prothesis.md:70-71 | Add handling for related-but-different |
-
 ## Claude Code Ecosystem Perspective
 
 ### Prompt Template
@@ -130,12 +105,7 @@ You are a **Claude Code Ecosystem Expert**.
 
 Validate protocol designs against Claude Code interaction patterns and epistemic principles.
 
-**Files to examine**:
-- prothesis/skills/frame/SKILL.md (Mode Activation, Rules sections)
-- syneidesis/skills/gap/SKILL.md (Mode Activation, Rules sections)
-- horismos/skills/bound/SKILL.md (Mode Activation, Rules sections)
-- katalepsis/skills/grasp/SKILL.md (Mode Activation, Rules sections)
-- CLAUDE.md (Project Overview, Axioms)
+**Files to examine**: the protocols changed in the current diff (fall back to a representative sample when the diff is not protocol-scoped), Mode Activation and Rules sections of each, plus CLAUDE.md (Northstar) and `.claude/rules/axioms.md`
 
 **Checklist**:
 

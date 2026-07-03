@@ -2845,6 +2845,175 @@ function checkPackagedAgentContractSync() {
 }
 
 // ============================================================
+// Check 25: Formal Blocks Rule
+// ============================================================
+// Compiled-copy coverage for the "Formal blocks are runtime-normative" Rules
+// entry (docs/structural-specs.md is the contributor-facing anatomy doc;
+// this rule is the runtime-normative compiled copy every packaged SKILL.md
+// must carry, since a packaged runtime contract cannot depend on contributor
+// docs alone — CLAUDE.md Runtime Contract). Verifies each core protocol
+// SKILL.md carries both the Rules entry label and its kernel sentence
+// (Formal blocks are LLM-facing and constitutive of protocol identity).
+//
+// Exemption list: pending decision on protocols that currently lack this
+// rule (e.g. anagoge) — either the rule gets added, or a recorded exemption
+// lands here. Currently EMPTY on purpose: do not pre-populate with today's
+// gap file — add a relPath only once the pending decision resolves in favor
+// of exemption.
+const FORMAL_BLOCKS_EXEMPTIONS = [];
+
+// Anchoring: the label must appear as a numbered Rules entry (not merely a
+// cross-reference elsewhere in the file), and the kernel sentence must fall
+// within that SAME entry's bounded body — not anywhere in the file. Bound
+// calibrated against all 16 core protocols (max observed entry ~560 chars);
+// 900 leaves comfortable margin without reaching into unrelated content.
+const NEXT_NUMBERED_ENTRY = /^\d+\.\s/m;
+
+function boundedEntryBody(content, labelMatch, bound) {
+  const bodyStart = labelMatch.index + labelMatch[0].length;
+  const bounded = content.slice(bodyStart, bodyStart + bound);
+  NEXT_NUMBERED_ENTRY.lastIndex = 0;
+  const next = NEXT_NUMBERED_ENTRY.exec(bounded);
+  return next ? bounded.slice(0, next.index) : bounded;
+}
+
+function checkFormalBlocksRule() {
+  const CHECK = 'formal-blocks-rule';
+  const LABEL_PATTERN = /^\d+\.\s+\*\*Formal blocks are runtime-normative\*\*/m;
+  const KERNEL = 'LLM-facing and constitutive of protocol identity';
+  const ENTRY_BOUND = 900;
+
+  let checked = 0;
+  for (const relPath of PROTOCOL_FILES) {
+    if (FORMAL_BLOCKS_EXEMPTIONS.includes(relPath)) continue;
+
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) {
+      results.warn.push({
+        check: CHECK,
+        file: relPath,
+        message: `Protocol file not found: ${relPath}`
+      });
+      continue;
+    }
+
+    checked++;
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const labelMatch = LABEL_PATTERN.exec(content);
+    if (!labelMatch) {
+      results.fail.push({
+        check: CHECK,
+        file: relPath,
+        message: 'Missing numbered Rules entry: "Formal blocks are runtime-normative"',
+      });
+      continue;
+    }
+
+    const entryBody = boundedEntryBody(content, labelMatch, ENTRY_BOUND);
+    if (!entryBody.includes(KERNEL)) {
+      results.fail.push({
+        check: CHECK,
+        file: relPath,
+        message: `"Formal blocks are runtime-normative" rule present but missing kernel sentence within its own entry: "${KERNEL}"`,
+      });
+    }
+  }
+
+  if (!results.fail.some(f => f.check === CHECK)) {
+    results.pass.push({
+      check: CHECK,
+      file: 'all core protocol SKILL.md files',
+      message: `Formal blocks rule coverage verified for ${checked} protocols (${FORMAL_BLOCKS_EXEMPTIONS.length} exempted)`,
+    });
+  }
+}
+
+// ============================================================
+// Check 26: Gate Integrity Rule
+// ============================================================
+// Compiled-copy coverage for the Gate Integrity Rules entry (axioms.md
+// "Gate Integrity (Operational Guards, Safeguard-tier)" — reclassified from
+// A7/Adversarial Anticipation per audit-2026-04-11 #241 resolution). Verifies
+// each core protocol SKILL.md carries a Gate integrity rule tagged
+// "(Safeguard tier)" whose body states the mutation-taxonomy kernel
+// (type-preserving materialization vs. injection/deletion/substitution), so
+// runtime enforcement of gate fidelity does not depend on contributor-only
+// axioms.md alone.
+//
+// Exemption list: pending decision on protocols that currently lack this
+// rule (e.g. anamnesis) — either the rule gets added, or a recorded
+// exemption lands here. Currently EMPTY on purpose: do not pre-populate with
+// today's gap file — add a relPath only once the pending decision resolves
+// in favor of exemption.
+const GATE_INTEGRITY_EXEMPTIONS = [];
+
+function checkGateIntegrityRule() {
+  const CHECK = 'gate-integrity-rule';
+  // Anchoring (same rationale as checkFormalBlocksRule above): the label
+  // must be a numbered Rules entry, not a cross-reference. Bound calibrated
+  // against all 16 core protocols (max observed entry ~1180 chars, horismos);
+  // 2000 leaves comfortable margin without reaching into unrelated content.
+  const LABEL_PATTERN = /^\d+\.\s+\*\*Gate integrity\*\*/m;
+  const KERNEL = 'type-preserving materialization';
+  const ENTRY_BOUND = 2000;
+
+  let checked = 0;
+  for (const relPath of PROTOCOL_FILES) {
+    if (GATE_INTEGRITY_EXEMPTIONS.includes(relPath)) continue;
+
+    const fullPath = path.join(projectRoot, relPath);
+    if (!fs.existsSync(fullPath)) {
+      results.warn.push({
+        check: CHECK,
+        file: relPath,
+        message: `Protocol file not found: ${relPath}`
+      });
+      continue;
+    }
+
+    checked++;
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const labelMatch = LABEL_PATTERN.exec(content);
+    if (!labelMatch) {
+      results.fail.push({
+        check: CHECK,
+        file: relPath,
+        message: 'Missing numbered Rules entry: "Gate integrity"',
+      });
+      continue;
+    }
+
+    const lineEnd = content.indexOf('\n', labelMatch.index);
+    const titleLine = lineEnd === -1 ? content.slice(labelMatch.index) : content.slice(labelMatch.index, lineEnd);
+    if (!titleLine.includes('(Safeguard tier)')) {
+      results.fail.push({
+        check: CHECK,
+        file: relPath,
+        message: '"Gate integrity" rule present but title line missing the "(Safeguard tier)" annotation',
+      });
+      continue;
+    }
+
+    const entryBody = boundedEntryBody(content, labelMatch, ENTRY_BOUND);
+    if (!entryBody.toLowerCase().includes(KERNEL)) {
+      results.fail.push({
+        check: CHECK,
+        file: relPath,
+        message: `"Gate integrity" rule present but missing mutation-taxonomy kernel within its own entry: "${KERNEL}"`,
+      });
+    }
+  }
+
+  if (!results.fail.some(f => f.check === CHECK)) {
+    results.pass.push({
+      check: CHECK,
+      file: 'all core protocol SKILL.md files',
+      message: `Gate integrity rule coverage verified for ${checked} protocols (${GATE_INTEGRITY_EXEMPTIONS.length} exempted)`,
+    });
+  }
+}
+
+// ============================================================
 // Run All Checks
 // ============================================================
 try {
@@ -2872,6 +3041,8 @@ try {
   checkFramingReadoutEnforcement();
   checkSingleAxisSoundness();
   checkLanguagePurity();
+  checkFormalBlocksRule();
+  checkGateIntegrityRule();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
