@@ -2855,11 +2855,9 @@ function checkPackagedAgentContractSync() {
 // SKILL.md carries both the Rules entry label and its kernel sentence
 // (Formal blocks are LLM-facing and constitutive of protocol identity).
 //
-// Exemption list: pending decision on protocols that currently lack this
-// rule (e.g. anagoge) — either the rule gets added, or a recorded exemption
-// lands here. Currently EMPTY on purpose: do not pre-populate with today's
-// gap file — add a relPath only once the pending decision resolves in favor
-// of exemption.
+// Exemption list: all 16 core protocols currently carry this rule (added
+// in the EP-02 enforcement cycle). Kept EMPTY on purpose: add a relPath
+// only when a recorded decision exempts a protocol — never pre-populate.
 const FORMAL_BLOCKS_EXEMPTIONS = [];
 
 // Anchoring: the label must appear as a numbered Rules entry (not merely a
@@ -2867,13 +2865,15 @@ const FORMAL_BLOCKS_EXEMPTIONS = [];
 // within that SAME entry's bounded body — not anywhere in the file. Bound
 // calibrated against all 16 core protocols (max observed entry ~560 chars);
 // 900 leaves comfortable margin without reaching into unrelated content.
-const NEXT_NUMBERED_ENTRY = /^\d+\.\s/m;
+// The cut also stops at the next section heading or column-0 bold
+// paragraph, so a terminal numbered entry's body does not extend into
+// following unrelated content.
+const NEXT_ENTRY_OR_SECTION = /^(?:\d+\.\s|#{1,6}\s|\*\*)/m;
 
 function boundedEntryBody(content, labelMatch, bound) {
   const bodyStart = labelMatch.index + labelMatch[0].length;
   const bounded = content.slice(bodyStart, bodyStart + bound);
-  NEXT_NUMBERED_ENTRY.lastIndex = 0;
-  const next = NEXT_NUMBERED_ENTRY.exec(bounded);
+  const next = NEXT_ENTRY_OR_SECTION.exec(bounded);
   return next ? bounded.slice(0, next.index) : bounded;
 }
 
@@ -2940,11 +2940,9 @@ function checkFormalBlocksRule() {
 // runtime enforcement of gate fidelity does not depend on contributor-only
 // axioms.md alone.
 //
-// Exemption list: pending decision on protocols that currently lack this
-// rule (e.g. anamnesis) — either the rule gets added, or a recorded
-// exemption lands here. Currently EMPTY on purpose: do not pre-populate with
-// today's gap file — add a relPath only once the pending decision resolves
-// in favor of exemption.
+// Exemption list: all 16 core protocols currently carry this rule (added
+// in the EP-02 enforcement cycle). Kept EMPTY on purpose: add a relPath
+// only when a recorded decision exempts a protocol — never pre-populate.
 const GATE_INTEGRITY_EXEMPTIONS = [];
 
 function checkGateIntegrityRule() {

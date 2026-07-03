@@ -255,7 +255,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
       disposition: Optional(A), active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
-*: product — (D₁ × D₂) → (R₁ × R₂). Realign composes with `/probe` upstream when a probe disposition routes to /realign. Realign composes with `/induce` laterally when an in-conversation abstraction crystallization references the project guide direction (the crystallized abstraction may be inscribed to the direction line via a subsequent /realign invocation). graph.json edges are absent by design — Realign is a utility skill, not a core protocol.
+*: product — (D₁ × D₂) → (R₁ × R₂). Realign composes with `/probe` upstream when a probe disposition routes to /realign. Realign composes with `/induce` laterally when an in-conversation abstraction crystallization references the project guide direction (the crystallized abstraction may be inscribed to the direction line via a subsequent /realign invocation). registered dependency edges are absent by design — Realign is a utility skill, not a core protocol.
 ```
 
 ## Storage Reference
