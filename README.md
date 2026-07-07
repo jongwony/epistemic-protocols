@@ -78,7 +78,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it |
 | [Anagoge](./anagoge) | `/ascend` | You vaguely remember a whole line of work, topic, or concept spread across many sessions — not any one session |
 | [Diylisis](./diylisis) | `/distill` | You're handing a working context to a fresh session that shares none of it — distill out the session-tethered references first |
-| [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you need a fast path to understand, approve, explain, or modify them |
+| [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you nod along — but do you actually grasp them? Verify your understanding is genuine before you approve or build on it |
 | [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
 | [Diairesis](./diairesis) | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces isn't obvious — partition it at its natural joints before conducting |
 
