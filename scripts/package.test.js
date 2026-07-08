@@ -762,11 +762,18 @@ describe('agent routing map', () => {
       assert.ok(e.resolution, `${e.cmd}: missing resolution spine`);
       assert.ok(e.cluster, `${e.cmd}: missing cluster`);
     }
-    // Every discovered protocol is covered by a routing entry (no silent drop).
+    // Bidirectional drift guard: the routing-entry command set must equal the
+    // discovered-protocol command set exactly — not just cover it (guard (a):
+    // no protocol silently dropped) but also not exceed it (guard (b): no
+    // stale catalog row surviving a protocol removal/rename).
     const covered = new Set(entries.map(e => e.cmd));
     const protocols = discoverPlugins({ projectRoot: REPO_ROOT }).filter(r => r.isProtocol);
+    const discovered = new Set(protocols.map(r => `/${r.skill}`));
     for (const r of protocols) {
       assert.ok(covered.has(`/${r.skill}`), `protocol /${r.skill} missing from routing map`);
+    }
+    for (const cmd of covered) {
+      assert.ok(discovered.has(cmd), `routing map entry ${cmd} has no matching discovered protocol (stale catalog row)`);
     }
   });
 

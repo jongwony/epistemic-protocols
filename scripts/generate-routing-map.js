@@ -87,10 +87,15 @@ function parseCatalog(catalogText) {
 /**
  * Build the structured routing model from both canonical sources.
  *
- * Robustness: FAIL LOUDLY when a protocol discovered by load-protocols has no
- * matching catalog row — silently dropping it would let catalog/protocol drift
- * go unnoticed. A null deficit/resolution (Type signature absent) omits the
- * spine gracefully rather than emitting the literal "null".
+ * Robustness: FAIL LOUDLY, bidirectionally, on any catalog/protocol drift —
+ * silently dropping or stale-carrying an entry would go unnoticed otherwise.
+ * (a) a protocol discovered by load-protocols with no matching catalog row,
+ * (b) a catalog row whose command is not a discovered protocol (e.g. the
+ * protocol was removed/renamed and its old row was left behind — without this
+ * guard the stale row would still render and regenerate byte-identically,
+ * routing-map-sync would pass, and SessionStart would inject a directive for
+ * a non-existent protocol). A null deficit/resolution (Type signature absent)
+ * omits the spine gracefully rather than emitting the literal "null".
  *
  * @returns {Array<{ cmd, name, cluster, deficit, resolution, trigger }>}
  */
@@ -115,6 +120,17 @@ function buildRoutingEntries(options = {}) {
       `[generate-routing-map] ${missingRows.length} protocol(s) missing from the catalog ` +
       `When-to-Use table (${CATALOG_SKILL_REL}): ${missingRows.join(', ')}. ` +
       `Add a catalog row for each, or the routing map would silently drop them.`
+    );
+  }
+
+  // Drift guard (b): every catalog row must correspond to a discovered protocol
+  // (reject stale rows left behind by a removed/renamed protocol).
+  const staleRows = order.filter(cmd => !spine.has(cmd));
+  if (staleRows.length) {
+    throw new Error(
+      `[generate-routing-map] ${staleRows.length} catalog row(s) reference protocol(s) not ` +
+      `discovered by load-protocols.js: ${staleRows.join(', ')}. ` +
+      `Remove the stale catalog row(s), or the routing map would route to a non-existent protocol.`
     );
   }
 
