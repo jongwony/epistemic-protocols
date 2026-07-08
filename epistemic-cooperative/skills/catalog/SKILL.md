@@ -74,8 +74,8 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Anagoge | `/ascend` | A recall a single session can't resolve — elevate it to a higher-granularity unit (connected-session chain, topic cluster, or already-sedimented concept) |
 | Diylisis | `/distill` | Handoff context to a fresh zero-memory session — distill out session-tethered references into a portable handoff |
 | Katalepsis | `/grasp` | AI-produced work you assume you grasp but haven't verified — comprehension may be an illusion; confirm your understanding is genuine before you approve, explain, or build on it |
-| Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins |
 | Diairesis | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces is unclear — partition it at natural joints (each unit fits one span, complete coverage with no orphans) before conducting |
+| Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins |
 
 ## Detail Mode
 
