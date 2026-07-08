@@ -19,6 +19,12 @@ const {
   CANONICAL_PRECEDENCE: CANONICAL_PRECEDENCE_ARR,
   CANONICAL_CLUSTERS,
 } = require(path.resolve(__dirname, '../../../../scripts/load-protocols.js'));
+// __dirname-anchored require (absolute regardless of the projectRoot arg) so the
+// generator's own canonical-source reads stay driven by the passed projectRoot.
+const {
+  checkRoutingMap,
+  ROUTING_MAP_REL,
+} = require(path.resolve(__dirname, '../../../../scripts/generate-routing-map.js'));
 
 const projectRoot = process.argv[2] || process.cwd();
 
@@ -2077,6 +2083,45 @@ function checkCatalogSync() {
   });
 }
 
+// ============================================================
+// Check: Routing Map Sync (agent-facing SessionStart directive)
+// ============================================================
+// routing-map.md is generated 100% from canonical sources (the catalog
+// When-to-Use triggers + load-protocols deficit → resolution spine). A stale
+// committed map would inject a wrong routing directive at SessionStart, so this
+// check re-generates in-memory and fails on any divergence — the same drift
+// posture as cross-ref-scan/catalog-sync, using the shared {check, file,
+// message} result shape. The generator FAILS LOUDLY (throws) when a protocol
+// has no catalog row; that throw is surfaced here as a fail rather than
+// crashing the verifier.
+function checkRoutingMapSync() {
+  const check = 'routing-map-sync';
+  let result;
+  try {
+    result = checkRoutingMap({ projectRoot });
+  } catch (e) {
+    results.fail.push({
+      check,
+      file: ROUTING_MAP_REL,
+      message: `Routing map generation failed (protocol/catalog drift or source error): ${e.message}`
+    });
+    return;
+  }
+  if (!result.inSync) {
+    results.fail.push({
+      check,
+      file: ROUTING_MAP_REL,
+      message: `${result.reason} — regenerate with: node scripts/generate-routing-map.js`
+    });
+    return;
+  }
+  results.pass.push({
+    check,
+    file: ROUTING_MAP_REL,
+    message: 'Routing map is in sync with canonical sources (catalog triggers + load-protocols spine)'
+  });
+}
+
 // Stem matching: handles Dismiss/Dismisses, Address/Addresses, UserSupplies/User-supplies
 function stemMatch(a, b) {
   // Normalize: remove hyphens, case-insensitive
@@ -3111,6 +3156,7 @@ try {
   checkRoutingIndexContract();
   checkOnboardSync();
   checkCatalogSync();
+  checkRoutingMapSync();
   checkPrecedenceLinearExtension();
   checkPartitionInvariant();
   checkGateTypeSoundness();

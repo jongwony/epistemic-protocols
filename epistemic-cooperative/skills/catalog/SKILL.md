@@ -74,8 +74,8 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Anagoge | `/ascend` | A recall a single session can't resolve — elevate it to a higher-granularity unit (connected-session chain, topic cluster, or already-sedimented concept) |
 | Diylisis | `/distill` | Handoff context to a fresh zero-memory session — distill out session-tethered references into a portable handoff |
 | Katalepsis | `/grasp` | AI-produced work you assume you grasp but haven't verified — comprehension may be an illusion; confirm your understanding is genuine before you approve, explain, or build on it |
-| Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins |
 | Diairesis | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces is unclear — partition it at natural joints (each unit fits one span, complete coverage with no orphans) before conducting |
+| Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins |
 
 ## Detail Mode
 
@@ -104,3 +104,34 @@ When a cluster name or protocol command/name is provided as argument:
 4. **Argument normalization** — accept case-insensitive input; strip `/` prefix; match against both protocol names and commands.
 5. **Graceful fallback** — unrecognized arguments get closest-match suggestions plus the full overview.
 6. **Distinction from /onboard** — catalog is passive reference (read and go); onboard is active learning (scenario, trial, quiz). Redirect to /onboard only when the user explicitly asks for guided learning.
+
+## Agent routing (SessionStart injection)
+
+The tables above are the human browse view. The agent-facing counterpart is `routing-map.md` — an auto-generated routing directive (do not edit by hand) built entirely from canonical sources: the `When to Use` triggers above plus each protocol's `Deficit → Resolution` spine. A passive skill description under-triggers invocation, so this map is injected at SessionStart to route the agent from the deficit, not the summary. Regenerate it after any protocol or trigger change:
+
+```bash
+node scripts/generate-routing-map.js
+```
+
+`scripts/session-context.js` is the SessionStart emitter: it reads `routing-map.md` and prints the hook payload on stdout. A consuming project wires it with a `settings.json` hook of type `command`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node <plugin>/skills/catalog/scripts/session-context.js" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Inject only the parts a project needs (the routing-directive preamble is always kept):
+
+- `--only=/grasp,/gap` — include only the listed commands (comma-separated).
+- `--cluster=Analysis,Decision` — include only the listed clusters (comma-separated).
+
+With no filter, the full map is injected; when both filters are given they combine as a union.

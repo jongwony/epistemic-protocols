@@ -737,3 +737,77 @@ describe('load-protocols Type signature extraction', () => {
     }
   });
 });
+
+// ============================================================
+// agent routing map (generate-routing-map + session-context)
+// ============================================================
+
+describe('agent routing map', () => {
+  const REPO_ROOT = path.resolve(__dirname, '..');
+  const {
+    generateRoutingMap,
+    buildRoutingEntries,
+    checkRoutingMap,
+  } = require('./generate-routing-map');
+  const SESSION_CONTEXT = path.join(
+    REPO_ROOT, 'epistemic-cooperative', 'skills', 'catalog', 'scripts', 'session-context.js'
+  );
+
+  it('parses all 16 protocols, each with a when: trigger and deficit → resolution spine', () => {
+    const entries = buildRoutingEntries({ projectRoot: REPO_ROOT });
+    assert.equal(entries.length, 16, `expected 16 routing entries, got ${entries.length}`);
+    for (const e of entries) {
+      assert.ok(e.trigger && e.trigger.length > 0, `${e.cmd}: missing when: trigger`);
+      assert.ok(e.deficit, `${e.cmd}: missing deficit spine`);
+      assert.ok(e.resolution, `${e.cmd}: missing resolution spine`);
+      assert.ok(e.cluster, `${e.cmd}: missing cluster`);
+    }
+    // Bidirectional drift guard: the routing-entry command set must equal the
+    // discovered-protocol command set exactly — not just cover it (guard (a):
+    // no protocol silently dropped) but also not exceed it (guard (b): no
+    // stale catalog row surviving a protocol removal/rename).
+    const covered = new Set(entries.map(e => e.cmd));
+    const protocols = discoverPlugins({ projectRoot: REPO_ROOT }).filter(r => r.isProtocol);
+    const discovered = new Set(protocols.map(r => `/${r.skill}`));
+    for (const r of protocols) {
+      assert.ok(covered.has(`/${r.skill}`), `protocol /${r.skill} missing from routing map`);
+    }
+    for (const cmd of covered) {
+      assert.ok(discovered.has(cmd), `routing map entry ${cmd} has no matching discovered protocol (stale catalog row)`);
+    }
+  });
+
+  it('produces deterministic output with the routing directive and every entry rendered', () => {
+    const a = generateRoutingMap({ projectRoot: REPO_ROOT });
+    const b = generateRoutingMap({ projectRoot: REPO_ROOT });
+    assert.equal(a, b, 'routing map generation must be deterministic');
+    assert.match(a, /Route from the deficit, not the summary\./);
+    assert.equal((a.match(/^\*\*`\//gm) || []).length, 16, 'all 16 entries rendered');
+    assert.equal((a.match(/^\s+when:/gm) || []).length, 16, 'every entry has a when: line');
+  });
+
+  it('committed routing-map.md is in sync with its canonical sources', () => {
+    const { inSync, reason } = checkRoutingMap({ projectRoot: REPO_ROOT });
+    assert.ok(inSync, `routing-map.md stale: ${reason} — run node scripts/generate-routing-map.js`);
+  });
+
+  it('session-context.js emits valid SessionStart JSON with non-empty additionalContext', () => {
+    const out = execFileSync(process.execPath, [SESSION_CONTEXT], { encoding: 'utf8' });
+    const parsed = JSON.parse(out);
+    assert.equal(parsed.hookSpecificOutput.hookEventName, 'SessionStart');
+    const ctx = parsed.hookSpecificOutput.additionalContext;
+    assert.ok(typeof ctx === 'string' && ctx.length > 0, 'additionalContext must be a non-empty string');
+    assert.match(ctx, /Route from the deficit, not the summary\./);
+    assert.equal((ctx.match(/\*\*`\//g) || []).length, 16, 'full map injects all 16 entries');
+  });
+
+  it('session-context.js --only filters to the requested commands (preamble kept)', () => {
+    const out = execFileSync(process.execPath, [SESSION_CONTEXT, '--only=/grasp,/gap'], { encoding: 'utf8' });
+    const ctx = JSON.parse(out).hookSpecificOutput.additionalContext;
+    assert.match(ctx, /Route from the deficit, not the summary\./);
+    assert.equal((ctx.match(/\*\*`\//g) || []).length, 2, 'only the two requested commands');
+    assert.ok(ctx.includes('**`/grasp`**'));
+    assert.ok(ctx.includes('**`/gap`**'));
+    assert.ok(!ctx.includes('**`/inquire`**'));
+  });
+});
