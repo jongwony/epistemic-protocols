@@ -13,10 +13,10 @@ Distill a session-tethered working context into a self-contained portable handof
 
 ```
 ── FLOW ──
-Diylisis(W, recipient?, next_task?) → Detect(W) → tethered? →
+Diylisis(W, recipient?, next_task?, activation_verb?) → Detect(W) → tethered? →
   ¬tethered: → deactivate (handoff already self-contained)
   tethered:  pass_n=1, now = invocation timestamp (immutable per invocation), residuals = ∅, loop:
-    F0 declare(recipient, next_task, allowed_sources, scope, verification, stop, handoff_durability, emit_target) → contract   -- relevance + minimality premise; handoff_durability conditionalizes the ledger (Change A); Λ.activation_edge = { verb (declared, default minimal), locator: ref contract.emit_target } is constructed here — the F5 fourth input exists from Phase 0
+    F0 declare(recipient, next_task, allowed_sources, scope, verification, stop, handoff_durability, emit_target) → contract   -- relevance + minimality premise; handoff_durability conditionalizes the ledger (Change A); Λ.activation_edge = { activation_verb? (default minimal), locator: ref contract.emit_target } is constructed here — the F5 fourth input exists from Phase 0
        ledger = read(CorrectionDelta) | unknown  if contract.handoff_durability = DurableRepo  else  unknown   -- conditional ledger: maintained only for the durable re-distilled case; OneShot/ExternalVersioned keep none
     F1 scan(deixis) → normalize(surface_token → canonical_ref, confidence, unresolved?) → SubstTable
        |unresolved tokens| > 0: append to residuals (reason: unresolved)
@@ -32,14 +32,14 @@ Diylisis(W, recipient?, next_task?) → Detect(W) → tethered? →
          Fail(blocking_items, sweep, realization): parse each verdict Findings row → EvidencedFinding, append to residuals (reason: comprehension-gap, evidence kept), block fixed_point
          Pass(sweep, realization):                 no new residual (sweep absent → no verdict, re-dispatch)
        Gate Qd(disposition conflicts ∪ unknown-provenance ∪ horizon-expired ∪ unresolved residuals) → Stop → A    -- Constitution surfacing (both verdicts; residuals incl. comprehension-gap)
-    F6 loop: measure(unresolved anchors, stop, schema, residual, leaked drops, unclean deltas) decreasing → fixed_point?  -- leak lint: DROP'd content absent from emit, incl. emit-ledger deltas under re-distillation (minimality dual of F5)
+    F6 loop: measure(unresolved anchors, stop, schema, residual, leaked drops, unclean deltas, undisposed authored) → fixed_point?  -- leak lint: DROP'd content absent from emit, incl. emit-ledger deltas under re-distillation (minimality dual of F5)
          ¬fixed_point: pass_n += 1, loop (one-pass + bounded audit/lint)
          fixed_point: → F7
     F7 emit(prose_channel, activation_edge, TaskStateBlock, correction_ledger?) → PortableHandoff → converge   -- leak_free across every emitted channel incl. the activation edge and the correction ledger; the emitted activation edge is the content-free verb+locator that hands the artifact to its recipient; re-distillation hygienes the single canonical handoff in place + appends a CorrectionDelta line, never a supersede-chain file
 
 ── MORPHISM ──
-WorkingContext, recipient?, next_task?
-  → declare(recipient, next_task, allowed_sources, scope, verification, stop, handoff_durability, emit_target)  -- F0 HandoffContract; relevance and minimality undefined without it; handoff_durability conditionalizes the CorrectionDelta ledger (OneShot/ExternalVersioned keep none, DurableRepo keeps the full ledger); Λ.activation_edge = { verb (declared, default minimal), locator: ref contract.emit_target } is constructed here — the F5 fourth input exists from Phase 0
+WorkingContext, recipient?, next_task?, activation_verb?
+  → declare(recipient, next_task, allowed_sources, scope, verification, stop, handoff_durability, emit_target)  -- F0 HandoffContract; relevance and minimality undefined without it; handoff_durability conditionalizes the CorrectionDelta ledger (OneShot/ExternalVersioned keep none, DurableRepo keeps the full ledger); Λ.activation_edge = { activation_verb? (default minimal), locator: ref contract.emit_target } is constructed here — the F5 fourth input exists from Phase 0
   → normalize(surface_token, canonical_ref, confidence)                        -- F1 deictic closure: precedes grounding so each grounded item names a stable referent
   → audit(item, self_containment) → (inline | stable-pointer | routed-residual)-- F2 grounding closure: silent residual surfaced, never dropped unseen; a stable-pointer's locator must resolve throughout the recipient's activation window (session-scoped roots fail for an absent recipient — inline the evidence or relocate to a resolving locator)
   → select(item, contract.next_task)                                           -- F3a recipient-relevance predicate against the declared contract
@@ -61,6 +61,7 @@ ContextItem    = { content: String, origin: Origin, surface_tokens: Set(String),
 Origin         ∈ {UserStatement, DocumentRead, ToolOutput, AIInference, PriorTask} ∪ Emergent(Origin)
 recipient?     = Optional(RecipientProfile)                  -- defaults to { knowledge: "zero-memory", activation: Unbounded } when absent (the conservative absent-recipient default)
 next_task?     = Optional(String)                            -- declared at F0; absence forces F0 elicitation before relevance is defined
+activation_verb? = Optional(String)                          -- the activation edge's verb, declared at invocation or F0; absent → the canonical minimal verb ("Read <locator> and execute it"). Never a contract field: the contract carries the noun (emit_target), the edge carries the verb
 Detect         = W → (Bool, tethered_items if true)          -- F0 precheck for session-tethered residue
 StableRef      = { kind: "path" | "url" | "id" | "command", locator: String }  -- a reference the recipient resolves throughout its declared activation window (the Unbounded window recovers the absent-recipient reading: resolvable without the author session). Durability is not a stored field: it is decided at each use site by resolves_at(locator, contract.recipient_profile.activation) — the test a StablePointer grounding applies
 ActivationWindow ∈ {Immediate, Bounded(Duration), Unbounded} ∪ Emergent(ActivationWindow)  -- WHEN the recipient reads and acts on the handoff, relative to the author session's lifetime; Emergent(·) is a not-yet-named window kind, consumed conservatively (treated as Unbounded until it earns its own branch)
@@ -143,9 +144,9 @@ PortableHandoff = { contract: HandoffContract; activation: ActivationEdge; prose
 Phase          ∈ {0, 1, 2, 3, 4}
 
 ── PHASE TRANSITIONS ──
-Phase 0: W, recipient?, next_task? → Detect(W) → tethered?                                       -- tethered checkpoint (silent)
+Phase 0: W, recipient?, next_task?, activation_verb? → Detect(W) → tethered?                                       -- tethered checkpoint (silent)
        then F0 declare(recipient, next_task, allowed_sources, scope, verification, stop, handoff_durability, emit_target) → HandoffContract   -- recipient is a RecipientProfile carrying its activation window (Immediate | Bounded | Unbounded); the window is declared here with the rest of the contract and checked against well-formed (DurableRepo ⇒ Unbounded); Λ.activation_edge = { verb (declared, default minimal), locator: ref contract.emit_target } is constructed here — the F5 fourth input exists from Phase 0
-       then Λ.activation_edge = edge(verb?, contract.emit_target)                              -- verb declared or defaulted to the canonical minimal verb; locator is a reference to the contract's emit target, never a copy
+       then Λ.activation_edge = edge(activation_verb?, contract.emit_target)                              -- verb declared or defaulted to the canonical minimal verb; locator is a reference to the contract's emit target, never a copy
        then bind Λ.now (always) and Λ.ledger = read(CorrectionDelta) | Unknown if handoff_durability = DurableRepo else Unknown   -- conditional ledger bind (Change A)
 Phase 1: HandoffContract → F1 normalize(surface_token, canonical_ref, confidence) → SubstTable    [Tool: Read, Grep, Glob]
        then F2 audit(item, self_containment) → Grounding (inline | stable-pointer | routed-residual)
@@ -156,7 +157,7 @@ Phase 2: (SubstTable, Grounding, ledger, handoff_durability) → F3a relevance(i
 Phase 3: kept → F4 compress(kept) → minimal_complete                                             -- minimal-complete (track)
        → F5 comprehension_gate(minimal_complete, contract, watchlist, activation_edge) → zero_memory_verdict   [Tool: Read, Task]
        → Qd(disposition conflicts ∪ unknown-provenance ∪ horizon-expired ∪ unresolved residuals) → Stop → A         [Tool: Constitution interaction]
-       then repair(A, blocking_items) → Λ.authored                                              -- F5-repair / leak-repair prose written THIS pass, after the Gate answer and before F6 settle, enters Λ.authored undisposed (Rule 25); |undisposed_authored| > 0 is therefore visible to this pass's F6 and triggers the next pass, whose F1–F3 dispose it
+       then repair(A, blocking_items) → Λ.authored                                              -- F5-repair prose written THIS pass, after the Gate answer and before F6 settle, enters Λ.authored undisposed (Rule 25); |undisposed_authored| > 0 is therefore visible to this pass's F6 and triggers the next pass, whose F1–F3 dispose it
 Phase 4: A, verdict → F6 settle(measure) → fixed_point?
        ¬fixed_point → Phase 1 (next pass); fixed_point → F7 emit(prose, activation_edge, TaskStateBlock, correction_ledger?) → PortableHandoff
 
@@ -165,7 +166,7 @@ Phase 0 → deactivate: context_tethered(W) = false                             
 Phase 1 → Phase 2:  SubstTable produced ∧ every item assigned a Grounding class        -- deixis normalized, self-containment audited
 Phase 2 → Phase 3:  every item carries a Disposition or a surfaced unknown-provenance / horizon-expired flag -- relevance + provenance discharged
 Phase 3 → Phase 4:  zero_memory_verdict produced ∧ A received                          -- comprehension evaluated (Pass or Fail) and residual answered; Pass gates convergence at Phase 4
-Phase 4 → Phase 1:  ¬fixed_point(Λ) → pass_n += 1                                      -- measure unsettled OR comprehension verdict not yet Pass OR |undisposed_authored| > 0, re-audit; the next pass's F1–F3 domain is Λ.authored (repair-authored content awaiting disposition — Rule 25), while items of the working context retain the dispositions they already carry and the source chain stays read-only
+Phase 4 → Phase 1:  ¬fixed_point(Λ) → pass_n += 1                                      -- measure unsettled OR comprehension verdict not yet Pass OR |undisposed_authored| > 0, re-audit; the next pass's F1–F3 domain is Λ.authored (repair-authored content awaiting disposition — Rule 25), while items of the working context retain the dispositions they already carry and the source chain stays read-only; a leak repair (leaked_drops > 0 ∨ unclean_deltas > 0 detected at this settle) is performed on this re-entry — the excisions/rewrites it authors enter Λ.authored before the next pass's F1, so they too are disposed by F1–F3 (Rule 25)
 Phase 4 → converge: fixed_point(Λ) ∧ zero_memory_verdict = Pass ∧ every ResidualLedger entry surfaced ∧ leak_free(Λ)  -- emit PortableHandoff across its channels (prose + TaskStateBlock, plus the correction ledger under re-distillation); no DROP'd content leaks into emit
 Phase 3 → deactivate (ungraceful):  Esc                                               -- residual untreated, handoff not emitted
 
@@ -196,7 +197,8 @@ progress(Λ) = 1 - measure(Λ) / measure(Λ_initial)
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect          (sense)        → Internal analysis (silent — heuristic scan for session-tethered residue; no user output)
-Phase 0 declare         (observe)      → Read, Grep (recipient, next_task, allowed_sources, scope, verification, stop, handoff_durability, emit_target from session context and project config; Λ.activation_edge constructed here — verb declared or defaulted; locator = contract.emit_target)
+Phase 0 declare         (observe)      → Read, Grep (recipient, next_task, allowed_sources, scope, verification, stop, handoff_durability, emit_target from session context and project config)
+Phase 0 bind            (track)        → Internal state update (Λ.activation_edge = edge(activation_verb? | minimal, contract.emit_target); Λ.now fixed as the invocation timestamp; Λ.ledger bound read-only under DurableRepo, Unknown otherwise; Λ.prior_handoff bound under DurableRepo)
 Phase 1 normalize       (observe)      → Read, Grep, Glob (resolve each surface token to a canonical reference; the read-only deictic scan runs as Extension)
 Phase 1 audit           (sense)        → Internal analysis (per-item self-containment classification: inline / stable-pointer / routed-residual)
 Phase 2 attest          (observe)      → Read, Grep, Glob (DurableRepo: read-only consumption of the append-only CorrectionDelta ledger → CorrectedKeep on a matching unexpired KEEP delta. ObservedKeep: read-only confirmation that the item's durable observable source resolves — re-read the file, resolve the url/id, confirm a contract verification_command exists for the recipient — an Extension relay (entropy→0, basis = the cited observable source, no Gate). OneShot/ExternalVersioned: no ledger read; ExternalVersioned records version_ref as the durable provenance pointer. No delta and no observable basis → Unknown → Gate)
@@ -204,8 +206,9 @@ Phase 2 dispose         (track)        → Internal state update (Λ.disposition
 Phase 3 comprehension_gate (observe)   → Read, Task (refute-posture review, platform-laddered: the diylisis:zero-memory-refuter subagent where the platform registers plugin agents; a generic fresh subagent carrying the F5 instructions where only generic spawn exists; lint checklist only where no subagent surface exists — a weakened realization that loses fresh-context isolation, named as such in the verdict. Inputs are the candidate handoff text, the contract's recipient profile + next task (including its activation window, against which locator resolvability is judged), the activation edge (verb + locator, reviewed under the minimal admissible edge), and the session-term WatchList enumerated per TYPES — skill/protocol names invoked, subagents dispatched, tools called, plugin/skill names whose instructions are loaded, read from the live session record; author self-simulation excluded)
 Phase 3 comprehension_gate (track)     → Internal state update (Λ.watchlist recorded at dispatch; parse the verdict: each Findings row → EvidencedFinding with `item` bound by quoted_token + location match — no unique match → synthesize a ContextItem from the finding (origin: AIInference), never drop a row; Fail findings re-enter Λ.residual_ledger as comprehension-gap entries carrying their evidence; Λ.zero_memory_verdict set with its sweep trace and realization; a verdict missing the per-category sweep trace or the Realization line is rejected as no verdict → re-dispatch)
 Phase 3 Qd              (constitution) → present (mandatory; surfaced residuals + unknown-provenance items + horizon-expired items + disposition conflicts; Esc → loop termination at LOOP level, not an Answer)
-Phase 3 repair          (track)        → Internal state update (repair-authored items appended to Λ.authored, undisposed; timing: within the pass, after the Gate answer, before Phase 4 settle — so the F6 measurement sees them and the loop re-enters; disposed by the next pass's F1–F3 per Rule 25)
+Phase 3 repair          (track)        → Internal state update (F5/Gate repair-authored items appended to Λ.authored, undisposed; timing: within the pass, after the Gate answer, before Phase 4 settle — so the F6 measurement sees them and the loop re-enters; disposed by the next pass's F1–F3 per Rule 25)
 Phase 4 settle          (track)        → Internal state update (measure(Λ) incl. leaked_drops, leak-lint, fixed-point check, pass counter)
+Phase 4 leak-repair     (track)        → Internal state update (performed on ¬fixed_point re-entry when leaked_drops > 0 ∨ unclean_deltas > 0: targeted emit-channel excision/rewrite per LOOP; authored excisions/rewrites enter Λ.authored before the next pass's F1 and are disposed by F1–F3 per Rule 25)
 converge                (extension)    → TextPresent+Proceed (substitution table + disposition trace + surfaced residual ledger + TaskStateBlock + the emitted activation edge; proceed with PortableHandoff — emit is leak_free across every channel incl. the activation edge, recipient ledger recipient-relevant only). Under re-distillation the emit also realizes as Edit/Write: hygiene the one canonical handoff file in place + append each delta to its CorrectionDelta JSONL ledger — a deterministic application of the converged Λ to the existing file (still Extension per A2 Standing authority — the Phase 3 Gate constituted the settled Λ, so the Edit/Write is a deterministic relay of that judgment, not a fresh constitutive act), never a new versioned sibling
 
 ── MODE STATE ──
