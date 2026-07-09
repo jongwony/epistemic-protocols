@@ -1,323 +1,458 @@
-# 방향 unknowns 노출용 "발산-폐기 인스턴스화" 프로토콜 — 구현 계획 (#606)
+# 방향 unknowns 노출용 "발산-폐기 인스턴스화" 프로토콜 — 구현 계획 v2 (#606)
 
-> 이슈 #606에 문서화된 결여의 세부 구현 계획. Thariq Shihipar "A Field Guide to
-> Fable: Finding Your Unknowns"의 핵심 기법 — "가짜 데이터로 완전히 다른 러프
-> 목업 몇 개를 만들어, 값쌀 때 방향을 확인하라" — 에 대응하는 형식 메커니즘을
-> 스위트에 추가한다. 결여의 서명: **복수(plural) · 가짜데이터 · 커밋전 · 발산(divergent)**.
+> 이슈 #606의 구현 계획 **v2**. 동일 경로의 v1을 대체(supersede)하며 v1은 git
+> 이력에서 열람 가능하다. 결여의 서명은 v1과 동일(**복수(plural) · 가짜데이터 ·
+> 커밋전 · 발산(divergent)**)이나, v1이 게이트로 남긴 A-vs-B가 본 세션에서
+> **B(형제 프로토콜 신설)로 구성**되었고 결핍·정체성·형식블록·배선이 재도출되었다.
 >
-> 이 계획은 두 프로토콜을 방법으로 조합해 도출했다: `/elicit`(결정 좌표 역추적)와
-> `/gap`(결정 지점별 미검토 결여 표면화). 방법 기록을 먼저 두고, 그 위에 권고를 쌓는다.
->
-> **경계**: 이 문서는 계획 단계까지만이다. A vs B 최종 선택은 근거와 함께 권고하되
-> 사용자 몫으로 남긴다(§열린 결정 참조). 전체 프로토콜 구현은 방향 확정 후 별도 작업.
+> **경계**: 이 문서는 설계-계획 단계까지다. SKILL.md 저작·배선·검증은 §10의 후속
+> 세션 4단계로 위임한다. §2의 조건부 단서는 M6 → /sublate → codex 라운드3 →
+> /ascend 증거 군집 → 사용자 최종 구성(2026-07-10)으로 **해소** — B-첫클래스
+> **확정** (경위: §2.2).
 
 ---
 
-## 0. 방법 기록: elicit × gap
+## 1. 방법 기록: v1→v2 델타
 
-### 0.1 역추적된 결정 좌표 (elicit)
+### 1.1 도출 방법의 차이
 
-이 구현이 **암묵적으로 요구하는** 결정 좌표를, 이슈와 기존 스킬 소스를 substrate로
-역추적했다. 각 좌표는 기존 형식블록에 근거(basis)를 둔다.
+- **v1**: `/elicit`(결정 좌표 역추적) × `/gap`(미검토 결여 표면화) **단독 조합**으로
+  도출. A-vs-B는 근거와 함께 B를 권고하되 **사용자 게이트 상태로 종결**.
+- **v2**: 지휘 계획(hyphegesis `/conduct`) 하에 **4갈래 증거**를 수집해 A-vs-B를
+  결정으로 구성:
+  1. **codex gpt-5.5 xhigh 격리 자문** — B 지지. 근거는 타이핑: 구별되는
+     (deficit → resolution) 쌍은 별도 프로토콜이라는 스위트 정체성 기준.
+  2. **M1 계약 실측** — `/ground` 형식블록의 계약 수준 재측정: (a) 스킬은 독립
+     SKILL.md 계약이라 기계 **재사용 불가**(구조 패턴 참조만 가능), (b) 기존 16개
+     프로토콜에 **복수 종단(벌거벗은 Set codomain) 선례 없음** — 모든 종단은 단일
+     레코드, (c) **변경규모 비대칭** — 2모드화는 `/ground` 형식 표면을 약 2배로
+     부풀리는 반면 신설은 표준 배선 목록(§9)으로 닫힌다.
+  3. **`/elicit` 2사이클** — (a) "만들기(수단)"와 "인식(목적)"의 분리 검증,
+     (b) 실물-기구 계보를 `/ground`가 아닌 **aitesis(ObservationSpec)**로 재배치,
+     (c) 프로토콜 자체 Northstar를 레포 Northstar 4개 절(unknowns 발화 유도 ·
+     편향 없는 주의 제약 · 국소 오정렬 근원 해소 · bounded loop)과 정렬.
+  4. **사용자 CP1 구성** — 방향 명확 판정(결핍이 실존한다는 자기 경험 확인 포함)
+     + **조건부 채택**: "인식론 범위가 성립하면 B로 간다." (단서는 이후 해소·확정 — §2.2)
 
-| # | 결정 좌표 | substrate 근거 | 이 계획의 제안값 |
-|---|-----------|----------------|------------------|
-| C1 | **새 deficit의 정체성** — 기존 `MappingUncertain`과 구별되는 이름·술어 | 스위트는 각 프로토콜을 (deficit → resolution) 쌍으로 타이핑한다. `/elicit`의 certify 단계와 `graph.json` 노드 목록이 deficit 인벤토리를 소비한다 | `DirectionLatent` (방향-미정): 빌드가 커밋됐으나 어느 방향으로 만들지의 unknowns가 잠복 상태 |
-| C2 | **codomain의 형태 — 복수성** | 기존 모든 프로토콜의 resolution은 **단일** 객체(`ValidatedMapping`, `AuditedDecision`, `CrystallizedAbstraction`, `ResolvedEndpoint`). 결여의 서명은 "복수" | codomain = 발산 인스턴스의 **집합**(N≥2) + 그로부터 추출된 방향 unknowns |
-| C3 | **A vs B — 스킬 배치** | `extend-not-replace`(user 전역 원칙) vs "깔끔한 per-skill 타이핑"(스위트 아키텍처) | **B 권고**(§1). 단, 사용자 게이트로 남김 |
-| C4 | **재사용할 instantiate 하위기계 경계** | `/ground`의 `I = M × F × Sₜ → Example`(매핑 스코프된 단일 렌더); `/elicit`의 `ReverseTrace → DimensionProjection`(좌표 역추적) | "추상 씨앗 → 구체 플레이스홀더 렌더"만 재사용; 매핑-스코핑(M,F)은 버리고 복수·발산으로 감쌈(§3.2) |
-| C5 | **initiator 분류** (AI-guided / Hybrid / User-initiated) | `/ground`=AI-guided, `/elicit`=Hybrid. "만들기" 이동은 보통 사용자가 발화 | **Hybrid** 제안 — 사용자 발화가 우세하나 AI가 잠복 방향을 감지해 나설 수 있음 |
-| C6 | **수렴/종결 조건** | Task Externalization Boundary: durable record엔 방향 결정(framing shift)만, 폐기 목업은 세션에 | 방향 unknowns가 노출되고 ∧ 사용자가 방향 판단(선택/좁힘/열린채 가시화)을 내리면 종결; 변이체는 폐기 |
+### 1.2 v1과의 독립 수렴 지점
 
-**핵심 좌표 C2의 함의**: 이 이동의 종결 타입은 *노출된 방향 신호*이고, 변이체 집합은
-그 *수단(scaffolding)*이다. `/ground`에서 `Example`이 단일 매핑을 검증하는 vehicle인 것과
-대비된다 — 거기선 매핑이 목적, 여기선 대비(contrast)가 목적이고 인스턴스는 소모품이다.
+서로 다른 방법이 같은 지점에 도달한 곳은 결론의 신뢰 근거가 된다:
 
-### 0.2 표면화된 결여 (gap)
+| v1 좌표 | v1 결론 | v2 독립 도달 | 수렴 |
+|---------|---------|--------------|------|
+| C4 재사용 경계 | 렌더 코어만 참조, 매핑-스코핑(M,F) 폐기 | M1 실측: 계약 수준 재사용 자체가 불가, 패턴 참조만 | 같은 방향 (v2가 더 강함) |
+| C5 initiator | Hybrid | codex 자문·결핍 술어 분석 모두 Hybrid | 일치 |
+| C6 종결/폐기 | durable record엔 방향 결정만, 목업은 세션-국소 폐기 | cleanup-바운드 Probe + `discard_trace` 종단 필드 | 일치 (v2가 폐기를 기구로 강제) |
 
-떠오른 계획안의 미검토 결여를, 결정 지점마다 표면화했다. 압력 순으로 정렬.
+### 1.3 v1 요소의 처분
 
-| # | 결여 | 압력 | 처리 |
-|---|------|------|------|
-| G1 | **"만들기"가 파일을 생성하는가, 세션텍스트로 방향을 서술하는가** | **load-bearing** (Epistemic Completeness Boundary 교차) | §열린 결정에 게이트로 표면화. 권고: 세션텍스트 렌더(파일 무변경) — 아래 근거 |
-| G2 | **발산이 어떻게 보장되는가** — N개 비슷한 인스턴스가 아니라 서로 다른 방향 가설이려면 | load-bearing | 발산 축(divergence axis) = 잠복 방향 unknown. 각 변이체는 축에 다른 값을 커밋. **이것이 방법이 `/elicit`인 이유** — 역추적된 방향 좌표가 발산 축이 된다. MORPHISM에 내장(§2) |
-| G3 | **Greek alias & 커맨드 이름** | cheap-to-settle이나 constitutive(이름=정체성) | 후보 제시, 사용자 결정(§열린 결정). 작업명: **Proplasma / `/sketch`** |
-| G4 | **의존성 엣지 설계** — 어떤 프로토콜을 suppress/advise 하는가 | load-bearing (graph.json DAG 무결성) | 제안 엣지셋(§3.3): `euporia→new`, `frame→new`, `new→analogia` (advisory). suppression 불필요 |
-| G5 | **변이체 개수(발산도)** | nonblocking | 제안: N∈[2,4] 소프트 캡. plurality(N≥2)는 constitutive, 상한은 값싼-탐색 유지용 |
-| G6 | **reduced-space-test와의 중복** | 이슈에서 이미 배제됨 | 재확인만: rst=사후·단일·실검증공간 vs new=커밋전·복수·가짜데이터. 겹치는 축 없음 |
-
-**G1의 근거 (가장 깊은 결여)**: `architectural-principles.md`의 Epistemic Completeness
-Boundary는 "EP 원칙은 인식적 substrate를 지배하고, 물리적 실행/making은 native harness나
-전문 플러그인에 속한다"고 선언한다. 목업 파일을 실제로 쓰는 버전은 스위트 최초의
-`(transform)` 코어 이동이 되어 이 경계를 넘는다. **인식적으로 충실한 버전**은 방향 대비와
-노출된 unknowns(인식적 객체)를 산출하고, 실제 파일-making은 (a) 핸드오프로 위임하거나
-(b) 세션텍스트 렌더로 소모품화한다 — `/ground`의 `Example`(쓰여진 파일이 아니라 서술된
-시나리오)과 동일한 타이핑. 권고는 (b): codomain을 *세션-렌더된 발산 플레이스홀더
-인스턴스에서 추출한 노출 방향 unknowns*로 두어 substrate 안에 유지하고, 구성상 폐기가능
-(세션텍스트는 증발)하게 한다. 대안(실파일 + cleanup 강제, `/inquire` 스타일)은 사용자 결정.
-
----
-
-## 1. A vs B 권고
-
-### 권고: **(B) 형제 프로토콜 신설** — instantiate 하위기계 재사용, 자체 deficit·codomain
-
-### 근거
-
-**(1) deficit/codomain 구별성은 스위트의 정체성 기준이다.** 아키텍처 전체가 각 프로토콜을
-(deficit → resolution) 쌍으로 타이핑한다. 이슈의 교차검증이 확립했듯, 결여된 메커니즘은
-`/ground` 포함 모든 기존 프로토콜과 *서로 다른 구조 축*에서 실패한다 — `/ground`에 대해선
-"단일+검증" vs "복수+탐색". 두 개의 진정으로 구별되는 (deficit, codomain) 쌍을 한 스킬에
-융합(A안)하는 것은 스위트가 세워진 "깔끔한 타이핑" 자체를 위반한다.
-
-**(2) `/ground`의 형식블록은 이미 과부하 상태다.** 현행 `/ground`가 짊어진 것: `MappingUncertain`,
-self-grounding 인식, `PartitionReading` 2차 기계, split-vs-trim의 `/conduct`·`/induce` 라우팅.
-여기에 자체 deficit·codomain(복수 폐기 집합)·MORPHISM·수렴·게이트 구조를 가진 *2번째 모드*를
-얹으면 이미 조밀한 스킬의 형식 표면이 대략 2배가 된다. 프로젝트의 semantic-closure 요구
-(모든 새 조건이 TYPES/PHASE TRANSITIONS/LOOP/CONVERGENCE/TOOL GROUNDING/Rules에 걸쳐
-타입·가드·상태갱신·종결경로·결과식을 가져야 함)를 감안하면 2-모드 `/ground`는 유지보수
-부채다. 이슈가 명시한 A안의 단점이 substrate로 확증된다.
-
-**(3) "공유 하위기계 + 구별되는 deficit/codomain의 별도 프로토콜"의 선례가 이미 있다:
-`/elicit` ↔ `/induce`.** 둘은 명시적 categorical dual이다(`graph.json` 엣지:
-`euporia → periagoge, advisory, "categorical dual 양립"`). "의도/인스턴스 ↔ 좌표/추상화"
-기계를 공유하지만 deficit과 화살표 방향이 달라 *별도 스킬*이다. `/ground`(단일-검증) vs
-new(복수-발산)는 구조적으로 동형이다 — 같은 인스턴스화 substrate, 다른 목적 → 별도 스킬.
-**이것이 가장 강한 단일 논거다**: 프로젝트는 정확히 이 형태의 질문을
-"substrate 공유하되 스킬 분리" 쪽으로 이미 결정한 바 있다(A5 option-set relay test의
-"sibling protocol's established pattern"에 해당하는 citable 선례).
-
-**(4) 이슈가 지적한 스위트 얇음("making/발산 외재화 축이 얇다")은 1급 노드가 더 잘 채운다.**
-`/ground` 안에 묻힌 모드는 catalog·클러스터 그룹핑(`load-protocols.js` CANONICAL_CLUSTERS)·
-`graph.json` 노드목록·README 표에서 **보이지 않는다**. 새 노드는 "making" 축을 peer로
-가시화한다 — 결여를 표면화한다는 목적 자체와 부합. A안은 새 능력을 "Analysis" 클러스터로
-분류된 스킬 안에 숨긴다.
-
-**(5) 재사용은 어느 쪽이든 보존된다.** B의 단점은 "스위트 증가"뿐인데, B도 인스턴스화
-하위기계를 *재사용*한다(하위기계 층에서 extend-not-replace, user 전역 원칙 준수). 증가분은
-노드 1개이고, 스위트는 이미 16노드다. 한계 catalog 비용은 낮다(project profile:
-notation maturity High, revision cost Low).
-
-### A안의 반론과 그 한계
-
-A안의 논거는 extend-not-replace + 스킬 수 억제다. 그러나 "extend-not-replace"(user 전역
-CLAUDE.md)는 *기존 메커니즘을 다시 짓지 말라*는 것이고, B는 instantiate 하위기계를 재사용해
-이를 준수한다. 이는 구별되는 deficit들을 한 스킬에 욱여넣으라는 명령이 아니다. 프로젝트
-자체의 아키텍처 원칙(Unix Philosophy Homomorphism, Tier Factorization)은 one-protocol-one-deficit을
-선호한다. 스킬 수 억제는 실질 비용이나(노드 1개), 위 (2)의 유지보수 부채가 이를 상회한다.
-
-### 왜 이것이 게이트인가
-
-A vs B는 published-artifact 마이그레이션 난이도를 가진, downstream 파일 배치·catalog·graph
-궤적이 진정으로 갈라지는 결정이다. 나중에 되돌리려면 published 플러그인을 삭제/병합해야
-한다(외부 커뮤니케이션·버전 이력·사용자 설치에 잔여). 따라서 가역성 티어에서 **비가역**이고,
-근거와 함께 권고하되 최종 선택은 사용자 몫으로 남긴다.
+- **보존**: C1–C6 좌표 프레임, G2(발산 축 보장) 해법(선언 축 구동), G6
+  (reduced-space-test 무중복) 재확인, auto-discovery-first 관찰과 package.test.js
+  하드코딩 카운트 경고, Greek 이름 후보 중 Proplasma.
+- **대체**: deficit 이름(`DirectionLatent` → `DirectionUnrecognizable`, §3), 커맨드
+  (`/sketch` → `/preview` vs `/contrast` 병기, §6), G1 결론(세션텍스트 렌더 권고 →
+  **계층화된 실현**, §5), 종단 타입(`Promoted(variant)` 처분 제거 — 폐기 강제, §7),
+  엣지 세트(3개 → 5개, §8), 배선 목록(M1 실측으로 갱신, §9).
 
 ---
 
-## 2. 프로토콜 스캐폴드 초안 (B안 기준)
+## 2. 결정 기록: A 기각, B 채택 (확정)
 
-> 작업명 **Proplasma** (πρόπλασμα, 최종물 전에 빚는 예비 모형/마케트) · 커맨드 `/sketch`.
-> 이름은 §열린 결정에서 확정. 아래 형식블록은 스위트 표기 관례(영문 타입명)를 따른다.
+### 2.1 (A) `/ground` 2모드 확장 — 기각
 
-### 2.1 타입 시그니처
+기각 근거: **코도메인/deficit 이중화가 의미를 희석한다.** `/ground`의 정체성은
+`MappingUncertain → ValidatedMapping`(단일 매핑의 검증)이다. 여기에
+`DirectionUnrecognizable → DirectionalContrast`(복수 발산의 대비)를 얹으면 한
+스킬이 두 (deficit, codomain) 쌍을 가져 per-skill 타이핑 기준을 위반하고, 활성화·
+수렴·게이트 구조가 모드 분기로 이중화되어 semantic-closure 유지보수 부채가 된다.
+**codex 스틸맨 포함**: codex 자문은 A안을 최강 형태로 재구성한 뒤에도
+("instantiate 기계 공유는 표면 논거일 뿐, 계약 수준에서는 공유할 기계가 없다")
+같은 결론에 도달했다 — M1 실측 (a)와 독립 일치.
 
-```
-(DirectionLatent, Hybrid, DIVERGE-CONTRAST, DirectionSeed × DivergenceAxisSet) → ContrastedDirection
-```
+### 2.2 (B) 형제 프로토콜 신설 — 확정 (해소 경위)
 
-### 2.2 MORPHISM (초안)
+사용자 CP1의 채택은 당초 조건부였다("**인식론 범위가 성립하면** 채택"). 그 단서는
+다음 경위로 해소되어 B-첫클래스는 **확정**이다: **M6 codex 반박 라운드**가 §5
+초판에 FAILS 판정(초판 형태로는 소속 불성립) → **/sublate 반론 4건**(S1–S4) →
+**codex 라운드3 평가**(S1 동의+수정 · S2 동의 · S3·S4 수정 — 수정 반영분이 §5의
+수리형) → **증거 3채널 완성(/ascend 군집)**: 원칙-위임 답변 원문 4건(세션
+91c5f8dd · d2a5b290 · 1608149c, 2026-06-10~17) · 선택지 밖 해석학적 재구성 3표집
+· 05-03 프레임-정지 장면(d113dd04, /recollect로 인지) (상세: §3.3) → **사용자
+최종 구성(2026-07-10)**: 위 증거와 수리형 §5 위에서 B-첫클래스를 구성적으로 확정.
 
-```
-── MORPHISM ──
-DirectionSeed
-  → detect(seed, latent_direction)      -- 방향 unknowns가 잠복인지(settled 아님) 검증
-  → trace_axes(seed, substrate)         -- 발산 축(=변이시킬 방향 unknowns) 식별 [/elicit 역추적 재사용]
-  → instantiate_divergent(seed, axes)   -- N≥2 값싼 플레이스홀더-데이터 인스턴스 렌더;
-                                        --   각 인스턴스는 축에 서로 다른 값을 커밋 [/ground instantiate 재사용, 복수화]
-  → contrast(variants)                  -- 변이체를 나란히 놓고, 각각이 노출하는 방향 unknown 추출
-  → judge_direction(user, contrast)     -- 사용자가 대비를 읽고 방향 판단(선택/좁힘/열린채/폐기)
-  → dispose(variants, judgment)         -- 변이체는 scaffolding: 폐기(세션텍스트 증발) 또는 하나 승격;
-                                        --   방향 결정은 지속, 목업은 지속 안 함
-  → ContrastedDirection
-requires:  latent(direction(seed))       -- 런타임 체크포인트 (Phase 0)
-deficit:   DirectionLatent               -- 활성화 전제조건 (Layer 1/2)
-preserves: seed                          -- read-only; 변이체는 소모 scaffolding, seed 변형 아님
-invariant: Divergent Contrast over Single Instantiation
-```
+**기각 기록 (근거와 함께 보존)**: codex의 유틸리티-우선 권고("가시성 소비자
+3개(/elicit·/bound·/contextualize)뿐, 사용 증거 축적 전의 첫클래스화는
+시기상조")는 검토 후 **기각**. 근거: (i) 레지스트리 가시성은 소비자 수의 함수가
+아니라 라우팅 가능성의 전제 조건(§5(d)), (ii) /ascend 군집이 이미 라우팅 수요를
+실증 — "축적 전"이라는 전제가 사실과 다르다.
 
-### 2.3 TYPES (핵심)
-
-```
-── TYPES ──
-DirectionSeed      = 빌드가 커밋됐으나 방향적으로 under-explored인 의도/스펙 (input type)
-DivergenceAxis     = 변이체 간 변이시킬 방향 unknown (substrate에서 역추적; /elicit 연결)
-DivergenceAxisSet  = Set(DivergenceAxis), |·| ≥ 1
-DisposableInstance = { rendering: String,                       -- 플레이스홀더-데이터 구체 인스턴스
-                       committed: Map(DivergenceAxis, Value),   -- 이 변이체가 각 축에 커밋한 값
-                       disposable: true }
-Variants           = Set(DisposableInstance), |Variants| ≥ 2   -- 복수성은 constitutive
-Contrast           = Variants → Set(DirectionalUnknown)         -- 나란히-읽기 → 노출된 unknowns
-DirectionalUnknown = { axis: DivergenceAxis, exposed_by: Contrast, still_open: Bool }
-V (판단)           = { Choose(variant), Narrow(axis, value), KeepOpen, Dispose }  -- answer coproduct
-Disposition        ∈ {Disposed, Promoted(variant)}             -- 변이체의 종결 처분
-ContrastedDirection = resolution where
-                       exposed(directional_unknowns)
-                       ∧ direction_judged(V)
-                       ∧ disposition_declared(Disposition)
-```
-
-### 2.4 invariant
-
-**Divergent Contrast over Single Instantiation** — codomain은 의도적으로 발산하는 소모
-인스턴스의 *복수*이며, 그 *대비*가 인식적 vehicle이다. 단일 검증 매핑이 아니다. 이 불변식이
-`/ground`(단일·검증·보존)와 구별하고 B안을 자연스럽게 만든다.
-
-### 2.5 형식-폐쇄 스케치 (semantic-closure 예비)
-
-새 조건마다 타입·가드·상태갱신·종결경로·결과식이 정합해야 한다(commit 전 수동 검증 필수):
-
-- `DirectionLatent` → 가드 `latent(direction(seed))` → Phase 0 detect → skip 조건(방향 이미
-  settled, 또는 단일 인스턴스로 충분 → `/ground`로 라우팅)
-- 복수성(N≥2) → 가드 `|Variants| ≥ 2` → Phase 1 instantiate_divergent → N<2면 발산 미성립,
-  단일 검증이면 `/ground` 라우팅
-- `Contrast` → Phase 2 relay 표면화(노출된 unknowns) + `V` 게이트(방향 판단)
-- `Disposition` → Phase 3 → 종결경로: 폐기/승격 선언 → `ContrastedDirection`
-- 수렴 evidence: 각 변이체 → 노출 unknown → 사용자 방향 판단의 trace (relay)
+**착지**: 워크트리 → feature branch → PR.
 
 ---
 
-## 3. 파일 배치 & 기존 스킬 재사용 경계
+## 3. 결핍 (뾰족한 형태)
 
-> §3.1 파일 목록은 레지스트레이션 인벤토리 스윕으로 정밀화 예정. 아래는 형식블록·graph.json·
-> load-protocols.js·structural-specs 근거의 초안.
+### 3.1 이름
 
-### 3.0 아키텍처 핵심: auto-discovery-first
+- **권고: `DirectionUnrecognizable`** — 결핍의 핵심이 "방향이 잠복해 있다"(v1
+  `DirectionLatent`)가 아니라 "방향 후보가 **서술로는 인식 불가**하다"임을 직접
+  가리킨다. A1의 어휘(recognizable)와 정합.
+- 대안(v1): `DirectionLatent` — 방향 미정 상태까지 포괄하나 그 상태는
+  `/frame`·`/elicit`의 관할(후보 생성)이므로 과포괄. 병기 후 전자 권고.
 
-레포는 의도적으로 **auto-discovery-first**다. `scripts/load-protocols.js`의 `discoverPlugins()`가
-파일시스템을 워크해 모든 열거(`PLUGINS`, `PROTOCOL_FILES`, ...)를 (a) `.claude-plugin/plugin.json`을
-가진 플러그인 디렉터리와 (b) `graph.json`의 노드 목록에서 파생한다. **플러그인이 protocol인지
-utility인지는 디렉터리명이 `graph.json.nodes`에 있는가로 갈린다.** 따라서:
-
-- **손수 편집 불필요(auto-discovery가 흡수)**: `package.js`, `install.sh`, `install-codex.sh`,
-  `generate-changelog.js`(커밋 scope 파싱), `.github/` 워크플로, `AGENTS.md`/`CLAUDE.md`
-  (router 계약 — per-protocol 재기입 시 오히려 warn).
-- **손수 편집 필요**: 아래 §3.3의 11개 파일 + 신규 플러그인 트리.
-
-### 3.1 신규 플러그인 골격 (형제 플러그인 템플릿, 신규 파일 5개)
-
-`analogia`/`euporia` 트리를 미러 (per-plugin LICENSE·scripts·tests 없음; LICENSE는 레포 루트만):
+### 3.2 술어
 
 ```
-proplasma/                         # 작업명; 확정 이름으로 대체
-  .claude-plugin/plugin.json       # 최소 스키마: name, version(semver), description, author (4필드 enforced)
-  .codex-plugin/plugin.json        # 리치 스키마(interface{} 블록 등); version은 claude 매니페스트와 동일해야 함(enforced)
+DirectionUnrecognizable ⟺
+    pre_commit(방향 결정)              -- 커밋 직전
+  ∧ |direction_candidates| ≥ 2         -- 대안이 이미 존재
+  ∧ route(§3.4) = ④                    -- 4단 라우팅이 ④로 귀착 (①–③ 전부 부정)
+  ∧ fake_data_sufficient               -- 타입 가드: 대비가 실증거 없이 성립 (§7.1)
+  ∧ placeholder_fidelity               -- 타입 가드: 발산 축의 differential futures를 왜곡 없이 운반 (§7.1)
+```
+
+초판의 인식-불가 경성 conjunct(`¬recognizable_from_description` —
+understood(options)의 부정형)는 **4단 라우팅 우선순위**(§3.4)로 교체 — 인식 불가는
+①–③ 라우팅의 잔여로 판정된다. 타입 가드 2종은 초판 `cheap(placeholder 구체화)`를
+흡수·정밀화한다 (형식화: §7.1 TYPES).
+
+A1 원문이 이 결핍의 축을 정확히 명명한다:
+
+> "Gate options that present labels without differential futures reduce to
+> recall-in-disguise — the user must **mentally simulate** consequences rather
+> than **recognize** them from the presented structure." (axioms.md §A1)
+
+즉 이 결핍은 **A1이 본문에 명명한 잔여 실패모드**다: 게이트가 구조적으로 완벽해도
+함의가 **언어로 전달 불가능한 종류**일 때 사용자는 머릿속 시뮬레이션으로 떨어진다.
+(A1은 이 실패모드를 명명할 뿐 해소 기구를 면허하지 않는다 — 소속 논거: §5(a).)
+
+### 3.3 감지 신호 — 3형상 감지 서명 (Layer 2)
+
+결핍은 세 가지 표면 형상으로 감지된다. 전부 /ascend 증거 군집의 실측 퇴적물이다
+— **군집 요약: 8퇴적물 / 2개월 / 단일 프로젝트**:
+
+- **(a) 원칙-위임 답변** — 방향 게이트에서 사용자가 방향을 고르지 못하고 판단을
+  원칙으로 위임: "northstar에 정합한 방향으로 진행", "권장방향이라면 진행" 등
+  **원문 4건** (세션 91c5f8dd · d2a5b290 · 1608149c, 2026-06-10~17).
+- **(b) 선택지 밖 해석학적 재구성** — 제시된 선택지를 고르는 대신 선택지 자체를
+  재구성하는 응답, **3표집**.
+- **(c) 구체화 요구·결정 정지** — 서술 선택지 앞에서 결정이 정지하고 구체물을
+  요구: 05-03 프레임-정지 장면 (**d113dd04**, /recollect로 인지 — /bound-인접
+  라우팅 미스 표본, §8), **92480a35**. 초판의 /bound 사용 회고("가까운 미래를
+  보고 싶다" 욕구의 경계 선택 오분류 자기 보고)는 이 형상의 초기 표본으로 흡수.
+
+**A2-침식 함의 (결핍의 심각도 근거)**: "권장방향이라면 진행"은 단순한 선호 위임이
+아니라, differential futures를 인식하지 못한 사용자가 **구성적 판단(Constitution)을
+AI에 이양**하는 장면이다 — 인식 실패가 A2의 detection/judgment 분리를 침식한다.
+
+### 3.4 과잉발동 가드 — 4단 라우팅 우선순위
+
+라우팅 이전 관문: differential futures가 **텍스트로 인식 가능**하면 결핍 부재 —
+일반 게이트로 충분하다(프로토콜 불필요). 그 다음 ①→④ 순서로 첫 매치가 이긴다:
+
+| 순위 | 조건 | 라우팅 |
+|------|------|--------|
+| ① | 익숙한 도메인으로의 **구조 매핑이 가능** | `/ground` (analogia — 구조 매핑 검증) |
+| ② | **실증거**가 필요 (진짜 데이터·실환경 검증) | `/inquire`(사실 unknowns) · `/reduced-space-test`(실증) |
+| ③ | **방향 후보/프레임 자체가 부재** | `/frame`(프레이밍) · `/elicit`(좌표 역추적) |
+| ④ | 후보 ≥ 2 ∧ 증거 불요 ∧ `fake_data_sufficient` ∧ `placeholder_fidelity` | **신규 프로토콜** |
+
+주석: 이해가 **물질화를 통해서만** 오는 경우 probe가 **이해+방향 판단을
+겸무**한다 — 이때도 라우팅은 ④다(①의 매핑이 없고 ②의 실증거가 불요하므로).
+
+---
+
+## 4. 프로토콜 자체 Northstar + 카탈로그 한 줄
+
+세션 합의 문장 그대로:
+
+> **Northstar**: 방향 선택지가 말로는 알아볼 수 없을 때, 폐기 전제의 값싼 구체물
+> 대비로 각 방향의 미래를 알아볼 수 있게 만들어, 커밋 전에 방향 판단을
+> 시뮬레이션이 아닌 인식 위에서 구성한다.
+
+> **카탈로그 한 줄 (when-to-use)**: 커밋 직전인데, 방향 후보들이 말로는 판단이
+> 안 서고 직접 봐야 알 것 같을 때.
+
+---
+
+## 5. 인식론적 소속 논거 (수리형)
+
+> 이 절이 §2.2 확정의 성립 주장이다. 초판은 M6 codex 반박 라운드에서 FAILS 판정을
+> 받았고, /sublate 반론 4건 + codex 라운드3 평가를 거쳐 수리형으로 전면
+> 재작성되었다 (경위: §2.2).
+
+**(a) A1은 제약이지 면허가 아니다 — 결핍은 별도의 실증 결핍.** 초판은 "A1의
+완성"을 소속 근거로 삼았다(공리가 프로토콜을 요청한다는 구도). 수리형은 방향을
+뒤집는다: A1은 게이트가 갖춰야 할 **제약**을 명명할 뿐, 특정 해소 기구를 면허하지
+않는다. 소속 근거는 A1 본문이 이미 명명한 잔여 실패모드 — "labels without
+differential futures → recall-in-disguise" (axioms.md §A1) — 를 다루는 **별도의
+실증 결핍**이 실존한다는 것이다. §3.3의 /ascend 군집(8퇴적물/2개월/단일 프로젝트)이
+그 실존 증거다 — 공리가 아니라 **증거가** 프로토콜을 정당화한다.
+
+**(b) aitesis ObservationSpec — cleanup 수명주기 선례로만 인용.** 초판은 aitesis의
+동적 관찰 조항(A2)을 "instantiation은 relay"의 직접 근거로 삼았다. 수리형은 유비의
+한계를 명시한다: ObservationSpec의 산출은 **증거**(관찰 결과가 주장을 지지)인 반면
+신규 probe는 **비증거**(§7.4 오염 가드)다. 따라서 aitesis는 "실물 기구를 만들고
+cleanup을 강제하는" **수명주기 선례**로만 인용하며, 관찰-relay 지위의 이전 근거로는 쓰지 않는다.
+
+**(c) 생성 분류 = transform 연산 — 생존 사슬과 파탄 조건.** probe 생성은 A2
+관찰-relay가 아니라 **transform 연산**이다 — 선례: epharmoge TOOL GROUNDING의
+`adapt (transform) → Edit, Write` (contextualize SKILL.md:150, "tool call that
+changes existing artifacts; medium-agnostic"). transform은 다음 **생존 사슬** 안에서만 합법이다:
+
+```
+Constitution 스펙 게이트 (발산 축 + placeholder 정책 확정)
+  → transform 생성 (temp-격리 · cleanup-등록 · 가시적 합성 · 비증거)
+  → relay 대비 제시 (축별 병치)
+  → Constitution 방향 결정
+  → cleanup 검증 (discard_trace)
+```
+
+**파탄 조건 3종** — 하나라도 위반하면 프로토콜은 frame식 **정지-핸드오프로
+강등**된다(transform 지위 상실):
+1. **게이트 후 축 선택** — 스펙 게이트 없이 또는 게이트 이후에 발산 축을 AI가 선택
+2. **영구 프로젝트 파일 쓰기** — temp-격리 밖 기존 프로젝트 파일 변경
+3. **probe의 증거 취급** — placeholder 구체물을 어떤 주장의 근거로 인용
+
+**(d) 첫클래스 근거 = certify-레지스트리 가시성 + 라우팅 수요 실증.** 유틸리티
+(레시피)와 프로토콜의 차이는 **레지스트리 가시성**이다: 형제 프로토콜의 certify
+파이프라인(소비자: `/elicit` · `/bound` · `/contextualize`)은 **그래프-등록 결핍**
+에 대해서만 라우팅한다 — 유틸리티의 deficit 선언은 레지스트리에 비가시라 라우팅
+대상이 될 수 없다(기존 유틸리티 `/probe`(epistemic-cooperative)가 그 증례).
+그리고 /ascend 군집이 라우팅 수요를 실증한다: **d113dd04는 /bound-인접 라우팅
+미스 표본** — 결핍이 레지스트리에 없어 형제 게이트가 이관하지 못한 장면이다.
+**codex 반론과 기각 근거 (병기)**: "가시성 소비자 3개뿐, 증거 축적 전 첫클래스화는
+시기상조 — 유틸리티로 시작하라." 기각: (i) 레지스트리 가시성은 소비자 수의 함수가
+아니라 라우팅 가능성의 **전제** — 유틸리티로 시작하면 d113dd04류 라우팅 미스가
+구조적으로 재생산된다; (ii) 증거는 이미 축적되어 있다(/ascend 군집 8퇴적물).
+§2.2 기각 기록과 동일 사안.
+
+**실현 계층 (보존 — v2 초판 (5)항)**: 최소 실현은 **텍스트 비네트 probe**(각 방향을
+placeholder 데이터로 채운 구체 시나리오 서술 — 하니스 도구 없이 성립, A4), 고급
+실현은 병렬 에이전트의 temp-격리 실물 목업. 프로토콜 의미는 실현 계층과 독립이며,
+v1 G1 게이트(세션텍스트 vs 실파일)는 이 계층화로 해소된다(§1.3). 자기잠식
+반론("서술로 안 되는 결핍을 서술로 푼다") 방어: 비네트는 라벨-서술이 아니라
+placeholder-**구체물** 서술이라는 층위 차이.
+
+---
+
+## 6. 정체성 제안
+
+### 6.1 Greek 이름
+
+- **권고: Proplasma** (πρόπλασμα) — 조각가가 대리석에 커밋하기 **전에** 만드는
+  예비 점토 모형. 커밋전·값쌈·폐기·방향확인이 어원에 전부 들어 있다. (v1과 수렴)
+- 대안: **Hypotyposis** (ὑποτύπωσις, 생생한 밑그림 — 수사학 용어) — "보이게
+  만든다" 축 강조, 단 복수·대비 축이 없음.
+- 대안: **Antiparabole** (ἀντιπαραβολή, 대조 병치) — 대비 축 강조, 단 커밋전·폐기
+  축이 없음.
+
+### 6.2 커맨드 — 병기, PR 리뷰서 확정 (§11-①)
+
+| 후보 | 충돌 검사 | 비고 (codex R12) |
+|------|-----------|------------------|
+| `/preview` | README.md · marketplace.json · 전체 스킬 디렉터리 무일치 | "커밋 전에 미래를 미리 본다"가 카탈로그 한 줄과 일대일. 단 리포에 "preview"가 **렌더 기질 용어로 기존 사용**(comment-review · triage · image-companion 등) — 용어 중첩 |
+| `/contrast` | 무일치 | 종단 타입 `DirectionalContrast` · morphism `contrast` 단계와 **정합** |
+| `/probe` | **충돌** — `epistemic-cooperative/skills/probe/` 기존재 (README.md:97) | 불가 |
+
+v2 초판의 `/preview` 단독 권고는 codex R12로 재개방 — 두 후보 **병기**, PR 리뷰에서 확정한다.
+
+### 6.3 Type 서명 · initiator
+
+```
+(DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast
+```
+
+MODE STATE 이름(`PREVIEW`)은 커맨드 확정(§11-①)을 따른다(`/contrast` 확정 시
+`CONTRAST`). Initiator: **Hybrid** — 사용자 발화("봐야 알 것 같다")가 우세하되, AI가
+§3.3의 3형상에서 결핍을 감지해 넛지할 수 있음. v1 C5와 수렴.
+
+---
+
+## 7. 형식블록 스케치 (설계 수준 — 완전한 SKILL.md 아님)
+
+### 7.1 TYPES
+
+```
+── TYPES (sketch) ──
+DirectionProspect   = 커밋 직전의 방향 결정 대상 (input; 후보 방향 ≥ 2 포함)
+DirectionAxis       = 선언된 발산 축 — probe들이 서로 다른 값을 커밋해야 하는 방향 unknown
+DetectGuards        = 타입 가드 2종 (§3.2 · §3.4-④):
+                        fake_data_sufficient : 방향 대비가 실증거 없이 placeholder 구체물만으로 성립
+                        placeholder_fidelity : placeholder 구체화가 발산 축 위의 differential futures를 왜곡 없이 운반
+PlaceholderPolicy   = 가짜 데이터 규약 { 가시적 합성(명백히 placeholder임이 보임),
+                                          비증거 낙인(probe는 어떤 주장의 증거도 아님) }
+Probe               = cleanup-바운드 기구 { direction, axes_realized: Map(DirectionAxis, Value),
+                                             artifact_ref, cleanup }
+ContrastMap         = 축별 대비 — DirectionAxis마다 각 probe가 노출한 미래의 병치
+ExposedUnknown      = 대비가 새로 드러낸 방향 unknown (커밋전 점검 대상)
+DirectionalContrast = 단일 레코드 {                        -- 종단; M1 관례 준수:
+                        contrast_map:    ContrastMap,      --   Set은 필드로 감쌈,
+                        exposed_unknowns: Set(ExposedUnknown), -- 벌거벗은 복수 종단 금지
+                        direction:       UserDecision,     --   (codex 제안형과 합치)
+                        discard_trace:   폐기 검증 기록 }
+```
+
+### 7.2 MORPHISM
+
+```
+── MORPHISM (sketch) ──
+DirectionProspect
+  → detect                       -- §3.2 술어 검증 + §3.4 4단 라우팅 (타입 가드 2종 포함)
+  → derive_axes                  -- 발산 축 후보 도출 (/elicit 계열 역추적 패턴)
+  → set_placeholder_policy       -- 가시적 합성·비증거 낙인 정책 초안
+  → gate_spec                    -- Constitution 스펙 게이트: 발산 축 + placeholder 정책 확정 (§5(c) 파탄 조건 1: 게이트 후 축 선택 금지)
+  → instantiate_probes           -- transform 연산 (§5(c) 생존 사슬; epharmoge adapt 선례) — ∥ (병렬), isolated (temp-격리), cleanup-등록, |probes| ≥ 2
+  → contrast                     -- 축별 병치 → ContrastMap + ExposedUnknowns
+  → present                      -- 축별 대비 relay (pre-gate 텍스트, A6 분리)
+  → constitute                   -- 방향 판단, Constitution 게이트 — 선택지가 probe로 물질화된 게이트
+  → cleanup_verify               -- 모든 probe artifact 폐기 검증 → discard_trace
+  → DirectionalContrast
+```
+
+### 7.3 Phase 구조 + TOOL GROUNDING 스케치
+
+- Phase 0 detect/derive_axes/set_placeholder_policy — 분석·라우팅 (relay)
+- Phase 1 gate_spec — 스펙 게이트 `(constitution)` — 발산 축 + placeholder 정책 확정
+- Phase 2 instantiate_probes — `[Write]`/`[Agent]` temp-격리 `(transform)` — §5(c) 생존 사슬; 기존 프로젝트 파일 무변경 제약 (epharmoge `adapt (transform)` 표기 선례)
+- Phase 3 contrast/present — 세션텍스트 relay `(extension)`
+- Phase 4 constitute — 방향 게이트 `(constitution)`
+- Phase 5 cleanup_verify — artifact 추적·폐기 확인 `(extension)`
+
+### 7.4 가드 4종
+
+1. **피상 발산 가드**: probe들은 **gate_spec에서 확정된 축 위에서** 갈려야 한다 —
+   표면 변주(색·이름·순서)만 다른 N개는 발산 미성립.
+2. **오염 가드**: probe는 **비증거** — placeholder 인스턴스를 이후 어떤 주장의
+   근거로도 인용 금지 (PlaceholderPolicy의 낙인이 표식; §5(c) 파탄 조건 3).
+3. **고착 가드**: 종단 가치는 `contrast_map`이지 목업이 아니다 — **목업 폐기 강제**
+   (v1의 `Promoted(variant)` 처분 제거; 방향이 정해져도 probe는 버리고 실구현은 새로 시작).
+4. **과잉발동 가드**: §3.4 4단 라우팅 우선순위.
+
+### 7.5 LOOP
+
+probe 기본 2–4개. 대비가 불충분하면 **재-팬(re-fan) 최대 1회**(bounded loop —
+레포 Northstar 준수). 그 후에도 불충분하면 결핍 오진으로 보고 §3.4 라우팅으로
+이관. 기본 개수·재-팬 상한 확정은 §11-③.
+
+**의미폐쇄 미비 — 구현 단계 체크리스트로 명시 이관**: 본 스케치는 설계 수준이라
+의미폐쇄가 미완이다 — `UserDecision` 타입 미정의, `artifact_ref` 규약, cleanup
+실패 분기(discard_trace 부분 실패), 재-팬 종결식 등. §10-① 저작 단계의
+semantic-closure 스윕 체크리스트로 이관한다.
+
+---
+
+## 8. 그래프 배선
+
+노드 신설 + **advisory 엣지만** (suppression·precondition 불필요 — deficit 분리,
+범용 `* → katalepsis` 엣지가 자동 커버):
+
+| 엣지 | 근거 |
+|------|------|
+| `prothesis(/frame) → 신규` | 프레이밍이 방향 후보를 공급 |
+| `euporia(/elicit) → 신규` | 역추적된 좌표의 미래가 인식 불가할 때 이관 |
+| `horismos(/bound) → 신규` | **실측 인용**: d113dd04 (05-03 프레임-정지 장면, /recollect 인지) — /bound-인접 **라우팅 미스 표본**; /bound 사용 회고("가까운 미래를 보고 싶다" 욕구의 경계 선택 오분류)도 같은 형상 (§3.3(c)) |
+| `신규 → syneidesis(/gap) · aitesis(/inquire)` | 노출된 unknowns의 하류 **병기** — 커밋전 점검(`/gap`) · 사실 unknowns 조사(`/inquire`). 병기 확정: §11-④ |
+| `신규 → analogia(/ground)` | **생존 방향의 익숙-도메인 구조 매핑 검증 (매핑 존재 시)** — analogia는 구조 매핑 검증이지 임의 방향 검증이 아니다 (codex R9) |
+
+### 클러스터
+
+- **권고: Planning** — unknowns **유도** 계보의 완성(`/inquire` 사실 · `/elicit`
+  의도 · **신규** 방향). 단 **미확립 — PR 리뷰서 확정** (codex R9).
+- 대안 병기: codex 제안 **Analysis** — `/frame → 신규 → /ground` 슬롯. §11-② 확정.
+
+### 구분 테이블 삼분법 (distinction 편집의 핵심 문장)
+
+- **이해 부족** → `/grasp` (내가 이해했는지 검증)
+- **경계 부족** → `/bound` (어디까지인지 확정)
+- **미래 인식 불가** → **신규** (어느 방향인지 보고 판단)
+
+### reduced-space-test와의 구분 (v1 G6 재확인)
+
+`/reduced-space-test` = **사후 · 실증거 · 단일** 검증 vs 신규 = **커밋전 · 가짜 ·
+복수** 대비. 겹치는 축 없음.
+
+---
+
+## 9. 기계적 배선 목록 (M1 실측 그대로)
+
+### 신규 파일 (~5–6)
+
+```
+{new}/                              # proplasma (확정 이름으로 대체)
+  .claude-plugin/plugin.json
+  .codex-plugin/plugin.json         # version은 claude 매니페스트와 동일 (enforced)
+  skills/{command}/SKILL.md         # 디렉터리명 = 커맨드 (§11-① 확정 후)
   README.md
   README_ko.md
-  skills/sketch/SKILL.md           # 스킬 디렉터리명 = 커맨드(/sketch); 프로토콜 계약(§2)
 ```
 
-**SKILL.md 필수 컴파일 규칙(누락 시 정적검사 fail)**: emit-load 3규칙(Context-Question
-Separation · Plain emit discipline · Round-local salience bundling), "Formal blocks are
-runtime-normative", "Gate integrity (Safeguard tier)" + type-preserving materialization,
-framing-readout(진행바 글리프 `▓/░` 금지), MORPHISM anatomy, TOOL GROUNDING 주석 소진성.
-필수 섹션 헤더: `## Definition` · `## Mode Activation` · `## Protocol` · `## Rules` + 형식블록
-`FLOW→MORPHISM→TYPES`(순서 enforced) · `PHASE TRANSITIONS` · `MODE STATE` · `TOOL GROUNDING`.
-frontmatter `description:`에 `Type: (Deficit, ...) → Resolution` 임베드(파싱됨).
+### 필수 편집 (~10)
 
-### 3.2 재사용 경계 (핵심)
+1. `.claude/skills/verify/graph.json` — 노드 + §8 엣지 (5행; 하류 병기 확정은 §11-④)
+2. `.claude-plugin/marketplace.json` — plugins[] 항목
+3. `scripts/load-protocols.js` — `CANONICAL_PRECEDENCE` + `CANONICAL_CLUSTERS`
+   (클러스터 문자열은 README×2와 정확 일치 요구 — drift 시 fail)
+4. `scripts/package.js` — `FIRST_RELEASE_HIGHLIGHTS` (v1의 "package.js는
+   auto-discovery가 흡수" 관찰에 대한 M1 정정: 이 상수는 손수 편집)
+5. `README.md` — 프로토콜 표 행 + 그리스어 표 + 클러스터 행
+6. `README_ko.md` — 동일 3개소 (한국어)
+7. `epistemic-cooperative/skills/onboard/SKILL.md` — "16 protocols" → 17 + Data
+   Sources/Phase 0 그룹핑
+8. onboard `references/scenarios.md` + `references/workflow.md` — 커맨드 refs
+9. `epistemic-cooperative/skills/catalog/SKILL.md` — 이름 + 커맨드
+10. `src/App.tsx` + `src/lib/i18n.tsx` — 프로토콜 카운트/배지
 
-스위트에서 "재사용"은 코드 import가 아니라 **구조 패턴 참조**다(스킬은 독립 SKILL.md 계약).
-경계를 정밀히:
+부수: `scripts/package.test.js` 하드코딩 카운트(views·protocols 배열·zip 목록)는
+v1 관찰이 여전히 유효 — 갱신 전 test fail이 정상이며 갱신 자체가 체크리스트다.
 
-- **`/ground`(analogia)에서 재사용**: 인스턴스화 하위기계 — "추상 씨앗 → 구체 플레이스홀더
-  렌더". `/ground`에선 `I = M × F × Sₜ → Example`(매핑-스코프된 단일). new는 *렌더 코어*만
-  재사용하고 매핑-스코핑(M, F)을 버린 뒤 **복수 + 발산축-구동**으로 만든다. 즉 재사용은
-  "seed → concrete rendering" 층이지 매핑-검증 기계 전체가 아니다.
-- **`/elicit`(euporia)에서 재사용**: substrate에서 방향 좌표를 역추적하는 `ReverseTrace →
-  DimensionProjection`. new의 `trace_axes`가 이를 미러한다. 발산 축은 elicit식 좌표지만,
-  *질문*으로 표면화하는 대신 new는 발산 *변이체*로 인스턴스화한다. → advisory 엣지 근거.
-- **신규(재사용 아님)**: 복수 codomain, contrast 연산, 폐기/scaffolding 의미론, 발산 보장.
+### distinction/precedence 편집 — ALL existing SKILL.md (정정)
 
-### 3.3 손수 편집 레지스트레이션 지점 (인벤토리로 확정, 11개 파일)
-
-정적검사(`static-checks.js`)가 대부분을 enforce하므로 누락 시 fail/warn한다.
-
-1. **`.claude/skills/verify/graph.json`** — `nodes[]`에 노드 추가(이것이 protocol로
-   분류시키는 결정점). `version` bump(convention, unenforced). 엣지 추가(제안, §G4):
-   - `euporia → new` (advisory): 역추적된 방향 좌표가 발산 축 시드를 좁힘
-   - `prothesis → new` (advisory): 선택된 렌즈가 변이체 프레이밍 컨텍스트 제공
-   - `new → analogia` (advisory): 방향 선택 후 그 매핑을 `/ground`가 검증
-   - suppression 불필요(deficit 분리). precondition 불필요 — 범용 `* → katalepsis` 엣지가
-     신규 노드→katalepsis를 자동 커버하므로, 순수 advisory 노드는 precondition 편집이 필요 없다.
-     노드는 최소 1개 엣지에 참여해야 함(고립 시 warn).
-2. **`.claude-plugin/marketplace.json`** — `plugins[]`에 항목 추가(실제 install source;
-   미등록 시 cross-ref-scan warn). version 필드 없음.
-3. **`.agents/plugins/marketplace.json`** — Codex 포맷 항목 추가(`source:{source:"local",path}`,
-   `policy`, `category`). 정적검사 미enforce이나 Codex install 패리티에 필요.
-4. **`README.md`** — 프로토콜 표에 행 1개(`| [Name](./dir) | \`/cmd\` | 사용시점 |`).
-5. **`README_ko.md`** — 한국어 프로토콜 표 행 1개 + 클러스터 라인(아래 7과 동기화).
-6. **`scripts/load-protocols.js` `CANONICAL_PRECEDENCE`** — 프로토콜명 추가. 릴리스노트
-   순서를 구동; 누락 시 릴리스노트 표에서 탈락 → `package.test.js` assertion fail.
-   precondition 엣지가 있으면 hard-required(precedence linear-extension 검사).
-7. **`scripts/load-protocols.js` `CANONICAL_CLUSTERS`(L38)** — `/sketch`를 클러스터 문자열에
-   추가. 이 문자열은 `README.md`·`README_ko.md`의 클러스터 라인과 **정확히 일치**해야 함
-   (drift 시 fail). 현행: Planning · Analysis · Decision · Execution · Verification · Cross-cutting.
-   **제안: Planning**(커밋전 방향 탐색이 `/inquire`,`/elicit`과 같은 층) — 또는 "making" 축
-   가시화용 신규 클러스터(더 큰 변경, §열린 결정의 연장선상 판단).
-8. **`epistemic-cooperative/skills/onboard/SKILL.md`** — Data Sources 행 + Phase 0 카테고리
-   그룹핑에 `/cmd` 포함(checkOnboardSync fail 방지); "the N protocols" 카운트 문구 갱신(warn).
-9. **`epistemic-cooperative/skills/onboard/references/scenarios.md`** — `## Name \`/cmd\`` 헤딩.
-10. **`epistemic-cooperative/skills/onboard/references/workflow.md`** — `/cmd` 포함.
-11. **`epistemic-cooperative/skills/catalog/SKILL.md`** — `/cmd` + 이름 둘 다 포함(checkCatalogSync fail 방지).
-
-**추가로 `scripts/package.test.js`의 하드코딩 카운트**(auto-derive 아님):
-`views.length` 38→39, "includes all 16 protocols" 이름 배열 +1(→17),
-package results 39→40, sorted zip 목록에 `sketch.zip` 추가.
-
-**옵션(미enforce)**: GitHub Pages 사이트(`src/components/ProtocolDemo.tsx`, `src/lib/i18n.tsx`)
-데모 서브셋 — 쇼케이스 원할 때만.
+**co-change.md:15 원문이 권위원** — "New protocol added" 행: "**ALL existing
+SKILL.md (precedence descriptions + distinction tables)**". v2 초판의 "엣지 스코프
+6개" 한정은 오독이었다: 갱신은 그래프 엣지 인접이 아니라 **기존 SKILL.md
+전체(16개 프로토콜)**에 적용 — 각각 distinction 행/precedence 서술 + `plugin.json` 버전범프.
 
 ---
 
-## 4. 검증 방법
+## 10. 구현 순서 (후속 세션용 4단계)
 
-1. **정적 검증 (결정적)**:
-   ```bash
-   node .claude/skills/verify/scripts/static-checks.js .
-   ```
-   형식블록 anatomy, TOOL GROUNDING 주석 소진성, 클러스터 cross-ref, 노드 등록,
-   게이트 전제조건 커널 앵커를 검사.
-2. **패키징 + liveness**:
-   ```bash
-   node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs
-   ```
-   AGENTS.md 경고: liveness 테스트가 live SKILL.md를 mutate할 수 있으므로 정적 프로토콜
-   검증과 **동시 실행 금지**. 주의: `package.test.js`는 하드코딩 카운트를 assert하므로
-   §3.3 addendum(views 39, protocols 17, results 40, zip 목록)을 갱신하기 전엔 fail한다 —
-   이 갱신 자체가 구현 체크리스트의 일부.
-3. **semantic-closure 스윕 (수동)**: §2.5의 모든 새 조건이 타입·가드·상태갱신·종결경로·
-   결과식을 TYPES/PHASE TRANSITIONS/LOOP/CONVERGENCE/TOOL GROUNDING/Rules에 걸쳐
-   정합하는지 확인. 정적 검사가 증명하지 못하므로 commit 전 수동 확인.
-4. **어휘 스윕**: 술어 확정 후 stale vocabulary 렉시컬 스윕(검증 가이드 기준).
-5. **`/verify`**: commit 전 실행.
-6. **버전 bump + 변경로그**: `plugin.json` version, `graph.json` version, `generate-changelog.js`.
+| 단계 | 작업 | 완료 기준 |
+|------|------|-----------|
+| ① SKILL.md 저작 | **형식블록 먼저**(FLOW→MORPHISM→TYPES 순서 enforced, PHASE TRANSITIONS, MODE STATE, TOOL GROUNDING) → 프로즈. CLAUDE.md Editing Conventions 준수(표기 `→`/`∥`/`[Tool]`, prime 규약) | semantic-closure 스윕 수동 통과: §7의 모든 조건이 타입·가드·상태갱신·종결경로·결과식을 가짐 — §7.5 말미의 이관 체크리스트(UserDecision · artifact_ref · cleanup 실패 분기 · 재-팬 종결식) 소진 포함 |
+| ② 배선 | §9 신규 파일 + 필수 편집 10개 + 카운트 갱신 | 클러스터 문자열 README×2 일치, graph.json 노드/엣지 반영, 카운트 정합 |
+| ③ 전체 distinction/precedence + 버전범프 | **ALL existing SKILL.md**(16) distinction/precedence 행 + plugin.json bump | co-change.md:15 스코프 소진, 삼분법 문장(§8) 반영 |
+| ④ 검증 및 PR | `node .claude/skills/verify/scripts/static-checks.js .` + `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`(정적 검증과 **동시 실행 금지**) + `/verify` → feature branch PR | static-checks 0 fail, 테스트 통과, PR 생성(커밋 규약 `feat(<plugin>): 한국어 설명`) |
 
 ---
 
-## 열린 결정 (사용자 게이트)
+## 11. 잔여 미해결 결정
 
-이 계획이 사용자에게 남기는 constitutive 결정:
+**해소됨 — 인식론 소속 단서** (초판 §11-①, 최우선 항목): M6(FAILS) → /sublate
+반론 4건 → codex 라운드3 → /ascend 증거 3채널 → 사용자 최종 구성(2026-07-10).
+경위는 §2.2, 수리형 논거는 §5. 초판 공격 목록의 과잉발동 가드 충분성(⑥)·A4
+비네트 긴장(⑦)은 각각 §3.4 4단 라우팅 재구성과 §5 실현-계층 보존 노트에 흡수.
 
-1. **A vs B** — 권고는 **B(형제 프로토콜 신설)**, 근거 §1. 비가역 결정이므로 최종 선택은
-   사용자 몫.
-2. **G1 — making 실현 형태**: 세션텍스트 렌더(권고, substrate 유지) vs 실파일 목업 +
-   cleanup 강제(`/inquire` 스타일, 스위트 최초 `(transform)` 코어). Epistemic Completeness
-   Boundary 교차 결정.
-3. **G3 — 이름**: Greek alias & 커맨드. 후보:
-   - `Proplasma`(πρόπλασμα, 예비 모형) / `/sketch` — 러프-값싼-making 강조
-   - `Parathesis`(παράθεσις, 나란히 놓기) / `/contrast` — 대비(contrast) 축 강조
-   - `Paradeigma`(παράδειγμα, 예시/패턴) / `/mock` — 가짜데이터 강조(단, 과부하된 용어)
+잔여 (PR 리뷰·구현 단계에서 확정):
 
-권고: **Proplasma / `/sketch`** (예비-모형 의미가 "커밋전 값싼 발산"을 가장 직접 담음),
-차선 `Parathesis / `/contrast`` (대비가 인식적 코어라면).
+1. **명명** — `/preview` vs `/contrast` **병기, PR 리뷰서 확정** (codex R12:
+   "preview"는 리포에 렌더 기질 용어로 기존 사용, `/contrast`는 종단 타입
+   `DirectionalContrast` · morphism `contrast` 단계와 정합 — §6.2; Greek 이름은
+   Proplasma 권고 유지, §6.1).
+2. **클러스터** — Planning(unknowns 유도 계보) vs Analysis(codex 워크플로 슬롯).
+   권고 Planning, **미확립 — PR 리뷰서 확정** (§8).
+3. **probe 기본 개수(2–4) · 재-팬 상한(1) 확정** — 값싼-탐색과 대비 충분성의
+   균형 검증 (§7.5).
+4. **엣지 세트 최종화** — 5행 advisory(+하류 `/gap`·`/inquire` 병기)의 과다/과소
+   판단 (§8).
+
+**구현 단계 이관**: §7 형식블록 스케치의 의미폐쇄 미비 항목(`UserDecision` ·
+`artifact_ref` · cleanup 실패 분기 · 재-팬 종결식 등)은 §10-① 체크리스트로 명시 이관 (§7.5 말미).
+
+---
+
+*v2 작성: hyphegesis 지휘 계획 M5. 선행: M1 계약 실측 · M2 codex 격리 자문 ·
+M3–M4 /elicit 2사이클 · CP1 조건부 채택. 후속 완료: M6(FAILS) → /sublate 4건 →
+codex 라운드3 → /ascend 군집(8퇴적물) → 사용자 최종 구성(2026-07-10) —
+**B-첫클래스 확정**(경위 §2.2). 남은 것: §10 구현 4단계(워크트리→PR 착지) +
+§11 잔여 4건.*
