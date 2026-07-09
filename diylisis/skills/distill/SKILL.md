@@ -145,7 +145,7 @@ Phase          ∈ {0, 1, 2, 3, 4}
 
 ── PHASE TRANSITIONS ──
 Phase 0: W, recipient?, next_task?, activation_verb? → Detect(W) → tethered?                                       -- tethered checkpoint (silent)
-       then F0 declare(recipient, next_task, allowed_sources, scope, verification, stop, handoff_durability, emit_target) → HandoffContract   -- recipient is a RecipientProfile carrying its activation window (Immediate | Bounded | Unbounded); the window is declared here with the rest of the contract and checked against well-formed (DurableRepo ⇒ Unbounded); Λ.activation_edge = { verb (declared, default minimal), locator: ref contract.emit_target } is constructed here — the F5 fourth input exists from Phase 0
+       then F0 declare(recipient, next_task, allowed_sources, scope, verification, stop, handoff_durability, emit_target) → HandoffContract   -- recipient is a RecipientProfile carrying its activation window (Immediate | Bounded | Unbounded); the window is declared here with the rest of the contract and checked against well-formed (DurableRepo ⇒ Unbounded); Λ.activation_edge is constructed in the next step from activation_verb? and contract.emit_target — the F5 fourth input exists from Phase 0
        then Λ.activation_edge = edge(activation_verb?, contract.emit_target)                              -- verb declared or defaulted to the canonical minimal verb; locator is a reference to the contract's emit target, never a copy
        then bind Λ.now (always) and Λ.ledger = read(CorrectionDelta) | Unknown if handoff_durability = DurableRepo else Unknown   -- conditional ledger bind (Change A)
 Phase 1: HandoffContract → F1 normalize(surface_token, canonical_ref, confidence) → SubstTable    [Tool: Read, Grep, Glob]
