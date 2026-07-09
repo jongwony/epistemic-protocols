@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/code-review · review-pr · /frame 동작 비교 분석</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c232d; --border:#2b3441;
+    --ink:#e6edf3; --dim:#9aa7b4; --faint:#6b7686;
+    --cr:#4493f8;   /* code-review  blue */
+    --pr:#3fb950;   /* review-pr    green */
+    --fr:#bc8cff;   /* frame        purple */
+    --warn:#f0883e; --bad:#f85149; --good:#3fb950;
+    --chip:#21262d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    line-height:1.6;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:48px 24px 96px}
+  header h1{font-size:30px;margin:0 0 6px;letter-spacing:-.02em}
+  header p.sub{color:var(--dim);margin:0 0 8px;font-size:15px}
+  .meta{color:var(--faint);font-size:13px;border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);padding:10px 0;margin:18px 0 36px}
+  .meta code{color:var(--dim)}
+  h2{font-size:21px;margin:54px 0 18px;padding-bottom:8px;border-bottom:1px solid var(--border);letter-spacing:-.01em}
+  h2 .num{color:var(--faint);font-weight:600;margin-right:10px}
+  h3{font-size:16px;margin:28px 0 12px;color:var(--ink)}
+  p{color:#cdd6e0}
+
+  /* legend */
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 8px}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--dim)}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* lane cards */
+  .lanes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:10px}
+  @media(max-width:900px){.lanes{grid-template-columns:1fr}}
+  .lane{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .lane .hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .lane .hd b{font-size:15px}
+  .lane .hd .tag{font-size:11px;color:var(--faint);margin-left:auto;text-transform:uppercase;letter-spacing:.05em}
+  .lane.cr{border-top:3px solid var(--cr)}
+  .lane.pr{border-top:3px solid var(--pr)}
+  .lane.fr{border-top:3px solid var(--fr)}
+  .lane .bd{padding:14px 16px;flex:1}
+  .lane .role{font-size:12.5px;color:var(--dim);min-height:34px;margin-bottom:12px}
+
+  /* flow steps */
+  .flow{list-style:none;margin:0;padding:0;counter-reset:s}
+  .flow li{position:relative;padding:9px 12px 9px 12px;margin:0 0 7px;background:var(--panel2);
+    border:1px solid var(--border);border-radius:8px;font-size:13px}
+  .flow li .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px}
+  .flow li .v{color:var(--ink)}
+  .flow li .v code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12px;color:#a9c6ff}
+  .arrow{text-align:center;color:var(--faint);font-size:13px;line-height:1;margin:-3px 0 4px}
+  .gate{border-color:var(--fr) !important;background:rgba(188,140,255,.08) !important}
+  .gate .k{color:var(--fr)}
+  .fan{border-style:dashed}
+  .verify{border-color:var(--cr) !important;background:rgba(68,147,248,.08) !important}
+  .verify .k{color:var(--cr)}
+  .auto{border-color:var(--pr) !important;background:rgba(63,185,80,.07) !important}
+
+  /* bucket pills */
+  .buckets{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .pill{font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--border);color:var(--dim)}
+  .pill.ok{border-color:var(--good);color:#7ee2a8}
+  .pill.q{border-color:var(--warn);color:#f5b27a}
+  .pill.no{border-color:var(--bad);color:#f5907f}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--border);vertical-align:top}
+  thead th{background:var(--panel2);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--dim);font-weight:600}
+  th.axis{width:170px;color:var(--ink)}
+  tbody tr:last-child td{border-bottom:none}
+  td.cr{color:#bcd6ff}td.pr{color:#bbe8c4}td.fr{color:#dcc8ff}
+  td code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12px;color:#cdd6e0}
+  .col-cr{border-left:2px solid rgba(68,147,248,.35)}
+  .col-pr{border-left:2px solid rgba(63,185,80,.35)}
+  .col-fr{border-left:2px solid rgba(188,140,255,.35)}
+
+  /* pros cons */
+  .pc{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:900px){.pc{grid-template-columns:1fr}}
+  .pc .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:0 0 6px;overflow:hidden}
+  .pc .card .ch{padding:12px 16px;font-weight:700;border-bottom:1px solid var(--border);font-size:14.5px}
+  .pc.cr .ch{border-top:3px solid var(--cr)} .pc .crh{border-top:3px solid var(--cr)}
+  .pcrow{padding:13px 16px}
+  .pcrow .lbl{font-size:11px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:7px}
+  .lbl.up{color:var(--good)} .lbl.dn{color:var(--bad)}
+  .pcrow ul{margin:0;padding-left:17px}
+  .pcrow li{margin:4px 0;font-size:13px;color:#cdd6e0}
+  .crh{border-top:3px solid var(--cr)} .prh{border-top:3px solid var(--pr)} .frh{border-top:3px solid var(--fr)}
+
+  /* verdict / when-to-use */
+  .when{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:8px}
+  @media(max-width:900px){.when{grid-template-columns:1fr}}
+  .when .w{background:var(--panel);border:1px solid var(--border);border-left-width:4px;border-radius:10px;padding:14px 16px}
+  .when .w.cr{border-left-color:var(--cr)} .when .w.pr{border-left-color:var(--pr)} .when .w.fr{border-left-color:var(--fr)}
+  .when .w b{display:block;margin-bottom:6px;font-size:14px}
+  .when .w span{font-size:13px;color:var(--dim)}
+
+  .callout{background:rgba(188,140,255,.07);border:1px solid var(--fr);border-radius:10px;padding:14px 18px;margin:20px 0;font-size:14px}
+  .callout b{color:#dcc8ff}
+  .note{color:var(--faint);font-size:12.5px;margin-top:8px}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;font-size:12.5px;color:#a9c6ff}
+  footer{margin-top:64px;border-top:1px solid var(--border);padding-top:18px;color:var(--faint);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>코드 리뷰 &amp; 인식론 프로토콜 동작 비교</h1>
+  <p class="sub"><b style="color:var(--cr)">/code-review</b> (빌트인) · <b style="color:var(--pr)">pr-review-toolkit:review-pr</b> (플러그인) · <b style="color:var(--fr)">/prothesis:frame</b> (인식론 프로토콜)</p>
+  <div class="meta">
+    근거: Claude Code v2.1.148 바이너리 임베디드 스킬 소스 · marketplace 플러그인 markdown · 로컬 <code>prothesis/skills/frame/SKILL.md</code> &nbsp;|&nbsp; 확신도: Confirmed (verbatim 문자열 / 직접 읽기)
+  </div>
+</header>
+
+<div class="legend">
+  <span><i class="dot" style="background:var(--cr)"></i>code-review</span>
+  <span><i class="dot" style="background:var(--pr)"></i>review-pr</span>
+  <span><i class="dot" style="background:var(--fr)"></i>frame</span>
+  <span><i class="dot" style="background:rgba(188,140,255,.5);border:1px solid var(--fr)"></i>사용자 게이트 (turn yield)</span>
+  <span><i class="dot" style="background:rgba(68,147,248,.5);border:1px solid var(--cr)"></i>적대적 검증</span>
+</div>
+
+<!-- ============ FLOW ============ -->
+<h2><span class="num">01</span>동작 흐름 (Pipeline)</h2>
+<div class="lanes">
+
+  <!-- code-review -->
+  <div class="lane cr">
+    <div class="hd"><i class="dot" style="background:var(--cr)"></i><b>/code-review</b><span class="tag">binary · review-branch</span></div>
+    <div class="bd">
+      <div class="role">git diff의 정합성 버그를 보고. 발견마다 독립 검증자가 반증에 실패해야 살아남는 <b>기각 편향</b> 엔진.</div>
+      <ul class="flow">
+        <li><span class="k">1 · Scope</span><span class="v">diff base·변경파일·컨벤션 발견 <code>git diff base...HEAD</code></span></li>
+        <div class="arrow">▼</div>
+        <li class="fan"><span class="k">2 · Review (∥ 6 dimensions)</span><span class="v">Bugs · Simplicity · Architecture · Dead Code · Best Practices · Patterns — 6개 blind 병렬 서브에이전트</span></li>
+        <div class="arrow">▼ 발견마다</div>
+        <li class="verify"><span class="k">3 · Verify (적대적, 발견당 1)</span><span class="v">fresh <code>agent()</code>가 git diff 재실행 → 5경로 반증 체크 → 기본값 <code>unclear</code>, "do NOT default to confirmed"</span>
+          <div class="buckets">
+            <span class="pill ok">confirmed</span><span class="pill q">unclear</span><span class="pill no">rejected</span><span class="pill">budgetDropped</span>
+          </div>
+        </li>
+        <div class="arrow">▼</div>
+        <li class="auto"><span class="k">4 · Report (자율)</span><span class="v">dedup + (severity → confidence) 정렬. <code>--comment</code> 시 인라인 PR 코멘트</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- review-pr -->
+  <div class="lane pr">
+    <div class="hd"><i class="dot" style="background:var(--pr)"></i><b>review-pr</b><span class="tag">plugin · command</span></div>
+    <div class="bd">
+      <div class="role">변경 내용에 따라 <b>전문가 에이전트를 조건부 선택</b>. 각 에이전트가 스스로 신뢰도를 채점해 자가 검열.</div>
+      <ul class="flow">
+        <li><span class="k">1–3 · Scope</span><span class="v"><code>git status</code> + <code>git diff --name-only</code>, <code>gh pr view</code>로 PR 존재만 확인</span></li>
+        <div class="arrow">▼</div>
+        <li><span class="k">4 · Route (조건부)</span><span class="v">파일 타입 → 에이전트 매핑 선택</span></li>
+        <div class="arrow">▼ 기본 순차 (병렬 opt-in)</div>
+        <li class="fan"><span class="k">5 · Specialists</span><span class="v">
+          <b>code-reviewer</b> (항상·opus) · pr-test-analyzer · comment-analyzer · silent-failure-hunter · type-design-analyzer
+          <br><span style="color:var(--faint)">→ 통과 후 <b>code-simplifier</b> 가 코드 재작성</span></span></li>
+        <div class="arrow">▼ 검증자 없음</div>
+        <li class="auto"><span class="k">자가 신뢰도 필터</span><span class="v">code-reviewer: "<code>confidence ≥ 80</code>만 보고". 2차 재검증 없음</span></li>
+        <div class="arrow">▼</div>
+        <li class="auto"><span class="k">6–7 · Aggregate (자율)</span><span class="v">Critical/Important/Suggestions/Strengths 수동 집계 markdown. dedup 키·인라인 코멘트 없음</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- frame -->
+  <div class="lane fr">
+    <div class="hd"><i class="dot" style="background:var(--fr)"></i><b>/prothesis:frame</b><span class="tag">protocol · SKILL.md</span></div>
+    <div class="bd">
+      <div class="role">코드가 아닌 <b>탐구의 분석틀 부재</b>를 해소. 어떤 렌즈로 볼지를 <b>사용자가 구성</b>하는 게이트형 프로토콜.</div>
+      <ul class="flow">
+        <li class="gate"><span class="k">Phase 0 · 게이트 ⏹</span><span class="v">Mission Brief 확인 + 모드 선택(recommend / inquire) → <b>턴 양보</b></span></li>
+        <div class="arrow">▼</div>
+        <li><span class="k">Phase 1 · Context</span><span class="v">맥락 수집, 후보 관점(lens) 배치(Placement)</span></li>
+        <div class="arrow">▼</div>
+        <li class="gate"><span class="k">Phase 2 · 게이트 ⏹</span><span class="v">분석 렌즈 <b>다중 선택</b> — 핵심 인식 행위는 사용자 몫 → <b>턴 양보</b></span></li>
+        <div class="arrow">▼ ∥ 격리 inquiry</div>
+        <li class="fan"><span class="k">Phase 3 · Spawn</span><span class="v">선택된 N개 관점을 격리 병렬 teammate로 spawn + await</span></li>
+        <div class="arrow">▼</div>
+        <li class="gate"><span class="k">Phase 4 · 게이트 ⏹</span><span class="v">교차 종합 + 라우팅(extend / add_input / wrap_up / withdraw) → <b>턴 양보</b></span>
+          <div class="buckets"><span class="pill">→ FramedInquiry</span></div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="callout">
+  <b>한눈에 보는 분기점</b> — 세 도구 모두 "분석가를 병렬로 펼친 뒤 종합한다"는 <em>구현 기법</em>은 공유한다.
+  갈리는 지점은 ① <b>사용자 게이트 유무</b>(frame만 3회 턴 양보, 둘은 완전 자율)와
+  ② <b>거짓 양성 통제 방식</b>(code-review = 생산자/판정자 분리한 독립 적대 검증 · review-pr = 생산자 자가 채점).
+</div>
+
+<!-- ============ COMPARISON ============ -->
+<h2><span class="num">02</span>축별 비교</h2>
+<table>
+  <thead>
+    <tr><th class="axis">축</th>
+      <th class="col-cr">/code-review</th>
+      <th class="col-pr">review-pr</th>
+      <th class="col-fr">/frame</th></tr>
+  </thead>
+  <tbody>
+    <tr><th class="axis">결손 / 목적</th>
+      <td class="cr col-cr">git diff의 코드 정합성 버그</td>
+      <td class="pr col-pr">PR/diff의 다차원 품질 (테스트·타입·주석·에러)</td>
+      <td class="fr col-fr">탐구의 분석틀 부재 → FramedInquiry</td></tr>
+    <tr><th class="axis">차원 분해</th>
+      <td class="cr col-cr">6개 <b>고정</b> 차원, 항상 전부 병렬</td>
+      <td class="pr col-pr">6개 전문가, diff에 따라 <b>조건부</b> 선택 (기본 순차)</td>
+      <td class="fr col-fr">사용자가 <b>선택</b>한 N개 관점 렌즈, 격리 병렬</td></tr>
+    <tr><th class="axis">검증 모델</th>
+      <td class="cr col-cr"><b>발견당 적대적 단일 검증자</b> (독립 agent, 기본 unclear, 5경로 반증)</td>
+      <td class="pr col-pr"><b>없음</b> — 에이전트 자가 신뢰도 채점 (<code>≥80</code>)</td>
+      <td class="fr col-fr">검증이 아닌 <b>교차 종합</b> + 변환 트레이스 입증</td></tr>
+    <tr><th class="axis">거짓 양성 통제</th>
+      <td class="cr col-cr">구조적: 2차 에이전트 + <code>rejected</code> 버킷 + slot 예산(25, high 항상 통과)</td>
+      <td class="pr col-pr">자가보고: 생산자가 곧 판정자 ("minimize FP" 만다트)</td>
+      <td class="fr col-fr">해당 없음 (정답형 검증이 아님)</td></tr>
+    <tr><th class="axis">상호작용 모델</th>
+      <td class="cr col-cr">자율 · 게이트 없음</td>
+      <td class="pr col-pr">자율 · 게이트 없음</td>
+      <td class="fr col-fr"><b>3회 게이트 (turn yield)</b> · 사용자 판단이 결과를 구성</td></tr>
+    <tr><th class="axis">산출물</th>
+      <td class="cr col-cr">랭킹·dedup 리포트 + <code>--comment</code> 인라인 PR 코멘트</td>
+      <td class="pr col-pr">수동 집계 markdown 요약 (인라인 없음)</td>
+      <td class="fr col-fr">FramedInquiry 객체 (렌즈 핸드오프 / 합성 Lens)</td></tr>
+    <tr><th class="axis">수렴 / 종료</th>
+      <td class="cr col-cr">검증·예산 버킷 처리 후 Report에서 종료</td>
+      <td class="pr col-pr">전 에이전트 보고 집계 후 종료</td>
+      <td class="fr col-fr">사용자 만족 / withdraw / Esc + 변환 트레이스 입증</td></tr>
+    <tr><th class="axis">코드 수정</th>
+      <td class="cr col-cr">보고만 (mutating 없음)</td>
+      <td class="pr col-pr"><b>code-simplifier가 재작성</b> (통과 후)</td>
+      <td class="fr col-fr">해당 없음</td></tr>
+    <tr><th class="axis">확장성</th>
+      <td class="cr col-cr">바이너리 컴파일 — <b>편집 불가</b></td>
+      <td class="pr col-pr">markdown 명령 + 에이전트 파일 — <b>완전 포크 가능</b></td>
+      <td class="fr col-fr">SKILL.md 포크 가능</td></tr>
+    <tr><th class="axis">Initiator</th>
+      <td class="cr col-cr">사용자 호출 → AI 완주</td>
+      <td class="pr col-pr">사용자 호출 → AI 완주</td>
+      <td class="fr col-fr">AI 배치 / 사용자 선택 (Detection with Authority)</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ PROS / CONS ============ -->
+<h2><span class="num">03</span>장단점</h2>
+<div class="pc">
+  <div class="card">
+    <div class="ch crh" style="color:var(--cr)">/code-review</div>
+    <div class="pcrow"><div class="lbl up">장점</div><ul>
+      <li>생산자/판정자 분리한 <b>독립 적대 검증</b> — 거짓 양성에 구조적으로 강함</li>
+      <li>정형 dedup + severity/confidence 랭킹</li>
+      <li>high/critical은 예산 무시하고 항상 검증</li>
+      <li>원격 PR 모드 + <code>--comment</code> 인라인 게시</li>
+    </ul></div>
+    <div class="pcrow"><div class="lbl dn">단점</div><ul>
+      <li>6차원 <b>고정</b> — 끌 수도 늘릴 수도 없음</li>
+      <li>바이너리 컴파일 — 프롬프트 편집 불가</li>
+      <li>코드를 고치지 않고 보고만</li>
+      <li>effort→예산 매핑이 불투명 (휴리스틱+상수)</li>
+    </ul></div>
+  </div>
+
+  <div class="card">
+    <div class="ch prh" style="color:var(--pr)">review-pr</div>
+    <div class="pcrow"><div class="lbl up">장점</div><ul>
+      <li><b>전문가 폭</b>: 에러 핸들링·타입 설계(1-10점)·주석·테스트 전용 에이전트</li>
+      <li>diff에 따라 <b>조건부 선택</b> — 불필요한 패스 생략</li>
+      <li>리뷰 후 <b>code-simplifier가 코드 재작성</b></li>
+      <li>전부 편집/포크 가능한 markdown</li>
+    </ul></div>
+    <div class="pcrow"><div class="lbl dn">단점</div><ul>
+      <li><b>독립 검증자 없음</b> — 생산자가 곧 판정자(자가 채점)라 FP에 약함</li>
+      <li>dedup 키 없음 (수동 집계)</li>
+      <li>이름과 달리 인라인 PR 코멘트 미게시</li>
+      <li>기본 순차라 느릴 수 있음 (병렬 opt-in)</li>
+    </ul></div>
+  </div>
+
+  <div class="card">
+    <div class="ch frh" style="color:var(--fr)">/prothesis:frame</div>
+    <div class="pcrow"><div class="lbl up">장점</div><ul>
+      <li>코드가 아닌 <b>사고의 틀</b>을 다룸 — 적용 영역이 다름</li>
+      <li>핵심 판단을 <b>사용자가 구성</b> (인간 주체성 보존)</li>
+      <li>변환 트레이스로 수렴을 <b>입증</b>(주장 아님)</li>
+      <li>다른 프로토콜과 조합 가능</li>
+    </ul></div>
+    <div class="pcrow"><div class="lbl dn">단점</div><ul>
+      <li>3회 게이트 — 자동화/무인 실행엔 부적합</li>
+      <li>코드 결함 탐지가 목적이 아님 (리뷰 도구 대체 불가)</li>
+      <li>사용자 참여 없이는 진행 불가</li>
+      <li>러닝 커브 (형식 블록·게이트 의미론)</li>
+    </ul></div>
+  </div>
+</div>
+
+<!-- ============ WHEN TO USE ============ -->
+<h2><span class="num">04</span>언제 무엇을 — 판정</h2>
+<p>세 도구는 <b>중복이 아니라 서로 다른 니치</b>다. code-review와 review-pr은 "같은 아이디어의 두 세대"(엄격한 검증 엔진 vs 확장 가능한 전문가 셋), frame은 아예 다른 층위(코드 결함 vs 사고틀 부재)다.</p>
+<div class="when">
+  <div class="w cr"><b style="color:var(--cr)">/code-review</b><span>거짓 양성이 비싼 <b>머지 전 정합성 게이트</b>. 적대 검증자가 값을 함. 인라인 PR 코멘트가 필요할 때.</span></div>
+  <div class="w pr"><b style="color:var(--pr)">review-pr</b><span><b>차원 특화 심층 감사</b>(에러 핸들링·타입 불변식·테스트 갭·comment rot), 리뷰어 셋 커스터마이즈, 리뷰 후 단순화 패스가 필요할 때.</span></div>
+  <div class="w fr"><b style="color:var(--fr)">/frame</b><span>코드가 아니라 <b>문제를 어떤 틀로 볼지</b>가 막혔을 때. 분석 렌즈를 사용자가 골라 다관점으로 탐구하고 싶을 때.</span></div>
+</div>
+
+<div class="callout" style="border-color:var(--cr);background:rgba(68,147,248,.06)">
+  <b>부하지지 차이 한 줄</b> — code-review의 <span class="kbd">agent('Adversarially verify: …') · "do NOT default to confirmed"</span> (독립 검증)
+  vs review-pr의 <span class="kbd">code-reviewer.md · "Only report issues with confidence ≥ 80"</span> (자가 임계).
+  <b>독립 검증 vs 자가 임계</b>가 두 리뷰 도구를 가르는 핵심이고, <b>게이트 유무</b>가 리뷰 도구 전체와 frame을 가른다.
+</div>
+
+<footer>
+  생성 근거: Claude Code v2.1.148 바이너리 임베디드 스킬 소스(verbatim 문자열) · <code>~/.claude/plugins/marketplaces/claude-plugins-official/plugins/pr-review-toolkit/</code> · <code>prothesis/skills/frame/SKILL.md</code>.
+  검증 캐비엇: 런타임 <code>--effort</code> 값이 code-review의 <code>MAX_VERIFY</code>/투표 수를 실제 변형하는지는 문자열만으로 미증명(minified 제어흐름). 그 외 전부 직접 증거.
+</footer>
+
+</div>
+</body>
+</html>
