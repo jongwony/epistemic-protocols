@@ -1,7 +1,6 @@
 ---
 name: zero-memory-refuter
 description: "Adversarial zero-memory review of a candidate portable handoff — refute-posture comprehension check for the /distill F5 gate."
-model: sonnet
 color: red
 tools:
   - Read
