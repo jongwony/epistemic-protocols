@@ -8,7 +8,7 @@ A locator rooted in an OS temp/cache/scratch tree does not have one durability a
 
 - **`Immediate`** — the recipient reads and acts while the author session is still alive, on the same machine (an immediately-dispatched zero-memory subagent). The temp tree is still present and, for shared roots like `/tmp`, still readable. A temp-rooted locator **resolves**.
 - **`Unbounded`** — the recipient reads at an unbounded later time, possibly on another machine (the classic "fresh recipient reads the handoff after the author session ends"). By then the temp tree has been cleaned, or was per-user-private to the author. A temp-rooted locator **does not resolve**.
-- **`Bounded(d)`** — resolves iff the referent's lifetime is at least `d`; the cleanup schedule below bounds `d`.
+- **`Bounded(d)`** — resolves iff the referent's lifetime is at least `d`. For `/tmp`, the cleanup schedule below bounds `d` only coarsely: the daily launch cadence is documented, the retention age threshold is not — see the conservative rule in the Takeaway.
 
 Under `Unbounded`, `resolves_at` reduces to the old absolute `durable(locator)` predicate, so nothing loosens for the absent-recipient case the original rule was written for. The predicate only *relaxes* for a recipient that has explicitly declared a shorter window.
 
@@ -25,7 +25,7 @@ Roots and their cleanup:
 Cleanup scheduling for `/tmp`:
 
 - Daemon: `/System/Library/LaunchDaemons/com.apple.tmp_cleaner.plist` runs `/usr/libexec/tmp_cleaner` on `StartCalendarInterval { Hour = 0 }` — **daily at local midnight** — at `LowPriorityIO`, `Nice 1`.
-- `tmp_cleaner(8)` (man page): "Remove old content from /tmp … Check for old content in the /tmp directory every day. If there is content there that hasn't been modified recently, remove it." First appeared in macOS 14.0. Users are told not to launch it manually.
+- `tmp_cleaner(8)` (man page): "Remove old content from /tmp … Check for old content in the /tmp directory every day. If there is content there that hasn't been modified recently, remove it." First appeared in macOS 14.0. Users are told not to launch it manually. The retention age threshold behind "recently" is not documented; this analysis therefore treats only the launch cadence (daily at local midnight) as a machine-checked fact.
 - The **older BSD periodic cleaner is absent** on this system: `/etc/periodic/daily/` does not exist (checked directly), so the legacy `110.clean-tmps` script is not the mechanism here — `tmp_cleaner` is.
 
 Consequence for the two windows on macOS:
@@ -40,4 +40,4 @@ Stated as background, not a machine-checked claim: `/tmp` and `$TMPDIR` are comm
 ## Takeaway for `/distill`
 
 - The activation window is declared at F0 as part of the recipient profile (Rule 21, Phase 0). Default `Unbounded` (the conservative absent-recipient window); `DurableRepo` is constrained to `Unbounded` by the TYPES well-formed rule.
-- Only an explicitly-declared `Immediate` (or a `Bounded(d)` shorter than the cleanup interval above) lets a temp-rooted locator pass F2 as a StablePointer. Absent such a declaration, `resolves_at` rejects it exactly as the old absolute rule did.
+- Only an explicitly-declared `Immediate` (or a `Bounded(d)` that ends before the next daily tmp_cleaner run after the write — the retention age threshold is undocumented, so any window crossing a midnight run is treated as non-resolving for a `/tmp` locator) lets a temp-rooted locator pass F2 as a StablePointer. Absent such a declaration, `resolves_at` rejects it exactly as the old absolute rule did.
