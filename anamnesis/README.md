@@ -32,7 +32,7 @@ AI systems often discard vague recall signals (`RecallAmbiguous`) — the user s
 ```
 Phase 0: Detect      → Recognize empty intention, classify input type, dispatch track (silent)
 Phase 1: Scan        → Scan stores along Salience dimensions, rank candidates
-Phase 2: Recognize   → Present ranked candidates for Socratic recognition (gate interaction)
+Phase 2: Recognize   → SingleObvious: emit the top candidate directly, no gate (silence = recognize); otherwise present ranked candidates for Socratic recognition (gate interaction)
 Phase 3: Integrate   → Emit recognized context into session; loop via Refine or Reorient on miss
 ```
 

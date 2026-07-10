@@ -66,15 +66,15 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | Protocol | Command | When to use |
 |----------|---------|-------------|
 | [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
-| [Euporia](./euporia) | `/elicit` | You have intent but the outcome isn't clear — surface it through inductive dialogue |
+| [Euporia](./euporia) | `/elicit` | You have intent but the decision coordinates are implicit — reverse-trace them from the externalized substrate (codebase, rules, past sessions) until intent crystallizes |
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
-| [Periagoge](./periagoge) | `/induce` | Multiple concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
+| [Periagoge](./periagoge) | `/induce` | One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction |
 | [Syneidesis](./syneidesis) | `/gap` | About to commit but might be missing something |
 | [Prosoche](./prosoche) | `/attend` | About to hand work to an autonomous run — compile its boundaries into verifiable goal conditions first |
 | [Epharmoge](./epharmoge) | `/contextualize` | AI's output is correct but doesn't fit your situation |
 | [Elenchus](./elenchus) | `/sublate` | About to externalize a working context that may have decayed — vet it dialectically first |
-| [Horismos](./horismos) | `/bound` | You need to define what you know vs what AI should figure out |
+| [Horismos](./horismos) | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it |
 | [Anagoge](./anagoge) | `/ascend` | You vaguely remember a whole line of work, topic, or concept spread across many sessions — not any one session |
 | [Diylisis](./diylisis) | `/distill` | You're handing a working context to a fresh session that shares none of it — distill out the session-tethered references first |

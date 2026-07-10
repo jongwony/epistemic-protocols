@@ -69,7 +69,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
-| Horismos | `/bound` | Unclear who decides what — ownership boundaries undefined |
+| Horismos | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |
 | Anamnesis | `/recollect` | A vague, ambiguous recall you can't quite pin down — resolve it into recognized context |
 | Anagoge | `/ascend` | A recall a single session can't resolve — elevate it to a higher-granularity unit (connected-session chain, topic cluster, or already-sedimented concept) |
 | Diylisis | `/distill` | Handoff context to a fresh zero-memory session — distill out session-tethered references into a portable handoff |

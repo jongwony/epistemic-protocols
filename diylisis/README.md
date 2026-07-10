@@ -2,7 +2,7 @@
 
 > [한국어](./README_ko.md)
 
-Distill a session-tethered working context into a self-contained portable handoff a fresh zero-memory agent can execute from. Normalizes deixis, audits self-containment, judges relevance and provenance, then emits a prose channel plus a schema-versioned task-state block.
+Distill a session-tethered working context into a self-contained portable handoff a fresh zero-memory agent can execute from. Normalizes deixis, audits self-containment, judges relevance and provenance, then emits a prose channel, a schema-versioned task-state block, and a content-free activation edge (plus an appended correction ledger under re-distillation).
 
 ## Type Signature
 
@@ -14,7 +14,7 @@ Distill a session-tethered working context into a self-contained portable handof
 
 A working session's context window inevitably accumulates session-tethered residue — undefined jargon, metric shorthand, author process narration, tool state, and dangling task identifiers — that reads as complete to the author because the author silently shares the missing context. A fresh recipient with no session access has none of that shared ground. Diylisis distills the working context into a handoff whose every load-bearing reference resolves without the author session.
 
-The morphism runs F0 through F7 once forward, then re-audits against a monotone hygiene measure until it reaches a fixed point:
+The morphism runs F0 through F7 once forward, then re-audits against a hygiene measure until it reaches a fixed point. The measure is NOT monotone — a repair pass authors new prose that can itself raise the measure before it settles — so termination is argued from the fixed point's structure (dispositions are permanent, the Gate bottoms out on a Resolve), not from a per-pass decrease:
 
 - **F0 — Handoff contract**: declare recipient, next task, allowed sources, scope, verification, stop condition, and **handoff durability** (`OneShot` | `ExternalVersioned` | `DurableRepo`). The premise for relevance and minimality; durability conditionalizes the correction ledger.
 - **F1 — Deictic closure**: normalize each session-local token to a canonical reference. Runs before grounding so each grounded item names a stable referent. Emits `surface_token → canonical_ref → confidence → unresolved?`.
@@ -24,8 +24,8 @@ The morphism runs F0 through F7 once forward, then re-audits against a monotone 
 - **F3 — Disposition**: KEEP(inline) | ROUTE(StableRef) | DROP.
 - **F4 — Compression closure**: retain the minimal-complete set — contract-relative completeness, not aesthetic brevity.
 - **F5 — Comprehension gate**: verify against a zero-memory recipient via the refute-posture `zero-memory-refuter` subagent (fresh context, session-term watchlist, evidence-cited verdict; platform ladder: named agent → generic fresh subagent → lint checklist, the lint tier weakened — no fresh-context isolation); author self-simulation is excluded. Includes the **prose-only deletion test**: with the TaskStateBlock, the correction ledger, native task-state, and every agent-specific affordance ignored, the next task must still execute from the prose channel plus the allowed sources alone — otherwise the gate Fails.
-- **F6 — Bounded audit/lint loop**: terminate on a weakly decreasing hygiene measure, not a felt sense of completeness.
-- **F7 — Channel separation**: emit a prose channel (authoritative) plus a schema-versioned `TaskStateBlock` that rehydrates dangling task identifiers.
+- **F6 — Bounded audit/lint loop**: terminate on the hygiene measure's fixed point (zero, or stable with every residual surfaced, leak-free, and every authored item disposed) plus a Pass comprehension verdict — not on a per-pass decrease (the measure can rise across a repair pass) and not a felt sense of completeness.
+- **F7 — Channel separation**: emit three channels — a prose channel (authoritative), a schema-versioned `TaskStateBlock` that rehydrates dangling task identifiers (non-overriding), and a content-free activation edge that hands the artifact to its recipient; under re-distillation, also appends to the correction ledger.
 
 **Core principle**: Portability over Author Familiarity — a handoff is portable when the author's familiarity is no longer a hidden dependency.
 

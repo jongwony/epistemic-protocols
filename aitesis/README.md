@@ -14,7 +14,7 @@ AI systems often proceed with execution despite insufficient context (`ContextIn
 
 ### The Solution
 
-**Inference over Detection**: Before execution, AI infers areas of context insufficiency, collects contextual signals through codebase exploration to improve question quality, and surfaces remaining uncertainties as structured mini-choices for the user. Read-only evidence resolves a claim only when its referent, source-kind, and scope authorize that claim. Transforms insufficient context into informed execution through targeted inquiry.
+**Evidence over Inference over Detection**: A three-level hierarchy with two boundaries. Before execution, AI infers areas of context insufficiency rather than detecting via a fixed taxonomy (Inference > Detection), collects contextual signals through codebase exploration and, when a fact is directly observable, gathers evidence rather than substituting inference (Evidence > Inference), then surfaces remaining uncertainties as structured mini-choices for the user. Read-only evidence resolves a claim only when its referent, source-kind, and scope authorize that claim. Transforms insufficient context into informed execution through targeted inquiry.
 
 ### Difference from Other Protocols
 

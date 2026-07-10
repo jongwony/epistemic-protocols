@@ -45,7 +45,7 @@ the skill descriptions alone under-trigger invocation. Route from the deficit, n
 ## Cross-cutting
 
 **`/bound`** (Horismos) — BoundaryUndefined → DefinedBoundary
-  when: Unclear who decides what — ownership boundaries undefined
+  when: An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership)
 
 **`/recollect`** (Anamnesis) — RecallAmbiguous → RecalledContext
   when: A vague, ambiguous recall you can't quite pin down — resolve it into recognized context
