@@ -17,7 +17,7 @@ Elevate a vague recall to a higher-granularity unit through AI-guided deposit-gr
 ```
 ── FLOW ──
 Anagoge(R) → attempts := 0 → Detect(R) →                             -- attempts initialized once, at activation (preserved on Reorient re-entry)
-  single_session_suffices(R): defer-to-Anamnesis → deactivate
+  single_session_suffices(R): relay(finding) → defer-to-Anamnesis → deactivate
   supra_session(R): Classify(R, Σ) → UnitType → Dispatch(UnitType) →
     Phase 1: attempts := attempts + 1 →                                   -- one increment per traversal, at traversal start
       Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → confirmations := Confirm(claim_source_pairs) → U[] →   -- index reads drive discovery/rank; each surfaced claim is paired with its OWN originating deposit's SSOT (not one shared SSOT) before Confirm; the per-claim verdict is recorded in Λ.confirmations, and every surfacing op renders each claim against it — never asserted from the lossy index alone

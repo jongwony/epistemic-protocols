@@ -14,7 +14,7 @@ Define epistemic boundaries per decision through AI-guided classification. Type:
 ```
 ── FLOW ──
 Horismos(T, B_prior?) → Probe(T) → Bᵢ? →
-  |Bᵢ| = 0: skip → deactivate
+  |Bᵢ| = 0: Qc(zero_signal_finding) → Stop → [Confirm: deactivate | Reopen(d): Bᵢ := {d}, proceed]      -- zero-signal gate (Rule 12)
   |Bᵢ| > 0: Phase 0b sync_kind_route(T) → KindRouteMap →                                            -- up-front KIND dispatch (dispatch-first: kind settles before downstream consumers read it)
     [single_dominant_kind(KindRouteMap): relay(captured_kind + basis) (extension) → proceed (kind committed)   -- entropy→0 fast-path (option-set relay test): one kind dominates, foils route away → NO turn yield
      | else: Stop → captured_kind (constitution)]                                                   -- ≥2 viable hypotheses ∨ emergent/naming → mandatory Constitution gate
@@ -168,7 +168,7 @@ Phase 4 (optional): residual, BoundaryEssence → Qf(residual, FinalGateDisposit
                                                                                                               -- final gate [Tool], reached via ExplicitTermination or Phase 1 substrate exhaustion; FinalGateDisposition = {UserSupplies, AIAutonomous}, every kind
 
 Phase 0 → Phase 0b: boundary_undefined(T) = true                                            -- domain signal present → dispatch the kind before the loop
-Phase 0 → deactivate: boundary_undefined(T) = false                                         -- no undefined boundary signal
+Phase 0 → deactivate: boundary_undefined(T) = false ∧ ZeroSignalConfirmation = Confirm      -- no undefined boundary signal, zero-signal finding confirmed (Rule 12)
 Phase 0b sync_kind_route relay branch: single_dominant_kind(KindRouteMap) = true → relay captured_kind + basis, proceed (extension, NO turn yield) → continue to bind_kind   -- entropy→0 (option-set relay test): one kind dominates, foils route away; the captured kind is committed for the activation (a rare mis-relay is corrected by re-invoking /bound, not an in-loop redirect); certify stays fail-closed
 Phase 0b sync_kind_route gated branch: single_dominant_kind(KindRouteMap) = false → Stop → captured_kind (constitution)                                                                      -- ≥2 viable hypotheses ∨ emergent/naming → mandatory Constitution gate
 Phase 0b → Phase 1: certificate.status = pass ∧ BoundaryClassification bound                               -- kind captured (via relay or gate), fit certified, value-space frozen → enter the per-cycle loop
@@ -383,7 +383,7 @@ Only one domain anchored per cycle. Remaining undischarged domains accumulate in
 
 ### Phase 0: Boundary Existence Checkpoint (Silent)
 
-Verify task scope contains boundary-undefined signal and optionally seed a prior BoundaryMap. This phase is **silent** — no user interaction and no user-visible output. Any user-facing notice about the seed is deferred to Phase 2 cycle 1.
+Verify task scope contains boundary-undefined signal and optionally seed a prior BoundaryMap. This phase is **silent** — no user interaction and no user-visible output, except the conditional zero-signal confirmation gate (Rule 12) when no undefined boundary is detected. Any user-facing notice about the seed is deferred to Phase 2 cycle 1.
 
 1. **Probe task scope** `T` for boundary-undefined signal: architecture choices, configuration preferences, quality standards, delegation scope, convention decisions, risk tolerance
 2. **Check boundary-kind signal**: assess whether ANY boundary-kind signal is unsettled (`unsettled(d, kind)`) — direction/priority, scope, type/concept, ownership, or an emergent kind. Ownership is one kind among the seeds, not the whole check (existence check, not exhaustive enumeration — full domain set is **cycle-emergent** via Phase 1 per-cycle re-scan)

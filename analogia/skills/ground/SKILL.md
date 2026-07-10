@@ -13,7 +13,7 @@ Validate structural mapping between abstract and concrete domains through AI-gui
 
 ```
 ── FLOW ──
-Analogia(R) → Detect(R) → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → AssessFit(M, Sₐ, Sₜ) → [self_grounding(Sₐ, Sₜ): PartitionRead(F, Sₜ)] → I(M, F, Sₜ) → V → D_f → R' → (loop until terminalized)
+Analogia(R) → Detect(R) → [¬uncertain: Qc(zero_gap_finding) → Stop → (Confirm: deactivate | Reopen(q): proceed)] → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → AssessFit(M, Sₐ, Sₜ) → [self_grounding(Sₐ, Sₜ): PartitionRead(F, Sₜ)] → I(M, F, Sₜ) → V → D_f → R' → (loop until terminalized)
 
 ── MORPHISM ──
 R
@@ -162,11 +162,11 @@ esc          (extension)       → TextPresent+Proceed (partial transformation t
 
 ### Activation
 
-AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2). On direct `/ground`, bind `R` from the current or most recent output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
+AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0) except the conditional zero-gap confirmation gate; validation always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2). On direct `/ground`, bind `R` from the current or most recent output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/ground` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Mapping uncertainty detected via in-protocol heuristics. Detection is silent (Phase 0).
+- **Layer 2 (AI-guided)**: Mapping uncertainty detected via in-protocol heuristics. Detection is silent (Phase 0) except the conditional zero-gap confirmation gate.
 
 **Mapping uncertain** = text applies abstract structures to a domain where structural correspondence has not been established.
 
@@ -227,7 +227,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 
 ### Phase 0: Mapping Uncertainty Checkpoint (Silent)
 
-Analyze text for mapping uncertainty. This phase is **silent** — no user interaction.
+Analyze text for mapping uncertainty. This phase is **silent** — no user interaction, except the conditional zero-gap confirmation gate (Rule 11) when no mapping uncertainty is detected.
 
 1. **Bind output** `R`: use explicit argument or the current/most recent output under discussion
 2. **Scan output** `R` for abstract structures: patterns, models, analogies, frameworks applied to user's domain
@@ -355,7 +355,7 @@ After integration:
 8. **Convergence persistence**: Mode active until all identified correspondences are addressed or user Esc key
 9. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 10. **Convergence evidence**: Present transformation trace before declaring terminalized(R', F, D_f); per-correspondence evidence is required
-11. **Zero-gap surfacing**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
+11. **Zero-gap surfacing**: If the Phase 0 scan finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
 12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 14. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.

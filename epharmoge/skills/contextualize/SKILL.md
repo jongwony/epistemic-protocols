@@ -14,7 +14,7 @@ Detect application-context mismatch after execution through AI-guided applicabil
 ```
 ── FLOW ──
 Epharmoge(R, X) → Eval(R, X) → Mᵢ? →
-  Mᵢ = ∅: → deactivate (no aspect ¬warranted; execution stands as-is)
+  Mᵢ = ∅: Qc(zero_mismatch_finding) → Stop → [Confirm: deactivate (no aspect ¬warranted; execution stands as-is) | Reopen(aspect): re-scan Eval]
   Mᵢ ≠ ∅: ∀m ∈ Mᵢ: bind_kind(m) → certify(m, registry) → keep(status = pass) → Mᵢ_passed →
     Mᵢ_passed = ∅ ∧ no deferred-pending ∧ adjudicated(R, X) (every flagged aspect resolved to ROUTED or TERMINAL-RESIDUAL via the typed routed(a)/terminal_residual(a) predicates — deferred mismatches first get their one bounded re-assessment to pass→registered, route→Λ.routed, or terminal-residual→Λ.residual): → emit routing recommendations + surface any terminal-residual (each flagged aspect either routed to a sibling deficit or terminal-residual/unattributable) → deactivate (trivial convergence: adjudicated by routing/terminal-residual, R unadapted)
     Mᵢ_passed ≠ ∅: AssessFit(R, X, Mᵢ_passed) → F → Register(Mᵢ_passed) → SelectNext(pending, F, Σ) → Mₛ → Q(F-scoped Mₛ) → A →[mutating: A ∈ {Confirm, Adapt}] adapt → R' → Eval(R', X) → Mₑ? (Dismiss: R' := R, no re-scan, no Mₑ) → ∀m ∈ Mₑ: bind_kind(m) → certify(m, registry) → keep(status = pass) → Mₑ_passed → Register(Mₑ_passed) → AssessFit(R', X, pending) → F' → (loop: SelectNext → Q → A → adapt → re-scan until contextualized)
@@ -247,7 +247,7 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 | Trigger | Effect |
 |---------|--------|
 | All mismatch tasks completed (adapted or dismissed) | Proceed with contextualized result |
-| No mismatches detected (Phase 0 passes) | Execution stands as-is |
+| No mismatches detected (Phase 0 zero-mismatch finding confirmed) | Execution stands as-is |
 | Mismatches detected but none in-scope (Mᵢ ≠ ∅ ∧ Mᵢ_passed = ∅ ∧ adjudicated(R, X) ∧ no deferred-pending ∧ pending(Σ) = ∅) | Trivial convergence — every flagged aspect is routed to a sibling deficit or terminal-residual (unattributable); emit the routing recommendations (/gap, /inquire, /bound, /distill), surface any terminal-residual, and deactivate without adapting R (adjudicated by routing/terminal-residual, not in-place adaptation). DEFERRED mismatches (ambiguous, atomic) get ONE bounded re-assessment → pass / route / terminal-residual before any convergence (a non-atomic mismatch is split pre-registration, not deferred); only a set with no in-scope mismatch (each routed or terminal-residual) fires this path. Distinct from the no-mismatch-detected row above: aspects WERE flagged but none is in-scope for adaptation |
 | User Esc key | EarlyExit (not ContextualizedExecution): present partial transformation trace + declare pending mismatches as unresolved residual, then accept result without further applicability review |
 
@@ -296,7 +296,7 @@ When multiple mismatches are identified, surface in severity order (Critical →
 
 ### Phase 0: Applicability Checkpoint (Silent)
 
-Evaluate result against application context. This phase is **silent** — no user interaction.
+Evaluate result against application context. This phase is **silent** — no user interaction, except the conditional zero-mismatch confirmation gate (Rule 9) when no mismatch is detected.
 
 1. **Scan result** `R` against context `X`: environment state, conventions, use case scope, temporal validity, user constraints
 2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)
