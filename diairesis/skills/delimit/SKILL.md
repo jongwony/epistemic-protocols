@@ -130,7 +130,8 @@ Phase 2 Qc (constitution)    → present (conditional: ¬SingleDominantCut(Ancho
 Phase 3 parse (sense)        → Internal analysis (parse A into cut_disposition + optional TerminationIntent; ambiguous parse triggers one-turn relay confirmation before routing)
 Phase 3 integrate (track)    → Internal state update (apply the settled cut to cut_set + work_unit_map as reference entries; move the anchor region from residual to committed ONLY once its unit Fits or the user explicitly accepts a non-Fits unit — else it stays in residual for a later cycle; skipped entirely on Esc / a pure-termination Sufficient that binds no cut, leaving the map unchanged; the WBS is never copied)
 Phase 3 check (sense)        → Internal analysis (assert the three packing invariants over the committed cut-set; coverage_complete is a hard convergence gate)
-Phase 3 autonomous_pack (extension) → TextPresent+Proceed (on Sufficient or substrate exhaustion, complete the residual cuts at their natural joints — Extension-default per the project's Extension calibration — and surface each for recognition before emit)
+Phase 3 autonomous_pack (track) → Internal state update (on Sufficient or substrate exhaustion, complete the residual cuts at their natural joints — Extension-default per the project's Extension calibration — moving each region from residual to committed)
+Phase 3 autonomous_pack_surface (extension) → TextPresent+Proceed (surface each autonomous_pack cut for recognition before emit)
 converge (extension)         → TextPresent+Proceed (per-unit cut trace + residual disposition trace + InvariantStatus + WorkUnitMap as a separate session-text artifact carrying the WBS reference and cut_set; proceed — the map flows to /conduct)
 
 ── MODE STATE ──

@@ -123,10 +123,10 @@ Deactivation: `all_tasks_completed` after convergence evidence sets `Λ.active :
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Orient (observe) → Internal analysis (Read for context if needed)
-Phase 0 AssessRoute (observe) → Internal analysis (entry-point adequacy; opacity-preserving — exposes selection scent, never probe answers)
+Phase 0 AssessRoute (sense) → Internal analysis (no external tool; entry-point adequacy; opacity-preserving — exposes selection scent, never probe answers)
 Phase 1 Emit (extension) → TextPresent+Proceed (entry-point-fit distinctions, hidden routes, and bounded open questions from Fᵣ; omitted when empty)
 Phase 1 Qc  (constitution)   → present (entry point selection enriched by Fᵣ)
-Phase 2 B   (observe) → Internal analysis (artifact basis materialization)
+Phase 2 B   (sense) → Internal analysis (no external tool; artifact basis materialization)
 Phase 2 Tᵣ  (track)   → TaskCreate (entry point tracking)
 Phase 3 detect (sense) → Internal analysis (gap type relevance detection per entry point)
 Phase 3 ZeroGapConfirm (constitution) → present (conditional: |GT| = 0 for current entry point; zero-gap finding + reasoning; Confirm/Reopen(description); Rule 10)
