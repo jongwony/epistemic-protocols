@@ -120,9 +120,9 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Prothesis: FrameworkAbsent → FramedInquiry (AI-guided, DESIGN)
   - Syneidesis: GapUnnoticed → AuditedDecision (AI-guided, SURFACE)
   - Horismos: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary
-  - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INFER)
-  - Analogia: MappingUncertain → ValidatedMapping (AI-guided, VALIDATE)
-  - Periagoge: AbstractionInProcess → CrystallizedAbstraction (AI-guided, CRYSTALLIZE)
+  - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INQUIRE)
+  - Analogia: MappingUncertain → ValidatedMapping (AI-guided, GROUND)
+  - Periagoge: AbstractionInProcess → CrystallizedAbstraction (AI-guided, INDUCE)
   - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
   - Elenchus: ContextSuspect → VettedContext (User-initiated, VET)
@@ -130,7 +130,9 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Prosoche: ExecutionBlind → SituatedExecution (User-initiated, EVALUATE)
   - Anamnesis: RecallAmbiguous → RecalledContext (AI-guided, RECOGNIZE)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
-  - Write: InsightInternal → ExternalizedKnowledge (User-invoked, EXTERNALIZE)
+  - Anagoge: RecallGranularityInsufficient → HigherGranularityUnit (AI-guided, ELEVATE)
+  - Hyphegesis: MethodUnderdetermined → ConductedMethod (Hybrid, CONDUCT)
+  - Diairesis: GranularityUnderdetermined → WorkUnitMap (Hybrid, DELIMIT)
 - [ ] Initiator correctly specified (AI-guided vs Hybrid vs User-initiated vs User-invoked)
 - [ ] Gap taxonomy matches protocol purpose
 
