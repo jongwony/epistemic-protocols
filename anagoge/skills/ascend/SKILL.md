@@ -20,7 +20,7 @@ Anagoge(R) → attempts := 0 → Detect(R) →                             -- at
   single_session_suffices(R): defer-to-Anamnesis → deactivate
   supra_session(R): Classify(R, Σ) → UnitType → Dispatch(UnitType) →
     Phase 1: attempts := attempts + 1 →                                   -- one increment per traversal, at traversal start
-      Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → confirmations := Confirm(evidential_claims, SSOT) → U[] →   -- index reads drive discovery/rank; the per-claim verdict is recorded in Λ.confirmations, and every surfacing op renders each claim against it — never asserted from the lossy index alone
+      Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → confirmations := Confirm(claim_source_pairs) → U[] →   -- index reads drive discovery/rank; each surfaced claim is paired with its OWN originating deposit's SSOT (not one shared SSOT) before Confirm; the per-claim verdict is recorded in Λ.confirmations, and every surfacing op renders each claim against it — never asserted from the lossy index alone
       |U[]| = 0 ∧ attempts < max: Rescope(R, Σ) → Stop → S → rebind(R, S) → Phase 1
       |U[]| = 0 ∧ attempts = max ∧ presented = ∅: NullMatch → inform(R, Σ) → fallback → deactivate   -- no unit ever assembled; the first empty traversal (attempts < max) already fired ≥1 Rescope
       |U[]| = 0 ∧ attempts = max ∧ presented ≠ ∅: surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units: a prior traversal assembled, so this is NOT NullMatch
@@ -40,7 +40,7 @@ ScatteredDeposits × DepositGraph
   → traverse(Deposits, infer_edges)    -- INFER cross-partition edges at read-time from stored anchors + shared keywords/metadata; broken-link-tolerant
   → assemble(connected_subgraph)       -- compose higher units of the dispatched type from the inferred-edge-connected deposits
   → rank(units, recall_trace)          -- order by recall alignment + connectivity
-  → confirm(evidential_claims, SSOT)   -- INDEX reads drive discovery/rank (provisional); each claim SURFACED as evidence (origin, timing, quoted decision/utterance) gets a per-claim verdict against the authoritative source, recorded in Λ.confirmations for the surfacing ops — never asserted from the lossy index alone
+  → confirm(claim_source_pairs)        -- INDEX reads drive discovery/rank (provisional); each claim SURFACED as evidence (origin, timing, quoted decision/utterance) gets a per-claim verdict against ITS OWN originating deposit's authoritative source (never a single unit-wide SSOT), recorded in Λ.confirmations for the surfacing ops — never asserted from the lossy index alone
   → present(unit, Socratic)            -- narrative presentation of one candidate higher unit; absorbed into the emit for SingleObvious (single densely-connected high-confidence unit) — Extension, no turn yield
   → recognize(unit, user)              -- user-constituted identification at the higher granularity; for SingleObvious, realized as silence-default behind a divergence-only affordance (non-divergence constitutes recognition)
   → emit(HigherUnit_prose)             -- NL rendering to session text
@@ -48,7 +48,7 @@ ScatteredDeposits × DepositGraph
 requires: supra_session(R)              -- granularity checkpoint (Phase 0): single session would NOT resolve it
 deficit:  RecallGranularityInsufficient -- activation precondition (Layer 1/2)
 preserves: DepositGraph                 -- deposits are read-only; traversal edges are reconstructed at read-time, never written; cross-slug reads only, never cross-slug writes
-confirms:  EvidentialClaim against SSOT -- the INDEX is a pointer for discovery/rank; evidence resolves against the authoritative source, not the derived index
+confirms:  EvidentialClaim against its OWN deposit's SSOT -- the INDEX is a pointer for discovery/rank; evidence resolves against the authoritative source of the claim's originating deposit, not the derived index and never a single unit-wide SSOT
 invariant: Recognition over Aggregation
 
 ── TYPES ──
@@ -63,9 +63,10 @@ LegacyAnchor     = String               -- a bare-string cross_ref from older de
 Deposit          = { slug: String, sid: String, cwd: Optional(String), date: Optional(String),
                      topic: String, fingerprint: Prose, cross_refs: List(Anchor) }          -- one partition-local sediment unit; cross_refs are STORED, partition-local, exactly what Anamnesis writes
                   -- cwd, date are STORED in the deposit's own frontmatter (the same fields Anamnesis writes): cwd pairs with sid to build the resume handle, date dates the source. Optional ⇒ absent in deposits written before the field was captured (cwd-absent ⇒ source surfaced but non-resumable)
-SSOT             = the deposit's authoritative session record (complete, append-only) the INDEX entry is DERIVED FROM   -- a Deposit is a LOSSY INDEX projection of its SSOT; evidential claims resolve against SSOT, never the deposit files alone
-EvidentialClaim  = a reading SURFACED to the user as fact: origin attribution, coinage/temporal timing, a quoted decision or utterance   -- index-only ⇒ provisional; settled only once Confirm-ed against SSOT
-Confirm          = (Set(EvidentialClaim), SSOT) → List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} })   -- per-claim confirmation against the authoritative source before surfacing; codomain is exactly Λ.confirmations, so `confirmations := Confirm(…)` is type-consistent; the verdict governs how each claim surfaces: confirmed ⇒ assert as settled fact; corrected ⇒ assert the SSOT value, discard the index reading; unattested ⇒ never assert as fact — surface provisional or omit. Index-only (unconfirmed) stays provisional.
+SSOT             = the deposit's authoritative session record (complete, append-only) the INDEX entry is DERIVED FROM   -- a Deposit is a LOSSY INDEX projection of its SSOT; evidential claims resolve against SSOT, never the deposit files alone. A cross-deposit higher unit spans MULTIPLE deposits, each with its OWN SSOT — there is no single suite-wide SSOT
+EvidentialClaim  = { content: a reading SURFACED to the user as fact (origin attribution, coinage/temporal timing, a quoted decision or utterance), source_deposit: DepositRef }   -- source_deposit names the ONE deposit the claim originates from — index-only ⇒ provisional; settled only once Confirm-ed against that deposit's OWN SSOT
+ClaimSourcePair  = (claim: EvidentialClaim, ssot: SSOT)   -- one claim paired with the authoritative source of ITS OWN originating deposit (ssot = SSOT(claim.source_deposit)); a cross-deposit unit's claim set carries one pair per claim, never one shared SSOT across the whole set
+Confirm          = Set(ClaimSourcePair) → List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} })   -- per-claim-source-pair confirmation: each claim is checked against its OWN deposit's authoritative source before surfacing, never a single unit-wide SSOT; codomain is exactly Λ.confirmations, so `confirmations := Confirm(…)` is type-consistent; the verdict governs how each claim surfaces: confirmed ⇒ assert as settled fact; corrected ⇒ assert the SSOT value, discard the index reading; unattested ⇒ never assert as fact — surface provisional or omit. Index-only (unconfirmed) stays provisional.
 DepositGraph     = (Set(Deposit), Set(TraversalEdge))    -- STRUCTURAL TYPE; the edge set is RECONSTRUCTED at read-time, not pre-materialized; invariants in ── GRAPH INVARIANTS ──
 TraversalEdge    = { from: DepositRef, to: DepositRef, kind: ∈ {chain, topic, concept, plain} }
                   -- `kind` and `to` are INFERRED at traversal time from stored anchors + shared keywords/session metadata + Σ — NEVER read from a stored field
@@ -122,7 +123,7 @@ Phase 0: R → Detect(R) → supra_session(R)?                         -- granul
        [single_session_suffices(R)] relay(finding) → defer_to_anamnesis → deactivate    -- zero-signal: present finding, defer to /recollect, Anagoge not activated
            → Classify(R, Σ) → UnitType                              -- dispatch (silent)
 Phase 1: R → attempts := attempts + 1 →                            -- one increment per traversal, at traversal start
-           Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → confirmations := Confirm(evidential_claims, SSOT) → U[ranked]  -- read-time inferred-edge traversal + assembly + rank, then confirm to-be-surfaced evidential claims against SSOT, recording the per-claim verdict in Λ.confirmations for the surfacing ops [Tool]
+           Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → confirmations := Confirm(claim_source_pairs) → U[ranked]  -- read-time inferred-edge traversal + assembly + rank, then confirm to-be-surfaced evidential claims each against ITS OWN originating deposit's SSOT (never a single unit-wide SSOT), recording the per-claim verdict in Λ.confirmations for the surfacing ops [Tool]
            |U[ranked]| = 0 ∧ attempts < max → Rescope(R, Σ) → Qc → Stop → S → rebind(R, S) → Phase 1   -- empty traversal always Rescopes while budget remains
            |U[ranked]| = 0 ∧ attempts = max ∧ presented = ∅ → NullMatch → inform → fallback → deactivate   -- nothing ever assembled; ≥1 Rescope already fired (Rule 12 holds structurally)
            |U[ranked]| = 0 ∧ attempts = max ∧ presented ≠ ∅ → surface(presented_best, traversal_scope) → deactivate   -- exhausted-with-units (a prior traversal assembled) — NOT NullMatch
@@ -200,7 +201,7 @@ converge              (extension)    → TextPresent+Proceed (convergence trace)
 ── MODE STATE ──
 Λ = { phase: Phase, R: RecallTrace, unit_type: UnitType,
       units: List(HigherUnit),
-      confirmations: List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} }),   -- per-claim Confirm verdicts written at Phase 1 (`confirmations := Confirm(evidential_claims, SSOT)`); consumed by every surfacing op (Phase 2 emit/Qc, Phase 3 emit, the exhausted-with-units terminal surface) so each claim renders per its verdict — confirmed/corrected ⇒ settled (corrected substitutes the SSOT value), unattested ⇒ provisional or omitted
+      confirmations: List({ claim: EvidentialClaim, verdict: ∈ {confirmed, corrected, unattested} }),   -- per-claim Confirm verdicts written at Phase 1 (`confirmations := Confirm(claim_source_pairs)`, each claim checked against its OWN deposit's SSOT); consumed by every surfacing op (Phase 2 emit/Qc, Phase 3 emit, the exhausted-with-units terminal surface) so each claim renders per its verdict — confirmed/corrected ⇒ settled (corrected substitutes the SSOT value), unattested ⇒ provisional or omitted
       presented: Set(HigherUnit),   -- updated `presented := presented ∪ {U[top]}` on every Phase 1 → Phase 2 edge (a candidate reaching the gate); serves as the "ever-assembled" witness that discriminates NullMatch (presented = ∅) from the exhausted-with-units terminal (presented ≠ ∅), and supplies presented_best for that terminal's surface
       recognized: Optional(HigherUnit),
       rescopes: List(RescopeOption),
