@@ -151,6 +151,7 @@ branching_factor : Uncertainty → ℕ
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency checkpoint (silent)
+       [Uᵢ = ∅] sufficiency_relay(reasoning) → proceed          -- zero-signal: present the sufficiency finding as relay text; trivial InformedExecution (remaining = ∅), Aitesis not activated
 Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- Step 1: context collection [Tool]
          Step₂ classify(Uᵢ', dimension) → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) → -- Step 2: epistemic classification (core act); Uₙ = non-actionable
          [if off-diagonal(scope, resolution)] Qc(scope_assessment, resolution_assessment) → Stop → Ac  -- Coherence 2D Constitution interaction [Tool]
@@ -182,6 +183,7 @@ early_exit = user_declares_sufficient
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Scan    (sense)       → Internal analysis (no external tool)
+Phase 0 sufficiency_relay (extension) → TextPresent+Proceed (Uᵢ = ∅: present the sufficiency finding with reasoning; proceed with X unchanged, trivial InformedExecution)
 Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch, WebFetch (conditional: CanonicalExternal channel — RFCs, vendor API docs, standards; `source: "web:{url}"` tag + staleness guard via codebase version cross-check); Bash (conditional: VersionControlHistory channel — read-only commit-log queries via subprocess (content pickaxe, message search, temporal range); `source: "history:{ref}"` tag; collection-only — ref-type staleness classification handled per Phase 1 Step 1 staleness rule)
 Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
 Phase 1 Qc      (constitution)        → present (conditional: Coherence 2D off-diagonal Constitution interaction; fires only when scope ≠ resolution assessment; user classifies coherence type as MemoryInternal or CrossDomain)

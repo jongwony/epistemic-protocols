@@ -119,6 +119,7 @@ Edge cases:
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → supra_session(R)?                         -- granularity trigger (silent); attempts := 0 ONCE at activation (Λ init), preserved on Reorient re-entry to Phase 0 so the cap spans the whole elevation
+       [single_session_suffices(R)] relay(finding) → defer_to_anamnesis → deactivate    -- zero-signal: present finding, defer to /recollect, Anagoge not activated
            → Classify(R, Σ) → UnitType                              -- dispatch (silent)
 Phase 1: R → attempts := attempts + 1 →                            -- one increment per traversal, at traversal start
            Traverse_{UnitType}(Deposits, infer_edges(Deposits, Σ)) → Assemble → Rank → confirmations := Confirm(evidential_claims, SSOT) → U[ranked]  -- read-time inferred-edge traversal + assembly + rank, then confirm to-be-surfaced evidential claims against SSOT, recording the per-claim verdict in Λ.confirmations for the surfacing ops [Tool]
@@ -179,6 +180,7 @@ progress(Σ) = attempts: N/max, units_assembled: N, inferred_edges_followed: N
 -- Span invariant binding: traversal issues cross-partition READS only (Read/Grep/Glob across `~/.claude/projects/*/hypomnesis/`); it NEVER writes to any slug. Each partition still owns its own writes; Anagoge adds none.
 -- Alternative realizations (documented, not active): ⓑ persisted-edge graph — if a future substrate stores cross-slug deposit pointers as first-class records, traversal could follow them directly rather than re-inferring at read-time; ⓒ a full Open Knowledge Federation link-graph store materializing edges as first-class records. ⓐ is chosen because it requires no schema beyond what Anamnesis already deposits and adds zero write surface.
 Phase 0 Detect        (sense)        → Internal analysis (supra-session granularity; distinguish from single-session Anamnesis)
+Phase 0 relay_single_session (extension) → TextPresent+Proceed (single_session_suffices(R): present the finding, defer to /recollect, deactivate — Anagoge not activated)
 Phase 0 Classify      (sense)        → Internal analysis (UnitType detection from R + Σ)
 Phase 0 Dispatch      (sense)        → Internal analysis (select the traversal shape for the dispatched UnitType; deterministic indexed selection, entropy→0)
 Phase 1 Traverse      (observe)      → Read, Grep, Glob (read entry-deposit anchors + index keywords/metadata, then search cross-partition for shared anchors/keywords/metadata; read-only, read-time inference)

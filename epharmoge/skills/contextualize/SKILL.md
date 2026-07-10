@@ -98,6 +98,7 @@ Register = { m ∈ Set(Mismatch) : certificate(m).status = pass } → Set(Task) 
 pending(Σ) = Set(Mismatch) where registered task status ∉ {completed, dismissed}  -- a routed/ambiguous mismatch never enters pending(Σ); only certificate-passing mismatches are registered
 Q      = Applicability inquiry over F-scoped mismatch (gate interaction)
 A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}  -- A ∈ V; answer drawn from the mismatch's value-space (local_value_space = {Confirm, Adapt, Dismiss})
+ZeroMismatchConfirmation = user's answer to a zero-mismatch finding ∈ {Confirm, Reopen(aspect)}  -- Confirm accepts the result as-is (Rule 9); Reopen names an aspect the Phase 0 scan missed, re-entering Eval focused on that aspect
 R'     = Adapted result (contextualized output)
 ContextualizedExecution = R' where ∀ task ∈ registered: task.status = completed
                  -- registered = certificate-passing mismatches only; routed/ambiguous mismatches are handed forward, not adapted in-place
@@ -105,6 +106,7 @@ EarlyExit = R' where user_esc  -- non-convergent early exit: result as of exit (
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Eval(R, X) → Mᵢ? → ∀m ∈ Mᵢ: bind_kind(m) → certify(m, registry) → (status = pass) → Mᵢ_passed → AssessFit(R, X, Mᵢ_passed) → F → Λ.fit_map := F  -- applicability checkpoint + registration-time KIND dispatch (fail-closed) + fit map (silent); certify runs WITHIN Phase 0, at registration, not as a separate phase
+Phase 0 → confirm_no_mismatch: Mᵢ = ∅ → Qc(zero_mismatch_finding) → Stop → ZeroMismatchConfirmation  -- true zero-mismatch case (distinct from the Mᵢ≠∅∧Mᵢ_passed=∅ trivial-convergence-by-routing case below); Confirm → deactivate (execution stands as-is, Rule 9); Reopen(aspect) → re-scan Eval focused on that aspect [Tool]
 Phase 0 → route_away (mismatch-local): certify(m).status = route        -- a sibling deficit owns the mismatch (backward misfit) → emit RoutePair.target (/gap, /inquire, /bound, /distill), drop m from registration (m never enters pending(Σ)); scan continues with remaining mismatches
 Phase 0 → split (pre-certify): KindBinding.atomicity = non-atomic  -- a compound mismatch bundles two distinct aspects → split into atomic sub-mismatches and re-run bind_kind + certify on each (same Phase 0 pass, before any pass/route/defer decision); recursive until atomic (well-founded: each split strictly decreases the number of bundled aspects — atomic = exactly one aspect — so the recursion terminates). A non-atomic mismatch is NEVER deferred or registered as a compound
 Phase 0 → defer (mismatch-local): certify(m).status = ambiguous  -- overlapping deficit fit on an ATOMIC mismatch → ONE narrowed-scope re-assessment at the fixed Phase-0 (R, X) (AI-side, no user interaction — Phase 0 stays silent), then re-certify. (R, X) is fixed in Phase 0, so a re-assessment is deterministic-identical → the bound is ONE attempt: resolves to pass (→ registered), route (→ Λ.routed), or — if it STAYS ambiguous — TERMINAL-RESIDUAL: record m in Λ.residual (an unattributable mismatch: never registered into pending(Σ), adjudicated by terminal_residual(aspect(m)), surfaced as residual, non-blocking). deferred-pending therefore always clears (no Phase-0 loop)
@@ -145,6 +147,7 @@ progress(Λ) = |completed_tasks| / |total_tasks|              -- NON-MONOTONE: m
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Eval   (sense)   → Internal analysis (no external tool)
+ZeroMismatchConfirm (constitution) → present (conditional: Mᵢ = ∅; zero-mismatch finding + reasoning; Confirm/Reopen(aspect) — Rule 9)
 bind_kind (sense)   → Internal analysis (capture each detected mismatch as a KindBinding {label, positive_predicate, evidence, origin ∈ {seed, emergent}, atomicity}; non-atomic mismatch → split before certify)
 certify (extension) → Internal analysis (fail-closed DeficitFitCertificate; fit of KindBinding.positive_predicate against the documented sibling-deficit scopes — each sibling protocol's deficit: declaration plus the registered deficit inventory (sibling-deficit nodes; epharmoge has no outgoing routing edge, so the fit rests on the deficit-scope declarations, not edge topology): owner = ApplicationDecontextualized when in-scope; status = pass | route | ambiguous; basis = the cited deficit-scope fit, shown at the mismatch's Phase 1 surfacing. Relay (Extension) because the fit is grounded in a citable source and an unclear fit returns status = ambiguous → defer, never a user gate. Runs at registration time — within Phase 0 for Mᵢ, within Phase 2 re-scan for Mₑ — BEFORE the mismatch enters pending(Σ))
 AssessFit (sense) → Internal analysis (no external tool)

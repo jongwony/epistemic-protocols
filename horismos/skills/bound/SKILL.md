@@ -73,6 +73,7 @@ Probe          = T → Set(Domain)                              -- boundary-unde
 Domain         = { name: String, description: String, evidence: Set(Evidence) }
 Evidence       = { source: String, content: String }
 Bᵢ             = Set(Domain) from Probe(T)                    -- initial boundary-undefined domain signal (cycle 1 seed)
+ZeroSignalConfirmation = user's answer to a zero-signal finding ∈ {Confirm, Reopen(Domain)}  -- Confirm accepts no boundary-undefined signal (Rule 12); Reopen names a domain Probe(T) missed, seeding it into Bᵢ and proceeding
 
 -- Shared meta-backbone (KIND dispatch). One canonical schema; bound-local instantiation ONLY for object_ref, local_value_space, guard routing targets.
 KindRouteMap   = sync_kind_route : (T, context) → { hypotheses: List<KindHypothesis>, emergent: NamingPath }
@@ -150,6 +151,7 @@ Phase          ∈ {0, 0b, 1, 2, 3, 4}
 
 ── PHASE TRANSITIONS ──
 Phase 0: T, B_prior? → Probe(T) → scan_B_prior(T) → Λ.B_prior → Bᵢ?                                           -- boundary existence checkpoint + optional hermeneutic-seed DETECTION (silent); detection binds Λ.B_prior but does NOT seed B — B does not exist yet (loop state, incl. boundary_map, is initialized at Phase 0b step 4 after the kind is captured and the certificate passes, since binding is gated on a passing certificate)
+       [Bᵢ = ∅] Qc(zero_signal_finding) → Stop → ZeroSignalConfirmation   -- zero-signal (Rule 12): Confirm → deactivate (Horismos not activated) | Reopen(d) → Bᵢ := {d}, proceed [Tool]
 Phase 0b: T → sync_kind_route(T) → KindRouteMap → [single_dominant_kind: relay(captured_kind + basis) → proceed (extension, kind committed, NO Stop) | else: Stop → captured_kind (constitution)]
        → bind_kind(captured_kind) → KindBinding
        → certify(KindBinding, registry) → DeficitFitCertificate
@@ -228,6 +230,7 @@ converge iff (Phase 3 ImplicitTermination ∨ Phase 4 completed ∨ substrate_ex
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Probe (sense)        → Internal analysis (silent — no user output; heuristic boundary-undefined detection + session-context scan for a prior BoundaryMap as Λ.B_prior (DETECTION only — Phase 0 seeds nothing; a kind-matched prior is seeded at Phase 0b step 4, a kind-mismatched prior stays advisory-only); notice visibility deferred to Phase 2 cycle 1 surfacing)
+Phase 0 ZeroSignalConfirm (constitution) → present (conditional: Bᵢ = ∅; zero-signal finding + reasoning; Confirm/Reopen(Domain) — Rule 12)
 Phase 0b sync_kind_route (constitution) → present (GATED branch — fires when single_dominant_kind = false: ≥2 kind hypotheses stay viable OR an emergent/naming capture is needed; up-front KindRouteMap — ≤3 recognizable kind hypotheses each with positive_predicate + evidence + differential_future + route-away conditions, plus an emergent/naming free-response path; named kinds are PRIORS not a closed set; user captures the kind by recognizing a seed, naming an emergent, or extending/replacing a seed; Esc → deactivate)
 Phase 0b sync_kind_route_relay (extension) → TextPresent+Proceed (RELAY branch — fires when single_dominant_kind = true, per the single_dominant_kind predicate (TYPES) and Rule 24. Present the captured kind + its basis as relay text and proceed, recording Λ.captured_kind WITHOUT a turn yield; the captured kind is committed for the activation (like the gated branch) — a rare mis-relay is corrected by re-invoking /bound, not an in-loop redirect transition. Mirrors /conduct's Phase 2 CT_default_relay. The fail-closed certify STILL runs on this branch — a non-pass DeficitFitCertificate gets the full gated treatment (route → route_away/deactivate, ambiguous → re-sync), so the relay never bypasses deficit-fit)
 Phase 0b certify (sense)     → Internal analysis (extension — fail-closed DeficitFitCertificate; deterministic check of KindBinding.positive_predicate against the documented sibling-deficit scopes (the registered deficit inventory + edge topology read together with each sibling protocol's deficit: declaration): owner = BoundaryUndefined when in-scope; status = pass | route | ambiguous; basis = the registry deficit/edge fit, cited at Phase 2 cycle 1's first surfacing)
