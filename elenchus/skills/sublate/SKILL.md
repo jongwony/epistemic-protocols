@@ -21,7 +21,7 @@ W → identify(W) → S_high → tag(provenance, freshness, leverage) → S' →
 WorkingContext
   → identify(high_leverage_sources, S_high)    -- silent scan for sources warranting audit
   → tag(provenance, freshness, leverage)        -- attach metadata triple per source
-  → posit(antithesis per source)                -- Pattern A ∪ Pattern B ∪ Pattern C ∪ Pattern D
+  → posit(antithesis per source)                -- Pattern A ∪ Pattern B ∪ Pattern C ∪ Pattern D ∪ Emergent(Pattern)
   → present(antitheses, disposition slots)      -- per-source Constitution interaction
   → judge(disposition per source)                -- closed coproduct response
   → emit(VettedContext with disposition table)
