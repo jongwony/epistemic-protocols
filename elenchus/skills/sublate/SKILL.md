@@ -65,7 +65,7 @@ trigger_met(c)        = Bool                                                    
 unresolved(Λ)         = {s ∈ S_high | s ∉ dom(Λ.dispositions) ∨ (∃c. Λ.dispositions(s) = Deferred(c) ∧ trigger_met(c))}   -- sources still requiring judgment: unjudged, or Deferred whose trigger has fired (re-vetting due); an untriggered Deferred is resolved (vetted-compatible), not pending
 vetted(V)      = dom(J) = S_high ∧ ∀ s ∈ S_high : ¬(∃c. J(s) = Deferred(c) ∧ trigger_met(c))
 VettedContext  = V where vetted(V)
-EarlyExit      = V where user_esc ∨ user_cancel  -- non-convergent early exit: V as of exit (dispositions/trace = judgments recorded so far, empty when exit precedes the first judged batch); working context remains un-vetted (or partially vetted under user_cancel); unjudged sources declared as unresolved residual
+EarlyExit      = V where user_esc ∨ user_cancel  -- non-convergent early exit: V as of exit (dispositions/trace = judgments recorded so far, empty when exit precedes the first judged batch); working context remains un-vetted (or partially vetted under user_cancel); unresolved sources (unresolved(Λ): unjudged, or Deferred whose trigger has fired) declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
 Phase 0: W → identify(W) → S_high                                       -- silent scan (no user interaction)
@@ -83,7 +83,7 @@ If all dispositions resolved (no Deferred or all triggers unmet): terminate with
 User can exit at Phase 2 (user_esc).
 Continue until: vetted(V) OR user_esc/user_cancel (EarlyExit, not VettedContext).
 Convergence evidence: At vetted(V), present transformation trace — for each s ∈ S_high, show (s → antithesis(s) → disposition(s)). Convergence is demonstrated, not asserted.
-On user_esc/user_cancel: present partial trace over judged sources (s → antithesis(s) → disposition(s) for each judged s), then declare unjudged sources in S_high as unresolved residual.
+On user_esc/user_cancel: present partial trace over judged sources (s → antithesis(s) → disposition(s) for each judged s), then declare unresolved(Λ) sources in S_high (unjudged, or Deferred whose trigger has fired — re-vetting due at exit) as unresolved residual.
 
 ── CONVERGENCE ──
 vetted(V): see TYPES
