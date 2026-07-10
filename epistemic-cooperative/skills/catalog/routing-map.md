@@ -22,7 +22,7 @@ the skill descriptions alone under-trigger invocation. Route from the deficit, n
   when: An abstract idea's correspondence to a concrete domain is uncertain — needs structural grounding, not just assertion
 
 **`/induce`** (Periagoge) — AbstractionInProcess → CrystallizedAbstraction
-  when: Concrete instances accumulating — abstraction has not located itself
+  when: One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction
 
 ## Decision
 

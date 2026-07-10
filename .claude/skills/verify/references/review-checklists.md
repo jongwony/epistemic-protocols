@@ -123,7 +123,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INQUIRE)
   - Analogia: MappingUncertain → ValidatedMapping (AI-guided, GROUND)
   - Periagoge: AbstractionInProcess → CrystallizedAbstraction (AI-guided, INDUCE)
-  - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE)
+  - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE-CYCLE)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
   - Elenchus: ContextSuspect → VettedContext (User-initiated, VET)
   - Diylisis: ContextTethered → PortableHandoff (AI-guided, DISTILL)

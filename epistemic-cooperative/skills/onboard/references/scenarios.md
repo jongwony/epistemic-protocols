@@ -8,24 +8,24 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You ask Claude to edit a long email draft. You're fine with typo fixes and smoother phrasing, but paragraph reorganization and tone changes feel like decisions you want to own. Right now there's no explicit boundary — Claude might change anything.
 
-**Intervention**: `/bound` classifies each edit domain via gate interaction: "Typos — AI autonomous? Phrasing — AI proposes, you pick? Paragraph structure — you decide, AI waits?" The resulting BoundaryMap tells Claude what it may change silently, what to propose, and what to leave alone.
+**Intervention**: `/bound` first dispatches what KIND of boundary each edit domain leaves unsettled — direction/priority (what tone to aim for), scope (which paragraphs are in bounds), type/concept (what counts as a "typo fix"), ownership (who decides), or an emergent kind it names on the spot — then settles each via a uniform disposition gate: "Typos — AI autonomous? Phrasing — AI proposes, you pick? Paragraph structure — you decide, AI waits?" Ownership is one kind among the seeds — the degenerate "who decides" case where the boundary value is the disposition itself. The resulting BoundaryMap tells Claude what it may change silently, what to propose, and what to leave alone.
 
-**Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show how /bound assigns ownership per edit type"
+**Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show how /bound dispatches each edit domain's boundary kind and settles its disposition"
 
 **Quiz Q (situation)**: You ask Claude to "tidy up my resume" — it rewrites your summary, swaps out job titles, and restructures bullet points. You only wanted typo fixes and better wording; the content decisions are yours.
 - A) Aitesis `/inquire` — B) Horismos `/bound` — C) Syneidesis `/gap` — D) Prosoche `/attend`
 - Answer: B
 
 **Quiz Q (design)**: You're about to delegate a multi-step task with some sensitive decisions. How would you make explicit which steps are AI's call vs yours?
-- Hint: The problem isn't unclear intent or missing context — it's undefined ownership of decisions.
+- Hint: The problem isn't unclear intent or missing context — it's unsettled boundaries: first name each decision's boundary kind (direction/priority, scope, type/concept, ownership, or an emergent kind), then settle how each is decided.
 
-**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Without explicit boundary definition, AI either over-assumes autonomy (causing surprise) or under-assumes (causing friction). Workflow position: cross-cutting — the BoundaryMap tells all downstream protocols what the human controls vs. what AI controls. Game feel: "Who decides what here?" → domain-by-domain classification → BoundaryMap emerges → shared understanding of ownership.
+**Philosophy**: ὁρισμός (definition, boundary) — from horizein, "to bound." Core principle: **Definition over Assumption**. Without explicit boundary definition, AI either over-assumes autonomy (causing surprise) or under-assumes (causing friction). Workflow position: cross-cutting — the BoundaryMap tells all downstream protocols which boundaries are settled and how each gets decided. Game feel: "What's unsettled here — and what kind of boundary is it?" → kind dispatch (direction/priority, scope, type/concept, ownership, or a named emergent kind) → disposition per domain → BoundaryMap emerges → shared understanding of the boundaries.
 
 ## Anamnesis `/recollect`
 
 **Situation**: You open a new session wanting to continue yesterday's conversation with Claude — something about a recommendation you liked, or a decision you made together — but you can't remember the exact topic or what was concluded. Re-explaining would lose the original framing.
 
-**Intervention**: `/recollect` scans session recall indices for narrative candidates matching your vague cue, then presents 2-3 story-form candidates (what was asked → where the talk went → what was decided) for you to recognize — resolving ambiguous recall into concrete prior context before current work proceeds.
+**Intervention**: `/recollect` scans session recall indices for narrative candidates matching your vague cue, then presents the highest-priority story-form candidate per cycle (what was asked → where the talk went → what was decided) for you to recognize — a high-confidence single match is emitted directly, no gate — resolving ambiguous recall into concrete prior context before current work proceeds.
 
 **Trial prompt**: "Let's practice: say 'Pick up where we left off yesterday' and I'll show how /recollect surfaces narrative candidates"
 
@@ -195,7 +195,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You've been collecting context for two hours — a teammate's verbal claim about API behavior, a doc you read at the start, a Slack thread quote, an inferred constraint built across three hops. Now you're about to share the plan in a meeting. One of those sources has aged, another's verification path is provisional, and two of them quietly point at the same referent in conflicting directions — but you don't know which.
 
-**Intervention**: `/sublate` vets the working context before it externalizes. It selects audit-candidate sources (high-leverage, age beyond horizon, long inference chain, or cross-source contradiction) and posits a dialectical antithesis per source — provenance challenge ("X's verification path is provisional"), counterfactual gap ("under condition Z, Y fails at point P"), or cross-source divergence ("X₁ and X₂ collide at Q"). You judge each source as Confirmed, Revised, Discarded, Deferred, Conditional, Bounded, or Routed before the sync.
+**Intervention**: `/sublate` vets the working context before it externalizes. It selects audit-candidate sources (high-leverage, age beyond horizon, long inference chain, cross-source contradiction, or an inference-character conclusion — a source that is itself an inferred conclusion) and posits a dialectical antithesis per source — provenance challenge ("X's verification path is provisional"), counterfactual gap ("under condition Z, Y fails at point P"), cross-source divergence ("X₁ and X₂ collide at Q"), or inference-fallacy audit ("Y's soundness rests on a reasoning archetype that fails here"). You judge each source as Confirmed, Revised, Discarded, Deferred, Conditional, Bounded, or Routed before the sync.
 
 **Trial prompt**: "Let's practice: tell me you're about to share an accumulated plan in 15 minutes and want to vet the context first, and I'll show how /sublate dialectically tests each source."
 

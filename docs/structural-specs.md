@@ -184,7 +184,7 @@ This boundary informs type naming: `Prospect` (forward-looking, unrealized), `Re
 
 ## Intra-Protocol Context Separation
 
-**Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. In Prothesis: `gather(context)` (Phase 1, meta) collects broad context to identify relevant perspectives; object-scope evidence is collected per-perspective at substrate execution time, after the Phase 3 handoff — the compiled spec deliberately excludes the meta-context so each perspective collects through its own lens independently (the TOOL GROUNDING G entry's meta-scope note). Passing meta-context to object-level executors biases their investigation toward the lead agent's framing, undermining the epistemic value of independent perspective analysis.
+**Context bifurcation** (intra-protocol context separation): Within a single protocol, context collected for different purposes must not be conflated. In Prothesis: `gather(context)` (Phase 1, meta) collects broad context to identify relevant perspectives; object-scope evidence is collected per-perspective at substrate execution time, after the Phase 3 handoff — the handoff (the framed object) deliberately excludes the meta-context — it is not passed to the substrate — so each perspective collects through its own lens independently (the TOOL GROUNDING G entry's meta-scope note). Passing meta-context to object-level executors biases their investigation toward the lead agent's framing, undermining the epistemic value of independent perspective analysis.
 
 ## Cross-Session Tertiary Pattern
 
