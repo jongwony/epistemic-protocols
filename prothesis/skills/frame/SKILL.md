@@ -28,7 +28,7 @@ Inquiry
   → select(perspectives)                -- user chooses lenses via Cognitive Partnership Move (Constitution)
   → LensEstablished                     -- the analysis object (lens)
   → bind_substrate(perspectives)        -- per lens, compute substrate_need (authoritative abstract persona/capability) + binding_hints (advisory candidate shortlist) + channel_need; NEVER binds a concrete agent
-  → discriminate(substrate_availability) -- single lens ∨ no specialized substrate beyond general-purpose → LensReturn; ≥2 lenses with at least one specialized substrate need → SubstrateCorrespondence
+  → discriminate(substrate_specialization_need) -- single lens ∨ no specialized substrate beyond general-purpose → LensReturn; ≥2 lenses with at least one specialized substrate need → SubstrateCorrespondence
   → handoff(framed_inquiry)             -- emit the framed object (detailed lens(es), or lens↔substrate pairs ⊕ /conduct nudge), record the handoff, then STOP — frame does NOT realize isolation, arrange, execute, or synthesize; the isolation + arrangement + synthesis apparatus is /conduct's to design (via the nudge) and the isolated substrate's to run
   → FramedInquiry
 requires: framework_absent(U)             -- runtime checkpoint (Phase 0)
@@ -39,8 +39,8 @@ invariant: Placement over Prescription; substrate-invariance (declares the NEED,
 ── TYPES ──
 U      = Underspecified request (purpose clear, approach unclear)
 MB     = MissionBrief(U): { inquiry_intent, expected_deliverable, scope_constraint }  -- AI-inferred from U
-Q1(MB) = Confirm: MB → MBᵥ                       -- extern (Mission Brief confirmation; the sole Phase 0 interaction — no mode question)
-MBᵥ    = Verified MissionBrief (user-confirmed)
+Q1     : MB → J_mb                               -- extern (Mission Brief confirmation/modification; the sole Phase 0 interaction — no mode question); answer type is J_mb, not MBᵥ directly
+MBᵥ    = Verified MissionBrief (user-confirmed)  -- DERIVED when J_mb = confirm; on J_mb = modify(field), Q1 re-presents over the revised MB' until confirm yields MBᵥ
 G      = Gather: MBᵥ → C                       -- targeted context acquisition (guided by MBᵥ)
 C      = Context (information for perspective formulation)
 Pᵦ     = Pre-confirmed base perspectives (user-supplied in U or at the Z zero-result surfacing; auto-included in Pₛ)
@@ -61,7 +61,7 @@ LensReturn = { lenses: { ⟨pᵢ, per_perspective_directive: PerspectiveDirectiv
 SubstrateCorrespondence = { pairs: {LensPair}, arrangement: ConductRef }  -- ≥2 lenses with at least one specialized substrate need: lens↔(substrate_need + binding_hints + per_perspective_directive + channel_need) pairs, handed off with the /conduct nudge (ConductRef) that carries the isolation + arrangement + reconciliation + synthesis concern. frame forms the pairs and STOPS — it does NOT realize isolation, arrange, execute, or synthesize
 FramedInquiry = inj₁(LensReturn where single lens ∨ no specialized substrate) ⊕
                 inj₂(SubstrateCorrespondence where ≥2 lenses with at least one specialized substrate need)
-        -- coproduct discriminated by SUBSTRATE AVAILABILITY (NOT a user-chosen mode): inj₁ → LensReturn (detailed lens(es) returned, no isolation handoff); inj₂ → SubstrateCorrespondence (lens↔substrate pairs handed off ⊕ /conduct nudge). NEITHER is executed by frame; isolation/convergence/synthesis is claimable only by a substrate that ran the lenses in genuine isolation, which frame neither performs nor asserts. Advisory-edge consumers (Syneidesis, Aitesis, Analogia) branch on the inj₁/inj₂ tag — inj₁(LensReturn) is a context-binding lens handoff, inj₂(SubstrateCorrespondence) is a lens↔substrate handoff the isolated substrates execute under the arrangement /conduct designs.
+        -- coproduct discriminated by SUBSTRATE SPECIALIZATION NEED (NOT a user-chosen mode): inj₁ → LensReturn (detailed lens(es) returned, no isolation handoff); inj₂ → SubstrateCorrespondence (lens↔substrate pairs handed off ⊕ /conduct nudge). NEITHER is executed by frame; isolation/convergence/synthesis is claimable only by a substrate that ran the lenses in genuine isolation, which frame neither performs nor asserts. Advisory-edge consumers (Syneidesis, Aitesis, Analogia) branch on the inj₁/inj₂ tag — inj₁(LensReturn) is a context-binding lens handoff, inj₂(SubstrateCorrespondence) is a lens↔substrate handoff the isolated substrates execute under the arrangement /conduct designs.
 J_mb   = MissionBriefRouting ∈ {confirm, modify(field)}  -- Phase 0 routing decision
 
 ── U-BINDING ──
@@ -77,10 +77,10 @@ Edge cases:
 - Re-invoke: If Pₛ exists in context, offer as Pᵦ for new invocation
 
 ── PHASE TRANSITIONS ──
-Phase 0:  U → MB(U) → Q1(MB) → Stop → MBᵥ                       -- Mission Brief confirmation ONLY (no mode question) [Tool]
+Phase 0:  U → MB(U) → Q1(MB) → Stop → J_mb → [confirm: derive MBᵥ | modify(field): MB' → re-present Q1(MB') → Stop → J_mb]   -- Mission Brief confirmation ONLY (no mode question); MBᵥ is derived on confirm, not Q1's direct return [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]; single lens is valid; on Z (zero candidates) surface the finding → Stop → route per LOOP (modify | Pᵦ' supply | Esc)
-Phase 3:  LensEstablished → bind_substrate(Pₛ) → discriminate(substrate_availability) → [single lens ∨ no specialized substrate: LensReturn | ≥2 lenses with at least one specialized substrate need: SubstrateCorrespondence(lens↔substrate pairs) ⊕ nudge(ConductRef)] → converge(transformation trace) → handoff(FramedInquiry) → STOP  -- bind each lens's substrate, discriminate by availability, emit the framed object as the terminal relay with the /conduct nudge, then halt (no gate, no dispatch, NO isolation, NO synthesis; isolation + arrangement + synthesis is /conduct's to design and the isolated substrate's to run downstream)
+Phase 3:  LensEstablished → bind_substrate(Pₛ) → discriminate(substrate_specialization_need) → [single lens ∨ no specialized substrate: LensReturn | ≥2 lenses with at least one specialized substrate need: SubstrateCorrespondence(lens↔substrate pairs) ⊕ nudge(ConductRef)] → converge(transformation trace) → handoff(FramedInquiry) → STOP  -- bind each lens's substrate, discriminate by availability, emit the framed object as the terminal relay with the /conduct nudge, then halt (no gate, no dispatch, NO isolation, NO synthesis; isolation + arrangement + synthesis is /conduct's to design and the isolated substrate's to run downstream)
 
 ── LOOP ──
 After Phase 0 (Mission Brief confirmation only):
@@ -99,7 +99,7 @@ During Phase 2 (Perspective Placement):
 
 During Phase 3 (Bind Substrate & Handoff):
   bind_substrate(Pₛ) → for each pᵢ ∈ Pₛ compute ⟨substrate_needᵢ (authoritative abstract persona/capability), binding_hintsᵢ (advisory enumerated candidate shortlist; PREFER skill-bundled agents), channel_needᵢ⟩ → never bind a concrete agent
-  discriminate(substrate_availability):
+  discriminate(substrate_specialization_need):
     single lens (|Pₛ| = 1) ∨ no specialized substrate beyond general-purpose → package the detailed lens(es): emit FramedInquiry = inj₁(LensReturn), hand off, terminate. NO synthesis, NO convergence claim, NO isolated handoff.
     ≥2 lenses with at least one specialized substrate need → pair each lens with ⟨substrate_need + binding_hints + per-perspective directive + channel-need⟩ → emit FramedInquiry = inj₂(SubstrateCorrespondence) with the /conduct nudge (ConductRef), hand off the lens↔substrate pairs, terminate. frame does NOT realize isolation, arrange, execute, or synthesize.
   -- handoff is the completeness boundary: frame records the handoff and halts. frame does NOT realize isolation — the isolated execution arrangement (isolation, reconciliation/dialogue, synthesis) is /conduct's to design (the /conduct nudge accompanies every SubstrateCorrespondence handoff) and the substrate's to run (an agent team, a dynamic-workflow, isolated subagents, or plan-mode). Convergence is claimable only by the isolated substrate that ran the lenses, which frame neither performs nor asserts. Esc key → tool-level termination (nothing compiled yet).
@@ -257,7 +257,7 @@ During perspective formulation, note whether each candidate lens depends on evid
 
 - Pᵦ are **auto-included** in Pₛ; present only the AI-proposed novel perspectives as selectable options
 - Constitution interaction presents only AI-proposed novel perspectives ({P₁...Pₙ} where Pᵢ ∉ Pᵦ)
-- State Pᵦ in the question text as context (e.g., "Base: [Pᵦ names]. Which additional lens(es)?")
+- State Pᵦ as pre-gate text output before the gate (e.g., "Base perspectives already included: [Pᵦ names]"), per Rule 8 (Context-Question Separation); the question itself stays essential-only (e.g., "Which additional lens(es)?")
 - AI must propose at least 1 novel perspective when Pᵦ ≠ ∅ — re-presenting known perspectives as options saturates the finite option space and structurally conceals unknown unknowns
 
 ### Phase 3: Bind Substrate & Handoff
