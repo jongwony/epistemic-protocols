@@ -69,6 +69,7 @@ ResidualDisposition ∈ {Sharpen, AcceptUncovered}
                --   unguarded during the interval, recorded in the compilation trace, never emitted
 K              = Set(CompiledCondition)
 R              = Set(Residual)       -- slow signals lacking a verifiable predicate at compile time
+AcceptResiduals = R → Set(BoundarySignal)   -- on Confirm, materializes each remaining residual's signal into Λ.accepted, so accepted_uncovered(b) is a recorded fact, not an unwritten inference
 V              = Judgment ∈ {Confirm, Adjust(direction)}
 Emit           = K → G [Tool: TaskCreate]
 G              = goal entries: coarse task entries consumable by a downstream completion-predicate enforcer
@@ -83,7 +84,7 @@ Phase 1: B → Normalize(B) → B̂ → Partition(B̂) → (Bₛ, Bₓ)    -- sp
            Bₛ = ∅ → no_compile → deactivate                -- nothing loop-consumable to compile (extension)
 Phase 2: ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) → Qc(K, R) → Stop → V   -- compilation + confirmation [Tool]
            V = Adjust(d) → recompile(K, R, d) → re-present Qc(K', R')   -- Sharpen rides as an Adjust direction
-           V = Confirm   → Phase 3                          -- Confirm over remaining ρ constitutes accepted_uncovered
+           V = Confirm   → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.signal | ρ ∈ R} → Phase 3   -- Confirm over remaining ρ records accepted_uncovered before Phase 3
 Phase 3: Emit(K) → G [TaskCreate] → converge(compilation trace) → deactivate   -- emission + handoff [Tool]
 
 ── LOOP ──
@@ -99,6 +100,7 @@ for each b ∈ Bₓ: the out-of-scope declaration with its substrate.
 Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
+accepted_uncovered(b) ≡ b ∈ Λ.accepted   -- recorded by AcceptResiduals(R) on Confirm (Phase 2), not inferred
 situated(C) = emitted(G) ∧ handoff_recorded
               ∧ (∀b∈Bₛ: (∃κ∈K compiled from b) ∨ accepted_uncovered(b))
               ∧ (∀b∈Bₓ: declared_oos(b))
@@ -116,13 +118,15 @@ Phase 1 Partition    (sense)        → Internal analysis (velocity classificati
 Phase 1 OOS          (extension)    → TextPresent+Proceed (fast-risk out-of-scope declaration with substrate handoff note)
 Phase 1 no_compile   (extension)    → TextPresent+Proceed (Bₛ = ∅: nothing to compile; deactivate)
 Phase 2 Qc           (constitution) → present (compiled condition set + residual disposition confirmation: Confirm / Adjust) [Tool]
+Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's signal into Λ.accepted, materializing accepted_uncovered(b) for the convergence predicate)
 Phase 3 Emit         (track)        → TaskCreate (coarse goal entries: subject + condition; TodoWrite is the harness-equivalent realization) [Tool]
 converge             (extension)    → TextPresent+Proceed (compilation trace; handoff recorded; deactivate)
 esc                  (extension)    → TextPresent+Proceed (no emission; deactivate as EarlyExit, not SituatedExecution)
 
 ── MODE STATE ──
 Λ = { phase: Phase, boundary: Option(B), slow: Option(Set(BoundarySignal)), oos: Option(Set(BoundarySignal)),
-       compiled: Option(K), residuals: Option(R), active: Bool, cause_tag: String }
+       compiled: Option(K), residuals: Option(R), accepted: Set(BoundarySignal), active: Bool, cause_tag: String }
+-- accepted: written by AcceptResiduals(R) on Confirm (Phase 2); accepted_uncovered(b) ≡ b ∈ Λ.accepted (CONVERGENCE)
 -- Compile-time only: Λ exists from invocation to emission; nothing persists into the execution interval.
 
 ── COMPOSITION ──
