@@ -106,7 +106,7 @@ esc (extension)   → TextPresent+Proceed (partial audit trace + unresolved-gap 
 
 ### Activation
 
-Command invocation activates mode until convergence or Esc; deferred tasks (queued/nonblocking gaps carried in `Σ.deferred`) remain resumable on later activation, per LOOP.
+Command invocation activates mode until convergence or Esc; deferred tasks (queued gaps carried in `Σ.deferred`; nonblocking gaps remain active registered gaps) remain resumable on later activation, per LOOP.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/gap` slash command or description-matching input. Always available.
@@ -136,6 +136,7 @@ When Syneidesis is active:
 | Trigger | Effect |
 |---------|--------|
 | Task completion | Auto-deactivate after final resolution |
+| User Esc key | EarlyExit (not AuditedDecision): present partial audit trace + declare remaining registered gaps as unresolved residual, then return to normal operation |
 
 ### Plan Mode Integration
 

@@ -13,7 +13,7 @@ Validate structural mapping between abstract and concrete domains through AI-gui
 
 ```
 ── FLOW ──
-Analogia(R) → Detect(R) → [¬uncertain: Qc(zero_gap_finding) → Stop → (Confirm: deactivate | Reopen(q): proceed)] → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → AssessFit(M, Sₐ, Sₜ) → [self_grounding(Sₐ, Sₜ): PartitionRead(F, Sₜ)] → I(M, F, Sₜ) → V → D_f → R' → (loop until terminalized)
+Analogia(R) → Detect(R) → [¬uncertain: Qc(zero_gap_finding) → Stop → (Confirm: deactivate | Reopen(q): reopen_seed := q, proceed)] → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → AssessFit(M, Sₐ, Sₜ) → [self_grounding(Sₐ, Sₜ): PartitionRead(F, Sₜ)] → I(M, F, Sₜ) → V → D_f → R' → (loop until terminalized)
 
 ── MORPHISM ──
 R
@@ -106,10 +106,10 @@ If no relevant text exists: pause activation and request a grounding target befo
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → uncertain? ∧ classify self_grounding(Sₐ, Sₜ)   -- mapping uncertainty checkpoint (silent); also recognize the self-grounding case (a located abstraction vs its OWN instances) — distinct from colimit route-away (locator absent → /induce)
-       [¬uncertain] Qc(zero_gap_finding) → Stop → ZeroGapConfirmation   -- zero-signal (Rule 11): Confirm → deactivate (mapping trivially established) | Reopen(q) → uncertain := true, proceed to Phase 1 [Tool]
+       [¬uncertain] Qc(zero_gap_finding) → Stop → ZeroGapConfirmation   -- zero-signal (Rule 11): Confirm → deactivate (mapping trivially established) | Reopen(q) → uncertain := true, reopen_seed := q, proceed to Phase 1 [Tool]
 Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M → AssessFit(M, Sₐ, Sₜ) → F → [self_grounding: PartitionRead(F, Sₜ) → PartitionReading]  -- domain decomposition + fit map; derived split-vs-trim reading in the self-grounding case (relay), via partition_reading() [Tool]
 Phase 2: (M, F) → I(M, F, Sₜ) → [self_grounding: surface PartitionReading + routing recommendation as pre-gate relay] → Qs(I, F, framing) → Stop → V  -- instantiation + validation; the partition reading is surfaced as relay before the gate [Tool]
-Phase 3: V → integrate(V, R, F) → (D_f, R') ; [self_grounding: R' carries PartitionReading + routing — Split → /conduct decompose-recovery recipe; Trim → /induce Narrow]  -- fit disposition + output update; partition relay folded into R' (sense)
+Phase 3: V → integrate(V, R, F) → (D_f, R') ; [self_grounding: R' carries PartitionReading + routing — Split → /conduct decompose-recovery recipe; Trim → /induce Narrow]  -- fit disposition + output update; partition relay folded into R' (track)
 
 ── LOOP ──
 After Phase 3: evaluate validation result.
@@ -141,6 +141,7 @@ esc          (extension)       → TextPresent+Proceed (partial transformation t
 ── MODE STATE ──
 Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,
       self_grounding: Bool, partition_reading: Option(PartitionReading),
+      reopen_seed: Option(StructuralQuestion),   -- the zero-gap Reopen(q) question the Phase 0 scan missed — the one entry Phase 1 cannot be assumed to re-derive; consumed into F.open at Phase 1, then cleared
       mappings: Set(Correspondence), confirmed: Set(Correspondence),
       dismissed: Set(Correspondence), remaining: Set(Correspondence),
       fit_map: F, fit_disposition: D_f, instantiations: List<Example>,
@@ -255,6 +256,7 @@ Decompose abstract and concrete domains, then construct structural correspondenc
    - `missing` tracks source components that do not yet have evidenced target correspondents
    - `open` is limited to structural questions whose answer could change validation of the mapping
    - Do not include general analogy ideas, background caveats, or future exploration horizons
+   - When `Λ.reopen_seed` is set (the zero-gap gate returned `Reopen(q)`): `F.open := F.open ∪ {reopen_seed}` — the reopened question is the one entry this scan cannot be assumed to re-derive — then clear `reopen_seed`
 4b. **Derive the partition reading** (self-grounding case only): when `self_grounding` holds, compute `partition_reading(F, Sₜ)` over the misfit members — the `misfit_instances(F, Sₜ)` projection: members `m ∈ Sₜ` implicated by `F.overextended` (members that violate an overextended facet's added constraint) or by `F.missing` (members lacking a facet the abstraction asserts of all members). The reading is **derived** from `F` (relay, no gate) and classifies the misfit set:
    - **Split** — the partition yields **≥2 non-empty cells** (the core cell plus rival cell(s), or ≥2 rival cells): the misfit members cluster into coherent rival essence(s), not just isolated outliers. The reading partitions `Sₜ` into three pairwise-disjoint groups: `rival_essences` (the InstanceClusters, each = member instances + the essence they support — pairwise disjoint), `core_remainder` (the members the original abstraction *genuinely fits* — `Sₜ` minus *all* misfits, so never a misfit), and `trim_outliers` (scattered/ambiguous misfits in no rival cell). The cell-candidate partition handed to `/conduct` is the rival cells **plus** the core cell (covering every fitting member); `trim_outliers` is surfaced for the checkpoint to narrow-out or place, never folded into the core. This is wrong fusion — the member set carries ≥2 essences forced under one form, so the recovery is **decompose** (the ≥2-cell count satisfies `/conduct`'s ≥2-move warrant). Route recommendation: the `/conduct` decompose-recovery recipe. Analogia *evidences* the split boundary and the full candidate partition; it does **not** constitute the cell assignment — that is the user's constitutive judgment at the recipe's boundary-checkpoint.
    - **Trim** — the partition yields **at most one non-empty cell**: either scattered misfits around an otherwise-sound core (narrow the outliers out), or a single coherent cell with an empty core (the abstraction is wholly the wrong essence and re-forms into one). The recovery is a **single-move** `/induce` (Narrow or Reorient), not a decompose — a single move does not warrant `/conduct`.

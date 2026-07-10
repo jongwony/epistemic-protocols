@@ -135,7 +135,7 @@ Phase 3 detect (sense) → Internal analysis (gap type relevance detection per e
 Phase 3 Rec  (track)  → Internal state update (detection/probe recording: Λ.detected[current] writes at detect / zero-gap Reopen / Horizon; Λ.probed[current] writes at the Horizon probe and verification loop)
 Phase 3 ZeroGapConfirm (constitution) → present (conditional: |GT| = 0 for current entry point; zero-gap finding + reasoning; Confirm/Reopen(description); Rule 10)
 Phase 3 Horizon (sense) → Internal analysis (admissible(HC) false-positive guard; opacity-preserving — never exposes the suspected edge, the answer, or the selection rationale)
-Phase 3 Qs  (constitution)   → present (mandatory; probe form per probe_kind — Qc for Expectation/Sequence, Qs otherwise; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 probe_kind (constitution) → present (mandatory; probe form per probe_kind — Qc for Expectation/Sequence, Qs otherwise; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3 StartAspectSelector (constitution) → present (conditional: |GT| > 0 ∧ Horizon did not preempt; "Which aspect to start with?" over GT_presented; fires once per entry point before the verification loop)
 Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
@@ -347,7 +347,7 @@ For each task (entry point):
 
 1. **TaskUpdate** to `in_progress`
 
-2. **Present overview**: Brief summary of the selected intent and its artifact basis, then show everyday aspect labels derived from detected gap types (`GT \ {Horizon}` — Horizon is never surfaced as a selectable aspect label; per Socratic opacity it is probed inline at detection, never offered in the start selector or any routing option) and let user select starting aspect:
+2. **Present overview**: Brief summary of the selected intent and its artifact basis. **Zero-gap branch** — if `|GT| = 0` for the current entry point: present the typed `ZeroGapFinding` with reasoning per Rule 10 and gate on `ZeroGapConfirmation`; `Confirm` binds `P' := P` (zero-gap phantasia stands as verified), TaskUpdate(completed), proceed to next task; `Reopen(description)` registers an Emergent gap in `Λ.detected[current]` and re-enters this Phase 3 with `GT = {Emergent}`. Otherwise, when the remaining aspect set is non-empty (`GT_presented ≠ ∅`), show everyday aspect labels derived from detected gap types (`GT \ {Horizon}` — Horizon is never surfaced as a selectable aspect label; per Socratic opacity it is probed inline at detection, never offered in the start selector or any routing option) and let user select starting aspect:
 
    Present the detected aspects as text output:
    - What this path covers: [plain-language aspect list]
