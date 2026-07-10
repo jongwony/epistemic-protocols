@@ -63,7 +63,7 @@ trigger_met(c)        = Bool                                                    
 deferred_pending(Λ)   = {s ∈ S_high | Λ.dispositions(s) = Deferred(c) ∧ ¬trigger_met(c)}                -- sources whose Deferred condition has not yet fired
 vetted(V)      = ∀ s ∈ S_high : ¬(∃c. J(s) = Deferred(c) ∧ trigger_met(c))
 VettedContext  = V where vetted(V)
-EarlyExit      = V where user_esc ∨ user_cancel  -- non-convergent early exit: working context remains un-vetted (or partially vetted under user_cancel); partial trace over judged sources, unjudged sources declared as unresolved residual
+EarlyExit      = V where user_esc ∨ user_cancel  -- non-convergent early exit: V as of exit (dispositions/trace = judgments recorded so far, empty when exit precedes the first judged batch); working context remains un-vetted (or partially vetted under user_cancel); unjudged sources declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
 Phase 0: W → identify(W) → S_high                                       -- silent scan (no user interaction)

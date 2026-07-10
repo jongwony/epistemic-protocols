@@ -118,7 +118,7 @@ On user ESC/cancel: present partial transformation trace over completed tasks, t
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
 VerifiedUnderstanding = P' where ∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R
-EarlyExit = P' where user_esc ∨ user_cancel  -- non-convergent early exit: understanding as of exit, partial trace over completed tasks, remaining tasks declared as unresolved residual
+EarlyExit = P' where user_esc ∨ user_cancel  -- non-convergent early exit: understanding as of exit (P' = last evaluated phantasia; P' := P over the current unprobed phantasia when exit precedes the first evaluated answer), partial trace over completed tasks, remaining tasks declared as unresolved residual
 Deactivation: `all_tasks_completed` after convergence evidence sets `Λ.active := false` and terminates as VerifiedUnderstanding; `user_esc` and `user_cancel` each set `Λ.active := false` and terminate as EarlyExit (partial trace + residual declaration), not VerifiedUnderstanding. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
 
 ── TOOL GROUNDING ──

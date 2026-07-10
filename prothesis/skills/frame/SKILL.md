@@ -13,7 +13,7 @@ Resolve absent frameworks by placing available epistemic perspectives before the
 
 ```
 ── FLOW ──
-Prothesis(U) → Q1(MB(U)) → MBᵥ → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → LensEstablished →
+Prothesis(U) → Q1(MB(U)) → J_mb → [confirm: MBᵥ | modify(field): MB' → re-present Q1(MB')] → G(MBᵥ) → C → {P₁...Pₙ}(C, MBᵥ) → S → Pₛ → LensEstablished →
   bind_substrate(Pₛ) → {⟨pᵢ, substrate_needᵢ, binding_hintsᵢ, channel_needᵢ⟩} →
   [single lens ∨ no specialized substrate: package(detailed lens) → LensReturn] |
   [≥2 lenses with at least one specialized substrate need: pair(lens ↔ substrate_need + binding_hints) ⊕ nudge(ConductRef) → SubstrateCorrespondence] →
