@@ -128,11 +128,11 @@ ReadOnlyAdmissible = { u : ReadOnlyVerifiable | coverage(u) ∧ support_integrit
                    --   Failure of either predicate → reclassify EmpiricallyObservable (backward arc T4). Step₃ ReadOnlyVerify takes the ReadOnlyVerifiable-classified candidate set (Uᵣ'_candidates, incl. support_integrity-undetermined items) and enforces this predicate at resolution time; ReadOnlyAdmissible characterizes the resolution survivors (= Uᵣ'), NOT a Step-3 input pre-filter.
 ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalObservation = (Uᵢ', ObservationSpec) → Uₑ  -- dynamic evidence gathering
-Uᵣ'_candidates = ReadOnlyVerifiable-classified uncertainties (Step 2 output → Step 3 input)
+Uᵣ'_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, (ReadOnlyVerifiable, s)) ∧ s ≠ UserTacit ∧ s ∉ Emergent(EvidenceSource) }  -- Step 2 output → Step 3 input
                -- includes support_integrity-undetermined items pending resolution-time enforcement; symmetric with Uₑ_candidates (transient set, NOT a MODE STATE partition bucket)
                -- Step 3 partitions this set: survivors → Uᵣ' (read_only_resolved); admissibility failures → backward arc → EmpiricallyObservable
 Uᵣ'        = Read-only verified uncertainties    -- Step 3 survivors only (= ReadOnlyAdmissible) → read_only_resolved; resolved (no Phase 2); excludes items routed via UserTacit override per Cite-or-observe rule
-Uₑ_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, (EmpiricallyObservable, s)) ∧ s ≠ UserTacit }
+Uₑ_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, (EmpiricallyObservable, s)) ∧ s ≠ UserTacit ∧ s ∉ Emergent(EvidenceSource) }
               -- Phase 1 observation checkpoint; excludes Cite-or-observe cite-based UserTacit overrides (those route directly to Uᵢ'')
 Uₑ         = Empirically observed uncertainties    -- evidence attached, proceeds to Phase 2
 Uᵢ''       = Remaining user-dependent uncertainties
@@ -140,6 +140,7 @@ Uᵢ''       = Remaining user-dependent uncertainties
              --           (b) Factual/EmpiricallyObservable with EvidenceSource = UserTacit (Cite-or-observe cited override)
              --           (c) Factual/ReadOnlyVerifiable with EvidenceSource = UserTacit (Cite-or-observe cited override)
              --           (d) reclassified Coherence/MemoryInternal landing in any of (a)-(c) above
+             --           (e) any Factual(v) with s ∈ Emergent(EvidenceSource) (channel unvalidated by definition; awaits Phase 2 Qs_emergent_channel confirmation)
              -- Phase 2 question candidates
 Uₙ         = Non-actionable detected uncertainties  -- Fiber(Coherence) = CrossDomain or Fiber(d) = Unit; shown in classify summary with routing target
 Action     = Tool call sequence (Write, Bash)

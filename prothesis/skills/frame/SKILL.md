@@ -91,7 +91,7 @@ After Phase 0 (Mission Brief confirmation only):
 
 During Phase 2 (Perspective Placement):
   Z ({P₁...Pₙ} = ∅ ∧ Pᵦ = ∅) → present the zero-result finding with reasoning → Stop:
-    modify(field) → re-present Q1(MB') → Stop → MBᵥ → re-enter Phase 1 (re-gather) → Phase 2
+    modify(field) → re-present Q1(MB') → Stop → J_mb (loop until confirm derives MBᵥ) → re-enter Phase 1 (re-gather) → Phase 2
     supply(Pᵦ')   → Pᵦ := Pᵦ' (auto-included) → re-present Sc with ≥ 1 novel proposal
     Esc           → terminate (nothing compiled)
   -- a single selected lens is valid (→ LensReturn); no two-lens minimum and no under-minimum recovery (there is no mode to satisfy)

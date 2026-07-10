@@ -151,7 +151,7 @@ Phase          ∈ {0, 0b, 1, 2, 3, 4}
 
 ── PHASE TRANSITIONS ──
 Phase 0: T, B_prior? → Probe(T) → scan_B_prior(T) → Λ.B_prior → Bᵢ?                                           -- boundary existence checkpoint + optional hermeneutic-seed DETECTION (silent); detection binds Λ.B_prior but does NOT seed B — B does not exist yet (loop state, incl. boundary_map, is initialized at Phase 0b step 4 after the kind is captured and the certificate passes, since binding is gated on a passing certificate)
-       [Bᵢ = ∅] Qc(zero_signal_finding) → Stop → ZeroSignalConfirmation   -- zero-signal (Rule 12): Confirm → deactivate (Horismos not activated) | Reopen(d) → Bᵢ := {d}, proceed [Tool]
+       [Bᵢ = ∅] Qc(zero_signal_finding) → Stop → ZeroSignalConfirmation   -- zero-signal (Rule 12): Confirm → deactivate (Horismos not activated) | Reopen(d) → Bᵢ := {d}, proceed to Phase 0b [Tool]
 Phase 0b: T → sync_kind_route(T) → KindRouteMap → [single_dominant_kind: relay(captured_kind + basis) → proceed (extension, kind committed, NO Stop) | else: Stop → captured_kind (constitution)]
        → bind_kind(captured_kind) → KindBinding
        → certify(KindBinding, registry) → DeficitFitCertificate
@@ -167,7 +167,7 @@ Phase 3: (user-response: A → parse(A) → (typed_A, termination?, override?)) 
 Phase 4 (optional): residual, BoundaryEssence → Qf(residual, FinalGateDisposition) → Stop → bulk_classify → DefinedBoundary
                                                                                                               -- final gate [Tool], reached via ExplicitTermination or Phase 1 substrate exhaustion; FinalGateDisposition = {UserSupplies, AIAutonomous}, every kind
 
-Phase 0 → Phase 0b: boundary_undefined(T) = true                                            -- domain signal present → dispatch the kind before the loop
+Phase 0 → Phase 0b: boundary_undefined(T) = true ∨ ZeroSignalConfirmation = Reopen(d)       -- domain signal present (probe-detected, or user-reopened seeding Bᵢ := {d}) → dispatch the kind before the loop
 Phase 0 → deactivate: boundary_undefined(T) = false ∧ ZeroSignalConfirmation = Confirm      -- no undefined boundary signal, zero-signal finding confirmed (Rule 12)
 Phase 0b sync_kind_route relay branch: single_dominant_kind(KindRouteMap) = true → relay captured_kind + basis, proceed (extension, NO turn yield) → continue to bind_kind   -- entropy→0 (option-set relay test): one kind dominates, foils route away; the captured kind is committed for the activation (a rare mis-relay is corrected by re-invoking /bound, not an in-loop redirect); certify stays fail-closed
 Phase 0b sync_kind_route gated branch: single_dominant_kind(KindRouteMap) = false → Stop → captured_kind (constitution)                                                                      -- ≥2 viable hypotheses ∨ emergent/naming → mandatory Constitution gate

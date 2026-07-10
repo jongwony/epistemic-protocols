@@ -39,7 +39,7 @@ ExternalWBS × ExecutionHorizon × ContextLifecycle
   → scan(wbs, cycle_n) → joints                   -- read the external WBS (reference, read-only) for natural joints: milestone boundaries, dependency seams, deliverable edges
   → pack(joints, horizon, lifecycle) → CutSet     -- THE IRREDUCIBLE CORE: search for a cut-set whose every unit fits one span, every cut sits on a joint, and coverage is complete with no work orphaned. Per-cycle realization (FLOW) proposes one (Anchor, proposed_cut, SpanFit); accepted cuts accumulate into this CutSet via integrate across cycles
   → fit(unit, horizon, lifecycle) → SpanFit       -- per-unit span-fit predicate (composes /distill: a unit fits one span iff its work is carriable by one self-contained span handoff)
-  → present(anchor, proposed_cut, SpanFit)        -- surface the highest-leverage uncut region's proposed cut for user judgment via Cognitive Partnership Move (Constitution)
+  → [SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: relay(AcceptCut) (extension) | else: present(anchor, proposed_cut, SpanFit) (constitution)]  -- single dominant cut relays without a turn yield (Rule 1 exception); otherwise surface the highest-leverage uncut region's proposed cut for user judgment via Cognitive Partnership Move
   → integrate(cut_disposition, CutSet, WorkUnitMap) → (CutSet', WorkUnitMap')  -- apply the settled cut to the map (reference entries only; the WBS is never copied)
   → check(WorkUnitMap') → InvariantStatus         -- span_fit ∧ natural_joint ∧ coverage_complete
   → finalize(WorkUnitMap', residual)              -- autonomous_pack the residual at its natural joints (Extension-default), then assert the three invariants hold over the whole map
