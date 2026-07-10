@@ -30,7 +30,7 @@ Diairesis(WB) → Probe(WB) → granularity_underdetermined? →
       Esc:        → ungraceful deactivate (residual uncut, partition abandoned)  -- caught before integrate; Esc binds no cut_disposition
       cut_disposition present → integrate(cut_disposition, cut_set, work_unit_map) → (cut_set', work_unit_map')  -- a region moves residual→committed only once its unit Fits (or the user explicitly accepts a non-Fits unit), else it stays in residual for a later cycle; skipped on a pure-termination Sufficient that carries no cut, in which case (cut_set', work_unit_map') = (cut_set, work_unit_map) so the downstream finalize stays bound
       check_invariants(work_unit_map') → InvariantStatus                  -- span_fit ∧ natural_joint ∧ coverage_complete over committed cuts
-      Sufficient: → autonomous_pack(residual) (track) → surface (extension) → finalize(work_unit_map', residual) → emit WorkUnitMap → converge
+      Sufficient: → autonomous_pack(residual) (track) → (work_unit_map'', residual := ∅) → surface (extension) → finalize(work_unit_map'') → emit WorkUnitMap → converge
       else:       → re-derive next-cycle anchor frame → cycle_n += 1, loop
 
 ── MORPHISM ──
@@ -42,7 +42,7 @@ ExternalWBS × ExecutionHorizon × ContextLifecycle
   → [SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: relay(AcceptCut) (extension) | else: present(anchor, proposed_cut, SpanFit) (constitution)]  -- single dominant cut relays without a turn yield (Rule 1 exception); otherwise surface the highest-leverage uncut region's proposed cut for user judgment via Cognitive Partnership Move
   → integrate(cut_disposition, CutSet, WorkUnitMap) → (CutSet', WorkUnitMap')  -- apply the settled cut to the map (reference entries only; the WBS is never copied)
   → check(WorkUnitMap') → InvariantStatus         -- span_fit ∧ natural_joint ∧ coverage_complete
-  → finalize(WorkUnitMap', residual)              -- autonomous_pack the residual at its natural joints (Extension-default), then assert the three invariants hold over the whole map
+  → finalize(WorkUnitMap'')                       -- WorkUnitMap'' = WorkUnitMap' with the residual autonomous_pack'ed at its natural joints (Extension-default, residual → ∅); finalize asserts the three invariants hold over the whole packed map
   → WorkUnitMap
 requires: granularity_underdetermined(WB)         -- runtime checkpoint (Phase 0); sole activation precondition
 deficit:  GranularityUnderdetermined              -- activation precondition (Layer 1/2)
@@ -93,7 +93,7 @@ Phase 2: Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n → Q
 Phase 3: (parse(A) → (cut_disposition?, termination?)) → [Esc → ungraceful deactivate, before integrate] → [cut_disposition present] integrate(cut_disposition, cut_set, work_unit_map) → (cut_set', work_unit_map') → check_invariants(work_unit_map') → InvariantStatus  -- integrate skipped on Esc (binds no cut) and on a pure-termination Sufficient (carries no cut); when skipped, (cut_set', work_unit_map') = (cut_set, work_unit_map) so the Sufficient finalize below stays bound; on the Phase 1 dominant-cut relay entry, parse(A) is skipped (no gate was presented) — cut_disposition := AcceptCut, integrate runs exactly once, then invariants and routing proceed normally
 Phase 3 → Phase 3 (relay): ambiguous parse (A readable as both a cut and termination) → one-turn relay confirmation of the parsed intent → re-parse → route  -- the ambiguous-parse state resolves before integrate/routing
 Phase 3 → Phase 1: ¬termination ∧ ¬Esc → re-derive next-cycle anchor frame → cycle_n += 1  -- continue the partition loop
-Phase 3 → converge (Sufficient): TerminationIntent = Sufficient → autonomous_pack(residual) (track) → surface (extension) → finalize(work_unit_map', residual) → assert InvariantStatus (coverage_complete hard) → emit WorkUnitMap
+Phase 3 → converge (Sufficient): TerminationIntent = Sufficient → autonomous_pack(residual) (track) → (work_unit_map'', residual := ∅) → surface (extension) → finalize(work_unit_map'') → assert InvariantStatus (coverage_complete hard) → emit WorkUnitMap
 Phase 3 → deactivate (ungraceful): Esc → residual uncut, partition abandoned (no WorkUnitMap)
 
 ── LOOP ──
