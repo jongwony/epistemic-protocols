@@ -57,7 +57,7 @@ file pure JSONL — the codex banner and any stderr warnings ride their own warn
 
 ```bash
 codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.6-sol \
-  --config model_reasoning_effort="high" \
+  --config model_reasoning_effort="xhigh" \
   --config mcp_servers.tavily.tool_timeout_sec=3600 \
   < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl 2>/tmp/goal_research_warn_${SUFFIX}.txt
 ```
