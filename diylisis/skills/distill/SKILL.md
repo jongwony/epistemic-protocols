@@ -82,8 +82,7 @@ content_free(e) ≡ no discriminating token of the task content — the declared
 InlineEvidence = { content: String }                         -- evidence carried inline rather than by reference
 HandoffContract { recipient_profile: RecipientProfile; next_task: String;
   allowed_sources: List(StableRef); execution_scope: String; verification_commands: List(String);
-  stop_condition: String; handoff_durability: HandoffDurability; emit_target: StableRef;
-  residual_unknown_policy: Map(String, "KEEP" | "ROUTE" | "DROP" | "ASK") }
+  stop_condition: String; handoff_durability: HandoffDurability; emit_target: StableRef }
                  -- F0 output; the contract every later phase reads for relevance and minimality. handoff_durability (Change A) is the switch F3b and F7 read to conditionalize the CorrectionDelta ledger. emit_target is the NOUN of the activation edge — the locator where F7 will emit the canonical handoff (under re-distillation it names the same file as the prior handoff); declared at F0 so the edge's locator exists before F5 reviews it
 HandoffDurability ∈ {OneShot, ExternalVersioned(version_ref: StableRef), DurableRepo} ∪ Emergent(HandoffDurability)
                  -- F0 classification of the handoff's lifetime/target — the switch that conditionalizes the CorrectionDelta ledger (read by F3b at Phase 0 bind, by F7 at emit):
