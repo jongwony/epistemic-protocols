@@ -76,7 +76,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You drafted a tough email to send — asking your manager for time off during a busy season. You think it reads fine, but you're not sure how it lands. "Fine to me" doesn't tell you how a tired manager or a peer in HR might read it.
 
-**Intervention**: `/frame` recommends analytical perspectives (e.g., "manager under deadline pressure," "HR fairness lens," "peer comparing workloads") and can compile a multi-perspective review spec the session then executes, so you see the email from each angle before hitting send.
+**Intervention**: `/frame` recommends analytical perspectives (e.g., "manager under deadline pressure," "HR fairness lens," "peer comparing workloads") and hands off the lenses for the session (via `/conduct`) to execute and synthesize, so you see the email from each angle before hitting send.
 
 **Trial prompt**: "Let's practice: say 'Review this email draft for me' and I'll show how /frame recommends audience perspectives"
 

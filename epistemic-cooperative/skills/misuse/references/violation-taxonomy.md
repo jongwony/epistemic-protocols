@@ -94,7 +94,7 @@ Instance count is NOT a gate — it is evidence for sensing, not a precondition.
 
 ### Violation: `/frame` Over-extension (separate class, evidence-pending)
 
-- **Definition** — the post-`/frame` session continued elaborating when `/induce` should have been handed off. The framed analysis (substrate-executed from `/frame`'s compiled spec) reaches 5+ converged perspectives, the user independently proposes a candidate name within or after that analysis, and no `/induce` invocation followed.
+- **Definition** — the post-`/frame` session continued elaborating when `/induce` should have been handed off. The framed analysis (lenses `/frame` formed, executed and synthesized under the arrangement `/conduct` designed) reaches 5+ converged perspectives, the user independently proposes a candidate name within or after that analysis, and no `/induce` invocation followed.
 - **Detection signals**:
   - The framed analysis reaches 5+ converged perspectives (perspective count visible in the framed-analysis output structure)
   - User message after the framed analysis contains a coined name pattern (a noun phrase the AI did not propose, used as if naming the synthesized abstraction)

@@ -16,7 +16,7 @@ the skill descriptions alone under-trigger invocation. Route from the deficit, n
 ## Analysis
 
 **`/frame`** (Prothesis) — FrameworkAbsent → FramedInquiry
-  when: No framework — need analytical lenses or a multi-perspective inquiry spec
+  when: No framework — need analytical lenses for a multi-perspective inquiry
 
 **`/ground`** (Analogia) — MappingUncertain → ValidatedMapping
   when: An abstract idea's correspondence to a concrete domain is uncertain — needs structural grounding, not just assertion
