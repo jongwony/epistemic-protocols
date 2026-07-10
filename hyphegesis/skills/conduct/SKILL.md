@@ -1,11 +1,11 @@
 ---
 name: conduct
-description: "Conduct the method of a session's epistemic work before object-level cognition begins. When a work prospect needs multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial, design a conduct topology over the protocol graph and hand off a method plan with in-session checkpoints; single-move work relays to that one protocol instead of conducting. Type: (MethodUnderdetermined, AI, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod. Alias: Hyphegesis(ὑφήγησις)."
+description: "Conduct the method of a session's epistemic work before object-level cognition begins. When a work prospect needs multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial, design a conduct topology over the protocol graph and hand off a method plan with in-session checkpoints; single-move work relays to that one protocol instead of conducting. Type: (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod. Alias: Hyphegesis(ὑφήγησις)."
 ---
 
 # Hyphegesis Protocol
 
-Conduct how a session's epistemic work will be carried out — the order, independence, reconciliation, termination, and routing of its cognitive moves — when that method is underdetermined before object-level cognition begins. The morphism is **design THEN hand off**: Hyphegesis designs a conduct topology over the protocol graph and emits a method plan with in-session checkpoints, then stops; the substrate executes the moves. Type: `(MethodUnderdetermined, AI, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod`.
+Conduct how a session's epistemic work will be carried out — the order, independence, reconciliation, termination, and routing of its cognitive moves — when that method is underdetermined before object-level cognition begins. The morphism is **design THEN hand off**: Hyphegesis designs a conduct topology over the protocol graph and emits a method plan with in-session checkpoints, then stops; the substrate executes the moves. Type: `(MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod`.
 
 ## Definition
 

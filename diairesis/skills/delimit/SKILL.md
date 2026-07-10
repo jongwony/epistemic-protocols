@@ -1,11 +1,11 @@
 ---
 name: delimit
-description: "Delimit a large body of work into right-sized execution units before its method is conducted. Searches for the cut-set over an external work-breakdown structure such that each unit fits one execution span, every cut falls at a natural joint, and coverage is complete with no work orphaned — then emits a WorkUnitMap that references the WBS without owning it, ready to flow into /conduct. Type: (GranularityUnderdetermined, AI, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap. Alias: Diairesis(διαίρεσις)."
+description: "Delimit a large body of work into right-sized execution units before its method is conducted. Searches for the cut-set over an external work-breakdown structure such that each unit fits one execution span, every cut falls at a natural joint, and coverage is complete with no work orphaned — then emits a WorkUnitMap that references the WBS without owning it, ready to flow into /conduct. Type: (GranularityUnderdetermined, Hybrid, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap. Alias: Diairesis(διαίρεσις)."
 ---
 
 # Diairesis Protocol
 
-Delimit a large body of work into right-sized execution units — partition a work horizon at its natural joints so each unit fits one span — when the granularity of the cut is underdetermined. The morphism is **cut, then hand the cut-set on**: Diairesis searches for the cut-set, the user constitutes it joint by joint, and the emitted WorkUnitMap flows into `/conduct` as its work prospect. Type: `(GranularityUnderdetermined, AI, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap`.
+Delimit a large body of work into right-sized execution units — partition a work horizon at its natural joints so each unit fits one span — when the granularity of the cut is underdetermined. The morphism is **cut, then hand the cut-set on**: Diairesis searches for the cut-set, the user constitutes it joint by joint, and the emitted WorkUnitMap flows into `/conduct` as its work prospect. Type: `(GranularityUnderdetermined, Hybrid, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap`.
 
 ## Definition
 
