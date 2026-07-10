@@ -13,7 +13,9 @@ Vet working context by dialectical antithesis before action through structured p
 
 ```
 ── FLOW ──
-W → identify(W) → S_high → tag(provenance, freshness, leverage) → S' → posit(antithesis) → A[] →
+W → identify(W) → S_high →
+  S_high = ∅: emit empty VettedContext (extension) → deactivate   -- trivial convergence (no audit-candidate source)
+  S_high ≠ ∅: tag(provenance, freshness, leverage) → S' → posit(antithesis) → A[] →
   Q(per-source disposition slots) → J → integrate(J, S') → V →
   (loop if ∃ s : disposition(s) = Deferred ∧ trigger(s) met)
 
@@ -60,13 +62,15 @@ Qs             = Per-source disposition gate
 J              = Map(Source, Disposition)
 V              = VettedContext { dispositions: J, trace: Map(Source, Antithesis) }
 trigger_met(c)        = Bool                                                                            -- evaluator: true when a Deferred re_trigger_condition c is now satisfied at the LOOP scan
-deferred_pending(Λ)   = {s ∈ S_high | Λ.dispositions(s) = Deferred(c) ∧ ¬trigger_met(c)}                -- sources whose Deferred condition has not yet fired
+unresolved(Λ)         = {s ∈ S_high | s ∉ dom(Λ.dispositions) ∨ (∃c. Λ.dispositions(s) = Deferred(c) ∧ trigger_met(c))}   -- sources still requiring judgment: unjudged, or Deferred whose trigger has fired (re-vetting due); an untriggered Deferred is resolved (vetted-compatible), not pending
 vetted(V)      = dom(J) = S_high ∧ ∀ s ∈ S_high : ¬(∃c. J(s) = Deferred(c) ∧ trigger_met(c))
 VettedContext  = V where vetted(V)
 EarlyExit      = V where user_esc ∨ user_cancel  -- non-convergent early exit: V as of exit (dispositions/trace = judgments recorded so far, empty when exit precedes the first judged batch); working context remains un-vetted (or partially vetted under user_cancel); unjudged sources declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
 Phase 0: W → identify(W) → S_high                                       -- silent scan (no user interaction)
+Phase 0 → converge (trivial): S_high = ∅ → emit empty VettedContext (dispositions = ∅, trace = ∅) as relay, deactivate   -- trivial convergence (TYPES: cardinality 0; no audit-candidate source)
+Phase 0 → Phase 1: S_high ≠ ∅
 Phase 1: S_high → Step₁ tag(provenance, freshness, leverage) → S'       [Tool: Read, Grep]
          Step₂ posit(antithesis per s ∈ S') → A[]                        -- per-source Pattern A ∪ B ∪ C ∪ D ∪ Emergent(Pattern) generation
 Phase 2: (A[], disposition slots) → Qs(per-source) → Stop → J            [Tool: Constitution interaction]
@@ -83,12 +87,13 @@ On user_esc/user_cancel: present partial trace over judged sources (s → antith
 
 ── CONVERGENCE ──
 vetted(V): see TYPES
-progress(Λ) = 1 if |S_high| = 0 else 1 - |deferred_pending(Λ)| / |S_high|   -- S_high = ∅ (Phase 0 trivial convergence, no audit-candidate source) is fully converged, not undefined
+progress(Λ) = 1 if |S_high| = 0 else 1 - |unresolved(Λ)| / |S_high|   -- S_high = ∅ (Phase 0 trivial convergence, no audit-candidate source) is fully converged, not undefined; progress = 1 coincides with vetted(V)
 early_exit = user_esc ∨ user_cancel
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 identify        (sense)        → Internal analysis (high-leverage / age / chain / contradiction / inference-character scan)
+Phase 0 trivial_converge (extension)   → TextPresent+Proceed (conditional: S_high = ∅ — relay the empty VettedContext, no audit-candidate source; deactivate)
 Phase 1 ProvenanceTag   (observe)      → Read, Grep (verification of source origin, authorized claim, and downstream references)
 Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C/D/Emergent antithesis generation per source)
 Phase 2 Qs              (constitution) → present (mandatory; per-source disposition slots; Esc → loop termination at LOOP level, not a Disposition)
@@ -168,6 +173,7 @@ When Elenchus is active:
 | Trigger | Effect |
 |---------|--------|
 | All dispositions resolved (no Deferred or all triggers unmet) | Emit VettedContext, proceed |
+| Phase 0 scan yields S_high = ∅ | Emit empty VettedContext trivially (relay), deactivate |
 | User Esc | Return to normal operation; working context remains un-vetted |
 | User explicitly cancels mid-loop | Accept partial vetting; remaining sources annotated as un-vetted in trace |
 

@@ -100,7 +100,7 @@ Q      = Applicability inquiry over F-scoped mismatch (gate interaction)
 A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}  -- A ∈ V; answer drawn from the mismatch's value-space (local_value_space = {Confirm, Adapt, Dismiss})
 ZeroMismatchConfirmation = user's answer to a zero-mismatch finding ∈ {Confirm, Reopen(aspect)}  -- Confirm accepts the result as-is (Rule 9); Reopen names an aspect the Phase 0 scan missed, re-entering Eval focused on that aspect
 R'     = Adapted result (contextualized output)
-ContextualizedExecution = R' where ∀ task ∈ registered: task.status = completed
+ContextualizedExecution = R' where (∀ task ∈ registered: task.status = completed) ∧ (Mᵢ = ∅ ⟹ zero-mismatch confirmation obtained: ZeroMismatchConfirmation = Confirm, or Reopen(aspect) whose focused re-scan still yields Mᵢ = ∅ → relay(finding) — Rule 9)
                  -- registered = certificate-passing mismatches only; routed/ambiguous mismatches are handed forward, not adapted in-place
 EarlyExit = R' where user_esc  -- non-convergent early exit: result as of exit (adapted or not), partial trace over completed/dismissed tasks, remaining pending mismatches declared as unresolved residual
 
@@ -127,7 +127,7 @@ If adjudicated(R', X): all tasks completed → convergence.
 progress(Λ) MAY REGRESS: because re-scan over a mutated R' can register newly certified mismatches, the completed/total ratio is non-monotone — this is the signature of the transformative-revalidation side, not an error.
 User can exit at Phase 1 (dismiss all remaining, or Esc).
 Continue until: contextualized(R') OR user ESC (EarlyExit, not ContextualizedExecution).
-Mode remains active until convergence.
+Mode remains active until convergence or explicit user exit (Esc).
 On user ESC: present partial transformation trace ranging over Σ.history ∪ Λ.routed ∪ Λ.residual as accumulated so far, then declare remaining pending(Σ) mismatches as unresolved residual.
 Convergence evidence: At adjudicated(R', X), present transformation trace ranging over ALL dispositioned mismatches — Σ.history ∪ Λ.routed ∪ Λ.residual (routed and terminal-residual mismatches never enter pending(Σ)/Σ.history, so the trace must range over all three): for each (m, _) ∈ Λ.state.history (adapted/dismissed), show (ApplicationDecontextualized(m) → adaptation_result(m)); for each (m, target) ∈ Λ.routed, show (m → routed_to(sibling_deficit, target)) — NOT ApplicationDecontextualized(m), since status = route means a sibling deficit owns m (it was never in-scope for ApplicationDecontextualized); for each m ∈ Λ.residual, show (m → terminal_residual(unattributable)) — surfaced for the user as a residual the certificate could not attribute. Convergence is demonstrated, not asserted.
 
@@ -142,12 +142,13 @@ trivial convergence (all-routed): when Mᵢ ≠ ∅ but Mᵢ_passed = ∅ AND ev
 certificate gate:  every registered mismatch carried certificate.status = pass (fail-closed, at registration) — routed/ambiguous mismatches never entered pending(Σ), so a contextualized R' is assembled only from in-scope (ApplicationDecontextualized-owned), fit-certified adaptations; backward misfit was handed forward (/gap, /inquire, /bound, /distill), not adapted in-place
 -- stratification: applicable(R', X) ⊆ adjudicated(R', X)
 -- operational proxy: ∀ task completed ⟹ adjudicated(R', X) ⟹ contextualized(R')
-progress(Λ) = 1 if |total_tasks| = 0 else |completed_tasks| / |total_tasks|   -- total_tasks = 0 (Mᵢ = ∅, or Mᵢ≠∅∧Mᵢ_passed=∅ trivial convergence via routing) is fully converged, not undefined; otherwise NON-MONOTONE: may regress when re-scan over the mutated R' registers newly certified mismatches (transformative-revalidation signature)
+progress(Λ) = 1 if |total_tasks| = 0 else |completed_tasks| / |total_tasks|   -- total_tasks = 0 (Mᵢ = ∅, or Mᵢ≠∅∧Mᵢ_passed=∅ trivial convergence via routing) is fully converged, not undefined — the Mᵢ = ∅ leg only after the Rule 9 zero-mismatch confirmation (Confirm, or Reopen whose focused re-scan stays ∅); otherwise NON-MONOTONE: may regress when re-scan over the mutated R' registers newly certified mismatches (transformative-revalidation signature)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Eval   (sense)   → Internal analysis (no external tool)
 ZeroMismatchConfirm (constitution) → present (conditional: Mᵢ = ∅; zero-mismatch finding + reasoning; Confirm/Reopen(aspect) — Rule 9)
+reopen_relay (extension) → TextPresent+Proceed (conditional: Reopen(aspect) focused re-scan still yields Mᵢ = ∅ → relay the still-zero finding and deactivate; one attempt per aspect, basis = the focused Eval re-scan)
 bind_kind (sense)   → Internal analysis (capture each detected mismatch as a KindBinding {label, positive_predicate, evidence, origin ∈ {seed, emergent}, atomicity}; non-atomic mismatch → split before certify)
 certify (extension) → Internal analysis (fail-closed DeficitFitCertificate; fit of KindBinding.positive_predicate against the documented sibling-deficit scopes — each sibling protocol's deficit: declaration plus the registered deficit inventory (sibling-deficit nodes; epharmoge has no outgoing routing edge, so the fit rests on the deficit-scope declarations, not edge topology): owner = ApplicationDecontextualized when in-scope; status = pass | route | ambiguous; basis = the cited deficit-scope fit, shown at the mismatch's Phase 1 surfacing. Relay (Extension) because the fit is grounded in a citable source and an unclear fit returns status = ambiguous → defer, never a user gate. Runs at registration time — within Phase 0 for Mᵢ, within Phase 2 re-scan for Mₑ — BEFORE the mismatch enters pending(Σ))
 AssessFit (sense) → Internal analysis (no external tool)
@@ -162,7 +163,7 @@ esc      (extension)  → TextPresent+Proceed (partial transformation trace + un
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
       fit_map: F, state: Σ, active: Bool, cause_tag: String,
-      reopen_focus: Option(aspect),   -- the zero-mismatch Reopen(aspect) focus the Phase 0 scan missed; threads into the focused re-scan, cleared after it; a focused re-scan that still yields Mᵢ = ∅ presents its finding as relay and deactivates (one attempt per aspect — deterministic-identical re-runs are not re-gated, per the re-assessment idiom)
+      reopen_focus: Option(String),   -- the zero-mismatch Reopen(aspect) focus the Phase 0 scan missed; threads into the focused re-scan, cleared after it; a focused re-scan that still yields Mᵢ = ∅ presents its finding as relay and deactivates (one attempt per aspect — deterministic-identical re-runs are not re-gated, per the re-assessment idiom)
       routed: List<(Mismatch, Protocol)>,   -- backward-misfit mismatches handed forward (never entered pending(Σ))
       deferred: Set(Mismatch),   -- ATOMIC mismatches with certificate.status = ambiguous, parked for their ONE bounded narrowed-scope re-assessment against the fixed detection state — (R, X) for an initial mismatch (Phase 0), (R', X) for an emerged mismatch (Phase 2 re-scan) (a non-atomic mismatch is split pre-registration, never parked here; status ≠ pass — never entered pending(Σ)). After the bounded attempt each resolves to pass / route / terminal-residual, so "no deferred-pending" (≡ no mismatch still awaiting its bounded re-assessment) always becomes reachable
       residual: Set(Mismatch) }   -- TERMINAL-residual mismatches: stayed ambiguous after their one bounded re-assessment (unattributable). Never entered pending(Σ); adjudicated by terminal_residual(a), surfaced as a non-blocking residual at convergence

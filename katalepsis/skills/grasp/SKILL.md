@@ -135,6 +135,7 @@ Phase 3 detect (sense) → Internal analysis (gap type relevance detection per e
 Phase 3 Rec  (track)  → Internal state update (detection/probe recording: Λ.detected[current] writes at detect / zero-gap Reopen / Horizon; Λ.probed[current] writes at the Horizon probe and verification loop)
 Phase 3 ZeroGapConfirm (constitution) → present (conditional: |GT| = 0 for current entry point; zero-gap finding + reasoning; Confirm/Reopen(description); Rule 10)
 Phase 3 Horizon (sense) → Internal analysis (admissible(HC) false-positive guard; opacity-preserving — never exposes the suspected edge, the answer, or the selection rationale)
+Phase 3 Qs(HC) (constitution) → present (conditional: Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]; preempting Horizon probe — fires once at detection, before the start-aspect selector; scenario-only open question, opacity-preserving — never a Horizon label, the edge, the answer, or the rationale; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3 probe_kind (constitution) → present (mandatory; probe form per probe_kind — Qc for Expectation/Sequence, Qs otherwise; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3 StartAspectSelector (constitution) → present (conditional: |GT| > 0 ∧ Horizon did not preempt; "Which aspect to start with?" over GT_presented; fires once per entry point before the verification loop)
 Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)

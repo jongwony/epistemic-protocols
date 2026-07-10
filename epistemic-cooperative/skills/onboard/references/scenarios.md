@@ -25,7 +25,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Situation**: You open a new session wanting to continue yesterday's conversation with Claude — something about a recommendation you liked, or a decision you made together — but you can't remember the exact topic or what was concluded. Re-explaining would lose the original framing.
 
-**Intervention**: `/recollect` scans session recall indices for narrative candidates matching your vague cue, then presents the highest-priority story-form candidate per cycle (what was asked → where the talk went → what was decided) for you to recognize — a high-confidence single match is emitted directly, no gate — resolving ambiguous recall into concrete prior context before current work proceeds.
+**Intervention**: `/recollect` scans your session transcripts plus their recall indices — the transcript record is authoritative, so sessions missing from the indices are still found — for narrative candidates matching your vague cue, then presents the highest-priority story-form candidate per cycle (what was asked → where the talk went → what was decided) for you to recognize — a high-confidence single match is emitted directly, no gate — resolving ambiguous recall into concrete prior context before current work proceeds.
 
 **Trial prompt**: "Let's practice: say 'Pick up where we left off yesterday' and I'll show how /recollect surfaces narrative candidates"
 

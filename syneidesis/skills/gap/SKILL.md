@@ -64,7 +64,7 @@ If new gaps: TaskCreate → add to queue.
 Pending gaps are active registered gaps ∪ Σ.deferred; each cycle reclassifies pending gaps through AssessGapPressure(D, pending) before Sel.
 P.queued updates Σ.deferred at TaskCreate/TaskUpdate; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
 Continue until: all tasks completed (AuditedDecision) OR user ESC (EarlyExit).
-Mode remains active until convergence.
+Mode remains active until convergence or explicit user exit (Esc).
 Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
 On user ESC: present partial audit trace over judged gaps, then declare remaining registered gaps as unresolved residual.
 

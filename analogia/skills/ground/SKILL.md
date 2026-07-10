@@ -107,7 +107,7 @@ If no relevant text exists: pause activation and request a grounding target befo
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → uncertain? ∧ classify self_grounding(Sₐ, Sₜ)   -- mapping uncertainty checkpoint (silent); also recognize the self-grounding case (a located abstraction vs its OWN instances) — distinct from colimit route-away (locator absent → /induce)
        [¬uncertain] Qc(zero_gap_finding) → Stop → ZeroGapConfirmation   -- zero-signal (Rule 11): Confirm → deactivate (mapping trivially established) | Reopen(q) → uncertain := true, reopen_seed := q, proceed to Phase 1 [Tool]
-Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M → AssessFit(M, Sₐ, Sₜ) → F → [self_grounding: PartitionRead(F, Sₜ) → PartitionReading]  -- domain decomposition + fit map; derived split-vs-trim reading in the self-grounding case (relay), via partition_reading() [Tool]
+Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M → AssessFit(M, Sₐ, Sₜ) → F → [reopen_seed = Some(q): F.open := F.open ∪ {q}; reopen_seed := None] → [self_grounding: PartitionRead(F, Sₜ) → PartitionReading]  -- domain decomposition + fit map (Reopen seed folded into F.open, then cleared — track); derived split-vs-trim reading in the self-grounding case (relay), via partition_reading() [Tool]
 Phase 2: (M, F) → I(M, F, Sₜ) → [self_grounding: surface PartitionReading + routing recommendation as pre-gate relay] → Qs(I, F, framing) → Stop → V  -- instantiation + validation; the partition reading is surfaced as relay before the gate [Tool]
 Phase 3: V → integrate(V, R, F) → (D_f, R') ; [self_grounding: R' carries PartitionReading + routing — Split → /conduct decompose-recovery recipe; Trim → /induce Narrow]  -- fit disposition + output update; partition relay folded into R' (track)
 
@@ -123,7 +123,7 @@ Convergence evidence: At terminalized(R', F, D_f), present transformation trace 
 
 ── CONVERGENCE ──
 terminalized(R', F, D_f) = all_addressed(R') ∧ fit_disposition_declared(F, D_f)
-progress(Λ) = 1 - |remaining| / |mappings|
+progress(Λ) = 1 if |mappings| = 0 else 1 - |remaining| / |mappings|   -- mappings = ∅ (Phase 0 zero-gap trivial convergence: Confirm deactivates before Phase 1 constructs M) is fully converged, not undefined
 narrowing(V, M) = |remaining(after)| < |remaining(before)|
 early_exit = user_declares_mapping_sufficient
 
@@ -132,6 +132,7 @@ early_exit = user_declares_mapping_sufficient
 Phase 0 Detect  (sense)     → Internal analysis (no external tool; also classify self_grounding — a located abstraction vs its own instances, distinct from colimit route-away)
 Phase 0 ZeroGapConfirm (constitution) → present (conditional: ¬uncertain(mapping); zero-gap finding + reasoning; Confirm/Reopen — Rule 11)
 Phase 1 Map/AssessFit (observe) → Read, Grep (stored knowledge extraction: domain structure and fit analysis); WebSearch (conditional: external domain knowledge)
+Phase 1        (track)      → Internal state update (conditional: Λ.reopen_seed = Some(q) — fold q into F.open at fit-map assembly, then Λ.reopen_seed := None, consumed once)
 Phase 1 PartitionRead (sense) → Internal analysis (no external tool; DERIVED split-vs-trim reading over F's misfit instances; self-grounding case ONLY; verdict = Split → route to the /conduct decompose-recovery recipe; verdict = Trim → /induce Narrow; basis cited from F; surfaced as pre-gate relay text within Phase 2 Qs, no separate gate)
 Phase 2 Qs      (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (track)     → Internal state update

@@ -152,7 +152,7 @@ the whole. When a Horizon probe lands, the user's frame expands (`P → P'`):
 surfacing the blind spot is what resolves the unknown. Katalepsis stops there — the
 surfaced edge is the *basis* for a fusion of horizons, but the fusion itself (a part
 revising the whole framing) belongs downstream to `/conduct`'s synthesis-checkpoint
-machinery (its `CheckpointBrief` output-shape candidates), executed by the substrate
+machinery (its `CheckpointBrief` fusion candidates), executed by the substrate
 — `/frame` supplies the lenses only, it never compiles the fusion directive — not
 to the comprehension loop. This keeps the part-revises-whole movement where it belongs and
 the Katalepsis loop strictly terminating.
@@ -160,7 +160,7 @@ the Katalepsis loop strictly terminating.
 **Complementary to Prothesis and Hyphegesis, not duplicative.** Prothesis (`/frame`) forms
 the distinct interpretive lenses; Hyphegesis (`/conduct`) instantiates Gadamer's
 *Horizontverschmelzung* (fusion of horizons) at its synthesis checkpoint — compiled
-into the `CheckpointBrief`'s output-shape candidates, executed by the
+into the `CheckpointBrief`'s fusion candidates, executed by the
 substrate — fusing the lenses' distinct horizons into one assessment. Katalepsis' `Horizon` operates one layer down: a single user's
 comprehension of a single result. Rule 14a fixes this boundary so the two do not
 conflate.
