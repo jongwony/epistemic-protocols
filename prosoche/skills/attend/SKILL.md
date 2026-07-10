@@ -21,7 +21,7 @@ Prosoche(C) →
     Bₛ = ∅ → no_compile → deactivate            -- nothing loop-consumable (relay)
   ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) →
   Qc(K, R) → Stop → V →
-    V = Adjust(d) → recompile(K, R, d) → Qc(K', R')
+    V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → Qc(K, R)
     V = Confirm   → AcceptResiduals(R) → Emit(K)[TaskCreate] → G →    -- remaining residuals recorded into Λ.accepted, never emitted
   converge(compilation trace) → SituatedExecution
 
@@ -83,7 +83,7 @@ Phase 1: B → Normalize(B) → B̂ → Partition(B̂) → (Bₛ, Bₓ)    -- sp
            Bₓ ≠ ∅ → OOS(Bₓ)                                -- out-of-scope declaration, substrate named (extension)
            Bₛ = ∅ → no_compile → deactivate                -- nothing loop-consumable to compile (extension)
 Phase 2: ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) → Qc(K, R) → Stop → V   -- compilation + confirmation [Tool]
-           V = Adjust(d) → recompile(K, R, d) → re-present Qc(K', R')   -- Sharpen rides as an Adjust direction
+           V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → re-present Qc(K, R)   -- Sharpen rides as an Adjust direction
            V = Confirm   → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.signal | ρ ∈ R} → Phase 3   -- Confirm over remaining ρ records accepted_uncovered before Phase 3
 Phase 3: Emit(K) → G [TaskCreate] → converge(compilation trace) → deactivate   -- emission + handoff [Tool]
 

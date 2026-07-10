@@ -70,7 +70,7 @@ On user ESC: present partial audit trace over judged gaps, then declare remainin
 
 ── ADJUSTMENT RULES ──
 A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
-A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ Gₛ }
+A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ[0]} }
 A(Probe, _, σ)      = σ { re-scan(expanded) }        -- additional verification round (depth varies by stakes)
 
 ── SELECTION RULE ──
