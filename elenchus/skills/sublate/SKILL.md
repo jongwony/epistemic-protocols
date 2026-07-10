@@ -62,7 +62,8 @@ V              = VettedContext { dispositions: J, trace: Map(Source, Antithesis)
 trigger_met(c)        = Bool                                                                            -- evaluator: true when a Deferred re_trigger_condition c is now satisfied at the LOOP scan
 deferred_pending(Λ)   = {s ∈ S_high | Λ.dispositions(s) = Deferred(c) ∧ ¬trigger_met(c)}                -- sources whose Deferred condition has not yet fired
 vetted(V)      = ∀ s ∈ S_high : ¬(∃c. J(s) = Deferred(c) ∧ trigger_met(c))
-VettedContext  = V where vetted(V) ∨ user_esc
+VettedContext  = V where vetted(V)
+EarlyExit      = V where user_esc ∨ user_cancel  -- non-convergent early exit: working context remains un-vetted (or partially vetted under user_cancel); partial trace over judged sources, unjudged sources declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
 Phase 0: W → identify(W) → S_high                                       -- silent scan (no user interaction)
@@ -76,8 +77,9 @@ After Phase 3: scan for Deferred dispositions whose re_trigger_condition is met.
 If ∃ s : J(s) = Deferred(c) ∧ trigger_met(c): return to Phase 1 with s as fresh ContextSuspect; new antithesis under updated evidence.
 If all dispositions resolved (no Deferred or all triggers unmet): terminate with VettedContext.
 User can exit at Phase 2 (user_esc).
-Continue until: vetted(V) ∨ user_esc.
+Continue until: vetted(V) OR user_esc/user_cancel (EarlyExit, not VettedContext).
 Convergence evidence: At vetted(V), present transformation trace — for each s ∈ S_high, show (s → antithesis(s) → disposition(s)). Convergence is demonstrated, not asserted.
+On user_esc/user_cancel: present partial trace over judged sources (s → antithesis(s) → disposition(s) for each judged s), then declare unjudged sources in S_high as unresolved residual.
 
 ── CONVERGENCE ──
 vetted(V): see TYPES
@@ -92,6 +94,7 @@ Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C/D an
 Phase 2 Qs              (constitution) → present (mandatory; per-source disposition slots; Esc → loop termination at LOOP level, not a Disposition)
 Phase 3 integrate       (track)        → Internal state update (Λ.dispositions, Λ.history)
 converge                (extension)    → TextPresent+Proceed (per-source disposition trace; proceed with VettedContext)
+esc                     (extension)    → TextPresent+Proceed (partial per-source disposition trace + unjudged-source residual declaration; terminate as EarlyExit, not VettedContext)
 
 ── MODE STATE ──
 Λ = {

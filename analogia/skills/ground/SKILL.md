@@ -88,8 +88,9 @@ V        = User validation ∈ {Confirm, Adjust(feedback), Dismiss}
 ValidationRecord = { example: Example, answer: V, fit_label: FitLabel, residual_disposition: FitDisposition }
 R'       = Updated output with explicit mapping status (in the self-grounding case, R' additionally carries the relay PartitionReading and its routing recommendation: verdict = Split → /conduct decompose-recovery recipe; verdict = Trim → /induce Narrow; the partition reading is an annotation on the validated mapping, not a change to the terminal type)
 ValidatedMapping = R' where terminalized(R', F, D_f)
-terminalized(R', F, D_f) = (all_addressed(R') ∧ fit_disposition_declared(F, D_f)) ∨ user_esc
+terminalized(R', F, D_f) = all_addressed(R') ∧ fit_disposition_declared(F, D_f)
 all_addressed(R') = ∀ c ∈ M : confirmed(c) ∨ dismissed(c)
+EarlyExit = R where user_esc  -- non-convergent early exit: current output R unmodified, partial trace over already-addressed correspondences, remaining correspondences declared as unresolved residual (mapping not terminalized)
 
 ── R-BINDING ──
 bind(R) = explicit_arg ∪ current_output ∪ most_recent_output
@@ -114,11 +115,12 @@ If V = Confirm: mark correspondence confirmed; record fit label snapshot and D_f
 If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
 If V = Dismiss: accept this correspondence as unresolved for this session; record fit label snapshot and D_f; terminalize if all correspondences addressed and fit disposition is declared.
 Max 3 mapping attempts per domain pair.
-Continue until: terminalized(R', F, D_f) OR attempts exhausted.
+Continue until: terminalized(R', F, D_f) OR attempts exhausted OR user ESC (EarlyExit, not ValidatedMapping).
+On user ESC: present partial transformation trace over already-addressed correspondences, then declare remaining correspondences as unresolved residual.
 Convergence evidence: At terminalized(R', F, D_f), present transformation trace — for each record in Λ.validations, show (MappingUncertain(record.example.mapping_trace) → record.fit_label → record.answer). When D_f.status = Bounded, append the bounded residual mapping uncertainty from D_f.declaration and briefly invite the user to supply a missing Sₜ correspondent if one can be identified — a free response within the existing turn, not a new gate or post-convergence morphism. When self_grounding holds, append the PartitionReading as relay: the verdict (Split / Trim / Hold), the full Sₜ partition when verdict = Split (rival cells, core cell, trim outliers), and the routing recommendation (Split → the /conduct decompose-recovery recipe; Trim → /induce Narrow; Hold → no partition action) — a relay annotation, not a new gate. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-terminalized(R', F, D_f) = (all_addressed(R') ∧ fit_disposition_declared(F, D_f)) ∨ user_esc
+terminalized(R', F, D_f) = all_addressed(R') ∧ fit_disposition_declared(F, D_f)
 progress(Λ) = 1 - |remaining| / |mappings|
 narrowing(V, M) = |remaining(after)| < |remaining(before)|
 early_exit = user_declares_mapping_sufficient
@@ -131,6 +133,7 @@ Phase 1 PartitionRead (extension) → Internal analysis (DERIVED split-vs-trim r
 Phase 2 Qs      (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (track)     → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace incl. PartitionReading relay when self_grounding; proceed with validated mapping)
+esc          (extension)       → TextPresent+Proceed (partial transformation trace + unresolved-correspondence declaration; terminate as EarlyExit, not ValidatedMapping)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,
@@ -214,7 +217,7 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Trigger | Effect |
 |---------|--------|
 | All correspondences addressed (confirmed or dismissed) | Proceed with validated mapping |
-| User Esc key | Accept current output without further grounding |
+| User Esc key | EarlyExit (not ValidatedMapping): present partial transformation trace + declare remaining correspondences as unresolved residual, then accept current output without further grounding |
 | Attempt cap reached | Surface remaining uncertainty, accept current output with explicit unresolved mapping note |
 
 ## Protocol

@@ -54,7 +54,8 @@ A        = User answer ∈ {Provide(context), Point(location), Dismiss, Unknown(
              -- EvidenceSource in ValidSources(v)) and re-enters Phase 1 for reclassification; routing arc formalized in PHASE TRANSITIONS
 Ac         = User coherence classification ∈ CoherenceType     -- Phase 1 Qc gate answer type
 X'       = Updated prospect (context-enriched)
-InformedExecution = X' where remaining = ∅ ∨ user_esc
+InformedExecution = X' where remaining = ∅
+EarlyExit = X' where user_esc  -- non-convergent early exit: X' as of exit (original prospect + any partial integration), partial transformation trace over resolved uncertainties, remaining declared as unresolved residual (morphism not completed)
 -- Layer 1 (epistemic)
 Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
                -- open set; external human communication excluded
@@ -169,6 +170,7 @@ If remaining = ∅: proceed with execution.
 User can exit at Phase 2 (early_exit).
 Continue until: informed(X') OR user ESC.
 Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.empirically_observed ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
+On user ESC (EarlyExit, not InformedExecution): present the same partial transformation trace restricted to uncertainties already resolved, then declare `remaining` as explicit unresolved residual.
 
 ── CONVERGENCE ──
 actionable(Λ) = uncertainties \ non_factual_detected       -- Fiber(Factual) + Fiber(Coherence)=MemoryInternal uncertainties
@@ -189,6 +191,7 @@ Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering,
 Phase 2 Qs      (constitution)        → present (mandatory: classify result + uncertainty surfacing; user provides context judgment on insufficiency; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
+esc          (extension)       → TextPresent+Proceed (partial transformation trace + unresolved residual declaration; terminate as EarlyExit, not InformedExecution)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: Prospect, uncertainties: Set(Uncertainty),
@@ -286,7 +289,7 @@ Heuristic signals for context insufficiency inference (not hard gates):
 |---------|--------|
 | All uncertainties resolved (context, read-only, observed, or user) | Proceed with updated prospect |
 | All remaining uncertainties dismissed | Proceed with original prospect + defaults |
-| User Esc key | Return to normal operation |
+| User Esc key | EarlyExit (not InformedExecution): present partial transformation trace + declare `remaining` as unresolved residual, then return to normal operation |
 
 ## Uncertainty Identification
 

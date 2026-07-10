@@ -73,7 +73,8 @@ V              = Judgment ∈ {Confirm, Adjust(direction)}
 Emit           = K → G [Tool: TaskCreate]
 G              = goal entries: coarse task entries consumable by a downstream completion-predicate enforcer
 Phase          ∈ {0, 1, 2, 3}
-SituatedExecution = (emitted(G) ∧ handoff_recorded) ∨ no_compile ∨ user_esc
+SituatedExecution = (emitted(G) ∧ handoff_recorded) ∨ no_compile
+EarlyExit = user_esc  -- non-convergent early exit: no emission, no handoff recorded; distinct from no_compile (which is a legitimate trivial-completion terminal, not an abort)
 
 ── PHASE TRANSITIONS ──
 Phase 0: C → Infer(C) → B                                  -- boundary inference (sense; evidence cited per signal)
@@ -89,7 +90,7 @@ Phase 3: Emit(K) → G [TaskCreate] → converge(compilation trace) → deactiva
 Single pass with a bounded adjustment loop at Phase 2:
   Qc(K, R) → Confirm → Phase 3 (terminal; remaining residuals become accepted_uncovered)
   Qc(K, R) → Adjust(direction) → recompile → re-present (Sharpen moves a residual toward κ)
-  Esc → deactivate (no emission)
+  Esc → deactivate (EarlyExit, not SituatedExecution — no emission, no handoff recorded)
 Stateless: Prosoche terminates at emission. No state survives into the execution interval —
 no session approvals, no per-action classification, no mid-execution checkpoint.
 Convergence evidence: at emission, present the compilation trace — for each b ∈ Bₛ:
@@ -101,7 +102,7 @@ Convergence is demonstrated, not asserted.
 situated(C) = emitted(G) ∧ handoff_recorded
               ∧ (∀b∈Bₛ: (∃κ∈K compiled from b) ∨ accepted_uncovered(b))
               ∧ (∀b∈Bₓ: declared_oos(b))
-SituatedExecution = situated(C) ∨ no_compile ∨ user_esc
+SituatedExecution = situated(C) ∨ no_compile
 -- The guarantee is compile-time: every loop-consumable boundary signal is either compiled into a
 -- verifiable condition or accepted as an uncovered residual at the gate — visibly, in the trace;
 -- every fast risk is visibly delegated.
@@ -117,6 +118,7 @@ Phase 1 no_compile   (extension)    → TextPresent+Proceed (Bₛ = ∅: nothing
 Phase 2 Qc           (constitution) → present (compiled condition set + residual disposition confirmation: Confirm / Adjust) [Tool]
 Phase 3 Emit         (track)        → TaskCreate (coarse goal entries: subject + condition; TodoWrite is the harness-equivalent realization) [Tool]
 converge             (extension)    → TextPresent+Proceed (compilation trace; handoff recorded; deactivate)
+esc                  (extension)    → TextPresent+Proceed (no emission; deactivate as EarlyExit, not SituatedExecution)
 
 ── MODE STATE ──
 Λ = { phase: Phase, boundary: Option(B), slow: Option(Set(BoundarySignal)), oos: Option(Set(BoundarySignal)),

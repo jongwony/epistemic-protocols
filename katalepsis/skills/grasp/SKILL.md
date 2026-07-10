@@ -103,14 +103,16 @@ If correct: emit continuation closure, then Aspect summary — show probed vs un
   User selects additional aspect → Resume with selected gap type.
   User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, emit side-branch continuation closure, resume current loop position.
 Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
-Continue until: all selected tasks completed OR user ESC/cancel.
+Continue until: all selected tasks completed (VerifiedUnderstanding) OR user ESC/cancel (EarlyExit).
 Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
+On user ESC/cancel: present partial transformation trace over completed tasks, then declare remaining tasks as unresolved residual.
 
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
-VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc ∨ user_cancel
-Deactivation: `all_tasks_completed` after convergence evidence, `user_esc`, and `user_cancel` each set `Λ.active := false`. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
+VerifiedUnderstanding = P' where ∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R
+EarlyExit = P' where user_esc ∨ user_cancel  -- non-convergent early exit: understanding as of exit, partial trace over completed tasks, remaining tasks declared as unresolved residual
+Deactivation: `all_tasks_completed` after convergence evidence sets `Λ.active := false` and terminates as VerifiedUnderstanding; `user_esc` and `user_cancel` each set `Λ.active := false` and terminate as EarlyExit (partial trace + residual declaration), not VerifiedUnderstanding. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -130,6 +132,7 @@ Phase 3 Tᵤ  (track)  → TaskUpdate (progress tracking)
 Phase 3 Prop (track)  → TaskCreate (proposal ejection)
 Phase 3 C    (extension)  → TextPresent+Proceed (continuation closure: verified status + side branch if any + return pointer + next moves)
 converge    (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
+esc/cancel  (extension)  → TextPresent+Proceed (partial transformation trace + unresolved-task residual declaration; terminate as EarlyExit, not VerifiedUnderstanding)
 -- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity
 
 ── MODE STATE ──
@@ -208,7 +211,7 @@ At Phase 3, present comprehension verification via Cognitive Partnership Move (C
 
 | Trigger | Effect |
 |---------|--------|
-| User explicitly cancels | Accept current understanding |
+| User explicitly cancels | EarlyExit (not VerifiedUnderstanding): present partial transformation trace + declare remaining tasks as unresolved residual, then accept current understanding |
 | User demonstrates full comprehension | Early termination |
 
 ## Entry Point Taxonomy

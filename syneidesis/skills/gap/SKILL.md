@@ -50,7 +50,8 @@ J      = Judgment ∈ {Address(c), Dismiss, Probe}
 c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
-AuditedDecision = Σ' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
+AuditedDecision = Σ' where ∀ task ∈ registered: task.status = completed
+EarlyExit = Σ' where user_esc  -- non-convergent early exit: state as of exit, partial audit trace over judged gaps, remaining registered gaps declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → Scan(D) → G → AssessGapPressure(D, G) → P  -- checkpoint + detection + pressure map (silent)
@@ -62,9 +63,10 @@ After Phase 2: re-scan for newly surfaced gaps from user response.
 If new gaps: TaskCreate → add to queue.
 Pending gaps are active registered gaps ∪ Σ.deferred; each cycle reclassifies pending gaps through AssessGapPressure(D, pending) before Sel.
 P.queued updates Σ.deferred at TaskCreate/TaskUpdate; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
-Continue until: all tasks completed OR user ESC.
+Continue until: all tasks completed (AuditedDecision) OR user ESC (EarlyExit).
 Mode remains active until convergence.
 Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
+On user ESC: present partial audit trace over judged gaps, then declare remaining registered gaps as unresolved residual.
 
 ── ADJUSTMENT RULES ──
 A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
@@ -87,6 +89,7 @@ Scan (observe) → Read, Grep (stored knowledge extraction: context for gap iden
 AssessGapPressure (observe) → Internal analysis (selection-only classification over Scan output; surfaces why a gap is load-bearing while gap resolution remains the user's constitutive act)
 A (track)      → Internal state update (no external tool)
 converge (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
+esc (extension)   → TextPresent+Proceed (partial audit trace + unresolved-gap residual declaration; terminate as EarlyExit, not AuditedDecision)
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, pressureMapSnapshot: P, active: Bool }  -- snapshot supports audit trace only; recompute before every Sel
