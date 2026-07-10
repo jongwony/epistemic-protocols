@@ -83,7 +83,7 @@ On user_esc/user_cancel: present partial trace over judged sources (s → antith
 
 ── CONVERGENCE ──
 vetted(V): see TYPES
-progress(Λ) = 1 - |deferred_pending(Λ)| / |S_high|
+progress(Λ) = 1 if |S_high| = 0 else 1 - |deferred_pending(Λ)| / |S_high|   -- S_high = ∅ (Phase 0 trivial convergence, no audit-candidate source) is fully converged, not undefined
 early_exit = user_esc
 
 ── TOOL GROUNDING ──
