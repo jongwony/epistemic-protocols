@@ -6,7 +6,7 @@ Resolve vague recall into recognized context (ἀνάμνησις: recollection,
 
 ## What is Anamnesis?
 
-A modern reinterpretation of Platonic ἀνάμνησις (recollection) — a protocol that **scans existing memory and session stores against a vague hook, then guides the user through Socratic recognition of the right prior context rather than returning keyword-matched retrieval results**.
+A modern reinterpretation of Platonic ἀνάμνησις (recollection) — a protocol that **scans the SSOT (session transcript) and the hypomnesis INDEX against a vague hook — `memory/` is a non-scanned, user-curated adjunct — then guides the user through Socratic recognition of the right prior context rather than returning keyword-matched retrieval results**.
 
 ### The Core Problem
 

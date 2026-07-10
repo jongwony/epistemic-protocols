@@ -10,7 +10,7 @@ Resolve vague recall into recognized context through AI-guided contextual scan a
 
 ## Definition
 
-**Anamnesis** (ἀνάμνησις): A dialogical act of resolving vague recall into recognized context, where AI detects empty intention, scans hypomnesis and memory stores with contextual awareness, presents narrative candidates for Socratic recognition, and facilitates guided recall orientation when initial candidates do not match — grounded in user-constituted identification rather than keyword retrieval.
+**Anamnesis** (ἀνάμνησις): A dialogical act of resolving vague recall into recognized context, where AI detects empty intention, scans the SSOT plus the hypomnesis INDEX with contextual awareness (`memory/` is a non-scanned, user-curated realization-layer adjunct — see STORE TOPOLOGY), presents narrative candidates for Socratic recognition, and facilitates guided recall orientation when initial candidates do not match — grounded in user-constituted identification rather than keyword retrieval.
 
 ```
 ── FLOW ──
