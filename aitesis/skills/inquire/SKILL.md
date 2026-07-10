@@ -13,7 +13,9 @@ Infer context insufficiency before execution through AI-guided inquiry. Type: `(
 
 ```
 ── FLOW ──
-Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
+Aitesis(X) → Scan(X, dimensions) → Uᵢ →
+  [if Uᵢ = ∅] sufficiency_relay(reasoning) → proceed (trivial InformedExecution)
+  Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
   classify(Uᵢ', dimension) → [if off-diagonal] Qc → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) →
   ReadOnlyVerify(Uᵣ'_candidates) → (Uᵣ' resolved | admissibility-fail → reclassify EmpiricallyObservable) →
   [if Uₑ_candidates ≠ ∅] EmpiricalObservation(Uₑ_candidates) → Uₑ →
@@ -231,7 +233,7 @@ Write is authorized for observation instrument setup (temporary test artifacts w
 
 ### Activation
 
-AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0); surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
+AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0), except the zero-unknown sufficiency relay which presents its reasoning without yielding the turn; surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
@@ -441,7 +443,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - a factual question via a newly observed evidence channel; your confirmation requested before treating this channel as resolved
   - a consistency question within the same scope, treated as a factual question (its evidence path is selected by the same procedure as a directly-classified factual item)
   - a consistency question spanning multiple scopes — routed to a downstream protocol
-  - a relevance question — routed to `/elicit`
+  - a relevance question — routed to the protocol matching its deficit (`/gap`, `/bound`, or `/elicit`)
   - Any of these classifications to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]

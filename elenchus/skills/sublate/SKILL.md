@@ -68,7 +68,7 @@ EarlyExit      = V where user_esc ∨ user_cancel  -- non-convergent early exit:
 ── PHASE TRANSITIONS ──
 Phase 0: W → identify(W) → S_high                                       -- silent scan (no user interaction)
 Phase 1: S_high → Step₁ tag(provenance, freshness, leverage) → S'       [Tool: Read, Grep]
-         Step₂ posit(antithesis per s ∈ S') → A[]                        -- per-source Pattern A ∪ B ∪ C ∪ D generation
+         Step₂ posit(antithesis per s ∈ S') → A[]                        -- per-source Pattern A ∪ B ∪ C ∪ D ∪ Emergent(Pattern) generation
 Phase 2: (A[], disposition slots) → Qs(per-source) → Stop → J            [Tool: Constitution interaction]
 Phase 3: J → integrate(J, S') → V                                        -- per-source disposition recorded
 
@@ -84,17 +84,17 @@ On user_esc/user_cancel: present partial trace over judged sources (s → antith
 ── CONVERGENCE ──
 vetted(V): see TYPES
 progress(Λ) = 1 if |S_high| = 0 else 1 - |deferred_pending(Λ)| / |S_high|   -- S_high = ∅ (Phase 0 trivial convergence, no audit-candidate source) is fully converged, not undefined
-early_exit = user_esc
+early_exit = user_esc ∨ user_cancel
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 identify        (sense)        → Internal analysis (high-leverage / age / chain / contradiction / inference-character scan)
 Phase 1 ProvenanceTag   (observe)      → Read, Grep (verification of source origin, authorized claim, and downstream references)
-Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C/D antithesis generation per source)
+Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C/D/Emergent antithesis generation per source)
 Phase 2 Qs              (constitution) → present (mandatory; per-source disposition slots; Esc → loop termination at LOOP level, not a Disposition)
 Phase 3 integrate       (track)        → Internal state update (Λ.dispositions, Λ.history)
 converge                (extension)    → TextPresent+Proceed (per-source disposition trace; proceed with VettedContext)
-esc                     (extension)    → TextPresent+Proceed (partial per-source disposition trace + unjudged-source residual declaration; terminate as EarlyExit, not VettedContext)
+esc/cancel              (extension)    → TextPresent+Proceed (partial per-source disposition trace + unjudged-source residual declaration; terminate as EarlyExit, not VettedContext)
 
 ── MODE STATE ──
 Λ = {

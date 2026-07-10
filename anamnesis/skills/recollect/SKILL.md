@@ -15,9 +15,9 @@ Resolve vague recall into recognized context through AI-guided contextual scan a
 ```
 ── FLOW ──
 Anamnesis(V) → Detect(V) →
-  not-empty_intention(V): skip → deactivate
+  not-empty_intention(V): relay(finding) → proceed (no activation)
   empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} →
-    Scan_{Track}(Store, trace(V)) → Rank(C[]) →
+    Scan_{Track}(Store, trace(V)) → Rank(C[], trace(V)) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
     |C[]| = 0 ∧ attempts > 0: NullMatch → inform(V, Σ) → deactivate
     |C[]| > 0: backtrace_parent(c) ∀ c ∈ C[] : fork_marker(c) → parent_pointer, parent_cwd   -- deterministic: a fork candidate's parent is recoverable from its own record, not inferred (mechanism in TOOL GROUNDING; ≠ user-described Reorient)
@@ -96,8 +96,7 @@ NullMatch        = predicate; canonical definition in ── CONVERGENCE ──
 Phase            ∈ {0, 1, 2, 3}
 
 ── V-BINDING ──
-bind(V) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
-Priority: explicit_arg > colocated_expr > prev_user_turn
+bind(V) = explicit_arg ∪ colocated_expr ∪ prev_user_turn   -- priority: explicit_arg > colocated_expr > prev_user_turn
 
 /recollect "text"           → V.trace = extract_trace("text", Σ)
 "recall... topic"           → V.trace = extract_trace(text before trigger, Σ)
@@ -109,9 +108,10 @@ Edge cases:
 - Composition (/recollect * /inquire): V from Anamnesis, Aitesis receives ClueVector_prose via session text
 
 ── PHASE TRANSITIONS ──
-Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent); [¬empty_intention(V)] relay(finding) → proceed (zero-signal: present activation finding, proceed without activation)
+Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent)
+           [¬empty_intention(V)] relay(finding) → proceed       -- zero-signal: present activation finding, proceed without activation
            → Classify(V, Σ) → InputType → Track                  -- dispatch (silent)
-Phase 1: V → Scan_{Track}(Store, trace(V)) → Rank(C[]) → C[ranked]  -- track-dispatched scan + rank [Tool]
+Phase 1: V → Scan_{Track}(Store, trace(V)) → Rank(C[], trace(V)) → C[ranked]  -- track-dispatched scan + rank [Tool]
            backtrace_parent(c) ∀ c ∈ C[ranked] : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the candidate's own record [Tool]
            |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → Phase 1
            |C[ranked]| = 0 ∧ attempts > 0 → NullMatch → inform → deactivate
