@@ -81,7 +81,7 @@ StructuredAnchor = { kind: ∈ {memory, github_issue, github_pr}, ref: String, c
                   -- ref stores the canonicalized literal (issue/PR numbers normalized to "#N", memory paths prefixed "memory/"); canonical-form grep over INDEX is form-invariant (a search for "#309" hits ref: "#309") — the canonical form is the dedup key, so raw surface variants ("PR 309") collapse into it
 LegacyAnchor     = String   -- opaque: memory path, URL, session ID, doc path — entries written before structured anchors; read as kind-unknown extends edges, never rejected, no migration
 Prose            = String   -- source-agnostic NL description
-Rank             = List(Candidate) → List(Candidate)   -- track-primary signal dominates; evidence_mode is a secondary tie-break + confidence modulator only (never a filter; Null neutral)
+Rank             = (List(Candidate), RecallTrace) → List(Candidate)   -- track-primary signal dominates; evidence_mode is a secondary tie-break + confidence modulator only (never a filter; Null neutral)
 Probe            = (V, Σ) → List(SocraticQuestion)
 SocraticQuestion = { dimension: ∈ {temporal, associative, contextual}, question: String }
 R                = Recognition ∈ {Recognize(Candidate), Refine, Reorient(description)}
@@ -170,12 +170,12 @@ converge            (extension)    → TextPresent+Proceed (convergence trace)
 Λ = { phase: Phase, V: VagueRecall,
       candidates: List(Candidate), presented: Set(Candidate),
       recognized: Optional(Candidate),
-      probes: List(SocraticQuestion),
+      probes: List(SocraticQuestion), history: List<(Candidate, R)>,   -- history appended at Phase 3 integration: Log (Candidate, R) to history
       attempts: Nat, active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
-*: /recollect ∘ /inquire — RecognizedContext → ClueVector_prose seeds Aitesis as input substrate; on NullMatch, the accumulated recall trace seeds Aitesis to search SSOT directly (INDEX may lack entries while SSOT retains the information).
+*: /recollect ∘ /inquire — RecalledContext → ClueVector_prose seeds Aitesis as input substrate; on NullMatch, the accumulated recall trace seeds Aitesis to search SSOT directly (INDEX may lack entries while SSOT retains the information).
 
 ── ENTROPY EXTRACTION ──
 extract : Session → Set(IdentifierTuple)

@@ -85,7 +85,7 @@ partition_reading(F, Sₜ) =   -- invoked ONLY under self_grounding (guarded in 
 I        = Concrete instantiation: M × F × Sₜ → Example
 Example  = { scenario: String, mapping_trace: List<Correspondence>, fit_basis: F }
 V        = User validation ∈ {Confirm, Adjust(feedback), Dismiss}
-ZeroGapConfirmation = user's answer to a zero-gap finding ∈ {Confirm, Reopen(StructuralQuestion)}  -- Confirm accepts the trivial mapping (Rule 15); Reopen names a structural question the Phase 0 scan missed, setting uncertain := true and proceeding to Phase 1
+ZeroGapConfirmation = user's answer to a zero-gap finding ∈ {Confirm, Reopen(StructuralQuestion)}  -- Confirm accepts the trivial mapping (Rule 11); Reopen names a structural question the Phase 0 scan missed, setting uncertain := true and proceeding to Phase 1
 ValidationRecord = { example: Example, answer: V, fit_label: FitLabel, residual_disposition: FitDisposition }
 R'       = Updated output with explicit mapping status (in the self-grounding case, R' additionally carries the relay PartitionReading and its routing recommendation: verdict = Split → /conduct decompose-recovery recipe; verdict = Trim → /induce Narrow; the partition reading is an annotation on the validated mapping, not a change to the terminal type)
 ValidatedMapping = R' where terminalized(R', F, D_f)
@@ -234,7 +234,7 @@ Analyze text for mapping uncertainty. This phase is **silent** — no user inter
 3. **Colimit-shape detection**: assess whether `R` is a colimit-shaped input — `essence_sensed` over concrete instances plus `locator_absent(A)` (Periagoge formal `¬located(A)`; from Analogia's substitution-interface vantage this surfaces as no source abstraction Sₐ available). Instance accumulation contributes evidence strength for the essence signal. When both criteria hold, route to `/induce` (Periagoge) for abstraction formation; Analogia remains scoped to mapping validation from a source abstraction to a concrete target.
 3b. **Self-grounding recognition**: if `located(Sₐ)` holds AND the grounding target is the abstraction against its OWN member instances (`Sₜ` = the instances `Sₐ` claims to subsume), set `self_grounding = true`. This is the complement of the colimit case (locator present, not absent): the abstraction already has a name and is being checked for wrong fusion against its members, not formed from scratch. Self-grounding does not route away — it proceeds through the normal mapping-validation phases, and the derived partition reading is computed in Phase 1.
 4. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
-5. If all mappings trivially established: present finding per Rule 15 before proceeding (Analogia not activated)
+5. If all mappings trivially established: present finding per Rule 11 before proceeding (Analogia not activated)
 6. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
 
 **Scan scope**: Bound text R, conversation context, observable domain signals. Does NOT modify files or call external services.

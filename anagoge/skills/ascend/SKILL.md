@@ -83,7 +83,7 @@ SedimentedConceptNode = { concept: String, forged_by: Set(Deposit), node: Deposi
 infer_edges      = (Set(Deposit), Σ) → Set(TraversalEdge)        -- read-time edge inference from stored anchors + shared keywords/session metadata; output is reconstructed, never read from a stored field
 Traverse         = (Set(Deposit), Set(TraversalEdge)) → (Set(Deposit), Set(TraversalEdge))   -- UnitType-dispatched read-time traversal: follow inferred edges to the connected sub-graph reachable from the entry deposits
 Assemble         = (Set(Deposit), Set(TraversalEdge)) → List(HigherUnit)  -- compose the inferred-edge-connected deposits of the traversed sub-graph into typed higher units
-Rank             = List(HigherUnit) → List(HigherUnit)           -- recall-alignment + inferred-edge-connectivity dominate
+Rank             = (List(HigherUnit), R) → List(HigherUnit)      -- recall-alignment (against the recall trace R) + inferred-edge-connectivity dominate
 Rescope          = (R, Σ) → List(RescopeOption)                  -- structured re-traversal navigation on empty assembly
 RescopeOption    = { dimension: ∈ {boundary, scope, unit_type}, option: String }
 ScopeHint        = RescopeOption  -- the dimension+option the user selects at the Rescope gate to re-navigate traversal
@@ -206,6 +206,7 @@ converge              (extension)    → TextPresent+Proceed (convergence trace)
       recognized: Optional(HigherUnit),
       rescopes: List(RescopeOption),
       attempts: Nat,   -- initialized 0 ONCE at activation (Λ init), preserved across Reorient re-entry to Phase 0; incremented once per traversal at Phase 1 start; cap (max 3) bounds the traversal count (empty-branch Rescope-vs-NullMatch and Phase 3 re-traversal-vs-surface both gate on it)
+      history: List<(HigherUnit, A)>,   -- appended at Phase 3 integration: Log (HigherUnit, A) to history
       active: Bool, cause_tag: String }
 
 ── GRAPH INVARIANTS ──
