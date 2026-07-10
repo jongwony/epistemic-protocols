@@ -51,7 +51,7 @@ c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
 Σ      = State { reviewed: Set(G), deferred: List(G), blocked: Bool }
 AuditedDecision = Σ' where ∀ task ∈ registered: task.status = completed
-EarlyExit = Σ' where user_esc  -- non-convergent early exit: state as of exit, partial audit trace over judged gaps, remaining registered gaps declared as unresolved residual
+EarlyExit = Σ' where user_esc  -- non-convergent early exit: state as of exit (Σ' = Σ when exit precedes the first adjustment), partial audit trace over judged gaps, remaining registered gaps declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → Scan(D) → G → AssessGapPressure(D, G) → P  -- checkpoint + detection + pressure map (silent)

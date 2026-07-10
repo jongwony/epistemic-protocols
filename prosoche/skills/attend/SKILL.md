@@ -238,13 +238,13 @@ Compile each slow/threshold signal into a `{ subject, condition }` pair:
 - **subject** — a coarse framing of the work unit the condition guards. Coarse means work-unit granularity, not procedural steps: the downstream enforcer owns the interval's internal step decomposition.
 - **condition** — a verifiable predicate: an executable check with a determinate pass/fail outcome (command exit status, test result, countable threshold, file-state assertion). A condition that can only be stated as prose judgment ("the code is clean enough") is not compilable — surface it as a residual for the user to either sharpen into a predicate or accept as uncovered.
 
-Present the compiled set as pre-gate text (per-condition: source signal, evidence, predicate), then **present** via Cognitive Partnership Move (Constitution):
+Present the compiled set as pre-gate text (per-condition: source signal, evidence, predicate), and each remaining residual with its uncovered-risk note, then **present** via Cognitive Partnership Move (Constitution):
 
 ```
 Compiled guardrail set ready. How should it land?
 
 Options:
-1. **Confirm** — emit these conditions as the goal entries for the execution interval
+1. **Confirm** — emit these conditions as the goal entries for the execution interval; any remaining residuals are accepted as uncovered (unguarded during the interval, recorded in the trace)
 2. **Adjust** — modify, add, or remove conditions: [prompt for direction]
 ```
 

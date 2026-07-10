@@ -22,7 +22,7 @@ Diairesis(WB) → Probe(WB) → granularity_underdetermined? →
   underdetermined:         init_loop_state: cycle_n=1, cut_set=∅, work_unit_map=∅, residual=regions(WB), committed=∅, regions_touched=regions(WB), joints=∅, invariant_status=⊥, history=∅, loop:
     Phase 1 Scan(WB, cycle_n) [per-cycle re-scan] → joints(region) → Pack(joints, horizon, lifecycle) → (Anchor[cycle_n], proposed_cut, SpanFit) →
       Anchor empty ∧ residual = ∅: → emit WorkUnitMap → converge          -- every region cut, nothing left
-      Anchor empty ∧ residual ≠ ∅: → autonomous_pack(residual) (extension) → surface → emit WorkUnitMap → converge  -- substrate exhausted; AI completes the residual cuts at their natural joints (Extension-default), surfaced as relay
+      Anchor empty ∧ residual ≠ ∅: → autonomous_pack(residual) (track) → surface (extension) → emit WorkUnitMap → converge  -- substrate exhausted; AI completes the residual cuts at their natural joints (Extension-default), surfaced as relay
       SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: → relay(AcceptCut) (extension) → Phase 3 integrate (skip Qc)  -- single dominant cut (Rule 11): no genuine alternative disposition exists for this Anchor
       else:                        → Phase 2
     Phase 2 Qc(Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n) → Stop → A
@@ -30,7 +30,7 @@ Diairesis(WB) → Probe(WB) → granularity_underdetermined? →
       Esc:        → ungraceful deactivate (residual uncut, partition abandoned)  -- caught before integrate; Esc binds no cut_disposition
       cut_disposition present → integrate(cut_disposition, cut_set, work_unit_map) → (cut_set', work_unit_map')  -- a region moves residual→committed only once its unit Fits (or the user explicitly accepts a non-Fits unit), else it stays in residual for a later cycle; skipped on a pure-termination Sufficient that carries no cut, in which case (cut_set', work_unit_map') = (cut_set, work_unit_map) so the downstream finalize stays bound
       check_invariants(work_unit_map') → InvariantStatus                  -- span_fit ∧ natural_joint ∧ coverage_complete over committed cuts
-      Sufficient: → autonomous_pack(residual) (extension) → finalize(work_unit_map', residual) → emit WorkUnitMap → converge
+      Sufficient: → autonomous_pack(residual) (track) → surface (extension) → finalize(work_unit_map', residual) → emit WorkUnitMap → converge
       else:       → re-derive next-cycle anchor frame → cycle_n += 1, loop
 
 ── MORPHISM ──
@@ -86,14 +86,14 @@ Phase 0 → deactivate (relay): cut_already_fixed(WB) → the WBS already impose
 Phase 0 → Phase 1: granularity_underdetermined(WB) = true → init loop state (cycle_n=1, cut_set=∅, work_unit_map=∅, residual=regions(WB), committed=∅, regions_touched=regions(WB), joints=∅, invariant_status=⊥, history=∅)
 Phase 1: WB, cycle_n → Scan(WB, cycle_n) → joints → Pack(joints, horizon, lifecycle) → (Anchor[cycle_n], proposed_cut, SpanFit)  -- per-cycle re-scan + packing search [Tool]
 Phase 1 → converge: Anchor empty ∧ residual = ∅ → emit WorkUnitMap directly (every region cut)
-Phase 1 → converge (autonomous residual): Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (extension) → surface → emit WorkUnitMap  -- substrate exhausted; AI completes residual cuts at natural joints, surfaced as relay
+Phase 1 → converge (autonomous residual): Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (track) → surface (extension) → emit WorkUnitMap  -- substrate exhausted; AI completes residual cuts at natural joints, surfaced as relay
 Phase 1 → Phase 3 (relay): Anchor non-empty ∧ SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits → relay(AcceptCut) (extension) → integrate(AcceptCut, cut_set, work_unit_map) directly, skipping Qc  -- single dominant cut (Rule 11): no genuine alternative disposition exists for this Anchor
 Phase 1 → Phase 2: Anchor non-empty ∧ ¬(SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits) → surface the proposed cut for user judgment
 Phase 2: Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n → Qc(...) → Stop → A  -- per-cycle partition gate over CutDisposition with cut-set snapshot + fit basis visible; fires only when NOT single-dominant-cut [Tool]
 Phase 3: (parse(A) → (cut_disposition?, termination?)) → [Esc → ungraceful deactivate, before integrate] → [cut_disposition present] integrate(cut_disposition, cut_set, work_unit_map) → (cut_set', work_unit_map') → check_invariants(work_unit_map') → InvariantStatus  -- integrate skipped on Esc (binds no cut) and on a pure-termination Sufficient (carries no cut); when skipped, (cut_set', work_unit_map') = (cut_set, work_unit_map) so the Sufficient finalize below stays bound; on the Phase 1 dominant-cut relay entry, parse(A) is skipped (no gate was presented) — cut_disposition := AcceptCut, integrate runs exactly once, then invariants and routing proceed normally
 Phase 3 → Phase 3 (relay): ambiguous parse (A readable as both a cut and termination) → one-turn relay confirmation of the parsed intent → re-parse → route  -- the ambiguous-parse state resolves before integrate/routing
 Phase 3 → Phase 1: ¬termination ∧ ¬Esc → re-derive next-cycle anchor frame → cycle_n += 1  -- continue the partition loop
-Phase 3 → converge (Sufficient): TerminationIntent = Sufficient → autonomous_pack(residual) (extension) → finalize(work_unit_map', residual) → assert InvariantStatus (coverage_complete hard) → emit WorkUnitMap
+Phase 3 → converge (Sufficient): TerminationIntent = Sufficient → autonomous_pack(residual) (track) → surface (extension) → finalize(work_unit_map', residual) → assert InvariantStatus (coverage_complete hard) → emit WorkUnitMap
 Phase 3 → deactivate (ungraceful): Esc → residual uncut, partition abandoned (no WorkUnitMap)
 
 ── LOOP ──
