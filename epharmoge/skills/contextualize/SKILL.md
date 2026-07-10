@@ -125,7 +125,7 @@ Recompute F over pending(Σ) before selecting the next surfaced mismatch, even w
 If pending(Σ) non-empty: return to Phase 1 (SelectNext by severity, then FitRank, then oldest registered task).
 If adjudicated(R', X): all tasks completed → convergence.
 progress(Λ) MAY REGRESS: because re-scan over a mutated R' can register newly certified mismatches, the completed/total ratio is non-monotone — this is the signature of the transformative-revalidation side, not an error.
-User can exit at Phase 1 (early_exit option or Esc).
+User can exit at Phase 1 (dismiss all remaining, or Esc).
 Continue until: contextualized(R') OR user ESC (EarlyExit, not ContextualizedExecution).
 Mode remains active until convergence.
 On user ESC: present partial transformation trace ranging over Σ.history ∪ Λ.routed ∪ Λ.residual as accumulated so far, then declare remaining pending(Σ) mismatches as unresolved residual.

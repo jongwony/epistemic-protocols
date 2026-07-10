@@ -78,6 +78,7 @@ DeactivationCondition = { all_tasks_completed, user_esc, user_cancel }
 unprobed(t) = Λ.detected[t] \ Λ.probed[t]  -- detected but not yet probed for task t
 GT_presented = unprobed(current_task) \ {Horizon}  -- unprobed detected relevant gap types offered at the start-aspect selector; Horizon is never surfaced as a selectable label (Socratic opacity) — probed inline at detection instead
 StartAspectSelection = user's chosen starting gap type ∈ GT_presented  -- Phase 3 step-1 answer; fires only when Horizon did not preempt (Horizon preemption always precedes this selector) and |GT| > 0
+probe_kind = GapType → {Qc, Qs}   -- per the Gap type → probe kind mapping table: Qc for Expectation/Sequence (classificatory), Qs for Causality/Scope/Emergent (open)
 ZeroGapFinding = { entry_point: EntryPoint, reasoning: String }  -- the self-evident finding surfaced when |GT| = 0 for the current entry point (Rule 10)
 ZeroGapConfirmation = user's answer to a ZeroGapFinding ∈ {Confirm, Reopen(description)}  -- Confirm marks the entry point complete; Reopen names a gap the detection missed, registered as Emergent in Λ.detected[current] (mirrors step 3e), re-entering the comprehension loop for that aspect
 TerminalShape = { phase1_entry_selection, phase3_zero_gap_confirmation, phase3_start_aspect_selection, phase3_verification_probe, coverage_routing, deactivation(DeactivationCondition) }
@@ -90,7 +91,7 @@ Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → Λ.detected[cu
        → [|GT| = 0] Qc(ZeroGapFinding) → Stop → ZeroGapConfirmation  -- zero-gap branch (Rule 10): Confirm → P' := P ; TaskUpdate(completed), next task; Reopen(desc) → Λ.detected[current] += Emergent, re-enter this Phase 3 with GT = {Emergent} [Tool]
        → [|GT| > 0] Qs(HC) → Stop → A → P' → Tᵤ ; Λ.detected[current] += Horizon ; Λ.probed[current] += Horizon  if Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]  -- Horizon probe: fires immediately at detection (mandatory once), preempts the start-aspect selector below; scenario-only, opacity-preserving (never the edge/answer/rationale, never a Horizon label); the answer is then evaluated as a normal probe answer (→ 3c eval → coverage), never a return to the start selector [Tool]
        → [Horizon did not preempt ∧ GT_presented ≠ ∅ ∧ Λ.probed[current] = ∅] Qc(GT_presented) → Stop → StartAspectSelection → Λ.cursor.aspect := StartAspectSelection  -- start-aspect selector: user picks the opening gap type from GT_presented = unprobed(current_task) \ {Horizon}; fires once per entry point (only before any probe for the current task), before the verification loop below [Tool]
-       → Qs(Δ, Λ.cursor.aspect) → Stop → A → P' → Tᵤ ; Λ.probed[current] += Λ.cursor.aspect    -- verification loop, the probe opens on the cursor's active aspect (selected at the start-aspect gate) then proceeds per coverage routing; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Emergent (Horizon handled by the preempting edge above) [Tool]
+       → probe_kind(Λ.cursor.aspect)(Δ, Λ.cursor.aspect) → Stop → A → P' → Tᵤ ; Λ.probed[current] += Λ.cursor.aspect    -- verification loop, the probe opens on the cursor's active aspect (selected at the start-aspect gate) then proceeds per coverage routing; probe form dispatched per gap type (probe_kind; Horizon handled by the preempting edge above) [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
        → C(branch) if proposal(A)                         -- side-branch continuation closure [Tool]
        → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
@@ -132,7 +133,7 @@ Phase 2 Tᵣ  (track)   → TaskCreate (entry point tracking)
 Phase 3 detect (sense) → Internal analysis (gap type relevance detection per entry point)
 Phase 3 ZeroGapConfirm (constitution) → present (conditional: |GT| = 0 for current entry point; zero-gap finding + reasoning; Confirm/Reopen(description); Rule 10)
 Phase 3 Horizon (sense) → Internal analysis (admissible(HC) false-positive guard; opacity-preserving — never exposes the suspected edge, the answer, or the selection rationale)
-Phase 3 Qs  (constitution)   → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 Qs  (constitution)   → present (mandatory; probe form per probe_kind — Qc for Expectation/Sequence, Qs otherwise; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3 StartAspectSelector (constitution) → present (conditional: |GT| > 0 ∧ Horizon did not preempt; "Which aspect to start with?" over GT_presented; fires once per entry point before the verification loop)
 Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)

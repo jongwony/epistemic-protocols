@@ -103,8 +103,7 @@ bind(V) = explicit_arg ∪ colocated_expr ∪ prev_user_turn   -- priority: expl
 /recollect (alone)          → V.trace = extract_trace(previous user message, Σ)
 
 Edge cases:
-- Multiple vague references: bind to first, note others
-- Re-invoke after NullMatch: fresh V, no carryover
+- Multiple vague references: bind to first, note others; re-invoke after NullMatch: fresh V, no carryover
 - Composition (/recollect * /inquire): V from Anamnesis, Aitesis receives ClueVector_prose via session text
 
 ── PHASE TRANSITIONS ──
@@ -151,7 +150,8 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 -- Candidate source binding: `Candidate.session_id` ← INDEX entry frontmatter `session_id`; `Candidate.cwd` ← INDEX entry frontmatter `cwd` (Optional — absent for entries written before cwd capture was implemented); Candidate.cross_refs ← INDEX entry frontmatter cross_refs — inline-mapping items {kind, ref, channel} since v0.7.0 (StructuredAnchor); bare-string items in older entries are LegacyAnchor and remain valid (degraded read: kind unknown); Candidate.evidence_mode ← max tier over matched artifacts' frontmatter evidence_mode/evidence_modes (Optional — absent for pre-v0.7 entries)
 -- Fork/sidechain binding (SidechainNoSSOT): `Candidate.fork_marker = true` ⇐ the recalled id appears as an `agent_id` in INDEX_substitute (~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl, appended by the SubagentStop hook) AND has no sibling top-level SSOT ~/.claude/projects/{slug}/{agent_id}.jsonl of its own — the fork's turns live only in the parent record + this capture, so `claude --resume <agent_id>` has no transcript to resume
 -- Parent back-trace (`backtrace_parent` ↦ `Candidate.parent_pointer`, `Candidate.parent_cwd`): deterministic, not heuristic — the substitute capture entry records `session_id` = the orchestrating parent's session id (the SubagentStop payload field), so `parent_pointer ← capture.session_id` is a direct read. The capture lives under the parent's slug by construction ({slug} = dirname of the parent transcript), so the parent is always same-slug — look only there. Resumability: if the parent's top-level SSOT ~/.claude/projects/{slug}/{parent_pointer}.jsonl still exists, `parent_pointer` is set and `parent_cwd ← that transcript's `cwd` field` when present (`parent_cwd = Null` if the parent transcript predates cwd capture — parent identified but cwd unknown); the full handle `cd <parent_cwd> && claude --resume <parent_pointer>` requires both components. If the parent SSOT has aged out, `parent_pointer = parent_cwd = Null` (non-resumable → surface the capture's recoverable artifacts). The native subagent transcript (captured verbatim as the `agent_transcript_path` field) is not relied on as a resume handle; the durable parent link is the capture's `session_id`.
-Phase 0 Detect      (sense)    → Internal analysis; relay_not_empty (extension) → TextPresent+Proceed (¬empty_intention(V): present finding, proceed without activation)
+Phase 0 Detect      (sense)    → Internal analysis
+Phase 0 relay_not_empty (extension) → TextPresent+Proceed (¬empty_intention(V): present finding, proceed without activation)
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
 Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over SSOT ∪ INDEX)
 Phase 1 Scan_salience (observe)  → Read, Grep, Glob (MarkerProfile match over INDEX; SSOT fallback on degraded_scan)
