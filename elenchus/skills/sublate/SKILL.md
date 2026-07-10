@@ -99,7 +99,7 @@ Phase 1 AntithesisPosit (sense)        → Internal analysis (Pattern A/B/C/D/Em
 Phase 2 Qs              (constitution) → present (mandatory; per-source disposition slots; Esc → loop termination at LOOP level, not a Disposition)
 Phase 3 integrate       (track)        → Internal state update (Λ.dispositions, Λ.history)
 converge                (extension)    → TextPresent+Proceed (per-source disposition trace; proceed with VettedContext)
-esc/cancel              (extension)    → TextPresent+Proceed (partial per-source disposition trace + unjudged-source residual declaration; terminate as EarlyExit, not VettedContext)
+esc/cancel              (extension)    → TextPresent+Proceed (partial per-source disposition trace + unresolved-source residual declaration (unresolved(Λ)); terminate as EarlyExit, not VettedContext)
 
 ── MODE STATE ──
 Λ = {

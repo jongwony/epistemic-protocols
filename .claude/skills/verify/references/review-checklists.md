@@ -172,7 +172,7 @@ When other experts flag these as issues, they should be filtered (not actual iss
 |---------|------------------|-----------|
 | Gate mandate | Structured presentation + turn yield in Phase 1/2 | Unstructured text bypass |
 | Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
-| Hybrid protocol | Hybrid protocols (Euporia, Hyphegesis, Diairesis) activate on user signal or with confirmation when AI-detected | Unconfirmed AI auto-activation |
+| Hybrid protocol | Hybrid protocols (Euporia, Hyphegesis, Diairesis) activate on user signal or with confirmation when AI-detected; Diairesis single-dominant-cut relay cycles (Rule 11) may run all-relay — confirmation shifts to the user's post-emission engagement with the emitted WorkUnitMap | Unconfirmed AI auto-activation outside Diairesis's all-relay path |
 
 ## Synthesis Template
 
