@@ -22,7 +22,7 @@ Prosoche(C) →
   ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) →
   Qc(K, R) → Stop → V →
     V = Adjust(d) → recompile(K, R, d) → Qc(K', R')
-    V = Confirm   → Emit(K)[TaskCreate] → G →    -- accepted residuals recorded in trace, never emitted
+    V = Confirm   → AcceptResiduals(R) → Emit(K)[TaskCreate] → G →    -- remaining residuals recorded into Λ.accepted, never emitted
   converge(compilation trace) → SituatedExecution
 
 ── MORPHISM ──
@@ -74,7 +74,7 @@ V              = Judgment ∈ {Confirm, Adjust(direction)}
 Emit           = K → G [Tool: TaskCreate]
 G              = goal entries: coarse task entries consumable by a downstream completion-predicate enforcer
 Phase          ∈ {0, 1, 2, 3}
-SituatedExecution = (emitted(G) ∧ handoff_recorded) ∨ no_compile
+SituatedExecution = situated(C) ∨ no_compile  -- situated(C) defined in CONVERGENCE
 EarlyExit = user_esc  -- non-convergent early exit: no emission, no handoff recorded; distinct from no_compile (which is a legitimate trivial-completion terminal, not an abort)
 
 ── PHASE TRANSITIONS ──

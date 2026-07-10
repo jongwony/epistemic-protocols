@@ -23,6 +23,7 @@ Diairesis(WB) → Probe(WB) → granularity_underdetermined? →
     Phase 1 Scan(WB, cycle_n) [per-cycle re-scan] → joints(region) → Pack(joints, horizon, lifecycle) → (Anchor[cycle_n], proposed_cut, SpanFit) →
       Anchor empty ∧ residual = ∅: → emit WorkUnitMap → converge          -- every region cut, nothing left
       Anchor empty ∧ residual ≠ ∅: → autonomous_pack(residual) (extension) → surface → emit WorkUnitMap → converge  -- substrate exhausted; AI completes the residual cuts at their natural joints (Extension-default), surfaced as relay
+      SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: → relay(AcceptCut) (extension) → Phase 3 integrate (skip Qc)  -- single dominant cut (Rule 11): no genuine alternative disposition exists for this Anchor
       else:                        → Phase 2
     Phase 2 Qc(Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n) → Stop → A
     Phase 3 (parse(A) → (cut_disposition?, termination?)) →
@@ -89,7 +90,7 @@ Phase 1 → converge (autonomous residual): Anchor empty ∧ residual ≠ ∅ �
 Phase 1 → Phase 3 (relay): Anchor non-empty ∧ SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits → relay(AcceptCut) (extension) → integrate(AcceptCut, cut_set, work_unit_map) directly, skipping Qc  -- single dominant cut (Rule 11): no genuine alternative disposition exists for this Anchor
 Phase 1 → Phase 2: Anchor non-empty ∧ ¬(SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits) → surface the proposed cut for user judgment
 Phase 2: Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n → Qc(...) → Stop → A  -- per-cycle partition gate over CutDisposition with cut-set snapshot + fit basis visible; fires only when NOT single-dominant-cut [Tool]
-Phase 3: (parse(A) → (cut_disposition?, termination?)) → [Esc → ungraceful deactivate, before integrate] → [cut_disposition present] integrate(cut_disposition, cut_set, work_unit_map) → (cut_set', work_unit_map') → check_invariants(work_unit_map') → InvariantStatus  -- integrate skipped on Esc (binds no cut) and on a pure-termination Sufficient (carries no cut); when skipped, (cut_set', work_unit_map') = (cut_set, work_unit_map) so the Sufficient finalize below stays bound
+Phase 3: (parse(A) → (cut_disposition?, termination?)) → [Esc → ungraceful deactivate, before integrate] → [cut_disposition present] integrate(cut_disposition, cut_set, work_unit_map) → (cut_set', work_unit_map') → check_invariants(work_unit_map') → InvariantStatus  -- integrate skipped on Esc (binds no cut) and on a pure-termination Sufficient (carries no cut); when skipped, (cut_set', work_unit_map') = (cut_set, work_unit_map) so the Sufficient finalize below stays bound; on the Phase 1 dominant-cut relay entry, parse(A) is skipped (no gate was presented) — cut_disposition := AcceptCut, integrate runs exactly once, then invariants and routing proceed normally
 Phase 3 → Phase 3 (relay): ambiguous parse (A readable as both a cut and termination) → one-turn relay confirmation of the parsed intent → re-parse → route  -- the ambiguous-parse state resolves before integrate/routing
 Phase 3 → Phase 1: ¬termination ∧ ¬Esc → re-derive next-cycle anchor frame → cycle_n += 1  -- continue the partition loop
 Phase 3 → converge (Sufficient): TerminationIntent = Sufficient → autonomous_pack(residual) (extension) → finalize(work_unit_map', residual) → assert InvariantStatus (coverage_complete hard) → emit WorkUnitMap
@@ -174,7 +175,7 @@ Diairesis DELIMITs but does NOT order (no sequencing — that is /conduct), does
 
 ### Activation
 
-AI detects a body of work whose cut into span-units is undetermined before that work is conducted OR the user calls `/delimit`. Detection is silent (Phase 0); the partition of each region requires user interaction (Phase 2) unless the body already fits one span (relay) or the WBS scope is too thin to cut (route to `/inquire`).
+AI detects a body of work whose cut into span-units is undetermined before that work is conducted OR the user calls `/delimit`. Detection is silent (Phase 0); the partition of each region requires user interaction (Phase 2) unless the body already fits one span (relay), a single dominant cut fits the span (relay), or the WBS scope is too thin to cut (route to `/inquire`).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/delimit` slash command or description-matching input. Always available.
@@ -341,7 +342,7 @@ Parse the answer, apply the settled cut, and check the three invariants.
 
 ## Rules
 
-1. **AI-searches, user-cuts**: AI scans the WBS, runs the packing search, and proposes each cut; settling the cut requires user choice via Cognitive Partnership Move (Constitution) at Phase 2 (per-cycle over `CutDisposition`). AI detection is implicitly confirmed when the user engages with a proposed cut. The Hybrid initiator mirrors `/conduct` (its dual).
+1. **AI-searches, user-cuts**: AI scans the WBS, runs the packing search, and proposes each cut; settling the cut requires user choice via Cognitive Partnership Move (Constitution) at Phase 2 (per-cycle over `CutDisposition`) — **unless Phase 1 finds a single dominant cut (`SingleDominantCut(Anchor, proposed_cut)` ∧ SpanFit = Fits) and takes the typed relay branch (extension)** (Phase 1 → Phase 3, skipping Phase 2 for that cycle). AI detection is implicitly confirmed when the user engages with a proposed cut. The Hybrid initiator mirrors `/conduct` (its dual).
 2. **Recognition over Recall**: Present structured options with differential futures via Cognitive Partnership Move (Constitution); Constitution interactions yield turn for response. Phase 2 binds to `A ∈ CutDisposition` (`{AcceptCut, MoveCut, SplitUnit, MergeUnits}`) plus a complete cut-set snapshot so a Sufficient signal is informed (per TYPES).
 3. **Delimit over Order (invariant)**: Diairesis marks the cuts; it does not sequence the units. Ordering — the units' order, independence, reconciliation, termination, routing — is `/conduct`'s work. The emitted WorkUnitMap carries a cut-set, never a sequence; the two protocols are duals across one seam (cut, then conduct).
 4. **Reference over Ownership (invariant)**: A WorkUnit references WBS ids and never copies or owns the external WBS's state. The WBS is the single source of truth; Diairesis reads it read-only and writes only the cut-set. The WorkUnitMap carries a WBS reference, not a snapshot, so downstream WBS changes are seen, never stale.

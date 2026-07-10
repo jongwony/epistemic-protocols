@@ -47,9 +47,9 @@ Pᵦ     = Pre-confirmed base perspectives (user-supplied in U or at the Z zero-
 {P₁...Pₙ}(C, MBᵥ) = AI-proposed novel perspectives (Pᵢ ∉ Pᵦ)
 S      = Selection: {P₁...Pₙ} → Pₛ             -- extern (user choice; Pᵦ auto-included)
 Pₛ     = Selected perspectives (Pₛ = Pᵦ ∪ sel({P₁...Pₙ}), |Pₛ| ≥ 1)
-         -- a single lens is valid (→ LensReturn); multiple lenses where AT LEAST ONE needs a specialized substrate trigger substrate-correspondence, while multiple lenses with no specialized substrate beyond general-purpose return directly (→ LensReturn). A mixed selection (some specialized, some general-purpose) has at least one specialized need, so it routes to SubstrateCorrespondence — the branch is total over every selection (single ∨ all-general-purpose → LensReturn; ≥2 ∧ ≥1 specialized → SubstrateCorrespondence). The branch is decided at Phase 3 by substrate availability, not by lens count. No two-lens minimum (no mode to satisfy)
+         -- a single lens is valid (→ LensReturn); multiple lenses where AT LEAST ONE needs a specialized substrate trigger substrate-correspondence, while multiple lenses with no specialized substrate beyond general-purpose return directly (→ LensReturn). A mixed selection (some specialized, some general-purpose) has at least one specialized need, so it routes to SubstrateCorrespondence — the branch is total over every selection (single ∨ all-general-purpose → LensReturn; ≥2 ∧ ≥1 specialized → SubstrateCorrespondence). The branch is decided at Phase 3 by substrate specialization need, not by lens count. No two-lens minimum (no mode to satisfy)
 Z      = ZeroCandidate: {P₁...Pₙ} = ∅ ∧ Pᵦ = ∅   -- Phase 2 guard: no candidate frameworks to place; surfaced as a finding (Constitution); responses: modify(field) (the J_mb constructor) | supply(Pᵦ') (perspective supply, typed via Pᵦ enrichment) | Esc — no FramedInquiry is emitted from this branch
-LensEstablished = Pₛ where lens selection complete  -- the analysis object; Phase 3 binds each lens's substrate and discriminates the output by substrate availability
+LensEstablished = Pₛ where lens selection complete  -- the analysis object; Phase 3 binds each lens's substrate and discriminates the output by substrate specialization need
 -- framed object: a detailed lens (LensReturn) or lens↔substrate pairs (SubstrateCorrespondence). frame forms the OBJECT plus its substrate NEED and hands it off; the ARRANGEMENT over multiple objects — and their isolation, reconciliation, and synthesis — is NOT produced here: it is /conduct's to design (referenced by ConductRef, carried as the nudge) and the substrate's to run --
 SubstrateNeed = per-lens AUTHORITATIVE abstract persona/capability the lens requires (what kind of analyst/agent must run this lens) -- declares the NEED only; names no concrete agent (substrate-invariance). Extends the ChannelNeed pattern from channel to persona/capability
 BindingHints  = per-lens ADVISORY, ENUMERATED shortlist of candidate substrates that could fulfill the SubstrateNeed (specific agent personas / subagent types; PREFER skill-bundled agents when they exist) -- NON-binding. Rationale: unless an agent is bundled with the skill, hosts rarely recognize available agents as substrates and default to general-purpose; the enumerated hint list makes specialized binding actually happen. Hints being advisory, substrate-invariance still holds
@@ -80,13 +80,13 @@ Edge cases:
 Phase 0:  U → MB(U) → Q1(MB) → Stop → J_mb → [confirm: derive MBᵥ | modify(field): MB' → re-present Q1(MB') → Stop → J_mb]   -- Mission Brief confirmation ONLY (no mode question); MBᵥ is derived on confirm, not Q1's direct return [Tool]
 Phase 1:  MBᵥ → G(MBᵥ) → C                                      -- targeted context acquisition
 Phase 2:  (C, MBᵥ) → Sc({P₁...Pₙ}(C, MBᵥ)) → Stop → Pₛ → LensEstablished  -- perspective selection [Tool]; single lens is valid; on Z (zero candidates) surface the finding → Stop → route per LOOP (modify | Pᵦ' supply | Esc)
-Phase 3:  LensEstablished → bind_substrate(Pₛ) → discriminate(substrate_specialization_need) → [single lens ∨ no specialized substrate: LensReturn | ≥2 lenses with at least one specialized substrate need: SubstrateCorrespondence(lens↔substrate pairs) ⊕ nudge(ConductRef)] → converge(transformation trace) → handoff(FramedInquiry) → STOP  -- bind each lens's substrate, discriminate by availability, emit the framed object as the terminal relay with the /conduct nudge, then halt (no gate, no dispatch, NO isolation, NO synthesis; isolation + arrangement + synthesis is /conduct's to design and the isolated substrate's to run downstream)
+Phase 3:  LensEstablished → bind_substrate(Pₛ) → discriminate(substrate_specialization_need) → [single lens ∨ no specialized substrate: LensReturn | ≥2 lenses with at least one specialized substrate need: SubstrateCorrespondence(lens↔substrate pairs) ⊕ nudge(ConductRef)] → converge(transformation trace) → handoff(FramedInquiry) → STOP  -- bind each lens's substrate, discriminate by substrate specialization need, emit the framed object as the terminal relay with the /conduct nudge, then halt (no gate, no dispatch, NO isolation, NO synthesis; isolation + arrangement + synthesis is /conduct's to design and the isolated substrate's to run downstream)
 
 ── LOOP ──
 After Phase 0 (Mission Brief confirmation only):
-  MBᵥ = Q1 result → Phase 1 → Phase 2 → LensEstablished → Phase 3 (bind_substrate → discriminate → handoff) → terminate
+  J_mb = Q1 result; MBᵥ derived on confirm → Phase 1 → Phase 2 → LensEstablished → Phase 3 (bind_substrate → discriminate → handoff) → terminate
   J_mb = confirm       → proceed to Phase 1 with MBᵥ
-  J_mb = modify(field) → re-present Q1(MB') → Stop → MBᵥ
+  J_mb = modify(field) → re-present Q1(MB') → Stop → J_mb (loop until confirm derives MBᵥ)
   -- Esc key → terminate (nothing compiled yet)
 
 During Phase 2 (Perspective Placement):
@@ -113,7 +113,7 @@ Q1(MB) (confirm)  = extern: Mission Brief confirmation boundary (the sole Phase 
 G (observe)  = purpose: targeted context acquisition (guided by MBᵥ)
 S (select)  = extern: user choice boundary
 bind_substrate = purpose: per-lens substrate_need + binding_hints computation (relay; no user judgment beyond lens selection — frame declares the NEED, never binds a concrete agent)
-discriminate  = purpose: coproduct selection by substrate availability (relay; entropy→0 once Pₛ and substrate needs are fixed; PerspectiveDirective wording is generated, but its contract shape is fixed by the template)
+discriminate  = purpose: coproduct selection by substrate specialization need (relay; entropy→0 once Pₛ and substrate needs are fixed; PerspectiveDirective wording is generated, but its contract shape is fixed by the template)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -123,7 +123,7 @@ G (observe)                      → Read, Glob, Grep (meta-scope context acquis
 Sc (constitution)                → present (mandatory; multiSelect: true; lens selection is epistemic choice; single lens valid; Esc key → loop termination at LOOP level)
 Phase 2 Z zero_result (constitution) → present (zero-candidate finding + reasoning; responses: modify(field) | supply(Pᵦ') → Pᵦ enrichment | Esc)
 Phase 3 bind_substrate (sense)   → Internal operation (per-lens substrate_need (authoritative abstract persona/capability) + binding_hints (advisory candidate shortlist; PREFER skill-bundled agents) + channel_need; relay — no external tool, no user judgment beyond Pₛ; frame declares the NEED, never binds a concrete agent)
-Phase 3 discriminate (sense)     → Internal operation (coproduct by substrate availability: single lens ∨ no specialized substrate → LensReturn = inj₁ FramedInquiry; ≥2 lenses with at least one specialized substrate need → SubstrateCorrespondence (lens↔substrate pairs ⊕ per-perspective directive ⊕ channel-need) with the /conduct nudge = inj₂ FramedInquiry)
+Phase 3 discriminate (sense)     → Internal operation (coproduct by substrate specialization need: single lens ∨ no specialized substrate → LensReturn = inj₁ FramedInquiry; ≥2 lenses with at least one specialized substrate need → SubstrateCorrespondence (lens↔substrate pairs ⊕ per-perspective directive ⊕ channel-need) with the /conduct nudge = inj₂ FramedInquiry)
 Phase 3 converge (extension)     → TextPresent+Proceed (convergence-of-framing evidence trace: per-perspective contribution; SubstrateCorrespondence additionally surfaces each lens's substrate_need + binding_hints + channel-need + the /conduct nudge; NO synthesis of findings, NO isolation realized)
 Phase 3 handoff (extension)      → TextPresent+STOP (emit the FramedInquiry — detailed lens(es) or lens↔substrate pairs ⊕ /conduct nudge — as the terminal relay, record the handoff, then halt; frame does NOT realize isolation, arrange, execute, or synthesize — it does NOT spawn or call Agent. The isolation + arrangement + synthesis apparatus is /conduct's to design (via the nudge) and the substrate's to run; when the substrate is the main session (the default) it consumes the framed object, when isolated executors are elected that dispatch is the substrate's action, not frame's morphism)
 Λ (track)                        → TaskCreate/TaskUpdate (problem-to-solve + framing shifts durable; per-phase bookkeeping stays in session)
@@ -135,7 +135,7 @@ frame forms analysis OBJECTS (lenses) plus each object's substrate NEED; /conduc
 ── MODE STATE ──
 Λ = { phase: Phase, mission_brief: Option(MBᵥ), perspectives: Option(Pₛ), lens_pairs: Option({LensPair}), framed_output: Option(FramedInquiry), active: Bool }
 Phase ∈ {0, 1, 2, 3}
--- no mode field (frame has no user-chosen mode): the framed output is discriminated at Phase 3 by substrate availability (LensReturn vs SubstrateCorrespondence), not by a Phase 0 choice. The section name is the cross-protocol structural-state slot, not a "mode" toggle.
+-- no mode field (frame has no user-chosen mode): the framed output is discriminated at Phase 3 by substrate specialization need (LensReturn vs SubstrateCorrespondence), not by a Phase 0 choice. The section name is the cross-protocol structural-state slot, not a "mode" toggle.
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
@@ -181,7 +181,7 @@ Consult `references/conceptual-foundations.md` for design rationale (Distinction
 
 ### Phase 0: Intent Confirmation (Mission Brief)
 
-Construct a Mission Brief from the user's request and **present** it for confirmation via Cognitive Partnership Move (Constitution). **Phase 0 is Mission Brief confirmation only — there is no mode question.** How the framed object is shaped (a detailed lens vs. lens↔substrate pairs) is decided at Phase 3 by substrate availability, not by a user choice here.
+Construct a Mission Brief from the user's request and **present** it for confirmation via Cognitive Partnership Move (Constitution). **Phase 0 is Mission Brief confirmation only — there is no mode question.** How the framed object is shaped (a detailed lens vs. lens↔substrate pairs) is decided at Phase 3 by substrate specialization need, not by a user choice here.
 
 **Phase 0 establishes the Mission Brief as the primary context vehicle for the framed object** — it structurally guarantees that the handoff carries enough context for the substrate to brief each perspective, rather than depending on substrate inference. When `user_invoked ∧ explicit_arg(U)`, the Phase 0 MB_from_arg Extension entry takes the path: the MB is still constructed from U but proceeds without the Phase 0 Constitution interaction; AI uses `J_mb=confirm` as the default. Phase 2 S (perspective selection) remains Constitution, providing a downstream correction opportunity.
 
@@ -224,7 +224,7 @@ After context gathering (Phase 1), **present** perspectives via Cognitive Partne
 
 Constitution presentation yields turn for user response.
 
-Each perspective is an **individual option**. Keep each option a single perspective so the user composes any combination directly. The user selects one or more perspectives directly. A single selected lens is valid (it returns directly at Phase 3 as a detailed lens); selecting multiple lenses **where at least one needs a specialized substrate** triggers substrate-correspondence at Phase 3, while multiple lenses with no specialized substrate beyond general-purpose return directly as `LensReturn`. The branch is decided at Phase 3 by substrate availability, not by lens count alone. There is no minimum-lens requirement.
+Each perspective is an **individual option**. Keep each option a single perspective so the user composes any combination directly. The user selects one or more perspectives directly. A single selected lens is valid (it returns directly at Phase 3 as a detailed lens); selecting multiple lenses **where at least one needs a specialized substrate** triggers substrate-correspondence at Phase 3, while multiple lenses with no specialized substrate beyond general-purpose return directly as `LensReturn`. The branch is decided at Phase 3 by substrate specialization need, not by lens count alone. There is no minimum-lens requirement.
 
 ```
 question: "Which lens(es) for this inquiry?"
@@ -262,14 +262,14 @@ During perspective formulation, note whether each candidate lens depends on evid
 
 ### Phase 3: Bind Substrate & Handoff
 
-Lens selection (Phase 2) established *which* perspectives. Phase 3 binds each lens to the substrate it needs, discriminates the framed object by substrate availability, and hands it off — frame does not realize isolation, arrange, execute, or synthesize.
+Lens selection (Phase 2) established *which* perspectives. Phase 3 binds each lens to the substrate it needs, discriminates the framed object by substrate specialization need, and hands it off — frame does not realize isolation, arrange, execute, or synthesize.
 
 **Bind substrate (every lens)** — for each selected lens, compute:
 
 - **`substrate_need`** (authoritative): the abstract persona/capability the lens requires — what kind of analyst/agent must run this lens (e.g. "a security-threat-modeling analyst", "a regulatory-compliance reviewer"). This declares the NEED only; it names no concrete agent. This is what preserves frame's substrate-invariance and extends the `channel_need` pattern from evidence-channel to persona/capability.
 - **`binding_hints`** (advisory): an enumerated shortlist of candidate substrates that could fulfill the need — specific agent personas / subagent types. **Prefer skill-bundled agents when they exist.** Rationale: unless an agent is bundled with the skill, hosts rarely recognize the available agents as substrates and default to `general-purpose`; the explicit hint list is what makes specialized binding actually happen. Because the hints are advisory (the host may bind otherwise), substrate-invariance still holds.
 
-**Discriminate by substrate availability** — the framed object is one of two:
+**Discriminate by substrate specialization need** — the framed object is one of two:
 
 **LensReturn** (`inj₁`) — when there is a **single lens**, OR when **no specialized substrate beyond `general-purpose`** is needed. Return the detailed lens(es) directly: each lens plus its per-perspective directive and channel-need (per lens, preserving the lens↔channel mapping even with multiple lenses). **No synthesis, no convergence claim, no isolated handoff.** `FrameworkAbsent` is structurally addressed at the framing layer; downstream protocols or the user apply the lens to complete domain-specific resolution.
 
