@@ -58,7 +58,7 @@ The loop is the skill's identity; the review source is a parameter behind it. Lo
 
 ## Phase 0: Source Designation + Scope Detection
 
-**Source designation.** If a `source` argument is given, use it directly — this is relay (Extension): the user already decided. If `source` is absent, **ask** — an init Constitution gate with no preselected default: present only the sources the current harness can invoke as a choice (`codex` for a single independent external model when the codex CLI is present; `code-review` for a Claude-native built-in review when the running harness provides that built-in), each with its coverage/cost trade-off, and let the user constitute the selection. Unless a `source` is named at invocation, the loop does not pick one on the user's behalf — source selection determines the cost and coverage of every round, so it waits for the answer.
+**Source designation.** If a `source` argument is given, use it directly — this is relay (Extension): the user already decided. If `source` is absent, **ask** — an init Constitution gate with no preselected default: present only the sources the current harness can invoke as a choice (`codex` for a single independent external model when the codex CLI is present; `code-review` for a Claude-native built-in review when the running harness provides that built-in), each with its coverage/cost trade-off, and let the user constitute the selection. Unless a `source` is named at invocation, the loop does not pick one on the user's behalf — source selection determines the cost and coverage of every round, so it waits for the answer. Cardinality guards the gate: with exactly one invokable source there is nothing to choose — designate it as relay, citing the availability fact, and proceed; with none, stop and surface what would make a source available.
 
 **Scope detection**:
 
@@ -155,7 +155,7 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
 
 ## Phase 5: Re-review + Convergence
 
-Re-call the source on the updated diff — a **FULL re-review each round**, not an incremental check against the prior round's findings. Convergence is reached when:
+Re-call the source on the updated diff — a **FULL re-review each round**, not an incremental check against the prior round's findings. Land the applied fixes as commits on the reviewed head first and re-resolve `{head_sha}` to the new head: the diff pointer compares committed trees, so an uncommitted working-tree fix is invisible to the re-review — the source would re-surface already-fixed findings and miss fix-induced regressions. Convergence is reached when:
 
 - the source verdict converges to `approve`, OR
 - the re-review surfaces zero new non-refuted findings and no recurrences await diagnosis — a recurrence is not "new" and routes through the Phase 3 recurrence escalation before any convergence claim — OR
