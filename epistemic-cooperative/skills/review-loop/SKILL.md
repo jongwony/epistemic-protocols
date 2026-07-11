@@ -35,7 +35,7 @@ The review source is pluggable: any source satisfying the `(diff, design-intent)
                           Judgment   → cluster by shared disposition → Constitution scope-gate
   Phase 4  : apply      — risk screen (substrate → harness permission; epistemic → Constitution) → apply approved edits
   Phase 5  : re-review  — source(diff', intent) → verdict'
-               verdict'=approve (or 0 new) → converge ; else round k+1: these findings → Phase 2 (re-review already done; no second source call)
+               verdict'=approve (or 0 new, no recurrence pending diagnosis) → converge ; else round k+1: these findings → Phase 2 (re-review already done; no second source call)
   free-exit : user may end the loop at any time (declared once in Phase 0)
 ```
 
@@ -58,13 +58,13 @@ The loop is the skill's identity; the review source is a parameter behind it. Lo
 
 ## Phase 0: Source Designation + Scope Detection
 
-**Source designation.** If a `source` argument is given, use it directly — this is relay (Extension): the user already decided. If `source` is absent, **ask** — an init Constitution gate with no preselected default: present the available sources as a choice (`codex` for a single independent external model when the codex CLI is present; `code-review` for a Claude-native built-in review, always available), each with its coverage/cost trade-off, and let the user constitute the selection. Unless a `source` is named at invocation, the loop does not pick one on the user's behalf — source selection determines the cost and coverage of every round, so it waits for the answer.
+**Source designation.** If a `source` argument is given, use it directly — this is relay (Extension): the user already decided. If `source` is absent, **ask** — an init Constitution gate with no preselected default: present only the sources the current harness can invoke as a choice (`codex` for a single independent external model when the codex CLI is present; `code-review` for a Claude-native built-in review when the running harness provides that built-in), each with its coverage/cost trade-off, and let the user constitute the selection. Unless a `source` is named at invocation, the loop does not pick one on the user's behalf — source selection determines the cost and coverage of every round, so it waits for the answer.
 
 **Scope detection**:
 
 1. PR number given as `scope`: scope = `gh pr diff {N}`
 2. No PR argument: `gh pr view --json number,title,headRefName,changedFiles 2>/dev/null` to detect a current-branch PR; if found, scope = its diff
-3. No PR: scope = working tree (`git diff HEAD`), with untracked files from `git status --porcelain` folded into the changed-files list; the source reads those files directly because the diff does not show them
+3. No PR: scope = working tree (`git diff HEAD`), with untracked files from `git status --porcelain --untracked-files=all` folded into the changed-files list — plain porcelain collapses an untracked directory to one entry and hides its nested files; the source reads those files directly because the diff does not show them
 4. No diff and no untracked files: ask the user what to review (stop here)
 
 Capture the **resolved base SHA** (the merge-base or PR base commit the diff is taken against) and the changed-files list — this base SHA + file list is the **pointer** the codex prompt passes; codex re-derives the diff locally with its own git (read-only sandbox, no network), so the full diff content is not inlined. Also capture diff stats for context.
@@ -108,7 +108,7 @@ Classify each surviving finding:
 
 **Settled-policy check (before opening any disposition gate).** A finding whose disposition policy was already constituted in a prior round is **Extension by default**: a consistent application of that settled policy auto-resolves per the prior disposition (apply / dismiss / defer), and any non-trivial side-effect (for example, an edit that touches a line outside the original diff hunk) is surfaced as a **relay annotation on its Relay trace entry**, not as a gate. The Extension/Constitution boundary for a finding moves with what is already decided — a prior round's direction and the PR's stated purpose can close an axis that would otherwise be live. A gate reopens only when a genuinely competing **Judgment-level** disposition (defer / separate follow-up / dismiss) is still live — one not already foreclosed by the PR's purpose or an established precedent. For a **Mechanical** finding — a verified correctness bug whose minimal localized fix is self-evident — the fold-now-vs-defer / which-PR scope axis does not reopen a gate: which PR the identical fix lands in is an administrative packaging variant (the fix is the same; only the PR boundary differs), folded in by the convergence goal. A genuine **scope expansion** — fixing a pre-existing defect because it happens to sit in the changed surface — is a separate axis: it folds in as a relay annotation on its Relay trace entry only when a citable basis licenses it (a mandated closure sweep, the PR's stated purpose, or a settled precedent); absent such a basis, expanding scope to a pre-existing defect is itself a judgment the user constitutes, so it surfaces for the user rather than auto-folding. Re-gating the consistent propagation of settled policy is the over-gating failure mode.
 
-**Recurrence escalation.** Settled policy absorbs the FIRST recurrence — consistent application, no re-gate. But when the same finding returns again on a later full re-review, after its disposition was applied and (for design decisions) conveyed in the design-intent bundle, the repetition is itself evidence requiring diagnosis. When the prior disposition was an apply and Phase 2 verification confirms the original diagnosis still holds — the fix was merely incomplete and a minimal repair remains self-evident — the finding remains Mechanical: stay Extension and re-apply properly under the Phase 4 write-tier escalation, with the loop-driving session writing inline and no gate. When the recurrence instead evidences a design-level disagreement — the prior disposition was a dismissal the source keeps contesting, or the source rejects the constituted direction itself — escalate to a Constitution design gate presenting the recurrence history; the constituted decision enters the design-decision ledger (Phase 0 harvest, source 4) and re-enters the bundle at the next re-harvest. If the same finding returns a third time after a tier-escalated re-apply, the Mechanical diagnosis is discredited: treat the disagreement as design-level and gate. Do not silently re-drop it — recurrence ends through constitution or a completed repair, never through suppression.
+**Recurrence escalation.** Settled policy absorbs the FIRST recurrence — consistent application, no re-gate. But when the same finding returns again on a later full re-review, after its disposition was applied and (for design decisions) conveyed in the design-intent bundle, the repetition is itself evidence requiring diagnosis. When the prior disposition was an apply and Phase 2 verification confirms the original diagnosis still holds — the fix was merely incomplete and a minimal repair remains self-evident — the finding remains Mechanical: stay Extension and re-apply properly under the Phase 4 write-tier escalation, with the loop-driving session writing inline and no gate. When the recurrence instead evidences a design-level disagreement — the prior disposition was a dismissal the source keeps contesting, or the source rejects the constituted direction itself — escalate to a Constitution design gate presenting the recurrence history. Only a resolution that articulates a decision or convention holding independently of current code state enters the design-decision ledger (Phase 0 harvest, source 4) and re-enters the bundle at the next re-harvest; an instance-specific dismissal or deferral remains a disposition — it auto-resolves as settled policy in later rounds, is surfaced as annotated residual at convergence, and never enters the bundle. If the same finding returns a third time after a tier-escalated re-apply, the Mechanical diagnosis is discredited: treat the disagreement as design-level and gate. Do not silently re-drop it — recurrence ends through constitution or a completed repair, never through suppression.
 
 For Judgment findings whose axis remains live, **cluster by shared disposition** — group findings that share the same resolution stance (apply / dismiss / defer) and present ONE scope-gate per cluster rather than one gate per finding. Follow context-question separation: present all analysis, evidence, and per-finding rationale as text BEFORE the gate; the gate itself carries only the question and the options with their differential implications. Each option must produce a materially different downstream trajectory — if two dispositions converge to the same trajectory, collapse them. Use plain everyday language in the user-facing emit.
 
@@ -155,7 +155,7 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
 Re-call the source on the updated diff — a **FULL re-review each round**, not an incremental check against the prior round's findings. Convergence is reached when:
 
 - the source verdict converges to `approve`, OR
-- the re-review surfaces zero new non-refuted findings, OR
+- the re-review surfaces zero new non-refuted findings and no recurrences await diagnosis — a recurrence is not "new" and routes through the Phase 3 recurrence escalation before any convergence claim — OR
 - the user exits (free-response).
 
 Carried-forward findings — deferred at a prior disposition gate or risk screen and still open — are not silently swallowed by a "zero new findings" convergence: a deferral carries forward as its recorded reason (the finding itself is re-detected fresh by each round's full re-review, not held as live state), and at convergence any still-open deferral is surfaced as annotated residual for the user (a dismiss-with-residual exit), never closed implicitly.
@@ -171,7 +171,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
 | Source | Kind | Mechanics |
 |--------|------|-----------|
 | `codex` | single model, background | Launch in background and collect on the completion notification (see below). |
-| `code-review` | single, Claude-native (built-in) | Call via `Skill("code-review", ...)` passing the detected scope **and the design-intent bundle**; it runs its own multi-angle finder fan-out and returns a findings JSON array (`{ file, line, summary, failure_scenario }`, ranked most-severe-first, capped at 15) with **no verdict line** — the adapter derives the verdict (`[]` → approve, otherwise needs-attention) and maps each finding to `[severity] file:line — description`, assigning severity by assessing each finding's own summary and failure scenario against the severity ladder and using rank order only for ordering or tie-breaking. Claude-native and reading the same repo, it can resolve `CLAUDE.md` and code comments itself; the bundle still directs it to the changed-surface `.claude/rules/*.md` it would not otherwise weight. No external CLI, so it is available whenever the loop runs. |
+| `code-review` | single, Claude-native (built-in) | Call via `Skill("code-review", ...)` passing the detected scope **and the design-intent bundle**; it runs its own multi-angle finder fan-out and returns a findings JSON array (`{ file, line, summary, failure_scenario }`, ranked most-severe-first, capped at 15) with **no verdict line** — the adapter derives the verdict (`[]` → approve, otherwise needs-attention) and maps each finding to `[severity] file:line — description`, assigning severity by assessing each finding's own summary and failure scenario against the severity ladder and using rank order only for ordering or tie-breaking. Claude-native and reading the same repo, it can resolve `CLAUDE.md` and code comments itself; the bundle still directs it to the changed-surface `.claude/rules/*.md` it would not otherwise weight. It needs no external CLI, so it is available whenever the running harness provides the built-in; the source-designation ask offers only sources the current harness can invoke. |
 
 **`codex` source mechanics**:
 
@@ -216,7 +216,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
 
 ## Convergence
 
-Convergence is `verdict=approve`, OR zero new (non-refuted) findings on a full re-review, OR a user free-response exit. Convergence is demonstrated, not asserted: at each round, present a relay trace showing the round's transformation:
+Convergence is `verdict=approve`, OR zero new (non-refuted) findings on a full re-review with no recurrences awaiting diagnosis, OR a user free-response exit. A recurrence is not "new" — it routes through the Phase 3 recurrence escalation before any convergence claim. Convergence is demonstrated, not asserted: at each round, present a relay trace showing the round's transformation:
 
 ```
 Round {k} — source: {source} — verdict: {verdict}
@@ -236,7 +236,7 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 
 | Condition | Action |
 |-----------|--------|
-| Designated source not installed (codex CLI not found) | Surface which source is unavailable so the user recognizes it is not installed, and **ask** which available source to use instead — or whether to stop and install it; do not silently substitute. `code-review` is Claude-native and always available, so an alternative can always be offered |
+| Designated source unavailable in the current harness (codex CLI not found, or a built-in the harness does not provide) | Surface which source is unavailable and why, and **ask** which source the current harness can invoke to use instead — or whether to stop and make the designated source available; do not silently substitute |
 | No diff / no changes | Report and stop at Phase 0 (nothing to review) |
 | Source timeout (>300s) | Present partial findings collected so far, note the timeout, let the user decide whether to continue |
 | Source approves with no findings | Report converged immediately — verdict=approve at round 1, no edits needed |
@@ -265,9 +265,12 @@ The per-round trace is a relay presentation — present it and proceed; it is no
    with the loop-driving session writing inline and no gate. If the recurrence instead
    evidences design-level disagreement — a prior dismissal the source keeps contesting,
    or rejection of the constituted direction itself — open a Constitution design gate
-   with the recurrence history presented; the constituted decision enters the
-   design-decision ledger and re-enters the source's bundle at the next re-harvest. A
-   third recurrence after a tier-escalated re-apply discredits the Mechanical diagnosis
+   with the recurrence history presented. Only a resolution that holds independently of
+   current code state enters the design-decision ledger and re-enters the source's
+   bundle at the next re-harvest; an instance-specific dismissal or deferral remains a
+   settled-policy disposition, is surfaced as annotated residual at convergence, and
+   never enters the bundle. A third recurrence after a tier-escalated re-apply
+   discredits the Mechanical diagnosis
    and is design-level by backstop. Recurrence ends through a completed repair or
    constitution, never suppression; a manufactured verdict (a source instructed to
    approve when findings match a ledger) is not convergence.
