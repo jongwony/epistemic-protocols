@@ -16,7 +16,7 @@ A source-agnostic, convergence-paced review-resolve loop for code/PR diffs: it d
 /review-loop [source?] [scope?]
 
 source : { codex | code-review }                     -- optional; review source behind the (diff, design-intent) → { findings[], verdict } interface
-                                                     --   absent → Phase 0 asks which source to use (no default)
+                                                     --   absent → Phase 0 asks which source to use (no default; one invokable source relays, zero stops)
 scope  : PR number | (implicit)                      -- optional; PR number, or implicit current-PR / working-tree detection
 ```
 
@@ -26,7 +26,7 @@ The review source is pluggable: any source satisfying the `(diff, design-intent)
 
 ```
 /review-loop [source?] [scope?]
-  Phase 0  : source designation (arg → relay | absent → ask) + scope detect (PR diff | working tree)
+  Phase 0  : source designation (arg → relay | absent → ask, cardinality-guarded) + scope detect (PR diff | working tree)
                           + design-intent harvest (rules/comments for the changed surface → intent bundle)
   Phase 1  : review    — source(diff, intent) → { findings[], verdict }
   Phase 2  : verify     — per finding: /inquire (vs codebase) + /contextualize (vs work-flow);
@@ -181,7 +181,7 @@ Review sources are **runtime-selected, not static frontmatter dependencies**: th
 1. Write a review prompt to `/tmp/review_loop_codex_${SUFFIX}.txt` (generate `SUFFIX=$(openssl rand -hex 4)`), passing a **pointer** to the diff rather than inlining it, so codex fetches the live diff with its own git. Include a Pointers section:
    ```
    ## Pointers — read the diff yourself with your own tools
-   - Diff command: `git diff {base_sha}...{head_sha}`  (PR scope — `{head_sha}` is the PR head, which equals `HEAD` only when the PR branch is checked out; for a working-tree scope use `git diff HEAD`, then read directly each untracked path carried in Changed files because it is absent from the diff)
+   - Diff command: `git diff {base_sha}...{head_sha}`  (PR scope — `{head_sha}` is the PR head, which equals `HEAD` only when the PR branch is checked out; for a working-tree scope use `git diff {captured_base}` — the `HEAD` SHA captured at Phase 0, still equal to `HEAD` until the loop lands commits — then read directly each untracked path carried in Changed files because it is absent from the diff)
    - Changed files: {file_list}
    Run the diff command in this repo and, for working-tree scope, read the identified untracked files directly to see exactly what changed — the diff is not inlined.
    ```
