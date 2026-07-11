@@ -20,7 +20,7 @@ source : { codex | code-review }                     -- optional; review source 
 scope  : PR number | (implicit)                      -- optional; PR number, or implicit current-PR / working-tree detection
 ```
 
-The review source is pluggable: any source satisfying the `(diff, design-intent) → { findings[], verdict }` interface can drive the loop. `codex` and `code-review` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
+The review source is pluggable: any source satisfying the `(diff, design-intent) → { findings[], verdict }` interface can drive the loop. `codex` and `code-review` are the two sources documented in the Source Interface section; both are runtime-selected, not fixed at definition time. When `source` is omitted, Phase 0 asks which source to use (no preselected default; with exactly one invokable source it relays the designation, with none it stops). When `scope` is omitted, Phase 0 detects it (current-branch PR or working tree).
 
 ## Pipeline Overview
 
@@ -240,7 +240,7 @@ The per-round trace is a relay presentation — present it and proceed; it is no
 | Condition | Action |
 |-----------|--------|
 | Designated source unavailable in the current harness (codex CLI not found, or a built-in the harness does not provide) | Surface which source is unavailable and why, and **ask** which source the current harness can invoke to use instead — or whether to stop and make the designated source available; do not silently substitute |
-| No diff / no changes | Report and stop at Phase 0 (nothing to review) |
+| No diff / no changes | Ask the user what to review, then stop at Phase 0 (nothing to review; the same transition as scope-detection step 4) |
 | Source timeout (>300s) | Present partial findings collected so far, note the timeout, let the user decide whether to continue |
 | Source approves with no findings | Report converged immediately — verdict=approve at round 1, no edits needed |
 
