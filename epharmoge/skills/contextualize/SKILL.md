@@ -142,7 +142,7 @@ trivial convergence (all-routed): when Mᵢ ≠ ∅ but Mᵢ_passed = ∅ AND ev
 certificate gate:  every registered mismatch carried certificate.status = pass (fail-closed, at registration) — routed/ambiguous mismatches never entered pending(Σ), so a contextualized R' is assembled only from in-scope (ApplicationDecontextualized-owned), fit-certified adaptations; backward misfit was handed forward (/gap, /inquire, /bound, /distill), not adapted in-place
 -- stratification: applicable(R', X) ⊆ adjudicated(R', X)
 -- operational proxy: ∀ task resolved (status ∈ {completed, dismissed}) ⟹ adjudicated(R', X) ⟹ contextualized(R')
-progress(Λ) = 1 if |total_tasks| = 0 else |completed_tasks| / |total_tasks|   -- total_tasks = 0 (Mᵢ = ∅, or Mᵢ≠∅∧Mᵢ_passed=∅ trivial convergence via routing) is fully converged, not undefined — the Mᵢ = ∅ leg only after the Rule 9 zero-mismatch confirmation (Confirm, or Reopen whose focused re-scan stays ∅); otherwise NON-MONOTONE: may regress when re-scan over the mutated R' registers newly certified mismatches (transformative-revalidation signature)
+progress(Λ) = 1 if |total_tasks| = 0 else |resolved_tasks| / |total_tasks|   -- resolved_tasks = tasks with status ∈ {completed, dismissed} (matches the ContextualizedExecution resolution contract)   -- total_tasks = 0 (Mᵢ = ∅, or Mᵢ≠∅∧Mᵢ_passed=∅ trivial convergence via routing) is fully converged, not undefined — the Mᵢ = ∅ leg only after the Rule 9 zero-mismatch confirmation (Confirm, or Reopen whose focused re-scan stays ∅); otherwise NON-MONOTONE: may regress when re-scan over the mutated R' registers newly certified mismatches (transformative-revalidation signature)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
