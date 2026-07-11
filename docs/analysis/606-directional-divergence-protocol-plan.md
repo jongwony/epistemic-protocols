@@ -201,7 +201,7 @@ cleanup을 강제하는" **수명주기 선례**로만 인용하며, 관찰-rela
 
 **(c) 생성 분류 = transform 연산 — 생존 사슬과 파탄 조건.** probe 생성은 A2
 관찰-relay가 아니라 **transform 연산**이다 — 선례: epharmoge TOOL GROUNDING의
-`adapt (transform) → Edit, Write` (contextualize SKILL.md:150, "tool call that
+`adapt (transform) → Edit, Write` (epharmoge/skills/contextualize/SKILL.md:150, "tool call that
 changes existing artifacts; medium-agnostic"). transform은 다음 **생존 사슬** 안에서만 합법이다:
 
 ```

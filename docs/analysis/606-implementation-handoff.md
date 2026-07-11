@@ -13,11 +13,17 @@
   스위트의 첫 클래스 프로토콜로 신설한다.
 - **허용 소스**: 계획 문서 · GitHub 이슈 jongwony/epistemic-protocols#606(및 그 해소
   코멘트) · 그 해소 코멘트가 링크하는 PR(리뷰 스레드 포함) · `AGENTS.md` ·
+  `docs/structural-specs.md` · `docs/verification.md`(둘 다 `AGENTS.md`가 §10-①
+  저작·검증의 다음 층위로 지정) ·
   `docs/co-change.md` · `.claude/skills/verify/graph.json` · 계획 §8–9가 지정하는
   형제 프로토콜 SKILL.md들 · 계획 §9가 지정하는 편집 대상 파일 일체 — README.md ·
   README_ko.md · `.claude-plugin/marketplace.json` · `scripts/load-protocols.js` ·
   `scripts/package.js` · `scripts/package.test.js` · `src/App.tsx` ·
   `src/lib/i18n.tsx` · onboard/catalog SKILL.md 및 onboard `references/*.md`.
+- **실행 위치**: 본 핸드오프와 계획 문서는 브랜치 `feat/606-c2-impl-plan`에 있다.
+  구현 착지는 계획 §2.2대로 격리 워크트리 + **새** 기능 브랜치 → PR이며, 이 계획
+  브랜치 위에 구현 커밋을 쌓지 않는다. 계획 문서가 아직 main에 없다면(계획 PR
+  미머지) 문서 열람은 이 브랜치의 워크트리 경로에서 한다.
 - **검증 명령**:
   - `node .claude/skills/verify/scripts/static-checks.js .`
   - `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
