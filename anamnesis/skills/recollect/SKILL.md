@@ -10,14 +10,14 @@ Resolve vague recall into recognized context through AI-guided contextual scan a
 
 ## Definition
 
-**Anamnesis** (ἀνάμνησις): A dialogical act of resolving vague recall into recognized context, where AI detects empty intention, scans hypomnesis and memory stores with contextual awareness, presents narrative candidates for Socratic recognition, and facilitates guided recall orientation when initial candidates do not match — grounded in user-constituted identification rather than keyword retrieval.
+**Anamnesis** (ἀνάμνησις): A dialogical act of resolving vague recall into recognized context, where AI detects empty intention, scans the SSOT plus the hypomnesis INDEX with contextual awareness (`memory/` is a non-scanned, user-curated realization-layer adjunct — see STORE TOPOLOGY), presents narrative candidates for Socratic recognition, and facilitates guided recall orientation when initial candidates do not match — grounded in user-constituted identification rather than keyword retrieval.
 
 ```
 ── FLOW ──
 Anamnesis(V) → Detect(V) →
-  not-empty_intention(V): skip → deactivate
+  not-empty_intention(V): relay(finding) → proceed (no activation)
   empty_intention(V): Classify(V, Σ) → InputType → Dispatch(InputType) → Track ∈ {entropy, salience, hybrid} →
-    Scan_{Track}(Store, trace(V)) → Rank(C[]) →
+    Scan_{Track}(Store, trace(V)) → Rank(C[], trace(V)) →
     |C[]| = 0 ∧ attempts = 0: Probe(V, Σ) → Qs(probe) → Stop → H → enrich(V, H) → re-scan
     |C[]| = 0 ∧ attempts > 0: NullMatch → inform(V, Σ) → deactivate
     |C[]| > 0: backtrace_parent(c) ∀ c ∈ C[] : fork_marker(c) → parent_pointer, parent_cwd   -- deterministic: a fork candidate's parent is recoverable from its own record, not inferred (mechanism in TOOL GROUNDING; ≠ user-described Reorient)
@@ -81,7 +81,7 @@ StructuredAnchor = { kind: ∈ {memory, github_issue, github_pr}, ref: String, c
                   -- ref stores the canonicalized literal (issue/PR numbers normalized to "#N", memory paths prefixed "memory/"); canonical-form grep over INDEX is form-invariant (a search for "#309" hits ref: "#309") — the canonical form is the dedup key, so raw surface variants ("PR 309") collapse into it
 LegacyAnchor     = String   -- opaque: memory path, URL, session ID, doc path — entries written before structured anchors; read as kind-unknown extends edges, never rejected, no migration
 Prose            = String   -- source-agnostic NL description
-Rank             = List(Candidate) → List(Candidate)   -- track-primary signal dominates; evidence_mode is a secondary tie-break + confidence modulator only (never a filter; Null neutral)
+Rank             = (List(Candidate), RecallTrace) → List(Candidate)   -- track-primary signal dominates; evidence_mode is a secondary tie-break + confidence modulator only (never a filter; Null neutral)
 Probe            = (V, Σ) → List(SocraticQuestion)
 SocraticQuestion = { dimension: ∈ {temporal, associative, contextual}, question: String }
 R                = Recognition ∈ {Recognize(Candidate), Refine, Reorient(description)}
@@ -96,28 +96,27 @@ NullMatch        = predicate; canonical definition in ── CONVERGENCE ──
 Phase            ∈ {0, 1, 2, 3}
 
 ── V-BINDING ──
-bind(V) = explicit_arg ∪ colocated_expr ∪ prev_user_turn
-Priority: explicit_arg > colocated_expr > prev_user_turn
+bind(V) = explicit_arg ∪ colocated_expr ∪ prev_user_turn   -- priority: explicit_arg > colocated_expr > prev_user_turn
 
 /recollect "text"           → V.trace = extract_trace("text", Σ)
 "recall... topic"           → V.trace = extract_trace(text before trigger, Σ)
 /recollect (alone)          → V.trace = extract_trace(previous user message, Σ)
 
 Edge cases:
-- Multiple vague references: bind to first, note others
-- Re-invoke after NullMatch: fresh V, no carryover
+- Multiple vague references: bind to first, note others; re-invoke after NullMatch: fresh V, no carryover
 - Composition (/recollect * /inquire): V from Anamnesis, Aitesis receives ClueVector_prose via session text
 
 ── PHASE TRANSITIONS ──
 Phase 0: V → Detect(V) → empty_intention(V)?                    -- trigger (silent)
+           [¬empty_intention(V)] relay(finding) → proceed       -- zero-signal: present activation finding, proceed without activation
            → Classify(V, Σ) → InputType → Track                  -- dispatch (silent)
-Phase 1: V → Scan_{Track}(Store, trace(V)) → Rank(C[]) → C[ranked]  -- track-dispatched scan + rank [Tool]
+Phase 1: V → Scan_{Track}(Store, trace(V)) → Rank(C[], trace(V)) → C[ranked]  -- track-dispatched scan + rank [Tool]
            backtrace_parent(c) ∀ c ∈ C[ranked] : fork_marker(c) → parent_pointer, parent_cwd  -- fork (SidechainNoSSOT): parent recovered deterministically from the candidate's own record [Tool]
            |C[ranked]| = 0 ∧ attempts = 0 → Probe(V, Σ) → Qs → Stop → H → enrich(V, H) → Phase 1
            |C[ranked]| = 0 ∧ attempts > 0 → NullMatch → inform → deactivate
 Phase 2: SingleObvious(C[ranked]) → emit(ClueVector_prose(C[top]) ⊕ divergence_affordance) → recall_complete(C[top]) → converge   -- Extension: high-confidence single candidate, no turn yield, no [Tool] Stop; silence = Recognize
          ¬SingleObvious(C[ranked]) → C[top] → Qc(C[top], evidence, framing) → Stop → R    -- recognition gate [Tool]
-Phase 3: R → integrate(R, V, Σ) →                                -- integration (sense); after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
+Phase 3: R → integrate(R, V, Σ) →                                -- integration (track: Λ.history ⊕ (C[top], R)); after a SingleObvious emit, a next-turn divergence reaches these paths through fresh re-activation (Layer 1/2), not a transition from the converged state
            Recognize(c) → ClueVector_prose(c) → emit → converge
            Refine → Probe(V, Σ) → Qs(probe) → Stop → H          -- Socratic probing [Tool]
                   → enrich(V, H) → Phase 1
@@ -152,6 +151,7 @@ progress(Σ) = attempts: N/max, enrichments: N, candidates_presented: N
 -- Fork/sidechain binding (SidechainNoSSOT): `Candidate.fork_marker = true` ⇐ the recalled id appears as an `agent_id` in INDEX_substitute (~/.claude/projects/{slug}/hypomnesis/subagent/{agent_id}.jsonl, appended by the SubagentStop hook) AND has no sibling top-level SSOT ~/.claude/projects/{slug}/{agent_id}.jsonl of its own — the fork's turns live only in the parent record + this capture, so `claude --resume <agent_id>` has no transcript to resume
 -- Parent back-trace (`backtrace_parent` ↦ `Candidate.parent_pointer`, `Candidate.parent_cwd`): deterministic, not heuristic — the substitute capture entry records `session_id` = the orchestrating parent's session id (the SubagentStop payload field), so `parent_pointer ← capture.session_id` is a direct read. The capture lives under the parent's slug by construction ({slug} = dirname of the parent transcript), so the parent is always same-slug — look only there. Resumability: if the parent's top-level SSOT ~/.claude/projects/{slug}/{parent_pointer}.jsonl still exists, `parent_pointer` is set and `parent_cwd ← that transcript's `cwd` field` when present (`parent_cwd = Null` if the parent transcript predates cwd capture — parent identified but cwd unknown); the full handle `cd <parent_cwd> && claude --resume <parent_pointer>` requires both components. If the parent SSOT has aged out, `parent_pointer = parent_cwd = Null` (non-resumable → surface the capture's recoverable artifacts). The native subagent transcript (captured verbatim as the `agent_transcript_path` field) is not relied on as a resume handle; the durable parent link is the capture's `session_id`.
 Phase 0 Detect      (sense)    → Internal analysis
+Phase 0 relay_not_empty (extension) → TextPresent+Proceed (¬empty_intention(V): present finding, proceed without activation)
 Phase 0 Classify    (sense)    → Internal analysis (InputType detection from V + Σ)
 Phase 1 Scan_entropy  (observe)  → Read, Grep (literal match over SSOT ∪ INDEX)
 Phase 1 Scan_salience (observe)  → Read, Grep, Glob (MarkerProfile match over INDEX; SSOT fallback on degraded_scan)
@@ -170,12 +170,12 @@ converge            (extension)    → TextPresent+Proceed (convergence trace)
 Λ = { phase: Phase, V: VagueRecall,
       candidates: List(Candidate), presented: Set(Candidate),
       recognized: Optional(Candidate),
-      probes: List(SocraticQuestion),
+      probes: List(SocraticQuestion), history: List<(Candidate, R)>,   -- history appended at Phase 3 integration: Log (Candidate, R) to history
       attempts: Nat, active: Bool, cause_tag: String }
 
 ── COMPOSITION ──
 *: product — (D₁ × D₂) → (R₁ × R₂). registered dependency edges preserved. Dimension resolution emergent via session context.
-*: /recollect ∘ /inquire — RecognizedContext → ClueVector_prose seeds Aitesis as input substrate; on NullMatch, the accumulated recall trace seeds Aitesis to search SSOT directly (INDEX may lack entries while SSOT retains the information).
+*: /recollect ∘ /inquire — RecalledContext → ClueVector_prose seeds Aitesis as input substrate; on NullMatch, the accumulated recall trace seeds Aitesis to search SSOT directly (INDEX may lack entries while SSOT retains the information).
 
 ── ENTROPY EXTRACTION ──
 extract : Session → Set(IdentifierTuple)

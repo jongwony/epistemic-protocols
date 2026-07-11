@@ -1,11 +1,11 @@
 ---
 name: delimit
-description: "Delimit a large body of work into right-sized execution units before its method is conducted. Searches for the cut-set over an external work-breakdown structure such that each unit fits one execution span, every cut falls at a natural joint, and coverage is complete with no work orphaned — then emits a WorkUnitMap that references the WBS without owning it, ready to flow into /conduct. Type: (GranularityUnderdetermined, AI, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap. Alias: Diairesis(διαίρεσις)."
+description: "Delimit a large body of work into right-sized execution units before its method is conducted. Searches for the cut-set over an external work-breakdown structure such that each unit fits one execution span, every cut falls at a natural joint, and coverage is complete with no work orphaned — then emits a WorkUnitMap that references the WBS without owning it, ready to flow into /conduct. Type: (GranularityUnderdetermined, Hybrid, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap. Alias: Diairesis(διαίρεσις)."
 ---
 
 # Diairesis Protocol
 
-Delimit a large body of work into right-sized execution units — partition a work horizon at its natural joints so each unit fits one span — when the granularity of the cut is underdetermined. The morphism is **cut, then hand the cut-set on**: Diairesis searches for the cut-set, the user constitutes it joint by joint, and the emitted WorkUnitMap flows into `/conduct` as its work prospect. Type: `(GranularityUnderdetermined, AI, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap`.
+Delimit a large body of work into right-sized execution units — partition a work horizon at its natural joints so each unit fits one span — when the granularity of the cut is underdetermined. The morphism is **cut, then hand the cut-set on**: Diairesis searches for the cut-set, the user constitutes it joint by joint, and the emitted WorkUnitMap flows into `/conduct` as its work prospect. Type: `(GranularityUnderdetermined, Hybrid, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap`.
 
 ## Definition
 
@@ -22,14 +22,15 @@ Diairesis(WB) → Probe(WB) → granularity_underdetermined? →
   underdetermined:         init_loop_state: cycle_n=1, cut_set=∅, work_unit_map=∅, residual=regions(WB), committed=∅, regions_touched=regions(WB), joints=∅, invariant_status=⊥, history=∅, loop:
     Phase 1 Scan(WB, cycle_n) [per-cycle re-scan] → joints(region) → Pack(joints, horizon, lifecycle) → (Anchor[cycle_n], proposed_cut, SpanFit) →
       Anchor empty ∧ residual = ∅: → emit WorkUnitMap → converge          -- every region cut, nothing left
-      Anchor empty ∧ residual ≠ ∅: → autonomous_pack(residual) (extension) → surface → emit WorkUnitMap → converge  -- substrate exhausted; AI completes the residual cuts at their natural joints (Extension-default), surfaced as relay
+      Anchor empty ∧ residual ≠ ∅: → autonomous_pack(residual) (track) → (work_unit_map'', residual := ∅) → surface (extension) → finalize(work_unit_map'') → emit WorkUnitMap → converge  -- substrate exhausted; AI completes the residual cuts at their natural joints (Extension-default), surfaced as relay; same packed-carrier + finalize shape as the Sufficient path
+      SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: → relay(AcceptCut) (extension) → Phase 3 integrate (skip Qc)  -- single dominant cut (Rule 11): no genuine alternative disposition exists for this Anchor
       else:                        → Phase 2
     Phase 2 Qc(Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n) → Stop → A
     Phase 3 (parse(A) → (cut_disposition?, termination?)) →
       Esc:        → ungraceful deactivate (residual uncut, partition abandoned)  -- caught before integrate; Esc binds no cut_disposition
       cut_disposition present → integrate(cut_disposition, cut_set, work_unit_map) → (cut_set', work_unit_map')  -- a region moves residual→committed only once its unit Fits (or the user explicitly accepts a non-Fits unit), else it stays in residual for a later cycle; skipped on a pure-termination Sufficient that carries no cut, in which case (cut_set', work_unit_map') = (cut_set, work_unit_map) so the downstream finalize stays bound
       check_invariants(work_unit_map') → InvariantStatus                  -- span_fit ∧ natural_joint ∧ coverage_complete over committed cuts
-      Sufficient: → autonomous_pack(residual) (extension) → finalize(work_unit_map', residual) → emit WorkUnitMap → converge
+      Sufficient: → autonomous_pack(residual) (track) → (work_unit_map'', residual := ∅) → surface (extension) → finalize(work_unit_map'') → emit WorkUnitMap → converge
       else:       → re-derive next-cycle anchor frame → cycle_n += 1, loop
 
 ── MORPHISM ──
@@ -38,10 +39,10 @@ ExternalWBS × ExecutionHorizon × ContextLifecycle
   → scan(wbs, cycle_n) → joints                   -- read the external WBS (reference, read-only) for natural joints: milestone boundaries, dependency seams, deliverable edges
   → pack(joints, horizon, lifecycle) → CutSet     -- THE IRREDUCIBLE CORE: search for a cut-set whose every unit fits one span, every cut sits on a joint, and coverage is complete with no work orphaned. Per-cycle realization (FLOW) proposes one (Anchor, proposed_cut, SpanFit); accepted cuts accumulate into this CutSet via integrate across cycles
   → fit(unit, horizon, lifecycle) → SpanFit       -- per-unit span-fit predicate (composes /distill: a unit fits one span iff its work is carriable by one self-contained span handoff)
-  → present(anchor, proposed_cut, SpanFit)        -- surface the highest-leverage uncut region's proposed cut for user judgment via Cognitive Partnership Move (Constitution)
+  → [SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: relay(AcceptCut) (extension) | else: present(anchor, proposed_cut, SpanFit) (constitution)]  -- single dominant cut relays without a turn yield (Rule 1 exception); otherwise surface the highest-leverage uncut region's proposed cut for user judgment via Cognitive Partnership Move
   → integrate(cut_disposition, CutSet, WorkUnitMap) → (CutSet', WorkUnitMap')  -- apply the settled cut to the map (reference entries only; the WBS is never copied)
   → check(WorkUnitMap') → InvariantStatus         -- span_fit ∧ natural_joint ∧ coverage_complete
-  → finalize(WorkUnitMap', residual)              -- autonomous_pack the residual at its natural joints (Extension-default), then assert the three invariants hold over the whole map
+  → finalize(WorkUnitMap'')                       -- WorkUnitMap'' = WorkUnitMap' with the residual autonomous_pack'ed at its natural joints (Extension-default, residual → ∅); finalize asserts the three invariants hold over the whole packed map
   → WorkUnitMap
 requires: granularity_underdetermined(WB)         -- runtime checkpoint (Phase 0); sole activation precondition
 deficit:  GranularityUnderdetermined              -- activation precondition (Layer 1/2)
@@ -64,6 +65,7 @@ Cut    = a committed delimitation at a Joint — the boundary between two units
 CutSet = Set(Cut)  -- the partition; the search output and the loop's accumulating state
 WorkUnit = { id: String, region: Region, refs: List(WBSRef), fit: SpanFit }  -- an "execution_cut" view over the WBS: it references issue ids (refs) and does NOT copy their content; it floats between milestone and issue granularity (a unit may span part of a milestone or several issues). One span's worth of work
 Anchor = the highest-leverage uncut Region surfaced this cycle (the region whose cut most constrains the remaining partition) — a Region; the surfacing tuple (Anchor, proposed_cut, SpanFit) pairs it with its AI-proposed cut and SpanFit at construction, which are not fields of Anchor itself
+SingleDominantCut(Anchor, proposed_cut) ≡ pack(...) finds no viable alternative joint for this Anchor — proposed_cut is the region's only joint candidate, so MoveCut/SplitUnit/MergeUnits have no genuine target and AcceptCut is the sole non-trivial disposition (option-level entropy → 0, Rule 11)
 A      = CutDisposition ∈ {AcceptCut, MoveCut(joint), SplitUnit(joint), MergeUnits(neighbor)}  -- the per-cycle user answer over the proposed cut; presented intact per gate integrity
          -- AcceptCut: adopt the proposed unit (SpanFit = Fits) as a committed WorkUnit
          -- MoveCut(joint): the cut should fall at a different joint — re-delimit the region's boundary
@@ -84,13 +86,14 @@ Phase 0 → deactivate (relay): cut_already_fixed(WB) → the WBS already impose
 Phase 0 → Phase 1: granularity_underdetermined(WB) = true → init loop state (cycle_n=1, cut_set=∅, work_unit_map=∅, residual=regions(WB), committed=∅, regions_touched=regions(WB), joints=∅, invariant_status=⊥, history=∅)
 Phase 1: WB, cycle_n → Scan(WB, cycle_n) → joints → Pack(joints, horizon, lifecycle) → (Anchor[cycle_n], proposed_cut, SpanFit)  -- per-cycle re-scan + packing search [Tool]
 Phase 1 → converge: Anchor empty ∧ residual = ∅ → emit WorkUnitMap directly (every region cut)
-Phase 1 → converge (autonomous residual): Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (extension) → surface → emit WorkUnitMap  -- substrate exhausted; AI completes residual cuts at natural joints, surfaced as relay
-Phase 1 → Phase 2: Anchor non-empty → surface the proposed cut for user judgment
-Phase 2: Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n → Qc(...) → Stop → A  -- per-cycle partition gate over CutDisposition with cut-set snapshot + fit basis visible [Tool]
-Phase 3: (parse(A) → (cut_disposition?, termination?)) → [Esc → ungraceful deactivate, before integrate] → [cut_disposition present] integrate(cut_disposition, cut_set, work_unit_map) → (cut_set', work_unit_map') → check_invariants(work_unit_map') → InvariantStatus  -- integrate skipped on Esc (binds no cut) and on a pure-termination Sufficient (carries no cut); when skipped, (cut_set', work_unit_map') = (cut_set, work_unit_map) so the Sufficient finalize below stays bound
+Phase 1 → converge (autonomous residual): Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (track) → (work_unit_map'', residual := ∅) → surface (extension) → finalize(work_unit_map'') → emit WorkUnitMap  -- substrate exhausted; AI completes residual cuts at natural joints, surfaced as relay; packed carrier + finalize, same shape as the Sufficient path
+Phase 1 → Phase 3 (relay): Anchor non-empty ∧ SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits → relay(AcceptCut) (extension) → integrate(AcceptCut, cut_set, work_unit_map) directly, skipping Qc  -- single dominant cut (Rule 11): no genuine alternative disposition exists for this Anchor
+Phase 1 → Phase 2: Anchor non-empty ∧ ¬(SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits) → surface the proposed cut for user judgment
+Phase 2: Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n → Qc(...) → Stop → A  -- per-cycle partition gate over CutDisposition with cut-set snapshot + fit basis visible; fires only when NOT single-dominant-cut [Tool]
+Phase 3: (parse(A) → (cut_disposition?, termination?)) → [Esc → ungraceful deactivate, before integrate] → [cut_disposition present] integrate(cut_disposition, cut_set, work_unit_map) → (cut_set', work_unit_map') → check_invariants(work_unit_map') → InvariantStatus  -- integrate skipped on Esc (binds no cut) and on a pure-termination Sufficient (carries no cut); when skipped, (cut_set', work_unit_map') = (cut_set, work_unit_map) so the Sufficient finalize below stays bound; on the Phase 1 dominant-cut relay entry, parse(A) is skipped (no gate was presented) — cut_disposition := AcceptCut, integrate runs exactly once, then invariants and routing proceed normally
 Phase 3 → Phase 3 (relay): ambiguous parse (A readable as both a cut and termination) → one-turn relay confirmation of the parsed intent → re-parse → route  -- the ambiguous-parse state resolves before integrate/routing
 Phase 3 → Phase 1: ¬termination ∧ ¬Esc → re-derive next-cycle anchor frame → cycle_n += 1  -- continue the partition loop
-Phase 3 → converge (Sufficient): TerminationIntent = Sufficient → autonomous_pack(residual) (extension) → finalize(work_unit_map', residual) → assert InvariantStatus (coverage_complete hard) → emit WorkUnitMap
+Phase 3 → converge (Sufficient): TerminationIntent = Sufficient → autonomous_pack(residual) (track) → (work_unit_map'', residual := ∅) → surface (extension) → finalize(work_unit_map'') → assert InvariantStatus (coverage_complete hard) → emit WorkUnitMap
 Phase 3 → deactivate (ungraceful): Esc → residual uncut, partition abandoned (no WorkUnitMap)
 
 ── LOOP ──
@@ -111,7 +114,7 @@ Convergence evidence: At convergence, present the transformation trace — per c
 converge iff (Phase 3 Sufficient ∨ substrate_exhaustion) ∧ coverage_complete(work_unit_map) ∧ ¬user_esc
   coverage gate:            convergence presupposes the three invariants hold over the whole map. span_fit is COMMIT-ENFORCED (a unit moves to committed only once it Fits, or the user explicitly accepts a non-Fits unit) and natural_joint holds BY CONSTRUCTION (every cut sits on a joint), so both are maintained invariants that already hold over the committed map at convergence — they need no separate convergence gate. coverage_complete is therefore the sole remaining HARD convergence gate (a map leaving work outside every unit is not a valid WorkUnitMap and cannot emit)
   Phase 3 Sufficient:       residual filled by autonomous_pack (each remaining region cut at its natural joints, Extension-default), surfaced for recognition; emit WorkUnitMap directly
-  substrate_exhaustion:     Phase 1 surfaces no new region — if residual = ∅, emit directly; if residual ≠ ∅, autonomous_pack the residual, surface, then emit
+  substrate_exhaustion:     Phase 1 surfaces no new region — if residual = ∅, emit directly; if residual ≠ ∅, autonomous_pack the residual, surface, finalize over the packed map, then emit
   user_esc:                 user exits via Esc at any Phase 2 (ungraceful, residual uncut, no WorkUnitMap emitted)
   route_away:               Phase 0 scope_insufficient → /inquire, non-convergent exit (the missing pre-cut fact belongs to ContextInsufficient; no WorkUnitMap)
 
@@ -123,11 +126,13 @@ Phase 0 single_span_relay (extension) → TextPresent+Proceed (the whole body al
 Phase 0 cut_already_fixed_relay (extension) → TextPresent+Proceed (the WBS already imposes a span-sized partition (one-issue-per-span) or a prior WorkUnitMap covers this scope → present "cut already fixed" as relay, deactivate)
 Phase 1 Scan (observe)       → Read, Grep, Glob (per-cycle re-scan of the external WBS — Linear/issue tree, plan, project config — for natural joints; reference-only, never mutating the WBS; composes /bound for joint candidates where a cut could fall)
 Phase 1 Pack (sense)         → Internal analysis (the packing search: propose the cut-set fitting each region against horizon × lifecycle; compose /distill's zero-memory carriability as the per-unit Fits predicate; basis cited at Phase 2 surfacing)
-Phase 2 Qc (constitution)    → present (mandatory; per-cycle partition gate over CutDisposition {AcceptCut, MoveCut, SplitUnit, MergeUnits} + the anchor region + its proposed cut + SpanFit basis + current cut-set snapshot + cycle_n + free-response Sufficient termination affordance; Esc → loop termination, not an Answer)
+Phase 1 relay_dominant_cut (extension) → TextPresent+Proceed (SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: record AcceptCut as relay, skip Qc, advance directly to Phase 3 integrate — Rule 11)
+Phase 2 Qc (constitution)    → present (conditional: ¬SingleDominantCut(Anchor, proposed_cut) ∨ SpanFit ≠ Fits; per-cycle partition gate over CutDisposition {AcceptCut, MoveCut, SplitUnit, MergeUnits} + the anchor region + its proposed cut + SpanFit basis + current cut-set snapshot + cycle_n + free-response Sufficient termination affordance; Esc → loop termination, not an Answer)
 Phase 3 parse (sense)        → Internal analysis (parse A into cut_disposition + optional TerminationIntent; ambiguous parse triggers one-turn relay confirmation before routing)
 Phase 3 integrate (track)    → Internal state update (apply the settled cut to cut_set + work_unit_map as reference entries; move the anchor region from residual to committed ONLY once its unit Fits or the user explicitly accepts a non-Fits unit — else it stays in residual for a later cycle; skipped entirely on Esc / a pure-termination Sufficient that binds no cut, leaving the map unchanged; the WBS is never copied)
 Phase 3 check (sense)        → Internal analysis (assert the three packing invariants over the committed cut-set; coverage_complete is a hard convergence gate)
-Phase 3 autonomous_pack (extension) → TextPresent+Proceed (on Sufficient or substrate exhaustion, complete the residual cuts at their natural joints — Extension-default per the project's Extension calibration — and surface each for recognition before emit)
+autonomous_pack (track)      → Internal state update (fires from Phase 3 on Sufficient, or directly from the Phase 1 substrate-exhaustion terminal: complete the residual cuts at their natural joints — Extension-default per the project's Extension calibration — moving each region from residual to committed)
+autonomous_pack_surface (extension) → TextPresent+Proceed (surface each autonomous_pack cut for recognition before emit; both firing paths)
 converge (extension)         → TextPresent+Proceed (per-unit cut trace + residual disposition trace + InvariantStatus + WorkUnitMap as a separate session-text artifact carrying the WBS reference and cut_set; proceed — the map flows to /conduct)
 
 ── MODE STATE ──
@@ -170,11 +175,11 @@ Diairesis DELIMITs but does NOT order (no sequencing — that is /conduct), does
 
 ### Activation
 
-AI detects a body of work whose cut into span-units is undetermined before that work is conducted OR the user calls `/delimit`. Detection is silent (Phase 0); the partition of each region requires user interaction (Phase 2) unless the body already fits one span (relay) or the WBS scope is too thin to cut (route to `/inquire`).
+AI detects a body of work whose cut into span-units is undetermined before that work is conducted OR the user calls `/delimit`. Detection is silent (Phase 0); the partition of each region requires user interaction (Phase 2) unless the body already fits one span (relay), a single dominant cut fits the span (relay), or the WBS scope is too thin to cut (route to `/inquire`).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/delimit` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided / Hybrid)**: A multi-span body of work detected before conduction — its cut into units is undetermined. The AI-detected path requires user confirmation at the Phase 2 partition gate (Hybrid initiator, mirroring `/conduct`).
+- **Layer 2 (AI-guided / Hybrid)**: A multi-span body of work detected before conduction — its cut into units is undetermined. The AI-detected path requires user confirmation at the Phase 2 partition gate for every cycle that gates (Hybrid initiator, mirroring `/conduct`); Rule 11 single-dominant-cut relay cycles and the autonomous residual pack are Extension-classified and skip that gate, so an all-relay activation emits the WorkUnitMap with each cut and the convergence trace surfaced as relay. Emission executes nothing — the map is a session-text cut-set artifact — so the user's engagement with the emitted map carries the confirmation with bounded regret (a mis-cut is corrected at the next interaction).
 
 **Granularity underdetermined** = the work body spans more than one execution unit AND the cut into those units is not already fixed by the WBS structure or a prior `/delimit` map.
 
@@ -254,7 +259,7 @@ Re-scan the WBS for the current cycle, find the natural joints, and run the pack
 1. **Per-cycle re-scan** — read the external WBS (Read/Grep/Glob over the Linear/issue tree, plan, or project config) for natural joints in the current frame: milestone boundaries, dependency seams, deliverable edges, or an emergent joint the seeds do not name. Skip regions already in `Λ.committed` (a settled region is never re-surfaced); the anchor is the highest-leverage region in `Λ.residual`. Composes `/bound` — where a cut could fall is a boundary question, and a prior BoundaryMap narrows the joint candidates.
 2. **Packing search** — run `pack(joints, horizon, lifecycle)`: propose a cut-set by fitting each candidate region against the span budget (horizon × lifecycle). The search seeks the cut-set satisfying the three invariants — each unit Fits, every cut on a joint, and coverage complete with no work orphaned.
 3. **Anchor selection** — surface the highest-leverage uncut region as `Anchor[cycle_n]`: the region whose cut most constrains the rest of the partition (a large Overflows region, or a hard dependency seam). Pair it with the proposed cut and its `SpanFit` (composing `/distill`'s zero-memory carriability as the Fits predicate — a unit Fits when its work is carriable by one self-contained span handoff).
-4. **Emit the cycle's exit signal**: if no region surfaces (substrate exhausted) and `residual = ∅`, converge directly; if substrate exhausted and `residual ≠ ∅`, autonomous-pack the residual and converge; else surface the anchor for Phase 2.
+4. **Emit the cycle's exit signal**: if no region surfaces (substrate exhausted) and `residual = ∅`, converge directly; if substrate exhausted and `residual ≠ ∅`, autonomous-pack the residual and converge; if the anchor is a **single dominant cut** (no viable alternative joint for this region — `SingleDominantCut(Anchor, proposed_cut)`) and its `SpanFit = Fits`, record `AcceptCut` as relay and advance directly to Phase 3 integrate, skipping the Phase 2 gate (Rule 11 — option-level entropy → 0); else surface the anchor for Phase 2.
 
 **Scope restriction**: Read-only investigation. No WBS modification.
 
@@ -337,7 +342,7 @@ Parse the answer, apply the settled cut, and check the three invariants.
 
 ## Rules
 
-1. **AI-searches, user-cuts**: AI scans the WBS, runs the packing search, and proposes each cut; settling the cut requires user choice via Cognitive Partnership Move (Constitution) at Phase 2 (per-cycle over `CutDisposition`). AI detection is implicitly confirmed when the user engages with a proposed cut. The Hybrid initiator mirrors `/conduct` (its dual).
+1. **AI-searches, user-cuts**: AI scans the WBS, runs the packing search, and proposes each cut; settling the cut requires user choice via Cognitive Partnership Move (Constitution) at Phase 2 (per-cycle over `CutDisposition`) — **unless Phase 1 finds a single dominant cut (`SingleDominantCut(Anchor, proposed_cut)` ∧ SpanFit = Fits) and takes the typed relay branch (extension)** (Phase 1 → Phase 3, skipping Phase 2 for that cycle). AI detection is implicitly confirmed when the user engages with a proposed cut; when every cycle takes the relay branch (no gated cycle), the confirmation locus shifts to the user's engagement with the emitted WorkUnitMap — emission executes nothing, so a mis-cut is corrected at the next interaction with bounded regret. The Hybrid initiator mirrors `/conduct` (its dual).
 2. **Recognition over Recall**: Present structured options with differential futures via Cognitive Partnership Move (Constitution); Constitution interactions yield turn for response. Phase 2 binds to `A ∈ CutDisposition` (`{AcceptCut, MoveCut, SplitUnit, MergeUnits}`) plus a complete cut-set snapshot so a Sufficient signal is informed (per TYPES).
 3. **Delimit over Order (invariant)**: Diairesis marks the cuts; it does not sequence the units. Ordering — the units' order, independence, reconciliation, termination, routing — is `/conduct`'s work. The emitted WorkUnitMap carries a cut-set, never a sequence; the two protocols are duals across one seam (cut, then conduct).
 4. **Reference over Ownership (invariant)**: A WorkUnit references WBS ids and never copies or owns the external WBS's state. The WBS is the single source of truth; Diairesis reads it read-only and writes only the cut-set. The WorkUnitMap carries a WBS reference, not a snapshot, so downstream WBS changes are seen, never stale.

@@ -13,7 +13,9 @@ Infer context insufficiency before execution through AI-guided inquiry. Type: `(
 
 ```
 ── FLOW ──
-Aitesis(X) → Scan(X, dimensions) → Uᵢ → Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
+Aitesis(X) → Scan(X, dimensions) → Uᵢ →
+  [if Uᵢ = ∅] sufficiency_relay(reasoning) → proceed (trivial InformedExecution)
+  Ctx(Uᵢ) → (Uᵢ', Uᵣ) →
   classify(Uᵢ', dimension) → [if off-diagonal] Qc → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) →
   ReadOnlyVerify(Uᵣ'_candidates) → (Uᵣ' resolved | admissibility-fail → reclassify EmpiricallyObservable) →
   [if Uₑ_candidates ≠ ∅] EmpiricalObservation(Uₑ_candidates) → Uₑ →
@@ -54,7 +56,8 @@ A        = User answer ∈ {Provide(context), Point(location), Dismiss, Unknown(
              -- EvidenceSource in ValidSources(v)) and re-enters Phase 1 for reclassification; routing arc formalized in PHASE TRANSITIONS
 Ac         = User coherence classification ∈ CoherenceType     -- Phase 1 Qc gate answer type
 X'       = Updated prospect (context-enriched)
-InformedExecution = X' where remaining = ∅ ∨ user_esc
+InformedExecution = X' where remaining = ∅
+EarlyExit = X' where user_esc  -- non-convergent early exit: X' as of exit (original prospect + any partial integration), partial transformation trace over resolved uncertainties, remaining declared as unresolved residual (morphism not completed)
 -- Layer 1 (epistemic)
 Dimension    ∈ {Factual, Coherence, Relevance} ∪ Emergent(Dimension)
                -- open set; external human communication excluded
@@ -125,11 +128,11 @@ ReadOnlyAdmissible = { u : ReadOnlyVerifiable | coverage(u) ∧ support_integrit
                    --   Failure of either predicate → reclassify EmpiricallyObservable (backward arc T4). Step₃ ReadOnlyVerify takes the ReadOnlyVerifiable-classified candidate set (Uᵣ'_candidates, incl. support_integrity-undetermined items) and enforces this predicate at resolution time; ReadOnlyAdmissible characterizes the resolution survivors (= Uᵣ'), NOT a Step-3 input pre-filter.
 ObservationSpec = { setup: Action, execute: Action, observe: Predicate, cleanup: Action }
 EmpiricalObservation = (Uᵢ', ObservationSpec) → Uₑ  -- dynamic evidence gathering
-Uᵣ'_candidates = ReadOnlyVerifiable-classified uncertainties (Step 2 output → Step 3 input)
+Uᵣ'_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, (ReadOnlyVerifiable, s)) ∧ s ≠ UserTacit ∧ s ∉ Emergent(EvidenceSource) }  -- Step 2 output → Step 3 input
                -- includes support_integrity-undetermined items pending resolution-time enforcement; symmetric with Uₑ_candidates (transient set, NOT a MODE STATE partition bucket)
                -- Step 3 partitions this set: survivors → Uᵣ' (read_only_resolved); admissibility failures → backward arc → EmpiricallyObservable
 Uᵣ'        = Read-only verified uncertainties    -- Step 3 survivors only (= ReadOnlyAdmissible) → read_only_resolved; resolved (no Phase 2); excludes items routed via UserTacit override per Cite-or-observe rule
-Uₑ_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, (EmpiricallyObservable, s)) ∧ s ≠ UserTacit }
+Uₑ_candidates = { u ∈ Uᵢ' : classify(u) = (Factual, (EmpiricallyObservable, s)) ∧ s ≠ UserTacit ∧ s ∉ Emergent(EvidenceSource) }
               -- Phase 1 observation checkpoint; excludes Cite-or-observe cite-based UserTacit overrides (those route directly to Uᵢ'')
 Uₑ         = Empirically observed uncertainties    -- evidence attached, proceeds to Phase 2
 Uᵢ''       = Remaining user-dependent uncertainties
@@ -137,6 +140,7 @@ Uᵢ''       = Remaining user-dependent uncertainties
              --           (b) Factual/EmpiricallyObservable with EvidenceSource = UserTacit (Cite-or-observe cited override)
              --           (c) Factual/ReadOnlyVerifiable with EvidenceSource = UserTacit (Cite-or-observe cited override)
              --           (d) reclassified Coherence/MemoryInternal landing in any of (a)-(c) above
+             --           (e) any Factual(v) with s ∈ Emergent(EvidenceSource) (channel unvalidated by definition; awaits Phase 2 Qs_emergent_channel confirmation)
              -- Phase 2 question candidates
 Uₙ         = Non-actionable detected uncertainties  -- Fiber(Coherence) = CrossDomain or Fiber(d) = Unit; shown in classify summary with routing target
 Action     = Tool call sequence (Write, Bash)
@@ -150,6 +154,7 @@ branching_factor : Uncertainty → ℕ
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → Scan(X, dimensions) → Uᵢ?                        -- context sufficiency checkpoint (silent)
+       [Uᵢ = ∅] sufficiency_relay(reasoning) → proceed          -- zero-signal: present the sufficiency finding as relay text; trivial InformedExecution (remaining = ∅), Aitesis not activated
 Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- Step 1: context collection [Tool]
          Step₂ classify(Uᵢ', dimension) → (Uᵣ'_candidates, Uₑ_candidates, Uᵢ'', Uₙ) → -- Step 2: epistemic classification (core act); Uₙ = non-actionable
          [if off-diagonal(scope, resolution)] Qc(scope_assessment, resolution_assessment) → Stop → Ac  -- Coherence 2D Constitution interaction [Tool]
@@ -158,7 +163,7 @@ Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- 
            [if support_integrity_unverified(u) ∨ coverage_gap(u)] reclassify(u, EmpiricallyObservable) → goto Step₂  -- backward arc (T4): support-integrity/coverage failure re-enters classification (staleness = temporal sub-case of support_integrity_unverified)
          [if Uₑ_candidates ≠ ∅] Step₄ EmpiricalObservation(Uₑ_candidates) → Uₑ  -- Step 4: dynamic evidence gathering [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[cluster], framing) → Stop → A          -- uncertainty surfacing [Tool]; cluster = one coherent cluster (size ≤ 4)
-Phase 3: A → integrate(A, X) → X'                               -- prospect update (sense)
+Phase 3: A → integrate(A, X) → X'                               -- prospect update (track: mutates Λ.X)
          [if A = Unknown(Partial)] auto_promote(uncertainty, next_source(ValidSources(v))) → goto Phase 1  -- backward arc (T2): user declines certainty → re-enter classification with next-preferred EvidenceSource
 
 ── LOOP ──
@@ -169,26 +174,29 @@ If remaining = ∅: proceed with execution.
 User can exit at Phase 2 (early_exit).
 Continue until: informed(X') OR user ESC.
 Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.empirically_observed ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
+On user ESC (EarlyExit, not InformedExecution): present the same partial transformation trace restricted to uncertainties already resolved, then declare `remaining` as explicit unresolved residual.
 
 ── CONVERGENCE ──
 actionable(Λ) = uncertainties \ non_factual_detected       -- Fiber(Factual) + Fiber(Coherence)=MemoryInternal uncertainties
 informed(X') = remaining = ∅                                -- non_factual_detected does not block convergence
-progress(Λ) = 1 - |remaining| / |actionable(Λ)|            -- denominator excludes non-actionable (CrossDomain + detect-only dimensions)
+progress(Λ) = 1 if |actionable(Λ)| = 0 else 1 - |remaining| / |actionable(Λ)|   -- |actionable| = 0 (zero-signal or all-nonactionable trivial convergence) is fully converged, not undefined; denominator excludes non-actionable (CrossDomain + detect-only dimensions)
 narrowing(Q, A) = |remaining(after)| < |remaining(before)| ∨ context(remaining(after)) ⊃ context(remaining(before))
 early_exit = user_declares_sufficient
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Scan    (sense)       → Internal analysis (no external tool)
+Phase 0 sufficiency_relay (extension) → TextPresent+Proceed (Uᵢ = ∅: present the sufficiency finding with reasoning; proceed with X unchanged, trivial InformedExecution)
 Phase 1 Ctx     (observe)     → Read, Grep (stored knowledge extraction: codebase, memory, references); WebSearch, WebFetch (conditional: CanonicalExternal channel — RFCs, vendor API docs, standards; `source: "web:{url}"` tag + staleness guard via codebase version cross-check); Bash (conditional: VersionControlHistory channel — read-only commit-log queries via subprocess (content pickaxe, message search, temporal range); `source: "history:{ref}"` tag; collection-only — ref-type staleness classification handled per Phase 1 Step 1 staleness rule)
 Phase 1 Classify (observe)    → Internal analysis (multi-dimension assessment); Read, Grep (stored knowledge cross-reference analysis)
 Phase 1 Qc      (constitution)        → present (conditional: Coherence 2D off-diagonal Constitution interaction; fires only when scope ≠ resolution assessment; user classifies coherence type as MemoryInternal or CrossDomain)
-Phase 1 Emergent_channel (constitution) → present (channel unvalidated by definition; regardless of parent Verifiability, route to Phase 2 to present observed channel description and await user confirmation before proceeding)
-Phase 1 CanonicalExternal_staleness (constitution) → present (when staleness cannot be verified; require BOTH `staleness:unverified` tag — the temporal sub-case of the general `support_integrity:unverified` tag — AND Phase 2 classify summary surfacing — no silent escalation path; publishing authority claim warrants user awareness)
+Phase 2 Qs_emergent_channel (constitution) → present (specialization of Phase 2 Qs: channel unvalidated by definition; regardless of parent Verifiability, the classify summary records the observed channel description and awaits user confirmation before proceeding; confirmation rides the parent A coproduct — Point(location) designates/validates the authoritative channel, Provide(context) supersedes it, Dismiss declines it (proceed-with-assumption), Unknown(Partial) leaves the item unresolved — no answer auto-resolves the item through the unconfirmed channel; the answer is recorded in Λ.channel_validations — a channel already Point-validated this session skips this gate only (prior in-session user decision); each later item on that channel still takes the claim-specific Phase 1 evidence pass against the validated channel, per the Point(location) semantics (record location, resolve via next Phase 1 iteration) — never blanket-resolved as user-responded)
+Phase 2 Qs_staleness (constitution) → present (specialization of Phase 2 Qs: when staleness cannot be verified; require BOTH `staleness:unverified` tag — the temporal sub-case of the general `support_integrity:unverified` tag — AND classify summary surfacing — no silent escalation path; publishing authority claim warrants user awareness)
 Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering, Factual only); cleanup via Bash
 Phase 2 Qs      (constitution)        → present (mandatory: classify result + uncertainty surfacing; user provides context judgment on insufficiency; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
+esc          (extension)       → TextPresent+Proceed (partial transformation trace + unresolved residual declaration; terminate as EarlyExit, not InformedExecution)
 
 ── MODE STATE ──
 Λ = { phase: Phase, X: Prospect, uncertainties: Set(Uncertainty),
@@ -203,6 +211,7 @@ converge     (extension)       → TextPresent+Proceed (convergence evidence tra
       history: List<(Uncertainty, A)>, observation_history: List<(ObservationSpec, Result, Evidence)>,
       observation_skips: List<(Uncertainty, EscapeCondition, String)>,  -- audit trail for Cite-or-observe escape hatches
       source_choice_overrides: List<(Uncertainty, EvidenceSource, String)>,  -- audit trail for Cite-or-observe cite-based UserTacit overrides
+      channel_validations: List<(Uncertainty, EvidenceSource, A)>,  -- Qs_emergent_channel answers recorded at Phase 3; audit trail feeds variation-stable observed use for (cross-session) base promotion; a channel Point-validated this session does not re-enter the gate this session
       active: Bool,
       cause_tag: String }
 -- Invariant: uncertainties = context_resolved ∪ read_only_resolved ∪ empirically_observed ∪ non_factual_detected ∪ user_responded ∪ remaining ∪ dismissed (pairwise disjoint)
@@ -226,7 +235,7 @@ Write is authorized for observation instrument setup (temporary test artifacts w
 
 ### Activation
 
-AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0); surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
+AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0), except the zero-unknown sufficiency relay which presents its reasoning without yielding the turn; surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
@@ -286,7 +295,7 @@ Heuristic signals for context insufficiency inference (not hard gates):
 |---------|--------|
 | All uncertainties resolved (context, read-only, observed, or user) | Proceed with updated prospect |
 | All remaining uncertainties dismissed | Proceed with original prospect + defaults |
-| User Esc key | Return to normal operation |
+| User Esc key | EarlyExit (not InformedExecution): present partial transformation trace + declare `remaining` as unresolved residual, then return to normal operation |
 
 ## Uncertainty Identification
 
@@ -361,18 +370,18 @@ Collect contextual evidence, classify each uncertainty by dimension and verifiab
     - `CanonicalExternal` → Step 3 with WebFetch/WebSearch (published external docs; `source: "web:{url}"` tag + determinism verification + staleness guard — see Web context below)
     - `Instrumentation` → Step 4 (Empirical observation via Bash lifecycle)
     - `UserTacit` → Phase 2 directly (user-dependent inquiry; includes reclassified Coherence/MemoryInternal items)
-    - `Emergent(source)` → **always Phase 2** (Constitution per TOOL GROUNDING `Phase 1 Emergent_channel`): record observed channel description in classify summary, await user confirmation that this channel is appropriate; accumulate toward variation-stable observed use for base promotion. Parent Verifiability tier is NOT used to bypass Phase 2 — the channel is unvalidated by definition.
+    - `Emergent(source)` → **always Phase 2** (Constitution per TOOL GROUNDING `Phase 2 Qs_emergent_channel`): record observed channel description in classify summary, await user confirmation that this channel is appropriate; accumulate toward variation-stable observed use for base promotion. Within the session, the validation is recorded in Λ.channel_validations; a channel already Point-validated this session skips the re-gate only (prior in-session user decision); each later item on that channel still routes through the claim-specific Phase 1 evidence pass against the validated channel, per the Point(location) semantics (record location, resolve via next Phase 1 iteration) — base promotion itself stays cross-session. Confirmation rides the standard Phase 2 answer coproduct — `Point(location)` designates/validates the authoritative channel, `Provide(context)` supersedes it, `Dismiss` declines it (proceed-with-assumption), `Unknown(Partial)` leaves the item unresolved — no separate answer type, and no answer auto-resolves the item through the unconfirmed channel. Parent Verifiability tier is NOT used to bypass Phase 2 — the channel is unvalidated by definition.
 - **Coherence classification** (Layer 2, 2D model: Scope × Resolution):
   - Pre-filter: cross-scope + rule-resolvable (existing scope hierarchy, established precedence) → coexistence (exit Coherence; not a contradiction)
   - Same scope + evidence-resolvable → MemoryInternal → factual reclassification (ReadOnlyVerifiable / EmpiricallyObservable / UserDependent) → follows Factual resolution path (Step 3, Step 4, or Phase 2)
     - **EvidenceSource inheritance procedure**: reclassified MemoryInternal items enter EvidenceSource selection identically to directly-classified Factual(v) items — the same cost-ordering default, external-dependency preference, and Cite-or-observe rule override requirements apply; `source_choice_overrides` logging applies identically
-  - Cross scope + structure-requiring → CrossDomain → deficit-matched routing: MappingUncertain→`/ground`, BoundaryUndefined→`/bound`, FrameworkAbsent→`/frame`, GapUnnoticed→`/gap`, IntentMisarticulated→`/elicit`, GoalIndeterminate→`/elicit`
+  - Cross scope + structure-requiring → CrossDomain → deficit-matched routing: MappingUncertain→`/ground`, BoundaryUndefined→`/bound`, FrameworkAbsent→`/frame`, GapUnnoticed→`/gap`, AbstractAporia→`/elicit`
   - Off-diagonal (Scope ≠ Resolution): present both assessments with evidence via conditional gate; user classifies as MemoryInternal or CrossDomain
     - (Same, Structure): same-scope contradiction where factual verification is insufficient — resolution requires understanding structural relationships within the scope
     - (Cross, Evidence): cross-scope contradiction where evidence comparison can determine which scope's claim is current — despite scope difference, factual verification suffices
   - MemoryInternal → actionable (proceeds to resolution); CrossDomain → record as `Uₙ` (non_factual_detected) with deficit-matched routing target
 - **Other non-actionable dimensions**: Relevance and Emergent → detect and record as `Uₙ` (non_factual_detected); shown with routing target in classify summary, not Phase 2 question
-  - Relevance → deficit-matched: GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`, IntentMisarticulated→`/elicit`, GoalIndeterminate→`/elicit`
+  - Relevance → deficit-matched: GapUnnoticed→`/gap`, BoundaryUndefined→`/bound`, AbstractAporia→`/elicit`
   - Emergent(_) → match observed deficit condition against candidate protocol deficit conditions
 - Store all results in `Λ.classify_results`
 
@@ -398,7 +407,7 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 
 **Determinism verification** (Extension precondition): CanonicalExternal is classified as Extension only when the source is deterministic for the claim scope. Verify one of: (a) pinned version or dated snapshot (specific RFC with publication date, vendor doc with version pin, W3C spec with date stamp), (b) tag-pinned URL (`/v1.2/`, `?version=X`), or (c) cached copy with recorded fetch timestamp. When the source is undated or versionless and the claim depends on temporal context (API behavior, deprecated features, vendor defaults), the fetch is NON-deterministic → classify as Constitution and escalate via Phase 2 classify summary before treating as evidence.
 
-**Staleness guard** (analogous to memory evidence): documentation may be temporally decoupled from the library version actually in use — verify against codebase import/pin version before treating as resolved. When staleness cannot be verified, the guard requires BOTH: (1) `staleness:unverified` tag (the temporal sub-case of the general `support_integrity:unverified` tag) attached to the evidence record, AND (2) surfacing to the user in Phase 2 classify summary regardless of whether EmpiricallyObservable reclassification subsequently resolves the uncertainty — no silent escalation path (no "or" fallback). The CanonicalExternal source carries publishing authority (standards body, vendor) distinct from internal CodeDerivable evidence — cite both when cross-validating, and always cite the authority source when its temporal alignment cannot be independently verified (see TOOL GROUNDING `Phase 1 CanonicalExternal_staleness` Constitution entry).
+**Staleness guard** (analogous to memory evidence): documentation may be temporally decoupled from the library version actually in use — verify against codebase import/pin version before treating as resolved. When staleness cannot be verified, the guard requires BOTH: (1) `staleness:unverified` tag (the temporal sub-case of the general `support_integrity:unverified` tag) attached to the evidence record, AND (2) surfacing to the user in Phase 2 classify summary regardless of whether EmpiricallyObservable reclassification subsequently resolves the uncertainty — no silent escalation path (no "or" fallback). The CanonicalExternal source carries publishing authority (standards body, vendor) distinct from internal CodeDerivable evidence — cite both when cross-validating, and always cite the authority source when its temporal alignment cannot be independently verified (see TOOL GROUNDING `Phase 2 Qs_staleness` Constitution entry).
 
 **Scope restriction**:
 - Context collection: Read-only investigation (Read, Grep, WebSearch). — core preserved
@@ -436,7 +445,7 @@ Present the classification results, uncertainty description, and evidence as tex
   - a factual question via a newly observed evidence channel; your confirmation requested before treating this channel as resolved
   - a consistency question within the same scope, treated as a factual question (its evidence path is selected by the same procedure as a directly-classified factual item)
   - a consistency question spanning multiple scopes — routed to a downstream protocol
-  - a relevance question — routed to `/elicit`
+  - a relevance question — routed to the protocol matching its deficit (`/gap`, `/bound`, or `/elicit`)
   - Any of these classifications to revise?
 - **[Specific uncertainty description — highest priority]**
 - **Evidence**: [Evidence collected during context collection and observation, if any]

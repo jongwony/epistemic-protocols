@@ -278,7 +278,7 @@ growth_items: [{
 <!-- CARD: Impact (replicate per protocol-outcome correlation) -->
 <div class="card success-card">
   <div class="card-title">/frame → Code Review Quality</div>
-  <p>Session b41bb932 used /frame to compile a 5-lens review spec the session then executed. Caught 7 issues including critical DST bugs. Outcome: fully_achieved with peer-verified fixes. Compare: sessions without /frame averaged 3.2 issues caught...</p>
+  <p>Session b41bb932 used /frame to form 5 review lenses that the session (via /conduct) then executed and synthesized. Caught 7 issues including critical DST bugs. Outcome: fully_achieved with peer-verified fixes. Compare: sessions without /frame averaged 3.2 issues caught...</p>
 </div>
 
 <!-- ====================================================

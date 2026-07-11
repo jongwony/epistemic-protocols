@@ -67,6 +67,8 @@ claude plugin install katalepsis@epistemic-protocols
 | **Causality** | User doesn't understand why something happens |
 | **Scope** | User doesn't see full impact of changes |
 | **Sequence** | User doesn't understand execution order |
+| **Horizon** | A co-intended but unspoken edge of the current entry point the user could not name from within their own framing — surfaced only when evidence-bound, material, and unspoken (false-positive guarded) |
+| **Emergent** | Gap outside the canonical types, adapted to the specific comprehension deficit |
 
 ## Author
 

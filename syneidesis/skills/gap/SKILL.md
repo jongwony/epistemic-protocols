@@ -49,8 +49,9 @@ Q      = Question formation (assertion-free)
 J      = Judgment ∈ {Address(c), Dismiss, Probe}
 c      = Clarification (user-provided response to Q)
 A      = Adjustment: J × D × Σ → Σ'
-Σ      = State { reviewed: Set(GapType), deferred: List(G), blocked: Bool }
-AuditedDecision = Σ' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
+Σ      = State { reviewed: Set(G), deferred: List(G), blocked: Bool }
+AuditedDecision = Σ' where ∀ task ∈ registered: task.status = completed
+EarlyExit = Σ' where user_esc  -- non-convergent early exit: state as of exit (Σ' = Σ when exit precedes the first adjustment), partial audit trace over judged gaps, remaining registered gaps declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
 Phase 0: D → committed?(D) → Scan(D) → G → AssessGapPressure(D, G) → P  -- checkpoint + detection + pressure map (silent)
@@ -62,13 +63,14 @@ After Phase 2: re-scan for newly surfaced gaps from user response.
 If new gaps: TaskCreate → add to queue.
 Pending gaps are active registered gaps ∪ Σ.deferred; each cycle reclassifies pending gaps through AssessGapPressure(D, pending) before Sel.
 P.queued updates Σ.deferred at TaskCreate/TaskUpdate; later cycles may reclassify any Σ.deferred gap into a higher-pressure bucket when context changes.
-Continue until: all tasks completed OR user ESC.
-Mode remains active until convergence.
+Continue until: all tasks completed (AuditedDecision) OR user ESC (EarlyExit).
+Mode remains active until convergence or explicit user exit (Esc).
 Convergence evidence: At all-tasks-completed, present audit trace — for each g ∈ registered, show (GapUnnoticed(g) → user_judgment(g) → adjustment(g)). Convergence is demonstrated by the complete audit record, not asserted by task status.
+On user ESC: present partial audit trace over judged gaps, then declare remaining registered gaps as unresolved residual.
 
 ── ADJUSTMENT RULES ──
 A(Address(c), _, σ) = σ { incorporate(c) }           -- extern: modifies plan
-A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ.type} }
+A(Dismiss, _, σ)    = σ { reviewed ← reviewed ∪ {Gₛ[0]} }
 A(Probe, _, σ)      = σ { re-scan(expanded) }        -- additional verification round (depth varies by stakes)
 
 ── SELECTION RULE ──
@@ -84,9 +86,10 @@ proceed(Σ) = ¬blocked(Σ)
 Qs (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Judgment)
 Σ (track)      → TaskCreate/TaskUpdate (async gap tracking with dependencies)
 Scan (observe) → Read, Grep (stored knowledge extraction: context for gap identification)
-AssessGapPressure (observe) → Internal analysis (selection-only classification over Scan output; surfaces why a gap is load-bearing while gap resolution remains the user's constitutive act)
+AssessGapPressure (sense) → Internal analysis (no external tool; selection-only classification over Scan output; surfaces why a gap is load-bearing while gap resolution remains the user's constitutive act)
 A (track)      → Internal state update (no external tool)
 converge (extension)   → TextPresent+Proceed (convergence evidence trace; proceed with audited decision)
+esc (extension)   → TextPresent+Proceed (partial audit trace + unresolved-gap residual declaration; terminate as EarlyExit, not AuditedDecision)
 
 ── MODE STATE ──
 Λ = { phase: Phase, state: Σ, pressureMapSnapshot: P, active: Bool }  -- snapshot supports audit trace only; recompute before every Sel
@@ -103,7 +106,7 @@ converge (extension)   → TextPresent+Proceed (convergence evidence trace; proc
 
 ### Activation
 
-Command invocation activates mode until session end.
+Command invocation activates mode until convergence or Esc; deferred tasks (queued gaps carried in `Σ.deferred`; nonblocking gaps remain active registered gaps) remain resumable on later activation, per LOOP.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/gap` slash command or description-matching input. Always available.
@@ -133,6 +136,7 @@ When Syneidesis is active:
 | Trigger | Effect |
 |---------|--------|
 | Task completion | Auto-deactivate after final resolution |
+| User Esc key | EarlyExit (not AuditedDecision): present partial audit trace + declare remaining registered gaps as unresolved residual, then return to normal operation |
 
 ### Plan Mode Integration
 
@@ -295,7 +299,7 @@ Note: Esc key → unconditional loop termination (LOOP level). Constitution inte
 
 | Level | When | Format |
 |-------|------|--------|
-| Light | Reversible, low impact | Constitution interaction with Confirm as default option |
+| Light | Reversible, low impact | Constitution interaction with Dismiss as default option |
 | Medium | Reversible + high impact, OR Irreversible + low impact | Constitution interaction with rationale context |
 | Heavy | Irreversible + high impact | Detailed rationale + Constitution interaction with explicit options |
 
@@ -310,7 +314,7 @@ Note: Esc key → unconditional loop termination (LOOP level). Constitution inte
 7. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation.
 8. **Option-set relay test (Extension classification)**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
 9. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
-10. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
+10. **Plain emit discipline**: User-facing emit (Phase 1 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 11. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 12. **Protocol-native pressure map**: Phase 0 produces a GapPressureMap before gap selection. The map is a pre-gate support object for gap selection and question formation, with no terminal-status or generic-calibration authority. It classifies already-detected gaps into exactly one current-cycle pressure bucket; gap tasks are sourced exclusively from Scan output, and `AuditedDecision` is unchanged. Surfacing over Deciding — the map justifies why a gap deserves attention now while gap resolution remains the user's constitutive act. `hidden_high_impact` is tightly capped (|hidden_high_impact| ≤ 1) and admitted only when the unknown could materially change the user's next judgment; the map must narrow the question set, never make the user inspect every possible gap.
 13. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Plain emit discipline).

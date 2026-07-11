@@ -16,13 +16,13 @@ the skill descriptions alone under-trigger invocation. Route from the deficit, n
 ## Analysis
 
 **`/frame`** (Prothesis) — FrameworkAbsent → FramedInquiry
-  when: No framework — need analytical lenses or a multi-perspective inquiry spec
+  when: No framework — need analytical lenses for a multi-perspective inquiry
 
 **`/ground`** (Analogia) — MappingUncertain → ValidatedMapping
   when: An abstract idea's correspondence to a concrete domain is uncertain — needs structural grounding, not just assertion
 
 **`/induce`** (Periagoge) — AbstractionInProcess → CrystallizedAbstraction
-  when: Concrete instances accumulating — abstraction has not located itself
+  when: One or more concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction
 
 ## Decision
 
@@ -45,7 +45,7 @@ the skill descriptions alone under-trigger invocation. Route from the deficit, n
 ## Cross-cutting
 
 **`/bound`** (Horismos) — BoundaryUndefined → DefinedBoundary
-  when: Unclear who decides what — ownership boundaries undefined
+  when: An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership)
 
 **`/recollect`** (Anamnesis) — RecallAmbiguous → RecalledContext
   when: A vague, ambiguous recall you can't quite pin down — resolve it into recognized context

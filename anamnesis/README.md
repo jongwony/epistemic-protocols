@@ -6,7 +6,7 @@ Resolve vague recall into recognized context (ἀνάμνησις: recollection,
 
 ## What is Anamnesis?
 
-A modern reinterpretation of Platonic ἀνάμνησις (recollection) — a protocol that **scans existing memory and session stores against a vague hook, then guides the user through Socratic recognition of the right prior context rather than returning keyword-matched retrieval results**.
+A modern reinterpretation of Platonic ἀνάμνησις (recollection) — a protocol that **scans the SSOT (session transcript) and the hypomnesis INDEX against a vague hook — `memory/` is a non-scanned, user-curated adjunct — then guides the user through Socratic recognition of the right prior context rather than returning keyword-matched retrieval results**.
 
 ### The Core Problem
 
@@ -32,7 +32,7 @@ AI systems often discard vague recall signals (`RecallAmbiguous`) — the user s
 ```
 Phase 0: Detect      → Recognize empty intention, classify input type, dispatch track (silent)
 Phase 1: Scan        → Scan stores along Salience dimensions, rank candidates
-Phase 2: Recognize   → Present ranked candidates for Socratic recognition (gate interaction)
+Phase 2: Recognize   → SingleObvious: emit the top candidate directly, no gate (silence = recognize); otherwise present the top-ranked candidate for Socratic recognition, one per cycle (gate interaction)
 Phase 3: Integrate   → Emit recognized context into session; loop via Refine or Reorient on miss
 ```
 

@@ -43,7 +43,7 @@ The deposit graph is a structural type with four invariants: no central aggregat
 ```
 Phase 0: Detect      → Recognize supra-session granularity, classify unit type, dispatch traversal (silent)
 Phase 1: Traverse    → Discover related deposits at read-time (shared anchors/keywords/metadata), assemble candidate higher units, rank
-Phase 2: Recognize   → Present the candidate higher unit as a narrative for recognition (gate interaction)
+Phase 2: Recognize   → SingleObvious: emit the narrative directly, no gate (silence = recognize); otherwise present the candidate higher unit for recognition (gate interaction)
 Phase 3: Integrate   → Emit the elevated higher unit into session; loop via Refine or Reorient on miss
 ```
 
