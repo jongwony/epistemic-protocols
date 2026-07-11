@@ -100,7 +100,7 @@ Q      = Applicability inquiry over F-scoped mismatch (gate interaction)
 A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}  -- A ∈ V; answer drawn from the mismatch's value-space (local_value_space = {Confirm, Adapt, Dismiss})
 ZeroMismatchConfirmation = user's answer to a zero-mismatch finding ∈ {Confirm, Reopen(aspect)}  -- Confirm accepts the result as-is (Rule 9); Reopen names an aspect the Phase 0 scan missed, re-entering Eval focused on that aspect
 R'     = Adapted result (contextualized output)
-ContextualizedExecution = R' where (∀ task ∈ registered: task.status = completed) ∧ (Mᵢ = ∅ ⟹ zero-mismatch confirmation obtained: ZeroMismatchConfirmation = Confirm, or Reopen(aspect) whose focused re-scan still yields Mᵢ = ∅ → relay(finding) — Rule 9)
+ContextualizedExecution = R' where (∀ task ∈ registered: task.status ∈ {completed, dismissed}) ∧ (Mᵢ = ∅ ⟹ zero-mismatch confirmation obtained: ZeroMismatchConfirmation = Confirm, or Reopen(aspect) whose focused re-scan still yields Mᵢ = ∅ → relay(finding) — Rule 9)
                  -- registered = certificate-passing mismatches only; routed/ambiguous mismatches are handed forward, not adapted in-place
 EarlyExit = R' where user_esc  -- non-convergent early exit: result as of exit (adapted or not), partial trace over completed/dismissed tasks, remaining pending mismatches declared as unresolved residual
 
@@ -123,7 +123,7 @@ After Phase 2 (mutating branch only — A ∈ {Confirm, Adapt}): re-scan R' agai
 Bind + certify each newly emerged mismatch at registration (fail-closed): only certificate-passing emerged mismatches (Mₑ_passed) are registered into pending(Σ); a routed mismatch is handed to its sibling deficit (/gap, /inquire, /bound, /distill); a non-atomic compound mismatch is split into atomic sub-mismatches and re-certified; an atomic ambiguous mismatch gets its one bounded re-assessment at the fixed re-scan (R', X) → pass / route / terminal-residual, before registration. AssessFit classifies tracked mismatches but never suppresses them.
 Recompute F over pending(Σ) before selecting the next surfaced mismatch, even when Mₑ_passed = ∅.
 If pending(Σ) non-empty: return to Phase 1 (SelectNext by severity, then FitRank, then oldest registered task).
-If adjudicated(R', X): all tasks completed → convergence.
+If adjudicated(R', X): all tasks resolved (completed or dismissed) → convergence.
 progress(Λ) MAY REGRESS: because re-scan over a mutated R' can register newly certified mismatches, the completed/total ratio is non-monotone — this is the signature of the transformative-revalidation side, not an error.
 User can exit at Phase 1 (dismiss all remaining, or Esc).
 Continue until: contextualized(R') OR user ESC (EarlyExit, not ContextualizedExecution).
@@ -141,7 +141,7 @@ contextualized(R') = adjudicated(R', X)
 trivial convergence (all-routed): when Mᵢ ≠ ∅ but Mᵢ_passed = ∅ AND every flagged aspect resolved to ROUTED or TERMINAL-RESIDUAL — aspect-keyed via routed(a)/terminal_residual(a) over the atomic (post-split) aspects, not raw Mᵢ membership — (no deferred-pending, pending(Σ) = ∅), adjudicated(R, X) holds by the routed(a)/terminal_residual(a) disjuncts for every flagged aspect (and warranted for the rest) — R is unadapted and contextualized(R) holds. This is the Phase 0 → deactivate (all-routed) path. DEFERRED mismatches do NOT satisfy this: they are not in Λ.routed, so the routed(a) disjunct does not cover them; a deferred mismatch first gets its one bounded re-assessment (Phase 0 → defer) to pass (→ pending(Σ)), route (→ Λ.routed), or terminal-residual before any convergence claim. Distinct from the no-mismatch case (Mᵢ = ∅, every aspect warranted from the start) — here aspects were flagged but all belong to sibling deficits
 certificate gate:  every registered mismatch carried certificate.status = pass (fail-closed, at registration) — routed/ambiguous mismatches never entered pending(Σ), so a contextualized R' is assembled only from in-scope (ApplicationDecontextualized-owned), fit-certified adaptations; backward misfit was handed forward (/gap, /inquire, /bound, /distill), not adapted in-place
 -- stratification: applicable(R', X) ⊆ adjudicated(R', X)
--- operational proxy: ∀ task completed ⟹ adjudicated(R', X) ⟹ contextualized(R')
+-- operational proxy: ∀ task resolved (status ∈ {completed, dismissed}) ⟹ adjudicated(R', X) ⟹ contextualized(R')
 progress(Λ) = 1 if |total_tasks| = 0 else |completed_tasks| / |total_tasks|   -- total_tasks = 0 (Mᵢ = ∅, or Mᵢ≠∅∧Mᵢ_passed=∅ trivial convergence via routing) is fully converged, not undefined — the Mᵢ = ∅ leg only after the Rule 9 zero-mismatch confirmation (Confirm, or Reopen whose focused re-scan stays ∅); otherwise NON-MONOTONE: may regress when re-scan over the mutated R' registers newly certified mismatches (transformative-revalidation signature)
 
 ── TOOL GROUNDING ──

@@ -22,7 +22,7 @@ Diairesis(WB) → Probe(WB) → granularity_underdetermined? →
   underdetermined:         init_loop_state: cycle_n=1, cut_set=∅, work_unit_map=∅, residual=regions(WB), committed=∅, regions_touched=regions(WB), joints=∅, invariant_status=⊥, history=∅, loop:
     Phase 1 Scan(WB, cycle_n) [per-cycle re-scan] → joints(region) → Pack(joints, horizon, lifecycle) → (Anchor[cycle_n], proposed_cut, SpanFit) →
       Anchor empty ∧ residual = ∅: → emit WorkUnitMap → converge          -- every region cut, nothing left
-      Anchor empty ∧ residual ≠ ∅: → autonomous_pack(residual) (track) → surface (extension) → emit WorkUnitMap → converge  -- substrate exhausted; AI completes the residual cuts at their natural joints (Extension-default), surfaced as relay
+      Anchor empty ∧ residual ≠ ∅: → autonomous_pack(residual) (track) → (work_unit_map'', residual := ∅) → surface (extension) → finalize(work_unit_map'') → emit WorkUnitMap → converge  -- substrate exhausted; AI completes the residual cuts at their natural joints (Extension-default), surfaced as relay; same packed-carrier + finalize shape as the Sufficient path
       SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: → relay(AcceptCut) (extension) → Phase 3 integrate (skip Qc)  -- single dominant cut (Rule 11): no genuine alternative disposition exists for this Anchor
       else:                        → Phase 2
     Phase 2 Qc(Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n) → Stop → A
@@ -86,7 +86,7 @@ Phase 0 → deactivate (relay): cut_already_fixed(WB) → the WBS already impose
 Phase 0 → Phase 1: granularity_underdetermined(WB) = true → init loop state (cycle_n=1, cut_set=∅, work_unit_map=∅, residual=regions(WB), committed=∅, regions_touched=regions(WB), joints=∅, invariant_status=⊥, history=∅)
 Phase 1: WB, cycle_n → Scan(WB, cycle_n) → joints → Pack(joints, horizon, lifecycle) → (Anchor[cycle_n], proposed_cut, SpanFit)  -- per-cycle re-scan + packing search [Tool]
 Phase 1 → converge: Anchor empty ∧ residual = ∅ → emit WorkUnitMap directly (every region cut)
-Phase 1 → converge (autonomous residual): Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (track) → surface (extension) → emit WorkUnitMap  -- substrate exhausted; AI completes residual cuts at natural joints, surfaced as relay
+Phase 1 → converge (autonomous residual): Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (track) → (work_unit_map'', residual := ∅) → surface (extension) → finalize(work_unit_map'') → emit WorkUnitMap  -- substrate exhausted; AI completes residual cuts at natural joints, surfaced as relay; packed carrier + finalize, same shape as the Sufficient path
 Phase 1 → Phase 3 (relay): Anchor non-empty ∧ SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits → relay(AcceptCut) (extension) → integrate(AcceptCut, cut_set, work_unit_map) directly, skipping Qc  -- single dominant cut (Rule 11): no genuine alternative disposition exists for this Anchor
 Phase 1 → Phase 2: Anchor non-empty ∧ ¬(SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits) → surface the proposed cut for user judgment
 Phase 2: Anchor[cycle_n], proposed_cut, SpanFit, cut_set_snapshot, cycle_n → Qc(...) → Stop → A  -- per-cycle partition gate over CutDisposition with cut-set snapshot + fit basis visible; fires only when NOT single-dominant-cut [Tool]
@@ -114,7 +114,7 @@ Convergence evidence: At convergence, present the transformation trace — per c
 converge iff (Phase 3 Sufficient ∨ substrate_exhaustion) ∧ coverage_complete(work_unit_map) ∧ ¬user_esc
   coverage gate:            convergence presupposes the three invariants hold over the whole map. span_fit is COMMIT-ENFORCED (a unit moves to committed only once it Fits, or the user explicitly accepts a non-Fits unit) and natural_joint holds BY CONSTRUCTION (every cut sits on a joint), so both are maintained invariants that already hold over the committed map at convergence — they need no separate convergence gate. coverage_complete is therefore the sole remaining HARD convergence gate (a map leaving work outside every unit is not a valid WorkUnitMap and cannot emit)
   Phase 3 Sufficient:       residual filled by autonomous_pack (each remaining region cut at its natural joints, Extension-default), surfaced for recognition; emit WorkUnitMap directly
-  substrate_exhaustion:     Phase 1 surfaces no new region — if residual = ∅, emit directly; if residual ≠ ∅, autonomous_pack the residual, surface, then emit
+  substrate_exhaustion:     Phase 1 surfaces no new region — if residual = ∅, emit directly; if residual ≠ ∅, autonomous_pack the residual, surface, finalize over the packed map, then emit
   user_esc:                 user exits via Esc at any Phase 2 (ungraceful, residual uncut, no WorkUnitMap emitted)
   route_away:               Phase 0 scope_insufficient → /inquire, non-convergent exit (the missing pre-cut fact belongs to ContextInsufficient; no WorkUnitMap)
 
