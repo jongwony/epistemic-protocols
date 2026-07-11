@@ -8,30 +8,36 @@
 ## 계약
 
 - **과업**: `docs/analysis/606-directional-divergence-protocol-plan.md`(이하 "계획")의
-  §10 구현 순서를 집행해, 커밋 전 방향 확인용 발산-폐기 인스턴스화 프로토콜(가칭
-  Proplasma — 어원과 대안은 계획 §6.1, 확정 여부는 아래 미결 표의 명명 항목)을
+  §10 구현 순서를 집행해, 커밋 전 방향 확인용 발산-폐기 인스턴스화 프로토콜(Proplasma
+  — 어원은 계획 §6.1, 명명 확정 경위는 계획 §12.1-①)을
   스위트의 첫 클래스 프로토콜로 신설한다.
 - **허용 소스**: 계획 문서 · GitHub 이슈 jongwony/epistemic-protocols#606(및 그 해소
   코멘트) · 그 해소 코멘트가 링크하는 PR(리뷰 스레드 포함) · `AGENTS.md` ·
   `docs/co-change.md` · `.claude/skills/verify/graph.json` · 계획 §8–9가 지정하는
-  형제 프로토콜 SKILL.md들.
+  형제 프로토콜 SKILL.md들 · 계획 §9가 지정하는 편집 대상 파일 일체 — README.md ·
+  README_ko.md · `.claude-plugin/marketplace.json` · `scripts/load-protocols.js` ·
+  `scripts/package.js` · `scripts/package.test.js` · `src/App.tsx` ·
+  `src/lib/i18n.tsx` · onboard/catalog SKILL.md 및 onboard `references/*.md`.
 - **검증 명령**:
   - `node .claude/skills/verify/scripts/static-checks.js .`
   - `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 - **정지 조건**: 계획 §10의 4단계가 모두 완료 기준을 충족하고 검증 명령이 통과하며 PR이
-  생성되면 종료. 미결 항목 처리는 아래 미결 표의 "미확정 시 행동" 열이 권위다 —
-  중단이 명시된 항목(명명)에서만 정지해 결정을 요청하고, 기본값이 명시된 항목은
-  그 기본값으로 진행한다.
+  생성되면 종료. 미결 4건(명명 포함)은 계획 §12에서 전부 확정되었으므로 명명에서의
+  착수 중단은 더 이상 발생하지 않는다 — 아래 미결 표는 원 미확정 상태와 확정값을
+  함께 보존한 이력이다. 구현 중 정지는 아래 "구현 중 감시 의무 — 파탄 조건 3종"
+  위반이 불가피해지는 경우로 한정된다.
 
 ## 진입 순서
 
-1. 계획 §2(결정 기록) → §3(결핍 정의) → §5(인식론적 소속 논거) 순으로 통독한다 —
-   무엇이 왜 확정됐는지가 여기 있다.
+1. 계획 §2(결정 기록) → §3(결핍 정의) → §5(인식론적 소속 논거) → §12(UX 설계)
+   순으로 통독한다 — 무엇이 왜 확정됐는지가 여기 있다.
 2. 이슈 #606의 해소 코멘트에서 PR 링크와 최종 결정 요약을 확인한다.
-3. 아래 미결 4건의 확정 여부를 해당 PR 리뷰 스레드에서 확인한다.
+3. 아래 미결 4건의 확정 여부는 계획 §12(1차 소스)를 참고한다 — PR #607 본문
+   체크박스(2차 소스)는 보조 열람용이며, 리뷰 스레드 확인은 불요하다.
 4. 계획 §10-①(SKILL.md 저작)부터 시작한다. 형식블록을 먼저 쓰고, `AGENTS.md`의
    Editing Conventions가 요구하는 semantic-closure 스윕(모든 새 조건에 타입·가드·
-   상태전이·종결 경로·결과 등식)을 계획 §7.5의 이관 체크리스트와 함께 소진한다.
+   상태전이·종결 경로·결과 등식)을 계획 §7.5의 이관 체크리스트 및 §12.2–§12.5
+   이관 항목과 함께 소진한다.
 
 ## 결정 이력 (압축 — 상세와 근거 인용은 계획 §1–2)
 
@@ -55,7 +61,7 @@
 | 명명 (그리스어 이름 + 커맨드) | 이름: Proplasma(계획 §6.1 권고) · 커맨드: `/preview` vs `/contrast`(계획 §6.2) | PR 리뷰(사용자). 미확정이면 착수 불가(디렉터리·파일명이 의존) — 중단 후 요청 | **확정: Proplasma + `/preview`** — MODE STATE `PREVIEW`, `skills/preview/` (계획 §12.1-①) |
 | 클러스터 배치 | Planning vs Analysis | PR 리뷰(사용자). 미확정이면 계획 §8 권고(Planning)를 기본값으로 진행 | **확정: Planning** (계획 §12.1-②) |
 | probe 기본 개수·재-팬 상한 | 2–4개 · 재-팬 1회 | 구현자 판단 허용 — 계획 §7 스케치 범위 내 | **확정: 2–4개 · 재-팬 상한 1회** (계획 §12.1-③) |
-| 그래프 엣지 세트 | 계획 §8의 advisory 5종 | 구현자 판단 허용 — 단 추가·삭제 시 PR 본문에 근거 명기 | **확정: advisory 5종 + 하류 `/gap`·`/inquire` 병기** (계획 §12.1-④) |
+| 그래프 엣지 세트 | 계획 §8의 advisory 5행(직렬화 6객체) | 구현자 판단 허용 — 단 추가·삭제 시 PR 본문에 근거 명기 | **확정: advisory 5행(직렬화 6객체) + 하류 `/gap`·`/inquire` 병기** (계획 §12.1-④) |
 
 ## 구현 중 감시 의무 — 파탄 조건 3종 (원문: 계획 §5)
 
@@ -71,7 +77,7 @@
 
 - schema_version: 1
 - [pending] 계획 §10-① SKILL.md 저작 — 완료 기준: 형식블록 완성 + semantic-closure
-  체크리스트(계획 §7.5 이관 4항목 포함) 소진. source: 계획 §10
+  체크리스트(계획 §7.5 이관 4항목 + §12.2–§12.5 이관 항목 포함) 소진. source: 계획 §10
 - [pending] 계획 §10-② 배선 — 완료 기준: `docs/co-change.md` "New protocol added" 행의
   전 항목 반영. source: 계획 §9–10
 - [pending] 계획 §10-③ 기존 전체 SKILL.md distinction/precedence 갱신 + 해당

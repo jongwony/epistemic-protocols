@@ -141,6 +141,10 @@ A1 원문이 이 결핍의 축을 정확히 명명한다:
   라우팅 미스 표본, §8), **92480a35**. 초판의 /bound 사용 회고("가까운 미래를
   보고 싶다" 욕구의 경계 선택 오분류 자기 보고)는 이 형상의 초기 표본으로 흡수.
 
+*세션 id들(91c5f8dd 등)과 "codex R9/R12" 류 토큰은 저작 환경의 세션-사적 증거
+식별자로, 실행에는 불요하며 출처 추적용으로만 보존된다 — 수신 세션에서
+재관측 불가함이 정상.*
+
 **A2-침식 함의 (결핍의 심각도 근거)**: "권장방향이라면 진행"은 단순한 선호 위임이
 아니라, differential futures를 인식하지 못한 사용자가 **구성적 판단(Constitution)을
 AI에 이양**하는 장면이다 — 인식 실패가 A2의 detection/judgment 분리를 침식한다.
@@ -247,7 +251,7 @@ placeholder-**구체물** 서술이라는 층위 차이.
 - 대안: **Antiparabole** (ἀντιπαραβολή, 대조 병치) — 대비 축 강조, 단 커밋전·폐기
   축이 없음.
 
-### 6.2 커맨드 — 병기, PR 리뷰서 확정 (§11-①)
+### 6.2 커맨드 — 병기, PR 리뷰서 확정 (§11-①) (→ §12에서 확정; 본 문구는 이력)
 
 | 후보 | 충돌 검사 | 비고 (codex R12) |
 |------|-----------|------------------|
@@ -355,10 +359,14 @@ semantic-closure 스윕 체크리스트로 이관한다.
 | `신규 → syneidesis(/gap) · aitesis(/inquire)` | 노출된 unknowns의 하류 **병기** — 커밋전 점검(`/gap`) · 사실 unknowns 조사(`/inquire`). 병기 확정: §11-④ |
 | `신규 → analogia(/ground)` | **생존 방향의 익숙-도메인 구조 매핑 검증 (매핑 존재 시)** — analogia는 구조 매핑 검증이지 임의 방향 검증이 아니다 (codex R9) |
 
+표는 5행이지만 4행(`신규 → syneidesis · aitesis` 병기)이 graph.json에서 2개의
+edge 객체로 직렬화되므로 **graph.json 객체는 6개**다 (graph.json edge = 단일
+source/target 쌍).
+
 ### 클러스터
 
 - **권고: Planning** — unknowns **유도** 계보의 완성(`/inquire` 사실 · `/elicit`
-  의도 · **신규** 방향). 단 **미확립 — PR 리뷰서 확정** (codex R9).
+  의도 · **신규** 방향). 단 **미확립 — PR 리뷰서 확정** (codex R9) (→ §12에서 확정; 본 문구는 이력).
 - 대안 병기: codex 제안 **Analysis** — `/frame → 신규 → /ground` 슬롯. §11-② 확정.
 
 ### 구분 테이블 삼분법 (distinction 편집의 핵심 문장)
@@ -389,7 +397,7 @@ semantic-closure 스윕 체크리스트로 이관한다.
 
 ### 필수 편집 (~10)
 
-1. `.claude/skills/verify/graph.json` — 노드 + §8 엣지 (5행; 하류 병기 확정은 §11-④)
+1. `.claude/skills/verify/graph.json` — 노드 + §8 엣지 (5행(직렬화 6객체); 하류 병기 확정은 §11-④)
 2. `.claude-plugin/marketplace.json` — plugins[] 항목
 3. `scripts/load-protocols.js` — `CANONICAL_PRECEDENCE` + `CANONICAL_CLUSTERS`
    (클러스터 문자열은 README×2와 정확 일치 요구 — drift 시 fail)
@@ -419,7 +427,7 @@ SKILL.md (precedence descriptions + distinction tables)**". v2 초판의 "엣지
 
 | 단계 | 작업 | 완료 기준 |
 |------|------|-----------|
-| ① SKILL.md 저작 | **형식블록 먼저**(FLOW→MORPHISM→TYPES 순서 enforced, PHASE TRANSITIONS, MODE STATE, TOOL GROUNDING) → 프로즈. CLAUDE.md Editing Conventions 준수(표기 `→`/`∥`/`[Tool]`, prime 규약) | semantic-closure 스윕 수동 통과: §7의 모든 조건이 타입·가드·상태갱신·종결경로·결과식을 가짐 — §7.5 말미의 이관 체크리스트(UserDecision · artifact_ref · cleanup 실패 분기 · 재-팬 종결식) 소진 포함 |
+| ① SKILL.md 저작 | **형식블록 먼저**(FLOW→MORPHISM→TYPES 순서 enforced, PHASE TRANSITIONS, MODE STATE, TOOL GROUNDING) → 프로즈. CLAUDE.md Editing Conventions 준수(표기 `→`/`∥`/`[Tool]`, prime 규약) | semantic-closure 스윕 수동 통과: §7의 모든 조건이 타입·가드·상태갱신·종결경로·결과식을 가짐 — §7.5 말미의 이관 체크리스트(UserDecision · artifact_ref · cleanup 실패 분기 · 재-팬 종결식) 소진 포함, §12.2–§12.5 이관 항목(probe-먼저 제시 순서 · 파탄조건-모먼트 매핑 · PlaceholderPolicy 골격-충실·데이터-가짜 분할 · 재-팬 미세게이트의 스펙 게이트 겸직 · 방향 게이트 응답 3종(선택·종합·심문) 규율 · transform 중 강제된 공통 커밋의 대비 보고 · 폐기 경계(파일 파기=충족·세션 잔존 허용·비증거 낙인 관통) · 재-팬 예산 공유(대비-불충분과 종합-물질화가 1회 공유)) 소진 포함 |
 | ② 배선 | §9 신규 파일 + 필수 편집 10개 + 카운트 갱신 | 클러스터 문자열 README×2 일치, graph.json 노드/엣지 반영, 카운트 정합 |
 | ③ 전체 distinction/precedence + 버전범프 | **ALL existing SKILL.md**(16) distinction/precedence 행 + plugin.json bump | co-change.md:15 스코프 소진, 삼분법 문장(§8) 반영 |
 | ④ 검증 및 PR | `node .claude/skills/verify/scripts/static-checks.js .` + `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`(정적 검증과 **동시 실행 금지**) + `/verify` → feature branch PR | static-checks 0 fail, 테스트 통과, PR 생성(커밋 규약 `feat(<plugin>): 한국어 설명`) |
@@ -447,7 +455,7 @@ SKILL.md (precedence descriptions + distinction tables)**". v2 초판의 "엣지
 3. **probe 기본 개수(2–4) · 재-팬 상한(1) 확정** — 값싼-탐색과 대비 충분성의
    균형 검증 (§7.5).
    → **확정: 기본 2–4개 · 재-팬 상한 1회 승인**. 상세: §12.1-③.
-4. **엣지 세트 최종화** — 5행 advisory(+하류 `/gap`·`/inquire` 병기)의 과다/과소
+4. **엣지 세트 최종화** — 5행(직렬화 6객체) advisory(+하류 `/gap`·`/inquire` 병기)의 과다/과소
    판단 (§8).
    → **확정: advisory 5종 + 하류 병기 승인**(anamnesis→신규 추가 후보는 미채택).
    상세: §12.1-④.
