@@ -13,7 +13,7 @@ Validate structural mapping between abstract and concrete domains through AI-gui
 
 ```
 ── FLOW ──
-Analogia(R) → Detect(R) → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → AssessFit(M, Sₐ, Sₜ) → [self_grounding(Sₐ, Sₜ): PartitionRead(F, Sₜ)] → I(M, F, Sₜ) → V → D_f → R' → (loop until terminalized)
+Analogia(R) → Detect(R) → [¬uncertain: Qc(zero_gap_finding) → Stop → (Confirm: deactivate | Reopen(q): reopen_seed := q, proceed)] → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → AssessFit(M, Sₐ, Sₜ) → [self_grounding(Sₐ, Sₜ): PartitionRead(F, Sₜ)] → I(M, F, Sₜ) → V → D_f → R' → (loop until terminalized)
 
 ── MORPHISM ──
 R
@@ -85,11 +85,13 @@ partition_reading(F, Sₜ) =   -- invoked ONLY under self_grounding (guarded in 
 I        = Concrete instantiation: M × F × Sₜ → Example
 Example  = { scenario: String, mapping_trace: List<Correspondence>, fit_basis: F }
 V        = User validation ∈ {Confirm, Adjust(feedback), Dismiss}
+ZeroGapConfirmation = user's answer to a zero-gap finding ∈ {Confirm, Reopen(StructuralQuestion)}  -- Confirm accepts the trivial mapping (Rule 11); Reopen names a structural question the Phase 0 scan missed, setting uncertain := true and proceeding to Phase 1
 ValidationRecord = { example: Example, answer: V, fit_label: FitLabel, residual_disposition: FitDisposition }
 R'       = Updated output with explicit mapping status (in the self-grounding case, R' additionally carries the relay PartitionReading and its routing recommendation: verdict = Split → /conduct decompose-recovery recipe; verdict = Trim → /induce Narrow; the partition reading is an annotation on the validated mapping, not a change to the terminal type)
 ValidatedMapping = R' where terminalized(R', F, D_f)
-terminalized(R', F, D_f) = (all_addressed(R') ∧ fit_disposition_declared(F, D_f)) ∨ user_esc
+terminalized(R', F, D_f) = all_addressed(R') ∧ fit_disposition_declared(F, D_f)
 all_addressed(R') = ∀ c ∈ M : confirmed(c) ∨ dismissed(c)
+EarlyExit = R where user_esc  -- non-convergent early exit: current output R unmodified, partial trace over already-addressed correspondences, remaining correspondences declared as unresolved residual (mapping not terminalized)
 
 ── R-BINDING ──
 bind(R) = explicit_arg ∪ current_output ∪ most_recent_output
@@ -104,9 +106,10 @@ If no relevant text exists: pause activation and request a grounding target befo
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → uncertain? ∧ classify self_grounding(Sₐ, Sₜ)   -- mapping uncertainty checkpoint (silent); also recognize the self-grounding case (a located abstraction vs its OWN instances) — distinct from colimit route-away (locator absent → /induce)
-Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M → AssessFit(M, Sₐ, Sₜ) → F → [self_grounding: PartitionRead(F, Sₜ) → PartitionReading]  -- domain decomposition + fit map; derived split-vs-trim reading in the self-grounding case (relay), via partition_reading() [Tool]
+       [¬uncertain] Qc(zero_gap_finding) → Stop → ZeroGapConfirmation   -- zero-signal (Rule 11): Confirm → deactivate (mapping trivially established) | Reopen(q) → uncertain := true, reopen_seed := q, proceed to Phase 1 [Tool]
+Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M → AssessFit(M, Sₐ, Sₜ) → F → [reopen_seed = Some(q): F.open := F.open ∪ {q}; reopen_seed := None] → [self_grounding: PartitionRead(F, Sₜ) → PartitionReading]  -- domain decomposition + fit map (Reopen seed folded into F.open, then cleared — track); derived split-vs-trim reading in the self-grounding case (relay), via partition_reading() [Tool]
 Phase 2: (M, F) → I(M, F, Sₜ) → [self_grounding: surface PartitionReading + routing recommendation as pre-gate relay] → Qs(I, F, framing) → Stop → V  -- instantiation + validation; the partition reading is surfaced as relay before the gate [Tool]
-Phase 3: V → integrate(V, R, F) → (D_f, R') ; [self_grounding: R' carries PartitionReading + routing — Split → /conduct decompose-recovery recipe; Trim → /induce Narrow]  -- fit disposition + output update; partition relay folded into R' (sense)
+Phase 3: V → integrate(V, R, F) → (D_f, R') ; [self_grounding: R' carries PartitionReading + routing — Split → /conduct decompose-recovery recipe; Trim → /induce Narrow]  -- fit disposition + output update; partition relay folded into R' (track)
 
 ── LOOP ──
 After Phase 3: evaluate validation result.
@@ -114,27 +117,32 @@ If V = Confirm: mark correspondence confirmed; record fit label snapshot and D_f
 If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
 If V = Dismiss: accept this correspondence as unresolved for this session; record fit label snapshot and D_f; terminalize if all correspondences addressed and fit disposition is declared.
 Max 3 mapping attempts per domain pair.
-Continue until: terminalized(R', F, D_f) OR attempts exhausted.
+Continue until: terminalized(R', F, D_f) OR attempts exhausted OR user ESC (EarlyExit, not ValidatedMapping).
+On user ESC: present partial transformation trace over already-addressed correspondences, then declare remaining correspondences as unresolved residual.
 Convergence evidence: At terminalized(R', F, D_f), present transformation trace — for each record in Λ.validations, show (MappingUncertain(record.example.mapping_trace) → record.fit_label → record.answer). When D_f.status = Bounded, append the bounded residual mapping uncertainty from D_f.declaration and briefly invite the user to supply a missing Sₜ correspondent if one can be identified — a free response within the existing turn, not a new gate or post-convergence morphism. When self_grounding holds, append the PartitionReading as relay: the verdict (Split / Trim / Hold), the full Sₜ partition when verdict = Split (rival cells, core cell, trim outliers), and the routing recommendation (Split → the /conduct decompose-recovery recipe; Trim → /induce Narrow; Hold → no partition action) — a relay annotation, not a new gate. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
-terminalized(R', F, D_f) = (all_addressed(R') ∧ fit_disposition_declared(F, D_f)) ∨ user_esc
-progress(Λ) = 1 - |remaining| / |mappings|
+terminalized(R', F, D_f) = all_addressed(R') ∧ fit_disposition_declared(F, D_f)
+progress(Λ) = 1 if |mappings| = 0 else 1 - |remaining| / |mappings|   -- mappings = ∅ (Phase 0 zero-gap trivial convergence: Confirm deactivates before Phase 1 constructs M) is fully converged, not undefined
 narrowing(V, M) = |remaining(after)| < |remaining(before)|
 early_exit = user_declares_mapping_sufficient
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect  (sense)     → Internal analysis (no external tool; also classify self_grounding — a located abstraction vs its own instances, distinct from colimit route-away)
+Phase 0 ZeroGapConfirm (constitution) → present (conditional: ¬uncertain(mapping); zero-gap finding + reasoning; Confirm/Reopen — Rule 11)
 Phase 1 Map/AssessFit (observe) → Read, Grep (stored knowledge extraction: domain structure and fit analysis); WebSearch (conditional: external domain knowledge)
-Phase 1 PartitionRead (extension) → Internal analysis (DERIVED split-vs-trim reading over F's misfit instances; self-grounding case ONLY; relay — no gate. verdict = Split → route to the /conduct decompose-recovery recipe; verdict = Trim → /induce Narrow; basis cited from F)
+Phase 1        (track)      → Internal state update (conditional: Λ.reopen_seed = Some(q) — fold q into F.open at fit-map assembly, then Λ.reopen_seed := None, consumed once)
+Phase 1 PartitionRead (sense) → Internal analysis (no external tool; DERIVED split-vs-trim reading over F's misfit instances; self-grounding case ONLY; verdict = Split → route to the /conduct decompose-recovery recipe; verdict = Trim → /induce Narrow; basis cited from F; surfaced as pre-gate relay text within Phase 2 Qs, no separate gate)
 Phase 2 Qs      (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
 Phase 3         (track)     → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace incl. PartitionReading relay when self_grounding; proceed with validated mapping)
+esc          (extension)       → TextPresent+Proceed (partial transformation trace + unresolved-correspondence declaration; terminate as EarlyExit, not ValidatedMapping)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,
       self_grounding: Bool, partition_reading: Option(PartitionReading),
+      reopen_seed: Option(StructuralQuestion),   -- the zero-gap Reopen(q) question the Phase 0 scan missed — the one entry Phase 1 cannot be assumed to re-derive; consumed into F.open at Phase 1, then cleared
       mappings: Set(Correspondence), confirmed: Set(Correspondence),
       dismissed: Set(Correspondence), remaining: Set(Correspondence),
       fit_map: F, fit_disposition: D_f, instantiations: List<Example>,
@@ -156,11 +164,11 @@ converge     (extension)       → TextPresent+Proceed (convergence evidence tra
 
 ### Activation
 
-AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0); validation always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2). On direct `/ground`, bind `R` from the current or most recent output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
+AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0) except the conditional zero-gap confirmation gate; validation always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2). On direct `/ground`, bind `R` from the current or most recent output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
 
 **Activation layers**:
 - **Layer 1 (User-invocable)**: `/ground` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Mapping uncertainty detected via in-protocol heuristics. Detection is silent (Phase 0).
+- **Layer 2 (AI-guided)**: Mapping uncertainty detected via in-protocol heuristics. Detection is silent (Phase 0) except the conditional zero-gap confirmation gate.
 
 **Mapping uncertain** = text applies abstract structures to a domain where structural correspondence has not been established.
 
@@ -214,21 +222,21 @@ Heuristic signals for mapping uncertainty detection (not hard gates):
 | Trigger | Effect |
 |---------|--------|
 | All correspondences addressed (confirmed or dismissed) | Proceed with validated mapping |
-| User Esc key | Accept current output without further grounding |
+| User Esc key | EarlyExit (not ValidatedMapping): present partial transformation trace + declare remaining correspondences as unresolved residual, then accept current output without further grounding |
 | Attempt cap reached | Surface remaining uncertainty, accept current output with explicit unresolved mapping note |
 
 ## Protocol
 
 ### Phase 0: Mapping Uncertainty Checkpoint (Silent)
 
-Analyze text for mapping uncertainty. This phase is **silent** — no user interaction.
+Analyze text for mapping uncertainty. This phase is **silent** — no user interaction, except the conditional zero-gap confirmation gate (Rule 11) when no mapping uncertainty is detected.
 
 1. **Bind output** `R`: use explicit argument or the current/most recent output under discussion
 2. **Scan output** `R` for abstract structures: patterns, models, analogies, frameworks applied to user's domain
 3. **Colimit-shape detection**: assess whether `R` is a colimit-shaped input — `essence_sensed` over concrete instances plus `locator_absent(A)` (Periagoge formal `¬located(A)`; from Analogia's substitution-interface vantage this surfaces as no source abstraction Sₐ available). Instance accumulation contributes evidence strength for the essence signal. When both criteria hold, route to `/induce` (Periagoge) for abstraction formation; Analogia remains scoped to mapping validation from a source abstraction to a concrete target.
 3b. **Self-grounding recognition**: if `located(Sₐ)` holds AND the grounding target is the abstraction against its OWN member instances (`Sₜ` = the instances `Sₐ` claims to subsume), set `self_grounding = true`. This is the complement of the colimit case (locator present, not absent): the abstraction already has a name and is being checked for wrong fusion against its members, not formed from scratch. Self-grounding does not route away — it proceeds through the normal mapping-validation phases, and the derived partition reading is computed in Phase 1.
 4. **Check correspondence**: For each abstract structure, assess whether mapping to user's concrete domain is established
-5. If all mappings trivially established: present finding per Rule 15 before proceeding (Analogia not activated)
+5. If all mappings trivially established: present finding per Rule 11 before proceeding (Analogia not activated)
 6. If uncertain mappings identified: record `(Sₐ, Sₜ)` — proceed to Phase 1
 
 **Scan scope**: Bound text R, conversation context, observable domain signals. Does NOT modify files or call external services.
@@ -249,6 +257,7 @@ Decompose abstract and concrete domains, then construct structural correspondenc
    - `missing` tracks source components that do not yet have evidenced target correspondents
    - `open` is limited to structural questions whose answer could change validation of the mapping
    - Do not include general analogy ideas, background caveats, or future exploration horizons
+   - When `Λ.reopen_seed` is set (the zero-gap gate returned `Reopen(q)`): `F.open := F.open ∪ {reopen_seed}` — the reopened question is the one entry this scan cannot be assumed to re-derive — then clear `reopen_seed`
 4b. **Derive the partition reading** (self-grounding case only): when `self_grounding` holds, compute `partition_reading(F, Sₜ)` over the misfit members — the `misfit_instances(F, Sₜ)` projection: members `m ∈ Sₜ` implicated by `F.overextended` (members that violate an overextended facet's added constraint) or by `F.missing` (members lacking a facet the abstraction asserts of all members). The reading is **derived** from `F` (relay, no gate) and classifies the misfit set:
    - **Split** — the partition yields **≥2 non-empty cells** (the core cell plus rival cell(s), or ≥2 rival cells): the misfit members cluster into coherent rival essence(s), not just isolated outliers. The reading partitions `Sₜ` into three pairwise-disjoint groups: `rival_essences` (the InstanceClusters, each = member instances + the essence they support — pairwise disjoint), `core_remainder` (the members the original abstraction *genuinely fits* — `Sₜ` minus *all* misfits, so never a misfit), and `trim_outliers` (scattered/ambiguous misfits in no rival cell). The cell-candidate partition handed to `/conduct` is the rival cells **plus** the core cell (covering every fitting member); `trim_outliers` is surfaced for the checkpoint to narrow-out or place, never folded into the core. This is wrong fusion — the member set carries ≥2 essences forced under one form, so the recovery is **decompose** (the ≥2-cell count satisfies `/conduct`'s ≥2-move warrant). Route recommendation: the `/conduct` decompose-recovery recipe. Analogia *evidences* the split boundary and the full candidate partition; it does **not** constitute the cell assignment — that is the user's constitutive judgment at the recipe's boundary-checkpoint.
    - **Trim** — the partition yields **at most one non-empty cell**: either scattered misfits around an otherwise-sound core (narrow the outliers out), or a single coherent cell with an empty core (the abstraction is wholly the wrong essence and re-forms into one). The recovery is a **single-move** `/induce` (Narrow or Reorient), not a decompose — a single move does not warrant `/conduct`.
@@ -349,7 +358,7 @@ After integration:
 8. **Convergence persistence**: Mode active until all identified correspondences are addressed or user Esc key
 9. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 10. **Convergence evidence**: Present transformation trace before declaring terminalized(R', F, D_f); per-correspondence evidence is required
-11. **Zero-gap surfacing**: If Phase 1 structural analysis finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
+11. **Zero-gap surfacing**: If the Phase 0 scan finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
 12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 14. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.

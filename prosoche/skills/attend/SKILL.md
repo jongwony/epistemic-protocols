@@ -21,8 +21,8 @@ Prosoche(C) →
     Bₛ = ∅ → no_compile → deactivate            -- nothing loop-consumable (relay)
   ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) →
   Qc(K, R) → Stop → V →
-    V = Adjust(d) → recompile(K, R, d) → Qc(K', R')
-    V = Confirm   → Emit(K)[TaskCreate] → G →    -- accepted residuals recorded in trace, never emitted
+    V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → Qc(K, R)
+    V = Confirm   → AcceptResiduals(R) → Emit(K)[TaskCreate] → G →    -- remaining residuals recorded into Λ.accepted, never emitted
   converge(compilation trace) → SituatedExecution
 
 ── MORPHISM ──
@@ -69,11 +69,13 @@ ResidualDisposition ∈ {Sharpen, AcceptUncovered}
                --   unguarded during the interval, recorded in the compilation trace, never emitted
 K              = Set(CompiledCondition)
 R              = Set(Residual)       -- slow signals lacking a verifiable predicate at compile time
+AcceptResiduals = R → Set(BoundarySignal)   -- on Confirm, materializes each remaining residual's signal into Λ.accepted, so accepted_uncovered(b) is a recorded fact, not an unwritten inference
 V              = Judgment ∈ {Confirm, Adjust(direction)}
 Emit           = K → G [Tool: TaskCreate]
 G              = goal entries: coarse task entries consumable by a downstream completion-predicate enforcer
 Phase          ∈ {0, 1, 2, 3}
-SituatedExecution = (emitted(G) ∧ handoff_recorded) ∨ no_compile ∨ user_esc
+SituatedExecution = situated(C) ∨ no_compile  -- situated(C) defined in CONVERGENCE
+EarlyExit = user_esc  -- non-convergent early exit: no emission, no handoff recorded; distinct from no_compile (which is a legitimate trivial-completion terminal, not an abort)
 
 ── PHASE TRANSITIONS ──
 Phase 0: C → Infer(C) → B                                  -- boundary inference (sense; evidence cited per signal)
@@ -81,15 +83,15 @@ Phase 1: B → Normalize(B) → B̂ → Partition(B̂) → (Bₛ, Bₓ)    -- sp
            Bₓ ≠ ∅ → OOS(Bₓ)                                -- out-of-scope declaration, substrate named (extension)
            Bₛ = ∅ → no_compile → deactivate                -- nothing loop-consumable to compile (extension)
 Phase 2: ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) → Qc(K, R) → Stop → V   -- compilation + confirmation [Tool]
-           V = Adjust(d) → recompile(K, R, d) → re-present Qc(K', R')   -- Sharpen rides as an Adjust direction
-           V = Confirm   → Phase 3                          -- Confirm over remaining ρ constitutes accepted_uncovered
+           V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → re-present Qc(K, R)   -- Sharpen rides as an Adjust direction
+           V = Confirm   → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.signal | ρ ∈ R} → Phase 3   -- Confirm over remaining ρ records accepted_uncovered before Phase 3
 Phase 3: Emit(K) → G [TaskCreate] → converge(compilation trace) → deactivate   -- emission + handoff [Tool]
 
 ── LOOP ──
 Single pass with a bounded adjustment loop at Phase 2:
   Qc(K, R) → Confirm → Phase 3 (terminal; remaining residuals become accepted_uncovered)
   Qc(K, R) → Adjust(direction) → recompile → re-present (Sharpen moves a residual toward κ)
-  Esc → deactivate (no emission)
+  Esc → deactivate (EarlyExit, not SituatedExecution — no emission, no handoff recorded)
 Stateless: Prosoche terminates at emission. No state survives into the execution interval —
 no session approvals, no per-action classification, no mid-execution checkpoint.
 Convergence evidence: at emission, present the compilation trace — for each b ∈ Bₛ:
@@ -98,10 +100,11 @@ for each b ∈ Bₓ: the out-of-scope declaration with its substrate.
 Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
+accepted_uncovered(b) ≡ b ∈ Λ.accepted   -- recorded by AcceptResiduals(R) on Confirm (Phase 2), not inferred
 situated(C) = emitted(G) ∧ handoff_recorded
               ∧ (∀b∈Bₛ: (∃κ∈K compiled from b) ∨ accepted_uncovered(b))
               ∧ (∀b∈Bₓ: declared_oos(b))
-SituatedExecution = situated(C) ∨ no_compile ∨ user_esc
+SituatedExecution = situated(C) ∨ no_compile
 -- The guarantee is compile-time: every loop-consumable boundary signal is either compiled into a
 -- verifiable condition or accepted as an uncovered residual at the gate — visibly, in the trace;
 -- every fast risk is visibly delegated.
@@ -115,12 +118,15 @@ Phase 1 Partition    (sense)        → Internal analysis (velocity classificati
 Phase 1 OOS          (extension)    → TextPresent+Proceed (fast-risk out-of-scope declaration with substrate handoff note)
 Phase 1 no_compile   (extension)    → TextPresent+Proceed (Bₛ = ∅: nothing to compile; deactivate)
 Phase 2 Qc           (constitution) → present (compiled condition set + residual disposition confirmation: Confirm / Adjust) [Tool]
+Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's signal into Λ.accepted, materializing accepted_uncovered(b) for the convergence predicate)
 Phase 3 Emit         (track)        → TaskCreate (coarse goal entries: subject + condition; TodoWrite is the harness-equivalent realization) [Tool]
 converge             (extension)    → TextPresent+Proceed (compilation trace; handoff recorded; deactivate)
+esc                  (extension)    → TextPresent+Proceed (no emission; deactivate as EarlyExit, not SituatedExecution)
 
 ── MODE STATE ──
 Λ = { phase: Phase, boundary: Option(B), slow: Option(Set(BoundarySignal)), oos: Option(Set(BoundarySignal)),
-       compiled: Option(K), residuals: Option(R), active: Bool, cause_tag: String }
+       compiled: Option(K), residuals: Option(R), accepted: Set(BoundarySignal), active: Bool, cause_tag: String }
+-- accepted: written by AcceptResiduals(R) on Confirm (Phase 2); accepted_uncovered(b) ≡ b ∈ Λ.accepted (CONVERGENCE)
 -- Compile-time only: Λ exists from invocation to emission; nothing persists into the execution interval.
 
 ── COMPOSITION ──
@@ -232,13 +238,13 @@ Compile each slow/threshold signal into a `{ subject, condition }` pair:
 - **subject** — a coarse framing of the work unit the condition guards. Coarse means work-unit granularity, not procedural steps: the downstream enforcer owns the interval's internal step decomposition.
 - **condition** — a verifiable predicate: an executable check with a determinate pass/fail outcome (command exit status, test result, countable threshold, file-state assertion). A condition that can only be stated as prose judgment ("the code is clean enough") is not compilable — surface it as a residual for the user to either sharpen into a predicate or accept as uncovered.
 
-Present the compiled set as pre-gate text (per-condition: source signal, evidence, predicate), then **present** via Cognitive Partnership Move (Constitution):
+Present the compiled set as pre-gate text (per-condition: source signal, evidence, predicate), and each remaining residual with its uncovered-risk note, then **present** via Cognitive Partnership Move (Constitution):
 
 ```
 Compiled guardrail set ready. How should it land?
 
 Options:
-1. **Confirm** — emit these conditions as the goal entries for the execution interval
+1. **Confirm** — emit these conditions as the goal entries for the execution interval; any remaining residuals are accepted as uncovered (unguarded during the interval, recorded in the trace)
 2. **Adjust** — modify, add, or remove conditions: [prompt for direction]
 ```
 

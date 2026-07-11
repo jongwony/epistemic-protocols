@@ -60,6 +60,8 @@ Phase 3: 검증 루프  → 점진적으로 이해 확인 (gate interaction + Ta
 | **Causality** | 사용자가 왜 그렇게 되는지 이해하지 못함 |
 | **Scope** | 사용자가 변경의 전체 영향을 보지 못함 |
 | **Sequence** | 사용자가 실행 순서를 이해하지 못함 |
+| **Horizon** | 현재 entry point의 co-intended but unspoken edge — 사용자가 자신의 프레임 안에서는 이름 붙일 수 없는 지점. evidence-bound·material·unspoken 조건(false-positive guard)을 만족할 때만 surface |
+| **Emergent** | 정형 유형에 속하지 않는 gap — 구체적 comprehension deficit에 맞춰 적응 |
 
 ## 저자
 

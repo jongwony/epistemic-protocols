@@ -2,7 +2,7 @@
 
 > [English](./README.md)
 
-세션-결박된 작업 맥락을, 사전 맥락이 전혀 없는(zero-memory) 새 에이전트가 그대로 실행할 수 있는 자기완결 이식 핸드오프로 증류합니다. 지표어(deixis)를 정규화하고, 자기완결성을 감사하고, 관련성과 출처를 판정한 뒤, prose 채널과 스키마 버전이 부여된 task-state 블록으로 산출합니다.
+세션-결박된 작업 맥락을, 사전 맥락이 전혀 없는(zero-memory) 새 에이전트가 그대로 실행할 수 있는 자기완결 이식 핸드오프로 증류합니다. 지표어(deixis)를 정규화하고, 자기완결성을 감사하고, 관련성과 출처를 판정한 뒤, prose 채널, 스키마 버전이 부여된 task-state 블록, content-free activation edge로 산출합니다(재증류 시에는 correction ledger append도 포함).
 
 ## 타입 시그니처
 
@@ -14,7 +14,7 @@
 
 한 작업 세션의 context window는 불가피하게 세션-결박 잔여물을 누적합니다 — 미정의 jargon, 지표 약어, 저자 프로세스 서술, 도구 상태, 댕글링 task 식별자. 이것들은 저자에게는 완결돼 보입니다. 저자가 빠진 맥락을 암묵적으로 공유하기 때문입니다. 그러나 세션 접근 권한이 없는 새 수신자에게는 그 공유 지반이 전혀 없습니다. Diylisis는 작업 맥락을, 모든 핵심 참조가 저자 세션 없이도 해소되는 핸드오프로 증류합니다.
 
-이 morphism은 F0~F7을 한 번 정방향으로 실행한 뒤, 단조 위생 척도(monotone hygiene measure)에 대해 고정점에 도달할 때까지 재감사합니다:
+이 morphism은 F0~F7을 한 번 정방향으로 실행한 뒤, 위생 척도(hygiene measure)가 고정점에 도달할 때까지 재감사합니다. 이 척도는 단조가 아닙니다 — repair pass가 새로 authored한 prose가 척도를 정착 전에 다시 끌어올릴 수 있으므로, 종료는 pass별 감소가 아니라 고정점의 구조(disposition은 영구적이며, Gate는 Resolve로 바닥을 침)로부터 논증됩니다:
 
 - **F0 — 핸드오프 계약**: 수신자, next task, 허용 소스, 범위, 검증, 정지 조건, **핸드오프 내구성(handoff durability)**(`OneShot` | `ExternalVersioned` | `DurableRepo`)을 선언합니다. 관련성과 최소성의 전제이며, 내구성이 교정 원장을 조건화합니다.
 - **F1 — 지표 폐쇄(Deictic closure)**: 각 세션-로컬 토큰을 canonical 참조로 정규화합니다. grounding보다 선행하여 grounded 항목이 안정 참조를 가리키도록 합니다. `surface_token → canonical_ref → confidence → unresolved?`를 산출합니다.
@@ -24,8 +24,8 @@
 - **F3 — 처분(Disposition)**: KEEP(inline) | ROUTE(StableRef) | DROP.
 - **F4 — 압축 폐쇄**: 최소-완전(minimal-complete) 집합만 유지합니다 — 계약-상대적 완전성이지, 미적 간결성이 아닙니다.
 - **F5 — 이해 게이트**: refute 자세의 `zero-memory-refuter` subagent(fresh context, 세션 용어 watchlist, 근거 인용 verdict; 플랫폼 사다리: named agent → generic fresh subagent → lint 체크리스트, lint 단계는 fresh-context 격리가 없는 약화된 실현)로 zero-memory 수신자 기준에 대해 검증합니다. 저자 self-simulation은 배제됩니다. **prose-only 삭제 테스트**를 포함합니다: TaskStateBlock, correction ledger, 네이티브 task-state, 모든 agent-specific affordance를 무시했을 때, next task가 prose 채널 + allowed sources만으로 여전히 실행 가능해야 하며 — 그렇지 않으면 게이트가 Fail합니다.
-- **F6 — 제한된 audit/lint 루프**: 약하게 감소하는 위생 척도에 따라 종료합니다. "완성된 느낌"이 아니라 척도로 종료합니다.
-- **F7 — 채널 분리**: prose 채널(권위)과, 댕글링 task 식별자를 복원하는 스키마 버전 `TaskStateBlock`을 산출합니다.
+- **F6 — 제한된 audit/lint 루프**: 위생 척도의 고정점(0, 또는 모든 residual이 surfaced되고 leak-free이며 모든 authored item이 disposed된 상태로 안정)과 Pass comprehension verdict에서 종료합니다 — pass별 감소(척도는 repair pass에서 오를 수 있음)나 "완성된 느낌"으로 종료하지 않습니다.
+- **F7 — 채널 분리**: prose 채널(권위), 댕글링 task 식별자를 복원하는 (비-override) 스키마 버전 `TaskStateBlock`, 핸드오프를 수신자에게 전달하는 content-free activation edge 세 채널을 산출합니다. 재증류 시에는 correction ledger에도 append합니다.
 
 **핵심 원리**: Portability over Author Familiarity — 저자의 친숙성이 더 이상 숨은 의존성이 아닐 때 핸드오프는 이식 가능합니다.
 

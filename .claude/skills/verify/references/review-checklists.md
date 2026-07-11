@@ -120,17 +120,19 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Prothesis: FrameworkAbsent → FramedInquiry (AI-guided, DESIGN)
   - Syneidesis: GapUnnoticed → AuditedDecision (AI-guided, SURFACE)
   - Horismos: (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary
-  - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INFER)
-  - Analogia: MappingUncertain → ValidatedMapping (AI-guided, VALIDATE)
-  - Periagoge: AbstractionInProcess → CrystallizedAbstraction (AI-guided, CRYSTALLIZE)
-  - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE)
+  - Aitesis: ContextInsufficient → InformedExecution (AI-guided, INQUIRE)
+  - Analogia: MappingUncertain → ValidatedMapping (AI-guided, GROUND)
+  - Periagoge: AbstractionInProcess → CrystallizedAbstraction (AI-guided, INDUCE)
+  - Euporia: AbstractAporia → ResolvedEndpoint (Hybrid, REVERSE-INDUCE-CYCLE)
   - Epharmoge: ApplicationDecontextualized → ContextualizedExecution (AI-guided, CONTEXTUALIZE)
   - Elenchus: ContextSuspect → VettedContext (User-initiated, VET)
   - Diylisis: ContextTethered → PortableHandoff (AI-guided, DISTILL)
   - Prosoche: ExecutionBlind → SituatedExecution (User-initiated, EVALUATE)
   - Anamnesis: RecallAmbiguous → RecalledContext (AI-guided, RECOGNIZE)
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
-  - Write: InsightInternal → ExternalizedKnowledge (User-invoked, EXTERNALIZE)
+  - Anagoge: RecallGranularityInsufficient → HigherGranularityUnit (AI-guided, ELEVATE)
+  - Hyphegesis: MethodUnderdetermined → ConductedMethod (Hybrid, CONDUCT)
+  - Diairesis: GranularityUnderdetermined → WorkUnitMap (Hybrid, DELIMIT)
 - [ ] Initiator correctly specified (AI-guided vs Hybrid vs User-initiated vs User-invoked)
 - [ ] Gap taxonomy matches protocol purpose
 
@@ -170,7 +172,7 @@ When other experts flag these as issues, they should be filtered (not actual iss
 |---------|------------------|-----------|
 | Gate mandate | Structured presentation + turn yield in Phase 1/2 | Unstructured text bypass |
 | Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
-| Hybrid protocol | Euporia activates on user signal or with confirmation when AI-detected | Unconfirmed AI auto-activation |
+| Hybrid protocol | Hybrid protocols (Euporia, Hyphegesis, Diairesis) activate on user signal or with confirmation when AI-detected; Diairesis single-dominant-cut relay cycles (Rule 11) may run all-relay — confirmation shifts to the user's post-emission engagement with the emitted WorkUnitMap | Unconfirmed AI auto-activation outside Diairesis's all-relay path |
 
 ## Synthesis Template
 

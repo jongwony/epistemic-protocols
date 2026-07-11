@@ -14,11 +14,12 @@
 
 Elenchus는 working context를 외부 sync에 commit 하기 직전 — 미팅, PR 리뷰, 배포 결정, Slack 스레드 — 에 실행됩니다. 프로토콜은 세션 동안 누적된 맥락 중에서 age, 출처 취약성, downstream 집중, 출처 간 모순 때문에 sufficiency가 의심스러워진 source를 스캔하고, 각 suspect source에 대해 변증법적 안티테제를 posit한 뒤 사용자가 source별 disposition을 판단하도록 합니다. 동작은 헤겔의 *Aufhebung*(보존 + 부정 + 지양)입니다: 정 → 반 → 합을 source 단위로 적용합니다.
 
-**세 가지 변증법적 패턴**:
+**네 가지 변증법적 패턴**:
 
 - **Pattern A — Source provenance audit (출처 검증)**: 정 "X는 claim C에 대해 검증되어 있다" ↔ 반 "X의 검증 경로는 다른 claim을 권위화하거나 provisional / inferred / stale"
 - **Pattern B — Counterfactual gap forecasting (반사실적 공백 예측)**: 정 "현재 조건에서 Y가 성립" ↔ 반 "조건 Z가 현재 조건 하나를 대체하면 P 지점에서 공백 B가 발생"
 - **Pattern C — Cross-source consistency check (출처 간 일관성)**: 정 "X₁과 X₂는 같은 referent와 호환되는 claim-kind를 일관되게 가리킨다" ↔ 반 "X₁과 X₂는 Q 지점에서 diverge"
+- **Pattern D — Inference fallacy audit (추론 오류 검증)**: 정 "결론 Y는 관찰된 근거로부터 타당하게 도출된다" ↔ 반 "Y의 타당성은 성립하지 않는 추론 archetype에 의존한다" — source 자체가 추론된 결론(origin `AIInference`, 또는 standing premise로 기능하는 결론)일 때 적용
 
 **핵심 원칙**: Silent Trust 대신 Dialectical Vetting — 누적된 맥락은 침묵 속에서 decay됩니다. 루프는 후속 작업이 전체 시스템 refactoring을 강제하기 전에 누적된 context cost를 해소합니다.
 
@@ -52,13 +53,14 @@ Phase 0는 working context에서 audit 후보 source를 silently 선택합니다
 | Source age beyond horizon | `observed_at + horizon(origin)` < now |
 | Provenance-chain length | belief이 N-step inference chain에 의존하며 직접 관찰·인용·측정이 아님 |
 | Cross-source contradiction | 같은 referent를 가리키는 두 source가 diverge |
+| Inference-character conclusion | source 자체가 추론된 결론(origin `AIInference`, 또는 standing premise로 기능하는 결론) |
 
 어느 기준에도 해당하지 않는 source는 surface되지 않습니다 — 프로토콜은 warranted audit candidate에만 주의를 집중합니다.
 
 ## 알려진 제한 사항
 
 - **Working hypothesis 임계값**: `N`(high-leverage 임계)과 origin별 horizon 기본값은 residual 변수로, 누적 사용 evidence를 통해 정제됩니다 (inscription 시점에 고정되지 않음).
-- **Pattern set closure**: 세 패턴(A·B·C)이 inscribed; Emergent는 세 패턴과 직교하는 변증법적 작용이 사용 evidence로 surface될 때 네 번째 패턴을 허용합니다.
+- **Pattern set closure**: 네 패턴(A·B·C·D)이 inscribed; Emergent는 네 패턴과 직교하는 변증법적 작용이 사용 evidence로 surface될 때 추가 패턴을 허용합니다.
 - **Source 당 single-pass**: 한 source는 한 loop iteration에서 하나의 안티테제를 받습니다. False-negative 안티테제 구성(실제 도전을 surface 못 함)은 intra-iteration 복구 없이 전파됩니다; LOOP의 Deferred re-trigger가 cross-iteration 보정을 제공합니다.
 
 ## 설치

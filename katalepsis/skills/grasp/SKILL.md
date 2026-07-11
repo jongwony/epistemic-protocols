@@ -75,15 +75,23 @@ ContinuationClosure = { verified: String, status: String, branch: Optional(Branc
                      -- relay metadata after evaluated answers or side-branch ejection; not a new gate
 C(·) = emit ContinuationClosure (relay; → TextPresent+Proceed)
 DeactivationCondition = { all_tasks_completed, user_esc, user_cancel }
-TerminalShape = { phase1_entry_selection, phase3_verification_probe, coverage_routing, deactivation(DeactivationCondition) }
+unprobed(t) = Λ.detected[t] \ Λ.probed[t]  -- detected but not yet probed for task t
+GT_presented = unprobed(current) \ {Horizon}  -- unprobed detected relevant gap types offered at the start-aspect selector; Horizon is never surfaced as a selectable label (Socratic opacity) — probed inline at detection instead
+StartAspectSelection = user's chosen starting gap type ∈ GT_presented  -- Phase 3 step-1 answer; fires only when Horizon did not preempt (Horizon preemption always precedes this selector) and |GT| > 0
+probe_kind = GapType → {Qc, Qs}   -- per the Gap type → probe kind mapping table: Qc for Expectation/Sequence (classificatory), Qs for Causality/Scope/Emergent (open)
+ZeroGapFinding = { entry_point: EntryPoint, reasoning: String }  -- the self-evident finding surfaced when |GT| = 0 for the current entry point (Rule 10)
+ZeroGapConfirmation = user's answer to a ZeroGapFinding ∈ {Confirm, Reopen(description)}  -- Confirm marks the entry point complete; Reopen names a gap the detection missed, registered as Emergent in Λ.detected[current] (mirrors step 3e), re-entering the comprehension loop for that aspect
+TerminalShape = { phase1_entry_selection, phase3_zero_gap_confirmation, phase3_start_aspect_selection, phase3_verification_probe, coverage_routing, deactivation(DeactivationCondition) }
 
 ── PHASE TRANSITIONS ──
 Phase 0: (R, U) → Orient(R, U) → I → DeriveEntries(I, R) → E → AssessRoute(I, E, R, U, Context) → Fᵣ  -- intent orientation + route map (silent)
 Phase 1: Fᵣ → Present(entry_point enriched by route-adequacy metadata; hidden_route + open when non-empty) → Qc(intent entry points) → Stop → Sₑ       -- entry point selection; default single, ordered multi when user names 2+ concerns [Tool]
 Phase 2: Sₑ → Materialize(Sₑ, R) → B → TaskCreate[selected] → Tᵣ  -- task registration; initialize Λ.cursor from first current task, entry point, and active aspect before Phase 3 [Tool]
-Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → P → Δ  -- comprehension check [Tool]
-       → Qs(HC) → Stop → A → P' → Tᵤ ; Λ.detected[current] += Horizon ; Λ.probed[current] += Horizon  if Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]  -- Horizon probe: fires immediately at detection (mandatory once), preempts the start-aspect selector; scenario-only, opacity-preserving (never the edge/answer/rationale, never a Horizon label); the answer is then evaluated as a normal probe answer (→ 3c eval → coverage), never a return to the start selector [Tool]
-       → Qs(Δ) → Stop → A → P' → Tᵤ                     -- verification loop; Qc for Expectation/Sequence gaps, Qs for Causality/Scope/Emergent (Horizon handled by the preempting edge above) [Tool]
+Phase 3: Tᵣ → TaskUpdate(current) → detect(E, B) → GT → Λ.detected[current] := Λ.detected[current] ∪ GT → P → Δ  -- comprehension check [Tool]
+       → [|GT| = 0] Qc(ZeroGapFinding) → Stop → ZeroGapConfirmation  -- zero-gap branch (Rule 10): Confirm → P' := P ; TaskUpdate(completed), next task; Reopen(desc) → Λ.detected[current] += Emergent, re-enter this Phase 3 with GT = {Emergent} [Tool]
+       → [|GT| > 0] Qs(HC) → Stop → A → P' → Tᵤ ; Λ.detected[current] += Horizon ; Λ.probed[current] += Horizon  if Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]  -- Horizon probe: fires immediately at detection (mandatory once), preempts the start-aspect selector below; scenario-only, opacity-preserving (never the edge/answer/rationale, never a Horizon label); the answer is then evaluated as a normal probe answer (→ 3c eval → coverage), never a return to the start selector [Tool]
+       → [Horizon did not preempt ∧ GT_presented ≠ ∅ ∧ Λ.probed[current] = ∅] Qc(GT_presented) → Stop → StartAspectSelection → Λ.cursor.aspect := StartAspectSelection  -- start-aspect selector: user picks the opening gap type from GT_presented = unprobed(current) \ {Horizon}; fires once per entry point (only before any probe for the current task), before the verification loop below [Tool]
+       → [|GT| > 0 ∧ Λ.cursor.aspect set] probe_kind(Λ.cursor.aspect)(Δ, Λ.cursor.aspect) → Stop → A → P' → Tᵤ ; Λ.probed[current] += Λ.cursor.aspect    -- verification loop, guarded: fires only with a bound aspect (set at the start-aspect gate, or by coverage routing after a probe); unreachable on the zero-gap branch and immediately after a Horizon preemption whose coverage routing has not yet bound an aspect; probe form dispatched per gap type (probe_kind; Horizon handled by the preempting edge above) [Tool]
        → TaskCreate[Proposal] if proposal(A)             -- proposal ejection (detected from Other) [Tool]
        → C(branch) if proposal(A)                         -- side-branch continuation closure [Tool]
        → Qᵣs(Aᵣ) → Stop if misconception(A)             -- reasoning inquiry [Tool]
@@ -96,33 +104,40 @@ Turn boundary invariant: While `Λ.active = true` at turn end, the last user-fac
 
 ── LOOP ──
 After Phase 3 verification: Evaluate comprehension per gap type.
-If |GT| = 0 for current entry point: present self-evident finding with reasoning per Rule 10, mark task completed upon confirmation, proceed to next task.
-If gap detected: Continue questioning within current entry point.
+If |GT| = 0 for current entry point: present typed `ZeroGapFinding` with reasoning per Rule 10 → `ZeroGapConfirmation`; `Confirm` binds `P' := P` (zero-gap phantasia stands as verified) and marks task completed, proceed to next task; `Reopen(description)` registers an Emergent gap in `Λ.detected[current]` and re-enters Phase 3 for this entry point.
+If gap detected (|GT| > 0): present `StartAspectSelection` (unless Horizon preempts) before questioning, then continue questioning within current entry point.
 If correct: emit continuation closure, then Aspect summary — show probed vs unprobed gap types.
   User selects "sufficient" → TaskUpdate completed, next pending task.
   User selects additional aspect → Resume with selected gap type.
   User provides proposal via Other → detected by Step 3b, ejected via TaskCreate, emit side-branch continuation closure, resume current loop position.
 Cursor lifecycle: Initialize `Λ.cursor` after Phase 2 task registration. Update it whenever the current task changes, the entry point changes, the active aspect changes, or the user-facing resume label changes. On proposal ejection, snapshot the pre-ejection cursor into the branch artifact; when a branch is present in the emitted closure, closure-level `return_pointer` equals `branch.return_pointer`.
-Continue until: all selected tasks completed OR user ESC/cancel.
+Continue until: all selected tasks completed (VerifiedUnderstanding) OR user ESC/cancel (EarlyExit).
 Convergence evidence: At all-tasks-completed, present transformation trace — for each t ∈ Λ.tasks, show (ResultUngrasped(t) → verified(t) with comprehension evidence). Convergence is demonstrated, not asserted.
+On user ESC/cancel: present partial transformation trace over completed tasks, then declare remaining tasks as unresolved residual.
 
 ── CONVERGENCE ──
 Katalepsis = ∀t ∈ Λ.tasks: t.status = completed
            ∧ P' ≅ R (user understanding matches AI result)
-VerifiedUnderstanding = P' where (∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R) ∨ user_esc ∨ user_cancel
-Deactivation: `all_tasks_completed` after convergence evidence, `user_esc`, and `user_cancel` each set `Λ.active := false`. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
+VerifiedUnderstanding = P' where ∀t ∈ Λ.tasks: t.status = completed ∧ P' ≅ R
+EarlyExit = P' where user_esc ∨ user_cancel  -- non-convergent early exit: understanding as of exit (P' = last evaluated phantasia; P' := P over the current unprobed phantasia when exit precedes the first evaluated answer), partial trace over completed tasks, remaining tasks declared as unresolved residual
+Deactivation: `all_tasks_completed` after convergence evidence sets `Λ.active := false` and terminates as VerifiedUnderstanding; `user_esc` and `user_cancel` each set `Λ.active := false` and terminate as EarlyExit (partial trace + residual declaration), not VerifiedUnderstanding. The convergence trace is a valid terminal shape, not a relay requiring a follow-up gate.
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Orient (observe) → Internal analysis (Read for context if needed)
-Phase 0 AssessRoute (observe) → Internal analysis (entry-point adequacy; opacity-preserving — exposes selection scent, never probe answers)
+Phase 0 AssessRoute (sense) → Internal analysis (no external tool; entry-point adequacy; opacity-preserving — exposes selection scent, never probe answers)
 Phase 1 Emit (extension) → TextPresent+Proceed (entry-point-fit distinctions, hidden routes, and bounded open questions from Fᵣ; omitted when empty)
 Phase 1 Qc  (constitution)   → present (entry point selection enriched by Fᵣ)
-Phase 2 B   (observe) → Internal analysis (artifact basis materialization)
+Phase 2 B   (sense) → Internal analysis (no external tool; artifact basis materialization)
 Phase 2 Tᵣ  (track)   → TaskCreate (entry point tracking)
+Phase 2 Cursor (track) → Internal state update (Λ.cursor init after task registration; updated on task/entry-point/aspect/resume-label change, incl. Phase 3 Λ.cursor.aspect := StartAspectSelection)
 Phase 3 detect (sense) → Internal analysis (gap type relevance detection per entry point)
+Phase 3 Rec  (track)  → Internal state update (detection/probe recording: Λ.detected[current] writes at detect / zero-gap Reopen / Horizon; Λ.probed[current] writes at the Horizon probe and verification loop)
+Phase 3 ZeroGapConfirm (constitution) → present (conditional: |GT| = 0 for current entry point; zero-gap finding + reasoning; Confirm/Reopen(description); Rule 10)
 Phase 3 Horizon (sense) → Internal analysis (admissible(HC) false-positive guard; opacity-preserving — never exposes the suspected edge, the answer, or the selection rationale)
-Phase 3 Qs  (constitution)   → present (mandatory; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 Qs(HC) (constitution) → present (conditional: Horizon ∈ GT ∧ admissible(HC) ∧ Horizon ∉ Λ.probed[current]; preempting Horizon probe — fires once at detection, before the start-aspect selector; scenario-only open question, opacity-preserving — never a Horizon label, the edge, the answer, or the rationale; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 probe_kind (constitution) → present (mandatory; probe form per probe_kind — Qc for Expectation/Sequence, Qs otherwise; Esc key → loop termination at LOOP level, not an Answer)
+Phase 3 StartAspectSelector (constitution) → present (conditional: |GT| > 0 ∧ Horizon did not preempt ∧ GT_presented ≠ ∅ ∧ Λ.probed[current] = ∅; "Which aspect to start with?" over GT_presented; fires once per entry point before the verification loop)
 Phase 3 Qᵣs (constitution)  → present (misconception reasoning inquiry)
 Phase 3 Qc  (constitution)   → present (aspect coverage: sufficient/aspect)
 Phase 3 Ref (observe) → Read (source artifact, AI-determined)
@@ -130,6 +145,7 @@ Phase 3 Tᵤ  (track)  → TaskUpdate (progress tracking)
 Phase 3 Prop (track)  → TaskCreate (proposal ejection)
 Phase 3 C    (extension)  → TextPresent+Proceed (continuation closure: verified status + side branch if any + return pointer + next moves)
 converge    (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with verified understanding)
+esc/cancel  (extension)  → TextPresent+Proceed (partial transformation trace + unresolved-task residual declaration; terminate as EarlyExit, not VerifiedUnderstanding)
 -- Interpretive transparency (Basis:) intentionally absent: Socratic verification requires AI judgment opacity — surfacing reasoning would compromise probe authenticity
 
 ── MODE STATE ──
@@ -208,7 +224,7 @@ At Phase 3, present comprehension verification via Cognitive Partnership Move (C
 
 | Trigger | Effect |
 |---------|--------|
-| User explicitly cancels | Accept current understanding |
+| User explicitly cancels | EarlyExit (not VerifiedUnderstanding): present partial transformation trace + declare remaining tasks as unresolved residual, then accept current understanding |
 | User demonstrates full comprehension | Early termination |
 
 ## Entry Point Taxonomy
@@ -332,7 +348,7 @@ For each task (entry point):
 
 1. **TaskUpdate** to `in_progress`
 
-2. **Present overview**: Brief summary of the selected intent and its artifact basis, then show everyday aspect labels derived from detected gap types (`GT \ {Horizon}` — Horizon is never surfaced as a selectable aspect label; per Socratic opacity it is probed inline at detection, never offered in the start selector or any routing option) and let user select starting aspect:
+2. **Present overview**: Brief summary of the selected intent and its artifact basis. **Zero-gap branch** — if `|GT| = 0` for the current entry point: present the typed `ZeroGapFinding` with reasoning per Rule 10 and gate on `ZeroGapConfirmation`; `Confirm` binds `P' := P` (zero-gap phantasia stands as verified), TaskUpdate(completed), proceed to next task; `Reopen(description)` registers an Emergent gap in `Λ.detected[current]` and re-enters this Phase 3 with `GT = {Emergent}`. Otherwise, when the remaining aspect set is non-empty (`GT_presented ≠ ∅`), show everyday aspect labels derived from detected gap types (`GT \ {Horizon}` — Horizon is never surfaced as a selectable aspect label; per Socratic opacity it is probed inline at detection, never offered in the start selector or any routing option) and let user select starting aspect:
 
    Present the detected aspects as text output:
    - What this path covers: [plain-language aspect list]
@@ -433,7 +449,7 @@ For each task (entry point):
 
    When step 3c evaluates as Correct for the current gap type:
 
-   1. Compare probed vs. unprobed detected relevant gap types (canonical + Emergent) for this entry point. The presented option set excludes `Horizon`: `GT_presented = unprobed(current_task) \ {Horizon}` — per Socratic opacity, `Horizon` is never surfaced as a user-facing coverage label; it is probed inline at detection, not offered as a routing option here.
+   1. Compare probed vs. unprobed detected relevant gap types (canonical + Emergent) for this entry point. The presented option set excludes `Horizon`: `GT_presented = unprobed(current) \ {Horizon}` — per Socratic opacity, `Horizon` is never surfaced as a user-facing coverage label; it is probed inline at detection, not offered as a routing option here.
    2. Emit continuation closure as relay text: verified aspect, current task/aspect status, branch artifact if one was just ejected, return pointer, and next available moves.
    3. If unprobed aspects exist, output a brief text nudge reminding the user they can share improvement ideas or unlisted comprehension gaps via the "Other" option (adapt wording to context, no fixed template).
 
@@ -498,11 +514,11 @@ For each task (entry point):
 8. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 9. **Convergence evidence**: Present transformation trace before declaring all tasks completed; per-task evidence is required
 9a. **Post-answer closure**: Always emit verified aspect, current task status, and next available moves after a correct answer or sufficient understanding signal, before coverage routing or task completion. This is relay metadata: it keeps the active loop legible without adding a new user gate.
-9b. **Active-turn fail-closed**: While `Λ.active = true` at turn end, every response must end in one protocol-owned TerminalShape: Phase 1 entry-point selection, Phase 3 verification probe, coverage routing after a correct or sufficient understanding signal, or deactivation by `all_tasks_completed`, `user_esc`, or `user_cancel`. Plain summaries, file references, context, and relay metadata may ground these shapes, but they cannot be the final shape by themselves while active. This enforces existing Stop, coverage, and deactivation points without adding a user gate or changing `VerifiedUnderstanding`.
-10. **Zero-gap surfacing**: If Phase 3 analysis finds no comprehension gaps for an entry point, present this finding with reasoning for user confirmation before marking as self-evident
+9b. **Active-turn fail-closed**: While `Λ.active = true` at turn end, every response must end in one protocol-owned TerminalShape: Phase 1 entry-point selection, Phase 3 zero-gap confirmation, Phase 3 start-aspect selection, Phase 3 verification probe, coverage routing after a correct or sufficient understanding signal, or deactivation by `all_tasks_completed`, `user_esc`, or `user_cancel`. Plain summaries, file references, context, and relay metadata may ground these shapes, but they cannot be the final shape by themselves while active. This enforces existing Stop, coverage, and deactivation points without adding a user gate or changing `VerifiedUnderstanding`.
+10. **Zero-gap surfacing**: If Phase 3 analysis finds no comprehension gaps for an entry point (`|GT| = 0`), present a typed `ZeroGapFinding` with reasoning and gate on `ZeroGapConfirmation` (`Confirm` marks the entry point complete; `Reopen(description)` names a missed gap, registered as Emergent) before marking the entry point self-evident
 11. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
-12. **Plain emit discipline**: User-facing emit (Phase 2 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
+12. **Plain emit discipline**: User-facing emit (Phase 3 surfacing prose, convergence traces, gate options, and any text shown to the user) uses everyday language to reduce the user's cognitive load — every emit token should carry decision-relevant meaning, not project-internal overhead. SKILL.md formal-block vocabulary — variable names with subscripts, Greek-rooted terms in narrative, formal type labels inline, and code-style backtick tokens — stays in the formal block. What the user reads is the action, observation, or question in their idiom.
 13. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
 14. **Protocol-native route map**: Phase 0 produces a ComprehensionRouteMap before entry-point selection. The map is a pre-gate support object for entry-point adequacy, not a terminal status and not generic calibration. It annotates derived entry points; it does not create, filter, suppress, or terminalize entry-point tasks, and `VerifiedUnderstanding` is unchanged. `hidden_route` marks entries the user did not name while preserving their artifact anchors; `open` carries bounded discovery pressure only when the unknown could change which entry point the user selects. Socratic opacity is preserved — the map exposes why an entry point is useful, never the expected answer or reasoning path.
-14a. **Horizon boundary**: `Horizon` is a named *comprehension* gap — the AI surfaces a co-intended-but-unspoken edge required for `P' ≅ R` — NOT a Prothesis synthesis construct (`Horizontverschmelzung` fuses multiple *perspectives*; Horizon operates within one user's comprehension of one result). It is detected at Phase 3 *inside* an already-selected entry point and preserves `Fᵣ`/`Sₑ`/`Λ.entryPoints`. It is `Qs`, opacity-preserving (never names the edge, answer, or rationale before `A`), capped at one candidate per entry point (`scarce`), and forbidden when the edge is merely speculative, an entry-point-selection pressure (`hidden_route`/`open`), or a decision gap (`/gap`). It enters the taxonomy under the Revision-threshold *unmeasurable-by-construction amendment* and carries a demotion review. **Surfacing, not fusion**: Katalepsis' role is to *surface* the Horizon edge — making the blind spot visible is what resolves the unknown, and that surfacing is the *basis* for a later fusion of horizons (`Horizontverschmelzung`), which belongs to the Prothesis pipeline — compiled into the inquiry spec's horizon-fusion synthesis directive by `/frame` and executed by the substrate. Katalepsis does not itself re-derive the route or re-frame the comprehension on a Horizon hit; the user's own reframing and any cross-perspective fusion are left to the user and to Prothesis. A surfaced Horizon answer is evaluated as a normal probe answer (step 3c) and proceeds to the coverage check — keeping the Katalepsis/Prothesis boundary sharp and the comprehension loop strictly terminating.
+14a. **Horizon boundary**: `Horizon` is a named *comprehension* gap — the AI surfaces a co-intended-but-unspoken edge required for `P' ≅ R` — NOT a Prothesis synthesis construct (`Horizontverschmelzung` fuses multiple *perspectives*; Horizon operates within one user's comprehension of one result). It is detected at Phase 3 *inside* an already-selected entry point and preserves `Fᵣ`/`Sₑ`/`Λ.entryPoints`. It is `Qs`, opacity-preserving (never names the edge, answer, or rationale before `A`), capped at one candidate per entry point (`scarce`), and forbidden when the edge is merely speculative, an entry-point-selection pressure (`hidden_route`/`open`), or a decision gap (`/gap`). It enters the taxonomy under the Revision-threshold *unmeasurable-by-construction amendment* and carries a demotion review. **Surfacing, not fusion**: Katalepsis' role is to *surface* the Horizon edge — making the blind spot visible is what resolves the unknown, and that surfacing is the *basis* for a later fusion of horizons (`Horizontverschmelzung`), which belongs downstream to `/conduct`'s synthesis-checkpoint machinery (its `CheckpointBrief` output-shape candidates) and is executed by the substrate — `/frame` supplies the lenses only, it never compiles the fusion directive itself. Katalepsis does not itself re-derive the route or re-frame the comprehension on a Horizon hit; the user's own reframing and any cross-perspective fusion are left to the user and to the `/conduct` synthesis checkpoint. A surfaced Horizon answer is evaluated as a normal probe answer (step 3c) and proceeds to the coverage check — keeping the Katalepsis/Prothesis boundary sharp and the comprehension loop strictly terminating.
 15. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Plain emit discipline).

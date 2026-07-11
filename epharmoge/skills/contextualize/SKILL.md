@@ -14,7 +14,7 @@ Detect application-context mismatch after execution through AI-guided applicabil
 ```
 ── FLOW ──
 Epharmoge(R, X) → Eval(R, X) → Mᵢ? →
-  Mᵢ = ∅: → deactivate (no aspect ¬warranted; execution stands as-is)
+  Mᵢ = ∅: Qc(zero_mismatch_finding) → Stop → [Confirm: deactivate (no aspect ¬warranted; execution stands as-is) | Reopen(aspect): reopen_focus := aspect, re-scan Eval focused on it (one attempt: still-∅ → relay finding, deactivate)]
   Mᵢ ≠ ∅: ∀m ∈ Mᵢ: bind_kind(m) → certify(m, registry) → keep(status = pass) → Mᵢ_passed →
     Mᵢ_passed = ∅ ∧ no deferred-pending ∧ adjudicated(R, X) (every flagged aspect resolved to ROUTED or TERMINAL-RESIDUAL via the typed routed(a)/terminal_residual(a) predicates — deferred mismatches first get their one bounded re-assessment to pass→registered, route→Λ.routed, or terminal-residual→Λ.residual): → emit routing recommendations + surface any terminal-residual (each flagged aspect either routed to a sibling deficit or terminal-residual/unattributable) → deactivate (trivial convergence: adjudicated by routing/terminal-residual, R unadapted)
     Mᵢ_passed ≠ ∅: AssessFit(R, X, Mᵢ_passed) → F → Register(Mᵢ_passed) → SelectNext(pending, F, Σ) → Mₛ → Q(F-scoped Mₛ) → A →[mutating: A ∈ {Confirm, Adapt}] adapt → R' → Eval(R', X) → Mₑ? (Dismiss: R' := R, no re-scan, no Mₑ) → ∀m ∈ Mₑ: bind_kind(m) → certify(m, registry) → keep(status = pass) → Mₑ_passed → Register(Mₑ_passed) → AssessFit(R', X, pending) → F' → (loop: SelectNext → Q → A → adapt → re-scan until contextualized)
@@ -98,12 +98,15 @@ Register = { m ∈ Set(Mismatch) : certificate(m).status = pass } → Set(Task) 
 pending(Σ) = Set(Mismatch) where registered task status ∉ {completed, dismissed}  -- a routed/ambiguous mismatch never enters pending(Σ); only certificate-passing mismatches are registered
 Q      = Applicability inquiry over F-scoped mismatch (gate interaction)
 A      = User answer ∈ {Confirm(mismatch), Adapt(direction), Dismiss}  -- A ∈ V; answer drawn from the mismatch's value-space (local_value_space = {Confirm, Adapt, Dismiss})
+ZeroMismatchConfirmation = user's answer to a zero-mismatch finding ∈ {Confirm, Reopen(aspect)}  -- Confirm accepts the result as-is (Rule 9); Reopen names an aspect the Phase 0 scan missed, re-entering Eval focused on that aspect
 R'     = Adapted result (contextualized output)
-ContextualizedExecution = R' where (∀ task ∈ registered: task.status = completed) ∨ user_esc
+ContextualizedExecution = R' where (∀ task ∈ registered: task.status ∈ {completed, dismissed}) ∧ (Mᵢ = ∅ ⟹ zero-mismatch confirmation obtained: ZeroMismatchConfirmation = Confirm, or Reopen(aspect) whose focused re-scan still yields Mᵢ = ∅ → relay(finding) — Rule 9)
                  -- registered = certificate-passing mismatches only; routed/ambiguous mismatches are handed forward, not adapted in-place
+EarlyExit = R' where user_esc  -- non-convergent early exit: result as of exit (adapted or not), partial trace over completed/dismissed tasks, remaining pending mismatches declared as unresolved residual
 
 ── PHASE TRANSITIONS ──
 Phase 0: R → Eval(R, X) → Mᵢ? → ∀m ∈ Mᵢ: bind_kind(m) → certify(m, registry) → (status = pass) → Mᵢ_passed → AssessFit(R, X, Mᵢ_passed) → F → Λ.fit_map := F  -- applicability checkpoint + registration-time KIND dispatch (fail-closed) + fit map (silent); certify runs WITHIN Phase 0, at registration, not as a separate phase
+Phase 0 → confirm_no_mismatch: Mᵢ = ∅ → Qc(zero_mismatch_finding) → Stop → ZeroMismatchConfirmation  -- true zero-mismatch case (distinct from the Mᵢ≠∅∧Mᵢ_passed=∅ trivial-convergence-by-routing case below); Confirm → R' := R, deactivate (execution stands as-is, Rule 9); Reopen(aspect) → reopen_focus := aspect → re-scan Eval focused on that aspect → reopen_focus := None (cleared after the focused re-scan, either arm); [Mᵢ ≠ ∅] re-enter the Phase 0 pipeline above (bind_kind → certify → Mᵢ_passed → AssessFit → F) and proceed to Phase 1; [Mᵢ still ∅] relay(finding) → R' := R, deactivate (one attempt per aspect) [Tool]
 Phase 0 → route_away (mismatch-local): certify(m).status = route        -- a sibling deficit owns the mismatch (backward misfit) → emit RoutePair.target (/gap, /inquire, /bound, /distill), drop m from registration (m never enters pending(Σ)); scan continues with remaining mismatches
 Phase 0 → split (pre-certify): KindBinding.atomicity = non-atomic  -- a compound mismatch bundles two distinct aspects → split into atomic sub-mismatches and re-run bind_kind + certify on each (same Phase 0 pass, before any pass/route/defer decision); recursive until atomic (well-founded: each split strictly decreases the number of bundled aspects — atomic = exactly one aspect — so the recursion terminates). A non-atomic mismatch is NEVER deferred or registered as a compound
 Phase 0 → defer (mismatch-local): certify(m).status = ambiguous  -- overlapping deficit fit on an ATOMIC mismatch → ONE narrowed-scope re-assessment at the fixed Phase-0 (R, X) (AI-side, no user interaction — Phase 0 stays silent), then re-certify. (R, X) is fixed in Phase 0, so a re-assessment is deterministic-identical → the bound is ONE attempt: resolves to pass (→ registered), route (→ Λ.routed), or — if it STAYS ambiguous — TERMINAL-RESIDUAL: record m in Λ.residual (an unattributable mismatch: never registered into pending(Σ), adjudicated by terminal_residual(aspect(m)), surfaced as residual, non-blocking). deferred-pending therefore always clears (no Phase-0 loop)
@@ -120,11 +123,12 @@ After Phase 2 (mutating branch only — A ∈ {Confirm, Adapt}): re-scan R' agai
 Bind + certify each newly emerged mismatch at registration (fail-closed): only certificate-passing emerged mismatches (Mₑ_passed) are registered into pending(Σ); a routed mismatch is handed to its sibling deficit (/gap, /inquire, /bound, /distill); a non-atomic compound mismatch is split into atomic sub-mismatches and re-certified; an atomic ambiguous mismatch gets its one bounded re-assessment at the fixed re-scan (R', X) → pass / route / terminal-residual, before registration. AssessFit classifies tracked mismatches but never suppresses them.
 Recompute F over pending(Σ) before selecting the next surfaced mismatch, even when Mₑ_passed = ∅.
 If pending(Σ) non-empty: return to Phase 1 (SelectNext by severity, then FitRank, then oldest registered task).
-If adjudicated(R', X): all tasks completed → convergence.
+If adjudicated(R', X): all tasks resolved (completed or dismissed) → convergence.
 progress(Λ) MAY REGRESS: because re-scan over a mutated R' can register newly certified mismatches, the completed/total ratio is non-monotone — this is the signature of the transformative-revalidation side, not an error.
-User can exit at Phase 1 (early_exit option or Esc).
-Continue until: contextualized(R') OR user ESC.
-Mode remains active until convergence.
+User can exit at Phase 1 (dismiss all remaining, or Esc).
+Continue until: contextualized(R') OR user ESC (EarlyExit, not ContextualizedExecution).
+Mode remains active until convergence or explicit user exit (Esc).
+On user ESC: present partial transformation trace ranging over Σ.history ∪ Λ.routed ∪ Λ.residual as accumulated so far, then declare remaining pending(Σ) mismatches as unresolved residual.
 Convergence evidence: At adjudicated(R', X), present transformation trace ranging over ALL dispositioned mismatches — Σ.history ∪ Λ.routed ∪ Λ.residual (routed and terminal-residual mismatches never enter pending(Σ)/Σ.history, so the trace must range over all three): for each (m, _) ∈ Λ.state.history (adapted/dismissed), show (ApplicationDecontextualized(m) → adaptation_result(m)); for each (m, target) ∈ Λ.routed, show (m → routed_to(sibling_deficit, target)) — NOT ApplicationDecontextualized(m), since status = route means a sibling deficit owns m (it was never in-scope for ApplicationDecontextualized); for each m ∈ Λ.residual, show (m → terminal_residual(unattributable)) — surfaced for the user as a residual the certificate could not attribute. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
@@ -133,16 +137,19 @@ warranted(a, R, X) = correct(R) ∧ fits(R, X)                -- correctness AND
 adjudicated(R', X) = ∀ aspect(a, R', X) : warranted(a, R', X) ∨ dismissed(a) ∨ routed(a) ∨ terminal_residual(a)
 routed(a)          = ∃ m ∈ Λ.routed : aspect(m) = a    -- the mismatch on aspect a failed the certificate (status = route) and was handed to a sibling deficit; backward misfit is adjudicated by routing, not by in-place adaptation. aspect is a String label, so this disjunct discharges by label equality — it assumes aspects stay stable and uniquely labelled across the R→R' trajectory; a transformative re-scan could in principle surface a new R'-aspect colliding on a routed label, a documented low-probability assumption, not foreclosed by the type
 terminal_residual(a) = ∃ m ∈ Λ.residual : aspect(m) = a  -- the mismatch on aspect a stayed ambiguous after its ONE bounded re-assessment at the fixed detection state ((R, X) for Mᵢ, (R', X) for Mₑ); unattributable (neither cleanly ApplicationDecontextualized-owned nor a sibling's), excluded from pending(Σ), adjudicated by being surfaced as a non-blocking residual (not adapted in-place, not silently dropped — Surfacing over Deciding)
-contextualized(R') = adjudicated(R', X) ∨ user_esc
+contextualized(R') = adjudicated(R', X)
 trivial convergence (all-routed): when Mᵢ ≠ ∅ but Mᵢ_passed = ∅ AND every flagged aspect resolved to ROUTED or TERMINAL-RESIDUAL — aspect-keyed via routed(a)/terminal_residual(a) over the atomic (post-split) aspects, not raw Mᵢ membership — (no deferred-pending, pending(Σ) = ∅), adjudicated(R, X) holds by the routed(a)/terminal_residual(a) disjuncts for every flagged aspect (and warranted for the rest) — R is unadapted and contextualized(R) holds. This is the Phase 0 → deactivate (all-routed) path. DEFERRED mismatches do NOT satisfy this: they are not in Λ.routed, so the routed(a) disjunct does not cover them; a deferred mismatch first gets its one bounded re-assessment (Phase 0 → defer) to pass (→ pending(Σ)), route (→ Λ.routed), or terminal-residual before any convergence claim. Distinct from the no-mismatch case (Mᵢ = ∅, every aspect warranted from the start) — here aspects were flagged but all belong to sibling deficits
 certificate gate:  every registered mismatch carried certificate.status = pass (fail-closed, at registration) — routed/ambiguous mismatches never entered pending(Σ), so a contextualized R' is assembled only from in-scope (ApplicationDecontextualized-owned), fit-certified adaptations; backward misfit was handed forward (/gap, /inquire, /bound, /distill), not adapted in-place
 -- stratification: applicable(R', X) ⊆ adjudicated(R', X)
--- operational proxy: ∀ task completed ⟹ adjudicated(R', X) ⟹ contextualized(R')
-progress(Λ) = |completed_tasks| / |total_tasks|              -- NON-MONOTONE: may regress when re-scan over the mutated R' registers newly certified mismatches (transformative-revalidation signature)
+-- operational proxy: ∀ task resolved (status ∈ {completed, dismissed}) ⟹ adjudicated(R', X) ⟹ contextualized(R')
+progress(Λ) = 1 if |total_tasks| = 0 else |resolved_tasks| / |total_tasks|   -- resolved_tasks = tasks with status ∈ {completed, dismissed} (matches the ContextualizedExecution resolution contract)   -- total_tasks = 0 (Mᵢ = ∅, or Mᵢ≠∅∧Mᵢ_passed=∅ trivial convergence via routing) is fully converged, not undefined — the Mᵢ = ∅ leg only after the Rule 9 zero-mismatch confirmation (Confirm, or Reopen whose focused re-scan stays ∅); otherwise NON-MONOTONE: may regress when re-scan over the mutated R' registers newly certified mismatches (transformative-revalidation signature)
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Eval   (sense)   → Internal analysis (no external tool)
+ZeroMismatchConfirm (constitution) → present (conditional: Mᵢ = ∅; zero-mismatch finding + reasoning; Confirm/Reopen(aspect) — Rule 9)
+reopen_relay (extension) → TextPresent+Proceed (conditional: Reopen(aspect) focused re-scan still yields Mᵢ = ∅ → relay the still-zero finding and deactivate; one attempt per aspect, basis = the focused Eval re-scan)
+reopen_focus (track) → Internal state update (set at Reopen(aspect), threads the focused Eval re-scan, cleared after the re-scan — consumed once, either arm)
 bind_kind (sense)   → Internal analysis (capture each detected mismatch as a KindBinding {label, positive_predicate, evidence, origin ∈ {seed, emergent}, atomicity}; non-atomic mismatch → split before certify)
 certify (extension) → Internal analysis (fail-closed DeficitFitCertificate; fit of KindBinding.positive_predicate against the documented sibling-deficit scopes — each sibling protocol's deficit: declaration plus the registered deficit inventory (sibling-deficit nodes; epharmoge has no outgoing routing edge, so the fit rests on the deficit-scope declarations, not edge topology): owner = ApplicationDecontextualized when in-scope; status = pass | route | ambiguous; basis = the cited deficit-scope fit, shown at the mismatch's Phase 1 surfacing. Relay (Extension) because the fit is grounded in a citable source and an unclear fit returns status = ambiguous → defer, never a user gate. Runs at registration time — within Phase 0 for Mᵢ, within Phase 2 re-scan for Mₑ — BEFORE the mismatch enters pending(Σ))
 AssessFit (sense) → Internal analysis (no external tool)
@@ -152,10 +159,12 @@ adapt  (transform) → Edit, Write (result adaptation based on user direction)
 route  (extension)   → TextPresent+Proceed (certificate.status = route → emit the matching RoutePair.target as a backward-misfit recommendation: decision gap → /gap, missing pre-execution fact → /inquire, undefined convention/dependency ownership → /bound, portability to an absent recipient → /distill; the routing target is read off the matched sibling-deficit scope, basis cited)
 Mᵢ/Mₑ (track)   → TaskCreate/TaskUpdate (mismatch tracking with framing visibility; only certificate-passing mismatches are registered)
 converge (extension)  → TextPresent+Proceed (convergence evidence trace; proceed with contextualized execution)
+esc      (extension)  → TextPresent+Proceed (partial transformation trace + unresolved-mismatch residual declaration; terminate as EarlyExit, not ContextualizedExecution)
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Result, X: Context,
       fit_map: F, state: Σ, active: Bool, cause_tag: String,
+      reopen_focus: Option(String),   -- the zero-mismatch Reopen(aspect) focus the Phase 0 scan missed; threads into the focused re-scan, cleared after it; a focused re-scan that still yields Mᵢ = ∅ presents its finding as relay and deactivates (one attempt per aspect — deterministic-identical re-runs are not re-gated, per the re-assessment idiom)
       routed: List<(Mismatch, Protocol)>,   -- backward-misfit mismatches handed forward (never entered pending(Σ))
       deferred: Set(Mismatch),   -- ATOMIC mismatches with certificate.status = ambiguous, parked for their ONE bounded narrowed-scope re-assessment against the fixed detection state — (R, X) for an initial mismatch (Phase 0), (R', X) for an emerged mismatch (Phase 2 re-scan) (a non-atomic mismatch is split pre-registration, never parked here; status ≠ pass — never entered pending(Σ)). After the bounded attempt each resolves to pass / route / terminal-residual, so "no deferred-pending" (≡ no mismatch still awaiting its bounded re-assessment) always becomes reachable
       residual: Set(Mismatch) }   -- TERMINAL-residual mismatches: stayed ambiguous after their one bounded re-assessment (unattributable). Never entered pending(Σ); adjudicated by terminal_residual(a), surfaced as a non-blocking residual at convergence
@@ -241,9 +250,9 @@ Heuristic signals for applicability mismatch detection (not hard gates):
 | Trigger | Effect |
 |---------|--------|
 | All mismatch tasks completed (adapted or dismissed) | Proceed with contextualized result |
-| No mismatches detected (Phase 0 passes) | Execution stands as-is |
+| No mismatches detected (Phase 0 zero-mismatch finding confirmed) | Execution stands as-is |
 | Mismatches detected but none in-scope (Mᵢ ≠ ∅ ∧ Mᵢ_passed = ∅ ∧ adjudicated(R, X) ∧ no deferred-pending ∧ pending(Σ) = ∅) | Trivial convergence — every flagged aspect is routed to a sibling deficit or terminal-residual (unattributable); emit the routing recommendations (/gap, /inquire, /bound, /distill), surface any terminal-residual, and deactivate without adapting R (adjudicated by routing/terminal-residual, not in-place adaptation). DEFERRED mismatches (ambiguous, atomic) get ONE bounded re-assessment → pass / route / terminal-residual before any convergence (a non-atomic mismatch is split pre-registration, not deferred); only a set with no in-scope mismatch (each routed or terminal-residual) fires this path. Distinct from the no-mismatch-detected row above: aspects WERE flagged but none is in-scope for adaptation |
-| User Esc key | Accept result without applicability review |
+| User Esc key | EarlyExit (not ContextualizedExecution): present partial transformation trace + declare pending mismatches as unresolved residual, then accept result without further applicability review |
 
 ## Mismatch Identification
 
@@ -290,7 +299,7 @@ When multiple mismatches are identified, surface in severity order (Critical →
 
 ### Phase 0: Applicability Checkpoint (Silent)
 
-Evaluate result against application context. This phase is **silent** — no user interaction.
+Evaluate result against application context. This phase is **silent** — no user interaction, except the conditional zero-mismatch confirmation gate (Rule 9) when no mismatch is detected.
 
 1. **Scan result** `R` against context `X`: environment state, conventions, use case scope, temporal validity, user constraints
 2. **Check applicability**: For each aspect, assess whether `correct(R) ∧ fits(R, X)` (i.e., `warranted(R, X)`)

@@ -38,16 +38,15 @@ const DESCRIPTION_OVERRIDES = {
   attend: 'Compile execution guardrails into verifiable goal conditions — (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution',
   ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, Text) → ValidatedMapping',
   induce: 'Calibrate and crystallize abstraction — (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction',
-  elicit: 'Resolve via Extended-Mind reverse induction — (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × Substrate) → ResolvedEndpoint',
+  elicit: 'Resolve via Extended-Mind reverse induction — (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint',
   bound: 'Epistemic boundary definition — (BoundaryUndefined, AI, DEFINE, TaskScope) → DefinedBoundary',
   contextualize: 'Detect application-context mismatch — (ApplicationDecontextualized, AI, CONTEXTUALIZE, Result) → ContextualizedExecution',
   distill: 'Distill a session-tethered context into a portable handoff — (ContextTethered, AI, DISTILL, WorkingContext) → PortableHandoff',
-  delimit: 'Cut a work horizon into right-sized units — (GranularityUnderdetermined, AI, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap',
-  conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, AI, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
+  delimit: 'Cut a work horizon into right-sized units — (GranularityUnderdetermined, Hybrid, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap',
+  conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
   ascend: 'Elevate a vague recall to a higher-granularity unit — (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
-  write: 'Multi-perspective blog drafting — transforms session insights into publishable content via iterative perspective-based refinement.',
   triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, and emit dispatchable initial prompts.',
   dispatch: 'Focused work-unit execution — consume /triage initial prompts, verify premises, fan out PRs, and inscribe rejection traces.',
 };
@@ -127,8 +126,7 @@ Every protocol carries a type signature \`(Deficit, Initiator, Action, Target) �
 
 ### Formal Verification
 
-16 static checks validate protocol integrity before every commit:
-json-schema, notation, directive-verb, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, precedence-linear-extension, partition-invariant, catalog-sync, gate-type-soundness, artifact-self-containment.
+Static checks validate protocol integrity before every commit (run \`node .claude/skills/verify/scripts/static-checks.js .\` for the current check inventory — covering, among others, json-schema, notation, xref, structure, tool-grounding, version-staleness, graph-integrity, spec-vs-impl, cross-ref-scan, onboard-sync, catalog-sync, gate-type-soundness, and artifact-self-containment).
 
 Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory edges, and suppression rules with cycle detection.
 
@@ -138,9 +136,7 @@ Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory e
 - \`/onboard\` — quest-based protocol learning (quick recommendation + targeted scenarios)
 - \`/probe\` — deficit recognition fit review (multi-hypothesis surfacing before protocol commitment)
 - \`/report\` — Growth Map with epistemic analysis from session patterns
-- \`/dashboard\` — full-session coverage analytics
-- \`/reflect\` — cross-session insight extraction into persistent memory
-- \`/write\` — multi-perspective blog drafting from session insights`;
+- \`/dashboard\` — full-session coverage analytics`;
 
 const DESCRIPTION_LIMIT = 200;
 // LINE_GUIDELINE is informational — emits a packaging warning but does not fail the build.
