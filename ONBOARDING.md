@@ -8,25 +8,24 @@ Contributors here design, refine, and verify the protocols themselves. This guid
 
 ## How the Maintainer Works on This
 
-Based on jongwony's last 30 days (81 sessions):
+Based on jongwony's last 30 days (64 sessions):
 
 Work Type Breakdown:
-  Plan Design       █████████░░░░░░░░░░░  45%   Axiom restructuring, protocol design, direction debates
-  Improve Quality   █████░░░░░░░░░░░░░░░  23%   PR review follow-ups, protocol refinement
-  Debug Fix         ███░░░░░░░░░░░░░░░░░  17%   CI failures, Ink rendering, gate hotfixes
-  Build Feature     ██░░░░░░░░░░░░░░░░░░   9%   New protocol elements, landing-page migration
-  Write Docs        █░░░░░░░░░░░░░░░░░░░   4%   Contributor conventions, memos
+  Improve Quality   ████████░░░░░░░░░░░░  40%   PR review loops, worktree checkouts, protocol audits
+  Plan Design       ██████░░░░░░░░░░░░░░  32%   Protocol design debates, elicitation, direction analysis
+  Build Feature     ███░░░░░░░░░░░░░░░░░  13%   New skill implementation, handoff-driven builds
+  Debug Fix         ██░░░░░░░░░░░░░░░░░░   9%   Codex invocation fixes, Ink rendering breakage
+  Write Docs        █░░░░░░░░░░░░░░░░░░░   6%   CLAUDE.md progressive disclosure, conventions
 
 Protocols the Maintainer Dogfoods:
-  /epharmoge:contextualize   ████████████████████  47x   post-execution applicability check
-  /syneidesis:gap            ███████████████░░░░░  36x   pre-decision gap surfacing
-  /task-workflow:ship        ██████████████░░░░░░  33x   commit + push + PR + task registration
-  /prosoche:attend           ██████████████░░░░░░  32x   pre-execution guardrail compilation
-  /task-workflow:task-run    ██████████████░░░░░░  32x   execute tracked tasks
-  /aitesis:inquire           █████████░░░░░░░░░░░  21x   context insufficiency probing
-  /gh-address-comments       ███████░░░░░░░░░░░░░  17x   PR feedback loop
-  /analogia:ground           ███████░░░░░░░░░░░░░  16x   structural mapping validation
-  /horismos:bound            ██████░░░░░░░░░░░░░░  15x   epistemic boundary definition
+  /epistemic-cooperative:review-loop  ████████████████████  19x   iterative PR review loop (+ codex reviewer)
+  /euporia:elicit                     █████░░░░░░░░░░░░░░░   5x   design-dimension elicitation
+  /formal-review                      ████░░░░░░░░░░░░░░░░   4x   formal-triple review of protocol changes
+  /release                            ████░░░░░░░░░░░░░░░░   4x   CalVer tag + draft release
+  /epistemic-cooperative:triage       ████░░░░░░░░░░░░░░░░   4x   route incoming findings to a protocol
+  /gh-address-comments                ███░░░░░░░░░░░░░░░░░   3x   PR feedback loop
+  /codex-plus:codex                   ███░░░░░░░░░░░░░░░░░   3x   cross-vendor second opinion
+  /diylisis:distill                   ███░░░░░░░░░░░░░░░░░   3x   portable cross-session handoff
 
 Contributors are expected to dogfood the protocols they edit — the list above is what that looks like in practice, not a mandated workflow.
 
@@ -41,7 +40,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 ### Repository
 - [ ] Clone `https://github.com/jongwony/epistemic-protocols`
 - [ ] Run `node .claude/skills/verify/scripts/static-checks.js .` to confirm your environment passes
-- [ ] Run `node --test scripts/package.test.js` to confirm the packaging tests pass
+- [ ] Run `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs` to confirm the tests pass
 
 ### Core Docs to Read (in order)
 - [ ] `CLAUDE.md` — Northstar, Settled Directions registry, Protocol Index routing table, Runtime Contract, verification commands (~15 min)
@@ -59,6 +58,8 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/verify` — run before every commit; static checks per `docs/verification.md`'s check inventory
 - [ ] `/syneidesis:gap` — surface gaps before committing to a design decision
 - [ ] `/aitesis:inquire` — when a redesign feels under-specified
+- [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
+- [ ] `/diylisis:distill` — author a portable handoff when work crosses a session boundary
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
 - [ ] `/prothesis:frame` — assemble analytical lenses (category theory, type theory, operational semantics) for protocol-level changes
 - [ ] `/analogia:ground` — validate abstract-concrete mappings
@@ -72,7 +73,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 2. **Design** — `/syneidesis:gap` before locking in a direction; `/prothesis:frame` for protocol-level changes that warrant multi-lens scrutiny
 3. **Edit** — `skills/<protocol>/SKILL.md` is the source of truth; bump version in `.claude-plugin/plugin.json` on any change (see `docs/co-change.md`)
 4. **Verify** — `/verify` must pass all static checks
-5. **Test** — `node --test scripts/package.test.js`
+5. **Test** — `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 6. **Commit** — `type(scope): Korean description` (types: feat / fix / refactor / style; scope = plugin name)
 7. **Ship** — [`/task-workflow:ship`](https://github.com/jongwony/ClaudePanel.spoon/blob/main/task-workflow/skills/ship/SKILL.md) for the one-shot flow if you have that external plugin installed, or fall back to plain `git push -u origin <branch>` + `gh pr create`; PR body language is Korean (hook-enforced)
 8. **Address review** — run `/formal-review` for the fixed formal-triple review of protocol changes (or `/lens-review` for a frame-derived panel; both post a single consolidated PR comment) and `/review-loop` for code review; use `/gh-address-comments` to respond to posted comments
