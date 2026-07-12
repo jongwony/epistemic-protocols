@@ -235,11 +235,7 @@ Write is authorized for observation instrument setup (temporary test artifacts w
 
 ### Activation
 
-AI infers context insufficiency before execution OR user calls `/inquire`. Inference is silent (Phase 0), except the zero-unknown sufficiency relay which presents its reasoning without yielding the turn; surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
-
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/inquire` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Context insufficiency inferred before execution via in-protocol heuristics. Inference is silent (Phase 0).
+Two activation layers: **Layer 1 (User-invocable)** — `/inquire` slash command or description-matching input, always available; **Layer 2 (AI-guided)** — context insufficiency inferred before execution via in-protocol heuristics. Inference is silent (Phase 0), except the zero-unknown sufficiency relay which presents its reasoning without yielding the turn; surfacing always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2).
 
 **Context insufficient** = the prospect contains requirements not available in the current context and not trivially inferrable. Context insufficiency spans multiple dimensions: missing facts, incoherent facts, and facts not relevant to the prospect's goals. Sufficiency encompasses both executability (can the action proceed?) and analysis confidence (is the context adequate for reliable judgment?).
 
@@ -266,15 +262,7 @@ When Aitesis is active:
 
 ### Trigger Signals
 
-Heuristic signals for context insufficiency inference (not hard gates):
-
-| Signal | Inference |
-|--------|-----------|
-| Novel domain | Knowledge area not previously addressed in session |
-| Implicit requirements | Task carries unstated assumptions |
-| Ambiguous scope | Multiple valid interpretations exist and AI cannot determine intended approach from available context |
-| Environmental dependency | Relies on external state (configs, APIs, versions) |
-| Prior-decision implication | Prospect references or rests on a decision made in an earlier session (rationale, commitment, convention) not present in current conversation context |
+Heuristic signals for context insufficiency inference (not hard gates): **Novel domain** — knowledge area not previously addressed in session; **Implicit requirements** — task carries unstated assumptions; **Ambiguous scope** — multiple valid interpretations exist and AI cannot determine intended approach from available context; **Environmental dependency** — relies on external state (configs, APIs, versions); **Prior-decision implication** — prospect references or rests on a decision made in an earlier session (rationale, commitment, convention) not present in current conversation context.
 
 **Default-scan trigger** (resolves the bootstrapping asymmetry of the Prior-decision implication signal): When the prospect scope touches architecture decisions, API or protocol design, persisted state schemas, or user-facing behavior commitments, the Prior-decision signal fires by default — Phase 1 Ctx begins with a bounded scan over persistent memory (MEMORY.md; project-local prior-decision logs where the project maintains them) regardless of explicit user mention. Without this default, detection would require the AI to already suspect prior involvement, which is the condition the signal is meant to surface. The default-scan is scope-triggered (not blanket), bounded to Phase 1 Ctx (no gate), and subject to the memory staleness rule in Phase 1 Step 1 (verify against current state before treating as resolved).
 
@@ -282,28 +270,15 @@ Heuristic signals for context insufficiency inference (not hard gates):
 
 **Revision threshold**: When accumulated observation_skips entries across 3+ sessions cluster around a specific EscapeCondition with consistent rationale, the Verifiability classification boundary warrants revision — the escape is systematic, not exceptional. When accumulated Emergent dimension detections across 3+ sessions reveal a recurring non-factual uncertainty pattern, the Layer 1 dimension set warrants a new fiber in the fibration structure — promoted fibers default to Unit (detect-only) unless the pattern exhibits internal classification structure requiring a structured fiber type.
 
-**Skip**:
-- Execution context is fully specified in current message
-- User explicitly says "just do it" or "proceed"
-- Same (domain, description) pair was dismissed in current session (session immunity)
-- Phase 1 context collection resolves all identified uncertainties
-- Read-only / exploratory task — no prospect to verify
+**Skip**: execution context is fully specified in current message; user explicitly says "just do it" or "proceed"; same (domain, description) pair was dismissed in current session (session immunity); Phase 1 context collection resolves all identified uncertainties; read-only / exploratory task — no prospect to verify.
 
 ### Mode Deactivation
 
-| Trigger | Effect |
-|---------|--------|
-| All uncertainties resolved (context, read-only, observed, or user) | Proceed with updated prospect |
-| All remaining uncertainties dismissed | Proceed with original prospect + defaults |
-| User Esc key | EarlyExit (not InformedExecution): present partial transformation trace + declare `remaining` as unresolved residual, then return to normal operation |
+All uncertainties resolved (context, read-only, observed, or user) → proceed with updated prospect. All remaining uncertainties dismissed → proceed with original prospect + defaults. User Esc key → EarlyExit (not InformedExecution): present partial transformation trace + declare `remaining` as unresolved residual, then return to normal operation.
 
 ## Uncertainty Identification
 
-Uncertainties are identified dynamically per task — no fixed taxonomy. Each uncertainty is characterized by:
-
-- **domain**: The knowledge area where context is missing (e.g., "deployment config", "API versioning", "user auth model")
-- **description**: What specifically is missing or uncertain
-- **context**: Evidence collected during Phase 1 that enriches question quality
+Uncertainties are identified dynamically per task — no fixed taxonomy. Each uncertainty is characterized by **domain** (the knowledge area where context is missing — e.g., "deployment config", "API versioning", "user auth model"), **description** (what specifically is missing or uncertain), and **context** (evidence collected during Phase 1 that enriches question quality).
 
 ### Priority
 
@@ -412,18 +387,7 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 **Scope restriction**:
 - Context collection: Read-only investigation (Read, Grep, WebSearch). — core preserved
 - Read-only verification: Extended context lookup for verifiable facts (Read, Grep). — resolves directly
-- Empirical observation: Non-destructive observation via Bash execution, with optional Write for observation instrument setup (temp test artifacts).
-  Observation artifacts must be created in temp locations and cleaned up after observation.
-  Observation must not modify existing project files.
-  Observation results are evidence for Phase 2, not resolution — evidence gathering, not replacement.
-
-**Observation design constraints**:
-1. **Minimal**: Create the smallest possible observation instrument
-2. **Reversible**: All observation artifacts must be cleaned up after observation
-3. **Sandboxed**: Observation must not modify existing project files
-4. **Transparent**: Log observation lifecycle in `Λ.observation_history`
-5. **Bounded**: 30-second timeout → fall back to user inquiry
-6. **Risk-aware**: Elevated-risk observation → reclassify as UserDependent
+- Empirical observation: Non-destructive observation via Bash execution, with optional Write for observation instrument setup (temp test artifacts). Observation results are evidence for Phase 2, not resolution — evidence gathering, not replacement. Design constraints: **Minimal** (create the smallest possible observation instrument), **Reversible** (all observation artifacts created in temp locations and cleaned up after observation), **Sandboxed** (observation must not modify existing project files), **Transparent** (log observation lifecycle in `Λ.observation_history`), **Bounded** (30-second timeout → fall back to user inquiry), **Risk-aware** (elevated-risk observation → reclassify as UserDependent).
 
 ### Phase 2: Uncertainty Surfacing
 
