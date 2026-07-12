@@ -49,6 +49,13 @@ const DESCRIPTION_OVERRIDES = {
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, and emit dispatchable initial prompts.',
   dispatch: 'Focused work-unit execution — consume /triage initial prompts, verify premises, fan out PRs, and inscribe rejection traces.',
+  'comment-review': "Reviews markdown/HTML artifacts before fixation (publish/commit/merge) via a channel-first browser preview loop.",
+  forge: "Reference-grounded prompt-artifact formation — surfaces under-determined contract coordinates from a reference doc and projects a ready-to-use prompt or skill recipe.",
+  'lens-review': "Frame-driven multi-perspective PR review — derives fitting lenses per diff, cross-verifies findings, posts one consolidated PR comment.",
+  misuse: "Retrospective protocol contract-violation detector — scans past sessions and surfaces violation records for review.",
+  'reduced-space-test': "Scoped empirical validation — decomposes a target↔surrogate equivalence claim, bounds a test space, captures evidence, carries the untested complement forward.",
+  'review-loop': "Convergence-paced review-resolve loop — verifies findings, auto-applies mechanical fixes, gates judgment fixes, re-reviews to approval.",
+  steer: "Project-profile recalibration — audits calibration drift, presents evidence for verdict, writes an updated profile rule and Settled Directions clause.",
 };
 
 const EXCLUDE_NAMES = new Set([
