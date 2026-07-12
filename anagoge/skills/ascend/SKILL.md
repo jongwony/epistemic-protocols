@@ -264,13 +264,7 @@ IndexAsEvidence  : an evidential claim (origin, timing, quotation) asserted from
 
 **Recognition over Aggregation**: When a vague recall has enough signal to recognize that *something* matters, but the right resolution unit is not any single session — it is a connected line of work, a topic cluster, or an already-sedimented concept — Anagoge leads the recall *up* to that higher unit by recognizing the unit the scattered deposits already imply. It does this by reconstructing the connections between deposits at read-time from their stored anchors plus shared keywords and metadata, not by fusing or synthesizing a new whole. The decisive mark of the deficit is that the recognition *object* changes: the user is no longer trying to locate one session, but to see the higher unit standing above many.
 
-The traversal reconstructs the connected deposits at read-time; the narrative Qc enables recognition of the higher unit; the user constitutes the unit's identity. Three constitutive distinctions:
-
-1. **Object elevation, not retrieval**: Anamnesis resolves recall to one session; Anagoge resolves it to the supra-session unit that session belongs to. The Phase 0 test is decisive — if a single session would resolve the recall, Anagoge defers to Anamnesis; Anagoge activates only when the right unit is genuinely above the session.
-
-2. **Recognition by traversal, not aggregation**: The higher unit is assembled by *reconstructing the connection at read-time from anchors + shared keywords/metadata* between deposits — a chain is the line the shared session/temporal signals trace, a cluster is the fragments the shared topic keywords connect, a concept node is the sediment the shared concept anchors forged. Anagoge writes nothing and forms no new abstraction; it makes visible the unity the deposits point to.
-
-3. **Type-dispatched narrative**: The candidate is presented in the shape of its UnitType — a chain as the connected line of work (origin → development across sessions → arrival); a topic cluster as the gathered fragments plus where the topic stands; a sedimented concept node as the node plus which deposits forged it.
+The traversal reconstructs the connected deposits at read-time; the narrative Qc enables recognition of the higher unit; the user constitutes the unit's identity. Three constitutive distinctions govern this shift — object elevation over retrieval, recognition by traversal over aggregation, and type-dispatched narrative — set out as Rules 3, 2, and 4 below, with the per-type breakdown walked through in Phase 1 (assembly) and Phase 2 (presentation format).
 
 ## Mode Activation
 
