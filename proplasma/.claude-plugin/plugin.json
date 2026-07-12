@@ -1,0 +1,9 @@
+{
+  "name": "proplasma",
+  "description": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)",
+  "version": "0.3.19",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  }
+}

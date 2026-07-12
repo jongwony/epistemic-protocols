@@ -40,6 +40,7 @@ const translations = {
     "protocol.Epharmoge.desc": "Adapt correct-in-theory solutions to your actual situation and constraints",
     "protocol.Horismos.desc": "Separate known information from unknowns to reason more precisely",
     "protocol.Anamnesis.desc": "Recover prior context from past sessions when recall is vague or incomplete",
+    "protocol.Proplasma.desc": "Contrast cheap discard-committed probes when direction candidates cannot be judged from descriptions",
     "protocol.Katalepsis.desc": "Ensure comprehension of substantial changes before they take effect",
 
     // Protocol categories
@@ -118,6 +119,7 @@ const translations = {
     "protocol.Epharmoge.desc": "\uc774\ub860\uc801\uc73c\ub85c \uc62c\ubc14\ub978 \ud574\uacb0\ucc45\uc744 \uc2e4\uc81c \uc0c1\ud669\uacfc \uc81c\uc57d\uc5d0 \ub9de\uac8c \uc870\uc815\ud569\ub2c8\ub2e4",
     "protocol.Horismos.desc": "\uc54c\ub824\uc9c4 \uc815\ubcf4\uc640 \ubbf8\uc9c0\uc758 \uac83\uc744 \ubd84\ub9ac\ud558\uc5ec \ub354 \uc815\ud655\ud558\uac8c \ucd94\ub860\ud569\ub2c8\ub2e4",
     "protocol.Anamnesis.desc": "\ud68c\uc0c1\uc774 \ubaa8\ud638\ud558\uac70\ub098 \ubd88\uc644\uc804\ud560 \ub54c \uc774\uc804 \uc138\uc158\uc758 \ub9e5\ub77d\uc744 \ubcf5\uc6d0\ud569\ub2c8\ub2e4",
+    "protocol.Proplasma.desc": "\ubc29\ud5a5 \ud6c4\ubcf4\ub97c \ub9d0\ub85c\ub294 \ud310\ub2e8\ud560 \uc218 \uc5c6\uc744 \ub54c \ud3d0\uae30 \uc804\uc81c\uc758 \uac12\uc2fc probe\ub4e4\ub85c \ub300\ube44\ud569\ub2c8\ub2e4",
     "protocol.Katalepsis.desc": "\uc2e4\uc9c8\uc801\uc778 \ubcc0\uacbd\uc0ac\ud56d\uc774 \uc801\uc6a9\ub418\uae30 \uc804\uc5d0 \uc774\ud574\ub97c \ud655\uc778\ud569\ub2c8\ub2e4",
 
     // Protocol categories

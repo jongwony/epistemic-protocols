@@ -4,7 +4,7 @@
     "horismos", "aitesis", "analogia",
     "periagoge", "euporia", "prothesis", "syneidesis", "prosoche", "epharmoge",
     "elenchus", "katalepsis", "anamnesis", "anagoge", "diylisis", "hyphegesis",
-    "diairesis"
+    "diairesis", "proplasma"
   ],
   "edge_types": {
     "precondition": {
@@ -71,6 +71,12 @@
     { "source": "diairesis", "target": "diylisis", "type": "advisory", "satisfies": "단위별 span-fit 판정을 distill의 zero-memory carriability에 위임 (한 단위가 한 self-contained span 핸드오프로 운반 가능하면 Fits)" },
     { "source": "diairesis", "target": "hyphegesis", "type": "advisory", "satisfies": "WorkUnitMap(절단된 실행 단위 집합)이 conduct의 WorkProspect로 흐름 — diairesis는 자르고, conduct는 배열·지휘 (cut, then conduct 쌍대)" },
     { "source": "anagoge", "target": "aitesis", "type": "advisory", "satisfies": "elevated 상위 단위가 컨텍스트 추론 범위를 좁힘" },
-    { "source": "anagoge", "target": "periagoge", "type": "advisory", "satisfies": "recognized sedimented 개념 노드가 Fuse 후보를 제공" }
+    { "source": "anagoge", "target": "periagoge", "type": "advisory", "satisfies": "recognized sedimented 개념 노드가 Fuse 후보를 제공" },
+    { "source": "prothesis", "target": "proplasma", "type": "advisory", "satisfies": "프레이밍이 공급한 렌즈의 실행이 ≥2 방향 후보를 표면화할 때 이관 (정보 흐름 — 후보는 렌즈 실행의 하류 산물)" },
+    { "source": "euporia", "target": "proplasma", "type": "advisory", "satisfies": "역추적된 좌표의 미래가 서술로 인식 불가할 때 이관" },
+    { "source": "horismos", "target": "proplasma", "type": "advisory", "satisfies": "경계 선택 장면에서 방향-미래 인식 불가가 드러날 때 이관 (라우팅 미스 실측 표본 기반)" },
+    { "source": "proplasma", "target": "syneidesis", "type": "advisory", "satisfies": "대비가 노출한 unknowns의 커밋전 점검 이관" },
+    { "source": "proplasma", "target": "aitesis", "type": "advisory", "satisfies": "대비가 노출한 사실 unknowns의 조사 이관" },
+    { "source": "proplasma", "target": "analogia", "type": "advisory", "satisfies": "생존 방향의 익숙-도메인 구조 매핑 검증 (매핑 존재 시)" }
   ]
 }

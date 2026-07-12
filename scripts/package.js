@@ -45,6 +45,7 @@ const DESCRIPTION_OVERRIDES = {
   delimit: 'Cut a work horizon into right-sized units — (GranularityUnderdetermined, Hybrid, DELIMIT, ExternalWBS × ExecutionHorizon × ContextLifecycle) → WorkUnitMap',
   conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
   ascend: 'Elevate a vague recall to a higher-granularity unit — (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit',
+  preview: 'Divergent-discard instantiation before direction commitment — (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, and emit dispatchable initial prompts.',

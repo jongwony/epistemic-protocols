@@ -157,6 +157,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: εὐπορία (way through, resourcefulness) — the resolving passage that emerges from aporia (no way through). Plato's later dialectic threads aporia and euporia as paired moments of inquiry. Core principle: **Reverse Induction over Axis-Fixed Extraction**. Directional dual to `/induce` — where `/induce` ascends from instances to abstraction (bottom-up colimit), `/elicit` descends from intent through substrate to coordinates (top-down reverse induction). Workflow position: Planning cluster — alongside `/inquire`, but for axis-emergent intents that no axis-specific protocol covers. Game feel: "I know I want X, but the axis is fuzzy" → substrate trace surfaces dimension projections → cycle-emergent answers → endpoint resolves.
 
+## Proplasma `/preview`
+
+**Situation**: You're at a direction gate — three ways to lay out the dashboard's first screen, or two shapes for the new API — and the options are well described, but you can't tell from the descriptions which future you'd actually want. You catch yourself saying "go with whatever fits the northstar" or "I'd have to see it."
+
+**Intervention**: `/preview` derives the axes on which the candidates genuinely diverge and has you settle them (plus the placeholder policy) at a spec gate before anything is generated — and sometimes the axes alone make the futures recognizable, in which case the protocol stands down without building anything. Otherwise it builds 2–4 cheap, overtly fake probes — text vignettes or temp-isolated mockups — each committing different values on the settled axes, and shows them one at a time before the per-axis contrast map. You select a probe-exposed direction or synthesize your own from the probes; questioning a probe first stays open as a free response. Harvest precedes discard: the direction, the deciding contrast rows, and the newly exposed unknowns survive; file probes are destroyed with each disposition declared — a failed destruction is declared with a cleanup handoff, never silent — and nothing probe-derived ever counts as evidence.
+
+**Trial prompt**: "Let's practice: name a direction decision you keep deferring because the options read fine but you can't picture them — I'll show how /preview contrasts discard-committed probes before you commit"
+
+**Quiz Q (situation)**: You're choosing between three onboarding flows. Each is clearly described, yet you keep stalling and finally say "honestly I'd have to see them side by side."
+- A) Prothesis `/frame` — B) Euporia `/elicit` — C) Proplasma `/preview` — D) Syneidesis `/gap`
+- Answer: C
+
+**Quiz Q (design)**: The candidate directions are known and no real evidence is needed — the futures just don't come through in words. How do you make them recognizable without committing to any direction or leaving artifacts behind?
+- Hint: Settle the divergence axes first, then contrast cheap placeholder probes that are discarded after harvest — the probes show futures; they never become evidence.
+
+**Philosophy**: πρόπλασμα (preliminary model) — the clay model a sculptor shapes before committing to marble: cheap, discardable, and made precisely to be seen. Core principle: **Contrast over Simulation**. Workflow position: Planning cluster — alongside `/inquire` (facts) and `/elicit` (intent coordinates), completing the unknowns-elicitation line with direction futures. Game feel: "I'd have to see it" → settle the axes → probes materialize the futures → you recognize, decide, and the clay goes back in the bin.
+
 ## Prosoche `/attend`
 
 **Situation**: You ask Claude to "work through my 200-photo album and build the yearbook layout" — an unattended run that will churn for an hour while you're away. You worry it might quietly declare victory halfway through, or wander into folders it was never meant to touch.
