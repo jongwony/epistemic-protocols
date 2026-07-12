@@ -63,6 +63,9 @@ DirectionProspect
   → cleanup_verify          -- per-probe discard verification → discard_trace
   → assemble                -- terminal record built from the harvest + the completed discard trace
   → DirectionalContrast
+  -- primary-path codomain: the advertised result type is the primary path's. DissolutionExit — the convergent
+  --   stand-down — emits the enriched axes with its cited basis INSTEAD of this record: the deficit dissolved,
+  --   so no resolution object is owed (see CONVERGENCE)
 requires: pre_commit(direction) ∧ |direction_candidates(X)| ≥ 2   -- runtime checkpoint (Phase 0)
 deficit:  DirectionUnrecognizable                                  -- activation precondition (Layer 1/2)
 preserves: commit_target_identity(X)   -- the pending commitment itself is unchanged; probes never mutate it
@@ -119,7 +122,10 @@ S  = Spec gate answer ∈ {Approve, Adjust(revision)}       -- Adjust revises ax
        --   by the refan kind — a different target set is a different fan, which the spent budget does not cover
        --   (the user can instead Confirm the standing synthesis or withdraw at the direction gate)
 D  = Direction gate answer ∈ {Select(direction), Synthesize(composition)}
-       -- Select: settle one probe-exposed direction
+       -- Select: settle one probe-exposed direction — CONSTRAINED constructor: direction ∈ directions(Λ.probes);
+       --   a response naming an UNPROBED candidate is never parsed as Select — it enters the unprobed-candidate
+       --   free-response pathway (probed first within budget, or stand-down), so no unmaterialized future can
+       --   converge as a DirectionalContrast
        -- Synthesize: user composes/recombines the presented probes → opens micro-gate Gs
        -- INTERROGATION IS NOT A PEER OPTION: questioning a probe commits no downstream action on the decision axis
        --   (it answers or records, then returns to the same gate), so it carries no differential future and surfaces as a
@@ -228,18 +234,21 @@ Phase 3: contrast(Λ.probes, Λ.axes) → (CM, EU, CC) → Λ.contrast_map := CM
          --   would corrupt the axis/premise distinction the declaration exists to protect
                                                                   --   (with CommonCommitments declared) → new unknowns [Tool]
        [contrast_insufficient ∧ Λ.refan_budget > 0] refan(gap) → Λ.refan_kind := Gap → decrement budget
-         → [spec revision: new axis ∨ tier escalation] Phase 1 (Qspec scoped to the revision — insufficiency rooted in
-             realization fidelity escalates the tier here, never silently) | [no spec revision] Phase 2
+         → [spec revision: new axis ∨ tier escalation ∨ revised target set] Phase 1 (Qspec scoped to the revision —
+             insufficiency rooted in realization fidelity escalates the tier here, never silently; a revised target
+             set is likewise user-settled before generation) | [no spec revision] Phase 2
        [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Materialization]
          insufficiency_after_materialization_relay → Phase 4 (re-present Qdir over Λ.probes)
        [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap] → Phase 5 (MisdiagnosisExit arm)
 Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- direction gate [Tool]
        -- pre-gate text declares the free-response pathways: interrogate a probe, declare the contrast insufficient, or withdraw
-       [D = Select(direction)] Λ.direction := direction → Phase 5
+       [D = Select(direction) ∧ direction ∈ directions(Λ.probes)] Λ.direction := direction → Phase 5
+         -- a named UNPROBED candidate never parses as Select: it enters the unprobed-candidate free response below
        [D = Synthesize(composition)] Qmicro(composition) → Stop → Gs  -- synthesis micro-gate [Tool]
          [Gs = Confirm] Λ.direction := composition → Phase 5
          [Gs = Materialize] refan(composition) → Λ.refan_kind := Materialization → Λ.tgt := [composition] → decrement budget
-           → [spec revision: new axis ∨ tier escalation] Phase 1 (Qspec scoped to the revision) | [no spec revision] Phase 2
+           → [spec revision: new axis ∨ tier escalation — a target-set revision cannot arise here: Tgt is fixed to
+               [composition] by the refan kind] Phase 1 (Qspec scoped to the revision) | [no spec revision] Phase 2
          -- Λ.refan_budget = 0: Materialize is not in Qmicro's option set (budget-guarded constructor);
          --   materialize_unavailable_relay states the exhaustion and Qmicro presents {Confirm} → no path re-enters Materialize
        [free response: interrogation]                              -- not a D constructor; the gate is re-presented unchanged
@@ -297,7 +306,10 @@ converged(Λ) = (Λ.direction ≠ None ∧ discard_declared(Λ))         -- prim
              ∨ (Λ.phase = 1 ∧ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ))
                                                                    -- success stand-down: DissolutionExit — dissolution is
                                                                    --   convergence (the deficit resolved), not abandonment;
-                                                                   --   EarlyExit / MisdiagnosisExit are non-convergent exits
+                                                                   --   EarlyExit / MisdiagnosisExit are non-convergent exits.
+                                                                   --   Dissolution emits the enriched axes, not a
+                                                                   --   DirectionalContrast: the advertised codomain is the
+                                                                   --   primary path's
 discard_declared(Λ) = ∀ p ∈ Λ.probes: ∃ d: (ref(p), d) ∈ Λ.discard_trace   -- every probe has a declared Disposition,
                                                                    --   keyed by ref(p) = {index(p), p.direction,
                                                                    --   p.artifact_ref}; the ordinal makes each probe's
@@ -575,7 +587,7 @@ The durable record keeps the direction decision only; probes and their detail re
 5. **Non-evidence stamp** (breach condition 3): a probe is evidence for no claim — the stamp attaches at creation and pierces the harvest record and any session-text remnant. Citing a placeholder concretum as grounds for any claim dissolves the protocol's legitimacy; if a breach becomes unavoidable by design, the only permitted fallback is demotion to stop-and-hand-off (no generation).
 6. **Probe-first presentation**: probes one at a time, then the per-axis contrast map, then new unknowns. A table placed first re-abstracts the concreta and reproduces the deficit in the presentation order.
 7. **Common commitments declared**: design decisions forced uniformly across probes during instantiation are reported with the contrast map, so shared premises are never mistaken for divergence axes.
-8. **Direction-gate response discipline**: the gate offers two options — Select settles a probe-exposed direction; Synthesize opens the micro-gate (Confirm now vs Materialize as re-fan) because only the user can judge whether their synthesis is already recognized. Questioning a probe, declaring the contrast insufficient, and stepping out are **free-response pathways named in the pre-gate text, never peer options**: none of them settles a direction, so none carries a differential future. A design-intent question is answered within placeholder discipline; a factual unknown is recorded and routed to `/inquire`; an analogy request is answered as commentary that declares which axis the borrowed domain weights, never as contrast material; the gate then returns unchanged. Downstream routes for harvested unknowns: a pre-commit check goes to `/gap` at the point the direction becomes a committed action (that is where `/gap` activates — it does not act on direction commitments), a factual unknown to `/inquire`, and the constituted direction to `/ground` when it maps onto a familiar domain worth validating — a tag on the harvested direction itself, not an unknown.
+8. **Direction-gate response discipline**: the gate offers two options — Select settles a probe-exposed direction (a constrained constructor: naming an unprobed candidate parses into the unprobed-candidate pathway, never as a Select); Synthesize opens the micro-gate (Confirm now vs Materialize as re-fan) because only the user can judge whether their synthesis is already recognized. Questioning a probe, declaring the contrast insufficient, and stepping out are **free-response pathways named in the pre-gate text, never peer options**: none of them settles a direction, so none carries a differential future. A design-intent question is answered within placeholder discipline; a factual unknown is recorded and routed to `/inquire`; an analogy request is answered as commentary that declares which axis the borrowed domain weights, never as contrast material; the gate then returns unchanged. Downstream routes for harvested unknowns: a pre-commit check goes to `/gap` at the point the direction becomes a committed action (that is where `/gap` activates — it does not act on direction commitments), a factual unknown to `/inquire`, and the constituted direction to `/ground` when it maps onto a familiar domain worth validating — a tag on the harvested direction itself, not an unknown.
 9. **One shared re-fan, and what it was spent on decides the ending**: contrast-insufficiency re-fan and synthesis materialization share a single re-fan. Materialize is offered only while the budget is live, so the synthesis path cannot loop. When the budget is spent and the contrast is still insufficient: if it went on a **gap** re-fan, the deficit was misdiagnosed — report it and hand off per the routing table (and when no row fits, say so plainly and return the decision to a regular gate). If it went on the user's **own materialization**, the deficit was not misdiagnosed — they recognized the contrast well enough to build on it — so re-present the direction gate over the probes already on the table. A direction the user has already recognized is never thrown away by a budget rule.
 10. **Harvest before discard**: harvest the direction, the deciding contrast rows only, and the routed unknowns — then discard, then assemble the record from the harvest and the completed discard trace. The trace is not part of the harvest; cleanup is what produces it. The durable record keeps the direction decision only; probe detail stays session-local.
 11. **Cleanup on every protocol-controlled exit path**: DirectionalContrast, EarlyExit (withdrawal), MisdiagnosisExit, and a DissolutionExit reached after generation all run cleanup verification; every probe carries a declared Disposition; a failed destruction is retried once and then declared with a manual-cleanup handoff, never silent. A hard esc — a tool-level escape that gives the protocol no turn — cannot run cleanup by nature; temp isolation's bounded scratch lifecycle is the backstop there, which is part of why probes never live outside it.

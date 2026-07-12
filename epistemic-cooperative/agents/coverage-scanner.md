@@ -35,9 +35,9 @@ You will receive:
    a. Glob `session_jsonl_glob` to get all JSONL paths on disk.
    b. **Single grep** with alternation pattern across all JSONL paths:
       ```
-      command-name|"skill":"(frame|gap|grasp|inquire|attend|contextualize|bound|ground|induce|elicit|recollect|sublate|distill|delimit|conduct|ascend|preview|prothesis:|syneidesis:|katalepsis:|aitesis:|prosoche:|epharmoge:|horismos:|analogia:|periagoge:|euporia:|anamnesis:|elenchus:|diylisis:|diairesis:|hyphegesis:|anagoge:|proplasma:)
+      command-name>/((frame|gap|grasp|inquire|attend|contextualize|bound|ground|induce|elicit|recollect|sublate|distill|delimit|conduct|ascend|preview)|(prothesis|syneidesis|katalepsis|aitesis|prosoche|epharmoge|horismos|analogia|periagoge|euporia|anamnesis|elenchus|diylisis|diairesis|hyphegesis|anagoge|proplasma):[a-z-]+)|"skill":"(frame|gap|grasp|inquire|attend|contextualize|bound|ground|induce|elicit|recollect|sublate|distill|delimit|conduct|ascend|preview|prothesis:|syneidesis:|katalepsis:|aitesis:|prosoche:|epharmoge:|horismos:|analogia:|periagoge:|euporia:|anamnesis:|elenchus:|diylisis:|diairesis:|hyphegesis:|anagoge:|proplasma:)
       ```
-      This captures both slash commands (`<command-name>` tags) and Skill tool invocations (`"skill":"<name>"`) in one pass, pre-filtering to protocol skills only.
+      This captures both slash commands (`<command-name>` tags — anchored to the protocol command names, so a non-protocol command whose record merely contains a protocol token never matches) and Skill tool invocations (`"skill":"<name>"`) in one pass, pre-filtering to protocol skills only.
    c. **Map** matches to protocol names:
       - `frame`, `prothesis:frame` → Prothesis
       - `gap`, `syneidesis:gap`, `syneidesis` → Syneidesis
@@ -58,10 +58,10 @@ You will receive:
       - `preview`, `proplasma:preview` → Proplasma
    d. **De-duplicate**: Group matches by source file path (= session_id), then de-duplicate protocol names within each group. Same session + same protocol = 1 usage event.
 
-3. **Gate interaction scan**: From session JSONL paths (same as step 2a), grep for gate interaction patterns:
-   - `AskUserQuestion` tool calls within protocol activation context = gated interaction proxy
-   - Count per-protocol gated interactions using protocol activation boundaries from step 2
-   - Derive relay count: `total_gates - gated_count` (relay interactions produce no AskUserQuestion calls, so relay count is inferred from the static TOOL GROUNDING `(extension)` entry baseline per protocol, not directly observed)
+3. **Gate interaction scan** (proxy-tier — session logs carry no activation spans): From session JSONL paths (same as step 2a), grep for gate interaction patterns:
+   - Gated Count = `AskUserQuestion` tool calls within sessions that recorded a usage event for the protocol (step 2) — a proximity proxy, not span attribution: the logs carry no activation boundaries, so a same-session non-protocol gate can inflate the count
+   - Relay Count = the protocol's static TOOL GROUNDING `(extension)` entry count — a static baseline, not observed firings (relay interactions leave no tool-call trace, and conditional relays fire situationally)
+   - Gate Efficiency = gated/(gated+relay) over the two figures above — an estimate (proxy over static); label it as such wherever reported
 
 4. **Code change statistics**: From session-meta aggregation, report total git_commits, git_pushes, and lines-changed if available.
 
@@ -123,6 +123,8 @@ You will receive:
 | Protocol | Session | Gated Count | Relay Count | Gate Efficiency |
 |----------|---------|-------------|-------------|-----------------|
 | {Protocol} | {session_id} | {gated} | {relay} | {gated/(gated+relay)} |
+
+Gated Count is a session-proximity proxy; Relay Count is the static `(extension)` baseline (not observed firings); Gate Efficiency is therefore an estimate — carry the label downstream.
 
 ### Code Change Statistics
 - Git commits: {total}
