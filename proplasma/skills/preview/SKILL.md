@@ -32,8 +32,8 @@ Proplasma(X) → detect(X, route) →
   [D = Select(direction)] harvest → cleanup_verify → assemble → DirectionalContrast
   [D = Synthesize(composition)] Qmicro → Gs →
     [Gs = Confirm] harvest(synthesized direction) → cleanup_verify → assemble → DirectionalContrast
-    [Gs = Materialize] spec_gate_if_new_axis → refan(composition) → contrast → present → Qdir
-  [contrast_insufficient ∧ refan_budget > 0] spec_gate_if_new_axis → refan(gap) → contrast → present → Qdir
+    [Gs = Materialize] spec_gate_if_spec_revision → refan(composition) → contrast → present → Qdir
+  [contrast_insufficient ∧ refan_budget > 0] spec_gate_if_spec_revision → refan(gap) → contrast → present → Qdir
   [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Materialization] insufficiency_after_materialization_relay → Qdir (re-present over the accumulated probes)
   [contrast_insufficient ∧ refan_budget = 0 ∧ refan_kind = Gap] misdiagnosis_exit → cleanup_verify → route_away(MisdiagnosisRoute)
 -- Materialize is a BUDGET-GUARDED constructor: it belongs to Qmicro's option set only while refan_budget > 0. With the budget spent,
@@ -41,7 +41,9 @@ Proplasma(X) → detect(X, route) →
 --   constructor absent from the option set is not option deletion, and no path can re-enter Materialize (termination guaranteed)
 -- interrogation is a FREE-RESPONSE pathway at Qdir, not a D constructor: it commits no downstream action on the decision axis
 -- refan_budget = 1 (shared): contrast-insufficiency re-fan and synthesis materialization draw from the SAME single budget
--- spec_gate_if_new_axis: a refan whose implication carries a NEW divergence axis routes through Qspec BEFORE generation (breach condition 1)
+-- spec_gate_if_spec_revision: a refan whose implication carries a spec revision — a NEW divergence axis, a realization-tier
+--   escalation, or a revised probe target set — routes through Qspec BEFORE generation (breach condition 1; axes, tier,
+--   and target set are spec-gate settings: none is revised past the gate)
 -- dissolution is a SUCCESS stand-down (axis derivation itself sharpened the description until probes became unnecessary),
 --   distinct from EarlyExit (user withdraws; residual) and MisdiagnosisExit (wrong deficit; rerouted)
 -- cleanup_verify runs on EVERY protocol-controlled exit path: DirectionalContrast, EarlyExit (withdrawal),
@@ -100,7 +102,8 @@ ArtifactRef = None                      -- Vignette tier: session-text only, no 
             | Path(temp-isolated path)  -- Mockup tier: locatable file/dir under temp isolation; registered at creation
 CleanupAction = the concrete destruction step for artifact_ref (no-op for None; file/dir removal for Path)
 ContrastMap = per-axis juxtaposition: for each axis ∈ Axs, the futures each probe exposes on that axis
-ExposedUnknown = a direction unknown newly exposed by the contrast, tagged with a DownstreamRoute at harvest
+ExposedUnknown = a direction unknown newly exposed by the contrast (or recorded at an interrogation), tagged with its
+                           DownstreamRoute at recording — the harvest inherits the tag, it does not attach it
 DownstreamRoute = Gap      -- a pre-commit check. It applies once the settled direction MATERIALIZES INTO A COMMITTED
                            --   ACTION: /gap's activation predicate captures execution commitment, not direction
                            --   commitment, so the handoff is stated at that boundary, not at the direction decision
@@ -177,6 +180,8 @@ MisdiagnosisExit = refan_budget = 0 ∧ refan_kind = Gap ∧ contrast still insu
 contrast_insufficient = the presented contrast does not make the candidate futures recognizable on the settled axes
             -- declared by the user (free response at the direction gate — not a D constructor) or detected at contrast
             --   (an axis with no differentiated values across probes); either way surfaced, never silently self-repaired
+            -- an insufficiency rooted in realization fidelity (the tier could not carry the contrast — not a missing axis)
+            --   signals a tier escalation through the spec gate, not more probes at the same tier
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → detect(X) → route?                                -- deficit predicate + 4-step routing (silent analysis)
@@ -200,12 +205,14 @@ Phase 1: derive_axes(X) → Axs_candidates → draft_policy → Qspec(axes + pol
        --   answered and the gate re-presented; a premise contest feeds the dissolution arm; a withdrawal runs
        --   cleanup_verify (when probes exist) and terminates as EarlyExit
        -- |X.direction_candidates| > 4: Qspec settles WHICH candidates are probed (Λ.tgt); unprobed candidates are declared at present
-       -- ENTERED FROM A REFAN carrying a NEW divergence axis (Phase 3 or Phase 4): Qspec is re-presented SCOPED TO THAT AXIS
-       --   (and the refan target set) before any generation — the inherited spec-gate duty, typed. A refan on the already-settled
-       --   axes skips this and enters Phase 2 directly. No probe is ever generated on an axis the user has not settled
+       -- ENTERED FROM A REFAN carrying a SPEC REVISION (Phase 3 or Phase 4) — a new divergence axis, a realization-tier
+       --   escalation, or a revised probe target set: Qspec is re-presented SCOPED TO THAT REVISION before any generation —
+       --   the inherited spec-gate duty, typed (axes, tier, and target set are spec-gate settings; none is revised past
+       --   the gate). A refan that revises nothing in the spec skips this and enters Phase 2 directly. No probe is ever
+       --   generated on an axis the user has not settled, nor at a tier the user has not settled
        --   On a materialization re-entry Adjust cannot replace Λ.tgt: the target stays [composition] (fixed by Λ.refan_kind);
        --   revising the target set into a new contrast fan is not covered by the spent budget
-Phase 2: instantiate(∥ over Λ.tgt, temp-isolated, cleanup-registered) → P → Λ.probes ∪= P  -- transform [Tool]
+Phase 2: instantiate(∥ over Λ.tgt, temp-isolated, cleanup-registered) → P → Λ.probes := Λ.probes ++ P  -- transform [Tool]
        [Mockup tier, conditional] instantiate_delegate(∥ one probe per agent, temp-isolated) [Tool]
        -- contrast fan (initial | gap refan): |P| ∈ 2..4 — one probe per target direction
        -- materialization refan: |P| ≥ 1 — the composition itself; it is contrasted against Λ.probes (cumulative), which
@@ -221,7 +228,8 @@ Phase 3: contrast(Λ.probes, Λ.axes) → (CM, EU, CC) → Λ.contrast_map := CM
          --   would corrupt the axis/premise distinction the declaration exists to protect
                                                                   --   (with CommonCommitments declared) → new unknowns [Tool]
        [contrast_insufficient ∧ Λ.refan_budget > 0] refan(gap) → Λ.refan_kind := Gap → decrement budget
-         → [new axis] Phase 1 (Qspec scoped to the new axis) | [settled axes] Phase 2
+         → [spec revision: new axis ∨ tier escalation] Phase 1 (Qspec scoped to the revision — insufficiency rooted in
+             realization fidelity escalates the tier here, never silently) | [no spec revision] Phase 2
        [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Materialization]
          insufficiency_after_materialization_relay → Phase 4 (re-present Qdir over Λ.probes)
        [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap] → Phase 5 (MisdiagnosisExit arm)
@@ -231,7 +239,7 @@ Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- directi
        [D = Synthesize(composition)] Qmicro(composition) → Stop → Gs  -- synthesis micro-gate [Tool]
          [Gs = Confirm] Λ.direction := composition → Phase 5
          [Gs = Materialize] refan(composition) → Λ.refan_kind := Materialization → Λ.tgt := [composition] → decrement budget
-           → [new axis] Phase 1 (Qspec scoped to the new axis) | [settled axes] Phase 2
+           → [spec revision: new axis ∨ tier escalation] Phase 1 (Qspec scoped to the revision) | [no spec revision] Phase 2
          -- Λ.refan_budget = 0: Materialize is not in Qmicro's option set (budget-guarded constructor);
          --   materialize_unavailable_relay states the exhaustion and Qmicro presents {Confirm} → no path re-enters Materialize
        [free response: interrogation]                              -- not a D constructor; the gate is re-presented unchanged
@@ -285,7 +293,11 @@ Convergence evidence: at terminal, present the transformation trace over the ste
   EarlyExit / MisdiagnosisExit: the partial trace with the per-probe dispositions. Demonstrated, not asserted.
 
 ── CONVERGENCE ──
-converged(Λ) = Λ.direction ≠ None ∧ discard_declared(Λ)
+converged(Λ) = (Λ.direction ≠ None ∧ discard_declared(Λ))         -- primary success: DirectionalContrast
+             ∨ (Λ.phase = 1 ∧ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ))
+                                                                   -- success stand-down: DissolutionExit — dissolution is
+                                                                   --   convergence (the deficit resolved), not abandonment;
+                                                                   --   EarlyExit / MisdiagnosisExit are non-convergent exits
 discard_declared(Λ) = ∀ p ∈ Λ.probes: ∃ d: (ref(p), d) ∈ Λ.discard_trace   -- every probe has a declared Disposition,
                                                                    --   keyed by ref(p) = {index(p), p.direction,
                                                                    --   p.artifact_ref}; the ordinal makes each probe's
@@ -294,14 +306,14 @@ discard_declared(Λ) = ∀ p ∈ Λ.probes: ∃ d: (ref(p), d) ∈ Λ.discard_tr
 result equations:
   DirectionalContrast ⇔ Λ.direction ≠ None ∧ discard_declared(Λ)
   EarlyExit           ⇔ (user_withdraw ∨ unprobed_standdown) ∧ discard_declared(Λ)
-                        -- withdrawal is the typed exit cleanup can act on; unprobed_standdown (budget-spent naming of an
+                        -- non-convergent exit: withdrawal is the typed exit cleanup can act on; unprobed_standdown (budget-spent naming of an
                         --   unprobed candidate) is a withdrawal by consequence — the user exits the materialized decision
                         --   space; a hard esc yields no turn — the bounded scratch lifecycle is the backstop
   MisdiagnosisExit    ⇔ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ contrast_insufficient ∧ discard_declared(Λ)
-                        -- a budget spent on Materialization does NOT reach this exit: that branch relays back to Qdir
+                        -- non-convergent exit; a budget spent on Materialization does NOT reach it: that branch relays back to Qdir
                         --   over the accumulated probes, where the direction is still constitutable
   DissolutionExit     ⇔ Λ.phase = 1 ∧ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ)
-                        -- pre-generation circulation: Λ.probes = ∅ and the obligation is trivially declared;
+                        -- convergent success stand-down (see converged); pre-generation circulation: Λ.probes = ∅ and the obligation is trivially declared;
                         --   refan re-entry: probes exist and cleanup_verify produces their dispositions first
 framing readout: the surfaced state names the work in play (axes being settled, probes under contrast, direction being
   constituted, discard being verified) — never a completion tally.
@@ -315,9 +327,10 @@ Phase 0 unfit_relay (extension)    → TextPresent+Proceed (a type guard fails a
 Phase 0 requires_fail_relay (extension) → TextPresent+Proceed (no imminent commitment, or fewer than two candidates: state the failed requirement; one or zero candidates is handed to row ③'s targets for candidate generation; not activated)
 Phase 1 derive_axes (sense)        → Internal analysis (divergence axis candidates from the candidate directions)
 Phase 1 draft_policy (sense)       → Internal analysis (placeholder policy draft: visible synthesis, non-evidence stamp, skeleton-data split)
-Phase 1 Qspec (constitution)       → present (mandatory spec gate: divergence axes + placeholder policy + probe target set + realization tier; fires BEFORE any probe generation — no divergence axis is AI-selected past this gate; Adjust re-presents without generation; RE-ENTERED from a refan carrying a new axis, scoped to that axis, before that refan generates anything; pre-gate text declares the free-response pathways — question an axis, contest the activation premise, withdraw)
+Phase 1 Qspec (constitution)       → present (mandatory spec gate: divergence axes + placeholder policy + probe target set + realization tier; fires BEFORE any probe generation — no divergence axis is AI-selected past this gate; Adjust re-presents without generation; RE-ENTERED from a refan carrying a spec revision — a new axis, a tier escalation, or a revised target set — scoped to that revision, before that refan generates anything; pre-gate text declares the free-response pathways — question an axis, contest the activation premise, withdraw)
 Phase 1 dissolution_relay (extension) → TextPresent+Proceed (either party, at any circulation: the sharpened description made the futures recognizable without probes, or the activation premise collapsed; state the basis — the sharpened axes themselves — and hand to the regular gate the enriched axes together with any exposed unknowns already recorded (each with its route) and, on a refan re-entry, the per-probe dispositions from the preceding cleanup_verify; stand down as DissolutionExit — a success, not an abandonment)
 Phase 1 revise (track)             → Internal state update (Adjust branch: Λ axes/policy/target-set/tier revision before re-presenting Qspec; on a materialization re-entry the target set is fixed to the composition and is not adjustable)
+Phase 1 settle (track)             → Internal state update (Approve branch: the user-approved axes, policy, probe target set, and tier are committed to Λ before generation — the spec every downstream transform is bound to)
 Phase 2 instantiate (transform)    → Write, Bash (temp-isolated placeholder artifacts, cleanup-registered at creation; existing project files never modified; Vignette tier emits session text only — no file artifact)
 Phase 2 instantiate_delegate (dispatch) → Agent (conditional, Mockup tier; parallel topology: one probe per agent, each temp-isolated with cleanup registration; delegation subordinate to the active runtime/tool policy)
 Phase 3 contrast (sense)           → Internal analysis (per-axis juxtaposition; CommonCommitment extraction)
@@ -353,7 +366,8 @@ misdiagnosis (extension)           → TextPresent+Proceed (deficit misdiagnosis
       history: List<(Q, A)>,
       active: Bool, cause_tag: String }
 -- Guard: no probe is generated before a Qspec approval covers its axes — on the initial pass, phase < 2 ⇒ probes = ∅;
---   a refan re-entry to Phase 1 HOLDS prior probes but generates nothing until its Qspec settles the new axis
+--   a refan re-entry to Phase 1 HOLDS prior probes but generates nothing until its Qspec settles the revision
+--   (new axis, tier escalation, or revised target set)
 -- Guard: ∀ a ∈ axes: settled_at_Qspec(a) — a refan carrying a new axis re-enters Phase 1 before generating (breach condition 1)
 -- Guard: Materialize ∉ presented(Qmicro) when refan_budget = 0 — budget-guarded constructor; no path re-enters it (termination)
 -- Guard: ∀ p ∈ probes: p.artifact_ref = None ∨ temp_isolated(p.artifact_ref) (no permanent project file, ever)
@@ -476,7 +490,7 @@ Options:
 2. **Adjust** — revise axes, policy, which directions get probed, or tier; I re-present the spec (nothing is generated meanwhile). On a materialization re-entry the target stays your composition — the spent budget covers no other fan
 ```
 
-This gate is the enforcement point of breach condition (1): past it, no divergence axis is ever AI-selected. **A re-fan whose implication carries a new axis re-enters this gate** — scoped to that axis — before it generates anything. That is a transition, not a reminder: a re-fan on the already-settled axes goes straight to instantiation, and a re-fan on a new axis cannot reach instantiation without passing through here.
+This gate is the enforcement point of breach condition (1): past it, no divergence axis is ever AI-selected. **A re-fan whose implication carries a spec revision re-enters this gate** — a new divergence axis, a realization-tier escalation (when vignette probes could not carry the contrast, Mockup is settled here, never assumed), or a revised probe target set — scoped to that revision, before it generates anything. That is a transition, not a reminder: a re-fan that revises nothing in the spec goes straight to instantiation, and no spec revision can reach instantiation without passing through here.
 
 The pre-gate text also names what is open to you beyond the two options: **question an axis**, **contest whether this protocol is even needed**, or **step out**. None of these settles the spec, so none is an option — but the second one matters structurally: deriving the axes is itself an act of description-sharpening, and sometimes the sharpened description alone makes the futures recognizable, or exposes the fork as false. When that happens — noticed by you or by the AI — the protocol **stands down as a success**: the basis is stated, the enriched axes go back to a regular decision gate, and nothing is ever generated. The preliminary clay model is skipped when the sketch turns out to be precise enough. An analogy offered during this circulation is commentary that must declare which axis it weights — a borrowed domain imports its own weights — and never substitutes for the contrast itself.
 
@@ -499,7 +513,7 @@ Fixed presentation order — **probes first**:
 
 A table placed first would re-abstract the concreta back into (structured) description — reproducing inside the presentation the very deficit the protocol resolves. The map interprets the probes; it never replaces them.
 
-If the contrast is insufficient (an axis with undifferentiated values, or the user says so): re-fan once within the shared budget. Past the budget, what happens depends on what the budget was spent on — a spent *gap* re-fan means the deficit was misdiagnosed (report it and hand off per the routing table), while a budget spent on the user's own *materialization* means the opposite: they recognized the contrast well enough to build on it, so the direction gate is re-presented over the probes already on the table rather than the work being thrown away.
+If the contrast is insufficient (an axis with undifferentiated values, or the user says so): re-fan once within the shared budget — and when the insufficiency lies in realization fidelity rather than a missing axis (the vignettes could not carry the contrast), the re-fan escalates the tier through the spec gate instead of regenerating more of the same. Past the budget, what happens depends on what the budget was spent on — a spent *gap* re-fan means the deficit was misdiagnosed (report it and hand off per the routing table), while a budget spent on the user's own *materialization* means the opposite: they recognized the contrast well enough to build on it, so the direction gate is re-presented over the probes already on the table rather than the work being thrown away.
 
 ### Phase 4: Direction Gate (Constitution)
 
@@ -541,7 +555,7 @@ The durable record keeps the direction decision only; probes and their detail re
 | Rule | Structure | Effect |
 |------|-----------|--------|
 | Gate specificity | Activation requires the full predicate incl. route = ④ and both type guards | No activation on decisions a regular gate or a sibling protocol serves |
-| Spec before generation | Phase 1 Qspec precedes Phase 2; Adjust loops without generating; a re-fan on a new axis routes back through Qspec | User settles axes/policy; breach condition (1) enforced on every path to generation, re-fans included |
+| Spec before generation | Phase 1 Qspec precedes Phase 2; Adjust loops without generating; a re-fan carrying a spec revision (new axis, tier escalation, or target-set revision) routes back through Qspec | User settles axes/policy/tier; breach condition (1) enforced on every path to generation, re-fans included |
 | Temp isolation | artifact_ref invariant: None or temp-isolated path; cleanup registered at creation | Breach condition (2) enforced; no permanent project file |
 | Non-evidence stamp | Policy attaches at creation; pierces harvest and session remnants | Breach condition (3) enforced; probes ground no claim |
 | Probe-first order | Phase 3 fixed order: probes → map → unknowns | Presentation does not re-abstract the concreta into description |
@@ -556,7 +570,7 @@ The durable record keeps the direction decision only; probes and their detail re
 
 1. **Hybrid initiation, user-constituted direction** (Cognitive Partnership Move): the user's utterance ("I'd have to see it") dominates activation, and the AI may nudge from the three detection shapes with cited evidence; every constitutive step — divergence axes, placeholder policy, the direction itself — is settled by the user at a Constitution gate. The AI derives, instantiates, contrasts; it never selects the direction.
 2. **Recognition over Recall, on materialized futures**: direction-gate options point at futures the probes already exposed — the user recognizes, never mentally simulates from labels. Presenting label-only implications at the direction gate reproduces the deficit inside the gate.
-3. **Spec gate before generation** (breach condition 1): no probe exists before the spec gate settles axes and policy; no divergence axis is AI-selected past the gate. A re-fan whose implication carries a new axis **routes back through the spec gate** — scoped to that axis — before it generates anything; a re-fan on the already-settled axes goes straight to instantiation. This is a transition on the path, not an instruction to remember: there is no route from a new axis to a probe that does not pass through the gate.
+3. **Spec gate before generation** (breach condition 1): no probe exists before the spec gate settles axes and policy; no divergence axis is AI-selected past the gate. A re-fan whose implication carries a spec revision — a new axis, a realization-tier escalation (vignettes that could not carry the contrast escalate to Mockup through the gate), or a revised probe target set — **routes back through the spec gate** scoped to that revision before it generates anything; a re-fan that revises nothing in the spec goes straight to instantiation. This is a transition on the path, not an instruction to remember: there is no route from a spec revision to a probe that does not pass through the gate.
 4. **Temp isolation** (breach condition 2): probes live under temp isolation with cleanup registered at creation; existing project files are never modified. Vignette-tier probes emit session text only.
 5. **Non-evidence stamp** (breach condition 3): a probe is evidence for no claim — the stamp attaches at creation and pierces the harvest record and any session-text remnant. Citing a placeholder concretum as grounds for any claim dissolves the protocol's legitimacy; if a breach becomes unavoidable by design, the only permitted fallback is demotion to stop-and-hand-off (no generation).
 6. **Probe-first presentation**: probes one at a time, then the per-axis contrast map, then new unknowns. A table placed first re-abstracts the concreta and reproduces the deficit in the presentation order.
