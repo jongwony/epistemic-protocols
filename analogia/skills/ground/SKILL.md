@@ -164,13 +164,7 @@ esc          (extension)       → TextPresent+Proceed (partial transformation t
 
 ### Activation
 
-AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0) except the conditional zero-gap confirmation gate; validation always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2). On direct `/ground`, bind `R` from the current or most recent output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
-
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/ground` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Mapping uncertainty detected via in-protocol heuristics. Detection is silent (Phase 0) except the conditional zero-gap confirmation gate.
-
-**Mapping uncertain** = text applies abstract structures to a domain where structural correspondence has not been established.
+See R-BINDING section for grounding target binding (lines 96–105) and **Rule 1** for the core principle: AI detects mapping uncertainty; validation always requires user choice via Cognitive Partnership Move (Constitution) (Phase 2). Detection is silent (Phase 0) except the conditional zero-gap confirmation gate.
 
 Gate predicate:
 ```
