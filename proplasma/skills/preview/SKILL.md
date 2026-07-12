@@ -98,8 +98,10 @@ DownstreamRoute = Gap      -- a pre-commit check. It applies once the settled di
                            --   ACTION: /gap's activation predicate captures execution commitment, not direction
                            --   commitment, so the handoff is stated at that boundary, not at the direction decision
                 | Inquire  -- a factual unknown needing real evidence (placeholders can never ground it)
-                | Ground   -- the constituted direction maps onto a familiar domain: hand the surviving direction to
-                           --   /ground to validate the structural mapping (only when such a mapping exists)
+GroundTag = optional annotation ON THE CONSTITUTED DIRECTION (not an ExposedUnknown route): when the surviving
+                           --   direction maps onto a familiar domain, it is tagged at harvest for /ground
+                           --   structural-mapping validation; the tag rides Harvest.direction into
+                           --   DirectionalContrast.direction, so the proplasma→analogia handoff survives assembly
 CommonCommitment = a design decision forced uniformly across ALL probes during instantiation (not on a divergence axis);
                    must be reported at present so the user does not mistake a shared premise for a divergence axis
 S  = Spec gate answer ∈ {Approve, Adjust(revision)}       -- Adjust revises axes/policy/target set/tier and re-presents; pre-generation
@@ -128,12 +130,12 @@ Disposition ∈ {FileDestroyed, NoFileArtifact, DiscardFailed(reason)}
   -- DiscardFailed: destruction attempted (with one retry) and still present; declared, never silent
 DiscardTrace = List<(Probe, Disposition)>  -- one entry per instantiated probe (re-fanned probes included)
 RefanKind ∈ {Gap, Materialization}   -- what the single shared budget was spent on; decides the still-insufficient branch
-Harvest = { direction: UserDecision, deciding_rows: ContrastMap, unknowns: Set(ExposedUnknown) }
+Harvest = { direction: UserDecision (⊕ optional GroundTag), deciding_rows: ContrastMap, unknowns: Set(ExposedUnknown) }
             -- recorded BEFORE discard; carries no discard_trace (the trace does not exist yet — cleanup produces it)
 DirectionalContrast = single record {                          -- terminal; single-record codomain (no bare plural)
                         contrast_map:     ContrastMap,         --   restricted to the DECIDING rows at harvest (Rule 10)
                         exposed_unknowns: Set(ExposedUnknown), --   each tagged with its DownstreamRoute
-                        direction:        UserDecision,
+                        direction:        UserDecision (⊕ optional GroundTag),
                         discard_trace:    DiscardTrace }
             -- ASSEMBLED after cleanup_verify: assemble(Harvest, DiscardTrace) → DirectionalContrast. Harvest precedes
             --   discard; the record that carries both is built once the discard trace exists (no circular ordering)
@@ -178,8 +180,9 @@ Phase 1: derive_axes(X) → Axs_candidates → draft_policy → Qspec(axes + pol
        [at any circulation, either party: futures recognizable from the sharpened description ∨ activation premise collapsed]
          dissolution_relay → [Λ.probes ≠ ∅: refan re-entry] cleanup_verify → DissolutionExit
          (enriched axes handed to the regular gate; any already-generated probe is discarded with its disposition declared)
-       -- free-response pathways at this gate, declared in the pre-gate text: question an axis, contest the activation
-       --   premise (feeds the dissolution arm), or withdraw — none is an S constructor; the gate is re-presented unchanged
+       -- free-response pathways at this gate, declared in the pre-gate text — none is an S constructor: a question is
+       --   answered and the gate re-presented; a premise contest feeds the dissolution arm; a withdrawal runs
+       --   cleanup_verify (when probes exist) and terminates as EarlyExit
        -- |X.direction_candidates| > 4: Qspec settles WHICH candidates are probed (Λ.tgt); unprobed candidates are declared at present
        -- ENTERED FROM A REFAN carrying a NEW divergence axis (Phase 3 or Phase 4): Qspec is re-presented SCOPED TO THAT AXIS
        --   (and the refan target set) before any generation — the inherited spec-gate duty, typed. A refan on the already-settled
@@ -281,7 +284,7 @@ Phase 1 derive_axes (sense)        → Internal analysis (divergence axis candid
 Phase 1 draft_policy (sense)       → Internal analysis (placeholder policy draft: visible synthesis, non-evidence stamp, skeleton-data split)
 Phase 1 Qspec (constitution)       → present (mandatory spec gate: divergence axes + placeholder policy + probe target set + realization tier; fires BEFORE any probe generation — no divergence axis is AI-selected past this gate; Adjust re-presents without generation; RE-ENTERED from a refan carrying a new axis, scoped to that axis, before that refan generates anything; pre-gate text declares the free-response pathways — question an axis, contest the activation premise, withdraw)
 Phase 1 dissolution_relay (extension) → TextPresent+Proceed (either party, at any circulation: the sharpened description made the futures recognizable without probes, or the activation premise collapsed; state the basis — the sharpened axes themselves — and hand to the regular gate the enriched axes together with any exposed unknowns already recorded (each with its route) and, on a refan re-entry, the per-probe dispositions from the preceding cleanup_verify; stand down as DissolutionExit — a success, not an abandonment)
-Phase 1 revise (track)             → Internal state update (Adjust branch: Λ axes/policy/target-set/tier revision before re-presenting Qspec)
+Phase 1 revise (track)             → Internal state update (Adjust branch: Λ axes/policy/target-set/tier revision before re-presenting Qspec; on a materialization re-entry the target set is fixed to the composition and is not adjustable)
 Phase 2 instantiate (transform)    → Write, Bash (temp-isolated placeholder artifacts, cleanup-registered at creation; existing project files never modified; Vignette tier emits session text only — no file artifact)
 Phase 2 instantiate_delegate (dispatch) → Agent (conditional, Mockup tier; parallel topology: one probe per agent, each temp-isolated with cleanup registration; delegation subordinate to the active runtime/tool policy)
 Phase 3 contrast (sense)           → Internal analysis (per-axis juxtaposition; CommonCommitment extraction)
@@ -306,7 +309,7 @@ misdiagnosis (extension)           → TextPresent+Proceed (deficit misdiagnosis
       tgt: List(direction),                    -- probe target set settled at Qspec; := [composition] on a materialization refan
       probes: List(Probe),                     -- cumulative across refan (discarded probes remain listed for the trace)
       contrast_map: Option(ContrastMap),
-      exposed_unknowns: Set(ExposedUnknown),   -- each carries a DownstreamRoute (Gap | Inquire | Ground)
+      exposed_unknowns: Set(ExposedUnknown),   -- each carries a DownstreamRoute (Gap | Inquire)
       common_commitments: Set(CommonCommitment),
       refan_budget: ℕ,                         -- init 1; decremented by refan (insufficiency or materialization, shared)
       refan_kind: Option(RefanKind),           -- what the budget was spent on; None until the single refan is taken
@@ -435,7 +438,7 @@ Settle the probe spec before I build anything.
 
 Options:
 1. **Approve** — generate the probes on these axes under this policy
-2. **Adjust** — revise axes, policy, which directions get probed, or tier; I re-present the spec (nothing is generated meanwhile)
+2. **Adjust** — revise axes, policy, which directions get probed, or tier; I re-present the spec (nothing is generated meanwhile). On a materialization re-entry the target stays your composition — the spent budget covers no other fan
 ```
 
 This gate is the enforcement point of breach condition (1): past it, no divergence axis is ever AI-selected. **A re-fan whose implication carries a new axis re-enters this gate** — scoped to that axis — before it generates anything. That is a transition, not a reminder: a re-fan on the already-settled axes goes straight to instantiation, and a re-fan on a new axis cannot reach instantiation without passing through here.
@@ -467,7 +470,7 @@ If the contrast is insufficient (an axis with undifferentiated values, or the us
 
 Present the contrast summary as pre-gate text; then **present** the direction gate. Each option's implication is a pointer to the future a probe already exposed — recognition, not label simulation.
 
-State in that pre-gate text that three things are open to you at any point without being menu items — **question a probe**, **say the probes don't distinguish anything**, or **step out** — because none of them settles a direction: they answer, record, or leave, and the same gate comes back. Options are for the choice; these are pathways around it.
+State in that pre-gate text that three things are open to you at any point without being menu items — **question a probe**, **say the probes don't distinguish anything**, or **step out** — because none of them settles a direction. Their trajectories differ: a question is answered and the same gate comes back; an insufficiency declaration enters the re-fan handling (within budget, or its exhaustion branches); stepping out runs cleanup and ends the protocol as an early exit. Options are for the choice; these are pathways around it.
 
 ```
 Which direction do you settle?
@@ -490,7 +493,7 @@ Options:
 - (c) inherited unknowns, each tagged with its downstream route:
   - a **pre-commit check** → `/gap`, at the point where the settled direction turns into a committed action. `/gap` activates on execution commitment, not on a direction commitment, so the handoff is named at that boundary rather than handed over here
   - a **factual unknown** → `/inquire` (placeholders can never ground it)
-  - the **constituted direction itself** → `/ground`, when it maps onto a familiar domain whose structural correspondence is worth validating
+  - the **constituted direction itself** → `/ground`, when it maps onto a familiar domain whose structural correspondence is worth validating — carried as a tag on the harvested direction (not as an unknown), so it survives into the terminal record
 
 The discard trace is *not* part of the harvest — it does not exist yet. Cleanup produces it, and the terminal record is assembled from the harvest plus the completed trace afterwards.
 
@@ -523,7 +526,7 @@ The durable record keeps the direction decision only; probes and their detail re
 5. **Non-evidence stamp** (breach condition 3): a probe is evidence for no claim — the stamp attaches at creation and pierces the harvest record and any session-text remnant. Citing a placeholder concretum as grounds for any claim dissolves the protocol's legitimacy; if a breach becomes unavoidable by design, the only permitted fallback is demotion to stop-and-hand-off (no generation).
 6. **Probe-first presentation**: probes one at a time, then the per-axis contrast map, then new unknowns. A table placed first re-abstracts the concreta and reproduces the deficit in the presentation order.
 7. **Common commitments declared**: design decisions forced uniformly across probes during instantiation are reported with the contrast map, so shared premises are never mistaken for divergence axes.
-8. **Direction-gate response discipline**: the gate offers two options — Select settles a probe-exposed direction; Synthesize opens the micro-gate (Confirm now vs Materialize as re-fan) because only the user can judge whether their synthesis is already recognized. Questioning a probe, declaring the contrast insufficient, and stepping out are **free-response pathways named in the pre-gate text, never peer options**: none of them settles a direction, so none carries a differential future. A design-intent question is answered within placeholder discipline; a factual unknown is recorded and routed to `/inquire`; an analogy request is answered as commentary that declares which axis the borrowed domain weights, never as contrast material; the gate then returns unchanged. Downstream routes for harvested unknowns: a pre-commit check goes to `/gap` at the point the direction becomes a committed action (that is where `/gap` activates — it does not act on direction commitments), a factual unknown to `/inquire`, and the constituted direction to `/ground` when it maps onto a familiar domain worth validating.
+8. **Direction-gate response discipline**: the gate offers two options — Select settles a probe-exposed direction; Synthesize opens the micro-gate (Confirm now vs Materialize as re-fan) because only the user can judge whether their synthesis is already recognized. Questioning a probe, declaring the contrast insufficient, and stepping out are **free-response pathways named in the pre-gate text, never peer options**: none of them settles a direction, so none carries a differential future. A design-intent question is answered within placeholder discipline; a factual unknown is recorded and routed to `/inquire`; an analogy request is answered as commentary that declares which axis the borrowed domain weights, never as contrast material; the gate then returns unchanged. Downstream routes for harvested unknowns: a pre-commit check goes to `/gap` at the point the direction becomes a committed action (that is where `/gap` activates — it does not act on direction commitments), a factual unknown to `/inquire`, and the constituted direction to `/ground` when it maps onto a familiar domain worth validating — a tag on the harvested direction itself, not an unknown.
 9. **One shared re-fan, and what it was spent on decides the ending**: contrast-insufficiency re-fan and synthesis materialization share a single re-fan. Materialize is offered only while the budget is live, so the synthesis path cannot loop. When the budget is spent and the contrast is still insufficient: if it went on a **gap** re-fan, the deficit was misdiagnosed — report it and hand off per the routing table (and when no row fits, say so plainly and return the decision to a regular gate). If it went on the user's **own materialization**, the deficit was not misdiagnosed — they recognized the contrast well enough to build on it — so re-present the direction gate over the probes already on the table. A direction the user has already recognized is never thrown away by a budget rule.
 10. **Harvest before discard**: harvest the direction, the deciding contrast rows only, and the routed unknowns — then discard, then assemble the record from the harvest and the completed discard trace. The trace is not part of the harvest; cleanup is what produces it. The durable record keeps the direction decision only; probe detail stays session-local.
 11. **Cleanup on every protocol-controlled exit path**: DirectionalContrast, EarlyExit (withdrawal), MisdiagnosisExit, and a DissolutionExit reached after generation all run cleanup verification; every probe carries a declared Disposition; a failed destruction is retried once and then declared with a manual-cleanup handoff, never silent. A hard esc — a tool-level escape that gives the protocol no turn — cannot run cleanup by nature; temp isolation's bounded scratch lifecycle is the backstop there, which is part of why probes never live outside it.
