@@ -149,7 +149,7 @@ Gate predicate:
 in_process(A) ≡ essence_sensed(A) ∧ ¬located(A)
 ```
 
-Periagoge's scope is specified by **operation**: colimit formation — constructing a new abstraction from an instance cocone when essence is sensed and locator gap is active. Instance cardinality is an evidence signal (see Trigger Signals table): stronger accumulation offers richer triangulation material. The operation distinguishes Periagoge from adjacent protocols: comparative analysis between already-named readings or frames belongs to Prothesis (frame selection); audit of decision gaps belongs to Syneidesis (gap); only colimit formation is Periagoge territory.
+Periagoge's scope is specified by **operation**: colimit formation — constructing a new abstraction from an instance cocone when essence is sensed and locator gap is active. Instance cardinality is an evidence signal (see Trigger Signals table): stronger accumulation offers richer triangulation material. The operation distinguishes Periagoge from adjacent protocols (see Non-scenarios below); only colimit formation is Periagoge territory.
 
 ### Priority
 
@@ -203,7 +203,8 @@ Periagoge's scope, stated positively by canonical use patterns:
 **Edge case (still valid)**: Single instance with strong phenomenological grip — e.g., "yesterday I was in a strange mode, what was that?" — qualifies when essence_sensed is active and no locator exists. Rare but legitimate.
 
 **Non-scenarios (out of scope — defer to named protocol)**:
-- Comparative analysis between already-named candidate readings/frames → Prothesis (`/frame`) or Syneidesis (`/gap`)
+- Comparative analysis between already-named candidate readings/frames → Prothesis (`/frame`, frame selection)
+- Audit of decision gaps → Syneidesis (`/gap`)
 - Validating an existing abstract structure against a concrete target → Analogia (`/ground`)
 
 The operational test: "Is the user operation *forming a new abstraction from observed instances*, or is it something else (selecting, validating)?" Only the first is Periagoge.
@@ -276,13 +277,6 @@ Options:
 
 When Phase 1 surfaces no adjacent candidates, omit the Fuse option — dead signal suppression. Free response is always available — the user may name an adjacent abstraction for fusion, propose an alternative abstraction, specify a dimension not captured by the presented moves, or describe a shape the options do not cover.
 
-**Design principles**:
-- **Personalized grounding**: Always draw the grounding example from the user's own domain context so they recognize it as theirs.
-- **Calibration before choice**: Show the preservation/sharpening/pruning/open map before the gate so the user evaluates the concept pressure, not just an AI label.
-- **Socratic shaping**: Each move (widen/narrow/fuse/reorient) is a recognized dialectical turn, not a free-form revision request.
-- **Budget framing**: Display the attempt counter as a framing signal — the remaining refinement budget the user reasons with — bounded by the attempt cap; not a progress count.
-- **Free response honored**: When the presented moves do not capture the user's shape, parse free response as candidate redirection. If the user disputes `K` itself, absorb the correction through the existing UserMove/free-response path rather than adding a separate calibration-review constructor.
-
 ### Phase 3: Integration
 
 After user response:
@@ -316,13 +310,10 @@ After integration:
 | Rule | Structure | Effect |
 |------|-----------|--------|
 | Gate specificity | `activate(Periagoge) only if essence_sensed ∧ ¬located` | Prevents false activation on settled abstractions or essence-less inputs; instance count is evidence-for-essence, not a gate |
-| Calibration map | Phase 1 sorts concept pressure into Keeps / Sharpens / Prunes / Open | Lets instances correct the concept without AI overriding the user |
-| Personalized grounding | Phase 1 requires grounding drawn from user's own domain context | Prevents generic textbook examples that fail to trigger recognition |
-| Socratic moves preserved | Phase 2 options map to dialectical families (Synagoge/Diairesis/Fuse/Reorient) | Each move has a recognized shape, not open-ended revision |
+| Calibration map | Phase 1 sorts concept pressure into Keeps / Sharpens / Prunes / Open, surfaced before the candidate | Lets instances correct the concept without AI overriding the user; keeps evaluation on concept pressure, not just an AI label |
 | Session immunity | Crystallized or dismissed (Iᵢ, E) pair → skip for session | Respects user's crystallization or release |
 | Attempt cap | Max 5 triangulations per abstraction seed | Prevents infinite refinement; forces convergence or release |
 | Budget framing | Attempt counter in Phase 2 surfacing — a framing signal, not a progress count | User sees remaining refinement budget |
-| Free response honored | Alternative abstraction via free response routes to Phase 1 | Supports reorient beyond presented axes |
 | Analogia misfit absorption | `/ground` colimit-detection nudge routes here | Prevents source-domain confabulation in substitution path |
 
 ## Rules
@@ -331,8 +322,8 @@ After integration:
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity; Constitution interaction requires turn yield before proceeding.
 3. **Calibration plus candidate plus grounding required**: Every Phase 2 surfacing pairs a calibration map, candidate abstraction, and personalized grounding example drawn from the user's own domain context — recognizable to the user as theirs (codebase, configs, session history, or stated domain), not a generic textbook example.
 4. **Calibrative Induction through Dialectical Triangulation over Unilateral Correction**: AI candidate is a working hypothesis, not a claim. Concept correction is mediated by the instance set surfaced through `K`; crystallization belongs to the user's move.
-5. **Socratic move preservation**: Phase 2 options map to recognized dialectical families (Synagoge / Diairesis / Fuse / Reorient — per-move mapping in Phase 3 Integration); the vocabulary is operational, not ornamental.
-6. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal. The user may also name an adjacent abstraction via free response when Fuse is not presented (because Phase 1 surfaced no candidates) and they hold one in mind.
+5. **Socratic move preservation**: Phase 2 options map to recognized dialectical families (Synagoge / Diairesis / Fuse / Reorient — per-move mapping in Phase 3 Integration); the vocabulary is operational, not ornamental — each move is a recognized dialectical turn, not a free-form revision request.
+6. **Free response honored**: When presented moves do not capture the user's shape, free response routes the candidate to reorient or fresh proposal. The user may also name an adjacent abstraction via free response when Fuse is not presented (because Phase 1 surfaced no candidates) and they hold one in mind. If the user disputes the calibration map (`K`) itself, the same free-response path absorbs the correction rather than requiring a separate calibration-review constructor.
 6a. **Fuse dead-signal suppression**: Phase 2 omits the Fuse option when Phase 1 surfaces no adjacent abstraction candidates. Free response remains the channel for user-proposed fusion targets.
 7. **Convergence persistence**: Mode active until crystallized, Esc, or attempt cap.
 8. **Cross-protocol awareness**: Defer to Analogia when a pre-existing abstract structure needs validation against a target.
