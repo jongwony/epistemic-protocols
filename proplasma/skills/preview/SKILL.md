@@ -19,7 +19,8 @@ Proplasma(X) → detect(X, route) →
   derive_axes(X) → Axs → draft_policy → Qspec(Axs, policy, Tgt, tier) → S →
   [S = Adjust(revision)] revise → Qspec (re-present; still pre-generation)
   [at any Qspec circulation, either party: sharpened description makes the futures recognizable ∨ activation premise collapses]
-    dissolution_relay → exit (DissolutionExit: deficit dissolved; enriched axes handed to a regular gate; no probe was generated)
+    dissolution_relay → [Λ.probes ≠ ∅: refan re-entry] cleanup_verify → exit (DissolutionExit: deficit dissolved;
+      enriched axes handed to a regular gate; any probe already generated is discarded with its disposition declared)
   [S = Approve] instantiate(∥ probes over Tgt, temp-isolated, cleanup-registered) →
   contrast(P, Axs) → (CM, EU, CC) → present(probe-first: probes → contrast map → unknowns) →
   Qdir → D →
@@ -38,8 +39,9 @@ Proplasma(X) → detect(X, route) →
 -- spec_gate_if_new_axis: a refan whose implication carries a NEW divergence axis routes through Qspec BEFORE generation (breach condition 1)
 -- dissolution is a SUCCESS stand-down (axis derivation itself sharpened the description until probes became unnecessary),
 --   distinct from EarlyExit (user withdraws; residual) and MisdiagnosisExit (wrong deficit; rerouted)
--- cleanup_verify runs on EVERY exit path: DirectionalContrast, EarlyExit (user esc), MisdiagnosisExit
---   (DissolutionExit exits at phase 1, where no probe exists by guard — discard is trivially declared)
+-- cleanup_verify runs on EVERY exit path: DirectionalContrast, EarlyExit (user esc), MisdiagnosisExit, and a
+--   DissolutionExit reached on a refan re-entry (probes exist there); on the pre-generation circulation nothing
+--   was generated, so the discard obligation is trivially declared
 
 ── MORPHISM ──
 DirectionProspect
@@ -135,9 +137,11 @@ EarlyExit = user esc at any gate: partial transformation trace over completed st
 DissolutionExit = deficit dissolved during the Phase 1 circulation: deriving or settling the axes sharpened the description
             until the candidate futures became recognizable without probes, or the circulation collapsed the activation
             premise itself (the fork proves false). Declared by either party; relayed with cited basis — the sharpened
-            axes ARE the evidence. The direction decision returns to a regular gate carrying the enriched axes; no probe
-            exists (phase < 2 guard), so discard is trivially declared. A success stand-down: nothing residual, nothing
-            rerouted — the protocol's own first move (axis derivation) resolved what it was invoked to materialize
+            axes ARE the evidence. The direction decision returns to a regular gate carrying the enriched axes. On the
+            pre-generation circulation no probe exists (phase < 2 guard) and discard is trivially declared; on a refan
+            re-entry probes already exist — cleanup_verify runs before the stand-down and their dispositions enter the
+            trace. A success stand-down: nothing residual, nothing rerouted — description-sharpening resolved what the
+            protocol was invoked to materialize
 MisdiagnosisRoute = Row(① | ② | ③)   -- a sibling deficit matches: hand off to the cited protocol
                   | NoRow             -- NO row matches (the candidates may simply not genuinely diverge): declare the
                                       --   misdiagnosis with no downstream protocol and return the decision to a regular
@@ -159,7 +163,8 @@ Phase 1: derive_axes(X) → Axs_candidates → draft_policy → Qspec(axes + pol
        [S = Adjust(revision)] revise(Λ) → re-present Qspec       -- pre-generation loop; no probe exists yet
        [S = Approve] settle(Λ.axes, Λ.policy, Λ.tgt, Λ.tier) → Phase 2
        [at any circulation, either party: futures recognizable from the sharpened description ∨ activation premise collapsed]
-         dissolution_relay → DissolutionExit (enriched axes handed to the regular gate; no generation occurred)
+         dissolution_relay → [Λ.probes ≠ ∅: refan re-entry] cleanup_verify → DissolutionExit
+         (enriched axes handed to the regular gate; any already-generated probe is discarded with its disposition declared)
        -- free-response pathways at this gate, declared in the pre-gate text: question an axis, contest the activation
        --   premise (feeds the dissolution arm), or esc — none is an S constructor; the gate is re-presented unchanged
        -- |X.direction_candidates| > 4: Qspec settles WHICH candidates are probed (Λ.tgt); unprobed candidates are declared at present
@@ -170,7 +175,10 @@ Phase 2: instantiate(∥ over Λ.tgt, temp-isolated, cleanup-registered) → P �
        [Mockup tier, conditional] instantiate_delegate(∥ one probe per agent, temp-isolated) [Tool]
        -- contrast fan (initial | gap refan): |P| ∈ 2..4 — one probe per target direction
        -- materialization refan: |P| ≥ 1 — the composition itself; it is contrasted against Λ.probes (cumulative), which
-       --   already carry the differentiated axis values, so a materialization needs no second probe of its own
+       --   already carry the differentiated values on the PREVIOUSLY SETTLED axes, so a materialization needs no second
+       --   probe of its own. A NEW axis settled on this refan predates the prior probes: contrast re-derives their
+       --   positions on it analytically where their artifacts carry them, and declares the cell undifferentiated where
+       --   they do not — surfaced, never fabricated (a declared-undifferentiated axis can then feed the insufficiency arms)
        -- forced common design decisions recorded → Λ.common_commitments
 Phase 3: contrast(Λ.probes, Λ.axes) → (CM, EU, CC) → present      -- probe-first order: probes one by one → contrast map
                                                                   --   (with CommonCommitments declared) → new unknowns [Tool]
@@ -192,16 +200,18 @@ Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- directi
          [design-intent] answer within placeholder discipline → re-present Qdir
          [factual unknown] record as ExposedUnknown (route: Inquire) → re-present Qdir
        [free response: contrast_insufficient] → Phase 3 insufficiency arms (same guards)
-Phase 5: harvest → cleanup_verify → assemble → terminal            -- harvest BEFORE discard [Tool]
-       harvest = (direction, deciding contrast rows, inherited unknowns with DownstreamRoutes) → Λ.harvest
-       cleanup_verify: per probe, execute cleanup → verify absence → Disposition → Λ.discard_trace
-         [DiscardFailed] retry once → still present → declare DiscardFailed(reason) in discard_trace (visible, never silent)
-       assemble(Λ.harvest, Λ.discard_trace) → the terminal record   -- built after the trace exists; harvest carries no trace
-       [from Phase 4] → DirectionalContrast
-       [from Phase 3 misdiagnosis arm] → MisdiagnosisExit (misdiagnosis report + route_away(MisdiagnosisRoute))
+Phase 5: three entry arms; cleanup_verify runs on all of them, harvest only where a direction was constituted [Tool]
+       [from Phase 4 — direction constituted] harvest → cleanup_verify → assemble → DirectionalContrast  -- harvest BEFORE discard
+         harvest = (direction, deciding contrast rows, inherited unknowns with DownstreamRoutes) → Λ.harvest
+         assemble(Λ.harvest, Λ.discard_trace) → the terminal record -- built after the trace exists; harvest carries no trace
+       [from Phase 3 misdiagnosis arm — no direction constituted; Harvest is unconstructible and is NOT attempted]
+         misdiagnosis report (+ any exposed unknowns with their routes) → cleanup_verify → MisdiagnosisExit(route_away(MisdiagnosisRoute))
          [no row matches] route = NoRow → declare the misdiagnosis with no downstream protocol; the decision returns to a
            regular gate with the residual declared -- the exit is defined even when nothing downstream fits
-       [user esc at any gate] → EarlyExit (partial trace; cleanup_verify still runs)
+       [user esc at any gate — no direction constituted; Harvest is NOT attempted]
+         partial transformation trace → cleanup_verify → EarlyExit (residual declared)
+       cleanup_verify (all arms): per probe, execute cleanup → verify absence → Disposition → Λ.discard_trace
+         [DiscardFailed] retry once → still present → declare DiscardFailed(reason) in discard_trace (visible, never silent)
 
 ── LOOP ──
 Probe target set 2–4 for a contrast fan (settled at the spec gate; when candidates exceed 4, the gate settles which are probed).
@@ -217,10 +227,12 @@ Materialize is budget-guarded: with the budget spent it is not in the micro-gate
 Interrogation, contrast-insufficiency declaration, and Adjust do not consume the re-fan budget (they generate no probes).
 User can exit at any gate (esc): EarlyExit — cleanup_verify still runs; partial trace presented; residual declared.
 Continue until: DirectionalContrast (direction constituted + discard declared) OR EarlyExit OR MisdiagnosisExit
-  OR DissolutionExit (deficit dissolved in the spec-gate circulation — the cheapest success: zero probes, zero discard).
-Convergence evidence: at terminal, present the transformation trace — each settled axis mapped to the contrast rows that
-  made its futures recognizable, the constituted direction, each exposed unknown with its downstream route, and the
-  per-probe discard disposition. Convergence is demonstrated, not asserted.
+  OR DissolutionExit (deficit dissolved in the spec-gate circulation — the cheapest success).
+Convergence evidence: at terminal, present the transformation trace over the steps actually completed. At
+  DirectionalContrast: each settled axis mapped to the contrast rows that made its futures recognizable, the constituted
+  direction, each exposed unknown with its downstream route, and the per-probe discard disposition. At DissolutionExit:
+  the sharpened axes and the dissolution basis (plus dispositions when a refan re-entry had generated probes). At
+  EarlyExit / MisdiagnosisExit: the partial trace with the per-probe dispositions. Demonstrated, not asserted.
 
 ── CONVERGENCE ──
 converged(Λ) = Λ.direction ≠ None ∧ discard_declared(Λ)
@@ -232,8 +244,9 @@ result equations:
   MisdiagnosisExit    ⇔ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ contrast_insufficient ∧ discard_declared(Λ)
                         -- a budget spent on Materialization does NOT reach this exit: that branch relays back to Qdir
                         --   over the accumulated probes, where the direction is still constitutable
-  DissolutionExit     ⇔ Λ.phase = 1 ∧ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ Λ.probes = ∅
-                        -- the phase < 2 guard makes discard trivially declared: nothing was generated
+  DissolutionExit     ⇔ Λ.phase = 1 ∧ (futures_recognizable(sharpened description) ∨ premise_collapsed) ∧ discard_declared(Λ)
+                        -- pre-generation circulation: Λ.probes = ∅ and the obligation is trivially declared;
+                        --   refan re-entry: probes exist and cleanup_verify produces their dispositions first
 framing readout: the surfaced state names the work in play (axes being settled, probes under contrast, direction being
   constituted, discard being verified) — never a completion tally.
 
@@ -475,7 +488,7 @@ The durable record keeps the direction decision only; probes and their detail re
 | Common-commitment declaration | Forced shared decisions declared with the contrast map | Shared premises are not mistaken for divergence axes |
 | Bounded re-fan | Single shared budget; Materialize is offered only while it is live | Bounded loop; the synthesis path cannot cycle |
 | Ending matched to the spend | Spent on a gap re-fan → misdiagnosis handoff; spent on the user's materialization → direction gate re-presented over the accumulated probes | A recognized direction is never discarded by a budget rule |
-| Cleanup on every exit | cleanup_verify runs for DirectionalContrast, EarlyExit, and MisdiagnosisExit | No exit path leaks artifacts |
+| Cleanup on every exit | cleanup_verify runs for DirectionalContrast, EarlyExit, MisdiagnosisExit, and a post-generation DissolutionExit | Every artifact's disposition is declared on every exit path — destruction verified, or its failure declared with a manual-cleanup handoff, never silent |
 | Discard transparency | Per-probe Disposition in discard_trace; DiscardFailed declared with handoff | User can audit the discard; failures never silent |
 | Current-work framing | Surfacing names the work in play (axes, probes, contrast, discard) | Framing readout, not a completion tally |
 
