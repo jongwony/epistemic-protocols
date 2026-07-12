@@ -235,7 +235,7 @@ Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- directi
          [design-intent] answer within placeholder discipline → re-present Qdir
          [factual unknown] record as ExposedUnknown (route: Inquire) → re-present Qdir
        [free response: contrast_insufficient] → Phase 3 insufficiency arms (same guards)
-       [free response: unprobed candidate named (|X.direction_candidates| > 4 fan)]
+       [free response: unprobed candidate named (whenever Λ.tgt ⊂ X.direction_candidates — any fan that left candidates unprobed)]
          [Λ.refan_budget > 0] refan(gap over the named candidate) → Λ.refan_kind := Gap → decrement budget
            → Phase 1 (Qspec scoped to the revised target set) — the named candidate is probed before it is settled
          [Λ.refan_budget = 0] stand_down_relay → unprobed_standdown → EarlyExit (a withdrawal by consequence: the choice
