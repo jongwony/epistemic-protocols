@@ -1,5 +1,6 @@
 {
   "name": "epistemic-protocols",
+  "description": "A domain-free metalanguage of structured types and morphisms for human-AI collaboration: it reduces cognitive load by eliciting unknowns into utterance, constraining AI attention without bias, and resolving interaction deficits at their root within bounded loops before local misalignment hardens into system-wide rework.",
   "owner": {
     "name": "jongwony"
   },

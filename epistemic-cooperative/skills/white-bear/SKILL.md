@@ -1,6 +1,6 @@
 ---
 name: white-bear
-description: Use when the user asks to "check white bear", "audit prohibition phrasing", "find negative framing", or invokes /white-bear. Read-only audit of LLM-facing prose: positive rationale over prohibition.
+description: "Use when the user asks to \"check white bear\", \"audit prohibition phrasing\", \"find negative framing\", or invokes /white-bear. Read-only audit of LLM-facing prose: positive rationale over prohibition."
 user_invocable: true
 allowed-tools: Read, Grep, Glob
 ---

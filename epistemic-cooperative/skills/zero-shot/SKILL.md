@@ -1,6 +1,6 @@
 ---
 name: zero-shot
-description: Use when the user asks to "check zero-shot", "audit few-shot anchoring", "find example anchoring", or invokes /zero-shot. Read-only audit of LLM-facing prose: principle over anchoring examples.
+description: "Use when the user asks to \"check zero-shot\", \"audit few-shot anchoring\", \"find example anchoring\", or invokes /zero-shot. Read-only audit of LLM-facing prose: principle over anchoring examples."
 user_invocable: true
 allowed-tools: Read, Grep, Glob
 ---
