@@ -76,6 +76,7 @@ RoutePair      = (route_if_predicate: String, target: Protocol)
                  -- euporia-local guard routing targets — FORWARD under-determination the loop routes away rather than reverse-tracing (BACKWARD misfit — an unnoticed decision gap → /gap, or portability to an absent recipient → /distill — is contextualize's domain, not elicit's, so /gap and /distill are intentionally absent from this forward-routing list):
                  --   missing pre-execution fact (no substrate value, requires fact supply) → /inquire   (ContextInsufficient)
                  --   undefined ownership/scope boundary for the decision                  → /bound     (BoundaryUndefined)
+                 --   direction candidates exist but their futures are unrecognizable from descriptions (pre-commit, placeholder-carriable) → /preview (DirectionUnrecognizable)
                  --   intent is axis-determined (a single axis-specific protocol covers it) → the axis-specific protocol for that axis
 V              = bind_value_space : DimensionProjection → ValueSpace  -- per-coordinate answer constructors; generated ONLY after certificate.status = pass; frozen for the cycle (relay / dead-signal test applied)
 ValueSpace     = the projection's per-coordinate answer coproduct (local_value_space; euporia-local instantiation point) = {Provide, Defer, Dismiss}

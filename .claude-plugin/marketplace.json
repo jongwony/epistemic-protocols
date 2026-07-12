@@ -88,6 +88,11 @@
       "name": "diairesis",
       "source": "./diairesis",
       "description": "Delimit a large body of work into right-sized execution units before its method is conducted — /delimit (διαίρεσις: a division)"
+    },
+    {
+      "name": "proplasma",
+      "source": "./proplasma",
+      "description": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)"
     }
   ]
 }

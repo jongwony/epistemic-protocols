@@ -24,6 +24,7 @@ AI applies patterns, models, and analogies from one domain to another without ch
 | Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | **Analogia** | **AI-guided** | **`MappingUncertain → ValidatedMapping`** |
+| Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
@@ -32,6 +33,7 @@ AI applies patterns, models, and analogies from one domain to another without ch
 - **vs. Prothesis**: Prothesis selects which framework to apply when none exists. Analogia validates whether a selected framework structurally maps to your domain.
 - **vs. Aitesis**: Aitesis checks if the AI has enough context to execute (factual). Analogia checks if abstract structures preserve when mapped to your context (relational).
 - **vs. Epharmoge**: Epharmoge checks post-execution applicability. Analogia checks pre-execution mapping validity between abstraction levels.
+- **vs. Proplasma**: Proplasma contrasts discard-committed placeholder probes when no familiar-domain mapping is available and direction futures are unrecognizable from descriptions. Analogia validates a structural mapping when one exists — a direction that survives the contrast flows to Analogia when a mapping is available.
 
 **Litmus test**: If the uncertainty is about *whether abstract structure A corresponds to concrete structure B*, it's Analogia. If it's about *whether enough context exists to execute*, it's Aitesis. If it's about *which framework to apply*, it's Prothesis.
 

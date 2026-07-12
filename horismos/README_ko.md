@@ -24,6 +24,7 @@
 | Syneidesis | AI 주도 | `GapUnnoticed → AuditedDecision` |
 | **Horismos** | **AI 주도** | **`BoundaryUndefined → DefinedBoundary`** |
 | Aitesis | AI 주도 | `ContextInsufficient → InformedExecution` |
+| Proplasma | 하이브리드 | `DirectionUnrecognizable → DirectionalContrast` |
 | Analogia | AI 주도 | `MappingUncertain → ValidatedMapping` |
 | Prosoche | 사용자 주도 | `ExecutionBlind → SituatedExecution` |
 | Epharmoge | AI 주도 | `ApplicationDecontextualized → ContextualizedExecution` |

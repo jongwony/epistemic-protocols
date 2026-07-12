@@ -22,8 +22,11 @@ AI systems often proceed with execution despite insufficient context (`ContextIn
 |----------|------|---------------|
 | Syneidesis | SURFACE | `GapUnnoticed → AuditedDecision` |
 | **Aitesis** | **INQUIRE** | **`ContextInsufficient → InformedExecution`** |
+| Proplasma | PREVIEW | `DirectionUnrecognizable → DirectionalContrast` |
 
 **Key distinction**: Syneidesis surfaces gaps at decision points for the user to judge — information flows AI→user (metacognitive). Aitesis infers what context the AI lacks before execution — information flows user→AI (heterocognitive: "do I have enough context?").
+
+Proplasma (`/preview`) is the Planning-cluster sibling on the direction axis: Aitesis supplies missing facts before execution; Proplasma materializes direction futures as discard-committed placeholder contrast when the candidates are already known but unrecognizable from descriptions.
 
 ## Protocol Flow
 

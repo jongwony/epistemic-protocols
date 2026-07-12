@@ -1,0 +1,35 @@
+{
+  "name": "proplasma",
+  "version": "0.1.0",
+  "description": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "proplasma"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Proplasma",
+    "shortDescription": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)",
+    "longDescription": "Expose direction unknowns through divergent-discard instantiation before commitment — /preview (πρόπλασμα: a preliminary clay model)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use proplasma for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}
