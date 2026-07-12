@@ -16,6 +16,8 @@ Expose direction unknowns through divergent-discard instantiation before commitm
 Proplasma(X) → detect(X, route) →
   [futures recognizable from text] no_deficit_relay → exit (regular gate suffices; not activated)
   [route ∈ {①, ②, ③}] route_away_relay(matched row) → exit (routed; not activated)
+  [a type guard fails (¬fake_data_sufficient ∨ ¬placeholder_fidelity) ∧ no routing row matches] unfit_relay → exit
+    (the deficit may be real but Proplasma cannot legitimately serve it: state the failed guard; the decision stays at a regular gate; not activated)
   derive_axes(X) → Axs → draft_policy → Qspec(Axs, policy, Tgt, tier) → S →
   [S = Adjust(revision)] revise → Qspec (re-present; still pre-generation)
   [at any Qspec circulation, either party: sharpened description makes the futures recognizable ∨ activation premise collapses]
@@ -39,9 +41,9 @@ Proplasma(X) → detect(X, route) →
 -- spec_gate_if_new_axis: a refan whose implication carries a NEW divergence axis routes through Qspec BEFORE generation (breach condition 1)
 -- dissolution is a SUCCESS stand-down (axis derivation itself sharpened the description until probes became unnecessary),
 --   distinct from EarlyExit (user withdraws; residual) and MisdiagnosisExit (wrong deficit; rerouted)
--- cleanup_verify runs on EVERY exit path: DirectionalContrast, EarlyExit (user esc), MisdiagnosisExit, and a
---   DissolutionExit reached on a refan re-entry (probes exist there); on the pre-generation circulation nothing
---   was generated, so the discard obligation is trivially declared
+-- cleanup_verify runs on EVERY protocol-controlled exit path: DirectionalContrast, EarlyExit (withdrawal),
+--   MisdiagnosisExit, and a DissolutionExit reached on a refan re-entry (probes exist there); on the pre-generation
+--   circulation nothing was generated, so the discard obligation is trivially declared
 
 ── MORPHISM ──
 DirectionProspect
@@ -132,16 +134,21 @@ DirectionalContrast = single record {                          -- terminal; sing
                         discard_trace:    DiscardTrace }
             -- ASSEMBLED after cleanup_verify: assemble(Harvest, DiscardTrace) → DirectionalContrast. Harvest precedes
             --   discard; the record that carries both is built once the discard trace exists (no circular ordering)
-EarlyExit = user esc at any gate: partial transformation trace over completed steps + cleanup_verify still enforced
-            + residual declared (direction NOT constituted; morphism not completed)
+EarlyExit = user WITHDRAWAL at any gate — an explicit exit declared as a free response, a typed withdrawal the protocol
+            acts on (side effects require explicit answer types, not tool-level escape): partial transformation trace
+            over completed steps + cleanup_verify enforced + residual declared (direction NOT constituted)
+            -- a hard esc (tool-level escape that yields the protocol no turn) is ungraceful by nature: cleanup cannot
+            --   run there. Temp isolation's bounded scratch lifecycle is the backstop — part of why probes never live
+            --   outside it (breach condition 2 is what makes an uncaught esc safe)
 DissolutionExit = deficit dissolved during the Phase 1 circulation: deriving or settling the axes sharpened the description
             until the candidate futures became recognizable without probes, or the circulation collapsed the activation
             premise itself (the fork proves false). Declared by either party; relayed with cited basis — the sharpened
             axes ARE the evidence. The direction decision returns to a regular gate carrying the enriched axes. On the
             pre-generation circulation no probe exists (phase < 2 guard) and discard is trivially declared; on a refan
             re-entry probes already exist — cleanup_verify runs before the stand-down and their dispositions enter the
-            trace. A success stand-down: nothing residual, nothing rerouted — description-sharpening resolved what the
-            protocol was invoked to materialize
+            trace, and any exposed unknowns already recorded are relayed with their DownstreamRoutes (never silently
+            dropped). A success stand-down: nothing residual, nothing rerouted — description-sharpening resolved what
+            the protocol was invoked to materialize
 MisdiagnosisRoute = Row(① | ② | ③)   -- a sibling deficit matches: hand off to the cited protocol
                   | NoRow             -- NO row matches (the candidates may simply not genuinely diverge): declare the
                                       --   misdiagnosis with no downstream protocol and return the decision to a regular
@@ -159,6 +166,9 @@ contrast_insufficient = the presented contrast does not make the candidate futur
 Phase 0: X → detect(X) → route?                                -- deficit predicate + 4-step routing (silent analysis)
        [futures recognizable from text] no_deficit_relay → exit  -- regular gate suffices; Proplasma not activated
        [route ∈ {①, ②, ③}] route_away_relay(matched row) → exit -- cite the matched routing row; not activated
+       [a type guard fails ∧ no row matches] unfit_relay → exit  -- failed guard stated; decision stays at a regular
+                                                                 --   gate; not activated (the flow is total: no path
+                                                                 --   falls through to Phase 1 with a failed guard)
 Phase 1: derive_axes(X) → Axs_candidates → draft_policy → Qspec(axes + policy + probe target set + tier) → Stop → S  -- spec gate [Tool]
        [S = Adjust(revision)] revise(Λ) → re-present Qspec       -- pre-generation loop; no probe exists yet
        [S = Approve] settle(Λ.axes, Λ.policy, Λ.tgt, Λ.tier) → Phase 2
@@ -166,7 +176,7 @@ Phase 1: derive_axes(X) → Axs_candidates → draft_policy → Qspec(axes + pol
          dissolution_relay → [Λ.probes ≠ ∅: refan re-entry] cleanup_verify → DissolutionExit
          (enriched axes handed to the regular gate; any already-generated probe is discarded with its disposition declared)
        -- free-response pathways at this gate, declared in the pre-gate text: question an axis, contest the activation
-       --   premise (feeds the dissolution arm), or esc — none is an S constructor; the gate is re-presented unchanged
+       --   premise (feeds the dissolution arm), or withdraw — none is an S constructor; the gate is re-presented unchanged
        -- |X.direction_candidates| > 4: Qspec settles WHICH candidates are probed (Λ.tgt); unprobed candidates are declared at present
        -- ENTERED FROM A REFAN carrying a NEW divergence axis (Phase 3 or Phase 4): Qspec is re-presented SCOPED TO THAT AXIS
        --   (and the refan target set) before any generation — the inherited spec-gate duty, typed. A refan on the already-settled
@@ -188,7 +198,7 @@ Phase 3: contrast(Λ.probes, Λ.axes) → (CM, EU, CC) → present      -- probe
          insufficiency_after_materialization_relay → Phase 4 (re-present Qdir over Λ.probes)
        [contrast_insufficient ∧ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap] → Phase 5 (MisdiagnosisExit arm)
 Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- direction gate [Tool]
-       -- pre-gate text declares the free-response pathways: interrogate a probe, declare the contrast insufficient, or esc
+       -- pre-gate text declares the free-response pathways: interrogate a probe, declare the contrast insufficient, or withdraw
        [D = Select(direction)] Λ.direction := direction → Phase 5
        [D = Synthesize(composition)] Qmicro(composition) → Stop → Gs  -- synthesis micro-gate [Tool]
          [Gs = Confirm] Λ.direction := composition → Phase 5
@@ -208,8 +218,10 @@ Phase 5: three entry arms; cleanup_verify runs on all of them, harvest only wher
          misdiagnosis report (+ any exposed unknowns with their routes) → cleanup_verify → MisdiagnosisExit(route_away(MisdiagnosisRoute))
          [no row matches] route = NoRow → declare the misdiagnosis with no downstream protocol; the decision returns to a
            regular gate with the residual declared -- the exit is defined even when nothing downstream fits
-       [user esc at any gate — no direction constituted; Harvest is NOT attempted]
+       [user withdrawal at any gate — no direction constituted; Harvest is NOT attempted]
          partial transformation trace → cleanup_verify → EarlyExit (residual declared)
+         -- withdrawal is an explicit free-response exit the protocol acts on; a hard esc yields no turn, so cleanup
+         --   cannot run there — temp isolation's bounded scratch lifecycle is the backstop
        cleanup_verify (all arms): per probe, execute cleanup → verify absence → Disposition → Λ.discard_trace
          [DiscardFailed] retry once → still present → declare DiscardFailed(reason) in discard_trace (visible, never silent)
 
@@ -225,13 +237,15 @@ Re-fan bound: at most 1 re-fan per activation — contrast-insufficiency re-fan 
     user has already recognized is never discarded by a budget rule.
 Materialize is budget-guarded: with the budget spent it is not in the micro-gate's option set, so the synthesis loop terminates.
 Interrogation, contrast-insufficiency declaration, and Adjust do not consume the re-fan budget (they generate no probes).
-User can exit at any gate (esc): EarlyExit — cleanup_verify still runs; partial trace presented; residual declared.
+User can withdraw at any gate (an explicit exit, free response): EarlyExit — cleanup_verify runs; partial trace
+  presented; residual declared. A hard esc (tool-level escape) gives the protocol no turn: cleanup cannot run there,
+  and temp isolation's bounded scratch lifecycle is the backstop.
 Continue until: DirectionalContrast (direction constituted + discard declared) OR EarlyExit OR MisdiagnosisExit
   OR DissolutionExit (deficit dissolved in the spec-gate circulation — the cheapest success).
 Convergence evidence: at terminal, present the transformation trace over the steps actually completed. At
   DirectionalContrast: each settled axis mapped to the contrast rows that made its futures recognizable, the constituted
   direction, each exposed unknown with its downstream route, and the per-probe discard disposition. At DissolutionExit:
-  the sharpened axes and the dissolution basis (plus dispositions when a refan re-entry had generated probes). At
+  the sharpened axes and the dissolution basis (plus dispositions and any exposed unknowns with their routes when a refan re-entry had generated probes). At
   EarlyExit / MisdiagnosisExit: the partial trace with the per-probe dispositions. Demonstrated, not asserted.
 
 ── CONVERGENCE ──
@@ -240,7 +254,8 @@ discard_declared(Λ) = ∀ p ∈ Λ.probes: (p, d) ∈ Λ.discard_trace   -- eve
                                                                    --   (DiscardFailed is declared, not converged-silently)
 result equations:
   DirectionalContrast ⇔ Λ.direction ≠ None ∧ discard_declared(Λ)
-  EarlyExit           ⇔ user_esc ∧ discard_declared(Λ)             -- cleanup enforced on early exit too
+  EarlyExit           ⇔ user_withdraw ∧ discard_declared(Λ)         -- withdrawal is the typed exit cleanup can act on;
+                        --   a hard esc yields no turn — the bounded scratch lifecycle is the backstop
   MisdiagnosisExit    ⇔ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ contrast_insufficient ∧ discard_declared(Λ)
                         -- a budget spent on Materialization does NOT reach this exit: that branch relays back to Qdir
                         --   over the accumulated probes, where the direction is still constitutable
@@ -274,7 +289,7 @@ Phase 5 cleanup (transform)        → Bash (per-probe artifact destruction; ret
 Phase 5 cleanup_verify (observe)   → Bash, Read (verify absence of each Path artifact; Disposition recorded per probe)
 Phase 5 assemble (track)           → Internal state update (terminal record built from the harvest and the completed discard trace — after cleanup, never before)
 converge (extension)               → TextPresent+Proceed (transformation trace: axes → deciding contrast rows → direction; unknowns with routes; per-probe discard disposition)
-esc (extension)                    → TextPresent+Proceed (partial transformation trace + residual declaration; cleanup_verify still enforced; terminate as EarlyExit)
+withdraw (extension)               → TextPresent+Proceed (explicit free-response exit: partial transformation trace + residual declaration; cleanup_verify enforced; terminate as EarlyExit. A hard esc — tool-level escape — yields no turn, so cleanup cannot run: temp isolation's bounded scratch lifecycle is the backstop)
 misdiagnosis (extension)           → TextPresent+Proceed (deficit misdiagnosis report + route_away handoff per routing table; when no row matches, declare the misdiagnosis with no downstream protocol and return the decision to a regular gate with the residual declared; cleanup_verify enforced; terminate as MisdiagnosisExit)
 
 ── MODE STATE ──
@@ -382,9 +397,9 @@ Surface shapes of the deficit (heuristic signals, not hard gates):
 | Trigger | Effect |
 |---------|--------|
 | Direction constituted + discard disposition declared (destruction verified, or its failure declared with handoff) | Emit DirectionalContrast; proceed with the commitment under the constituted direction |
-| Deficit dissolved in the spec-gate circulation (axes alone made the futures recognizable, or the activation premise collapsed) | DissolutionExit: relay the basis, hand the enriched axes to a regular gate — a success stand-down, zero probes generated |
+| Deficit dissolved in the spec-gate circulation (axes alone made the futures recognizable, or the activation premise collapsed) | DissolutionExit: relay the basis, hand the enriched axes to a regular gate — a success stand-down; on a refan re-entry, already-generated probes are discarded with dispositions declared |
 | Gap re-fan spent, contrast still insufficient | MisdiagnosisExit: misdiagnosis report + cleanup + routing handoff (①–③, or none when no row fits — the decision returns to a regular gate) |
-| User esc at any gate | EarlyExit: partial trace + cleanup still enforced + residual declared |
+| User withdraws at any gate (explicit exit; a hard esc gives no turn — the bounded scratch lifecycle is the backstop) | EarlyExit: partial trace + cleanup enforced + residual declared |
 
 ## Protocol
 
@@ -395,7 +410,7 @@ Verify the gate predicate and run the routing precedence. No user interaction un
 1. Confirm a direction commitment is imminent and at least two candidates exist
 2. Threshold test: are the differential futures recognizable from text? If yes — present the finding as relay and stand down (a regular gate suffices)
 3. Walk routing rows ① → ③; on a match, present the matched row with its basis as relay and hand off (not activated)
-4. Verify both type guards: the contrast must hold on placeholder concreta alone (`fake_data_sufficient`), and placeholders must carry the axis futures without distortion (`placeholder_fidelity`). A guard failure is a routing signal, not a defect to push through — row ② (evidence needed) or row ③ (frame absent) usually explains it
+4. Verify both type guards: the contrast must hold on placeholder concreta alone (`fake_data_sufficient`), and placeholders must carry the axis futures without distortion (`placeholder_fidelity`). A guard failure is a routing signal, not a defect to push through — row ② (evidence needed) or row ③ (frame absent) usually explains it. When neither row explains the failure, stand down with the failed guard stated: the deficit may be real, but this protocol cannot legitimately serve it, and the decision stays at a regular gate (relay; not activated)
 5. All positive: proceed to Phase 1
 
 ### Phase 1: Spec Gate
@@ -504,7 +519,7 @@ The durable record keeps the direction decision only; probes and their detail re
 8. **Direction-gate response discipline**: the gate offers two options — Select settles a probe-exposed direction; Synthesize opens the micro-gate (Confirm now vs Materialize as re-fan) because only the user can judge whether their synthesis is already recognized. Questioning a probe, declaring the contrast insufficient, and stepping out are **free-response pathways named in the pre-gate text, never peer options**: none of them settles a direction, so none carries a differential future. A design-intent question is answered within placeholder discipline; a factual unknown is recorded and routed to `/inquire`; an analogy request is answered as commentary that declares which axis the borrowed domain weights, never as contrast material; the gate then returns unchanged. Downstream routes for harvested unknowns: a pre-commit check goes to `/gap` at the point the direction becomes a committed action (that is where `/gap` activates — it does not act on direction commitments), a factual unknown to `/inquire`, and the constituted direction to `/ground` when it maps onto a familiar domain worth validating.
 9. **One shared re-fan, and what it was spent on decides the ending**: contrast-insufficiency re-fan and synthesis materialization share a single re-fan. Materialize is offered only while the budget is live, so the synthesis path cannot loop. When the budget is spent and the contrast is still insufficient: if it went on a **gap** re-fan, the deficit was misdiagnosed — report it and hand off per the routing table (and when no row fits, say so plainly and return the decision to a regular gate). If it went on the user's **own materialization**, the deficit was not misdiagnosed — they recognized the contrast well enough to build on it — so re-present the direction gate over the probes already on the table. A direction the user has already recognized is never thrown away by a budget rule.
 10. **Harvest before discard**: harvest the direction, the deciding contrast rows only, and the routed unknowns — then discard, then assemble the record from the harvest and the completed discard trace. The trace is not part of the harvest; cleanup is what produces it. The durable record keeps the direction decision only; probe detail stays session-local.
-11. **Cleanup on every exit path**: DirectionalContrast, EarlyExit, and MisdiagnosisExit all run cleanup verification; every probe carries a declared Disposition; a failed destruction is retried once and then declared, never silent.
+11. **Cleanup on every protocol-controlled exit path**: DirectionalContrast, EarlyExit (withdrawal), MisdiagnosisExit, and a DissolutionExit reached after generation all run cleanup verification; every probe carries a declared Disposition; a failed destruction is retried once and then declared with a manual-cleanup handoff, never silent. A hard esc — a tool-level escape that gives the protocol no turn — cannot run cleanup by nature; temp isolation's bounded scratch lifecycle is the backstop there, which is part of why probes never live outside it.
 12. **Convergence persistence, with the cheapest success honored**: the mode stays active until the direction is constituted and the discard is declared, or the user exits, or misdiagnosis is declared — or the deficit dissolves in the spec-gate circulation: axis derivation is itself description-sharpening, and when the sharpened description alone makes the futures recognizable (or collapses the activation premise), the protocol stands down as a success with the basis stated and the enriched axes handed back. Convergence is demonstrated via the transformation trace, not asserted. Actually removing a stuck artifact is the environment's job — the protocol's own duty ends at the declared disposition and the manual-cleanup handoff; a constituted direction is never held hostage to a janitorial failure.
 13. **Context-Question Separation**: analysis, evidence, and the contrast presentation are text output before each gate; the gate contains the essential question and option-specific differential implications only.
 14. **Option-set relay test (Extension classification)**: a single dominant option (entropy → 0) is presented as relay with cited basis. Each Constitution option must be genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
