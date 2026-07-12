@@ -215,7 +215,10 @@ Phase 2: instantiate(∥ over Λ.tgt, temp-isolated, cleanup-registered) → P �
        --   they do not — surfaced, never fabricated (a declared-undifferentiated axis can then feed the insufficiency arms)
        -- forced common design decisions recorded → Λ.common_commitments
 Phase 3: contrast(Λ.probes, Λ.axes) → (CM, EU, CC) → Λ.contrast_map := CM; Λ.exposed_unknowns ∪= EU;
-         Λ.common_commitments ∪= CC → present                       -- probe-first order: probes one by one → contrast map
+         Λ.common_commitments := CC → present                       -- probe-first order: probes one by one → contrast map
+         -- CC is RECOMPUTED over ALL accumulated probes at every contrast and REPLACES the set (:=, never ∪=):
+         --   a re-fan can break an earlier fan's shared premise, and a stale entry silently presented as shared
+         --   would corrupt the axis/premise distinction the declaration exists to protect
                                                                   --   (with CommonCommitments declared) → new unknowns [Tool]
        [contrast_insufficient ∧ Λ.refan_budget > 0] refan(gap) → Λ.refan_kind := Gap → decrement budget
          → [new axis] Phase 1 (Qspec scoped to the new axis) | [settled axes] Phase 2
@@ -235,7 +238,8 @@ Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- directi
          [design-intent] answer within placeholder discipline → re-present Qdir
          [factual unknown] record as ExposedUnknown (route: Inquire) → re-present Qdir
        [free response: contrast_insufficient] → Phase 3 insufficiency arms (same guards)
-       [free response: unprobed candidate named (whenever Λ.tgt ⊂ X.direction_candidates — any fan that left candidates unprobed)]
+       [free response: unprobed candidate named (whenever ∃ c ∈ X.direction_candidates: c ∉ directions(Λ.probes) —
+         judged on ACCUMULATED probe coverage, not on Λ.tgt, which a materialization overwrites)]
          [Λ.refan_budget > 0] refan(gap over the named candidate) → Λ.refan_kind := Gap → decrement budget
            → Phase 1 (Qspec scoped to the revised target set) — the named candidate is probed before it is settled
          [Λ.refan_budget = 0] stand_down_relay → unprobed_standdown → EarlyExit (a withdrawal by consequence: the choice
