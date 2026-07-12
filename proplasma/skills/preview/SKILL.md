@@ -238,9 +238,9 @@ Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- directi
        [free response: unprobed candidate named (|X.direction_candidates| > 4 fan)]
          [Λ.refan_budget > 0] refan(gap over the named candidate) → Λ.refan_kind := Gap → decrement budget
            → Phase 1 (Qspec scoped to the revised target set) — the named candidate is probed before it is settled
-         [Λ.refan_budget = 0] stand_down_relay → EarlyExit (withdrawal-shaped: the choice moved outside the materialized
-           set; the decision returns to a regular gate with the contrast harvest relayed as context — the morphism never
-           claims an unmaterialized future)
+         [Λ.refan_budget = 0] stand_down_relay → unprobed_standdown → EarlyExit (a withdrawal by consequence: the choice
+           moved outside the materialized set; cleanup_verify runs, the decision returns to a regular gate with the
+           contrast harvest relayed as context — the morphism never claims an unmaterialized future)
 Phase 5: three entry arms; cleanup_verify runs on all of them, harvest only where a direction was constituted [Tool]
        [from Phase 4 — direction constituted] harvest → cleanup_verify → assemble → DirectionalContrast  -- harvest BEFORE discard
          harvest = (direction, deciding contrast rows, inherited unknowns with DownstreamRoutes) → Λ.harvest
@@ -289,8 +289,10 @@ discard_declared(Λ) = ∀ p ∈ Λ.probes: ∃ d: (ref(p), d) ∈ Λ.discard_tr
                                                                    --   (DiscardFailed is declared, not converged-silently)
 result equations:
   DirectionalContrast ⇔ Λ.direction ≠ None ∧ discard_declared(Λ)
-  EarlyExit           ⇔ user_withdraw ∧ discard_declared(Λ)         -- withdrawal is the typed exit cleanup can act on;
-                        --   a hard esc yields no turn — the bounded scratch lifecycle is the backstop
+  EarlyExit           ⇔ (user_withdraw ∨ unprobed_standdown) ∧ discard_declared(Λ)
+                        -- withdrawal is the typed exit cleanup can act on; unprobed_standdown (budget-spent naming of an
+                        --   unprobed candidate) is a withdrawal by consequence — the user exits the materialized decision
+                        --   space; a hard esc yields no turn — the bounded scratch lifecycle is the backstop
   MisdiagnosisExit    ⇔ Λ.refan_budget = 0 ∧ Λ.refan_kind = Gap ∧ contrast_insufficient ∧ discard_declared(Λ)
                         -- a budget spent on Materialization does NOT reach this exit: that branch relays back to Qdir
                         --   over the accumulated probes, where the direction is still constitutable
@@ -327,6 +329,7 @@ Phase 5 cleanup_verify (observe)   → Bash, Read (the VERIFICATION step closing
 Phase 5 assemble (track)           → Internal state update (terminal record built from the harvest and the completed discard trace — after cleanup, never before)
 converge (extension)               → TextPresent+Proceed (transformation trace: axes → deciding contrast rows → direction; unknowns with routes; per-probe discard disposition)
 withdraw (extension)               → TextPresent+Proceed (explicit free-response exit: partial transformation trace + residual declaration; cleanup_verify enforced; terminate as EarlyExit. A hard esc — tool-level escape — yields no turn, so cleanup cannot run: temp isolation's bounded scratch lifecycle is the backstop)
+Phase 4 stand_down_relay (extension) → TextPresent+Proceed (budget-spent naming of an unprobed candidate: state that its future was never materialized and the remaining decision belongs to a regular gate; relay the contrast harvest as context; cleanup_verify enforced; terminate as EarlyExit via unprobed_standdown — a withdrawal by consequence)
 misdiagnosis (extension)           → TextPresent+Proceed (deficit misdiagnosis report + route_away handoff per routing table; when no row matches, declare the misdiagnosis with no downstream protocol and return the decision to a regular gate with the residual declared; cleanup_verify enforced; terminate as MisdiagnosisExit)
 
 ── MODE STATE ──
