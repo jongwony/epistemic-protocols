@@ -53,7 +53,7 @@ Phase 0 detection is silent — internal analysis, no output of its own. On a po
 
 ### Phase 1: Catalog Scan
 
-Scan the user's situation against the full catalog of 16 epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
+Scan the user's situation against the full catalog of 17 epistemic deficits. For each candidate hypothesis, build a `Set(CoverageEntry)` where each entry pairs:
 
 - A `deficit: DeficitName` matched against the situation
 - The `protocol: ProtocolId` that addresses that deficit
@@ -151,7 +151,7 @@ invariant: Recognition over Resolution
 
 ── TYPES ──
 U                = UserSituation { utterance: String, session_slice: Optional(Slice) }
-Catalog          = Set(DeficitEntry)               -- 16 named deficits + Emergent
+Catalog          = Set(DeficitEntry)               -- 17 named deficits + Emergent
 DeficitEntry     = { deficit: DeficitName, protocol: ProtocolId,
                      trigger_signal: String, reverse_evidence_template: String }
 Evidence         = String                           -- quoted or paraphrased situation evidence
@@ -183,10 +183,11 @@ DeficitName      ∈ {BoundaryUndefined, ContextInsufficient, FrameworkAbsent,
                     GapUnnoticed, ExecutionBlind, ApplicationDecontextualized,
                     ContextSuspect, ContextTethered, RecallAmbiguous,
                     RecallGranularityInsufficient, ResultUngrasped,
-                    GranularityUnderdetermined, MethodUnderdetermined} ∪ Emergent
+                    GranularityUnderdetermined, MethodUnderdetermined,
+                    DirectionUnrecognizable} ∪ Emergent
 ProtocolId       ∈ {bound, inquire, frame, ground, induce, elicit, gap,
                     attend, contextualize, sublate, distill, recollect, ascend,
-                    grasp, delimit, conduct} ∪ Emergent
+                    grasp, delimit, conduct, preview} ∪ Emergent
 Phase            ∈ {0, 1, 2, 3}
 
 ── PHASE TRANSITIONS ──

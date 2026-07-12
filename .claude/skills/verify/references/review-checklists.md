@@ -133,6 +133,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Anagoge: RecallGranularityInsufficient → HigherGranularityUnit (AI-guided, ELEVATE)
   - Hyphegesis: MethodUnderdetermined → ConductedMethod (Hybrid, CONDUCT)
   - Diairesis: GranularityUnderdetermined → WorkUnitMap (Hybrid, DELIMIT)
+  - Proplasma: DirectionUnrecognizable → DirectionalContrast (Hybrid, PREVIEW)
 - [ ] Initiator correctly specified (AI-guided vs Hybrid vs User-initiated vs User-invoked)
 - [ ] Gap taxonomy matches protocol purpose
 

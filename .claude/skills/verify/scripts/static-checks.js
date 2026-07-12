@@ -2908,7 +2908,7 @@ const FORMAL_BLOCKS_EXEMPTIONS = [];
 // Anchoring: the label must appear as a numbered Rules entry (not merely a
 // cross-reference elsewhere in the file), and the kernel sentence must fall
 // within that SAME entry's bounded body — not anywhere in the file. Bound
-// calibrated against all 16 core protocols (max observed entry ~560 chars);
+// calibrated against all 17 core protocols (max observed entry ~560 chars);
 // 900 leaves comfortable margin without reaching into unrelated content.
 // The cut also stops at the next section heading or column-0 bold
 // paragraph, so a terminal numbered entry's body does not extend into
@@ -2997,7 +2997,7 @@ function checkGateIntegrityRule() {
   const CHECK = 'gate-integrity-rule';
   // Anchoring (same rationale as checkFormalBlocksRule above): the label
   // must be a numbered Rules entry, not a cross-reference. Bound calibrated
-  // against all 16 core protocols (max observed entry ~1180 chars, horismos);
+  // against all 17 core protocols (max observed entry ~1180 chars, horismos);
   // 2000 leaves comfortable margin without reaching into unrelated content.
   const LABEL_PATTERN = /^\d+\.\s+\*\*Gate integrity\*\*/m;
   const KERNEL = 'type-preserving materialization';
