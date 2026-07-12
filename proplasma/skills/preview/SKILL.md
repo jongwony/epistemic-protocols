@@ -347,7 +347,7 @@ Phase 2 instantiate (transform)    → Write, Bash (temp-isolated placeholder ar
 Phase 2 instantiate_delegate (dispatch) → Agent (conditional, Mockup tier; parallel topology: one probe per agent, each temp-isolated with cleanup registration; delegation subordinate to the active runtime/tool policy)
 Phase 3 contrast (sense)           → Internal analysis (per-axis juxtaposition; CommonCommitment extraction)
 Phase 3 present (extension)        → TextPresent+Proceed (probe-first order: probes one by one → per-axis contrast map with common commitments declared → newly exposed unknowns; table-first re-abstracts and reproduces the deficit)
-Phase 4 Qdir (constitution)        → present (mandatory direction gate: each option points at the probe-exposed future it settles — recognition, not label simulation; Select | Synthesize. The free-response pathways — interrogate a probe, declare the contrast insufficient, withdraw — are declared in the pre-gate text, never as peer options: they commit no downstream action on the decision axis)
+Phase 4 Qdir (constitution)        → present (mandatory direction gate: each option points at the probe-exposed future it settles — recognition, not label simulation; presented as one concrete Select per probe-exposed direction (type-preserving materialization of the Select constructor) plus Synthesize. The free-response pathways — interrogate a probe, declare the contrast insufficient, withdraw — are declared in the pre-gate text, never as peer options: they commit no downstream action on the decision axis)
 Phase 4 Qmicro (constitution)      → present (conditional: fires on Synthesize; Confirm settles the synthesis now, Materialize re-fans it into new probes consuming the shared budget; only the user can judge whether the synthesis is already recognized. Materialize is budget-guarded: with the budget spent the defined option set is {Confirm} — the guard is in the type, so this is not option deletion)
 Phase 4 interrogate_answer (extension) → TextPresent+Proceed (free-response pathway, not a gate option: design-intent answers within placeholder discipline; factual unknowns recorded as ExposedUnknowns with the Inquire route; the gate is re-presented unchanged)
 Phase 4 materialize_unavailable_relay (extension) → TextPresent+Proceed (Materialize requested with the shared re-fan budget spent: state the exhaustion with its basis; Qmicro presents {Confirm} — no option of the presented set is ever mutated, and no path re-enters Materialize)
@@ -443,8 +443,8 @@ When Proplasma is active:
 **Action**: At Phase 1 present the spec gate before any generation; at Phase 4 present the direction gate whose options point at probe-exposed futures.
 </system-reminder>
 
-- Proplasma completes (or exits via EarlyExit / MisdiagnosisExit) before the direction commitment proceeds
-- Loaded instructions resume after the terminal record is emitted
+- Proplasma completes (or stands down via DissolutionExit, or exits via EarlyExit / MisdiagnosisExit) before the direction commitment proceeds
+- Loaded instructions resume after the terminal outcome is emitted — the DirectionalContrast record, or the dissolution / exit relay with its trace
 
 ### Trigger Signals
 
@@ -536,9 +536,11 @@ State in that pre-gate text that three things are open to you at any point witho
 ```
 Which direction do you settle?
 
-Options:
-1. **Select** — settle one of the probe-exposed directions (name it); its future is the one you saw in that probe
-2. **Synthesize** — compose your own direction from the probes (recombine/adjust); opens a micro-choice: confirm it now, or materialize it as a new probe within the remaining re-fan budget
+Options (one concrete Select per probe-exposed direction — type-preserving materialization of the Select constructor; the coproduct stays {Select, Synthesize}):
+1. **Select: {direction A}** — the future probe A exposed: {its deciding axis values, as you saw them}
+2. **Select: {direction B}** — the future probe B exposed: {its deciding axis values, as you saw them}
+   (… one numbered Select option per probed direction …)
+N. **Synthesize** — compose your own direction from the probes (recombine/adjust); opens a micro-choice: confirm it now, or materialize it as a new probe within the remaining re-fan budget
 ```
 
 - **Select(direction)** → Phase 5

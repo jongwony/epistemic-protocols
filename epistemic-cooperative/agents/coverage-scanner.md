@@ -124,7 +124,7 @@ You will receive:
 |----------|---------|-------------|-------------|-----------------|
 | {Protocol} | {session_id} | {gated} | {relay} | {gated/(gated+relay)} |
 
-Gated Count is a session-proximity proxy; Relay Count is the static `(extension)` baseline (not observed firings); Gate Efficiency is therefore an estimate — carry the label downstream.
+Gated Count is a session-proximity proxy; Relay Count is the static `(extension)` baseline (not observed firings); Gate Efficiency is therefore an estimate — carry the label downstream. Do not derive relay↔gated transition claims (e.g., erosion trends) from these figures: a static baseline plus a proximity proxy cannot establish transitions — span-based observation is a recorded follow-up.
 
 ### Code Change Statistics
 - Git commits: {total}
