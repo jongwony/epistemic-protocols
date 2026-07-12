@@ -14,6 +14,8 @@ Expose direction unknowns through divergent-discard instantiation before commitm
 ```
 ── FLOW ──
 Proplasma(X) → detect(X, route) →
+  [¬pre_commit(X) ∨ |direction_candidates(X)| < 2] requires_fail_relay → exit (checkpoint failed: state which
+    requirement; a single candidate is row ③ territory — /frame · /elicit generate the missing alternatives; not activated)
   [futures recognizable from text] no_deficit_relay → exit (regular gate suffices; not activated)
   [route ∈ {①, ②, ③}] route_away_relay(matched row) → exit (routed; not activated)
   [a type guard fails (¬fake_data_sufficient ∨ ¬placeholder_fidelity) ∧ no routing row matches] unfit_relay → exit
@@ -169,6 +171,10 @@ contrast_insufficient = the presented contrast does not make the candidate futur
 
 ── PHASE TRANSITIONS ──
 Phase 0: X → detect(X) → route?                                -- deficit predicate + 4-step routing (silent analysis)
+       [¬pre_commit(X) ∨ |direction_candidates(X)| < 2] requires_fail_relay → exit  -- the MORPHISM requires-checkpoint,
+                                                                 --   typed: state the failed requirement; a single
+                                                                 --   candidate routes to row ③'s targets (/frame · /elicit)
+                                                                 --   for candidate generation; not activated
        [futures recognizable from text] no_deficit_relay → exit  -- regular gate suffices; Proplasma not activated
        [route ∈ {①, ②, ③}] route_away_relay(matched row) → exit -- cite the matched routing row; not activated
        [a type guard fails ∧ no row matches] unfit_relay → exit  -- failed guard stated; decision stays at a regular
@@ -280,6 +286,7 @@ Phase 0 detect (sense)             → Internal analysis (deficit predicate + 4-
 Phase 0 no_deficit_relay (extension) → TextPresent+Proceed (futures recognizable from text: present the finding with reasoning; regular gate suffices; not activated)
 Phase 0 route_away_relay (extension) → TextPresent+Proceed (routing rows ①–③: present the matched row with its basis; hand off to the cited protocol; not activated)
 Phase 0 unfit_relay (extension)    → TextPresent+Proceed (a type guard fails and no routing row matches: state the failed guard and why; the decision stays at a regular gate; not activated)
+Phase 0 requires_fail_relay (extension) → TextPresent+Proceed (no imminent commitment, or fewer than two candidates: state the failed requirement; a single candidate is handed to row ③'s targets for candidate generation; not activated)
 Phase 1 derive_axes (sense)        → Internal analysis (divergence axis candidates from the candidate directions)
 Phase 1 draft_policy (sense)       → Internal analysis (placeholder policy draft: visible synthesis, non-evidence stamp, skeleton-data split)
 Phase 1 Qspec (constitution)       → present (mandatory spec gate: divergence axes + placeholder policy + probe target set + realization tier; fires BEFORE any probe generation — no divergence axis is AI-selected past this gate; Adjust re-presents without generation; RE-ENTERED from a refan carrying a new axis, scoped to that axis, before that refan generates anything; pre-gate text declares the free-response pathways — question an axis, contest the activation premise, withdraw)
@@ -417,7 +424,7 @@ Surface shapes of the deficit (heuristic signals, not hard gates):
 
 Verify the gate predicate and run the routing precedence. No user interaction unless a relay fires.
 
-1. Confirm a direction commitment is imminent and at least two candidates exist
+1. Confirm a direction commitment is imminent and at least two candidates exist — when either fails, stand down with the failed requirement stated (a single candidate is row ③ territory: `/frame` · `/elicit` generate the missing alternatives); this is a typed exit, not a silent fall-through
 2. Threshold test: are the differential futures recognizable from text? If yes — present the finding as relay and stand down (a regular gate suffices)
 3. Walk routing rows ① → ③; on a match, present the matched row with its basis as relay and hand off (not activated)
 4. Verify both type guards: the contrast must hold on placeholder concreta alone (`fake_data_sufficient`), and placeholders must carry the axis futures without distortion (`placeholder_fidelity`). A guard failure is a routing signal, not a defect to push through — row ② (evidence needed) or row ③ (frame absent) usually explains it. When neither row explains the failure, stand down with the failed guard stated: the deficit may be real, but this protocol cannot legitimately serve it, and the decision stays at a regular gate (relay; not activated)
