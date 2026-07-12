@@ -23,7 +23,8 @@ Proplasma(X) → detect(X, route) →
   derive_axes(X) → Axs → draft_policy → Qspec(Axs, policy, Tgt, tier) → S →
   [S = Adjust(revision)] revise → Qspec (re-present; still pre-generation)
   [at any Qspec circulation, either party: sharpened description makes the futures recognizable ∨ activation premise collapses]
-    [Λ.probes ≠ ∅: refan re-entry] cleanup_verify first → dissolution_relay → exit (DissolutionExit: deficit dissolved;
+    dissolution: [Λ.probes ≠ ∅ (refan re-entry) → cleanup_verify first] → dissolution_relay → exit (DissolutionExit: deficit dissolved;
+      pre-generation circulation has Λ.probes = ∅ — the relay fires directly, nothing to clean;
       enriched axes handed to a regular gate; any probe already generated is discarded with its disposition declared)
   [S = Approve] instantiate(∥ probes over Tgt, temp-isolated, cleanup-registered) →
   contrast(P, Axs) → (CM, EU, CC) → present(probe-first: probes → contrast map → unknowns) →
@@ -192,7 +193,8 @@ Phase 1: derive_axes(X) → Axs_candidates → draft_policy → Qspec(axes + pol
        [S = Adjust(revision)] revise(Λ) → re-present Qspec       -- pre-generation loop; no probe exists yet
        [S = Approve] settle(Λ.axes, Λ.policy, Λ.tgt, Λ.tier) → Phase 2
        [at any circulation, either party: futures recognizable from the sharpened description ∨ activation premise collapsed]
-         [Λ.probes ≠ ∅: refan re-entry] cleanup_verify first → dissolution_relay → DissolutionExit
+         [Λ.probes ≠ ∅ (refan re-entry) → cleanup_verify first] → dissolution_relay → DissolutionExit
+         -- pre-generation circulation (Λ.probes = ∅): the relay fires directly — the conditional guards only the cleanup step
          (enriched axes handed to the regular gate; any already-generated probe is discarded with its disposition declared)
        -- free-response pathways at this gate, declared in the pre-gate text — none is an S constructor: a question is
        --   answered and the gate re-presented; a premise contest feeds the dissolution arm; a withdrawal runs
@@ -233,6 +235,12 @@ Phase 4: Qdir(probe-exposed futures) → Stop → D                   -- directi
          [design-intent] answer within placeholder discipline → re-present Qdir
          [factual unknown] record as ExposedUnknown (route: Inquire) → re-present Qdir
        [free response: contrast_insufficient] → Phase 3 insufficiency arms (same guards)
+       [free response: unprobed candidate named (|X.direction_candidates| > 4 fan)]
+         [Λ.refan_budget > 0] refan(gap over the named candidate) → Λ.refan_kind := Gap → decrement budget
+           → Phase 1 (Qspec scoped to the revised target set) — the named candidate is probed before it is settled
+         [Λ.refan_budget = 0] stand_down_relay → EarlyExit (withdrawal-shaped: the choice moved outside the materialized
+           set; the decision returns to a regular gate with the contrast harvest relayed as context — the morphism never
+           claims an unmaterialized future)
 Phase 5: three entry arms; cleanup_verify runs on all of them, harvest only where a direction was constituted [Tool]
        [from Phase 4 — direction constituted] harvest → cleanup_verify → assemble → DirectionalContrast  -- harvest BEFORE discard
          harvest = (direction, deciding contrast rows, inherited unknowns with DownstreamRoutes) → Λ.harvest
