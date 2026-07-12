@@ -5,7 +5,7 @@ description: "Multi-perspective framing — a pure lens-formation tool. When the
 
 # Prothesis Protocol
 
-Resolve absent frameworks by placing available epistemic perspectives before the user, enabling lens selection prior to any perspective-requiring cognition, then computing — for each selected lens — the **substrate** that lens needs and handing the lens↔substrate pairs off. The morphism is **select THEN bind-substrate THEN hand off**: for each lens, frame declares an authoritative `substrate_need` (the abstract persona/capability the lens requires — never a concrete agent) plus advisory `binding_hints` (an enumerated shortlist of candidate substrates that could fulfill the need) and the lens's channel need. A single lens (or lenses with no specialized substrate beyond general-purpose) returns directly as a detailed lens; ≥2 lenses with at least one specialized substrate need become a **substrate-correspondence** handoff that nudges `/conduct` for the isolation + arrangement + reconciliation + synthesis apparatus. frame does NOT arrange the perspectives, does NOT realize their isolation, does NOT execute the inquiry, and does NOT synthesize a multi-perspective result in its own context — the isolated execution arrangement (isolation, reconciliation/dialogue, synthesis) is `/conduct`'s to design and the substrate's to run, reached via the `/conduct` nudge that accompanies every `SubstrateCorrespondence` handoff. frame is the lens-formation tool: it forms the analysis object, declares its substrate need + channel need, nudges `/conduct`, and stops at handoff. Type: `(FrameworkAbsent, AI, DESIGN, Inquiry) → FramedInquiry`.
+Resolve absent frameworks by placing available epistemic perspectives before the user for lens selection, then for each selected lens computing the substrate it needs and handing the lens↔substrate pairs off — without arranging, isolating, executing, or synthesizing. Type: `(FrameworkAbsent, AI, DESIGN, Inquiry) → FramedInquiry`.
 
 ## Definition
 
@@ -183,7 +183,7 @@ Consult `references/conceptual-foundations.md` for design rationale (Distinction
 
 Construct a Mission Brief from the user's request and **present** it for confirmation via Cognitive Partnership Move (Constitution). **Phase 0 is Mission Brief confirmation only — there is no mode question.** How the framed object is shaped (a detailed lens vs. lens↔substrate pairs) is decided at Phase 3 by substrate specialization need, not by a user choice here.
 
-**Phase 0 establishes the Mission Brief as the primary context vehicle for the framed object** — it structurally guarantees that the handoff carries enough context for the substrate to brief each perspective, rather than depending on substrate inference. When `user_invoked ∧ explicit_arg(U)`, the Phase 0 MB_from_arg Extension entry takes the path: the MB is still constructed from U but proceeds without the Phase 0 Constitution interaction; AI uses `J_mb=confirm` as the default. Phase 2 S (perspective selection) remains Constitution, providing a downstream correction opportunity.
+**Phase 0 establishes the Mission Brief as the primary context vehicle for the framed object** — it structurally guarantees that the handoff carries enough context for the substrate to brief each perspective, rather than depending on substrate inference.
 
 The coordinator infers the Mission Brief from U (the user's request):
 
@@ -206,7 +206,7 @@ Q1. Mission Brief:
 4. **Modify scope** — adjust inclusions/exclusions
 ```
 
-**Pre-fill from explicit text**: `/frame "text"` → the MB is constructed from the provided text and takes the Phase 0 MB_from_arg Extension path (presented as relay text, then proceed — no Constitution stop); Phase 2 lens selection remains the downstream correction opportunity.
+**Pre-fill from explicit text**: `/frame "text"` → the MB is constructed from the provided text and takes the Phase 0 MB_from_arg Extension path (presented as relay text, then proceed with `J_mb=confirm` as the default — no Constitution stop); Phase 2 lens selection remains Constitution, the downstream correction opportunity.
 
 **Distinction from other protocols**: Phase 0 operates at the operational layer (structuring context the handoff carries), not the epistemic layer. Phase 0 packages confirmed intent into a structured vehicle for substrate consumption — a prerequisite for a quality handoff, not a substitute for upstream intent resolution.
 

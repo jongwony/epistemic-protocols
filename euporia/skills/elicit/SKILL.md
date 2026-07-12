@@ -306,7 +306,7 @@ Analyze the intent seed for abstract aporia. Detection is silent on the aporia-c
 
 ### Phase 1: Substrate Access + Reverse Trace + Per-Projection Kind Dispatch
 
-Read substrate channels (immutable — monotone re-projection), reverse-trace candidate dimension projections, and pass each through the shared meta-backbone pipeline (KindBinding → fail-closed DeficitFitCertificate → per-coordinate value-space) BEFORE its coordinates are surfaced for answer. The certificate is **cycle-emergent**: it attaches to each projection at projection time, not as an up-front sync — euporia's projection IS the dynamic capture (contrast bound's dispatch-first up-front sync, which exists only because BoundaryMap is a multi-consumer router).
+Read substrate channels (immutable — monotone re-projection), reverse-trace candidate dimension projections, and pass each through the shared meta-backbone pipeline (KindBinding → fail-closed DeficitFitCertificate → per-coordinate value-space) BEFORE its coordinates are surfaced for answer — cycle-emergent per projection, not dispatch-first (see Rule 10a for the full rationale and the contrast with bound's dispatch-first up-front sync).
 
 1. **Substrate scan** (external channels): Read/Grep over the user's codebase, rules, recent sessions; Bash for read-only Environment queries (machine-setup metadata only: uname, pwd, tool versions, git config public fields). MUST NOT execute `env`, `printenv`, `set`, `echo $VAR`, or read `.env*` files. Tag each evidence record with its substrate channel (Codebase / Rules / Session / Environment). Reads are immutable — the substrate is never mutated, which is what makes re-trace a read-only re-projection rather than a revalidation.
 2. **Utterance analysis** (Utterance channel): Internal analysis of `I.utterance` for in-text semantic ambiguity. Citations quote the actual utterance fragment only; paraphrase and attribution of unstated mental models are outside the channel. Utterance evidence supplements external substrate evidence within Phase 1 dimension projections — it does not by itself trigger activation (see Gate predicate).
@@ -322,7 +322,7 @@ Read substrate channels (immutable — monotone re-projection), reverse-trace ca
 
 **Certificate basis visibility**: the certificate's deficit-fit basis (which sibling-deficit scope the projection matched, and the registered dependency edge that relates it) is cited at the projection's Phase 2 surfacing — relay (Extension), grounded in the cited deficit-scope declarations (an unclear fit returns ambiguous → defer, never a user gate). ReverseTrace and the per-projection kind capture are AI inference; the user constitutes the coordinate values at Phase 2.
 
-**Backbone discipline**: the schema (KindBinding / DeficitFitCertificate / value-space binding) is ONE canonical definition shared across protocols; euporia instantiates only `object_ref` (= DimensionProjection), `local_value_space` (= the per-coordinate `{Provide, Defer, Dismiss}` coproduct), and the guard routing targets (the RoutePairs above). Same field names, same fail-closed statuses, same certificate-before-binding order.
+**Backbone discipline**: euporia's shared meta-backbone instantiation (`object_ref`, `local_value_space`, guard routing targets) — see Rule 10(e) for the canonical schema statement.
 
 **Scope restriction**: Read-only investigation. No test execution or file modifications. Substrate evidence must cite a specific source.
 
@@ -353,21 +353,17 @@ Or:
 - Esc — terminate review
 ```
 
-**Design principles**:
-- **Substrate-cited basis**: Every dimension's basis cites specific substrate evidence (file:line, rule reference, session id). No speculation.
-- **Cycle counter visibility**: `cycle_n` surfaced at every Phase 2; user perceives signal density and decides when to terminate.
-- **Coordinate-level granularity**: User answers per-coordinate; deferral is per-coordinate.
-- **Free response honored**: User may answer beyond surfaced coordinates, redirect axis, name an excluded dimension, or terminate.
+Design principles for this surfacing (substrate-cited basis, cycle counter visibility, coordinate-level granularity, free response) are recorded in **UX Safeguards** below.
 
 ### Phase 3: Integration
 
 After user response. `integrate(A, I)` is **monotone**: it ADDS coordinate determination to `I'` and never revises a previously accepted coordinate (see §Coordinate Monotonicity Invariant).
 
-1. **Provide(values)**: Update I' with provided coordinate values; mark answered coordinates and enter them into `Λ.accepted_coords` (accumulate-only — an accepted coordinate is immutable and is never removed or overwritten by a later cycle). Append snapshot of I' to `I_history`.
-2. **Defer(coords)**: Mark deferred coordinates (covers ambiguous/partial/unknown answers) as still-pending — they were never accepted, so nothing about them is yet immutable. They re-enter Phase 1's re-projection in the next cycle; when later answered, the result is an ADD scoped to that coordinate, never an overturning of a coordinate already in `Λ.accepted_coords`. Append current I' snapshot (unchanged in a Defer cycle) to `I_history` to preserve pairwise alignment with `D_history` and `A_history`.
+1. **Provide(values)**: Update I' with provided coordinate values; mark answered coordinates and enter them into `Λ.accepted_coords` (accumulate-only, per §Coordinate Monotonicity Invariant). Append snapshot of I' to `I_history`.
+2. **Defer(coords)**: Mark deferred coordinates (covers ambiguous/partial/unknown answers) as still-pending; they re-enter Phase 1's re-projection in the next cycle (see §Coordinate Monotonicity Invariant for the monotonicity guarantee). Append current I' snapshot (unchanged in a Defer cycle) to `I_history` to preserve pairwise alignment with `D_history` and `A_history`.
 3. **Dismiss**: Mark intent as dismissed-with-residual; collect unresolved axes AND any remaining `Λ.deferred` projections (with their reason + basis) into `residual`. Terminate.
 
-**Conflict handling (monotonicity boundary)**: if a later answer genuinely contradicts a coordinate already in `Λ.accepted_coords`, this is a **frame change**, not a within-loop revision. Surface the conflict rather than silently overwriting; the user must explicitly re-open the resolved coordinate (a fresh constitutive act — equivalently a new `/elicit` pass over the changed intent). The integrate step alone never overturns an accepted coordinate.
+**Conflict handling**: a later answer contradicting an accepted coordinate is a frame change requiring explicit user re-opening, never a silent overwrite — see §Coordinate Monotonicity Invariant.
 
 After integration:
 - Re-detect remaining aporia in I'
@@ -387,7 +383,7 @@ After integration:
 | Rule | Structure | Effect |
 |------|-----------|--------|
 | Gate specificity | `activate(Euporia) only if axis_undetermined(I) ∧ substrate_implicit(I)` | Prevents false activation on axis-determined intent or empty substrate |
-| Substrate evidence required | Phase 1 dimension projections must cite specific substrate evidence | Prevents speculation; reverse-trace must be grounded |
+| Substrate evidence required | Phase 1 dimension projections must cite specific substrate evidence (file:line, rule reference, session id) | Prevents speculation; reverse-trace must be grounded |
 | Fail-closed deficit-fit certificate | Each projection's `certificate.status = pass` strictly precedes value-space binding and surfacing; route → drop projection (forward to sibling deficit), ambiguous → defer to a later cycle, non-atomic → split into atomic sub-projections before certify | A projection a sibling deficit owns never surfaces as an aporia coordinate; forward under-determination is routed (`/inquire`, `/bound`, `/preview`, axis-specific) rather than reverse-traced |
 | Cycle-emergent certificate (no up-front sync) | The certificate attaches per projection at projection time (Phase 1), not once before the loop | euporia's projection IS the dynamic capture; distinct from bound's dispatch-first up-front sync (which exists only for a multi-consumer router) |
 | Coordinate monotonicity | Accepted coordinates are immutable; integrate ADDS, never revises; a deferred coordinate, when later answered, only adds determination | Read-only re-projection cannot invalidate an already-accepted coordinate; resolution reached by accumulation, never regression |
@@ -395,7 +391,7 @@ After integration:
 | Cycle counter visibility | Phase 2 surfacing always shows `cycle_n` | User perceives cycle signal density and decides when to terminate |
 | Cycle-emergent option set | Phase 2 options reflect current cycle's coordinates; no fixed dialect | Adapts to actual coordinates surfaced; respects axis-emergence |
 | Coordinate-level granularity | User answers per-coordinate; deferral per-coordinate | Permits partial progress within a cycle |
-| Free response honored | User may answer beyond, redirect, or terminate at any Phase 2 | Full constitutive control |
+| Free response honored | User may answer beyond, redirect, name an excluded dimension, or terminate at any Phase 2 | Full constitutive control |
 | Session immunity | Resolved or dismissed (utterance, substrate slice) → skip for session | Respects user's resolution or release |
 | Substrate read-only | Phase 1 substrate access uses read-only tools only | No mutation of user's externalized cognition during scan |
 | Utterance channel discipline | Utterance evidence quotes the actual utterance fragment only; paraphrase and attribution of unstated mental models are outside the channel | Prevents AI from projecting unspoken user mental models as substrate evidence |

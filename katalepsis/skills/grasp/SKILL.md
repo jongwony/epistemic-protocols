@@ -181,11 +181,7 @@ State invariant: Λ.entryPoints = List(Λ.routeMap.entry_point); Λ.selected ⊆
 
 ### Activation
 
-Command invocation or trigger phrase activates mode until comprehension is verified for all selected entry points.
-
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/grasp` slash command or description-matching input. Always available.
-- **Layer 2**: No AI-guided activation. User signals awareness of comprehension deficit.
+Command invocation or trigger phrase activates mode until comprehension is verified for all selected entry points. **Activation layers**: Layer 1 (user-invocable) — `/grasp` slash command or description-matching input, always available; Layer 2 — no AI-guided activation, user signals awareness of comprehension deficit.
 
 ### Priority
 
@@ -206,26 +202,15 @@ At Phase 3, present comprehension verification via Cognitive Partnership Move (C
 
 ### Triggers
 
-| Signal | Examples |
-|--------|----------|
-| Direct request | "explain this", "help me understand", "walk me through" |
-| Comprehension signal | "I don't get it", "what did you change?", "why?" |
-| Following along | "let me catch up", "what's happening here?" |
-| Review request | "show me what you did", "summarize the changes" |
+Trigger signals: direct request ("explain this", "help me understand", "walk me through"), comprehension signal ("I don't get it", "what did you change?", "why?"), following along ("let me catch up", "what's happening here?"), review request ("show me what you did", "summarize the changes").
 
 **Qualifying condition**: Activate only when trigger signal co-occurs with recent AI-generated work output (`R` exists in conversation context). Do not activate on general questions unrelated to prior AI work.
 
-**Skip**:
-- User demonstrates understanding through accurate statements
-- User explicitly declines explanation
-- Changes are trivial (typo fixes, formatting)
+**Skip**: user demonstrates understanding through accurate statements; user explicitly declines explanation; changes are trivial (typo fixes, formatting).
 
 ### Mode Deactivation
 
-| Trigger | Effect |
-|---------|--------|
-| User explicitly cancels | EarlyExit (not VerifiedUnderstanding): present partial transformation trace + declare remaining tasks as unresolved residual, then accept current understanding |
-| User demonstrates full comprehension | Early termination |
+User explicitly cancels → EarlyExit (not VerifiedUnderstanding): present partial transformation trace, declare remaining tasks as unresolved residual, then accept current understanding as of exit (see CONVERGENCE). User demonstrates full comprehension → early termination (Rule 6: user's "I understand" is final).
 
 ## Entry Point Taxonomy
 
@@ -321,12 +306,8 @@ options:
 The user may also state the entry point in their own words; treat that response as an Emergent entry point when it remains within `ResultUngrasped → VerifiedUnderstanding`.
 
 **Design principles**:
-- Show max 3 entry points in the first question
-- Labels name user intent or outcome, not artifact taxonomy
-- Descriptions carry information scent: what this path will make clear and why it matters
-- **Route map before choice**: Present the `entry_point` option set enriched by `Fᵣ` route metadata; surface hidden routes and bounded open questions only when non-empty, without filtering options or revealing probe answers
-- Artifact basis may appear in surrounding context, not as the primary option label
-- If the initial user signal or Phase 1 freeform response names 2+ distinct concerns, enable multi-select in a follow-up question or register the named concerns directly as an ordered task list
+- Show max 3 entry points in the first question; labels name user intent or outcome, not artifact taxonomy (Rule 3), with artifact basis kept to surrounding context rather than the primary option label, and descriptions carrying information scent — what this path will make clear and why it matters
+- Route-map enrichment (hidden routes, bounded open questions, surfaced only when non-empty, without filtering/creation/suppression per TYPES `entry_point`) and multi-select on 2+ named concerns (TYPES `Sₑ`) follow the Phase 0 route-assessment steps and the Phase 1 PHASE TRANSITIONS entry above; when concerns are already explicit, register them directly as an ordered task list instead of a follow-up question
 
 ### Phase 2: Task Registration
 
@@ -495,11 +476,7 @@ For each task (entry point):
 
 ## Intensity
 
-| Level | When | Format |
-|-------|------|--------|
-| Light | Simple change, user seems familiar | Single-probe Constitution interaction targeting core understanding |
-| Medium | Moderate complexity | Scenario-based Constitution interaction targeting prediction |
-| Heavy | Complex architecture or unfamiliar pattern | Multi-step decomposed Constitution interaction targeting causal reasoning |
+Probe intensity scales with complexity: **Light** (simple change, user seems familiar) uses a single-probe Constitution interaction targeting core understanding; **Medium** (moderate complexity) uses a scenario-based Constitution interaction targeting prediction; **Heavy** (complex architecture or unfamiliar pattern) uses a multi-step decomposed Constitution interaction targeting causal reasoning.
 
 ## Rules
 

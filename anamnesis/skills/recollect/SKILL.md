@@ -295,15 +295,9 @@ MutualNull        : scan_entropy = ∅ ∧ scan_salience = ∅ on Track = hybrid
 
 ## Core Principle
 
-**Recognition over Retrieval**: When a user has a vague memory of prior discussion or decision, verify the match between their recalled context and historical context through cognitive assistance — presenting narrative candidates for user recognition, rather than returning search results. The protocol function is context identity verification (Husserl's synthesis of identification: empty intention meets fulfilled re-presentation), not information retrieval. Identity verification is not current-reality verification: recognizing that a context WAS discussed does not establish that it still HOLDS — recalled context is current in the store yet may be desynced from current reality, so it carries a currency≠fidelity caveat and is re-verified before commit.
+**Recognition over Retrieval**: When a user has a vague memory of prior discussion or decision, verify the match between their recalled context and historical context through cognitive assistance — presenting narrative candidates for user recognition, rather than returning search results. The protocol function is context identity verification (Husserl's synthesis of identification: empty intention meets fulfilled re-presentation), not information retrieval; identity verification is not current-reality verification (Rule 18 carries the full currency≠fidelity distinction).
 
-The scan finds candidates; the narrative Qc enables recognition; the user constitutes the identity match. Three constitutive distinctions from search/retrieval:
-
-1. **Input-typed dispatch**: V's input type determines the scan track. Structured identifiers (URLs, explicit references, citations) route to the entropy track where high-precision literal matching dominates; natural recall (temporal hedges, existence claims, vague topical references) routes to the salience track where marker profiles and session context (Σ) rank candidates. Treating every input as Σ-primary keyword query has structural blind spots; track-appropriate scanning resolves them.
-
-2. **Narrative presentation**: Candidates are presented as discussion narratives (question asked → direction taken → outcome reached), not as result summaries. Narrative enables recognition by providing the contextual story that triggers identification; result-only summaries require additional investigation that defeats the protocol's purpose.
-
-3. **Guided recall orientation on Refine**: When initial candidates do not match, the protocol facilitates structured recognitive orientation — presenting concrete navigation through adjacent memory vectors rather than open-ended questions. The user's vague memory and the stored context are brought into productive contact through specific alternatives that enable recognition.
+The scan finds candidates; the narrative Qc enables recognition; the user constitutes the identity match. Three constitutive distinctions from search/retrieval — input-typed dispatch, narrative presentation, and guided recall orientation on Refine — are detailed as Rules 3-5.
 
 ## Mode Activation
 

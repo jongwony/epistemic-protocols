@@ -164,13 +164,7 @@ esc          (extension)       → TextPresent+Proceed (partial transformation t
 
 ### Activation
 
-AI detects mapping uncertainty in output OR user calls `/ground`. Detection is silent (Phase 0) except the conditional zero-gap confirmation gate; validation always requires user interaction via Cognitive Partnership Move (Constitution) (Phase 2). On direct `/ground`, bind `R` from the current or most recent output under discussion; if no recoverable `R` exists, request the grounding target before Phase 0.
-
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/ground` slash command or description-matching input. Always available.
-- **Layer 2 (AI-guided)**: Mapping uncertainty detected via in-protocol heuristics. Detection is silent (Phase 0) except the conditional zero-gap confirmation gate.
-
-**Mapping uncertain** = text applies abstract structures to a domain where structural correspondence has not been established.
+See R-BINDING section for grounding target binding (lines 96–105) and **Rule 1** for the core principle: AI detects mapping uncertainty; validation always requires user choice via Cognitive Partnership Move (Constitution) (Phase 2). Detection is silent (Phase 0) except the conditional zero-gap confirmation gate.
 
 Gate predicate:
 ```
@@ -301,13 +295,6 @@ Options:
 
 Other is always available — user can propose an alternative mapping or describe a structural correspondence not captured by the presented options.
 
-**Design principles**:
-- **Structural evidence**: Show what abstract structures are being mapped and why
-- **Fit map before choice**: Show only the correspondence-fit distinctions that matter for the current validation
-- **Concrete instantiation**: Always include at least one concrete example in user's domain
-- **Current correspondence framed**: Surface the correspondence currently being validated as framing — which mapping is in play this cycle — rather than a completion count across all correspondences
-- **Actionable options**: Each option leads to a concrete next step
-
 ### Phase 3: Integration
 
 After user response:
@@ -339,10 +326,7 @@ After integration:
 | Rule | Structure | Effect |
 |------|-----------|--------|
 | Gate specificity | `activate(Analogia) only if ∃ structure(s, Sₐ) : ¬established(correspondence(s, Sₜ))` | Prevents false activation on domain-specific output |
-| Domain decomposition first | Phase 1 before Phase 2 | Ensures mapping is structurally grounded |
 | One correspondence per cycle | Present highest-priority correspondence per Phase 2 | Prevents example overload |
-| Session immunity | Validated domain pair → skip for session | Respects user's validation |
-| Self-grounding partition reading | Phase 1 derives split-vs-trim from `F` in the self-grounding case (relay, second-order over misfit instances) | Routes wrong-fusion recovery — Split → `/conduct` decompose-recovery, Trim → `/induce` Narrow — without constituting the cell assignment (deferred to the `/conduct` boundary-checkpoint) |
 | Current-correspondence framing | Phase 2 surfaces the correspondence currently being validated (which mapping is in play this cycle) — a framing readout, not an `[N validated / M]` completion count | User recognizes which mapping is in play without parsing a coverage tally; granular progress stays in session |
 | Attempt cap | Max 3 mapping attempts per domain pair | Prevents infinite refinement |
 | Early exit | User can declare mapping sufficient at any Phase 2 | Full control over validation depth |
@@ -351,7 +335,7 @@ After integration:
 
 1. **AI-guided, user-validated**: AI detects mapping uncertainty; validation requires user choice via Cognitive Partnership Move (Constitution) (Phase 2)
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
-3. **Domain decomposition first**: Before presenting instantiations, decompose abstract and concrete domain structures through codebase analysis (Phase 1)
+3. **Domain decomposition first**: Before presenting instantiations, decompose abstract and concrete domain structures through codebase analysis (Phase 1) — ensures the mapping is structurally grounded rather than assumed
 4. **Structural Correspondence over Abstract Assertion**: When mapping is uncertain, construct explicit correspondences rather than assert mapping validity — silence is worse than a rejected mapping
 5. **Concrete instantiation required**: Every mapping presented must include at least one concrete example in the user's domain
 6. **Evidence-grounded**: Every correspondence must cite specific structural elements from both abstract and concrete domains

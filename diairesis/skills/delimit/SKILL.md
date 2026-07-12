@@ -292,11 +292,7 @@ will be cut at their natural joints (you can review them) and the WorkUnitMap em
 
 **Free-response termination affordance**: Phase 2 prose includes the Sufficient signal (the partition is complete). Phase 3 parses the utterance into `TerminationIntent` while the typed coproduct `A ∈ CutDisposition` stays intact (gate integrity).
 
-**Design principles**:
-- **One region per cycle**: each Phase 2 presents one anchor region; surfaced-but-not-anchored regions accumulate into `Λ.residual`.
-- **Span-fit visibility**: the fit verdict (Fits/Overflows/Underfills) is shown with its basis, so AcceptCut/SplitUnit/MergeUnits are recognized from evidence, not guessed.
-- **Cut-set snapshot visibility**: the partition so far and the residual are surfaced each cycle — the user sees the exact map a Sufficient signal would commit.
-- **WBS-cited evidence**: every surfaced datum carries a WBS reference (issue id, milestone), never a copy of its content.
+**Design principles**: one region per cycle, span-fit visibility, cut-set snapshot visibility, and WBS-cited evidence — see UX Safeguards below for the structure and effect of each.
 
 ### Phase 3: Pack Integration + Invariant Check
 
@@ -327,11 +323,11 @@ Parse the answer, apply the settled cut, and check the three invariants.
 | Rule | Structure | Effect |
 |------|-----------|--------|
 | Gate specificity | `activate(Diairesis) only if multi_span(WB) ∧ ¬cut_already_fixed(WB)` | Prevents false activation on single-span work or an already-fixed partition |
-| Read-only WBS | The external WBS is referenced, never copied or mutated | The WBS keeps its single-source-of-truth authority; the map sees changes through the reference |
+| Read-only WBS | The external WBS is referenced, never copied or mutated | The WBS keeps its single-source-of-truth authority; the map sees changes through the reference, and every surfaced datum cites a WBS id (issue, milestone) rather than copying its content |
 | Packing search | `pack(joints, horizon, lifecycle)` proposes the cut-set against the three invariants | The one new operation; the user disposes each proposed cut |
 | Per-unit span-fit | `SpanFit` composes `/distill` carriability; shown with basis at Phase 2 | AcceptCut/SplitUnit/MergeUnits recognized from a fit verdict, not guessed |
 | Commit only Fits | A unit moves to committed only when it Fits (or is explicitly accepted); a non-Fits unit stays in residual | No WorkUnitMap emits a unit violating its own SpanFit |
-| One region per cycle | One anchor region per Phase 2 | Prevents per-cycle partition overload; residual accumulates |
+| One region per cycle | One anchor region per Phase 2 | Prevents per-cycle partition overload; surfaced-but-not-anchored regions accumulate into `Λ.residual` |
 | Cut-set snapshot visibility | The partition so far + residual surfaced each cycle | The user sees the map a Sufficient signal would commit |
 | Hard coverage | `coverage_complete` is a convergence gate | A map orphaning work cannot emit; every piece of the body lands in exactly one unit |
 | Autonomous residual pack | At Sufficient / exhaustion, residual is cut at natural joints (Extension-default) and surfaced | Termination never leaves orphaned work; the completion is recognized, not silent |

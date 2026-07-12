@@ -235,8 +235,8 @@ Partition failure mode is fail-visible: a signal whose velocity is ambiguous is 
 
 Compile each slow/threshold signal into a `{ subject, condition }` pair:
 
-- **subject** — a coarse framing of the work unit the condition guards. Coarse means work-unit granularity, not procedural steps: the downstream enforcer owns the interval's internal step decomposition.
-- **condition** — a verifiable predicate: an executable check with a determinate pass/fail outcome (command exit status, test result, countable threshold, file-state assertion). A condition that can only be stated as prose judgment ("the code is clean enough") is not compilable — surface it as a residual for the user to either sharpen into a predicate or accept as uncovered.
+- **subject** — a coarse framing of the work unit the condition guards, not a procedural step.
+- **condition** — a verifiable predicate: an executable check with a determinate pass/fail outcome. A condition that can only be stated as prose judgment ("the code is clean enough") is not compilable — surface it as a residual for the user to either sharpen into a predicate or accept as uncovered.
 
 Present the compiled set as pre-gate text (per-condition: source signal, evidence, predicate), and each remaining residual with its uncovered-risk note, then **present** via Cognitive Partnership Move (Constitution):
 
