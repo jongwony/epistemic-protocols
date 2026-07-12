@@ -103,6 +103,9 @@ DownstreamRoute = Gap      -- a pre-commit check. It applies once the settled di
 CommonCommitment = a design decision forced uniformly across ALL probes during instantiation (not on a divergence axis);
                    must be reported at present so the user does not mistake a shared premise for a divergence axis
 S  = Spec gate answer ∈ {Approve, Adjust(revision)}       -- Adjust revises axes/policy/target set/tier and re-presents; pre-generation
+       -- on a MATERIALIZATION re-entry, Adjust revises the new axis, policy, or tier only: Tgt = [composition] is fixed
+       --   by the refan kind — a different target set is a different fan, which the spent budget does not cover
+       --   (the user can instead Confirm the standing synthesis or withdraw at the direction gate)
 D  = Direction gate answer ∈ {Select(direction), Synthesize(composition)}
        -- Select: settle one probe-exposed direction
        -- Synthesize: user composes/recombines the presented probes → opens micro-gate Gs
@@ -181,6 +184,8 @@ Phase 1: derive_axes(X) → Axs_candidates → draft_policy → Qspec(axes + pol
        -- ENTERED FROM A REFAN carrying a NEW divergence axis (Phase 3 or Phase 4): Qspec is re-presented SCOPED TO THAT AXIS
        --   (and the refan target set) before any generation — the inherited spec-gate duty, typed. A refan on the already-settled
        --   axes skips this and enters Phase 2 directly. No probe is ever generated on an axis the user has not settled
+       --   On a materialization re-entry Adjust cannot replace Λ.tgt: the target stays [composition] (fixed by Λ.refan_kind);
+       --   revising the target set into a new contrast fan is not covered by the spent budget
 Phase 2: instantiate(∥ over Λ.tgt, temp-isolated, cleanup-registered) → P → Λ.probes ∪= P  -- transform [Tool]
        [Mockup tier, conditional] instantiate_delegate(∥ one probe per agent, temp-isolated) [Tool]
        -- contrast fan (initial | gap refan): |P| ∈ 2..4 — one probe per target direction
@@ -275,7 +280,7 @@ Phase 0 unfit_relay (extension)    → TextPresent+Proceed (a type guard fails a
 Phase 1 derive_axes (sense)        → Internal analysis (divergence axis candidates from the candidate directions)
 Phase 1 draft_policy (sense)       → Internal analysis (placeholder policy draft: visible synthesis, non-evidence stamp, skeleton-data split)
 Phase 1 Qspec (constitution)       → present (mandatory spec gate: divergence axes + placeholder policy + probe target set + realization tier; fires BEFORE any probe generation — no divergence axis is AI-selected past this gate; Adjust re-presents without generation; RE-ENTERED from a refan carrying a new axis, scoped to that axis, before that refan generates anything; pre-gate text declares the free-response pathways — question an axis, contest the activation premise, withdraw)
-Phase 1 dissolution_relay (extension) → TextPresent+Proceed (either party, at any circulation: the sharpened description made the futures recognizable without probes, or the activation premise collapsed; state the basis — the sharpened axes themselves — hand the enriched axes to the regular gate, and stand down as DissolutionExit; a success, not an abandonment)
+Phase 1 dissolution_relay (extension) → TextPresent+Proceed (either party, at any circulation: the sharpened description made the futures recognizable without probes, or the activation premise collapsed; state the basis — the sharpened axes themselves — and hand to the regular gate the enriched axes together with any exposed unknowns already recorded (each with its route) and, on a refan re-entry, the per-probe dispositions from the preceding cleanup_verify; stand down as DissolutionExit — a success, not an abandonment)
 Phase 1 revise (track)             → Internal state update (Adjust branch: Λ axes/policy/target-set/tier revision before re-presenting Qspec)
 Phase 2 instantiate (transform)    → Write, Bash (temp-isolated placeholder artifacts, cleanup-registered at creation; existing project files never modified; Vignette tier emits session text only — no file artifact)
 Phase 2 instantiate_delegate (dispatch) → Agent (conditional, Mockup tier; parallel topology: one probe per agent, each temp-isolated with cleanup registration; delegation subordinate to the active runtime/tool policy)
