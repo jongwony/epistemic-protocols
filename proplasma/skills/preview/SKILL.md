@@ -23,7 +23,7 @@ Proplasma(X) → detect(X, route) →
   derive_axes(X) → Axs → draft_policy → Qspec(Axs, policy, Tgt, tier) → S →
   [S = Adjust(revision)] revise → Qspec (re-present; still pre-generation)
   [at any Qspec circulation, either party: sharpened description makes the futures recognizable ∨ activation premise collapses]
-    dissolution_relay → [Λ.probes ≠ ∅: refan re-entry] cleanup_verify → exit (DissolutionExit: deficit dissolved;
+    [Λ.probes ≠ ∅: refan re-entry] cleanup_verify first → dissolution_relay → exit (DissolutionExit: deficit dissolved;
       enriched axes handed to a regular gate; any probe already generated is discarded with its disposition declared)
   [S = Approve] instantiate(∥ probes over Tgt, temp-isolated, cleanup-registered) →
   contrast(P, Axs) → (CM, EU, CC) → present(probe-first: probes → contrast map → unknowns) →
@@ -130,7 +130,7 @@ Disposition ∈ {FileDestroyed, NoFileArtifact, DiscardFailed(reason)}
   -- FileDestroyed: Path artifact removed and verified absent (satisfying condition for Mockup tier)
   -- NoFileArtifact: Vignette tier — nothing to destroy; discard = non-promotion, remnant text stays under the non-evidence stamp
   -- DiscardFailed: destruction attempted (with one retry) and still present; declared, never silent
-ProbeRef = minimal identity carrier { direction: String, artifact_ref: ArtifactRef }
+ProbeRef = minimal identity carrier { index: ℕ (ordinal in Λ.probes — uniqueness key), direction: String, artifact_ref: ArtifactRef }
             -- what was destroyed and where it lived — axis values, probe content, and cleanup actions stay
             --   session-local (Rule 10): the trace records the discard, not what the probe contained
 DiscardTrace = List<(ProbeRef, Disposition)>  -- one entry per instantiated probe (re-fanned probes included)
@@ -188,7 +188,7 @@ Phase 1: derive_axes(X) → Axs_candidates → draft_policy → Qspec(axes + pol
        [S = Adjust(revision)] revise(Λ) → re-present Qspec       -- pre-generation loop; no probe exists yet
        [S = Approve] settle(Λ.axes, Λ.policy, Λ.tgt, Λ.tier) → Phase 2
        [at any circulation, either party: futures recognizable from the sharpened description ∨ activation premise collapsed]
-         dissolution_relay → [Λ.probes ≠ ∅: refan re-entry] cleanup_verify → DissolutionExit
+         [Λ.probes ≠ ∅: refan re-entry] cleanup_verify first → dissolution_relay → DissolutionExit
          (enriched axes handed to the regular gate; any already-generated probe is discarded with its disposition declared)
        -- free-response pathways at this gate, declared in the pre-gate text — none is an S constructor: a question is
        --   answered and the gate re-presented; a premise contest feeds the dissolution arm; a withdrawal runs
@@ -271,8 +271,9 @@ Convergence evidence: at terminal, present the transformation trace over the ste
 ── CONVERGENCE ──
 converged(Λ) = Λ.direction ≠ None ∧ discard_declared(Λ)
 discard_declared(Λ) = ∀ p ∈ Λ.probes: ∃ d: (ref(p), d) ∈ Λ.discard_trace   -- every probe has a declared Disposition,
-                                                                   --   keyed by its ProbeRef projection ref(p) =
-                                                                   --   {p.direction, p.artifact_ref}
+                                                                   --   keyed by ref(p) = {index(p), p.direction,
+                                                                   --   p.artifact_ref}; the ordinal makes each probe's
+                                                                   --   entry distinct even when labels repeat
                                                                    --   (DiscardFailed is declared, not converged-silently)
 result equations:
   DirectionalContrast ⇔ Λ.direction ≠ None ∧ discard_declared(Λ)
@@ -332,7 +333,8 @@ misdiagnosis (extension)           → TextPresent+Proceed (deficit misdiagnosis
       discard_trace: DiscardTrace,             -- one entry per probe by terminal (invariant: discard_declared)
       history: List<(Q, A)>,
       active: Bool, cause_tag: String }
--- Guard: no probe exists while phase < 2 (spec gate precedes all generation)
+-- Guard: no probe is generated before a Qspec approval covers its axes — on the initial pass, phase < 2 ⇒ probes = ∅;
+--   a refan re-entry to Phase 1 HOLDS prior probes but generates nothing until its Qspec settles the new axis
 -- Guard: ∀ a ∈ axes: settled_at_Qspec(a) — a refan carrying a new axis re-enters Phase 1 before generating (breach condition 1)
 -- Guard: Materialize ∉ presented(Qmicro) when refan_budget = 0 — budget-guarded constructor; no path re-enters it (termination)
 -- Guard: ∀ p ∈ probes: p.artifact_ref = None ∨ temp_isolated(p.artifact_ref) (no permanent project file, ever)
