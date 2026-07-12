@@ -14,7 +14,7 @@ Some direction choices are unrecognizable from words (`DirectionUnrecognizable`)
 
 ### The Solution
 
-**Contrast over Simulation**: settle the divergence axes and the placeholder policy at a spec gate, generate probes that commit different values on those axes (text vignettes, or real temp-isolated mockups), present them probe-first with a per-axis contrast map, and decide on recognition. Probes are discard-committed instruments: overtly synthetic, never evidence for any claim, and destroyed after harvest — only the direction decision, the deciding contrast rows, and the newly exposed unknowns survive.
+**Contrast over Simulation**: settle the divergence axes and the placeholder policy at a spec gate, generate probes that commit different values on those axes (text vignettes, or real temp-isolated mockups), present them probe-first with a per-axis contrast map, and decide on recognition. Probes are discard-committed instruments: overtly synthetic, never evidence for any claim, and discarded after harvest with each probe's disposition declared (a failed destruction is declared with a cleanup handoff, never silent) — only the direction decision, the deciding contrast rows, and the newly exposed unknowns survive.
 
 ### Difference from Other Protocols
 

@@ -75,7 +75,11 @@ Axs = Set(DirectionAxis) settled at the spec gate (AI derives candidates; user s
 Tgt = List(direction) — the probe target set settled at the spec gate: which directions get probes on this fan
       -- contrast fan (initial, or gap refan): Tgt ⊆ X.direction_candidates with |Tgt| ∈ 2..4. When |candidates| > 4,
       --   Qspec settles WHICH candidates are probed (the cap is a presentation bound, not a silent truncation);
-      --   candidates left unprobed are declared at present so none is silently dropped
+      --   candidates left unprobed are declared at present so none is silently dropped, and they stay reachable at the
+      --   direction gate via free response: within the remaining re-fan budget, naming one triggers a gap refan over it
+      --   (target-set revision through the spec gate); with the budget spent, settling an unprobed candidate happens at a
+      --   regular gate — the protocol stands down as a withdrawal with the contrast harvest relayed as context (its future
+      --   was never materialized, so the morphism cannot claim it)
       -- materialization refan: Tgt = [composition] — the user's own synthesis, materialized so they can see it;
       --   |Tgt| ≥ 1 here, because a materialization is a recognition step, not a contrast (the composition is
       --   contrasted against the ACCUMULATED probes, which already carry the differentiated axis values)
@@ -486,7 +490,7 @@ If the contrast is insufficient (an axis with undifferentiated values, or the us
 
 Present the contrast summary as pre-gate text; then **present** the direction gate. Each option's implication is a pointer to the future a probe already exposed — recognition, not label simulation.
 
-State in that pre-gate text that three things are open to you at any point without being menu items — **question a probe**, **say the probes don't distinguish anything**, or **step out** — because none of them settles a direction. Their trajectories differ: a question is answered and the same gate comes back; an insufficiency declaration enters the re-fan handling (within budget, or its exhaustion branches); stepping out runs cleanup and ends the protocol as an early exit. Options are for the choice; these are pathways around it.
+State in that pre-gate text that three things are open to you at any point without being menu items — **question a probe**, **say the probes don't distinguish anything**, or **step out** — because none of them settles a direction. When candidates were left unprobed at the spec gate, name them here too: asking for one is a fourth free response — within the remaining re-fan budget it is probed first (a gap re-fan through the spec gate); with the budget spent, settling it un-materialized is a regular-gate decision, and the protocol stands down with the contrast relayed as context. Their trajectories differ: a question is answered and the same gate comes back; an insufficiency declaration enters the re-fan handling (within budget, or its exhaustion branches); stepping out runs cleanup and ends the protocol as an early exit. Options are for the choice; these are pathways around it.
 
 ```
 Which direction do you settle?
