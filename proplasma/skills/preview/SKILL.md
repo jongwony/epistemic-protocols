@@ -130,7 +130,10 @@ Disposition ∈ {FileDestroyed, NoFileArtifact, DiscardFailed(reason)}
   -- FileDestroyed: Path artifact removed and verified absent (satisfying condition for Mockup tier)
   -- NoFileArtifact: Vignette tier — nothing to destroy; discard = non-promotion, remnant text stays under the non-evidence stamp
   -- DiscardFailed: destruction attempted (with one retry) and still present; declared, never silent
-DiscardTrace = List<(Probe, Disposition)>  -- one entry per instantiated probe (re-fanned probes included)
+ProbeRef = minimal identity carrier { direction: String, artifact_ref: ArtifactRef }
+            -- what was destroyed and where it lived — axis values, probe content, and cleanup actions stay
+            --   session-local (Rule 10): the trace records the discard, not what the probe contained
+DiscardTrace = List<(ProbeRef, Disposition)>  -- one entry per instantiated probe (re-fanned probes included)
 RefanKind ∈ {Gap, Materialization}   -- what the single shared budget was spent on; decides the still-insufficient branch
 Harvest = { direction: UserDecision (⊕ optional GroundTag), deciding_rows: ContrastMap, unknowns: Set(ExposedUnknown) }
             -- recorded BEFORE discard; carries no discard_trace (the trace does not exist yet — cleanup produces it)
@@ -154,7 +157,8 @@ DissolutionExit = deficit dissolved during the Phase 1 circulation: deriving or 
             pre-generation circulation no probe exists (phase < 2 guard) and discard is trivially declared; on a refan
             re-entry probes already exist — cleanup_verify runs before the stand-down and their dispositions enter the
             trace, and any exposed unknowns already recorded are relayed with their DownstreamRoutes (never silently
-            dropped). A success stand-down: nothing residual, nothing rerouted — description-sharpening resolved what
+            dropped). A success stand-down: no unresolved residual remains — recorded unknowns are relayed with their routes
+            rather than lost, and the deficit itself needs no rerouting — description-sharpening resolved what
             the protocol was invoked to materialize
 MisdiagnosisRoute = Row(① | ② | ③)   -- a sibling deficit matches: hand off to the cited protocol
                   | NoRow             -- NO row matches (the candidates may simply not genuinely diverge): declare the
@@ -248,7 +252,8 @@ Re-fan bound: at most 1 re-fan per activation — contrast-insufficiency re-fan 
     (MisdiagnosisExit; NoRow when nothing downstream fits), never fan again.
   - spent on the user's own MATERIALIZATION, contrast still insufficient → NOT misdiagnosis: the user already recognized the
     contrast well enough to synthesize from it. Relay the exhaustion and re-present the direction gate over the accumulated
-    probes — the standing synthesis is still Confirmable and the original directions are still Selectable. A direction the
+    probes — the standing synthesis is Selectable there (its probe now exists among the accumulated probes — a
+    type-preserving materialization of Select) and the original directions stay Selectable. A direction the
     user has already recognized is never discarded by a budget rule.
 Materialize is budget-guarded: with the budget spent it is not in the micro-gate's option set, so the synthesis loop terminates.
 Interrogation, contrast-insufficiency declaration, and Adjust do not consume the re-fan budget (they generate no probes).
@@ -300,7 +305,7 @@ Phase 4 Qdir (constitution)        → present (mandatory direction gate: each o
 Phase 4 Qmicro (constitution)      → present (conditional: fires on Synthesize; Confirm settles the synthesis now, Materialize re-fans it into new probes consuming the shared budget; only the user can judge whether the synthesis is already recognized. Materialize is budget-guarded: with the budget spent the defined option set is {Confirm} — the guard is in the type, so this is not option deletion)
 Phase 4 interrogate_answer (extension) → TextPresent+Proceed (free-response pathway, not a gate option: design-intent answers within placeholder discipline; factual unknowns recorded as ExposedUnknowns with the Inquire route; the gate is re-presented unchanged)
 Phase 4 materialize_unavailable_relay (extension) → TextPresent+Proceed (Materialize requested with the shared re-fan budget spent: state the exhaustion with its basis; Qmicro presents {Confirm} — no option of the presented set is ever mutated, and no path re-enters Materialize)
-Phase 3 insufficiency_after_materialization_relay (extension) → TextPresent+Proceed (budget spent on the user's own materialization and the contrast is still insufficient: state it with its basis and re-present the direction gate over the accumulated probes — the standing synthesis stays Confirmable, the original directions stay Selectable; this is NOT deficit misdiagnosis)
+Phase 3 insufficiency_after_materialization_relay (extension) → TextPresent+Proceed (budget spent on the user's own materialization and the contrast is still insufficient: state it with its basis and re-present the direction gate over the accumulated probes — the standing synthesis is Selectable there, since its probe now exists among the accumulated probes (type-preserving materialization of Select), and the original directions stay Selectable; this is NOT deficit misdiagnosis)
 Phase 5 harvest (track)            → Internal state update (direction, deciding contrast rows, routed unknowns recorded before discard; the discard trace does not exist yet)
 Phase 5 cleanup (transform)        → Bash (the DESTRUCTION step inside cleanup_verify's typed sequence — per-probe artifact destruction, retry once on failure; every transition that names cleanup_verify runs this step first)
 Phase 5 cleanup_verify (observe)   → Bash, Read (the VERIFICATION step closing the same sequence: verify absence of each Path artifact after its destruction step; Disposition recorded per probe — verification never runs without the destruction step preceding it)
