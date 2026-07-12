@@ -421,23 +421,13 @@ misdiagnosis (extension)           → TextPresent+Proceed (deficit misdiagnosis
 
 ## Core Principle
 
-**Contrast over Simulation**: When the differential futures of direction candidates cannot be carried by descriptions, a structurally perfect gate still forces the user to mentally simulate consequences instead of recognizing them. Proplasma replaces simulation with materialized contrast: cheap placeholder probes commit different values on user-settled divergence axes, and the direction judgment is constituted on futures the user has actually seen.
-
-Probe generation is a **transform operation**, legitimate only inside this survival chain: Constitution spec gate (axes + placeholder policy settled) → transform generation (temp-isolated, cleanup-registered, visibly synthetic, non-evidence) → relay contrast presentation (per-axis juxtaposition) → Constitution direction decision → cleanup verification (discard_trace). Three breach conditions dissolve the chain, and any one of them demotes the protocol to a stop-and-hand-off (no generation): (1) an AI-selected divergence axis without or after the spec gate, (2) a write to a permanent project file, (3) a probe treated as evidence for any claim. The demotion is the only permitted fallback — there is no ad-hoc bypass.
-
-The self-cannibalization objection ("resolving a description-failure with more description") is answered by the tier structure: a vignette is not a label-description but a placeholder-**concretum** narration — a different layer. When even vignette-level materialization cannot carry the contrast, the Mockup tier builds real temp-isolated artifacts; the protocol's meaning is independent of the realization tier.
+**Contrast over Simulation**: When the differential futures of direction candidates cannot be carried by descriptions, a structurally perfect gate still forces the user to mentally simulate consequences instead of recognizing them. Proplasma replaces simulation with materialized contrast: cheap placeholder probes commit different values on user-settled divergence axes, and the direction judgment is constituted on futures the user has actually seen. Probe generation is a **transform operation**, legitimate only inside this survival chain: Constitution spec gate (axes + placeholder policy settled) → transform generation (temp-isolated, cleanup-registered, visibly synthetic, non-evidence) → relay contrast presentation (per-axis juxtaposition) → Constitution direction decision → cleanup verification (discard_trace). Three breach conditions dissolve the chain, and any one of them demotes the protocol to a stop-and-hand-off (no generation): (1) an AI-selected divergence axis without or after the spec gate, (2) a write to a permanent project file, (3) a probe treated as evidence for any claim — the demotion is the only permitted fallback, there is no ad-hoc bypass. The self-cannibalization objection ("resolving a description-failure with more description") is answered by the tier structure: a vignette is not a label-description but a placeholder-**concretum** narration — a different layer; when even vignette-level materialization cannot carry the contrast, the Mockup tier builds real temp-isolated artifacts, and the protocol's meaning stays independent of the realization tier.
 
 ## Mode Activation
 
 ### Activation
 
-User calls `/preview` on a pending direction decision, OR the AI detects the deficit from its surface shapes and nudges. Detection is silent (Phase 0); activation always passes through the Constitution spec gate before anything is generated.
-
-**Activation layers**:
-- **Layer 1 (User-invocable)**: `/preview` slash command or description-matching input ("I'd have to see it to decide"). Always available.
-- **Layer 2 (AI-guided)**: The three detection shapes below observed at a live direction gate; the AI surfaces the deficit with evidence and proposes activation — it never activates silently.
-
-Gate predicate:
+User calls `/preview` on a pending direction decision — **Layer 1 (User-invocable)**: the slash command or description-matching input ("I'd have to see it to decide"), always available — or the AI detects the deficit from the three signals below observed at a live direction gate and nudges — **Layer 2 (AI-guided)**: the AI surfaces the deficit with evidence and proposes activation, it never activates silently. Detection is silent (Phase 0); activation always passes through the Constitution spec gate before anything is generated. Gate predicate:
 ```
 DirectionUnrecognizable ≡
     pre_commit(direction)              -- a direction commitment is imminent
@@ -446,19 +436,7 @@ DirectionUnrecognizable ≡
   ∧ fake_data_sufficient               -- type guard: the contrast holds without real evidence
   ∧ placeholder_fidelity               -- type guard: placeholders carry the axis futures without distortion
 ```
-
-**Routing precedence (over-activation guard)** — before the rows, a threshold test: if the differential futures ARE recognizable from text, there is no deficit — a regular gate suffices and no protocol activates. Then the first matching row wins:
-
-| Order | Condition | Route |
-|-------|-----------|-------|
-| ① | A structural mapping to a familiar domain carries the candidate futures on the divergence axes without distortion (mapping fidelity — mere availability of *an* analogy never fires this row: an analogy can always be manufactured, and each imports its own domain's weights) | `/ground` (validate the mapping) |
-| ② | Real evidence is required (real data, live environment) | `/inquire` (factual unknowns; empirical verification paths) |
-| ③ | Direction candidates or the frame itself are absent | `/frame` (framing) · `/elicit` (coordinate back-trace) |
-| ④ | Candidates ≥ 2 ∧ evidence-free ∧ both type guards hold | **Proplasma** |
-
-Note: when understanding arrives only through materialization, the probe does double duty (understanding + direction judgment) — the routing is still ④, since no mapping carries the futures faithfully (①) and ② needs no real evidence.
-
-**Cross-session enrichment**: Prior session indices from the hypomnesis store, when present, may seed Phase 0 deficit detection; the constitutive judgment remains with the user.
+**Routing precedence (over-activation guard)** — before the rows, a threshold test: if the differential futures ARE recognizable from text, there is no deficit — a regular gate suffices and no protocol activates. Then the first matching row wins: **①** a structural mapping to a familiar domain carries the candidate futures on the divergence axes without distortion (mapping fidelity — mere availability of *an* analogy never fires this row: an analogy can always be manufactured, and each imports its own domain's weights) routes to `/ground` (validate the mapping); **②** real evidence is required (real data, live environment) routes to `/inquire` (factual unknowns; empirical verification paths); **③** direction candidates or the frame itself are absent routes to `/frame` (framing) · `/elicit` (coordinate back-trace); **④** candidates ≥ 2 ∧ evidence-free ∧ both type guards hold routes to **Proplasma**. Note: when understanding arrives only through materialization, the probe does double duty (understanding + direction judgment) — the routing is still ④, since no mapping carries the futures faithfully (①) and ② needs no real evidence. **Cross-session enrichment**: prior session indices from the hypomnesis store, when present, may seed Phase 0 deficit detection; the constitutive judgment remains with the user.
 
 ### Priority
 
@@ -473,57 +451,23 @@ When Proplasma is active:
 **Action**: At Phase 1 present the spec gate before any generation; at Phase 4 present the direction gate whose options point at probe-exposed futures.
 </system-reminder>
 
-- Proplasma completes (or stands down via DissolutionExit, or exits via EarlyExit / MisdiagnosisExit) before the direction commitment proceeds
-- Loaded instructions resume after the terminal outcome is emitted — the DirectionalContrast record, or the dissolution / exit relay with its trace
-
 ### Trigger Signals
 
-Surface shapes of the deficit (heuristic signals, not hard gates):
-
-| Signal | Inference |
-|--------|-----------|
-| Principle-delegation answer — at a direction gate the user delegates the choice to a principle ("proceed with whatever aligns with the northstar", "go with the recommended direction") | The user cannot recognize the differential futures from the descriptions; the constitutive judgment is silently handed to the AI — this erosion of the detection/judgment boundary is the severity basis |
-| Out-of-option hermeneutic reconstruction — instead of choosing, the user reworks the option set itself | The presented labels fail to carry the futures they name |
-| Concretization demand / decision stall — the decision halts before descriptive options and the user asks for something concrete ("I'd have to see it") | Direction judgment is blocked on materialization |
-
-**Skip**:
-- Differential futures are recognizable from the textual options (regular gate suffices)
-- Only one direction candidate exists (nothing to contrast)
-- The judgment needs real evidence — route ② (`/inquire`)
-- A structural mapping to a familiar domain would carry the futures on the divergence axes without distortion — route ① (`/ground`)
-- Direction candidates or the frame are absent — route ③ (`/frame` · `/elicit`)
+Surface shapes of the deficit (heuristic signals, not hard gates): a **principle-delegation answer** — at a direction gate the user delegates the choice to a principle ("proceed with whatever aligns with the northstar", "go with the recommended direction") — signals that the user cannot recognize the differential futures from the descriptions and the constitutive judgment is silently handed to the AI, an erosion of the detection/judgment boundary that is the severity basis; an **out-of-option hermeneutic reconstruction** — the user reworks the option set itself instead of choosing — signals that the presented labels fail to carry the futures they name; a **concretization demand / decision stall** — the decision halts before descriptive options and the user asks for something concrete ("I'd have to see it") — signals that direction judgment is blocked on materialization. **Skip** when: differential futures are recognizable from the textual options (regular gate suffices); only one direction candidate exists (nothing to contrast); the judgment needs real evidence (route ②, `/inquire`); a structural mapping to a familiar domain would carry the futures on the divergence axes without distortion (route ①, `/ground`); or direction candidates or the frame are absent (route ③, `/frame` · `/elicit`).
 
 ### Mode Deactivation
 
-| Trigger | Effect |
-|---------|--------|
-| Direction constituted + harvest recorded + discard disposition declared (destruction verified, or its failure declared with handoff) | Emit DirectionalContrast; proceed with the commitment under the constituted direction |
-| Deficit dissolved in the spec-gate circulation (axes alone made the futures recognizable, or the activation premise collapsed) | DissolutionExit: relay the basis, hand the enriched axes to a regular gate — a success stand-down; on a refan re-entry, already-generated probes are discarded with dispositions declared and the pending re-fan target set (the user-authored composition, or the revised candidates) is relayed as live candidates |
-| Gap re-fan spent, contrast still insufficient | MisdiagnosisExit: misdiagnosis report + cleanup + routing handoff (①–③, or none when no row fits — the decision returns to a regular gate) |
-| User withdraws at any gate (explicit exit; a hard esc gives no turn — the bounded scratch lifecycle is the backstop), or a stand-down by consequence (an unprobed candidate named with the budget spent, or a repeated insufficiency at the re-presented gate) | EarlyExit: partial trace + cleanup enforced + residual declared — with the contrast harvest relayed as context |
+Deactivates on any of four triggers. Direction constituted + harvest recorded + discard disposition declared (destruction verified, or its failure declared with handoff) emits DirectionalContrast, and the commitment proceeds under the constituted direction. The deficit dissolving in the spec-gate circulation (axes alone made the futures recognizable, or the activation premise collapsed) emits DissolutionExit: relay the basis, hand the enriched axes to a regular gate — a success stand-down; on a refan re-entry, already-generated probes are discarded with dispositions declared and the pending re-fan target set (the user-authored composition, or the revised candidates) is relayed as live candidates. A gap re-fan spent with the contrast still insufficient emits MisdiagnosisExit: misdiagnosis report + cleanup + routing handoff (①–③, or none when no row fits — the decision returns to a regular gate). A user withdrawal at any gate (explicit exit; a hard esc gives no turn — the bounded scratch lifecycle is the backstop), or a stand-down by consequence (an unprobed candidate named with the budget spent, or a repeated insufficiency at the re-presented gate), emits EarlyExit: partial trace + cleanup enforced + residual declared — with the contrast harvest relayed as context.
 
 ## Protocol
 
 ### Phase 0: Detection + Routing (Silent)
 
-Verify the gate predicate and run the routing precedence. No user interaction unless a relay fires.
-
-1. Confirm a direction commitment is imminent and at least two candidates exist — when either fails, stand down with the failed requirement stated (fewer than two candidates — one or none — is row ③ territory: `/frame` · `/elicit` generate the missing alternatives); this is a typed exit, not a silent fall-through
-2. Threshold test: are the differential futures recognizable from text? If yes — present the finding as relay and stand down (a regular gate suffices)
-3. Walk routing rows ① → ③; on a match, present the matched row with its basis as relay and hand off (not activated)
-4. Verify both type guards: the contrast must hold on placeholder concreta alone (`fake_data_sufficient`), and placeholders must carry the axis futures without distortion (`placeholder_fidelity`). A guard failure is a routing signal, not a defect to push through — row ② (evidence needed) or row ③ (frame absent) usually explains it. When neither row explains the failure, stand down with the failed guard stated: the deficit may be real, but this protocol cannot legitimately serve it, and the decision stays at a regular gate (relay; not activated)
-5. All positive: proceed to Phase 1
+Verify the gate predicate and walk the routing precedence (PHASE TRANSITIONS Phase 0; TOOL GROUNDING relays above): confirm an imminent commitment with ≥2 candidates, test whether the futures are already recognizable from text, walk routing rows ①→③, then verify both type guards — a guard failure is usually explained by row ② (evidence needed) or row ③ (frame absent) rather than being a protocol defect. Any negative relays with its cited basis and stands down (not activated); all positive proceeds to Phase 1.
 
 ### Phase 1: Spec Gate
 
-Derive the divergence axes and draft the placeholder policy; the user settles both before anything is generated.
-
-- **Derive axes**: from the candidate directions, back-trace the unknowns on which they genuinely diverge — each axis is a dimension where probes must commit different values. Surface variation (color, naming, ordering) is not divergence
-- **Draft policy**: visible synthesis (artifacts overtly placeholder), non-evidence stamp (probes ground no claim), skeleton-data split (skeleton faithful to each direction, data fake — divergence lives in the skeleton, fake data must not blur it)
-- **Propose the probe target set (2–4) and realization tier**: which candidate directions get probes — when more than four candidates exist, the gate settles *which* are probed and the unprobed ones are named at the contrast presentation, so none is silently dropped. Tier: Vignette (session-text scenario narration; no files) or Mockup (real temp-isolated artifacts, optionally via parallel agents)
-
-Present the axes, policy, target set, and tier as pre-gate analysis text; then **present** the spec gate:
-
+Derive the divergence axes (surface variation — color, naming, ordering — is not divergence), draft the placeholder policy, and propose the probe target set and realization tier (TYPES DirectionAxis, PlaceholderPolicy, Tgt, RealizationTier); the user settles all of it before anything is generated. Present the axes, policy, target set, and tier as pre-gate analysis text; then **present** the spec gate:
 ```
 Settle the probe spec before I build anything.
 
@@ -531,38 +475,19 @@ Options:
 1. **Approve** — generate the probes on these axes under this policy
 2. **Adjust** — revise axes, policy, which directions get probed, or tier; I re-present the spec (nothing is generated meanwhile). On a materialization re-entry the target stays your composition — the spent budget covers no other fan
 ```
-
-This gate is the enforcement point of breach condition (1): past it, no divergence axis is ever AI-selected. **A re-fan whose implication carries a spec revision re-enters this gate** — a new divergence axis, a realization-tier escalation (when vignette probes could not carry the contrast, Mockup is settled here, never assumed), or a revised probe target set — scoped to that revision, before it generates anything. That is a transition, not a reminder: a re-fan that revises nothing in the spec goes straight to instantiation, and no spec revision can reach instantiation without passing through here.
-
-The pre-gate text also names what is open to you beyond the two options: **question an axis**, **contest whether this protocol is even needed**, or **step out**. None of these settles the spec, so none is an option — but the second one matters structurally: deriving the axes is itself an act of description-sharpening, and sometimes the sharpened description alone makes the futures recognizable, or exposes the fork as false. When that happens — noticed by you or by the AI — the protocol **stands down as a success**: the basis is stated, the enriched axes go back to a regular decision gate, and nothing is ever generated. The preliminary clay model is skipped when the sketch turns out to be precise enough. An analogy offered during this circulation is commentary that must declare which axis it weights — a borrowed domain imports its own weights — and never substitutes for the contrast itself.
+This gate is the enforcement point of breach condition (1): past it, no divergence axis is ever AI-selected; the spec-revision re-entry contract (new axis, tier escalation, or revised target set) is Rule 3. The pre-gate text also names what is open to you beyond the two options — **question an axis**, **contest whether this protocol is even needed**, or **step out** — none of these settles the spec, so none is an option, but contesting the premise can dissolve the deficit outright: deriving the axes is itself description-sharpening, and when that alone makes the futures recognizable or exposes the fork as false, the protocol **stands down as a success** (Rule 12) — the preliminary clay model is skipped when the sketch turns out precise enough. An analogy offered during this circulation is commentary that must declare which axis it weights — a borrowed domain imports its own weights — and never substitutes for the contrast itself.
 
 ### Phase 2: Instantiation (Transform)
 
-Generate the probes without interaction, inside the survival chain:
-
-- One probe per direction in the settled target set (2–4 for a contrast fan), each committing its own values on every settled axis. A **materialization** re-fan is the exception: it instantiates the user's own composition (one probe is enough) and contrasts it against the probes already on the table — a materialization is a recognition step, not a fresh contrast
-- **Temp isolation**: Mockup artifacts are created only under temp/scratch isolation and registered for cleanup at creation; existing project files are never modified (breach condition 2). Vignette probes emit session text only. Where the harness provides a session-scoped scratch area with a bounded lifecycle, realize temp isolation there — a leftover then decays with the substrate, and a destruction failure is a bounded residual rather than a permanent one
-- **Common commitments**: any design decision forced uniformly across all probes (a shared premise, not a divergence axis) is recorded for declaration at Phase 3 — otherwise the user may mistake it for divergence
-- Every artifact is overtly synthetic per the policy; the non-evidence stamp attaches at creation
+Generate the probes without interaction, inside the survival chain: one probe per direction in the settled target set (2–4 for a contrast fan), each committing its own values on every settled axis. A **materialization** re-fan is the exception — it instantiates only the user's own composition and contrasts it against the probes already on the table, a recognition step rather than a fresh contrast. Temp isolation, common-commitment declaration, and the non-evidence stamp at creation follow Rules 4, 7, and 5.
 
 ### Phase 3: Contrast Presentation (Relay)
 
-Fixed presentation order — **probes first**:
-
-1. Each probe, one at a time (the concretum itself: the vignette narration, or the Mockup artifact walked through)
-2. The per-axis contrast map — for each settled axis, the futures each probe exposes — with common commitments explicitly declared as shared premises
-3. Newly exposed unknowns
-
-A table placed first would re-abstract the concreta back into (structured) description — reproducing inside the presentation the very deficit the protocol resolves. The map interprets the probes; it never replaces them.
-
-If the contrast is insufficient (an axis with undifferentiated values, or the user says so): re-fan once within the shared budget — and when the insufficiency lies in realization fidelity rather than a missing axis (the vignettes could not carry the contrast), the re-fan escalates the tier through the spec gate instead of regenerating more of the same. Past the budget, what happens depends on what the budget was spent on — a spent *gap* re-fan means the deficit was misdiagnosed (report it and hand off per the routing table), while a budget spent on the user's own *materialization* means the opposite: they recognized the contrast well enough to build on it, so the direction gate is re-presented over the probes already on the table rather than the work being thrown away. That re-presentation happens once: if the contrast still cannot carry the decision at the re-presented gate, the protocol stands down — cleanup runs and the decision returns to a regular gate with the contrast findings relayed as context — rather than looping the same gate unchanged.
+Fixed presentation order — **probes first** (Rule 6): each probe's concretum (the vignette narration, or the Mockup artifact walked through), then the per-axis contrast map with common commitments declared as shared premises, then newly exposed unknowns — a table placed first would re-abstract the concreta back into description, reproducing inside the presentation the very deficit the protocol resolves. If the contrast is insufficient (an axis with undifferentiated values, or the user says so): re-fan once within the shared budget, escalating the realization tier through the spec gate when the gap is fidelity rather than a missing axis. What happens when the budget is exhausted and the contrast is still insufficient depends on what it was spent on — misdiagnosis handoff for a spent gap re-fan, or a one-shot re-presentation of the direction gate over the accumulated probes for a spent materialization (Rule 9; LOOP).
 
 ### Phase 4: Direction Gate (Constitution)
 
-Present the contrast summary as pre-gate text; then **present** the direction gate. Each option's implication is a pointer to the future a probe already exposed — recognition, not label simulation.
-
-State in that pre-gate text that three things are open to you at any point without being menu items — **question a probe**, **say the probes don't distinguish anything**, or **step out** — because none of them settles a direction. When candidates were left unprobed at the spec gate, name them here too: asking for one is a fourth free response — within the remaining re-fan budget it is probed first (a gap re-fan through the spec gate); with the budget spent, settling it un-materialized is a regular-gate decision, and the protocol stands down with the contrast relayed as context. Their trajectories differ: a question is answered and the same gate comes back; an insufficiency declaration enters the re-fan handling (within budget, or its exhaustion branches); stepping out runs cleanup and ends the protocol as an early exit. Options are for the choice; these are pathways around it.
-
+Present the contrast summary as pre-gate text; then **present** the direction gate — each option points at a future a probe already exposed, recognition rather than label simulation (Rule 2). The pre-gate text names the free-response pathways — question a probe, declare the contrast insufficient, step out, or name an unprobed candidate — per Rule 8 and PHASE TRANSITIONS Phase 4; none of them settles a direction, so none is a peer option.
 ```
 Which direction do you settle?
 
@@ -572,50 +497,22 @@ Options (one concrete Select per probe-exposed direction — type-preserving mat
    (… one numbered Select option per probed direction …)
 N. **Synthesize** — compose your own direction from the probes (recombine/adjust); opens a micro-choice: confirm it now, or materialize it as a new probe within the remaining re-fan budget
 ```
-
-- **Select(direction)** → Phase 5
-- **Synthesize(composition)** → **present** the micro-gate: **Confirm** (settle now) or **Materialize** (re-fan the synthesis into a probe; consumes the shared budget). Only the user can judge whether their synthesis is already recognized well enough — the AI cannot measure that. **With the budget spent, Materialize is not among the micro-gate's options at all** — the option set for that state is just Confirm, stated with the exhaustion and its basis. Nothing is deleted from a set the user was shown; the budget is part of what defines the set, which is also why the synthesis path always terminates
-- **Question a probe** (free response, not an option) → design-intent: answer immediately, staying within placeholder discipline (no real-evidence claims); factual unknown: record as an exposed unknown routed to `/inquire`, then re-present the gate unchanged
-- **"These don't distinguish anything"** (free response, not an option) → the insufficiency branch above
+**Select(direction)** proceeds to Phase 5; **Synthesize(composition)** opens the micro-gate — **Confirm** settles it now, **Materialize** re-fans it into a new probe within the remaining budget (with the budget spent, Materialize drops out of the option set and only Confirm remains) — per TYPES Gs and Rule 8. Free responses (questioning a probe, declaring the contrast insufficient) route per Rule 8 and the Phase 3 insufficiency handling above, never as peer options.
 
 ### Phase 5: Harvest → Discard (in this order)
 
-**Harvest precedes discard.** Harvest exactly:
-- (a) the constituted direction
-- (b) the **deciding** contrast rows — the rows that actually contributed to the decision, not the whole map
-- (c) inherited unknowns, each tagged with its downstream route:
-  - a **pre-commit check** → `/gap`, at the point where the settled direction turns into a committed action. `/gap` activates on execution commitment, not on a direction commitment, so the handoff is named at that boundary rather than handed over here
-  - a **factual unknown** → `/inquire` (placeholders can never ground it)
-  - the **constituted direction itself** → `/ground`, when it maps onto a familiar domain whose structural correspondence is worth validating — carried as a tag on the harvested direction (not as an unknown), so it survives into the terminal record
-
-The discard trace is *not* part of the harvest — it does not exist yet. Cleanup produces it, and the terminal record is assembled from the harvest plus the completed trace afterwards.
-
-Then **cleanup verification**, per probe: execute the registered cleanup, verify absence, record the Disposition. File destruction is the satisfying condition (Mockup); Vignette probes record NoFileArtifact — session-text remnants are permitted, and the non-evidence stamp pierces them: no remnant, and no harvested contrast row, is ever citable as evidence for any claim. A failed destruction is retried once, then declared as DiscardFailed in the trace with a manual-cleanup handoff — visible, never silent.
-
-The durable record keeps the direction decision only; probes and their detail remain session-local and discarded. Present the convergence trace (LOOP) and emit the terminal record.
+**Harvest precedes discard** (Rule 10): the constituted direction, the **deciding** contrast rows only (not the whole map), and inherited unknowns tagged with their downstream route — a pre-commit check to `/gap`, a factual unknown to `/inquire`, and the constituted direction itself to `/ground` when it maps onto a familiar domain worth validating (Rule 8; TYPES DownstreamRoute, GroundTag). The discard trace is not part of the harvest — cleanup produces it afterwards. Then **cleanup verification**, per probe: execute the registered cleanup, verify absence, record the Disposition (Rule 11; TYPES Disposition) — a failed destruction is retried once, then declared as DiscardFailed with a manual-cleanup handoff, visible, never silent. The durable record keeps the direction decision only; probes and their detail remain session-local and discarded. Present the convergence trace (LOOP) and emit the terminal record.
 
 ## UX Safeguards
 
-| Rule | Structure | Effect |
-|------|-----------|--------|
-| Gate specificity | Activation requires the full predicate incl. route = ④ and both type guards | No activation on decisions a regular gate or a sibling protocol serves |
-| Spec before generation | Phase 1 Qspec precedes Phase 2; Adjust loops without generating; a re-fan carrying a spec revision (new axis, tier escalation, or target-set revision) routes back through Qspec | User settles axes/policy/tier; breach condition (1) enforced on every path to generation, re-fans included |
-| Temp isolation | artifact_ref invariant: None or temp-isolated path; cleanup registered at creation | Breach condition (2) enforced; no permanent project file |
-| Non-evidence stamp | Policy attaches at creation; pierces harvest and session remnants | Breach condition (3) enforced; probes ground no claim |
-| Probe-first order | Phase 3 fixed order: probes → map → unknowns | Presentation does not re-abstract the concreta into description |
-| Common-commitment declaration | Forced shared decisions declared with the contrast map | Shared premises are not mistaken for divergence axes |
-| Bounded re-fan | Single shared budget; Materialize is offered only while it is live | Bounded loop; the synthesis path cannot cycle |
-| Ending matched to the spend | Spent on a gap re-fan → misdiagnosis handoff; spent on the user's materialization → direction gate re-presented over the accumulated probes (once — a repeated insufficiency at that gate stands down with the contrast relayed as context) | A recognized direction is never discarded by a budget rule, and the loop never re-presents an unchanged gate twice |
-| Cleanup on every exit | cleanup_verify runs for DirectionalContrast, EarlyExit, MisdiagnosisExit, and a post-generation DissolutionExit | Every artifact's disposition is declared on every exit path — destruction verified, or its failure declared with a manual-cleanup handoff, never silent |
-| Discard transparency | Per-probe Disposition in discard_trace; DiscardFailed declared with handoff | User can audit the discard; failures never silent |
-| Current-work framing | Surfacing names the work in play (axes, probes, contrast, discard) | Framing readout, not a completion tally |
+Every safeguard here is enforced by a numbered Rule or a formal-block invariant, not restated structure: gate specificity (the gate predicate + routing precedence above), spec before generation (Rule 3), temp isolation (Rule 4), the non-evidence stamp (Rule 5), probe-first order (Rule 6), common-commitment declaration (Rule 7), the bounded shared re-fan with its ending matched to what it was spent on (Rule 9), cleanup and discard transparency on every exit (Rule 11), and the current-work framing readout in place of a completion tally (LOOP). No safeguard introduces a constraint beyond what the Rules already state.
 
 ## Rules
 
 1. **Hybrid initiation, user-constituted direction** (Cognitive Partnership Move): the user's utterance ("I'd have to see it") dominates activation, and the AI may nudge from the three detection shapes with cited evidence; every constitutive step — divergence axes, placeholder policy, the direction itself — is settled by the user at a Constitution gate. The AI derives, instantiates, contrasts; it never selects the direction.
 2. **Recognition over Recall, on materialized futures**: direction-gate options point at futures the probes already exposed — the user recognizes, never mentally simulates from labels. Presenting label-only implications at the direction gate reproduces the deficit inside the gate.
 3. **Spec gate before generation** (breach condition 1): no probe exists before the spec gate settles axes and policy; no divergence axis is AI-selected past the gate. A re-fan whose implication carries a spec revision — a new axis, a realization-tier escalation (vignettes that could not carry the contrast escalate to Mockup through the gate), or a revised probe target set — **routes back through the spec gate** scoped to that revision before it generates anything; a re-fan that revises nothing in the spec goes straight to instantiation. This is a transition on the path, not an instruction to remember: there is no route from a spec revision to a probe that does not pass through the gate.
-4. **Temp isolation** (breach condition 2): probes live under temp isolation with cleanup registered at creation; existing project files are never modified. Vignette-tier probes emit session text only.
+4. **Temp isolation** (breach condition 2): probes live under temp isolation with cleanup registered at creation; existing project files are never modified. Vignette-tier probes emit session text only. Where the harness provides a session-scoped scratch area with a bounded lifecycle, isolation is realized there — a leftover decays with the substrate, and a destruction failure becomes a bounded residual rather than a permanent one.
 5. **Non-evidence stamp** (breach condition 3): a probe is evidence for no claim — the stamp attaches at creation and pierces the harvest record and any session-text remnant. Citing a placeholder concretum as grounds for any claim dissolves the protocol's legitimacy; if a breach becomes unavoidable by design, the only permitted fallback is demotion to stop-and-hand-off (no generation).
 6. **Probe-first presentation**: probes one at a time, then the per-axis contrast map, then new unknowns. A table placed first re-abstracts the concreta and reproduces the deficit in the presentation order. Each probe is presented from the concretum recorded at instantiation — the vignette narration re-presented as generated, the Mockup artifact walked through — never re-narrated from memory.
 7. **Common commitments declared**: design decisions forced uniformly across probes during instantiation are reported with the contrast map, so shared premises are never mistaken for divergence axes.
