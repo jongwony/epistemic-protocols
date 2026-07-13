@@ -21,7 +21,7 @@
 | `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 (수렴까지) | 적용된 수정 + 수렴 trace |
-| `/white-bear` | 프로즈 감사 — 금지 대신 긍정적 근거 | JSON findings (읽기 전용) |
+| `/white-bear` | 프로즈 감사 — 불필요한 경쟁-대상 언급 (금지 프레이밍, 대체-경로 언급, 부정 앵커링) | JSON findings (읽기 전용) |
 | `/zero-shot` | 프로즈 감사 — 앵커링 예시 대신 원칙 진술 | JSON findings (읽기 전용) |
 
 ## 스킬
