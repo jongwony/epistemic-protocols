@@ -8,7 +8,7 @@ allowed-tools: Read, Grep, Glob
 
 The project-local instance of the **semantic-audit engine** (`docs/audit-engine.md`). The shared mechanism — read-only Claude-judge review, the scope shape, severity calibration, self-application stance, and on-demand slash invocation — is defined in that engine document; read it for the parts this skill holds in common with its published siblings. Below is this instance's principle parameter and the one place its output schema extends the engine's base.
 
-This instance audits LLM-facing prose for Plugin Encapsulation: the runtime contract surface (`Skill.md` plus plugin description metadata) must be self-contained and intelligible without contributor documentation. Project-local — its principle is coupled to this repo's deterministic encapsulation check and contributor model, and so (unlike `white-bear` and `zero-shot`) it is not decouplable into a portable skill. Read-only: it emits structured findings and writes no fixes.
+This instance audits LLM-facing prose for Plugin Encapsulation: the runtime contract surface (`SKILL.md` plus plugin description metadata) must be self-contained and intelligible without contributor documentation. Project-local — its principle is coupled to this repo's deterministic encapsulation check and contributor model, and so (unlike `white-bear` and `zero-shot`) it is not decouplable into a portable skill. Read-only: it emits structured findings and writes no fixes.
 
 ## Purpose
 
@@ -36,7 +36,7 @@ The engine's scope shape applies, specialized to the runtime contract surface th
 
 ## What to evaluate
 
-**The principle.** The packaged runtime contract is `Skill.md` plus plugin description metadata; the surface must be self-contained, with no external references (axiom identifiers, rule file paths, design-philosophy concepts, mission/vision docs) that require reading contributor documentation. The deterministic verify check covers literal pattern matches; this audit covers semantic encapsulation.
+**The principle.** The packaged runtime contract is `SKILL.md` plus plugin description metadata; the surface must be self-contained, with no external references (axiom identifiers, rule file paths, design-philosophy concepts, mission/vision docs) that require reading contributor documentation. The deterministic verify check covers literal pattern matches; this audit covers semantic encapsulation.
 
 Two signal types — this instance extends the engine's single-failure-kind shape with a failure-kind dimension:
 
@@ -44,7 +44,7 @@ Two signal types — this instance extends the engine's single-failure-kind shap
 
 **`bypass_rephrasing`** — a prose passage that conveys a banned reference's content without using its banned token. The deterministic check passes; the encapsulation invariant fails. Test: "Would the deterministic check have flagged this if the original token had remained?" If yes, it is a bypass-rephrasing finding.
 
-For each candidate finding, prefer the rewrite that carries the meaning into the runtime surface (compile the relevant rule into `Skill.md` Rules sections per CLAUDE.md guidance) or replaces it with a self-contained restatement. Treat ambiguous cases as `severity: low` and surface them for human triage.
+For each candidate finding, prefer the rewrite that carries the meaning into the runtime surface (compile the relevant rule into `SKILL.md` Rules sections per CLAUDE.md guidance) or replaces it with a self-contained restatement. Treat ambiguous cases as `severity: low` and surface them for human triage.
 
 ## Output
 

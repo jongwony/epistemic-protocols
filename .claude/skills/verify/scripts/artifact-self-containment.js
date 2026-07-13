@@ -3,7 +3,7 @@
  * Runtime-contract self-containment verification.
  *
  * Checks the actual user-facing contract surface:
- * - transformed Skill.md (packaged runtime contract)
+ * - transformed SKILL.md (packaged runtime contract)
  * - plugin description metadata (discovery/routing layer)
  * - packaged support entry list (relative-link closure)
  */
@@ -129,12 +129,12 @@ function runArtifactSelfContainmentCheck() {
       results.fail.push({
         check,
         file: surfaceLabel,
-        message: `runtime contract malformed: expected exactly one packaged Skill.md at ${view.skillPath}`
+        message: `runtime contract malformed: expected exactly one packaged SKILL.md at ${view.skillPath}`
       });
       continue;
     }
 
-    if (checkSurfaceLeaks(view.transformedSkillMd, `${surfaceLabel}:Skill.md`, check, results)) {
+    if (checkSurfaceLeaks(view.transformedSkillMd, `${surfaceLabel}:SKILL.md`, check, results)) {
       hadFailure = true;
     }
     if (checkSurfaceLeaks(view.pluginDescription, `${surfaceLabel}:plugin-description`, check, results)) {
@@ -149,7 +149,7 @@ function runArtifactSelfContainmentCheck() {
         hadFailure = true;
         results.fail.push({
           check,
-          file: `${surfaceLabel}:Skill.md`,
+          file: `${surfaceLabel}:SKILL.md`,
           message: `relative link escapes packaged runtime surface: "${relativeTarget}" → "${resolved}"`
         });
       }
@@ -158,8 +158,8 @@ function runArtifactSelfContainmentCheck() {
     if (!hasInvocationCue(view.transformedSkillMd, view.skill)) {
       results.warn.push({
         check,
-        file: `${surfaceLabel}:Skill.md`,
-        message: 'runtime Skill.md lacks an explicit Layer 1 invocation cue (/command or Layer 1 user-invocable wording)'
+        file: `${surfaceLabel}:SKILL.md`,
+        message: 'runtime SKILL.md lacks an explicit Layer 1 invocation cue (/command or Layer 1 user-invocable wording)'
       });
     }
 

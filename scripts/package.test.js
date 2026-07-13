@@ -9,12 +9,24 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('zlib');
 const {
+  PLUGINS,
+  CODEX_SUBMIT_PLUGINS,
+  buildSkillArtifact,
+  buildCodexSubmitArtifact,
+  buildCodexSubmitArtifacts,
   buildRuntimeContractViews,
+  collectCodexSubmitFiles,
+  collectReleaseFiles,
+  isForbiddenCodexPath,
   parseFrontmatter,
+  readCodexManifestVersion,
+  runRelease,
+  runCodexSubmit,
   serializeFrontmatter,
   transformSkillMd,
   createZip,
@@ -22,6 +34,68 @@ const {
 } = require('./package');
 const { runArtifactSelfContainmentCheck } = require('../.claude/skills/verify/scripts/artifact-self-containment');
 const { discoverPlugins } = require('./load-protocols');
+
+function writeFixtureFile(root, relativePath, content = 'fixture\n') {
+  const target = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, content);
+}
+
+function makeCodexFixture() {
+  const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'codex-submit-fixture-'));
+  const plugin = { dir: 'fixture-plugin', skill: 'fixture' };
+  writeFixtureFile(root, 'fixture-plugin/.codex-plugin/plugin.json', JSON.stringify({
+    name: 'fixture-plugin',
+    version: '1.2.3',
+  }));
+  writeFixtureFile(root, 'fixture-plugin/.claude-plugin/plugin.json', JSON.stringify({
+    name: 'fixture-plugin',
+    version: '1.2.3',
+  }));
+  writeFixtureFile(root, 'fixture-plugin/skills/fixture/SKILL.md', [
+    '---',
+    'name: fixture',
+    'description: Fixture skill',
+    '---',
+    '[local](references/local.md?view=1#section)',
+    '[external](https://example.com/reference)',
+    '`references/inline.md`',
+    '`agents/refuter.md`',
+    '',
+  ].join('\n'));
+  writeFixtureFile(root, 'fixture-plugin/skills/fixture/references/local.md');
+  writeFixtureFile(root, 'fixture-plugin/skills/fixture/references/inline.md');
+  writeFixtureFile(root, 'fixture-plugin/skills/fixture/scripts/unreferenced.sh', '#!/bin/sh\n');
+  writeFixtureFile(root, 'fixture-plugin/skills/fixture/assets/icon.svg', '<svg/>\n');
+  writeFixtureFile(root, 'fixture-plugin/skills/fixture/agents/openai.yaml', [
+    'interface:',
+    '  icon_small: "./assets/icon.svg"',
+    '',
+  ].join('\n'));
+  writeFixtureFile(
+    root,
+    'fixture-plugin/agents/refuter.md',
+    '[fixture reference](../references/local.md)\n'
+  );
+  writeFixtureFile(root, 'fixture-plugin/agents/unrelated.md');
+  return { root, plugin };
+}
+
+function snapshotTree(root) {
+  if (!fs.existsSync(root)) return null;
+  const snapshot = [];
+  function walk(current, relative) {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })
+      .sort((a, b) => a.name.localeCompare(b.name))) {
+      const nextRelative = path.posix.join(relative, entry.name);
+      const target = path.join(current, entry.name);
+      if (entry.isDirectory()) walk(target, nextRelative);
+      else if (entry.isFile()) snapshot.push([nextRelative, fs.readFileSync(target).toString('base64')]);
+    }
+  }
+  walk(root, '');
+  return snapshot;
+}
 
 // ============================================================
 // parseFrontmatter
@@ -209,9 +283,9 @@ describe('runtime contract view', () => {
     const views = buildRuntimeContractViews();
     assert.equal(views.length, 39);
     for (const view of views) {
-      assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one Skill.md entry`);
-      assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed Skill.md`);
-      assert.ok(view.packagedEntries.includes(`${view.skill}/Skill.md`), `${view.plugin}:${view.skill} should package Skill.md`);
+      assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one SKILL.md entry`);
+      assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed SKILL.md`);
+      assert.ok(view.packagedEntries.includes(`${view.skill}/SKILL.md`), `${view.plugin}:${view.skill} should package SKILL.md`);
       assert.ok(typeof view.pluginDescription === 'string');
     }
   });
@@ -252,7 +326,7 @@ describe('artifact-self-containment detector liveness', () => {
   const TARGET_SKILL_MD = path.join(REPO_ROOT, 'aitesis', 'skills', 'inquire', 'SKILL.md');
   const INJECTION = '\n\nContributor reference: .claude/rules/axioms.md (A1)\n';
 
-  it('fires when a known banned pattern is injected into a Skill.md', () => {
+  it('fires when a known banned pattern is injected into a SKILL.md', () => {
     const backup = fs.readFileSync(TARGET_SKILL_MD, 'utf8');
     try {
       fs.writeFileSync(TARGET_SKILL_MD, backup + INJECTION);
@@ -513,6 +587,302 @@ describe('createZip', () => {
       recovered = compressed;
     }
     assert.deepEqual(recovered, original);
+  });
+});
+
+// ============================================================
+// codex-submit artifact profile
+// ============================================================
+
+describe('codex-submit artifact profile', () => {
+  it('packages support closure, openai.yaml, and only directly referenced plugin agents', () => {
+    const { root, plugin } = makeCodexFixture();
+    try {
+      const first = buildCodexSubmitArtifact(plugin, { root });
+      const second = buildCodexSubmitArtifact(plugin, { root });
+      assert.deepEqual(first.artifact.entries, [
+        'fixture/SKILL.md',
+        'fixture/agents/openai.yaml',
+        'fixture/agents/refuter.md',
+        'fixture/assets/icon.svg',
+        'fixture/references/inline.md',
+        'fixture/references/local.md',
+        'fixture/scripts/unreferenced.sh',
+      ]);
+      assert.ok(!first.artifact.entries.includes('fixture/agents/unrelated.md'));
+      assert.equal(first.artifact.version, '1.2.3');
+      assert.equal(first.artifact.entries.filter(name => name.endsWith('/SKILL.md')).length, 1);
+      assert.ok(!first.artifact.entries.some(name => name.endsWith('/Skill.md')));
+      assert.deepEqual(first.zipBuffer, second.zipBuffer);
+      assert.deepEqual(first.artifact, second.artifact);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('fails closed on every forbidden filename and path-segment class', () => {
+    const forbidden = [
+      'references/.env',
+      'references/.env.local',
+      'scripts/server.pem',
+      'scripts/private.key',
+      'assets/id_rsa',
+      'assets/id_rsa.pub',
+      'references/credentials.json',
+      'references/secrets.yaml',
+      'references/events.jsonl',
+      'references/.claude/state.md',
+      'references/.codex/state.md',
+      'references/sessions/state.md',
+      'references/transcripts/state.md',
+    ];
+    for (const relativePath of forbidden) {
+      const { root, plugin } = makeCodexFixture();
+      try {
+        writeFixtureFile(root, `fixture-plugin/skills/fixture/${relativePath}`);
+        assert.equal(isForbiddenCodexPath(`fixture/${relativePath}`), true, relativePath);
+        assert.throws(
+          () => collectCodexSubmitFiles(plugin, { root }),
+          /artifact forbidden path/,
+          relativePath
+        );
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+    assert.equal(isForbiddenCodexPath('fixture/references/public.md'), false);
+  });
+
+  it('rejects missing and escaping archive-local references', () => {
+    for (const reference of ['[missing](references/missing.md)', '[escape](../../outside.md)']) {
+      const { root, plugin } = makeCodexFixture();
+      try {
+        const skillPath = path.join(root, 'fixture-plugin', 'skills', 'fixture', 'SKILL.md');
+        fs.appendFileSync(skillPath, `${reference}\n`);
+        assert.throws(
+          () => buildCodexSubmitArtifact(plugin, { root }),
+          /unresolved local reference|reference escapes skill root/
+        );
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it('treats inline-code and openai.yaml asset paths as closure obligations', () => {
+    const missingTargets = [
+      'fixture-plugin/skills/fixture/references/inline.md',
+      'fixture-plugin/skills/fixture/assets/icon.svg',
+    ];
+    for (const missingTarget of missingTargets) {
+      const { root, plugin } = makeCodexFixture();
+      try {
+        fs.rmSync(path.join(root, missingTarget));
+        assert.throws(
+          () => buildCodexSubmitArtifact(plugin, { root }),
+          /unresolved local reference/,
+          missingTarget
+        );
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it('rejects parent traversal in agents/openai.yaml paths', () => {
+    const { root, plugin } = makeCodexFixture();
+    try {
+      writeFixtureFile(
+        root,
+        'fixture-plugin/skills/fixture/agents/openai.yaml',
+        'interface:\n  icon_small: "./assets/../icon.svg"\n'
+      );
+      assert.throws(
+        () => buildCodexSubmitArtifact(plugin, { root }),
+        /openai\.yaml traversal is forbidden/
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('uses the Codex manifest version and rejects Claude manifest drift', () => {
+    const { root, plugin } = makeCodexFixture();
+    try {
+      assert.equal(readCodexManifestVersion(plugin, { root }), '1.2.3');
+      writeFixtureFile(root, 'fixture-plugin/.claude-plugin/plugin.json', JSON.stringify({
+        name: 'fixture-plugin',
+        version: '9.9.9',
+      }));
+      assert.throws(
+        () => readCodexManifestVersion(plugin, { root }),
+        /manifest version mismatch/
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('fails when an expected selected plugin is absent', () => {
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'codex-submit-empty-'));
+    try {
+      assert.throws(
+        () => buildCodexSubmitArtifacts({ root }),
+        /expected plugin is absent: aitesis/
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('rejects an excluded plugin even when it exists in the repository', () => {
+    assert.throws(
+      () => buildCodexSubmitArtifact({ dir: 'anamnesis', skill: 'recollect' }),
+      /excluded plugin selected: anamnesis/
+    );
+  });
+
+  it('dry-run reports exactly the public-core set without mutating profile output', () => {
+    const profileDir = path.join(__dirname, '..', 'dist', 'codex-submit');
+    const before = snapshotTree(profileDir);
+    const script = path.join(__dirname, 'package.js');
+    const first = JSON.parse(execFileSync(
+      process.execPath,
+      [script, '--profile', 'codex-submit', '--dry-run'],
+      { encoding: 'utf8' }
+    ));
+    const second = JSON.parse(execFileSync(
+      process.execPath,
+      [script, '--profile', 'codex-submit', '--dry-run'],
+      { encoding: 'utf8' }
+    ));
+
+    assert.equal(first.profile, 'codex-submit');
+    assert.equal(first.dryRun, true);
+    assert.equal(first.results.length, 15);
+    assert.deepEqual(first.index, second.index);
+    assert.deepEqual(
+      first.results.map(({ plugin, skill }) => ({ dir: plugin, skill })),
+      CODEX_SUBMIT_PLUGINS
+    );
+    assert.ok(!first.results.some(result =>
+      ['anamnesis', 'anagoge', 'epistemic-cooperative', 'bundle'].includes(result.plugin)
+    ));
+    assert.ok(!first.results.some(result => /bundle|release-notes/.test(result.filename)));
+    for (const artifact of first.results) {
+      assert.deepEqual(artifact.entries, [...artifact.entries].sort());
+      assert.equal(artifact.entries.filter(name => name.endsWith('/SKILL.md')).length, 1);
+      assert.ok(!artifact.entries.some(name => name.endsWith('/Skill.md')));
+    }
+    assert.ok(
+      first.results.find(result => result.plugin === 'diylisis').entries
+        .includes('distill/agents/zero-memory-refuter.md')
+    );
+    assert.ok(
+      first.results.find(result => result.plugin === 'prothesis').entries
+        .includes('frame/references/conceptual-foundations.md')
+    );
+    assert.deepEqual(snapshotTree(profileDir), before);
+  });
+
+  it('clean rebuilds reproduce index data and remove stale profile artifacts', () => {
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'codex-submit-build-'));
+    const outputDir = path.join(root, 'output');
+    try {
+      const first = runCodexSubmit({ dryRun: false, outputDir });
+      const firstSnapshot = snapshotTree(outputDir);
+      writeFixtureFile(outputDir, 'stale.zip', 'stale');
+      const second = runCodexSubmit({ dryRun: false, outputDir });
+      const secondSnapshot = snapshotTree(outputDir);
+
+      assert.deepEqual(second.index, first.index);
+      assert.deepEqual(secondSnapshot, firstSnapshot);
+      assert.ok(!fs.existsSync(path.join(outputDir, 'stale.zip')));
+      assert.equal(second.index.artifacts.length, 15);
+      for (const artifact of second.index.artifacts) {
+        const zip = fs.readFileSync(path.join(outputDir, artifact.filename));
+        assert.equal(zip.length, artifact.bytes);
+        assert.equal(
+          crypto.createHash('sha256').update(zip).digest('hex'),
+          artifact.sha256
+        );
+      }
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+// ============================================================
+// unified release artifact contract
+// ============================================================
+
+describe('unified release artifact contract', () => {
+  it('produces byte-identical release and submission ZIPs for the fifteen public-core skills', () => {
+    for (const plugin of CODEX_SUBMIT_PLUGINS) {
+      const release = buildSkillArtifact(plugin, { profile: 'release' });
+      const submission = buildCodexSubmitArtifact(plugin);
+      assert.deepEqual(release.zipBuffer, submission.zipBuffer, `${plugin.dir}/${plugin.skill}`);
+      assert.deepEqual(release.artifact, submission.artifact, `${plugin.dir}/${plugin.skill}`);
+    }
+  });
+
+  it('retains utility sidecars and directly referenced agents in the release superset', () => {
+    const entriesFor = (dir, skill) => collectReleaseFiles({ dir, skill }).map(file => file.zipPath);
+    assert.ok(entriesFor('epistemic-cooperative', 'catalog').includes('catalog/routing-map.md'));
+    assert.ok(entriesFor('epistemic-cooperative', 'comment-review')
+      .includes('comment-review/templates/preview.html'));
+    assert.ok(entriesFor('epistemic-cooperative', 'forge')
+      .includes('forge/adapters/codex-goals.md'));
+    assert.ok(entriesFor('diylisis', 'distill')
+      .includes('distill/agents/zero-memory-refuter.md'));
+    assert.ok(entriesFor('epistemic-cooperative', 'curses')
+      .includes('curses/agents/dimension-profiler.md'));
+    assert.ok(!entriesFor('epistemic-cooperative', 'comment-review')
+      .includes('comment-review/evals/evals.json'));
+  });
+
+  it('rebuilds every release ZIP and bundle deterministically with canonical SKILL.md casing', () => {
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'release-build-'));
+    const outputDir = path.join(root, 'output');
+    try {
+      const first = runRelease({ dryRun: false, outputDir });
+      const firstSnapshot = snapshotTree(outputDir);
+      const second = runRelease({ dryRun: false, outputDir });
+      const secondSnapshot = snapshotTree(outputDir);
+
+      assert.deepEqual(second, first);
+      assert.deepEqual(secondSnapshot, firstSnapshot);
+      assert.equal(second.results.length, 40);
+      assert.equal(PLUGINS.length, 39);
+      for (const plugin of PLUGINS) {
+        const build = buildSkillArtifact(plugin, { profile: 'release' });
+        assert.equal(
+          build.artifact.entries.filter(name => name.endsWith('/SKILL.md')).length,
+          1,
+          `${plugin.dir}/${plugin.skill}`
+        );
+        assert.ok(
+          !build.artifact.entries.some(name => name.endsWith('/Skill.md')),
+          `${plugin.dir}/${plugin.skill}`
+        );
+        const written = fs.readFileSync(path.join(outputDir, build.artifact.filename));
+        assert.equal(written.length, build.artifact.bytes);
+        assert.equal(
+          crypto.createHash('sha256').update(written).digest('hex'),
+          build.artifact.sha256
+        );
+      }
+      const bundle = second.results.find(result => result.plugin === 'bundle');
+      const bundleBytes = fs.readFileSync(path.join(outputDir, bundle.zip));
+      assert.equal(bundleBytes.length, bundle.bytes);
+      assert.equal(
+        crypto.createHash('sha256').update(bundleBytes).digest('hex'),
+        bundle.sha256
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
   });
 });
 

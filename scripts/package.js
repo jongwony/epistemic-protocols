@@ -13,6 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const crypto = require('crypto');
 const { discoverPlugins, protocolOrder, CANONICAL_CLUSTERS } = require('./load-protocols');
 const projectRoot = path.resolve(__dirname, '..');
 
@@ -21,15 +22,15 @@ const projectRoot = path.resolve(__dirname, '..');
 // ============================================================
 
 // Single filesystem walk shared across PLUGINS / PROTOCOL_METADATA /
-// PROTOCOL_ORDER / buildRuntimeContractView / main(). plugin.json reads are
-// memoized inside the helper, so the prior buildRuntimeContractView →
-// packagePlugin double-read collapses to one read per plugin.json.
+// PROTOCOL_ORDER. Artifact building reads the Codex manifest directly because
+// it is the canonical packaged-version source and must be compared with the
+// corresponding Claude manifest at the build boundary.
 const _records = discoverPlugins({ projectRoot });
 
 const PLUGINS = _records.map(r => ({ dir: r.dir, skill: r.skill }));
 
-// claude.ai description overrides (originals exceed 200 chars)
-// Protocol overrides: compact Type-only format for Layer 0 reference
+// Compact description overrides for packaged discovery metadata.
+// Protocol overrides use Type-only format for Layer 0 reference.
 const DESCRIPTION_OVERRIDES = {
   frame: 'Multi-perspective framing — (FrameworkAbsent, AI, DESIGN, Inquiry) → FramedInquiry',
   gap: 'Gap surfacing before decisions — (GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision',
@@ -148,12 +149,37 @@ Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory e
 
 const DESCRIPTION_LIMIT = 200;
 // LINE_GUIDELINE is informational — emits a packaging warning but does not fail the build.
-// 510 absorbs anamnesis Skill.md at 501 lines (after the +1 Euporia distinction row);
+// 510 absorbs anamnesis SKILL.md at 501 lines (after the +1 Euporia distinction row);
 // existing 525/581/591 lines in aitesis/prothesis/prosoche were already over the prior 500 baseline.
 // Per-protocol grandfathered overage is acknowledged; tightening this guideline requires per-file caps.
 const LINE_GUIDELINE = 510;
 const DIST_DIR = path.join(projectRoot, 'dist');
 const BUNDLE_NAME = 'epistemic-protocols-bundle';
+const CODEX_SUBMIT_DIST_DIR = path.join(DIST_DIR, 'codex-submit');
+const CODEX_SUBMIT_PLUGINS = Object.freeze([
+  { dir: 'aitesis', skill: 'inquire' },
+  { dir: 'analogia', skill: 'ground' },
+  { dir: 'diairesis', skill: 'delimit' },
+  { dir: 'diylisis', skill: 'distill' },
+  { dir: 'elenchus', skill: 'sublate' },
+  { dir: 'epharmoge', skill: 'contextualize' },
+  { dir: 'euporia', skill: 'elicit' },
+  { dir: 'horismos', skill: 'bound' },
+  { dir: 'hyphegesis', skill: 'conduct' },
+  { dir: 'katalepsis', skill: 'grasp' },
+  { dir: 'periagoge', skill: 'induce' },
+  { dir: 'proplasma', skill: 'preview' },
+  { dir: 'prosoche', skill: 'attend' },
+  { dir: 'prothesis', skill: 'frame' },
+  { dir: 'syneidesis', skill: 'gap' },
+]);
+const CODEX_SUBMIT_EXCLUDED = new Set(['anamnesis', 'anagoge', 'epistemic-cooperative']);
+const CODEX_SUPPORT_DIRS = Object.freeze(['references', 'scripts', 'assets']);
+const CODEX_FORBIDDEN_SEGMENTS = new Set(['.claude', '.codex', 'sessions', 'transcripts']);
+
+function compareCodexPaths(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
 
 // ============================================================
 // Section 2: YAML Frontmatter Parser
@@ -301,7 +327,10 @@ function crc32(buf) {
   return zlib.crc32(buf) >>> 0;
 }
 
-function dosDateTime() {
+function dosDateTime({ deterministic = false } = {}) {
+  if (deterministic) {
+    return { time: 0, date: 0x0021 }; // 1980-01-01 00:00:00, the DOS epoch.
+  }
   const d = new Date();
   return {
     time: ((d.getHours() & 0x1F) << 11) | ((d.getMinutes() & 0x3F) << 5) | ((d.getSeconds() >> 1) & 0x1F),
@@ -309,8 +338,8 @@ function dosDateTime() {
   };
 }
 
-function createZip(entries) {
-  const { time, date } = dosDateTime();
+function createZip(entries, { deterministic = false } = {}) {
+  const { time, date } = dosDateTime({ deterministic });
   const localParts = [];
   const centralParts = [];
   let offset = 0;
@@ -380,43 +409,451 @@ function createZip(entries) {
 }
 
 // ============================================================
-// Section 5: File Collector
+// Section 5: Canonical SKILL.md Artifact Builder
 // ============================================================
 
-function collectFiles(baseDir, prefix) {
-  const files = [];
+function isForbiddenCodexPath(archivePath) {
+  const segments = archivePath.split('/');
+  if (segments.some(segment => CODEX_FORBIDDEN_SEGMENTS.has(segment))) return true;
 
-  function walk(dir, rel) {
-    const entries = fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
+  const basename = segments.at(-1).toLowerCase();
+  return basename === '.env' ||
+    basename.startsWith('.env.') ||
+    basename.endsWith('.pem') ||
+    basename.endsWith('.key') ||
+    basename === 'id_rsa' ||
+    basename === 'id_rsa.pub' ||
+    basename.startsWith('credentials.') ||
+    basename.startsWith('secrets.') ||
+    basename.endsWith('.jsonl');
+}
+
+function assertCodexPathAllowed(archivePath) {
+  if (isForbiddenCodexPath(archivePath)) {
+    throw new Error(`artifact forbidden path: ${archivePath}`);
+  }
+}
+
+function stripReferenceSuffix(target) {
+  const suffix = target.search(/[?#]/);
+  return suffix === -1 ? target : target.slice(0, suffix);
+}
+
+function markdownTarget(rawTarget) {
+  const trimmed = rawTarget.trim();
+  if (trimmed.startsWith('<')) {
+    const closing = trimmed.indexOf('>');
+    return closing === -1 ? trimmed : trimmed.slice(1, closing);
+  }
+  return trimmed.match(/^\S+/)?.[0] || '';
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function extractArchiveLocalReferences(
+  content,
+  archivePath,
+  { inlinePrefixes = [...CODEX_SUPPORT_DIRS, 'agents'], inlineRootFiles = [] } = {}
+) {
+  const references = [];
+  const markdownPattern = /!?\[[^\]]*\]\(([^)]+)\)/g;
+  const prefixPattern = inlinePrefixes.map(escapeRegExp).join('|');
+  const rootFilePattern = inlineRootFiles.map(escapeRegExp).join('|');
+  const tokenPattern = [
+    prefixPattern ? `(?:${prefixPattern})\\/[^\`\\s]+` : null,
+    rootFilePattern ? `(?:${rootFilePattern})` : null,
+  ].filter(Boolean).join('|');
+  const inlinePathPattern = tokenPattern ? new RegExp(`\`(${tokenPattern})\``, 'g') : null;
+  let match;
+
+  while ((match = markdownPattern.exec(content)) !== null) {
+    const target = markdownTarget(match[1]);
+    if (!target || /^[A-Za-z][A-Za-z0-9+.-]*:/.test(target) ||
+        target.startsWith('//') || target.startsWith('#') || target.startsWith('/')) {
+      continue;
+    }
+    references.push({ kind: 'markdown', target });
+  }
+
+  if (inlinePathPattern) {
+    while ((match = inlinePathPattern.exec(content)) !== null) {
+      references.push({ kind: 'inline', target: match[1] });
+    }
+  }
+
+  if (archivePath.endsWith('/agents/openai.yaml')) {
+    for (const line of content.split('\n')) {
+      const yamlPath = line.match(/(?:^|:\s*|-\s*)(["']?)(\.\/[^"'\s#]+)\1(?:\s|#|$)/)?.[2];
+      if (yamlPath) references.push({ kind: 'openai-yaml', target: yamlPath });
+    }
+  }
+
+  return references;
+}
+
+function resolveCodexReference(reference, referringArchivePath, skill) {
+  let target = stripReferenceSuffix(reference.target);
+  if (!target) return null;
+
+  if (reference.kind === 'openai-yaml') {
+    if (target.split('/').includes('..')) {
+      throw new Error(`artifact openai.yaml traversal is forbidden: ${target}`);
+    }
+    target = target.slice(2);
+    return path.posix.normalize(`${skill}/${target}`);
+  }
+
+  return path.posix.normalize(path.posix.join(path.posix.dirname(referringArchivePath), target));
+}
+
+function assertCodexReferenceClosure(
+  zipEntries,
+  skill,
+  {
+    inlinePrefixes,
+    inlineRootFiles = [],
+    label = 'codex-submit',
+    allowPlaceholderReferences = false,
+    validateSupportText = true,
+  } = {}
+) {
+  const packaged = new Set(zipEntries.map(entry => entry.name));
+  const skillRoot = `${skill}/`;
+
+  for (const entry of zipEntries) {
+    if (!/\.(?:md|ya?ml)$/i.test(entry.name)) continue;
+    if (!validateSupportText &&
+        entry.name !== `${skill}/SKILL.md` &&
+        !entry.name.endsWith('/agents/openai.yaml')) {
+      continue;
+    }
+    const content = entry.data.toString('utf8');
+    for (const reference of extractArchiveLocalReferences(content, entry.name, {
+      inlinePrefixes,
+      inlineRootFiles,
+    })) {
+      const resolved = resolveCodexReference(reference, entry.name, skill);
+      if (!resolved) continue;
+      if (!resolved.startsWith(skillRoot)) {
+        throw new Error(
+          `${label} reference escapes skill root: ${entry.name} -> ${reference.target}`
+        );
+      }
+      const placeholderMatch = allowPlaceholderReferences && /<[^/<>]+>/.test(resolved)
+        ? new RegExp(
+          `^${resolved.split(/(<[^/<>]+>)/).map(part =>
+            /^<[^/<>]+>$/.test(part) ? '[^/]+' : escapeRegExp(part)
+          ).join('')}$`
+        )
+        : null;
+      if (!packaged.has(resolved) &&
+          !(placeholderMatch && [...packaged].some(name => placeholderMatch.test(name)))) {
+        throw new Error(
+          `${label} unresolved local reference: ${entry.name} -> ${reference.target} (${resolved})`
+        );
+      }
+    }
+  }
+}
+
+function collectRegularFiles(sourceDir, archiveDir, files) {
+  const entries = fs.readdirSync(sourceDir, { withFileTypes: true })
+    .sort((a, b) => compareCodexPaths(a.name, b.name));
+  for (const entry of entries) {
+    const sourcePath = path.join(sourceDir, entry.name);
+    const archivePath = path.posix.join(archiveDir, entry.name);
+    assertCodexPathAllowed(archivePath);
+    if (entry.isSymbolicLink()) continue;
+    if (entry.isDirectory()) {
+      collectRegularFiles(sourcePath, archivePath, files);
+    } else if (entry.isFile()) {
+      files.push({ sourcePath, zipPath: archivePath, isSkillMd: false });
+    }
+  }
+}
+
+function directlyReferencedPluginAgents(skillContent) {
+  const names = new Set();
+  const references = extractArchiveLocalReferences(skillContent, 'skill/SKILL.md');
+  for (const reference of references) {
+    const target = stripReferenceSuffix(reference.target);
+    const match = target.match(/^agents\/([A-Za-z0-9._-]+\.md)$/);
+    if (match) names.add(match[1]);
+  }
+  return [...names].sort(compareCodexPaths);
+}
+
+function collectCodexSubmitFiles(plugin, { root = projectRoot } = {}) {
+  const pluginDir = path.join(root, plugin.dir);
+  const skillDir = path.join(pluginDir, 'skills', plugin.skill);
+  const skillSource = path.join(skillDir, 'SKILL.md');
+
+  if (!fs.existsSync(pluginDir)) {
+    throw new Error(`codex-submit expected plugin is absent: ${plugin.dir}`);
+  }
+  if (!fs.existsSync(skillDir) || !fs.statSync(skillDir).isDirectory()) {
+    throw new Error(`codex-submit expected skill is absent: ${plugin.dir}/${plugin.skill}`);
+  }
+  if (!fs.existsSync(skillSource) || !fs.lstatSync(skillSource).isFile()) {
+    throw new Error(`codex-submit expected SKILL.md is absent: ${plugin.dir}/${plugin.skill}`);
+  }
+
+  const skillContent = fs.readFileSync(skillSource, 'utf8');
+  const files = [{
+    sourcePath: skillSource,
+    zipPath: `${plugin.skill}/SKILL.md`,
+    isSkillMd: true,
+  }];
+
+  for (const supportDir of CODEX_SUPPORT_DIRS) {
+    const sourceDir = path.join(skillDir, supportDir);
+    if (!fs.existsSync(sourceDir)) continue;
+    if (!fs.lstatSync(sourceDir).isDirectory()) {
+      throw new Error(`codex-submit support path is not a directory: ${sourceDir}`);
+    }
+    collectRegularFiles(sourceDir, `${plugin.skill}/${supportDir}`, files);
+  }
+
+  const openaiYaml = path.join(skillDir, 'agents', 'openai.yaml');
+  if (fs.existsSync(openaiYaml)) {
+    const archivePath = `${plugin.skill}/agents/openai.yaml`;
+    assertCodexPathAllowed(archivePath);
+    if (!fs.lstatSync(openaiYaml).isFile()) {
+      throw new Error(`codex-submit agents/openai.yaml is not a regular file: ${openaiYaml}`);
+    }
+    files.push({ sourcePath: openaiYaml, zipPath: archivePath, isSkillMd: false });
+  }
+
+  for (const agentName of directlyReferencedPluginAgents(skillContent)) {
+    const skillAgent = path.join(skillDir, 'agents', agentName);
+    if (fs.existsSync(skillAgent)) continue;
+    const pluginAgent = path.join(pluginDir, 'agents', agentName);
+    if (!fs.existsSync(pluginAgent) || !fs.lstatSync(pluginAgent).isFile()) continue;
+    const archivePath = `${plugin.skill}/agents/${agentName}`;
+    assertCodexPathAllowed(archivePath);
+    files.push({ sourcePath: pluginAgent, zipPath: archivePath, isSkillMd: false });
+  }
+
+  return files.sort((a, b) => compareCodexPaths(a.zipPath, b.zipPath));
+}
+
+function collectReleaseFiles(plugin, { root = projectRoot } = {}) {
+  const files = collectCodexSubmitFiles(plugin, { root });
+  const included = new Set(files.map(file => file.sourcePath));
+  const skillDir = path.join(root, plugin.dir, 'skills', plugin.skill);
+
+  function walk(dir, archiveDir, isSkillRoot = false) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+      .sort((a, b) => compareCodexPaths(a.name, b.name));
     for (const entry of entries) {
       if (EXCLUDE_NAMES.has(entry.name)) continue;
       if (EXCLUDE_EXTS.has(path.extname(entry.name))) continue;
       if (entry.isSymbolicLink()) continue;
-      const fullPath = path.join(dir, entry.name);
+      if (isSkillRoot && entry.name === 'SKILL.md') continue;
+
+      const sourcePath = path.join(dir, entry.name);
+      const archivePath = path.posix.join(archiveDir, entry.name);
+      if (included.has(sourcePath)) continue;
       if (entry.isDirectory()) {
-        if (EXCLUDE_DIRS.has(entry.name)) continue;
-        walk(fullPath, rel + entry.name + '/');
-      } else {
-        const zipName = entry.name === 'SKILL.md' ? 'Skill.md' : entry.name;
-        files.push({ sourcePath: fullPath, zipPath: rel + zipName, isSkillMd: entry.name === 'SKILL.md' });
+        if (isSkillRoot && (EXCLUDE_DIRS.has(entry.name) || CODEX_SUPPORT_DIRS.includes(entry.name))) {
+          continue;
+        }
+        assertCodexPathAllowed(archivePath);
+        walk(sourcePath, archivePath);
+      } else if (entry.isFile()) {
+        assertCodexPathAllowed(archivePath);
+        files.push({ sourcePath, zipPath: archivePath, isSkillMd: false });
+        included.add(sourcePath);
       }
     }
   }
 
-  walk(baseDir, prefix + '/');
-  return files;
+  walk(skillDir, plugin.skill, true);
+  return files.sort((a, b) => compareCodexPaths(a.zipPath, b.zipPath));
+}
+
+function readCodexManifestVersion(plugin, { root = projectRoot } = {}) {
+  const codexManifestPath = path.join(root, plugin.dir, '.codex-plugin', 'plugin.json');
+  if (!fs.existsSync(codexManifestPath)) {
+    throw new Error(`artifact manifest is absent: ${plugin.dir}/.codex-plugin/plugin.json`);
+  }
+  const codexManifest = JSON.parse(fs.readFileSync(codexManifestPath, 'utf8'));
+  if (typeof codexManifest.version !== 'string' || !codexManifest.version) {
+    throw new Error(`artifact manifest version is absent: ${plugin.dir}/.codex-plugin/plugin.json`);
+  }
+
+  const claudeManifestPath = path.join(root, plugin.dir, '.claude-plugin', 'plugin.json');
+  if (fs.existsSync(claudeManifestPath)) {
+    const claudeManifest = JSON.parse(fs.readFileSync(claudeManifestPath, 'utf8'));
+    if (claudeManifest.version !== codexManifest.version) {
+      throw new Error(
+        `artifact manifest version mismatch for ${plugin.dir}: ` +
+        `Codex ${codexManifest.version}, Claude ${claudeManifest.version}`
+      );
+    }
+  }
+  return codexManifest.version;
+}
+
+function assertCodexArtifactContract(
+  zipEntries,
+  plugin,
+  {
+    inlinePrefixes,
+    inlineRootFiles,
+    label = 'codex-submit',
+    allowPlaceholderReferences = false,
+    validateSupportText = true,
+  } = {}
+) {
+  const skillEntries = zipEntries.filter(entry => entry.name.endsWith('/SKILL.md'));
+  if (skillEntries.length !== 1 || skillEntries[0].name !== `${plugin.skill}/SKILL.md`) {
+    throw new Error(
+      `${label} ${plugin.dir} must contain exactly one ${plugin.skill}/SKILL.md`
+    );
+  }
+  if (zipEntries.some(entry => entry.name.endsWith('/Skill.md'))) {
+    throw new Error(`${label} ${plugin.dir} contains forbidden Skill.md casing`);
+  }
+  assertCodexReferenceClosure(zipEntries, plugin.skill, {
+    inlinePrefixes,
+    inlineRootFiles,
+    label,
+    allowPlaceholderReferences,
+    validateSupportText,
+  });
+}
+
+function buildSkillArtifact(
+  plugin,
+  { root = projectRoot, profile = 'release', warnings = [] } = {}
+) {
+  const files = profile === 'codex-submit'
+    ? collectCodexSubmitFiles(plugin, { root })
+    : collectReleaseFiles(plugin, { root });
+  const version = readCodexManifestVersion(plugin, { root });
+  const zipEntries = files.map(file => {
+    let data = fs.readFileSync(file.sourcePath);
+    if (file.isSkillMd) {
+      const content = data.toString('utf8');
+      const lineCount = content.split('\n').length - (content.endsWith('\n') ? 1 : 0);
+      if (lineCount > LINE_GUIDELINE) {
+        warnings.push(
+          `${plugin.dir}: SKILL.md is ${lineCount} lines ` +
+          `(${lineCount - LINE_GUIDELINE} over ${LINE_GUIDELINE}-line guideline)`
+        );
+      }
+      const { fields } = parseFrontmatter(content);
+      const desc = fields.get('description');
+      if (desc && desc.length > DESCRIPTION_LIMIT && !DESCRIPTION_OVERRIDES[plugin.skill]) {
+        warnings.push(
+          `${plugin.dir}: description is ${desc.length} chars ` +
+          `(over ${DESCRIPTION_LIMIT}-char limit, no override defined)`
+        );
+      }
+      data = Buffer.from(transformSkillMd(content, plugin.skill), 'utf8');
+    }
+    return { name: file.zipPath, data };
+  }).sort((a, b) => compareCodexPaths(a.name, b.name));
+
+  const inlineRootFiles = profile === 'release'
+    ? zipEntries
+      .map(entry => entry.name)
+      .filter(name => path.posix.dirname(name) === plugin.skill)
+      .map(name => path.posix.basename(name))
+      .filter(name => name !== 'SKILL.md')
+    : [];
+  const releaseInlinePrefixes = profile === 'release'
+    ? [...new Set(zipEntries.map(entry => {
+      const relative = entry.name.slice(`${plugin.skill}/`.length);
+      return relative.includes('/') ? relative.split('/')[0] : null;
+    }).filter(Boolean))].sort(compareCodexPaths)
+    : undefined;
+  assertCodexArtifactContract(zipEntries, plugin, {
+    inlinePrefixes: releaseInlinePrefixes,
+    inlineRootFiles,
+    label: profile,
+    allowPlaceholderReferences: profile === 'release',
+    validateSupportText: profile === 'codex-submit',
+  });
+  const zipBuffer = createZip(zipEntries, { deterministic: true });
+  const filename = `${plugin.skill}.zip`;
+  const artifact = {
+    plugin: plugin.dir,
+    skill: plugin.skill,
+    version,
+    filename,
+    entries: zipEntries.map(entry => entry.name),
+    bytes: zipBuffer.length,
+    sha256: crypto.createHash('sha256').update(zipBuffer).digest('hex'),
+  };
+  return { artifact, zipBuffer, zipEntries };
+}
+
+function buildCodexSubmitArtifact(plugin, { root = projectRoot, warnings = [] } = {}) {
+  if (CODEX_SUBMIT_EXCLUDED.has(plugin.dir)) {
+    throw new Error(`codex-submit excluded plugin selected: ${plugin.dir}`);
+  }
+  return buildSkillArtifact(plugin, { root, profile: 'codex-submit', warnings });
+}
+
+function assertArtifactMatchesIndex(artifact, zipBuffer) {
+  const digest = crypto.createHash('sha256').update(zipBuffer).digest('hex');
+  if (artifact.bytes !== zipBuffer.length || artifact.sha256 !== digest) {
+    throw new Error(`codex-submit index/hash disagreement: ${artifact.filename}`);
+  }
+}
+
+function buildCodexSubmitArtifacts({ root = projectRoot } = {}) {
+  if (CODEX_SUBMIT_PLUGINS.length !== 15) {
+    throw new Error(`codex-submit selection must contain exactly 15 plugins`);
+  }
+  const keys = new Set();
+  for (const plugin of CODEX_SUBMIT_PLUGINS) {
+    const key = `${plugin.dir}/${plugin.skill}`;
+    if (keys.has(key)) throw new Error(`codex-submit duplicate selection: ${key}`);
+    keys.add(key);
+  }
+  const builds = CODEX_SUBMIT_PLUGINS.map(plugin => buildCodexSubmitArtifact(plugin, { root }));
+  for (const build of builds) assertArtifactMatchesIndex(build.artifact, build.zipBuffer);
+  return builds;
+}
+
+function runCodexSubmit({ dryRun, root = projectRoot, outputDir = CODEX_SUBMIT_DIST_DIR } = {}) {
+  const builds = buildCodexSubmitArtifacts({ root });
+  const index = {
+    schemaVersion: 1,
+    profile: 'codex-submit',
+    artifacts: builds.map(build => build.artifact),
+  };
+
+  if (!dryRun) {
+    fs.rmSync(outputDir, { recursive: true, force: true });
+    fs.mkdirSync(outputDir, { recursive: true });
+    for (const build of builds) {
+      const outputPath = path.join(outputDir, build.artifact.filename);
+      fs.writeFileSync(outputPath, build.zipBuffer);
+      const written = fs.readFileSync(outputPath);
+      assertArtifactMatchesIndex(build.artifact, written);
+    }
+    fs.writeFileSync(
+      path.join(outputDir, 'submission-index.json'),
+      `${JSON.stringify(index, null, 2)}\n`,
+      'utf8'
+    );
+  }
+
+  return { warnings: [], results: index.artifacts, dryRun: Boolean(dryRun), profile: 'codex-submit', index };
 }
 
 function buildRuntimeContractView(plugin) {
-  const skillDir = path.join(projectRoot, plugin.dir, 'skills', plugin.skill);
-  // plugin.json read piggybacks on the discoverPlugins() walk that produced
-  // PLUGINS. Falls back to direct read for plugins introduced after module
-  // load (none in current flow, retained for defensive correctness).
-  const record = _records.find(r => r.dir === plugin.dir && r.skill === plugin.skill);
-  const pluginJson = record
-    ? record.pluginJson
-    : JSON.parse(fs.readFileSync(path.join(projectRoot, plugin.dir, '.claude-plugin', 'plugin.json'), 'utf8'));
-  const files = collectFiles(skillDir, plugin.skill);
+  const pluginJson = JSON.parse(fs.readFileSync(
+    path.join(projectRoot, plugin.dir, '.codex-plugin', 'plugin.json'),
+    'utf8'
+  ));
+  const files = collectReleaseFiles(plugin);
   const packagedEntries = [];
   let transformedSkillMd = null;
   let skillEntryCount = 0;
@@ -435,7 +872,7 @@ function buildRuntimeContractView(plugin) {
     skill: plugin.skill,
     pluginDescription: pluginJson.description || '',
     skillEntryCount,
-    skillPath: `${plugin.skill}/Skill.md`,
+    skillPath: `${plugin.skill}/SKILL.md`,
     transformedSkillMd,
     packagedEntries,
   };
@@ -541,6 +978,73 @@ function generateReleaseNotes(buildResults, { tag = null, changelog = null } = {
   return [headline, '', highlights, '', protocols, '', assets, ''].join('\n');
 }
 
+function runRelease({
+  dryRun,
+  root = projectRoot,
+  outputDir = DIST_DIR,
+  tag = process.env.TAG_NAME || null,
+} = {}) {
+  const warnings = [];
+  const builds = PLUGINS.map(plugin =>
+    buildSkillArtifact(plugin, { root, profile: 'release', warnings })
+  );
+  const buildResults = builds.map(({ artifact }) => ({
+    plugin: artifact.plugin,
+    skill: artifact.skill,
+    version: artifact.version,
+    zip: artifact.filename,
+    files: artifact.entries.length,
+    bytes: artifact.bytes,
+    sha256: artifact.sha256,
+  }));
+  const bundleEntries = builds.flatMap(({ zipEntries }) =>
+    zipEntries.map(entry => ({
+      name: `epistemic-protocols/${entry.name}`,
+      data: entry.data,
+    }))
+  ).sort((a, b) => compareCodexPaths(a.name, b.name));
+  const bundleBuffer = createZip(bundleEntries, { deterministic: true });
+  const bundleFile = `${BUNDLE_NAME}.zip`;
+  buildResults.push({
+    plugin: 'bundle',
+    skill: BUNDLE_NAME,
+    zip: bundleFile,
+    files: bundleEntries.length,
+    bytes: bundleBuffer.length,
+    sha256: crypto.createHash('sha256').update(bundleBuffer).digest('hex'),
+  });
+
+  let changelog = null;
+  try {
+    const { execFileSync } = require('child_process');
+    const changelogArgs = [
+      path.join(root, 'scripts', 'generate-changelog.js'),
+      ...(tag ? [tag] : []),
+    ];
+    const output = execFileSync(process.execPath, changelogArgs, {
+      encoding: 'utf8',
+      cwd: root,
+    });
+    changelog = JSON.parse(output);
+  } catch (e) {
+    warnings.push(`changelog generation failed, using curated fallback: ${e.message}`);
+  }
+  const notes = generateReleaseNotes(buildResults, { tag, changelog });
+
+  if (!dryRun) {
+    fs.mkdirSync(outputDir, { recursive: true });
+    for (const build of builds) {
+      const outputPath = path.join(outputDir, build.artifact.filename);
+      fs.writeFileSync(outputPath, build.zipBuffer);
+      assertArtifactMatchesIndex(build.artifact, fs.readFileSync(outputPath));
+    }
+    fs.writeFileSync(path.join(outputDir, bundleFile), bundleBuffer);
+    fs.writeFileSync(path.join(outputDir, 'release-notes.md'), notes, 'utf8');
+  }
+
+  return { warnings, results: buildResults, dryRun: Boolean(dryRun) };
+}
+
 // ============================================================
 // Section 7: Main
 // ============================================================
@@ -548,118 +1052,22 @@ function generateReleaseNotes(buildResults, { tag = null, changelog = null } = {
 function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
+  const profileFlag = args.indexOf('--profile');
+  const profile = profileFlag === -1 ? null : args[profileFlag + 1];
 
-  const warnings = [];
-  const buildResults = [];
-  const bundleEntries = [];
-
-  if (!dryRun) fs.mkdirSync(DIST_DIR, { recursive: true });
-
-  for (const plugin of PLUGINS) {
-    const skillDir = path.join(projectRoot, plugin.dir, 'skills', plugin.skill);
-
-    if (!fs.existsSync(skillDir)) {
-      warnings.push(`${plugin.dir}: skill directory not found`);
-      continue;
-    }
-
-    // plugin.json comes from the shared discoverPlugins() walk — same
-    // object the buildRuntimeContractView path consumes, so a single
-    // process pays one read per plugin.json regardless of which entry
-    // points are exercised.
-    const record = _records.find(r => r.dir === plugin.dir && r.skill === plugin.skill);
-    const pluginJson = record ? record.pluginJson : null;
-    if (!pluginJson) {
-      warnings.push(`${plugin.dir}: plugin record not found in discoverPlugins()`);
-      continue;
-    }
-    let files;
-    try {
-      files = collectFiles(skillDir, plugin.skill);
-    } catch (e) {
-      warnings.push(`${plugin.dir}: collectFiles failed: ${e.message}`);
-      continue;
-    }
-    const zipEntries = [];
-
-    for (const file of files) {
-      let data = fs.readFileSync(file.sourcePath);
-
-      if (file.isSkillMd) {
-        const content = data.toString('utf8');
-        const lineCount = content.split('\n').length - (content.endsWith('\n') ? 1 : 0);
-
-        if (lineCount > LINE_GUIDELINE) {
-          warnings.push(`${plugin.dir}: Skill.md is ${lineCount} lines (${lineCount - LINE_GUIDELINE} over ${LINE_GUIDELINE}-line guideline)`);
-        }
-
-        const { fields } = parseFrontmatter(content);
-        const desc = fields.get('description');
-        if (desc && desc.length > DESCRIPTION_LIMIT && !DESCRIPTION_OVERRIDES[plugin.skill]) {
-          warnings.push(`${plugin.dir}: description is ${desc.length} chars (over ${DESCRIPTION_LIMIT}-char limit, no override defined)`);
-        }
-
-        data = Buffer.from(transformSkillMd(content, plugin.skill), 'utf8');
-      }
-
-      zipEntries.push({ name: file.zipPath, data });
-    }
-
-    const zipBuffer = createZip(zipEntries);
-    const zipFile = `${plugin.skill}.zip`;
-
-    if (!dryRun) fs.writeFileSync(path.join(DIST_DIR, zipFile), zipBuffer);
-
-    buildResults.push({
-      plugin: plugin.dir,
-      skill: plugin.skill,
-      version: pluginJson.version,
-      zip: zipFile,
-      files: files.length,
-      bytes: zipBuffer.length,
-    });
-
-    for (const entry of zipEntries) {
-      bundleEntries.push({ name: `epistemic-protocols/${entry.name}`, data: entry.data });
-    }
+  if (profileFlag !== -1 && !profile) {
+    throw new Error('--profile requires a value');
   }
-
-  // Bundle ZIP
-  const bundleBuffer = createZip(bundleEntries);
-  const bundleFile = `${BUNDLE_NAME}.zip`;
-  if (!dryRun) fs.writeFileSync(path.join(DIST_DIR, bundleFile), bundleBuffer);
-
-  buildResults.push({
-    plugin: 'bundle',
-    skill: BUNDLE_NAME,
-    zip: bundleFile,
-    files: bundleEntries.length,
-    bytes: bundleBuffer.length,
-  });
-
-  // Release notes (consumed by CI workflow)
-  const tag = process.env.TAG_NAME || null;
-  let changelog = null;
-  try {
-    const { execFileSync } = require('child_process');
-    const changelogArgs = [path.join(__dirname, 'generate-changelog.js'), ...(tag ? [tag] : [])];
-    const output = execFileSync(process.execPath, changelogArgs, {
-      encoding: 'utf8',
-      cwd: projectRoot,
-    });
-    changelog = JSON.parse(output);
-  } catch (e) {
-    // No previous tag or script error — fall back to curated first-release content
-    warnings.push(`changelog generation failed, using curated fallback: ${e.message}`);
+  if (profile && profile !== 'codex-submit') {
+    throw new Error(`unknown packaging profile: ${profile}`);
   }
-  const notes = generateReleaseNotes(buildResults, { tag, changelog });
-  if (!dryRun) {
-    fs.writeFileSync(path.join(DIST_DIR, 'release-notes.md'), notes, 'utf8');
+  if (profile === 'codex-submit') {
+    console.log(JSON.stringify(runCodexSubmit({ dryRun }), null, 2));
+    return;
   }
-
-  // Output
-  for (const w of warnings) console.error(`WARN: ${w}`);
-  console.log(JSON.stringify({ warnings, results: buildResults, dryRun }, null, 2));
+  const release = runRelease({ dryRun });
+  for (const warning of release.warnings) console.error(`WARN: ${warning}`);
+  console.log(JSON.stringify(release, null, 2));
 }
 
 // Allow importing for tests; skip main() when required as module
@@ -674,10 +1082,20 @@ if (require.main === module) {
 
 module.exports = {
   PLUGINS,
+  CODEX_SUBMIT_PLUGINS,
+  buildSkillArtifact,
   buildRuntimeContractView,
   buildRuntimeContractViews,
-  collectFiles,
+  buildCodexSubmitArtifact,
+  buildCodexSubmitArtifacts,
+  collectCodexSubmitFiles,
+  collectReleaseFiles,
+  extractArchiveLocalReferences,
+  isForbiddenCodexPath,
   parseFrontmatter,
+  readCodexManifestVersion,
+  runRelease,
+  runCodexSubmit,
   serializeFrontmatter,
   transformSkillMd,
   createZip,
