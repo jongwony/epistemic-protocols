@@ -24,7 +24,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 14. **partition-invariant**: Verifies MODE STATE pairwise disjoint partition invariants — universe set and partition members exist as MODE STATE fields
 15. **catalog-sync**: Catalog SKILL.md protocol coverage — all protocol names and commands present, count verified against `PROTOCOL_FILES`
 16. **gate-type-soundness**: TYPES answer coproducts matched against Phase prose option enumerations — detects gate mutation (option injection/deletion/substitution) via stem matching. Warning level (safeguard). Type-preserving materialization permitted
-17. **artifact-self-containment**: Validates the packaged runtime-contract view — transformed `Skill.md`, plugin description metadata, and packaged support entries. Fails on contributor-doc leakage or broken packaged references; warns on weak invocation/routing cues
+17. **artifact-self-containment**: Validates the packaged runtime-contract view — transformed `SKILL.md`, plugin description metadata, and packaged support entries. Fails on contributor-doc leakage or broken packaged references; warns on weak invocation/routing cues
 18. **emit-load-discipline**: Verifies every core protocol SKILL.md carries the compiled-copy runtime rules for Context-Question Separation, Plain emit discipline, and Round-local salience bundling; also verifies the Output Style source contains the shared vocabulary, bundling, and drift-tracking sections
 19. **framing-readout-enforcement**: Couples the Epistemic Ink invariant (user-facing protocol surfacing is a framing readout, never a scalar progress meter) to an enforcement channel. Two coupled fails: (a) the unicode progress-bar glyphs ▓/░ must not appear in any core protocol SKILL.md or the Output Style source `epistemic-cooperative/styles/epistemic-ink.md` — they only ever rendered a completion bar; (b) the Output Style must retain the categorical-ban guard sentence (`bar, percentage, or N-of-M tally`) so the invariant cannot be silently deleted. Scope mirrors emit-load-discipline (core protocols + Output Style); utility skills that legitimately render bars (e.g. `/dashboard`) are out of scope. Repair: delete the progress-bar glyph, or restore the guard sentence in the Output Style
 20. **single-axis-soundness**: Enforces `TOOL GROUNDING`'s `(constitution)`/`(extension)` markers as the sole runtime annotation axis across live `*.md` files. Whitelisted paths: `docs/analysis/`, `docs/audit-*`, `.claude/skills/audit-delta/`, `.claude/worktrees/`, `.claude-pr/`, `node_modules/`, `dist/`, `.git/`. Source-of-truth banned-vocabulary list lives in the check function itself (`checkSingleAxisSoundness`)
@@ -47,22 +47,25 @@ Use these checks during protocol edits and reviews. Do not promote them to stati
 - Pressure maps must be protocol-native and decision-relevant. Discovery pressure is limited to bounded residual unknowns that could materially change the next user judgment.
 - These checks compile invariants only: do not freeze horizon content, philosophical lens choice, or broad exploratory context into runtime/static requirements.
 
-## Packaging Transformations
+## Packaging Contract
 
-`scripts/package.js` applies non-trivial transforms when building release ZIPs:
-- Renames `SKILL.md` → `Skill.md` (marketplace case convention)
-- Strips frontmatter fields: `allowed-tools`, `license`, `compatibility`, `metadata`
-- Overrides descriptions exceeding 200 chars (`frame`, `catalog`)
-- Excludes `agents/`, `commands/`, README files from ZIPs
-- 500-line guideline per SKILL.md (warns if exceeded)
+`scripts/package.js` uses one deterministic `SKILL.md` archive builder for both GitHub Release and Codex submission ZIPs:
+
+- Preserves `<skill>/SKILL.md` exactly and uses `.codex-plugin/plugin.json` as the version source; a differing Claude manifest version fails closed.
+- Strips frontmatter fields: `allowed-tools`, `license`, `compatibility`, `metadata`.
+- Applies compact description overrides when the source description exceeds 200 characters.
+- Includes runtime support files and directly referenced plugin agents while excluding unrelated agents, commands, evals, README files, and forbidden secret/session paths.
+- The default release selects every active skill and adds the all-skills bundle plus release notes. Its support-file surface is a safe superset for utility sidecars such as `routing-map.md`, `templates/`, and `adapters/`.
+- `--profile codex-submit` selects the explicit public-core set, enforces its narrower support allowlist and full packaged-text reference closure, and emits `submission-index.json` with byte sizes and SHA-256 digests.
+- The line-count guideline is 510 lines per SKILL.md and remains warning-only.
 
 ## Runtime Contract Surfaces
 
 `artifact-self-containment` does not inspect source prose in isolation. It checks the runtime-contract view that users actually encounter:
 
-- `Skill.md`: normative contract for protocol semantics, phases, gates, and usage
-- Plugin `description` metadata: discovery/routing hint only; intentionally weaker than `Skill.md`
-- Packaged support entries: bundled `references/` or local assets that `Skill.md` links to
+- `SKILL.md`: normative contract for protocol semantics, phases, gates, and usage
+- Plugin `description` metadata: discovery/routing hint only; intentionally weaker than `SKILL.md`
+- Packaged support entries: bundled runtime files that `SKILL.md` loads or links to
 
 Two implications follow:
 

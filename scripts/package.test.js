@@ -14,14 +14,18 @@ const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('zlib');
 const {
+  PLUGINS,
   CODEX_SUBMIT_PLUGINS,
+  buildSkillArtifact,
   buildCodexSubmitArtifact,
   buildCodexSubmitArtifacts,
   buildRuntimeContractViews,
   collectCodexSubmitFiles,
+  collectReleaseFiles,
   isForbiddenCodexPath,
   parseFrontmatter,
   readCodexManifestVersion,
+  runRelease,
   runCodexSubmit,
   serializeFrontmatter,
   transformSkillMd,
@@ -279,9 +283,9 @@ describe('runtime contract view', () => {
     const views = buildRuntimeContractViews();
     assert.equal(views.length, 39);
     for (const view of views) {
-      assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one Skill.md entry`);
-      assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed Skill.md`);
-      assert.ok(view.packagedEntries.includes(`${view.skill}/Skill.md`), `${view.plugin}:${view.skill} should package Skill.md`);
+      assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one SKILL.md entry`);
+      assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed SKILL.md`);
+      assert.ok(view.packagedEntries.includes(`${view.skill}/SKILL.md`), `${view.plugin}:${view.skill} should package SKILL.md`);
       assert.ok(typeof view.pluginDescription === 'string');
     }
   });
@@ -322,7 +326,7 @@ describe('artifact-self-containment detector liveness', () => {
   const TARGET_SKILL_MD = path.join(REPO_ROOT, 'aitesis', 'skills', 'inquire', 'SKILL.md');
   const INJECTION = '\n\nContributor reference: .claude/rules/axioms.md (A1)\n';
 
-  it('fires when a known banned pattern is injected into a Skill.md', () => {
+  it('fires when a known banned pattern is injected into a SKILL.md', () => {
     const backup = fs.readFileSync(TARGET_SKILL_MD, 'utf8');
     try {
       fs.writeFileSync(TARGET_SKILL_MD, backup + INJECTION);
@@ -639,7 +643,7 @@ describe('codex-submit artifact profile', () => {
         assert.equal(isForbiddenCodexPath(`fixture/${relativePath}`), true, relativePath);
         assert.throws(
           () => collectCodexSubmitFiles(plugin, { root }),
-          /codex-submit forbidden path/,
+          /artifact forbidden path/,
           relativePath
         );
       } finally {
@@ -803,6 +807,79 @@ describe('codex-submit artifact profile', () => {
           artifact.sha256
         );
       }
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+// ============================================================
+// unified release artifact contract
+// ============================================================
+
+describe('unified release artifact contract', () => {
+  it('produces byte-identical release and submission ZIPs for the fifteen public-core skills', () => {
+    for (const plugin of CODEX_SUBMIT_PLUGINS) {
+      const release = buildSkillArtifact(plugin, { profile: 'release' });
+      const submission = buildCodexSubmitArtifact(plugin);
+      assert.deepEqual(release.zipBuffer, submission.zipBuffer, `${plugin.dir}/${plugin.skill}`);
+      assert.deepEqual(release.artifact, submission.artifact, `${plugin.dir}/${plugin.skill}`);
+    }
+  });
+
+  it('retains utility sidecars and directly referenced agents in the release superset', () => {
+    const entriesFor = (dir, skill) => collectReleaseFiles({ dir, skill }).map(file => file.zipPath);
+    assert.ok(entriesFor('epistemic-cooperative', 'catalog').includes('catalog/routing-map.md'));
+    assert.ok(entriesFor('epistemic-cooperative', 'comment-review')
+      .includes('comment-review/templates/preview.html'));
+    assert.ok(entriesFor('epistemic-cooperative', 'forge')
+      .includes('forge/adapters/codex-goals.md'));
+    assert.ok(entriesFor('diylisis', 'distill')
+      .includes('distill/agents/zero-memory-refuter.md'));
+    assert.ok(entriesFor('epistemic-cooperative', 'curses')
+      .includes('curses/agents/dimension-profiler.md'));
+    assert.ok(!entriesFor('epistemic-cooperative', 'comment-review')
+      .includes('comment-review/evals/evals.json'));
+  });
+
+  it('rebuilds every release ZIP and bundle deterministically with canonical SKILL.md casing', () => {
+    const root = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'release-build-'));
+    const outputDir = path.join(root, 'output');
+    try {
+      const first = runRelease({ dryRun: false, outputDir });
+      const firstSnapshot = snapshotTree(outputDir);
+      const second = runRelease({ dryRun: false, outputDir });
+      const secondSnapshot = snapshotTree(outputDir);
+
+      assert.deepEqual(second, first);
+      assert.deepEqual(secondSnapshot, firstSnapshot);
+      assert.equal(second.results.length, 40);
+      assert.equal(PLUGINS.length, 39);
+      for (const plugin of PLUGINS) {
+        const build = buildSkillArtifact(plugin, { profile: 'release' });
+        assert.equal(
+          build.artifact.entries.filter(name => name.endsWith('/SKILL.md')).length,
+          1,
+          `${plugin.dir}/${plugin.skill}`
+        );
+        assert.ok(
+          !build.artifact.entries.some(name => name.endsWith('/Skill.md')),
+          `${plugin.dir}/${plugin.skill}`
+        );
+        const written = fs.readFileSync(path.join(outputDir, build.artifact.filename));
+        assert.equal(written.length, build.artifact.bytes);
+        assert.equal(
+          crypto.createHash('sha256').update(written).digest('hex'),
+          build.artifact.sha256
+        );
+      }
+      const bundle = second.results.find(result => result.plugin === 'bundle');
+      const bundleBytes = fs.readFileSync(path.join(outputDir, bundle.zip));
+      assert.equal(bundleBytes.length, bundle.bytes);
+      assert.equal(
+        crypto.createHash('sha256').update(bundleBytes).digest('hex'),
+        bundle.sha256
+      );
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
