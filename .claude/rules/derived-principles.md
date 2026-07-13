@@ -68,7 +68,7 @@ LLM-facing instructions (Output Style, SKILL.md prose, agent prompts) state prin
 
 Scope boundary: this principle applies to instructions the LLM interprets and applies at runtime — not to contributor-facing documentation where examples serve comprehension. The boundary test: "would removing this example increase the LLM's latitude in applying the principle to novel contexts, without losing the output-format or behavioral reliability that the containing instruction depends on?" If yes, the example is anchoring and should be removed. An example whose primary effect is stabilizing output format or anchoring a subtle, high-failure-rate behavior is exempt — removing it costs adherence, not latitude. If the example aids human understanding without constraining LLM application, it is outside scope. SKILL.md formal blocks (Definition code blocks) are LLM-facing by definition; prose outside formal blocks in SKILL.md is hybrid (read by both LLMs and contributors) — err toward principle-only in hybrid contexts.
 
-Prohibition-axis complement: `.claude/principles/safeguards.md §White Bear Avoidance` (Safeguard tier).
+Unnecessary-mention-axis complement: `.claude/principles/safeguards.md §White Bear Avoidance` (Safeguard tier; prohibition framing is its strongest-evidenced form).
 
 ## Loop Continuity under Bounded Regret
 
