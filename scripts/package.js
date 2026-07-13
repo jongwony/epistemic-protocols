@@ -13,6 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const crypto = require('crypto');
 const { discoverPlugins, protocolOrder, CANONICAL_CLUSTERS } = require('./load-protocols');
 const projectRoot = path.resolve(__dirname, '..');
 
@@ -154,6 +155,31 @@ const DESCRIPTION_LIMIT = 200;
 const LINE_GUIDELINE = 510;
 const DIST_DIR = path.join(projectRoot, 'dist');
 const BUNDLE_NAME = 'epistemic-protocols-bundle';
+const CODEX_SUBMIT_DIST_DIR = path.join(DIST_DIR, 'codex-submit');
+const CODEX_SUBMIT_PLUGINS = Object.freeze([
+  { dir: 'aitesis', skill: 'inquire' },
+  { dir: 'analogia', skill: 'ground' },
+  { dir: 'diairesis', skill: 'delimit' },
+  { dir: 'diylisis', skill: 'distill' },
+  { dir: 'elenchus', skill: 'sublate' },
+  { dir: 'epharmoge', skill: 'contextualize' },
+  { dir: 'euporia', skill: 'elicit' },
+  { dir: 'horismos', skill: 'bound' },
+  { dir: 'hyphegesis', skill: 'conduct' },
+  { dir: 'katalepsis', skill: 'grasp' },
+  { dir: 'periagoge', skill: 'induce' },
+  { dir: 'proplasma', skill: 'preview' },
+  { dir: 'prosoche', skill: 'attend' },
+  { dir: 'prothesis', skill: 'frame' },
+  { dir: 'syneidesis', skill: 'gap' },
+]);
+const CODEX_SUBMIT_EXCLUDED = new Set(['anamnesis', 'anagoge', 'epistemic-cooperative']);
+const CODEX_SUPPORT_DIRS = Object.freeze(['references', 'scripts', 'assets']);
+const CODEX_FORBIDDEN_SEGMENTS = new Set(['.claude', '.codex', 'sessions', 'transcripts']);
+
+function compareCodexPaths(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
 
 // ============================================================
 // Section 2: YAML Frontmatter Parser
@@ -301,7 +327,10 @@ function crc32(buf) {
   return zlib.crc32(buf) >>> 0;
 }
 
-function dosDateTime() {
+function dosDateTime({ deterministic = false } = {}) {
+  if (deterministic) {
+    return { time: 0, date: 0x0021 }; // 1980-01-01 00:00:00, the DOS epoch.
+  }
   const d = new Date();
   return {
     time: ((d.getHours() & 0x1F) << 11) | ((d.getMinutes() & 0x3F) << 5) | ((d.getSeconds() >> 1) & 0x1F),
@@ -309,8 +338,8 @@ function dosDateTime() {
   };
 }
 
-function createZip(entries) {
-  const { time, date } = dosDateTime();
+function createZip(entries, { deterministic = false } = {}) {
+  const { time, date } = dosDateTime({ deterministic });
   const localParts = [];
   const centralParts = [];
   let offset = 0;
@@ -405,6 +434,305 @@ function collectFiles(baseDir, prefix) {
 
   walk(baseDir, prefix + '/');
   return files;
+}
+
+function isForbiddenCodexPath(archivePath) {
+  const segments = archivePath.split('/');
+  if (segments.some(segment => CODEX_FORBIDDEN_SEGMENTS.has(segment))) return true;
+
+  const basename = segments.at(-1).toLowerCase();
+  return basename === '.env' ||
+    basename.startsWith('.env.') ||
+    basename.endsWith('.pem') ||
+    basename.endsWith('.key') ||
+    basename === 'id_rsa' ||
+    basename === 'id_rsa.pub' ||
+    basename.startsWith('credentials.') ||
+    basename.startsWith('secrets.') ||
+    basename.endsWith('.jsonl');
+}
+
+function assertCodexPathAllowed(archivePath) {
+  if (isForbiddenCodexPath(archivePath)) {
+    throw new Error(`codex-submit forbidden path: ${archivePath}`);
+  }
+}
+
+function stripReferenceSuffix(target) {
+  const suffix = target.search(/[?#]/);
+  return suffix === -1 ? target : target.slice(0, suffix);
+}
+
+function markdownTarget(rawTarget) {
+  const trimmed = rawTarget.trim();
+  if (trimmed.startsWith('<')) {
+    const closing = trimmed.indexOf('>');
+    return closing === -1 ? trimmed : trimmed.slice(1, closing);
+  }
+  return trimmed.match(/^\S+/)?.[0] || '';
+}
+
+function extractArchiveLocalReferences(content, archivePath) {
+  const references = [];
+  const markdownPattern = /!?\[[^\]]*\]\(([^)]+)\)/g;
+  const inlinePathPattern = /`((?:references|scripts|assets|agents)\/[^`\s]+)`/g;
+  let match;
+
+  while ((match = markdownPattern.exec(content)) !== null) {
+    const target = markdownTarget(match[1]);
+    if (!target || /^[A-Za-z][A-Za-z0-9+.-]*:/.test(target) ||
+        target.startsWith('//') || target.startsWith('#') || target.startsWith('/')) {
+      continue;
+    }
+    references.push({ kind: 'markdown', target });
+  }
+
+  while ((match = inlinePathPattern.exec(content)) !== null) {
+    references.push({ kind: 'inline', target: match[1] });
+  }
+
+  if (archivePath.endsWith('/agents/openai.yaml')) {
+    for (const line of content.split('\n')) {
+      const yamlPath = line.match(/(?:^|:\s*|-\s*)(["']?)(\.\/[^"'\s#]+)\1(?:\s|#|$)/)?.[2];
+      if (yamlPath) references.push({ kind: 'openai-yaml', target: yamlPath });
+    }
+  }
+
+  return references;
+}
+
+function resolveCodexReference(reference, referringArchivePath, skill) {
+  let target = stripReferenceSuffix(reference.target);
+  if (!target) return null;
+
+  if (reference.kind === 'openai-yaml') {
+    if (target.split('/').includes('..')) {
+      throw new Error(`codex-submit openai.yaml traversal is forbidden: ${target}`);
+    }
+    target = target.slice(2);
+    return path.posix.normalize(`${skill}/${target}`);
+  }
+
+  return path.posix.normalize(path.posix.join(path.posix.dirname(referringArchivePath), target));
+}
+
+function assertCodexReferenceClosure(zipEntries, skill) {
+  const packaged = new Set(zipEntries.map(entry => entry.name));
+  const skillRoot = `${skill}/`;
+
+  for (const entry of zipEntries) {
+    if (!/\.(?:md|ya?ml)$/i.test(entry.name)) continue;
+    const content = entry.data.toString('utf8');
+    for (const reference of extractArchiveLocalReferences(content, entry.name)) {
+      const resolved = resolveCodexReference(reference, entry.name, skill);
+      if (!resolved) continue;
+      if (!resolved.startsWith(skillRoot)) {
+        throw new Error(
+          `codex-submit reference escapes skill root: ${entry.name} -> ${reference.target}`
+        );
+      }
+      if (!packaged.has(resolved)) {
+        throw new Error(
+          `codex-submit unresolved local reference: ${entry.name} -> ${reference.target} (${resolved})`
+        );
+      }
+    }
+  }
+}
+
+function collectRegularFiles(sourceDir, archiveDir, files) {
+  const entries = fs.readdirSync(sourceDir, { withFileTypes: true })
+    .sort((a, b) => compareCodexPaths(a.name, b.name));
+  for (const entry of entries) {
+    const sourcePath = path.join(sourceDir, entry.name);
+    const archivePath = path.posix.join(archiveDir, entry.name);
+    assertCodexPathAllowed(archivePath);
+    if (entry.isSymbolicLink()) continue;
+    if (entry.isDirectory()) {
+      collectRegularFiles(sourcePath, archivePath, files);
+    } else if (entry.isFile()) {
+      files.push({ sourcePath, zipPath: archivePath, isSkillMd: false });
+    }
+  }
+}
+
+function directlyReferencedPluginAgents(skillContent) {
+  const names = new Set();
+  const references = extractArchiveLocalReferences(skillContent, 'skill/SKILL.md');
+  for (const reference of references) {
+    const target = stripReferenceSuffix(reference.target);
+    const match = target.match(/^agents\/([A-Za-z0-9._-]+\.md)$/);
+    if (match) names.add(match[1]);
+  }
+  return [...names].sort(compareCodexPaths);
+}
+
+function collectCodexSubmitFiles(plugin, { root = projectRoot } = {}) {
+  const pluginDir = path.join(root, plugin.dir);
+  const skillDir = path.join(pluginDir, 'skills', plugin.skill);
+  const skillSource = path.join(skillDir, 'SKILL.md');
+
+  if (!fs.existsSync(pluginDir)) {
+    throw new Error(`codex-submit expected plugin is absent: ${plugin.dir}`);
+  }
+  if (!fs.existsSync(skillDir) || !fs.statSync(skillDir).isDirectory()) {
+    throw new Error(`codex-submit expected skill is absent: ${plugin.dir}/${plugin.skill}`);
+  }
+  if (!fs.existsSync(skillSource) || !fs.lstatSync(skillSource).isFile()) {
+    throw new Error(`codex-submit expected SKILL.md is absent: ${plugin.dir}/${plugin.skill}`);
+  }
+
+  const skillContent = fs.readFileSync(skillSource, 'utf8');
+  const files = [{
+    sourcePath: skillSource,
+    zipPath: `${plugin.skill}/SKILL.md`,
+    isSkillMd: true,
+  }];
+
+  for (const supportDir of CODEX_SUPPORT_DIRS) {
+    const sourceDir = path.join(skillDir, supportDir);
+    if (!fs.existsSync(sourceDir)) continue;
+    if (!fs.lstatSync(sourceDir).isDirectory()) {
+      throw new Error(`codex-submit support path is not a directory: ${sourceDir}`);
+    }
+    collectRegularFiles(sourceDir, `${plugin.skill}/${supportDir}`, files);
+  }
+
+  const openaiYaml = path.join(skillDir, 'agents', 'openai.yaml');
+  if (fs.existsSync(openaiYaml)) {
+    const archivePath = `${plugin.skill}/agents/openai.yaml`;
+    assertCodexPathAllowed(archivePath);
+    if (!fs.lstatSync(openaiYaml).isFile()) {
+      throw new Error(`codex-submit agents/openai.yaml is not a regular file: ${openaiYaml}`);
+    }
+    files.push({ sourcePath: openaiYaml, zipPath: archivePath, isSkillMd: false });
+  }
+
+  for (const agentName of directlyReferencedPluginAgents(skillContent)) {
+    const skillAgent = path.join(skillDir, 'agents', agentName);
+    if (fs.existsSync(skillAgent)) continue;
+    const pluginAgent = path.join(pluginDir, 'agents', agentName);
+    if (!fs.existsSync(pluginAgent) || !fs.lstatSync(pluginAgent).isFile()) continue;
+    const archivePath = `${plugin.skill}/agents/${agentName}`;
+    assertCodexPathAllowed(archivePath);
+    files.push({ sourcePath: pluginAgent, zipPath: archivePath, isSkillMd: false });
+  }
+
+  return files.sort((a, b) => compareCodexPaths(a.zipPath, b.zipPath));
+}
+
+function readCodexManifestVersion(plugin, { root = projectRoot } = {}) {
+  const codexManifestPath = path.join(root, plugin.dir, '.codex-plugin', 'plugin.json');
+  if (!fs.existsSync(codexManifestPath)) {
+    throw new Error(`codex-submit manifest is absent: ${plugin.dir}/.codex-plugin/plugin.json`);
+  }
+  const codexManifest = JSON.parse(fs.readFileSync(codexManifestPath, 'utf8'));
+  if (typeof codexManifest.version !== 'string' || !codexManifest.version) {
+    throw new Error(`codex-submit manifest version is absent: ${plugin.dir}/.codex-plugin/plugin.json`);
+  }
+
+  const claudeManifestPath = path.join(root, plugin.dir, '.claude-plugin', 'plugin.json');
+  if (fs.existsSync(claudeManifestPath)) {
+    const claudeManifest = JSON.parse(fs.readFileSync(claudeManifestPath, 'utf8'));
+    if (claudeManifest.version !== codexManifest.version) {
+      throw new Error(
+        `codex-submit manifest version mismatch for ${plugin.dir}: ` +
+        `Codex ${codexManifest.version}, Claude ${claudeManifest.version}`
+      );
+    }
+  }
+  return codexManifest.version;
+}
+
+function assertCodexArtifactContract(zipEntries, plugin) {
+  const skillEntries = zipEntries.filter(entry => entry.name.endsWith('/SKILL.md'));
+  if (skillEntries.length !== 1 || skillEntries[0].name !== `${plugin.skill}/SKILL.md`) {
+    throw new Error(
+      `codex-submit ${plugin.dir} must contain exactly one ${plugin.skill}/SKILL.md`
+    );
+  }
+  if (zipEntries.some(entry => entry.name.endsWith('/Skill.md'))) {
+    throw new Error(`codex-submit ${plugin.dir} contains forbidden Skill.md casing`);
+  }
+  assertCodexReferenceClosure(zipEntries, plugin.skill);
+}
+
+function buildCodexSubmitArtifact(plugin, { root = projectRoot } = {}) {
+  if (CODEX_SUBMIT_EXCLUDED.has(plugin.dir)) {
+    throw new Error(`codex-submit excluded plugin selected: ${plugin.dir}`);
+  }
+  const files = collectCodexSubmitFiles(plugin, { root });
+  const version = readCodexManifestVersion(plugin, { root });
+  const zipEntries = files.map(file => {
+    let data = fs.readFileSync(file.sourcePath);
+    if (file.isSkillMd) {
+      data = Buffer.from(transformSkillMd(data.toString('utf8'), plugin.skill), 'utf8');
+    }
+    return { name: file.zipPath, data };
+  }).sort((a, b) => compareCodexPaths(a.name, b.name));
+
+  assertCodexArtifactContract(zipEntries, plugin);
+  const zipBuffer = createZip(zipEntries, { deterministic: true });
+  const filename = `${plugin.skill}.zip`;
+  const artifact = {
+    plugin: plugin.dir,
+    skill: plugin.skill,
+    version,
+    filename,
+    entries: zipEntries.map(entry => entry.name),
+    bytes: zipBuffer.length,
+    sha256: crypto.createHash('sha256').update(zipBuffer).digest('hex'),
+  };
+  return { artifact, zipBuffer };
+}
+
+function assertArtifactMatchesIndex(artifact, zipBuffer) {
+  const digest = crypto.createHash('sha256').update(zipBuffer).digest('hex');
+  if (artifact.bytes !== zipBuffer.length || artifact.sha256 !== digest) {
+    throw new Error(`codex-submit index/hash disagreement: ${artifact.filename}`);
+  }
+}
+
+function buildCodexSubmitArtifacts({ root = projectRoot } = {}) {
+  if (CODEX_SUBMIT_PLUGINS.length !== 15) {
+    throw new Error(`codex-submit selection must contain exactly 15 plugins`);
+  }
+  const keys = new Set();
+  for (const plugin of CODEX_SUBMIT_PLUGINS) {
+    const key = `${plugin.dir}/${plugin.skill}`;
+    if (keys.has(key)) throw new Error(`codex-submit duplicate selection: ${key}`);
+    keys.add(key);
+  }
+  const builds = CODEX_SUBMIT_PLUGINS.map(plugin => buildCodexSubmitArtifact(plugin, { root }));
+  for (const build of builds) assertArtifactMatchesIndex(build.artifact, build.zipBuffer);
+  return builds;
+}
+
+function runCodexSubmit({ dryRun, root = projectRoot, outputDir = CODEX_SUBMIT_DIST_DIR } = {}) {
+  const builds = buildCodexSubmitArtifacts({ root });
+  const index = {
+    schemaVersion: 1,
+    profile: 'codex-submit',
+    artifacts: builds.map(build => build.artifact),
+  };
+
+  if (!dryRun) {
+    fs.rmSync(outputDir, { recursive: true, force: true });
+    fs.mkdirSync(outputDir, { recursive: true });
+    for (const build of builds) {
+      const outputPath = path.join(outputDir, build.artifact.filename);
+      fs.writeFileSync(outputPath, build.zipBuffer);
+      const written = fs.readFileSync(outputPath);
+      assertArtifactMatchesIndex(build.artifact, written);
+    }
+    fs.writeFileSync(
+      path.join(outputDir, 'submission-index.json'),
+      `${JSON.stringify(index, null, 2)}\n`,
+      'utf8'
+    );
+  }
+
+  return { warnings: [], results: index.artifacts, dryRun: Boolean(dryRun), profile: 'codex-submit', index };
 }
 
 function buildRuntimeContractView(plugin) {
@@ -548,6 +876,19 @@ function generateReleaseNotes(buildResults, { tag = null, changelog = null } = {
 function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
+  const profileFlag = args.indexOf('--profile');
+  const profile = profileFlag === -1 ? null : args[profileFlag + 1];
+
+  if (profileFlag !== -1 && !profile) {
+    throw new Error('--profile requires a value');
+  }
+  if (profile && profile !== 'codex-submit') {
+    throw new Error(`unknown packaging profile: ${profile}`);
+  }
+  if (profile === 'codex-submit') {
+    console.log(JSON.stringify(runCodexSubmit({ dryRun }), null, 2));
+    return;
+  }
 
   const warnings = [];
   const buildResults = [];
@@ -674,10 +1015,18 @@ if (require.main === module) {
 
 module.exports = {
   PLUGINS,
+  CODEX_SUBMIT_PLUGINS,
   buildRuntimeContractView,
   buildRuntimeContractViews,
+  buildCodexSubmitArtifact,
+  buildCodexSubmitArtifacts,
   collectFiles,
+  collectCodexSubmitFiles,
+  extractArchiveLocalReferences,
+  isForbiddenCodexPath,
   parseFrontmatter,
+  readCodexManifestVersion,
+  runCodexSubmit,
   serializeFrontmatter,
   transformSkillMd,
   createZip,
