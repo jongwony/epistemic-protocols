@@ -1,6 +1,6 @@
 ---
 name: white-bear
-description: "Use when the user asks to \"check white bear\", \"audit prohibition phrasing\", \"find negative framing\", or invokes /white-bear. Read-only audit: unnecessary competing-target mentions in LLM-facing prose."
+description: "Use when the user asks to \"check white bear\", \"audit prohibitions\", \"find negative framing\", or invokes /white-bear. Read-only audit: unnecessary competing-target mentions in LLM-facing prose."
 user_invocable: true
 allowed-tools: Read, Grep, Glob
 ---
@@ -94,7 +94,7 @@ When zero findings result, emit the JSON object with empty `findings` array and 
 
 ## Self-application
 
-This SKILL.md is itself LLM-facing prose and so is in scope. The audit may surface findings against the prose above; rewrite in place when the rewrite preserves directive force. Findings against this file are first-class — the audit's own definition is subject to the same review as any other in-scope file.
+This SKILL.md is itself LLM-facing prose and so is in scope. The audit may surface findings against the prose above, emitting a `suggested_rewrite` that preserves directive force like any other finding; the human author decides whether it lands. Findings against this file are first-class — the audit's own definition is subject to the same review as any other in-scope file.
 
 ## Distinction
 

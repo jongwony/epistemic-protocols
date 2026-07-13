@@ -85,7 +85,7 @@ When zero findings result, emit the JSON object with empty `findings` array and 
 
 ## Self-application
 
-This SKILL.md is itself LLM-facing prose and so is in scope. The audit may surface findings against the prose above; rewrite in place when the rewrite preserves directive force.
+This SKILL.md is itself LLM-facing prose and so is in scope. The audit may surface findings against the prose above, emitting a `suggested_rewrite` that preserves directive force like any other finding; the human author decides whether it lands.
 
 ## Distinction
 
