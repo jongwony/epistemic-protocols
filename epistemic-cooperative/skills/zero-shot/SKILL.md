@@ -85,7 +85,7 @@ When zero findings result, emit the JSON object with empty `findings` array and 
 
 ## Self-application
 
-This SKILL.md is itself LLM-facing prose and so is in scope. The audit may surface findings against the prose above; rewrite in place when the rewrite preserves directive force.
+This SKILL.md is itself LLM-facing prose and so is in scope. The audit may surface findings against the prose above, emitting a `suggested_rewrite` that preserves directive force like any other finding; the human author decides whether it lands.
 
 ## Distinction
 
@@ -93,7 +93,7 @@ This SKILL.md is itself LLM-facing prose and so is in scope. The audit may surfa
 |---------|-----------|---------------------|
 | Deterministic static checks | Literal pattern matching and structural validation | Structural drift between coupled artifacts; literal pattern leaks |
 | `zero-shot` | Claude-judge semantic review of LLM-facing prose | Few-shot anchoring drift that survives structural validity |
-| `white-bear` | Sibling semantic audit | Negative-framing drift |
+| `white-bear` | Sibling semantic audit | Unnecessary competing-target mention drift |
 
 Deterministic checks run at pre-commit and CI; this semantic audit runs on-demand via its slash command. Each maintains its own confidence curve.
 

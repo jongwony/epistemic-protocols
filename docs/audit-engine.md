@@ -84,7 +84,7 @@ An instance is the engine plus one principle, given as a triple:
 
 | Instance | Home | Tier | Principle parameter |
 |---|---|---|---|
-| `white-bear` | `epistemic-cooperative/skills/white-bear/` | Published (portable) | Positive rationale over negative prohibition |
+| `white-bear` | `epistemic-cooperative/skills/white-bear/` | Published (portable) | Necessary-path attention over unnecessary competing-target mentions |
 | `zero-shot` | `epistemic-cooperative/skills/zero-shot/` | Published (portable) | Principle statement over anchoring few-shot examples |
 | `encapsulation` | `.claude/skills/encapsulation/` | Project-local (not shipped) | This repo's runtime-contract self-containment: no contributor-knowledge assumption, no rephrasing that bypasses the deterministic BANNED-pattern check |
 

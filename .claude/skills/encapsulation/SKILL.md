@@ -92,7 +92,7 @@ This SKILL.md sits in `.claude/skills/`, which is project-local contributor tool
 |---------|-----------|---------------------|
 | `verify` `artifact-self-containment` | Deterministic literal pattern matching against BANNED tokens | Banned reference tokens leaking into the runtime surface |
 | `encapsulation` | Claude-judge semantic review of runtime-surface prose | Contributor-knowledge assumption; BANNED-bypass rephrasing |
-| `white-bear` | Sibling semantic audit (published, portable) | Negative-framing drift |
+| `white-bear` | Sibling semantic audit (published, portable) | Unnecessary competing-target mention drift |
 | `zero-shot` | Sibling semantic audit (published, portable) | Few-shot anchoring drift |
 
 The verify check and this audit are complementary on the encapsulation axis: deterministic pattern matching catches token leaks; semantic review catches meaning leaks that survive token absence.
