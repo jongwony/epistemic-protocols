@@ -66,6 +66,8 @@ When `Λ.coverage_constraint` is set (from a prior `Narrow(CoverageSubset)`), fi
 
 Construct the candidate set. Keep at minimum two candidates with non-overlapping reverse-evidence conditions — singleton high-confidence framing is forbidden (see Rules section, Rule 5).
 
+**Substrate-implicit disambiguation**: Before defaulting a candidate to a missing-information framing (e.g., ContextInsufficient/`/inquire`, FrameworkAbsent/`/frame`), check whether the situation's external substrate (the user's own codebase, project rules or Northstar documents, prior session record, or environment) already carries an implicit, not-yet-articulated decision signal relevant to the utterance. When it does, include AbstractAporia (`/elicit`) in the candidate set — per Euporia's own `substrate_implicit` boundary (`euporia/skills/elicit/SKILL.md` Gate predicate), an implicit-but-unarticulated decision coordinate is intent-decoding, not external-fact supply, and belongs to `/elicit` rather than `/inquire`. Utterance-only ambiguity without an external substrate signal still routes to `/inquire`, consistent with that same boundary.
+
 **Single-pass routing scope**: Phase 1 enumerates named deficits across the catalog as a one-shot fit review. Per-protocol convergence dynamics — including cycle iteration within a routed protocol such as `/elicit`'s reverse-induction loop — remain internal to that destination protocol; Probe does not surface, measure, or aggregate convergence efficiency across uses (Rule 7 reinforcement; cycle-counter visibility is the destination protocol's UX surface, not Probe's).
 
 ### Phase 2: Hypothesis Presentation
