@@ -19,8 +19,8 @@ BacklogIntake
   -> NorthstarFusion
   -> FocusedWorkUnit
   -> RouteChoice
-  -> [/distill]
-  -> PortableHandoff
+       -> independent session: [/distill] -> PortableHandoff
+       -> re-triage: back to the relevant earlier phase, no handoff composed
 ```
 
 Execution is not `/triage`'s. The receiving session consumes the portable handoff `/distill` composes — or a focused work unit directly — and does the branching, editing, and PR work itself. Arranging how several routed units run is likewise outside this skill: `/triage` emits one handoff per routed unit and stops.
