@@ -16,7 +16,7 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/report` | Growth Map with epistemic analysis | HTML artifact (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | Protocol handbook — instant reference | Terminal-based protocol browser |
-| `/triage` | Work-unit triage from GitHub issues | Dispatchable initial prompts |
+| `/triage` | Work-unit triage from GitHub issues | Routed work units, composed into `/distill` portable handoffs |
 | `/dispatch` | Focused work-unit execution | Branches, PRs, feedback inscriptions |
 | `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
@@ -107,10 +107,10 @@ Browse all protocols, compare by concern cluster, and view detailed scenarios. T
 
 ### /triage — Work-Unit Formation
 
-Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and emits dispatchable initial prompts. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
+Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and forms focused work units. Once the user picks a route, `/triage` composes `/distill` to emit each unit's portable handoff. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
 
 ```
-RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → INITIAL PROMPT → ROUTE
+RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → [/distill] → HANDOFF
 ```
 
 Key features:
@@ -118,6 +118,7 @@ Key features:
 - similarity grouping by problem pressure rather than labels alone
 - `IssueGroup -> FocusedWorkUnit` one-to-one by default, with split only when the northstar fusion exposes distinct execution axes
 - route choice belongs to the current session: independent session, linear `/dispatch`, parallel `/dispatch`, or re-triage
+- an independent-session or dispatch route composes `/distill` for the routed unit's portable handoff; re-triage composes no handoff
 
 ### /dispatch — Focused Work-Unit Execution
 

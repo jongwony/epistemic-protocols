@@ -1,11 +1,11 @@
 ---
 name: triage
-description: "Work-unit triage for GitHub issues. Groups raw issues, fuses each group with the AGENTS.md northstar in session, and emits dispatchable initial prompts."
+description: "Work-unit triage for GitHub issues. Groups raw issues, fuses each group with the AGENTS.md northstar in session, and composes /distill to hand off each routed work unit."
 ---
 
 # Triage: Work-Unit Formation
 
-Form executable work units from GitHub issue substrate, handing execution — branches, PRs, applied fixes — to /dispatch or a normal session. It reads raw issues, groups related issues, fuses each group with the project's inscribed northstar and the user's current-session judgment, and emits one or more initial prompts that can be routed to an independent session, linear `/dispatch`, or parallel `/dispatch`.
+Form executable work units from GitHub issue substrate, handing execution — branches, PRs, applied fixes — to /dispatch or a normal session. It reads raw issues, groups related issues, fuses each group with the project's inscribed northstar and the user's current-session judgment, forms one or more focused work units, and — once the user picks a route — composes `/distill` to emit each unit as a portable handoff for an independent session, linear `/dispatch`, or parallel `/dispatch`.
 
 ## Core Contract
 
@@ -18,11 +18,12 @@ BacklogIntake
   -> NormalizedProblemFrame
   -> NorthstarFusion
   -> FocusedWorkUnit
-  -> InitialPrompt
   -> RouteChoice
+  -> [/distill]
+  -> PortableHandoff
 ```
 
-`/dispatch` owns work-unit execution. It consumes a focused work unit or initial prompt and applies the selected execution topology. If the user asks `/dispatch` to process open issues directly, route to `/triage` first unless a focused work unit is already present in the session.
+`/dispatch` owns work-unit execution. It consumes a focused work unit or the portable handoff `/distill` composes, and applies the selected execution topology. If the user asks `/dispatch` to process open issues directly, route to `/triage` first unless a focused work unit is already present in the session.
 
 ## Types
 
@@ -37,8 +38,8 @@ BacklogIntake
 | `Northstar` | The inscribed direction line read from `AGENTS.md` or the active project guide, usually under `## Northstar`. This may have been produced by `/realign`. |
 | `NorthstarFusion` | A session-text trace showing how the normalized problem frame preserves, transforms, or drops issue claims in light of the northstar and the user's current judgment. |
 | `FocusedWorkUnit` | The executable unit formed from one issue group after northstar fusion. Default cardinality is `IssueGroup -> FocusedWorkUnit` one-to-one. Split only when northstar fusion exposes distinct execution axes. |
-| `InitialPrompt` | The handoff text for an independent session or `/dispatch`. It is the output artifact, not a raw issue summary. |
 | `RouteChoice` | The user's current-session choice: independent session, linear dispatch, parallel dispatch, or re-triage. |
+| `PortableHandoff` | The handoff artifact for an independent session or `/dispatch`, composed by `/distill` from a routed `FocusedWorkUnit`. `/distill` owns this type; `/triage` composes it rather than emitting its own handoff format. |
 
 ## Phase 0: Bind Scope
 
@@ -89,7 +90,7 @@ Read the full issue substrate for each issue in the bound scope or confirmed clu
 
 Use the available GitHub interface (`gh`, MCP, or pasted issue text). Preserve issue numbers in every downstream artifact.
 
-For medium and large intake postures, metadata-only lists are provisional. They can seed `IssueGroup` candidates, but a candidate cannot become a `NormalizedProblemFrame`, `FocusedWorkUnit`, or `InitialPrompt` until the relevant full issue substrate has been read.
+For medium and large intake postures, metadata-only lists are provisional. They can seed `IssueGroup` candidates, but a candidate cannot become a `NormalizedProblemFrame`, `FocusedWorkUnit`, or distilled `PortableHandoff` until the relevant full issue substrate has been read.
 
 ## Phase 2: Group Issues
 
@@ -160,60 +161,26 @@ Each work unit includes:
 - verification expectations
 - suggested route with rationale
 
-## Phase 6: Emit Initial Prompts
-
-For each ready work unit, emit an `InitialPrompt` in this format:
-
-```markdown
-# Initial Prompt: <FocusedWorkUnit name>
-
-## Work Unit
-
-<one-paragraph description of the focused work unit>
-
-## Northstar Fusion
-
-- Preserved: <issue claims preserved by the northstar>
-- Transformed: <issue claims reframed by the northstar>
-- Dropped: <issue claims excluded from this unit>
-
-## Issue Substrate
-
-- #<n> — <role in the work unit>
-
-## Scope
-
-In scope:
-- <specific scope item>
-
-Out of scope:
-- <specific exclusion>
-
-## Execution Instructions
-
-<what the receiving session or /dispatch should do first>
-
-## Verification
-
-- <project-specific verification command or check>
-
-## Route Options
-
-- Independent session: <when this is appropriate>
-- Linear dispatch: <when this is appropriate>
-- Parallel dispatch: <when this is appropriate>
-```
-
-## Phase 7: Route Choice
+## Phase 6: Route Choice
 
 Present the work units and ask the user to choose a route:
 
-1. **Independent session** — use one initial prompt in a fresh session.
+1. **Independent session** — hand one portable handoff to a fresh session.
 2. **Linear dispatch** — pass selected work units to `/dispatch` sequentially.
 3. **Parallel dispatch** — pass independent work units to `/dispatch` in parallel.
 4. **Re-triage** — revise grouping, fusion, or work-unit boundaries.
 
-If the user chooses dispatch, hand off only the selected `InitialPrompt` or work-unit set; `/dispatch` consumes it as-is without re-scanning open issues.
+The route choice is the input Phase 7 hands `/distill`: an independent-session, linear-dispatch, or parallel-dispatch route proceeds to Phase 7 for that work unit. Re-triage returns to the relevant earlier phase; no handoff is composed for that cycle.
+
+## Phase 7: Compose /distill
+
+For each work unit the user routed to an independent session, linear dispatch, or parallel dispatch, compose `/distill` to produce its `PortableHandoff`.
+
+Hand `/distill` the work unit's own substrate as its working context: the `FocusedWorkUnit`, its `NormalizedProblemFrame`, its `NorthstarFusion` trace, and the included issue numbers with their per-issue contribution. `/distill` runs its own contract declaration against this substrate — the chosen route is what fixes the handoff's durability and its recipient profile: a dispatch route hands the work unit to the current session's own `/dispatch` continuation, while an independent session hands it to a fresh session with no access to the current one. `/triage` does not pre-classify durability or recipient profile; it supplies the route and the work-unit substrate, and `/distill` resolves them at its own contract phase.
+
+Re-triage does not reach this phase: revising grouping, fusion, or work-unit boundaries produces no handoff to distill.
+
+`/distill` emits the `PortableHandoff`, including the activation edge that hands the artifact to `/dispatch` or the independent session as a copyable initial-prompt block.
 
 ## Rules
 
@@ -221,19 +188,29 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 2. **RawIssueSet scope** (Architectural — substrate boundary): Use `RawIssueSet`, not broad external-signal language, for the issue substrate. The concrete input is GitHub issues or pasted issue equivalents.
 3. **Dynamic scale judgment** (Architectural — bounded attention): Classify small, medium, or large by `TriageLoad`, not by a fixed issue-count threshold. Issue count is only one signal inside `IssueLoad`.
 4. **Scale-aware substrate read** (Architectural — bounded attention): Small intake may be full-scanned; medium intake requires metadata-first cluster confirmation; large intake requires `IntakeIntent` via `/elicit` before full substrate reads.
-5. **Metadata is provisional** (Architectural — substrate boundary): Metadata-only grouping cannot produce a work unit. Full issue substrate is required before normalization, northstar fusion, and prompt emission.
+5. **Metadata is provisional** (Architectural — substrate boundary): Metadata-only grouping cannot produce a work unit. Full issue substrate is required before normalization, northstar fusion, and handoff composition.
 6. **Work-unit formation, not execution** (Architectural — role boundary): `/triage` does not edit production files, create implementation branches, open PRs, or apply fixes.
 7. **IssueGroup default cardinality** (Architectural — review-surface visibility): Default to `IssueGroup -> FocusedWorkUnit` one-to-one. Split only with cited execution-axis evidence.
 8. **Northstar fusion required** (Axiom anchor — Convergence Persistence): Every ready work unit includes a fusion trace against the active project northstar. A summary without fusion is not a triaged work unit.
 9. **Session route authority** (Axiom anchor — Detection with Authority): Route choice belongs to the user in the current session. GitHub labels or project fields may record the choice but do not replace it.
-10. **InitialPrompt is the handoff artifact** (Architectural — handoff specificity): Dispatch and independent sessions consume initial prompts or focused work units, not raw issue lists.
+10. **PortableHandoff is the handoff artifact** (Architectural — handoff specificity): Dispatch and independent sessions consume the portable handoff `/distill` composes, or a focused work unit directly, not a raw issue list.
 11. **No silent grouping** (Derived — Surfacing over Deciding): Surface grouping candidates before forming work units. Similarity grouping is a user-recognized judgment, not a hidden classifier result.
-12. **Preserve issue provenance** (Architectural — provenance continuity): Every problem frame, work unit, and prompt cites the source issue numbers that contributed to it.
+12. **Preserve issue provenance** (Architectural — provenance continuity): Every problem frame, work unit, and composed handoff cites the source issue numbers that contributed to it.
 13. **Blocked work stays visible** (Derived — Surfacing over Deciding): If an issue group is blocked, stale, or needs-info, emit that as a work-unit disposition or re-triage note rather than dropping it.
+14. **Composition boundary, not hand-rolled emission** (Architectural — composition boundary): `/triage` forms and routes focused work units; it does not hand-roll its own handoff template. The portable handoff — its zero-memory comprehension gate, leak lint, and durability classification — is `/distill`'s owned contract, composed at Phase 7 rather than duplicated inline.
 
 ## Boundary Note
 
-`/triage` reads GitHub issue substrate and emits focused work units. It may read the current northstar produced by `/realign`, but it does not rewrite the project guide. It hands selected initial prompts to `/dispatch`, but does not execute branches, PRs, or review compliance.
+`/triage` reads GitHub issue substrate and emits focused work units. It may read the current northstar produced by `/realign`, but it does not rewrite the project guide. It composes `/distill` to hand selected work units' portable handoffs to `/dispatch` or an independent session, but does not execute branches, PRs, or review compliance.
+
+## Composition
+
+Triage composes the following protocols at runtime:
+
+- **Phase 0 (large intake posture)**: `/elicit` (Euporia) — crystallizes `IntakeIntent` before full substrate reads
+- **Phase 7**: `/distill` (Diylisis) — composes the routed work unit's portable handoff
+
+Composition is sequential — each phase consumes the previous phase's output. The re-triage route at Phase 6 does not reach Phase 7; that cycle composes no handoff.
 
 ## Anti-patterns
 
@@ -241,11 +218,12 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 - **Unbounded backlog scan**: reading full bodies/comments for a medium or large intake posture before a metadata grouping checkpoint or `/elicit`-formed `IntakeIntent`.
 - **Label-only grouping**: labels can seed grouping, but the work unit must be formed by shared problem pressure and cited issue evidence.
 - **Label-implies-load**: inferring low deliverable (execution/review) load from a `refactor`/mechanical label when the issue's output is a decision or candidate-classification that will spawn in-session judgment gates.
-- **Metadata-only work units**: emitting normalized frames, focused work units, or initial prompts from titles/labels alone.
+- **Metadata-only work units**: emitting normalized frames, focused work units, or composed handoffs from titles/labels alone.
 - **Northstar-free summary**: a raw issue summary without preserved/transformed/dropped claims is not a triaged work unit.
 - **Dispatch leakage**: branch creation, file edits, PR creation, and review compliance belong to `/dispatch` or a normal execution session, not `/triage`.
 - **Silent split or merge**: changing work-unit cardinality without surfacing the grouping rationale hides the decision the user must recognize.
-- **Prompt as issue dump**: an initial prompt must state scope, exclusions, execution entry point, and verification expectations; it is not a pasted issue list.
+- **Work unit as issue dump**: a `FocusedWorkUnit` handed to `/distill` must carry the fused problem frame, scope, exclusions, and verification expectations Phase 3 through 5 produced; it is not a pasted issue list.
+- **Hand-rolled handoff emission**: writing a bespoke initial-prompt template inside `/triage` instead of composing `/distill` at Phase 7. The handoff's comprehension gate, leak lint, and durability classification live in `/distill`'s contract; re-implementing them inline duplicates and drifts from it.
 
 ## Operational checklist (per cycle)
 
@@ -258,5 +236,5 @@ If the user chooses dispatch, hand off only the selected `InitialPrompt` or work
 - [ ] Phase 3 NormalizedProblemFrame records evidence, conflicts, missing context, and exclusions
 - [ ] Phase 4 NorthstarFusion records preserved / transformed / dropped claims
 - [ ] Phase 5 FocusedWorkUnit readiness and split rationale are explicit
-- [ ] Phase 6 InitialPrompt includes scope, out-of-scope clauses, execution instructions, and verification
-- [ ] Phase 7 route choice is selected by the user before dispatch handoff
+- [ ] Phase 6 route choice is selected by the user before any handoff is composed
+- [ ] Phase 7 `/distill` is composed per routed work unit, handed the FocusedWorkUnit/NormalizedProblemFrame/NorthstarFusion/issue-provenance substrate; re-triage skips this step

@@ -49,7 +49,7 @@ const DESCRIPTION_OVERRIDES = {
   preview: 'Divergent-discard instantiation before direction commitment — (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
-  triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, and emit dispatchable initial prompts.',
+  triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, and compose /distill to hand off routed work units.',
   dispatch: 'Focused work-unit execution — consume /triage initial prompts, verify premises, fan out PRs, and inscribe rejection traces.',
   'comment-review': "Reviews markdown/HTML artifacts before fixation (publish/commit/merge) via a channel-first browser preview loop.",
   forge: "Reference-grounded prompt-artifact formation — surfaces under-determined contract coordinates from a reference doc and projects a ready-to-use prompt or skill recipe.",

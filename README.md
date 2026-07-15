@@ -107,7 +107,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/preview`) · Analysis (`/fr
 
 **Work-unit triage and dispatch**:
 
-- `/triage` — read a scoped GitHub `RawIssueSet`, group related issues, normalize each group into a problem frame, fuse it with the `AGENTS.md` northstar in the current session, and emit dispatchable initial prompts with route choices
+- `/triage` — read a scoped GitHub `RawIssueSet`, group related issues, normalize each group into a problem frame, fuse it with the `AGENTS.md` northstar in the current session, form focused work units, and — once the user picks a route — compose `/distill` to emit each unit's portable handoff
 - `/dispatch` — consume focused work units or initial prompts, set an execution topology contract (composes `/bound`), verify each unit's premise, fan out work-unit branches/PRs, then load review feedback and inscribe rejection traces into linked issues so the next fresh-context session can re-enter without re-deriving the rejection's reasoning
 
 **Reference-grounded prompt formation**:

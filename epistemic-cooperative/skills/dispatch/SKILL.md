@@ -38,7 +38,7 @@ Project-specific values are **read** from the above; the skill itself does not h
 Activation cues:
 
 - `/dispatch <initial prompt>` slash command (Layer 1)
-- `/dispatch` after `/triage` has emitted one or more `FocusedWorkUnit`s or `InitialPrompt`s in the current session
+- `/dispatch` after `/triage` has emitted one or more `FocusedWorkUnit`s or composed `PortableHandoff`s in the current session
 - User route choice from `/triage`: "run these linearly", "dispatch these in parallel", "execute work unit A"
 
 Pre-activation check:
@@ -68,7 +68,7 @@ If the project's profile declares an Extension-default with a closure clause cov
 
 ## Phase 2: Load Focused Work Units
 
-Read the selected `InitialPrompt`s or `FocusedWorkUnit`s from current session context. For each unit, capture:
+Read the selected `PortableHandoff`s or `FocusedWorkUnit`s from current session context. For each unit, capture:
 
 - work-unit name
 - included issue numbers
@@ -112,7 +112,7 @@ Execute according to the bounded topology:
 - **Linear sequence**: execute work units one at a time, returning to base after each PR.
 - **Parallel fanout**: create independent per-work-unit branches only when write scopes are disjoint and the active runtime/tool policy authorizes parallel agent work.
 
-Carry the work-unit rationale trace forward through the cycle. Dispatch preserves the InitialPrompt's problem frame, northstar fusion summary, and selected route rationale, then adds the premise/fusion verification result from Phase 3 and any continuation links from Phase 6 or Phase 8.
+Carry the work-unit rationale trace forward through the cycle. Dispatch preserves the PortableHandoff's problem frame, northstar fusion summary, and selected route rationale, then adds the premise/fusion verification result from Phase 3 and any continuation links from Phase 6 or Phase 8.
 
 For each executable work unit:
 
@@ -223,12 +223,12 @@ Final summary always includes:
 - Skipped work-unit count by class (blocked / stale / needs-info / re-triage-needed)
 - Deferred work units (effort cap)
 - Follow-up improvement issue count with created links, duplicate-skipped links, and draft-only or intentionally skipped candidate reasons
-- Cycle rationale trace: InitialPrompt source, northstar fusion summary, selected route rationale, premise/fusion verification result, and continuation links from rejection inscription or improvement capture
+- Cycle rationale trace: PortableHandoff source, northstar fusion summary, selected route rationale, premise/fusion verification result, and continuation links from rejection inscription or improvement capture
 
 ## Rules
 
 1. **Boundary contract first** (Detection with Authority anchor): Phase 1 must complete before Phase 2. Executing without topology and work-unit selection boundaries exercises silent constitutive authority.
-2. **No intake inside dispatch**: Dispatch consumes `FocusedWorkUnit`s or `InitialPrompt`s. Open issue discovery, similarity grouping, and northstar fusion belong to `/triage`.
+2. **No intake inside dispatch**: Dispatch consumes `FocusedWorkUnit`s or `PortableHandoff`s. Open issue discovery, similarity grouping, and northstar fusion belong to `/triage`.
 3. **Substrate-cited skip surfacing** (Derived — Surfacing over Deciding): Skip decisions quote the lock condition or premise failure from the work unit or linked issue substrate. Silent skip drops Recognition.
 4. **One PR per work unit by default** (Architectural — review-surface visibility): Each work unit produces exactly one PR unless the boundary contract explicitly chooses a grouped PR. Bundling unrelated work units obscures the review basis.
 5. **Northstar-fusion carry-through** (Architectural — alignment-basis visibility): PR bodies preserve the work unit's northstar fusion summary. Dispatch does not re-fuse the direction; it verifies that the supplied fusion still fits.
@@ -291,4 +291,4 @@ Composition is sequential — each phase consumes the previous phase's output. P
 - [ ] Phase 8 de-duplicates candidates against open issues before creation
 - [ ] Phase 8 records created, duplicate-skipped, draft-only, or intentionally skipped improvement candidates with reasons
 - [ ] Final summary surfaces merged / compliant-fix / rejected-inscribed / skipped / deferred / follow-up-improvement counts and links
-- [ ] Final summary preserves the InitialPrompt source, northstar fusion summary, selected route rationale, premise/fusion verification result, and continuation links
+- [ ] Final summary preserves the PortableHandoff source, northstar fusion summary, selected route rationale, premise/fusion verification result, and continuation links
