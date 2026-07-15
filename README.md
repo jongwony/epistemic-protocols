@@ -89,7 +89,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/preview`) · Analysis (`/fr
 
 | Plugin | Command | Purpose |
 |--------|---------|---------|
-| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/dispatch`, `/forge`, `/reduced-space-test` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, focused work-unit dispatch with PR fanout + rejection-trace inscription, reference-grounded prompt-artifact formation, and scoped empirical validation |
+| [Epistemic Cooperative](./epistemic-cooperative) | `/onboard`, `/probe`, `/catalog`, `/report`, `/dashboard`, `/steer`, `/realign`, `/misuse`, `/triage`, `/forge`, `/reduced-space-test` | Protocol learning, deficit recognition fit review, handbook reference, usage analysis, coverage dashboard, project profile recalibration, project guide direction-line fusion, retrospective contract violation detection, work-unit triage, reference-grounded prompt-artifact formation, and scoped empirical validation |
 
 **Three discovery modes coexist** (none replaces the others):
 
@@ -105,10 +105,9 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/preview`) · Analysis (`/fr
 
 - `/realign` — surface three horizons (the project guide's currently inscribed direction line, externally surfaced direction signals from a configured channel set, and the user's present pre-understanding elicited as a separate sub-step), compose a fusion candidate with a per-horizon transformation trace marking what was preserved / transformed / dropped in each horizon, shape the candidate through the dialectical widen / narrow / fuse / reorient / confirm / dismiss vocabulary inherited from `/induce`, and on user confirmation write the fused line back to the project guide direction line (rollback through the project's version control)
 
-**Work-unit triage and dispatch**:
+**Work-unit triage**:
 
 - `/triage` — read a scoped GitHub `RawIssueSet`, group related issues, normalize each group into a problem frame, fuse it with the `AGENTS.md` northstar in the current session, form focused work units, and — once the user picks a route — compose `/distill` to emit each unit's portable handoff
-- `/dispatch` — consume focused work units or initial prompts, set an execution topology contract (composes `/bound`), verify each unit's premise, fan out work-unit branches/PRs, then load review feedback and inscribe rejection traces into linked issues so the next fresh-context session can re-enter without re-deriving the rejection's reasoning
 
 **Reference-grounded prompt formation**:
 

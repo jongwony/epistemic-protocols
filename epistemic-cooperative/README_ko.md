@@ -1,12 +1,12 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-프로토콜 학습, 사용 분석, 커버리지 대시보드, work-unit triage, dispatch orchestration 유틸리티.
+프로토콜 학습, 사용 분석, 커버리지 대시보드, work-unit triage 유틸리티.
 
 > [English](./README.md)
 
 ## Epistemic Cooperative란?
 
-인식론적 프로토콜 온보딩, 분석, 작업 orchestration을 위한 유틸리티 플러그인이다. 특정 결정 지점을 다루는 프로토콜과 달리, Epistemic Cooperative는 **진입점** 역할을 한다 — 체험 기반 프로토콜 학습을 안내하고, 근거 기반 분석 리포트를 생성하며, 세션 전반의 사용량을 추적하고, 이슈에서 focused work unit을 형성해 선택된 unit을 실행으로 넘긴다.
+인식론적 프로토콜 온보딩, 분석, 작업 orchestration을 위한 유틸리티 플러그인이다. 특정 결정 지점을 다루는 프로토콜과 달리, Epistemic Cooperative는 **진입점** 역할을 한다 — 체험 기반 프로토콜 학습을 안내하고, 근거 기반 분석 리포트를 생성하며, 세션 전반의 사용량을 추적하고, 이슈에서 focused work unit을 형성한다.
 
 ### 스킬
 
@@ -17,7 +17,6 @@
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | 프로토콜 핸드북 — 즉시 참조 | 터미널 기반 프로토콜 브라우저 |
 | `/triage` | GitHub 이슈 기반 work-unit triage | routed work unit, `/distill` portable handoff로 compose |
-| `/dispatch` | focused work-unit 실행 | 브랜치, PR, feedback inscription |
 | `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 (수렴까지) | 적용된 수정 + 수렴 trace |
@@ -117,22 +116,8 @@ RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE 
 - bare `/triage`는 open-backlog metadata intake를 먼저 수행한 뒤 issue load, repo load, mapping load, intent ambiguity로 small / medium / large posture를 판정한다.
 - label만이 아니라 problem pressure 기준으로 similarity grouping
 - 기본은 `IssueGroup -> FocusedWorkUnit` 1:1, northstar fusion 중 실행축이 갈라질 때만 split
-- route choice는 현재 세션에서 사용자가 결정: independent session, linear `/dispatch`, parallel `/dispatch`, re-triage
-- independent session 또는 dispatch route는 routed unit의 portable handoff를 위해 `/distill`을 compose; re-triage는 handoff를 compose하지 않음
-
-### /dispatch — Focused Work-Unit Execution
-
-`/triage`가 만든 focused work unit 또는 initial prompt를 받아 `/bound`로 실행 topology 계약을 설정하고, 각 unit의 premise를 검증한 뒤 branch/PR로 fanout하고 review feedback을 linked issue에 inscribe한다.
-
-```
-DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK
-```
-
-주요 특징:
-- dispatch 내부에서 open issue intake를 하지 않음; backlog discovery는 `/triage`로 라우팅
-- branch 생성 전 premise verification
-- 선택된 work unit에 대한 linear 또는 parallel fanout
-- fresh-context continuity를 위한 verbatim rejection feedback inscription
+- route choice는 현재 세션에서 사용자가 결정: independent session, re-triage
+- independent session으로 routed된 unit은 portable handoff를 위해 `/distill`을 compose; re-triage는 handoff를 compose하지 않음
 
 ### /forge — Reference-Grounded Prompt-Artifact Formation
 
@@ -173,7 +158,6 @@ epistemic-cooperative/
 │   ├── dashboard/SKILL.md        # /dashboard 커버리지 대시보드
 │   ├── catalog/SKILL.md          # /catalog 프로토콜 핸드북
 │   ├── triage/SKILL.md           # /triage work-unit formation
-│   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
 │   ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
 │   └── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
 └── agents/
@@ -201,7 +185,6 @@ epistemic-cooperative/
 | 시간 경과에 따른 프로토콜 채택 추적 | `/dashboard` |
 | 빠른 프로토콜 참조 | `/catalog` |
 | 관련 GitHub 이슈를 focused work unit으로 만들 때 | `/triage` |
-| 선택된 focused work unit을 실행할 때 | `/dispatch` |
 | 불확실한 명제를 bounded 대리 공간에서 검증할 때 | `/reduced-space-test` |
 ## 사용법
 
@@ -212,7 +195,6 @@ epistemic-cooperative/
 /catalog
 /triage
 /triage #41 #52 #60
-/dispatch <initial prompt>
 ```
 
 ## 저자
