@@ -1,12 +1,12 @@
 # Epistemic Cooperative (epistemic-cooperative)
 
-Protocol learning, usage analysis, coverage dashboard, work-unit triage, and dispatch orchestration for Claude Code and Codex.
+Protocol learning, usage analysis, coverage dashboard, and work-unit triage for Claude Code and Codex.
 
 > [한국어](./README_ko.md)
 
 ## What is Epistemic Cooperative?
 
-A utility plugin for epistemic protocol onboarding, analytics, and work orchestration. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, tracking usage across sessions, forming focused work units from issues, and dispatching selected work units into execution.
+A utility plugin for epistemic protocol onboarding, analytics, and work orchestration. Unlike protocols that target specific decision points, Epistemic Cooperative serves as the **entry point** — guiding users through hands-on protocol learning, generating evidence-backed analysis reports, tracking usage across sessions, and forming focused work units from issues.
 
 ### Skills
 
@@ -16,8 +16,7 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/report` | Growth Map with epistemic analysis | HTML artifact (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | Protocol handbook — instant reference | Terminal-based protocol browser |
-| `/triage` | Work-unit triage from GitHub issues | Dispatchable initial prompts |
-| `/dispatch` | Focused work-unit execution | Branches, PRs, feedback inscriptions |
+| `/triage` | Work-unit triage from GitHub issues | Routed work units, composed into `/distill` portable handoffs |
 | `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop to convergence | Applied fixes + convergence trace |
@@ -107,31 +106,18 @@ Browse all protocols, compare by concern cluster, and view detailed scenarios. T
 
 ### /triage — Work-Unit Formation
 
-Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and emits dispatchable initial prompts. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
+Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and forms focused work units. Once the user picks a route, `/triage` composes `/distill` to emit each unit's portable handoff. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
 
 ```
-RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → INITIAL PROMPT → ROUTE
+RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → [/distill] → HANDOFF
 ```
 
 Key features:
 - bare `/triage` performs lightweight open-backlog metadata intake, then classifies small / medium / large posture from issue load, repo load, mapping load, and intent ambiguity
 - similarity grouping by problem pressure rather than labels alone
 - `IssueGroup -> FocusedWorkUnit` one-to-one by default, with split only when the northstar fusion exposes distinct execution axes
-- route choice belongs to the current session: independent session, linear `/dispatch`, parallel `/dispatch`, or re-triage
-
-### /dispatch — Focused Work-Unit Execution
-
-Consumes focused work units or initial prompts from `/triage`, sets an execution topology contract with `/bound`, verifies each unit's premise, fans out branches/PRs, then loads review feedback and inscribes rejection traces into linked issues.
-
-```
-DETECT → BOUND → LOAD WORK UNITS → PREMISE → FANOUT → FEEDBACK
-```
-
-Key features:
-- no open-issue intake inside dispatch; route backlog discovery to `/triage`
-- premise verification before branch creation
-- linear or parallel fanout over selected work units
-- verbatim rejection feedback inscription for fresh-context continuity
+- route choice belongs to the current session: independent session or re-triage
+- a unit routed to an independent session composes `/distill` for its portable handoff; re-triage composes no handoff
 
 ### /forge — Reference-Grounded Prompt-Artifact Formation
 
@@ -172,7 +158,6 @@ epistemic-cooperative/
 │   ├── dashboard/SKILL.md        # /dashboard coverage dashboard
 │   ├── catalog/SKILL.md          # /catalog protocol handbook
 │   ├── triage/SKILL.md           # /triage work-unit formation
-│   ├── dispatch/SKILL.md         # /dispatch focused work-unit execution
 │   ├── forge/SKILL.md            # /forge reference-grounded prompt-artifact formation
 │   └── reduced-space-test/SKILL.md  # /reduced-space-test scoped empirical validation
 └── agents/
@@ -200,7 +185,6 @@ epistemic-cooperative/
 | Tracking protocol adoption over time | `/dashboard` |
 | Quick protocol reference | `/catalog` |
 | Turning related GitHub issues into focused work units | `/triage` |
-| Executing selected focused work units | `/dispatch` |
 | Validating an uncertain proposition in a bounded stand-in space | `/reduced-space-test` |
 
 ## Install
@@ -219,7 +203,6 @@ claude plugin install epistemic-cooperative@epistemic-protocols
 /catalog
 /triage
 /triage #41 #52 #60
-/dispatch <initial prompt>
 ```
 
 ## Author

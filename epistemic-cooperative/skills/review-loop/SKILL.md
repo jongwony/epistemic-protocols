@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: "Convergence-paced code/PR review-resolve loop via /review-loop. Drives a pluggable review source (codex | code-review), passing it the design intent already captured for the changed surface (relevant project rules + adjacent design comments + decisions constituted at the loop's own gates, with a mission-anchored severity steer) so intentional documented choices are pre-filtered upstream, verifies each finding against the codebase (/inquire) and work-flow (/contextualize), auto-applies Mechanical fixes (Extension) and gates Judgment fixes by shared disposition (Constitution), risk-screens applies (substrate risk → harness permission; epistemic risk → direct Constitution), then re-reviews until the source verdict converges to approve — recurring signals escalate to constituted design decisions rather than suppression, keeping the reviewer independent. User-invoked via /review-loop."
+description: "Convergence-paced code/PR review-resolve loop via /review-loop. Drives a pluggable review source (codex | code-review), passing it the design intent already captured for the changed surface (relevant project rules + adjacent design comments + decisions constituted at the loop's own gates, with a mission-anchored severity steer) so intentional documented choices are pre-filtered upstream, verifies each finding against the codebase (/inquire) and work-flow (/contextualize), auto-applies Mechanical fixes (Extension) and gates Judgment fixes by shared disposition (Constitution), risk-screens applies (substrate risk → harness permission; epistemic risk → direct Constitution), then re-reviews until the source verdict converges to approve — recurring signals escalate to constituted design decisions rather than suppression, keeping the reviewer independent. At exit, converged or free, a decision constituted at its gates is offered for durable record on the home its reach implies (for a PR scope, the issues the PR closes), never as a condition of exiting. User-invoked via /review-loop."
 skills:
   - aitesis:inquire
   - epharmoge:contextualize
@@ -82,7 +82,7 @@ Pass the repo-resident sources (1–3) as **pointers, not copied content** — r
 
 **Role separation — conventions vs the severity anchor.** Conveyed intent plays two distinct roles. Conventions and rules are what the source checks against; the project's stated mission (a Northstar or equivalent project-goal statement) is how the source weighs severity. Pointing a reviewer at rule files amplifies rule-enforcement findings — it reads them as checklists — while a mission statement gains no operational grip on its own. The adapter therefore conveys the mission anchor with an explicit severity-calibration steer: a defect that breaks runtime behavior ranks high — critical when it additionally corrupts silently, producing wrong results the user would act on without noticing; a defect that misbehaves only in edge conditions ranks medium; an internal-consistency mismatch with no behavioral consequence ranks low or suggestion; a wording preference the documented conventions already account for is not a finding.
 
-**Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates.
+**Free-exit affordance (declared once).** Announce here, before the first review round: *"You can end this loop at any time by saying so; on exit I will present the convergence trace so far, offer to record any decision you made here that outlives this review, and stop."* This is a free-response pathway, not a gate option — it does not reappear as a peer option at later gates, and the record offer never conditions the exit (see the Convergence section's ledger carryover).
 
 ## Phase 1: Review
 
@@ -235,6 +235,10 @@ The interruption axis — not the resolution class — places each entry. A Mech
 
 The per-round trace is a relay presentation — present it and proceed; it is not a gate. At convergence, the accumulated traces are the evidence that each finding reached a disposition — applied, dropped or dismissed, or explicitly surfaced as annotated residual.
 
+**Ledger carryover at exit.** An entry enters the design-decision ledger (Phase 0 harvest, source 4) precisely because it holds independently of current code state — its reach already exceeds the diff that occasioned it. The ledger is nonetheless loop-local: an entry re-enters the source's bundle at the next re-harvest and otherwise ends with the session, so the admission criterion and the lifetime disagree. The entries that lose most are the ones that redirect the work the diff was serving rather than settling it — a direction the user constituted *against* the diff, which the diff itself does not record. With the loop gone that direction is unrecoverable, and the next session to pick the work up re-derives the frame the user just rejected.
+
+At exit — converged or free — surface each ledger entry with the durable home its reach implies: for a PR scope, a decision redirecting the work belongs on the issues the PR declares it closes, where that work is next read. Carry the user's constituting words verbatim rather than a summary, which keeps the conclusion and drops the frame that produced it — the frame is what the next reader needs. This is an offer, not a condition: the exit has already landed when the offer is made, declining ends the loop identically, and the user may redirect the record's shape or home.
+
 ## Error Handling
 
 | Condition | Action |
@@ -282,6 +286,16 @@ The per-round trace is a relay presentation — present it and proceed; it is no
    and is design-level by backstop. Recurrence ends through a completed repair or
    constitution, never suppression; a manufactured verdict (a source instructed to
    approve when findings match a ledger) is not convergence.
+10. **A constituted decision outlives the loop; its record is offered, never demanded** —
+    a design-decision ledger entry is admitted because it holds independently of current
+    code state, so its reach already exceeds the diff, and the ledger's loop-local
+    lifetime would drop it anyway. At every exit, converged or free, surface each entry
+    with the durable home its reach implies — for a PR scope, a decision that redirects
+    the work rather than settling the diff belongs on the issues the PR declares it
+    closes — carrying the user's constituting words verbatim, because a summary drops the
+    frame the next reader needs. The offer never conditions the exit: exiting is
+    immediate, declining costs nothing, and the user may redirect the record's shape or
+    home.
 
 ## Deferred (v1.x stretch)
 
