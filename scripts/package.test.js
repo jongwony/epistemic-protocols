@@ -281,7 +281,7 @@ describe('transformSkillMd', () => {
 describe('runtime contract view', () => {
   it('builds a packaged runtime view for every skill', () => {
     const views = buildRuntimeContractViews();
-    assert.equal(views.length, 38);
+    assert.equal(views.length, 39);
     for (const view of views) {
       assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one SKILL.md entry`);
       assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed SKILL.md`);
@@ -853,8 +853,8 @@ describe('unified release artifact contract', () => {
 
       assert.deepEqual(second, first);
       assert.deepEqual(secondSnapshot, firstSnapshot);
-      assert.equal(second.results.length, 39);
-      assert.equal(PLUGINS.length, 38);
+      assert.equal(second.results.length, 40);
+      assert.equal(PLUGINS.length, 39);
       for (const plugin of PLUGINS) {
         const build = buildSkillArtifact(plugin, { profile: 'release' });
         assert.equal(
@@ -1014,7 +1014,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 38 skills plus bundle in dry-run', () => {
+  it('packages all 39 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -1027,7 +1027,7 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 39);
+    assert.equal(result.results.length, 40);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -1050,6 +1050,7 @@ describe('package.js CLI', () => {
         'goal-research.zip',
         'grasp.zip',
         'ground.zip',
+        'ideate.zip',
         'image-companion.zip',
         'induce.zip',
         'inquire.zip',
@@ -1125,7 +1126,7 @@ describe('agent routing map', () => {
 
   it('parses all 17 protocols, each with a when: trigger and deficit → resolution spine', () => {
     const entries = buildRoutingEntries({ projectRoot: REPO_ROOT });
-    assert.equal(entries.length, 17, `expected 17 routing entries, got ${entries.length}`);
+    assert.equal(entries.length, 18, `expected 18 routing entries, got ${entries.length}`);
     for (const e of entries) {
       assert.ok(e.trigger && e.trigger.length > 0, `${e.cmd}: missing when: trigger`);
       assert.ok(e.deficit, `${e.cmd}: missing deficit spine`);
@@ -1152,8 +1153,8 @@ describe('agent routing map', () => {
     const b = generateRoutingMap({ projectRoot: REPO_ROOT });
     assert.equal(a, b, 'routing map generation must be deterministic');
     assert.match(a, /Route from the deficit, not the summary\./);
-    assert.equal((a.match(/^\*\*`\//gm) || []).length, 17, 'all 17 entries rendered');
-    assert.equal((a.match(/^\s+when:/gm) || []).length, 17, 'every entry has a when: line');
+    assert.equal((a.match(/^\*\*`\//gm) || []).length, 18, 'all 18 entries rendered');
+    assert.equal((a.match(/^\s+when:/gm) || []).length, 18, 'every entry has a when: line');
   });
 
   it('committed routing-map.md is in sync with its canonical sources', () => {
@@ -1168,7 +1169,7 @@ describe('agent routing map', () => {
     const ctx = parsed.hookSpecificOutput.additionalContext;
     assert.ok(typeof ctx === 'string' && ctx.length > 0, 'additionalContext must be a non-empty string');
     assert.match(ctx, /Route from the deficit, not the summary\./);
-    assert.equal((ctx.match(/\*\*`\//g) || []).length, 17, 'full map injects all 17 entries');
+    assert.equal((ctx.match(/\*\*`\//g) || []).length, 18, 'full map injects all 18 entries');
   });
 
   it('session-context.js --only filters to the requested commands (preamble kept)', () => {

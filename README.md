@@ -51,7 +51,7 @@ The Codex marketplace preserves the same plugin boundaries as Claude Code: each 
 
 - The Codex marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json).
 - Each plugin keeps its Codex manifest beside the existing Claude manifest: `<plugin>/.codex-plugin/plugin.json`.
-- The marketplace includes the 17 protocol plugins plus `epistemic-cooperative`.
+- The marketplace includes the 18 protocol plugins plus `epistemic-cooperative`.
 
 </details>
 
@@ -67,6 +67,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 |----------|---------|-------------|
 | [Aitesis](./aitesis) | `/inquire` | AI charges ahead without asking what it needs to know |
 | [Euporia](./euporia) | `/elicit` | You have intent but the decision coordinates are implicit — reverse-trace them from the externalized substrate (codebase, rules, past sessions) until intent crystallizes |
+| [Heuresis](./heuresis) | `/ideate` | The candidate field for a decision is empty or has prematurely converged — widen it into a diverse set before any selection, not after |
 | [Proplasma](./proplasma) | `/preview` | Right before committing to a direction — the candidates read fine but you'd have to see them to judge; contrast cheap discard-committed probes first |
 | [Prothesis](./prothesis) | `/frame` | Need to look at this from multiple angles, not sure which |
 | [Analogia](./analogia) | `/ground` | AI's advice sounds right in theory but unclear in your context |
@@ -83,7 +84,7 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
 | [Diairesis](./diairesis) | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces isn't obvious — partition it at its natural joints before conducting |
 
-Concern clusters: Planning (`/inquire`, `/elicit`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/distill`, `/grasp`, `/delimit`, `/conduct`)
+Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/distill`, `/grasp`, `/delimit`, `/conduct`)
 
 ## Utilities
 
@@ -156,6 +157,7 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 | Hyphegesis | ὑφήγησις | Leading the way, guiding from ahead |
 | Diairesis | διαίρεσις | Division, partition |
 | Proplasma | πρόπλασμα | Preliminary model, first mold |
+| Heuresis | εὕρεσις | Finding, discovery |
 
 </details>
 

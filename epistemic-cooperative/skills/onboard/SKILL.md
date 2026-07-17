@@ -52,6 +52,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 |----------|---------|-------------|-------------|
 | Aitesis `/inquire` | Planning | AI is about to answer without enough observable context | External fact queries, verifiable grounding (for prior-session recall → use `/recollect`) |
 | Euporia `/elicit` | Planning | Intent articulated but axis-undetermined; decision coordinates implicit in codebase / rules / past sessions | Multi-axis intent without single axis-specific protocol fit; substrate-implicit coordinates surface through cycle-emergent dimensions |
+| Heuresis `/ideate` | Planning | Object-level candidate field is empty or has prematurely converged — widen it before any selection is made | Zero entry questions (seed vs. blank inferred from the utterance), frame-first mode on a blank entry, no elimination or ranking during generation, every candidate tagged `origin ∈ {User, AI}` |
 | Proplasma `/preview` | Planning | Right before a direction commitment when the candidates cannot be judged from descriptions — contrast cheap discard-committed placeholder probes on user-settled axes | Principle-delegation at direction gates ("go with the recommended direction"), option-set reconstruction instead of choosing, "I'd have to see it" decision stalls |
 | Prothesis `/frame` | Analysis | Unsure which analytical perspective to use | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
@@ -83,7 +84,7 @@ Begin with a concise welcome and path selection, reserving the full catalog for 
 
 **If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 17 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
+**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 18 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
 - Text: Post-catalog path selection
 - Options:
   - Quick recommendation
@@ -100,7 +101,7 @@ Present a condensed catalog as text output: render the Data Sources table groupe
 Then **Gate #2**:
 - Text: Protocol selection (type name or number in Other)
 - Options:
-  - Pre-execution (Planning) — /bound, /inquire, /elicit, /preview
+  - Pre-execution (Planning) — /bound, /inquire, /elicit, /ideate, /preview
   - Analysis/Decision — /frame, /ground, /induce, /gap
   - Execution/Verification/Understanding — /attend, /contextualize, /sublate, /recollect, /ascend, /distill, /delimit, /conduct, /grasp
 

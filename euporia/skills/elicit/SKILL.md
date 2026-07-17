@@ -273,6 +273,7 @@ When Euporia is active:
 - Substrate is empty (no externalized coordinates available — fall back to direct execution or Aitesis)
 - User explicitly requests proceed without surfacing
 - Same (utterance, substrate slice) was resolved or dismissed in current session (session immunity)
+- Wants generated candidates from a topic or fragments, not coordinates reverse-traced from externalized substrate → Heuresis (`/ideate`)
 
 ### Activation Conditions
 

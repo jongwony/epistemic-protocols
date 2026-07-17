@@ -47,6 +47,7 @@ const DESCRIPTION_OVERRIDES = {
   conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
   ascend: 'Elevate a vague recall to a higher-granularity unit — (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit',
   preview: 'Divergent-discard instantiation before direction commitment — (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast',
+  ideate: 'Frame-parallel divergent candidate generation — (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, and compose /distill to hand off routed work units.',
