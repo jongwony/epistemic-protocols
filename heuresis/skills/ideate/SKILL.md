@@ -118,8 +118,9 @@ Phase 1: Entry → derive_frames(Entry) → Frames_candidate
        [Entry = Seeded(seeds)] → Phase 2 directly with Frames_candidate (no gate — expand-first)
 Phase 2: F_open → generate(∥ over F_open) → Round(candidates, frames_opened := F_open)   -- no elimination, no ranking; on the first pass of a Seeded entry, seeds promote to Candidates under the frame each lands in (origin=User); generated candidates carry origin=AI
 Phase 3: Round → present(Round: candidates by frame, explored_frames, unexplored_frames) → Qround → Stop → D   [Tool]
-       [D = Continue(frames: F')] Frames_candidate := Frames_candidate ∪ derive_frames(F') → Phase 2 with F' (open, deepen, or user-named — type-preserving materialization of Continue)
-         -- a Continue naming no frames defaults F' := unexplored frames; when none remain, F' := currently open frames (deepen) — F' is never empty or undefined
+       [D = Continue(frames: F'), F' ⊆ Frames_candidate] → Phase 2 with F' (open unexplored or deepen already-open — no new derivation)
+       [D = Continue(frames: F'), F' ⊄ Frames_candidate] Frames_candidate := Frames_candidate ∪ derive_frames(F' \ Frames_candidate) → Phase 2 with F' (user-named new angle — the Phase 1 reopen; type-preserving materialization of Continue)
+         -- a Continue naming no frames defaults F' := unexplored frames; when none remain, F' := currently open frames (deepen) — F' is never empty or undefined, and a bare Continue never derives new frames
        [D = Stop, Λ.candidates ≠ ∅] → assemble(Λ.candidates) → DiverseCandidateField(candidates, explored_frames, unexplored_frames)
        [D = Stop, Λ.candidates = ∅] → EarlyExit(frames_offered := Frames_candidate)   -- a completed pass can yield nothing; honest stop typing routes an empty field to EarlyExit, never DiverseCandidateField
 user_esc (any Phase, before Λ.candidates ≠ ∅) → EarlyExit(frames_offered := Frames_candidate)   -- ungraceful; no cleanup — no side-effect state to discard
