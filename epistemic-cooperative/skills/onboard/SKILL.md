@@ -147,7 +147,7 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 
 | Protocol | Signal patterns | Priority |
 |----------|----------------|----------|
-| `/elicit` | Vague first prompts ("improve", "optimize", "ideas for", "make it better", "help me plan"); intent articulated but axis-undetermined; substrate-implicit decision coordinates | Highest (also fallback) |
+| `/elicit` | Vague first prompts ("improve", "optimize", "make it better", "help me plan"); intent articulated but axis-undetermined; substrate-implicit decision coordinates. An ideation ask ("ideas for", "brainstorm") routes to `/ideate` (Heuresis), which is user-initiated and therefore outside this proactive pool | Highest (also fallback) |
 | `/gap` | Multiple revisions on same topic in summary; finalization language ("wrap up", "ready", "finalize", "ship", "merge") | Medium |
 | `/frame` | Exploration/comparison language ("approach", "options", "tradeoffs", "compare", "architecture", "which way") | Medium |
 

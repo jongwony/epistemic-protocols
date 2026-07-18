@@ -122,7 +122,8 @@ If no `sessions-index.json` found in any project, skip Phase 2 extraction (steps
       - Subagent extracts: tool frequencies, rework indicators (same file 3+ edits), slash command history, Bash keywords, AskUserQuestion presence, context snippets, situation co-occurrence facts, conversation quality signals
       - Subagent returns structured analysis (raw data only, no interpretation)
 4. Main agent analyzes `firstPrompt` text from `sessions-index.json` for ambiguity/exploration keywords:
-   - Vague starts: `improve`, `optimize`, `ideas for`, `something like`
+   - Vague starts: `improve`, `optimize`, `something like`
+   - Ideation asks: `ideas for`, `brainstorm` and Korean equivalents
    - Vague starts (Korean equivalents): expressions meaning "I want to~", "how do I~", "a bit more", "enhance"
    - Exploratory framing: `explore`, `investigate`, `look into` and Korean equivalents
 5. Main agent uses secondary sources from Phase 1 project-scanner output:
@@ -224,7 +225,8 @@ Apply the mapping tables below to match observed patterns to protocols.
 | Same file edited 3+ times | Edit path frequency | **Syneidesis** `/gap` | Repeated edits without prior gap check |
 | Exploration ratio 3:1+ across multiple sessions | (Read+Grep+Glob) / (Edit+Write) threshold | **Prothesis** `/frame` | Sustained exploration without analytical framework |
 | Bash contains deploy/push/apply keywords | Bash input keyword match | **Prosoche** `/attend` | Risky execution without compiled guardrail conditions |
-| Vague first prompts ("improve", "optimize", "ideas for") | firstPrompt keyword match: short underspecified directives | **Euporia** `/elicit` | Goal coordinate aporia — reverse-induce endpoint from substrate |
+| Vague first prompts ("improve", "optimize") | firstPrompt keyword match: short underspecified directives | **Euporia** `/elicit` | Goal coordinate aporia — reverse-induce endpoint from substrate |
+| Ideation-shaped first prompts ("ideas for", "brainstorm") | firstPrompt keyword match: ideation asks | **Heuresis** `/ideate` | Candidate field underexpanded — frame-parallel divergence before any selection |
 | Verification keywords in firstPrompt (user-authored text only) | firstPrompt keyword match: "explain", "what did you do", "help me understand", "verify", "check" | **Katalepsis** `/grasp` | Need to verify comprehension of results |
 
 ### Secondary Mapping Table (Environment Patterns)

@@ -117,9 +117,10 @@ Phase 1: Entry → derive_frames(Entry) → Frames_candidate
          [FrameSelection = Stop] → EarlyExit(frames_offered := Frames_candidate)   -- stop before any candidate exists
        [Entry = Seeded(seeds)] → Phase 2 directly with Frames_candidate (no gate — expand-first)
 Phase 2: F_open → generate(∥ over F_open) → Round(candidates, frames_opened := F_open)   -- no elimination, no ranking; on the first pass of a Seeded entry, seeds promote to Candidates under the frame each lands in (origin=User); generated candidates carry origin=AI
+       Λ.candidates := Λ.candidates ∪ Round.candidates, Λ.frames_open := Λ.frames_open ∪ F_open, Λ.rounds := append(Λ.rounds, Round)   -- state absorbed BEFORE Phase 3 presents: every Qround guard (the Stop branches' Λ.candidates test) reads post-round state, never stale
 Phase 3: Round → present(Round: candidates by frame, explored_frames, unexplored_frames) → Qround → Stop → D   [Tool]
        [D = Continue(frames: F'), F' ⊆ Frames_candidate] → Phase 2 with F' (open unexplored or deepen already-open — no new derivation)
-       [D = Continue(frames: F'), F' ⊄ Frames_candidate] Frames_candidate := Frames_candidate ∪ derive_frames(F' \ Frames_candidate) → Phase 2 with F' (user-named new angle — the Phase 1 reopen; type-preserving materialization of Continue)
+       [D = Continue(frames: F'), F' ⊄ Frames_candidate] Fₙ := derive_frames(F' \ Frames_candidate); Frames_candidate := Frames_candidate ∪ Fₙ → Phase 2 with (F' ∩ Frames_candidate) ∪ Fₙ (user-named new angle — the Phase 1 reopen shapes it into registered frames before generation; type-preserving materialization of Continue)
          -- a Continue naming no frames defaults F' := unexplored frames; when none remain, F' := currently open frames (deepen) — F' is never empty or undefined, and a bare Continue never derives new frames
        [D = Stop, Λ.candidates ≠ ∅] → assemble(Λ.candidates) → DiverseCandidateField(candidates, explored_frames, unexplored_frames)
        [D = Stop, Λ.candidates = ∅] → EarlyExit(frames_offered := Frames_candidate)   -- a completed pass can yield nothing; honest stop typing routes an empty field to EarlyExit, never DiverseCandidateField
@@ -127,10 +128,10 @@ user_esc (any Phase, before Λ.candidates ≠ ∅) → EarlyExit(frames_offered 
 user_esc (any Phase, after Λ.candidates ≠ ∅)  → terminate, no formal DiverseCandidateField record   -- ungraceful; the already-presented round content stays visible in session text regardless
 
 ── LOOP ──
-Round cadence: Phase 2 (generate, ∥ over open frames) → Phase 3 (present + Qround). A Continue answer either reopens
-  Phase 1 (deriving fresh frames when the user names unexplored ones or a wholly new angle) or returns directly to
-  Phase 2 (deepening an already-open frame) — then back to Phase 3. No fixed round count and no quota: heuresis tracks
-  no target to converge toward; the loop continues until the user's own Stop.
+Round cadence: Phase 2 (generate, ∥ over open frames) → Phase 3 (present + Qround). A Continue answer reopens Phase 1's
+  derivation only when the user names a wholly new angle (shaped into registered frames before generation); opening
+  declared-unexplored frames or deepening already-open ones returns directly to Phase 2 — then back to Phase 3.
+  No fixed round count and no quota: heuresis tracks no target to converge toward; the loop continues until the user's own Stop.
 Novelty relay (optional, extension): at any Qround, heuresis MAY note as basis-cited context whether recent rounds read
   as producing candidates closer to earlier ones (novelty has not yet declined further, or has) — informational only,
   sits in the pre-gate text, and never blocks or discourages Stop.
@@ -171,7 +172,9 @@ converge                (extension)   → TextPresent+Proceed (DiverseCandidateF
 ── MODE STATE ──
 Λ = { phase: Phase, entry: Option(Entry), witness: Option(ExpansionWitness),
       chain_ref: Option(ChainRef),
-      frames_candidate: Set(Frame), frames_open: Set(Frame),
+      frames_candidate: Set(Frame),
+      frames_open: Set(Frame),           -- invariant: frames_open ⊆ frames_candidate — every opened frame is registered
+                                         --   before generation (the Phase 3 new-angle branch registers Fₙ first)
       frames_unexplored: Set(Frame),     -- derived, not accumulated: frames_candidate \ frames_open — opening a frame
                                          --   removes it here, so no frame is ever reported explored AND unexplored
       candidates: Set(Candidate),        -- accumulate-only across rounds; origin never relabeled once tagged
@@ -289,7 +292,7 @@ Options:
 2. **Stop** — this is the candidate field; declare what's still unexplored and hand it off
 ```
 
-**Continue** may name specific unexplored frames, re-select an already-open frame to deepen, or introduce a frame the user names outright (a free response — type-preserving materialization of `Continue`, not a new constructor); a Continue naming nothing defaults to the declared unexplored frames, or to deepening the open ones when none remain — the next pass always has ≥1 open frame. Loop back to Phase 1 (when new frames need deriving) or directly to Phase 2 (when deepening an already-open frame). **Stop** is available here exactly as it is at Qframes — the user's own Stop, at any round, is what bounds the field: assemble `Λ.candidates` into `DiverseCandidateField` when at least one candidate exists, with `explored_frames` and `unexplored_frames` both declared; a Stop after passes that produced nothing returns `EarlyExit` — honest stop typing, an empty field is never dressed up as the resolution type.
+**Continue** may name specific unexplored frames, re-select an already-open frame to deepen, or introduce a frame the user names outright (a free response — type-preserving materialization of `Continue`, not a new constructor); a Continue naming nothing defaults to the declared unexplored frames, or to deepening the open ones when none remain — the next pass always has ≥1 open frame. Loop back to Phase 1's derivation (only when a user-named new angle needs shaping into a registered frame) or directly to Phase 2 (opening declared-unexplored frames or deepening already-open ones). **Stop** is available here exactly as it is at Qframes — the user's own Stop, at any round, is what bounds the field: assemble `Λ.candidates` into `DiverseCandidateField` when at least one candidate exists, with `explored_frames` and `unexplored_frames` both declared; a Stop after passes that produced nothing returns `EarlyExit` — honest stop typing, an empty field is never dressed up as the resolution type.
 
 ## Adversarial Guards
 
