@@ -186,10 +186,10 @@ DeficitName      ∈ {BoundaryUndefined, ContextInsufficient, FrameworkAbsent,
                     ContextSuspect, ContextTethered, RecallAmbiguous,
                     RecallGranularityInsufficient, ResultUngrasped,
                     GranularityUnderdetermined, MethodUnderdetermined,
-                    DirectionUnrecognizable} ∪ Emergent
+                    DirectionUnrecognizable, CandidateFieldUnderexpanded} ∪ Emergent
 ProtocolId       ∈ {bound, inquire, frame, ground, induce, elicit, gap,
                     attend, contextualize, sublate, distill, recollect, ascend,
-                    grasp, delimit, conduct, preview} ∪ Emergent
+                    grasp, delimit, conduct, preview, ideate} ∪ Emergent
 Phase            ∈ {0, 1, 2, 3}
 
 ── PHASE TRANSITIONS ──
