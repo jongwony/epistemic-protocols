@@ -19,14 +19,15 @@ Heuresis(U) → bind(U) → classify_entry(U) → Entry →
   [Entry = Blank]         derive_frames(topic) → Qframes(frame_map) → Stop → FrameSelection →
                              [FrameSelection = Open(F_selected)] generate(∥ F_selected) → Round₁
                              [FrameSelection = Stop] → EarlyExit
-  [Entry = Seeded(seeds)] derive_frames(seeds, topic) → generate(∥ frames; seeds fold in as origin=User) → Round₁
+  [Entry = Seeded(seeds)] derive_frames(seeds, topic) → generate(∥ frames; seeds fold in under their origin — utterance fragments as User) → Round₁
   present(Round) → Qround → Stop → D →
     [D = Continue(frames)] shape_frames(frames)? → generate(∥ frames) → Round → present → Qround (loop)
     [D = Stop]             assemble(Λ) → DiverseCandidateField (Λ.candidates ≠ ∅) | EarlyExit (Λ.candidates = ∅)
   [user_esc, before Λ.candidates ≠ ∅] → EarlyExit
   [user_esc, after Λ.candidates ≠ ∅]  → terminate, no formal record (already-presented rounds stay visible in session text)
--- chain note: when U names a ChainRef (a prior collection protocol's output), its material folds in as origin=User seeds
---   at classify_entry — a deliberate substrate-first choice the user made, documented as a trade-off (Rule 8)
+-- chain note: when U names a ChainRef (a prior protocol's output), its material folds in as seeds at classify_entry —
+--   origin preserved when already tagged (a chained DiverseCandidateField), origin=User when untagged (collection
+--   output, utterance fragments); a deliberate substrate-first choice the user made, documented as a trade-off (Rule 8)
 -- park note: a deepen request at any Qround (wanting more on an already-open frame) parks into Λ.parked — it never
 --   re-opens a frame mid-loop; parked follow-ups are declared at either terminal for post-protocol chaining
 
@@ -34,7 +35,8 @@ Heuresis(U) → bind(U) → classify_entry(U) → Entry →
 IdeationRequest
   → bind(utterance)                     -- read only the invocation utterance + any explicitly named chain reference
   → classify_entry(utterance)           -- Blank | Seeded(seeds); zero entry questions — inferred, never asked; a named
-                                        --   ChainRef's material folds in here as origin=User seeds, so a ChainRef-bearing
+                                        --   ChainRef's material folds in here as seeds (origin preserved when already
+                                        --   tagged, origin=User otherwise), so a ChainRef-bearing
                                         --   entry classifies Seeded even on a bare-topic utterance
   → derive_frames(Entry)                -- candidate GenerationFrames — the registry later rounds progressively open
   → select_frames(frames)               -- Blank only: Cognitive Partnership Move (Constitution) — frame map BEFORE any concrete candidate
@@ -47,7 +49,9 @@ IdeationRequest
   → DiverseCandidateField               -- happy-path terminal; the zero-candidate stop path exits as EarlyExit (FLOW)
 requires: candidate_field_underexpanded(U)   -- runtime checkpoint (Phase 0); direct /ideate invocation satisfies it
 deficit:  CandidateFieldUnderexpanded         -- activation precondition (Layer 1)
-preserves: seed_provenance(U)                 -- user-supplied seeds keep origin=User through every later round; never relabeled
+preserves: seed_provenance(U)                 -- every seed keeps the origin it folded in with (User for the user's own
+                                              --   fragments, an already-tagged chain origin as-is) through every later
+                                              --   round; never relabeled
 invariant: Divergence over Selection          -- generation never eliminates, ranks, or converges; selection is outside this protocol
 
 ── TYPES ──
@@ -59,12 +63,16 @@ U      = IdeationRequest: the invocation utterance, read as-is — a natural-lan
          --   or rules (Euporia's reverse-trace territory, not this protocol's)
 Entry  = Blank                                -- utterance carries a topic only — no idea fragments, no named ChainRef
        | Seeded(Set(Seed))                    -- utterance carries idea fragments and/or names a ChainRef; both sources
-         --   fold in as origin=User seeds at classify_entry
+         --   fold in as seeds at classify_entry — utterance fragments as origin=User, chained material under its
+         --   existing origin tag when it carries one (origin=User only when untagged)
          -- coproduct: Blank and Seeded take DIFFERENT phase paths (frame-first gate vs. expand-first) — behavioral
          --   branching per the structural convention (natural-language definitions are for uniform-processing inputs only)
-Seed   = { content: String, origin = User }   -- a pre-frame fragment lifted from the utterance; carries no frame yet —
-         --   frames do not exist until Phase 1 derives them. Promoted to Candidate on the first generation pass,
-         --   gaining the frame it lands under (origin stays User, never relabeled)
+Seed   = { content: String, origin ∈ {User, AI} }   -- a pre-frame fragment; origin=User for utterance-borne fragments and
+         --   untagged chained material, while chained material already carrying an origin tag keeps it (a chained
+         --   DiverseCandidateField's candidates re-seed under their existing tags — an origin=AI candidate is never
+         --   relabeled User by re-chaining). Carries no frame yet — frames do not exist until Phase 1 derives them
+         --   (GenerationFrames are invocation-local, so a chained candidate's old frame is dropped, not preserved).
+         --   Promoted to Candidate on the first generation pass, gaining the frame it lands under (origin travels unchanged)
 ExpansionWitness ∈ {Empty, NarrowAcrossFrames, PrematurelyConverged} ∪ Emergent(T)
          -- classification of WHY the candidate field is underexpanded; cited as Phase 0 relay basis. Sub-level to
          --   CandidateFieldUnderexpanded — NOT itself a top-level deficit, and never gates activation (User-initiated:
@@ -124,12 +132,12 @@ bind(U) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ chain_ref
 Priority: explicit_arg > colocated_expr > prev_user_turn > chain_ref
          -- prev_user_turn binds only on a bare invocation: the immediately preceding user message BECOMES the utterance
          --   (one turn, the user's own words) — a binding rule for U, not a license to scan session history
-         -- chain_ref, when named, folds its material in as origin=User seeds — it never substitutes for the topic itself
+         -- chain_ref, when named, folds its material in as seeds (origin preserved when tagged, User otherwise) — it never substitutes for the topic itself
 
 /ideate "topic or fragments"               → U = "topic or fragments"
 /ideate (alone)                            → U = previous user message
 "give me some ideas ... /ideate"           → U = text before trigger
-"using what /inquire just found, /ideate"  → U also carries the named ChainRef; its material folds in as origin=User seeds
+"using what /inquire just found, /ideate"  → U also carries the named ChainRef; its material folds in as origin=User seeds (untagged collection output; a chained DiverseCandidateField would keep its candidates' own origin tags)
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → bind(U) → classify_entry(U) → Entry ⊗ ExpansionWitness; Λ.topic := topic(U)   -- silent; zero entry questions; topic(U) records the bound request in mode state, so assemble(Λ) has a formal source for the field's topic
@@ -139,7 +147,7 @@ Phase 1: Entry → Λ.frames_candidate := derive_frames(Entry)   -- registered i
          [FrameSelection = Open(F_selected)] → Phase 2 with F_selected
          [FrameSelection = Stop] → EarlyExit(frames_offered := Λ.frames_candidate, parked := Λ.parked)   -- stop before any candidate exists; Λ.parked is necessarily ∅ here (parks originate at Qround) — passed explicitly for uniform construction
        [Entry = Seeded(seeds)] → Phase 2 directly with Λ.frames_candidate (no gate — expand-first)
-Phase 2: F_open → generate(∥ over F_open) → Round(candidates, frames_opened := F_open)   -- no elimination, no ranking; on the first pass of a Seeded entry, seeds promote to Candidates under the frame each lands in (origin=User); generated candidates carry origin=AI; F_open ∩ Λ.frames_open = ∅ (Phase 3 admits only unexplored or newly registered frames), so frames_opened records genuinely new openings
+Phase 2: F_open → generate(∥ over F_open) → Round(candidates, frames_opened := F_open)   -- no elimination, no ranking; on the first pass of a Seeded entry, seeds promote to Candidates under the frame each lands in, each keeping its seed origin (utterance fragments User); generated candidates carry origin=AI; F_open ∩ Λ.frames_open = ∅ (Phase 3 admits only unexplored or newly registered frames), so frames_opened records genuinely new openings
        Λ.candidates := Λ.candidates ∪ Round.candidates, Λ.frames_open := Λ.frames_open ∪ F_open, Λ.rounds := append(Λ.rounds, Round)   -- state absorbed BEFORE Phase 3 presents: every Qround guard (the Stop branches' Λ.candidates test) reads post-round state, never stale
 Phase 3: Round → present(Round: candidates by frame, explored_frames, unexplored_frames, parked so far) → Qround → Stop → D   [Tool]
        [park request — the response asks for more on an already-open frame] Λ.parked := Λ.parked ∪ {ParkedFollowUp(frame, note)} — relay the parking (extension); a response carrying only a park leaves the continuation question open, so Qround is re-presented with the park acknowledged
@@ -281,7 +289,7 @@ When Heuresis is active:
 
 ### Phase 0: Entry Classification (Silent)
 
-Bind the invocation utterance per U-BINDING. Determine `Entry` by scanning the utterance for idea fragments: any fragment present → `Seeded`, extracted as seeds tagged `origin=User` (pre-frame fragments — each gains a frame when generation first runs); material carried by a `ChainRef` the utterance names folds in the same way at this step, so a ChainRef-bearing invocation is `Seeded` even when its utterance is a bare topic; a bare topic with no fragments and no named `ChainRef` → `Blank`. This is a relay, not a gate — `Entry` is inferred, never asked (zero entry questions).
+Bind the invocation utterance per U-BINDING. Determine `Entry` by scanning the utterance for idea fragments: any fragment present → `Seeded`, extracted as seeds tagged `origin=User` (pre-frame fragments — each gains a frame when generation first runs); material carried by a `ChainRef` the utterance names folds in the same way at this step — keeping any origin tag it already carries (a chained candidate field's candidates re-seed under their existing tags), typing `origin=User` only when untagged — so a ChainRef-bearing invocation is `Seeded` even when its utterance is a bare topic; a bare topic with no fragments and no named `ChainRef` → `Blank`. This is a relay, not a gate — `Entry` is inferred, never asked (zero entry questions).
 
 Classify `ExpansionWitness` alongside `Entry` — `Empty` (Blank: nothing yet), `NarrowAcrossFrames` (Seeded, but every seed clusters within one implied frame), `PrematurelyConverged` (the utterance signals settling on a single option while the underlying goal stays open), or an emergent case outside the named three (`Emergent(T)`: name the observed pattern ad hoc — the named types are working hypotheses, not an exhaustive set) — cited as basis in the relay text that follows, and used to shape frame derivation (a `PrematurelyConverged` witness pushes frame derivation toward angles distant from the existing single idea).
 
@@ -315,7 +323,7 @@ Selecting ≥1 frame proceeds to Phase 2 with exactly those frames open. **Stop*
 
 ### Phase 2: Parallel Generation (Silent)
 
-Generate candidates across every open frame in this round — logically parallel, no mandatory subagent dispatch (a host MAY realize this via isolated parallel agents when available; heuresis's meaning does not depend on it). No elimination, no ranking, no scoring: every candidate produced survives into the round. On the very first pass of a Seeded entry, the original seeds are promoted to `origin=User` candidates under the frame each lands in, alongside whatever the frames generate as `origin=AI`; every later pass tags its output `origin=AI`.
+Generate candidates across every open frame in this round — logically parallel, no mandatory subagent dispatch (a host MAY realize this via isolated parallel agents when available; heuresis's meaning does not depend on it). No elimination, no ranking, no scoring: every candidate produced survives into the round. On the very first pass of a Seeded entry, the original seeds are promoted to candidates under the frame each lands in — each keeping the origin its seed carried (utterance fragments `origin=User`) — alongside whatever the frames generate as `origin=AI`; every later pass tags its output `origin=AI`.
 
 ### Phase 3: Round Presentation + Continuation (Constitution)
 
@@ -357,7 +365,7 @@ Options:
 | Depth parks, never hijacks | A deepen wish on an open frame parks as `ParkedFollowUp`, declared at either terminal | Mid-loop divergence stays wide; depth chains downstream on the assembled field |
 | Honest stop typing | `Λ.candidates = ∅` at Stop/Esc → `EarlyExit`, never `DiverseCandidateField` | An empty field is never dressed up as the resolution type |
 | Euporia boundary | `bind()` reads only the utterance + a named `ChainRef` | No substrate scan, no reverse-traced coordinates |
-| Chain trade-off documented | Chained material folds in as `origin=User` with no mitigation | The user's deliberate substrate-first choice stays honest, undisguised |
+| Chain trade-off documented | Chained material folds in as seeds with no mitigation — origin preserved when tagged, `origin=User` when untagged | The user's deliberate substrate-first choice stays honest, undisguised — and AI-generated material never masquerades as the user's own |
 | Vendor-neutral parallelism | `generate()`'s `∥` topology names no required tool | Meaning independent of host realization; provenance stays `{User, AI}` |
 
 ## Rules
@@ -365,11 +373,11 @@ Options:
 1. **User-initiated, zero entry questions**: `/ideate` activates only on direct invocation (Layer 1); `Entry` (Blank vs. Seeded) is inferred from the utterance alone — never asked. Phase 0's `classify_entry` is Extension/relay, not a gate.
 2. **Recognition over Recall, frame-first before concrete**: On a Blank entry, the frame map is presented via Cognitive Partnership Move (Constitution) BEFORE any concrete candidate is generated — abstract frames only, so the user picks a direction of divergence, not a specific idea, preserving ownership and mitigating early-example fixation.
 3. **No elimination, no ranking**: Generation never discards, scores, ranks, or optimizes a candidate. A "candidate" in this type is a generated idea item (raw material) — never a selection-ready alternative. Selection is out of scope; it belongs downstream — seeing candidate futures before choosing (`/preview`) or the user's own direct judgment, with the resulting decision auditable for unnoticed gaps (`/gap` — an audit of the decision made, not a selector among candidates).
-4. **Provenance preserved**: Every candidate carries `origin ∈ {User, AI}`. User-supplied seeds keep `origin=User` through every subsequent round; they are never relabeled.
+4. **Provenance preserved**: Every candidate carries `origin ∈ {User, AI}`, assigned once and never relabeled. User-supplied seeds keep `origin=User` through every subsequent round, and chained material that arrives already origin-tagged keeps its tag — re-chaining a candidate field never converts `origin=AI` into `origin=User`.
 5. **Termination is the user's constitutive act, at any time**: Stop is available at every gate, including before any candidate is ever generated. The user's stop bounds the field — it is not a pre-convergence abandonment; the completion predicate for `DiverseCandidateField` IS the user's own stop (with candidates ≠ ∅ at that moment). heuresis MAY relay that recent rounds show declining novelty as basis-cited context; this NEVER blocks or discourages Stop.
 6. **Honest stop typing**: A stop while ≥1 candidate exists converges to `DiverseCandidateField`. A stop while none exist — declining the Blank frame map, `user_esc` before the first round completes, or a Stop after completed passes that produced nothing — returns `EarlyExit` — the frames that were offered are declared, never silently dropped, and an empty field is never mislabeled `DiverseCandidateField`.
 7. **Euporia boundary — utterance-only input**: heuresis reads only what the invocation carries — the utterance itself, plus a prior protocol's output the user explicitly names (a chain reference). A bare invocation binds the immediately preceding user message as the utterance (a one-turn U-BINDING rule, not a session scan). Beyond the bound utterance it never scans the wider session, codebase, or rules, and it never reverse-traces hidden decision coordinates from externalized substrate — that is Euporia's territory (`/elicit`), not this protocol's.
-8. **Chain semantics — a documented trade-off, not a mitigation**: When the invocation names a chain reference, the chained material folds in as `origin=User` seeds — promoted to candidates on the first generation pass exactly like utterance-borne seeds, gaining the frame each lands under. Chaining substrate material in is itself the user's deliberate choice of substrate-first over independent-ideation-first; the ownership/diversity benefit of ideating before seeing prior material does not hold on this path, and heuresis adds no mitigation for it.
+8. **Chain semantics — a documented trade-off, not a mitigation**: When the invocation names a chain reference, the chained material folds in as seeds — keeping any origin tag it already carries (a chained `DiverseCandidateField`'s candidates re-seed under their existing tags, so an `origin=AI` candidate is never relabeled `User` by re-chaining), typed `origin=User` only when untagged (utterance-borne fragments, a collection protocol's output) — promoted to candidates on the first generation pass exactly like utterance-borne seeds, gaining the frame each lands under (frames are invocation-local, so a chained candidate's prior frame is dropped by design). Chaining substrate material in is itself the user's deliberate choice of substrate-first over independent-ideation-first; the ownership/diversity benefit of ideating before seeing prior material does not hold on this path, and heuresis adds no mitigation for it.
 9. **GenerationFrame ≠ analytical lens**: A `GenerationFrame` is a partition for parallel candidate production — a divergence angle, not an analytical perspective. It carries no substrate need, no per-perspective directive, and is never handed off as a framed inquiry object; that machinery belongs to Prothesis (`/frame`).
 10. **Vendor-neutral parallelism**: "Generate `∥` over open frames" names a logical topology, not a required tool. A host MAY realize it via isolated parallel agents when available; heuresis's meaning does not depend on that realization, and provenance stays `{User, AI}` — never a host- or vendor-specific tag.
 11. **Context-Question Separation**: Output round results (candidates by frame, explored/unexplored frames) as text before presenting via Cognitive Partnership Move (Constitution). The gate itself contains only the essential question — continue (which frames) or stop.
