@@ -165,6 +165,7 @@ Phase 3 Probe       (sense)    → Internal (gap detection)
 Phase 3 Qs          (constitution)     → present (Socratic probing with structured navigation; mandatory on Refine)
 Phase 3 emit        (extension)    → TextPresent+Proceed (ClueVector_prose)
 converge            (extension)    → TextPresent+Proceed (convergence trace)
+seam                (extension)    → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares — the `/recollect ∘ /inquire` COMPOSITION edge — settles the next move; proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
 ── MODE STATE ──
 Λ = { phase: Phase, V: VagueRecall,
@@ -502,3 +503,5 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 20. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Plain emit discipline).
 
 21. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
+
+22. **Seam relay on declared continuation**: when a user-declared chain or a composition edge this SKILL.md declares (the `/recollect ∘ /inquire` COMPOSITION edge) names the next protocol, the between-protocol seam after Mode Deactivation is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named composition edge). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.
