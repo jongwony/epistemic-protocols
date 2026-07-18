@@ -47,6 +47,7 @@ const DESCRIPTION_OVERRIDES = {
   conduct: 'Conduct a session\'s epistemic method before object-level work — (MethodUnderdetermined, Hybrid, CONDUCT, WorkProspect × ProtocolGraph) → ConductedMethod',
   ascend: 'Elevate a vague recall to a higher-granularity unit — (RecallGranularityInsufficient, AI, ELEVATE, ScatteredDeposits × DepositGraph) → HigherGranularityUnit',
   preview: 'Divergent-discard instantiation before direction commitment — (DirectionUnrecognizable, Hybrid, PREVIEW, DirectionProspect) → DirectionalContrast',
+  ideate: 'Frame-parallel divergent candidate generation — (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
   triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, and compose /distill to hand off routed work units.',
@@ -163,6 +164,7 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'elenchus', skill: 'sublate' },
   { dir: 'epharmoge', skill: 'contextualize' },
   { dir: 'euporia', skill: 'elicit' },
+  { dir: 'heuresis', skill: 'ideate' },
   { dir: 'horismos', skill: 'bound' },
   { dir: 'hyphegesis', skill: 'conduct' },
   { dir: 'katalepsis', skill: 'grasp' },
@@ -806,8 +808,8 @@ function assertArtifactMatchesIndex(artifact, zipBuffer) {
 }
 
 function buildCodexSubmitArtifacts({ root = projectRoot } = {}) {
-  if (CODEX_SUBMIT_PLUGINS.length !== 15) {
-    throw new Error(`codex-submit selection must contain exactly 15 plugins`);
+  if (CODEX_SUBMIT_PLUGINS.length !== 16) {
+    throw new Error(`codex-submit selection must contain exactly 16 plugins`);
   }
   const keys = new Set();
   for (const plugin of CODEX_SUBMIT_PLUGINS) {

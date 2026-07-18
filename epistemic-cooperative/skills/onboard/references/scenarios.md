@@ -174,6 +174,23 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: πρόπλασμα (preliminary model) — the clay model a sculptor shapes before committing to marble: cheap, discardable, and made precisely to be seen. Core principle: **Contrast over Simulation**. Workflow position: Planning cluster — alongside `/inquire` (facts) and `/elicit` (intent coordinates), completing the unknowns-elicitation line with direction futures. Game feel: "I'd have to see it" → settle the axes → probes materialize the futures → you recognize, decide, and the clay goes back in the bin.
 
+## Heuresis `/ideate`
+
+**Situation**: You've got a topic to write about — or maybe just a couple of scattered fragments jotted down — and what you need isn't a decision between two known options, and it isn't analytical lenses on a question you've already fixed. You just need more raw material. Right now you have one idea, or none, and you keep circling back to the same one or two instead of getting anywhere new.
+
+**Intervention**: `/ideate` reads your invocation alone and infers whether you're starting from a bare topic or from idea fragments already in hand — no entry questions asked. Starting from a bare topic opens an abstract frame map first — angles to open, no concrete idea shown yet — so you pick a direction of divergence before any example can anchor your own thinking; starting from fragments expands straight out from what you already wrote. Each round generates candidates in parallel across the open frames with no elimination, ranking, or scoring — every candidate carries a tag for whether you or the AI produced it, so you can see where fixation crept in and who owns what. You stop whenever you want — there's no round quota — and what comes back declares plainly which frames never got opened.
+
+**Trial prompt**: "Let's practice: name a topic where your options feel thin or you keep circling the same one or two ideas — I'll show how /ideate opens a frame map and generates across it"
+
+**Quiz Q (situation)**: You have one idea for your team's offsite theme and you keep refining it — better name, better schedule, nicer venue — but you haven't actually generated a genuinely different second idea to compare it against.
+- A) Prothesis `/frame` — B) Proplasma `/preview` — C) Heuresis `/ideate` — D) Syneidesis `/gap`
+- Answer: C
+
+**Quiz Q (design)**: You want a wide field of genuinely different ideas without your own first instinct anchoring everything that follows. How do you get divergence without narrowing too soon?
+- Hint: The problem isn't choosing between existing options (that's `/preview`) or picking an analytical lens on a fixed question (that's `/frame`) — it's that the candidate field itself is too thin. Open an abstract frame map before any concrete idea appears, and don't eliminate or rank anything a round produces.
+
+**Philosophy**: εὕρεσις (finding, discovery) — the older, broader sense of turning up something not yet in view, prior to its later narrowing into a term of rhetorical technique. Core principle: **Divergence over Selection**. A candidate is raw material, not a selection-ready alternative — heuresis never discards, scores, or ranks what a round produces; that judgment belongs downstream, entirely out of its scope. Workflow position: Planning cluster, immediately upstream of `/preview` — heuresis widens a thin or converged field into a diverse one; `/preview` picks up only once two or more candidates already exist and need their futures contrasted. Game feel: "I've only got one idea, and it's getting stale" → frame map opens → candidates generate in parallel, untouched by ranking → you stop when the field is wide enough → a diverse set, ready for whatever comes next.
+
 ## Prosoche `/attend`
 
 **Situation**: You ask Claude to "work through my 200-photo album and build the yearbook layout" — an unattended run that will churn for an hour while you're away. You worry it might quietly declare victory halfway through, or wander into folders it was never meant to touch.

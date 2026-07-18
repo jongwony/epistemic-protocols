@@ -1,7 +1,7 @@
 {
-  "name": "euporia",
-  "version": "0.3.11",
-  "description": "Resolve via Extended-Mind reverse induction — /elicit (εὐπορία: way through)",
+  "name": "heuresis",
+  "version": "0.1.11",
+  "description": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -12,13 +12,13 @@
   "keywords": [
     "epistemic-protocols",
     "skills",
-    "euporia"
+    "heuresis"
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Euporia",
-    "shortDescription": "Resolve via Extended-Mind reverse induction — /elicit (εὐπορία: way through)",
-    "longDescription": "Resolve via Extended-Mind reverse induction — /elicit (εὐπορία: way through)",
+    "displayName": "Heuresis",
+    "shortDescription": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)",
+    "longDescription": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [
@@ -28,7 +28,7 @@
     ],
     "websiteURL": "https://github.com/jongwony/epistemic-protocols",
     "defaultPrompt": [
-      "Use euporia for this task"
+      "Use heuresis for this task"
     ],
     "brandColor": "#2563EB"
   }

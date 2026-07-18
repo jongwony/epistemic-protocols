@@ -52,6 +52,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 |----------|---------|-------------|-------------|
 | Aitesis `/inquire` | Planning | AI is about to answer without enough observable context | External fact queries, verifiable grounding (for prior-session recall → use `/recollect`) |
 | Euporia `/elicit` | Planning | Intent articulated but axis-undetermined; decision coordinates implicit in codebase / rules / past sessions | Multi-axis intent without single axis-specific protocol fit; substrate-implicit coordinates surface through cycle-emergent dimensions |
+| Heuresis `/ideate` | Planning | Object-level candidate field is empty or has prematurely converged — widen it before any selection is made | Zero entry questions (seed vs. blank inferred from the utterance), frame-first mode on a blank entry, no elimination or ranking during generation, every candidate tagged `origin ∈ {User, AI}` |
 | Proplasma `/preview` | Planning | Right before a direction commitment when the candidates cannot be judged from descriptions — contrast cheap discard-committed placeholder probes on user-settled axes | Principle-delegation at direction gates ("go with the recommended direction"), option-set reconstruction instead of choosing, "I'd have to see it" decision stalls |
 | Prothesis `/frame` | Analysis | Unsure which analytical perspective to use | Exploration ratio 3:1+ (Read+Grep+Glob vs Edit+Write) |
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
@@ -83,7 +84,7 @@ Begin with a concise welcome and path selection, reserving the full catalog for 
 
 **If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render the 17 protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
+**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render all core protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
 - Text: Post-catalog path selection
 - Options:
   - Quick recommendation
@@ -100,7 +101,7 @@ Present a condensed catalog as text output: render the Data Sources table groupe
 Then **Gate #2**:
 - Text: Protocol selection (type name or number in Other)
 - Options:
-  - Pre-execution (Planning) — /bound, /inquire, /elicit, /preview
+  - Pre-execution (Planning) — /bound, /inquire, /elicit, /ideate, /preview
   - Analysis/Decision — /frame, /ground, /induce, /gap
   - Execution/Verification/Understanding — /attend, /contextualize, /sublate, /recollect, /ascend, /distill, /delimit, /conduct, /grasp
 
@@ -146,15 +147,16 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 
 | Protocol | Signal patterns | Priority |
 |----------|----------------|----------|
-| `/elicit` | Vague first prompts ("improve", "optimize", "ideas for", "make it better", "help me plan"); intent articulated but axis-undetermined; substrate-implicit decision coordinates | Highest (also fallback) |
+| `/elicit` | Vague first prompts ("improve", "optimize", "make it better", "help me plan"); intent articulated but axis-undetermined; substrate-implicit decision coordinates. An ideation ask ("ideas for", "brainstorm") routes to `/ideate` (Heuresis), which is user-initiated and therefore outside this proactive pool | Highest (also fallback) |
 | `/gap` | Multiple revisions on same topic in summary; finalization language ("wrap up", "ready", "finalize", "ship", "merge") | Medium |
 | `/frame` | Exploration/comparison language ("approach", "options", "tradeoffs", "compare", "architecture", "which way") | Medium |
 
 **Decision logic**:
 1. Score each protocol by signal match count from `firstPrompt` and `summary` fields
-2. Select the single strongest match
-3. Tie-break: `/elicit` > `/gap` > `/frame`
-4. **Fallback**: If no signals detected (no sessions, sparse metadata), recommend `/elicit`
+2. **Ideation route-away**: ideation asks ("ideas for", "brainstorm") score no pool protocol — when they are the only matched signals, relay in one sentence that the ask itself maps to `/ideate` (user-initiated: named as the route for that ask, not presented as the onboarding recommendation), then continue via the Fallback rule; the Phase 2b evidence card follows its fallback form, since the recommendation rests on the default, not on a matched signal
+3. Select the single strongest match
+4. Tie-break: `/elicit` > `/gap` > `/frame`
+5. **Fallback**: If no signals detected (no sessions, sparse metadata) — or every detected signal was routed away — recommend `/elicit`
 
 **Output**: Present exactly one recommendation as a single sentence.
 

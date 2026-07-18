@@ -134,6 +134,7 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Hyphegesis: MethodUnderdetermined → ConductedMethod (Hybrid, CONDUCT)
   - Diairesis: GranularityUnderdetermined → WorkUnitMap (Hybrid, DELIMIT)
   - Proplasma: DirectionUnrecognizable → DirectionalContrast (Hybrid, PREVIEW)
+  - Heuresis: CandidateFieldUnderexpanded → DiverseCandidateField (User-initiated, DIVERGE)
 - [ ] Initiator correctly specified (AI-guided vs Hybrid vs User-initiated vs User-invoked)
 - [ ] Gap taxonomy matches protocol purpose
 

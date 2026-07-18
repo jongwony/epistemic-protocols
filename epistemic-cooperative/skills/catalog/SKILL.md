@@ -5,7 +5,7 @@ description: "Protocol handbook — instant reference for when to use each epist
 
 # Catalog Skill
 
-Instant reference handbook for 17 epistemic protocols. Browse by cluster, look up by command, or find the right protocol for a situation.
+Instant reference handbook for the epistemic protocols. Browse by cluster, look up by command, or find the right protocol for a situation.
 
 ## When to Use
 
@@ -23,7 +23,7 @@ Skip when:
 
 | Invocation | Behavior |
 |------------|----------|
-| `/catalog` | Overview: 17 protocols grouped by cluster, 1-line each + usage hints |
+| `/catalog` | Overview: all protocols grouped by cluster, 1-line each + usage hints |
 | `/catalog {cluster}` | Cluster detail: expanded protocol cards with scenarios |
 | `/catalog {command}` | Single protocol detail: full card from scenarios.md |
 
@@ -37,6 +37,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 |----------|---------|-------------|
 | Aitesis | `/inquire` | Context is insufficient for confident execution |
 | Euporia | `/elicit` | Intent articulated but decision coordinates implicit in externalized substrate — reverse-trace to surface |
+| Heuresis | `/ideate` | Object-level candidate field is empty or has prematurely converged — widen it before any selection is made |
 | Proplasma | `/preview` | Right before a direction commitment when the candidates cannot be judged from descriptions — contrast cheap discard-committed placeholder probes, then decide on recognized futures |
 
 ### Analysis

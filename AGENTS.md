@@ -11,7 +11,7 @@ Epistemic Protocols is a domain-free metalanguage of structured types and morphi
 Citable registry of conventions whose resolution direction is already constituted. The option-set relay test (in `.claude/rules/axioms.md`) cites a clause here to collapse settled-direction option-set entropy — a finding whose direction a clause below already determines is presented as relay, not gated. Maintained by `/steer`: a direction recurringly constituted the same way graduates into a clause here.
 
 - Mechanism pointer: the consuming mechanism (the option-set relay test) is defined in `.claude/rules/axioms.md` §A5 — not restated here.
-- (no direction entries yet)
+- **Count-free protocol cardinality**: do not hardcode the protocol count in prose, comments, test names, or metadata descriptions — use count-free phrasing ("all core protocols", "every protocol plugin"). Completeness-sensitive code and tests compare exact protocol identities against the canonical registry (`scripts/load-protocols.js` `CANONICAL_PRECEDENCE`) or derive displayed counts from it; a deliberate subset (e.g. the Codex submission set) states its inclusion policy explicitly. (Constituted: PR #656 review.)
 
 ## Protocol Index
 

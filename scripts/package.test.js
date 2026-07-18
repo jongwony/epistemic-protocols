@@ -13,6 +13,10 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('zlib');
+const { CANONICAL_PRECEDENCE } = require('./load-protocols');
+// Full protocol registry, derived — display-first Anamnesis + canonical precedence chain +
+// structurally-last Katalepsis (same construction as load-protocols protocolOrder()).
+const ALL_PROTOCOLS = ['Anamnesis', ...CANONICAL_PRECEDENCE, 'Katalepsis'];
 const {
   PLUGINS,
   CODEX_SUBMIT_PLUGINS,
@@ -281,7 +285,7 @@ describe('transformSkillMd', () => {
 describe('runtime contract view', () => {
   it('builds a packaged runtime view for every skill', () => {
     const views = buildRuntimeContractViews();
-    assert.equal(views.length, 38);
+    assert.equal(views.length, 39);
     for (const view of views) {
       assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one SKILL.md entry`);
       assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed SKILL.md`);
@@ -759,7 +763,7 @@ describe('codex-submit artifact profile', () => {
 
     assert.equal(first.profile, 'codex-submit');
     assert.equal(first.dryRun, true);
-    assert.equal(first.results.length, 15);
+    assert.equal(first.results.length, CODEX_SUBMIT_PLUGINS.length);
     assert.deepEqual(first.index, second.index);
     assert.deepEqual(
       first.results.map(({ plugin, skill }) => ({ dir: plugin, skill })),
@@ -798,7 +802,7 @@ describe('codex-submit artifact profile', () => {
       assert.deepEqual(second.index, first.index);
       assert.deepEqual(secondSnapshot, firstSnapshot);
       assert.ok(!fs.existsSync(path.join(outputDir, 'stale.zip')));
-      assert.equal(second.index.artifacts.length, 15);
+      assert.equal(second.index.artifacts.length, CODEX_SUBMIT_PLUGINS.length);
       for (const artifact of second.index.artifacts) {
         const zip = fs.readFileSync(path.join(outputDir, artifact.filename));
         assert.equal(zip.length, artifact.bytes);
@@ -818,7 +822,7 @@ describe('codex-submit artifact profile', () => {
 // ============================================================
 
 describe('unified release artifact contract', () => {
-  it('produces byte-identical release and submission ZIPs for the fifteen public-core skills', () => {
+  it('produces byte-identical release and submission ZIPs for the public-core skills', () => {
     for (const plugin of CODEX_SUBMIT_PLUGINS) {
       const release = buildSkillArtifact(plugin, { profile: 'release' });
       const submission = buildCodexSubmitArtifact(plugin);
@@ -853,8 +857,8 @@ describe('unified release artifact contract', () => {
 
       assert.deepEqual(second, first);
       assert.deepEqual(secondSnapshot, firstSnapshot);
-      assert.equal(second.results.length, 39);
-      assert.equal(PLUGINS.length, 38);
+      assert.equal(second.results.length, 40);
+      assert.equal(PLUGINS.length, 39);
       for (const plugin of PLUGINS) {
         const build = buildSkillArtifact(plugin, { profile: 'release' });
         assert.equal(
@@ -959,13 +963,9 @@ describe('generateReleaseNotes', () => {
     assert.ok(prothesisPos < katalepsisPos, 'Katalepsis should be last');
   });
 
-  it('includes all 17 protocols in protocols table', () => {
+  it('includes all core protocols in protocols table', () => {
     const notes = generateReleaseNotes(mockResults);
-    const protocolNames = [
-      'Anamnesis', 'Anagoge', 'Horismos', 'Aitesis', 'Prothesis', 'Hyphegesis',
-      'Analogia', 'Periagoge', 'Euporia', 'Proplasma', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Elenchus', 'Diylisis', 'Diairesis', 'Katalepsis',
-    ];
-    for (const name of protocolNames) {
+    for (const name of ALL_PROTOCOLS) {
       assert.ok(notes.includes(name), `Expected ${name} in protocols table`);
     }
   });
@@ -1014,7 +1014,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 38 skills plus bundle in dry-run', () => {
+  it('packages all 39 skills plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -1027,7 +1027,7 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 39);
+    assert.equal(result.results.length, 40);
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -1050,6 +1050,7 @@ describe('package.js CLI', () => {
         'goal-research.zip',
         'grasp.zip',
         'ground.zip',
+        'ideate.zip',
         'image-companion.zip',
         'induce.zip',
         'inquire.zip',
@@ -1097,9 +1098,10 @@ describe('load-protocols Type signature extraction', () => {
   it('every active protocol yields non-null deficit and resolution', () => {
     const records = discoverPlugins({ projectRoot: path.resolve(__dirname, '..') });
     const protocols = records.filter(r => r.isProtocol);
-    assert.ok(
-      protocols.length >= 11,
-      `expected >= 11 active protocols, got ${protocols.length} (graph.json may have failed to parse)`
+    assert.deepEqual(
+      protocols.map(r => r.dir).sort(),
+      ALL_PROTOCOLS.map(p => p.toLowerCase()).sort(),
+      'active protocol set diverges from the canonical registry (graph.json may have failed to parse)'
     );
     for (const r of protocols) {
       assert.ok(r.deficit, `${r.dir}: deficit is null — SKILL.md Type signature parse failed`);
@@ -1123,9 +1125,10 @@ describe('agent routing map', () => {
     REPO_ROOT, 'epistemic-cooperative', 'skills', 'catalog', 'scripts', 'session-context.js'
   );
 
-  it('parses all 17 protocols, each with a when: trigger and deficit → resolution spine', () => {
+  it('parses all core protocols, each with a when: trigger and deficit → resolution spine', () => {
     const entries = buildRoutingEntries({ projectRoot: REPO_ROOT });
-    assert.equal(entries.length, 17, `expected 17 routing entries, got ${entries.length}`);
+    assert.equal(entries.length, ALL_PROTOCOLS.length,
+      `expected ${ALL_PROTOCOLS.length} routing entries, got ${entries.length}`);
     for (const e of entries) {
       assert.ok(e.trigger && e.trigger.length > 0, `${e.cmd}: missing when: trigger`);
       assert.ok(e.deficit, `${e.cmd}: missing deficit spine`);
@@ -1152,8 +1155,8 @@ describe('agent routing map', () => {
     const b = generateRoutingMap({ projectRoot: REPO_ROOT });
     assert.equal(a, b, 'routing map generation must be deterministic');
     assert.match(a, /Route from the deficit, not the summary\./);
-    assert.equal((a.match(/^\*\*`\//gm) || []).length, 17, 'all 17 entries rendered');
-    assert.equal((a.match(/^\s+when:/gm) || []).length, 17, 'every entry has a when: line');
+    assert.equal((a.match(/^\*\*`\//gm) || []).length, ALL_PROTOCOLS.length, 'all entries rendered');
+    assert.equal((a.match(/^\s+when:/gm) || []).length, ALL_PROTOCOLS.length, 'every entry has a when: line');
   });
 
   it('committed routing-map.md is in sync with its canonical sources', () => {
@@ -1168,7 +1171,7 @@ describe('agent routing map', () => {
     const ctx = parsed.hookSpecificOutput.additionalContext;
     assert.ok(typeof ctx === 'string' && ctx.length > 0, 'additionalContext must be a non-empty string');
     assert.match(ctx, /Route from the deficit, not the summary\./);
-    assert.equal((ctx.match(/\*\*`\//g) || []).length, 17, 'full map injects all 17 entries');
+    assert.equal((ctx.match(/\*\*`\//g) || []).length, ALL_PROTOCOLS.length, 'full map injects all entries');
   });
 
   it('session-context.js --only filters to the requested commands (preamble kept)', () => {

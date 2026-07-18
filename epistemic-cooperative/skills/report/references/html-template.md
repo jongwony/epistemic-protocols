@@ -232,7 +232,7 @@ growth_items: [{
 <div class="glance-grid">
   <div class="glance-block">
     <h4>Structured Decisions</h4>
-    <p>3 of 10 protocols actively used across recent sessions. Code review (via /frame) and reverse-induction (via /elicit) are your most adopted patterns...</p>
+    <p>3 of the core protocols actively used across recent sessions. Code review (via /frame) and reverse-induction (via /elicit) are your most adopted patterns...</p>
   </div>
   <div class="glance-block">
     <h4>Unstructured Decisions</h4>

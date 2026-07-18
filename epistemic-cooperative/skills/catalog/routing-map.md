@@ -13,6 +13,9 @@ the skill descriptions alone under-trigger invocation. Route from the deficit, n
 **`/elicit`** (Euporia) — AbstractAporia → ResolvedEndpoint
   when: Intent articulated but decision coordinates implicit in externalized substrate — reverse-trace to surface
 
+**`/ideate`** (Heuresis) — CandidateFieldUnderexpanded → DiverseCandidateField
+  when: Object-level candidate field is empty or has prematurely converged — widen it before any selection is made
+
 **`/preview`** (Proplasma) — DirectionUnrecognizable → DirectionalContrast
   when: Right before a direction commitment when the candidates cannot be judged from descriptions — contrast cheap discard-committed placeholder probes, then decide on recognized futures
 

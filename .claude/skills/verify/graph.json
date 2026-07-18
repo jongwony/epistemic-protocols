@@ -4,7 +4,7 @@
     "horismos", "aitesis", "analogia",
     "periagoge", "euporia", "prothesis", "syneidesis", "prosoche", "epharmoge",
     "elenchus", "katalepsis", "anamnesis", "anagoge", "diylisis", "hyphegesis",
-    "diairesis", "proplasma"
+    "diairesis", "proplasma", "heuresis"
   ],
   "edge_types": {
     "precondition": {
@@ -77,6 +77,7 @@
     { "source": "horismos", "target": "proplasma", "type": "advisory", "satisfies": "경계 선택 장면에서 방향-미래 인식 불가가 드러날 때 이관 (라우팅 미스 실측 표본 기반)" },
     { "source": "proplasma", "target": "syneidesis", "type": "advisory", "satisfies": "대비가 노출한 unknowns의 커밋전 점검 이관" },
     { "source": "proplasma", "target": "aitesis", "type": "advisory", "satisfies": "대비가 노출한 사실 unknowns의 조사 이관" },
-    { "source": "proplasma", "target": "analogia", "type": "advisory", "satisfies": "생존 방향의 익숙-도메인 구조 매핑 검증 (매핑 존재 시)" }
+    { "source": "proplasma", "target": "analogia", "type": "advisory", "satisfies": "생존 방향의 익숙-도메인 구조 매핑 검증 (매핑 존재 시)" },
+    { "source": "heuresis", "target": "proplasma", "type": "advisory", "satisfies": "생성된 후보장이 discard-instantiation 대상 후보를 제공 (정보 흐름 — 후보 존재가 재료를 공급, 필수 아님)" }
   ]
 }

@@ -19,7 +19,7 @@ node .claude/skills/verify/scripts/static-checks.js .
 9. **spec-vs-impl**: TYPES definitions cross-referenced against PHASE TRANSITIONS and prose — detects rename drift, dead types, and resolution type mismatches
 10. **morphism-anatomy**: SKILL.md Definition block formal integrity — FLOW → MORPHISM → TYPES section order, MORPHISM source object distinct from canonical deficit (deficit belongs in `requires:` precondition), required clauses (`requires`/`deficit`/`preserves`/`invariant`) all present, MORPHISM chain terminates in canonical resolution, Type signature exposes `deficit → resolution` pattern
 11. **cross-ref-scan**: Protocol name and deficit → resolution pair consistency across all SKILL.md files, README concern-cluster invariant, cross-enumeration completeness (`PROTOCOL_FILES`, graph nodes, marketplace entries), graph.json edge type allowlist verification
-12. **onboard-sync**: Onboard SKILL.md Data Sources table, protocol count, Phase 0 category groupings, `references/scenarios.md` scenario blocks, `references/workflow.md` slash commands — all cross-checked against `PROTOCOL_FILES`
+12. **onboard-sync**: Onboard SKILL.md Data Sources table, Phase 0 category groupings, `references/scenarios.md` scenario blocks, `references/workflow.md` slash commands — all cross-checked against `PROTOCOL_FILES`
 13. **precedence-linear-extension**: Verifies CANONICAL_PRECEDENCE total order is a valid linear extension of graph.json precondition partial order
 14. **partition-invariant**: Verifies MODE STATE pairwise disjoint partition invariants — universe set and partition members exist as MODE STATE fields
 15. **catalog-sync**: Catalog SKILL.md protocol coverage — all protocol names and commands present, count verified against `PROTOCOL_FILES`
