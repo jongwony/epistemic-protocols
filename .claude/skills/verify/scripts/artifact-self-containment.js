@@ -120,6 +120,17 @@ function runArtifactSelfContainmentCheck() {
   const results = { pass: [], fail: [], warn: [] };
   const views = buildRuntimeContractViews();
 
+  // Multi-skill plugins (skill count > 1) trade away per-skill pre-install
+  // routing enumeration in the top-level plugin description for
+  // maintainability — see AGENTS.md "Settled Directions § Multi-skill
+  // plugin description scope". Post-install discovery for these skills
+  // stays fully enforced via hasInvocationCue below. Single-skill plugins
+  // are unaffected.
+  const skillCountByPlugin = new Map();
+  for (const v of views) {
+    skillCountByPlugin.set(v.plugin, (skillCountByPlugin.get(v.plugin) || 0) + 1);
+  }
+
   for (const view of views) {
     const surfaceLabel = `${view.plugin}:${view.skill}`;
     const entrySet = new Set(view.packagedEntries.map(normalizePosix));
@@ -163,7 +174,8 @@ function runArtifactSelfContainmentCheck() {
       });
     }
 
-    if (!hasRoutingCue(view.pluginDescription, view.skill)) {
+    const isMultiSkillPlugin = skillCountByPlugin.get(view.plugin) > 1;
+    if (!isMultiSkillPlugin && !hasRoutingCue(view.pluginDescription, view.skill)) {
       results.warn.push({
         check,
         file: `${surfaceLabel}:plugin-description`,
