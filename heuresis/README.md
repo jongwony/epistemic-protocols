@@ -46,7 +46,7 @@ claude plugin install heuresis@epistemic-protocols
 /ideate [a topic, or a few fragments you already have]
 ```
 
-heuresis reads your invocation, infers blank or seeded entry, and — on blank — opens an abstract frame map for you to pick from before generating anything. Each round then produces candidates in parallel across the open frames, tagged with origin, presented with what's still unexplored. Continue by opening more frames, deepening one, or naming your own; stop whenever the field is wide enough. The candidate field then flows into `/preview`, `/gap`, or whatever evaluation work comes next.
+heuresis reads your invocation, infers blank or seeded entry, and — on blank — opens an abstract frame map for you to pick from before generating anything. Each round then produces candidates in parallel across the open frames, tagged with origin, presented with what's still unexplored. Continue by opening more frames, deepening one, or naming your own; stop whenever the field is wide enough. The candidate field then flows into `/preview`, your own direct judgment, or whatever evaluation work comes next — and the decision that judgment produces can be audited with `/gap`.
 
 ## Author
 
