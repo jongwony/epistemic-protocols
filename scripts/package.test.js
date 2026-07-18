@@ -13,6 +13,10 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('zlib');
+const { CANONICAL_PRECEDENCE } = require('./load-protocols');
+// Full protocol registry, derived — display-first Anamnesis + canonical precedence chain +
+// structurally-last Katalepsis (same construction as load-protocols protocolOrder()).
+const ALL_PROTOCOLS = ['Anamnesis', ...CANONICAL_PRECEDENCE, 'Katalepsis'];
 const {
   PLUGINS,
   CODEX_SUBMIT_PLUGINS,
@@ -759,7 +763,7 @@ describe('codex-submit artifact profile', () => {
 
     assert.equal(first.profile, 'codex-submit');
     assert.equal(first.dryRun, true);
-    assert.equal(first.results.length, 15);
+    assert.equal(first.results.length, CODEX_SUBMIT_PLUGINS.length);
     assert.deepEqual(first.index, second.index);
     assert.deepEqual(
       first.results.map(({ plugin, skill }) => ({ dir: plugin, skill })),
@@ -798,7 +802,7 @@ describe('codex-submit artifact profile', () => {
       assert.deepEqual(second.index, first.index);
       assert.deepEqual(secondSnapshot, firstSnapshot);
       assert.ok(!fs.existsSync(path.join(outputDir, 'stale.zip')));
-      assert.equal(second.index.artifacts.length, 15);
+      assert.equal(second.index.artifacts.length, CODEX_SUBMIT_PLUGINS.length);
       for (const artifact of second.index.artifacts) {
         const zip = fs.readFileSync(path.join(outputDir, artifact.filename));
         assert.equal(zip.length, artifact.bytes);
@@ -818,7 +822,7 @@ describe('codex-submit artifact profile', () => {
 // ============================================================
 
 describe('unified release artifact contract', () => {
-  it('produces byte-identical release and submission ZIPs for the fifteen public-core skills', () => {
+  it('produces byte-identical release and submission ZIPs for the public-core skills', () => {
     for (const plugin of CODEX_SUBMIT_PLUGINS) {
       const release = buildSkillArtifact(plugin, { profile: 'release' });
       const submission = buildCodexSubmitArtifact(plugin);
@@ -959,13 +963,9 @@ describe('generateReleaseNotes', () => {
     assert.ok(prothesisPos < katalepsisPos, 'Katalepsis should be last');
   });
 
-  it('includes all 17 protocols in protocols table', () => {
+  it('includes all core protocols in protocols table', () => {
     const notes = generateReleaseNotes(mockResults);
-    const protocolNames = [
-      'Anamnesis', 'Anagoge', 'Horismos', 'Aitesis', 'Prothesis', 'Hyphegesis',
-      'Analogia', 'Periagoge', 'Euporia', 'Proplasma', 'Syneidesis', 'Prosoche', 'Epharmoge', 'Elenchus', 'Diylisis', 'Diairesis', 'Katalepsis',
-    ];
-    for (const name of protocolNames) {
+    for (const name of ALL_PROTOCOLS) {
       assert.ok(notes.includes(name), `Expected ${name} in protocols table`);
     }
   });
@@ -1124,9 +1124,10 @@ describe('agent routing map', () => {
     REPO_ROOT, 'epistemic-cooperative', 'skills', 'catalog', 'scripts', 'session-context.js'
   );
 
-  it('parses all 17 protocols, each with a when: trigger and deficit → resolution spine', () => {
+  it('parses all core protocols, each with a when: trigger and deficit → resolution spine', () => {
     const entries = buildRoutingEntries({ projectRoot: REPO_ROOT });
-    assert.equal(entries.length, 18, `expected 18 routing entries, got ${entries.length}`);
+    assert.equal(entries.length, ALL_PROTOCOLS.length,
+      `expected ${ALL_PROTOCOLS.length} routing entries, got ${entries.length}`);
     for (const e of entries) {
       assert.ok(e.trigger && e.trigger.length > 0, `${e.cmd}: missing when: trigger`);
       assert.ok(e.deficit, `${e.cmd}: missing deficit spine`);
@@ -1153,8 +1154,8 @@ describe('agent routing map', () => {
     const b = generateRoutingMap({ projectRoot: REPO_ROOT });
     assert.equal(a, b, 'routing map generation must be deterministic');
     assert.match(a, /Route from the deficit, not the summary\./);
-    assert.equal((a.match(/^\*\*`\//gm) || []).length, 18, 'all 18 entries rendered');
-    assert.equal((a.match(/^\s+when:/gm) || []).length, 18, 'every entry has a when: line');
+    assert.equal((a.match(/^\*\*`\//gm) || []).length, ALL_PROTOCOLS.length, 'all entries rendered');
+    assert.equal((a.match(/^\s+when:/gm) || []).length, ALL_PROTOCOLS.length, 'every entry has a when: line');
   });
 
   it('committed routing-map.md is in sync with its canonical sources', () => {
@@ -1169,7 +1170,7 @@ describe('agent routing map', () => {
     const ctx = parsed.hookSpecificOutput.additionalContext;
     assert.ok(typeof ctx === 'string' && ctx.length > 0, 'additionalContext must be a non-empty string');
     assert.match(ctx, /Route from the deficit, not the summary\./);
-    assert.equal((ctx.match(/\*\*`\//g) || []).length, 18, 'full map injects all 18 entries');
+    assert.equal((ctx.match(/\*\*`\//g) || []).length, ALL_PROTOCOLS.length, 'full map injects all entries');
   });
 
   it('session-context.js --only filters to the requested commands (preamble kept)', () => {

@@ -51,7 +51,7 @@ The Codex marketplace preserves the same plugin boundaries as Claude Code: each 
 
 - The Codex marketplace lives at [`.agents/plugins/marketplace.json`](./.agents/plugins/marketplace.json).
 - Each plugin keeps its Codex manifest beside the existing Claude manifest: `<plugin>/.codex-plugin/plugin.json`.
-- The marketplace includes the 18 protocol plugins plus `epistemic-cooperative`.
+- The marketplace includes every protocol plugin plus `epistemic-cooperative`.
 
 </details>
 

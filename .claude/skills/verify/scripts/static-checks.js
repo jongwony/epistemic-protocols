@@ -1700,17 +1700,7 @@ function checkOnboardSync() {
     }
   }
 
-  // Sub-check 2: Protocol count reference matches actual count
-  const expectedCount = protocols.length;
-  if (!onboardContent.includes(`the ${expectedCount} protocols`)) {
-    results.warn.push({
-      check: 'onboard-sync',
-      file: 'epistemic-cooperative/skills/onboard/SKILL.md',
-      message: `Protocol count may be stale — expected "the ${expectedCount} protocols"`
-    });
-  }
-
-  // Sub-check 3: Phase 0 category groupings cover all slash commands
+  // Sub-check 2: Phase 0 category groupings cover all slash commands
   // (assumes Pre-execution/Analysis/Execution on consecutive lines)
   const categoryLines = onboardContent.match(/Pre-execution[^\n]*\n[^\n]*Analysis[^\n]*\n[^\n]*Execution[^\n]*/);
   if (categoryLines) {
@@ -1732,7 +1722,7 @@ function checkOnboardSync() {
     });
   }
 
-  // Sub-check 4: scenarios.md — every protocol must have a scenario block
+  // Sub-check 3: scenarios.md — every protocol must have a scenario block
   const scenariosPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/references/scenarios.md');
   if (fs.existsSync(scenariosPath)) {
     const scenariosContent = fs.readFileSync(scenariosPath, 'utf8');
@@ -1755,7 +1745,7 @@ function checkOnboardSync() {
     });
   }
 
-  // Sub-check 5: workflow.md — all slash commands present
+  // Sub-check 4: workflow.md — all slash commands present
   const workflowPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/references/workflow.md');
   if (fs.existsSync(workflowPath)) {
     const workflowContent = fs.readFileSync(workflowPath, 'utf8');
@@ -1781,7 +1771,7 @@ function checkOnboardSync() {
     results.pass.push({
       check: 'onboard-sync',
       file: 'epistemic-cooperative/',
-      message: `Onboard sync — Data Sources, scenarios, and workflow verified for ${expectedCount} protocols`
+      message: `Onboard sync — Data Sources, scenarios, and workflow verified for ${protocols.length} protocols`
     });
   }
 }
@@ -2900,7 +2890,7 @@ function checkPackagedAgentContractSync() {
 // SKILL.md carries both the Rules entry label and its kernel sentence
 // (Formal blocks are LLM-facing and constitutive of protocol identity).
 //
-// Exemption list: all 17 core protocols currently carry this rule (added
+// Exemption list: all core protocols currently carry this rule (added
 // in the compiled-copy enforcement family (checks 25–26)). Kept EMPTY on purpose: add a relPath
 // only when a recorded decision exempts a protocol — never pre-populate.
 const FORMAL_BLOCKS_EXEMPTIONS = [];
@@ -2908,7 +2898,7 @@ const FORMAL_BLOCKS_EXEMPTIONS = [];
 // Anchoring: the label must appear as a numbered Rules entry (not merely a
 // cross-reference elsewhere in the file), and the kernel sentence must fall
 // within that SAME entry's bounded body — not anywhere in the file. Bound
-// calibrated against all 17 core protocols (max observed entry ~560 chars);
+// calibrated against all core protocols (max observed entry ~560 chars);
 // 900 leaves comfortable margin without reaching into unrelated content.
 // The cut also stops at the next section heading or column-0 bold
 // paragraph, so a terminal numbered entry's body does not extend into
@@ -2988,7 +2978,7 @@ function checkFormalBlocksRule() {
 // euporia phrases mutations as partial omission of cycle coordinates), so
 // the check anchors on the kernel phrase only.
 //
-// Exemption list: all 17 core protocols currently carry this rule (added
+// Exemption list: all core protocols currently carry this rule (added
 // in the compiled-copy enforcement family (checks 25–26)). Kept EMPTY on purpose: add a relPath
 // only when a recorded decision exempts a protocol — never pre-populate.
 const GATE_INTEGRITY_EXEMPTIONS = [];
@@ -2997,7 +2987,7 @@ function checkGateIntegrityRule() {
   const CHECK = 'gate-integrity-rule';
   // Anchoring (same rationale as checkFormalBlocksRule above): the label
   // must be a numbered Rules entry, not a cross-reference. Bound calibrated
-  // against all 17 core protocols (max observed entry ~1180 chars, horismos);
+  // against all core protocols (max observed entry ~1180 chars, horismos);
   // 2000 leaves comfortable margin without reaching into unrelated content.
   const LABEL_PATTERN = /^\d+\.\s+\*\*Gate integrity\*\*/m;
   const KERNEL = 'type-preserving materialization';

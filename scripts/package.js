@@ -164,6 +164,7 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'elenchus', skill: 'sublate' },
   { dir: 'epharmoge', skill: 'contextualize' },
   { dir: 'euporia', skill: 'elicit' },
+  { dir: 'heuresis', skill: 'ideate' },
   { dir: 'horismos', skill: 'bound' },
   { dir: 'hyphegesis', skill: 'conduct' },
   { dir: 'katalepsis', skill: 'grasp' },
@@ -807,8 +808,8 @@ function assertArtifactMatchesIndex(artifact, zipBuffer) {
 }
 
 function buildCodexSubmitArtifacts({ root = projectRoot } = {}) {
-  if (CODEX_SUBMIT_PLUGINS.length !== 15) {
-    throw new Error(`codex-submit selection must contain exactly 15 plugins`);
+  if (CODEX_SUBMIT_PLUGINS.length !== 16) {
+    throw new Error(`codex-submit selection must contain exactly 16 plugins`);
   }
   const keys = new Set();
   for (const plugin of CODEX_SUBMIT_PLUGINS) {

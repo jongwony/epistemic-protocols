@@ -22,11 +22,11 @@ Heuresis(U) → bind(U) → classify_entry(U) → Entry →
   [Entry = Seeded(seeds)] derive_frames(seeds, topic) → generate(∥ frames; seeds fold in as origin=User) → Round₁
   present(Round) → Qround → Stop → D →
     [D = Continue(frames)] derive_frames(frames)? → generate(∥ frames) → Round → present → Qround (loop)
-    [D = Stop]             assemble(Λ.candidates) → DiverseCandidateField
+    [D = Stop]             assemble(Λ.candidates) → DiverseCandidateField (Λ.candidates ≠ ∅) | EarlyExit (Λ.candidates = ∅)
   [user_esc, before Λ.candidates ≠ ∅] → EarlyExit
   [user_esc, after Λ.candidates ≠ ∅]  → terminate, no formal record (already-presented rounds stay visible in session text)
--- chain note: when U names a ChainRef (a prior collection protocol's output), its material folds into Seeded candidates
---   (origin=User) at classify_entry — a deliberate substrate-first choice the user made, documented as a trade-off (Rule 8)
+-- chain note: when U names a ChainRef (a prior collection protocol's output), its material folds in as origin=User seeds
+--   at classify_entry — a deliberate substrate-first choice the user made, documented as a trade-off (Rule 8)
 
 ── MORPHISM ──
 IdeationRequest
@@ -51,9 +51,12 @@ U      = IdeationRequest: the invocation utterance, read as-is — a natural-lan
          --   prior-output reference; it never scans the wider session, codebase, or rules (Euporia's reverse-trace
          --   territory, not this protocol's)
 Entry  = Blank                                -- utterance carries a topic only, no idea fragments
-       | Seeded(Set(Candidate))               -- utterance carries idea fragments, extracted as origin=User candidates
+       | Seeded(Set(Seed))                    -- utterance carries idea fragments, extracted as origin=User seeds
          -- coproduct: Blank and Seeded take DIFFERENT phase paths (frame-first gate vs. expand-first) — behavioral
          --   branching per the structural convention (natural-language definitions are for uniform-processing inputs only)
+Seed   = { content: String, origin = User }   -- a pre-frame fragment lifted from the utterance; carries no frame yet —
+         --   frames do not exist until Phase 1 derives them. Promoted to Candidate on the first generation pass,
+         --   gaining the frame it lands under (origin stays User, never relabeled)
 ExpansionWitness ∈ {Empty, NarrowAcrossFrames, PrematurelyConverged} ∪ Emergent(T)
          -- classification of WHY the candidate field is underexpanded; cited as Phase 0 relay basis. Sub-level to
          --   CandidateFieldUnderexpanded — NOT itself a top-level deficit, and never gates activation (User-initiated:
@@ -78,7 +81,9 @@ Qround = per-round presentation: candidates by frame + explored/unexplored decla
 D      = ContinuationAnswer ∈ {Continue(frames: Set(Frame)), Stop}
          -- Continue's frames may be drawn from the declared unexplored set, may re-select an already-open frame to
          --   deepen, or may be a user-named frame outside the declared set (free response — type-preserving
-         --   materialization of Continue, not a new constructor). Stop is available at every Qround exactly as at
+         --   materialization of Continue, not a new constructor). A Continue naming no frames defaults to the declared
+         --   unexplored set — or, when none remain, to deepening the currently open frames — so the next pass always
+         --   has ≥1 open frame. Stop is available at every Qround exactly as at
          --   Qframes — the user's stop is the constitutive act that bounds the field, not a pre-convergence abandonment
 DiverseCandidateField = {
   candidates: Set(Candidate { content, frame, origin }),
@@ -88,19 +93,20 @@ DiverseCandidateField = {
          -- "diverse" = frame-distributed, never scored/ranked/optimized; candidates ≠ ∅ always holds here (see EarlyExit
          --   for the empty case)
 EarlyExit = { frames_offered: Set(Frame), reason: Optional(String) }
-         -- the typed terminal for a stop (Qframes Stop, or user_esc) that fires BEFORE any candidate exists — an empty
+         -- the typed terminal for a stop (Qframes Stop, a Qround Stop after passes that produced nothing, or user_esc)
+         --   that fires while no candidate exists — an empty
          --   field is never mislabeled DiverseCandidateField; frames_offered declares what was on the table even
          --   though nothing was generated, so nothing is silently dropped
 
 ── U-BINDING ──
 bind(U) = explicit_arg ∪ colocated_expr ∪ prev_user_turn ∪ chain_ref
 Priority: explicit_arg > colocated_expr > prev_user_turn > chain_ref
-         -- chain_ref, when named, folds its material into Seeded candidates — it never substitutes for the topic itself
+         -- chain_ref, when named, folds its material in as origin=User seeds — it never substitutes for the topic itself
 
 /ideate "topic or fragments"               → U = "topic or fragments"
 /ideate (alone)                            → U = previous user message
 "give me some ideas ... /ideate"           → U = text before trigger
-"using what /inquire just found, /ideate"  → U also carries the named ChainRef; its material folds in as Seeded candidates
+"using what /inquire just found, /ideate"  → U also carries the named ChainRef; its material folds in as origin=User seeds
 
 ── PHASE TRANSITIONS ──
 Phase 0: U → bind(U) → classify_entry(U) → Entry ⊗ ExpansionWitness           -- silent; zero entry questions
@@ -109,11 +115,13 @@ Phase 1: Entry → derive_frames(Entry) → Frames_candidate
        [Entry = Blank] present(frame map) → Qframes → Stop → FrameSelection   [Tool]
          [FrameSelection = Open(F_selected)] → Phase 2 with F_selected
          [FrameSelection = Stop] → EarlyExit(frames_offered := Frames_candidate)   -- stop before any candidate exists
-       [Entry = Seeded(seeds)] → Phase 2 directly with Frames_candidate (seeds fold in as origin=User candidates; no gate — expand-first)
-Phase 2: F_open → generate(∥ over F_open) → Round(candidates, frames_opened := F_open)   -- no elimination, no ranking; seeds (first pass only) carry origin=User, generated candidates carry origin=AI
+       [Entry = Seeded(seeds)] → Phase 2 directly with Frames_candidate (no gate — expand-first)
+Phase 2: F_open → generate(∥ over F_open) → Round(candidates, frames_opened := F_open)   -- no elimination, no ranking; on the first pass of a Seeded entry, seeds promote to Candidates under the frame each lands in (origin=User); generated candidates carry origin=AI
 Phase 3: Round → present(Round: candidates by frame, explored_frames, unexplored_frames) → Qround → Stop → D   [Tool]
        [D = Continue(frames: F')] Frames_candidate := Frames_candidate ∪ derive_frames(F') → Phase 2 with F' (open, deepen, or user-named — type-preserving materialization of Continue)
-       [D = Stop] → assemble(Λ.candidates) → DiverseCandidateField(candidates, explored_frames, unexplored_frames)   -- Λ.candidates ≠ ∅ always holds here (Phase 3 is reached only after ≥1 completed Phase 2 pass)
+         -- a Continue naming no frames defaults F' := unexplored frames; when none remain, F' := currently open frames (deepen) — F' is never empty or undefined
+       [D = Stop, Λ.candidates ≠ ∅] → assemble(Λ.candidates) → DiverseCandidateField(candidates, explored_frames, unexplored_frames)
+       [D = Stop, Λ.candidates = ∅] → EarlyExit(frames_offered := Frames_candidate)   -- a completed pass can yield nothing; honest stop typing routes an empty field to EarlyExit, never DiverseCandidateField
 user_esc (any Phase, before Λ.candidates ≠ ∅) → EarlyExit(frames_offered := Frames_candidate)   -- ungraceful; no cleanup — no side-effect state to discard
 user_esc (any Phase, after Λ.candidates ≠ ∅)  → terminate, no formal DiverseCandidateField record   -- ungraceful; the already-presented round content stays visible in session text regardless
 
@@ -126,11 +134,12 @@ Novelty relay (optional, extension): at any Qround, heuresis MAY note as basis-c
   as producing candidates closer to earlier ones (novelty has not yet declined further, or has) — informational only,
   sits in the pre-gate text, and never blocks or discourages Stop.
 User esc available at every gate (Qframes, Qround) — ungraceful, no cleanup, universal.
-Continue until: DiverseCandidateField (user Stop with ≥1 candidate already generated) OR EarlyExit (Stop at the Blank
-  frame map before any candidate exists, or user_esc before the first round completes).
+Continue until: DiverseCandidateField (user Stop with ≥1 candidate already generated) OR EarlyExit (Stop or user_esc
+  while no candidate exists — the Blank frame map declined, an escape before the first round completes, or a Stop
+  after passes that produced nothing).
 Convergence evidence: at DiverseCandidateField, present the transformation trace — for each opened frame, the
   candidates it produced with their origin tags, plus the declared unexplored frames. At EarlyExit, present the frames
-  that were derived and offered but never opened. Demonstrated, not asserted.
+  that were derived and offered, none of which yielded a candidate. Demonstrated, not asserted.
 
 ── CONVERGENCE ──
 resolved(Λ) = user_stops(Λ)   -- the user's own Stop IS the completion predicate — not a separate judgment layered on
@@ -155,13 +164,15 @@ Phase 1 Qframes         (constitution) → present (Blank path only; conditional
 Phase 2 generate        (sense)       → Internal generation (logical topology: parallel over open frames — no mandatory subagent dispatch; a host MAY realize this via isolated parallel agents when available, but heuresis's meaning is independent of that realization; no elimination, no ranking, no scoring)
 Phase 3 present         (extension)   → TextPresent+Proceed (round relay: candidates grouped by frame with origin tags, explored/unexplored frame declaration; precedes the gate)
 Phase 3 Qround          (constitution) → present (mandatory every round; Continue — open more / deepen / name a new frame — or Stop; Esc → loop termination)
-Λ                       (track)       → Internal state update (candidates, rounds, frames_open/unexplored accumulate; a candidate is never removed or relabeled once tagged with origin)
-converge                (extension)   → TextPresent+Proceed (DiverseCandidateField: transformation trace — per opened frame, its candidates + declared unexplored frames; EarlyExit: frames offered but never opened)
+Λ                       (track)       → Internal state update (candidates, rounds, frames_open accumulate; frames_unexplored is derived — frames_candidate minus frames_open, so an opened frame leaves the unexplored set; a candidate is never removed or relabeled once tagged with origin)
+converge                (extension)   → TextPresent+Proceed (DiverseCandidateField: transformation trace — per opened frame, its candidates + declared unexplored frames; EarlyExit: the frames offered, none of which yielded a candidate)
 
 ── MODE STATE ──
 Λ = { phase: Phase, entry: Option(Entry), witness: Option(ExpansionWitness),
       chain_ref: Option(ChainRef),
-      frames_candidate: Set(Frame), frames_open: Set(Frame), frames_unexplored: Set(Frame),
+      frames_candidate: Set(Frame), frames_open: Set(Frame),
+      frames_unexplored: Set(Frame),     -- derived, not accumulated: frames_candidate \ frames_open — opening a frame
+                                         --   removes it here, so no frame is ever reported explored AND unexplored
       candidates: Set(Candidate),        -- accumulate-only across rounds; origin never relabeled once tagged
       rounds: List(Round),
       active: Bool, cause_tag: String }
@@ -221,7 +232,7 @@ When Heuresis is active:
 | Trigger | Effect |
 |---------|--------|
 | Stop at Qframes (Blank, before any candidate) | `EarlyExit` — frames_offered declared, nothing generated |
-| Stop at Qround (≥1 candidate already exists) | `DiverseCandidateField` — candidates + explored/unexplored frames |
+| Stop at Qround | `DiverseCandidateField` when ≥1 candidate exists — candidates + explored/unexplored frames; `EarlyExit` when completed passes produced none |
 | user_esc before `Λ.candidates ≠ ∅` | `EarlyExit` — ungraceful, no cleanup (no side-effect state exists) |
 | user_esc after `Λ.candidates ≠ ∅` | Terminate without a formal record — already-presented rounds remain visible in session text |
 
@@ -229,9 +240,9 @@ When Heuresis is active:
 
 ### Phase 0: Entry Classification (Silent)
 
-Bind the invocation utterance per U-BINDING. Determine `Entry` by scanning the utterance for idea fragments: any fragment present → `Seeded`, extracted as candidates tagged `origin=User`; a bare topic with no fragments → `Blank`. This is a relay, not a gate — `Entry` is inferred, never asked (zero entry questions).
+Bind the invocation utterance per U-BINDING. Determine `Entry` by scanning the utterance for idea fragments: any fragment present → `Seeded`, extracted as seeds tagged `origin=User` (pre-frame fragments — each gains a frame when generation first runs); a bare topic with no fragments → `Blank`. This is a relay, not a gate — `Entry` is inferred, never asked (zero entry questions).
 
-Classify `ExpansionWitness` alongside `Entry` — `Empty` (Blank: nothing yet), `NarrowAcrossFrames` (Seeded, but every seed clusters within one implied frame), or `PrematurelyConverged` (the utterance signals settling on a single option while the underlying goal stays open) — cited as basis in the relay text that follows, and used to shape frame derivation (a `PrematurelyConverged` witness pushes frame derivation toward angles distant from the existing single idea).
+Classify `ExpansionWitness` alongside `Entry` — `Empty` (Blank: nothing yet), `NarrowAcrossFrames` (Seeded, but every seed clusters within one implied frame), `PrematurelyConverged` (the utterance signals settling on a single option while the underlying goal stays open), or an emergent case outside the named three (`Emergent(T)`: name the observed pattern ad hoc — the named types are working hypotheses, not an exhaustive set) — cited as basis in the relay text that follows, and used to shape frame derivation (a `PrematurelyConverged` witness pushes frame derivation toward angles distant from the existing single idea).
 
 Present the classification as a short relay before proceeding: what was read as `Entry`, its basis (quoting the utterance fragment), and the `ExpansionWitness`. No user response is requested here — proceed directly to Phase 1.
 
@@ -263,7 +274,7 @@ Selecting ≥1 frame proceeds to Phase 2 with exactly those frames open. **Stop*
 
 ### Phase 2: Parallel Generation (Silent)
 
-Generate candidates across every open frame in this round — logically parallel, no mandatory subagent dispatch (a host MAY realize this via isolated parallel agents when available; heuresis's meaning does not depend on it). No elimination, no ranking, no scoring: every candidate produced survives into the round. On the very first pass of a Seeded entry, the original seeds are folded in as `origin=User` candidates alongside whatever the frames generate as `origin=AI`; every later pass tags its output `origin=AI`.
+Generate candidates across every open frame in this round — logically parallel, no mandatory subagent dispatch (a host MAY realize this via isolated parallel agents when available; heuresis's meaning does not depend on it). No elimination, no ranking, no scoring: every candidate produced survives into the round. On the very first pass of a Seeded entry, the original seeds are promoted to `origin=User` candidates under the frame each lands in, alongside whatever the frames generate as `origin=AI`; every later pass tags its output `origin=AI`.
 
 ### Phase 3: Round Presentation + Continuation (Constitution)
 
@@ -273,11 +284,11 @@ Then **present** Qround:
 
 ```
 Options:
-1. **Continue** — open more of the unexplored frames, deepen one already open, or name a new angle yourself; another pass follows
+1. **Continue** — open more of the unexplored frames, deepen one already open, or name a new angle yourself; a bare continue opens the remaining unexplored frames (or deepens the open ones when none remain); another pass follows
 2. **Stop** — this is the candidate field; declare what's still unexplored and hand it off
 ```
 
-**Continue** may name specific unexplored frames, re-select an already-open frame to deepen, or introduce a frame the user names outright (a free response — type-preserving materialization of `Continue`, not a new constructor); loop back to Phase 1 (when new frames need deriving) or directly to Phase 2 (when deepening an already-open frame). **Stop** is available here exactly as it is at Qframes — the user's own Stop, at any round, is what bounds the field: assemble `Λ.candidates` (never empty at this point — Phase 3 is reached only after Phase 2 has completed at least once) into `DiverseCandidateField`, with `explored_frames` and `unexplored_frames` both declared.
+**Continue** may name specific unexplored frames, re-select an already-open frame to deepen, or introduce a frame the user names outright (a free response — type-preserving materialization of `Continue`, not a new constructor); a Continue naming nothing defaults to the declared unexplored frames, or to deepening the open ones when none remain — the next pass always has ≥1 open frame. Loop back to Phase 1 (when new frames need deriving) or directly to Phase 2 (when deepening an already-open frame). **Stop** is available here exactly as it is at Qframes — the user's own Stop, at any round, is what bounds the field: assemble `Λ.candidates` into `DiverseCandidateField` when at least one candidate exists, with `explored_frames` and `unexplored_frames` both declared; a Stop after passes that produced nothing returns `EarlyExit` — honest stop typing, an empty field is never dressed up as the resolution type.
 
 ## Adversarial Guards
 
@@ -309,10 +320,10 @@ Options:
 
 1. **User-initiated, zero entry questions**: `/ideate` activates only on direct invocation (Layer 1); `Entry` (Blank vs. Seeded) is inferred from the utterance alone — never asked. Phase 0's `classify_entry` is Extension/relay, not a gate.
 2. **Recognition over Recall, frame-first before concrete**: On a Blank entry, the frame map is presented via Cognitive Partnership Move (Constitution) BEFORE any concrete candidate is generated — abstract frames only, so the user picks a direction of divergence, not a specific idea, preserving ownership and mitigating early-example fixation.
-3. **No elimination, no ranking**: Generation never discards, scores, ranks, or optimizes a candidate. A "candidate" in this type is a generated idea item (raw material) — never a selection-ready alternative. Selection is out of scope; it belongs downstream (`/preview`, `/gap`, or direct user judgment).
+3. **No elimination, no ranking**: Generation never discards, scores, ranks, or optimizes a candidate. A "candidate" in this type is a generated idea item (raw material) — never a selection-ready alternative. Selection is out of scope; it belongs downstream — seeing candidate futures before choosing (`/preview`) or the user's own direct judgment, with the resulting decision auditable for unnoticed gaps (`/gap` — an audit of the decision made, not a selector among candidates).
 4. **Provenance preserved**: Every candidate carries `origin ∈ {User, AI}`. User-supplied seeds keep `origin=User` through every subsequent round; they are never relabeled.
 5. **Termination is the user's constitutive act, at any time**: Stop is available at every gate, including before any candidate is ever generated. The user's stop bounds the field — it is not a pre-convergence abandonment; the completion predicate for `DiverseCandidateField` IS the user's own stop (with candidates ≠ ∅ at that moment). heuresis MAY relay that recent rounds show declining novelty as basis-cited context; this NEVER blocks or discourages Stop.
-6. **Honest stop typing**: A stop after ≥1 candidate exists converges to `DiverseCandidateField`. A stop before any candidate exists (declining the Blank frame map, or `user_esc` before the first round completes) returns `EarlyExit` — the frames that were offered are declared, never silently dropped, and an empty field is never mislabeled `DiverseCandidateField`.
+6. **Honest stop typing**: A stop while ≥1 candidate exists converges to `DiverseCandidateField`. A stop while none exist — declining the Blank frame map, `user_esc` before the first round completes, or a Stop after completed passes that produced nothing — returns `EarlyExit` — the frames that were offered are declared, never silently dropped, and an empty field is never mislabeled `DiverseCandidateField`.
 7. **Euporia boundary — utterance-only input**: heuresis reads only what the invocation carries — the utterance itself, plus a prior protocol's output the user explicitly names (a chain reference). It never scans the wider session, codebase, or rules, and it never reverse-traces hidden decision coordinates from externalized substrate — that is Euporia's territory (`/elicit`), not this protocol's.
 8. **Chain semantics — a documented trade-off, not a mitigation**: When the invocation names a chain reference, the chained material folds in as `origin=User` candidates. Chaining substrate material in is itself the user's deliberate choice of substrate-first over independent-ideation-first; the ownership/diversity benefit of ideating before seeing prior material does not hold on this path, and heuresis adds no mitigation for it.
 9. **GenerationFrame ≠ analytical lens**: A `GenerationFrame` is a temporary partition for parallel candidate production within a round — a divergence angle, not an analytical perspective. It carries no substrate need, no per-perspective directive, and is never handed off as a framed inquiry object; that machinery belongs to Prothesis (`/frame`).
