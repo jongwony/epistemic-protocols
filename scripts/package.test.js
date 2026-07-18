@@ -1098,9 +1098,10 @@ describe('load-protocols Type signature extraction', () => {
   it('every active protocol yields non-null deficit and resolution', () => {
     const records = discoverPlugins({ projectRoot: path.resolve(__dirname, '..') });
     const protocols = records.filter(r => r.isProtocol);
-    assert.ok(
-      protocols.length >= 11,
-      `expected >= 11 active protocols, got ${protocols.length} (graph.json may have failed to parse)`
+    assert.deepEqual(
+      protocols.map(r => r.dir).sort(),
+      ALL_PROTOCOLS.map(p => p.toLowerCase()).sort(),
+      'active protocol set diverges from the canonical registry (graph.json may have failed to parse)'
     );
     for (const r of protocols) {
       assert.ok(r.deficit, `${r.dir}: deficit is null — SKILL.md Type signature parse failed`);

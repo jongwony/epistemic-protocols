@@ -119,7 +119,7 @@ From Phase 2 timeline data:
 
 Compute milestones:
 - **Session milestones**: 10, 50, 100, 250, 500 sessions
-- **Protocol milestones**: first protocol used, 3+ protocols used, all 8 used
+- **Protocol milestones**: first protocol used, 3+ protocols used, all core protocols used
 - **Code milestones**: 100 commits, 500 commits
 - **Streak**: consecutive days with sessions (from timeline data)
 

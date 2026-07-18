@@ -1,6 +1,6 @@
 {
   "name": "epistemic-cooperative",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "description": "Utility skills layered on top of the core protocols — /catalog, /onboard, /probe, /report, /dashboard, /introspect, /sophia, /curses, /comment-review, /review-loop, /lens-review, /goal-research, /steer, /realign, /misuse, /triage, /forge, /reduced-space-test, /image-companion, and the /white-bear and /zero-shot prose audits. See each skill's SKILL.md for details.",
   "author": {
     "name": "Jongwon Choi",

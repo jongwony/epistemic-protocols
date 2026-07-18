@@ -37,8 +37,8 @@ IdeationRequest
   → generate(∥ open frames)             -- parallel candidate production; no elimination, no ranking, no scoring
   → present(Round)                      -- relay: candidates by frame + explored/unexplored declaration
   → continue_or_stop(Round)             -- user constitutive judgment; Stop available at every round AND before the first one
-  → assemble(field)                     -- candidates ≠ ∅ at Stop → DiverseCandidateField; candidates = ∅ at Stop/Esc → EarlyExit
-  → DiverseCandidateField
+  → assemble(field)                     -- the surviving field entire: every candidate origin- and frame-tagged, nothing dropped
+  → DiverseCandidateField               -- happy-path terminal; the zero-candidate stop path exits as EarlyExit (FLOW)
 requires: candidate_field_underexpanded(U)   -- runtime checkpoint (Phase 0); direct /ideate invocation satisfies it
 deficit:  CandidateFieldUnderexpanded         -- activation precondition (Layer 1)
 preserves: seed_provenance(U)                 -- user-supplied seeds keep origin=User through every later round; never relabeled
