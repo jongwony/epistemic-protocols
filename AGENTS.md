@@ -13,6 +13,7 @@ Citable registry of conventions whose resolution direction is already constitute
 - Mechanism pointer: the consuming mechanism (the option-set relay test) is defined in `.claude/rules/axioms.md` §A5 — not restated here.
 - **Count-free protocol cardinality**: do not hardcode the protocol count in prose, comments, test names, or metadata descriptions — use count-free phrasing ("all core protocols", "every protocol plugin"). Completeness-sensitive code and tests compare exact protocol identities against the canonical registry (`scripts/load-protocols.js` `CANONICAL_PRECEDENCE`) or derive displayed counts from it; a deliberate subset (e.g. the Codex submission set) states its inclusion policy explicitly.
 - **Multi-skill plugin description scope**: a plugin bundling more than one skill (currently: `epistemic-cooperative` only) is not required to enumerate every skill's `/command` in its top-level plugin description to satisfy `artifact-self-containment.js`'s `hasRoutingCue` check; single-skill plugin descriptions must still name their one skill's `/command`, enforced unchanged.
+- **Ledger binding**: this project's canonical ledger is the git record — commit messages plus issue/PR bodies. "Then"-records (narrative, provenance, trade-offs, rejected alternatives) route there at write time; state surfaces carry only now-asserting operative content, strictest in always-loaded instruction files.
 
 ## Protocol Index
 
