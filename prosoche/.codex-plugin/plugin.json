@@ -1,6 +1,6 @@
 {
   "name": "prosoche",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "Compile slow/threshold execution risks into verifiable goal conditions — /attend (προσοχή: attention)",
   "author": {
     "name": "Jongwon Choi",
