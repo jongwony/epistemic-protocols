@@ -42,7 +42,7 @@ IdeationRequest
   → present(Round)                      -- relay: candidates by frame + explored/unexplored declaration
   → continue_or_stop(Round)             -- user constitutive judgment; Stop available at every round AND before the first one;
                                         --   a deepen request parks (relay) rather than continuing — the loop only widens
-  → assemble(field)                     -- the surviving field entire: every candidate origin- and frame-tagged, parked
+  → assemble(field)                     -- the surviving field entire under the bound topic: every candidate origin- and frame-tagged, parked
                                         --   follow-ups declared, nothing dropped
   → DiverseCandidateField               -- happy-path terminal; the zero-candidate stop path exits as EarlyExit (FLOW)
 requires: candidate_field_underexpanded(U)   -- runtime checkpoint (Phase 0); direct /ideate invocation satisfies it
@@ -131,7 +131,7 @@ Priority: explicit_arg > colocated_expr > prev_user_turn > chain_ref
 "using what /inquire just found, /ideate"  → U also carries the named ChainRef; its material folds in as origin=User seeds
 
 ── PHASE TRANSITIONS ──
-Phase 0: U → bind(U) → classify_entry(U) → Entry ⊗ ExpansionWitness           -- silent; zero entry questions
+Phase 0: U → bind(U) → classify_entry(U) → Entry ⊗ ExpansionWitness; Λ.topic := topic(U)   -- silent; zero entry questions; topic(U) records the bound request in mode state, so assemble(Λ) has a formal source for the field's topic
        classify_relay(Entry, ExpansionWitness) → TextPresent+Proceed          -- states the inferred entry + its basis before proceeding; relay, not a gate
 Phase 1: Entry → Λ.frames_candidate := derive_frames(Entry)   -- registered into mode state at derivation, so the frames_open ⊆ frames_candidate invariant is checkable from the first pass
        [Entry = Blank] present(frame map) → Qframes → Stop → FrameSelection   [Tool]
@@ -164,8 +164,8 @@ User esc available at every gate (Qframes, Qround) — ungraceful, no cleanup, u
 Continue until: DiverseCandidateField (user Stop with ≥1 candidate already generated) OR EarlyExit (Stop or user_esc
   while no candidate exists — the Blank frame map declined, an escape before the first round completes, or a Stop
   after passes that produced nothing).
-Convergence evidence: at DiverseCandidateField, present the transformation trace — for each opened frame, the
-  candidates it produced with their origin tags, plus the declared unexplored frames and parked follow-ups. At
+Convergence evidence: at DiverseCandidateField, present the transformation trace — the bound topic, then for each
+  opened frame, the candidates it produced with their origin tags, plus the declared unexplored frames and parked follow-ups. At
   EarlyExit, present the frames that were derived and offered, none of which yielded a candidate, plus any parked
   follow-ups. Demonstrated, not asserted — and the trace materializes the full result type, nothing more, nothing less.
 
@@ -196,11 +196,13 @@ Phase 2 generate        (sense)       → Internal generation (logical topology:
 Phase 3 present         (extension)   → TextPresent+Proceed (round relay: candidates grouped by frame with origin tags, explored/unexplored frame declaration; precedes the gate)
 Phase 3 Qround          (constitution) → present (mandatory every round; Continue — open more unexplored or name a new frame — or Stop; a deepen request parks rather than continuing; Esc → loop termination)
 Phase 3 park            (extension)   → Internal state update + TextPresent+Proceed (a request for more on an already-open frame parks as ParkedFollowUp — relay, basis: the user's own request quoted; declared at either terminal; durable externalization is a host-side handoff after the protocol ends)
-Λ                       (track)       → Internal state update (frames_candidate registers at Phase 1 and extends only on a user-named new angle; candidates, rounds, frames_open, parked accumulate; frames_unexplored is derived — frames_candidate minus frames_open, so an opened frame leaves the unexplored set; a candidate is never removed or relabeled once tagged with origin)
-converge                (extension)   → TextPresent+Proceed (DiverseCandidateField: transformation trace — per opened frame, its candidates + declared unexplored frames + parked follow-ups; EarlyExit: the frames offered, none of which yielded a candidate, + parked follow-ups; either way the parked set's durable externalization hands off to the host after the trace)
+Λ                       (track)       → Internal state update (topic records at Phase 0 bind; frames_candidate registers at Phase 1 and extends only on a user-named new angle; candidates, rounds, frames_open, parked accumulate; frames_unexplored is derived — frames_candidate minus frames_open, so an opened frame leaves the unexplored set; a candidate is never removed or relabeled once tagged with origin)
+converge                (extension)   → TextPresent+Proceed (DiverseCandidateField: transformation trace — the bound topic + per opened frame, its candidates + declared unexplored frames + parked follow-ups; EarlyExit: the frames offered, none of which yielded a candidate, + parked follow-ups; either way the parked set's durable externalization hands off to the host after the trace)
 
 ── MODE STATE ──
 Λ = { phase: Phase, entry: Option(Entry), witness: Option(ExpansionWitness),
+      topic: Option(String),             -- the bound request, recorded at Phase 0; assemble(Λ) carries it into
+                                         --   DiverseCandidateField so the chain contract needs no source outside Λ
       chain_ref: Option(ChainRef),
       frames_candidate: Set(Frame),
       frames_open: Set(Frame),           -- invariant: frames_open ⊆ frames_candidate — every opened frame is registered
@@ -324,7 +326,7 @@ Options:
    [when completed passes produced none] end here with nothing generated — a typed early exit; the offered frames are declared, not dropped
 ```
 
-**Continue** may name specific unexplored frames or introduce a frame the user names outright (a free response — type-preserving materialization of `Continue`, not a new constructor); a Continue naming nothing defaults to the declared unexplored frames — when none remain, Continue has no default target and materializes only with a user-named new angle, and the option text renders that state. A request for more on an already-open frame is a **park**, not a continuation: it is recorded as a typed follow-up (`ParkedFollowUp` — a relay quoting the user's own request), acknowledged in the next presentation, and declared at either terminal; the deepening itself belongs to a later invocation chaining on the assembled field, because turning the live loop inward narrows the very field it exists to widen. A response carrying only a park leaves the continuation question open — Qround is re-presented with the park acknowledged. Loop back to Phase 1's derivation (only when a user-named new angle needs shaping into a registered frame) or directly to Phase 2 (opening declared-unexplored frames). **Stop** is available here exactly as it is at Qframes — the user's own Stop, at any round, is what bounds the field: assemble the mode state into `DiverseCandidateField` when at least one candidate exists, with `explored_frames`, `unexplored_frames`, and `parked` all declared; a Stop after passes that produced nothing returns `EarlyExit` — honest stop typing, an empty field is never dressed up as the resolution type. The Stop option's description renders whichever of these two futures is live at gate time — the gate never promises a candidate field that does not exist.
+**Continue** may name specific unexplored frames or introduce a frame the user names outright (a free response — type-preserving materialization of `Continue`, not a new constructor); a Continue naming nothing defaults to the declared unexplored frames — when none remain, Continue has no default target and materializes only with a user-named new angle, and the option text renders that state. A request for more on an already-open frame is a **park**, not a continuation: it is recorded as a typed follow-up (`ParkedFollowUp` — a relay quoting the user's own request), acknowledged in the next presentation, and declared at either terminal; the deepening itself belongs to a later invocation chaining on the assembled field, because turning the live loop inward narrows the very field it exists to widen. A response carrying only a park leaves the continuation question open — Qround is re-presented with the park acknowledged. Loop back to Phase 1's derivation (only when a user-named new angle needs shaping into a registered frame) or directly to Phase 2 (opening declared-unexplored frames). **Stop** is available here exactly as it is at Qframes — the user's own Stop, at any round, is what bounds the field: assemble the mode state into `DiverseCandidateField` when at least one candidate exists, with the topic, `explored_frames`, `unexplored_frames`, and `parked` all declared; a Stop after passes that produced nothing returns `EarlyExit` — honest stop typing, an empty field is never dressed up as the resolution type. The Stop option's description renders whichever of these two futures is live at gate time — the gate never promises a candidate field that does not exist.
 
 ## Adversarial Guards
 
