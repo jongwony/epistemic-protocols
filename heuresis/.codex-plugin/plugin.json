@@ -1,6 +1,6 @@
 {
   "name": "heuresis",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Widen an underexpanded candidate field through frame-parallel divergent generation — /ideate (εὕρεσις: finding/invention)",
   "author": {
     "name": "Jongwon Choi",

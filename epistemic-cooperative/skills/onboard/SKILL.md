@@ -153,9 +153,10 @@ If no `sessions-index.json` files found: Quick path proceeds to Pick-1 with fall
 
 **Decision logic**:
 1. Score each protocol by signal match count from `firstPrompt` and `summary` fields
-2. Select the single strongest match
-3. Tie-break: `/elicit` > `/gap` > `/frame`
-4. **Fallback**: If no signals detected (no sessions, sparse metadata), recommend `/elicit`
+2. **Ideation route-away**: ideation asks ("ideas for", "brainstorm") score no pool protocol — when they are the only matched signals, relay in one sentence that the ask itself maps to `/ideate` (user-initiated: named as the route for that ask, not presented as the onboarding recommendation), then continue via the Fallback rule; the Phase 2b evidence card follows its fallback form, since the recommendation rests on the default, not on a matched signal
+3. Select the single strongest match
+4. Tie-break: `/elicit` > `/gap` > `/frame`
+5. **Fallback**: If no signals detected (no sessions, sparse metadata) — or every detected signal was routed away — recommend `/elicit`
 
 **Output**: Present exactly one recommendation as a single sentence.
 
