@@ -53,11 +53,11 @@ Report:
 
 Launch via `Bash(run_in_background: true, timeout: 4500000)`. `--color never` + splitting the
 streams (stdout to the events file, `2>` to a separate warn file) keeps the events
-file pure JSONL — the codex banner and any stderr warnings ride their own warn file:
+file pure JSONL — the codex banner and any stderr warnings ride their own warn file. Select `{effort}` per run by the research question's depth and breadth, floored at `high` — a multi-branch or deep-synthesis question stays `xhigh` (this model's ceiling; its ladder has nothing higher), dropping to `high` only for a narrow, single-fact question, never below `high`:
 
 ```bash
 codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.6-sol \
-  --config model_reasoning_effort="xhigh" \
+  --config model_reasoning_effort="{effort}" \
   --config mcp_servers.tavily.tool_timeout_sec=3600 \
   < /tmp/goal_research_${SUFFIX}.txt > /tmp/goal_research_events_${SUFFIX}.jsonl 2>/tmp/goal_research_warn_${SUFFIX}.txt
 ```
