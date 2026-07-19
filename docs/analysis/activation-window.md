@@ -41,3 +41,7 @@ Stated as background, not a machine-checked claim: `/tmp` and `$TMPDIR` are comm
 
 - The activation window is declared at F0 as part of the recipient profile (Rule 21, Phase 0). Default `Unbounded` (the conservative absent-recipient window); `DurableRepo` is constrained to `Unbounded` by the TYPES well-formed rule.
 - Only an explicitly-declared `Immediate` (or a `Bounded(d)` that ends before the next daily tmp_cleaner run after the write — the retention age threshold is undocumented, so any window crossing a midnight run is treated as non-resolving for a `/tmp` locator) lets a temp-rooted locator pass F2 as a StablePointer. Absent such a declaration, `resolves_at` rejects it exactly as the old absolute rule did.
+
+## Default handoff root (pace-layered emit target, Rule 29)
+
+The pace-layered emit-target default (SKILL.md Rule 29) lands the handoff artifact in an ephemeral, author-session-keyed scratch location outside version control. The observed macOS realization of that default is `/private/tmp/.handoff/<author-session-id>/` — a `/tmp`-rooted, session-keyed directory. Being temp-rooted is the design, not a defect: the handoff is consumed within its activation window (Immediate, or a Bounded window ending before the cleanup boundary in the Takeaway above), and content that must outlive that window routes to a strengthened design record in an externally-versioned store rather than to a longer-lived handoff location.
