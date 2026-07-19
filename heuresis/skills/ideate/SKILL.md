@@ -130,7 +130,8 @@ DiverseCandidateField = {
 }
          -- "diverse" = frame-distributed, never scored/ranked/optimized; candidates ≠ ∅ always holds here (see EarlyExit
          --   for the empty case). unaddressed_signals holds only signals with no responding candidate at Stop — an
-         --   addressed signal needs no field of its own, since the candidate(s) responding to it already evidence it.
+         --   addressed signal needs no field of its own: the candidates heuresis read as answering it are already in
+         --   the field, and judging that fit is the consumer's own act at selection time.
          --   The field is the propagation contract: endpoint-neutral and complete for arbitrary
          --   downstream unfolding (an issue tracker, /preview, a chained /ideate) — topic carries the bound request so
          --   a consumer needs nothing outside the field; endpoint-specific unfolding is downstream scope, not heuresis's
@@ -206,7 +207,10 @@ resolved(Λ) = user_stops(Λ)   -- the user's own Stop IS the completion predica
 unaddressed(Λ) = { s ∈ Λ.signals | no c ∈ Λ.candidates responds to s }   -- derived, binary, source-traceable coverage
   observation, recomputed every round from current Λ.candidates — never a stored partition, and never a quality score,
   elimination reason, or ranking signal; a candidate "responding" to a signal is a semantic judgment heuresis makes at
-  presentation time, basis-cited like any other relay, never itself a score or rank on the candidate
+  presentation time — a session-local reading remade from scratch each round (Λ.signals never shrinks, so a reading
+  can reverse; nothing is sticky), never stored as a signal-to-candidate mapping, and never itself a score or rank on
+  the candidate. The contract carries only the derived set as it stands at Stop — whether a candidate truly answers a
+  signal is the consumer's own judgment at selection time, downstream of this protocol
 result equations:
   DiverseCandidateField ⇔ resolved(Λ) ∧ Λ.candidates ≠ ∅
   EarlyExit             ⇔ (resolved(Λ) ∨ user_esc) ∧ Λ.candidates = ∅
@@ -234,7 +238,7 @@ Phase 2 generate        (sense)       → Internal generation (logical topology:
 Phase 3 present         (extension)   → TextPresent+Proceed (round relay: candidates grouped by frame with origin tags, explored/unexplored frame declaration with direction contrast, unaddressed signals when any exist, plus the fixed four-part decision-delta evaluation; precedes the gate)
 Phase 3 Qround          (constitution) → present (mandatory every round; fixed order Continue=1, Stop=2 at every presentation and re-presentation; Continue — open more unexplored or name a new frame — or Stop; a deepen request parks rather than continuing; Esc → loop termination)
 Phase 3 park            (extension)   → Internal state update + TextPresent+Proceed (a request for more on an already-open frame parks as ParkedFollowUp — relay, basis: the user's own request quoted; declared at either terminal; durable externalization is a host-side handoff after the protocol ends)
-Λ                       (track)       → Internal state update (topic records at Phase 0 bind; signals extracted at Phase 0 and accumulate-only afterward; frames_candidate registers at Phase 1 and extends only on a user-named new angle; candidates, rounds, frames_open, parked accumulate; frames_unexplored and unaddressed(Λ) are both derived — frames_candidate minus frames_open, and signals with no responding candidate, respectively — recomputed each round, never stored as a separate partition; a candidate is never removed or relabeled once tagged with origin)
+Λ                       (track)       → Internal state update (topic records at Phase 0 bind; signals extracted at Phase 0 and fixed thereafter — never re-scanned, never removed; frames_candidate registers at Phase 1 and extends only on a user-named new angle; candidates, rounds, frames_open, parked accumulate; frames_unexplored and unaddressed(Λ) are both derived — frames_candidate minus frames_open, and signals with no responding candidate, respectively — recomputed each round, never stored as a separate partition; a candidate is never removed or relabeled once tagged with origin)
 converge                (extension)   → TextPresent+Proceed (DiverseCandidateField: transformation trace — the bound topic + per opened frame, its candidates + declared unexplored frames + parked follow-ups + unaddressed signals; EarlyExit: the frames offered, none of which yielded a candidate, + parked follow-ups + unaddressed signals; either way the parked set's durable externalization hands off to the host after the trace)
 
 ── MODE STATE ──
@@ -243,7 +247,7 @@ converge                (extension)   → TextPresent+Proceed (DiverseCandidateF
                                          --   DiverseCandidateField so the chain contract needs no source outside Λ
       chain_ref: Option(ChainRef),
       signals: Set(Signal),              -- extracted at Phase 0 from the same bound utterance + named ChainRef only;
-                                         --   accumulate-only, never re-scanned from a wider source; unaddressed(Λ)
+                                         --   fixed thereafter — never re-scanned from a wider source, never removed; unaddressed(Λ)
                                          --   (defined in CONVERGENCE) derives from this set and Λ.candidates, not
                                          --   stored separately
       frames_candidate: Set(Frame),
@@ -326,7 +330,7 @@ Classify `ExpansionWitness` alongside `Entry` — `Empty` (Blank: nothing yet), 
 
 Present the classification as a short relay before proceeding: what was read as `Entry`, its basis (quoting the utterance fragment), and the `ExpansionWitness`. No user response is requested here — proceed directly to Phase 1.
 
-Alongside `Entry`, extract `Signal`s from the same bound input — concerns, weaknesses, or requirements the utterance or a named chain reference already carries, each tagged by which of the two it came from. Signals accumulate in mode state for the rest of the session and are never re-scanned from anywhere wider; whether a generated candidate later responds to one is a derived observation recomputed each round, not something Phase 0 assigns. This step is silent, exactly like `Entry` classification's own extraction — nothing about it is relayed until it becomes decision-relevant at a later Qround.
+Alongside `Entry`, extract `Signal`s from the same bound input — concerns, weaknesses, or requirements the utterance or a named chain reference already carries, each tagged by which of the two it came from. Signals enter mode state once, at this step, and stay fixed for the rest of the session — never re-scanned from anywhere wider; whether a generated candidate later responds to one is a derived observation recomputed each round, not something Phase 0 assigns. This step is silent, exactly like `Entry` classification's own extraction — nothing about it is relayed until it becomes decision-relevant at a later Qround.
 
 **Scope restriction**: Phase 0 reads only the invocation utterance plus a chain reference the utterance explicitly names (`ChainRef` — e.g. "using what `/inquire` just gathered") — the same boundary governs `Signal` extraction. A bare `/ideate` binds the immediately preceding user message as that utterance (U-BINDING) — a one-turn binding, not a session scan. Beyond the bound utterance it never scans the wider session, codebase, or rules — that is Euporia's territory, not this protocol's.
 
@@ -392,6 +396,8 @@ Options:
 **Chain fixation is a stated trade-off, not a mitigated one**: material folded in via a `ChainRef` was read by the user before the invocation utterance was written, so the ownership/diversity benefit of ideating before seeing material does not hold on that path. heuresis documents this; it adds no countermeasure.
 
 **Signal extraction is bounded by what heuresis reads, not a formal completeness guarantee**: heuresis surfaces the concerns, weaknesses, and requirements it identifies within the bound utterance and named chain material — it cannot prove every signal present in that input was found, only that nothing it did find was silently dropped from the presentation or the trace.
+
+**Signal extraction is an entry-time act, not a session-long listener**: signals enter the field once, at Phase 0, from the bound input. A concern first voiced in a later turn of the loop is not folded into `Λ.signals` and will not appear in `unaddressed_signals` — it stays visible in session text, and carrying it forward is the consumer's own move: re-voice it where it should land, a later invocation chaining on the assembled field, or a collection protocol run first whose output the next invocation names. The contract carries what entered at the boundary; what arises mid-loop routes at the consumer's discretion.
 
 ## UX Safeguards
 
