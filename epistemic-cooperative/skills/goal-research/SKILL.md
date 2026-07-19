@@ -53,7 +53,7 @@ Report:
 
 Launch via `Bash(run_in_background: true, timeout: 4500000)`. `--color never` + splitting the
 streams (stdout to the events file, `2>` to a separate warn file) keeps the events
-file pure JSONL — the codex banner and any stderr warnings ride their own warn file. Select `{effort}` per run by the research question's depth and breadth, floored at `high` — a multi-branch or deep-synthesis question stays `xhigh` (this model's ceiling; its ladder has nothing higher), dropping to `high` only for a narrow, single-fact question, never below `high`:
+file pure JSONL — the codex banner and any stderr warnings ride their own warn file. Select `{effort}` per run by the research question's depth and breadth, floored at `high` (never below) — a narrow, single-fact question runs at `high`, a multi-branch or deep-synthesis question at `xhigh`, and the most demanding research may escalate to `max` (the top of this model's ladder — it consumes usage limits faster, so reserve it for genuinely heavy questions):
 
 ```bash
 codex exec --ephemeral --json --color never --skip-git-repo-check -m gpt-5.6-sol \
