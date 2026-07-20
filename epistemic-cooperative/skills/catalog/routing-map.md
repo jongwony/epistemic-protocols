@@ -59,7 +59,7 @@ the skill descriptions alone under-trigger invocation. Route from the deficit, n
 **`/ascend`** (Anagoge) — RecallGranularityInsufficient → HigherGranularityUnit
   when: A recall a single session can't resolve — elevate it to a higher-granularity unit (connected-session chain, topic cluster, or already-sedimented concept)
 
-**`/distill`** (Diylisis) — ContextTethered → PortableHandoff
+**`/distill`** (Diylisis) — ContextTethered → Certificate
   when: Handoff context to a fresh zero-memory session — distill out session-tethered references into a portable handoff
 
 **`/grasp`** (Katalepsis) — ResultUngrasped → VerifiedUnderstanding
