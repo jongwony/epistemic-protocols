@@ -16,7 +16,7 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/report` | Growth Map with epistemic analysis | HTML artifact (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | Full coverage analytics dashboard | HTML dashboard (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | Protocol handbook — instant reference | Terminal-based protocol browser |
-| `/triage` | Work-unit triage from GitHub issues | Routed work units, composed into `/distill` portable handoffs |
+| `/triage` | Work-unit triage from GitHub issues | Routed work units, externalized to records `/distill` certifies |
 | `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop to convergence | Applied fixes + convergence trace |
@@ -106,7 +106,7 @@ Browse all protocols, compare by concern cluster, and view detailed scenarios. T
 
 ### /triage — Work-Unit Formation
 
-Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and forms focused work units. Once the user picks a route, `/triage` composes `/distill` to emit each unit's portable handoff. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
+Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and forms focused work units. Once the user picks a route, `/triage` externalizes each routed unit to a substrate-owned record and composes `/distill` to certify it for the receiving session. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
 
 ```
 RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → [/distill] → HANDOFF
@@ -117,7 +117,7 @@ Key features:
 - similarity grouping by problem pressure rather than labels alone
 - `IssueGroup -> FocusedWorkUnit` one-to-one by default, with split only when the northstar fusion exposes distinct execution axes
 - route choice belongs to the current session: independent session or re-triage
-- a unit routed to an independent session composes `/distill` for its portable handoff; re-triage composes no handoff
+- a unit routed to an independent session externalizes its record and composes `/distill` to certify it; re-triage composes no certification
 
 ### /forge — Reference-Grounded Prompt-Artifact Formation
 

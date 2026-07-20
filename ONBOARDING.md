@@ -59,7 +59,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] `/syneidesis:gap` — surface gaps before committing to a design decision
 - [ ] `/aitesis:inquire` — when a redesign feels under-specified
 - [ ] `/euporia:elicit` — elicit the important design dimensions together before locking in a direction
-- [ ] `/diylisis:distill` — author a portable handoff when work crosses a session boundary
+- [ ] `/diylisis:distill` — certify an existing record's portability when work crosses a session boundary
 - [ ] `/horismos:bound` — define epistemic boundaries for multi-domain refactors
 - [ ] `/prothesis:frame` — assemble analytical lenses (category theory, type theory, operational semantics) for protocol-level changes
 - [ ] `/analogia:ground` — validate abstract-concrete mappings

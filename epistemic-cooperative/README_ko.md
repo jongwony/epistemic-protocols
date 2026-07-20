@@ -16,7 +16,7 @@
 | `/report` | Growth Map — 인식론적 분석 | HTML 아티팩트 (`~/.claude/.report/growth-map.html`) |
 | `/dashboard` | 전체 커버리지 분석 대시보드 | HTML 대시보드 (`~/.claude/.dashboard/dashboard.html`) |
 | `/catalog` | 프로토콜 핸드북 — 즉시 참조 | 터미널 기반 프로토콜 브라우저 |
-| `/triage` | GitHub 이슈 기반 work-unit triage | routed work unit, `/distill` portable handoff로 compose |
+| `/triage` | GitHub 이슈 기반 work-unit triage | routed work unit, 기판 레코드로 외재화 후 `/distill` 인증으로 compose |
 | `/forge` | 레퍼런스-grounded prompt-artifact 형성 | prompt artifact (후속 세션/도구용 initial prompt, 또는 상주 custom-skill recipe) |
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 (수렴까지) | 적용된 수정 + 수렴 trace |
@@ -106,7 +106,7 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 
 ### /triage — Work-Unit Formation
 
-GitHub `RawIssueSet`을 그룹화하고, 각 issue group을 공유 problem frame으로 normalize한 뒤, 현재 세션에서 active `AGENTS.md` northstar와 융합해 focused work unit을 형성한다. 사용자가 route를 선택하면 `/triage`는 `/distill`을 compose해 각 unit의 portable handoff를 emit한다. 이슈 범위 없이 `/triage`만 호출하면 현재 repository의 open backlog에서 시작하고, full issue substrate를 읽기 전에 triage load를 판정한다.
+GitHub `RawIssueSet`을 그룹화하고, 각 issue group을 공유 problem frame으로 normalize한 뒤, 현재 세션에서 active `AGENTS.md` northstar와 융합해 focused work unit을 형성한다. 사용자가 route를 선택하면 `/triage`는 각 routed unit을 기판 레코드로 외재화하고 `/distill`을 compose해 수신 세션용으로 인증한다. 이슈 범위 없이 `/triage`만 호출하면 현재 repository의 open backlog에서 시작하고, full issue substrate를 읽기 전에 triage load를 판정한다.
 
 ```
 RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → [/distill] → HANDOFF
@@ -117,7 +117,7 @@ RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE 
 - label만이 아니라 problem pressure 기준으로 similarity grouping
 - 기본은 `IssueGroup -> FocusedWorkUnit` 1:1, northstar fusion 중 실행축이 갈라질 때만 split
 - route choice는 현재 세션에서 사용자가 결정: independent session, re-triage
-- independent session으로 routed된 unit은 portable handoff를 위해 `/distill`을 compose; re-triage는 handoff를 compose하지 않음
+- independent session으로 routed된 unit은 레코드를 외재화하고 인증을 위해 `/distill`을 compose; re-triage는 인증을 compose하지 않음
 
 ### /forge — Reference-Grounded Prompt-Artifact Formation
 
