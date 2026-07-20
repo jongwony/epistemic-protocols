@@ -54,14 +54,14 @@ F3b never infers KEEP from how settled an item *looks*. KEEP is reachable exactl
 
 ## Assurance Tiers
 
-The label is **record-relative**: it attaches to `target` — the certified record Diylisis points at — never to a document Diylisis produces (Diylisis creates no new artifact of its own).
+The label is **record-relative**: it attaches to `target` — the certified record Diylisis points at — never to a new content record (the one artifact Diylisis produces is the Certificate itself — the judgment layer over `target`, landing at `certificate_target` or the session scratchpad, never inside `target`).
 
 | Tier | Label | What it runs |
 |------|-------|--------------|
-| Draft | **Uncertified draft** | No Diylisis pass has run against `target` — plain Markdown, no F5 gate, no leak / durable-pointer audit. `target` carries no Certificate claim. |
-| Certified | **Certified `/distill`** | One always-on F5 comprehension-gate Pass (realization recorded in the verdict) + one leak / durable-pointer audit, reaching fixed point. `target` carries a Certificate: the F5 gate reached Pass under the realization its verdict records (refuter subagent, generic subagent, or lint fallback — the label claims exactly that realization's rigor), every judgment basis is grounded, and the audit cleared. |
+| Draft | **Uncertified draft** | No Diylisis pass has run against `target` — plain Markdown, no F5 gate, no leak / durable-pointer audit. No Certificate has been issued against `target`. |
+| Certified | **Certified `/distill`** | One always-on F5 comprehension-gate Pass (realization recorded in the verdict) + one leak / durable-pointer audit, reaching fixed point. A Certificate has been issued against `target`: the F5 gate reached Pass under the realization its verdict records (refuter subagent, generic subagent, or lint fallback — the label claims exactly that realization's rigor), every judgment basis is grounded, and the audit cleared. |
 
-Because the F5 dispatch is unconditional — every certification pass runs the full gate under the strongest realization the platform offers, no optional lighter layer — there is no partial-rigor middle tier: `target` either has never been through F7 (Draft) or carries a Certificate from a completed pass (Certified). The label certifies `target` together with its emitted activation edge; a later edit outside Diylisis, or a certification dispatched under a substituted edge, breaks the verified reception conditions.
+Because the F5 dispatch is unconditional — every certification pass runs the full gate under the strongest realization the platform offers, no optional lighter layer — there is no partial-rigor middle tier: `target` either has never been through F7 (Draft) or has a completed pass's Certificate issued against it (Certified). The label certifies `target` together with its emitted activation edge; a later edit outside Diylisis, or a certification dispatched under a substituted edge, breaks the verified reception conditions.
 
 ## Known Limitations
 
