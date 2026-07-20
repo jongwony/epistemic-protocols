@@ -38,7 +38,7 @@ ExternalWBS × ExecutionHorizon × ContextLifecycle
   → probe(work_body)                              -- detect a body of work whose cut into span-units is undetermined
   → scan(wbs, cycle_n) → joints                   -- read the external WBS (reference, read-only) for natural joints: milestone boundaries, dependency seams, deliverable edges
   → pack(joints, horizon, lifecycle) → CutSet     -- THE IRREDUCIBLE CORE: search for a cut-set whose every unit fits one span, every cut sits on a joint, and coverage is complete with no work orphaned. Per-cycle realization (FLOW) proposes one (Anchor, proposed_cut, SpanFit); accepted cuts accumulate into this CutSet via integrate across cycles
-  → fit(unit, horizon, lifecycle) → SpanFit       -- per-unit span-fit predicate (composes /distill: a unit fits one span iff its work is carriable by one self-contained span handoff)
+  → fit(unit, horizon, lifecycle) → SpanFit       -- per-unit span-fit predicate (composes /distill's portability standard: a unit fits one span iff, once externalized to a single substrate-owned record, that record would certify portable for the receiving span)
   → [SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: relay(AcceptCut) (extension) | else: present(anchor, proposed_cut, SpanFit) (constitution)]  -- single dominant cut relays without a turn yield (Rule 1 exception); otherwise surface the highest-leverage uncut region's proposed cut for user judgment via Cognitive Partnership Move
   → integrate(cut_disposition, CutSet, WorkUnitMap) → (CutSet', WorkUnitMap')  -- apply the settled cut to the map (reference entries only; the WBS is never copied)
   → check(WorkUnitMap') → InvariantStatus         -- span_fit ∧ natural_joint ∧ coverage_complete
@@ -60,7 +60,7 @@ Region = a contiguous extent of the work body not yet cut into a unit — the pa
 Joint  = { locus: WBSRef, kind: JointKind, evidence: Set(Evidence) }  -- a candidate cut point in the WBS
 JointKind ∈ {milestone_boundary, dependency_seam, deliverable_edge, emergent}  -- recognition seeds for where a cut can fall (NOT a closed set — emergent admits a joint the seeds do not name; the user may name one)
 Evidence = { source: String, content: String }
-SpanFit ∈ {Fits, Overflows, Underfills}  -- the per-unit fit verdict against (horizon × lifecycle): Fits = one span; Overflows = too big for one span (split); Underfills = too small to warrant its own span (merge). Composes /distill's zero-memory carriability as the Fits predicate
+SpanFit ∈ {Fits, Overflows, Underfills}  -- the per-unit fit verdict against (horizon × lifecycle): Fits = one span; Overflows = too big for one span (split); Underfills = too small to warrant its own span (merge). Composes /distill's portability-certification standard as the Fits predicate
 Cut    = a committed delimitation at a Joint — the boundary between two units
 CutSet = Set(Cut)  -- the partition; the search output and the loop's accumulating state
 WorkUnit = { id: String, region: Region, refs: List(WBSRef), fit: SpanFit }  -- an "execution_cut" view over the WBS: it references issue ids (refs) and does NOT copy their content; it floats between milestone and issue granularity (a unit may span part of a milestone or several issues). One span's worth of work
@@ -125,7 +125,7 @@ Phase 0 route_away (extension) → TextPresent+Proceed (scope insufficient to cu
 Phase 0 single_span_relay (extension) → TextPresent+Proceed (the whole body already fits one span → present "no partition needed" as relay, deactivate)
 Phase 0 cut_already_fixed_relay (extension) → TextPresent+Proceed (the WBS already imposes a span-sized partition (one-issue-per-span) or a prior WorkUnitMap covers this scope → present "cut already fixed" as relay, deactivate)
 Phase 1 Scan (observe)       → Read, Grep, Glob (per-cycle re-scan of the external WBS — Linear/issue tree, plan, project config — for natural joints; reference-only, never mutating the WBS; composes /bound for joint candidates where a cut could fall)
-Phase 1 Pack (sense)         → Internal analysis (the packing search: propose the cut-set fitting each region against horizon × lifecycle; compose /distill's zero-memory carriability as the per-unit Fits predicate; basis cited at Phase 2 surfacing)
+Phase 1 Pack (sense)         → Internal analysis (the packing search: propose the cut-set fitting each region against horizon × lifecycle; compose /distill's portability-certification standard as the per-unit Fits predicate; basis cited at Phase 2 surfacing)
 Phase 1 relay_dominant_cut (extension) → TextPresent+Proceed (SingleDominantCut(Anchor, proposed_cut) ∧ SpanFit = Fits: record AcceptCut as relay, skip Qc, advance directly to Phase 3 integrate — Rule 11)
 Phase 2 Qc (constitution)    → present (conditional: ¬SingleDominantCut(Anchor, proposed_cut) ∨ SpanFit ≠ Fits; per-cycle partition gate over CutDisposition {AcceptCut, MoveCut, SplitUnit, MergeUnits} + the anchor region + its proposed cut + SpanFit basis + current cut-set snapshot + cycle_n + free-response Sufficient termination affordance; Esc → loop termination, not an Answer)
 Phase 3 parse (sense)        → Internal analysis (parse A into cut_disposition + optional TerminationIntent; ambiguous parse triggers one-turn relay confirmation before routing)
@@ -159,7 +159,7 @@ Seam transition to a declared next protocol (extension) → TextPresent+Proceed 
 Composition (compose, do not reimplement): Diairesis carries ONE new operation — the packing/partition judgment (search for the cut-set satisfying the three invariants). Everything else composes existing protocols and is wired as advisory graph edges:
   • /inquire (Aitesis) — when the WBS scope is insufficient to cut, Phase 0 routes away to ContextInsufficient rather than guessing a partition.
   • /bound (Horismos) — boundary candidates feed the joint scan: where a cut could fall is a boundary question /bound already answers; Diairesis reads its BoundaryMap to narrow joint candidates.
-  • /distill (Diylisis) — the per-unit fit predicate: a unit "fits one span" iff its work is carriable by one self-contained span handoff, which is exactly /distill's zero-memory carriability. SpanFit = Fits composes that verdict.
+  • /distill (Diylisis) — the per-unit fit predicate: a unit "fits one span" iff, once externalized to a single substrate-owned record, that record would certify portable for the receiving span — exactly /distill's portability-certification standard. SpanFit = Fits composes that verdict.
   • → /conduct (Hyphegesis) — the emitted WorkUnitMap flows downstream as /conduct's WorkProspect. Diairesis cuts the units; /conduct orders and conducts them. The two are duals: cut, then conduct.
 Diairesis DELIMITs but does NOT order (no sequencing — that is /conduct), does NOT own the WBS (the ExternalWBS stays the single source of truth — reference, never duplicate), and does NOT conduct a unit's internal method (that is /conduct's per-unit topology).
 ```
@@ -259,7 +259,7 @@ Re-scan the WBS for the current cycle, find the natural joints, and run the pack
 
 1. **Per-cycle re-scan** — read the external WBS (Read/Grep/Glob over the Linear/issue tree, plan, or project config) for natural joints in the current frame: milestone boundaries, dependency seams, deliverable edges, or an emergent joint the seeds do not name. Skip regions already in `Λ.committed` (a settled region is never re-surfaced); the anchor is the highest-leverage region in `Λ.residual`. Composes `/bound` — where a cut could fall is a boundary question, and a prior BoundaryMap narrows the joint candidates.
 2. **Packing search** — run `pack(joints, horizon, lifecycle)`: propose a cut-set by fitting each candidate region against the span budget (horizon × lifecycle). The search seeks the cut-set satisfying the three invariants — each unit Fits, every cut on a joint, and coverage complete with no work orphaned.
-3. **Anchor selection** — surface the highest-leverage uncut region as `Anchor[cycle_n]`: the region whose cut most constrains the rest of the partition (a large Overflows region, or a hard dependency seam). Pair it with the proposed cut and its `SpanFit` (composing `/distill`'s zero-memory carriability as the Fits predicate — a unit Fits when its work is carriable by one self-contained span handoff).
+3. **Anchor selection** — surface the highest-leverage uncut region as `Anchor[cycle_n]`: the region whose cut most constrains the rest of the partition (a large Overflows region, or a hard dependency seam). Pair it with the proposed cut and its `SpanFit` (composing `/distill`'s portability-certification standard as the Fits predicate — a unit Fits when, once externalized to a single substrate-owned record, that record would certify portable for the receiving span).
 4. **Emit the cycle's exit signal**: if no region surfaces (substrate exhausted) and `residual = ∅`, converge directly; if substrate exhausted and `residual ≠ ∅`, autonomous-pack the residual and converge; if the anchor is a **single dominant cut** (no viable alternative joint for this region — `SingleDominantCut(Anchor, proposed_cut)`) and its `SpanFit = Fits`, record `AcceptCut` as relay and advance directly to Phase 3 integrate, skipping the Phase 2 gate (Rule 11 — option-level entropy → 0); else surface the anchor for Phase 2.
 
 **Scope restriction**: Read-only investigation. No WBS modification.
@@ -272,7 +272,7 @@ Re-scan the WBS for the current cycle, find the natural joints, and run the pack
 - **Cycle**: `cycle_n` (always visible)
 - **Anchor region**: the uncut region under judgment — what work it covers, cited from the WBS (issue ids, milestone)
 - **Proposed cut**: where the AI proposes the cut falls (the joint) and the resulting unit
-- **Span-fit verdict**: Fits / Overflows / Underfills, with its basis (the horizon × lifecycle estimate, composing `/distill` carriability)
+- **Span-fit verdict**: Fits / Overflows / Underfills, with its basis (the horizon × lifecycle estimate, composing `/distill`'s portability-certification standard)
 - **Cut-set snapshot**: the units settled so far (each `region → cut at joint → fit`) and the residual regions still uncut
 - **Joint candidates**: the natural joints found this cycle (milestone boundary, dependency seam, deliverable edge) with WBS citations
 
@@ -326,7 +326,7 @@ Parse the answer, apply the settled cut, and check the three invariants.
 | Gate specificity | `activate(Diairesis) only if multi_span(WB) ∧ ¬cut_already_fixed(WB)` | Prevents false activation on single-span work or an already-fixed partition |
 | Read-only WBS | The external WBS is referenced, never copied or mutated | The WBS keeps its single-source-of-truth authority; the map sees changes through the reference, and every surfaced datum cites a WBS id (issue, milestone) rather than copying its content |
 | Packing search | `pack(joints, horizon, lifecycle)` proposes the cut-set against the three invariants | The one new operation; the user disposes each proposed cut |
-| Per-unit span-fit | `SpanFit` composes `/distill` carriability; shown with basis at Phase 2 | AcceptCut/SplitUnit/MergeUnits recognized from a fit verdict, not guessed |
+| Per-unit span-fit | `SpanFit` composes `/distill`'s portability-certification standard; shown with basis at Phase 2 | AcceptCut/SplitUnit/MergeUnits recognized from a fit verdict, not guessed |
 | Commit only Fits | A unit moves to committed only when it Fits (or is explicitly accepted); a non-Fits unit stays in residual | No WorkUnitMap emits a unit violating its own SpanFit |
 | One region per cycle | One anchor region per Phase 2 | Prevents per-cycle partition overload; surfaced-but-not-anchored regions accumulate into `Λ.residual` |
 | Cut-set snapshot visibility | The partition so far + residual surfaced each cycle | The user sees the map a Sufficient signal would commit |
