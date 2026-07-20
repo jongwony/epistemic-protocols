@@ -60,7 +60,7 @@ the skill descriptions alone under-trigger invocation. Route from the deficit, n
   when: A recall a single session can't resolve — elevate it to a higher-granularity unit (connected-session chain, topic cluster, or already-sedimented concept)
 
 **`/distill`** (Diylisis) — ContextTethered → Certificate
-  when: Handoff context to a fresh zero-memory session — distill out session-tethered references into a portable handoff
+  when: An existing record must hand work to a fresh zero-memory session — certify its portability for the declared recipient role, repairing resolution gaps in place
 
 **`/grasp`** (Katalepsis) — ResultUngrasped → VerifiedUnderstanding
   when: AI-produced work you assume you grasp but haven't verified — comprehension may be an illusion; confirm your understanding is genuine before you approve, explain, or build on it
