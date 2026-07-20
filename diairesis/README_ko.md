@@ -21,7 +21,7 @@
 | 프로토콜 | 개시자 | 타입 시그니처 |
 |----------|--------|---------------|
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
-| Diylisis | AI-guided | `ContextTethered → PortableHandoff` |
+| Diylisis | AI-guided | `ContextTethered → Certificate` |
 | **Diairesis** | **Hybrid** | **`GranularityUnderdetermined → WorkUnitMap`** |
 | Hyphegesis | Hybrid | `MethodUnderdetermined → ConductedMethod` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |

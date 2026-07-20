@@ -23,7 +23,7 @@
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
-| Diylisis | AI-guided | `ContextTethered → PortableHandoff` |
+| Diylisis | AI-guided | `ContextTethered → Certificate` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
 Prothesis는 한 탐구를 위한 *어떤 관점*을 프레이밍하고, Hyphegesis는 세션 전체 이동들이 *어떻게* 관계 맺는지를 지휘합니다. 두 프로토콜은 토폴로지 대수를 공유하며 — Hyphegesis가 프로토콜 그래프 위에서 인스턴스화하는 그 배열 functor가 Prothesis가 공급하는 관점도 배열합니다.
