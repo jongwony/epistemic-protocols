@@ -109,7 +109,7 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 GitHub `RawIssueSet`을 그룹화하고, 각 issue group을 공유 problem frame으로 normalize한 뒤, 현재 세션에서 active `AGENTS.md` northstar와 융합해 focused work unit을 형성한다. 사용자가 route를 선택하면 `/triage`는 각 routed unit을 기판 레코드로 외재화하고 `/distill`을 compose해 수신 세션용으로 인증한다. 이슈 범위 없이 `/triage`만 호출하면 현재 repository의 open backlog에서 시작하고, full issue substrate를 읽기 전에 triage load를 판정한다.
 
 ```
-RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → [/distill] → HANDOFF
+RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → EXTERNALIZE (WorkUnitRecord) → [/distill] → CERTIFICATE
 ```
 
 주요 특징:

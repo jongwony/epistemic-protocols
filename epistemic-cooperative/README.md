@@ -109,7 +109,7 @@ Browse all protocols, compare by concern cluster, and view detailed scenarios. T
 Groups a GitHub `RawIssueSet`, normalizes each issue group into a shared problem frame, fuses the frame with the active `AGENTS.md` northstar in the current session, and forms focused work units. Once the user picks a route, `/triage` externalizes each routed unit to a substrate-owned record and composes `/distill` to certify it for the receiving session. With no issue scope supplied, `/triage` starts from the current repository's open backlog and judges triage load before reading full issue substrate.
 
 ```
-RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → [/distill] → HANDOFF
+RAW ISSUES → GROUP → NORMALIZE → NORTHSTAR FUSION → WORK UNIT → ROUTE → EXTERNALIZE (WorkUnitRecord) → [/distill] → CERTIFICATE
 ```
 
 Key features:
