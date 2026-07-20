@@ -27,6 +27,7 @@
     { "source": "aitesis", "target": "epharmoge", "type": "suppression", "satisfies": "동일 범위 pre+post 스태킹 방지" },
     { "source": "aitesis", "target": "prosoche", "type": "advisory", "satisfies": "추론된 컨텍스트가 경계맵 추론과 컨디션 컴파일 초점을 좁힘" },
     { "source": "prosoche", "target": "epharmoge", "type": "advisory", "satisfies": "컴파일된 가드레일 조건이 사후 적용성 검증 컨텍스트를 제공" },
+    { "source": "prosoche", "target": "diylisis", "type": "advisory", "satisfies": "방출된 goal 엔트리 레코드의 복원 가능성 점검을 distill에 요청 (판단은 distill 소유; 조건 타당성은 attend의 확인 게이트 몫)" },
     { "source": "prothesis", "target": "aitesis", "type": "advisory", "satisfies": "frame이 공급하는 프레임된 객체(렌즈)가 컨텍스트 추론 추천을 제공" },
     { "source": "prothesis", "target": "analogia", "type": "advisory", "satisfies": "frame이 공급하는 프레임된 객체(렌즈)가 매핑 구성 컨텍스트를 제공" },
     { "source": "aitesis", "target": "analogia", "type": "advisory", "satisfies": "추론된 컨텍스트가 매핑 도메인 식별을 좁힘" },
