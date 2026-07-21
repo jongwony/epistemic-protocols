@@ -1,6 +1,6 @@
 ---
 name: attend
-description: "Compile execution guardrails before autonomous execution. Infers a boundary map from context, partitions risks by velocity, compiles slow/threshold risks into verifiable predicates, and emits coarse goal entries for a downstream completion-predicate enforcer; fast risks are declared out of scope for harness-level gating. Stateless: compile-time only, no execution-time state. Type: (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution. Alias: Prosoche(προσοχή)."
+description: "Compile execution guardrails before autonomous execution. Infers a boundary map from context, partitions risks by velocity, compiles slow/threshold risks into verifiable predicates, and emits coarse goal entries for a downstream completion-predicate enforcer; fast risks are declared out of scope for harness-level gating; a loop-type interval lacking a termination predicate is confirmed before it proceeds unguarded. Stateless: compile-time only, no execution-time state. Type: (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution. Alias: Prosoche(προσοχή)."
 ---
 
 # Prosoche Protocol
@@ -18,10 +18,15 @@ Prosoche(C) →
   Normalize(B) → B̂ →                            -- split signals decomposed (Slow part, Fast part)
   Partition(B̂) → (Bₛ, Bₓ) →
     Bₓ ≠ ∅ → OOS(Bₓ)                            -- fast risks declared out of scope (relay)
-    Bₛ = ∅ → no_compile → deactivate            -- nothing loop-consumable (relay)
+    Bₛ = ∅ ∧ loop_interval(C) → Qt(∅) → Stop → Vₜ   -- empty guardrail set before a loop interval gates first (Vₜ arms below)
+    Bₛ = ∅ → no_compile → deactivate            -- otherwise: nothing loop-consumable; absent termination coverage named (relay)
   ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) →
+  loop_interval(C) ∧ ¬termination_present(Bₛ) → Qt(K) → Stop → Vₜ →   -- presence, not coverage: a residual termination signal closes through Qc, not a second Qt
+    Vₜ = DefineNow(d)     → Bₛ := Bₛ ∪ {signal(d)} → Compile(signal(d)) → (K, R) updated per κ ∨ ρ outcome
+    Vₜ = RouteBound       → deactivate           -- Rerouted: termination domain goes to /bound; a later /attend recompiles fresh
+    Vₜ = ApproveUnbounded → Λ.unbounded_approved := true   -- recorded acceptance; at the Bₛ = ∅ site this closes as no_compile
   Qc(K, R) → Stop → V →
-    V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → Qc(K, R)
+    V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → Qc(K, R)   -- over the same Bₛ: K' ∪ R' spans every b (no removal; withdrawn → residual)
     V = Confirm   → AcceptResiduals(R) → Emit(K)[TaskCreate] → G →    -- remaining residuals recorded into Λ.accepted, never emitted
   converge(compilation trace) → SituatedExecution
 
@@ -71,24 +76,66 @@ K              = Set(CompiledCondition)
 R              = Set(Residual)       -- slow signals lacking a verifiable predicate at compile time
 AcceptResiduals = R → Set(BoundarySignal)   -- on Confirm, materializes each remaining residual's signal into Λ.accepted, so accepted_uncovered(b) is a recorded fact, not an unwritten inference
 V              = Judgment ∈ {Confirm, Adjust(direction)}
+TerminationKind = {Budget, CompletionThreshold}   -- the SignalKind subset whose compiled predicates make "done"/"stop" determinate for the interval
+termination_covered(K) ≡ ∃ b ∈ Bₛ : kind(b) ∈ TerminationKind ∧ (∃ κ ∈ K compiled from b)
+termination_present(Bₛ) ≡ ∃ b ∈ Bₛ : kind(b) ∈ TerminationKind
+               -- the termination domain is represented in the compile set, compiled or residual;
+               --   termination_covered(K) ⇒ termination_present(Bₛ). Qt guards on presence, not coverage:
+               --   a present-but-residual termination signal routes through Qc (Sharpen toward κ, or
+               --   Confirm recording the acceptance), so Qt does not re-present a judgment already made
+loop_interval(C) = heuristic predicate: the upcoming interval is iterative or long-running
+               -- cues: loop/retry/until semantics in the utterance, a stated long-run or autonomous-interval
+               --   intent, a context-declared autonomous or long-running enforcer run this emission is to feed
+               --   (the mere fact that emitted entries are enforcer-consumable holds for EVERY emission and is
+               --   NOT a cue — the cue is the declared run, not the output format); each firing cites its cue from C
+               --   (fail-visible at the gate); ambiguous cues classify true with both readings surfaced,
+               --   mirroring the conservative Slow classification at Normalize
+signal(d)      = BoundarySignal materialized from a DefineNow direction
+               -- kind ∈ TerminationKind per the stated criterion, evidence = the user's stated direction,
+               --   velocity = Slow; enters Bₛ and compiles like any inferred signal
+Vₜ             = TerminationJudgment ∈ {DefineNow(direction), RouteBound, ApproveUnbounded}
+               -- DefineNow: the user states the stop criterion now; it compiles into the set under review
+               -- RouteBound: the termination boundary domain goes to /bound for definition; this pass ends
+               --   (Rerouted) and a later /attend invocation recompiles fresh (Rule 5)
+               -- ApproveUnbounded: informed acceptance of an interval with no termination predicate —
+               --   recorded in Λ.unbounded_approved, visible in the compilation trace
+Rerouted       = routed_to_bound     -- deliberate non-emission exit at Qt: termination definition handed to
+               --   /bound; distinct from EarlyExit (abort) and from no_compile (trivial completion)
 Emit           = K → G [Tool: TaskCreate]
 G              = goal entries: coarse task entries consumable by a downstream completion-predicate enforcer
 Phase          ∈ {0, 1, 2, 3}
-SituatedExecution = situated(C) ∨ no_compile  -- situated(C) defined in CONVERGENCE
+SituatedExecution = situated(C) ∨ (no_compile ∧ termination_guarded(C))  -- situated(C), termination_guarded(C) defined in CONVERGENCE
 EarlyExit = user_esc  -- non-convergent early exit: no emission, no handoff recorded; distinct from no_compile (which is a legitimate trivial-completion terminal, not an abort)
 
 ── PHASE TRANSITIONS ──
 Phase 0: C → Infer(C) → B                                  -- boundary inference (sense; evidence cited per signal)
 Phase 1: B → Normalize(B) → B̂ → Partition(B̂) → (Bₛ, Bₓ)    -- split decomposition + velocity partition (sense)
            Bₓ ≠ ∅ → OOS(Bₓ)                                -- out-of-scope declaration, substrate named (extension)
-           Bₛ = ∅ → no_compile → deactivate                -- nothing loop-consumable to compile (extension)
-Phase 2: ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R) → Qc(K, R) → Stop → V   -- compilation + confirmation [Tool]
-           V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → re-present Qc(K, R)   -- Sharpen rides as an Adjust direction
+           Bₛ = ∅ ∧ loop_interval(C) → Qt(∅) → Stop → Vₜ    -- termination-absence confirmation before an unguarded loop interval (constitution) [Tool]
+             Vₜ = DefineNow(d)     → Bₛ := {signal(d)} → Phase 2
+             Vₜ = RouteBound       → deactivate            -- Rerouted; /bound → /attend re-entry recompiles fresh
+             Vₜ = ApproveUnbounded → Λ.unbounded_approved := true → no_compile → deactivate
+           Bₛ = ∅ → no_compile → deactivate                -- otherwise: nothing loop-consumable; absent termination coverage named (extension)
+Phase 2: ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R)                -- compilation
+           loop_interval(C) ∧ ¬termination_present(Bₛ) → Qt(K) → Stop → Vₜ   -- termination-presence check; fires once per pass, before Qc (constitution) [Tool]
+             Vₜ = DefineNow(d)     → Bₛ := Bₛ ∪ {signal(d)} → Compile(signal(d)) → (K, R) updated per κ ∨ ρ outcome
+             Vₜ = RouteBound       → deactivate            -- Rerouted
+             Vₜ = ApproveUnbounded → Λ.unbounded_approved := true
+           Qc(K, R) → Stop → V                             -- confirmation [Tool]
+           V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → re-present Qc(K, R)   -- Sharpen rides as an Adjust direction. recompile re-runs Compile under d over the SAME Bₛ: K' ∪ R' still spans every b ∈ Bₛ (κ ∨ ρ — no removal; a withdrawn or weakened condition becomes a residual), so a termination-kind signal never leaves the compile set — termination_present is Adjust-invariant, and an Adjusted-away termination condition reaches convergence as an accepted residual (termination_guarded's third branch), never as silent loss
            V = Confirm   → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.signal | ρ ∈ R} → Phase 3   -- Confirm over remaining ρ records accepted_uncovered before Phase 3
 Phase 3: Emit(K) → G [TaskCreate] → converge(compilation trace) → deactivate   -- emission + handoff [Tool]
 
 ── LOOP ──
 Single pass with a bounded adjustment loop at Phase 2:
+  Qt (conditional: loop-type interval, no termination-kind signal in the compile set — presence, not
+    coverage) precedes Qc and fires at most once per invocation pass per site — DefineNow feeds the
+    compile set and control proceeds to Qc; RouteBound exits as Rerouted; ApproveUnbounded records the
+    acceptance and control proceeds to Qc (at the Bₛ = ∅ site it closes as no_compile). A DefineNow
+    direction that compiles only to a residual re-enters through Qc — Sharpen moves it toward κ, and
+    Confirm over it records the acceptance that satisfies termination coverage (CONVERGENCE); Qt does
+    not re-fire on it: its signal keeps the termination domain present, and the Phase 2 guard tests
+    presence (termination_present), not coverage.
   Qc(K, R) → Confirm → Phase 3 (terminal; remaining residuals become accepted_uncovered)
   Qc(K, R) → Adjust(direction) → recompile → re-present (Sharpen moves a residual toward κ)
   Esc → deactivate (EarlyExit, not SituatedExecution — no emission, no handoff recorded)
@@ -96,18 +143,29 @@ Stateless: Prosoche terminates at emission. No state survives into the execution
 no session approvals, no per-action classification, no mid-execution checkpoint.
 Convergence evidence: at emission, present the compilation trace — for each b ∈ Bₛ:
 (b.kind, b.evidence) → κ.condition, or its accepted-uncovered residual disposition;
-for each b ∈ Bₓ: the out-of-scope declaration with its substrate.
+for each b ∈ Bₓ: the out-of-scope declaration with its substrate;
+when Λ.unbounded_approved: the recorded unbounded acceptance, with its Qt site and cited loop cue.
+The Phase 1 ApproveUnbounded path closes as no_compile before emission — there its record
+surfaces in the no_compile presentation instead (same visibility obligation, different venue).
 Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 accepted_uncovered(b) ≡ b ∈ Λ.accepted   -- recorded by AcceptResiduals(R) on Confirm (Phase 2), not inferred
-situated(C) = emitted(G) ∧ handoff_recorded
+unbounded_approved ≡ Λ.unbounded_approved   -- recorded by Qt on ApproveUnbounded, not inferred
+termination_guarded(C) = ¬loop_interval(C) ∨ termination_covered(K) ∨ unbounded_approved
+                         ∨ (∃ b ∈ Λ.accepted : kind(b) ∈ TerminationKind)
+              -- a loop-type interval closes only through a compiled termination predicate or a recorded,
+              -- informed acceptance (Qt approval, or an accepted-uncovered termination residual at Qc);
+              -- a short interval satisfies it vacuously
+situated(C) = emitted(G) ∧ handoff_recorded ∧ termination_guarded(C)
               ∧ (∀b∈Bₛ: (∃κ∈K compiled from b) ∨ accepted_uncovered(b))
               ∧ (∀b∈Bₓ: declared_oos(b))
-SituatedExecution = situated(C) ∨ no_compile
+SituatedExecution = situated(C) ∨ (no_compile ∧ termination_guarded(C))
+-- Rerouted (Qt RouteBound) is a deliberate non-emission exit and EarlyExit a user abort — neither claims SituatedExecution.
 -- The guarantee is compile-time: every loop-consumable boundary signal is either compiled into a
 -- verifiable condition or accepted as an uncovered residual at the gate — visibly, in the trace;
--- every fast risk is visibly delegated.
+-- every fast risk is visibly delegated; a loop-type interval additionally carries a termination
+-- predicate or a recorded acceptance of running unbounded.
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -116,7 +174,10 @@ Phase 0 evidence     (observe)      → Read, Grep (optional evidence gathering 
 Phase 1 Normalize    (sense)        → Internal analysis (split-signal decomposition into Slow/Fast parts)
 Phase 1 Partition    (sense)        → Internal analysis (velocity classification per signal)
 Phase 1 OOS          (extension)    → TextPresent+Proceed (fast-risk out-of-scope declaration with substrate handoff note)
-Phase 1 no_compile   (extension)    → TextPresent+Proceed (Bₛ = ∅: nothing to compile; deactivate)
+Phase 1 no_compile   (extension)    → TextPresent+Proceed (Bₛ = ∅ outside a loop-type interval, or after a recorded unbounded approval: nothing to compile; the absent termination coverage is named in the presented partition, and a recorded unbounded approval is presented with it — its cited loop cue included — so the acceptance stays visible despite closing before emission; deactivate)
+Phase 1 Qt           (constitution) → present (conditional: Bₛ = ∅ ∧ loop_interval(C) — termination-absence confirmation before an unguarded loop interval: define the stop criterion now / route its definition to /bound / approve running unbounded) [Tool]
+Phase 2 Qt           (constitution) → present (conditional: loop_interval(C) with no termination-kind signal in the compile set — ¬termination_present(Bₛ), presence not coverage; a present-but-residual termination signal closes through Qc instead; fires once per pass, before Qc; same judgment coproduct as Phase 1 Qt) [Tool]
+Phase 2 ApproveUnbounded (track)    → Internal state update (on ApproveUnbounded: record Λ.unbounded_approved, materializing the informed acceptance for the convergence predicate)
 Phase 2 Qc           (constitution) → present (compiled condition set + residual disposition confirmation: Confirm / Adjust) [Tool]
 Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's signal into Λ.accepted, materializing accepted_uncovered(b) for the convergence predicate)
 Phase 3 Emit         (track)        → TaskCreate (coarse goal entries: subject + condition; TodoWrite is the harness-equivalent realization) [Tool]
@@ -126,8 +187,11 @@ seam                 (extension)    → TextPresent+Proceed (two seams, scoped s
 
 ── MODE STATE ──
 Λ = { phase: Phase, boundary: Option(B), slow: Option(Set(BoundarySignal)), oos: Option(Set(BoundarySignal)),
-       compiled: Option(K), residuals: Option(R), accepted: Set(BoundarySignal), active: Bool, cause_tag: String }
+       compiled: Option(K), residuals: Option(R), accepted: Set(BoundarySignal),
+       loop_interval: Bool, unbounded_approved: Bool, active: Bool, cause_tag: String }
 -- accepted: written by AcceptResiduals(R) on Confirm (Phase 2); accepted_uncovered(b) ≡ b ∈ Λ.accepted (CONVERGENCE)
+-- loop_interval: evaluated once from C at Phase 0 (cue cited); unbounded_approved: written by Qt on
+--   ApproveUnbounded — both feed termination_guarded(C) (CONVERGENCE)
 -- Compile-time only: Λ exists from invocation to emission; nothing persists into the execution interval.
 
 ── COMPOSITION ──
@@ -156,8 +220,11 @@ User calls `/attend` to declare execution intent for an upcoming autonomous exec
 
 Gate predicate:
 ```
-blind(C) ≡ ∃ b ∈ Normalize(B) : velocity(b) = Slow ∧ ¬compiled(b)
--- evaluated over the normalized map: a Split-only context still yields a Slow part that must compile
+blind(C) ≡ (∃ b ∈ Normalize(B) : velocity(b) = Slow ∧ ¬compiled(b)) ∨ (loop_interval(C) ∧ ¬termination_present(Bₛ))
+-- evaluated over the normalized map: a Split-only context still yields a Slow part that must compile.
+-- Second disjunct: a loop-type interval whose compile set carries no termination-kind signal is blind
+-- even when Bₛ = ∅ — an empty guardrail set in front of a loop is itself the deficit, caught by the
+-- Phase 1 termination-absence confirmation rather than skipped as "nothing to compile"
 ```
 
 **Activation layer**:
@@ -191,7 +258,8 @@ Repeated risk patterns accumulated in Anamnesis's hypomnesis store (prior-sessio
 | Trigger | Effect |
 |---------|--------|
 | User Esc key | Deactivate Prosoche for remainder of session (no emission) |
-| `Bₛ = ∅` after partition | No-compile relay: nothing loop-consumable; deactivate with the partition shown |
+| `Bₛ = ∅` after partition | Loop-type interval: the termination-absence confirmation fires before anything closes (define now / route to `/bound` / approve unbounded). Otherwise no-compile relay: nothing loop-consumable; deactivate with the partition shown and the absent termination coverage named |
+| Route-to-`/bound` at the termination confirmation | Deliberate reroute (no emission): the termination boundary domain goes to `/bound`; a later `/attend` invocation recompiles fresh |
 | Condition set emitted | Terminal: compilation trace presented, handoff recorded, deactivate |
 
 ## Boundary Signal Taxonomy
@@ -228,7 +296,7 @@ Classify each inferred signal by velocity. A signal carrying both an end-state-c
 1. **Slow/threshold** (`Bₛ`): violation evaluable at loop stop time → proceeds to compilation
 2. **Fast** (`Bₓ`): requires pre-action interception → declared out of scope as relay text, with the delegated substrate named (harness permission system, pre-action hook, HITL gate)
 
-When `Bₛ = ∅`: present the partition (everything was fast-velocity or no signals were inferred) and deactivate — there is nothing a stop-time predicate can guard, so emitting would manufacture false coverage.
+When `Bₛ = ∅`: for a loop-type or long-running interval (cue cited from context), the termination-coverage check below fires before anything closes — an empty guardrail set in front of a loop is a decision, not a default. Otherwise present the partition (everything was fast-velocity or no signals were inferred), name the termination coverage that is absent, and deactivate — there is nothing a stop-time predicate can guard, so emitting would manufacture false coverage.
 
 Partition failure mode is fail-visible: a signal whose velocity is ambiguous is conservatively routed to compilation (classified Slow at normalization) and surfaced in the Phase 2 gate text with both readings rather than silently classified.
 
@@ -238,6 +306,19 @@ Compile each slow/threshold signal into a `{ subject, condition }` pair:
 
 - **subject** — a coarse framing of the work unit the condition guards, not a procedural step.
 - **condition** — a verifiable predicate: an executable check with a determinate pass/fail outcome. A condition that can only be stated as prose judgment ("the code is clean enough") is not compilable — surface it as a residual for the user to either sharpen into a predicate or accept as uncovered.
+
+**Termination-coverage check** (loop-type intervals, before the confirmation gate): when the context cues an iterative or long-running interval (the cue is cited) and the compile set carries no termination-kind signal at all — no completion check, no budget or turn bound, neither compiled nor residual — present the gap and its consequence (the downstream enforcer would run with no determinate stop), then **present** via Cognitive Partnership Move (Constitution), once per pass. A termination signal that is present but compiled only to a residual does not re-fire this check — it closes at the confirmation gate below (sharpened toward a predicate, or accepted on record):
+
+```
+This run has no finish line yet. How should it get one?
+
+Options:
+1. **Define the stop criterion now** — state when the run should stop (a completion check, a count or time bound); it compiles into the set under review
+2. **Define it with /bound first** — hand the termination question to the boundary-definition step; this pass ends and a later /attend recompiles with its output
+3. **Run unbounded, on record** — proceed with no termination guard; the acceptance is recorded and visible in the compilation trace
+```
+
+A stop criterion defined now enters compilation like any signal (verifiable → condition; prose-only → residual, sharpened or accepted at the confirmation gate below). Short, single-shot work fires nothing here. The same check guards the empty-set case at Phase 1: an inferred map with nothing to compile, in front of a loop-type interval, asks this question before deactivating.
 
 Present the compiled set as pre-gate text (per-condition: source signal, evidence, predicate), and each remaining residual with its uncovered-risk note, then **present** via Cognitive Partnership Move (Constitution):
 
@@ -269,7 +350,7 @@ Prosoche is the compile step inside a conducted execution workflow. The composit
 
 - **Conduct drives**: `/conduct` (Hyphegesis) owns workflow driving — which moves run, in what order, with what checkpoints. Within a conducted method, the execution-preparation chain is `/bound` → `/attend` → enforcer: `/bound` defines the boundary map, `/attend` compiles its slow/threshold portion into verifiable conditions, and the enforcer runs the autonomous loop inside those bounds. Neither `/attend` nor the enforcer drives the workflow — `/attend` is a compiler, the enforcer is a leaf.
 - **The enforcer is a leaf executor**: on Claude Code (verified against v2.1.140; bounded claim — re-verify on harness version change), `/goal` installs a session-scoped stop-hook that re-prompts the model until its condition is met. It enforces a completion predicate *inside* one bounded interval; it exposes no external step injection and no mid-loop gating. Driving it as a progressive workflow engine fails structurally — that role belongs to `/conduct` and, for step-approval/resume/timeout semantics, to a workflow/HITL substrate outside this protocol suite.
-- **Guard role**: the compiled conditions defend the enforcer's two characteristic failure modes — (a) early or false termination below the boundary conditions (CompletionThreshold and Budget predicates make "done" determinate), and (b) boundary erosion across a long interval, as repetitive scripts or unstructured data drift work outside the user's declared bounds (ScopeConfinement and slow-Irreversibility predicates make the erosion detectable at stop time).
+- **Guard role**: the compiled conditions defend the enforcer's two characteristic failure modes — (a) early or false termination below the boundary conditions (CompletionThreshold and Budget predicates make "done" determinate), and (b) boundary erosion across a long interval, as repetitive scripts or unstructured data drift work outside the user's declared bounds (ScopeConfinement and slow-Irreversibility predicates make the erosion detectable at stop time). When a loop-type interval carries no termination-kind signal at all, the termination-coverage confirmation makes that absence a recorded decision rather than a silent default — the enforcer never inherits an unbounded interval nobody chose.
 - **Separate activation**: emitting the compiled entries is `/attend`'s epistemic endpoint. The user invokes the enforcer separately — automatic coupling to a harness built-in is avoided by design, so the constitutive act of starting the autonomous interval stays with the user.
 - **Portability of the emitted records is `/distill`'s judgment**: the emitted entries are execution-face authorship — completion predicates and verification commands whose validity the user judged at the Phase 2 gate. Whether those records are written restorably (readable by a fresh consumer without this session) is owned by `/distill`: at emission, `/attend` recommends that check over the emitted records (registered as the `prosoche → diylisis` advisory edge), and the check may legitimately conclude "already portable". Portability discipline is never compiled into `/attend` itself — that would re-mix the certification concern this protocol is deliberately narrowed away from.
 - **After the interval**: `/contextualize` checks post-execution applicability and `/grasp` verifies understanding of the result, both downstream of the enforced run.
@@ -278,7 +359,7 @@ Prosoche is the compile step inside a conducted execution workflow. The composit
 
 **Bounded platform claim**: The leaf-executor characterization of `/goal` (stop-hook predicate enforcer, no external step injection) is verified against Claude Code v2.1.140 only. A harness version change requires re-verification before relying on the composition guidance above.
 
-**Inference is heuristic**: Boundary inference pattern-matches context cues; a boundary the user holds but never uttered, and that no upstream protocol captured, will not be inferred. The Phase 2 gate is the correction point — the compiled set is presented precisely so missing conditions become visible.
+**Inference is heuristic**: Boundary inference pattern-matches context cues; a boundary the user holds but never uttered, and that no upstream protocol captured, will not be inferred. The Phase 2 gate is the correction point — the compiled set is presented precisely so missing conditions become visible. The loop-interval cue is heuristic in the same way: a long interval the context never cues will not fire the termination-coverage confirmation, though the absent coverage is still named in the gate text and the compilation trace.
 
 **Predicate coverage**: Subjective quality bars and moving targets do not compile into verifiable predicates. Prosoche surfaces them as residuals rather than emitting prose conditions; an uncovered residual the user accepts remains genuinely unguarded during the interval.
 
@@ -304,3 +385,4 @@ Prosoche is the compile step inside a conducted execution workflow. The composit
 16. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background and distant context to pre-gate text or the compilation trace.
 17. **Formal blocks are runtime-normative**: This protocol's formal blocks — those defined in its Definition code block above — are LLM-facing and constitutive of protocol identity: they type the prose and carry the operational contract executed at runtime. A reduced or single-shot realization carries every one of them through as runtime contract, since each block is the type that constitutes the protocol — preserving the blocks keeps the protocol intact. How its symbols render to the user is a separate emit-layer concern (see Plain emit discipline).
 18. **Seam relay on declared continuation, enforcer edge excepted**: this protocol's seam splits into two, each scoped to its own lifecycle point. INBOUND activation seam (before this protocol activates): when a user-declared chain names `/attend` next, or an invocation follows the `## Composition` chain's declared `/bound → /attend` edge, the transition into `/attend` is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named composition edge); this seam fires at the `/bound` handoff, before `/attend` activates, not after this protocol's emission. OUTBOUND emission seam (after this protocol emits): the `/attend → enforcer` edge is EXCLUDED — Rule 6 (Separate activation) governs it more specifically, since starting the autonomous interval is the user's separate constitutive act, deliberately kept outside automatic coupling, and this seam-relay rule never elides that act; this protocol declares no relay-eligible outbound continuation edge. The advisory portability-check recommendation toward `/distill` at emission (per the registered `prosoche → diylisis` advisory edge) is a recommendation surface, not a relay continuation — `/distill`'s activation remains the user's act. Both seams govern only the transition BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.
+19. **Termination coverage before unbounded intervals**: A loop-type or long-running interval (cue cited from context) whose compile set carries no termination-kind signal — neither a compiled predicate nor a residual (presence, not coverage: a present-but-residual termination signal closes through the confirmation gate instead, so the same judgment is never presented twice) — fires one conditional confirmation — define the stop criterion now, route its definition to `/bound`, or approve running unbounded on record. The approval is recorded state, never an inference; an accepted-uncovered termination residual at the confirmation gate records the same informed acceptance. Short intervals and covered sets add zero gate load — the confirmation exists precisely where an interval would otherwise start with no determinate stop, so silent unbounded passage is the failure mode this rule closes.
