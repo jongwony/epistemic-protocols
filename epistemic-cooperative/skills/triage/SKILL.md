@@ -1,11 +1,11 @@
 ---
 name: triage
-description: "Work-unit triage for GitHub issues. Groups raw issues, fuses each group with the AGENTS.md northstar in session, and composes /distill to hand off each routed work unit."
+description: "Work-unit triage for GitHub issues. Groups raw issues, fuses each group with the AGENTS.md northstar in session, externalizes each routed work unit to a substrate record, and composes /distill to certify it for a collaborator session."
 ---
 
 # Triage: Work-Unit Formation
 
-Form executable work units from GitHub issue substrate, handing execution — branches, PRs, applied fixes — to a normal session. It reads raw issues, groups related issues, fuses each group with the project's inscribed northstar and the user's current-session judgment, forms one or more focused work units, and — once the user routes a unit for handoff — composes `/distill` to emit it as a portable handoff for an independent session.
+Form executable work units from GitHub issue substrate, handing execution — branches, PRs, applied fixes — to a normal session. It reads raw issues, groups related issues, fuses each group with the project's inscribed northstar and the user's current-session judgment, forms one or more focused work units, and — once the user routes a unit for handoff — externalizes it to a substrate-owned record and composes `/distill` to certify that record for a continuing collaborator session.
 
 ## Core Contract
 
@@ -19,11 +19,11 @@ BacklogIntake
   -> NorthstarFusion
   -> FocusedWorkUnit
   -> RouteChoice
-       -> independent session: [/distill] -> PortableHandoff
-       -> re-triage: back to the relevant earlier phase, no handoff composed
+       -> independent session: externalize -> WorkUnitRecord; [/distill] -> Certificate
+       -> re-triage: back to the relevant earlier phase, no record externalized
 ```
 
-Execution is not `/triage`'s. The receiving session consumes the portable handoff `/distill` composes — or a focused work unit directly — and does the branching, editing, and PR work itself. Arranging how several routed units run is likewise outside this skill: `/triage` emits one handoff per routed unit and stops.
+Execution is not `/triage`'s. The receiving session starts from the reception procedure `/distill` emits, dereferences the certified work-unit record with its own tools, and does the branching, editing, and PR work itself as a continuing collaborator, not a mere executor. Arranging how several routed units run is likewise outside this skill: `/triage` certifies one record per routed unit and stops.
 
 ## Types
 
@@ -39,7 +39,8 @@ Execution is not `/triage`'s. The receiving session consumes the portable handof
 | `NorthstarFusion` | A session-text trace showing how the normalized problem frame preserves, transforms, or drops issue claims in light of the northstar and the user's current judgment. |
 | `FocusedWorkUnit` | The executable unit formed from one issue group after northstar fusion. Default cardinality is `IssueGroup -> FocusedWorkUnit` one-to-one. Split only when northstar fusion exposes distinct execution axes. |
 | `RouteChoice` | The user's current-session choice for a formed work unit: hand it off to an independent session, or re-triage it. |
-| `PortableHandoff` | The handoff artifact for an independent session, composed by `/distill` from a routed `FocusedWorkUnit`. `/distill` owns this type; `/triage` composes it rather than emitting its own handoff format. |
+| `WorkUnitRecord` | The substrate-owned record a routed `FocusedWorkUnit` is externalized to before certification — an anchor-issue comment or issue-body triage section carrying the problem frame, fusion trace, issue provenance, exclusions, and verification expectations. It exists before `/distill` runs; the receiving session dereferences it. |
+| `Certificate` | The certification `/distill` issues over the `WorkUnitRecord` for the declared collaborator Role — route judgments, an outcome (already portable, or repaired in place), and the reception procedure the receiving session executes first. `/distill` owns this type; `/triage` composes the certification rather than emitting its own handoff format. |
 
 ## Phase 0: Bind Scope
 
@@ -90,7 +91,7 @@ Read the full issue substrate for each issue in the bound scope or confirmed clu
 
 Use the available GitHub interface (`gh`, MCP, or pasted issue text). Preserve issue numbers in every downstream artifact.
 
-For medium and large intake postures, metadata-only lists are provisional. They can seed `IssueGroup` candidates, but a candidate cannot become a `NormalizedProblemFrame`, `FocusedWorkUnit`, or distilled `PortableHandoff` until the relevant full issue substrate has been read.
+For medium and large intake postures, metadata-only lists are provisional. They can seed `IssueGroup` candidates, but a candidate cannot become a `NormalizedProblemFrame`, a `FocusedWorkUnit`, or a certified `WorkUnitRecord` until the relevant full issue substrate has been read.
 
 ## Phase 2: Group Issues
 
@@ -165,20 +166,22 @@ Each work unit includes:
 
 Present the work units and ask the user to choose a route for each:
 
-1. **Independent session** — hand this unit's portable handoff to a fresh session.
+1. **Independent session** — externalize this unit to a substrate record and hand its certified record to a fresh collaborator session.
 2. **Re-triage** — revise grouping, fusion, or work-unit boundaries.
 
-The route choice is the input Phase 7 hands `/distill`: a unit routed to an independent session proceeds to Phase 7. Re-triage returns to the relevant earlier phase; no handoff is composed for that cycle.
+The route choice is the input Phase 7 consumes: a unit routed to an independent session proceeds to Phase 7. Re-triage returns to the relevant earlier phase; no record is externalized and no certification is composed for that cycle.
 
-## Phase 7: Compose /distill
+## Phase 7: Externalize, Then Compose /distill
 
-For each work unit the user routed to an independent session, compose `/distill` to produce its `PortableHandoff`.
+For each work unit the user routed to an independent session, hand off in two steps: externalize the unit to a substrate-owned record, then compose `/distill` to certify that record.
 
-Hand `/distill` the work unit's own substrate as its working context: the `FocusedWorkUnit`, its `NormalizedProblemFrame`, its `NorthstarFusion` trace, and the included issue numbers with their per-issue contribution. `/distill` runs its own contract declaration against this substrate: the recipient is a fresh session with no access to the current one, so the handoff carries what that session cannot re-derive from the repository itself. `/triage` does not pre-classify durability or recipient profile; it supplies the work-unit substrate, and `/distill` resolves them at its own contract phase.
+**Externalize**: write the work unit — its `NormalizedProblemFrame`, its `NorthstarFusion` trace, the included issue numbers with their per-issue contribution, exclusions, readiness, and verification expectations — to a substrate-owned record the receiving session will actually read: the `WorkUnitRecord`. Its natural home is the issue substrate the unit came from — an issue-body triage section on the unit's anchor issue first (the issue body is squarely inside the project's inscribed ledger convention), or an anchor-issue comment (the same git-hosted issue record; this project's own decision chains live in issue comments). The anchor issue is bound deterministically when the record home is chosen: the included issue whose problem statement the unit's `NormalizedProblemFrame` primarily derives from; when the frame does not single one out, the earliest-created included issue — a deterministic tiebreak, surfaced as a relay annotation alongside the externalization, so a multi-issue group never leaves the mutation target to a silent choice. The record exists before `/distill` runs; it, not session text, is what the receiving session dereferences.
 
-Re-triage does not reach this phase: revising grouping, fusion, or work-unit boundaries produces no handoff to distill.
+**Certify**: compose `/distill` with `target` = the `WorkUnitRecord` (a stable reference — the issue-comment URL or equivalent) and `boundary` = a declared recipient Role for a **continuing collaborator** session — one that inherits the triage judgment and carries the work forward as a full participant, not a mere executor: the grouping rationale, northstar fusion, and route intent travel IN the record itself as decision-shaped content — `/distill` binds each to a decision record with its ledger pointer and judges it like any other kept content, so the collaborator reads them in the certified record — while the reception procedure's premise list carries only what `/distill`'s own claim-repair channel relays, and method stays with the recipient. `/distill` runs its own contract declaration against that record, tests its portability against the zero-memory standard, repairs resolution gaps in place on the record, and issues the `Certificate` with its reception procedure. `/triage` does not pre-classify the recipient profile; it declares the collaborator Role and lets `/distill` resolve the rest at its own contract phase.
 
-`/distill` emits the `PortableHandoff`, including the activation edge that hands the artifact to the independent session as a copyable initial-prompt block.
+Re-triage does not reach this phase: revising grouping, fusion, or work-unit boundaries externalizes no record and composes no certification.
+
+The receiving session starts from the reception procedure `/distill` emits — the role declaration, the dereference steps it runs with its own tools, and the premise list it reconfirms — and continues the work from the certified record itself.
 
 ## Rules
 
@@ -191,24 +194,24 @@ Re-triage does not reach this phase: revising grouping, fusion, or work-unit bou
 7. **IssueGroup default cardinality** (Architectural — review-surface visibility): Default to `IssueGroup -> FocusedWorkUnit` one-to-one. Split only with cited execution-axis evidence.
 8. **Northstar fusion required** (Axiom anchor — Convergence Persistence): Every ready work unit includes a fusion trace against the active project northstar. A summary without fusion is not a triaged work unit.
 9. **Session route authority** (Axiom anchor — Detection with Authority): Route choice belongs to the user in the current session. GitHub labels or project fields may record the choice but do not replace it.
-10. **PortableHandoff is the handoff artifact** (Architectural — handoff specificity): A receiving session consumes the portable handoff `/distill` composes, or a focused work unit directly, not a raw issue list.
+10. **Certified record is the handoff artifact** (Architectural — handoff specificity): A receiving session starts from the reception procedure and the certified `WorkUnitRecord` `/distill` issued its `Certificate` over — never a raw issue list, and never an uncertified session-local unit: every unit that crosses the session boundary goes through the Phase 7 externalize-then-certify path.
 11. **No silent grouping** (Derived — Surfacing over Deciding): Surface grouping candidates before forming work units. Similarity grouping is a user-recognized judgment, not a hidden classifier result.
 12. **Preserve issue provenance** (Architectural — provenance continuity): Every problem frame, work unit, and composed handoff cites the source issue numbers that contributed to it.
 13. **Blocked work stays visible** (Derived — Surfacing over Deciding): If an issue group is blocked, stale, or needs-info, emit that as a work-unit disposition or re-triage note rather than dropping it.
-14. **Composition boundary, not hand-rolled emission** (Architectural — composition boundary): `/triage` forms and routes focused work units; it does not hand-roll its own handoff template. The portable handoff — its zero-memory comprehension gate, leak lint, and durability classification — is `/distill`'s owned contract, composed at Phase 7 rather than duplicated inline.
+14. **Composition boundary, not hand-rolled emission** (Architectural — composition boundary): `/triage` forms and routes focused work units and externalizes each routed unit to a `WorkUnitRecord`; it does not hand-roll its own handoff template or certification. The certification — its zero-memory comprehension gate, leak lint, and reception procedure — is `/distill`'s owned contract, composed at Phase 7 rather than duplicated inline.
 
 ## Boundary Note
 
-`/triage` reads GitHub issue substrate and emits focused work units. It may read the current northstar produced by `/realign`, but it does not rewrite the project guide. It composes `/distill` to hand selected work units' portable handoffs to independent sessions, but does not execute branches, PRs, or review compliance, and does not arrange the order or concurrency in which several routed units run.
+`/triage` reads GitHub issue substrate and emits focused work units. It may read the current northstar produced by `/realign`, but it does not rewrite the project guide. It externalizes routed work units to substrate records and composes `/distill` to certify them for independent collaborator sessions, but does not execute branches, PRs, or review compliance, and does not arrange the order or concurrency in which several routed units run.
 
 ## Composition
 
 Triage composes the following protocols at runtime:
 
 - **Phase 0 (large intake posture)**: `/elicit` (Euporia) — crystallizes `IntakeIntent` before full substrate reads
-- **Phase 7**: `/distill` (Diylisis) — composes the routed work unit's portable handoff
+- **Phase 7**: `/distill` (Diylisis) — certifies the routed work unit's externalized record for the declared collaborator Role
 
-Composition is sequential — each phase consumes the previous phase's output. The re-triage route at Phase 6 does not reach Phase 7; that cycle composes no handoff.
+Composition is sequential — each phase consumes the previous phase's output. The re-triage route at Phase 6 does not reach Phase 7; that cycle externalizes no record and composes no certification.
 
 ## Anti-patterns
 
@@ -220,8 +223,8 @@ Composition is sequential — each phase consumes the previous phase's output. T
 - **Northstar-free summary**: a raw issue summary without preserved/transformed/dropped claims is not a triaged work unit.
 - **Execution leakage**: branch creation, file edits, PR creation, and review compliance belong to the receiving execution session, not `/triage`.
 - **Silent split or merge**: changing work-unit cardinality without surfacing the grouping rationale hides the decision the user must recognize.
-- **Work unit as issue dump**: a `FocusedWorkUnit` handed to `/distill` must carry the fused problem frame, scope, exclusions, and verification expectations Phase 3 through 5 produced; it is not a pasted issue list.
-- **Hand-rolled handoff emission**: writing a bespoke initial-prompt template inside `/triage` instead of composing `/distill` at Phase 7. The handoff's comprehension gate, leak lint, and durability classification live in `/distill`'s contract; re-implementing them inline duplicates and drifts from it.
+- **Work unit as issue dump**: a `WorkUnitRecord` externalized for `/distill` must carry the fused problem frame, scope, exclusions, and verification expectations Phase 3 through 5 produced; it is not a pasted issue list.
+- **Hand-rolled handoff emission**: writing a bespoke initial-prompt template inside `/triage` instead of externalizing the record and composing `/distill` at Phase 7. The certification's comprehension gate, leak lint, and reception procedure live in `/distill`'s contract; re-implementing them inline duplicates and drifts from it.
 
 ## Operational checklist (per cycle)
 
@@ -235,4 +238,4 @@ Composition is sequential — each phase consumes the previous phase's output. T
 - [ ] Phase 4 NorthstarFusion records preserved / transformed / dropped claims
 - [ ] Phase 5 FocusedWorkUnit readiness and split rationale are explicit
 - [ ] Phase 6 route choice is selected by the user before any handoff is composed
-- [ ] Phase 7 `/distill` is composed per routed work unit, handed the FocusedWorkUnit/NormalizedProblemFrame/NorthstarFusion/issue-provenance substrate; re-triage skips this step
+- [ ] Phase 7 externalizes each routed work unit to a `WorkUnitRecord` (anchor-issue comment or issue-body triage section) carrying the FocusedWorkUnit/NormalizedProblemFrame/NorthstarFusion/issue-provenance substrate, then composes `/distill` with that record as target and a collaborator Role as boundary; re-triage skips this step

@@ -2,39 +2,39 @@
 
 > [English](./README.md)
 
-세션-결박된 작업 맥락을, 사전 맥락이 전혀 없는(zero-memory) 새 에이전트가 그대로 실행할 수 있는 자기완결 이식 핸드오프로 증류합니다. 지표어(deixis)를 정규화하고, 자기완결성을 감사하고, 관련성과 출처를 판정한 뒤, prose 채널, 스키마 버전이 부여된 task-state 블록, content-free activation edge로 산출합니다(재증류 시에는 correction ledger append도 포함).
+이미 존재하는 substrate 소유 레코드 — Task 설명, 커밋 메시지, 위임 프롬프트, 영속 문서 — 가 선언된 수신자 역할에 대해 이식 가능한지 인증하고, 제자리에서 수리 가능한 것은 수리하고, 불가능한 것은 표면화합니다. Diylisis는 레코드를 가리킬 뿐, 새 문서를 작성하지 않습니다.
 
 ## 타입 시그니처
 
 ```
-(ContextTethered, AI, DISTILL, WorkingContext) → PortableHandoff
+(ContextTethered, AI, DISTILL, StableRef) → Certificate
 ```
 
 ## 무엇을 하는가
 
-한 작업 세션의 context window는 불가피하게 세션-결박 잔여물을 누적합니다 — 미정의 jargon, 지표 약어, 저자 프로세스 서술, 도구 상태, 댕글링 task 식별자. 이것들은 저자에게는 완결돼 보입니다. 저자가 빠진 맥락을 암묵적으로 공유하기 때문입니다. 그러나 세션 접근 권한이 없는 새 수신자에게는 그 공유 지반이 전혀 없습니다. Diylisis는 작업 맥락을, 모든 핵심 참조가 저자 세션 없이도 해소되는 핸드오프로 증류합니다.
+substrate 소유 레코드는 불가피하게 세션-결박 잔여물을 누적합니다 — 미정의 jargon, 지표 약어, 저자 프로세스 서술, 도구 상태, 댕글링 task 식별자. 이것들은 저자에게는 완결돼 보입니다. 저자가 빠진 맥락을 암묵적으로 공유하기 때문입니다. 그러나 세션 접근 권한이 없는 새 수신자에게는 그 공유 지반이 전혀 없습니다. Diylisis는 레코드의 이식성을 제자리에서 인증합니다: 각 지표어 토큰을 canonical 참조로 정규화하고, 각 항목의 자기완결성을 감사하고, 각 판정을 선언된 수신자 역할과 변환-출처에 대해 채점하며, 해소되지 않은 잔여물은 침묵 없이 표면화합니다.
 
 이 morphism은 F0~F7을 한 번 정방향으로 실행한 뒤, 위생 척도(hygiene measure)가 고정점에 도달할 때까지 재감사합니다. 이 척도는 단조가 아닙니다 — repair pass가 새로 authored한 prose가 척도를 정착 전에 다시 끌어올릴 수 있으므로, 종료는 pass별 감소가 아니라 고정점의 구조(disposition은 영구적이며, Gate는 Resolve로 바닥을 침)로부터 논증됩니다:
 
-- **F0 — 핸드오프 계약**: 수신자, next task, 허용 소스, 범위, 검증, 정지 조건, **핸드오프 내구성(handoff durability)**(`OneShot` | `ExternalVersioned` | `DurableRepo`)을 선언합니다. 관련성과 최소성의 전제이며, 내구성이 교정 원장을 조건화합니다.
-- **F1 — 지표 폐쇄(Deictic closure)**: 각 세션-로컬 토큰을 canonical 참조로 정규화합니다. grounding보다 선행하여 grounded 항목이 안정 참조를 가리키도록 합니다. `surface_token → canonical_ref → confidence → unresolved?`를 산출합니다.
-- **F2 — Grounding 폐쇄**: 각 항목의 자기완결성을 inline / stable-pointer / routed-residual로 감사합니다. silent residual은 허용되지 않습니다.
-- **F3a — 수신자-관련성**: 선언된 next task에 대해 각 항목을 판정합니다.
-- **F3b — 변환-출처(Transformation-provenance)**: 3분할 verdict — **CorrectedKeep**(매칭되는 비-잠정 미만료 `KEEP` `CorrectionDelta`, DurableRepo 전용), **ObservedKeep**(교정 기록이 없고, support-integrity로 값과 결합된 durable·직접 관측 가능 출처 — 원장 없이, Gate 없이 직접 KEEP), **Unknown**(관측 기반도 delta도 없음 → Gate). 평범한 출처-기반 상태는 ObservedKeep이므로 원장 부재가 더 이상 모든 항목을 Gate로 보내지 않습니다. KEEP은 외관으로 추론되지 않으며, correction이 필요한 주장은 여전히 원장 또는 Gate Resolve가 필요합니다.
-- **F3 — 처분(Disposition)**: KEEP(inline) | ROUTE(StableRef) | DROP.
-- **F4 — 압축 폐쇄**: 최소-완전(minimal-complete) 집합만 유지합니다 — 계약-상대적 완전성이지, 미적 간결성이 아닙니다.
-- **F5 — 이해 게이트**: refute 자세의 `zero-memory-refuter` subagent(fresh context, 세션 용어 watchlist, 근거 인용 verdict; 플랫폼 사다리: named agent → generic fresh subagent → lint 체크리스트, lint 단계는 fresh-context 격리가 없는 약화된 실현)로 zero-memory 수신자 기준에 대해 검증합니다. 저자 self-simulation은 배제됩니다. **prose-only 삭제 테스트**를 포함합니다: TaskStateBlock, correction ledger, 네이티브 task-state, 모든 agent-specific affordance를 무시했을 때, next task가 prose 채널 + allowed sources만으로 여전히 실행 가능해야 하며 — 그렇지 않으면 게이트가 Fail합니다.
-- **F6 — 제한된 audit/lint 루프**: 위생 척도의 고정점(0, 또는 모든 residual이 surfaced되고 leak-free이며 모든 authored item이 disposed된 상태로 안정)과 Pass comprehension verdict에서 종료합니다 — pass별 감소(척도는 repair pass에서 오를 수 있음)나 "완성된 느낌"으로 종료하지 않습니다.
-- **F7 — 채널 분리**: prose 채널(권위), 댕글링 task 식별자를 복원하는 (비-override) 스키마 버전 `TaskStateBlock`, 핸드오프를 수신자에게 전달하는 content-free activation edge 세 채널을 산출합니다. 재증류 시에는 correction ledger에도 append합니다.
+- **F0 — 인증 계약**: 인증 대상 `target`(기존 레코드), 수신자의 **boundary**(열린, 사용자-선언 Role — 프로토콜 소유 열거형 없음), 선택적 **activity**, 허용 소스, 범위, 검증, 정지 조건을 선언합니다. 관련성과 최소성의 전제입니다.
+- **F1 — 지표 폐쇄 + 결정 바인딩**: `target` 내 각 세션-로컬 토큰을 canonical 참조로 정규화합니다. 각 결정-형태 항목을, 그 근거가 사는 영속 레코드(이 프로젝트: git 기록 — 커밋 메시지, 이슈/PR 본문)를 가리키는 `DecisionRecord{claim, ledger_ref}`에 바인딩합니다.
+- **F2 — Grounding 폐쇄**: 각 항목의 자기완결성을 inline / stable-pointer / routed-residual로 감사합니다. stable-pointer의 locator는 저자 세션 없이 해소되어야 하고, 수신자가 소비 시점에 자기 도구로 재확인할 때도 역참조·재검증 가능해야 합니다.
+- **F3a — 수신자-관련성**: 선언된 activity와 boundary에 대해 각 항목을 판정합니다.
+- **F3b — 변환-출처(Transformation-provenance)**: 2분할 verdict — **ObservedKeep**(support-integrity로 값과 결합된 durable·직접 관측 가능 출처 — 원장 없이, Gate 없이 직접 KEEP) 또는 **Unknown**(관측 기반 없음 → Gate).
+- **F3 — 처분(Disposition)**: KEEP(inline) | ROUTE(StableRef) | DROP. 절제 가능한 내용을 가진 DROP은 Gate에 표면화되고, 사용자의 Drop 응답이 절제(excision) 델타를 확정합니다: 해당 항목의 판별 내용이 `target`에서 제자리 제거되어(주장 보존), 새 수신자는 kept·routed 내용만 물려받습니다 — 제거된 내용과 그 사유는 세션 측에 보존됩니다.
+- **F4 — 판정 형성**: 인증서의 `RouteJudgment` 목록을 구성합니다 — kept 또는 routed 항목마다 판정(`Value(inline_evidence)` 또는 `Reference(stable_ref)`)과 근거(`basis`)를 짝짓습니다.
+- **F5 — 이해 게이트(상시)**: refute 자세의 `zero-memory-refuter` subagent로 zero-memory 수신자 기준에 대해 검증하며, 매 인증 패스마다 dispatch됩니다 — 선택적 계층이 아닙니다. 각 판정의 근거와 수신 절차의 충분성을 공격합니다. 저자 self-simulation은 배제됩니다.
+- **F6 — 제한된 audit/lint 루프**: 위생 척도의 고정점(부재 근거, 해소 불가 route 포인터, 무원장 결정을 포함 — 디스패치 없는 기계적 레그 — 그리고 탐지 전용 노출 스캔: 라우팅·부여 소스의 역참조 가능한 내용에서 발견된 drop 내용은 사용자 판정으로 표면화됩니다. 외부 레코드는 인증의 쓰기 권한 밖이기 때문입니다. 세션이 읽을 수 없는 소스도 drop이 존재하는 동안 같은 방식으로 표면화됩니다 — 비노출을 인증할 수 없기 때문입니다)과 Pass comprehension verdict에서 종료합니다 — pass별 감소나 "완성된 느낌"으로 종료하지 않습니다.
+- **F7 — 인증**: **Certificate**를 조립합니다 — 인증 대상 레코드 자신의 참조, 인증된 상태의 동일성(최종 Pass가 검토한 바로 그 상태의 리비전 고정 형식 또는 내용 다이제스트 — 최종 Pass 시점에 결속되고, F7이 발급 전 재검증하며, 수신 절차의 선두 역참조 단계에서 재확인), activation edge(외재화 시에도 자기-식별), 판정 목록, outcome(수리가 필요 없었으면 `AlreadyPortable`, 그렇지 않으면 `Repaired(deltas)`), 그리고 필수 **수신 절차**(역할 선언, 계약이 부여한 소스·검증 명령·실행 범위·정지 조건, 수신측이 실행하는 역참조 단계, 수신측이 재확인하는 주장-수리 발견의 전제 목록)입니다. `target`은 이미 모든 수리 델타를 담고 있습니다 — 해소 추가와 drop-절제가 각각을 분류한 패스에서 제자리 적용되었고, 어느 것도 단언된 주장을 바꾸지 않습니다 — 그래서 F7은 더 이상 편집하지 않습니다: 최종 Pass verdict가 검토한 바로 그 상태를 인증합니다.
 
-**핵심 원리**: Portability over Author Familiarity — 저자의 친숙성이 더 이상 숨은 의존성이 아닐 때 핸드오프는 이식 가능합니다.
+**핵심 원리**: Portability over Author Familiarity — 저자의 친숙성이 더 이상 숨은 의존성이 아닐 때 레코드는 이식 가능하며, 아무것도 수리할 필요가 없었을 때도 Certificate는 모든 판정의 근거를 명시합니다.
 
 ## 언제 활성화되는가
 
-- 사용자가 `/distill` 호출 (Layer 1, 항상 가용)
-- AI가 맥락 핸드오프 직전 세션-결박 잔여물을 감지 — 핸드오프 브리프, fresh-context 서브에이전트 디스패치, 재개 가능한 plan (Layer 2, 무음 감지)
+- 사용자가 `/distill`을 호출하여 대상 레코드와 수신자 역할을 지목 (Layer 1, 항상 가용)
+- AI가 수신 경계를 넘으려는 레코드에서 세션-결박 잔여물을 감지 — fresh subagent에게 전달될 Task, 외부 공유될 문서, 디스패치될 위임 프롬프트 (Layer 2, 무음 감지)
 
-`/distill`은 **secret-free 작업 맥락**을 전제합니다 — secret(credential, token, key) 제거는 전용 redaction 에이전트가 상류에서 처리하는 별개 관심사이며, distill morphism의 일부가 아닙니다.
+`/distill`은 **secret-free 레코드**를 전제합니다 — secret(credential, token, key) 제거는 전용 redaction 에이전트가 상류에서 처리하는 별개 관심사이며, distill morphism의 일부가 아닙니다.
 
 ## 처분 Coproduct
 
@@ -42,34 +42,31 @@
 
 | 처분 | 의미 |
 |------|------|
-| **KEEP(inline)** | 항목을 inline으로 유지. CorrectedKeep(매칭되는 비-잠정 `CorrectionDelta`, DurableRepo), ObservedKeep(support-integrity를 갖춘 durable 관측 출처, 직접 KEEP), 또는 사용자 Resolve 응답으로 도달 가능. |
+| **KEEP(inline)** | 항목을 inline으로 유지. ObservedKeep(support-integrity를 갖춘 durable 관측 출처, 직접 KEEP) 또는 사용자 Resolve 응답으로 도달 가능. |
 | **ROUTE(StableRef)** | 수신자가 해소하는 안정 참조(path, id, url, command)로 항목을 운반. |
-| **DROP** | 항목이 선언된 next task에 기여하지 않음; 핸드오프에서 해제. |
+| **DROP** | 항목이 선언된 activity에 기여하지 않음; 인증에서 해제. |
 
 Gate에서, 표면화된 residual 또는 unknown-provenance 항목은 `Resolve | Route | Drop | Defer`로 응답합니다.
 
 ## 출처 하드라인(The Provenance Hard Line)
 
-F3b는 항목의 *외관*으로 KEEP을 추론하지 않습니다. KEEP은 정확히 세 경로로만 도달합니다: **CorrectedKeep** — 매칭 `CorrectionDelta`가 비-잠정 상태로 `export_policy = KEEP`을 가지고 `validity_horizon`이 만료되지 않음(DurableRepo 전용; 원장의 권위로, 교정·이견·노후·user-구성 주장에 한정); **ObservedKeep** — 교정 기록이 없고, support-integrity로 값과 결합된 durable·직접 관측 가능 출처(파일 읽기, 명령 출력, PR/이슈 URL, durable stable-ref)로 원장·Gate 없이 직접 KEEP; 또는 Gate에서의 사용자 **Resolve**. 관측 기반도 delta도 없는 항목은 **Unknown** — KEEP으로 기본 처리되지 않고 Gate에서 사용자 판정으로 표면화됩니다. ObservedKeep은 저자의 미검증 신념이 아니라 수신자가 재관측 가능한 외부 기반에 대한 relay이므로, (단순 currency가 아닌) support-integrity가 기준이며 불확실/이견 기반은 보수적으로 Unknown입니다. **correction이 필요한 주장은 여전히 원장이 필요하다는** 하드라인은 유지됩니다: 관측 출처에서 벗어난 주장은 ObservedKeep이 될 수 없습니다. 원장 스키마와 read contract는 [`references/correction-delta-schema.md`](./skills/distill/references/correction-delta-schema.md)를 참조하세요.
-
-교정 원장은 **핸드오프 내구성에 조건적**입니다: `DurableRepo`(durable·재증류 in-repo 핸드오프 — CorrectedKeep이 도달 가능한 유일 모드)에서만 유지됩니다. `OneShot`(일시적, 일회용)은 원장을 두지 않고, `ExternalVersioned`(Notion, Linear 등 외부 버전 저장소)는 외부 시스템의 네이티브 히스토리에 위임하며 그 버전 핸들을 provenance 포인터로 기록합니다. 이는 ObservedKeep과 짝을 이뤄, 일상적 일시·외부 대상 핸드오프의 흔한 gate storm을 무너뜨립니다.
+F3b는 항목의 *외관*으로 KEEP을 추론하지 않습니다. KEEP은 정확히 두 경로로만 도달합니다: **ObservedKeep** — durable·직접 관측 가능 출처(파일 읽기, 명령 출력, PR/이슈 URL, durable stable-ref)로 support-integrity를 통해 값과 결합됨 — Gate 없이 직접 KEEP — 또는 Gate에서의 사용자 **Resolve**. 관측 기반이 없는 항목은 **Unknown** — KEEP으로 기본 처리되지 않고 Gate에서 사용자 판정으로 표면화됩니다. ObservedKeep은 저자의 미검증 신념이 아니라 수신자가 재관측 가능한 외부 기반에 대한 relay이므로, (단순 currency가 아닌) support-integrity가 기준이며 불확실/이견 기반은 보수적으로 Unknown입니다. **correction이 필요한 주장** — 관측 출처에서 벗어난 주장 — 은 ObservedKeep이 될 수 없으며, Gate에서 사용자 Resolve로 표면화됩니다. 포인터-기반 관측 항목 — durable 출처가 인라인이 아니라 안정 참조로 인용된 항목 — 은 같은 relay 근거 위에서 ROUTE로 운반되어, 인증서의 Value/Reference 판정이 항상 그 증거와 타입이 일치합니다. 결정-형태 내용은 그 근거가 사는 영속 레코드(이 저장소: git)를 가리키는 `DecisionRecord`를 추가로 운반합니다 — F1에서 결속되며, 모든 항목이 거치는 출처·처분 시험을 대체하는 것이 아니라 병행합니다.
 
 ## 보증 등급(Assurance Tiers)
 
-산출물의 라벨은 실제 적용된 엄밀성만큼만 정직하게 반영합니다 — 낮은 등급이 높은 등급의 주장을 빌리지 않습니다:
+라벨은 **레코드-상대적**입니다: Diylisis가 지목한 인증 대상 `target`에 붙습니다(Diylisis가 만드는 유일한 산출물은 인증서 자신 — `target` 위의 판정 레이어로, `certificate_target` 또는 세션 스크래치패드에 놓이며 결코 `target` 안에 들어가지 않습니다).
 
 | 등급 | 라벨 | 실행 내용 |
 |------|------|-----------|
-| (a) | **Quick handoff draft** | 평문 Markdown만 — F5 게이트·감사·원장 없음. PortableHandoff 주장을 **하지 않음**. |
-| (b) | **Certified light /distill** | F5 1회 통과(prose-only 삭제 테스트 포함) + leak / durable-pointer 감사 1회; `CorrectionDelta` 원장 없음 — 원장은 DurableRepo(tier c) 경로이며, correction이 필요한 주장은 Gate로 surface. |
-| (c) | **Heavy /distill** | 전체 refuter + watchlist + residual Gate + `CorrectionDelta` 원장 + leak lint + 수렴 증거 + re-distillation(DurableRepo 경로). |
+| Draft | **비인증 초안(Uncertified draft)** | `target`에 대해 Diylisis 패스가 실행된 적 없음 — 평문 Markdown, F5 게이트·leak/durable-pointer 감사 없음. `target`에 대해 발급된 Certificate가 없습니다. |
+| Certified | **인증된 `/distill`** | 상시 F5 이해-게이트 Pass 1회(realization은 verdict에 기록) + leak / durable-pointer 감사 1회, 고정점 도달. `target`에 대해 Certificate가 발급되었습니다: F5 게이트가 verdict에 기록된 realization(refuter subagent / generic subagent / lint fallback — 라벨은 정확히 그 realization의 엄밀성만 주장) 아래에서 Pass에 도달했고, 모든 판정 근거가 근거지어졌으며, 감사가 통과했습니다. |
 
-**정직 라벨 규칙**: 형식적 `converge` 전이는 Pass verdict로 고정점에 도달한 어떤 등급에서도 발생합니다 — tier (b) 포함, 즉 certified-light 핸드오프도 형식적으로 수렴하여 정당한 `PortableHandoff`를 산출합니다. 다만 보증 **라벨** "converged /distill"은 더 좁아서, 전체 보증 추적을 거친 tier-(c)의 Pass-verdict 고정점에만 허용됩니다. refuter를 건너뛴 산출물(tier (a))은 **draft / degraded handoff**이며 — `PortableHandoff`도 "converged /distill"도 아닙니다. tier (b)가 PortableHandoff 주장의 하한입니다.
+F5 dispatch가 무조건적이므로 — 모든 인증 패스가 플랫폼이 제공하는 가장 강한 realization 아래에서 전체 게이트를 실행하며, 더 가벼운 선택적 계층이 없음 — 부분-엄밀성 중간 등급은 없습니다: `target`은 F7을 거친 적이 없거나(Draft) 완료된 패스의 Certificate가 발급되어 있습니다(Certified). 라벨은 `target`을 그 발행된 activation edge와 함께 인증합니다; Diylisis 밖에서의 후속 편집이나 대체된 edge로 디스패치된 인증은 검증된 수신 조건을 깨뜨립니다 — 그리고 이 깨짐은 수신측이 탐지할 수 있습니다: Certificate가 인증된 상태의 동일성(리비전 고정 형식 또는 내용 다이제스트)을 담고 있고 수신 절차의 선두 단계가 이를 재확인하므로, 낡은 Certificate는 신뢰되는 대신 수신 시점에 적발됩니다.
 
 ## 알려진 한계
 
-- **원장 쓰기는 re-distillation으로 한정**: F3b는 `CorrectionDelta` 원장을 읽기 전용으로 소비하고, F7 re-distillation emit이 원장에 append합니다(Rule 19). 세션 중 교정 델타를 기록하는 메커니즘은 별도의 후속 과제입니다.
-- **첫 wired 표면**: plan-level 핸드오프가 `/distill`의 첫 wired 표면입니다. 세션-중 pruning과 서브에이전트 핸드오프는 후속 표면으로 누적됩니다.
+- **수신 절차 재검증은 수신측 소유**: 산출된 역참조 단계는 수신자가 자기 도구로 실행하는 것입니다; Diylisis 자신은 수신자가 실제로 재실행했는지 확인하지 않습니다.
+- **첫 wired 표면**: plan-level 인증이 `/distill`의 첫 wired 표면입니다. 세션-중 pruning과 서브에이전트 핸드오프는 후속 표면으로 누적됩니다.
 
 ## 설치
 
@@ -81,7 +78,7 @@ claude plugin install diylisis@epistemic-protocols
 ## 사용법
 
 ```
-/distill [선택: next-task 또는 수신자]   # 작업 맥락을 이식 핸드오프로 증류
+/distill [대상 레코드] [수신자 역할]   # 기존 레코드의 이식성을 선언된 수신자에 대해 인증
 ```
 
 ## 라이선스

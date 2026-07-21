@@ -74,7 +74,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 | Horismos | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |
 | Anamnesis | `/recollect` | A vague, ambiguous recall you can't quite pin down — resolve it into recognized context |
 | Anagoge | `/ascend` | A recall a single session can't resolve — elevate it to a higher-granularity unit (connected-session chain, topic cluster, or already-sedimented concept) |
-| Diylisis | `/distill` | Handoff context to a fresh zero-memory session — distill out session-tethered references into a portable handoff |
+| Diylisis | `/distill` | An existing record must hand work to a fresh zero-memory session — certify its portability for the declared recipient role, repairing resolution gaps in place |
 | Katalepsis | `/grasp` | AI-produced work you assume you grasp but haven't verified — comprehension may be an illusion; confirm your understanding is genuine before you approve, explain, or build on it |
 | Diairesis | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces is unclear — partition it at natural joints (each unit fits one span, complete coverage with no orphans) before conducting |
 | Hyphegesis | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins |

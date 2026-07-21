@@ -1,7 +1,7 @@
 {
   "name": "diylisis",
-  "version": "0.6.2",
-  "description": "Distill a session-tethered working context into a self-contained portable handoff — /distill (διύλισις: refining/distillation)",
+  "version": "1.0.0",
+  "description": "Certify an existing record's portability for a declared recipient role, repairing resolution gaps in place — /distill (διύλισις: refining/distillation)",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Diylisis",
-    "shortDescription": "Distill a session-tethered working context into a self-contained portable handoff — /distill (διύλισις: refining/distillation)",
-    "longDescription": "Distill a session-tethered working context into a self-contained portable handoff — /distill (διύλισις: refining/distillation)",
+    "shortDescription": "Certify an existing record's portability for a declared recipient role, repairing resolution gaps in place — /distill (διύλισις: refining/distillation)",
+    "longDescription": "Certify an existing record's portability for a declared recipient role, repairing resolution gaps in place — /distill (διύλισις: refining/distillation)",
     "developerName": "Jongwon Choi",
     "category": "Productivity",
     "capabilities": [

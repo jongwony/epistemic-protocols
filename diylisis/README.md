@@ -2,39 +2,39 @@
 
 > [한국어](./README_ko.md)
 
-Distill a session-tethered working context into a self-contained portable handoff a fresh zero-memory agent can execute from. Normalizes deixis, audits self-containment, judges relevance and provenance, then emits a prose channel, a schema-versioned task-state block, and a content-free activation edge (plus an appended correction ledger under re-distillation).
+Certify an existing substrate-owned record's portability for a declared recipient role — a Task description, a commit message, a delegation prompt, a durable document — repairing what can be repaired in place and surfacing what cannot. Diylisis points at the record; it never authors a new one.
 
 ## Type Signature
 
 ```
-(ContextTethered, AI, DISTILL, WorkingContext) → PortableHandoff
+(ContextTethered, AI, DISTILL, StableRef) → Certificate
 ```
 
 ## What It Does
 
-A working session's context window inevitably accumulates session-tethered residue — undefined jargon, metric shorthand, author process narration, tool state, and dangling task identifiers — that reads as complete to the author because the author silently shares the missing context. A fresh recipient with no session access has none of that shared ground. Diylisis distills the working context into a handoff whose every load-bearing reference resolves without the author session.
+A substrate-owned record accumulates session-tethered residue — undefined jargon, metric shorthand, author process traces, tool state, and dangling task identifiers — that reads as complete to its author because the author silently shares the missing context. A fresh recipient with no session access has none of that shared ground. Diylisis certifies the record's portability in place: each deictic token is normalized to a canonical reference, each item is audited for self-containment, each judgment is graded against the declared recipient role and its transformation-provenance, and unresolved residue is surfaced rather than silently carried.
 
 The morphism runs F0 through F7 once forward, then re-audits against a hygiene measure until it reaches a fixed point. The measure is NOT monotone — a repair pass authors new prose that can itself raise the measure before it settles — so termination is argued from the fixed point's structure (dispositions are permanent, the Gate bottoms out on a Resolve), not from a per-pass decrease:
 
-- **F0 — Handoff contract**: declare recipient, next task, allowed sources, scope, verification, stop condition, and **handoff durability** (`OneShot` | `ExternalVersioned` | `DurableRepo`). The premise for relevance and minimality; durability conditionalizes the correction ledger.
-- **F1 — Deictic closure**: normalize each session-local token to a canonical reference. Runs before grounding so each grounded item names a stable referent. Emits `surface_token → canonical_ref → confidence → unresolved?`.
-- **F2 — Grounding closure**: audit each item for self-containment — inline, stable-pointer, or routed-residual. No residual is dropped silently.
-- **F3a — Recipient-relevance**: judge each item against the declared next task.
-- **F3b — Transformation-provenance**: a ternary verdict — **CorrectedKeep** (a matching non-provisional unexpired `KEEP` `CorrectionDelta`, DurableRepo only), **ObservedKeep** (no correction record and a durable, directly-observable source coupled to the value by support-integrity — KEPT directly, no ledger, no Gate), or **Unknown** (no observable basis and no delta → Gate). Ordinary source-backed state is ObservedKeep, so an absent ledger no longer routes every item to the Gate; KEEP is never inferred from appearance, and a correction-requiring claim still needs the ledger or a Gate Resolve.
-- **F3 — Disposition**: KEEP(inline) | ROUTE(StableRef) | DROP.
-- **F4 — Compression closure**: retain the minimal-complete set — contract-relative completeness, not aesthetic brevity.
-- **F5 — Comprehension gate**: verify against a zero-memory recipient via the refute-posture `zero-memory-refuter` subagent (fresh context, session-term watchlist, evidence-cited verdict; platform ladder: named agent → generic fresh subagent → lint checklist, the lint tier weakened — no fresh-context isolation); author self-simulation is excluded. Includes the **prose-only deletion test**: with the TaskStateBlock, the correction ledger, native task-state, and every agent-specific affordance ignored, the next task must still execute from the prose channel plus the allowed sources alone — otherwise the gate Fails.
-- **F6 — Bounded audit/lint loop**: terminate on the hygiene measure's fixed point (zero, or stable with every residual surfaced, leak-free, and every authored item disposed) plus a Pass comprehension verdict — not on a per-pass decrease (the measure can rise across a repair pass) and not a felt sense of completeness.
-- **F7 — Channel separation**: emit three channels — a prose channel (authoritative), a schema-versioned `TaskStateBlock` that rehydrates dangling task identifiers (non-overriding), and a content-free activation edge that hands the artifact to its recipient; under re-distillation, also appends to the correction ledger.
+- **F0 — Certification contract**: declare `target` (the existing record under certification), the recipient's **boundary** (an open, user-declared Role — no protocol-owned enum), an optional **activity**, allowed sources, scope, verification, and stop condition. The premise for relevance and minimality.
+- **F1 — Deictic closure + decision binding**: normalize each session-local token within `target` to a canonical reference; bind each decision-shaped item to a `DecisionRecord{claim, ledger_ref}` naming the durable record where its rationale lives (this project: the git record — commit messages, issue/PR bodies).
+- **F2 — Grounding closure**: audit each item for self-containment — inline, stable-pointer, or routed-residual. A stable-pointer's locator must resolve without the author session and remain dereferenceable and re-verifiable when the receiver checks it at consume time.
+- **F3a — Recipient-relevance**: judge each item against the declared activity and boundary.
+- **F3b — Transformation-provenance**: a two-way verdict — **ObservedKeep** (a durable, directly-observable source coupled to the value by support-integrity — KEPT directly, no Gate) or **Unknown** (no observable basis → Gate).
+- **F3 — Disposition**: KEEP(inline) | ROUTE(StableRef) | DROP. A DROP with excisable target content surfaces at the Gate, and the user's Drop answer confirms its excision delta: the dropped item's discriminating content is removed from `target` in place (claim-preserving), so the fresh recipient inherits kept and routed content only — the dropped content and its reason survive session-side.
+- **F4 — Judgment formation**: construct the certificate's `RouteJudgment` list — each kept or routed item paired with its verdict (`Value(inline_evidence)` or `Reference(stable_ref)`) and a cited `basis`.
+- **F5 — Comprehension gate (always on)**: verify against a zero-memory recipient via the refute-posture `zero-memory-refuter` subagent, dispatched every certification pass — no optional layer. Attacks each judgment's basis and the reception procedure's sufficiency; author self-simulation is excluded.
+- **F6 — Bounded audit/lint loop**: terminate on the hygiene measure's fixed point (including missing judgment bases, unresolvable route pointers, and ledger-less decisions — mechanical, no-dispatch legs — and a detection-only exposure scan: dropped content found in the dereferenceable contents of a routed or granted source surfaces for user judgment, since the foreign record sits outside the certification's write authority — and a source the session cannot read surfaces the same way while drops exist, since non-exposure cannot be certified for it) plus a Pass comprehension verdict — not on a per-pass decrease and not a felt sense of completeness.
+- **F7 — Certify**: assemble the **Certificate** — the certified record's own reference, its certified-state identity (a revision-fixed form or content digest of the exact state the final Pass reviewed — bound when that Pass lands, re-verified by F7 before issuance, and re-checked as the reception procedure's lead dereference step), and activation edge (self-identifying when externalized), the judgment list, an outcome (`AlreadyPortable` when nothing needed repair, `Repaired(deltas)` otherwise), and the mandatory **reception procedure** (role declaration, the contract's granted sources, verification commands, execution scope, and stop condition, receiver-run dereference steps, and the premise list of claim-repair findings the receiver reconfirms). `target` already carries every repair delta — resolution additions and drop-excisions, applied in place at the pass that classified each, none altering an asserted claim — so F7 edits nothing further: it certifies the same state the final Pass verdict reviewed.
 
-**Core principle**: Portability over Author Familiarity — a handoff is portable when the author's familiarity is no longer a hidden dependency.
+**Core principle**: Portability over Author Familiarity — a record is portable when the author's familiarity is no longer a hidden dependency, and the Certificate names the basis for every judgment even when nothing needed fixing.
 
 ## When It Activates
 
-- User calls `/distill` (Layer 1, always available)
-- AI detects session-tethered residue before a context handoff — a handoff brief, a fresh-context subagent dispatch, a resumable plan (Layer 2, silent detection)
+- User calls `/distill`, naming a target record and a recipient role (Layer 1, always available)
+- AI detects session-tethered residue in a record about to cross a reception boundary — a Task about to be handed to a fresh subagent, a doc about to be shared, a delegation prompt about to be dispatched (Layer 2, silent detection)
 
-`/distill` assumes a **secret-free working context** — stripping secrets (credentials, tokens, keys) is a separate concern handled upstream by a dedicated redaction agent, not part of the distill morphism.
+`/distill` assumes a **secret-free record** — stripping secrets (credentials, tokens, keys) is a separate concern handled upstream by a dedicated redaction agent, not part of the distill morphism.
 
 ## Disposition Coproduct
 
@@ -42,34 +42,31 @@ Each item resolves into one of three named dispositions. Surfaced residuals and 
 
 | Disposition | Meaning |
 |-------------|---------|
-| **KEEP(inline)** | Item retained inline. Reachable via CorrectedKeep (a matching non-provisional `CorrectionDelta`, DurableRepo), ObservedKeep (a durable observable source with support-integrity, KEPT directly), or a user Resolve answer. |
+| **KEEP(inline)** | Item retained inline. Reachable via ObservedKeep (a durable observable source with support-integrity, KEPT directly) or a user Resolve answer. |
 | **ROUTE(StableRef)** | Item carried by a stable reference the recipient resolves (path, id, url, command). |
-| **DROP** | Item does not serve the declared next task; released from the handoff. |
+| **DROP** | Item does not serve the declared activity; released from the certification. |
 
 At the Gate, a surfaced residual or unknown-provenance item is answered with `Resolve | Route | Drop | Defer`.
 
 ## The Provenance Hard Line
 
-F3b never infers KEEP from how settled an item *looks*. KEEP is reachable exactly three ways: **CorrectedKeep** — a matching `CorrectionDelta` with `export_policy = KEEP`, a non-provisional status, and an unlapsed `validity_horizon` (DurableRepo only; the ledger's authority, reserved for corrected, disputed, stale, or user-constituted claims); **ObservedKeep** — no correction record and a durable, directly-observable source (a file read, a command's output, a PR/issue URL, a durable stable-ref) coupled to the kept value by support-integrity, KEPT directly without a ledger or the Gate; or a user **Resolve** at the Gate. An item with no observable basis and no delta is **Unknown** — surfaced at the Gate for user judgment, never defaulted to KEEP. ObservedKeep is relay against an external, recipient-re-observable basis — not an author's unverified belief — so support-integrity (not mere currency) is the bar, and an uncertain or contested basis is conservatively Unknown. The hard line that a **correction-requiring claim still needs the ledger** holds: a claim diverging from its observable source cannot be ObservedKeep. See [`references/correction-delta-schema.md`](./skills/distill/references/correction-delta-schema.md) for the ledger schema and read contract.
-
-The correction ledger is **conditional on handoff durability**: maintained only for `DurableRepo` (durable, re-distilled in-repo handoffs — the only mode where CorrectedKeep is reachable). `OneShot` (temporary, used once) keeps none; `ExternalVersioned` (Notion, Linear, any externally-versioned store) defers to the external system's native history and records its version handle as the provenance pointer. This pairs with ObservedKeep to collapse the common-case gate storm for everyday temporary and external-target handoffs.
+F3b never infers KEEP from how settled an item *looks*. KEEP is reachable exactly two ways: **ObservedKeep** — a durable, directly-observable source (a file read, a command's output, a PR/issue URL, a durable stable-ref) coupled to the kept value by support-integrity, KEPT directly without a Gate — or a user **Resolve** at the Gate. An item with no observable basis is **Unknown** — surfaced at the Gate for user judgment, never defaulted to KEEP. ObservedKeep is relay against an external, recipient-re-observable basis — not an author's unverified belief — so support-integrity (not mere currency) is the bar, and an uncertain or contested basis is conservatively Unknown. A correction-requiring claim — one that diverges from its observable source — cannot be ObservedKeep; it surfaces at the Gate for a user Resolve. A pointer-backed observed item — its durable source cited as a stable reference rather than carried inline — travels as ROUTE on the same relay basis, so the certificate's Value/Reference verdicts always match their evidence. Decision-shaped content additionally carries a `DecisionRecord` pointing at the durable record (this repo: git) where its rationale lives — bound at F1 alongside, not instead of, the same provenance and disposition tests every item passes.
 
 ## Assurance Tiers
 
-The artifact's label honestly reflects the rigor actually applied — a lower tier never borrows a higher tier's claim:
+The label is **record-relative**: it attaches to `target` — the certified record Diylisis points at — never to a new content record (the one artifact Diylisis produces is the Certificate itself — the judgment layer over `target`, landing at `certificate_target` or the session scratchpad, never inside `target`).
 
 | Tier | Label | What it runs |
 |------|-------|--------------|
-| (a) | **Quick handoff draft** | Plain Markdown only — no F5 gate, no audit, no ledger. Makes **no** PortableHandoff claim. |
-| (b) | **Certified light /distill** | One F5 pass (incl. the prose-only deletion test) + one leak / durable-pointer audit; no CorrectionDelta ledger (that is the DurableRepo / tier-(c) path) — a correction surfaces at the Gate. |
-| (c) | **Heavy /distill** | Full refuter + watchlist + residual Gate + `CorrectionDelta` ledger + leak lint + convergence evidence + re-distillation (the DurableRepo path). |
+| Draft | **Uncertified draft** | No Diylisis pass has run against `target` — plain Markdown, no F5 gate, no leak / durable-pointer audit. No Certificate has been issued against `target`. |
+| Certified | **Certified `/distill`** | One always-on F5 comprehension-gate Pass (realization recorded in the verdict) + one leak / durable-pointer audit, reaching fixed point. A Certificate has been issued against `target`: the F5 gate reached Pass under the realization its verdict records (refuter subagent, generic subagent, or lint fallback — the label claims exactly that realization's rigor), every judgment basis is grounded, and the audit cleared. |
 
-**Honest-label rule**: the formal `converge` transition fires at any tier that reaches a fixed point with a Pass verdict — tier (b) included, so a certified-light handoff formally converges and emits a legitimate `PortableHandoff`. The assurance **label** "converged /distill" is narrower: it is reserved for the tier-(c) full-assurance fixed point with a Pass verdict. A skipped-refuter artifact (tier (a)) is a **draft / degraded handoff** — never a `PortableHandoff`, never "converged /distill". Tier (b) is the floor for the PortableHandoff claim.
+Because the F5 dispatch is unconditional — every certification pass runs the full gate under the strongest realization the platform offers, no optional lighter layer — there is no partial-rigor middle tier: `target` either has never been through F7 (Draft) or has a completed pass's Certificate issued against it (Certified). The label certifies `target` together with its emitted activation edge; a later edit outside Diylisis, or a certification dispatched under a substituted edge, breaks the verified reception conditions — and the break is receiver-detectable: the Certificate carries the certified state's identity (a revision-fixed form or content digest), and the reception procedure's lead step re-checks it, so a stale Certificate is caught at reception rather than trusted.
 
 ## Known Limitations
 
-- **Ledger writes scoped to re-distillation**: F3b consumes the `CorrectionDelta` ledger read-only; the F7 re-distillation emit appends to it (Rule 19). The mechanism that records correction deltas mid-session is a separate, deferred concern.
-- **First wired surface**: plan-level handoff is the first wired surface for `/distill`; session-mid pruning and subagent handoff accrue as later surfaces.
+- **Reception-procedure re-verification is receiver-owned**: the emitted dereference steps are what the receiver runs with its own tools; Diylisis does not itself confirm the receiver actually re-ran them.
+- **First wired surface**: plan-level certification is the first wired surface for `/distill`; session-mid pruning and subagent handoff accrue as later surfaces.
 
 ## Install
 
@@ -81,7 +78,7 @@ claude plugin install diylisis@epistemic-protocols
 ## Usage
 
 ```
-/distill [optional next-task or recipient]   # Distill a working context into a portable handoff
+/distill [target record] [recipient role]   # Certify an existing record's portability for a declared recipient
 ```
 
 ## License
