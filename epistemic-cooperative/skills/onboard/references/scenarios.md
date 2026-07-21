@@ -267,7 +267,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Trial prompt**: "Let's practice: say 'Certify this task description for a fresh implementer session' and I'll show how /distill normalizes the session-only references, repairs what it can in place, and surfaces what cannot be resolved"
 
-**Quiz Q (situation)**: You paste yesterday's working notes into a brand-new chat and ask it to continue. It immediately asks what "the earlier approach" means and which file "that config" was — the notes assumed context only the old session had.
+**Quiz Q (situation)**: Today's session is wrapping up, and its working notes — leaning on "the earlier approach" and "that config" — are saved as the record a brand-new chat will continue from tomorrow. Handed over as-is, the fresh chat would stall on every one of those session-only references.
 - A) Anamnesis `/recollect` — B) Diylisis `/distill` — C) Aitesis `/inquire` — D) Epharmoge `/contextualize`
 - Answer: B
 

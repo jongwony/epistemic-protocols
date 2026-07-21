@@ -60,7 +60,7 @@ Region = a contiguous extent of the work body not yet cut into a unit — the pa
 Joint  = { locus: WBSRef, kind: JointKind, evidence: Set(Evidence) }  -- a candidate cut point in the WBS
 JointKind ∈ {milestone_boundary, dependency_seam, deliverable_edge, emergent}  -- recognition seeds for where a cut can fall (NOT a closed set — emergent admits a joint the seeds do not name; the user may name one)
 Evidence = { source: String, content: String }
-SpanFit ∈ {Fits, Overflows, Underfills}  -- the per-unit fit verdict against (horizon × lifecycle): Fits = one span; Overflows = too big for one span (split); Underfills = too small to warrant its own span (merge). Composes /distill's portability-certification standard as the Fits predicate
+SpanFit ∈ {Fits, Overflows, Underfills, Unportable}  -- the per-unit fit verdict against (horizon × lifecycle): Fits = one span; Overflows = too big for one span (split); Underfills = too small to warrant its own span (merge); Unportable = the capacity leg holds but the portability leg fails — the counterfactual externalized record would not certify portable for the receiving span: a boundary defect, not a size defect, disposed by MoveCut (re-cut at a joint whose record can certify), never by split/merge. Composes /distill's portability-certification standard as the Fits predicate
 Cut    = a committed delimitation at a Joint — the boundary between two units
 CutSet = Set(Cut)  -- the partition; the search output and the loop's accumulating state
 WorkUnit = { id: String, region: Region, refs: List(WBSRef), fit: SpanFit }  -- an "execution_cut" view over the WBS: it references issue ids (refs) and does NOT copy their content; it floats between milestone and issue granularity (a unit may span part of a milestone or several issues). One span's worth of work
@@ -68,7 +68,7 @@ Anchor = the highest-leverage uncut Region surfaced this cycle (the region whose
 SingleDominantCut(Anchor, proposed_cut) ≡ pack(...) finds no viable alternative joint for this Anchor — proposed_cut is the region's only joint candidate, so MoveCut/SplitUnit/MergeUnits have no genuine target and AcceptCut is the sole non-trivial disposition (option-level entropy → 0, Rule 11)
 A      = CutDisposition ∈ {AcceptCut, MoveCut(joint), SplitUnit(joint), MergeUnits(neighbor)}  -- the per-cycle user answer over the proposed cut; presented intact per gate integrity
          -- AcceptCut: adopt the proposed unit (SpanFit = Fits) as a committed WorkUnit
-         -- MoveCut(joint): the cut should fall at a different joint — re-delimit the region's boundary
+         -- MoveCut(joint): the cut should fall at a different joint — re-delimit the region's boundary (also the Unportable disposition: move the boundary so the unit's externalized record can certify portable)
          -- SplitUnit(joint): the proposed unit Overflows one span — cut it again at an interior joint into two units
          -- MergeUnits(neighbor): the proposed unit Underfills — merge it with an adjacent region into one span-unit
          -- termination intent (Sufficient) surfaces via free-response affordance, NOT as an extra option in CutDisposition
@@ -106,7 +106,7 @@ Per-cycle re-scan: Phase 1 re-reads the WBS each cycle; the anchor is drawn from
 Cycle 1 anchor: the highest-leverage region — the one whose cut most constrains the rest of the partition (typically the largest Overflows region or a hard dependency seam).
 Cycle k≥2 anchor: the cut settled at cycle k-1 routes the next scan toward the regions adjacent to it; AI re-applies leverage ordering within that frame.
 
-Packing search (the irreducible core): `pack(joints, horizon, lifecycle)` proposes the cut-set by fitting each candidate region against the span budget (horizon × lifecycle) — an Overflows region invites an interior cut (split), an Underfills region invites a merge with a neighbour, a Fits region anchors a unit. The search seeks the cut-set satisfying all three invariants; the user constitutes each cut, so the search proposes and the gate disposes.
+Packing search (the irreducible core): `pack(joints, horizon, lifecycle)` proposes the cut-set by fitting each candidate region against the span budget (horizon × lifecycle) — an Overflows region invites an interior cut (split), an Underfills region invites a merge with a neighbour, a Fits region anchors a unit, and an Unportable unit (capacity holds, the certification counterfactual fails) invites a boundary move to a joint whose record can certify. The search seeks the cut-set satisfying all three invariants; the user constitutes each cut, so the search proposes and the gate disposes.
 
 Convergence evidence: At convergence, present the transformation trace — per committed WorkUnit, (Anchor region → Cut at joint → SpanFit → disposition), plus the residual disposition (each autonomous_pack cut with its joint + Extension-default basis), plus the InvariantStatus (all three invariants, with the coverage check shown). The WorkUnitMap is presented as a separate session-text artifact carrying the WBS reference and the cut_set. Convergence is demonstrated, not asserted.
 
@@ -272,7 +272,7 @@ Re-scan the WBS for the current cycle, find the natural joints, and run the pack
 - **Cycle**: `cycle_n` (always visible)
 - **Anchor region**: the uncut region under judgment — what work it covers, cited from the WBS (issue ids, milestone)
 - **Proposed cut**: where the AI proposes the cut falls (the joint) and the resulting unit
-- **Span-fit verdict**: Fits / Overflows / Underfills, with its basis (the horizon × lifecycle estimate, composing `/distill`'s portability-certification standard)
+- **Span-fit verdict**: Fits / Overflows / Underfills / Unportable, with its basis (the horizon × lifecycle estimate, composing `/distill`'s portability-certification standard)
 - **Cut-set snapshot**: the units settled so far (each `region → cut at joint → fit`) and the residual regions still uncut
 - **Joint candidates**: the natural joints found this cycle (milestone boundary, dependency seam, deliverable edge) with WBS citations
 

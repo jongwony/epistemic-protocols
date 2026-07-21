@@ -50,7 +50,7 @@ Gate에서, 표면화된 residual 또는 unknown-provenance 항목은 `Resolve |
 
 ## 출처 하드라인(The Provenance Hard Line)
 
-F3b는 항목의 *외관*으로 KEEP을 추론하지 않습니다. KEEP은 정확히 두 경로로만 도달합니다: **ObservedKeep** — durable·직접 관측 가능 출처(파일 읽기, 명령 출력, PR/이슈 URL, durable stable-ref)로 support-integrity를 통해 값과 결합됨 — Gate 없이 직접 KEEP — 또는 Gate에서의 사용자 **Resolve**. 관측 기반이 없는 항목은 **Unknown** — KEEP으로 기본 처리되지 않고 Gate에서 사용자 판정으로 표면화됩니다. ObservedKeep은 저자의 미검증 신념이 아니라 수신자가 재관측 가능한 외부 기반에 대한 relay이므로, (단순 currency가 아닌) support-integrity가 기준이며 불확실/이견 기반은 보수적으로 Unknown입니다. **correction이 필요한 주장** — 관측 출처에서 벗어난 주장 — 은 ObservedKeep이 될 수 없으며, Gate에서 사용자 Resolve로 표면화됩니다. 결정-형태 내용은 이 KEEP 시험을 통과하는 대신, 그 근거가 사는 영속 레코드(이 저장소: git)를 가리키는 `DecisionRecord`를 운반합니다.
+F3b는 항목의 *외관*으로 KEEP을 추론하지 않습니다. KEEP은 정확히 두 경로로만 도달합니다: **ObservedKeep** — durable·직접 관측 가능 출처(파일 읽기, 명령 출력, PR/이슈 URL, durable stable-ref)로 support-integrity를 통해 값과 결합됨 — Gate 없이 직접 KEEP — 또는 Gate에서의 사용자 **Resolve**. 관측 기반이 없는 항목은 **Unknown** — KEEP으로 기본 처리되지 않고 Gate에서 사용자 판정으로 표면화됩니다. ObservedKeep은 저자의 미검증 신념이 아니라 수신자가 재관측 가능한 외부 기반에 대한 relay이므로, (단순 currency가 아닌) support-integrity가 기준이며 불확실/이견 기반은 보수적으로 Unknown입니다. **correction이 필요한 주장** — 관측 출처에서 벗어난 주장 — 은 ObservedKeep이 될 수 없으며, Gate에서 사용자 Resolve로 표면화됩니다. 포인터-기반 관측 항목 — durable 출처가 인라인이 아니라 안정 참조로 인용된 항목 — 은 같은 relay 근거 위에서 ROUTE로 운반되어, 인증서의 Value/Reference 판정이 항상 그 증거와 타입이 일치합니다. 결정-형태 내용은 그 근거가 사는 영속 레코드(이 저장소: git)를 가리키는 `DecisionRecord`를 추가로 운반합니다 — F1에서 결속되며, 모든 항목이 거치는 출처·처분 시험을 대체하는 것이 아니라 병행합니다.
 
 ## 보증 등급(Assurance Tiers)
 
