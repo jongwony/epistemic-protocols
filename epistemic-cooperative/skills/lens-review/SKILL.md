@@ -71,7 +71,7 @@ The diff headers are the authoritative source for file fate and the hunks carry 
 
 ## Phase 2: Framed-Lens Review (isolated analysis → adversarial cross-verification)
 
-`/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here, in the skill, not routed to `/conduct`. Review **only the changed files**.
+`/frame` forms the parallel perspectives; this skill then describes the substrate that analyzes and adversarially verifies them **directly** — the isolated-then-adversarial arrangement is recorded here in the skill itself. Review **only the changed files**.
 
 **Lens framing.** Call `/frame` (prothesis) to derive the review perspectives that fit the changed files, and `/gap` (syneidesis) for the gap audit. `/frame` selects the lenses appropriate to the diff — for a formally-structured change these are often morphism-coherence, type-soundness, and evaluation-order lenses, but the panel is `/frame`'s to determine, not a fixed list baked into this skill. Each derived lens is one isolated perspective; the gap dimensions audited by `/gap` are:
 
@@ -116,7 +116,7 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 
 1. **Changed files only** — review the files in the Phase 1 diff and nothing else; the diff headers are authoritative for file fate, the hunks for line-level evidence.
 2. **Frame-derived lenses** — the review panel is not fixed at definition time; `/frame` selects the lenses fitting the diff. A project needing a fixed panel pins it in a project-skill specialization, not by hard-coding lenses here.
-3. **Isolated lenses, then adversarial cross-verification** — each lens forms its findings in isolation (independence-before-contamination); the aggregated findings then pass a single adversarial refutation pass before posting. Surviving findings proceed; defeated findings are recorded in the consolidated comment as refuted with cited basis. The isolated-then-adversarial substrate is described in this skill directly, not routed to `/conduct`.
+3. **Isolated lenses, then adversarial cross-verification** — each lens forms its findings in isolation (independence-before-contamination); the aggregated findings then pass a single adversarial refutation pass before posting. Surviving findings proceed; defeated findings are recorded in the consolidated comment as refuted with cited basis. The isolated-then-adversarial substrate is described in this skill directly.
 4. **Confidence ≥ 80%** — only report findings at or above the confidence threshold; trivial changes (e.g. version bumps) are stated briefly and skipped rather than padded with low-value findings.
 5. **Verify before post** — run the Phase 3 direction-error guard against the diff-header fate before any comment is posted; an Added-but-described-as-deleted file augments the review with a direction-misread warning.
 6. **Substrate writes route to harness permission** — posting the consolidated PR comment is an external, human-visible GitHub mutation; surface what will be posted and let the harness gate the execution. The skill does not absorb that substrate decision.
