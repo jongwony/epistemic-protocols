@@ -143,7 +143,10 @@ Stateless: Prosoche terminates at emission. No state survives into the execution
 no session approvals, no per-action classification, no mid-execution checkpoint.
 Convergence evidence: at emission, present the compilation trace — for each b ∈ Bₛ:
 (b.kind, b.evidence) → κ.condition, or its accepted-uncovered residual disposition;
-for each b ∈ Bₓ: the out-of-scope declaration with its substrate.
+for each b ∈ Bₓ: the out-of-scope declaration with its substrate;
+when Λ.unbounded_approved: the recorded unbounded acceptance, with its Qt site and cited loop cue.
+The Phase 1 ApproveUnbounded path closes as no_compile before emission — there its record
+surfaces in the no_compile presentation instead (same visibility obligation, different venue).
 Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
@@ -171,7 +174,7 @@ Phase 0 evidence     (observe)      → Read, Grep (optional evidence gathering 
 Phase 1 Normalize    (sense)        → Internal analysis (split-signal decomposition into Slow/Fast parts)
 Phase 1 Partition    (sense)        → Internal analysis (velocity classification per signal)
 Phase 1 OOS          (extension)    → TextPresent+Proceed (fast-risk out-of-scope declaration with substrate handoff note)
-Phase 1 no_compile   (extension)    → TextPresent+Proceed (Bₛ = ∅ outside a loop-type interval, or after a recorded unbounded approval: nothing to compile; the absent termination coverage is named in the presented partition; deactivate)
+Phase 1 no_compile   (extension)    → TextPresent+Proceed (Bₛ = ∅ outside a loop-type interval, or after a recorded unbounded approval: nothing to compile; the absent termination coverage is named in the presented partition, and a recorded unbounded approval is presented with it — its cited loop cue included — so the acceptance stays visible despite closing before emission; deactivate)
 Phase 1 Qt           (constitution) → present (conditional: Bₛ = ∅ ∧ loop_interval(C) — termination-absence confirmation before an unguarded loop interval: define the stop criterion now / route its definition to /bound / approve running unbounded) [Tool]
 Phase 2 Qt           (constitution) → present (conditional: loop_interval(C) with no termination-kind signal in the compile set — ¬termination_present(Bₛ), presence not coverage; a present-but-residual termination signal closes through Qc instead; fires once per pass, before Qc; same judgment coproduct as Phase 1 Qt) [Tool]
 Phase 2 ApproveUnbounded (track)    → Internal state update (on ApproveUnbounded: record Λ.unbounded_approved, materializing the informed acceptance for the convergence predicate)
