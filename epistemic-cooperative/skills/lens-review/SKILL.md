@@ -1,6 +1,6 @@
 ---
 name: lens-review
-description: "A frame-driven multi-perspective PR review that posts findings as a single consolidated PR comment. /frame derives the review perspectives that fit the diff — for a formally-structured change, often morphism, type, or evaluation-order lenses — plus a gap scan, over only the files changed in a PR. Each lens analyzes in isolation (independence-before-contamination), then the findings are adversarially cross-verified before surviving ones are posted as a single consolidated comment. Composes prothesis:frame for lens framing and syneidesis:gap for the gap audit; the isolated-then-adversarial substrate is described in the skill, not routed to /conduct. The lens panel is not fixed at definition time — a project that needs a fixed panel specializes this skill in a project skill. User-invoked via /lens-review. Sibling of /review-loop (applies fixes to convergence) and /comment-review (markdown artifacts)."
+description: "One-pass multi-perspective PR review that posts findings as a single consolidated PR comment. /frame derives the review lenses that fit the diff, plus a gap scan, over only the files changed in a PR; each lens analyzes in isolation, then the findings are adversarially cross-verified before the survivors are posted. Composes prothesis:frame and syneidesis:gap. User-invoked via /lens-review."
 skills:
   - prothesis:frame
   - syneidesis:gap
@@ -42,13 +42,7 @@ The skill's identity is a frame-derived lens panel applied once over a PR diff a
 - One-pass multi-perspective review of a PR from the epistemic lenses `/frame` derives for the diff, plus a gap audit
 - You want the findings posted back to the PR as a single consolidated comment for human reviewers to consume
 - The change benefits from several structural perspectives held in isolation and then adversarially cross-checked
-- Need the *same* fixed lens panel every run (e.g. a formal triple)? Specialize this skill in a project skill that pins the lenses — see Composition Lineage
-
-## When NOT to Use
-
-- Driving review findings all the way to fixed (apply-and-converge) — that is `/review-loop` (this skill posts comments, it does not apply fixes)
-- Reviewing a markdown artifact before fixation — that is `/comment-review` (this skill targets a PR code diff and posts GitHub comments)
-- A general correctness-bug review with no lens framing — call `/review-loop` with the built-in `code-review` source directly
+- Need the *same* fixed lens panel every run (e.g. a formal triple)? A project pins those lenses in its own project skill and reuses this isolated→adversarial→consolidated-comment pipeline; the fixed panel lives in the project layer while this plugin skill stays general
 
 ## Phase 0: Scope Detection + Free-Exit
 
@@ -129,15 +123,3 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 7. **Context-question separation at gates** — present all analysis and evidence as text before any gate; a gate carries only the question and the options with their differential implications.
 8. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the user-facing surface.
 9. **One consolidated comment** — all surviving findings go in a single PR comment, each referencing its `path:line` in text; preserve lens tags and severity on every finding; skip duplicates.
-
-## Composition Lineage
-
-Sibling of `review-loop` and `comment-review`. All three surface review findings, but they differ in what they target and what they do with the findings:
-
-- `/lens-review` is a **one-pass frame-driven review that POSTS a single PR comment** for human reviewers — `/frame` derives the lenses that fit a PR diff, plus a gap scan, and the findings are written back as a single consolidated GitHub comment. It does not apply fixes and does not loop.
-- `/review-loop` is **convergence-paced** — it drives a pluggable review source (`codex` | `code-review`) and applies fixes to verdict-convergence (ends when the source verdict reaches approve), gating the judgment calls.
-- `/comment-review` targets **markdown artifacts before fixation** and surfaces findings through a browser sidepanel, user-paced.
-
-**Project specialization.** Because the lens panel is `/frame`-derived, a project that always wants the *same* fixed panel — for example a formal category-theory ∥ type-theory ∥ operational-semantics triple for protocol review — specializes this skill in its own project skill that pins those lenses and otherwise reuses the same isolated→adversarial→consolidated-comment pipeline. The fixed panel lives in the project layer; this plugin skill stays general.
-
-`/lens-review` composes `/frame` (prothesis) to derive the lenses and `/gap` (syneidesis) for the gap audit. The posting step is a substrate write routed to the harness permission layer, not an in-skill gate.

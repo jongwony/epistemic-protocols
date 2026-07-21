@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: "Convergence-paced code/PR review-resolve loop via /review-loop. Drives a pluggable review source (codex | code-review), passing it the design intent already captured for the changed surface (relevant project rules + adjacent design comments + decisions constituted at the loop's own gates, with a mission-anchored severity steer) so intentional documented choices are pre-filtered upstream, verifies each finding against the codebase (/inquire) and work-flow (/contextualize), auto-applies Mechanical fixes (Extension) and gates Judgment fixes by shared disposition (Constitution), risk-screens applies (substrate risk → harness permission; epistemic risk → direct Constitution), then re-reviews until the source verdict converges to approve — recurring signals escalate to constituted design decisions rather than suppression, keeping the reviewer independent. At exit, converged or free, a decision constituted at its gates is offered for durable record on the home its reach implies (for a PR scope, the issues the PR closes), never as a condition of exiting. User-invoked via /review-loop."
+description: "Convergence-paced review-resolve loop over code/PR diffs. Drives a pluggable review source (codex | code-review), verifies each finding against the codebase and the work-flow, auto-applies mechanical fixes and gates judgment fixes with the user, then re-reviews until the source verdict reaches approve. User-invoked via /review-loop."
 skills:
   - aitesis:inquire
   - epharmoge:contextualize
@@ -51,9 +51,6 @@ The loop is the skill's identity; the review source is a parameter behind it. Lo
 
 ## When NOT to Use
 
-- Reviewing a markdown artifact before fixation — that is `/comment-review` (this skill targets code/PR diffs)
-- Wanting a one-shot review with no apply phase — call a source directly (the codex CLI or `/code-review`); for a cross-model composition, assemble it with `/conduct` (frame supplies the lenses, conduct arranges the review topology) — `/review-loop` is the loop that drives findings to approve
-- Wanting to resolve ONLY findings your PR's own changes introduced (not pre-existing issues surfaced in the touched files) — `/review-loop` drives the whole changed surface to convergence; for a PR-introduced-only pass, use a one-shot reviewer (the codex CLI or `/code-review`) and triage manually
 - Trivial single-line edits where a direct Edit is faster than a review loop
 
 ## Phase 0: Source Designation + Scope Detection
@@ -311,18 +308,3 @@ At exit — converged or free — surface each ledger entry with the durable hom
     boundary and the Phase 0 design-intent harvest, not to invent a new scope restriction
     on the reviewer: a restriction manufactured to force convergence is the suppression
     regime under a different name, and courts the same manufactured approve Rule 9 forbids.
-
-## Deferred (v1.x stretch)
-
-Out of v1 scope, recorded so the source interface stays forward-compatible:
-
-- **Live-teammate driving** — driving an already-active teammate via SendMessage rather than spawning a fresh source per round. No codebase precedent yet; spawn-and-wait (background launch + collect on notification) is the current pattern.
-- **`/frame` as a direct single source** — using `/frame` standalone as a source behind the same interface.
-- **Cross-model composite via `/conduct`** — a user-assembled arrangement (frame-supplied lenses + codex, arranged by `/conduct`) as a source behind the same interface.
-- **`/sublate` + `/gap` in the verify step** — adding `/sublate` (evidence-currency stress test) and `/gap` (decision-quality audit) alongside `/inquire` and `/contextualize` in Phase 2.
-
-## Composition Lineage
-
-Sibling of `comment-review`: both are review-resolve loops, but `/review-loop` targets code/PR diffs where `/comment-review` targets markdown artifacts before fixation. Termination differs — `/review-loop` is convergence-paced (it ends when the source verdict reaches approve), where `/comment-review` is user-paced (rounds end when the user answers the branch gate). The judgment venue differs too — `/review-loop` gates Judgment findings through a disposition-cluster chat scope-gate, where `/comment-review` surfaces findings through a browser sidepanel.
-
-`/review-loop` drives pluggable review sources (`codex` directly, or the built-in `code-review`). It composes `/inquire` (codebase verification) and `/contextualize` (work-flow fit), and screens applies for risk directly — substrate risk routes to the harness permission layer, epistemic risk to an in-loop Constitution decision.
