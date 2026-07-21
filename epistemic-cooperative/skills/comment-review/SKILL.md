@@ -40,7 +40,7 @@ Phase L  : loop iteration k
 free-exit : user may end the review at any time by saying so (Phase 0 prose declares this once)
 ```
 
-4 protocols composed inside each `apply + scan` round's scan step (only when the user picks that option; `apply`-only sessions run 0 sub-protocol audits). `/sublate` joins the scan as a *range expansion* — it does NOT add a new round-mode option, the Phase L gate stays 2-option (`apply + scan` / `apply`). The loop is outer; sub-protocol Constitution semantics persist but their judgment venue moves from in-round chat to next-round sidepanel disposition (see "Why No Gate Reduction" below). Each iteration boundary surfaces exactly one branch gate. Findings surfaced by the scan are materialized into the harness-managed TaskList file with the source protocol's disposition coproduct attached, rendered in a browser sidepanel for the next round so the user can recognize per-finding state without leaving the rendered preview; resolution flows through the response popup (click finding → type response → submit; comment auto-tagged with `[task: <id>]`) or chat (TaskUpdate). Round-mode decisions stay in chat — modality cleanliness preserved.
+4 protocols composed inside each `apply + scan` round's scan step (only when the user picks that option; `apply`-only sessions run 0 sub-protocol audits). `/sublate` joins the scan as a *range expansion* — it does NOT add a new round-mode option, the Phase L gate stays 2-option (`apply + scan` / `apply`). The loop is outer; sub-protocol Constitution semantics persist but their judgment venue moves from in-round chat to next-round sidepanel disposition (see Channel Modality). Each iteration boundary surfaces exactly one branch gate. Findings surfaced by the scan are materialized into the harness-managed TaskList file with the source protocol's disposition coproduct attached, rendered in a browser sidepanel for the next round so the user can recognize per-finding state without leaving the rendered preview; resolution flows through the response popup (click finding → type response → submit; comment auto-tagged with `[task: <id>]`) or chat (TaskUpdate). Round-mode decisions stay in chat — modality cleanliness preserved.
 
 ## When to Use
 
@@ -53,7 +53,6 @@ free-exit : user may end the review at any time by saying so (Phase 0 prose decl
 ## When NOT to Use
 
 - Trivial artifacts (single sentence, typo, comment fix) — direct Edit suffices
-- Code-centric changesets where `/review` is the right tool
 - One-shot artifacts the user does not intend to revise
 
 ## Phase 0: Channel Open
@@ -220,6 +219,8 @@ The disposition tag convention `[disposition: <variant>] [task: <task-id>]` rema
 
 Modality cleanliness preserved: the response popup is the existing comment-collection surface (extended with finding context + auto-tag); round-mode decisions and explicit closes still flow through chat.
 
+Sub-protocol Constitution gates are relocated to this channel: each sub-protocol's Phase 2 coproduct materializes as the disposition affordance on the corresponding TaskList entry, and the user judges it in the next round's sidepanel. Every audit finding is therefore judged by the user before it becomes an edit; the venue is the sidepanel and the timing is the next round, leaving one round-mode decision per iteration in chat.
+
 ### Anchor Assignment (UUID-based, ambiguity-free)
 
 When a scan finding has a text-anchored target in the source markdown, the AI references the rendered HTML preview to identify the unique span (rendered DOM position is unambiguous; markdown substring may not be — e.g., repeated phrases like "Phase 1" or "the user"), generates a UUID, and wraps the target span in source markdown:
@@ -278,21 +279,6 @@ An `apply`-only round skips the scan step entirely. It runs the apply step exact
 
 Apply step tools are restricted to Edit / Write + `TaskUpdate` — sub-protocol invocation belongs to the `apply + scan` mode's scan step only. The "wait without consuming" affordance is implicit in not yet answering the gate — the user may keep drag-commenting and disposing in the browser; consumption happens only when the user responds.
 
-## Why No Gate Reduction
-
-Sub-protocol Constitution gates are **not elided** — they are **relocated**. All four protocols require Constitution user judgment on answers not entailed by upstream protocol outputs:
-- `InformedExecution` (Aitesis output) does not entail the per-source disposition judgment Elenchus asks
-- `VettedContext` (Elenchus output) does not entail the `{Address, Dismiss, Probe}` judgment Syneidesis asks
-- `AuditedDecision` (Syneidesis output) does not entail the `{Confirm, Adapt, Dismiss}` judgment Epharmoge asks
-
-In a standalone invocation, each sub-protocol's Phase 2 fires as an in-round chat gate, the user judges, and edits follow. In this pipeline, the Phase 2 coproduct is **materialized into the corresponding TaskList entry's disposition affordance** in the next round's sidepanel; the user's per-finding judgment expresses through sidepanel clicks (and tagged comments), and the next apply step translates that judgment into edits + `TaskUpdate` calls. Constitution semantics — every audit finding is judged by the user before becoming an edit — are preserved without loss; only the venue (chat → sidepanel) and timing (in-round → next-round) shift.
-
-The composition's value is therefore structural, not interaction-reducing:
-1. **Signature unification** — caller supplies `(artifact, D, context)` once; the composition distributes
-2. **Scope differentiation inscribed** — Named 4-scope + Emergent clause bypasses two suppression edges at pipeline level
-3. **Channel-first modality with cross-round sidepanel disposition** — rendered preview is opened in Phase 0 and persists across iterations; the sidepanel surfaces per-finding state with disposition affordances from the TaskList file across rounds; sub-protocol scans materialize findings whenever the user picks `apply + scan`, and the user judges them through the sidepanel rather than through in-round chat gates
-4. **Loop branch gate at the iteration boundary, in-round chat gate count = 1** — single 2-option Constitution gate (`apply + scan` / `apply`) controls AI processing depth; per-finding sub-protocol Constitution judgments are deferred to next-round sidepanel rather than firing as additional in-round chat gates, compressing in-round chat traffic to one decision per round while preserving the per-finding judgment cardinality across rounds. `/sublate` joins as a scan range expansion, NOT a peer round-mode option (it shares the audit-depth axis with the other scan steps, not a distinct downstream trajectory at the round-mode level). Termination is a free-response pathway declared once in Phase 0; "wait and add more comments / dispose findings" is implicit in not yet answering the gate.
-
 ## Materialized View
 
 On user-explicit termination (free-response exit), present the transformation trace as aggregated totals — not a per-round breakdown. Round-level visibility belongs to the in-loop pre-gate prose (Phase L); the materialized view is the audit summary.
@@ -350,7 +336,3 @@ Suffix-replay rules (apply within a single `apply + scan` round's scan step — 
 - `scripts/serve.ts` — Bun-based live server; `bun scripts/serve.ts <artifact.md|artifact.html> [more...]`. Picks the render mode from the file extension and injects it into the preview; handles GET/POST/WebSocket; `node:fs.watch` triggers reload broadcasts.
 - `templates/preview.html` — interactive preview with anchored comment popup, WebSocket hot-reload client, dark-mode support. Renders markdown via marked into the light DOM (drag-select text anchoring) or raw HTML through a Shadow DOM (right-click element → CSS-selector anchoring, with hover outline + live selector chip).
 - `templates/marked.min.js` — bundled marked.js markdown renderer (markdown mode only; not used in HTML mode).
-
-## Composition Lineage
-
-Authored via `/compose`. Supersedes the legacy `/write-review` skill by generalizing the domain scope from blog-specific ("publish") to artifact-agnostic (caller-supplied fixation event + application context). Sub-protocol scope differentiation and channel-loop mechanism carry forward unchanged; changes are at the orchestration and signature layers. `/sublate` (Elenchus) was added later as a scan range expansion per a 2-cycle `/elicit` design session: the loop branch gate stays 2-option, the scan grows from 3 sub-protocols to 4, and finding visibility extends through a TaskList-backed sidepanel — preserving the modality split (browser collects, chat decides) while making per-finding state recognizable across rounds. A subsequent `/inquire` cycle then revealed that the original `scan + apply` framing conflated the apply step (this round's queued comments → edits) with the in-round firing of sub-protocol Constitution gates, which empirically required multiple chat turns per round-mode commitment. The corrected design renames `scan + apply` → `apply + scan` to make the cross-round nature visible and relocates sub-protocol Phase 2 judgment from in-round chat to next-round sidepanel disposition affordances, preserving Constitution semantics while compressing in-round chat traffic to a single round-mode decision per iteration.

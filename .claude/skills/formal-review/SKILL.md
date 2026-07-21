@@ -1,6 +1,6 @@
 ---
 name: formal-review
-description: "This skill should be used when the user asks to \"formal review\", \"formal lens review\", \"review this PR with the formal triple\", or invokes /formal-review. A fixed-lens multi-perspective PR review specialized for this repository's formally-structured protocol changes: it pins a Category Theory / Type Theory / Operational Semantics lens panel plus a gap scan over only the files changed in a PR, analyzes each lens in isolation, adversarially cross-verifies the findings, and posts the survivors as a single consolidated PR comment. Self-contained project specialization of the frame-driven /lens-review (epistemic-cooperative): it composes /frame for lens framing and /gap for the gap audit, but pins the panel here rather than letting /frame derive it. Project-local contributor tooling."
+description: "This skill should be used when the user asks to \"formal review\", \"formal lens review\", or invokes /formal-review. A fixed-lens PR review for this repository's formally-structured protocol changes: it pins a Category Theory / Type Theory / Operational Semantics lens panel plus a gap scan over only the files changed in a PR, analyzes each lens in isolation, adversarially cross-verifies the findings, and posts the survivors as a single consolidated PR comment. Project-local contributor tooling."
 allowed-tools: Bash, Read, Grep, Glob, Task, Skill
 skills:
   - prothesis:frame
@@ -47,13 +47,6 @@ The skill's identity is the **fixed formal lens panel** applied once over a PR d
 - One-pass review of a formally-structured protocol change on this repository's standing formal axes — morphism/type/evaluation-order coherence — plus a gap audit, every run on the same three lenses
 - You want the findings posted back to the PR as a single consolidated comment for human reviewers to consume
 - The change touches protocol formal blocks (`TYPES`, `PHASE TRANSITIONS`, `MORPHISM`, `LOOP`, `CONVERGENCE`) where the formal triple is the load-bearing review axis
-
-## When NOT to Use
-
-- You want the review lenses derived from the diff rather than the fixed formal triple — that is the general `/lens-review` (epistemic-cooperative)
-- Driving review findings all the way to fixed (apply-and-converge) — that is `/review-loop` (this skill posts a comment, it does not apply fixes)
-- Reviewing a markdown artifact before fixation — that is `/comment-review` (this skill targets a PR code diff and posts a GitHub comment)
-- A general correctness-bug review with no formal-lens framing — call `/review-loop` with the built-in `code-review` source directly
 
 ## Phase 0: Scope Detection + Free-Exit
 
@@ -138,14 +131,3 @@ If the scope is a working tree (no PR), there is no PR to post to — present th
 7. **Context-question separation at gates** — present all analysis and evidence as text before any gate; a gate carries only the question and the options with their differential implications.
 8. **Plain everyday language** in all user-facing emit — no internal protocol jargon at the user-facing surface.
 9. **One consolidated comment** — all surviving findings go in a single PR comment, each referencing its `path:line` in text; preserve lens tags and severity on every finding; skip duplicates.
-
-## Composition Lineage
-
-Project-local specialization of the general `/lens-review` plugin skill (epistemic-cooperative). Both run the same one-pass isolated→adversarial→consolidated-comment pipeline; they differ only in lens selection:
-
-- `/formal-review` (this skill) **pins** the formal triple (category theory ∥ type theory ∥ operational semantics) plus a gap scan — the fixed panel this repository's protocol work always wants. Self-contained in the project skill layer — it composes `/frame` and `/gap`, but takes no dependency on the `/lens-review` plugin.
-- `/lens-review` (plugin) leaves the panel **frame-derived** — `/frame` selects the lenses that fit the diff. The general capability; this skill is its project-specific fixed-panel specialization.
-- `/review-loop` (plugin) is **convergence-paced** — it drives a review source and applies fixes to verdict-convergence, gating the judgment calls.
-- `/comment-review` (plugin) targets **markdown artifacts before fixation** and surfaces findings through a browser sidepanel, user-paced.
-
-This skill composes `/frame` (prothesis) to frame the fixed lenses and `/gap` (syneidesis) for the gap audit. The posting step is a substrate write routed to the harness permission layer, not an in-skill gate.
