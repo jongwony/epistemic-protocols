@@ -26,7 +26,7 @@ Prosoche(C) →
     Vₜ = RouteBound       → deactivate           -- Rerouted: termination domain goes to /bound; a later /attend recompiles fresh
     Vₜ = ApproveUnbounded → Λ.unbounded_approved := true   -- recorded acceptance; at the Bₛ = ∅ site this closes as no_compile
   Qc(K, R) → Stop → V →
-    V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → Qc(K, R)
+    V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → Qc(K, R)   -- over the same Bₛ: K' ∪ R' spans every b (no removal; withdrawn → residual)
     V = Confirm   → AcceptResiduals(R) → Emit(K)[TaskCreate] → G →    -- remaining residuals recorded into Λ.accepted, never emitted
   converge(compilation trace) → SituatedExecution
 
@@ -122,7 +122,7 @@ Phase 2: ∀b∈Bₛ: Compile(b) → κ ∨ ρ → (K, R)                -- comp
              Vₜ = RouteBound       → deactivate            -- Rerouted
              Vₜ = ApproveUnbounded → Λ.unbounded_approved := true
            Qc(K, R) → Stop → V                             -- confirmation [Tool]
-           V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → re-present Qc(K, R)   -- Sharpen rides as an Adjust direction
+           V = Adjust(d) → recompile(K, R, d) → (K, R) := (K', R') → re-present Qc(K, R)   -- Sharpen rides as an Adjust direction. recompile re-runs Compile under d over the SAME Bₛ: K' ∪ R' still spans every b ∈ Bₛ (κ ∨ ρ — no removal; a withdrawn or weakened condition becomes a residual), so a termination-kind signal never leaves the compile set — termination_present is Adjust-invariant, and an Adjusted-away termination condition reaches convergence as an accepted residual (termination_guarded's third branch), never as silent loss
            V = Confirm   → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.signal | ρ ∈ R} → Phase 3   -- Confirm over remaining ρ records accepted_uncovered before Phase 3
 Phase 3: Emit(K) → G [TaskCreate] → converge(compilation trace) → deactivate   -- emission + handoff [Tool]
 
