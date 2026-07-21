@@ -43,13 +43,13 @@ Invoke `/delimit` over a large body of work before it is conducted:
 /delimit cut this Linear project into execution-sized units
 ```
 
-Diairesis binds the external WBS read-only, scans it for natural joints (milestone boundaries, dependency seams, deliverable edges), and runs the packing search — proposing a cut-set whose units each fit one span. It surfaces the highest-leverage uncut region's proposed cut one at a time, with its span-fit verdict (Fits / Overflows / Underfills) and the current cut-set, for you to settle: accept the cut, move it to a different joint, split a unit that overflows, or merge one that underfills. When you signal the partition is complete, it cuts the remaining regions at their natural joints, asserts the three packing invariants — each unit fits one span, every cut on a joint, and coverage complete with no work orphaned — and emits the WorkUnitMap, which flows to `/conduct` as its work prospect.
+Diairesis binds the external WBS read-only, scans it for natural joints (milestone boundaries, dependency seams, deliverable edges), and runs the packing search — proposing a cut-set whose units each fit one span. It surfaces the highest-leverage uncut region's proposed cut one at a time, with its span-fit verdict (Fits / Overflows / Underfills / Unportable — fit composes capacity with `/distill`'s portability-certification standard) and the current cut-set, for you to settle: accept the cut, move it to a different joint, split a unit that overflows, merge one that underfills — or move the boundary of an Unportable one, whose externalized record would not certify portable for its receiving span. When you signal the partition is complete, it cuts the remaining regions at their natural joints, asserts the three packing invariants — each unit fits one span, every cut on a joint, and coverage complete with no work orphaned — and emits the WorkUnitMap, which flows to `/conduct` as its work prospect.
 
 ## Three Packing Invariants
 
 | Invariant | Meaning |
 |-----------|---------|
-| span_fit | Each unit fits one execution span (horizon × context lifecycle) |
+| span_fit | Each unit fits one execution span (horizon × context lifecycle) AND its externalized record would certify portable for the receiving span (`/distill`'s standard) |
 | natural_joint | Every cut falls at a natural joint, never mid-seam |
 | coverage_complete | The units cover the whole body with no work left outside any unit — full coverage, no orphan (HARD convergence gate) |
 
