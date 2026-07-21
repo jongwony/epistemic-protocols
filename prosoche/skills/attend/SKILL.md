@@ -85,7 +85,9 @@ termination_present(Bₛ) ≡ ∃ b ∈ Bₛ : kind(b) ∈ TerminationKind
                --   Confirm recording the acceptance), so Qt does not re-present a judgment already made
 loop_interval(C) = heuristic predicate: the upcoming interval is iterative or long-running
                -- cues: loop/retry/until semantics in the utterance, a stated long-run or autonomous-interval
-               --   intent, emission aimed at a completion-predicate enforcer; each firing cites its cue from C
+               --   intent, a context-declared autonomous or long-running enforcer run this emission is to feed
+               --   (the mere fact that emitted entries are enforcer-consumable holds for EVERY emission and is
+               --   NOT a cue — the cue is the declared run, not the output format); each firing cites its cue from C
                --   (fail-visible at the gate); ambiguous cues classify true with both readings surfaced,
                --   mirroring the conservative Slow classification at Normalize
 signal(d)      = BoundarySignal materialized from a DefineNow direction
