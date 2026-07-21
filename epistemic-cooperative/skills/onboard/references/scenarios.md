@@ -261,20 +261,20 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 ## Diylisis `/distill`
 
-**Situation**: You wrote a handoff brief so a fresh session can resume your work tomorrow. It reads complete to you, but it leans on things only this session knows — a coined label like "v4", a "do it as above" anchor, a "Task #3" with no restoration data. A new session with no memory of today would stall on every one of those.
+**Situation**: You have an existing record — a Task description, a commit message, a delegation prompt — that's about to be handed to a fresh zero-memory session. It reads complete to you, but it leans on things only this session knows — a coined label like "v4", a "do it as above" anchor, a "Task #3" with no restoration data. A fresh session with no memory of today would stall on every one of those.
 
-**Intervention**: `/distill` declares a handoff contract (who resumes, what the next task is, what sources they may read), normalizes each session-local token to a stable reference, audits each item for whether it travels on its own, judges relevance and provenance, and surfaces whatever cannot be resolved. It emits a plain-language handoff plus a structured task-state block that rehydrates the dangling task ids — so a fresh agent executes from it without asking you to fill the gaps.
+**Intervention**: `/distill` declares a certification contract naming the target record and the recipient's role, normalizes each session-local token to a stable reference, audits each item for whether it travels on its own, judges relevance and provenance, repairs resolution gaps in the record itself, and gates the result through an always-on zero-memory refuter. It issues a Certificate — already portable, or repaired with the applied deltas named — plus a reception procedure the receiver executes first, so a fresh agent works from the record itself without asking you to fill the gaps.
 
-**Trial prompt**: "Let's practice: say 'Turn my session notes into a handoff a fresh agent can run from' and I'll show how /distill normalizes the session-only references and surfaces what cannot be resolved"
+**Trial prompt**: "Let's practice: say 'Certify this task description for a fresh implementer session' and I'll show how /distill normalizes the session-only references, repairs what it can in place, and surfaces what cannot be resolved"
 
-**Quiz Q (situation)**: You paste yesterday's working notes into a brand-new chat and ask it to continue. It immediately asks what "the earlier approach" means and which file "that config" was — the notes assumed context only the old session had.
+**Quiz Q (situation)**: Today's session is wrapping up, and its working notes — leaning on "the earlier approach" and "that config" — are saved as the record a brand-new chat will continue from tomorrow. Handed over as-is, the fresh chat would stall on every one of those session-only references.
 - A) Anamnesis `/recollect` — B) Diylisis `/distill` — C) Aitesis `/inquire` — D) Epharmoge `/contextualize`
 - Answer: B
 
 **Quiz Q (design)**: You're about to hand a plan to a fresh-context subagent that shares none of your session. How would you make the plan self-contained so the subagent executes it without needing your session?
 - Hint: The problem isn't vague recall of a past session (that's `/recollect`) or missing external facts (that's `/inquire`) — it's that your current context is tethered to references only this session can resolve, and a fresh recipient needs them distilled out.
 
-**Philosophy**: διύλισις (refining, distillation) — separating what transfers from what is session-bound residue. Core principle: **Portability over Author Familiarity**. A handoff reads complete to its author because the author silently shares the missing context; a fresh recipient has none of it. Workflow position: cross-cutting — invoked when a working context is about to transfer to a session with no shared ground. Game feel: "this is obvious to me — but would a stranger get it?" → normalize the session-only references → surface what cannot be resolved → portable handoff a zero-memory agent can run.
+**Philosophy**: διύλισις (refining, distillation) — separating what transfers from what is session-bound residue. Core principle: **Portability over Author Familiarity**. A record reads complete to its author because the author silently shares the missing context; a fresh recipient has none of it. Workflow position: cross-cutting — invoked when an existing, substrate-owned record is about to reach a session with no shared ground. Game feel: "this is obvious to me — but would a stranger get it?" → normalize the session-only references → repair what can be repaired in place → certified record + reception procedure a zero-memory agent can run from.
 
 ## Hyphegesis `/conduct`
 
