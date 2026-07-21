@@ -220,8 +220,11 @@ User calls `/attend` to declare execution intent for an upcoming autonomous exec
 
 Gate predicate:
 ```
-blind(C) ≡ ∃ b ∈ Normalize(B) : velocity(b) = Slow ∧ ¬compiled(b)
--- evaluated over the normalized map: a Split-only context still yields a Slow part that must compile
+blind(C) ≡ (∃ b ∈ Normalize(B) : velocity(b) = Slow ∧ ¬compiled(b)) ∨ (loop_interval(C) ∧ ¬termination_present(Bₛ))
+-- evaluated over the normalized map: a Split-only context still yields a Slow part that must compile.
+-- Second disjunct: a loop-type interval whose compile set carries no termination-kind signal is blind
+-- even when Bₛ = ∅ — an empty guardrail set in front of a loop is itself the deficit, caught by the
+-- Phase 1 termination-absence confirmation rather than skipped as "nothing to compile"
 ```
 
 **Activation layer**:
