@@ -49,7 +49,7 @@ Diairesis binds the external WBS read-only, scans it for natural joints (milesto
 
 | Invariant | Meaning |
 |-----------|---------|
-| span_fit | Each unit fits one execution span (horizon × context lifecycle) AND its externalized record would certify portable for the receiving span (`/distill`'s standard) |
+| span_fit | Each unit fits one execution span (horizon × context lifecycle) AND its externalized record would certify portable for the receiving span (`/distill`'s standard) — or carries an explicit user-accepted override recorded on the unit (an accepted Unportable defers the portability test to the receiving span's certification) |
 | natural_joint | Every cut falls at a natural joint, never mid-seam |
 | coverage_complete | The units cover the whole body with no work left outside any unit — full coverage, no orphan (HARD convergence gate) |
 

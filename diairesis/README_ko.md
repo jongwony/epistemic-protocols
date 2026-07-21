@@ -49,7 +49,7 @@ Diairesis는 외부 WBS를 읽기 전용으로 바인딩하고, 자연스러운 
 
 | 불변식 | 의미 |
 |--------|------|
-| span_fit | 각 단위가 한 실행 span(horizon × context lifecycle)에 맞고, 외재화된 레코드가 수신 span에 대해 이식 인증 가능(`/distill` 표준) |
+| span_fit | 각 단위가 한 실행 span(horizon × context lifecycle)에 맞고, 외재화된 레코드가 수신 span에 대해 이식 인증 가능(`/distill` 표준) — 또는 사용자가 명시적으로 수락한 오버라이드가 단위에 기록됨(수락된 Unportable은 이식성 검사를 수신 span의 인증으로 유예) |
 | natural_joint | 모든 절단이 자연스러운 joint에 떨어짐, seam 한가운데가 아님 |
 | coverage_complete | 단위들이 전체 덩어리를 덮고 어떤 작업도 단위 밖에 남지 않음 — 완전 커버리지, orphan 없음 (HARD 수렴 게이트) |
 
