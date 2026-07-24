@@ -368,7 +368,7 @@ describe('artifact-self-containment detector liveness', () => {
 });
 
 // ============================================================
-// enforcement-check detector liveness (checks 25/26/27)
+// enforcement-check detector liveness (checks 25/26/27/28)
 // ============================================================
 // static-checks.js is a run-to-completion script (no module exports), so
 // these liveness tests execute it as a subprocess and parse its JSON
@@ -498,6 +498,28 @@ describe('enforcement-check detector liveness', () => {
       assert.ok(namesDeletedKernel, 'fail message should name the deleted kernel phrase');
     } finally {
       restoreOrDie(INK_STYLE_MD, backup, 'epistemic-ink.md');
+    }
+  });
+
+  it('ink-body-identity fires when the reproduced Ink body drifts in the sibling style', () => {
+    const SIBLING_STYLE_MD = path.join(
+      REPO_ROOT, 'epistemic-cooperative', 'styles', 'proactive-epistemic-ink.md'
+    );
+    const KERNEL = '`basis-as-paraphrase`';
+    const backup = fs.readFileSync(SIBLING_STYLE_MD, 'utf8');
+    assert.ok(backup.includes(KERNEL), 'precondition: body phrase present in pristine file');
+    try {
+      fs.writeFileSync(SIBLING_STYLE_MD, backup.replaceAll(KERNEL, '`basis-as-paraphrase-MANGLED`'));
+      const result = runStaticChecksSubprocess();
+      const fails = result.fail.filter(f => f.check === 'ink-body-identity');
+      assert.ok(
+        fails.length >= 1,
+        `expected ≥1 ink-body-identity fail after drifting the reproduced body, ` +
+        `got ${fails.length}. If 0: detector is silently no-op (liveness failure). ` +
+        `Fails: ${JSON.stringify(result.fail)}`
+      );
+    } finally {
+      restoreOrDie(SIBLING_STYLE_MD, backup, 'proactive-epistemic-ink.md');
     }
   });
 });
