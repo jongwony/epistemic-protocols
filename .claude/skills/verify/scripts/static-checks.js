@@ -2338,16 +2338,26 @@ function checkEmitLoadDiscipline() {
   }
 }
 
+// Ink-derived Output Styles subject to the same framing-readout / gate-anchor
+// enforcement as the canonical epistemic-ink.md. A sibling style that
+// reproduces the Epistemic Ink body verbatim (see checkInkBodyIdentity) is a
+// copy, not a reference, so its copy of the load-bearing invariants must be
+// checked independently or a drifted copy escapes enforcement silently.
+const INK_DERIVED_STYLE_FILES = [
+  'epistemic-cooperative/styles/epistemic-ink.md',
+  'epistemic-cooperative/styles/proactive-epistemic-ink.md',
+];
+
 // ============================================================
 // Check: Framing-Readout Enforcement (progress-glyph ban)
 // ============================================================
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
 // framing readout, never a scalar progress meter) to an enforcement channel:
 //   (a) the unicode progress-bar glyphs ▓/░ must not appear in any core
-//       protocol SKILL.md or the Output Style — they only ever rendered a
-//       completion bar;
-//   (b) the Output Style must retain the categorical-ban guard sentence so the
-//       invariant cannot be silently deleted.
+//       protocol SKILL.md or any Ink-derived Output Style — they only ever
+//       rendered a completion bar;
+//   (b) each Ink-derived Output Style must retain the categorical-ban guard
+//       sentence so the invariant cannot be silently deleted.
 // Scope mirrors checkEmitLoadDiscipline (core protocols + Output Style). Utility
 // skills (e.g. /dashboard) may legitimately render bars and are out of scope.
 function checkFramingReadoutEnforcement() {
@@ -2374,36 +2384,37 @@ function checkFramingReadoutEnforcement() {
     });
   }
 
-  const stylePath = 'epistemic-cooperative/styles/epistemic-ink.md';
-  const styleFull = path.join(projectRoot, stylePath);
-  if (!fs.existsSync(styleFull)) {
-    results.fail.push({ check: CHECK, file: stylePath, message: 'Missing Output Style source for framing-readout enforcement' });
-    return;
-  }
-  const styleContent = fs.readFileSync(styleFull, 'utf8');
-  styleContent.split('\n').forEach((line, idx) => {
-    if (BAR_GLYPH.test(line)) {
+  const GUARD = 'bar, percentage, or N-of-M tally';
+  for (const stylePath of INK_DERIVED_STYLE_FILES) {
+    const styleFull = path.join(projectRoot, stylePath);
+    if (!fs.existsSync(styleFull)) {
+      results.fail.push({ check: CHECK, file: stylePath, message: 'Missing Output Style source for framing-readout enforcement' });
+      continue;
+    }
+    const styleContent = fs.readFileSync(styleFull, 'utf8');
+    styleContent.split('\n').forEach((line, idx) => {
+      if (BAR_GLYPH.test(line)) {
+        results.fail.push({
+          check: CHECK,
+          file: stylePath,
+          message: `Progress-bar glyph (▓/░) at line ${idx + 1} — the realization layer must not re-introduce a progress bar`,
+        });
+      }
+    });
+    if (!styleContent.includes(GUARD)) {
       results.fail.push({
         check: CHECK,
         file: stylePath,
-        message: `Progress-bar glyph (▓/░) at line ${idx + 1} — the realization layer must not re-introduce a progress bar`,
+        message: `Missing categorical-ban guard ("${GUARD}") — the framing-readout invariant must remain inscribed`,
       });
     }
-  });
-  const GUARD = 'bar, percentage, or N-of-M tally';
-  if (!styleContent.includes(GUARD)) {
-    results.fail.push({
-      check: CHECK,
-      file: stylePath,
-      message: `Missing categorical-ban guard ("${GUARD}") — the framing-readout invariant must remain inscribed`,
-    });
   }
 
   if (!results.fail.some(f => f.check === CHECK)) {
     results.pass.push({
       check: CHECK,
-      file: 'all core protocol SKILL.md files + Output Style',
-      message: `Framing-readout enforcement verified for ${checked} protocols (no progress-bar glyph; guard sentence inscribed)`,
+      file: 'all core protocol SKILL.md files + Output Style(s)',
+      message: `Framing-readout enforcement verified for ${checked} protocols + ${INK_DERIVED_STYLE_FILES.length} Ink-derived styles (no progress-bar glyph; guard sentence inscribed)`,
     });
   }
 }
@@ -3052,11 +3063,10 @@ function checkGateIntegrityRule() {
 // ============================================================
 // Check 27: Gate Firing Precondition Kernel Anchor
 // ============================================================
-// The Output Style source (epistemic-cooperative/styles/epistemic-ink.md)
-// carries the "Gate firing precondition" element — the rendering-layer rule
-// that decides WHETHER a gate exists before the divider block decides how
-// one looks. This check pins the element's three load-bearing kernel
-// phrases:
+// Every Ink-derived Output Style source (INK_DERIVED_STYLE_FILES) must carry
+// the "Gate firing precondition" element — the rendering-layer rule that
+// decides WHETHER a gate exists before the divider block decides how one
+// looks. This check pins the element's three load-bearing kernel phrases:
 //   1. "fires as classified" — protocol classification controls by default;
 //   2. "an uncited skip is not a relay but a silent gate omission" — a
 //      relay collapse carries a citation obligation at the point of use;
@@ -3067,10 +3077,11 @@ function checkGateIntegrityRule() {
 // kernel phrases are pinned. Each kernel must appear inside the element's
 // own bounded body (label line to the next Ink element label or heading),
 // not merely anywhere in the file, so a gutted element still fails even if
-// a kernel survives elsewhere.
+// a kernel survives elsewhere. A sibling style is a copy, not a reference
+// (see checkInkBodyIdentity), so a drifted copy must fail here independently
+// of the canonical file.
 function checkGateFiringAnchor() {
   const CHECK = 'gate-firing-anchor';
-  const REL_PATH = 'epistemic-cooperative/styles/epistemic-ink.md';
   const LABEL_PATTERN = /^\*\*Gate firing precondition\*\*/m;
   // Element boundary: a column-0 bold label opening the next capitalized
   // Ink element, or a Markdown heading. The element's own bullet lines
@@ -3086,42 +3097,113 @@ function checkGateFiringAnchor() {
     "never overrides a protocol's TOOL GROUNDING classification",
   ];
 
-  const fullPath = path.join(projectRoot, REL_PATH);
-  if (!fs.existsSync(fullPath)) {
-    results.fail.push({
-      check: CHECK,
-      file: REL_PATH,
-      message: `Output Style source not found: ${REL_PATH}`,
-    });
-    return;
+  for (const REL_PATH of INK_DERIVED_STYLE_FILES) {
+    const fullPath = path.join(projectRoot, REL_PATH);
+    if (!fs.existsSync(fullPath)) {
+      results.fail.push({
+        check: CHECK,
+        file: REL_PATH,
+        message: `Output Style source not found: ${REL_PATH}`,
+      });
+      continue;
+    }
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const labelMatch = LABEL_PATTERN.exec(content);
+    if (!labelMatch) {
+      results.fail.push({
+        check: CHECK,
+        file: REL_PATH,
+        message: 'Missing Ink element label: "**Gate firing precondition**"',
+      });
+      continue;
+    }
+
+    const elementBody = boundedEntryBody(content, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
+    const missing = KERNELS.filter(kernel => !elementBody.includes(kernel));
+    for (const kernel of missing) {
+      results.fail.push({
+        check: CHECK,
+        file: REL_PATH,
+        message: `"Gate firing precondition" element present but missing kernel phrase within its bounded body: "${kernel}"`,
+      });
+    }
   }
 
-  const content = fs.readFileSync(fullPath, 'utf8');
-  const labelMatch = LABEL_PATTERN.exec(content);
-  if (!labelMatch) {
-    results.fail.push({
-      check: CHECK,
-      file: REL_PATH,
-      message: 'Missing Ink element label: "**Gate firing precondition**"',
-    });
-    return;
-  }
-
-  const elementBody = boundedEntryBody(content, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
-  const missing = KERNELS.filter(kernel => !elementBody.includes(kernel));
-  for (const kernel of missing) {
-    results.fail.push({
-      check: CHECK,
-      file: REL_PATH,
-      message: `"Gate firing precondition" element present but missing kernel phrase within its bounded body: "${kernel}"`,
-    });
-  }
-
-  if (missing.length === 0) {
+  if (!results.fail.some(f => f.check === CHECK)) {
     results.pass.push({
       check: CHECK,
-      file: REL_PATH,
-      message: `Gate firing precondition element verified — all ${KERNELS.length} kernel phrases anchored within the element body`,
+      file: INK_DERIVED_STYLE_FILES.join(', '),
+      message: `Gate firing precondition element verified — all ${KERNELS.length} kernel phrases anchored within the element body (${INK_DERIVED_STYLE_FILES.length} files)`,
+    });
+  }
+}
+
+// ============================================================
+// Check: Ink Body Byte-Identity (copied-sibling drift guard)
+// ============================================================
+// proactive-epistemic-ink.md reproduces the canonical Epistemic Ink body
+// verbatim rather than referencing it — a per-turn injected Output Style
+// cannot dereference a sibling file at runtime, so the only safe carrier is
+// a literal copy. This check pins that reproduction: the region of
+// proactive-epistemic-ink.md from its own "# Epistemic Protocol Formatting"
+// heading up to (not including) its "# Per-Turn Reminder" heading must be
+// byte-identical (module trailing-newline padding at the cut point) to
+// epistemic-ink.md's "# Epistemic Protocol Formatting" heading through EOF.
+// Any future sibling Ink-derived style should extend SIBLING_STYLES below.
+function checkInkBodyIdentity() {
+  const CHECK = 'ink-body-identity';
+  const CANONICAL = 'epistemic-cooperative/styles/epistemic-ink.md';
+  const HEADING = '# Epistemic Protocol Formatting';
+  const SIBLING_STYLES = [
+    { file: 'epistemic-cooperative/styles/proactive-epistemic-ink.md', endHeading: '# Per-Turn Reminder' },
+  ];
+
+  const canonicalFull = path.join(projectRoot, CANONICAL);
+  if (!fs.existsSync(canonicalFull)) {
+    results.fail.push({ check: CHECK, file: CANONICAL, message: `Canonical Output Style source not found: ${CANONICAL}` });
+    return;
+  }
+  const canonicalContent = fs.readFileSync(canonicalFull, 'utf8');
+  const canonicalIdx = canonicalContent.indexOf(HEADING);
+  if (canonicalIdx === -1) {
+    results.fail.push({ check: CHECK, file: CANONICAL, message: `Missing canonical body heading: "${HEADING}"` });
+    return;
+  }
+  const canonicalBody = canonicalContent.slice(canonicalIdx).replace(/\n+$/, '');
+
+  for (const { file: siblingPath, endHeading } of SIBLING_STYLES) {
+    const siblingFull = path.join(projectRoot, siblingPath);
+    if (!fs.existsSync(siblingFull)) {
+      results.fail.push({ check: CHECK, file: siblingPath, message: `Sibling Output Style source not found: ${siblingPath}` });
+      continue;
+    }
+    const siblingContent = fs.readFileSync(siblingFull, 'utf8');
+    const siblingIdx = siblingContent.indexOf(HEADING);
+    if (siblingIdx === -1) {
+      results.fail.push({ check: CHECK, file: siblingPath, message: `Missing reproduced body heading: "${HEADING}"` });
+      continue;
+    }
+    const siblingEndIdx = siblingContent.indexOf(endHeading, siblingIdx);
+    if (siblingEndIdx === -1) {
+      results.fail.push({ check: CHECK, file: siblingPath, message: `Missing closing heading: "${endHeading}"` });
+      continue;
+    }
+    const siblingBody = siblingContent.slice(siblingIdx, siblingEndIdx).replace(/\n+$/, '');
+
+    if (siblingBody !== canonicalBody) {
+      results.fail.push({
+        check: CHECK,
+        file: siblingPath,
+        message: `Reproduced Epistemic Ink body diverges from ${CANONICAL} — the copy must stay byte-identical to the canonical source between "${HEADING}" and EOF (only the surrounding overlay sections may differ)`,
+      });
+      continue;
+    }
+
+    results.pass.push({
+      check: CHECK,
+      file: siblingPath,
+      message: `Reproduced Epistemic Ink body verified byte-identical to ${CANONICAL}`,
     });
   }
 }
@@ -3158,6 +3240,7 @@ try {
   checkFormalBlocksRule();
   checkGateIntegrityRule();
   checkGateFiringAnchor();
+  checkInkBodyIdentity();
 
   // Output results as JSON
   console.log(JSON.stringify(results, null, 2));
