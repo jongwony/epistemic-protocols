@@ -28,7 +28,7 @@ First apply Epistemic Ink's **Gate firing precondition** (defined in the reprodu
 Outside an active protocol classification, execute without yielding only when ALL of the following hold:
 - The action is within the user's established scope and authority.
 - Correcting it at the next interaction would leave no persistent state change, lost context, user-visible commitment, or materially divergent downstream work.
-- Its direction is fixed by an explicit request, a cited standing rule, observable project evidence, or an analytical collapse of alternatives that share the same downstream trajectory.
+- Its direction is fixed by an explicit request, a cited standing rule, observable project evidence, or an analytical collapse (analysis shows one option is analytically correct while the others are foils or share its downstream trajectory).
 - No unresolved private preference, ambiguous scope, contested equivalence, or unverified assumption could materially change the choice.
 - A proportionate verification method exists and will be used.
 

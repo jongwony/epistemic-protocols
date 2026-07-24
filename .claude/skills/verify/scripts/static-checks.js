@@ -346,7 +346,7 @@ function checkCrossReference() {
 }
 
 // ============================================================
-// Check: Routing Index Contract
+// Check 24: Routing Index Contract
 // ============================================================
 // CLAUDE.md/AGENTS.md indexes the protocol catalog rather than mirroring it: it
 // must keep a "## Protocol Index" section that routes to the authoritative sources
@@ -1661,7 +1661,7 @@ function checkCrossRefScan() {
 }
 
 // ============================================================
-// Check 11: Onboard Sync (Protocol coverage in onboard materials)
+// Check 12: Onboard Sync (Protocol coverage in onboard materials)
 // ============================================================
 function checkOnboardSync() {
   const onboardSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/SKILL.md');
@@ -1777,7 +1777,7 @@ function checkOnboardSync() {
 }
 
 // ============================================================
-// Check 12: precedence-linear-extension
+// Check 13: precedence-linear-extension
 // Verify CANONICAL_PRECEDENCE total order is a valid linear extension
 // of graph.json precondition partial order
 // ============================================================
@@ -1909,7 +1909,7 @@ function checkPrecedenceLinearExtension() {
 }
 
 // ============================================================
-// Check 13: partition-invariant
+// Check 14: partition-invariant
 // Verify MODE STATE pairwise disjoint partition invariants —
 // universe set and partition members exist as MODE STATE fields
 // ============================================================
@@ -2008,7 +2008,7 @@ function checkPartitionInvariant() {
 }
 
 // ============================================================
-// Check 14: Catalog Sync (Protocol coverage in catalog SKILL.md)
+// Check 15: Catalog Sync (Protocol coverage in catalog SKILL.md)
 // ============================================================
 function checkCatalogSync() {
   const catalogSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/catalog/SKILL.md');
@@ -2074,7 +2074,7 @@ function checkCatalogSync() {
 }
 
 // ============================================================
-// Check: Routing Map Sync (agent-facing SessionStart directive)
+// Check 29: Routing Map Sync (agent-facing SessionStart directive)
 // ============================================================
 // routing-map.md is generated 100% from canonical sources (the catalog
 // When-to-Use triggers + load-protocols deficit → resolution spine). A stale
@@ -2132,7 +2132,7 @@ function stemMatch(a, b) {
 }
 
 // ============================================================
-// Check 15: Gate Type Soundness (Safeguard — warning only)
+// Check 16: Gate Type Soundness (Safeguard — warning only)
 // Verifies TYPES answer coproducts match Phase prose option enumerations.
 // Type-preserving materialization is permitted; gate mutation is flagged.
 // ============================================================
@@ -2349,15 +2349,19 @@ const INK_DERIVED_STYLE_FILES = [
 ];
 
 // ============================================================
-// Check: Framing-Readout Enforcement (progress-glyph ban)
+// Check 19: Framing-Readout Enforcement (progress-glyph ban)
 // ============================================================
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
 // framing readout, never a scalar progress meter) to an enforcement channel:
 //   (a) the unicode progress-bar glyphs ▓/░ must not appear in any core
 //       protocol SKILL.md or any Ink-derived Output Style — they only ever
 //       rendered a completion bar;
-//   (b) each Ink-derived Output Style must retain the categorical-ban guard
-//       sentence so the invariant cannot be silently deleted.
+//   (b) each Ink-derived Output Style's **Cognitive work** element must
+//       retain the categorical-ban guard kernel within its own bounded
+//       body (label line to the next Ink element label or heading) — not
+//       merely anywhere in the file — so the guard cannot silently migrate
+//       into a comment, frontmatter, or an opposite instruction and still
+//       pass.
 // Scope mirrors checkEmitLoadDiscipline (core protocols + Output Style). Utility
 // skills (e.g. /dashboard) may legitimately render bars and are out of scope.
 function checkFramingReadoutEnforcement() {
@@ -2384,7 +2388,16 @@ function checkFramingReadoutEnforcement() {
     });
   }
 
-  const GUARD = 'bar, percentage, or N-of-M tally';
+  // Guard kernel: the negation-carrying sentence fragment from the
+  // Cognitive work element (see header comment (b)). Anchored within that
+  // element's own bounded body, mirroring checkGateFiringAnchor's
+  // element-anchoring convention below, rather than a whole-file substring
+  // test.
+  const GUARD = "does not render the loop's completion as a bar, percentage, or N-of-M tally";
+  const COGNITIVE_WORK_LABEL_PATTERN = /^\*\*Cognitive work\*\*/m;
+  const NEXT_INK_ELEMENT_OR_HEADING = /^(?:\*\*[A-Z]|#{1,6}\s)/m;
+  const ELEMENT_BOUND = 6000;
+
   for (const stylePath of INK_DERIVED_STYLE_FILES) {
     const styleFull = path.join(projectRoot, stylePath);
     if (!fs.existsSync(styleFull)) {
@@ -2401,11 +2414,22 @@ function checkFramingReadoutEnforcement() {
         });
       }
     });
-    if (!styleContent.includes(GUARD)) {
+
+    const labelMatch = COGNITIVE_WORK_LABEL_PATTERN.exec(styleContent);
+    if (!labelMatch) {
       results.fail.push({
         check: CHECK,
         file: stylePath,
-        message: `Missing categorical-ban guard ("${GUARD}") — the framing-readout invariant must remain inscribed`,
+        message: 'Missing Ink element label: "**Cognitive work**"',
+      });
+      continue;
+    }
+    const elementBody = boundedEntryBody(styleContent, labelMatch, ELEMENT_BOUND, NEXT_INK_ELEMENT_OR_HEADING);
+    if (!elementBody.includes(GUARD)) {
+      results.fail.push({
+        check: CHECK,
+        file: stylePath,
+        message: `Missing categorical-ban guard kernel ("${GUARD}") within the Cognitive work element's bounded body — the framing-readout invariant must remain inscribed there`,
       });
     }
   }
@@ -2414,13 +2438,13 @@ function checkFramingReadoutEnforcement() {
     results.pass.push({
       check: CHECK,
       file: 'all core protocol SKILL.md files + Output Style(s)',
-      message: `Framing-readout enforcement verified for ${checked} protocols + ${INK_DERIVED_STYLE_FILES.length} Ink-derived styles (no progress-bar glyph; guard sentence inscribed)`,
+      message: `Framing-readout enforcement verified for ${checked} protocols + ${INK_DERIVED_STYLE_FILES.length} Ink-derived styles (no progress-bar glyph; guard kernel anchored within the Cognitive work element)`,
     });
   }
 }
 
 // ============================================================
-// Check 19: Single-Axis Soundness
+// Check 20: Single-Axis Soundness
 // ============================================================
 // Enforces the unified Constitution/Extension annotation axis in TOOL GROUNDING.
 // Live SKILL.md / rule / doc files must not contain the obsolete dual-axis vocabulary
@@ -3140,7 +3164,7 @@ function checkGateFiringAnchor() {
 }
 
 // ============================================================
-// Check: Ink Body Byte-Identity (copied-sibling drift guard)
+// Check 28: Ink Body Byte-Identity (copied-sibling drift guard)
 // ============================================================
 // proactive-epistemic-ink.md reproduces the canonical Epistemic Ink body
 // verbatim rather than referencing it — a per-turn injected Output Style
@@ -3155,6 +3179,7 @@ function checkInkBodyIdentity() {
   const CHECK = 'ink-body-identity';
   const CANONICAL = 'epistemic-cooperative/styles/epistemic-ink.md';
   const HEADING = '# Epistemic Protocol Formatting';
+  const HEADING_LINE_PATTERN = new RegExp('^' + escapeRegex(HEADING) + '$', 'm');
   const SIBLING_STYLES = [
     { file: 'epistemic-cooperative/styles/proactive-epistemic-ink.md', endHeading: '# Per-Turn Reminder' },
   ];
@@ -3165,12 +3190,12 @@ function checkInkBodyIdentity() {
     return;
   }
   const canonicalContent = fs.readFileSync(canonicalFull, 'utf8');
-  const canonicalIdx = canonicalContent.indexOf(HEADING);
-  if (canonicalIdx === -1) {
+  const canonicalMatch = HEADING_LINE_PATTERN.exec(canonicalContent);
+  if (!canonicalMatch) {
     results.fail.push({ check: CHECK, file: CANONICAL, message: `Missing canonical body heading: "${HEADING}"` });
     return;
   }
-  const canonicalBody = canonicalContent.slice(canonicalIdx).replace(/\n+$/, '');
+  const canonicalBody = canonicalContent.slice(canonicalMatch.index).replace(/\n+$/, '');
 
   for (const { file: siblingPath, endHeading } of SIBLING_STYLES) {
     const siblingFull = path.join(projectRoot, siblingPath);
@@ -3179,16 +3204,19 @@ function checkInkBodyIdentity() {
       continue;
     }
     const siblingContent = fs.readFileSync(siblingFull, 'utf8');
-    const siblingIdx = siblingContent.indexOf(HEADING);
-    if (siblingIdx === -1) {
+    const siblingMatch = HEADING_LINE_PATTERN.exec(siblingContent);
+    if (!siblingMatch) {
       results.fail.push({ check: CHECK, file: siblingPath, message: `Missing reproduced body heading: "${HEADING}"` });
       continue;
     }
-    const siblingEndIdx = siblingContent.indexOf(endHeading, siblingIdx);
-    if (siblingEndIdx === -1) {
+    const siblingIdx = siblingMatch.index;
+    const endHeadingPattern = new RegExp('^' + escapeRegex(endHeading) + '$', 'm');
+    const endMatch = endHeadingPattern.exec(siblingContent.slice(siblingIdx));
+    if (!endMatch) {
       results.fail.push({ check: CHECK, file: siblingPath, message: `Missing closing heading: "${endHeading}"` });
       continue;
     }
+    const siblingEndIdx = siblingIdx + endMatch.index;
     const siblingBody = siblingContent.slice(siblingIdx, siblingEndIdx).replace(/\n+$/, '');
 
     if (siblingBody !== canonicalBody) {

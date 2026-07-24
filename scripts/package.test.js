@@ -522,6 +522,33 @@ describe('enforcement-check detector liveness', () => {
       restoreOrDie(SIBLING_STYLE_MD, backup, 'proactive-epistemic-ink.md');
     }
   });
+
+  it('ink-body-identity fires when the reproduced-body heading line is destroyed in the sibling style', () => {
+    const SIBLING_STYLE_MD = path.join(
+      REPO_ROOT, 'epistemic-cooperative', 'styles', 'proactive-epistemic-ink.md'
+    );
+    const HEADING_LINE = '# Epistemic Protocol Formatting';
+    const backup = fs.readFileSync(SIBLING_STYLE_MD, 'utf8');
+    const lines = backup.split('\n');
+    const headingIdx = lines.indexOf(HEADING_LINE);
+    assert.ok(headingIdx !== -1, 'precondition: exact heading line present in pristine file');
+    try {
+      lines[headingIdx] = 'X' + HEADING_LINE;
+      fs.writeFileSync(SIBLING_STYLE_MD, lines.join('\n'));
+
+      const result = runStaticChecksSubprocess();
+      const fails = result.fail.filter(f => f.check === 'ink-body-identity');
+      assert.ok(
+        fails.length >= 1,
+        `expected ≥1 ink-body-identity fail after destroying the reproduced-body heading line, ` +
+        `got ${fails.length}. If 0: detector is silently no-op (liveness failure) — a mid-line ` +
+        `substring match on the mangled heading would silently still pass. ` +
+        `Fails: ${JSON.stringify(result.fail)}`
+      );
+    } finally {
+      restoreOrDie(SIBLING_STYLE_MD, backup, 'proactive-epistemic-ink.md');
+    }
+  });
 });
 
 // ============================================================
