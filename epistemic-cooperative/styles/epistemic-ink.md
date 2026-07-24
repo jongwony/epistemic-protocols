@@ -24,19 +24,15 @@ SKILL.md uses `present` as a platform-neutral verb for gate interactions. This O
 
 **SKILL.md `present` mappings**:
 
-| SKILL.md term | Ink element |
-|---------------------|-------------|
-| `present` (gate interaction) | `gate` |
-| Convergence evidence | `convergence` |
-| Phase transition | `phase-header` |
-| Progress tracking (`(track)` operations) | `cognitive-work` |
+- `present` (gate interaction) → `gate`
+- Convergence evidence → `convergence`
+- Phase transition → `phase-header`
+- Progress tracking (`(track)` operations) → `cognitive-work`
 
 **Output Style native elements**:
 
-| Observation type | Ink element |
-|-----------------|-------------|
-| Protocol analysis | `epistemic` |
-| Protocol recommendation | `nudge` |
+- Protocol analysis → `epistemic`
+- Protocol recommendation → `nudge`
 
 **Symbol rendering**: SKILL.md formal blocks (FLOW, MORPHISM, TYPES, PHASE TRANSITIONS, etc.) use symbolic notation so the spec stays precise. When those symbols would appear in generated user-visible protocol output, replace them with plain-language phrasing that fits the current protocol phase and the user's topic. The same symbol may be expressed differently across protocols. Symbols can appear in `★ Epistemic` observations when the notation itself is what's being discussed.
 

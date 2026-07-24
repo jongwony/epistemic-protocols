@@ -134,7 +134,7 @@ function extractAllFormalSections(content, sectionSuffix) {
 }
 
 // ============================================================
-// Check 1: JSON Schema Validation
+// Check: JSON Schema Validation
 // ============================================================
 function checkJsonSchema() {
   const pluginJsonPaths = walkFiles(projectRoot, e => e.name === 'plugin.json', 'json-schema');
@@ -193,7 +193,7 @@ function checkJsonSchema() {
 }
 
 // ============================================================
-// Check 2: Unicode Notation Consistency
+// Check: Unicode Notation Consistency
 // ============================================================
 // Strip fenced code blocks and inline code spans from text
 // Notation conventions apply to prose, not code
@@ -254,7 +254,7 @@ function checkNotation() {
 }
 
 // ============================================================
-// Check 3: Directive Verb Consistency
+// Check: Directive Verb Consistency
 // ============================================================
 function checkDirectiveVerb() {
   const mdFiles = walkFiles(projectRoot, e => e.name.endsWith('.md'), 'directive-verb');
@@ -292,7 +292,7 @@ function checkDirectiveVerb() {
 }
 
 // ============================================================
-// Check 4: Cross-Reference Integrity
+// Check: Cross-Reference Integrity
 // ============================================================
 function checkCrossReference() {
   const claudeMdPath = path.join(projectRoot, 'CLAUDE.md');
@@ -346,7 +346,7 @@ function checkCrossReference() {
 }
 
 // ============================================================
-// Check 24: Routing Index Contract
+// Check: Routing Index Contract
 // ============================================================
 // CLAUDE.md/AGENTS.md indexes the protocol catalog rather than mirroring it: it
 // must keep a "## Protocol Index" section that routes to the authoritative sources
@@ -433,7 +433,7 @@ function checkRoutingIndexContract() {
 }
 
 // ============================================================
-// Check 5: Required Sections in Protocols
+// Check: Required Sections in Protocols
 // ============================================================
 function checkRequiredSections() {
 
@@ -478,7 +478,7 @@ function checkRequiredSections() {
 }
 
 // ============================================================
-// Check 6: Tool Grounding Consistency
+// Check: Tool Grounding Consistency
 // ============================================================
 function checkToolGrounding() {
 
@@ -663,7 +663,7 @@ function checkToolGrounding() {
 }
 
 // ============================================================
-// Check 7: Version Staleness Detection
+// Check: Version Staleness Detection
 // ============================================================
 function checkVersionStaleness() {
   // Verify git repo
@@ -835,7 +835,7 @@ function checkVersionStaleness() {
 }
 
 // ============================================================
-// Check 8: Graph Integrity
+// Check: Graph Integrity
 // ============================================================
 function checkGraphIntegrity() {
   const graphPath = path.join(projectRoot, '.claude', 'skills', 'verify', 'graph.json');
@@ -1067,7 +1067,7 @@ function checkGraphIntegrity() {
 }
 
 // ============================================================
-// Check 9: Spec vs Impl Drift Detection
+// Check: Spec vs Impl Drift Detection
 // ============================================================
 function checkSpecVsImpl() {
   // Extract type definitions from all TYPES sections of a formal block
@@ -1173,7 +1173,7 @@ function checkSpecVsImpl() {
 }
 
 // ============================================================
-// Check 10: Morphism Anatomy
+// Check: Morphism Anatomy
 // ============================================================
 function checkMorphismAnatomy() {
   for (const relPath of PROTOCOL_FILES) {
@@ -1296,7 +1296,7 @@ function checkMorphismAnatomy() {
 }
 
 // ============================================================
-// Check 11: Cross-Reference Scan (Protocol Name & Deficit Consistency)
+// Check: Cross-Reference Scan (Protocol Name & Deficit Consistency)
 // ============================================================
 function checkCrossRefScan() {
   let subCheckFailed = false;
@@ -1661,7 +1661,7 @@ function checkCrossRefScan() {
 }
 
 // ============================================================
-// Check 12: Onboard Sync (Protocol coverage in onboard materials)
+// Check: Onboard Sync (Protocol coverage in onboard materials)
 // ============================================================
 function checkOnboardSync() {
   const onboardSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/onboard/SKILL.md');
@@ -1777,7 +1777,7 @@ function checkOnboardSync() {
 }
 
 // ============================================================
-// Check 13: precedence-linear-extension
+// Check: precedence-linear-extension
 // Verify CANONICAL_PRECEDENCE total order is a valid linear extension
 // of graph.json precondition partial order
 // ============================================================
@@ -1909,7 +1909,7 @@ function checkPrecedenceLinearExtension() {
 }
 
 // ============================================================
-// Check 14: partition-invariant
+// Check: partition-invariant
 // Verify MODE STATE pairwise disjoint partition invariants —
 // universe set and partition members exist as MODE STATE fields
 // ============================================================
@@ -2008,7 +2008,7 @@ function checkPartitionInvariant() {
 }
 
 // ============================================================
-// Check 15: Catalog Sync (Protocol coverage in catalog SKILL.md)
+// Check: Catalog Sync (Protocol coverage in catalog SKILL.md)
 // ============================================================
 function checkCatalogSync() {
   const catalogSkillPath = path.join(projectRoot, 'epistemic-cooperative/skills/catalog/SKILL.md');
@@ -2074,7 +2074,7 @@ function checkCatalogSync() {
 }
 
 // ============================================================
-// Check 29: Routing Map Sync (agent-facing SessionStart directive)
+// Check: Routing Map Sync (agent-facing SessionStart directive)
 // ============================================================
 // routing-map.md is generated 100% from canonical sources (the catalog
 // When-to-Use triggers + load-protocols deficit → resolution spine). A stale
@@ -2132,7 +2132,7 @@ function stemMatch(a, b) {
 }
 
 // ============================================================
-// Check 16: Gate Type Soundness (Safeguard — warning only)
+// Check: Gate Type Soundness (Safeguard — warning only)
 // Verifies TYPES answer coproducts match Phase prose option enumerations.
 // Type-preserving materialization is permitted; gate mutation is flagged.
 // ============================================================
@@ -2268,7 +2268,7 @@ function checkLanguagePurity() {
 }
 
 // ============================================================
-// Check 18: Emit Load Discipline
+// Check: Emit Load Discipline
 // ============================================================
 // Enforces compiled-copy coverage for the user-facing cognitive-load
 // disciplines that shape runtime protocol output. Context-Question Separation
@@ -2349,7 +2349,7 @@ const INK_DERIVED_STYLE_FILES = [
 ];
 
 // ============================================================
-// Check 19: Framing-Readout Enforcement (progress-glyph ban)
+// Check: Framing-Readout Enforcement (progress-glyph ban)
 // ============================================================
 // Couples the Epistemic Ink invariant (user-facing protocol surfacing is a
 // framing readout, never a scalar progress meter) to an enforcement channel:
@@ -2444,7 +2444,7 @@ function checkFramingReadoutEnforcement() {
 }
 
 // ============================================================
-// Check 20: Single-Axis Soundness
+// Check: Single-Axis Soundness
 // ============================================================
 // Enforces the unified Constitution/Extension annotation axis in TOOL GROUNDING.
 // Live SKILL.md / rule / doc files must not contain the obsolete dual-axis vocabulary
@@ -2523,7 +2523,7 @@ function checkSingleAxisSoundness() {
 }
 
 // ============================================================
-// Check 22: Codex Manifest Version Sync
+// Check: Codex Manifest Version Sync
 // ============================================================
 // Every plugin carries a canonical .claude-plugin/plugin.json (the one
 // package.js builds from) and may carry a .codex-plugin/plugin.json variant.
@@ -2594,7 +2594,7 @@ function checkCodexManifestSync() {
 }
 
 // ============================================================
-// Check 23: Packaged Agent ↔ SKILL.md Contract Sync
+// Check: Packaged Agent ↔ SKILL.md Contract Sync
 // ============================================================
 // A plugin may ship a packaged subagent (`<plugin>/agents/*.md`) that a SKILL.md
 // phase dispatches and whose verdict the SKILL.md parses back into typed state.
@@ -2915,7 +2915,7 @@ function checkPackagedAgentContractSync() {
 }
 
 // ============================================================
-// Check 25: Formal Blocks Rule
+// Check: Formal Blocks Rule
 // ============================================================
 // Compiled-copy coverage for the "Formal blocks are runtime-normative" Rules
 // entry (docs/structural-specs.md is the contributor-facing anatomy doc;
@@ -2999,7 +2999,7 @@ function checkFormalBlocksRule() {
 }
 
 // ============================================================
-// Check 26: Gate Integrity Rule
+// Check: Gate Integrity Rule
 // ============================================================
 // Compiled-copy coverage for the Gate Integrity Rules entry (axioms.md
 // "Gate Integrity (Operational Guards, Safeguard-tier)" — reclassified from
@@ -3085,7 +3085,7 @@ function checkGateIntegrityRule() {
 }
 
 // ============================================================
-// Check 27: Gate Firing Precondition Kernel Anchor
+// Check: Gate Firing Precondition Kernel Anchor
 // ============================================================
 // Every Ink-derived Output Style source (INK_DERIVED_STYLE_FILES) must carry
 // the "Gate firing precondition" element — the rendering-layer rule that
@@ -3164,7 +3164,7 @@ function checkGateFiringAnchor() {
 }
 
 // ============================================================
-// Check 28: Ink Body Byte-Identity (copied-sibling drift guard)
+// Check: Ink Body Byte-Identity (copied-sibling drift guard)
 // ============================================================
 // proactive-epistemic-ink.md reproduces the canonical Epistemic Ink body
 // verbatim rather than referencing it — a per-turn injected Output Style
