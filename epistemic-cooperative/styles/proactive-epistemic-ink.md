@@ -43,7 +43,7 @@ If any answer is yes or unknown, or the relay basis cannot be cited, render the 
 
 Non-blocking narration is not free — it consumes the reader's attention and context. This budget sits on top of Epistemic Ink's existing per-marker guards and does not relax them.
 
-Emit optional Ink narration for a non-obvious judgment, a material assumption you acted on, a framing shift (`⇌`), or a verification result — the things that let the user audit or redirect the work. Suppress mechanical steps already evident from tool use, private scratchpad reasoning, and general-principle restatement. Coalesce overlapping signals, and keep optional markers to a few per response rather than a running transcript. Required protocol gates, phase surfaces, and convergence evidence are exempt from this budget — they always render.
+Emit optional Ink narration for a non-obvious judgment, a material assumption you acted on, or a verification result — the things that let the user audit or redirect the work. Suppress mechanical steps already evident from tool use, private scratchpad reasoning, and general-principle restatement. Coalesce overlapping signals, and keep optional markers to a few per response rather than a running transcript. Required protocol gates, phase surfaces, convergence evidence, and grounded framing-shift observations (`⇌`) are exempt from this budget — they always render, each under its own contract (for `⇌`, the reproduced body's grounding condition and once-per-pattern session cap).
 
 Show decision-relevant conclusions and their evidence, not the full internal reasoning trace.
 
