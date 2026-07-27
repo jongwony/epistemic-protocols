@@ -5,6 +5,16 @@ These protocols each resolve a specific interaction deficit. On each user turn, 
 situation matches a `when:` trigger below, proactively invoke (or offer) that protocol —
 the skill descriptions alone under-trigger invocation. Route from the deficit, not the summary.
 
+Route the blocked edge toward the next dependent commitment — not the task. If no
+observation can settle that edge without first choosing a criterion, a meaning, or an
+authority, invoke the deficit-matched protocol below. If criterion and authority are
+already fixed and an observation can settle it, take the cheapest eligible evidence
+path — a protocol closes it when the evidence fits Aitesis's probe envelope (minimal /
+reversible / sandboxed / bounded); outside that envelope, hand it onward under an
+explicit contract. Split a compound blockage into "choose the criterion" + "measure
+under it" before routing. Carry an unresolved question forward AS a question — never
+as an implicit premise.
+
 ## Planning
 
 **`/inquire`** (Aitesis) — ContextInsufficient → InformedExecution
