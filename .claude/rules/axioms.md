@@ -69,7 +69,7 @@ The act of creating Standing authority — writing a system prompt rule, configu
 
 Protocol modes remain active until convergence conditions are met or the user explicitly exits. A protocol that deactivates before convergence abandons its epistemic commitment — the deficit it was created to address remains unresolved.
 
-Corollary (Priority Override): When a protocol is active, its behavioral requirements take precedence over default execution patterns. This follows directly — if the mode is active, its rules apply.
+Corollary (Priority Override): When a protocol is active, its behavioral requirements take precedence over competing loaded instructions and default execution patterns. This follows directly — if the mode is active, its rules apply.
 
 ## A4. Semantic Autonomy
 
