@@ -60,6 +60,42 @@ Anamnesis's hypomnesis store persists session recall indices that enrich protoco
 
 **Pollution caveat**: Prior patterns loaded per-session may bias detection toward previously observed patterns, suppressing novel signals. The risk is not staleness (information becoming outdated) but pollution (loading itself contaminating judgment). Protocols with halt characteristics (Horismos: Rule 11 per-decision freshness, Prosoche: risk gate) naturally resist pollution; others rely on gate judgment to override prior-pattern bias.
 
+## Task Externalization Boundary
+
+Relocated from `.claude/rules/derived-principles.md` (2026-07-28, whole section) — session-boundary durable-record externalization criteria, complementing Cross-Session Knowledge Composition above.
+
+A1 enters through one channel only — the framing the user reasons with must be recognizable rather than recalled — and not through the re-derivation argument below, which rests on offloading cost-sensitivity, not on Recognition.
+
+Externalize to the durable record only two things: (1) the problem — or commitment — the session must solve, and (2) framing shifts, recorded on each framing or work-unit change so they survive interruption and context compaction. Everything else — dependencies, sub-steps, granular progress — stays in session. As models improve, in-session retention with cheap re-derivation dominates bookkeeping: a model can re-derive its own sub-steps and dependency order on demand, so capturing them externally pays the capture, review, and reacquisition cost while the offloading benefit it would otherwise buy (below) does not accrue to a record the substrate can already regenerate. The durable record is reserved for what the session genuinely cannot reconstruct from the substrate: the committed problem and the framing under which it is being solved.
+
+The two externalized items connect to the axiom basis directly. The problem-to-solve is the commitment the substrate cannot re-derive — losing it loses the session's purpose, the one thing delegation (the Epistemic Completeness Boundary) cannot recover. Framing shifts are the constitutive frame under which work proceeds; a frame change silently dropped corrupts every downstream judgment, and the user must be able to recognize (A1) the frame in force rather than recall a frame that has since moved.
+
+**Trigger discipline is EVENT-based, not phase-boundary.** The record is updated on a framing or work-unit change — the event that alters what the session is solving or how it is framed — not on phase entry/exit. Blind phase logging (a durable write at every phase boundary regardless of whether the framing moved) adds extraneous capture, review, and reacquisition load: it externalizes bookkeeping the model can re-derive, taxing the very working memory offloading is meant to relieve. Phase boundaries that carry no framing change produce no durable write.
+
+**The boundary owns what crosses, not how it renders.** This principle governs what reaches the durable record. How the durable surface is then rendered to the user — a framing readout of the kind of work in play, not a progress bar, percentage, or completion tally — is realized one layer down at the Output Style, per the Epistemic Completeness Boundary's principle/realization split. The only constraint the principle itself contributes is that progress bookkeeping does not cross into the durable record; fixing the rendering vocabulary belongs to the realization layer, not here.
+
+**Convergence evidence is a terminal relay, not the in-flight surface.** The per-item transformation trace required at convergence (`.claude/rules/derived-principles.md §Convergence Evidence`) is a one-time end-of-protocol relay in session text, enumerating each resolved deficit to demonstrate the morphism completed. It is distinct from the durable status surface this boundary governs: the no-completion-tally reading applies to the in-flight surface, not to this terminal trace, so the two principles govern different moments and do not conflict.
+
+**Safety valve**: a blocker discovered mid-session that the model cannot re-derive from the substrate — a non-reconstructable external constraint, a credential gap, an irreversible state it has already entered — is included in the framing record. The boundary test is re-derivability from the substrate (codebase, branch, runtime state, and the model's own reconstruction), not the item's grain: it excludes re-derivable bookkeeping, not genuinely lost-on-interruption facts, so when a sub-step graduates into a non-re-derivable commitment it crosses into the externalized set.
+
+Evidence review externalized to `docs/analysis/task-externalization-evidence.md`.
+
+## Reference over Copy
+
+Relocated from `.claude/rules/derived-principles.md` (2026-07-28, whole section) — handoff-boundary reference/copy criteria, extending Session Text Composition and Cross-Session Knowledge Composition above to tool/agent/turn boundaries.
+
+When context crosses a handoff boundary — a tool boundary (a CLI subprocess), an agent boundary (a subagent or teammate), a durable-record boundary (session text surviving compaction), or a turn boundary — pass a **reference** that lets the consumer re-access the live authoritative source wherever the consumer can re-derive it, and **copy** only what the consumer cannot. The partition is **re-derivability by the consumer**: context reconstructable from shared substrate (codebase, git, runtime state, the consumer's own tools) is passed by reference (a pointer the consumer dereferences); context the consumer cannot reconstruct — the constitutive WHY and framing, an output contract, a generated artifact, user-specific intent, or a snapshot whose determinism is itself the requirement — is copied so it survives the handoff intact. Both faces are first-class; which dominates is set by how much of the handoff the consumer can re-derive.
+
+The unifying figure is the **consumer that cannot re-derive**: an isolated subagent that cannot see the parent's context, a CLI process across a tool boundary, the post-compaction future-self. Each receives exactly what it cannot reconstruct (copy) plus pointers to everything it can (reference).
+
+The reference face is favored by three forces — transcription cost (a copy spends tokens), staleness (a copy diverges from the source it duplicated), and fidelity (re-encoding an authoritative form is lossy). The copy face is governed by loss-avoidance alone.
+
+This is the shared root of several existing positions rather than a new mechanism: A2 relay forwards environmental facts with cited basis (a citation, not a re-constitution); the Task Externalization Boundary externalizes only the problem-to-solve and framing shifts (what the substrate cannot re-derive); Subagent Context Isolation has the coordinator point while the executor fetches its own context. On the receive side the move appears as forwarding a tool's native output unit verbatim instead of re-bucketing it into an imposed schema; on the send side as passing a pointer instead of inlining content. Both are the same move across the same boundary.
+
+**Operational test**: "Can the consumer re-derive this from shared substrate with its own tools?" Yes → reference; no → copy. A copy where reference would serve pays tokens, risks staleness, and may lose fidelity; a reference where copy is required loses the non-re-derivable content outright.
+
+Falsifiability and tier analysis externalized to `docs/analysis/task-externalization-evidence.md`.
+
 ## Dual Advisory Layer
 
 Inter-protocol guidance operates through two distinct mechanisms at different abstraction levels: graph.json `advisory` edges (structural, validated by static checks, topology-aware) and Output Style nudge (runtime, session-context-dependent, deficit-type matching). These are complementary — graph.json edges encode stable architectural relationships, while nudges respond to observed session conditions. Protocol convergence moments are high-signal observation points for cross-protocol needs, but nudges are not position-constrained and fire whenever contextual evidence warrants.
