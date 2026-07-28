@@ -341,7 +341,7 @@ After integration:
 5. **Concrete instantiation required**: Every mapping presented must include at least one concrete example in the user's domain
 6. **Evidence-grounded**: Every correspondence must cite specific structural elements from both abstract and concrete domains
 7. **Validation respected**: User validation or dismissal is final for that correspondence in the current session
-8. **Convergence persistence**: Mode active until all identified correspondences are addressed or user Esc key
+8. **Convergence persistence**: as typed by the closed deactivation-condition set in the Mode Deactivation table.
 9. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 10. **Convergence evidence**: as typed by the `Convergence evidence` statement in the LOOP block.
 11. **Zero-gap surfacing**: If the Phase 0 scan finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation

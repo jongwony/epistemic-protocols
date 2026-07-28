@@ -416,7 +416,7 @@ After a **mutating** answer (Confirm/Adapt — these adapt `R` into `R'`) — **
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
 3. **Applicability over Correctness**: When result is correct but contextually mismatched, surface the mismatch — do not assume correctness implies fitness
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
-5. **Convergence persistence**: Mode active until all mismatch tasks are completed (resolved or dismissed)
+5. **Convergence persistence**: as typed by the closed deactivation-condition set in the Mode Deactivation table.
 6. **Non-circularity**: Information source is the result itself compared against context, not pre-execution context scans (independence from Aitesis)
 7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
 8. **Convergence evidence**: as typed by the `Convergence evidence` statement in the LOOP block.
