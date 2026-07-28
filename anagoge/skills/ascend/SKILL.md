@@ -454,7 +454,7 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 14. **Plain emit discipline**: What the user reads is in their language, not the spec's — formal-block vocabulary stays in the formal block.
 
-15. **Round-local salience bundling**: Each user-facing round bundles the current judgment, its nearest evidence, and the differential implication that matters for the next move. Keep adjacent material together so the user can recognize the decision without context-switching; defer background, distant context, and unrelated findings to pre-gate text, convergence traces, or later cycles.
+15. **Round-local salience bundling**: Each round carries the current judgment, its nearest evidence, and what it implies for the next move; everything else defers.
 
 16. **Context-Question Separation**: Present narrative context, traversal evidence, and broken-link notes as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding context inside the question field violates this invariant.
 
