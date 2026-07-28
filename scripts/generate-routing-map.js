@@ -5,16 +5,18 @@
  * The harness already holds every skill's `description:` frontmatter, yet a
  * passive capability description does not trigger invocation. This map is an
  * active, deficit-framed routing DIRECTIVE meant to be injected at SessionStart
- * (see epistemic-cooperative/skills/catalog/scripts/session-context.js). It is
- * generated 100% from canonical sources — no hand-written gloss:
+ * (see epistemic-cooperative/skills/catalog/scripts/session-context.js). Its
+ * protocol entries are generated 100% from canonical sources — no hand-written
+ * gloss:
  *
  *   1. deficit-framed `when:` trigger = the "When to Use" column of the catalog
  *      table in epistemic-cooperative/skills/catalog/SKILL.md.
  *   2. `Deficit → Resolution` spine + Name/command = scripts/load-protocols.js
  *      records (discoverPlugins().filter(p => p.isProtocol)).
  *
- * The `description:` frontmatter gloss is intentionally NOT used (redundant with
- * what the harness already carries).
+ * The routing PREAMBLE below is the one hand-maintained part of the map: edit it
+ * here, never in the generated file. The `description:` frontmatter gloss is
+ * intentionally NOT used (redundant with what the harness already carries).
  *
  * Usage:
  *   node scripts/generate-routing-map.js            # write routing-map.md

@@ -109,7 +109,7 @@ When a cluster name or protocol command/name is provided as argument:
 
 ## Agent routing (SessionStart injection)
 
-The tables above are the human browse view. The agent-facing counterpart is `routing-map.md` — an auto-generated routing directive (do not edit by hand) built entirely from canonical sources: the `When to Use` triggers above plus each protocol's `Deficit → Resolution` spine. A passive skill description under-triggers invocation, so this map is injected at SessionStart to route the agent from the deficit, not the summary. Regenerate it after any protocol or trigger change:
+The tables above are the human browse view. The agent-facing counterpart is `routing-map.md` — an auto-generated routing directive (do not edit by hand) whose protocol entries are built from canonical sources — the `When to Use` triggers above plus each protocol's `Deficit → Resolution` spine — alongside a routing preamble maintained in the generator. A passive skill description under-triggers invocation, so this map is injected at SessionStart to route the agent from the deficit, not the summary. Regenerate it after any protocol or trigger change:
 
 ```bash
 node scripts/generate-routing-map.js
