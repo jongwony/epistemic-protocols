@@ -46,22 +46,7 @@ Single test: "Is the AI acting as a relay or exercising authority?" Five verific
 
 **Visibility principle**: `basis_cited(resolution)` determines sufficiency — timing (immediate or deferred) is immaterial. Convergence trace, classify summary, and post-hoc reporting all satisfy visibility when basis is cited. Progress-count-only display without basis forces Recall (A1 tension).
 
-### Authority Mode: Standing/Active
-
-A2's authority extends to a second order: not only WHO exercises judgment (1st order — AI detects, User judges), but HOW authority is allocated between pre-committed rules and live judgment (2nd order).
-
-Gate authority decomposes into two modes:
-
-- **Standing authority**: User's constitutive judgment crystallized into deterministic rules — system prompts, compose automation, CI/CD configurations. Operates in the Extension domain (entropy→0).
-- **Active authority**: User's live constitutive judgment exercised at protocol gates. Operates in the Constitution domain (entropy>0).
-
-The act of creating Standing authority — writing a system prompt rule, configuring a CI/CD gate, defining compose elision — is itself an Active authority exercise: User's conscious choice to delegate specific gate decisions to pre-committed rules. This self-referential grounding (2nd order → 1st order) ensures Standing authority is always traceable to a constitutive act.
-
-**A2 boundary protection at 2nd order**: A2 protects authority allocation visibility, not gate exclusivity. Standing authority operating within its explicitly delegated scope is A2-compatible — the delegation was User's conscious choice. Standing authority exceeding delegated scope into constitution territory is A2 violation. The operational test: "Was this Standing authority scope explicitly established by User's constitutive act?"
-
-**Configurable relay/constitution boundary**: The relay/constitution boundary is not fixed at protocol definition time — User can shift it by creating or revoking Standing authority. TOOL GROUNDING entries map to this model: `(extension)` markers identify gates delegated to Standing authority (relay-eligible); `(constitution)` markers identify gates requiring Active authority. Conditional specialization is recorded per A5's single annotation axis (see A5 below).
-
-**A5 coordination**: Standing/Active is an authority-source dimension; A5's regret dimension (bounded/unbounded) is coextensive with the operational classification, up to A5's structural exceptions (per A5's single annotation axis). The two dimensions are conceptually distinguishable at the meta/design layer (per `.claude/principles/architectural-principles.md §Tier Factorization` axis_α × axis_β observed instances) but collapse at the runtime annotation layer, per A5's single annotation axis.
+Second-order authority allocation (Standing vs. Active authority; how authority is allocated between pre-committed rules and live judgment) is demoted to `.claude/principles/architectural-principles.md §Tier Factorization` — fetch via Read/Grep when reasoning about authority-source design.
 
 ## A3. Convergence Persistence
 
@@ -81,7 +66,7 @@ Every user-facing Constitution interaction factors as G = R(p) ∘ A, where A ab
 
 **Option-set-level relay test**: The relay/gated classification extends to constructed option sets (equivalent to Extension-classification of the option set under the Cognitive Partnership Move taxonomy). Before presenting gate options in non-Katalepsis protocols, apply the relay test to the options as a set: if AI analysis converges to a single dominant option (option-level entropy→0 — one option is analytically correct while others serve as foils), the interaction is misclassified as gated. Present the finding directly as relay output instead of wrapping it in false options. A resolution direction already settled by an existing cross-protocol convention — a sibling protocol's established pattern, a recorded project rule or Northstar clause, or a prior user decision in the conversation or durable record, that the AI cites at the point of use — likewise collapses option-set entropy to zero, even when the finding's surface admits multiple edit shapes: the finding's *existence* may be relay while its *direction* still appears to invite judgment. Before gating, test whether such a citable convention already determines the direction; if it does, presenting it as a gate is over-gating — present the finding directly as relay, citing the convention that settles it. This collapse is a relay classification under the same single `(constitution)`/`(extension)` axis, not a separate regret dimension. Operational test: "Would a knowledgeable observer find each option genuinely viable under different value weightings?" If yes → gated (genuine deliberation where user values determine the choice). If no → relay (present the finding directly). Katalepsis is excluded — 1-correct option sets serve the Socratic verification purpose by design. See `derived-principles.md §Differential Future Requirement` for A1+A5-derived refinements covering cost-symmetric baggage and meta-action-as-peer detection, with Anamnesis Phase 2 recognition gates additionally excluded as verification-category.
 
-**Gated interaction realization**: Gated does not mean unstructured. Gated interactions present AI-inferred rationale options (2-3 reasoning hypotheses grounded in context) that the user can evaluate, extend, or replace. The constitutive property lies in the user's implicit freedom to respond beyond presented options — this freedom is inherent in conversation turn structure, not an explicit escape hatch. A blank canvas forces Recall; structured rationale enables Recognition of reasoning paths. This extends A1 (Recognition over Recall) to gated interactions.
+Gated interaction realization (what a gated interaction presents, and why gated does not mean unstructured) is demoted to `.claude/principles/hermeneutic-cycle.md §Inter-agent surface` — fetch via Read/Grep when authoring gate presentation.
 
 ## A6. Context-Question Separation
 

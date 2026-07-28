@@ -11,11 +11,30 @@ Tier-classified artifacts in this project factor into a product of two orthogona
 The factorization is realized by complementary mechanisms. File content typically carries axis_α — `axioms.md` carries the Axiom-tier classification by what it contains. Directory location or annotation typically carries axis_β — `.claude/rules/` realizes the auto-loaded T1 zone (per-turn invocation), `.claude/principles/` realizes the lazy-loaded T2–T3 zone (per-authoring or per-verify invocation). The same axis_α value can occupy either zone depending on observed invocation frequency. Lazy-load mechanisms operate on axis_β alone; demoted content retains its axis_α classification.
 
 **Observed instances**:
-- Gate annotations: A2 §A5 coordination distinguishes Standing/Active authority (axis_α) from regret (axis_β) at the meta/design layer; the runtime annotation layer collapses to a single TOOL GROUNDING `(extension)`/`(constitution)` axis per A5 coextension — see `axioms.md`.
+- Gate annotations: A2 §A5 coordination distinguishes Standing/Active authority (axis_α) from regret (axis_β) at the meta/design layer; the runtime annotation layer collapses to a single TOOL GROUNDING `(extension)`/`(constitution)` axis per A5 coextension — see `### Authority Mode: Standing/Active` below.
 - Principle classification: `.claude/rules/` (T1) versus `.claude/principles/` (T2–T3) directly realizes the factorization for prescriptive content.
 - Tier-changing moves: e-tier reclassification (Axiom → Safeguard) and o-tier compression (content reduction) operate as independent moves — see `.claude/principles/safeguards.md` Adversarial Anticipation tier note.
 
 Sibling concept to A5 (Interaction Kind Factorization): A5 factors gate operations into Extension/Constitution × bounded/unbounded; Tier Factorization factors tier classifications into axis_α × axis_β.
+
+### Authority Mode: Standing/Active
+
+Relocated from `.claude/rules/axioms.md` A2 (2026-07-28) — the axis_α × axis_β observed-instance example above, materialized in full.
+
+A2's authority extends to a second order: not only WHO exercises judgment (1st order — AI detects, User judges), but HOW authority is allocated between pre-committed rules and live judgment (2nd order).
+
+Gate authority decomposes into two modes:
+
+- **Standing authority**: User's constitutive judgment crystallized into deterministic rules — system prompts, compose automation, CI/CD configurations. Operates in the Extension domain (entropy→0).
+- **Active authority**: User's live constitutive judgment exercised at protocol gates. Operates in the Constitution domain (entropy>0).
+
+The act of creating Standing authority — writing a system prompt rule, configuring a CI/CD gate, defining compose elision — is itself an Active authority exercise: User's conscious choice to delegate specific gate decisions to pre-committed rules. This self-referential grounding (2nd order → 1st order) ensures Standing authority is always traceable to a constitutive act.
+
+**A2 boundary protection at 2nd order**: A2 protects authority allocation visibility, not gate exclusivity. Standing authority operating within its explicitly delegated scope is A2-compatible — the delegation was User's conscious choice. Standing authority exceeding delegated scope into constitution territory is A2 violation. The operational test: "Was this Standing authority scope explicitly established by User's constitutive act?"
+
+**Configurable relay/constitution boundary**: The relay/constitution boundary is not fixed at protocol definition time — User can shift it by creating or revoking Standing authority. TOOL GROUNDING entries map to this model: `(extension)` markers identify gates delegated to Standing authority (relay-eligible); `(constitution)` markers identify gates requiring Active authority. Conditional specialization is recorded per A5's single annotation axis (see `axioms.md` A5).
+
+**A5 coordination**: Standing/Active is an authority-source dimension; A5's regret dimension (bounded/unbounded) is coextensive with the operational classification, up to A5's structural exceptions (per A5's single annotation axis). The two dimensions are conceptually distinguishable at the meta/design layer (per this section's axis_α × axis_β observed instances) but collapse at the runtime annotation layer, per A5's single annotation axis.
 
 ## Epistemic Cost Topology
 
