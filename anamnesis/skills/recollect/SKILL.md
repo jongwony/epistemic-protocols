@@ -504,4 +504,4 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 21. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 
-22. **Seam relay on declared continuation**: when a user-declared chain or a composition edge this SKILL.md declares (the `/recollect ∘ /inquire` COMPOSITION edge) names the next protocol, the between-protocol seam after Mode Deactivation is relay (Extension) — proceed directly, citing the settling source (the chain declaration or the named composition edge). This governs only the seam BETWEEN protocols; every Constitution gate inside this protocol and the next fires unchanged, and the user can redirect at any turn.
+22. **Seam relay on declared continuation**: as typed by the "seam (extension)" entry in TOOL GROUNDING.
