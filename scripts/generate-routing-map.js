@@ -9,10 +9,12 @@
  * protocol entries are generated 100% from canonical sources — no hand-written
  * gloss:
  *
- *   1. deficit-framed `when:` trigger = the "When to Use" column of the catalog
- *      table in epistemic-cooperative/skills/catalog/SKILL.md.
- *   2. `Deficit → Resolution` spine + Name/command = scripts/load-protocols.js
- *      records (discoverPlugins().filter(p => p.isProtocol)).
+ *   1. Name, `/command`, cluster, presentation order, and the deficit-framed
+ *      `when:` trigger = the catalog table in
+ *      epistemic-cooperative/skills/catalog/SKILL.md.
+ *   2. `Deficit → Resolution` spine = scripts/load-protocols.js records
+ *      (discoverPlugins().filter(p => p.isProtocol)); the same records supply the
+ *      protocol set that both drift guards check the catalog rows against.
  *
  * The routing PREAMBLE below is the one hand-maintained part of the map: edit it
  * here, never in the generated file. The `description:` frontmatter gloss is
@@ -52,13 +54,13 @@ const PREAMBLE =
   '\n' +
   'Route the blocked edge toward the next dependent commitment — not the task. If no\n' +
   'observation can settle that edge without first choosing a criterion, a meaning, or an\n' +
-  'authority, invoke the deficit-matched protocol below. If criterion, meaning, and\n' +
-  'authority are already fixed and an observation can settle it, take the cheapest\n' +
-  'eligible evidence path — a protocol closes it when the required observation fits\n' +
-  'Aitesis\'s `/inquire` probe envelope; outside that envelope, hand it onward under an\n' +
-  'explicit contract. Split a compound blockage into "choose the criterion" + "measure\n' +
-  'under it" before routing. Carry an unresolved question forward AS a question — never\n' +
-  'as an implicit premise.\n';
+  'authority, invoke (or offer) the deficit-matched protocol below. If criterion,\n' +
+  'meaning, and authority are already fixed and an observation can settle it, take the\n' +
+  'cheapest eligible evidence path — a protocol closes it when the required observation\n' +
+  'fits Aitesis\'s `/inquire` probe envelope; outside that envelope, hand it onward\n' +
+  'under an explicit contract. Split a compound blockage into "choose the criterion" +\n' +
+  '"measure under it" before routing. Carry an unresolved question forward AS a\n' +
+  'question — never as an implicit premise.\n';
 
 // Catalog table row: | Name | `/command` | When to Use |. Name is the protocol
 // display name (capitalized), command is all-lowercase, third cell is the
