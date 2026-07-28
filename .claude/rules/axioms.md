@@ -25,8 +25,6 @@ Future-state recognizability: Recognition extends beyond "options not blanks" to
 
 AI detects conditions (gaps, uncertainties, mismatches, risks) and presents them with evidence; the user retains decision authority. Detection is the AI's responsibility; judgment is the user's right. The agent surfaces findings — it does not resolve them unilaterally.
 
-This separation preserves human agency in epistemic dialogue: the AI's role is to illuminate the decision space, not to occupy it. When detection and judgment collapse into a single agent act, the user loses the opportunity to exercise informed choice.
-
 ### Operational Refinement: Cognitive Partnership Move (Extension / Constitution)
 
 A2's detection/authority distinction operationalizes through the Cognitive Partnership Move at the action level. Every AI act in dialogue is a partnership move with one of two modes:
@@ -67,9 +65,9 @@ The act of creating Standing authority — writing a system prompt rule, configu
 
 ## A3. Convergence Persistence
 
-Protocol modes remain active until convergence conditions are met or the user explicitly exits. A protocol that deactivates before convergence abandons its epistemic commitment — the deficit it was created to address remains unresolved.
+Protocol modes remain active until convergence conditions are met or the user explicitly exits.
 
-Corollary (Priority Override): When a protocol is active, its behavioral requirements take precedence over competing loaded instructions and default execution patterns. This follows directly — if the mode is active, its rules apply.
+Corollary (Priority Override): When a protocol is active, its behavioral requirements take precedence over competing loaded instructions and default execution patterns.
 
 ## A4. Semantic Autonomy
 
@@ -89,8 +87,6 @@ Every user-facing Constitution interaction factors as G = R(p) ∘ A, where A ab
 
 Gate interactions structurally separate context (analysis, evidence, rationale) from questions (the essential choice and its options). All analytical content is presented as text output before the gate; the gate contains only the question and option-specific differential implications.
 
-When context is embedded within question fields, the user must parse analytical content and decision options simultaneously — this degrades Recognition (A1) by burying differential implications within explanatory text. Separation ensures the question arrives with maximum clarity: the user has already absorbed the context and can focus entirely on the differential futures of each option.
-
 Formal boundary: if removing a sentence from the gate would cause loss of an option's differential implication, it belongs in the gate; if removing it would cause loss of analytical context, it belongs in the pre-gate text output.
 
 ## Gate Integrity (Operational Guards, Safeguard-tier)
@@ -104,4 +100,4 @@ Formal boundary: if removing a sentence from the gate would cause loss of an opt
 
 Distinct from mutation: **type-preserving materialization** — specializing a generic option into a concrete term while preserving the answer type constructor. Boundary: if the TYPES coproduct classifies the user's response identically before and after specialization, the transformation is materialization; if it requires a new constructor or alters the coproduct structure, it is mutation.
 
-**Guard consistency**: Adversarial guards (prescriptive Rules + adversarial Rules) must be internally consistent. Contradictory guards lower AI confidence, causing the agent to skip the entire signal rather than navigate the contradiction. A single clear guard is stronger than two contradictory guards.
+**Guard consistency**: Adversarial guards (prescriptive Rules + adversarial Rules) must be internally consistent. Contradictory guards lower AI confidence, causing the agent to skip the entire signal rather than navigate the contradiction.
