@@ -482,7 +482,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 8. **Convergence evidence**: Present transformation trace (VagueRecall → enrichments → Candidate(recognized) → ClueVector_prose) before declaring recall_complete — convergence is demonstrated, not asserted. The SingleObvious Extension path folds this trace into its non-yielding inline emit (degenerate — a single candidate with no enrichments collapses the trace to VagueRecall → Candidate(recognized) → ClueVector_prose), satisfying this rule within the emit rather than via a separate Phase 3 step.
 
-9. **Context-Question Separation**: Present narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding context inside the question field violates this invariant.
+9. **Context-Question Separation**: Analysis, evidence, and rationale are text before the gate; the gate carries the question and each option's differential implication only.
 
 10. **NullMatch handoff diagnosis**: On NullMatch after exhausted probing, offer Aitesis handoff with accumulated trace and enumerate possible causes — lifecycle gap (SessionEnd did not fire), pre-store (session predates hypomnesis), missing extractor, or PartialExtract from corrupted source — giving actionable diagnosis. INDEX may lack entries while SSOT retains the information. A successful-scan-but-no-resumable-SSOT case (the recalled id is a fork/sidechain) is NOT a NullMatch — the scan succeeds on the substitute channel — and is handled as SidechainNoSSOT by parent back-trace (Rule 19), not by this NullMatch handoff.
 

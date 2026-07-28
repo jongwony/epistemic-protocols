@@ -456,7 +456,7 @@ After integration: `elevate_complete` → present the convergence evidence trace
 
 15. **Round-local salience bundling**: Each round carries the current judgment, its nearest evidence, and what it implies for the next move; everything else defers.
 
-16. **Context-Question Separation**: Present narrative context, traversal evidence, and broken-link notes as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding context inside the question field violates this invariant.
+16. **Context-Question Separation**: Analysis, evidence, and rationale are text before the gate; the gate carries the question and each option's differential implication only.
 
 17. **Elevated unit currency is not fidelity**: Elevation constitutes the unit (these deposits form this higher whole), not current-reality agreement (it still holds). A correctly recognized higher unit may still be desynced from current reality — the recognition gate verifies the unit, not its fidelity. `HigherUnit_prose` emits with a currency≠fidelity caveat; the elevated unit is re-verified against current state before commit and is not handed to downstream protocols as confirmed current context.
 

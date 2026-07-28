@@ -418,7 +418,7 @@ After a **mutating** answer (Confirm/Adapt — these adapt `R` into `R'`) — **
 4. **Evidence-grounded**: Every surfaced mismatch must cite specific observable evidence from both result `R` and context `X`, not speculation
 5. **Convergence persistence**: Mode active until all mismatch tasks are completed (resolved or dismissed)
 6. **Non-circularity**: Information source is the result itself compared against context, not pre-execution context scans (independence from Aitesis)
-7. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
+7. **Context-Question Separation**: Analysis, evidence, and rationale are text before the gate; the gate carries the question and each option's differential implication only.
 8. **Convergence evidence**: Present transformation trace before declaring adjudicated(R', X); per-mismatch evidence is required
 9. **Zero-mismatch surfacing**: If Phase 0 scan detects no context mismatches, present this finding with reasoning for user confirmation
 10. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
