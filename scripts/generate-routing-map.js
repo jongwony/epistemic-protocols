@@ -52,13 +52,13 @@ const PREAMBLE =
   '\n' +
   'Route the blocked edge toward the next dependent commitment — not the task. If no\n' +
   'observation can settle that edge without first choosing a criterion, a meaning, or an\n' +
-  'authority, invoke the deficit-matched protocol below. If criterion and authority are\n' +
-  'already fixed and an observation can settle it, take the cheapest eligible evidence\n' +
-  'path — a protocol closes it when the required observation fits Aitesis\'s `/inquire`\n' +
-  'probe envelope; outside that envelope, hand it onward under an explicit contract.\n' +
-  'Split a compound blockage into "choose the criterion" + "measure under it" before\n' +
-  'routing. Carry an unresolved question forward AS a question — never as an implicit\n' +
-  'premise.\n';
+  'authority, invoke the deficit-matched protocol below. If criterion, meaning, and\n' +
+  'authority are already fixed and an observation can settle it, take the cheapest\n' +
+  'eligible evidence path — a protocol closes it when the required observation fits\n' +
+  'Aitesis\'s `/inquire` probe envelope; outside that envelope, hand it onward under an\n' +
+  'explicit contract. Split a compound blockage into "choose the criterion" + "measure\n' +
+  'under it" before routing. Carry an unresolved question forward AS a question — never\n' +
+  'as an implicit premise.\n';
 
 // Catalog table row: | Name | `/command` | When to Use |. Name is the protocol
 // display name (capitalized), command is all-lowercase, third cell is the
