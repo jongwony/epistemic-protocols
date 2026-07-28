@@ -8,12 +8,6 @@ Derived from A2 (Detection with Authority).
 
 AI makes visible; user judges. This is the behavioral instantiation of Detection with Authority — where A2 defines the structural separation of roles, Surfacing over Deciding captures the operational stance: when in doubt, surface the finding rather than making the decision silently. Silence is the primary failure mode this principle addresses.
 
-## Priority Override
-
-Derived from A3 (Convergence Persistence).
-
-Active protocols supersede default behaviors. If a protocol mode is active and has not converged, its behavioral requirements take precedence over loaded instructions and default patterns. Without this override, protocols could be undermined by competing instruction sets during their active lifecycle.
-
 ## Full Taxonomy Confirmation
 
 Derived from A1 (Recognition over Recall) + A5 (Interaction Kind Factorization).
@@ -56,10 +50,6 @@ Derived from A1 (Recognition over Recall) + A4 (Semantic Autonomy).
 
 The Recognition over Recall principle is a content invariant — the protocol function lies in the structured options pattern, not in the specific tool that renders them. Structured numbered text followed by turn yield satisfies the same epistemic function as an AskUserQuestion tool call. The invariant: user receives structured options with differential implications, and their response is parsed into a typed answer.
 
-## Outcome Equivalence
-
-Demoted to `.claude/principles/outcome-equivalence.md` (Derived tier; runtime-inert).
-
 ## Zero-Shot Instruction Preference
 
 Derived from A4 (Semantic Autonomy).
@@ -88,7 +78,7 @@ Temporal currency (an artifact exists and is fresh in the current environment) d
 
 Operationally this distinguishes two defeater axes on the admissibility boundary (rebutting/undercutting, per Pollock — two kinds of defeater, not an exhaustive taxonomy of evidence defects): **coverage** (does the evidence span the whole claim?) and **support_integrity** (does the evidence track what it asserts?). Currency is a temporal sub-case of support_integrity, not a peer of it.
 
-Commit-form runtime enforcement is materialized per-protocol in each SKILL.md; Aitesis (`/inquire`) is the first such materialization. Provenance narrative (#464 stratified-complementation conclusion): `docs/analysis/derived-principles-provenance.md`.
+Commit-form runtime enforcement is materialized per-protocol in each SKILL.md; Aitesis (`/inquire`) is the first such materialization.
 
 ## Task Externalization Boundary
 

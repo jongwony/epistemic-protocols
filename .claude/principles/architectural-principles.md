@@ -31,6 +31,8 @@ Inter-protocol data flows as natural language in the session context — no stru
 
 **Stigmergy signal constraint**: Classification artifacts that flow between protocols (e.g., BoundaryMap) carry signal only, not payload. Downstream protocols read the classification and autonomously modify their own behavior — this is behavioral stigmergy, not central prescription. Loading candidates or behavioral directives into classification entries converts the signal into payload, breaking the stigmergy pattern. Test: "Is the downstream protocol reading a signal and choosing its behavior, or following a central prescription?" Former is correct.
 
+Composition scope: The factorization G = R(p) ∘ A applies to individual gate operations within a single protocol activation. Inter-protocol composition (sequential activation of multiple protocols) operates through `.claude/principles/architectural-principles.md §Session Text Composition` — natural language in session context, not formal gate composition. Associativity of gate operations across protocol boundaries is not claimed; each protocol's gates are independently factored.
+
 ## Cross-Session Knowledge Composition
 
 Anamnesis's hypomnesis store persists session recall indices that enrich protocol detection in subsequent sessions. This is the session-boundary extension of Session Text Composition — where intra-session data flows through conversation context, cross-session data flows through the hypomnesis store. Each protocol's Phase 0/1 can leverage accumulated domain knowledge to narrow scan scope and improve detection precision (Tertiary hermeneutic circle; see [`hermeneutic-cycle`](hermeneutic-cycle.md)).

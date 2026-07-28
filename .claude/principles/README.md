@@ -42,6 +42,7 @@ The split realizes the orthogonal e-tier × o-tier mapping established in this p
 | Tier Factorization | `.claude/rules/architectural-principles.md` | 2026-07-03 | T2 — meta/design-time cross-reference (axis_α × axis_β), not per-turn load-bearing; `.claude/rules/architectural-principles.md` keeps only §Epistemic Completeness Boundary as T1. |
 | project-profile-calibration.md (whole file) | `.claude/rules/project-profile-calibration.md` | 2026-07-03 | T2-T3 — six-variable derivation and Scope Boundary are authoring/calibration-time reference; `project-profile.md` (rules layer) carries the per-turn operative Calibration Result and stays in `.claude/rules/`. In transit, §Cross-Project Corroboration was deliberately deleted (audit item S9) and the Self-containment policy's historical opening clause was trimmed (S11). |
 | Outcome Equivalence | `.claude/rules/derived-principles.md` | 2026-07-03 | T2-T3 — empirical-corollary argument chain (A4 + realization-completeness) invoked at authoring/verify time, not per-turn; A4 itself retains a one-line pointer in `axioms.md`. |
+| A5 Composition Scope | `.claude/rules/axioms.md` | 2026-07-28 | T2-T3 — authoring/design-time cross-protocol composition question (does the G = R(p) ∘ A factorization compose across protocol boundaries), not per-turn load-bearing; appended into `architectural-principles.md §Session Text Composition`, the section it names as the inter-protocol composition mechanism. |
 
 ## Philosophy
 
