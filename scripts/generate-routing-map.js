@@ -5,16 +5,20 @@
  * The harness already holds every skill's `description:` frontmatter, yet a
  * passive capability description does not trigger invocation. This map is an
  * active, deficit-framed routing DIRECTIVE meant to be injected at SessionStart
- * (see epistemic-cooperative/skills/catalog/scripts/session-context.js). It is
- * generated 100% from canonical sources — no hand-written gloss:
+ * (see epistemic-cooperative/skills/catalog/scripts/session-context.js). Its
+ * protocol entries are generated 100% from canonical sources — no hand-written
+ * gloss:
  *
- *   1. deficit-framed `when:` trigger = the "When to Use" column of the catalog
- *      table in epistemic-cooperative/skills/catalog/SKILL.md.
- *   2. `Deficit → Resolution` spine + Name/command = scripts/load-protocols.js
- *      records (discoverPlugins().filter(p => p.isProtocol)).
+ *   1. Name, `/command`, cluster, presentation order, and the deficit-framed
+ *      `when:` trigger = the catalog table in
+ *      epistemic-cooperative/skills/catalog/SKILL.md.
+ *   2. `Deficit → Resolution` spine = scripts/load-protocols.js records
+ *      (discoverPlugins().filter(p => p.isProtocol)); the same records supply the
+ *      protocol set that both drift guards check the catalog rows against.
  *
- * The `description:` frontmatter gloss is intentionally NOT used (redundant with
- * what the harness already carries).
+ * The routing PREAMBLE below is the one hand-maintained part of the map: edit it
+ * here, never in the generated file. The `description:` frontmatter gloss is
+ * intentionally NOT used (redundant with what the harness already carries).
  *
  * Usage:
  *   node scripts/generate-routing-map.js            # write routing-map.md
@@ -46,7 +50,17 @@ const PREAMBLE =
   '# Epistemic Protocols — session routing map (auto-generated; do not edit by hand)\n\n' +
   'These protocols each resolve a specific interaction deficit. On each user turn, if the\n' +
   'situation matches a `when:` trigger below, proactively invoke (or offer) that protocol —\n' +
-  'the skill descriptions alone under-trigger invocation. Route from the deficit, not the summary.\n';
+  'the skill descriptions alone under-trigger invocation. Route from the deficit, not the summary.\n' +
+  '\n' +
+  'Route the blocked edge toward the next dependent commitment — not the task. If no\n' +
+  'observation can settle that edge without first choosing a criterion, a meaning, or an\n' +
+  'authority, invoke (or offer) the deficit-matched protocol below. If criterion,\n' +
+  'meaning, and authority are already fixed and an observation can settle it, take the\n' +
+  'cheapest eligible evidence path — close it in place when the required observation is\n' +
+  'small, reversible, and contained; when it is not, hand it onward under an explicit\n' +
+  'contract. Split a compound blockage into "choose the criterion" + "measure under it"\n' +
+  'before routing. Carry an unresolved question forward AS a question — never as an\n' +
+  'implicit premise.\n';
 
 // Catalog table row: | Name | `/command` | When to Use |. Name is the protocol
 // display name (capitalized), command is all-lowercase, third cell is the
