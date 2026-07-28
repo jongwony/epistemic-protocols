@@ -56,11 +56,11 @@ const PREAMBLE =
   'observation can settle that edge without first choosing a criterion, a meaning, or an\n' +
   'authority, invoke (or offer) the deficit-matched protocol below. If criterion,\n' +
   'meaning, and authority are already fixed and an observation can settle it, take the\n' +
-  'cheapest eligible evidence path — a protocol closes it when the required observation\n' +
-  'fits Aitesis\'s `/inquire` probe envelope; outside that envelope, hand it onward\n' +
-  'under an explicit contract. Split a compound blockage into "choose the criterion" +\n' +
-  '"measure under it" before routing. Carry an unresolved question forward AS a\n' +
-  'question — never as an implicit premise.\n';
+  'cheapest eligible evidence path — close it in place when the required observation is\n' +
+  'small, reversible, and contained; when it is not, hand it onward under an explicit\n' +
+  'contract. Split a compound blockage into "choose the criterion" + "measure under it"\n' +
+  'before routing. Carry an unresolved question forward AS a question — never as an\n' +
+  'implicit premise.\n';
 
 // Catalog table row: | Name | `/command` | When to Use |. Name is the protocol
 // display name (capitalized), command is all-lowercase, third cell is the

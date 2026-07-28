@@ -9,11 +9,11 @@ Route the blocked edge toward the next dependent commitment — not the task. If
 observation can settle that edge without first choosing a criterion, a meaning, or an
 authority, invoke (or offer) the deficit-matched protocol below. If criterion,
 meaning, and authority are already fixed and an observation can settle it, take the
-cheapest eligible evidence path — a protocol closes it when the required observation
-fits Aitesis's `/inquire` probe envelope; outside that envelope, hand it onward
-under an explicit contract. Split a compound blockage into "choose the criterion" +
-"measure under it" before routing. Carry an unresolved question forward AS a
-question — never as an implicit premise.
+cheapest eligible evidence path — close it in place when the required observation is
+small, reversible, and contained; when it is not, hand it onward under an explicit
+contract. Split a compound blockage into "choose the criterion" + "measure under it"
+before routing. Carry an unresolved question forward AS a question — never as an
+implicit premise.
 
 ## Planning
 
