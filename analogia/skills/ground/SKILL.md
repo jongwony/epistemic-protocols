@@ -343,7 +343,7 @@ After integration:
 7. **Validation respected**: User validation or dismissal is final for that correspondence in the current session
 8. **Convergence persistence**: Mode active until all identified correspondences are addressed or user Esc key
 9. **Context-Question Separation**: Output all analysis, evidence, and rationale as text before presenting via Cognitive Partnership Move (Constitution). The question contains only the essential question; options contain only option-specific differential implications. Embedding context in question fields = protocol violation
-10. **Convergence evidence**: Present transformation trace before declaring terminalized(R', F, D_f); per-correspondence evidence is required
+10. **Convergence evidence**: as typed by the `Convergence evidence` statement in the LOOP block.
 11. **Zero-gap surfacing**: If the Phase 0 scan finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
 12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
 13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.

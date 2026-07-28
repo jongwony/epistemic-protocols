@@ -480,7 +480,7 @@ After integration: `recall_complete` → present convergence evidence trace (Vag
 
 7. **Convergence persistence and early exit**: Mode active until recall_complete, NullMatch after exhausted attempts, or user Esc; user recognition or rejection of a candidate is final for that candidate in the current session, and Esc is accepted immediately regardless of remaining attempts.
 
-8. **Convergence evidence**: Present transformation trace (VagueRecall → enrichments → Candidate(recognized) → ClueVector_prose) before declaring recall_complete — convergence is demonstrated, not asserted. The SingleObvious Extension path folds this trace into its non-yielding inline emit (degenerate — a single candidate with no enrichments collapses the trace to VagueRecall → Candidate(recognized) → ClueVector_prose), satisfying this rule within the emit rather than via a separate Phase 3 step.
+8. **Convergence evidence**: as typed by the `Convergence evidence` statement in the LOOP block, with the SingleObvious Extension-path folding in the CONVERGENCE block's `recall_complete` equation.
 
 9. **Context-Question Separation**: Present narrative context, evidence, and adjacent vectors as text before the Constitution interaction; the interaction contains only the recognition question and options with differential implications. Embedding context inside the question field violates this invariant.
 

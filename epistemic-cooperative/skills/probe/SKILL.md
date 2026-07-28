@@ -268,7 +268,7 @@ The hypomnesis sibling `misfit.md` sub-index (under `~/.claude/projects/{slug}/h
 12. **Recognition over Recall** — Present structured hypothesis options via Cognitive Partnership Move (Constitution) and yield turn. Each option carries differential reverse-evidence so the post-selection state is anticipatable.
 13. **Detection with Authority** — AI detects candidate deficits with cited situation evidence; the user constitutes the recognition. AI never resolves the disposition.
 14. **Context-Question Separation** — All hypothesis evidence and reverse-evidence is presented as text output before the gate. The gate contains only the disposition options.
-15. **Convergence evidence** — Present a transformation trace before declaring convergence: Recognize/Redirect/Dismiss/Narrow produce a session-text artifact (ProtocolRoute or FitReviewNote); Stop deactivates without an artifact.
+15. **Convergence evidence** — as typed by the `Convergence evidence` statement in the LOOP block.
 16. **Coexistence with /catalog and /onboard** — Probe does not replace passive reference (`/catalog`) or pattern-based recommendation (`/onboard`). The three skills occupy distinct stances.
 17. **Structural-change calibration** — When a candidate hypothesis concerns whether a structural change crosses the architectural threshold, distinguish at hypothesis construction time:
     - **Architectural inscription**: addition of a new core protocol, addition of a `graph.json` edge, category-level promotion. Deferral pending accumulated use evidence applies.

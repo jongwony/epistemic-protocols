@@ -304,7 +304,7 @@ Note: Esc key → unconditional loop termination (LOOP level). Constitution inte
 3. **Minimal intrusion** (Surfacing over Deciding): Lightest intervention that achieves awareness; intensity follows the stakes matrix in `## Intensity`.
 4. **Gap dependencies**: Task blocking enforces logical ordering when gaps have prerequisite relationships.
 5. **Context-Question Separation**: Output analysis, evidence, and rationale as text before presenting the gate; the gate contains the essential question and option-specific differential implications only. Embedding context in question fields = protocol violation.
-6. **Convergence evidence**: Present convergence audit trace before declaring all tasks completed; per-gap evidence is required.
+6. **Convergence evidence**: as typed by the `Convergence evidence` statement in the LOOP block.
 7. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation.
 8. **Option-set relay test (Extension classification)**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
 9. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
