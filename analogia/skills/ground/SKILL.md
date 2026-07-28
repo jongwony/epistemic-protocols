@@ -345,7 +345,7 @@ After integration:
 9. **Context-Question Separation**: Analysis, evidence, and rationale are text before the gate; the gate carries the question and each option's differential implication only.
 10. **Convergence evidence**: Present transformation trace before declaring terminalized(R', F, D_f); per-correspondence evidence is required
 11. **Zero-gap surfacing**: If the Phase 0 scan finds perfect correspondence with no mapping gaps, present this finding with reasoning for user confirmation
-12. **Option-set relay test (Extension classification)**: If AI analysis converges to a single dominant option (option-level entropy→0 — Extension mode of the Cognitive Partnership Move), present the finding directly. Each Constitution option must be genuinely viable under different user value weightings. Options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options
+12. **Option-set relay test (Extension classification)**: Relay a cited finding only when one path stays genuinely viable across reasonable user value weightings; otherwise the Constitution gate fires.
 13. **Gate integrity** (Safeguard tier): The defined option set is presented intact — injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 14. **Plain emit discipline**: What the user reads is in their language, not the spec's — formal-block vocabulary stays in the formal block.
 15. **Round-local salience bundling**: Each round carries the current judgment, its nearest evidence, and what it implies for the next move; everything else defers.

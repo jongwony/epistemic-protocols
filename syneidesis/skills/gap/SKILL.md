@@ -306,7 +306,7 @@ Note: Esc key → unconditional loop termination (LOOP level). Constitution inte
 5. **Context-Question Separation**: Analysis, evidence, and rationale are text before the gate; the gate carries the question and each option's differential implication only.
 6. **Convergence evidence**: Present convergence audit trace before declaring all tasks completed; per-gap evidence is required.
 7. **Zero-gap surfacing**: If Scan(D) finds no gaps, present scan methodology and conclusion — committed decisions with stakes warrant explicit "no gaps found" confirmation.
-8. **Option-set relay test (Extension classification)**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
+8. **Option-set relay test (Extension classification)**: Relay a cited finding only when one path stays genuinely viable across reasonable user value weightings; otherwise the Constitution gate fires.
 9. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection/deletion/substitution each violate this invariant. Type-preserving materialization (specializing a generic option while preserving the TYPES coproduct) is distinct from mutation.
 10. **Plain emit discipline**: What the user reads is in their language, not the spec's — formal-block vocabulary stays in the formal block.
 11. **Round-local salience bundling**: Each round carries the current judgment, its nearest evidence, and what it implies for the next move; everything else defers.
