@@ -1,6 +1,6 @@
 # Task Externalization Boundary — Evidence Review
 
-> Demoted from `.claude/rules/derived-principles.md` on 2026-07-03. Grounded exposition supporting the Task Externalization Boundary and Reference over Copy derived principles; the operative rule paragraphs remain in `derived-principles.md`.
+> Demoted from `.claude/rules/derived-principles.md` on 2026-07-03. Grounded exposition supporting the Task Externalization Boundary and Reference over Copy derived principles; the operative rule paragraphs live in `.claude/principles/architectural-principles.md` (relocated there on 2026-07-28; `derived-principles.md` retains a one-line pointer for each).
 
 ## From §Task Externalization Boundary — cognitive-offloading literature review
 
