@@ -2076,8 +2076,10 @@ function checkCatalogSync() {
 // ============================================================
 // Check: Routing Map Sync (agent-facing SessionStart directive)
 // ============================================================
-// routing-map.md is generated 100% from canonical sources (the catalog
-// When-to-Use triggers + load-protocols deficit → resolution spine). A stale
+// routing-map.md pairs a hand-maintained PREAMBLE constant in the generator with
+// protocol entries derived from canonical sources (the catalog When-to-Use
+// triggers + load-protocols deficit → resolution spine); both are covered by the
+// in-memory regeneration below, so neither part can drift silently. A stale
 // committed map would inject a wrong routing directive at SessionStart, so this
 // check re-generates in-memory and fails on any divergence — the same drift
 // posture as cross-ref-scan/catalog-sync, using the shared {check, file,
