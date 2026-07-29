@@ -2848,6 +2848,29 @@ function checkPackagedAgentContractSync() {
       const SWEEP_COLS = new Set(['Category', 'Status', 'What was checked']);
       const EF_EXPECTED = new Set(['item', 'quoted_token', 'location', 'category', 'why_unresolvable', 'advisory', 'repair_note']);
       const ST_EXPECTED = new Set(['category', 'status', 'checked']);
+      // Unobservable-references table — same shape as Findings/EvidencedFinding
+      // above, added after that pair was written.
+      const UNOBS_COLS = new Set(['Quoted token', 'Location', 'Basis', 'Owner', 'Durability class evidence']);
+      const UR_EXPECTED = new Set(['quoted_token', 'location', 'basis', 'owner', 'class_evidence']);
+
+      // F5Input membership — the agent's `## Inputs` bullets vs SKILL.md's
+      // F5Input record fields (TYPES). Unlike (d) above this is a DIRECT
+      // symmetric comparison (no third locked-constant anchor): either side can
+      // drift and the other catches it. Some bullets are ALIASED — the agent
+      // names the input differently from F5Input's field name because the
+      // agent (a fresh-context consumer holding a COPY of the membership, not a
+      // reference to F5Input — Reference over Copy) explains the input in
+      // language its own reader needs, where SKILL.md keeps the compact field
+      // name. The alias table is the explicit, visible record of that name
+      // drift — an implicit fuzzy/substring match would let a REAL rename hide
+      // inside what looks like an alias, so aliases are enumerated here, not
+      // inferred.
+      const F5_INPUT_ALIASES = {
+        // agent `## Inputs` bullet name → F5Input field name (why they differ)
+        activation: 'activation_edge',        // agent bullet shortens "the activation edge under review" to a one-word key; F5Input keeps the fuller ActivationEdge-typed member name
+        contract_confirmation: 'cp_record',   // agent spells out what the record IS (the F0 contract-provenance gate's record) since it cannot dereference F0's own definition from a fresh context; F5Input keeps the compact field name
+        recipient_profile: 'contract',        // one agent bullet documents recipient_profile itself PLUS the contract's exposed members (boundary, activity, allowed_sources, execution_scope, verification_commands, stop_condition) — it is the bullet carrying F5Input's `contract: HandoffContract` field
+      };
 
       if (isF5VerdictContract) {
         if (!agentFindingsCols) {
@@ -2886,6 +2909,51 @@ function checkPackagedAgentContractSync() {
           localFails.push(
             `SweepTrace field drift in ${skillRel} — fields {${[...stFields].sort().join(', ')}} ` +
             `do not match the locked set {${[...ST_EXPECTED].sort().join(', ')}}. Sync TYPES.`
+          );
+        }
+
+        // (e) Unobservable-references table column schema — the same
+        // bidirectional-lock shape as (d) above, added after (d) was written:
+        // the caller parses these columns into UnobservableRef fields.
+        const agentUnobsCols = tableColumns(agentContent, /^###\s+Unobservable references/i);
+        if (!agentUnobsCols) {
+          localFails.push('agent declares an F5 verdict contract but has no `### Unobservable references` table header — cannot verify the Unobservable-references column schema');
+        } else if (!setEqual(new Set(agentUnobsCols), UNOBS_COLS)) {
+          localFails.push(
+            `Unobservable references table column drift — agent columns {${agentUnobsCols.join(', ')}} ` +
+            `do not match the locked F5 schema {${[...UNOBS_COLS].join(', ')}}. ` +
+            `The caller parses these columns into UnobservableRef fields; sync the table header.`
+          );
+        }
+
+        const urFields = parseRecordFields(paired.typesBlock, 'UnobservableRef');
+        if (!urFields) {
+          localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no UnobservableRef record — the Unobservable-references parse contract is undefined`);
+        } else if (!setEqual(urFields, UR_EXPECTED)) {
+          localFails.push(
+            `UnobservableRef field drift in ${skillRel} — fields {${[...urFields].sort().join(', ')}} ` +
+            `do not match the locked set {${[...UR_EXPECTED].sort().join(', ')}}. The Unobservable-references columns parse into these fields; sync TYPES.`
+          );
+        }
+
+        // (f) F5Input membership — the agent's `## Inputs` bullets, alias-
+        // normalized (F5_INPUT_ALIASES above), against whatever SKILL.md
+        // currently declares as F5Input's fields. A member added, removed, or
+        // renamed on either side without a matching edit on the other fails.
+        const inputsSection = extractMdSection(agentContent, /^##\s+Inputs/i);
+        const agentInputNames = [...inputsSection.matchAll(/^-\s*`(\w+)`:/gm)].map(x => x[1].trim());
+        const agentInputSet = new Set(agentInputNames.map(name => F5_INPUT_ALIASES[name] || name));
+        const f5InputFields = parseRecordFields(paired.typesBlock, 'F5Input');
+
+        if (agentInputNames.length === 0) {
+          localFails.push('agent `## Inputs` section has no backtick-named bullets — cannot verify F5Input membership');
+        } else if (!f5InputFields) {
+          localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no F5Input record — the dispatch-input membership contract is undefined`);
+        } else if (!setEqual(agentInputSet, f5InputFields)) {
+          localFails.push(
+            `F5Input membership drift — agent \`## Inputs\` bullets {${[...agentInputSet].sort().join(', ')}} (alias-normalized) ` +
+            `do not match F5Input's fields {${[...f5InputFields].sort().join(', ')}} in ${skillRel}. ` +
+            `Sync the agent's Inputs section (add/remove/rename a bullet) or F5Input's fields — and update F5_INPUT_ALIASES if a name pairing changed.`
           );
         }
       }
