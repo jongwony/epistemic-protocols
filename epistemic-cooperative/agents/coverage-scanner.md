@@ -35,7 +35,7 @@ You will receive:
    a. Glob `session_jsonl_glob` to get all JSONL paths on disk.
    b. **Single grep** with alternation pattern across all JSONL paths:
       ```
-      command-name>/(frame|gap|grasp|inquire|attend|contextualize|bound|ground|induce|elicit|ideate|recollect|sublate|distill|delimit|conduct|ascend|preview|prothesis:frame|syneidesis:gap|katalepsis:grasp|aitesis:inquire|prosoche:attend|epharmoge:contextualize|horismos:bound|analogia:ground|periagoge:induce|euporia:elicit|heuresis:ideate|anamnesis:recollect|elenchus:sublate|diylisis:distill|diairesis:delimit|hyphegesis:conduct|anagoge:ascend|proplasma:preview)<|"skill":"(frame|gap|grasp|inquire|attend|contextualize|bound|ground|induce|elicit|ideate|recollect|sublate|distill|delimit|conduct|ascend|preview|prothesis:frame|syneidesis:gap|katalepsis:grasp|aitesis:inquire|prosoche:attend|epharmoge:contextualize|horismos:bound|analogia:ground|periagoge:induce|euporia:elicit|heuresis:ideate|anamnesis:recollect|elenchus:sublate|diylisis:distill|diairesis:delimit|hyphegesis:conduct|anagoge:ascend|proplasma:preview)"
+      command-name>/(frame|gap|grasp|inquire|attend|contextualize|bound|ground|induce|elicit|ideate|recollect|sublate|delimit|conduct|ascend|preview|prothesis:frame|syneidesis:gap|katalepsis:grasp|aitesis:inquire|prosoche:attend|epharmoge:contextualize|horismos:bound|analogia:ground|periagoge:induce|euporia:elicit|heuresis:ideate|anamnesis:recollect|elenchus:sublate|diairesis:delimit|hyphegesis:conduct|anagoge:ascend|proplasma:preview)<|"skill":"(frame|gap|grasp|inquire|attend|contextualize|bound|ground|induce|elicit|ideate|recollect|sublate|delimit|conduct|ascend|preview|prothesis:frame|syneidesis:gap|katalepsis:grasp|aitesis:inquire|prosoche:attend|epharmoge:contextualize|horismos:bound|analogia:ground|periagoge:induce|euporia:elicit|heuresis:ideate|anamnesis:recollect|elenchus:sublate|diairesis:delimit|hyphegesis:conduct|anagoge:ascend|proplasma:preview)"
       ```
       This captures both slash commands (`<command-name>` tags) and Skill tool invocations (`"skill":"<name>"`) in one pass, pre-filtering to protocol skills only. Both arms are anchored on BOTH sides — left to the tag/key prefix, right to the closing delimiter (`<` for the tag, `"` for the key) — and the namespaced alternatives pair each plugin with exactly its own protocol command: a non-protocol command whose record merely contains a protocol token, a longer name sharing a protocol prefix (e.g. a hypothetical `/previewing`), or an unrelated skill under a protocol plugin's namespace never matches.
    c. **Map** matches to protocol names:
@@ -52,7 +52,6 @@ You will receive:
       - `ideate`, `heuresis:ideate` → Heuresis
       - `recollect`, `anamnesis:recollect` → Anamnesis
       - `sublate`, `elenchus:sublate` → Elenchus
-      - `distill`, `diylisis:distill` → Diylisis
       - `delimit`, `diairesis:delimit` → Diairesis
       - `conduct`, `hyphegesis:conduct` → Hyphegesis
       - `ascend`, `anagoge:ascend` → Anagoge
