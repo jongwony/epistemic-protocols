@@ -654,11 +654,21 @@ function checkToolGrounding() {
       });
     }
 
-    results.pass.push({
-      check: 'tool-grounding',
-      file: relPath,
-      message: 'Tool grounding consistency verified'
-    });
+    // Emit the per-file pass ONLY when this same iteration recorded no
+    // tool-grounding failure for this file. Checks 6c and 6g push failures
+    // WITHOUT continuing, so an unconditional pass here made the check report
+    // both verdicts about one file at once — "Tool grounding consistency
+    // verified" printed beside the very failure that denies it. The global exit
+    // status was still correct, which is exactly why the contradiction could
+    // sit unnoticed; the honest-label discipline governs each claim, not only
+    // the aggregate.
+    if (!results.fail.some(f => f.check === 'tool-grounding' && f.file === relPath)) {
+      results.pass.push({
+        check: 'tool-grounding',
+        file: relPath,
+        message: 'Tool grounding consistency verified'
+      });
+    }
   }
 }
 
@@ -2860,8 +2870,8 @@ function checkPackagedAgentContractSync() {
       // Unresolved-references table — the third full-key typed row, same
       // bidirectional-lock shape as (e)/Resolved above, added alongside the
       // round that closed the exact-string-match defect (UnresolvedRef).
-      const UNRESOLVED_COLS = new Set(['Locator', 'Basis', 'Owner', 'Why unresolvable', 'Advisory disposition', 'Repair note']);
-      const UNRES_EXPECTED = new Set(['locator', 'basis', 'owner', 'why_unresolvable', 'advisory', 'repair_note']);
+      const UNRESOLVED_COLS = new Set(['Quoted token', 'Location', 'Basis', 'Owner', 'Locator', 'Why unresolvable', 'Advisory disposition', 'Repair note']);
+      const UNRES_EXPECTED = new Set(['quoted_token', 'location', 'basis', 'owner', 'locator', 'why_unresolvable', 'advisory', 'repair_note']);
 
       // F5Input membership — the agent's `## Inputs` bullets vs SKILL.md's
       // F5Input record fields (TYPES). Unlike (d) above this is a DIRECT
@@ -3200,7 +3210,17 @@ function checkVerdictArity() {
             }
             if (endLine !== -1) break;
           }
-          if (endLine === -1) continue; // genuinely unbalanced within the block — skip defensively, never a false verdict
+          if (endLine === -1) {
+            // Fail CLOSED, not open. An arity-bearing constructor that opens
+            // inside a formal block and never closes before the block ends is
+            // malformed on its face; skipping it would leave the pass message
+            // below asserting a coverage the scan did not deliver — the same
+            // honest-label defect the cross-line walk above removes, one
+            // boundary further down. Reporting it is also strictly more useful
+            // than silence: there is no legitimate spec in which this occurs.
+            fails.push({ line: i + 1, name, found: null, expected: arity, snippet: lines[i].slice(Math.max(0, om.index - 15), Math.min(lines[i].length, om.index + 60)) });
+            continue;
+          }
           const inner = endLine === i
             ? lines[i].slice(openIdx + 1, endIdx)
             : [lines[i].slice(openIdx + 1), ...lines.slice(i + 1, endLine), lines[endLine].slice(0, endIdx)].join(' ');
@@ -3225,7 +3245,9 @@ function checkVerdictArity() {
         results.fail.push({
           check: CHECK,
           file: `${skillRel}:${f.line}`,
-          message: `Positional \`${f.name}(...)\` occurrence has ${f.found} field(s) but TYPES declares ${f.name} with ${f.expected} — a positional pattern must bind every field; a site needing only some fields uses named access instead. Near: …${f.snippet}…`,
+          message: f.found === null
+            ? `Positional \`${f.name}(...)\` occurrence opens but never closes before the end of its formal block, so its arity cannot be checked against the ${f.expected} field(s) TYPES declares. Balance the parentheses inside the block. Near: …${f.snippet}…`
+            : `Positional \`${f.name}(...)\` occurrence has ${f.found} field(s) but TYPES declares ${f.name} with ${f.expected} — a positional pattern must bind every field; a site needing only some fields uses named access instead. Near: …${f.snippet}…`,
         });
       }
     } else {
