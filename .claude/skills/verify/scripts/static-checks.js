@@ -2857,6 +2857,11 @@ function checkPackagedAgentContractSync() {
       // reception-block reference-observation repair.
       const RESOLVED_COLS = new Set(['Locator', 'Basis', 'Owner', 'Confirmation evidence']);
       const RR_EXPECTED = new Set(['locator', 'basis', 'owner', 'evidence']);
+      // Unresolved-references table — the third full-key typed row, same
+      // bidirectional-lock shape as (e)/Resolved above, added alongside the
+      // round that closed the exact-string-match defect (UnresolvedRef).
+      const UNRESOLVED_COLS = new Set(['Locator', 'Basis', 'Owner', 'Why unresolvable', 'Advisory disposition', 'Repair note']);
+      const UNRES_EXPECTED = new Set(['locator', 'basis', 'owner', 'why_unresolvable', 'advisory', 'repair_note']);
 
       // F5Input membership — the agent's `## Inputs` bullets vs SKILL.md's
       // F5Input record fields (TYPES). Unlike (d) above this is a DIRECT
@@ -2965,6 +2970,30 @@ function checkPackagedAgentContractSync() {
           );
         }
 
+        // Unresolved-references table column schema — the third full-key
+        // typed row, same bidirectional-lock shape as Unobservable/Resolved
+        // above: the caller parses these columns into UnresolvedRef fields.
+        const agentUnresolvedCols = tableColumns(agentContent, /^###\s+Unresolved references/i);
+        if (!agentUnresolvedCols) {
+          localFails.push('agent declares an F5 verdict contract but has no `### Unresolved references` table header — cannot verify the Unresolved-references column schema');
+        } else if (!setEqual(new Set(agentUnresolvedCols), UNRESOLVED_COLS)) {
+          localFails.push(
+            `Unresolved references table column drift — agent columns {${agentUnresolvedCols.join(', ')}} ` +
+            `do not match the locked F5 schema {${[...UNRESOLVED_COLS].join(', ')}}. ` +
+            `The caller parses these columns into UnresolvedRef fields; sync the table header.`
+          );
+        }
+
+        const unresFields = parseRecordFields(paired.typesBlock, 'UnresolvedRef');
+        if (!unresFields) {
+          localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no UnresolvedRef record — the Unresolved-references parse contract is undefined`);
+        } else if (!setEqual(unresFields, UNRES_EXPECTED)) {
+          localFails.push(
+            `UnresolvedRef field drift in ${skillRel} — fields {${[...unresFields].sort().join(', ')}} ` +
+            `do not match the locked set {${[...UNRES_EXPECTED].sort().join(', ')}}. The Unresolved-references columns parse into these fields; sync TYPES.`
+          );
+        }
+
         // (f) F5Input membership — the agent's `## Inputs` bullets, alias-
         // normalized (F5_INPUT_ALIASES above), against whatever SKILL.md
         // currently declares as F5Input's fields. A member added, removed, or
@@ -3042,6 +3071,139 @@ function checkPackagedAgentContractSync() {
       file: 'working tree',
       message: 'No contract-bearing packaged agents found (no agent carries a "### Realization:" verdict anchor) — nothing to sync',
     });
+  }
+}
+
+// ============================================================
+// Check: Verdict Arity
+// ============================================================
+// A verdict-shaped coproduct declared in a TYPES block as `Name ∈ {Ctor1(f1:
+// T1, ...), Ctor2(...), ...}` fixes each constructor's field COUNT once, at
+// its declaration. Every OTHER positional occurrence of that constructor
+// elsewhere in the same SKILL.md's formal blocks (FLOW, MORPHISM, TYPES,
+// PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, MODE STATE,
+// COMPOSITION — any `── HEADER ──`-delimited section) must bind EVERY field
+// of that arity, never a partial positional pattern — round 18's defect was
+// exactly this: `ZeroMemoryVerdict`'s `Fail` grew from 4-ary to 5-ary and two
+// backstop guards kept destructuring it 4-ary (`Fail(B, _, _, _)`), silently
+// dropping the newest field from both wildcard sites. A site needing only
+// some fields uses named access instead (`verdict.blocking_items`) — never a
+// positional pattern at all, so it carries no arity to go stale (the
+// established idiom this spec already uses for a bare tag test, e.g.
+// `zero_memory_verdict = Pass`, generalizes to named-field reads the same
+// way).
+//
+// Scoped to diylisis only, NOT generic across every protocol: a name-based
+// scan over other protocols' SKILL.md files hits real collisions — e.g.
+// hyphegesis's `VM = ConductMove ∈ {..., Compose(via op), ...}` (arity 1, a
+// user-move constructor) shares its bare name with an UNRELATED algebraic
+// `Compose(RVᵣ, RVᵣ, op)` (arity 3, a value-composition operator) elsewhere
+// in the same file — two different things, same identifier, no drift. Widening
+// this check to every protocol would need a disambiguation this round was not
+// asked to build and would report a false defect outside this PR's mandate.
+function checkVerdictArity() {
+  const CHECK = 'verdict-arity';
+  const SCOPED_DIRS = ['diylisis'];
+  const HEADER_RE = /^── .+ ──$/;
+
+  // Split on top-level commas only — a nested paren/brace/bracket (e.g.
+  // `Set(EvidencedFinding)` inside a field's type annotation) does not count
+  // as a separator, so a constructor's OWN field list is split correctly,
+  // and a usage occurrence's own nested calls (if any) are respected too.
+  function splitTopLevel(s) {
+    const parts = [];
+    let depth = 0, cur = '';
+    for (const ch of s) {
+      if ('([{'.includes(ch)) depth++;
+      else if (')]}'.includes(ch)) depth--;
+      if (ch === ',' && depth === 0) { parts.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    if (cur.trim() !== '') parts.push(cur);
+    return parts.map(p => p.trim()).filter(Boolean);
+  }
+
+  // Parse every `Name ∈ {Ctor1(f1: T1, ...), Ctor2(...), Atom, ...}`
+  // enumeration in a TYPES block into { ctorName -> declared arity }. An
+  // atomic tag (no parens, e.g. `DROP`, `Unknown`) has no arity to check and
+  // is skipped — only constructors with a parenthesized field list are
+  // arity-bearing. This IS the declaration; it is read here, never counted
+  // as an occurrence when the same line is later scanned for usage sites.
+  function parseConstructorArities(typesBlockText) {
+    const arities = new Map();
+    const re = /([A-Za-z_][\w]*)\s*∈\s*\{([^}]*)\}/g;
+    let m;
+    while ((m = re.exec(typesBlockText)) !== null) {
+      for (const member of splitTopLevel(m[2])) {
+        const ctorMatch = member.match(/^([A-Za-z_][\w]*)\s*\(([\s\S]*)\)$/);
+        if (!ctorMatch) continue;
+        arities.set(ctorMatch[1], splitTopLevel(ctorMatch[2]).length);
+      }
+    }
+    return arities;
+  }
+
+  for (const rec of _protocolRecords.filter(r => SCOPED_DIRS.includes(r.dir))) {
+    const skillRel = path.relative(projectRoot, rec.skillMdPath);
+    const content = fs.readFileSync(rec.skillMdPath, 'utf8');
+    const typesBlock = extractFormalSection(content, 'TYPES');
+    if (!typesBlock) continue;
+
+    const arities = parseConstructorArities(typesBlock);
+    if (arities.size === 0) continue;
+
+    const lines = content.split('\n');
+    let inFormalBlock = false;
+    const fails = [];
+    for (let i = 0; i < lines.length; i++) {
+      const trimmed = lines[i].trim();
+      if (HEADER_RE.test(trimmed)) { inFormalBlock = true; continue; }
+      if (trimmed === '```') { inFormalBlock = false; continue; }
+      if (!inFormalBlock) continue;
+      // The `Name ∈ {...}` declaration line itself is the declaration, not
+      // an occurrence — exclude it from the scan entirely.
+      if (/∈\s*\{/.test(lines[i])) continue;
+
+      for (const [name, arity] of arities) {
+        const occRe = new RegExp(`(?<![\\w])${name}\\(`, 'g');
+        let om;
+        while ((om = occRe.exec(lines[i])) !== null) {
+          const openIdx = om.index + name.length; // index of '('
+          let depth = 0, j = openIdx;
+          for (; j < lines[i].length; j++) {
+            if (lines[i][j] === '(') depth++;
+            else if (lines[i][j] === ')') { depth--; if (depth === 0) break; }
+          }
+          if (j >= lines[i].length) continue; // unbalanced on this physical line — skip defensively, never a false verdict
+          const found = splitTopLevel(lines[i].slice(openIdx + 1, j)).length;
+          if (found !== arity) {
+            fails.push({
+              line: i + 1,
+              name,
+              found,
+              expected: arity,
+              snippet: lines[i].slice(Math.max(0, om.index - 15), Math.min(lines[i].length, j + 15)),
+            });
+          }
+        }
+      }
+    }
+
+    if (fails.length) {
+      for (const f of fails) {
+        results.fail.push({
+          check: CHECK,
+          file: `${skillRel}:${f.line}`,
+          message: `Positional \`${f.name}(...)\` occurrence has ${f.found} field(s) but TYPES declares ${f.name} with ${f.expected} — a positional pattern must bind every field; a site needing only some fields uses named access instead. Near: …${f.snippet}…`,
+        });
+      }
+    } else {
+      results.pass.push({
+        check: CHECK,
+        file: skillRel,
+        message: `${arities.size} verdict-shaped constructor(s) checked — every positional occurrence in the formal blocks matches its declared arity`,
+      });
+    }
   }
 }
 
@@ -3380,6 +3542,7 @@ try {
   checkVersionStaleness();
   checkCodexManifestSync();
   checkPackagedAgentContractSync();
+  checkVerdictArity();
   checkGraphIntegrity();
   checkSpecVsImpl();
   checkMorphismAnatomy();
