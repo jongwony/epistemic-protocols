@@ -626,7 +626,8 @@ function checkToolGrounding() {
       // Skip non-mandatory classifications (track, sense, observe, etc.)
       if (!MANDATORY_CLASSIFICATIONS.has(binding.classification)) continue;
 
-      // Check if operation appears with [Tool] notation in PHASE TRANSITIONS
+      // Check the operation is NAMED in PHASE TRANSITIONS. The lookup accepts six
+      // notations, so a green result does not establish [Tool] notation itself.
       // For compound operations (e.g., "PF Qc", "TeamCoord Qc"), search for both
       // the compound form and the base operation
       const compoundOp = binding.qualifier ? `${binding.operation} ${binding.qualifier}` : null;
@@ -637,7 +638,7 @@ function checkToolGrounding() {
         results.fail.push({
           check: 'tool-grounding',
           file: relPath,
-          message: `Mandatory binding "${displayOp} (${binding.classification}) → ${binding.tool}" not found in PHASE TRANSITIONS with [Tool] notation`
+          message: `Mandatory binding "${displayOp} (${binding.classification}) → ${binding.tool}" is not named anywhere in PHASE TRANSITIONS (checked against all six accepted notations) — declare it there, by convention with [Tool] notation`
         });
       }
     }
