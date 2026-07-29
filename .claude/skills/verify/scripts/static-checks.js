@@ -2603,11 +2603,11 @@ function checkCodexManifestSync() {
 // When both surfaces inscribe the same review contract — the verdict's
 // realization value set, the advisory disposition vocabulary, and the reviewer's
 // checklist categories — an edit to one surface silently drifts from the other
-// (the diylisis zero-memory-refuter ↔ /distill F5 pattern, Issue #532). The
+// (a packaged agent paired with the skill contract it enforces, Issue #532). The
 // agent file's own Maintenance Note states the sync obligation; this check makes
 // it a forcing function at the /verify gate.
 //
-// Design (generic, not diylisis-pinned):
+// Design (generic, not pinned to any one plugin):
 //  - Opt-in by STRUCTURAL ANCHOR: an agent is contract-bearing iff its body
 //    carries a verdict `### Realization:` enumeration line. Utility scanner
 //    agents (epistemic-cooperative) lack it and are skipped — no false sync.

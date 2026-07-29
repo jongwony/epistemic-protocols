@@ -21,12 +21,11 @@ The work is known, but *where to slice it into units* is not (`GranularityUnderd
 | Protocol | Initiator | Type Signature |
 |----------|-----------|---------------|
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
-| Diylisis | AI-guided | `ContextTethered → Certificate` |
 | **Diairesis** | **Hybrid** | **`GranularityUnderdetermined → WorkUnitMap`** |
 | Hyphegesis | Hybrid | `MethodUnderdetermined → ConductedMethod` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
-Diairesis carries one new operation — the partition/packing judgment — and composes the rest: `/inquire` when the WBS scope is too thin to cut, `/bound` for the joint candidates where a cut can fall, `/distill` for the per-unit span-fit predicate, and it feeds `/conduct` downstream. `/induce` (Periagoge) carries an internal move-family label "Diairesis" (the Platonic *division* move); the shared Greek root is cosmetic — that is a response-family label inside one protocol, this is a top-level protocol that partitions a work body.
+Diairesis carries one new operation — the partition/packing judgment — and composes the rest: `/inquire` when the WBS scope is too thin to cut, `/bound` for the joint candidates where a cut can fall, and it feeds `/conduct` downstream. `/induce` (Periagoge) carries an internal move-family label "Diairesis" (the Platonic *division* move); the shared Greek root is cosmetic — that is a response-family label inside one protocol, this is a top-level protocol that partitions a work body.
 
 ## Install
 
@@ -43,13 +42,13 @@ Invoke `/delimit` over a large body of work before it is conducted:
 /delimit cut this Linear project into execution-sized units
 ```
 
-Diairesis binds the external WBS read-only, scans it for natural joints (milestone boundaries, dependency seams, deliverable edges), and runs the packing search — proposing a cut-set whose units each fit one span. It surfaces the highest-leverage uncut region's proposed cut one at a time, with its span-fit verdict (Fits / Overflows / Underfills / Unportable — fit composes capacity with `/distill`'s portability-certification standard) and the current cut-set, for you to settle: accept the cut, move it to a different joint, split a unit that overflows, merge one that underfills — or move the boundary of an Unportable one, whose externalized record would not certify portable for its receiving span. When you signal the partition is complete, it cuts the remaining regions at their natural joints, asserts the three packing invariants — each unit fits one span, every cut on a joint, and coverage complete with no work orphaned — and emits the WorkUnitMap, which flows to `/conduct` as its work prospect.
+Diairesis binds the external WBS read-only, scans it for natural joints (milestone boundaries, dependency seams, deliverable edges), and runs the packing search — proposing a cut-set whose units each fit one span. It surfaces the highest-leverage uncut region's proposed cut one at a time, with its span-fit verdict (Fits / Overflows / Underfills — the capacity judgment against horizon x context lifecycle) and the current cut-set, for you to settle: accept the cut, move it to a different joint, split a unit that overflows, or merge one that underfills. When you signal the partition is complete, it cuts the remaining regions at their natural joints, asserts the three packing invariants — each unit fits one span, every cut on a joint, and coverage complete with no work orphaned — and emits the WorkUnitMap, which flows to `/conduct` as its work prospect.
 
 ## Three Packing Invariants
 
 | Invariant | Meaning |
 |-----------|---------|
-| span_fit | Each unit fits one execution span (horizon × context lifecycle) AND its externalized record would certify portable for the receiving span (`/distill`'s standard) — or carries an explicit user-accepted override recorded on the unit (an accepted Unportable defers the portability test to the receiving span's certification) |
+| span_fit | Each unit fits one execution span (horizon × context lifecycle) — or carries an explicit user-accepted override recorded on the unit, its verdict never silently upgraded to Fits |
 | natural_joint | Every cut falls at a natural joint, never mid-seam |
 | coverage_complete | The units cover the whole body with no work left outside any unit — full coverage, no orphan (HARD convergence gate) |
 

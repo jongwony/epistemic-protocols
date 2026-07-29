@@ -50,7 +50,7 @@ const DESCRIPTION_OVERRIDES = {
   ideate: 'Frame-parallel divergent candidate generation — (CandidateFieldUnderexpanded, User, DIVERGE, IdeationRequest) → DiverseCandidateField',
   onboard: 'Quest-based protocol learning — quick recommendation + targeted scenarios for epistemic protocol adoption',
   catalog: 'Instant protocol handbook — browse all protocols, compare by concern, view detailed scenarios',
-  triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, externalize routed work units to records /distill certifies.',
+  triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, externalize routed work units to substrate records a collaborator session is pointed at.',
   'comment-review': "Reviews markdown/HTML artifacts before fixation (publish/commit/merge) via a channel-first browser preview loop.",
   forge: "Reference-grounded prompt-artifact formation — surfaces under-determined contract coordinates from a reference doc and projects a ready-to-use prompt or skill recipe.",
   'lens-review': "Frame-driven multi-perspective PR review — derives fitting lenses per diff, cross-verifies findings, posts one consolidated PR comment.",
@@ -160,7 +160,6 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'aitesis', skill: 'inquire' },
   { dir: 'analogia', skill: 'ground' },
   { dir: 'diairesis', skill: 'delimit' },
-  { dir: 'diylisis', skill: 'distill' },
   { dir: 'elenchus', skill: 'sublate' },
   { dir: 'epharmoge', skill: 'contextualize' },
   { dir: 'euporia', skill: 'elicit' },
@@ -808,8 +807,23 @@ function assertArtifactMatchesIndex(artifact, zipBuffer) {
 }
 
 function buildCodexSubmitArtifacts({ root = projectRoot } = {}) {
-  if (CODEX_SUBMIT_PLUGINS.length !== 16) {
-    throw new Error(`codex-submit selection must contain exactly 16 plugins`);
+  // Inclusion policy (stated explicitly rather than as a hardcoded count): the
+  // codex-submit set is every protocol plugin in the canonical registry except
+  // those in CODEX_SUBMIT_EXCLUDED. Compared by identity so a registry change
+  // surfaces here as the specific plugin added or dropped. Read against the
+  // repository root, not the build root: this checks the constant against the
+  // registry, a repo-level fact independent of the tree being built.
+  const expectedDirs = protocolOrder({ projectRoot })
+    .filter(dir => !CODEX_SUBMIT_EXCLUDED.has(dir));
+  const selectedDirs = CODEX_SUBMIT_PLUGINS.map(plugin => plugin.dir);
+  const missing = expectedDirs.filter(dir => !selectedDirs.includes(dir));
+  const unexpected = selectedDirs.filter(dir => !expectedDirs.includes(dir));
+  if (missing.length || unexpected.length) {
+    throw new Error(
+      `codex-submit selection must match the canonical protocol registry minus exclusions` +
+      `${missing.length ? `; missing: ${missing.join(', ')}` : ''}` +
+      `${unexpected.length ? `; unexpected: ${unexpected.join(', ')}` : ''}`
+    );
   }
   const keys = new Set();
   for (const plugin of CODEX_SUBMIT_PLUGINS) {

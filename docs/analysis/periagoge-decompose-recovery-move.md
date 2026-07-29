@@ -89,13 +89,13 @@ window (substrate). The recommended realization is a `/conduct` Phase 1 refineme
 aim), not a new protocol. Full analysis: `docs/analysis/governor-span-focus-kill-test.md`
 (branch `governor-followup`).
 
-## Map nodes ≈ distill, conditionally
+## Map nodes ≈ externalized records, conditionally
 
 If the recovery composition is later driven over many nodes, a node is **backed
-by** a `/distill` PortableHandoff *only when it must cross a boundary* (compaction,
-session branch, delegation) — not identical to a distill output. A live in-session
-node is a lightweight reference; forcing every node through `/distill` would
-over-externalize (Task Externalization Boundary). Edges (parent/child from a split,
+by** a substrate-owned record *only when it must cross a boundary* (compaction,
+session branch, delegation). A live in-session node is a lightweight reference;
+forcing every node onto a durable record would over-externalize
+(Task Externalization Boundary). Edges (parent/child from a split,
 sibling from a fuse) are framing-shift records, not contained in any single node.
 
 ## Scope of the corresponding PR
