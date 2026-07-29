@@ -2850,8 +2850,13 @@ function checkPackagedAgentContractSync() {
       const ST_EXPECTED = new Set(['category', 'status', 'checked']);
       // Unobservable-references table — same shape as Findings/EvidencedFinding
       // above, added after that pair was written.
-      const UNOBS_COLS = new Set(['Quoted token', 'Location', 'Basis', 'Owner', 'Durability class evidence']);
-      const UR_EXPECTED = new Set(['quoted_token', 'location', 'basis', 'owner', 'class_evidence']);
+      const UNOBS_COLS = new Set(['Quoted token', 'Location', 'Basis', 'Owner', 'Locator', 'Durability class evidence']);
+      const UR_EXPECTED = new Set(['quoted_token', 'location', 'basis', 'owner', 'locator', 'class_evidence']);
+      // Resolved-references table — the positive counterpart of Unobservable
+      // references, same bidirectional-lock shape, added alongside the
+      // reception-block reference-observation repair.
+      const RESOLVED_COLS = new Set(['Locator', 'Basis', 'Owner', 'Confirmation evidence']);
+      const RR_EXPECTED = new Set(['locator', 'basis', 'owner', 'evidence']);
 
       // F5Input membership — the agent's `## Inputs` bullets vs SKILL.md's
       // F5Input record fields (TYPES). Unlike (d) above this is a DIRECT
@@ -2936,6 +2941,30 @@ function checkPackagedAgentContractSync() {
           );
         }
 
+        // Resolved-references table column schema — the positive counterpart
+        // of (e) above, same bidirectional-lock shape: the caller parses
+        // these columns into ResolvedRef fields.
+        const agentResolvedCols = tableColumns(agentContent, /^###\s+Resolved references/i);
+        if (!agentResolvedCols) {
+          localFails.push('agent declares an F5 verdict contract but has no `### Resolved references` table header — cannot verify the Resolved-references column schema');
+        } else if (!setEqual(new Set(agentResolvedCols), RESOLVED_COLS)) {
+          localFails.push(
+            `Resolved references table column drift — agent columns {${agentResolvedCols.join(', ')}} ` +
+            `do not match the locked F5 schema {${[...RESOLVED_COLS].join(', ')}}. ` +
+            `The caller parses these columns into ResolvedRef fields; sync the table header.`
+          );
+        }
+
+        const rrFields = parseRecordFields(paired.typesBlock, 'ResolvedRef');
+        if (!rrFields) {
+          localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no ResolvedRef record — the Resolved-references parse contract is undefined`);
+        } else if (!setEqual(rrFields, RR_EXPECTED)) {
+          localFails.push(
+            `ResolvedRef field drift in ${skillRel} — fields {${[...rrFields].sort().join(', ')}} ` +
+            `do not match the locked set {${[...RR_EXPECTED].sort().join(', ')}}. The Resolved-references columns parse into these fields; sync TYPES.`
+          );
+        }
+
         // (f) F5Input membership — the agent's `## Inputs` bullets, alias-
         // normalized (F5_INPUT_ALIASES above), against whatever SKILL.md
         // currently declares as F5Input's fields. A member added, removed, or
@@ -2947,14 +2976,48 @@ function checkPackagedAgentContractSync() {
 
         if (agentInputNames.length === 0) {
           localFails.push('agent `## Inputs` section has no backtick-named bullets — cannot verify F5Input membership');
-        } else if (!f5InputFields) {
-          localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no F5Input record — the dispatch-input membership contract is undefined`);
-        } else if (!setEqual(agentInputSet, f5InputFields)) {
-          localFails.push(
-            `F5Input membership drift — agent \`## Inputs\` bullets {${[...agentInputSet].sort().join(', ')}} (alias-normalized) ` +
-            `do not match F5Input's fields {${[...f5InputFields].sort().join(', ')}} in ${skillRel}. ` +
-            `Sync the agent's Inputs section (add/remove/rename a bullet) or F5Input's fields — and update F5_INPUT_ALIASES if a name pairing changed.`
-          );
+        } else {
+          // No collision: two bullets normalizing to the same name would
+          // silently collapse into one Set entry, hiding a drift the
+          // membership set-equality check below cannot see — e.g. adding a
+          // bullet named `contract` beside its own alias `recipient_profile`.
+          if (agentInputNames.length !== agentInputSet.size) {
+            const seen = new Map();
+            const collisions = new Set();
+            for (const raw of agentInputNames) {
+              const norm = F5_INPUT_ALIASES[raw] || raw;
+              if (seen.has(norm)) { collisions.add(norm); collisions.add(seen.get(norm)); }
+              else seen.set(norm, raw);
+            }
+            localFails.push(
+              `F5Input Inputs-bullet collision — agent \`## Inputs\` bullets {${agentInputNames.join(', ')}} normalize (alias-mapped) to only ${agentInputSet.size} distinct name(s), not ${agentInputNames.length}: ` +
+              `{${[...collisions].sort().join(', ')}} collide onto the same normalized name. Rename one bullet or drop the stale one.`
+            );
+          }
+
+          if (!f5InputFields) {
+            localFails.push(`${skillRel} declares an F5 verdict contract but TYPES has no F5Input record — the dispatch-input membership contract is undefined`);
+          } else if (!setEqual(agentInputSet, f5InputFields)) {
+            localFails.push(
+              `F5Input membership drift — agent \`## Inputs\` bullets {${[...agentInputSet].sort().join(', ')}} (alias-normalized) ` +
+              `do not match F5Input's fields {${[...f5InputFields].sort().join(', ')}} in ${skillRel}. ` +
+              `Sync the agent's Inputs section (add/remove/rename a bullet) or F5Input's fields — and update F5_INPUT_ALIASES if a name pairing changed.`
+            );
+          }
+
+          // No stale alias: every F5_INPUT_ALIASES key must still name a
+          // bullet the agent actually carries — an alias for a bullet that
+          // no longer exists means one side renamed without the alias table
+          // being updated (e.g. `recipient_profile` renamed to `contract`
+          // in place: the normalized Set stays unchanged since both names
+          // alias/identity to `contract`, so membership never catches it).
+          const staleAliasKeys = Object.keys(F5_INPUT_ALIASES).filter(k => !agentInputNames.includes(k));
+          if (staleAliasKeys.length) {
+            localFails.push(
+              `F5_INPUT_ALIASES stale entry — alias key(s) {${staleAliasKeys.join(', ')}} name no bullet present in the agent's \`## Inputs\` section {${agentInputNames.join(', ')}}. ` +
+              `The bullet was renamed or removed without updating F5_INPUT_ALIASES.`
+            );
+          }
         }
       }
 
