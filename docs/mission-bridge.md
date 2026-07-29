@@ -22,7 +22,7 @@ The README remains the source of truth for the Codex-supported distribution surf
 
 Actual protocol users should not need mission/vision wording to use the system correctly.
 
-- Discovery/onboarding may pass through README or landing copy
+- Discovery/onboarding may pass through the README
 - Runtime use passes through `SKILL.md` and plugin descriptions
 - Maintainer mission/vision edits must never create a dependency from runtime usage back to `CLAUDE.md` or this bridge
 
@@ -32,7 +32,7 @@ If a user would need to read mission/vision docs to understand how to invoke or 
 
 | Surface | Primary audience | Job |
 |---|---|---|
-| `README.md`, `README_ko.md`, landing copy | New users evaluating the project | Explain why the project exists and when to reach for it |
+| `README.md`, `README_ko.md` | New users evaluating the project | Explain why the project exists and when to reach for it |
 | Protocol `SKILL.md` and plugin descriptions | Actual runtime users | Provide the self-contained user contract for invocation and use |
 | `docs/mission-bridge.md` | Maintainers and curious contributors | Keep public promise, runtime boundary, and contributor framing aligned |
 | `CLAUDE.md` | Contributors and coding agents | Hold the maintainer-facing canonical umbrella statement and explain the repo's machinery |
@@ -58,7 +58,7 @@ When mission or vision wording changes:
 
 1. Update the canonical umbrella statement in `CLAUDE.md`
 2. Update this bridge document's public contract and runtime boundary if needed
-3. Update README and landing copy as audience-specific derivations
+3. Update README as an audience-specific derivation
 4. Verify that no `SKILL.md` or plugin description now depends on mission/vision documents for correct use
 
 If a change makes README depend on CLAUDE to be understandable, the bridge has failed and the public contract needs revision. If a change makes runtime users depend on mission/vision documents, the boundary has failed.

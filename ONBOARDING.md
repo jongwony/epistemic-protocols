@@ -35,7 +35,7 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 - [ ] **Node.js 22+** — CI pins Node 22; `zlib.crc32` is used in packaging
 - [ ] **gh CLI** authenticated — required for PR, CI, and release workflows
 - [ ] **Claude Code** installed with this repo added via `/add-dir`
-- [ ] Understand that there is **no root `package.json`** — plugin code uses only the Node.js standard library; `src/` (landing page) is an isolated sub-project with its own deps
+- [ ] Understand that plugin code uses only the **Node.js standard library** — no runtime dependencies
 
 ### Repository
 - [ ] Clone `https://github.com/jongwony/epistemic-protocols`
