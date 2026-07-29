@@ -57,4 +57,3 @@
 리뷰 파이프라인과 무관한 다음 GitHub Actions 워크플로우는 그대로 유지된다:
 
 - `release.yml` — 태그 푸시 시 CI 릴리스(`gh release create --draft`).
-- `pages.yml` — 랜딩 페이지 배포.

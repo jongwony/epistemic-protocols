@@ -54,7 +54,7 @@ This repository packages epistemic dialogue protocols as plugin skills; each tra
 ## Development
 
 - Node.js 22+ is required; CI pins Node 22.
-- Plugin code uses Node.js standard library only. The landing page under `src/` is an independent React/Vite/Tailwind sub-project with its own `package.json`.
+- Plugin code uses Node.js standard library only.
 - Static checks: see `## Verification` below for the command.
 - Tests: `node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs`
 - Packaging: `node scripts/package.js [--dry-run]`

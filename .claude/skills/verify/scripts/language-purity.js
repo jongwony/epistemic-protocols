@@ -5,7 +5,6 @@
  * Whitelist preserves intentional Korean regions:
  *   - **\/README_ko.md            Korean README localizations
  *   - .claude/skills/release/**   Release notes skill (Korean by purpose)
- *   - src/**                      Landing page i18n
  *   - docs/**                     Repo documentation reports
  *   - .claude/rules/editing-conventions.md  Korean commit convention text
  *
@@ -35,7 +34,6 @@ const WHITELIST_PATTERNS = [
   /(^|\/)README_ko\.md$/,
   /(^|\/)README\.md$/,                    // English README + Korean localization link
   /^\.claude\/skills\/release(\/|$)/,
-  /^src(\/|$)/,
   /(^|\/)docs(\/|$)/,                     // repo and per-plugin docs
   /(^|\/)references(\/|$)/,               // plugin contributor references
   /(^|\/)graph\.json$/,                   // satisfies field is Korean by project convention
