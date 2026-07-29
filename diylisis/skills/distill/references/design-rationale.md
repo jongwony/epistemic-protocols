@@ -1,4 +1,4 @@
-# Design rationale — reception block and the durability predicates
+# Design rationale — reception block and the locator predicates
 
 Why the current shapes are what they are: what each replaced, what defect each closes, and which alternatives were evaluated and rejected.
 
@@ -6,21 +6,32 @@ You need this file when you are **editing or reviewing** the specification. An a
 
 ---
 
-## The two durability predicates (Rule 21, Rule 26)
+## The locator predicates (Rule 21, Rule 26)
 
-`resolves_at` used to carry both truth conditions at once. Its equation reads an **extant** referent — the locator's target persists beyond the author session, is reachable by an absent recipient, and stays dereferenceable when the receiver re-checks it at consume time. The F0 destination guard applied that same name to a landing site that **does not exist yet**: the Certificate appears at that locator only when F7 emits it.
+One name, `resolves_at`, used to carry three different claims at once: that a locator's **location class** is one a recipient can address, that its referent **exists and dereferences now**, and that it **will still resolve when the receiver arrives**. Bundling them is what made every repair round produce a new symptom of the same defect rather than a new defect.
 
-The two are not one test read two ways. `resolves_at` on a not-yet-created landing site is simply false, so a single predicate covering both would have to mean different things at different sites — which is the defect the split removes. Under the unsplit reading the authoritative transition, and therefore every activity-bearing path, could not pass at all.
+The third claim is the one that cannot be discharged at all. An authoring session cannot verify, from inside itself, a property only the receiving session can observe: whether a substrate, a permission, a network, an account, or a referent still exists at some later moment. No author-side test establishes it — not a class judgment, not an emit act, not any combination. The specification already drew that line correctly once, in Rule 31, around content drift at a still-resolving locator; the contraction extends the same line around resolution itself.
+
+So the claims separate by what is actually there to test:
+
+- `recipient_class(locator, boundary)` — the **class screen**. Reads the root, never a referent, so it applies whether or not anything is there yet.
+- `resolves_at(locator, boundary)` — class ∧ the referent **exists and dereferences now**, without author-session memory. Observation, and the whole of what certification establishes about an existing reference.
+- `admissible_destination(locator, boundary)` — class ∧ the session can write there. The **prospective** test for a landing site: nothing exists to observe, so the class screen is the whole of it.
+- `reference_ready(r, boundary)` — what use sites over existing references actually apply: observed to resolve, **or** beyond the evaluator's reach with an addressable class and identifying context, the second arm reported as unobserved.
+
+The prospective/extant distinction is not one test read two ways. `resolves_at` on a not-yet-created landing site is simply false, so a single predicate covering both would have to mean different things at different sites. Under the unsplit reading the authoritative transition, and therefore every activity-bearing path, could not pass at all.
 
 **Rejected: widen `resolves_at` to admit prospective referents.** Every site that reads an existing referent — the F2 StablePointer class, `self_contained`, `verified_operative`, `unresolvable_route_pointers`, and Rule 33's ledger pointer — would weaken with it. The defect lived at one site; widening would have paid for it at every other.
 
-`admissible_destination(locator, boundary)` is therefore the prospective test, judged by **location class** rather than by present existence, and it runs once, at the Phase 0 destination guard. F7's emit act discharges existence before any recipient reads.
+**Rejected: bridge the prospective test to the extant one.** A `bridge:` clause once derived consume-time resolution from the class screen plus F7's emit act. It is a modal fallacy: `admissible_destination` says the class *can host* a suitable referent, and the emit act says *a referent was created* — neither, nor their conjunction, says the created referent satisfies a future condition. What the emit act does establish is stated instead, and only that: a referent **exists at issuance**.
+
+**Rejected: restore the withdrawn reference-observation architecture** (resolvability as a total result type, an authoritative-consumer mapping, provenance carriers — the direction under the `diylisis-f5-observation-withdrawn` tag). It was machinery for deriving a receiver-side fact from author-side evidence, and no amount of it crosses a temporal authority boundary. The one legitimate residue of that direction — distinguishing "observed resolvable now" from "not observable here, but class-admissible with identifying context" — costs a single predicate arm plus the `RouteJudgment.basis` and sweep-row fields that already exist.
 
 ## `StableRef` is a locator carrier, not a durability claim (TYPES)
 
 `StableRef`'s declaration used to describe itself as "a reference resolvable without the author session" while the same line said durability is not a stored field. `SessionTethered(StableRef)` then put a deliberately non-portable locator inside that type, so the F0 default was not constructible on the type's own terms.
 
-The name marks what the carrier is *for* — the references this protocol must keep dereferenceable — not a property its values are guaranteed to have. The durability claim moved out to the two use-site predicates above, and the constructor (`SessionTethered` / `Authoritative`) is what states the durability class.
+The name marks what the carrier is *for* — the references this protocol must keep dereferenceable — not a property its values are guaranteed to have. The addressability claim moved out to the use-site predicates above, and the constructor (`SessionTethered` / `Authoritative`) is what states the durability class.
 
 **Rejected: introduce a new neutral locator carrier type.** That touches every use site, while the contradiction lived in one overclaiming clause whose own line already carried the correct account. The smaller edit was to delete the overclaim.
 
