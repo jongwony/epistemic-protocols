@@ -1,7 +1,7 @@
 {
   "name": "diylisis",
   "description": "Certify an existing record's portability for a declared recipient role, repairing resolution gaps in place — /distill (διύλισις: refining/distillation)",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "author": {
     "name": "Jongwon Choi",
     "url": "https://github.com/jongwony"
