@@ -3153,13 +3153,31 @@ function checkVerdictArity() {
     if (arities.size === 0) continue;
 
     const lines = content.split('\n');
-    let inFormalBlock = false;
+
+    // Formal-block membership, computed per line up front rather than tracked
+    // inside the occurrence scan. This is what lets the balanced walk below
+    // cross a line break: a constructor whose field list WRAPS onto following
+    // lines is still ONE occurrence, and a scan bounded to the physical line
+    // would find no closing paren and skip it — silently excluding exactly the
+    // partial positional pattern this check exists to catch, while the pass
+    // message below still claimed every occurrence was covered. Reformatting a
+    // long formal line is a plain editorial act, so a line-bounded scan lets an
+    // author drop the guard without touching it, and Rule 24's honest-label
+    // discipline forbids the surviving claim.
+    const inBlock = new Array(lines.length).fill(false);
+    {
+      let open = false;
+      for (let i = 0; i < lines.length; i++) {
+        const trimmed = lines[i].trim();
+        if (HEADER_RE.test(trimmed)) { open = true; continue; }
+        if (trimmed === '```') { open = false; continue; }
+        inBlock[i] = open;
+      }
+    }
+
     const fails = [];
     for (let i = 0; i < lines.length; i++) {
-      const trimmed = lines[i].trim();
-      if (HEADER_RE.test(trimmed)) { inFormalBlock = true; continue; }
-      if (trimmed === '```') { inFormalBlock = false; continue; }
-      if (!inFormalBlock) continue;
+      if (!inBlock[i]) continue;
       // The `Name ∈ {...}` declaration line itself is the declaration, not
       // an occurrence — exclude it from the scan entirely.
       if (/∈\s*\{/.test(lines[i])) continue;
@@ -3169,20 +3187,33 @@ function checkVerdictArity() {
         let om;
         while ((om = occRe.exec(lines[i])) !== null) {
           const openIdx = om.index + name.length; // index of '('
-          let depth = 0, j = openIdx;
-          for (; j < lines[i].length; j++) {
-            if (lines[i][j] === '(') depth++;
-            else if (lines[i][j] === ')') { depth--; if (depth === 0) break; }
+          // Balanced walk for the matching ')', continuing onto following
+          // in-block lines when the field list wraps. Bounded by the formal
+          // block: the walk never leaves it, so a stray '(' in prose below the
+          // fence cannot drag the scan past the region being checked.
+          let depth = 0, endLine = -1, endIdx = -1;
+          for (let k = i; k < lines.length && (k === i || inBlock[k]); k++) {
+            const text = lines[k];
+            for (let j = (k === i ? openIdx : 0); j < text.length; j++) {
+              if (text[j] === '(') depth++;
+              else if (text[j] === ')') { depth--; if (depth === 0) { endLine = k; endIdx = j; break; } }
+            }
+            if (endLine !== -1) break;
           }
-          if (j >= lines[i].length) continue; // unbalanced on this physical line — skip defensively, never a false verdict
-          const found = splitTopLevel(lines[i].slice(openIdx + 1, j)).length;
+          if (endLine === -1) continue; // genuinely unbalanced within the block — skip defensively, never a false verdict
+          const inner = endLine === i
+            ? lines[i].slice(openIdx + 1, endIdx)
+            : [lines[i].slice(openIdx + 1), ...lines.slice(i + 1, endLine), lines[endLine].slice(0, endIdx)].join(' ');
+          const found = splitTopLevel(inner).length;
           if (found !== arity) {
             fails.push({
               line: i + 1,
               name,
               found,
               expected: arity,
-              snippet: lines[i].slice(Math.max(0, om.index - 15), Math.min(lines[i].length, j + 15)),
+              snippet: endLine === i
+                ? lines[i].slice(Math.max(0, om.index - 15), Math.min(lines[i].length, endIdx + 15))
+                : `${lines[i].slice(Math.max(0, om.index - 15))} ⏎…(continues to line ${endLine + 1})`,
             });
           }
         }
