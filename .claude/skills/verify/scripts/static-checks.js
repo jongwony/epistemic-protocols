@@ -558,7 +558,7 @@ function checkToolGrounding() {
     // Parse lines like: "S (extern) → ..." or "Phase 4a Δ (detect) → ..."
     // Capture: operation, qualifier (optional), classification, tool
     // Supports: Phase prefix, qualifier word (e.g., "Qc", "Qᵣs"), Greek letters, ?'/
-    const bindingPattern = /^(?:Phase\s+\S+\s+)?([∥]?[\w\u0370-\u03FF?'\/]+)(?:\s+([\w\u0370-\u03FFᵣ]+))?\s*\((\w+)\)\s*→\s*(\w+)/gm;
+    const bindingPattern = /^(?:Phase\s+\S+\s+)?([∥]?[-\w\u0370-\u03FF?'\/]+)(?:\s+([-\w\u0370-\u03FFᵣ]+))?\s*\((\w+)\)\s*→\s*(\w+)/gm;
     let match;
     while ((match = bindingPattern.exec(groundingSection)) !== null) {
       toolBindings.push({
@@ -580,12 +580,29 @@ function checkToolGrounding() {
       }
     }
 
-    // Warn if grounding section has binding arrows but no bindings were parsed
-    if (toolBindings.length === 0 && groundingSection.includes('→')) {
+    // Coverage accounting. The old guard fired only when ZERO bindings parsed,
+    // so a section where most lines parsed and a handful silently did not still
+    // reported full consistency. Count the binding-SHAPED lines — a non-comment
+    // line carrying a single-token annotation immediately followed by the
+    // binding arrow — and compare against what actually parsed, so the coverage
+    // the check delivers is the coverage it reports.
+    //
+    // Unparsed shapes are a WARN and the pass message carries the real ratio,
+    // rather than a FAIL: the residue is repo-wide and pre-existing (multiword
+    // operations like "Seam transition to declared next protocol", subscripted
+    // operation names, parenthesised operands), and converting it to a failure
+    // would gate every protocol on a notation cleanup that no branch has been
+    // authorised to do. What this closes is the OVERCLAIM — the check no longer
+    // asserts a consistency it did not establish.
+    const shapedLines = groundingSection
+      .split('\n')
+      .filter(l => l.trim() && !l.trim().startsWith('--') && /\(\w+\)\s*→/.test(l));
+    const unparsed = shapedLines.filter(l => !new RegExp(bindingPattern.source).test(l));
+    if (unparsed.length > 0) {
       results.warn.push({
         check: 'tool-grounding',
         file: relPath,
-        message: 'TOOL GROUNDING section contains binding arrows (→) but no bindings were parsed — regex may not match current format'
+        message: `${unparsed.length} of ${shapedLines.length} binding-shaped lines did not parse and were NOT annotation- or phase-link-checked (e.g. "${unparsed[0].trim().slice(0, 70)}…") — these bindings ride unverified`
       });
     }
 
@@ -666,7 +683,7 @@ function checkToolGrounding() {
       results.pass.push({
         check: 'tool-grounding',
         file: relPath,
-        message: 'Tool grounding consistency verified'
+        message: `Tool grounding consistency verified over ${toolBindings.length} of ${shapedLines.length} binding-shaped lines`
       });
     }
   }
