@@ -406,25 +406,29 @@ function runStaticChecksSubprocess() {
   }
 }
 
+// Restores a file a liveness test deliberately broke. A failed restore leaves
+// the working tree mutated, so it is announced loudly rather than swallowed by
+// whichever assertion runs next.
+function restoreOrDie(filePath, backup, label) {
+  const REPO_ROOT = path.join(__dirname, '..');
+  try {
+    fs.writeFileSync(filePath, backup);
+  } catch (restoreErr) {
+    process.stderr.write(
+      `\n\n!!! LIVENESS TEST FAILED TO RESTORE ${label} !!!\n` +
+      `Manual recovery required: git checkout ${path.relative(REPO_ROOT, filePath)}\n` +
+      `Original restore error: ${restoreErr && restoreErr.message}\n\n`
+    );
+    throw restoreErr;
+  }
+}
+
 describe('enforcement-check detector liveness', () => {
   const REPO_ROOT = path.join(__dirname, '..');
   const CORE_SKILL_MD = path.join(REPO_ROOT, 'aitesis', 'skills', 'inquire', 'SKILL.md');
   const INK_STYLE_MD = path.join(
     REPO_ROOT, 'epistemic-cooperative', 'styles', 'epistemic-ink.md'
   );
-
-  function restoreOrDie(filePath, backup, label) {
-    try {
-      fs.writeFileSync(filePath, backup);
-    } catch (restoreErr) {
-      process.stderr.write(
-        `\n\n!!! LIVENESS TEST FAILED TO RESTORE ${label} !!!\n` +
-        `Manual recovery required: git checkout ${path.relative(REPO_ROOT, filePath)}\n` +
-        `Original restore error: ${restoreErr && restoreErr.message}\n\n`
-      );
-      throw restoreErr;
-    }
-  }
 
   it('formal-blocks-rule fires when the rule label is mangled in a core SKILL.md', () => {
     const LABEL = '**Formal blocks are runtime-normative**';
@@ -547,6 +551,123 @@ describe('enforcement-check detector liveness', () => {
       );
     } finally {
       restoreOrDie(SIBLING_STYLE_MD, backup, 'proactive-epistemic-ink.md');
+    }
+  });
+});
+
+// ============================================================
+// packaged-check detector liveness (verdict-arity,
+// packaged-agent-contract-sync)
+// ============================================================
+// Both checks guard a surface an ordinary editorial act can silently narrow:
+// the field list of a positional pattern, and the column sets the packaged
+// refuter holds by copy because it runs in a fresh context and cannot
+// dereference SKILL.md. Neither narrowing announces itself — the check simply
+// stops covering the site while its pass message still speaks for it — so the
+// tests below break one live file each and assert the intended check fires.
+// The mutate-and-restore caveat on the block above applies here too.
+
+describe('packaged-check detector liveness', () => {
+  const REPO_ROOT = path.join(__dirname, '..');
+  const DISTILL_SKILL_MD = path.join(
+    REPO_ROOT, 'diylisis', 'skills', 'distill', 'SKILL.md'
+  );
+  const REFUTER_MD = path.join(
+    REPO_ROOT, 'diylisis', 'agents', 'zero-memory-refuter.md'
+  );
+
+  it('verdict-arity fires when a single-line positional occurrence drops a field', () => {
+    const OCCURRENCE = 'Pass(sweep, unobservable_refs, resolved_refs, realization)';
+    const backup = fs.readFileSync(DISTILL_SKILL_MD, 'utf8');
+    assert.ok(
+      backup.includes(OCCURRENCE),
+      'precondition: 4-ary positional Pass occurrence present in pristine file'
+    );
+    try {
+      fs.writeFileSync(
+        DISTILL_SKILL_MD,
+        backup.replace(OCCURRENCE, 'Pass(sweep, unobservable_refs, resolved_refs)')
+      );
+
+      const result = runStaticChecksSubprocess();
+      const fails = result.fail.filter(f => f.check === 'verdict-arity');
+      assert.ok(
+        fails.length >= 1,
+        `expected ≥1 verdict-arity fail after dropping a field from a positional Pass(...), ` +
+        `got ${fails.length}. If 0: detector is silently no-op (liveness failure). ` +
+        `Fails: ${JSON.stringify(result.fail)}`
+      );
+    } finally {
+      restoreOrDie(DISTILL_SKILL_MD, backup, 'diylisis distill SKILL.md');
+    }
+  });
+
+  it('verdict-arity counts fields across a wrapped occurrence, not only within one line', () => {
+    // The field list is wrapped AND short by one. A line-bounded scan would see
+    // an occurrence that opens without closing and, at best, report the
+    // fail-closed "never closes" branch — so asserting the message carries a
+    // field COUNT is what separates a live cross-line walk from a line-bounded
+    // scan that merely happens to fail for a different reason.
+    const OCCURRENCE =
+      'Fail(blocking_items, sweep, unobservable_refs, resolved_refs, unresolved_refs, realization)';
+    const backup = fs.readFileSync(DISTILL_SKILL_MD, 'utf8');
+    assert.ok(
+      backup.includes(OCCURRENCE),
+      'precondition: 6-ary positional Fail occurrence present in pristine file'
+    );
+    try {
+      fs.writeFileSync(
+        DISTILL_SKILL_MD,
+        backup.replace(
+          OCCURRENCE,
+          'Fail(blocking_items, sweep,\n         unobservable_refs, resolved_refs, realization)'
+        )
+      );
+
+      const result = runStaticChecksSubprocess();
+      const counted = result.fail.filter(
+        f => f.check === 'verdict-arity' && /has \d+ field\(s\)/.test(f.message)
+      );
+      assert.ok(
+        counted.length >= 1,
+        `expected ≥1 verdict-arity fail REPORTING A FIELD COUNT after wrapping a short ` +
+        `Fail(...) across lines, got ${counted.length}. If 0: the scan is line-bounded again — ` +
+        `a wrapped occurrence escapes arity checking while the pass message still speaks for ` +
+        `every positional occurrence. Fails: ${JSON.stringify(result.fail)}`
+      );
+    } finally {
+      restoreOrDie(DISTILL_SKILL_MD, backup, 'diylisis distill SKILL.md');
+    }
+  });
+
+  it('packaged-agent-contract-sync fires when the refuter drops a verdict-table column', () => {
+    const HEADER =
+      '| Quoted token | Location | Basis | Owner | Locator | Why unresolvable | Advisory disposition | Repair note |';
+    const backup = fs.readFileSync(REFUTER_MD, 'utf8');
+    assert.ok(
+      backup.includes(HEADER),
+      'precondition: Unresolved-references header present in pristine file'
+    );
+    try {
+      fs.writeFileSync(
+        REFUTER_MD,
+        backup.replace(
+          HEADER,
+          '| Quoted token | Location | Basis | Locator | Why unresolvable | Advisory disposition | Repair note |'
+        )
+      );
+
+      const result = runStaticChecksSubprocess();
+      const fails = result.fail.filter(f => f.check === 'packaged-agent-contract-sync');
+      assert.ok(
+        fails.length >= 1,
+        `expected ≥1 packaged-agent-contract-sync fail after dropping the Owner column from ` +
+        `the refuter's Unresolved-references table, got ${fails.length}. If 0: the agent's copy ` +
+        `of the row schema can drift from UnresolvedRef undetected — the exact drift the check ` +
+        `exists to catch. Fails: ${JSON.stringify(result.fail)}`
+      );
+    } finally {
+      restoreOrDie(REFUTER_MD, backup, 'diylisis zero-memory-refuter.md');
     }
   });
 });
