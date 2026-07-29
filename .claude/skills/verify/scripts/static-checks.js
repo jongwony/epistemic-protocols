@@ -482,7 +482,9 @@ function checkRequiredSections() {
 // ============================================================
 function checkToolGrounding() {
 
-  // Only mandatory classifications require [Tool] notation in PHASE TRANSITIONS
+  // Only mandatory classifications must appear in PHASE TRANSITIONS at all. The
+  // presence test below accepts six notations, so it does NOT enforce [Tool]:
+  // [Tool] is the repository convention (docs/structural-specs.md), not this check's bar.
   const MANDATORY_CLASSIFICATIONS = new Set(['dispatch']);
 
   // Valid annotation vocabulary (7-label MECE set; Cognitive Partnership Move primary frame)
@@ -3210,6 +3212,11 @@ function checkVerdictArity() {
       if (/∈\s*\{/.test(lines[i])) continue;
 
       for (const [name, arity] of arities) {
+        // NO `\s*` before `\(` — deliberately. Inside these blocks the space IS the
+        // disambiguator: `Name(` is a positional pattern (arity-bearing, scanned here),
+        // while `Name (` is the bare constructor followed by a prose aside and binds no
+        // fields. Admitting whitespace makes the walk read those asides as field lists
+        // and fail them against the declared arity. The pass message states this scope.
         const occRe = new RegExp(`(?<![\\w])${name}\\(`, 'g');
         let om;
         while ((om = occRe.exec(lines[i])) !== null) {
@@ -3271,7 +3278,7 @@ function checkVerdictArity() {
       results.pass.push({
         check: CHECK,
         file: skillRel,
-        message: `${arities.size} verdict-shaped constructor(s) checked — every positional occurrence in the formal blocks matches its declared arity`,
+        message: `${arities.size} verdict-shaped constructor(s) checked — every positional \`Name(\` occurrence in the formal blocks matches its declared arity (a space before \`(\` marks a prose aside, not a pattern, and is not scanned)`,
       });
     }
   }

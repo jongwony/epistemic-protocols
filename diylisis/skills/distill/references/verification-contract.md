@@ -10,6 +10,8 @@ You need this file when you are **editing** the specification or the packaged ag
 
 Holds every positional `Pass(…)` / `Fail(…)` occurrence in `SKILL.md`'s own formal blocks to the arity `ZeroMemoryVerdict` declares in TYPES. A site that binds fewer fields than the constructor declares fails the check.
 
+**The space is the disambiguator, and it is load-bearing.** `Pass(…)` with no space is a positional pattern and is scanned; `Pass (…)` with a space is the bare constructor followed by a prose aside — it binds no fields, and it is not scanned. The formal blocks use both forms, so this is not a gap in the scan but the distinction the scan reads: admitting whitespace makes the walk parse a prose parenthetical as a field list and fail it against the declared arity (verified against `SKILL.md`'s CONVERGENCE block, where `zero_memory_verdict = Pass (a Fail re-enters blocking items …)` is exactly such an aside). The consequence to know when editing: writing a positional pattern **with** a space silently removes that site from the check. Write positional patterns closed up.
+
 The rule itself lives in `SKILL.md` (a positional pattern binds every field; a site needing only some fields uses named access). This check is what makes forgetting it visible rather than silent — the defect it was built for was `Fail` growing from 4-ary to 5-ary while two backstop guards kept destructuring it 4-ary, dropping the newest field from both wildcard sites without any surface disagreeing.
 
 **Scope**: `diylisis` only. A name-based scan across other protocols hits real homonyms — `hyphegesis` declares `Compose(via op)` as a user-move constructor and separately uses an unrelated `Compose(RVᵣ, RVᵣ, op)` value-composition operator in the same file. Widening the check would need a disambiguation that has not been built, and would report a false defect outside this branch's mandate.
@@ -54,6 +56,6 @@ Those remain the manual semantic-closure sweep this project requires of protocol
 
 ## tool-grounding
 
-Validates annotation vocabulary and, for mandatory classifications, that each binding also appears in PHASE TRANSITIONS with `[Tool]` notation.
+Validates annotation vocabulary and, for the mandatory classifications (currently `dispatch` alone), that each binding's operation also appears *somewhere* in PHASE TRANSITIONS. The presence test accepts six notations — `Op[Tool]`, `alias[Op]`, `∥Op[Tool]`, a `-- Op:` comment, `Op(args)`, and `Op →` — so what it establishes is that the operation is named there, NOT that it carries `[Tool]` notation: dropping the `[Tool]` suffix from a binding that also appears as `Op(args)` leaves the check green. `[Tool]` remains the repository convention (`docs/structural-specs.md`); it is simply not the thing this check enforces.
 
 Its parser does not reach every binding line. Multiword operation names (`Seam transition to a declared next protocol`), subscripted names, and parenthesised operands do not parse, and an unparsed line is annotation- and phase-link-unchecked. The check reports the ratio it actually covered and warns with the residue named, rather than claiming consistency it did not establish. The residue is repo-wide and pre-existing; closing it is tracked separately.
