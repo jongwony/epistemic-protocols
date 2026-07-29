@@ -183,12 +183,12 @@ FitReviewNote    = session text { presented_hypotheses, dismissed: true }
 DeficitName      ∈ {BoundaryUndefined, ContextInsufficient, FrameworkAbsent,
                     MappingUncertain, AbstractionInProcess, AbstractAporia,
                     GapUnnoticed, ExecutionBlind, ApplicationDecontextualized,
-                    ContextSuspect, ContextTethered, RecallAmbiguous,
+                    ContextSuspect, RecallAmbiguous,
                     RecallGranularityInsufficient, ResultUngrasped,
                     GranularityUnderdetermined, MethodUnderdetermined,
                     DirectionUnrecognizable, CandidateFieldUnderexpanded} ∪ Emergent
 ProtocolId       ∈ {bound, inquire, frame, ground, induce, elicit, gap,
-                    attend, contextualize, sublate, distill, recollect, ascend,
+                    attend, contextualize, sublate, recollect, ascend,
                     grasp, delimit, conduct, preview, ideate} ∪ Emergent
 Phase            ∈ {0, 1, 2, 3}
 
