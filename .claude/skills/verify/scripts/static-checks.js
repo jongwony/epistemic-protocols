@@ -1453,7 +1453,7 @@ function checkCrossRefScan() {
     // must match PLUGINS exactly. This sub-check deliberately does NOT apply the
     // utilityDirs skip — utility plugin SKILL.md files must also be published.
     // Sources 1, 2, 4 remain protocol-only (utility-skip preserved) — that's the
-    // core C7 separation between graph.json (10 protocols) and publication surface.
+    // core C7 separation between graph.json (protocols only) and publication surface.
     //
     // IMPORTANT: path.resolve (not path.join) is load-bearing here. When invoked
     // as `node .claude/skills/verify/scripts/static-checks.js .`, projectRoot is
