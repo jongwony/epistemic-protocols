@@ -285,7 +285,7 @@ describe('transformSkillMd', () => {
 describe('runtime contract view', () => {
   it('builds a packaged runtime view for every skill', () => {
     const views = buildRuntimeContractViews();
-    assert.equal(views.length, 39);
+    assert.equal(views.length, PLUGINS.length);
     for (const view of views) {
       assert.equal(view.skillEntryCount, 1, `${view.plugin}:${view.skill} should have one SKILL.md entry`);
       assert.ok(view.transformedSkillMd, `${view.plugin}:${view.skill} should expose transformed SKILL.md`);
@@ -828,10 +828,6 @@ describe('codex-submit artifact profile', () => {
       assert.ok(!artifact.entries.some(name => name.endsWith('/Skill.md')));
     }
     assert.ok(
-      first.results.find(result => result.plugin === 'diylisis').entries
-        .includes('distill/agents/zero-memory-refuter.md')
-    );
-    assert.ok(
       first.results.find(result => result.plugin === 'prothesis').entries
         .includes('frame/references/conceptual-foundations.md')
     );
@@ -887,8 +883,6 @@ describe('unified release artifact contract', () => {
       .includes('comment-review/templates/preview.html'));
     assert.ok(entriesFor('epistemic-cooperative', 'forge')
       .includes('forge/adapters/codex-goals.md'));
-    assert.ok(entriesFor('diylisis', 'distill')
-      .includes('distill/agents/zero-memory-refuter.md'));
     assert.ok(entriesFor('epistemic-cooperative', 'curses')
       .includes('curses/agents/dimension-profiler.md'));
     assert.ok(!entriesFor('epistemic-cooperative', 'comment-review')
@@ -906,8 +900,7 @@ describe('unified release artifact contract', () => {
 
       assert.deepEqual(second, first);
       assert.deepEqual(secondSnapshot, firstSnapshot);
-      assert.equal(second.results.length, 40);
-      assert.equal(PLUGINS.length, 39);
+      assert.equal(second.results.length, PLUGINS.length + 1); // every skill plus the bundle
       for (const plugin of PLUGINS) {
         const build = buildSkillArtifact(plugin, { profile: 'release' });
         assert.equal(
@@ -1063,7 +1056,7 @@ describe('generate-changelog.js CLI', () => {
 // ============================================================
 
 describe('package.js CLI', () => {
-  it('packages all 39 skills plus bundle in dry-run', () => {
+  it('packages every skill plus bundle in dry-run', () => {
     const output = execFileSync(process.execPath, [path.join(__dirname, 'package.js'), '--dry-run'], {
       encoding: 'utf8',
     });
@@ -1076,7 +1069,7 @@ describe('package.js CLI', () => {
     // surfacing the cause — this filter catches that specific failure mode.
     const anamnesisWarnings = result.warnings.filter(w => /anamnesis|recollect/.test(w));
     assert.deepEqual(anamnesisWarnings, [], 'no anamnesis/recollect packaging warnings');
-    assert.equal(result.results.length, 40);
+    assert.equal(result.results.length, PLUGINS.length + 1); // every skill plus the bundle
     assert.deepEqual(
       result.results.map(entry => entry.zip).sort(),
       [
@@ -1090,7 +1083,6 @@ describe('package.js CLI', () => {
         'curses.zip',
         'dashboard.zip',
         'delimit.zip',
-        'distill.zip',
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
         'forge.zip',

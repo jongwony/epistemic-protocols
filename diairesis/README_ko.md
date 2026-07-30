@@ -21,12 +21,11 @@
 | 프로토콜 | 개시자 | 타입 시그니처 |
 |----------|--------|---------------|
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
-| Diylisis | AI-guided | `ContextTethered → Certificate` |
 | **Diairesis** | **Hybrid** | **`GranularityUnderdetermined → WorkUnitMap`** |
 | Hyphegesis | Hybrid | `MethodUnderdetermined → ConductedMethod` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
-Diairesis는 하나의 새 연산 — 분할/packing 판단 — 을 담고 나머지는 합성합니다: WBS 범위가 자르기엔 너무 얇을 때 `/inquire`, 절단이 떨어질 수 있는 joint 후보를 위한 `/bound`, 단위별 span-fit 술어를 위한 `/distill`, 그리고 하류로 `/conduct`에 공급합니다. `/induce`(Periagoge)는 내부 move-family 라벨 "Diairesis"(플라톤의 *나눔* 이동)를 갖는데, 공유된 그리스 어근은 cosmetic합니다 — 그것은 한 프로토콜 안의 응답-family 라벨이고, 이것은 작업 덩어리를 분할하는 최상위 프로토콜입니다.
+Diairesis는 하나의 새 연산 — 분할/packing 판단 — 을 담고 나머지는 합성합니다: WBS 범위가 자르기엔 너무 얇을 때 `/inquire`, 절단이 떨어질 수 있는 joint 후보를 위한 `/bound`, 그리고 하류로 `/conduct`에 공급합니다. `/induce`(Periagoge)는 내부 move-family 라벨 "Diairesis"(플라톤의 *나눔* 이동)를 갖는데, 공유된 그리스 어근은 cosmetic합니다 — 그것은 한 프로토콜 안의 응답-family 라벨이고, 이것은 작업 덩어리를 분할하는 최상위 프로토콜입니다.
 
 ## 설치
 
@@ -43,13 +42,13 @@ claude plugin install diairesis@epistemic-protocols
 /delimit 이 Linear 프로젝트를 실행 크기 단위로 잘라줘
 ```
 
-Diairesis는 외부 WBS를 읽기 전용으로 바인딩하고, 자연스러운 joint(마일스톤 경계, 의존성 seam, 산출물 가장자리)를 스캔하며, packing 탐색을 실행합니다 — 단위들이 각각 한 span에 맞는 cut-set을 제안합니다. 가장 레버리지가 큰 미절단 region의 제안된 절단을 한 번에 하나씩, 그 span-fit 판정(Fits / Overflows / Underfills / Unportable — fit은 용량과 `/distill`의 이식성-인증 표준의 연접)과 현재 cut-set과 함께 제시해 사용자가 확정하게 합니다: 절단 수용, 다른 joint로 이동, overflow하는 단위 분할, underfill하는 단위 병합 — 또는 외재화된 레코드가 수신 span에 대해 이식 인증되지 못할 Unportable 단위의 경계 이동. 분할이 완료되었다고 신호하면, 남은 region들을 자연스러운 joint에서 자르고, 세 packing 불변식 — 각 단위가 한 span에 맞음, 모든 절단이 joint 위, coverage 완전(작업 orphan 없음) — 을 단언한 뒤 WorkUnitMap을 방출하며, 이는 `/conduct`의 work prospect로 흐릅니다.
+Diairesis는 외부 WBS를 읽기 전용으로 바인딩하고, 자연스러운 joint(마일스톤 경계, 의존성 seam, 산출물 가장자리)를 스캔하며, packing 탐색을 실행합니다 — 단위들이 각각 한 span에 맞는 cut-set을 제안합니다. 가장 레버리지가 큰 미절단 region의 제안된 절단을 한 번에 하나씩, 그 span-fit 판정(Fits / Overflows / Underfills — horizon x context lifecycle에 대한 용량 판정)과 현재 cut-set과 함께 제시해 사용자가 확정하게 합니다: 절단 수용, 다른 joint로 이동, overflow하는 단위 분할, underfill하는 단위 병합. 분할이 완료되었다고 신호하면, 남은 region들을 자연스러운 joint에서 자르고, 세 packing 불변식 — 각 단위가 한 span에 맞음, 모든 절단이 joint 위, coverage 완전(작업 orphan 없음) — 을 단언한 뒤 WorkUnitMap을 방출하며, 이는 `/conduct`의 work prospect로 흐릅니다.
 
 ## 세 Packing 불변식
 
 | 불변식 | 의미 |
 |--------|------|
-| span_fit | 각 단위가 한 실행 span(horizon × context lifecycle)에 맞고, 외재화된 레코드가 수신 span에 대해 이식 인증 가능(`/distill` 표준) — 또는 사용자가 명시적으로 수락한 오버라이드가 단위에 기록됨(수락된 Unportable은 이식성 검사를 수신 span의 인증으로 유예) |
+| span_fit | 각 단위가 한 실행 span(horizon × context lifecycle)에 맞음 — 또는 사용자가 명시적으로 수락한 오버라이드가 단위에 기록됨(판정은 결코 Fits로 조용히 승격되지 않음) |
 | natural_joint | 모든 절단이 자연스러운 joint에 떨어짐, seam 한가운데가 아님 |
 | coverage_complete | 단위들이 전체 덩어리를 덮고 어떤 작업도 단위 밖에 남지 않음 — 완전 커버리지, orphan 없음 (HARD 수렴 게이트) |
 

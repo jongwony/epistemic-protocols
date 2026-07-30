@@ -23,7 +23,6 @@
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
-| Diylisis | AI-guided | `ContextTethered → Certificate` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
 Prothesis는 한 탐구를 위한 *어떤 관점*을 프레이밍하고, Hyphegesis는 세션 전체 이동들이 *어떻게* 관계 맺는지를 지휘합니다. 두 프로토콜은 토폴로지 대수를 공유하며 — Hyphegesis가 프로토콜 그래프 위에서 인스턴스화하는 그 배열 functor가 Prothesis가 공급하는 관점도 배열합니다.
@@ -57,4 +56,4 @@ Hyphegesis는 작업 브리프를 확인하고, 지휘가 필요한지 점검하
 
 `order`가 `dependency_dag`일 때 independence/reconciliation/routing/termination은 move-region별로 해소됩니다(저작 권역은 `shared`, 검증 권역은 `isolated`처럼).
 
-`handoff_to_span`은 이동의 출력을 **span 벽 너머** 맥락을 공유하지 않는 미래 span(`/compact`, `/clear`, 또는 새 세션 이후)으로 라우팅하고, 그 portability를 핸드오프 seam에서 `/distill`에 위임합니다 — 흡수가 아니라 composition: `/conduct`의 cognition은 단일 span을 유지하고 출력만 다리를 건너며, 반대편의 compile-back은 `/conduct`의 범위 밖에 둡니다.
+`handoff_to_span`은 이동의 출력을 **span 벽 너머** 맥락을 공유하지 않는 미래 span(`/compact`, `/clear`, 또는 새 세션 이후)으로 라우팅하고, 핸드오프 seam에서 외재화 의무를 선언합니다: 실행 기판이 그 출력을 기판 소유 레코드로 쓰고, 미래 span은 그 레코드를 가리키게 됩니다. `/conduct`의 cognition은 단일 span을 유지하고 출력만 다리를 건너며, 반대편의 compile-back은 `/conduct`의 범위 밖에 둡니다.

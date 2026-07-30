@@ -79,12 +79,11 @@ Hosts that need an [Agent Skills](https://agentskills.io/specification)-style vi
 | [Horismos](./horismos) | `/bound` | An epistemic boundary is undefined — direction/priority, scope, type/concept, or who decides (ownership) |
 | [Anamnesis](./anamnesis) | `/recollect` | You vaguely remember something was discussed before but cannot name it |
 | [Anagoge](./anagoge) | `/ascend` | You vaguely remember a whole line of work, topic, or concept spread across many sessions — not any one session |
-| [Diylisis](./diylisis) | `/distill` | An existing record is about to reach a fresh session that shares none of it — certify its portability for the recipient role first |
 | [Katalepsis](./katalepsis) | `/grasp` | AI made big changes and you nod along — but do you actually grasp them? Verify your understanding is genuine before you approve or build on it |
 | [Hyphegesis](./hyphegesis) | `/conduct` | Multiple cognitive moves whose order, independence, reconciliation, stopping (termination), and routing aren't obvious — conduct how the whole session's work runs before starting |
 | [Diairesis](./diairesis) | `/delimit` | A large body of work spans many execution units but where to cut it into right-sized pieces isn't obvious — partition it at its natural joints before conducting |
 
-Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/distill`, `/grasp`, `/delimit`, `/conduct`)
+Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/grasp`, `/delimit`, `/conduct`)
 
 ## Utilities
 
@@ -108,7 +107,7 @@ Concern clusters: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Ana
 
 **Work-unit triage**:
 
-- `/triage` — read a scoped GitHub `RawIssueSet`, group related issues, normalize each group into a problem frame, fuse it with the `AGENTS.md` northstar in the current session, form focused work units, and — once the user picks a route — compose `/distill` to certify each unit's externalized record portable for its receiving span
+- `/triage` — read a scoped GitHub `RawIssueSet`, group related issues, normalize each group into a problem frame, fuse it with the `AGENTS.md` northstar in the current session, form focused work units, and — once the user picks a route — externalize each unit to a substrate-owned record the receiving span is pointed at
 
 **Reference-grounded prompt formation**:
 
@@ -153,7 +152,6 @@ For the architecture and principles behind the protocols themselves, read [CLAUD
 | Elenchus | ἔλεγχος | Cross-examination, refutation |
 | Anamnesis | ἀνάμνησις | Recollection |
 | Anagoge | ἀναγωγή | A leading-up |
-| Diylisis | διύλισις | Refining, distillation |
 | Hyphegesis | ὑφήγησις | Leading the way, guiding from ahead |
 | Diairesis | διαίρεσις | Division, partition |
 | Proplasma | πρόπλασμα | Preliminary model, first mold |

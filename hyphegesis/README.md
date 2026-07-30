@@ -23,7 +23,6 @@ The goal is clear, but *how to conduct the work* is not (`MethodUnderdetermined`
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Horismos | AI-guided | `BoundaryUndefined → DefinedBoundary` |
 | **Hyphegesis** | **Hybrid** | **`MethodUnderdetermined → ConductedMethod`** |
-| Diylisis | AI-guided | `ContextTethered → Certificate` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
 Prothesis frames *which perspectives* for one inquiry; Hyphegesis conducts *how the whole session's moves* relate. The two share a topology algebra — the same arrangement functor Hyphegesis runs over the protocol graph also arranges the perspectives Prothesis supplies.
@@ -57,4 +56,4 @@ Hyphegesis confirms the work brief, checks whether conduction is warranted (sing
 
 When `order` is `dependency_dag`, independence/reconciliation/routing/termination resolve per move-region (an authoring region can be `shared` while a verification region is `isolated`).
 
-`handoff_to_span` routes a move's output **across the span wall** to a context-less future span (post `/compact`, `/clear`, or a new session) and delegates its portability to `/distill` at the handoff seam — composition, not absorption: `/conduct` stays single-span in its cognition and only its output bridges, while the far-side compile-back stays outside `/conduct`'s scope.
+`handoff_to_span` routes a move's output **across the span wall** to a context-less future span (post `/compact`, `/clear`, or a new session) and declares an externalization obligation at the handoff seam: the executing substrate writes that output to a substrate-owned record, and the future span is pointed at it. `/conduct` stays single-span in its cognition and only its output bridges, while the far-side compile-back stays outside `/conduct`'s scope.

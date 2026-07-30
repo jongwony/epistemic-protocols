@@ -79,12 +79,11 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Horismos](./horismos) | `/bound` | 인식론적 경계가 정의되지 않았을 때 — 방향/우선순위, 범위, 유형/개념, 또는 누가 결정할지(ownership) |
 | [Anamnesis](./anamnesis) | `/recollect` | 이전에 논의했던 무언가가 막연히 기억나지만 구체적으로 짚어낼 수 없을 때 |
 | [Anagoge](./anagoge) | `/ascend` | 여러 세션에 걸친 작업 라인·토픽·개념 전체가 막연히 기억나지만 어느 한 세션이 아닐 때 |
-| [Diylisis](./diylisis) | `/distill` | 기존 레코드를, 그것을 전혀 공유하지 않는 새 세션에 넘길 때 — 수신자 역할에 대해 이식성을 먼저 인증할 때 |
 | [Katalepsis](./katalepsis) | `/grasp` | AI가 큰 변경을 했고 이해한 것 같지만 정말 파악했는지 확신이 없을 때 — 승인·활용 전에 이해가 진짜인지 검증 |
 | [Hyphegesis](./hyphegesis) | `/conduct` | 여러 인지 이동의 순서·독립성·화해·종료·라우팅이 자명하지 않을 때 — 작업을 시작하기 전에 세션 전체를 어떻게 수행할지 지휘 |
 | [Diairesis](./diairesis) | `/delimit` | 큰 작업 덩어리가 여러 실행 단위에 걸쳐 있지만 어디서 적정 크기로 자를지 자명하지 않을 때 — 지휘 전에 자연스러운 joint에서 분할 |
 
-관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/distill`, `/grasp`, `/delimit`, `/conduct`)
+관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/attend`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/grasp`, `/delimit`, `/conduct`)
 
 ## 유틸리티
 
@@ -108,7 +107,7 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 
 **Work-unit triage**:
 
-- `/triage` — scoped GitHub `RawIssueSet`을 읽고, 관련 이슈를 묶고, 각 그룹을 problem frame으로 normalize한 뒤, 현재 세션에서 `AGENTS.md` northstar와 융합해 focused work unit을 형성하고, 사용자가 route를 선택하면 `/distill`을 compose해 각 unit의 외부화된 레코드를 수신 span에 대해 이식성 인증
+- `/triage` — scoped GitHub `RawIssueSet`을 읽고, 관련 이슈를 묶고, 각 그룹을 problem frame으로 normalize한 뒤, 현재 세션에서 `AGENTS.md` northstar와 융합해 focused work unit을 형성하고, 사용자가 route를 선택하면 각 unit을 기판 소유 레코드로 외재화하고 수신 span이 그 레코드를 가리키게
 
 **레퍼런스-grounded prompt 형성**:
 
@@ -153,7 +152,6 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | Elenchus | ἔλεγχος | 반박, 교차 심문 |
 | Anamnesis | ἀνάμνησις | 상기, 회상 |
 | Anagoge | ἀναγωγή | 끌어올림 |
-| Diylisis | διύλισις | 정제, 증류 |
 | Hyphegesis | ὑφήγησις | 앞서 이끌기, 안내 |
 | Diairesis | διαίρεσις | 나눔, 분할 |
 | Proplasma | πρόπλασμα | 예비 모형, 첫 거푸집 |

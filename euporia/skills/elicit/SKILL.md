@@ -73,7 +73,7 @@ DeficitFitCertificate = { owner: Deficit, in_scope_if: String, route_if: List<Ro
                  -- status = route: a sibling deficit owns the projection (forward under-determination) → emit RoutePair target, drop the projection from this cycle's surfaced D[]
                  -- status = ambiguous: overlapping deficit fit → defer the projection to a later cycle (re-tried once a surfaced answer advances I'); never surface coordinates under ambiguous fit
 RoutePair      = (route_if_predicate: String, target: Protocol)
-                 -- euporia-local guard routing targets — FORWARD under-determination the loop routes away rather than reverse-tracing (BACKWARD misfit — an unnoticed decision gap → /gap, or portability to an absent recipient → /distill — is contextualize's domain, not elicit's, so /gap and /distill are intentionally absent from this forward-routing list):
+                 -- euporia-local guard routing targets — FORWARD under-determination the loop routes away rather than reverse-tracing (BACKWARD misfit — an unnoticed decision gap → /gap — is contextualize's domain, not elicit's, so /gap is intentionally absent from this forward-routing list):
                  --   missing pre-execution fact (no substrate value, requires fact supply) → /inquire   (ContextInsufficient)
                  --   undefined ownership/scope boundary for the decision                  → /bound     (BoundaryUndefined)
                  --   direction candidates exist but their futures are unrecognizable from descriptions (pre-commit, placeholder-carriable) → /preview (DirectionUnrecognizable)

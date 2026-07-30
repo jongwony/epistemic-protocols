@@ -14,6 +14,17 @@ Citable registry of conventions whose resolution direction is already constitute
 - **Count-free protocol cardinality**: do not hardcode the protocol count in prose, comments, test names, or metadata descriptions — use count-free phrasing ("all core protocols", "every protocol plugin"). Completeness-sensitive code and tests compare exact protocol identities against the canonical registry (`scripts/load-protocols.js` `CANONICAL_PRECEDENCE`) or derive displayed counts from it; a deliberate subset (e.g. the Codex submission set) states its inclusion policy explicitly.
 - **Multi-skill plugin description scope**: a plugin bundling more than one skill (currently: `epistemic-cooperative` only) is not required to enumerate every skill's `/command` in its top-level plugin description to satisfy `artifact-self-containment.js`'s `hasRoutingCue` check; single-skill plugin descriptions must still name their one skill's `/command`, enforced unchanged.
 - **Ledger binding**: this project's canonical ledger is the git record — commit messages plus issue/PR bodies. "Then"-records (narrative, provenance, trade-offs, rejected alternatives) route there at write time; state surfaces carry only now-asserting operative content, strictest in always-loaded instruction files.
+- **Session-handoff routing**: work crossing a session boundary is handed over as a pointer into the canonical record, never as a re-authored copy of it. Two pipelines. **Temporary continuation** (same owner, same temperament): hand over the prior session id plus a dereference instruction, and the receiving session grounds what it needs with `/inquire` where available, or the equivalent grounding pass the recipient has — authoring is zero. **Durable externalization** (an artifact another reader consumes): produce the canonical record first, fit it to the currently-known audience with `/contextualize` when the audience warrants it, then hand over a pointer to that record plus the same reception instruction. What the author writes in either case is a navigation block — navigation, not certification — in this fixed shape:
+
+      Purpose / frame:
+      Canonical locator:
+      Dereference instruction:
+      Snapshot anchor:       [only when exact-state determinacy is needed]
+      Grounding instruction: run /inquire where available, or the recipient's equivalent
+                             grounding pass; stop when a source is unreachable or a
+                             needed premise lacks support-integrity
+
+  The authoring side supplies only purpose/frame and entry points; *what* to carry over is derived by the recipient from that purpose — the moment the author selects the items, the corruption a pointer avoids re-enters at small scale.
 
 ## Protocol Index
 

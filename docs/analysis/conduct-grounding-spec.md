@@ -1,7 +1,7 @@
 # Conduct-Grounding Portable Spec
 
 Portable across any substrate that injects tool descriptions at session start.
-Produced by `/conduct` (method design) then `/distill` (portable handoff).
+Produced by `/conduct` (method design), the resulting plan externalized to a substrate-owned record when it crosses a session boundary.
 
 ## Portability invariant — reference the description, not the token
 

@@ -1,10 +1,23 @@
 {
   "version": "2.5.0",
   "nodes": [
-    "horismos", "aitesis", "analogia",
-    "periagoge", "euporia", "prothesis", "syneidesis", "prosoche", "epharmoge",
-    "elenchus", "katalepsis", "anamnesis", "anagoge", "diylisis", "hyphegesis",
-    "diairesis", "proplasma", "heuresis"
+    "horismos",
+    "aitesis",
+    "analogia",
+    "periagoge",
+    "euporia",
+    "prothesis",
+    "syneidesis",
+    "prosoche",
+    "epharmoge",
+    "elenchus",
+    "katalepsis",
+    "anamnesis",
+    "anagoge",
+    "hyphegesis",
+    "diairesis",
+    "proplasma",
+    "heuresis"
   ],
   "edge_types": {
     "precondition": {
@@ -21,64 +34,329 @@
     }
   },
   "edges": [
-    { "source": "*", "target": "katalepsis", "type": "precondition", "satisfies": "작업 완료 → 이해 검증 가능" },
-    { "source": "prothesis", "target": "syneidesis", "type": "advisory", "satisfies": "frame이 공급하는 프레임된 객체(렌즈)가 갭 감지 컨텍스트를 제공" },
-    { "source": "syneidesis", "target": "aitesis", "type": "suppression", "satisfies": "동일 작업 범위 Aitesis 억제 (비대칭)" },
-    { "source": "aitesis", "target": "epharmoge", "type": "suppression", "satisfies": "동일 범위 pre+post 스태킹 방지" },
-    { "source": "aitesis", "target": "prosoche", "type": "advisory", "satisfies": "추론된 컨텍스트가 경계맵 추론과 컨디션 컴파일 초점을 좁힘" },
-    { "source": "prosoche", "target": "epharmoge", "type": "advisory", "satisfies": "컴파일된 가드레일 조건이 사후 적용성 검증 컨텍스트를 제공" },
-    { "source": "prosoche", "target": "diylisis", "type": "advisory", "satisfies": "방출된 goal 엔트리 레코드의 복원 가능성 점검을 distill에 요청 (판단은 distill 소유; 조건 타당성은 attend의 확인 게이트 몫)" },
-    { "source": "prothesis", "target": "aitesis", "type": "advisory", "satisfies": "frame이 공급하는 프레임된 객체(렌즈)가 컨텍스트 추론 추천을 제공" },
-    { "source": "prothesis", "target": "analogia", "type": "advisory", "satisfies": "frame이 공급하는 프레임된 객체(렌즈)가 매핑 구성 컨텍스트를 제공" },
-    { "source": "aitesis", "target": "analogia", "type": "advisory", "satisfies": "추론된 컨텍스트가 매핑 도메인 식별을 좁힘" },
-    { "source": "analogia", "target": "syneidesis", "type": "advisory", "satisfies": "검증된 매핑이 갭 감지 정확성을 높임" },
-    { "source": "horismos", "target": "aitesis", "type": "advisory", "satisfies": "경계 맵이 컨텍스트 추론 범위를 좁힘" },
-    { "source": "horismos", "target": "prothesis", "type": "advisory", "satisfies": "경계 맵이 관점 선택 범위를 좁힘" },
-    { "source": "horismos", "target": "prosoche", "type": "advisory", "satisfies": "경계 맵이 slow/threshold 컨디션 컴파일의 입력을 제공" },
-    { "source": "horismos", "target": "analogia", "type": "advisory", "satisfies": "경계 맵이 매핑 도메인 식별을 좁힘" },
-    { "source": "horismos", "target": "syneidesis", "type": "advisory", "satisfies": "경계 맵이 갭 감지 범위를 좁힘" },
-    { "source": "anamnesis", "target": "aitesis", "type": "advisory", "satisfies": "과거 맥락 기억이 컨텍스트 추론 범위를 좁힘" },
-    { "source": "anamnesis", "target": "prothesis", "type": "advisory", "satisfies": "과거 관점 이력이 프레임워크 선택 후보를 강화" },
-    { "source": "anamnesis", "target": "syneidesis", "type": "advisory", "satisfies": "과거 갭 이력이 감지 가중치를 조정" },
-    { "source": "anamnesis", "target": "horismos", "type": "advisory", "satisfies": "과거 경계 분류 이력이 분류 제안을 제공" },
-    { "source": "anamnesis", "target": "prosoche", "type": "advisory", "satisfies": "과거 위험 이력이 경계맵 추론을 강화" },
-    { "source": "anamnesis", "target": "analogia", "type": "advisory", "satisfies": "과거 도메인 매핑이 매핑 후보를 제공" },
-    { "source": "anamnesis", "target": "epharmoge", "type": "advisory", "satisfies": "과거 적용-맥락 불일치 이력이 현재 불일치 감지를 강화" },
-    { "source": "anamnesis", "target": "periagoge", "type": "advisory", "satisfies": "인접 추상화 재호출이 Fuse 후보를 제공" },
-    { "source": "euporia", "target": "horismos", "type": "advisory", "satisfies": "역추적된 좌표가 후속 경계 정의 컨텍스트를 제공" },
-    { "source": "euporia", "target": "aitesis", "type": "advisory", "satisfies": "역추적된 좌표가 컨텍스트 추론 범위를 좁힘" },
-    { "source": "euporia", "target": "periagoge", "type": "advisory", "satisfies": "해소된 endpoint가 downstream 추상화 형성의 시드를 좁힘 (categorical dual 양립)" },
-    { "source": "anamnesis", "target": "euporia", "type": "advisory", "satisfies": "회상된 세션 이력이 substrate 스캔을 보강" },
-    { "source": "horismos", "target": "euporia", "type": "advisory", "satisfies": "경계 맵이 substrate scope를 좁힘" },
-    { "source": "aitesis", "target": "elenchus", "type": "advisory", "satisfies": "수집된 컨텍스트가 변증법적 audit substrate를 제공" },
-    { "source": "anamnesis", "target": "elenchus", "type": "advisory", "satisfies": "회상된 prior context가 vetting 대상 후보를 제공" },
-    { "source": "horismos", "target": "elenchus", "type": "advisory", "satisfies": "경계 맵이 high-leverage source 범위를 좁힘" },
-    { "source": "elenchus", "target": "syneidesis", "type": "advisory", "satisfies": "vetted context가 갭 감지 정확성을 높임" },
-    { "source": "elenchus", "target": "prosoche", "type": "advisory", "satisfies": "vetted context가 컨디션 컴파일 초점을 좁힘" },
-    { "source": "elenchus", "target": "epharmoge", "type": "advisory", "satisfies": "vetted pre-state가 post-execution 적용성 검증 컨텍스트를 제공" },
-    { "source": "elenchus", "target": "horismos", "type": "advisory", "satisfies": "vetted findings가 후속 경계 정의 정보를 제공" },
-    { "source": "elenchus", "target": "diylisis", "type": "advisory", "satisfies": "vetted provenance가 distill F3b provenance 판정(ObservedKeep/Unknown) 컨텍스트를 제공" },
-    { "source": "horismos", "target": "diylisis", "type": "advisory", "satisfies": "경계 맵이 distill recipient-relevance 판정 범위를 좁힘" },
-    { "source": "prothesis", "target": "hyphegesis", "type": "advisory", "satisfies": "frame이 공급하는 분석 객체(렌즈)를 conduct의 배열 functor가 소비 — 비자명 배열(순서·독립성·조정·종료·라우팅)은 conduct가 설계" },
-    { "source": "horismos", "target": "hyphegesis", "type": "advisory", "satisfies": "경계 맵이 지휘 범위(어떤 이동이 in-scope)를 좁힘" },
-    { "source": "analogia", "target": "hyphegesis", "type": "advisory", "satisfies": "self-grounding 오정합(wrong-fusion) + split partition reading이 decompose-recovery conduct 레시피에 작업 전망과 셀 경계 증거를 공급" },
-    { "source": "hyphegesis", "target": "prosoche", "type": "advisory", "satisfies": "지휘된 방법이 situated 실행으로 핸드오프" },
-    { "source": "anamnesis", "target": "anagoge", "type": "advisory", "satisfies": "단일 세션 회상이 elevation이 순회할 진입 deposit을 제공" },
-    { "source": "hyphegesis", "target": "anagoge", "type": "advisory", "satisfies": "conduct synthesis checkpoint가 흩어진 cross-worker 결과를 connected-session 단위로 elevate하도록 라우팅" },
-    { "source": "hyphegesis", "target": "periagoge", "type": "advisory", "satisfies": "decompose-recovery 레시피가 per-cell 재형성을 위해 각 셀을 periagoge 활성화로 라우팅 (다중 CrystallizedAbstraction, 융합 아님)" },
-    { "source": "hyphegesis", "target": "diylisis", "type": "advisory", "satisfies": "handoff_to_span 라우팅이 span 벽을 넘는 출력을 기판 레코드로 외재화하고 그 인증을 distill에 위임 (composition — conduct는 라우팅·외재화 선언, distill은 인증; cognition은 단일 span 유지)" },
-    { "source": "aitesis", "target": "diairesis", "type": "advisory", "satisfies": "수집된 컨텍스트가 절단 가능한 WBS 범위를 충족시켜 분할을 가능케 함 (scope 부족 시 delimit이 inquire로 route-away)" },
-    { "source": "horismos", "target": "diairesis", "type": "advisory", "satisfies": "경계 맵이 절단이 떨어질 joint 후보(어디서 자를 수 있는가)를 좁힘" },
-    { "source": "diairesis", "target": "diylisis", "type": "advisory", "satisfies": "단위별 span-fit의 이식성 다리를 distill의 이식성-인증 표준에 위임 (Fits는 용량∧이식성 연접: 용량 다리는 delimit 자신이 판정하고, 단일 기판 레코드로 외재화된 유닛이 수신 span에 portable 인증되는지의 다리만 distill 표준을 구성)" },
-    { "source": "diairesis", "target": "hyphegesis", "type": "advisory", "satisfies": "WorkUnitMap(절단된 실행 단위 집합)이 conduct의 WorkProspect로 흐름 — diairesis는 자르고, conduct는 배열·지휘 (cut, then conduct 쌍대)" },
-    { "source": "anagoge", "target": "aitesis", "type": "advisory", "satisfies": "elevated 상위 단위가 컨텍스트 추론 범위를 좁힘" },
-    { "source": "anagoge", "target": "periagoge", "type": "advisory", "satisfies": "recognized sedimented 개념 노드가 Fuse 후보를 제공" },
-    { "source": "prothesis", "target": "proplasma", "type": "advisory", "satisfies": "프레이밍이 공급한 렌즈의 실행이 ≥2 방향 후보를 표면화할 때 이관 (정보 흐름 — 후보는 렌즈 실행의 하류 산물)" },
-    { "source": "euporia", "target": "proplasma", "type": "advisory", "satisfies": "역추적된 좌표의 미래가 서술로 인식 불가할 때 이관" },
-    { "source": "horismos", "target": "proplasma", "type": "advisory", "satisfies": "경계 선택 장면에서 방향-미래 인식 불가가 드러날 때 이관 (라우팅 미스 실측 표본 기반)" },
-    { "source": "proplasma", "target": "syneidesis", "type": "advisory", "satisfies": "대비가 노출한 unknowns의 커밋전 점검 이관" },
-    { "source": "proplasma", "target": "aitesis", "type": "advisory", "satisfies": "대비가 노출한 사실 unknowns의 조사 이관" },
-    { "source": "proplasma", "target": "analogia", "type": "advisory", "satisfies": "생존 방향의 익숙-도메인 구조 매핑 검증 (매핑 존재 시)" },
-    { "source": "heuresis", "target": "proplasma", "type": "advisory", "satisfies": "생성된 후보장이 discard-instantiation 대상 후보를 제공 (정보 흐름 — 후보 존재가 재료를 공급, 필수 아님)" }
+    {
+      "source": "*",
+      "target": "katalepsis",
+      "type": "precondition",
+      "satisfies": "작업 완료 → 이해 검증 가능"
+    },
+    {
+      "source": "prothesis",
+      "target": "syneidesis",
+      "type": "advisory",
+      "satisfies": "frame이 공급하는 프레임된 객체(렌즈)가 갭 감지 컨텍스트를 제공"
+    },
+    {
+      "source": "syneidesis",
+      "target": "aitesis",
+      "type": "suppression",
+      "satisfies": "동일 작업 범위 Aitesis 억제 (비대칭)"
+    },
+    {
+      "source": "aitesis",
+      "target": "epharmoge",
+      "type": "suppression",
+      "satisfies": "동일 범위 pre+post 스태킹 방지"
+    },
+    {
+      "source": "aitesis",
+      "target": "prosoche",
+      "type": "advisory",
+      "satisfies": "추론된 컨텍스트가 경계맵 추론과 컨디션 컴파일 초점을 좁힘"
+    },
+    {
+      "source": "prosoche",
+      "target": "epharmoge",
+      "type": "advisory",
+      "satisfies": "컴파일된 가드레일 조건이 사후 적용성 검증 컨텍스트를 제공"
+    },
+    {
+      "source": "prothesis",
+      "target": "aitesis",
+      "type": "advisory",
+      "satisfies": "frame이 공급하는 프레임된 객체(렌즈)가 컨텍스트 추론 추천을 제공"
+    },
+    {
+      "source": "prothesis",
+      "target": "analogia",
+      "type": "advisory",
+      "satisfies": "frame이 공급하는 프레임된 객체(렌즈)가 매핑 구성 컨텍스트를 제공"
+    },
+    {
+      "source": "aitesis",
+      "target": "analogia",
+      "type": "advisory",
+      "satisfies": "추론된 컨텍스트가 매핑 도메인 식별을 좁힘"
+    },
+    {
+      "source": "analogia",
+      "target": "syneidesis",
+      "type": "advisory",
+      "satisfies": "검증된 매핑이 갭 감지 정확성을 높임"
+    },
+    {
+      "source": "horismos",
+      "target": "aitesis",
+      "type": "advisory",
+      "satisfies": "경계 맵이 컨텍스트 추론 범위를 좁힘"
+    },
+    {
+      "source": "horismos",
+      "target": "prothesis",
+      "type": "advisory",
+      "satisfies": "경계 맵이 관점 선택 범위를 좁힘"
+    },
+    {
+      "source": "horismos",
+      "target": "prosoche",
+      "type": "advisory",
+      "satisfies": "경계 맵이 slow/threshold 컨디션 컴파일의 입력을 제공"
+    },
+    {
+      "source": "horismos",
+      "target": "analogia",
+      "type": "advisory",
+      "satisfies": "경계 맵이 매핑 도메인 식별을 좁힘"
+    },
+    {
+      "source": "horismos",
+      "target": "syneidesis",
+      "type": "advisory",
+      "satisfies": "경계 맵이 갭 감지 범위를 좁힘"
+    },
+    {
+      "source": "anamnesis",
+      "target": "aitesis",
+      "type": "advisory",
+      "satisfies": "과거 맥락 기억이 컨텍스트 추론 범위를 좁힘"
+    },
+    {
+      "source": "anamnesis",
+      "target": "prothesis",
+      "type": "advisory",
+      "satisfies": "과거 관점 이력이 프레임워크 선택 후보를 강화"
+    },
+    {
+      "source": "anamnesis",
+      "target": "syneidesis",
+      "type": "advisory",
+      "satisfies": "과거 갭 이력이 감지 가중치를 조정"
+    },
+    {
+      "source": "anamnesis",
+      "target": "horismos",
+      "type": "advisory",
+      "satisfies": "과거 경계 분류 이력이 분류 제안을 제공"
+    },
+    {
+      "source": "anamnesis",
+      "target": "prosoche",
+      "type": "advisory",
+      "satisfies": "과거 위험 이력이 경계맵 추론을 강화"
+    },
+    {
+      "source": "anamnesis",
+      "target": "analogia",
+      "type": "advisory",
+      "satisfies": "과거 도메인 매핑이 매핑 후보를 제공"
+    },
+    {
+      "source": "anamnesis",
+      "target": "epharmoge",
+      "type": "advisory",
+      "satisfies": "과거 적용-맥락 불일치 이력이 현재 불일치 감지를 강화"
+    },
+    {
+      "source": "anamnesis",
+      "target": "periagoge",
+      "type": "advisory",
+      "satisfies": "인접 추상화 재호출이 Fuse 후보를 제공"
+    },
+    {
+      "source": "euporia",
+      "target": "horismos",
+      "type": "advisory",
+      "satisfies": "역추적된 좌표가 후속 경계 정의 컨텍스트를 제공"
+    },
+    {
+      "source": "euporia",
+      "target": "aitesis",
+      "type": "advisory",
+      "satisfies": "역추적된 좌표가 컨텍스트 추론 범위를 좁힘"
+    },
+    {
+      "source": "euporia",
+      "target": "periagoge",
+      "type": "advisory",
+      "satisfies": "해소된 endpoint가 downstream 추상화 형성의 시드를 좁힘 (categorical dual 양립)"
+    },
+    {
+      "source": "anamnesis",
+      "target": "euporia",
+      "type": "advisory",
+      "satisfies": "회상된 세션 이력이 substrate 스캔을 보강"
+    },
+    {
+      "source": "horismos",
+      "target": "euporia",
+      "type": "advisory",
+      "satisfies": "경계 맵이 substrate scope를 좁힘"
+    },
+    {
+      "source": "aitesis",
+      "target": "elenchus",
+      "type": "advisory",
+      "satisfies": "수집된 컨텍스트가 변증법적 audit substrate를 제공"
+    },
+    {
+      "source": "anamnesis",
+      "target": "elenchus",
+      "type": "advisory",
+      "satisfies": "회상된 prior context가 vetting 대상 후보를 제공"
+    },
+    {
+      "source": "horismos",
+      "target": "elenchus",
+      "type": "advisory",
+      "satisfies": "경계 맵이 high-leverage source 범위를 좁힘"
+    },
+    {
+      "source": "elenchus",
+      "target": "syneidesis",
+      "type": "advisory",
+      "satisfies": "vetted context가 갭 감지 정확성을 높임"
+    },
+    {
+      "source": "elenchus",
+      "target": "prosoche",
+      "type": "advisory",
+      "satisfies": "vetted context가 컨디션 컴파일 초점을 좁힘"
+    },
+    {
+      "source": "elenchus",
+      "target": "epharmoge",
+      "type": "advisory",
+      "satisfies": "vetted pre-state가 post-execution 적용성 검증 컨텍스트를 제공"
+    },
+    {
+      "source": "elenchus",
+      "target": "horismos",
+      "type": "advisory",
+      "satisfies": "vetted findings가 후속 경계 정의 정보를 제공"
+    },
+    {
+      "source": "prothesis",
+      "target": "hyphegesis",
+      "type": "advisory",
+      "satisfies": "frame이 공급하는 분석 객체(렌즈)를 conduct의 배열 functor가 소비 — 비자명 배열(순서·독립성·조정·종료·라우팅)은 conduct가 설계"
+    },
+    {
+      "source": "horismos",
+      "target": "hyphegesis",
+      "type": "advisory",
+      "satisfies": "경계 맵이 지휘 범위(어떤 이동이 in-scope)를 좁힘"
+    },
+    {
+      "source": "analogia",
+      "target": "hyphegesis",
+      "type": "advisory",
+      "satisfies": "self-grounding 오정합(wrong-fusion) + split partition reading이 decompose-recovery conduct 레시피에 작업 전망과 셀 경계 증거를 공급"
+    },
+    {
+      "source": "hyphegesis",
+      "target": "prosoche",
+      "type": "advisory",
+      "satisfies": "지휘된 방법이 situated 실행으로 핸드오프"
+    },
+    {
+      "source": "anamnesis",
+      "target": "anagoge",
+      "type": "advisory",
+      "satisfies": "단일 세션 회상이 elevation이 순회할 진입 deposit을 제공"
+    },
+    {
+      "source": "hyphegesis",
+      "target": "anagoge",
+      "type": "advisory",
+      "satisfies": "conduct synthesis checkpoint가 흩어진 cross-worker 결과를 connected-session 단위로 elevate하도록 라우팅"
+    },
+    {
+      "source": "hyphegesis",
+      "target": "periagoge",
+      "type": "advisory",
+      "satisfies": "decompose-recovery 레시피가 per-cell 재형성을 위해 각 셀을 periagoge 활성화로 라우팅 (다중 CrystallizedAbstraction, 융합 아님)"
+    },
+    {
+      "source": "aitesis",
+      "target": "diairesis",
+      "type": "advisory",
+      "satisfies": "수집된 컨텍스트가 절단 가능한 WBS 범위를 충족시켜 분할을 가능케 함 (scope 부족 시 delimit이 inquire로 route-away)"
+    },
+    {
+      "source": "horismos",
+      "target": "diairesis",
+      "type": "advisory",
+      "satisfies": "경계 맵이 절단이 떨어질 joint 후보(어디서 자를 수 있는가)를 좁힘"
+    },
+    {
+      "source": "diairesis",
+      "target": "hyphegesis",
+      "type": "advisory",
+      "satisfies": "WorkUnitMap(절단된 실행 단위 집합)이 conduct의 WorkProspect로 흐름 — diairesis는 자르고, conduct는 배열·지휘 (cut, then conduct 쌍대)"
+    },
+    {
+      "source": "anagoge",
+      "target": "aitesis",
+      "type": "advisory",
+      "satisfies": "elevated 상위 단위가 컨텍스트 추론 범위를 좁힘"
+    },
+    {
+      "source": "anagoge",
+      "target": "periagoge",
+      "type": "advisory",
+      "satisfies": "recognized sedimented 개념 노드가 Fuse 후보를 제공"
+    },
+    {
+      "source": "prothesis",
+      "target": "proplasma",
+      "type": "advisory",
+      "satisfies": "프레이밍이 공급한 렌즈의 실행이 ≥2 방향 후보를 표면화할 때 이관 (정보 흐름 — 후보는 렌즈 실행의 하류 산물)"
+    },
+    {
+      "source": "euporia",
+      "target": "proplasma",
+      "type": "advisory",
+      "satisfies": "역추적된 좌표의 미래가 서술로 인식 불가할 때 이관"
+    },
+    {
+      "source": "horismos",
+      "target": "proplasma",
+      "type": "advisory",
+      "satisfies": "경계 선택 장면에서 방향-미래 인식 불가가 드러날 때 이관 (라우팅 미스 실측 표본 기반)"
+    },
+    {
+      "source": "proplasma",
+      "target": "syneidesis",
+      "type": "advisory",
+      "satisfies": "대비가 노출한 unknowns의 커밋전 점검 이관"
+    },
+    {
+      "source": "proplasma",
+      "target": "aitesis",
+      "type": "advisory",
+      "satisfies": "대비가 노출한 사실 unknowns의 조사 이관"
+    },
+    {
+      "source": "proplasma",
+      "target": "analogia",
+      "type": "advisory",
+      "satisfies": "생존 방향의 익숙-도메인 구조 매핑 검증 (매핑 존재 시)"
+    },
+    {
+      "source": "heuresis",
+      "target": "proplasma",
+      "type": "advisory",
+      "satisfies": "생성된 후보장이 discard-instantiation 대상 후보를 제공 (정보 흐름 — 후보 존재가 재료를 공급, 필수 아님)"
+    }
   ]
 }
