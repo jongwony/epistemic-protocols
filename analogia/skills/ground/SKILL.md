@@ -13,13 +13,15 @@ Validate structural mapping between abstract and concrete domains through AI-gui
 
 ```
 ── FLOW ──
-Analogia(R) → Detect(R) → [¬uncertain: Qc(zero_gap_finding) → Stop → (Confirm: deactivate | Reopen(q): reopen_seed := q, proceed)] → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → AssessFit(M, Sₐ, Sₜ) → [self_grounding(Sₐ, Sₜ): PartitionRead(F, Sₜ)] → I(M, F, Sₜ) → V → D_f → R' → (loop until terminalized)
+Analogia(R) → Detect(R) → [¬uncertain: Qc(zero_gap_finding) → Stop → (Confirm: deactivate | Reopen(q): reopen_seed := q, proceed)] → (Sₐ, Sₜ) → derive_focus_candidates(Sₐ, Sₜ) → [focus_settled(φ): FocusReadback(φ) | ¬focus_settled(φ): Qc(candidate_focuses) → Stop → FocusAnswer → φ] → Λ.focus := φ → Map(Sₐ, Sₜ, φ) → AssessFit(M, Sₐ, Sₜ) → [self_grounding(Sₐ, Sₜ): PartitionRead(F, Sₜ)] → I(M, F, Sₜ) → V → D_f → R' → (loop until terminalized)
 
 ── MORPHISM ──
 R
   → detect(R, context)                 -- infer mapping uncertainty
   → decompose(abstract, concrete)      -- identify source and target domains
-  → construct(mapping, Sₐ→Sₜ)          -- build structural correspondences
+  → derive_focus_candidates(Sₐ, Sₜ, R, context) -- surface plausible MappingFocus candidates (source_scope, target_scope, relation, purpose), before any correspondence is constructed
+  → settle_focus(candidates, R, context) → φ -- relay (FocusReadback) when focus_settled(φ) already holds — checked PER FIELD, not object-wide (see focus_settled); otherwise gate (FocusSelector), once per domain pair, before construction
+  → construct(mapping, Sₐ→Sₜ, φ)        -- build structural correspondences along the settled focus φ
   → assess_fit(mapping, Sₐ, Sₜ, context) -- sort correspondence adequacy before user validation
   → read_partition(fit_map, Sₜ) -- DERIVED split-vs-trim reading over the misfit MEMBERS (self-grounding case only — guarded; relay, no gate): misfits clustering into a coherent rival essence → Split → decompose recovery (route to the /conduct recipe) vs scattered misfits → Trim → narrow in place (/induce Narrow) vs no misfit → Hold
   → instantiate(mapping, fit_map, target) -- generate concrete examples scoped by fit map
@@ -39,7 +41,10 @@ Detect   = Mapping uncertainty detection: R → Bool
 Sₐ       = Source domain (abstract structure in R)
 Sₜ       = Target domain (user's concrete application context)
 self_grounding(Sₐ, Sₜ) ≡ instances(Sₐ) = Sₜ   -- self-grounding case: Sₜ is the source abstraction's OWN member instances (Sₐ a LOCATED candidate fused abstraction validated against the instances it claims to subsume), not a separate application domain. located(Sₐ) holds — this is what distinguishes self-grounding from the colimit route-away case (locator absent → /induce); here the abstraction already has a name and is checked for wrong-fusion against its own members
-Map      = Structure-preserving mapping construction: (Sₐ, Sₜ) → Set(Correspondence)
+MappingFocus = { source_scope: Set(Component), target_scope: Set(Component), relation: String, purpose: String }  -- protocol-local: the comparison focus that conditions Map before any correspondence is constructed; not a Correspondence itself — MappingFocus scopes and orients WHICH comparison Map will build, a Correspondence is one constructed pairing
+focus_settled(φ) ≡ determined(φ.relation) ∧ determined(φ.purpose)  -- PER-FIELD settlement predicate, never a whole-object test: relay requires relation ∧ purpose independently determined by explicit user language or a citable standing rule. source_scope/target_scope being determined is NOT sufficient — a user hypothesis naming candidate correspondents (e.g. "X is Y's representative mapping point") determines source_scope/target_scope while leaving relation undetermined, so focus_settled(φ) is false and the gate still fires. See Rule 3b for the worked example this predicate exists to cover.
+FocusAnswer = Select(MappingFocus) ∪ Reframe(description)  -- user's answer to the mapping-focus checkpoint; Reframe may revise source_scope/target_scope as well as relation/purpose, feeding back into (Sₐ, Sₜ) decomposition
+Map      = Structure-preserving mapping construction: (Sₐ, Sₜ, φ) → Set(Correspondence)   -- consumes the settled MappingFocus φ; construction is scoped and oriented by φ, not by (Sₐ, Sₜ) alone
 M        = Set(Correspondence)                                   -- mapping result
 Correspondence = { abstract: Component, concrete: Component, relation: String }
 Component = { name: String, structure: String }
@@ -107,19 +112,19 @@ If no relevant text exists: pause activation and request a grounding target befo
 ── PHASE TRANSITIONS ──
 Phase 0: R → Detect(R) → uncertain? ∧ classify self_grounding(Sₐ, Sₜ)   -- mapping uncertainty checkpoint (silent); also recognize the self-grounding case (a located abstraction vs its OWN instances) — distinct from colimit route-away (locator absent → /induce)
        [¬uncertain] Qc(zero_gap_finding) → Stop → ZeroGapConfirmation   -- zero-signal (Rule 11): Confirm → deactivate (mapping trivially established) | Reopen(q) → uncertain := true, reopen_seed := q, proceed to Phase 1 [Tool]
-Phase 1: uncertain → (Sₐ, Sₜ) → Map(Sₐ, Sₜ) → M → AssessFit(M, Sₐ, Sₜ) → F → [reopen_seed = Some(q): F.open := F.open ∪ {q}; reopen_seed := None] → [self_grounding: PartitionRead(F, Sₜ) → PartitionReading]  -- domain decomposition + fit map (Reopen seed folded into F.open, then cleared — track); derived split-vs-trim reading in the self-grounding case (relay), via partition_reading() [Tool]
-Phase 2: (M, F) → I(M, F, Sₜ) → [self_grounding: surface PartitionReading + routing recommendation as pre-gate relay] → Qs(I, F, framing) → Stop → V  -- instantiation + validation; the partition reading is surfaced as relay before the gate [Tool]
+Phase 1: uncertain → (Sₐ, Sₜ) → derive_focus_candidates(Sₐ, Sₜ) → candidates → [focus_settled(φ): FocusReadback(φ) | ¬focus_settled(φ): Qc(candidate_focuses) → Stop → FocusAnswer → φ] → Λ.focus := φ → Map(Sₐ, Sₜ, φ) → M → AssessFit(M, Sₐ, Sₜ) → F → [reopen_seed = Some(q): F.open := F.open ∪ {q}; reopen_seed := None] → [self_grounding: PartitionRead(F, Sₜ) → PartitionReading]  -- mapping-focus checkpoint (per-field settlement over relation ∧ purpose, NOT source_scope/target_scope alone — see Rule 3b) precedes construction; then domain decomposition + fit map (Reopen seed folded into F.open, then cleared — track); derived split-vs-trim reading in the self-grounding case (relay), via partition_reading() [Tool]
+Phase 2: (M, F) → I(M, F, Sₜ) → [surface Λ.focus as pre-gate relay: the settled comparison focus this instantiation is scoped by] → [self_grounding: surface PartitionReading + routing recommendation as pre-gate relay] → Qs(I, F, φ) → Stop → V  -- instantiation + validation; mapping focus and (when self-grounding) the partition reading are surfaced as relay before the gate; the prior untyped `framing` argument is now the typed MappingFocus φ [Tool]
 Phase 3: V → integrate(V, R, F) → (D_f, R') ; [self_grounding: R' carries PartitionReading + routing — Split → /conduct decompose-recovery recipe; Trim → /induce Narrow]  -- fit disposition + output update; partition relay folded into R' (track)
 
 ── LOOP ──
 After Phase 3: evaluate validation result.
 If V = Confirm: mark correspondence confirmed; record fit label snapshot and D_f; terminalize if all correspondences addressed and fit disposition is declared.
-If V = Adjust(feedback): refine mapping with feedback → return to Phase 1.
+If V = Adjust(feedback): refine mapping with feedback → return to Phase 1. If feedback revises the comparison focus itself (relation, purpose, or scope) rather than only a correspondence detail, treat it as a focus Reframe: update Λ.focus before reconstruction.
 If V = Dismiss: accept this correspondence as unresolved for this session; record fit label snapshot and D_f; terminalize if all correspondences addressed and fit disposition is declared.
-Max 3 mapping attempts per domain pair.
+Max 3 mapping attempts per domain pair — counts Map/AssessFit reconstruction cycles; the initial Phase 1 focus checkpoint (FocusReadback or FocusSelector) does not itself consume an attempt. A changed domain pair (Sₐ, Sₜ) triggers a new focus checkpoint before the next Map.
 Continue until: terminalized(R', F, D_f) OR attempts exhausted OR user ESC (EarlyExit, not ValidatedMapping).
 On user ESC: present partial transformation trace over already-addressed correspondences, then declare remaining correspondences as unresolved residual.
-Convergence evidence: At terminalized(R', F, D_f), present transformation trace — for each record in Λ.validations, show (MappingUncertain(record.example.mapping_trace) → record.fit_label → record.answer). When D_f.status = Bounded, append the bounded residual mapping uncertainty from D_f.declaration and briefly invite the user to supply a missing Sₜ correspondent if one can be identified — a free response within the existing turn, not a new gate or post-convergence morphism. When self_grounding holds, append the PartitionReading as relay: the verdict (Split / Trim / Hold), the full Sₜ partition when verdict = Split (rival cells, core cell, trim outliers), and the routing recommendation (Split → the /conduct decompose-recovery recipe; Trim → /induce Narrow; Hold → no partition action) — a relay annotation, not a new gate. Convergence is demonstrated, not asserted.
+Convergence evidence: At terminalized(R', F, D_f), present transformation trace — first the settled MappingFocus Λ.focus (source_scope, target_scope, relation, purpose) as the comparison basis every correspondence below was constructed along, then for each record in Λ.validations, show (MappingUncertain(record.example.mapping_trace) → record.fit_label → record.answer). When D_f.status = Bounded, append the bounded residual mapping uncertainty from D_f.declaration and briefly invite the user to supply a missing Sₜ correspondent if one can be identified — a free response within the existing turn, not a new gate or post-convergence morphism. When self_grounding holds, append the PartitionReading as relay: the verdict (Split / Trim / Hold), the full Sₜ partition when verdict = Split (rival cells, core cell, trim outliers), and the routing recommendation (Split → the /conduct decompose-recovery recipe; Trim → /induce Narrow; Hold → no partition action) — a relay annotation, not a new gate. Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 terminalized(R', F, D_f) = all_addressed(R') ∧ fit_disposition_declared(F, D_f)
@@ -131,7 +136,11 @@ early_exit = user_declares_mapping_sufficient
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Detect  (sense)     → Internal analysis (no external tool; also classify self_grounding — a located abstraction vs its own instances, distinct from colimit route-away)
 Phase 0 ZeroGapConfirm (constitution) → present (conditional: ¬uncertain(mapping); zero-gap finding + reasoning; Confirm/Reopen — Rule 11)
-Phase 1 Map/AssessFit (observe) → Read, Grep (stored knowledge extraction: domain structure and fit analysis); WebSearch (conditional: external domain knowledge)
+Phase 1 FocusDerive (sense) → Internal analysis (no external tool; derive_focus_candidates over Sₐ, Sₜ, R, context — surfaces plausible MappingFocus candidates before any correspondence is constructed)
+Phase 1 FocusReadback (extension) → TextPresent+Proceed (conditional: focus_settled(φ) already holds — checked PER FIELD, relation ∧ purpose independently determined — from explicit user language or a citable standing rule; relay φ, no gate)
+Phase 1 FocusSelector (constitution) → present (conditional: ¬focus_settled(φ); candidate MappingFocus options — Select(MappingFocus) or Reframe(description); fires once per domain pair before Map; Esc key → loop termination at LOOP level, not a FocusAnswer)
+Phase 1 FocusStore (track) → Internal state update (Λ.focus := φ once settled via FocusReadback or FocusSelector; a changed (Sₐ, Sₜ) domain pair clears Λ.focus and re-triggers the checkpoint)
+Phase 1 Map/AssessFit (observe) → Read, Grep (stored knowledge extraction: domain structure and fit analysis, scoped by the settled focus φ); WebSearch (conditional: external domain knowledge)
 Phase 1        (track)      → Internal state update (conditional: Λ.reopen_seed = Some(q) — fold q into F.open at fit-map assembly, then Λ.reopen_seed := None, consumed once)
 Phase 1 PartitionRead (sense) → Internal analysis (no external tool; DERIVED split-vs-trim reading over F's misfit instances; self-grounding case ONLY; verdict = Split → route to the /conduct decompose-recovery recipe; verdict = Trim → /induce Narrow; basis cited from F; surfaced as pre-gate relay text within Phase 2 Qs, no separate gate)
 Phase 2 Qs      (constitution)      → present (mandatory; Esc key → loop termination at LOOP level, not a Validation)
@@ -142,6 +151,7 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
 
 ── MODE STATE ──
 Λ = { phase: Phase, R: Text, Sₐ: Domain, Sₜ: Domain,
+      focus: Option(MappingFocus),   -- the settled comparison focus Map consumes; None before the Phase 1 focus checkpoint resolves it
       self_grounding: Bool, partition_reading: Option(PartitionReading),
       reopen_seed: Option(StructuralQuestion),   -- the zero-gap Reopen(q) question the Phase 0 scan missed — the one entry Phase 1 cannot be assumed to re-derive; consumed into F.open at Phase 1, then cleared
       mappings: Set(Correspondence), confirmed: Set(Correspondence),
@@ -150,6 +160,7 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
       validations: List<ValidationRecord>, attempts: Nat, active: Bool,
       cause_tag: String }
 -- Invariant: mappings = confirmed ∪ dismissed ∪ remaining (pairwise disjoint)
+-- Invariant: Λ.focus is set (via FocusReadback relay or the FocusSelector gate's FocusAnswer) before Map(Sₐ, Sₜ, φ) runs in Phase 1 — Map never runs against Λ.focus = None. Adjust(feedback) may revise Λ.focus (a focus-level Reframe) without consuming a mapping attempt beyond the reconstruction cycle itself; a changed (Sₐ, Sₜ) domain pair clears Λ.focus and re-triggers the Phase 1 focus checkpoint before the next Map
 -- Invariant: fit_partition(F, M)  -- PartitionReading is SECOND-ORDER over misfit instances, not a partition of M, so it does not enter this invariant
 -- Invariant (always holds): partition_reading = Some(PartitionReading) ⟹ self_grounding. Steady-state converse (after Phase 1 computes the reading for the current F): self_grounding ⟹ partition_reading = Some(...) with verdict ∈ {Split, Trim, Hold}. Before Phase 1 computes it — Phase 0, or a Phase 1 re-entry via Adjust until recompute — partition_reading = None even under self_grounding (Pending). So None means ¬self_grounding OR not-yet-computed-for-current-F; the verdict Hold (no-misfit) stays a distinct value, never conflated with the Option None
 
@@ -244,7 +255,12 @@ Decompose abstract and concrete domains, then construct structural correspondenc
 1. **Identify source domain** `Sₐ`: Extract abstract structures from R — components, relationships, constraints, assumptions
 2. **Identify target domain** `Sₜ`: Determine user's concrete application context — environment, constraints, existing structures
    - **Call Read/Grep** to collect evidence about target domain from codebase, configs, documentation
-3. **Construct mapping** `M`: For each abstract component, identify the candidate concrete correspondent
+2b. **Derive and settle the mapping focus** `φ`: Before constructing any correspondence, surface plausible `MappingFocus` candidates (`source_scope`, `target_scope`, `relation`, `purpose`) from `R` and session context.
+   - Check `focus_settled(φ)` **per field** — `relation` and `purpose` must be independently determined, not merely `source_scope`/`target_scope` (Rule 3b carries the worked example: a user hypothesis naming candidate correspondents settles scope, not relation)
+   - If settled by explicit user language or a citable standing rule: relay the focus via `FocusReadback` (Extension) — no gate
+   - Otherwise: present the candidate focuses via `FocusSelector` (Constitution) — `Select(MappingFocus)` or `Reframe(description)` — and store the result as `Λ.focus`
+   - This checkpoint does not consume a mapping attempt (`Max 3 mapping attempts per domain pair` counts `Map`/`AssessFit` reconstruction cycles only)
+3. **Construct mapping** `M`: For each abstract component, identify the candidate concrete correspondent along the settled focus `φ`
    - If correspondence is clear: add to confirmed candidates
    - If structural mismatch detected: flag as uncertain — include evidence
    - If no correspondent exists: flag as gap — the abstract structure may not apply
@@ -275,6 +291,7 @@ Web evidence is tagged with `source: "web:{url}"` for traceability.
 **Surfacing format**:
 
 Present the mapping details as text output:
+- **Mapping focus** (relay, settled at Phase 1): [source scope] compared against [target scope] along [relation], for [purpose] — the comparison basis this instantiation is constructed along
 - **Abstract**: [component from Sₐ with structural description]
 - **Concrete**: [proposed correspondence in Sₜ with evidence]
 - **Fit**: [preserved / partial / missing / overextended / open issue, in plain language]
@@ -337,6 +354,7 @@ After integration:
 1. **AI-guided, user-validated**: AI detects mapping uncertainty; validation requires user choice via Cognitive Partnership Move (Constitution) (Phase 2)
 2. **Recognition over Recall**: Present structured options via Cognitive Partnership Move (Constitution) — structured content reaches the user with response opportunity — Constitution interaction requires turn yield before proceeding
 3. **Domain decomposition first**: Before presenting instantiations, decompose abstract and concrete domain structures through codebase analysis (Phase 1) — ensures the mapping is structurally grounded rather than assumed
+3b. **Mapping focus precedes construction, settled per field**: Before `Map` constructs any correspondence, Phase 1 derives candidate `MappingFocus` options (`source_scope`, `target_scope`, `relation`, `purpose`) and checks `focus_settled(φ)` **per field**, never as a whole-object test. `focus_settled(φ) ≡ determined(relation) ∧ determined(purpose)` — `source_scope`/`target_scope` being determined is not sufficient. **Worked example**: a user hypothesis that names candidate correspondents ("X is Y's representative mapping point, and Z corresponds to W") determines `source_scope` and `target_scope`, but says nothing about which relation to compare them along (residual-slot fit? core-deficit fit? some other relation?) — `relation` stays undetermined, so `focus_settled(φ)` is false even though the call reads richly specified. A whole-object test that asks only "did the user say something about the mapping" would misread this as settled and relay past the checkpoint — reproducing the exact focus mismatch this rule exists to prevent. When `focus_settled(φ)` holds — from explicit user language or a citable standing rule — relay via `FocusReadback` (Extension); otherwise gate via `FocusSelector` (Constitution), once per domain pair, before construction.
 4. **Structural Correspondence over Abstract Assertion**: When mapping is uncertain, construct explicit correspondences rather than assert mapping validity — silence is worse than a rejected mapping
 5. **Concrete instantiation required**: Every mapping presented must include at least one concrete example in the user's domain
 6. **Evidence-grounded**: Every correspondence must cite specific structural elements from both abstract and concrete domains
