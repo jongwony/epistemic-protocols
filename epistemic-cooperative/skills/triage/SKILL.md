@@ -238,4 +238,4 @@ Phase 7's grounding instruction names `/inquire` as the *receiving* session's ac
 - [ ] Phase 4 NorthstarFusion records preserved / transformed / dropped claims
 - [ ] Phase 5 FocusedWorkUnit readiness and split rationale are explicit
 - [ ] Phase 6 route choice is selected by the user before any handoff is prepared
-- [ ] Phase 7 externalizes each routed work unit to a `WorkUnitRecord` (anchor-issue comment or issue-body triage section) carrying the FocusedWorkUnit/NormalizedProblemFrame/NorthstarFusion/issue-provenance substrate, then hands the receiving session a navigation block over that record — purpose/frame, canonical locator, dereference instruction, grounding instruction — with a collaborator Role declared; re-triage skips this step
+- [ ] Phase 7 externalizes each routed work unit to a `WorkUnitRecord` (anchor-issue comment or issue-body triage section) carrying the FocusedWorkUnit/NormalizedProblemFrame/NorthstarFusion/issue-provenance substrate, then hands the receiving session a navigation block over that record in the shape Phase 7 declares, with a collaborator Role declared; re-triage skips this step
