@@ -35,10 +35,12 @@ All prompts are English per delegation rules; search keywords in quotes are exem
 PURPOSE: Extract the user's explicitly stated preferences and constraints from their
 Claude Code configuration.
 
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
 COLLECT:
-1. Read ~/.claude/CLAUDE.md — extract all stated preferences, principles, and constraints
-2. Read all files in ~/.claude/rules/ — extract each rule with its rationale
-3. Read ~/.claude/projects/*/memory/MEMORY.md — extract persistent session memory
+1. Read {config_dir}/CLAUDE.md — extract all stated preferences, principles, and constraints
+2. Read all files in {config_dir}/rules/ — extract each rule with its rationale
+3. Read {config_dir}/projects/*/memory/MEMORY.md — extract persistent session memory
 
 RETURN FORMAT:
 ## Stated Preferences
@@ -61,12 +63,14 @@ RETURN FORMAT:
 ```
 PURPOSE: Extract quantitative behavioral patterns from usage data.
 
+Paths below written {config_dir}/… take {config_dir} = CLAUDE_CONFIG_DIR when set, else ~/.claude. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
 COLLECT:
-1. Read ~/.claude/usage-data/report.html — extract key statistics (messages, tools,
+1. Read {config_dir}/usage-data/report.html — extract key statistics (messages, tools,
    friction types, outcomes, satisfaction, session types)
-2. Sample 5-10 facet files from ~/.claude/usage-data/facets/ — extract
+2. Sample 5-10 facet files from {config_dir}/usage-data/facets/ — extract
    recurring themes, tool usage patterns, satisfaction signals
-3. Sample 5-10 session-meta files from ~/.claude/usage-data/session-meta/ —
+3. Sample 5-10 session-meta files from {config_dir}/usage-data/session-meta/ —
    extract session types, durations, goal patterns
 
 RETURN FORMAT:
@@ -90,8 +94,10 @@ RETURN FORMAT:
 ```
 PURPOSE: Extract qualitative behavioral patterns from recent session transcripts.
 
+Paths below written {config_dir}/… take {config_dir} = CLAUDE_CONFIG_DIR when set, else ~/.claude. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
 COLLECT:
-1. List session files in ~/.claude/projects/ (find recent, large sessions)
+1. List session files in {config_dir}/projects/ (find recent, large sessions)
 2. Sample 3-5 substantive sessions (>50KB) — use Grep to extract:
    - User correction patterns (interruptions, redirections)
    - Decision-making patterns (how user makes choices)
@@ -200,11 +206,13 @@ through an AI-delegation counter-hypothesis.
 
 ## Phase 4: Report Generation
 
-Generate an HTML report and save to `~/.claude/epistemic-cooperative/introspect/`.
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
+Generate an HTML report and save to `{config_dir}/epistemic-cooperative/introspect/`.
 
 ### Design System
 
-Read the existing `~/.claude/usage-data/report.html` to extract the CSS design system.
+Read the existing `{config_dir}/usage-data/report.html` to extract the CSS design system.
 Match its visual style: Inter font, #f8fafc background, white cards with #e2e8f0 border.
 See `references/report-guide.md` for section templates and component patterns.
 
@@ -222,7 +230,7 @@ See `references/report-guide.md` for section templates and component patterns.
 
 ### Output
 
-Save as `~/.claude/epistemic-cooperative/introspect/cognitive-partnership-profile.html`
+Save as `{config_dir}/epistemic-cooperative/introspect/cognitive-partnership-profile.html`
 (date-stamped variant if previous report exists).
 After saving, print the file path so the user can open it manually.
 

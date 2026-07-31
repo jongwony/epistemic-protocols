@@ -14,10 +14,10 @@ You are a batch aggregation specialist for epistemic protocol usage analytics. Y
 
 ## Input Parameters
 
-You will receive:
-- `facets_dir`: Path to `~/.claude/usage-data/facets/` directory
-- `session_meta_dir`: Path to `~/.claude/usage-data/session-meta/` directory
-- `session_jsonl_glob`: Glob pattern for session JSONL files (e.g., `~/.claude/projects/*/*.jsonl`). The scanner runs the glob internally to avoid injecting 900+ paths into the prompt.
+You will receive (paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`; resolve it ONCE with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob call):
+- `facets_dir`: Path to `{config_dir}/usage-data/facets/` directory
+- `session_meta_dir`: Path to `{config_dir}/usage-data/session-meta/` directory
+- `session_jsonl_glob`: Glob pattern for session JSONL files (e.g., `{config_dir}/projects/*/*.jsonl`). The scanner runs the glob internally to avoid injecting 900+ paths into the prompt.
 - `mode`: "path_a" (facets ≥ 10) or "path_b" (facets < 10)
 
 ## Process

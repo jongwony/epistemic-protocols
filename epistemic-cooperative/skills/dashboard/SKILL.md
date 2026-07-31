@@ -37,25 +37,27 @@ COLLECT → AGGREGATE → ANALYZE → PRESENT
 
 ### Primary: Usage Data Cache
 
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
 | Source | Method | Extracts |
 |--------|--------|----------|
-| `~/.claude/usage-data/facets/{session_id}.json` | Glob + Read | friction_counts, friction_detail, goal_categories, session_type, outcome, user_satisfaction_counts |
-| `~/.claude/usage-data/session-meta/{session_id}.json` | Glob + Read | tool_counts, git_commits, git_pushes, languages, duration_minutes, start_time, first_prompt |
+| `{config_dir}/usage-data/facets/{session_id}.json` | Glob + Read | friction_counts, friction_detail, goal_categories, session_type, outcome, user_satisfaction_counts |
+| `{config_dir}/usage-data/session-meta/{session_id}.json` | Glob + Read | tool_counts, git_commits, git_pushes, languages, duration_minutes, start_time, first_prompt |
 
 ### Secondary: Session Logs
 
 | Source | Method | Extracts |
 |--------|--------|----------|
-| `~/.claude/projects/*/*.jsonl` | Glob | All session JSONL files on disk |
+| `{config_dir}/projects/*/*.jsonl` | Glob | All session JSONL files on disk |
 | Session JSONL files | Grep `command-name` + `"skill":"` | Protocol usage history (slash commands + Skill tool invocations) |
 
 ## Phase Execution
 
 ### Phase 1: Collect (Main)
 
-1. Glob `~/.claude/usage-data/facets/*.json` → inventory facets files
-2. Glob `~/.claude/usage-data/session-meta/*.json` → inventory session-meta files
-3. Note JSONL glob pattern `~/.claude/projects/*/*.jsonl` (scanner runs glob internally)
+1. Glob `{config_dir}/usage-data/facets/*.json` → inventory facets files
+2. Glob `{config_dir}/usage-data/session-meta/*.json` → inventory session-meta files
+3. Note JSONL glob pattern `{config_dir}/projects/*/*.jsonl` (scanner runs glob internally)
 4. Intersect facets ∩ session-meta by filename stem (session_id)
 5. **Path decision**: facets ∩ session-meta ≥ 10 → Path A, else Path B
 
@@ -64,9 +66,9 @@ If no facets or session-meta data found: report "No usage data available. Run so
 ### Phase 2: Aggregate (Subagent: coverage-scanner)
 
 **Call coverage-scanner subagent** with:
-- `facets_dir`: `~/.claude/usage-data/facets/`
-- `session_meta_dir`: `~/.claude/usage-data/session-meta/`
-- `session_jsonl_glob`: `~/.claude/projects/*/*.jsonl` (scanner runs glob + grep internally, avoiding 900+ paths in prompt)
+- `facets_dir`: `{config_dir}/usage-data/facets/`
+- `session_meta_dir`: `{config_dir}/usage-data/session-meta/`
+- `session_jsonl_glob`: `{config_dir}/projects/*/*.jsonl` (scanner runs glob + grep internally, avoiding 900+ paths in prompt)
 - `mode`: "path_a" or "path_b" based on Phase 1 decision
 
 The subagent returns aggregated data: friction totals, outcome/satisfaction distributions, tool totals, timeline, protocol usage (slash commands + Skill tool invocations, de-duplicated), gate interaction data (per-protocol gated/relay counts), code change statistics.
@@ -158,8 +160,8 @@ For protocols with 3+ session history:
 ### Phase 4: Present (Main)
 
 1. **HTML Dashboard**:
-   - Pre-write step: call Bash `mkdir -p ~/.claude/.dashboard` to ensure the parent directory exists (handles fresh environments without prior `.dashboard/` activity)
-   - Write to `~/.claude/.dashboard/dashboard.html` via Write tool
+   - Pre-write step: call Bash `cfg="${CLAUDE_CONFIG_DIR-$HOME/.claude}"; mkdir -p "${cfg:+$cfg/}.dashboard"` to ensure the parent directory exists (handles fresh environments without prior `.dashboard/` activity)
+   - Write to `{config_dir}/.dashboard/dashboard.html` via Write tool
    - Refer to `references/html-template.md` for the full HTML skeleton
    - 11 sections: Coverage, Protocol Usage, Friction→Protocol, Improvement Opportunities, Growth Timeline, Achievements, Satisfaction Trends, Quality Score, Gate Efficiency, Relay Erosion, Quick Actions
    - Path B degradation: Sections 3 (Friction), 7 (Satisfaction), 8 (Quality Score), 9 (Gate Efficiency), 10 (Relay Erosion) show "Facets data enables richer analysis" guidance. Sections 9-10 additionally show "Insufficient data for erosion tracking" when protocol session count < 3
@@ -169,9 +171,9 @@ For protocols with 3+ session history:
    - Coverage summary (X/Y protocols with situations detected)
    - Top friction areas
    - Quality score (if available)
-   - File path: `~/.claude/.dashboard/dashboard.html`
+   - File path: `{config_dir}/.dashboard/dashboard.html`
 
-3. **Open in browser**: Call Bash `open ~/.claude/.dashboard/dashboard.html` to launch the dashboard in the default browser
+3. **Open in browser**: Call Bash `cfg="${CLAUDE_CONFIG_DIR-$HOME/.claude}"; open "${cfg:+$cfg/}.dashboard/dashboard.html"` to launch the dashboard in the default browser
 
 ## HTML Artifact Guidelines
 
