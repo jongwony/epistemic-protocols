@@ -15,7 +15,7 @@
 
 import { closeSync, constants, existsSync, fstatSync, openSync, readFileSync, statSync, watch } from "node:fs";
 import { appendFile, readdir, readFile, realpath } from "node:fs/promises";
-import { basename, dirname, extname, resolve, sep } from "node:path";
+import { basename, dirname, extname, join, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 
 const args = process.argv.slice(2);
@@ -93,16 +93,21 @@ const stripFrontmatter = (md: string) => {
 
 // TaskList-backed finding store — read-only view onto the harness task store.
 // Per SKILL.md "TaskList File as Sync Medium": tasks live under
-// ~/.claude/tasks/<session-uuid>/<task-id>.json (per-session directories).
+// <config-dir>/tasks/<session-uuid>/<task-id>.json (per-session directories),
+// where <config-dir> is CLAUDE_CONFIG_DIR when set and ~/.claude otherwise.
 // We scan every session subdirectory and filter entries whose description carries
 // the artifact slug tag, so findings created in earlier sessions remain visible
 // until completed (preserves hermeneutic cycle across sessions).
 //
 // Override the task root via COMMENT_REVIEW_TASK_ROOT for testing; defaults to
 // the harness-managed location.
+// The harness resolver is `CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude")` — `??`, not
+// `||`, so an empty string is honoured rather than falling back; and `join`, not `resolve`,
+// so an empty base yields a relative path exactly as the harness would.
+const CLAUDE_CONFIG_DIR = process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude");
 const TASK_ROOT = process.env.COMMENT_REVIEW_TASK_ROOT
   ? resolve(process.env.COMMENT_REVIEW_TASK_ROOT)
-  : resolve(homedir(), ".claude", "tasks");
+  : join(CLAUDE_CONFIG_DIR, "tasks");
 
 interface TaskEntry {
   id?: string;
