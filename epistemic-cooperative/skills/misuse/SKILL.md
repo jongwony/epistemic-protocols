@@ -66,7 +66,7 @@ Delegate to the `epistemic-cooperative:session-analyzer` subagent in friction-po
 - 10–20 turns of preceding user messages (pre-invocation context window)
 - The assistant turn(s) immediately following the invocation (Phase 0 output of the invoked protocol)
 
-Optional auxiliary read: the `{config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md` file if present and the user has consented to cross-session scope. This is opt-in evidence enrichment, not a primary data source. `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`; the TOOL GROUNDING block below binds it once via Phase 0 resolve_cfg before any store path is read.
+Optional auxiliary read: the `{config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md` file if present and the user has consented to cross-session scope. This is opt-in evidence enrichment, not a primary data source. `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`; the TOOL GROUNDING block below binds it once via Phase 0 ResolveConfigDir before any store path is read.
 
 Construct the candidate set `I[]` of `{invocation, pre_context, post_output}` triples.
 
@@ -260,7 +260,7 @@ Phase 0 scope_from_arg       (extension)    → TextPresent+Proceed (user-specif
 Phase 0 scope_default_relay  (extension)    → TextPresent+Proceed (scope unspecified → safe default current_session ∧ ¬cross_project; surface inferred scope, relay)
 Phase 0 scope_expand_confirm (constitution) → present (resolved scope is expansion(s): cross-session ∨ cross-project widening, whether arg-hinted or user-requested; constitutive privacy authorization; decline → fall back to safe_default)
 -- Phase 0 relay basis: default_scope(s) is read-only and privacy-local (SessionHistory preserved, Rule 6); its resolution is deterministic and citable (the safe default), so it is relay-eligible (Extension) per the A5 option-set relay test and the project Extension-default profile. The (constitution) gate is retained only for the privacy-sensitive cross-session / cross-project widening, where the user constitutes authorization to read beyond the current session.
-Phase 0 resolve_cfg    (observe)       → Bash (`printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` — binds {config_dir} before Phase 1 read_misfit; read-only, no side effect. `${VAR-default}` without the colon falls back on UNSET only, matching the harness resolver's `??`)
+Phase 0 ResolveConfigDir (observe)     → Bash (`printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` — binds {config_dir} before Phase 1 read_misfit; read-only, no side effect. `${VAR-default}` without the colon falls back on UNSET only, matching the harness resolver's `??`)
 Phase 1 extract        (extension)     → Agent(epistemic-cooperative:session-analyzer, mode=friction_pointers)
 Phase 1 read_misfit    (extension)     → Read ({config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md, opt-in)
 Phase 2 read_taxonomy  (extension)     → Read (references/violation-taxonomy.md)
@@ -285,7 +285,7 @@ converge               (extension)     → TextPresent+Proceed (convergence trac
 
 ## Storage Reference
 
-The `{config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md` file (written by `/probe` sessions) is opt-in auxiliary read input for Phase 1 evidence enrichment. Misuse does not write to this location. Default scope reads only the current session; cross-session reads require explicit user confirmation in Phase 0. `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude` (bound by TOOL GROUNDING's Phase 0 resolve_cfg above).
+The `{config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md` file (written by `/probe` sessions) is opt-in auxiliary read input for Phase 1 evidence enrichment. Misuse does not write to this location. Default scope reads only the current session; cross-session reads require explicit user confirmation in Phase 0. `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude` (bound by TOOL GROUNDING's Phase 0 ResolveConfigDir above).
 
 ## Rules
 
