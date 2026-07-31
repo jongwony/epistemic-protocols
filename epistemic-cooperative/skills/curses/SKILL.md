@@ -56,9 +56,9 @@ Analyze this user's behavioral dimensions from their session data.
 coverage_data: [paste coverage-scanner output here]
 
 data_sources:
-  rules_dir: ~/.claude/rules/
-  claude_md: ~/.claude/CLAUDE.md
-  settings_json: ~/.claude/settings.json
+  rules_dir: {config_dir}/rules/
+  claude_md: {config_dir}/CLAUDE.md
+  settings_json: {config_dir}/settings.json
 
 data_context: session-enriched
 
@@ -188,8 +188,10 @@ Generate an HTML report following the cooperative's design system.
 
 ### Design system source
 
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
 Read one of:
-- `~/.claude/usage-data/report.html` — extract CSS
+- `{config_dir}/usage-data/report.html` — extract CSS
 - Cooperative's `skills/report/references/html-template.md` — use as template basis
 - `skills/curses/references/report-template.md` — curses-specific components
 
@@ -225,7 +227,7 @@ If the dimension profile and philosopher match are available from a prior
 
 ### Output
 
-Save to `~/.claude/usage-data/curses-profile.html`
+Save to `{config_dir}/usage-data/curses-profile.html`
 Open in browser: `open <filepath>`
 
 ---

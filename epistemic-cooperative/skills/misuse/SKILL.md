@@ -52,7 +52,7 @@ Resolve the audit scope before scanning. Decisions:
 
 - **Target protocols** — fixed at `/ground` and `/induce` for v1.0. Other protocols deferred pending accumulated use evidence.
 - **Session window** — default is the current session only. Cross-session scanning requires explicit user confirmation per Rule 4.
-- **Cross-project scope** — default off. Scanning across `~/.claude/projects/` requires explicit user confirmation.
+- **Cross-project scope** — default off. Scanning across `{config_dir}/projects/` requires explicit user confirmation.
 
 Resolve scope from the invocation argument; if none is given, apply the safe default — **current session only, cross-project off**. This default scope is read-only and privacy-local (`/misuse` preserves SessionHistory, Rule 6), and its selection is deterministic and citable (the safe default), so it is a **relay (Extension)**: surface the inferred scope to the user and proceed directly to Phase 1, without a scope-authorization gate. The Constitution interaction is **retained only for the cross-session / cross-project expansion** — the privacy-sensitive widening the user opts into. When the resolved scope is an expansion (cross-session or cross-project), present the widening for constitutive authorization before scanning; if the user declines, fall back to the safe default scope. This mirrors `/probe`'s Phase 0 — silent on the current-session default (its Rule 3), explicit confirmation only on cross-session expansion (its Rule 4).
 
@@ -66,7 +66,7 @@ Delegate to the `epistemic-cooperative:session-analyzer` subagent in friction-po
 - 10–20 turns of preceding user messages (pre-invocation context window)
 - The assistant turn(s) immediately following the invocation (Phase 0 output of the invoked protocol)
 
-Optional auxiliary read: the `~/.claude/projects/{slug}/hypomnesis/{session-id}/misfit.md` file if present and the user has consented to cross-session scope. This is opt-in evidence enrichment, not a primary data source.
+Optional auxiliary read: the `{config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md` file if present and the user has consented to cross-session scope. This is opt-in evidence enrichment, not a primary data source. `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`; the TOOL GROUNDING block below binds it once via Phase 0 resolve_cfg before any store path is read.
 
 Construct the candidate set `I[]` of `{invocation, pre_context, post_output}` triples.
 
@@ -260,8 +260,9 @@ Phase 0 scope_from_arg       (extension)    → TextPresent+Proceed (user-specif
 Phase 0 scope_default_relay  (extension)    → TextPresent+Proceed (scope unspecified → safe default current_session ∧ ¬cross_project; surface inferred scope, relay)
 Phase 0 scope_expand_confirm (constitution) → present (resolved scope is expansion(s): cross-session ∨ cross-project widening, whether arg-hinted or user-requested; constitutive privacy authorization; decline → fall back to safe_default)
 -- Phase 0 relay basis: default_scope(s) is read-only and privacy-local (SessionHistory preserved, Rule 6); its resolution is deterministic and citable (the safe default), so it is relay-eligible (Extension) per the A5 option-set relay test and the project Extension-default profile. The (constitution) gate is retained only for the privacy-sensitive cross-session / cross-project widening, where the user constitutes authorization to read beyond the current session.
+Phase 0 resolve_cfg    (observe)       → Bash (`printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` — binds {config_dir} before Phase 1 read_misfit; read-only, no side effect. `${VAR-default}` without the colon falls back on UNSET only, matching the harness resolver's `??`)
 Phase 1 extract        (extension)     → Agent(epistemic-cooperative:session-analyzer, mode=friction_pointers)
-Phase 1 read_misfit    (extension)     → Read (~/.claude/projects/{slug}/hypomnesis/{session-id}/misfit.md, opt-in)
+Phase 1 read_misfit    (extension)     → Read ({config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md, opt-in)
 Phase 2 read_taxonomy  (extension)     → Read (references/violation-taxonomy.md)
 Phase 2 classify       (sense)         → Internal analysis (per-invocation 2-step check)
 Phase 3 aggregate      (sense)         → Internal analysis (clustering + ranking)
@@ -284,7 +285,7 @@ converge               (extension)     → TextPresent+Proceed (convergence trac
 
 ## Storage Reference
 
-The `~/.claude/projects/{slug}/hypomnesis/{session-id}/misfit.md` file (written by `/probe` sessions) is opt-in auxiliary read input for Phase 1 evidence enrichment. Misuse does not write to this location. Default scope reads only the current session; cross-session reads require explicit user confirmation in Phase 0.
+The `{config_dir}/projects/{slug}/hypomnesis/{session-id}/misfit.md` file (written by `/probe` sessions) is opt-in auxiliary read input for Phase 1 evidence enrichment. Misuse does not write to this location. Default scope reads only the current session; cross-session reads require explicit user confirmation in Phase 0. `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude` (bound by TOOL GROUNDING's Phase 0 resolve_cfg above).
 
 ## Rules
 

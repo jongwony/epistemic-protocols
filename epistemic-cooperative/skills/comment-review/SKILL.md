@@ -26,7 +26,7 @@ fixation_event D     : Irreversible(String) | Reversible(String)  -- committed a
 application_context  : String                                     -- where the fixed artifact operates
 ```
 
-The caller — whether the user invoking `/comment-review` directly or a composing skill that calls this one — supplies all three fields. When `D` or `application_context` is omitted, the skill infers defaults from the artifact path when possible (e.g., `~/.claude/plans/*.md` → D = "commit to execution", `~/.claude/.write/*.md` → D = "publish"); if inference yields no confident match, the skill asks the user.
+The caller — whether the user invoking `/comment-review` directly or a composing skill that calls this one — supplies all three fields. When `D` or `application_context` is omitted, the skill infers defaults from the artifact path when possible (e.g., `{config_dir}/plans/*.md` → D = "commit to execution", `{config_dir}/.write/*.md` → D = "publish", where `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`); if inference yields no confident match, the skill asks the user.
 
 ## Pipeline Overview
 

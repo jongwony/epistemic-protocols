@@ -70,6 +70,8 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 
 ## Phase Execution
 
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
 ### Phase 0: Entry (Path Selection)
 
 Begin with a concise welcome and path selection, reserving the full catalog for the Browse-all path.
@@ -83,7 +85,7 @@ Begin with a concise welcome and path selection, reserving the full catalog for 
 
 **If Quick recommendation**: set `path = quick`, proceed to Phase 1.
 
-**If Browse all**: Present the protocol catalog (check installation status via Glob `~/.claude/plugins/cache/epistemic-protocols/*/`, then render all core protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
+**If Browse all**: Present the protocol catalog (check installation status via Glob `{config_dir}/plugins/cache/epistemic-protocols/*/`, then render all core protocols from Data Sources as a numbered list grouped by Cluster with name + "When to Use" + installation badge). After catalog, present:
 - Text: Post-catalog path selection
 - Options:
   - Quick recommendation
@@ -123,7 +125,7 @@ Build a User Context Profile from recent session metadata. Runs inline with Glob
 
 **Step 1: Collect session metadata**
 
-Glob `~/.claude/projects/*/sessions-index.json` (exclude directories containing `-worktrees-`). Read the 2-3 most recently modified indexes. For each, parse `entries` and extract the 5 most recent entries' `firstPrompt` and `summary` fields.
+Glob `{config_dir}/projects/*/sessions-index.json` (exclude directories containing `-worktrees-`). Read the 2-3 most recently modified indexes. For each, parse `entries` and extract the 5 most recent entries' `firstPrompt` and `summary` fields.
 
 **Step 2: Infer User Context Profile**
 
