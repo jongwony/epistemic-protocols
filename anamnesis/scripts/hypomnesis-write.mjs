@@ -165,7 +165,7 @@ function parseSession(transcriptPath) {
   const protocolMap = {
     "/frame": "frame", "/gap": "gap", "/clarify": "clarify",
     "/goal": "goal", "/bound": "bound", "/inquire": "inquire",
-    "/ground": "ground", "/apportion": "attend",
+    "/ground": "ground", "/apportion": "apportion",
     "/contextualize": "contextualize", "/grasp": "grasp",
     "/reflect": "reflect", "/recollect": "recollect",
     "/write": "write", "/verify": "verify",

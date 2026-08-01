@@ -48,7 +48,7 @@ implicit premise.
 ## Execution
 
 **`/apportion`** (Merismos) — GoalPlanUncompiled → ConditionBearingUnitPlan
-  when: Autonomous run ahead with its boundaries not yet compiled into verifiable conditions
+  when: Autonomous goal not yet cut into units that fit one run each, with no checkable done-condition per unit
 
 ## Verification
 

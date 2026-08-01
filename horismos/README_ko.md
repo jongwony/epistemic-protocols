@@ -26,7 +26,7 @@
 | Aitesis | AI 주도 | `ContextInsufficient → InformedExecution` |
 | Proplasma | 하이브리드 | `DirectionUnrecognizable → DirectionalContrast` |
 | Analogia | AI 주도 | `MappingUncertain → ValidatedMapping` |
-| Merismos | 사용자 주도 | `ExecutionBlind → SituatedExecution` |
+| Merismos | 사용자 주도 | `GoalPlanUncompiled → ConditionBearingUnitPlan` |
 | Epharmoge | AI 주도 | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | 사용자 주도 | `ResultUngrasped → VerifiedUnderstanding` |
 

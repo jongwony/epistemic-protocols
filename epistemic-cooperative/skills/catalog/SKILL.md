@@ -58,7 +58,7 @@ Argument normalization: case-insensitive, accepts `/command` or bare name (e.g.,
 
 | Protocol | Command | When to Use |
 |----------|---------|-------------|
-| Merismos | `/apportion` | Autonomous run ahead with its boundaries not yet compiled into verifiable conditions |
+| Merismos | `/apportion` | Autonomous goal not yet cut into units that fit one run each, with no checkable done-condition per unit |
 
 ### Verification
 

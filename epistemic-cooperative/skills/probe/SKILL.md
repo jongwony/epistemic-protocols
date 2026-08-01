@@ -182,13 +182,13 @@ ProtocolRoute    = session text { target_coverage: Set(CoverageEntry) }    -- |t
 FitReviewNote    = session text { presented_hypotheses, dismissed: true }
 DeficitName      ∈ {BoundaryUndefined, ContextInsufficient, FrameworkAbsent,
                     MappingUncertain, AbstractionInProcess, AbstractAporia,
-                    GapUnnoticed, ExecutionBlind, ApplicationDecontextualized,
+                    GapUnnoticed, GoalPlanUncompiled, ApplicationDecontextualized,
                     ContextSuspect, RecallAmbiguous,
                     RecallGranularityInsufficient, ResultUngrasped,
-                    GranularityUnderdetermined, MethodUnderdetermined,
+                    MethodUnderdetermined,
                     DirectionUnrecognizable, CandidateFieldUnderexpanded} ∪ Emergent
 ProtocolId       ∈ {bound, inquire, frame, ground, induce, elicit, gap,
-                    attend, contextualize, sublate, recollect, ascend,
+                    apportion, contextualize, sublate, recollect, ascend,
                     grasp, conduct, preview, ideate} ∪ Emergent
 Phase            ∈ {0, 1, 2, 3}
 

@@ -140,7 +140,7 @@
 
 본 매핑은 Codex(`/goal`) + Tavily 외부 검증 세션으로 도출했다. **검증 강도**:
 
-- **외부 확인됨**(Verified): Aitesis, Analogia, Syneidesis, Prosoche, Epharmoge, Elenchus, Horismos, 인지부하 핵심 문헌, Tulving & Thomson — 이번 실행에서 소스를 외부 확인.
+- **외부 확인됨**(Verified): Aitesis, Analogia, Syneidesis, Prosoche(역사적 — 2026-08 Merismos로 대체; 검증 대상이었던 §Mechanism 앵커의 위험 게이팅 메커니즘은 그 자체가 이미 2026-06 prosoche 2.0.0에서 제거되어 Merismos에 없음), Epharmoge, Elenchus, Horismos, 인지부하 핵심 문헌, Tulving & Thomson — 이번 실행에서 소스를 외부 확인.
 - **부분 확인**(Mostly): Euporia, Prothesis, Periagoge, Katalepsis — 핵심만 외부 확인, 일부는 학습지식 종합.
 - **재구성 주의**: 일부 서지의 권/호/페이지는 학습지식에서 재구성했다. **출판/공개 전 정전 항목의 정확한 pagination을 1차 출처로 spot-check 권장.**
 
