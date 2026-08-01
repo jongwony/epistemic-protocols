@@ -106,7 +106,7 @@ terminalized(R', F, D_f) = all_addressed(R') ∧ fit_disposition_declared(F, D_f
 all_addressed(R') = M ≠ ∅ ∧ ∀ c ∈ M : confirmed(c) ∨ dismissed(c)  -- the M ≠ ∅ conjunct is what stops an empty construction from satisfying this vacuously; the Phase 0 zero-gap path deactivates before Phase 1 builds M, so it never reaches this predicate and is unaffected
 EarlyExit = R where user_esc  -- non-convergent early exit: current output R unmodified, partial trace over already-addressed correspondences, remaining correspondences declared as unresolved residual (mapping not terminalized)
 attempts_exhausted(Λ) ≡ Λ.attempts = max ∧ continuing would require a further Map/AssessFit reconstruction  -- the single cap predicate every exit site reads: the cap counts reconstruction cycles, so correspondences still judgeable from the mapping already built do not trip it
-AttemptExhausted = R' where attempts_exhausted(Λ) ∧ ¬terminalized(R', F, D_f)  -- non-convergent exit on the per-domain-pair attempt cap: distinct from EarlyExit (user_esc, output unmodified) and from ValidatedMapping; partial trace over already-addressed correspondences, remaining correspondences declared as unresolved residual (mapping not terminalized)
+AttemptExhausted = R' where attempts_exhausted(Λ) ∧ ¬terminalized(R', F, D_f)  -- non-convergent exit on the per-domain-pair attempt cap: distinct from EarlyExit (user_esc, output unmodified) and from ValidatedMapping; partial trace over already-addressed correspondences, remaining correspondences declared as unresolved residual (mapping not terminalized). When the cap is reached before any Phase 3 has run — repeated empty constructions never bind an R' — R' is R annotated with the unresolved mapping status, and F.missing carries the residual declaration in place of remaining correspondences, so this exit always has a bound result and a stated reason
 
 ── R-BINDING ──
 bind(R) = explicit_arg ∪ current_output ∪ most_recent_output
@@ -274,12 +274,15 @@ Decompose abstract and concrete domains, then construct structural correspondenc
 2b. **Derive and settle the mapping focus** `φ`: Before constructing any correspondence, surface plausible `MappingFocus` candidates (`source_scope`, `target_scope`, `relation`, `purpose`) from `R` and session context.
    - Check `focus_settled(φ)` **per field** — `relation` and `purpose` must be independently determined, not merely `source_scope`/`target_scope` (Rule 3b carries the worked example: a user hypothesis naming candidate correspondents settles scope, not relation)
    - If settled by explicit user language or a citable standing rule: relay the focus via `FocusReadback` (Extension) — no gate
-   - Otherwise: present the candidate focuses via `FocusSelector` (Constitution) — `Select(MappingFocus)` or `Reframe(description)` — and store the result as `Λ.focus`
-   - This checkpoint does not consume a mapping attempt (`Max 3 mapping attempts per domain pair` counts `Map`/`AssessFit` reconstruction cycles only)
+   - Otherwise: present the candidate focuses via `FocusSelector` (Constitution). `Select` carries the chosen `MappingFocus`; `Reframe(description)` carries no focus at all — it re-decomposes `(Sₐ, Sₜ)` and re-enters this step, setting `Λ.basis_dirty` when the domain pair actually changed
+   - Do not write `Λ.focus` here. The successor focus stays uncommitted until the focus-change checkpoint below has resolved the fate of any judgments already standing; committing early makes that checkpoint's condition compare the successor against itself and silently carries prior judgments forward as though Park had been chosen
+   - **Focus-change checkpoint** (conditional): when judgments already stand and the comparison basis is about to change — a different focus, or the same focus after a re-decomposed domain pair — present `ParkPriorJudgments` / `RevalidatePriorJudgments` (Constitution) before anything is committed. Only after it resolves does `Λ.focus := φ'` run
+   - Neither checkpoint consumes a mapping attempt (`Max 3 mapping attempts per domain pair` counts `Map`/`AssessFit` reconstruction cycles only)
 3. **Construct mapping** `M`: For each abstract component, identify the candidate concrete correspondent along the settled focus `φ`
    - If correspondence is clear: add to confirmed candidates
    - If structural mismatch detected: flag as uncertain — include evidence
    - If no correspondent exists: flag as gap — the abstract structure may not apply
+   - On a rebuild, carry the standing judgments over: correspondences the new mapping still contains keep whatever status they already had, correspondences it drops leave both the terminal sets and the record list, and genuinely new correspondences arrive unjudged. Dropping the records alongside the correspondences is what keeps the convergence trace to the mapping that actually converged
 4. **Assess fit** `F`: Sort the correspondence adequacy into preserved, partial, missing, overextended, and open
    - `preserved`, `partial`, and `overextended` partition the constructed correspondences `M`
    - `missing` tracks source components that do not yet have evidenced target correspondents
@@ -291,7 +294,10 @@ Decompose abstract and concrete domains, then construct structural correspondenc
    - **Trim** — the partition yields **at most one non-empty cell**: either scattered misfits around an otherwise-sound core (narrow the outliers out), or a single coherent cell with an empty core (the abstraction is wholly the wrong essence and re-forms into one). The recovery is a **single-move** `/induce` (Narrow or Reorient), not a decompose — a single move does not warrant `/conduct`.
    - **Hold** — no significant misfit (`misfit_instances(F, Sₜ) = ∅`); the fusion holds, no partition action. (Distinct from `Λ.partition_reading = None`, which means the reading was never computed because the case is not self-grounding.)
    The split-vs-trim distinction is the signal the `/conduct` recipe consumes to route decompose vs leave it to `/induce` Narrow; surface it in Phase 2 and the convergence trace, never constitute it here.
-5. Proceed to Phase 2 with mapping candidates and fit map
+5. Branch on what the reconstruction left, rather than entering Phase 2 unconditionally:
+   - **`M` is empty** — construction produced no correspondence along this focus. Relay that finding with `F.missing` as its basis and re-enter the focus checkpoint; the attempt cap bounds the retry. An empty mapping was never validated, so it is not convergence
+   - **`M` is non-empty and nothing remains** — the rebuilt mapping is entirely made of judgments that still stand (a Park carried them). Declare the fit disposition and terminalize; do not re-present an already-addressed correspondence just to reach Phase 3
+   - **Otherwise** — proceed to Phase 2 with the mapping candidates and fit map
 
 **Web context** (conditional): When source or target domain knowledge exists primarily outside the codebase (external APIs, academic domains, industry standards), extend context collection to web search.
 Web evidence is tagged with `source: "web:{url}"` for traceability.
@@ -345,7 +351,7 @@ After integration:
 - Check remaining unvalidated correspondences
 - If correspondences remain: return to Phase 2 (present next correspondence)
 - If all correspondences are addressed and `D_f` is declared: proceed with updated output
-- Log `ValidationRecord` to validations, recording `focus_snapshot := Λ.focus` and the judged `correspondence` at judgment time alongside the existing fit-label snapshot, so convergence traces use the fit label and comparison focus that were active when the user judged the correspondence
+- On `Confirm` or `Dismiss` — never on `Adjust`, which ends no judgment — move the correspondence into the matching terminal set and log a `ValidationRecord` to validations, recording `focus_snapshot := Λ.focus` and the judged `correspondence` at judgment time alongside the existing fit-label snapshot, so convergence traces use the fit label and comparison focus that were active when the user judged the correspondence. Adjustment feedback is not stored as a record; storing it would let superseded feedback appear in the trace as terminal validation evidence
 
 ## Intensity
 
