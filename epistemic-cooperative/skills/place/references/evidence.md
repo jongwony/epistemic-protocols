@@ -80,13 +80,13 @@ Stated plainly, because these are the claims most likely to be smuggled in:
 - **That negative phrasing is always counterproductive.** The largest directly relevant study points the other way in its tested setting.
 - **That shorter instructions are better instructions.** No source supports length as the operative variable.
 - **That deleting a clause is safe because no evidence shows it is load-bearing.** Absence of evidence is not the negative result. The audit never infers a "no" on the held-out question from a missing evaluation.
-- **That relocating content improves outcomes.** The one study measuring whether standing instruction files help at all found no measurable difference — see below.
+- **That relocating content improves outcomes.** No cited study measures relocation. The one that compared having a standing instruction file against not having one found no measurable difference — see below. The controlled study above varied what a persistent file contains rather than whether one exists, so its polarity result speaks to content and not to placement.
 
 ## The standing limitation
 
 There is no held-out evaluation channel. Nothing measures whether contract violations rise or fall after a surface is routed, so every judgment the audit emits rests on argument rather than measurement.
 
-This is sharpened by the one study that looked directly:
+This is sharpened by the one cited study that put the surface itself on trial rather than its contents:
 
 - *Do Context Files Help Coding Agents?* (2026) — https://arxiv.org/abs/2607.27250 — 288 runs across 3 repositories and 15–17 tasks found no measurable correctness difference between no context file, an always-on project instruction file, and selective retrieval.
 
