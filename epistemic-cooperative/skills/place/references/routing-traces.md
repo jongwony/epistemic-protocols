@@ -180,11 +180,12 @@ kind:        cross-route-cluster
 claim:       The rule scoping deletion to the surface under audit is stated three times on
              one surface — the destinations table, the ownership step, and a standalone
              paragraph.
-affects:     all three instances — only the standalone paragraph emitted a full block
+affects:     all three instances, each with a route of its own
 no block:    Each instance is operative read alone, so each is admitted at its own tier and
-             each disposition is stay. Two of the three were uncontested and reached the
-             report as compact per-unit lines, which carry a route and no finding. The
-             redundancy exists only in the relation between them.
+             each disposition is stay. The relation bears on all three symmetrically — no
+             instance is the one the others duplicate — so all three are contested and all
+             three emit blocks, and each block says only that its own placement is in doubt.
+             The redundancy exists in the relation between them, which no block holds.
 consequence: Two statements could go with no loss, and the pass cannot say which, having no
              canonical-instance test.
 confidence:  high
