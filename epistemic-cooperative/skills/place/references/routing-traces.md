@@ -155,14 +155,13 @@ The route:
 R9 — SKILL.md:60   tier1 → tier1   stay, contested
 
   > Delete is scoped to the surface under audit, not to the content's worth.
-  From: "Delete is scoped to the surface under audit, not to the content's worth. A fact
-  that belongs in another tool's documentation leaves this surface and keeps its value
-  elsewhere; the route records where."
+  From: that sentence, whole — its own and only parent. The sentence beside it, on where the
+  route records content going, is a separate unit with a route of its own.
 
   Settled at step 3, Tier 1 admission: the clause binds behavior for the duration of this
   skill's work, so the load-tier question answers before any later test is reached.
-  Enforcement: not mechanically checkable — whether a route records where content went is a
-  judgment about what the report says, not a decidable property of it.
+  Enforcement: not mechanically checkable — whether a clause's value survives on some other
+  surface is a judgment about the content, not a decidable property of the text.
   No action — the clause is on the surface it belongs to.
   Confidence low — the placement is right and the clause is still redundant, and a route
   has no way to say both.

@@ -43,7 +43,7 @@ Where the host has not declared a binding, emit the route with an unresolved bin
 
 ## The destinations
 
-Five, and a route carries one of them, never two. Enforcement is not among them: a mechanical guard and a runtime sentence act at different moments on the same constraint, so enforcement is a second axis every route carries alongside its destination (see Enforcement candidacy).
+Five, and a route carries one of them or records that none fits, never two. Enforcement is not among them: a mechanical guard and a runtime sentence act at different moments on the same constraint, so enforcement is a second axis every route carries alongside its destination (see Enforcement candidacy).
 
 | Destination | Admission criterion |
 |---|---|
@@ -103,11 +103,13 @@ An example is not one object, and the two judgments that apply to it point in op
 |---|---|---|
 | **Illustrative gloss** | Fixes the boundary of a term the surface coins | Keep one where the term is always needed and the gloss materially changes how the surface is read |
 | **Contract specimen** | Pins an exact shape — a structure, a command syntax, a parameter binding, a template | Keep the minimum specimen where the contract is universally active and prose alone has demonstrably failed. Prefer a schema or grammar wherever one fully specifies the contract |
-| **Behavioral demonstration** | Teaches a procedure through an input-to-output pair or a trajectory | Route to the on-demand surface. This kind carries the highest risk of one sampled workflow hardening into default policy |
-| **Negative demonstration** | Displays a bad output or a failed trajectory | Route to diagnostic reference; it is read when detecting or repairing that specific failure |
+| **Behavioral demonstration** | Teaches a procedure through an input-to-output pair or a trajectory | Argues for the on-demand surface. This kind carries the highest risk of one sampled workflow hardening into default policy |
+| **Negative demonstration** | Displays a bad output or a failed trajectory | Argues for diagnostic reference; it is read when detecting or repairing that specific failure |
 | **Prohibition / negative constraint** | States a boundary | Not an example. It goes through the salience transformation and the enforcement test, not through this table |
 
-The screening question when a clause is an example: **which of the five kinds is it?** Both demonstration kinds route to the on-demand surface. A gloss and a contract specimen can hold a place on a loaded surface, each only under its own condition in the table above; a prohibition leaves the table entirely.
+This table feeds step 3 rather than standing beside it: a kind argues for a destination, and the tier ordering decides. Where a demonstration is needed before the on-demand surface would load — the model must have it to know what to reach for — the ordering keeps it at the earlier tier, and the kind's argument survives as the reason to move whatever part of it a pointer can reach in time.
+
+The screening question when a clause is an example: **which of the five kinds is it?** Both demonstration kinds argue for the on-demand surface. A gloss and a contract specimen can hold a place on a loaded surface, each only under its own condition in the table above; a prohibition leaves the table entirely.
 
 One example can answer to more than one kind — a filled invocation shown with its result pins an exact shape and teaches a procedure at the same time. Where the kinds it matches disagree about the destination, the on-demand rule governs: the demonstration kind is the one whose risk the table names, and the specimen rule already prefers a schema or grammar wherever one fully specifies the contract, so what the loaded surface gives up is a specimen a schema can replace. Where an example matches no kind at all, what the route describes in place of a label is what the example does, because a label taken for closeness carries a standing-surface rule the example was never measured against.
 
@@ -147,7 +149,8 @@ R{n} — {file}:{line}   {current surface} → {destination}   {disposition}[, c
 
   > {the unit as the surface states it — verbatim where it is contiguous; each part it was
   assembled from, marked as parts, where it is not}
-  From: {every parent sentence the unit was drawn from — where the unit is not a whole sentence}
+  From: {every parent sentence the unit was drawn from — the sentence itself, stated as its
+  own and only parent, where the unit is a whole one}
 
   Settled at {step}, {the admission or failure predicate that fired}. {why it holds}
   Enforcement: {the channel a guard already runs in, named with where the pass saw the guard
