@@ -48,19 +48,21 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 
 ### Secondary: Configuration (Environment Context)
 
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
 | Source | Method | Extracts |
 |--------|--------|----------|
-| `~/.claude/CLAUDE.md` | Read | Workflow style keywords (team, delegation, safety) |
-| `~/.claude/rules/` | Glob | Rule file presence (which domains are rule-governed) |
-| `~/.claude/settings.json` | Read (hooks only) | Hook usage patterns |
+| `{config_dir}/CLAUDE.md` | Read | Workflow style keywords (team, delegation, safety) |
+| `{config_dir}/rules/` | Glob | Rule file presence (which domains are rule-governed) |
+| `{config_dir}/settings.json` | Read (hooks only) | Hook usage patterns |
 | MEMORY.md (if exists) | Read | Existing insights, recurring patterns |
 
 ### Tertiary: Usage Data Cache (Accelerator — Optional)
 
 | Source | Method | Extracts |
 |--------|--------|----------|
-| `~/.claude/usage-data/facets/{session_id}.json` | Read | friction_counts, friction_detail, goal_categories, session_type, outcome, user_satisfaction_counts, brief_summary, underlying_goal, primary_success, claude_helpfulness |
-| `~/.claude/usage-data/session-meta/{session_id}.json` | Read | tool_counts, git_commits, git_pushes, languages, uses_task_agent, duration_minutes, first_prompt, user_response_times, message_hours |
+| `{config_dir}/usage-data/facets/{session_id}.json` | Read | friction_counts, friction_detail, goal_categories, session_type, outcome, user_satisfaction_counts, brief_summary, underlying_goal, primary_success, claude_helpfulness |
+| `{config_dir}/usage-data/session-meta/{session_id}.json` | Read | tool_counts, git_commits, git_pushes, languages, uses_task_agent, duration_minutes, first_prompt, user_response_times, message_hours |
 
 **Join key**: session_id from sessions-index.json matches filename in both directories.
 **Availability**: Only exists if user has run `/insights` (built-in command). Read-only consumption — never write to these caches.
@@ -69,7 +71,7 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 
 | Source | Method | Extracts |
 |--------|--------|----------|
-| `~/.claude/usage-data/report.html` | Read + best-effort parsing | at_a_glance, interaction_style, what_works, friction_analysis, suggestions, on_the_horizon, project_areas |
+| `{config_dir}/usage-data/report.html` | Read + best-effort parsing | at_a_glance, interaction_style, what_works, friction_analysis, suggestions, on_the_horizon, project_areas |
 
 **Availability**: Only exists after `/insights` execution. Enables Growth Map Path A (epistemic-lens analysis using insights as targeting input). Parsing is best-effort — HTML structure changes trigger graceful fallback to Epistemic Profile mode.
 **Relationship**: insights = 1st pass (behavioral sweep), report = 2nd pass (epistemic resolution). Report consumes insights' analyzed data as input, not output — generates orthogonal epistemic analysis that insights cannot produce.
@@ -82,15 +84,15 @@ SCAN → EXTRACT → MAP → PRESENT → GUIDE
 **Call project-scanner subagent** to handle all project discovery. Phase 1 inherently requires 5+ Bash calls (directory listing, stat, file reads), always exceeding the delegation threshold. Pre-planned delegation avoids reactive interruption.
 
 The subagent:
-1. Lists project directories under `~/.claude/projects/`
+1. Lists project directories under `{config_dir}/projects/`
 2. Selects the 3 most recently modified projects (using `stat` for modification time)
 3. Reconstructs actual project paths from encoded directory names (e.g., `-Users-choi-myproject` → `~/myproject`). Records project path ↔ session mapping for Phase 4 resume commands
 4. Reads each project's `sessions-index.json`
 5. Aggregates: total session count, average/max messageCount, last activity date
-6. Scans secondary sources: `~/.claude/CLAUDE.md`, `~/.claude/rules/`, `~/.claude/settings.json`, MEMORY.md
+6. Scans secondary sources: `{config_dir}/CLAUDE.md`, `{config_dir}/rules/`, `{config_dir}/settings.json`, MEMORY.md
 
 **Insights detection** (main agent, concurrent with project-scanner — no dependency on subagent output):
-1. Glob `~/.claude/usage-data/report.html` — existence check
+1. Glob `{config_dir}/usage-data/report.html` — existence check
 2. If present: Grep report.html for section-identifying patterns (heading text, `id=` attributes), then Read with offset/limit per section. Never Read entire file if >500 lines.
    - Success → set `growth_map_path = A`, store extracted sections as targeting inputs for epistemic-lens analysis
    - Parse failure → set `growth_map_path = B` (graceful degradation, no error)
@@ -99,7 +101,7 @@ The subagent:
 Main agent awaits both project-scanner output and insights detection, then proceeds to Phase 2.
 
 **Edge cases**:
-- If `~/.claude/projects/` does not exist or is empty: subagent reports absence (secondary sources still scanned), main agent skips Phase 2 extraction (steps 1-3), proceeds to Phase 2 step 5 (secondary sources from Phase 1 output) and Phase 3, set Tier 3
+- If `{config_dir}/projects/` does not exist or is empty: subagent reports absence (secondary sources still scanned), main agent skips Phase 2 extraction (steps 1-3), proceeds to Phase 2 step 5 (secondary sources from Phase 1 output) and Phase 3, set Tier 3
 - If `sessions-index.json` cannot be parsed (corrupted JSON): subagent skips that project, continues with remaining
 - Project path reconstruction: directory names encode absolute paths with `/` and `.` replaced by `-`. Subagent uses heuristics (home directory prefix, known directory structure) to reconstruct readable `~/...` paths
 
@@ -108,7 +110,7 @@ If no `sessions-index.json` found in any project, skip Phase 2 extraction (steps
 ### Phase 2: Extract (Pattern Extraction) — Dual-Path
 
 1. Use session JSONL paths from Phase 1 project-scanner output (3 most recently modified sessions per project, maximum 9 total).
-2. **Facets availability check**: Glob `~/.claude/usage-data/facets/*.json` once, intersect returned filenames (stem = session_id) with selected session IDs. Determine path per project:
+2. **Facets availability check**: Glob `{config_dir}/usage-data/facets/*.json` once, intersect returned filenames (stem = session_id) with selected session IDs. Determine path per project:
    - **Path A**: 2+ sessions in the project have facets files → facets-accelerated extraction
    - **Path B**: 0-1 sessions have facets → full subagent extraction (baseline)
 3. **Path A** (facets-available, per project):
@@ -127,9 +129,9 @@ If no `sessions-index.json` found in any project, skip Phase 2 extraction (steps
    - Vague starts (Korean equivalents): expressions meaning "I want to~", "how do I~", "a bit more", "enhance"
    - Exploratory framing: `explore`, `investigate`, `look into` and Korean equivalents
 5. Main agent uses secondary sources from Phase 1 project-scanner output:
-   - `~/.claude/CLAUDE.md`: keywords indicating team work, delegation preferences, safety focus
-   - `~/.claude/rules/`: which domains have explicit rules (communication, boundaries, etc.)
-   - `~/.claude/settings.json`: hook configurations (safety consciousness indicator)
+   - `{config_dir}/CLAUDE.md`: keywords indicating team work, delegation preferences, safety focus
+   - `{config_dir}/rules/`: which domains have explicit rules (communication, boundaries, etc.)
+   - `{config_dir}/settings.json`: hook configurations (safety consciousness indicator)
    - MEMORY.md: existing patterns and insights
 
 ### Phase 3: Map (Protocol Matching)
@@ -166,7 +168,7 @@ Apply the mapping tables below to match observed patterns to protocols.
    - Ask user to confirm before generating artifact
 
 2. On confirmation, generate Growth Map HTML artifact via Write tool:
-   - Save to `~/.claude/.report/growth-map.html`
+   - Save to `{config_dir}/.report/growth-map.html`
    - Structure varies by `growth_map_path`:
 
    **Path A — Growth Map (insights as targeting input, epistemic-lens output)**:
@@ -198,12 +200,12 @@ Apply the mapping tables below to match observed patterns to protocols.
 
    Refer to `references/html-template.md` for the HTML skeleton, CSS classes, and section templates.
 
-3. Open HTML artifact in default browser via Bash: `open ~/.claude/.report/growth-map.html`
+3. Open HTML artifact in default browser via Bash: `cfg="${CLAUDE_CONFIG_DIR-$HOME/.claude}"; open "${cfg:+$cfg/}.report/growth-map.html"`
 
 ### Phase 5: Guide (Trial CTA + Install Helper)
 
 1. **Check plugin installation**: verify whether recommended protocols are installed
-   - Check plugin installation via file existence: Glob for `~/.claude/plugins/cache/epistemic-protocols/{plugin-name}/*/skills/*/SKILL.md`. If found, the protocol is installed.
+   - Check plugin installation via file existence: Glob for `{config_dir}/plugins/cache/epistemic-protocols/{plugin-name}/*/skills/*/SKILL.md`. If found, the protocol is installed.
    - If installed: provide direct CTA (e.g., "Try `/gap` right now in your current session")
    - If not installed: guide marketplace installation:
      - `claude plugin install epistemic-protocols/{plugin-name}` or marketplace URL

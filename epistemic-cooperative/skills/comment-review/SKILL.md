@@ -26,7 +26,7 @@ fixation_event D     : Irreversible(String) | Reversible(String)  -- committed a
 application_context  : String                                     -- where the fixed artifact operates
 ```
 
-The caller — whether the user invoking `/comment-review` directly or a composing skill that calls this one — supplies all three fields. When `D` or `application_context` is omitted, the skill infers defaults from the artifact path when possible (e.g., `~/.claude/plans/*.md` → D = "commit to execution", `~/.claude/.write/*.md` → D = "publish"); if inference yields no confident match, the skill asks the user.
+The caller — whether the user invoking `/comment-review` directly or a composing skill that calls this one — supplies all three fields. When `D` or `application_context` is omitted, the skill infers defaults from what the artifact is (a plan awaiting execution → D = "commit to execution"; a draft awaiting publication → D = "publish"); if inference yields no confident match, the skill asks the user. Write the artifact under review to the session scratchpad and point the skill at it there. No path under a harness config directory is referenced: where such a directory sits varies by substrate, and pinning an inference rule to one substrate's layout would make the rule wrong everywhere else.
 
 ## Pipeline Overview
 

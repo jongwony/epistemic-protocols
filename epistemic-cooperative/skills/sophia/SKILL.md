@@ -57,9 +57,9 @@ Analyze this user's behavioral dimensions from their session data.
 coverage_data: [paste coverage-scanner output here]
 
 data_sources:
-  rules_dir: ~/.claude/rules/
-  claude_md: ~/.claude/CLAUDE.md
-  settings_json: ~/.claude/settings.json
+  rules_dir: {config_dir}/rules/
+  claude_md: {config_dir}/CLAUDE.md
+  settings_json: {config_dir}/settings.json
 
 data_context: session-enriched
 
@@ -154,7 +154,9 @@ If the user selects "Report", generate an HTML profile card.
 
 ### Report structure
 
-Read the existing CSS design system from `~/.claude/usage-data/report.html` or
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
+Read the existing CSS design system from `{config_dir}/usage-data/report.html` or
 use the design tokens from the cooperative's dashboard/report templates.
 
 **Sections**:
@@ -166,7 +168,7 @@ use the design tokens from the cooperative's dashboard/report templates.
 5. **Dimension breakdown**: Each dimension with score bar, human-readable explanation, measurement basis, and meaning. Use the explanation column from dimension-profiler output (e.g., "How you approach problems") as subtitle for each bar.
 6. **Protocol affinity**: Recommended protocols with one-line rationale
 7. **Runner-up**: Brief comparison showing where profiles diverge
-**File**: Save to `~/.claude/usage-data/sophia-profile.html`
+**File**: Save to `{config_dir}/usage-data/sophia-profile.html`
 Open in browser: `open <filepath>`
 
 ### CSS radar chart (no JS dependency)

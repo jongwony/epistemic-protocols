@@ -22,11 +22,13 @@ Steer maintains a **second inscription target** alongside the profile: a **Settl
 
 Phase 3 per-cluster recognition is verification-category — the user verifies the AI's classification accuracy of an already-detected drift cluster, not a forward-trajectory selection. The Differential Future Requirement does not apply to the per-cluster verdict gate by the same logic that exempts Anamnesis Phase 2 recognition gates (past-identity synthesis, not future-trajectory commitment): a 1-correct option structure (was-drift / was-aligned) is legitimate by purpose because downstream diff assembly is a deterministic consequence of the verdict, not a user-selected trajectory. Phase 5 final approve gate IS forward-looking (write or not write) and follows the Differential Future Requirement.
 
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE per invocation with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob/Grep call.
+
 ## When to Use
 
 Invoke this skill when:
 - The project profile was set at initialization but the user senses observed calibration practice has drifted from the inscribed defaults
-- The user wants to refresh `~/.claude/rules/project-profile.md` (user-global) or `.claude/rules/project-profile.md` (project-local) based on a recent session's calibration moves
+- The user wants to refresh `{config_dir}/rules/project-profile.md` (user-global) or `.claude/rules/project-profile.md` (project-local) based on a recent session's calibration moves
 - The user wants empirical evidence about which Cognitive Partnership Move axes (Constitution / Extension / six profile variables) need recalibration
 - A target session contains enough calibration moves (gate interactions, auto-resolutions, agent boundary actions) to support a meaningful audit
 - A resolution direction has been constituted the same way often enough that re-gating it is over-gating, and the user wants it recorded as a citable Settled Directions clause adjacent to the project Northstar
@@ -55,7 +57,7 @@ The skill family coexists by operation and persistence — none replaces the oth
 Determine the audit scope before scanning. Three decisions:
 
 - **Target session** — default is the current session only; the user may pass a session_id argument to target a different session
-- **Layer** — `user_global` (`~/.claude/rules/project-profile.md`) or `project_local` (`.claude/rules/project-profile.md`); when both files exist, default to the layer the user invoked from (project_local when CWD is inside a project with a local file, user_global otherwise); the user may override
+- **Layer** — `user_global` (`{config_dir}/rules/project-profile.md`) or `project_local` (`.claude/rules/project-profile.md`); when both files exist, default to the layer the user invoked from (project_local when CWD is inside a project with a local file, user_global otherwise); the user may override
 - **Cross-session evidence** — default off; reading prior session calibration history beyond the target session requires explicit user confirmation
 
 If the user invocation does not specify scope, present a Constitution interaction soliciting the three decisions before proceeding to Phase 1. If scope is fully specified, accept it and proceed.
@@ -66,7 +68,7 @@ Phase 0 is otherwise silent. If the target session contains fewer than the minim
 
 Read the existing project-profile rule file at the chosen layer:
 
-- For `user_global`: `~/.claude/rules/project-profile.md`
+- For `user_global`: `{config_dir}/rules/project-profile.md`
 - For `project_local`: `.claude/rules/project-profile.md`
 
 Parse the existing six profile variables (revision_cost, deploy_fan_out, dependency_lock_in, runtime_persistence, hermeneutic_circle_availability, notation_maturity) and the calibration result (Extension-default vs Constitution-default vs mixed). When the file does not exist, treat the existing profile as the empty profile P_∅ — the audit then operates as a first-time profile induction rather than a recalibration.
@@ -78,7 +80,7 @@ Phase 1 emits no surfacing. The loaded profile becomes the prejudgment baseline 
 Scan the target session for calibration moves and classify each into a drift cluster.
 
 Scan procedure:
-1. Read the target session transcript (`~/.claude/projects/{slug}/{session-id}.jsonl`)
+1. Read the target session transcript (`{config_dir}/projects/{slug}/{session-id}.jsonl`)
 2. Extract calibration move candidates — gate interactions (Constitution / Extension presentations per TOOL GROUNDING), auto-resolutions where AI proceeded without user gate, agent boundary actions (Skill / Agent / SendMessage invocations), Standing-authority delegations
 3. For each candidate, identify the move kind (Constitution / Extension / BoundaryAction) and the axis it implicates (which of the six profile variables it bears on, when applicable)
 
@@ -414,16 +416,16 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 ## Storage Reference
 
 **Read paths**:
-- Existing profile: `~/.claude/rules/project-profile.md` (user_global) or `.claude/rules/project-profile.md` (project_local)
-- Target session transcript: `~/.claude/projects/{slug}/{session-id}.jsonl`
-- Optional cross-session evidence (opt-in only): hypomnesis sub-indices at `~/.claude/projects/{slug}/hypomnesis/{session-id}/`
+- Existing profile: `{config_dir}/rules/project-profile.md` (user_global) or `.claude/rules/project-profile.md` (project_local)
+- Target session transcript: `{config_dir}/projects/{slug}/{session-id}.jsonl`
+- Optional cross-session evidence (opt-in only): hypomnesis sub-indices at `{config_dir}/projects/{slug}/hypomnesis/{session-id}/`
 
 **Write paths**:
 - Proposed profile: same path as the existing profile at the chosen layer
 - Backup: `<existing_profile_path>.bak.YYYYMMDD-HHMMSS` (timestamp ensures backups accumulate without overwrite); backup is created before the proposed profile write so rollback is `mv <backup_path> <existing_profile_path>`
 - Settled Directions registry: the project guide at the project root (`AGENTS.md` / `CLAUDE.md`), in a `## Settled Directions` section adjacent to the Northstar/mission section (section created when absent). Project-scoped — settled directions are project conventions — and written only when the settled-directions delta is non-empty
 - Registry rollback: through version control — the project guide is git-tracked, so rollback is `git checkout -- <registry_path>` (or `git revert` of the commit). No separate `.bak` file, matching the `/realign` convention for the same file
-- Trial index: `.claude/steer-trials.md` (project_local) or `~/.claude/steer-trials.md` (user_global). Lazy-loaded inventory file appended to on Approve and RouteToOperationalLayer dispositions; created on first entry. Reject and Defer leave it untouched.
+- Trial index: `.claude/steer-trials.md` (project_local) or `{config_dir}/steer-trials.md` (user_global). Lazy-loaded inventory file appended to on Approve and RouteToOperationalLayer dispositions; created on first entry. Reject and Defer leave it untouched.
 
 **First-time induction**: when the existing profile file is absent, Phase 1 treats `P_existing = P_∅` (empty profile). Phase 5 Approve writes the proposed profile without backup (nothing to back up). The emitted UpdatedProjectProfile artifact notes the first-time induction status. The trial index append still occurs.
 
@@ -446,7 +448,7 @@ converge                  (extension)    → TextPresent+Proceed (convergence ev
 15. **Provisional release modality** — This skill is released provisionally; architectural inscription (graph.json placement, advisory edges, formal lineage to /induce) is deferred pending accumulated cross-session use evidence.
 16. **Vocabulary discipline** — Output uses positive framing: "drift", "calibration", "fit", "recalibration", "induce", "steering". Output frames per-cluster verdicts as recognition acts and the final approval as a writable inscription. The skill describes evidence and diffs; verdicts and approvals belong to the user.
 17. **Routing to operational layer when finding shape mismatches** — When the Phase 4 fit-shape check detects that the assembled diff requires programmatic-trigger enforcement, mixes universal principle with specific instance and recognition mechanism, or has behavioral enforcement (rather than visibility) as its load-bearing requirement, surface RouteToOperationalLayer as a Phase 5 disposition. The operational layer (hooks, system prompts, CI/CD, settings.json) realizes Standing-authority delegation — calibration prose belongs to the epistemic substrate, while behavioral enforcement belongs to the operational substrate. Steer's role is to recognize the routing and emit a realization template (concrete trigger + behavior outline + scope); implementation belongs to a downstream task using the appropriate substrate tooling. The user retains override authority — selecting Approve forces prose inscription despite the routing recommendation.
-18. **Trial index inscription** — On Approve and RouteToOperationalLayer dispositions, append a structured TrialIndexEntry to `steer-trials.md` at the chosen layer (`.claude/steer-trials.md` for project_local, `~/.claude/steer-trials.md` for user_global). The entry records date, disposition type, mismatch signals (always present as a Set — the actual Phase 4 fit-shape signal set is recorded verbatim: empty when the diff fit cleanly, non-empty when fit-shape signals fired; thus non-empty for RouteToOperationalLayer and also non-empty for an Approve that overrode a routing recommendation, so the override is preserved rather than misrecorded as empty), realization references (profile rule file path, Settled Directions registry path when the delta was written, or operational-layer artifact paths), origin context, falsification conditions (if specified), reevaluation cadence, and current status. The index file is lazy-loaded — its purpose is single-glance trial inventory across sessions, not per-turn enforcement. Reject and Defer dispositions do not append (no inscription to track yet). The index file is created on first entry; existing entries are not retroactively backfilled. Layer scope of the index matches the disposition's layer — index inscription does not cross layer boundaries.
+18. **Trial index inscription** — On Approve and RouteToOperationalLayer dispositions, append a structured TrialIndexEntry to `steer-trials.md` at the chosen layer (`.claude/steer-trials.md` for project_local, `{config_dir}/steer-trials.md` for user_global). The entry records date, disposition type, mismatch signals (always present as a Set — the actual Phase 4 fit-shape signal set is recorded verbatim: empty when the diff fit cleanly, non-empty when fit-shape signals fired; thus non-empty for RouteToOperationalLayer and also non-empty for an Approve that overrode a routing recommendation, so the override is preserved rather than misrecorded as empty), realization references (profile rule file path, Settled Directions registry path when the delta was written, or operational-layer artifact paths), origin context, falsification conditions (if specified), reevaluation cadence, and current status. The index file is lazy-loaded — its purpose is single-glance trial inventory across sessions, not per-turn enforcement. Reject and Defer dispositions do not append (no inscription to track yet). The index file is created on first entry; existing entries are not retroactively backfilled. Layer scope of the index matches the disposition's layer — index inscription does not cross layer boundaries.
 
 ## UX Safeguards
 

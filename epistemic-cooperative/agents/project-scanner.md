@@ -16,13 +16,15 @@ You are a project discovery specialist. Your task is to scan Claude Code project
 ### Step 1: List and Sort Projects
 
 Run a single Bash command that:
-1. Lists all directories under `~/.claude/projects/`
+1. Lists all directories under `${CLAUDE_CONFIG_DIR-$HOME/.claude}/projects/`
 2. Gets modification time for each using `stat -f%m` (macOS) with `stat -c%Y` (Linux) fallback
 3. Sorts by modification time (descending)
 4. Selects the top 3
 
 ```bash
-for d in ~/.claude/projects/*/; do
+claude_cfg_dir="${CLAUDE_CONFIG_DIR-$HOME/.claude}"
+projects_dir="${claude_cfg_dir:+$claude_cfg_dir/}projects"
+for d in "$projects_dir"/*/; do
   mtime=$(stat -f%m "$d" 2>/dev/null || stat -c%Y "$d" 2>/dev/null || echo 0)
   echo "$mtime $d"
 done | sort -rn | head -3
@@ -73,9 +75,11 @@ Batch-verify with a single Glob per project: `{project_dir}/sessions/*/session.j
 
 ### Step 4: Scan Secondary Sources
 
-1. Read `~/.claude/CLAUDE.md` (if exists) — extract first 50 lines for keyword scanning
-2. Glob `~/.claude/rules/*` — list rule file names
-3. Read `~/.claude/settings.json` (if exists) — extract hook configurations only
+Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob call.
+
+1. Read `{config_dir}/CLAUDE.md` (if exists) — extract first 50 lines for keyword scanning
+2. Glob `{config_dir}/rules/*` — list rule file names
+3. Read `{config_dir}/settings.json` (if exists) — extract hook configurations only
 4. Read MEMORY.md from the project directory (if exists) — extract existing insights and recurring patterns
 
 ### Step 5: Compile Output

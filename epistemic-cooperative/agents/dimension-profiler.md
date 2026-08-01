@@ -15,12 +15,12 @@ You are a behavioral dimension profiler. Your task is to analyze Claude Code ses
 ## Input Parameters
 
 You will receive:
-- `data_sources`: Object containing paths to data sources
+- `data_sources`: Object containing paths to data sources. Paths below written `{config_dir}/…` take `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude`. Resolve it ONCE with Bash `printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` and substitute the absolute result before any Read/Glob call.
   - `facets_dir`: Path to usage-data/facets/ directory
   - `session_meta_dir`: Path to usage-data/session-meta/ directory
-  - `rules_dir`: Path to ~/.claude/rules/ directory
-  - `claude_md`: Path to ~/.claude/CLAUDE.md
-  - `settings_json`: Path to ~/.claude/settings.json (optional)
+  - `rules_dir`: Path to {config_dir}/rules/ directory
+  - `claude_md`: Path to {config_dir}/CLAUDE.md
+  - `settings_json`: Path to {config_dir}/settings.json (optional)
   - `report_html`: Path to usage-data/report.html (optional)
 - `coverage_data`: Pre-aggregated coverage-scanner output (optional). When provided, skip raw facets/session-meta reading and derive dimensions from aggregate data. Ignore `sample_size` when present.
 - `sample_size`: Number of facets/session-meta files to sample when `coverage_data` is absent (default: 20)
