@@ -91,6 +91,7 @@ Details: `docs/verification.md`.
 - Git and editing rules are auto-loaded via `.claude/rules/editing-conventions.md`.
 - Any protocol change requires the relevant `plugin.json` version bump plus `/verify`.
 - Co-change patterns are tracked in `docs/co-change.md`.
+- Instruction-surface placement — which clause belongs on which surface — routes through `/place`. Its host bindings: this project's ledger is the git record (`## Settled Directions`), and its enforcement channel is the static checks (`## Verification`).
 - When editing protocol prose, prefer positive predicates over negated anchoring, preserve composability while making morphism completion explicit, and verify the runtime contract view rather than source prose alone.
 - For protocol edits, run a semantic-closure sweep whenever changing terminal conditions, state transitions, or result types. Align TYPES, PHASE TRANSITIONS, LOOP, CONVERGENCE, TOOL GROUNDING, and Rules so every new condition has a type, guard, state update, termination path, and result equation. Static checks do not prove this; manually verify before commit.
 
