@@ -205,7 +205,7 @@ seam         (extension)       → TextPresent+Proceed (fires at deactivation/ha
 
 ### Activation
 
-See R-BINDING section for grounding target binding (lines 108–117) and **Rule 1** for the core principle: AI detects mapping uncertainty; validation always requires user choice via Cognitive Partnership Move (Constitution) (Phase 2). Detection is silent (Phase 0) except the conditional zero-gap confirmation gate.
+See the `── R-BINDING ──` section for grounding target binding and **Rule 1** for the core principle: AI detects mapping uncertainty; validation always requires user choice via Cognitive Partnership Move (Constitution) (Phase 2). Detection is silent (Phase 0) except the conditional zero-gap confirmation gate.
 
 Gate predicate:
 ```
