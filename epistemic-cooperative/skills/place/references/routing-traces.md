@@ -23,7 +23,8 @@ Every trace here has been checked against the route-block contract: one route pe
 3. *Load tier.* Does it change action selection on an arbitrary turn? No — a model executing the audit behaves identically whether or not it has read this. Does it determine what to load? No. Fails Tier 0, and fails Tier 1 for the same reason.
 4. *Enforcement.* Not mechanically checkable; the axis records that and the destination is untouched.
 5. *Ledger.* Positive record value: it states why this instrument exists alongside the deterministic layer, which is the design rationale a future reader needs to reconstruct the split. Admitted.
-6. — 7. Not reached; no transformation applies.
+6. Not reached.
+7. *Transformations.* None fire; the clause names no path to prefer over another and carries no pre-assembled command.
 
 **Route:** one, destination `ledger`, disposition `move`, enforcement axis `not mechanically checkable`.
 
@@ -71,7 +72,7 @@ Every trace here has been checked against the route-block contract: one route pe
 1. *Extract.* One operative unit, already standalone.
 2. *Ownership.* A fact about this project's own toolchain. Owned here.
 3. *Load tier.* It has to be known before either command is issued; a model deciding how to parallelize verification would otherwise not know to serialize. Tier 0.
-4. *Enforcement.* Mechanically checkable — a lock, or mutually exclusive task definitions, would enforce it. The host has no such channel, so the axis names that guard and leaves the binding unresolved. The destination is unaffected; step 3 settled it already.
+4. *Enforcement.* Mechanically checkable — a lock, or mutually exclusive task definitions, would enforce it. The host binds a static-check channel, but a guard that serializes two commands runs in whatever invokes them rather than in a pass over their sources, so no bound channel could carry it: the axis names the guard to add and leaves the binding unresolved. Naming the bound channel here would report a home this guard cannot have. The destination is unaffected; step 3 settled it already.
 5. — 6. Not reached.
 7. *Salience.* The sentence names the forbidden combination. Test the rewrite rather than assuming it fails: *"When liveness tests may mutate live instruction files, run the packaging suite and static verification serially."* That preserves the condition and the directive, and it does not over-constrain the unconditioned case. The rewrite holds, so it is the finding.
 
@@ -122,7 +123,7 @@ The first draft of that section closed with:
 
 > The schema above is a contract specimen under this audit's own taxonomy: the contract is active on every run, and a schema specifies it more completely than a filled-in sample would.
 
-**Pass:** no operative clause; owned here; nothing follows from it at execution time; not mechanically checkable; positive record value as the rationale for choosing a schema over a sample. **Route:** `ledger`, disposition `move`, enforcement axis `not mechanically checkable`.
+**Pass:** no operative clause; owned here; nothing follows from it at execution time; not mechanically checkable; positive record value as the rationale for choosing a schema over a sample; no transformation fires. **Route:** `ledger`, disposition `move`, enforcement axis `not mechanically checkable`.
 
 **What the author did:** kept it anyway, at `stay` with confidence `low`, on the reasoning that it was the one place the audit demonstrated its taxonomy on itself, and that an instrument whose credibility rests on self-application loses something the routing rule does not measure.
 
