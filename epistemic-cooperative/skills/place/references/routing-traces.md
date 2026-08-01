@@ -147,14 +147,18 @@ The first draft of that section closed with:
 
 The traces above follow the pass to a destination. This shows what reaches the author afterward, and why the most useful result of a run sometimes fits in no route block at all.
 
-**Surface:** this audit's own instruction body, in the section defining the destinations.
+**Surface:** a prose-audit skill's instruction body. Its scoping rule — that deletion is judged against the surface under audit and not against the content's worth — appears three times: in the table defining the destinations, inside the ownership step of the pass, and again as a standalone paragraph.
+
+The routed clause, quoted in full:
+
+> Deletion is scoped to the surface under audit, not to the content's worth.
 
 The route:
 
 ```
-R9 — SKILL.md:60   tier1 → tier1   stay, contested
+R9 — skill-body.md:58   tier1 → tier1   stay, contested
 
-  > Delete is scoped to the surface under audit, not to the content's worth.
+  > Deletion is scoped to the surface under audit, not to the content's worth.
   From: that sentence, whole — its own and only parent. The sentence beside it, on where the
   route records content going, is a separate unit with a route of its own.
 
@@ -165,19 +169,22 @@ R9 — SKILL.md:60   tier1 → tier1   stay, contested
   No action — the clause is on the surface it belongs to.
   Confidence low — the placement is right and the clause is still redundant, and a route
   has no way to say both.
-  Additional obligations: cluster — SKILL.md:54 and SKILL.md:78 carry the same rule.
+  Additional obligations: cluster — the destinations table and the ownership step carry the
+  same rule.
 ```
 
 And the finding beside it:
 
 ```
 kind:        cross-route-cluster
-claim:       The rule scoping Delete to the surface under audit is stated three times on
-             one surface — the destinations table, pass step 2, and a standalone paragraph.
-affects:     SKILL.md:54, SKILL.md:78, SKILL.md:60 — only the last emitted a route
+claim:       The rule scoping deletion to the surface under audit is stated three times on
+             one surface — the destinations table, the ownership step, and a standalone
+             paragraph.
+affects:     all three instances — only the standalone paragraph emitted a full block
 no block:    Each instance is operative read alone, so each is admitted at its own tier and
-             each disposition is stay. Two of the three were not contested and so emitted
-             no block at all. The redundancy exists only in the relation between them.
+             each disposition is stay. Two of the three were uncontested and reached the
+             report as compact per-unit lines, which carry a route and no finding. The
+             redundancy exists only in the relation between them.
 consequence: Two statements could go with no loss, and the pass cannot say which, having no
              canonical-instance test.
 confidence:  high
