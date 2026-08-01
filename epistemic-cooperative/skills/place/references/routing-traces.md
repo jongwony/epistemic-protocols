@@ -152,7 +152,7 @@ The traces above follow the pass to a destination. This shows what reaches the a
 The route:
 
 ```
-R9 — SKILL.md:58   tier1 → tier1   stay, contested
+R9 — SKILL.md:60   tier1 → tier1   stay, contested
 
   > Delete is scoped to the surface under audit, not to the content's worth.
   From: "Delete is scoped to the surface under audit, not to the content's worth. A fact
@@ -166,7 +166,7 @@ R9 — SKILL.md:58   tier1 → tier1   stay, contested
   No action — the clause is on the surface it belongs to.
   Confidence low — the placement is right and the clause is still redundant, and a route
   has no way to say both.
-  Additional obligations: cluster — SKILL.md:54 and SKILL.md:74 carry the same rule.
+  Additional obligations: cluster — SKILL.md:54 and SKILL.md:78 carry the same rule.
 ```
 
 And the finding beside it:
@@ -175,7 +175,7 @@ And the finding beside it:
 kind:        cross-route-cluster
 claim:       The rule scoping Delete to the surface under audit is stated three times on
              one surface — the destinations table, pass step 2, and a standalone paragraph.
-affects:     SKILL.md:54, SKILL.md:74, SKILL.md:58 — only the last emitted a route
+affects:     SKILL.md:54, SKILL.md:78, SKILL.md:60 — only the last emitted a route
 no block:    Each instance is operative read alone, so each is admitted at its own tier and
              each disposition is stay. Two of the three were not contested and so emitted
              no block at all. The redundancy exists only in the relation between them.
