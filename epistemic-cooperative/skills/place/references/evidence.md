@@ -41,7 +41,7 @@ For language models the mechanism is different and the evidence is narrower. Neg
 
 **Both supported, and they are not in conflict — they measure different things.** This is the whole reason "example" is split five ways rather than judged as one object.
 
-- Yuan et al., *EasyTool: Enhancing LLM-based Agents with Concise Tool Instruction* (NAACL 2025) — https://aclanthology.org/2025.naacl-long.44/ — adding a single example to an already-concise tool description cut parameter errors from 21 to 6 (ChatGPT) and from 14 to 1 (GPT-4). Three examples produced no further gain. The baseline is the processed concise description, not raw vendor documentation.
+- Yuan et al., *EasyTool: Enhancing LLM-based Agents with Concise Tool Instruction* (NAACL 2025) — https://aclanthology.org/2025.naacl-long.44/ — adding a single example to an already-concise tool description cut parameter errors from 21 to 6 (ChatGPT) and from 14 to 1 (GPT-4). Three examples produced no material additional gain — 6 to 5 and 1 to 1, which is the basis for preferring one specimen over several rather than a claim that further examples do nothing. The baseline is the processed concise description, not raw vendor documentation.
 - Faghih et al., *Tool Preferences in Agentic LLMs are Unreliable* (EMNLP 2025) — https://arxiv.org/abs/2505.18135 — with two functionally identical tools competing, adding a usage example to one description raised its selection share by 1.13× (GPT-4.1) to 1.60× (Qwen2.5-7B).
 
 The first measures parameter correctness *after* a tool has been selected. The second measures selection share *while* two tools compete. Different outcome variables at different points in the trajectory, so no single verdict on "examples" can be read off them together. The contract-specimen rule takes the first result; the demonstration-routing rule takes the caution from the second.
@@ -60,7 +60,7 @@ The complication: demonstrations appear to work largely by signaling format, inp
 - Min et al., *Rethinking the Role of Demonstrations* (EMNLP 2022) — https://aclanthology.org/2022.emnlp-main.759/
 - Wang et al., *Super-NaturalInstructions* (EMNLP 2022) — https://aclanthology.org/2022.emnlp-main.340/ — definition + one positive example outperforms definition alone; returns diminish past one or two.
 
-**What this supports:** routing demonstrations off the standing surface. **What it refutes:** the stronger claim that a principle stated well needs no example at all. It does not hold as a general rule, and an audit built on it would cut contract specimens that are doing measurable work.
+**What this supports:** that an example is a stronger and more surface-sensitive commitment than the principle beside it. Routing demonstrations off the standing surface is this audit's *design response* to that sensitivity, not a conclusion any cited study reaches — none of them tested placement. **What it refutes:** the stronger claim that a principle stated well needs no example at all. That does not hold as a general rule, and an audit built on it would cut contract specimens doing measurable work.
 
 ### Long or crowded surfaces cost something
 
@@ -96,10 +96,4 @@ The evaluation that would close it: a held-out task set plus a contract-violatio
 
 ## Human cognitive-load literature
 
-Split-attention, seductive detail, and working-memory limits are well established for human readers and are the intuition behind much of this audit's shape.
-
-- Sweller (1988) — https://doi.org/10.1207/s15516709cog1202_4
-- Chandler & Sweller (1992) — https://doi.org/10.1111/j.2044-8279.1992.tb01017.x
-- Harp & Mayer (1998) — https://doi.org/10.1037/0022-0663.90.3.414
-
-A language model does not have human working memory, and no source establishes that these results transfer. They are recorded here as the origin of an intuition, not as support for any rule.
+Split-attention and seductive-detail effects are established for human readers and are the intuition behind much of this audit's shape, but a language model does not have human working memory and no source establishes that the results transfer — so they support no rule here.

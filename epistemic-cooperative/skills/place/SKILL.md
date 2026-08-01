@@ -52,9 +52,11 @@ Six, exhaustive. Each is a canonical home, and a clause may additionally warrant
 | **Tier 2 — on-demand surface** | Opened deliberately: reference material a surface points to. Admitted when the clause is needed while performing one specific sub-task, and reading it at any other time costs attention without changing an action. |
 | **Enforcement** | Admitted when a violation is mechanically checkable and the host has a channel that checks it. |
 | **Ledger** | Admitted on positive record value: rationale, provenance, a trade-off, a rejected alternative, or an epistemic status that a future reader needs to reconstruct why the surface says what it says. |
-| **Delete** | Admitted when no operative, routing, diagnostic, enforcement, or record value remains after residue extraction. |
+| **Delete** | Admitted when no operative, routing, diagnostic, enforcement, or record value remains **on this surface** after residue extraction. Content that is accurate but owned by a surface this project does not maintain routes here too, with the owner named. |
 
 Absence of runtime relevance does not by itself admit a clause to the ledger. Without a positive record test the ledger becomes the place everything goes, and Delete stops firing.
+
+Delete is scoped to the surface under audit, not to the content's worth. A fact that belongs in another tool's documentation leaves this surface and keeps its value elsewhere; the route records where.
 
 ## Unit of judgment
 
@@ -64,15 +66,15 @@ Absence of runtime relevance does not by itself admit a clause to the ledger. Wi
 
 ## The pass
 
-Run in order. The earlier tests are coarser: each one can settle a clause without the later questions arising.
+Run in order. Steps 2 through 6 choose the destination, and the first one that settles a clause fixes it — an earlier step is coarser, so a clause it settles raises no later destination question. Two steps still run on an already-settled clause: enforcement candidacy, which can add a mirror to any destination, and the transformations, which change how the clause is written wherever it lands.
 
 **1. Extract the decision-bearing clauses.** Apply residue extraction (below) before judging placement. Placement judged on an unextracted paragraph routes the rationale and the operative clause to the same destination, which is how routing degrades into deletion.
 
-**2. Ownership.** Is this a fact about this surface, or about another tool's surface? A file that wraps an external command, API, or model accumulates that tool's option space — its accepted values, its version differences, its error taxonomy. Such content is accurate and drifts on the other tool's schedule, where nobody reviewing this surface will see it go stale. Route it out of this surface and name the owner that should carry it; moving it to a reference here only relocates the drift. **Exception:** a routing or index surface exists precisely to say which external thing to reach for, so a cross-tool fact that determines what gets loaded is owned here.
+**2. Ownership.** Is this a fact about this surface, or about another tool's surface? A file that wraps an external command, API, or model accumulates that tool's option space — its accepted values, its version differences, its error taxonomy. Such content is accurate and drifts on the other tool's schedule, where nobody reviewing this surface will see it go stale. The route is delete, with the owner named — that tool's own documentation should carry it, and moving it to a reference here only relocates the drift. **Exception:** a routing or index surface exists precisely to say which external thing to reach for, so a cross-tool fact that determines what gets loaded is owned here.
 
 **3. Load tier.** Choose Tier 0, 1, or 2 by the admission criteria above. Two questions decide Tier 0 admission: does this change action selection on an arbitrary turn, and does it determine what to load in a situation the model must recognize unprompted? A clause that answers no to both is a relocation candidate, not yet a deletion candidate.
 
-**4. Enforcement candidacy.** Is the constraint mechanically checkable, and does the host have a channel that checks it? If so, the enforcement channel is its canonical home — a guard that rejects a bad value converts a silent wrong result into a loud stop, which is worth more than prose describing the same value. Where the constraint should be enforced and is not, the finding is the missing guard, not a longer paragraph. **Enforcement does not automatically retire the prose.** A validator reports during or after the action; an instruction shapes the action before it happens. When both are load-bearing, record the enforcement channel as canonical and the runtime sentence as a justified mirror, stating what each one catches that the other does not.
+**4. Enforcement candidacy.** Is the constraint mechanically checkable, and does the host have a channel that checks it? If so, the enforcement channel is its canonical home — a guard that rejects a bad value converts a silent wrong result into a loud stop. Where the constraint should be enforced and no channel exists, the finding is the missing guard: route to enforcement with the binding left unresolved and name the guard to add. **Enforcement does not automatically retire the prose.** A validator reports during or after the action; an instruction shapes the action before it happens. When both are load-bearing, record the enforcement channel as canonical and the runtime sentence as a justified mirror, stating what each one catches that the other does not.
 
 **5. Ledger.** Apply the positive record test above.
 
@@ -82,7 +84,7 @@ Run in order. The earlier tests are coarser: each one can settle a clause withou
 
 - **Salience.** Does naming this in order to forbid it introduce it? A written prohibition puts the named action into the context of every session that loads the surface. The rewrite is valid when stating only the intended path preserves both the directive's force and the boundary it marks — where it does, prefer the positive statement, which occupies the same space and leaves no residue. Where it does not, the prohibition stays: the evidence runs against deleting load-bearing negative constraints by default, and a mention that marks a genuine boundary, a contract, a legacy input, a migration target, or a fallback loses that boundary when removed. A section whose declared role is naming failure modes — an anti-pattern list, a diagnostic checklist, a review vocabulary — is compliant by purpose, because negative wording is the content there rather than an instruction.
 
-- **Friction.** Does a pre-assembled example make a high-privilege or destructive path the frictionless one? A complete, ready-to-run command line for an operation the surface elsewhere gates lowers the cost of exactly that operation: the gate has to be read to work, while the command only has to be seen. Trim the pre-assembly, keeping the capability documented in the options. This is a safety argument about copyable artifacts and is scoped to them — it is not a general argument against examples, which the taxonomy below handles instead. The same reasoning at smaller stakes covers an example passing a flag that is already the default: it teaches a habit that does nothing and propagates into every example copied from it.
+- **Friction.** Does a pre-assembled example make a high-privilege or destructive path the frictionless one? A complete, ready-to-run command line for an operation the surface elsewhere gates lowers the cost of exactly that operation: the gate has to be read to work, while the command only has to be seen. Trim the pre-assembly, keeping the capability documented in the options. This is a safety argument about copyable artifacts and is scoped to them — it is not a general argument against examples, which the taxonomy below handles instead. It is also a design hypothesis rather than a measured effect; no study cited in the reference material tests it.
 
 ## Judging an example
 
@@ -96,13 +98,15 @@ An example is not one object, and the two judgments that apply to it point in op
 | **Negative demonstration** | Displays a bad output or a failed trajectory | Route to diagnostic reference; it is read when detecting or repairing that specific failure |
 | **Prohibition / negative constraint** | States a boundary | Not an example. It goes through the salience transformation and the enforcement test, not through this table |
 
-The screening question when a clause is an example: **is this a specimen or a demonstration?** A demonstration routes to the on-demand surface. A specimen is the only kind that earns a place on the standing surface, and only where prose has been observed to fail without it.
+The screening question when a clause is an example: **which of the five kinds is it?** Both demonstration kinds route to the on-demand surface. A gloss and a contract specimen can hold a place on a loaded surface, each only under its own condition in the table above; a prohibition leaves the table entirely.
+
+Where a specimen's condition cannot be checked — nothing records whether prose alone has failed — route it to the on-demand surface and record the missing evidence. Granting a standing place on an unverified condition is how the exception becomes the rule.
 
 **Frontmatter descriptions are judged differently.** A quoted trigger phrase in a description is not an example of the skill's behavior — it is the routing signal that decides whether the skill loads at all. Judge it by whether it triggers too often or too rarely, not by whether it is an instance.
 
 ## Residue extraction
 
-Never move a paragraph whole. Operative clauses hide inside rationale.
+Atomize before moving. Operative clauses hide inside rationale, so extract them first; a paragraph whose clauses all reach the same destination can then move whole.
 
 1. Mark every clause that names an action, a threshold, or a condition.
 2. Rewrite those clauses as standalone instructions on the surface they bind.
@@ -133,21 +137,22 @@ Route := {
   excerpt:      string,          -- the decision-bearing clause, verbatim
   parent:       string,          -- the sentence it was extracted from
   current_tier: "tier0" | "tier1" | "tier2" | "enforcement" | "ledger" | "unclassified",
-  disposition:  "stay" | "move" | "split" | "rewrite" | "delete",
+  disposition:  "stay" | "move" | "rewrite" | "delete",
   destination:  "tier0" | "tier1" | "tier2" | "enforcement" | "ledger" | "delete",
   binding:      string | null,   -- host-declared target; null when unresolved
+  owner:        string | null,   -- for delete: the surface that should carry it, where one exists
   test:         string,          -- the pass step that settled it
   kind:         string | null,   -- example kind, where the clause is an example
   mirror:       string | null,   -- justified secondary home, with what it catches
-  rewrite:      string | null,   -- proposed restatement, for rewrite and split
+  rewrite:      string | null,   -- proposed restatement, for rewrite
   rationale:    string,          -- one sentence
   confidence:   "high" | "low"   -- low where the judgment is contested
 }
 ```
 
-Emit a `Route` for every unit whose disposition is other than `stay`, and for any `stay` whose placement was contested. Count the rest in `units_scanned` so the denominator stays visible. When nothing routes, emit the object with an empty `routes` array; the summary always emits.
+One route per extracted clause, each with a single destination. A sentence that splits is represented by several routes sharing a `parent` — the split lives at the sentence, since a clause that has already been extracted has one destination by construction.
 
-The schema above is a contract specimen under this audit's own taxonomy: the contract is active on every run, and a schema specifies it more completely than a filled-in sample would.
+A missing guard is a route to `enforcement` with `binding` null and the guard named in `rationale`; an unresolved host binding takes the same shape with the reason stated. Emit a route for every unit whose disposition is other than `stay`, and for any `stay` whose placement was contested. Count the rest in `units_scanned` so the denominator stays visible. When nothing routes, emit the object with an empty `routes` array; the summary always emits.
 
 ## Reference material
 
