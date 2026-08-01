@@ -13,7 +13,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Edit this email for me' and I'll show how /bound dispatches each edit domain's boundary kind and settles its disposition"
 
 **Quiz Q (situation)**: You ask Claude to "tidy up my resume" — it rewrites your summary, swaps out job titles, and restructures bullet points. You only wanted typo fixes and better wording; the content decisions are yours.
-- A) Aitesis `/inquire` — B) Horismos `/bound` — C) Syneidesis `/gap` — D) Prosoche `/attend`
+- A) Aitesis `/inquire` — B) Horismos `/bound` — C) Syneidesis `/gap` — D) Merismos `/apportion`
 - Answer: B
 
 **Quiz Q (design)**: You're about to delegate a multi-step task with some sensitive decisions. How would you make explicit which steps are AI's call vs yours?
@@ -64,7 +64,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Here's my trip checklist, ready to go' and I'll show how /gap surfaces blind spots"
 
 **Quiz Q (situation)**: You're about to accept a job offer. The salary is good, the role sounds interesting, you're ready to reply. Something feels off but you can't name it.
-- A) Prosoche `/attend` — B) Syneidesis `/gap` — C) Epharmoge `/contextualize` — D) Periagoge `/induce`
+- A) Merismos `/apportion` — B) Syneidesis `/gap` — C) Epharmoge `/contextualize` — D) Periagoge `/induce`
 - Answer: B
 
 **Quiz Q (design)**: You've picked option B out of three. Before committing, how would you check if you're overlooking something the decision logic didn't cover?
@@ -98,7 +98,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 **Trial prompt**: "Let's practice: say 'Is the National Museum open next Friday afternoon?' and I'll show how /inquire grounds the answer in observable facts"
 
 **Quiz Q (situation)**: You ask Claude "can my MacBook Air run this 70B model locally?" — the answer depends on your exact spec and the model's published requirements. Claude starts recommending settings without confirming either.
-- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Horismos `/bound` — D) Prosoche `/attend`
+- A) Prothesis `/frame` — B) Aitesis `/inquire` — C) Horismos `/bound` — D) Merismos `/apportion`
 - Answer: B
 
 **Quiz Q (design)**: You want to ask "will flight KE123 be on time tomorrow?" — a verifiable external fact. How would you make sure Claude checks rather than guesses?
@@ -191,22 +191,22 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Philosophy**: εὕρεσις (finding, discovery) — the older, broader sense of turning up something not yet in view, prior to its later narrowing into a term of rhetorical technique. Core principle: **Divergence over Selection**. A candidate is raw material, not a selection-ready alternative — heuresis never discards, scores, or ranks what a round produces; that judgment belongs downstream, entirely out of its scope. Workflow position: Planning cluster, immediately upstream of `/preview` — heuresis widens a thin or converged field into a diverse one; `/preview` picks up only once two or more candidates already exist and need their futures contrasted. Game feel: "I've only got one idea, and it's getting stale" → frame map opens → candidates generate in parallel, untouched by ranking → you stop when the field is wide enough → a diverse set, ready for whatever comes next.
 
-## Prosoche `/attend`
+## Merismos `/apportion`
 
 **Situation**: You ask Claude to "work through my 200-photo album and build the yearbook layout" — an unattended run that will churn for an hour while you're away. You worry it might quietly declare victory halfway through, or wander into folders it was never meant to touch.
 
-**Intervention**: `/attend` reads the boundaries the job implies — which folders are fair game, what counts as done, how long it may run — and compiles each into a checkable condition (every album photo appears in the layout; nothing outside the album folder changed; at most N passes). You confirm the set, and it becomes the finish-line contract the autonomous run is held to. Anything that would need split-second blocking (like deleting originals) is named as out of its hands and left to your tool's permission prompts.
+**Intervention**: `/apportion` reads the boundaries the job implies — which folders are fair game, what counts as done, how long it may run — and compiles each into a checkable condition (every album photo appears in the layout; nothing outside the album folder changed; at most N passes). You confirm the set, and it becomes the finish-line contract the autonomous run is held to. Anything that would need split-second blocking (like deleting originals) is named as out of its hands and left to your tool's permission prompts.
 
-**Trial prompt**: "Let's practice: describe a task you'd hand to an unattended run and I'll show how /attend compiles its boundaries into verifiable conditions"
+**Trial prompt**: "Let's practice: describe a task you'd hand to an unattended run and I'll show how /apportion compiles its boundaries into verifiable conditions"
 
 **Quiz Q (situation)**: You're about to let Claude run unattended overnight migrating hundreds of files, and you want certainty that "done" really means done — and that it stayed inside the folders you named.
-- A) Aitesis `/inquire` — B) Prosoche `/attend` — C) Syneidesis `/gap` — D) Horismos `/bound`
+- A) Aitesis `/inquire` — B) Merismos `/apportion` — C) Syneidesis `/gap` — D) Horismos `/bound`
 - Answer: B
 
 **Quiz Q (design)**: You want an autonomous run held to your boundaries without watching it work. How do you get protection that doesn't depend on supervision?
 - Hint: The answer is not watching harder — it's making each boundary checkable at the moment the run stops.
 
-**Philosophy**: προσοχή (attention, vigilance) — the Stoic practice of self-aware engagement, inscribed before autonomy begins. Core principle: **Attention over Automation**. Infer the boundaries → keep what is checkable at stop time → compile into verifiable conditions → confirm → hand off. Workflow position: Execution cluster — the compile step before an autonomous run. Game feel: "Here's the finish line and the fences — now go" → the run proceeds unattended → the stop-time check tells the truth → you trust the result.
+**Philosophy**: μερισμός (attention, vigilance) — the Stoic practice of self-aware engagement, inscribed before autonomy begins. Core principle: **Attention over Automation**. Infer the boundaries → keep what is checkable at stop time → compile into verifiable conditions → confirm → hand off. Workflow position: Execution cluster — the compile step before an autonomous run. Game feel: "Here's the finish line and the fences — now go" → the run proceeds unattended → the stop-time check tells the truth → you trust the result.
 
 ## Epharmoge `/contextualize`
 
@@ -303,14 +303,14 @@ When you say "find me that café we talked about — and check if it's open toda
 
 **Shape**: empty intention → recognized prior context → grounded current fact.
 
-### `/attend * /contextualize` — Guardrail-compiled execution plus context-fit check
+### `/apportion * /contextualize` — Guardrail-compiled execution plus context-fit check
 
-When you say "run the inbox cleanup while I'm out, and check it actually fits my inbox style after." `/attend` compiles the cleanup's boundaries into verifiable conditions for the autonomous run (what counts as done, what must remain untouched), then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
+When you say "run the inbox cleanup while I'm out, and check it actually fits my inbox style after." `/apportion` compiles the cleanup's boundaries into verifiable conditions for the autonomous run (what counts as done, what must remain untouched), then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
 
 **Shape**: pre-execution guardrail compilation → post-execution context-fit.
 
 ### `/sublate * (downstream)` — Pre-execution vetting plus deficit-matched handoff
 
-When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each source via dialectical antithesis (provenance / counterfactual / cross-source); sources whose surfaced concern belongs to a different protocol family get **Routed** rather than refined in place. Typical handoffs: a gap surfaced in the user's decision → `/gap`, an execution boundary needing compiled guardrails → `/attend`, post-execution applicability → `/contextualize`, undefined ownership → `/bound`. Pre-execution counterpart to `/contextualize` (which vets after the fact). When a single source maps to multiple handoff targets, surface them in execution-order priority — pre-execution handoffs (`/bound`, `/gap`, `/attend`) precede post-execution ones (`/contextualize`).
+When you say "stress-test the context I've gathered before the meeting share — and reroute anything that turns out to be a different kind of problem." `/sublate` tests each source via dialectical antithesis (provenance / counterfactual / cross-source); sources whose surfaced concern belongs to a different protocol family get **Routed** rather than refined in place. Typical handoffs: a gap surfaced in the user's decision → `/gap`, an execution boundary needing compiled guardrails → `/apportion`, post-execution applicability → `/contextualize`, undefined ownership → `/bound`. Pre-execution counterpart to `/contextualize` (which vets after the fact). When a single source maps to multiple handoff targets, surface them in execution-order priority — pre-execution handoffs (`/bound`, `/gap`, `/apportion`) precede post-execution ones (`/contextualize`).
 
 **Shape**: per-source antithesis → disposition → handoff routing where the deficit belongs to another protocol family.

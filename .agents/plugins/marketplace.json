@@ -89,10 +89,10 @@
       "category": "Productivity"
     },
     {
-      "name": "prosoche",
+      "name": "merismos",
       "source": {
         "source": "local",
-        "path": "./prosoche"
+        "path": "./merismos"
       },
       "policy": {
         "installation": "AVAILABLE",

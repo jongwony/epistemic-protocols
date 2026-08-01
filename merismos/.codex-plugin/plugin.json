@@ -1,0 +1,35 @@
+{
+  "name": "merismos",
+  "version": "3.0.0",
+  "description": "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions — /apportion (μερισμός: an apportionment)",
+  "author": {
+    "name": "Jongwon Choi",
+    "url": "https://github.com/jongwony"
+  },
+  "homepage": "https://github.com/jongwony/epistemic-protocols",
+  "repository": "https://github.com/jongwony/epistemic-protocols",
+  "license": "MIT",
+  "keywords": [
+    "epistemic-protocols",
+    "skills",
+    "merismos"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Merismos",
+    "shortDescription": "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions — /apportion (μερισμός: an apportionment)",
+    "longDescription": "Apportion an autonomous goal into coarse execution units and derive each unit's completion conditions — /apportion (μερισμός: an apportionment)",
+    "developerName": "Jongwon Choi",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jongwony/epistemic-protocols",
+    "defaultPrompt": [
+      "Use merismos for this task"
+    ],
+    "brandColor": "#2563EB"
+  }
+}

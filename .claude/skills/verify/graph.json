@@ -1,5 +1,5 @@
 {
-  "version": "2.5.0",
+  "version": "2.6.0",
   "nodes": [
     "horismos",
     "aitesis",
@@ -8,7 +8,7 @@
     "euporia",
     "prothesis",
     "syneidesis",
-    "prosoche",
+    "merismos",
     "epharmoge",
     "elenchus",
     "katalepsis",
@@ -60,15 +60,15 @@
     },
     {
       "source": "aitesis",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "추론된 컨텍스트가 경계맵 추론과 컨디션 컴파일 초점을 좁힘"
+      "satisfies": "수집된 컨텍스트가 목표 의무 읽기와 조건 도출의 초점을 좁힘"
     },
     {
-      "source": "prosoche",
+      "source": "merismos",
       "target": "epharmoge",
       "type": "advisory",
-      "satisfies": "컴파일된 가드레일 조건이 사후 적용성 검증 컨텍스트를 제공"
+      "satisfies": "단위별 완료·불변 조건이 사후 적용성 검증 컨텍스트를 제공"
     },
     {
       "source": "prothesis",
@@ -108,9 +108,9 @@
     },
     {
       "source": "horismos",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "경계 맵이 slow/threshold 컨디션 컴파일의 입력을 제공"
+      "satisfies": "경계 맵이 절단 후보 이음매와 단위가 종속되는 조건 양쪽을 좁힘"
     },
     {
       "source": "horismos",
@@ -150,9 +150,9 @@
     },
     {
       "source": "anamnesis",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "과거 위험 이력이 경계맵 추론을 강화"
+      "satisfies": "과거 초과·거짓완료 이력이 이음매 스캔과 술어 도출을 강화"
     },
     {
       "source": "anamnesis",
@@ -228,9 +228,9 @@
     },
     {
       "source": "elenchus",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "vetted context가 컨디션 컴파일 초점을 좁힘"
+      "satisfies": "vetted context가 조건 도출 초점을 좁힘"
     },
     {
       "source": "elenchus",
@@ -264,9 +264,15 @@
     },
     {
       "source": "hyphegesis",
-      "target": "prosoche",
+      "target": "merismos",
       "type": "advisory",
-      "satisfies": "지휘된 방법이 situated 실행으로 핸드오프"
+      "satisfies": "지휘된 방법의 미해결 자율 구역을 분배·조건화로 이관 — 그 구역의 토폴로지는 고정 입력이고 merismos가 재지휘하지 않음 (재진입 금지 가드)"
+    },
+    {
+      "source": "merismos",
+      "target": "hyphegesis",
+      "type": "advisory",
+      "satisfies": "조건 보유 단위 계획이 conduct의 WorkProspect로 흐름 — 단위 배열(순서·독립성·조정·종료·라우팅)이 자명하지 않을 때만. 단위 술어는 conduct의 stated_condition 종료 근거가 되고 merismos로 되돌아오지 않음 (재진입 금지 가드); 단일 단위 또는 순서가 자명한 집합은 conduct를 건너뜀"
     },
     {
       "source": "anamnesis",

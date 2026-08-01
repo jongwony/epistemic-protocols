@@ -47,7 +47,7 @@ implicit premise.
 
 ## Execution
 
-**`/attend`** (Prosoche) — ExecutionBlind → SituatedExecution
+**`/apportion`** (Merismos) — GoalPlanUncompiled → ConditionBearingUnitPlan
   when: Autonomous run ahead with its boundaries not yet compiled into verifiable conditions
 
 ## Verification

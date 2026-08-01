@@ -26,7 +26,7 @@ Users and AI often operate without clear boundaries about who knows what (`Bound
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
 | Proplasma | Hybrid | `DirectionUnrecognizable → DirectionalContrast` |
 | Analogia | AI-guided | `MappingUncertain → ValidatedMapping` |
-| Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
+| Merismos | User-initiated | `ExecutionBlind → SituatedExecution` |
 | Epharmoge | AI-guided | `ApplicationDecontextualized → ContextualizedExecution` |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 

@@ -36,7 +36,7 @@ const DESCRIPTION_OVERRIDES = {
   gap: 'Gap surfacing before decisions — (GapUnnoticed, AI, SURFACE, Decision) → AuditedDecision',
   grasp: 'Intent-scented comprehension verification — (ResultUngrasped, User, VERIFY, Result) → VerifiedUnderstanding',
   inquire: 'Infer context insufficiency before execution — (ContextInsufficient, AI, INQUIRE, Prospect) → InformedExecution',
-  attend: 'Compile execution guardrails into verifiable goal conditions — (ExecutionBlind, User, EVALUATE, ExecutionContext) → SituatedExecution',
+  apportion: 'Apportion a goal into conditioned execution units — (GoalPlanUncompiled, User, APPORTION, AutonomousGoal × ExecutionHorizon) → ConditionBearingUnitPlan',
   ground: 'Validate structural mapping between domains — (MappingUncertain, AI, GROUND, Text) → ValidatedMapping',
   induce: 'Calibrate and crystallize abstraction — (AbstractionInProcess, AI, INDUCE, A) → CrystallizedAbstraction',
   elicit: 'Resolve via Extended-Mind reverse induction — (AbstractAporia, Hybrid, REVERSE-INDUCE-CYCLE, IntentSeed × ExternalizedSubstrate) → ResolvedEndpoint',
@@ -149,7 +149,7 @@ Protocol dependency graph (\`graph.json\`) enforces precondition DAG, advisory e
 const DESCRIPTION_LIMIT = 200;
 // LINE_GUIDELINE is informational — emits a packaging warning but does not fail the build.
 // 510 absorbs anamnesis SKILL.md at 501 lines (after the +1 Euporia distinction row);
-// existing 525/581/591 lines in aitesis/prothesis/prosoche were already over the prior 500 baseline.
+// existing 525/581/591 lines in aitesis/prothesis/merismos were already over the prior 500 baseline.
 // Per-protocol grandfathered overage is acknowledged; tightening this guideline requires per-file caps.
 const LINE_GUIDELINE = 510;
 const DIST_DIR = path.join(projectRoot, 'dist');
@@ -168,7 +168,7 @@ const CODEX_SUBMIT_PLUGINS = Object.freeze([
   { dir: 'katalepsis', skill: 'grasp' },
   { dir: 'periagoge', skill: 'induce' },
   { dir: 'proplasma', skill: 'preview' },
-  { dir: 'prosoche', skill: 'attend' },
+  { dir: 'merismos', skill: 'apportion' },
   { dir: 'prothesis', skill: 'frame' },
   { dir: 'syneidesis', skill: 'gap' },
 ]);

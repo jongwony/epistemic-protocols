@@ -50,7 +50,7 @@ Under the canonical umbrella, the protocol set covers decision points across the
 - Verification: check applicability after execution
 - Cross-cutting: define epistemic boundaries, recover prior context, verify comprehension
 
-This is why the public hook can stay narrow while the project still legitimately includes Prosoche, Epharmoge, Anamnesis, and Katalepsis.
+This is why the public hook can stay narrow while the project still legitimately includes Merismos, Epharmoge, Anamnesis, and Katalepsis.
 
 ## Editing Rule
 

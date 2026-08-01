@@ -23,7 +23,7 @@ AI produces correct results, but correctness alone doesn't guarantee applicabili
 | Prothesis | AI-guided | `FrameworkAbsent → FramedInquiry` |
 | Syneidesis | AI-guided | `GapUnnoticed → AuditedDecision` |
 | Aitesis | AI-guided | `ContextInsufficient → InformedExecution` |
-| Prosoche | User-initiated | `ExecutionBlind → SituatedExecution` |
+| Merismos | User-initiated | `ExecutionBlind → SituatedExecution` |
 | **Epharmoge** | **AI-guided** | **`ApplicationDecontextualized → ContextualizedExecution`** |
 | Katalepsis | User-initiated | `ResultUngrasped → VerifiedUnderstanding` |
 
