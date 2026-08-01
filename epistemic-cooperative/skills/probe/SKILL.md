@@ -225,7 +225,6 @@ session_text(probe) ∋ {ProtocolRoute | FitReviewNote} (Stop deactivates withou
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
-Phase 0 ResolveConfigDir (observe) → Bash (`printf '%s\n' "${CLAUDE_CONFIG_DIR-$HOME/.claude}"` — binds {config_dir} before an opt-in cross-session misfit.md read (Rule 4); read-only, no side effect. `${VAR-default}` without the colon falls back on UNSET only, matching the harness resolver's `??`)
 Phase 0 Detect      (sense)    → Internal analysis (heuristic vague-deficit detection)
 Phase 1 Scan        (sense)    → Internal analysis (catalog match against situation)
 Phase 1 enrich      (sense)    → Internal analysis (situation broadening when |H[]| < 2)
@@ -251,7 +250,7 @@ converge            (extension)    → TextPresent+Proceed (convergence trace)
 
 ## Storage Reference
 
-The hypomnesis sibling `misfit.md` sub-index (under `{config_dir}/projects/{slug}/hypomnesis/{session-id}/`) is the designed-for read location for accumulated probe usage records — fit-review notes, recognized routes, and dismissed hypotheses. Probe reads this sub-index when available to enrich situation context. `{config_dir}` = `CLAUDE_CONFIG_DIR` when set, else `~/.claude` (bound by TOOL GROUNDING's Phase 0 ResolveConfigDir above). The writer mechanism is out of scope for this skill and is implemented separately at the substrate layer.
+The hypomnesis sibling `misfit.md` sub-index (under `{config_dir}/projects/{slug}/hypomnesis/{session-id}/`) is the designed-for read location for accumulated probe usage records — fit-review notes, recognized routes, and dismissed hypotheses. Probe reads this sub-index when available to enrich situation context. `{config_dir}` is the Claude Code config directory — `CLAUDE_CONFIG_DIR` when set, else `~/.claude`; a substrate detail of this realization, not protocol vocabulary. Read the value and substitute an absolute path before reading; a `${...}` left in this text is inert, since Read/Grep perform no shell expansion. The writer mechanism is out of scope for this skill and is implemented separately at the substrate layer.
 
 ## Rules
 
