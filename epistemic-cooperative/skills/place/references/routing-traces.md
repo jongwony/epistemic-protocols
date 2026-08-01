@@ -4,7 +4,7 @@ Complete traces of the pass running over real instruction prose. Read one when a
 
 Each trace quotes its source clause in full, so no trace depends on reaching the file it came from. Surfaces are named by kind rather than by path, because the same shapes recur across projects.
 
-The route-block contract these traces follow is defined in `SKILL.md` §The route block, and where a trace and that section disagree, the section governs. This file states no separate conformance guarantee of its own: a certification nothing checks reads as verification while tracking the contract only as well as its last hand-edit, which is the failure the audit routes and would be committing here.
+These traces narrate the pass and summarize where each unit lands. Their route lines carry what the trace is showing rather than every element a block requires, so they are not emitted route blocks and reading one as a template would model an incomplete output. The one filled block in this file is the specimen in the report fragment below. The route-block contract itself is defined in `SKILL.md` §The route block, and where anything here disagrees with that section, the section governs. This file states no conformance guarantee of its own: a certification nothing checks reads as verification while tracking the contract only as well as its last hand-edit, which is the failure the audit routes and would be committing here.
 
 ---
 
