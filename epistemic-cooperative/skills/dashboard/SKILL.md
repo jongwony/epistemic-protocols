@@ -83,9 +83,9 @@ For each protocol, determine:
 
 | Protocol | situation_occurred (Path A) | situation_occurred (Path B) |
 |----------|---------------------------|---------------------------|
-| Syneidesis | friction `wrong_approach` OR friction `excessive_changes` OR rework | rework + high exploration |
+| Syneidesis | friction `wrong_approach` OR friction `excessive_changes` OR friction `wrong_file_edited` OR rework | rework + high exploration |
 | Aitesis | friction `context_loss` | N/A |
-| Merismos | friction `wrong_file_edited` | deploy/push keywords |
+| Merismos | — | unattended-run firstPrompt keyword match |
 | Prothesis | — | exploration ratio ≥ 3:1 |
 | Katalepsis | — | verification firstPrompt |
 | Epharmoge | — | N/A (conditional protocol) |
@@ -107,7 +107,7 @@ Aggregate friction_counts from Phase 2. Map to protocol groups using the Tertiar
 | `wrong_approach` | Syneidesis |
 | `excessive_changes` | Syneidesis |
 | `context_loss` | Aitesis |
-| `wrong_file_edited` | Merismos |
+| `wrong_file_edited` | Syneidesis |
 | Others (`buggy_code`, `api_errors`, etc.) | Environmental (no protocol mapping) |
 
 #### 3.4 Growth Timeline

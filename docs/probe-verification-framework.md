@@ -78,7 +78,7 @@ This refinement is not yet inscribed in `probe/SKILL.md`. Inscription requires a
 
 ## Open Questions
 
-- **Generalization**: Is the two-axis distinction Probe-specific, or does it apply to other Phase-1-like classifications elsewhere in the protocol set? `recollect` (Phase 1 contextual scan) and `attend` (Phase 0 risk classification) also classify candidates under uncertainty — sibling instances could either corroborate or refute generalization.
+- **Generalization**: Is the two-axis distinction Probe-specific, or does it apply to other Phase-1-like classifications elsewhere in the protocol set? `recollect` (Phase 1 contextual scan) also classifies candidates under uncertainty — a sibling instance that could corroborate or refute generalization. (`attend`'s Phase 0 risk classification, cited here originally as a second sibling instance, no longer exists as of the 2026-08 Merismos replacement — `apportion`'s Phase 0 is an uncompiled-plan checkpoint, not a risk classification, so it is not a like-for-like substitute; the line is preserved as historical context rather than re-pointed.)
 - **Verification cost**: A second axis costs more inference per candidate. Where is the break-even between miss-cost (interim patch + rework) and verify-cost (additional simulation)?
 - **Self-reference**: Probe verification framework refinement is itself a candidate for Probe to surface in a future session ("we observed a single false-surgical instance, is this a pattern?"). The framework is recursively in scope of its own evidence-collection modality.
 

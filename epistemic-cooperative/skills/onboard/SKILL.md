@@ -58,7 +58,7 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Analogia `/ground` | Analysis | Checking if abstract advice fits your situation | Abstract pattern application without domain validation |
 | Periagoge `/induce` | Analysis | Concrete cases accumulating into an unnamed essence — crystallize the emerging abstraction | 3+ instances with essence intuition but no located abstraction; `/ground` misfit where colimit is forced into substitution |
 | Syneidesis `/gap` | Decision | Right before committing, checking for blind spots | Same file 3+ edits (different concerns), `excessive_changes` friction |
-| Merismos `/apportion` | Execution | Guardrail compilation — execution boundaries become verifiable goal conditions before an autonomous run | Imminent autonomous/unattended execution, stated done-criteria or budget cues, `wrong_file_edited` friction |
+| Merismos `/apportion` | Execution | An autonomous goal is stated but its unit plan is uncompiled — cut it into coarse units at cited seams and derive each unit's completion conditions before the run begins | Unattended-run directives in the first prompt ("work through", "go through all", "run until done"), a goal that plainly exceeds one execution horizon, a stop-hook or completion enforcer being configured |
 | Epharmoge `/contextualize` | Verification | Output is correct but doesn't fit the accumulated conversation context | Mismatch against session-built constraints (user-aware context accumulation) |
 | Elenchus `/sublate` | Verification | About to externalize a working context whose apparent sufficiency has decayed | Dialectical antithesis per source (provenance / counterfactual / cross-source consistency) before pre-execution sync |
 | Horismos `/bound` | Cross-cutting | Deciding what to delegate to AI | Boundary probe, domain classification, BoundaryMap |
@@ -377,7 +377,7 @@ Summarize the learning experience, connect it to the broader epistemic workflow,
 
 5. **Advanced Usage** (bonus tips after main guide):
 
-   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/apportion`, show the three-step chain: context → decision audit → guardrail compilation (inquire → gap → attend).
+   Present 3-5 tips from `references/advanced-usage.md` (protocol chaining, multi-protocol sessions, invocation techniques, etc.), prioritizing tips related to protocols from TRIAL and QUIZ. If they quizzed on `/gap` vs `/apportion`, show the three-step chain: context → decision audit → unit apportionment (inquire → gap → apportion).
 
 6. **Continue exploring** (when MAP results contain unexplored protocols):
 

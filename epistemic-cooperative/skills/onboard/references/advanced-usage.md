@@ -16,7 +16,7 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 
 | Pattern | Description |
 |---------|-------------|
-| Full workflow traversal | Up to 8 protocols in one session: inquire → attend → contextualize → grasp |
+| Full workflow traversal | Up to 8 protocols in one session: inquire → apportion → contextualize → grasp |
 | On-demand invocation | Protocols are independent tools — invoke whenever the need arises, not in prescribed order |
 | Mid-session protocol switch | Start with one protocol, switch to another when a different deficit emerges |
 

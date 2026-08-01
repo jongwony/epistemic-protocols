@@ -133,7 +133,7 @@ handles this correctly: a user with D4=30 scores high similarity with Wittgenste
 - **Defining**: D6 (Extended Mind — literally his thesis)
 - **Secondary**: D1 (Inquiry — explores boundaries of cognition)
 - **Distinguishing signal**: Highest delegation ratio + treats AI as cognitive extension + Task orchestration
-- **Protocol affinity**: `/apportion` (Merismos — situated awareness of extended system)
+- **Protocol affinity**: `/apportion` (Merismos — apportioning a goal into units before handing execution to an autonomous run extends cognition into the delegated system, Clark's core thesis)
 
 #### Aristotle (384-322 BCE)
 - **Tradition**: Virtue epistemology, practical wisdom

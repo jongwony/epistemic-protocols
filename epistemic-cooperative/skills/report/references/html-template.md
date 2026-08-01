@@ -240,7 +240,7 @@ growth_items: [{
   </div>
   <div class="glance-block">
     <h4>Coverage Delta</h4>
-    <p>Planning cluster (inquire, elicit): 40% adoption. Execution cluster (attend): 0% adoption in implementation sessions. Verification (grasp): not invoked...</p>
+    <p>Planning cluster (inquire, elicit): 40% adoption. Execution cluster (apportion): 0% adoption in implementation sessions. Verification (grasp): not invoked...</p>
   </div>
   <div class="glance-block">
     <h4>Highest-Impact Gap</h4>
