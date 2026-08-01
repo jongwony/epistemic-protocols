@@ -4,7 +4,7 @@ Complete traces of the pass running over real instruction prose. Read one when a
 
 Each trace quotes its source clause in full, so no trace depends on reaching the file it came from. Surfaces are named by kind rather than by path, because the same shapes recur across projects.
 
-Every trace here has been checked against the route-block contract: one route per routing unit — extracted clauses and the residue alongside them — one destination and one enforcement axis each, and a sentence that splits appears as several blocks quoting the same parent sentence.
+Every trace here has been checked against the route-block contract: one route per routing unit — extracted clauses and the residue alongside them — one destination and one enforcement axis each, a sentence that splits appearing as several blocks that name it as their common parent, and a unit assembled across sentences carrying every parent it was drawn from.
 
 ---
 
@@ -108,9 +108,9 @@ Every trace here has been checked against the route-block contract: one route pe
 6. Not reached.
 7. *Transformations.* None fire. "Will not cap it" names the specific failure a reader would otherwise walk into and carries the threshold, so salience leaves it.
 
-**Routes:** three, sharing the paragraph's sentences as parents — the instruction to `tier1` (`rewrite`), carrying the unresolved guard on its axis; the verification note and the bystander reasoning to `ledger` (`move`), both `not mechanically checkable`.
+**Routes:** three. The instruction is assembled from four of the paragraph's sentences and carries all four as its parents — to `tier1` (`rewrite`), with the unresolved guard on its axis. The verification note and the bystander reasoning each carry the one sentence they came from — both to `ledger` (`move`), both `not mechanically checkable`.
 
-**Why it is worth tracing:** the paragraph loses roughly half its length and none of its operative content. It is also the clearest case against deletion as the instrument: a reviewer cutting for length would most likely drop the byte-bounding clause, which is the only sentence in the paragraph that prevents a real failure.
+**Why it is worth tracing:** the paragraph loses roughly half its length and none of its operative content. It is also the assembly case: the operative content is stated across four sentences and no one of them carries the threshold alone, so the unit joins rather than splits and its provenance names every sentence it was drawn from. It is also the clearest case against deletion as the instrument: a reviewer cutting for length would most likely drop the byte-bounding clause, which is the only sentence in the paragraph that prevents a real failure.
 
 ---
 

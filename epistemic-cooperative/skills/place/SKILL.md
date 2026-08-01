@@ -7,7 +7,7 @@ allowed-tools: Read, Grep, Glob
 
 # Placement Audit
 
-A read-only audit of LLM-facing instruction prose that answers one question per clause: **where does this belong?** Every decision-bearing clause receives a destination. The audit emits routes; the human author applies them.
+A read-only audit of LLM-facing instruction prose that answers one question per clause: **where does this belong?** Every routing unit receives a destination, whether or not it bears a decision. The audit emits routes; the human author applies them.
 
 ## Purpose
 
@@ -57,13 +57,13 @@ Absence of runtime relevance does not by itself admit a clause to the ledger. Wi
 
 Delete is scoped to the surface under audit, not to the content's worth. A fact that belongs in another tool's documentation leaves this surface and keeps its value elsewhere; the route records where.
 
-The five are named hypotheses rather than a proof of exhaustion. Where a clause's home is a surface none of them names, emit the route with its destination unresolved, describe the surface the clause wants, and record the shape as a method limitation. Forcing the fit into the nearest named destination is what this path prevents: the route then reads as a judgment the pass never made, and reads that way with the same confidence as a route that was earned.
+The five are named hypotheses rather than a proof of exhaustion. Where a clause's home is a surface none of them names, the destination is unresolved and what the route describes in its place is the surface the clause wants. Forcing the fit into the nearest named destination is what that leaves open: the route would otherwise read as a judgment the pass never made, and read that way with the same confidence as a route that was earned.
 
 ## Unit of judgment
 
 - **Scan unit** — the sentence. Read the surface sentence by sentence.
-- **Routing unit** — every part a sentence divides into, whether or not it bears a decision. An extracted clause and the residue left behind by that extraction are both routing units and both reach a destination; one sentence can hold a standing-surface clause and a ledger clause, and routing the sentence whole would misplace one of them.
-- **Provenance** — the parent sentence, retained on every route so the author can find what was split.
+- **Routing unit** — what the surface divides into once extraction has run, whether or not it bears a decision. An extracted clause and the residue left behind by that extraction are both routing units and both reach a destination. A unit is usually part of one sentence, because one sentence can hold a standing-surface clause and a ledger clause and routing it whole would misplace one of them. A unit may also be assembled from parts of several sentences, where the operative content is stated across them and any part read alone supplies the wrong threshold.
+- **Provenance** — every parent sentence the unit was drawn from, retained on every route so the author can find what was split or joined.
 
 ## The pass
 
@@ -75,7 +75,7 @@ Run in order. Steps 2, 3, 5, and 6 choose the destination, and the first one tha
 
 **3. Load tier.** Choose Tier 0, 1, or 2 by the admission criteria above. Two questions decide Tier 0 admission: does this change action selection on an arbitrary turn, and does it determine what to load in a situation the model must recognize unprompted? A clause that answers no to both is a relocation candidate, not yet a deletion candidate.
 
-**4. Enforcement candidacy.** This step sets the enforcement axis. It does not choose a destination, and it runs whether or not an earlier step already settled one. Is the constraint mechanically checkable, and does the host have a channel that checks it? Where a channel exists, the axis names it — a guard that rejects a bad value converts a silent wrong result into a loud stop. Where the constraint should be enforced and no channel exists, the finding is the missing guard: the axis names the guard to add and leaves the binding unresolved. Where nothing about the clause is mechanically decidable, the axis says so, which is a result rather than an omission.
+**4. Enforcement candidacy.** This step sets the enforcement axis. It does not choose a destination, and it runs whether or not an earlier step already settled one. Two questions in order: is the constraint mechanically checkable, and where it is, does a guard earn its cost here? Where a channel already exists, the axis names it — a guard that rejects a bad value converts a silent wrong result into a loud stop. Where a guard is warranted and no channel exists, the finding is the missing guard: the axis names the guard to add and leaves the binding unresolved. Where the constraint is checkable and a guard is not warranted — the check would be brittle, or would cost more than the failure it prevents — the axis records the checkability together with the reason the guard was declined, which is what keeps a deliberate decision from reading as an oversight the next reader reopens at full cost. Where nothing about the clause is mechanically decidable, the axis says so, which is a result rather than an omission.
 
 **A guard does not retire the prose by existing.** A validator reports during or after the action; an instruction shapes the action before it happens. Where both are load-bearing, the clause keeps the destination its own admission earned and the axis records the channel, stating what each one catches that the other does not. Where a guard covers everything the sentence was doing, the destination steps decide the sentence on their own merits — a clause they leave with no value on this surface routes to delete while the axis carries the channel, which is the honest record of a constraint that moved from prose to machine.
 
@@ -101,7 +101,9 @@ An example is not one object, and the two judgments that apply to it point in op
 | **Negative demonstration** | Displays a bad output or a failed trajectory | Route to diagnostic reference; it is read when detecting or repairing that specific failure |
 | **Prohibition / negative constraint** | States a boundary | Not an example. It goes through the salience transformation and the enforcement test, not through this table |
 
-The screening question when a clause is an example: **which of the five kinds is it?** Both demonstration kinds route to the on-demand surface. A gloss and a contract specimen can hold a place on a loaded surface, each only under its own condition in the table above; a prohibition leaves the table entirely. The five are named hypotheses rather than a closed partition — where an example matches none of them, describe what it does instead of taking the nearest label, route it on that description, and record the kind as a method limitation. A label taken for closeness carries a standing-surface rule the example was never measured against.
+The screening question when a clause is an example: **which of the five kinds is it?** Both demonstration kinds route to the on-demand surface. A gloss and a contract specimen can hold a place on a loaded surface, each only under its own condition in the table above; a prohibition leaves the table entirely.
+
+The kinds are named hypotheses rather than a closed partition, and one example can answer to more than one of them — a filled invocation shown with its result pins an exact shape and teaches a procedure at the same time. Where the kinds an example matches disagree about the destination, the on-demand rule governs: the demonstration kind is the one whose risk the table names, and the specimen rule already prefers a schema or grammar wherever one fully specifies the contract, so what the loaded surface gives up is a specimen a schema can replace. Where an example matches no kind at all, what the route describes in place of a label is what the example does, because a label taken for closeness carries a standing-surface rule the example was never measured against.
 
 Where a specimen's condition cannot be checked — nothing records whether prose alone has failed — route it to the on-demand surface and record the missing evidence. Granting a standing place on an unverified condition is how the exception becomes the rule.
 
@@ -126,7 +128,7 @@ A report in three sections, written for the author who will weigh it. The order 
 
 **2. Report-level findings**, only when the section fires. Defined below.
 
-**3. Route blocks**, one per routing unit — extracted clauses and the residue alongside them — each with a single destination and its enforcement axis. A sentence that splits is represented by several blocks quoting the same parent sentence; the split lives at the sentence, since a routing unit has one destination by construction. Emit a block for every routing unit whose disposition is other than `stay`, for any `stay` whose placement was contested, and for any `stay` whose axis names a guard the host has not bound — an unbound guard is a finding, and a clause that stays where it is would otherwise carry it out of the report. When nothing routes, the summary still emits.
+**3. Route blocks**, one per routing unit — extracted clauses and the residue alongside them — each with a single destination and its enforcement axis. A sentence that splits is represented by several blocks naming it as their common parent; the split lives at the sentence, since a routing unit has one destination by construction. Emit a block for every routing unit whose disposition is other than `stay`, for any `stay` whose placement was contested, and for any `stay` whose axis names a guard the host has not bound — an unbound guard is a finding, and a clause that stays where it is would otherwise carry it out of the report. When nothing routes, the summary still emits.
 
 ### The route block
 
@@ -134,23 +136,26 @@ A report in three sections, written for the author who will weigh it. The order 
 R{n} — {file}:{line}   {current surface} → {destination}   {disposition}[, contested]
 
   > {routed clause, verbatim}
-  From: {parent sentence — where the clause is not the whole sentence}
+  From: {every parent sentence the unit was drawn from — where the unit is not a whole sentence}
 
   Settled at {step}, {the admission or failure predicate that fired}. {why it holds}
-  Enforcement: {the channel, named | the guard to add, binding unresolved | not mechanically
-  checkable}{ — what each catches that the other does not, where the prose is load-bearing too}
-  {required action, per the disposition}
+  Enforcement: {the channel, named | the guard to add, binding unresolved | checkable, the
+  guard declined and why | not mechanically checkable}{ — what each catches that the other
+  does not, where the prose is load-bearing too}
+  {required action, per each disposition the route names}
   Confidence {high|low}{ — the uncertainty, where low}
   Additional obligations: none | kind …; cluster …; owner …; binding …
 ```
 
-Every element is required. Five of them carry obligations a placeholder name does not convey:
+Every element is required. An element may be **unresolved** where the pass could not settle it, or **plural** where the pass settled on more than one value, and it then says which of the two holds and why. An unresolved element is a limit of the method reached on this clause, and the report records it as one; a plural element is an ordinary result and records nothing further. This loosens what an element may say and never whether it appears — an absent element reports a check that was not made, and an unresolved value is not that. The destination is the one element plurality never reaches: the steps that choose it stop at the first to fire, so it settles at most once.
 
-- **The settling step names its predicate.** Naming the step alone reports where the pass stopped; naming the predicate reports what it found. The steps run in order and the first one to settle a clause fixes its destination, so a clause admitted at an early step never reaches the later destination tests — reporting a step the pass did not run claims a judgment it did not make.
-- **The required action follows the disposition.** For `rewrite`, the exact restatement. For `move`, the destination binding, or an explicitly unresolved binding with the reason; where the destination is the on-demand surface, also the pointer on the source surface that reaches it, or a note that one already exists. A clause moved to a reference nothing points at is not relocated but lost — the on-demand surface is defined by being pointed to, so naming the pointer is a condition of the route working rather than a courtesy after it. For `delete` caused by ownership, the external owner.
-- **The enforcement line states the axis on every block.** The axis is set for every routing unit, so a block that omits it reports a check that was not made. `not mechanically checkable` is a result and is stated as one; an unbound guard names what to add, because a missing guard the report does not name is a finding the author never receives.
+Five elements carry obligations a placeholder name does not convey:
+
+- **The settling step names its predicate.** Naming the step alone reports where the pass stopped; naming the predicate reports what it found. The steps run in order and the first one to settle a clause fixes its destination, so a clause admitted at an early step never reaches the later destination tests — reporting a step the pass did not run claims a judgment it did not make. A route no step settled names no step: the element is unresolved, and what it reports instead is which steps ran and where the named destinations ran out, since a settling step recorded for a settlement that did not happen is the same false claim from the other direction.
+- **The required action follows every disposition the route names.** A relocating clause routinely names two: the extraction that let it move is what leaves it needing to stand alone, so `move` and `rewrite` co-occur and each discharges its own obligation — whichever label the route leads with settles nothing about the other. For `rewrite`, the exact restatement. For `move`, the destination binding, or an explicitly unresolved binding with the reason; where the destination is the on-demand surface, also the pointer on the source surface that reaches it, or a note that one already exists. A clause moved to a reference nothing points at is not relocated but lost — the on-demand surface is defined by being pointed to, so naming the pointer is a condition of the route working rather than a courtesy after it. For `delete` caused by ownership, the external owner.
+- **The enforcement line states the axis on every block.** The axis is set for every routing unit, so a block that omits it reports a check that was not made. `not mechanically checkable` is a result and is stated as one; an unbound guard names what to add, because a missing guard the report does not name is a finding the author never receives; a checkable constraint whose guard was declined records the reason it was declined, because a decision that reaches the reader as an omission is reopened at the cost of making it again.
 - **Low confidence names its uncertainty.** A confidence value with no named uncertainty is a hedge; the author cannot weigh what they cannot see.
-- **The obligations line closes every block.** It preserves what a rigid field set buys and drops what that costs. Naming each secondary dimension forces an acknowledgement that it was checked; `none` is that acknowledgement in one phrase rather than an empty slot for each. `cluster` belongs to this contract rather than to the author's discretion — a relation across routes is the one thing a per-clause block cannot hold, and it disappears silently when its recording is optional.
+- **The obligations line closes every block.** It preserves what a rigid field set buys and drops what that costs. Naming each secondary dimension forces an acknowledgement that it was checked; `none` is that acknowledgement in one phrase rather than an empty slot for each. `none` is a settled value and not the unresolved one — it reports that every secondary dimension was checked and none applies, so a dimension the pass could not settle says that in its own terms rather than closing as `none`. `cluster` belongs to this contract rather than to the author's discretion — a relation across routes is the one thing a per-clause block cannot hold, and it disappears silently when its recording is optional.
 
 ### Report-level findings
 
@@ -182,6 +187,6 @@ This skill's whole packaged surface is in scope for its own audit — frontmatte
 | Surface | Mechanism | What it handles |
 |---|---|---|
 | Deterministic checks | Literal pattern matching and structural validation | Structural drift between coupled artifacts; literal pattern leaks |
-| `/place` | Claude-judge placement classification over decision-bearing clauses | Which surface a clause belongs on, and what it must be rewritten to before it moves |
+| `/place` | Claude-judge placement classification over routing units | Which surface a clause belongs on, and what it must be rewritten to before it moves |
 
 A deterministic check answers whether a surface is well-formed. This audit answers whether its content is in the right place, which no pattern match reaches.

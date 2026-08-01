@@ -20,7 +20,7 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/forge` | Reference-grounded prompt-artifact formation | Prompt artifact (initial prompt for a follow-up session/tool, or a standing custom-skill recipe) |
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop to convergence | Applied fixes + convergence trace |
-| `/place` | Placement audit — routes each decision-bearing clause of instruction prose to one of five destinations (three load tiers, ledger, delete) and sets its enforcement axis | Routing report — route blocks plus report-level findings (read-only) |
+| `/place` | Placement audit — routes each clause of instruction prose to one of five destinations (three load tiers, ledger, delete) and sets its enforcement axis | Routing report — route blocks plus report-level findings (read-only) |
 | `/white-bear` | Prose audit — unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring) | JSON findings (read-only) |
 | `/zero-shot` | Prose audit — principle statement over anchoring examples | JSON findings (read-only) |
 
