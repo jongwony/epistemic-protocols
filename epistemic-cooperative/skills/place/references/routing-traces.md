@@ -4,7 +4,7 @@ Complete traces of the pass running over real instruction prose. Read one when a
 
 Each trace quotes its source clause in full, so no trace depends on reaching the file it came from. Surfaces are named by kind rather than by path, because the same shapes recur across projects.
 
-Every trace here has been checked against the schema: one route per extracted clause, one destination each, and a sentence that splits appears as several routes sharing a parent.
+Every trace here has been checked against the route-block contract: one route per extracted clause, one destination each, and a sentence that splits appears as several blocks quoting the same parent sentence.
 
 ---
 
@@ -54,7 +54,7 @@ Every trace here has been checked against the schema: one route per extracted cl
 
 **Routes:** two, sharing this sentence as `parent`. The instruction → `tier1`, disposition `rewrite`. The remainder → `ledger`, disposition `move`.
 
-**Why it is worth tracing:** the sentence splits, the clauses do not. Two routes with a shared parent is how a split is represented — there is no single route carrying two destinations, and a trace that produced one would not conform to the schema.
+**Why it is worth tracing:** the sentence splits, the clauses do not. Two routes quoting the same parent sentence is how a split is represented — there is no single route carrying two destinations, and a trace that produced one would not conform to the contract.
 
 ---
 
@@ -129,3 +129,46 @@ The first draft of that section closed with:
 **What review found:** that reasoning is an untyped exemption. "Loses something the rule does not measure" can be said of any rationale an author is attached to, and an exemption that admits everything protects nothing. The sentence was removed and the route applied.
 
 **Why it is worth tracing:** the author holds the decision, and this is what holding it responsibly looks like — an override is legitimate, and it still has to survive being read back. The failure mode is not overriding; it is overriding on a reason that would justify keeping any sentence. When the stated reason for an exception does not narrow, the exception is not a judgment.
+
+---
+
+## Report fragment — a route, and the finding it could not hold
+
+The traces above follow the pass to a destination. This shows what reaches the author afterward, and why the most useful result of a run sometimes fits in no route block at all.
+
+**Surface:** this audit's own instruction body, in the section defining the destinations.
+
+The route:
+
+```
+R9 — SKILL.md:59   tier1 → tier1   stay, contested
+
+  > Delete is scoped to the surface under audit, not to the content's worth.
+  From: "Delete is scoped to the surface under audit, not to the content's worth. A fact
+  that belongs in another tool's documentation leaves this surface and keeps its value
+  elsewhere; the route records where."
+
+  Settled at step 3, Tier 1 admission: the clause binds behavior for the duration of this
+  skill's work, so the load-tier question answers before any later test is reached.
+  No action — the clause is on the surface it belongs to.
+  Confidence low — the placement is right and the clause is still redundant, and a route
+  has no way to say both.
+  Additional obligations: cluster — SKILL.md:55 and SKILL.md:73 carry the same rule.
+```
+
+And the finding beside it:
+
+```
+kind:        cross-route-cluster
+claim:       The rule scoping Delete to the surface under audit is stated three times on
+             one surface — the destinations table, pass step 2, and a standalone paragraph.
+affects:     SKILL.md:55, SKILL.md:73, SKILL.md:59 — only the last emitted a route
+no block:    Each instance is operative read alone, so each is admitted at its own tier and
+             each disposition is stay. Two of the three were not contested and so emitted
+             no block at all. The redundancy exists only in the relation between them.
+consequence: Two statements could go with no loss, and the pass cannot say which, having no
+             canonical-instance test.
+confidence:  high
+```
+
+**Why it is worth recording:** the route is correct and nearly uninformative; the finding carries the result. Note also which step settled the route — step 3, not step 6. The steps run in order and the first to settle a clause fixes its destination, so a clause admitted at Tier 1 never reaches the Delete test. Recording step 6 would report that the pass considered deletion and declined, which it did not do.

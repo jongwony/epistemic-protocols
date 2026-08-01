@@ -37,7 +37,7 @@ Where the host has not declared a binding, emit the route with an unresolved bin
 
 **In scope** — prose that a model reads as instruction: project instruction files, rule files, skill instruction files and their frontmatter, agent system prompts, output styles, and the reference material those files point to.
 
-**Fenced blocks are inspected by role, not excluded.** A fenced block carries one of the roles in the example taxonomy below — schema, template, contract specimen, demonstration — and the taxonomy is the reason to look at it. A block that fully specifies a contract belongs where the contract is active and generally stays; a block that walks through a sampled procedure is a demonstration and routes on demand. Source code that is the delivered artifact rather than an instruction is out of scope.
+**Fenced blocks are inspected by role, not excluded.** A fenced block carries one of the kinds in the example taxonomy below — most often a contract specimen or one of the two demonstration kinds — and the taxonomy is the reason to look at it. A block that fully specifies a contract belongs where the contract is active and generally stays; a block that walks through a sampled procedure is a demonstration and routes on demand. Source code that is the delivered artifact rather than an instruction is out of scope.
 
 **Out of scope** — prose written for a human reader (project READMEs, design notes, published documentation), where an example serves comprehension and the load-tier argument does not apply.
 
@@ -117,42 +117,40 @@ Step 4 is the one that fails silently. An instruction that reads correctly to so
 
 ## Output
 
-Emit a single JSON object as the final assistant message, conforming to this schema.
+A report in three sections, written for the author who will weigh it. The order is fixed.
+
+**1. Summary.** Files audited, and routes emitted. Unresolved host bindings are listed by name — a count reports how many places the host left unbound without saying which, and the which is the actionable part. Emit no count that the emitted material does not already contain: a denominator over decision-bearing clauses is a judgment, and an exact integer over a judgment reads as measurement while resting on none.
+
+**2. Report-level findings**, only when the section fires. Defined below.
+
+**3. Route blocks**, one per extracted clause, each with a single destination. A sentence that splits is represented by several blocks quoting the same parent sentence — the split lives at the sentence, since a clause that has already been extracted has one destination by construction. Emit a block for every unit whose disposition is other than `stay`, and for any `stay` whose placement was contested. When nothing routes, the summary still emits.
+
+### The route block
 
 ```
-Report := {
-  summary: {
-    files_audited:  integer,
-    units_scanned:  integer,     -- decision-bearing clauses examined
-    units_routed:   integer,     -- entries in routes
-    by_destination: { <destination>: integer },
-    unresolved_bindings: integer
-  },
-  routes: [ Route ]
-}
+R{n} — {file}:{line}   {current surface} → {destination}   {disposition}[, contested]
 
-Route := {
-  file:         string,          -- repo-relative path
-  line:         integer,
-  excerpt:      string,          -- the decision-bearing clause, verbatim
-  parent:       string,          -- the sentence it was extracted from
-  current_tier: "tier0" | "tier1" | "tier2" | "enforcement" | "ledger" | "unclassified",
-  disposition:  "stay" | "move" | "rewrite" | "delete",
-  destination:  "tier0" | "tier1" | "tier2" | "enforcement" | "ledger" | "delete",
-  binding:      string | null,   -- host-declared target; null when unresolved
-  owner:        string | null,   -- for delete: the surface that should carry it, where one exists
-  test:         string,          -- the pass step that settled it
-  kind:         string | null,   -- example kind, where the clause is an example
-  mirror:       string | null,   -- justified secondary home, with what it catches
-  rewrite:      string | null,   -- proposed restatement, for rewrite
-  rationale:    string,          -- one sentence
-  confidence:   "high" | "low"   -- low where the judgment is contested
-}
+  > {routed clause, verbatim}
+  From: {parent sentence — where the clause is not the whole sentence}
+
+  Settled at {step}, {the admission or failure predicate that fired}. {why it holds}
+  {required action, per the disposition}
+  Confidence {high|low}{ — the uncertainty, where low}
+  Additional obligations: none | kind …; mirror …; cluster …; owner …; binding …
 ```
 
-One route per extracted clause, each with a single destination. A sentence that splits is represented by several routes sharing a `parent` — the split lives at the sentence, since a clause that has already been extracted has one destination by construction.
+Every element is required. Four of them carry obligations a placeholder name does not convey:
 
-A missing guard is a route to `enforcement` with `binding` null and the guard named in `rationale`; an unresolved host binding takes the same shape with the reason stated. Emit a route for every unit whose disposition is other than `stay`, and for any `stay` whose placement was contested. Count the rest in `units_scanned` so the denominator stays visible. When nothing routes, emit the object with an empty `routes` array; the summary always emits.
+- **The settling step names its predicate.** Naming the step alone reports where the pass stopped; naming the predicate reports what it found. The steps run in order and the first one to settle a clause fixes its destination, so a clause admitted at an early step never reaches the later tests — reporting a step the pass did not run claims a judgment it did not make.
+- **The required action follows the disposition.** For `rewrite`, the exact restatement. For `move`, the destination binding, or an explicitly unresolved binding with the reason. For `delete` caused by ownership, the external owner. For enforcement without a channel, the guard to add.
+- **Low confidence names its uncertainty.** A confidence value with no named uncertainty is a hedge; the author cannot weigh what they cannot see.
+- **The obligations line closes every block.** It preserves what a rigid field set buys and drops what that costs. Naming each secondary dimension forces an acknowledgement that it was checked; `none` is that acknowledgement in one phrase rather than five empty slots. `cluster` belongs to this contract rather than to the author's discretion — a relation across routes is the one thing a per-clause block cannot hold, and it disappears silently when its recording is optional.
+
+### Report-level findings
+
+A finding here is about the pass or about the surface as a whole rather than about one clause. Each takes a fixed shape: its kind — `cross-route-cluster`, `method-limitation`, or `output-contract`; the claim; the routes or clauses affected; why no route block can express it; the consequence; and confidence.
+
+The section fires when the target exposes a limitation that changes, blocks, or makes dishonest at least one route, or when two or more routes stand in a relation no single block holds. A consistency defect unrelated to placement stays out — a finding that would hold whatever surface its clause sat on belongs to a different review, and admitting it turns this section into an unbounded prose bucket.
 
 ## Reference material
 
@@ -164,6 +162,8 @@ A missing guard is a route to `enforcement` with `binding` null and the guard na
 An advisory, human-reviewed instrument. Routes are candidates for an author to weigh, not automatic edits.
 
 The load-tier distinction rests on measured architecture: a skill's frontmatter is preloaded and its body is read on trigger, so the two are genuinely different surfaces. The rest — six destinations, the pass order, the example taxonomy, routing demonstrations to the on-demand surface — are design hypotheses that organize the available evidence rather than conclusions the evidence forces.
+
+**Two known gaps in the pass.** Delete's criterion weighs a clause read alone, so a rule stated more than once on one surface is operative in each instance and each instance routes to the tier it already occupies — intra-surface duplication reaches the report as a cross-route finding, never as a route. And no step tests a pointer against its referent, so an enumeration that disagrees with the table it points at is found while executing the pass rather than by it. Both gaps are known and unclosed; closing either would widen the method past placement, which is a separate decision.
 
 **Standing limitation.** There is no held-out evaluation channel: nothing measures whether contract violations rise or fall after a surface is routed. Every judgment here therefore rests on argument. Treat a claim about what routing achieves as untested, and never infer that deleting a clause is safe from the absence of evidence that it is load-bearing.
 
