@@ -72,8 +72,5 @@ implicit premise.
 **`/grasp`** (Katalepsis) — ResultUngrasped → VerifiedUnderstanding
   when: AI-produced work you assume you grasp but haven't verified — comprehension may be an illusion; confirm your understanding is genuine before you approve, explain, or build on it
 
-**`/delimit`** (Diairesis) — GranularityUnderdetermined → WorkUnitMap
-  when: A large body of work spans many execution units but where to cut it into right-sized pieces is unclear — partition it at natural joints (each unit fits one span, complete coverage with no orphans) before conducting
-
 **`/conduct`** (Hyphegesis) — MethodUnderdetermined → ConductedMethod
   when: Multiple cognitive moves whose order, independence, reconciliation, termination, and routing are non-trivial — conduct the session's method before object-level work begins

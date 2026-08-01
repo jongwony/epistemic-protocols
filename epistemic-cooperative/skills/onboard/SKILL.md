@@ -66,7 +66,6 @@ Compact mapping for inline use. For full Primary/Secondary/Tertiary tables with 
 | Anagoge `/ascend` | Cross-cutting | A vague recall whose right unit is supra-session — a connected line of work, topic cluster, or already-sedimented concept across many sessions | Read-time deposit-graph reconstruction (discover related deposits by shared anchors/keywords/metadata); higher-unit recognition (Recognition over Aggregation) |
 | Katalepsis `/grasp` | Cross-cutting | Rapid comprehension verification via intent-scented entry points | User-intent grasp for AI-completed work, reviews, plans, docs, or code changes |
 | Hyphegesis `/conduct` | Cross-cutting | Conducting the method of a multi-move work prospect before object-level cognition — order, independence, reconciliation, termination, routing | Multi-move work with non-trivial conduct (migrations, staged investigations, entangled adversarial/parallel/synthesis); "how should I approach this whole thing?" meta-questions |
-| Diairesis `/delimit` | Cross-cutting | Delimiting a large body of work into right-sized execution units — where to cut so each unit fits one span, at natural joints, with complete coverage (no work orphaned) | A multi-span project / milestone set / issue tree whose cut into executable units is unclear; "how do I break this down?" partition questions before conducting |
 
 ## Phase Execution
 
@@ -104,7 +103,7 @@ Then **Gate #2**:
 - Options:
   - Pre-execution (Planning) — /bound, /inquire, /elicit, /ideate, /preview
   - Analysis/Decision — /frame, /ground, /induce, /gap
-  - Execution/Verification/Understanding — /apportion, /contextualize, /sublate, /recollect, /ascend, /delimit, /conduct, /grasp
+  - Execution/Verification/Understanding — /apportion, /contextualize, /sublate, /recollect, /ascend, /conduct, /grasp
 
 **Gate #3** (Targeted only, session source):
 - Text: Session source selection

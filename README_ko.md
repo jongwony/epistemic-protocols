@@ -81,9 +81,8 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | [Anagoge](./anagoge) | `/ascend` | 여러 세션에 걸친 작업 라인·토픽·개념 전체가 막연히 기억나지만 어느 한 세션이 아닐 때 |
 | [Katalepsis](./katalepsis) | `/grasp` | AI가 큰 변경을 했고 이해한 것 같지만 정말 파악했는지 확신이 없을 때 — 승인·활용 전에 이해가 진짜인지 검증 |
 | [Hyphegesis](./hyphegesis) | `/conduct` | 여러 인지 이동의 순서·독립성·화해·종료·라우팅이 자명하지 않을 때 — 작업을 시작하기 전에 세션 전체를 어떻게 수행할지 지휘 |
-| [Diairesis](./diairesis) | `/delimit` | 큰 작업 덩어리가 여러 실행 단위에 걸쳐 있지만 어디서 적정 크기로 자를지 자명하지 않을 때 — 지휘 전에 자연스러운 joint에서 분할 |
 
-관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/grasp`, `/delimit`, `/conduct`)
+관심사 클러스터: Planning (`/inquire`, `/elicit`, `/ideate`, `/preview`) · Analysis (`/frame`, `/ground`, `/induce`) · Decision (`/gap`) · Execution (`/apportion`) · Verification (`/contextualize`, `/sublate`) · Cross-cutting (`/bound`, `/recollect`, `/ascend`, `/grasp`, `/conduct`)
 
 ## 유틸리티
 
@@ -153,7 +152,6 @@ Codex marketplace는 Claude Code와 같은 플러그인 경계를 유지합니�
 | Anamnesis | ἀνάμνησις | 상기, 회상 |
 | Anagoge | ἀναγωγή | 끌어올림 |
 | Hyphegesis | ὑφήγησις | 앞서 이끌기, 안내 |
-| Diairesis | διαίρεσις | 나눔, 분할 |
 | Proplasma | πρόπλασμα | 예비 모형, 첫 거푸집 |
 | Heuresis | εὕρεσις | 발견, 찾아냄 |
 

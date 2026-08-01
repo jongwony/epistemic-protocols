@@ -131,7 +131,6 @@ Validate protocol designs against Claude Code interaction patterns and epistemic
   - Katalepsis: ResultUngrasped → VerifiedUnderstanding (User-initiated, VERIFY)
   - Anagoge: RecallGranularityInsufficient → HigherGranularityUnit (AI-guided, ELEVATE)
   - Hyphegesis: MethodUnderdetermined → ConductedMethod (Hybrid, CONDUCT)
-  - Diairesis: GranularityUnderdetermined → WorkUnitMap (Hybrid, DELIMIT)
   - Proplasma: DirectionUnrecognizable → DirectionalContrast (Hybrid, PREVIEW)
   - Heuresis: CandidateFieldUnderexpanded → DiverseCandidateField (User-initiated, DIVERGE)
 - [ ] Initiator correctly specified (AI-guided vs Hybrid vs User-initiated vs User-invoked)
@@ -173,7 +172,7 @@ When other experts flag these as issues, they should be filtered (not actual iss
 |---------|------------------|-----------|
 | Gate mandate | Structured presentation + turn yield in Phase 1/2 | Unstructured text bypass |
 | Epistemic transition | Match protocol definition | Misaligned transition type in CLAUDE.md |
-| Hybrid protocol | Hybrid protocols (Euporia, Hyphegesis, Diairesis, Proplasma) activate on user signal or with confirmation when AI-detected; Diairesis single-dominant-cut relay cycles (Rule 11) may run all-relay — confirmation shifts to the user's post-emission engagement with the emitted WorkUnitMap | Unconfirmed AI auto-activation outside Diairesis's all-relay path |
+| Hybrid protocol | Hybrid protocols (Euporia, Hyphegesis, Proplasma) activate on user signal or with confirmation when AI-detected | Unconfirmed AI auto-activation |
 
 ## Synthesis Template
 

@@ -1,5 +1,5 @@
 {
-  "version": "2.6.0",
+  "version": "2.7.0",
   "nodes": [
     "horismos",
     "aitesis",
@@ -15,7 +15,6 @@
     "anamnesis",
     "anagoge",
     "hyphegesis",
-    "diairesis",
     "proplasma",
     "heuresis"
   ],
@@ -291,24 +290,6 @@
       "target": "periagoge",
       "type": "advisory",
       "satisfies": "decompose-recovery 레시피가 per-cell 재형성을 위해 각 셀을 periagoge 활성화로 라우팅 (다중 CrystallizedAbstraction, 융합 아님)"
-    },
-    {
-      "source": "aitesis",
-      "target": "diairesis",
-      "type": "advisory",
-      "satisfies": "수집된 컨텍스트가 절단 가능한 WBS 범위를 충족시켜 분할을 가능케 함 (scope 부족 시 delimit이 inquire로 route-away)"
-    },
-    {
-      "source": "horismos",
-      "target": "diairesis",
-      "type": "advisory",
-      "satisfies": "경계 맵이 절단이 떨어질 joint 후보(어디서 자를 수 있는가)를 좁힘"
-    },
-    {
-      "source": "diairesis",
-      "target": "hyphegesis",
-      "type": "advisory",
-      "satisfies": "WorkUnitMap(절단된 실행 단위 집합)이 conduct의 WorkProspect로 흐름 — diairesis는 자르고, conduct는 배열·지휘 (cut, then conduct 쌍대)"
     },
     {
       "source": "anagoge",

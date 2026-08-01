@@ -1082,7 +1082,6 @@ describe('package.js CLI', () => {
         'contextualize.zip',
         'curses.zip',
         'dashboard.zip',
-        'delimit.zip',
         'elicit.zip',
         'epistemic-protocols-bundle.zip',
         'forge.zip',

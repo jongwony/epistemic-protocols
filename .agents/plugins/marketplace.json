@@ -185,18 +185,6 @@
       "category": "Productivity"
     },
     {
-      "name": "diairesis",
-      "source": {
-        "source": "local",
-        "path": "./diairesis"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "proplasma",
       "source": {
         "source": "local",

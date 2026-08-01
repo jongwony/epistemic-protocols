@@ -189,7 +189,7 @@ DeficitName      ∈ {BoundaryUndefined, ContextInsufficient, FrameworkAbsent,
                     DirectionUnrecognizable, CandidateFieldUnderexpanded} ∪ Emergent
 ProtocolId       ∈ {bound, inquire, frame, ground, induce, elicit, gap,
                     attend, contextualize, sublate, recollect, ascend,
-                    grasp, delimit, conduct, preview, ideate} ∪ Emergent
+                    grasp, conduct, preview, ideate} ∪ Emergent
 Phase            ∈ {0, 1, 2, 3}
 
 ── PHASE TRANSITIONS ──
