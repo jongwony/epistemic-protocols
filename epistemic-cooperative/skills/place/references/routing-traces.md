@@ -4,7 +4,7 @@ Complete traces of the pass running over real instruction prose. Read one when a
 
 Each trace quotes its source clause in full, so no trace depends on reaching the file it came from. Surfaces are named by kind rather than by path, because the same shapes recur across projects.
 
-Every trace here has been checked against the route-block contract: one route per routing unit — extracted clauses and the residue alongside them — one destination and one enforcement axis each, a sentence that splits appearing as several blocks that name it as their common parent, and a unit assembled across sentences carrying every parent it was drawn from.
+The route-block contract these traces follow is defined in `SKILL.md` §The route block, and where a trace and that section disagree, the section governs. This file states no separate conformance guarantee of its own: a certification nothing checks reads as verification while tracking the contract only as well as its last hand-edit, which is the failure the audit routes and would be committing here.
 
 ---
 
@@ -72,7 +72,7 @@ Every trace here has been checked against the route-block contract: one route pe
 1. *Extract.* One operative unit, already standalone.
 2. *Ownership.* A fact about this project's own toolchain. Owned here.
 3. *Load tier.* It has to be known before either command is issued; a model deciding how to parallelize verification would otherwise not know to serialize. Tier 0.
-4. *Enforcement.* Mechanically checkable — a lock, or mutually exclusive task definitions, would enforce it. The host binds a static-check channel, but a guard that serializes two commands runs in whatever invokes them rather than in a pass over their sources, so no bound channel could carry it: the axis names the guard to add and leaves the binding unresolved. Naming the bound channel here would report a home this guard cannot have. The destination is unaffected; step 3 settled it already.
+4. *Enforcement.* Mechanically checkable — a lock, or mutually exclusive task definitions, would enforce it. The host binds a static-check channel and no other, read from its declared bindings rather than assumed, but a guard that serializes two commands runs in whatever invokes them rather than in a pass over their sources, so no bound channel could carry it: the axis names the guard to add and leaves the binding unresolved. Naming the bound channel here would report a home this guard cannot have. The destination is unaffected; step 3 settled it already.
 5. — 6. Not reached.
 7. *Salience.* The sentence names the forbidden combination. Test the rewrite rather than assuming it fails: *"When liveness tests may mutate live instruction files, run the packaging suite and static verification serially."* That preserves the condition and the directive, and it does not over-constrain the unconditioned case. The rewrite holds, so it is the finding.
 
@@ -82,7 +82,17 @@ Every trace here has been checked against the route-block contract: one route pe
 
 > Node.js 22 or later is required; the continuous integration pipeline pins Node 22.
 
-**Pass:** ownership is local; the sentence has to be known before a contributor picks a runtime, so step 3 settles it at Tier 0. The axis names the pipeline as the existing channel, and the destination holds for a reason specific to this sentence: the pipeline reports the mismatch only after a contributor has already done the work on the wrong runtime.
+**Pass:**
+
+1. *Extract.* The sentence splits. *"Node.js 22 or later is required"* names a threshold and is operative. *"the continuous integration pipeline pins Node 22"* names no action a reader takes; it reports where the requirement is enforced, and is residue.
+2. *Ownership.* Both units are facts about this project's own toolchain. Owned here.
+3. *Load tier.* The requirement has to be known before a contributor picks a runtime, so it settles at Tier 0. The residue changes no action selection and determines nothing to load, so it reaches no tier.
+4. *Enforcement.* Checkable, and a guard already covers it: the axis names the pipeline, read from the pipeline's own pinned version rather than from the sentence asserting it — the sentence is the claim under audit and cannot be its own evidence.
+5. *Ledger.* The residue is admitted on record value: it records that the requirement is enforced and where, which is what a future reader needs to reconstruct why the surface states the requirement rather than trusting contributors to know it. The axis carries the same fact into this report, and the report is not a surface the project keeps.
+6. Not reached.
+7. *Transformations.* None fire. Neither unit names a path to avoid, and neither carries a pre-assembled command.
+
+**Routes:** two, sharing this sentence as `parent`. The requirement → `tier0`, disposition `stay`, the axis naming the pipeline with where it was read; the residue → `ledger`, disposition `move`. The Tier 0 sentence survives a guard that already enforces it for a reason specific to it: the pipeline reports the mismatch only after a contributor has already done the work on the wrong runtime.
 
 **Why it is worth tracing:** the salience step is a rewrite *test*, not a presumption in either direction. Asserting that a positive restatement would lose the condition — without writing the restatement out and reading it — is how a prohibition gets kept for the wrong reason. Both sentences also show the axis crossing a destination rather than competing with it: a guard and an instruction catch the same violation at different moments, so the clause keeps its tier and the axis records the channel.
 
@@ -104,7 +114,7 @@ Every trace here has been checked against the route-block contract: one route pe
 
 2. *Ownership.* The log is the wrapper's own surface, not the wrapped tool's. Owned here. Had the paragraph enumerated the wrapped tool's accepted flag values, that unit would route to `delete` at this step with the wrapped tool's documentation as `owner`, and never reach step 3.
 3. *Load tier.* Tier 1 — it binds behavior while working with this wrapper and governs no arbitrary turn.
-4. *Enforcement.* The byte bound is checkable in principle: a wrapper that reads the log itself could cap the read rather than instruct the caller to. The wrapper does not, so the axis names that guard with its binding unresolved; the instruction keeps the Tier 1 destination step 3 gave it.
+4. *Enforcement.* The byte bound is checkable in principle: a wrapper that reads the log itself could cap the read rather than instruct the caller to. Its read path was opened and carries no cap — the axis records that reading, not the absence of a claim to the contrary — so the axis names that guard with its binding unresolved; the instruction keeps the Tier 1 destination step 3 gave it.
 5. *Ledger.* The verification note is an epistemic annotation — real, worth recording, and no action follows from reading it. The bystander reasoning justifies a safety claim the instruction already carries. Both admitted.
 6. Not reached.
 7. *Transformations.* None fire. "Will not cap it" names the specific failure a reader would otherwise walk into and carries the threshold, so salience leaves it.
