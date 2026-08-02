@@ -17,9 +17,10 @@ The check separates two things that usually collapse into one: **who wrote the o
 gate    : (implicit) | explicit draft   -- optional; defaults to the gate drafted in the current turn
 advisor : { codex }                     -- optional; the independent adjudicator behind the
                                         --   (frozen option set, settled constraints, pointers)
-                                        --   → { verdict, axis reading, cited grounds, falsifier,
-                                        --      and on a collapse verdict, the option
-                                        --      the set reduces to } interface
+                                        --   → { verdict, axis reading, grounds cited for the reading
+                                        --      and for the verdict, falsifier, and on a collapse
+                                        --      verdict the option the set reduces to with the
+                                        --      ground it reduces on } interface
 ```
 
 The advisor is a parameter, not the identity. Any adjudicator satisfying that interface can drive the check, provided it is a genuinely separate reasoner — a second pass by the drafting agent does not satisfy it, because the independence is the whole mechanism.
@@ -33,7 +34,8 @@ The advisor is a parameter, not the identity. Any adjudicator satisfying that in
                                    controlling sources and verification criteria BEFORE any advisor
                                    output is visible
   Phase 2 : verify              -- collect the advisor's own words; check each cited ground against
-                                   the substrate; check whether its stated falsifier is actually there
+                                   the substrate; check whether its stated falsifier could have
+                                   defeated the reading and whether it is there
   Phase 3 : dispose             -- genuine | collapse | malformed | indeterminate | failed
   Phase 4 : synthesize          -- malformed only: rebuild the option set under the synthesis guards,
                                    then one external recheck, bounded
@@ -84,9 +86,9 @@ Where the running environment carries its own standing policy about when gates g
 - the constraints already settled by the user that the advisor cannot re-derive from the substrate — decisions made in conversation that left no trace on disk
 - substrate pointers: paths, search patterns, and commands the advisor can dereference with its own tools
 
-Ask it for four things back: a verdict (`genuine | collapse | malformed`), its reading of what axis the options actually stand on, the grounds it cites for that reading, and — stated after the rest, so it accounts for what it just said rather than shaping it — the observation that would break its own reading.
+Ask it for four things back: a verdict (`genuine | collapse | malformed`), its reading of what axis the options actually stand on, the grounds it cites — for the axis reading and, separately, for the verdict it reaches on that axis — and, stated after the rest so it accounts for what it just said rather than shaping it, the observation that would break its own reading. The two sets of grounds are asked for apart because they establish different claims: what axis a set stands on and what follows for the set rest on different evidence, and it is the verdict, not the axis, that routes what happens next.
 
-On a `collapse` verdict, ask for a fifth: which option of the frozen set the others reduce to. It is asked for rather than worked out afterwards because naming it *is* the substance of that verdict — a set said to collapse without saying what it collapses to has not been adjudicated. Leaving it to be supplied later would hand the choice back to the side whose option set is under judgment, which is the collapse of drafter and judge this skill exists to keep apart.
+On a `collapse` verdict, ask for a fifth: which option of the frozen set the others reduce to, and the ground on which they reduce to it. Both are asked for rather than worked out afterwards because naming them *is* the substance of that verdict — a set said to collapse without saying what it collapses to has not been adjudicated, and a target named without the ground that carries it defers the same thing one step in, arriving as a conclusion with nothing behind it for the verification to check. Leaving either to be supplied later would hand the choice back to the side whose option set is under judgment, which is the collapse of drafter and judge this skill exists to keep apart.
 
 **Input boundary.** The dispatch never carries which option the drafting side prefers, the rationale behind the option set, or any prior disposition. An adjudicator told the preferred answer is no longer adjudicating; it is agreeing. Naming the constraint the user settled is conveyance; adding what the advisor should therefore conclude is not.
 
@@ -105,8 +107,8 @@ Then check it, ground by ground, against the anchored substrate:
 
 - **Does each cited source exist, and does it say what the advisor attributed to it?** A citation pointing at a location that says something else is a failed ground even when the underlying claim turns out to be true elsewhere — the claim and its citation are checked separately, and both are reported.
 - **Does the source track what it asserts?** A source that is current but coupled to nothing can silently disagree with the behavior it describes; freshness is not the same as fidelity.
-- **Does the cited ground carry the axis conclusion, or only one premise inside it?** A true premise that does not reach the conclusion is the most common way a verdict looks grounded and is not.
-- **Is the advisor's stated falsifier actually present in the substrate?** Present means the reading is live-contested. Absent means that particular objection does not apply — not that the reading is right.
+- **Does each cited ground carry what it was offered for — the axis conclusion, and on a `collapse` verdict the reduction itself?** A true premise that does not reach the conclusion is the most common way a verdict looks grounded and is not. The axis and the reduction are separate conclusions and are checked separately: grounds establishing what axis a set stands on leave untouched the claim that some of its options reduce to one, and a reduction relayed on the strength of the axis grounds is the advisor's own judgment passed through unaudited.
+- **Could the stated falsifier have defeated the reading, and is it present in the substrate?** Whether it could comes first: an observation that cannot be obtained, or whose obtaining would leave the reading standing, is not a falsifier at all, and its absence certifies nothing. Once it could, presence carries meaning — present means the reading is live-contested, absent means that particular objection does not apply, not that the reading is right. The two are checked apart because absent-because-vacuous and absent-because-tested look identical afterwards, and only the second is a result.
 - **Is any material premise inaccessible, ambiguous, or a matter of reading rather than fact?**
 - **Did the answer turn on the sources the precommit named?** This is where the precommit is read, and reading it is the only thing that makes it more than a record. A source it named that the answer never reaches is an uncovered ground no present citation can speak for — the answer did not refute that source, it went somewhere else. Every citation checking out and the controlling source going untouched are perfectly compatible, which is exactly the shape a followed answer takes.
 
@@ -123,7 +125,7 @@ Exactly one of these holds. They are checked in order, and the first that applie
 | No usable answer — the advisor failed, timed out, or returned nothing readable | **failed** | Present the original gate, labeled as unchecked, with what went wrong. The cycle ends in failure; the gate still fires |
 | The substrate moved again after the one permitted re-anchor | **indeterminate (anchor)** | Unfold everything, naming both anchors and what moved between them. Grounds read against a substrate that will not hold still are not grounds |
 | A cited ground is missing, or says something other than what was attributed to it | **indeterminate (uncitable)** | Unfold everything; the user decides with both readings in view |
-| Grounds located, but the entailment to the axis conclusion is contestable, a material premise is interpretive, or a source the precommit named went untouched | **indeterminate (audit)** | Unfold everything, naming what the answer did not reach |
+| Grounds located, but an entailment is contestable — to the axis conclusion, or on `collapse` to the reduction — a material premise is interpretive, a source the precommit named went untouched, or the stated falsifier could not have defeated the reading | **indeterminate (audit)** | Unfold everything, naming what the answer did not reach |
 | The advisor's own stated falsifier is present in the substrate | **indeterminate (falsifier live)** | Unfold everything, naming the live falsifier |
 | Grounds check out, falsifier absent, verdict `genuine` | **genuine** | Present the original gate, now checked, with the axis reading |
 | Grounds check out, falsifier absent, verdict `collapse` | **collapse** | Relay: state the finding and the option it settles on, with the ground that settles it. No gate |
@@ -141,7 +143,7 @@ A `malformed` verdict means the options stand on the wrong axis. The advisor sup
 2. **A change of answer kind routes back.** If the relocated axis needs a different answer kind, or belongs to a different phase of the work, return control to wherever the original gate was constructed. Do not present the replacement as though it were a sharpening of the original.
 3. **Every original option is accounted for.** Each one is retained, collapsed into another, removed as off-axis, or reframed — and each disposition names the advisor ground that licensed it. An option that quietly disappears is a deletion wearing a rewrite's clothes.
 4. **No unsupported additions.** A new option derives from the relocated axis and cited substrate. An option that traces only to the drafting side's unrecorded preference is an injection, and injection is the failure mode this skill was built against.
-5. **The replacement is itself checked, once, and the recheck is a full pass.** Run the same collapse test on the new set: if analysis converges on a single dominant option, it is a relay, not a gate. Then send it for **one** external recheck — bounded at one. What comes back re-enters the same ground verification and lands on exactly one disposition, the way the first answer did; a lighter second look would let the rebuilt gate reach you on a verdict that was never checked, which is the one thing no verdict here is allowed to do. A recheck that lands on `genuine` presents the rebuilt gate; one that lands on `collapse` relays the option it settles on. Any other landing — the advisor returning `malformed` again, any indeterminate disposition, or an answer that never arrives — ends the cycle here: surface the diagnosis and both attempts, and do not present a third unverified gate. Recursion here manufactures confidence rather than earning it.
+5. **The replacement is itself checked, once, and the recheck is a full pass.** Run the same collapse test on the new set: if analysis converges on a single dominant option, it is a relay, not a gate. Then send it for **one** external recheck — bounded at one. What comes back re-enters the same ground verification and lands on exactly one disposition, the way the first answer did; a lighter second look would let the rebuilt gate reach you on a verdict that was never checked, which is the one thing no verdict here is allowed to do. A recheck that lands on `genuine` presents the rebuilt gate; one that lands on `collapse` relays the option it settles on together with the ground it settles on, the same pair the first answer owes. Any other landing — the advisor returning `malformed` again, any indeterminate disposition, or an answer that never arrives — ends the cycle here: surface the diagnosis and both attempts, and do not present a third unverified gate. Recursion here manufactures confidence rather than earning it.
 6. **Provenance stays separable.** The original gate, the advisor's response, the precommit, the verification result, and the synthesized gate remain distinguishable from one another at every point. Merging them into one narrative destroys the only record that shows how the conclusion was reached.
 
 ## Presentation
@@ -154,12 +156,12 @@ A `malformed` verdict means the options stand on the wrong axis. The advisor sup
 
 These are what you read in order to decide, so they belong in front of you at the moment of deciding.
 
-**The ground-by-ground detail folds to one line.** Something like *"nine of ten cited grounds confirmed; one citation pointed at the wrong location though its claim holds elsewhere; the answer turned on both sources the precommit named; falsifier absent."* The precommit comparison rides that line either way — stating that the answer did reach what was expected is what makes the converged case distinguishable from an unasked question. The full detail stays available and is produced on request. It folds because it is what you read to decide whether to *trust* the conclusion, not to reach it — a later and rarer need, and one that keeps its own place.
+**The ground-by-ground detail folds to one line.** Something like *"nine of ten cited grounds confirmed; one citation pointed at the wrong location though its claim holds elsewhere; the answer turned on both sources the precommit named; the falsifier could have landed and did not."* The precommit comparison rides that line either way — stating that the answer did reach what was expected is what makes the converged case distinguishable from an unasked question. The full detail stays available and is produced on request. It folds because it is what you read to decide whether to *trust* the conclusion, not to reach it — a later and rarer need, and one that keeps its own place.
 
 Two things never fold, even inside the summary line:
 
 - **whatever routed the disposition**, with what it turned on — the ground that failed and how, the entailment that would not carry, the premise that was a reading rather than a fact, the named source the answer never reached, the anchor that moved. Hiding the router hides the reasoning, and each Phase 3 row names its own
-- **the falsifier's status** — present or absent, always stated, because its absence is a result and not a silence
+- **the falsifier's status** — whether it could have defeated the reading, and whether it is present, both always stated, because an absence that is a result and an absence that was vacuous read the same otherwise
 
 Folding the detail while dropping either would not be compression; it would be concealment wearing compression's shape.
 
@@ -198,7 +200,7 @@ Keeping these separate is what prevents one unavailable advisor from leaving eve
 
 ## Rules
 
-1. **The advisor's verdict is an input, never a ruling.** It enters the record as one reasoner's grounded reading and is checked before it reaches you. On `collapse` the answer also names which option the set reduces to, because naming it is what that verdict asserts — supplying it afterwards would return the choice to the side under judgment. Adopting any of it unchecked would replace one unaudited judgment with another and lose the independence the exchange was for.
+1. **The advisor's verdict is an input, never a ruling.** It enters the record as one reasoner's grounded reading and is checked before it reaches you. On `collapse` the answer also names which option the set reduces to and the ground it reduces on, because naming both is what that verdict asserts — supplying either afterwards would return the choice to the side under judgment, and a target arriving without its ground is a conclusion the verification has nothing to check. Adopting any of it unchecked would replace one unaudited judgment with another and lose the independence the exchange was for.
 2. **Launch before precommit, and never read partial output first.** The ordering is the mechanism. A judgment recorded after the answer is visible cannot be distinguished from the answer, and the whole question the precommit answers — did this converge or follow — becomes unanswerable.
 3. **The precommit records expected controlling sources and verification criteria, not a preferred option — and the verification reads it back.** A recorded preference turns the later comparison into an agreement check, which is what the ordering exists to avoid. A precommit nothing later reads is a record impersonating a safeguard: the check that reads it asks whether the answer turned on the sources it named, a named source left untouched routes the cycle to an indeterminate audit, and what the comparison showed is stated when the result is presented.
 4. **The audit vertex checks grounds, not options.** The side that drafted the options has no independent opinion about them. Its independent contribution is whether the advisor represented and applied the evidence correctly.
