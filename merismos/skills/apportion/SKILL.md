@@ -41,7 +41,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
         V = Adjust(d)  → rederive(K, R, P, d) → (K, R, P) := (K', R', P') → Λ.plan_conditions_stale := ⊥ → [¬acceptance_present(P') → Qt(K', P') → Stop → Vₜ → P' updated as at Phase 2 entry] → [acceptance_present(P') ∧ Λ.unbounded_approved: Λ.unbounded_approved := ⊥] → check(U, K', R', P', oos) → InvariantStatus → Qc(...)   -- over the SAME U: K' ∪ R' spans every obligation of every unit (no removal; a withdrawn condition becomes a residual); an Adjust that clears whole-goal acceptance re-fires Qt before re-presenting; an Adjust that INTRODUCES whole-goal acceptance while Λ.unbounded_approved still reads ⊤ retracts that stale waiver instead of emitting both (D5); check is RE-RUN against the adjusted (and possibly Qt-updated) state so Qc's hard_invariants_hold guard never reads InvariantStatus computed pre-Adjust; Adjust is the user's engagement point with P, so it clears the staleness notice (R4) regardless of which axis the direction d touched
         V = Reopen(u)  → residual := residual ∪ u.obligations; U := U \ {u}; K := K \ {κ∈K:κ.unit=u}; R := R \ {ρ∈R:ρ.unit=Some(u)}; Λ.fit_overrides := Λ.fit_overrides \ {u.unit_ref}; Λ.plan_conditions_stale := ⊤ → cycle_n += 1 → Phase 1   -- the conditions revealed a bad cut; that unit's obligations return to residual and its derived K/R entries leave with it, so a later repack does not collide with stale derivations (D4) — residual is NOT reseeded from obligations(G) \ oos (D3), it carries forward every other unit's obligations untouched; u's fit-override record leaves with it too, mirroring K/R — a fresh repack gets a fresh UnitRef and, if it again overflows, needs its own OverrideFit recorded anew; plan-level P is intentionally NOT re-derived here (Rule 25: a user's Adjust-shaped P survives a Reopen detour) but the unit set it was derived against just changed, so Λ.plan_conditions_stale marks that for surfacing rather than leaving it silently possibly-stale (R4)
         V = Confirm ∧ ¬hard_invariants_hold(Λ): → re-present Qc with the violated invariant named   -- a hard invariant is never waived by confirming past it
-        V = Confirm ∧ hard_invariants_hold(Λ):  → AcceptResiduals(R) → ∀ρ∈R: ρ.disposition := AcceptUncovered; ∀p∈P: p.scope=WholeGoalAcceptance → p.dischargeable_when := plan_terminal → Phase 3   -- the dischargeable_when refresh is plan_terminal's producer (C2/C3): recomputed over the U, K, R current at Confirm, after the disposition write, replacing whatever provisional value DefineNow first wrote at Qt
+        V = Confirm ∧ hard_invariants_hold(Λ):  → AcceptResiduals(R) → ∀ρ∈R: ρ.disposition := AcceptUncovered; ∀p∈P: p.scope=WholeGoalAcceptance → p.dischargeable_when := plan_terminal → Phase 3   -- the dischargeable_when refresh is plan_terminal's producer (C2/C3): recomputed over the U, K, R current at Confirm, after the disposition write. Unconditional over the scope, not only over DefineNow's provisional value — DerivePlan can put a WholeGoalAcceptance condition into P without Qt ever firing, and Adjust can rederive one. This is scope-invariant maintenance, not an overwrite of authored content: see PlanStateRequirement's SCOPE-OWNED note for why dischargeable_when is protocol-owned at this one scope
     Phase 3 Emit(U, K, P) → E [TaskCreate] → package(E) → record_handoff(E) → N → converge(apportionment trace) → ConditionBearingUnitPlan
 
 ── MORPHISM ──
@@ -190,14 +190,22 @@ PlanStateRequirement = { predicate: VerifiablePredicate, basis: Set(Evidence) }
                --   predicate over K ∪ R, or a completion-count threshold — never a turn count or a named unit
                -- SCOPE-OWNED at WholeGoalAcceptance: those open alternatives are for the OTHER plan scopes
                --   (FinalIntegration, GlobalNonRegression), whose discharge points genuinely vary with what
-               --   the condition asserts. A whole-goal acceptance criterion has exactly one safe discharge
-               --   point — every unit's leaf resolved — so at that scope dischargeable_when is protocol-owned
-               --   and IS plan_terminal, whichever step produced the condition (Qt's plan_condition(d), or
-               --   DerivePlan reading acceptance straight from the goal, in which case Qt never fires). This
-               --   is why AcceptResiduals refreshes every WholeGoalAcceptance p unconditionally: it maintains
-               --   a scope invariant rather than overwriting an authored choice. A user's Adjust changes the
-               --   acceptance criterion itself (p.condition); when it is safe to discharge that criterion is
-               --   a plan-state fact this protocol computes, not a value the user authors
+               --   the condition asserts. At WholeGoalAcceptance, dischargeable_when is protocol-owned and
+               --   IS plan_terminal, whichever step produced the condition (Qt's plan_condition(d), or
+               --   DerivePlan reading acceptance straight from the goal, in which case Qt never fires) —
+               --   which is why AcceptResiduals refreshes every such p unconditionally: it maintains a scope
+               --   invariant rather than overwriting an authored choice
+               -- the claim is SUFFICIENCY, not uniqueness: plan_terminal is always SAFE for this scope — every
+               --   unit's leaf resolved is a conservative superset of any narrower firing point, so the
+               --   criterion is never discharged early — and topology_free forbids naming units or order
+               --   positions, so a narrower point could only be expressed as a coverage or count predicate
+               --   over K ∪ R. Such a point may exist and be safe too; this scope takes the conservative one
+               --   rather than ranking them, accepting non-minimality as the price of one uniform rule
+               -- authorship division, restated at the Adjust gate: a user's Adjust changes the acceptance
+               --   CRITERION (p.condition). WHEN it is safe to discharge that criterion is a plan-state fact
+               --   this protocol computes, not a value the user authors — a direction phrased as timing
+               --   ("check acceptance once A and B pass") is read as a change to the criterion, never as an
+               --   authored dischargeable_when, because Confirm resets that field regardless
 topology_free(req) ≡ req contains no UnitRef, Move, MoveRegion, or order-position reference
                -- an AI-judged semantic check over req.predicate and req.basis, not a structural guarantee:
                --   PlanStateRequirement's fields (VerifiablePredicate, Set(Evidence)) are generic and do not
@@ -828,6 +836,8 @@ Options:
 2. **Adjust** — change the conditions over the same units: [prompt for direction]
 3. **Reopen a unit** — the conditions exposed a bad cut; return that unit's obligations to the apportionment loop: [prompt for which unit]
 ```
+
+An Adjust direction reshapes what each condition ASSERTS. When a whole-goal acceptance criterion becomes safe to discharge is a plan-state fact this protocol computes at Confirm, not a value the user authors, so a direction phrased as timing ("check acceptance once A and B pass") lands on the criterion rather than on its firing point — see `PlanStateRequirement`'s SCOPE-OWNED note for why that field is protocol-owned at this one scope.
 
 Adjust rederives over the same apportionment and re-presents. Reopen returns exactly that unit's obligations to the residual and re-enters Phase 1. Both are bounded by user agency: Confirm or Esc terminates.
 
