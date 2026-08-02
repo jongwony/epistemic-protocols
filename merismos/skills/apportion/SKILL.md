@@ -29,7 +29,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
         Aᵤ = Recut(d)       → re-derive the Anchor frame under d → cycle_n += 1, loop           -- same residual, different cut
         Aᵤ = OverrideFit    → Λ.fit_overrides ∪= {proposed_unit} → integrate_unit → cycle_n += 1, loop  -- offered iff SpanFit ≠ Fits: an Overflows/Indeterminate unit committed on record
         Aᵤ = Sufficient     → autonomous_pack(residual) (track) → [any packed unit with SpanFit ≠ Fits, or residual ≠ ∅ after packing: next cycle's Anchor → cycle_n += 1, loop] | (U'', residual := ∅) → surface (extension) → Phase 2
-    Phase 2 ∀u∈U: Derive(u) → κ ∨ ρ → (K, R) ∥ DerivePlan(G, U) → P →
+    Phase 2 ∀u∈U: Derive(u) → (Set(κ), Set(ρ)) → (K, R) ∥ DerivePlan(G, U) → P →
       oos ≠ ∅ → OOS(oos) (extension)                                            -- obligations needing pre-action interception: out of scope, substrate named; oos was computed at Phase 1 entry, not re-computed here
       ¬acceptance_present(P) → Qt(K, P) → Stop → Vₜ →                            -- the whole goal has no acceptance criterion yet
         Vₜ = DefineNow(d)     → P := P ∪ {plan_condition(d)}                     -- acceptance_present(P) now holds by construction
