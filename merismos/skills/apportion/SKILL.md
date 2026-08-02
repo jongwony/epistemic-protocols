@@ -41,7 +41,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
         V = Reopen(u)  → residual := residual ∪ u.obligations; U := U \ {u} → cycle_n += 1 → Phase 1   -- the conditions revealed a bad cut; that unit returns to the apportionment loop
         V = Confirm ∧ ¬hard_invariants_hold(Λ): → re-present Qc with the violated invariant named   -- a hard invariant is never waived by confirming past it
         V = Confirm ∧ hard_invariants_hold(Λ):  → AcceptResiduals(R) → ∀ρ∈R: ρ.disposition := AcceptUncovered → Phase 3
-    Phase 3 Emit(U, K, P) → E [TaskCreate] → package(E) → record_handoff → converge(apportionment trace) → ConditionBearingUnitPlan
+    Phase 3 Emit(U, K, P) → E [TaskCreate] → package(E) → record_handoff(E) → N → converge(apportionment trace) → ConditionBearingUnitPlan
 
 ── MORPHISM ──
 AutonomousGoal × ExecutionHorizon
@@ -58,7 +58,7 @@ AutonomousGoal × ExecutionHorizon
   → confirm(unit_plan)                 -- user judges the apportionment together with its conditions
   → emit(goal_entries)                 -- one entry per unit; that unit's conditions conjoined into one leaf predicate
   → package(E)                         -- constructs the whole returned plan from E's own coproduct partition, envelope included — a read-back of what was emitted, never a second derivation beside it
-  → record_handoff                     -- writes Λ.handoff_locator: the address a later session dereferences to read E back, so "handoff recorded" is a produced fact rather than a self-report
+  → record_handoff(E) → N              -- emits the fixed-shape navigation block a later session dereferences to read E back; the locator leaves invocation-local state instead of dying with it
   → ConditionBearingUnitPlan
 requires: user_initiated(G)            -- user declares autonomous execution intent via /apportion
 deficit:  GoalPlanUncompiled           -- activation precondition (Layer 1)
@@ -189,6 +189,9 @@ leaf(u)        = ⋀ { κ.condition | κ ∈ K, κ.unit = u }
                -- THE JOIN RULE: one unit = one execution interval = one conjoined leaf predicate. A unit's
                --   conditions are an all-of, not several entries: per-condition entries would duplicate the
                --   unit's execution identity, and a cartesian product does the same more explicitly
+leaf_basis     = Unit → Evidence
+               -- maps u to Evidence whose source identifies K's compiled condition for u.unit_ref and whose
+               --   String content renders leaf(u); plan_condition materializes this from the current U and K
 E              = Set(GoalEntry)        -- emission
 GoalEntry      = UnitEntry { unit_ref: UnitRef, subject: String, condition: VerifiablePredicate,
                              conjuncts: Set(LeafConjunct), capability_requirements: Set(CapabilityRequirement),
@@ -293,8 +296,9 @@ Vₜ             = TerminationJudgment ∈ {DefineNow(direction), RouteBound, Ap
 plan_condition(d) = PlanCondition materialized from a DefineNow direction
                -- scope = WholeGoalAcceptance, kind = completion, dischargeable_when = plan_terminal
 plan_terminal  = a distinguished PlanStateRequirement with BOTH fields supplied — predicate: every unit's
-               --   leaf predicate has resolved (κ-covered or accepted-uncovered); basis: {leaf(u) | u ∈ U},
-               --   the emitted units' own compiled leaves. The ordinary terminal case, expressed as a
+               --   leaf predicate has resolved (κ-covered or accepted-uncovered); basis:
+               --   {leaf_basis(u) | u ∈ U}, where leaf_basis(u) is Evidence whose source identifies K's
+               --   compiled condition for u.unit_ref and whose String content renders leaf(u). The ordinary terminal case, expressed as a
                --   property of plan state rather than as an order fact (after unit U / at terminal)
                -- basis is supplied, not omitted as self-evident: a consumer deciding which work could
                --   invalidate this requirement reads basis to do it, so a distinguished value with basis
@@ -317,7 +321,7 @@ ConditionBearingUnitPlan = { units: Set(UnitEntry), plan_conditions: Set(PlanEnt
                --   the three plan-level facts (accepted-uncovered obligations, delegated substrates, the
                --   whole-goal acceptance waiver) reach a consumer through the durable channel and not only
                --   through an in-memory return the session boundary destroys. Neither the returned value nor
-               --   the convergence trace crosses that boundary; E does. Well-formed exactly when
+               --   the convergence trace crosses that boundary; E persists and N points the recipient to it. Well-formed exactly when
                --   apportioned(G) holds (see CONVERGENCE)
 AcceptedResidualEntry = { obligation: Obligation, unit_ref: Option(UnitRef), kind: PredicateKind }
                -- one entry per residual whose disposition is AcceptUncovered at Confirm; unit_ref threads
@@ -325,11 +329,30 @@ AcceptedResidualEntry = { obligation: Obligation, unit_ref: Option(UnitRef), kin
                --   see WHICH unit's completion or invariant predicate is missing, not merely THAT one is
 plan           = the ConditionBearingUnitPlan value returned by this invocation -- referenced in CONVERGENCE
 HandoffLocator = the durable identity of the emitted record set E — what a later session dereferences to
-               --   read this plan back. Written by record_handoff, required non-None by apportioned(G)
+               --   read this plan back. Written into N by record_handoff, required by apportioned(G)
                -- the handoff is a POINTER to the emitted record, never a re-authored copy of it: this
                --   protocol supplies the entry point, and the consumer derives from its own purpose what to
                --   carry over. A handoff step that recorded only "handed off" would leave the successor
                --   session with a claim and no address
+locator        = E → HandoffLocator   -- read by record_handoff from the durable identities TaskCreate returned
+N              = NavigationBlock { purpose_frame: String, canonical_locator: HandoffLocator,
+                                    dereference_instruction: DereferenceInstruction, snapshot_anchor: Option(String),
+                                    grounding_instruction: GroundingInstruction }
+               -- emitted in the settled fixed shape: Purpose / frame; Canonical locator; Dereference
+               --   instruction; optional Snapshot anchor only when exact-state determinacy is needed; and
+               --   Grounding instruction. The grounding instruction directs the recipient to run /inquire
+               --   where available (or its equivalent grounding pass) and stop when a source is unreachable
+               --   or a needed premise lacks support-integrity. It carries entry points, never a copy of E
+DereferenceInstruction = an instruction to read E at the canonical locator
+GroundingInstruction = the fixed instruction to run /inquire where available, or the recipient's equivalent
+               --   grounding pass, and stop when a source is unreachable or a needed premise lacks
+               --   support-integrity
+emitted(N)     ≡ record_handoff presented N in the handoff output — the emission IS the text, since N
+               --   crosses the session boundary as presented text and not as Λ state. Defined separately
+               --   from emitted(E) ≡ Λ.emitted: the two travel on different channels, and reusing one
+               --   symbol across both without saying so leaves the reader unable to discharge either
+handoff_recorded(N, E) ≡ emitted(N) ∧ N.purpose_frame ≠ ""
+                          ∧ N.canonical_locator = locator(E)
 
 ── PHASE TRANSITIONS ──
 Phase 0: G → Probe(G) → goal_plan_uncompiled?                          -- activation checkpoint (sense)
@@ -360,7 +383,7 @@ Phase 2: U → ∀u∈U: Derive(u) → (Set(κ), Set(ρ)) → (K, R) ∥ DeriveP
              V = Reopen(u) → residual := residual ∪ u.obligations; U := U \ {u} → cycle_n += 1 → Phase 1
              V = Confirm ∧ ¬hard_invariants_hold(Λ) → re-present Qc naming the violated invariant   -- a hard invariant is not waivable by confirming past it
              V = Confirm ∧ hard_invariants_hold(Λ) → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.obligation | ρ ∈ R}; ∀ρ∈R: ρ.disposition := AcceptUncovered (track) → Phase 3
-Phase 3: (U, K, P) → Emit → E [Tool: TaskCreate] → package(E) → record_handoff (track) → converge(apportionment trace) (extension) → ConditionBearingUnitPlan
+Phase 3: (U, K, P) → Emit → E [Tool: TaskCreate] → package(E) → record_handoff(E) → N (extension) → converge(apportionment trace) (extension) → ConditionBearingUnitPlan
 
 Phase 0 → Phase 1: goal_plan_uncompiled(G)                             -- an autonomous goal whose unit plan and conditions are uncompiled
 Phase 0 → deactivate: ¬autonomous_intent(G) ∨ condition_bearing(G)     -- relay the scan result; no activation
@@ -372,7 +395,7 @@ Phase 2 → Phase 2: V = Adjust(d)                                       -- rede
 Phase 2 → Phase 2: V = Confirm ∧ ¬hard_invariants_hold(Λ)              -- Qc re-presents with the violated invariant named; no state advances
 Phase 2 → deactivate: Vₜ = RouteBound                                  -- Rerouted; /bound → /apportion re-entry recompiles fresh
 Phase 2 → Phase 3: V = Confirm ∧ hard_invariants_hold(Λ)               -- residuals accepted on record; every clause of apportioned(G) that Qc can violate holds AT THE TRANSITION, not merely in the equation
-Phase 3 → converge: emitted(E) ∧ handoff_recorded                      -- ConditionBearingUnitPlan + apportionment trace
+Phase 3 → converge: emitted(E) ∧ handoff_recorded(N, E)                -- ConditionBearingUnitPlan + apportionment trace + navigation block
 Phase 1 → deactivate (ungraceful): user_esc                            -- EarlyExit: no emission, no handoff recorded
 Phase 2 → deactivate (ungraceful): user_esc                            -- EarlyExit: no emission, no handoff recorded
 
@@ -400,8 +423,9 @@ Condition loop (Phase 2): Qt fires whenever the whole goal carries no acceptance
   because Phase 1 → Phase 2 always re-runs Derive/DerivePlan/check from entry, no staleness carries across
   this back-edge either. Confirm or Esc terminates.
 
-Stateless: Merismos terminates at emission. No state survives into the execution interval — no session
-approvals, no per-action classification, no mid-execution checkpoint.
+Stateless: Merismos terminates at emission. No invocation-local state survives into the execution interval —
+no session approvals, no per-action classification, no mid-execution checkpoint. The emitted navigation
+block is the cross-session route to E, not surviving Λ state.
 
 Convergence evidence (relay, at emission): present the apportionment trace —
   (a) Plan readback — the goal restated as its units in plain single-sentence form;
@@ -421,7 +445,7 @@ Convergence is demonstrated, not asserted.
 
 ── CONVERGENCE ──
 -- plan denotes the returned ConditionBearingUnitPlan (see TYPES); E is the TaskCreate-emitted goal-entry set
-apportioned(G) = emitted(E) ∧ handoff_recorded
+apportioned(G) = emitted(E) ∧ handoff_recorded(N, E)
                  ∧ coverage_complete(U, G) ∧ span_fit(U)
                  ∧ (U ≠ ∅ ∨ oos ≠ ∅)                                                -- a goal with nothing read from it never claims apportionment occurred
                  ∧ (∀u∈U: unit_termination_covered(u, K, R))
@@ -431,6 +455,9 @@ apportioned(G) = emitted(E) ∧ handoff_recorded
                                      ∧ e.capability_requirements = u.capability_requirements ∧ e.feasibility_notes = u.feasibility_notes))   -- the join rule's provenance half, extended: the emitted conjunct breakdown is the same κ set the leaf conjoins, and the emitted capability/feasibility fields are the same values Pack read onto the unit — neither is a separately asserted claim
                  ∧ (∀p∈P: ∃! e ∈ E : e is PlanEntry ∧ e.scope = p.scope ∧ e.kind = p.kind
                                      ∧ e.condition = p.condition ∧ e.dischargeable_when = p.dischargeable_when)
+                 ∧ (∀e∈E: e is UnitEntry → ∃! u∈U: e.unit_ref = u.unit_ref)          -- reverse correspondence: no unapproved UnitEntry can ride in E
+                 ∧ (∀e∈E: e is PlanEntry → ∃ p∈P: e.scope = p.scope ∧ e.kind = p.kind
+                                     ∧ e.condition = p.condition ∧ e.dischargeable_when = p.dischargeable_when)   -- reverse correspondence: no unapproved PlanEntry can ride in E
                  ∧ (∀p∈P: topology_free(p.dischargeable_when))
                  ∧ plan.units = {e ∈ E : e is UnitEntry}                             -- the RETURNED plan's units are exactly E's UnitEntry partition — produced by Phase 3 package from E, not asserted separately; closes F2: an empty or stale returned plan cannot satisfy this equation
                  ∧ plan.plan_conditions = {e ∈ E : e is PlanEntry}                   -- the RETURNED plan's plan conditions are exactly E's PlanEntry partition — produced by Phase 3 package from E
@@ -480,10 +507,10 @@ Phase 2 ApproveUnbounded (track)    → Internal state update (record Λ.unbound
 Phase 2 check        (track)        → Internal state update (invariant status: coverage, horizon fit, termination coverage, obligation derivation, oos substrate-naming, and each plan condition's topology-freedom — an AI semantic judgment over the plan condition's predicate content, not a structural proof — over the current apportionment; RE-RUN every time Qc is about to (re-)present — at pass entry, and again after every Adjust plus any Qt re-fire it triggers — so Λ.invariant_status is never read stale against a state check has not yet seen)
 Phase 2 Qc           (constitution) → present (apportionment + derived conditions + residual dispositions + invariant status: Confirm / Adjust / Reopen) [Tool]
 Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's obligation into Λ.accepted, materializing accepted_uncovered for the convergence predicate; also writes ρ.disposition := AcceptUncovered for each ρ ∈ R so the field reads correctly in the Phase 3 trace — the pre-Confirm guard does not depend on this write, see unit_termination_covered)
-Phase 3 Emit         (track)        → TaskCreate (one goal entry per unit: unit_ref + subject + the conjoined leaf predicate + its unconjoined conjuncts with kind + its capability requirements and feasibility notes carried verbatim from the unit; plan-level conditions as their own entries carrying scope + kind + condition + dischargeable_when; AND exactly one plan-envelope entry carrying the Λ-accepted residuals, the computed oos set, and Λ.unbounded_approved — the three plan-level facts have no unit or plan condition to ride on, and emitting them here is what puts them on the channel that survives the session boundary; TodoWrite is the harness-equivalent realization; sets Λ.emitted on completion — the record_handoff step that follows writes Λ.handoff_locator separately) [Tool]
+Phase 3 Emit         (track)        → TaskCreate (one goal entry per unit: unit_ref + subject + the conjoined leaf predicate + its unconjoined conjuncts with kind + its capability requirements and feasibility notes carried verbatim from the unit; plan-level conditions as their own entries carrying scope + kind + condition + dischargeable_when; AND exactly one plan-envelope entry carrying the Λ-accepted residuals, the computed oos set, and Λ.unbounded_approved — the three plan-level facts have no unit or plan condition to ride on, and emitting them here is what puts them on the channel that survives the session boundary; TodoWrite is the harness-equivalent realization; sets Λ.emitted on completion — record_handoff then emits N with locator(E), outside Λ) [Tool]
 Phase 3 package      (track)        → Internal state update (constructs the returned ConditionBearingUnitPlan as a VIEW of E, partitioned by constructor: units from the UnitEntry members, plan_conditions from the PlanEntry members, and accepted_residuals/oos/unbounded_approved read back off the emitted PlanEnvelopeEntry — never re-derived from Λ in parallel with what was emitted, so the value and the durable record cannot disagree)
-Phase 3 record_handoff (track)      → Internal state update (writes Λ.handoff_locator := the durable identity of the emitted record set E — the address a later session dereferences to read this plan back, which is what makes handoff_recorded a produced fact rather than a self-report. The Phase 3 → converge transition and apportioned(G) both read it)
-converge             (extension)    → TextPresent+Proceed (apportionment trace; handoff recorded; deactivate)
+Phase 3 record_handoff (extension)  → TextPresent+Proceed (emit N in the fixed navigation-block shape with canonical_locator = locator(E), a dereference instruction, the optional snapshot anchor only when exact-state determinacy is needed, and the grounding instruction; entry points only, never a re-authored plan. This emitted block is what handoff_recorded(N, E) reads)
+converge             (extension)    → TextPresent+Proceed (apportionment trace after the navigation block has been emitted; deactivate)
 esc                  (extension)    → TextPresent+Proceed (no emission; deactivate as EarlyExit, not ConditionBearingUnitPlan)
 seam                 (extension)    → TextPresent+Proceed (two seams, scoped separately. INBOUND activation seam (before this protocol activates): the `/bound → /apportion` and `/conduct → /apportion` legs of the `## Composition` chain relay when a user-declared chain names `/apportion` next, or an invocation follows that declared composition edge — proceed directly, citing the settling source; this seam fires at the upstream handoff, not after this protocol's emission. OUTBOUND emission seam (after this protocol emits): the `/apportion → enforcer` edge is EXCLUDED — Rule 8 (Separate activation) governs it, keeping the enforcer's start the user's own constitutive act; the `/apportion → /conduct` edge relays only under a user-declared chain naming /conduct next, never automatically, and carries the no-reentry guard of Rule 9. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
@@ -499,9 +526,6 @@ seam                 (extension)    → TextPresent+Proceed (two seams, scoped s
       --   a per-cycle audit trail, but no FLOW operation appends to or reads either list — see Known
       --   Limitations §Cycle history is declared but not wired
       emitted: Bool,                     -- written by Phase 3 Emit; emitted(E) ≡ Λ.emitted
-      handoff_locator: Option(HandoffLocator),  -- written by Phase 3 record_handoff; handoff_recorded ≡ Λ.handoff_locator ≠ None
-      --   a locator, not a flag: the successor session needs an address it can dereference, and a boolean
-      --   would let handoff_recorded hold while nothing addressable exists
       active: Bool, cause_tag: String }
 -- Coverage partition invariant: residual, (⋃ᵤ u.obligations) and {d.obligation | d ∈ oos} are pairwise
 --   disjoint and together equal G.obligations at every cycle boundary — an obligation is always exactly one
@@ -673,7 +697,7 @@ On Confirm:
 1. **Emit** one goal entry per unit via TaskCreate — the unit's identity and subject, its conditions conjoined into a single leaf predicate carried as the entry's verifiable completion criterion, that same leaf's unconjoined conjuncts with their kind so provenance survives the join, and the unit's capability requirements and feasibility notes carried verbatim so the downstream runtime can bind an executor without re-deriving what the handoff dropped. One unit is one execution interval is one entry; plan-level conditions are emitted as their own entries carrying the plan-state requirement under which each becomes safe to discharge.
 2. **Package the result**: carry over E's own unit and plan-condition entries as the plan's units and plan conditions, and fold in every qualifying fact Λ already holds — each accepted-uncovered residual keyed to its owning unit, the out-of-scope declarations, and the unbounded-acceptance waiver — as fields on the returned plan itself, not only as trace text.
 3. **Present the apportionment trace**: the plan readback, then per unit its covered obligations, seam quality, fit verdict, leaf predicate with each conjunct's kind, and its capability requirements and feasibility notes; the plan-level conditions; each accepted-uncovered residual; each out-of-scope obligation with its substrate; and any recorded acceptance waiver.
-4. **Record the handoff** and deactivate.
+4. **Emit the handoff navigation block** and deactivate: purpose/frame, E's canonical locator, the dereference instruction, a snapshot anchor only when exact-state determinacy is needed, and the grounding instruction to run `/inquire` where available (or equivalent grounding) and stop on an unreachable source or unsupported load-bearing premise. This is a pointer to E, never a re-authored plan.
 
 Emission is Merismos's epistemic endpoint. Merismos does not invoke the downstream enforcer, and it does not order the units — the user activates the enforcer separately, and `/conduct` arranges the units if their arrangement is non-trivial. Nothing of Merismos survives into the execution interval.
 
@@ -724,7 +748,7 @@ Merismos is the apportion-and-condition step ahead of an autonomous run. The com
 13. **Transparency-grounded**: Every obligation cites its evidence; every seam quality, fit verdict, residual disposition, override and out-of-scope delegation is visible in pre-gate text or the apportionment trace — surfaced and relay paths satisfy the same transparency invariant.
 14. **Recognition over Recall**: Present structured options with differential implications via Cognitive Partnership Move (Constitution); Constitution interactions yield turn before proceeding.
 15. **Context-Question Separation**: All analysis, evidence, and rationale appear as text output preceding the Constitution interaction; the question contains only the essential choice and option-specific differential implications.
-16. **Convergence evidence**: Present the apportionment trace before deactivating — the plan readback plus per-unit evidence (obligations covered, seam quality with its citation or heuristic declaration, fit verdict or recorded override, leaf predicate with conjunct kinds, capability requirements and feasibility notes), the plan-level conditions, each accepted-uncovered residual, and each out-of-scope delegation — required, not asserted. The units, plan conditions, accepted-uncovered residuals, out-of-scope delegations, and any acceptance waiver are additionally carried as fields on the emitted plan itself, in exact correspondence with what was emitted — a consumer reading only the returned structure, without this trace, can still see them.
+16. **Convergence evidence**: Present the apportionment trace before deactivating — the plan readback plus per-unit evidence (obligations covered, seam quality with its citation or heuristic declaration, fit verdict or recorded override, leaf predicate with conjunct kinds, capability requirements and feasibility notes), the plan-level conditions, each accepted-uncovered residual, and each out-of-scope delegation — required, not asserted. The units, plan conditions, accepted-uncovered residuals, out-of-scope delegations, and any acceptance waiver are additionally carried as fields on the emitted plan itself, in exact correspondence with what was emitted — a consumer reading only the returned structure, without this trace, can still see them. Emit the fixed-shape navigation block beside the trace so a later session can dereference that durable plan; no locator remains solely in invocation-local state.
 17. **Option-set relay test (Extension classification)**: When AI analysis converges to a single dominant option (option-level entropy → 0), present the finding directly as Extension — a single dominant unit that fits its horizon is accepted as relay rather than wrapped in a false choice. Each Constitution option must be genuinely viable under different user value weightings; options sharing a downstream trajectory collapse to one; options lacking an on-axis trajectory surface as free-response pathways rather than peer options.
 18. **Gate integrity** (Safeguard tier): The defined option set is presented intact — option injection, deletion, and substitution each violate this invariant. Type-preserving materialization (specializing a generic option into a concrete unit or condition while preserving the coproduct structure) is distinct from mutation.
 19. **Substrate boundary**: Merismos scope is the epistemic substrate — obligation reading, apportionment search, fit and seam judgment, condition derivation, compile-time confirmation. Enforcement inside each interval, pre-action interception, workflow/HITL semantics, and concrete executor binding belong to native harnesses or specialized substrates, delegated by handoff at emission.
