@@ -27,6 +27,7 @@ const {
   collectCodexSubmitFiles,
   collectReleaseFiles,
   isForbiddenCodexPath,
+  DESCRIPTION_LIMIT,
   parseFrontmatter,
   readCodexManifestVersion,
   runRelease,
@@ -1225,5 +1226,26 @@ describe('agent routing map', () => {
     assert.ok(ctx.includes('**`/grasp`**'));
     assert.ok(ctx.includes('**`/gap`**'));
     assert.ok(!ctx.includes('**`/inquire`**'));
+  });
+});
+
+describe('packaged discovery metadata', () => {
+  it('keeps every packaged description within the discovery limit', () => {
+    // The override path used to bypass the length warning entirely: the check fired
+    // only when NO override existed, so an over-limit override shipped silently.
+    // This asserts the thing that is actually statically decidable — the description a
+    // runtime reader receives, after transformation, and its length.
+    const offenders = [];
+    for (const plugin of PLUGINS) {
+      const skillPath = path.join(__dirname, '..', plugin.dir, 'skills', plugin.skill, 'SKILL.md');
+      if (!fs.existsSync(skillPath)) continue;
+      const transformed = transformSkillMd(fs.readFileSync(skillPath, 'utf8'), plugin.skill);
+      const { fields } = parseFrontmatter(transformed);
+      const desc = fields.get('description') || '';
+      if (desc.length > DESCRIPTION_LIMIT) {
+        offenders.push(`${plugin.dir}/${plugin.skill}: ${desc.length} chars`);
+      }
+    }
+    assert.deepEqual(offenders, [], `over ${DESCRIPTION_LIMIT}-char discovery limit: ${offenders.join('; ')}`);
   });
 });
