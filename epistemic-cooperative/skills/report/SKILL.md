@@ -226,16 +226,15 @@ Apply the mapping tables below to match observed patterns to protocols.
 |---|---|---|---|
 | Same file edited 3+ times | Edit path frequency | **Syneidesis** `/gap` | Repeated edits without prior gap check |
 | Exploration ratio 3:1+ across multiple sessions | (Read+Grep+Glob) / (Edit+Write) threshold | **Prothesis** `/frame` | Sustained exploration without analytical framework |
-| Unattended-run directives in firstPrompt ("work through", "go through all", "handle the whole", "run until done") | firstPrompt keyword match: hand-off-and-leave directives | **Merismos** `/apportion` (reinforcing) | Autonomous interval intended, but reinforcing only — the keyword match tests just autonomous_intent(G); it does not test whether a unit plan already exists, so a goal already condition-bearing (a prior /apportion plan, or explicit units+conditions the user supplied) can still surface here |
 | Vague first prompts ("improve", "optimize") | firstPrompt keyword match: short underspecified directives | **Euporia** `/elicit` | Goal coordinate aporia — reverse-induce endpoint from substrate |
 | Ideation-shaped first prompts ("ideas for", "brainstorm") | firstPrompt keyword match: ideation asks | **Heuresis** `/ideate` | Candidate field underexpanded — frame-parallel divergence before any selection |
 | Verification keywords in firstPrompt (user-authored text only) | firstPrompt keyword match: "explain", "what did you do", "help me understand", "verify", "check" | **Katalepsis** `/grasp` | Need to verify comprehension of results |
 
+**Merismos excluded by design**: `/apportion`'s deficit is `¬condition_bearing(G)` — whether a goal already carries units with determinate completion conditions. No observable available to this skill (firstPrompt keywords, a configured stop-hook) can establish that negative; each only detects that an autonomous interval is *intended*, which is equally true of a goal that is already condition-bearing. A row built on either observable therefore cannot honestly claim a deficit match at any strength, so none is carried here — matching `dashboard/SKILL.md`'s coverage table, which marks Merismos `N/A` for the identical reason. `/apportion` stays discoverable through `/catalog` and `/onboard`, neither of which claims deficit detection.
+
 ### Secondary Mapping Table (Environment Patterns)
 
-| Observable Pattern | Source | Protocol | Rationale |
-|---|---|---|---|
-| Stop-hook / completion-predicate enforcer configured | settings.json hooks | **Merismos** `/apportion` (reinforcing) | An autonomous interval is being set up; its units and their done-conditions may not be compiled |
+No environment pattern currently clears the accuracy bar for a protocol match (a stop-hook/completion-enforcer configuration was previously mapped to Merismos here; removed for the same reason as above — hook presence alone cannot establish `¬condition_bearing(G)`). Reserved for a future observable that can establish a deficit rather than merely a correlated setup step.
 
 ### Tertiary Mapping Table (Friction Patterns — from Facets)
 
