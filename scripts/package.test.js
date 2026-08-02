@@ -1088,6 +1088,7 @@ describe('package.js CLI', () => {
         'forge.zip',
         'frame.zip',
         'gap.zip',
+        'gate-check.zip',
         'goal-research.zip',
         'grasp.zip',
         'ground.zip',
