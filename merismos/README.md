@@ -33,7 +33,7 @@ Seam quality is **not** an invariant. A cut cites the seam it sits on, or declar
 
 ## The Join Rule
 
-One unit is one execution interval is one entry, with that unit's conditions conjoined into a single leaf predicate. Per-condition entries would duplicate the unit's execution identity; a cartesian product does the same more explicitly. Predicate kind (`completion` / `invariant`) is retained on each conjunct so provenance stays readable even though enforcement conjoins them. Conditions whose subject is the whole goal — final integration, global non-regression, whole-goal acceptance — stay plan-level and fire after the reconciliation unit they name, or at terminal.
+One unit is one execution interval is one entry, with that unit's conditions conjoined into a single leaf predicate. Per-condition entries would duplicate the unit's execution identity; a cartesian product does the same more explicitly. Predicate kind (`completion` / `invariant`) is retained on each conjunct so provenance stays readable even though enforcement conjoins them. Conditions whose subject is the whole goal — final integration, global non-regression, whole-goal acceptance — stay plan-level and carry a plan-state requirement stating when it becomes safe to discharge them: a property of plan state alone, never a named unit or order-position, since naming an order fact is `/conduct`'s axis, not this protocol's.
 
 ## Composition
 

@@ -236,7 +236,7 @@ growth_items: [{
   </div>
   <div class="glance-block">
     <h4>Unstructured Decisions</h4>
-    <p>81 wrong_approach events occurred without /elicit or /inquire. Execution sessions lack /apportion despite deploy/push activity in 3 of 8 sessions...</p>
+    <p>81 wrong_approach events occurred without /elicit or /inquire. Execution sessions show unattended-run directives without /apportion in 3 of 8 sessions...</p>
   </div>
   <div class="glance-block">
     <h4>Coverage Delta</h4>
@@ -377,7 +377,7 @@ growth_items: [{
 <!-- CARD: Horizon (replicate per protocol adoption opportunity) -->
 <div class="card horizon-card">
   <div class="card-title">/apportion for Autonomous Pipelines</div>
-  <p>Your work trajectory points toward autonomous PR pipelines (git ops: 84 sessions). As execution becomes less human-gated, /apportion becomes critical — compiling boundaries into verifiable goal conditions before autonomous execution prevents the 81 wrong_approach events from compounding in unattended workflows...</p>
+  <p>Your work trajectory points toward autonomous PR pipelines (unattended-run directives in 12 of 84 sessions). As execution becomes less human-gated, /apportion becomes critical — compiling boundaries into verifiable goal conditions before autonomous execution begins prevents scope and done-criteria from being improvised mid-run...</p>
   <div class="resume-cmd">cd ~/myproject && claude --resume a1b2c3d4</div>
 </div>
 

@@ -85,7 +85,7 @@ For each protocol, determine:
 |----------|---------------------------|---------------------------|
 | Syneidesis | friction `wrong_approach` OR friction `excessive_changes` OR friction `wrong_file_edited` OR rework | rework + high exploration |
 | Aitesis | friction `context_loss` | N/A |
-| Merismos | — | unattended-run firstPrompt keyword match |
+| Merismos | — | N/A (keyword match tests autonomous intent only, not whether a plan is already condition-bearing — insufficient to assert the deficit occurred) |
 | Prothesis | — | exploration ratio ≥ 3:1 |
 | Katalepsis | — | verification firstPrompt |
 | Epharmoge | — | N/A (conditional protocol) |
