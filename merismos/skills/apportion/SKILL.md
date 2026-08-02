@@ -409,7 +409,7 @@ Phase 2 ApproveUnbounded (track)    → Internal state update (record Λ.unbound
 Phase 2 check        (track)        → Internal state update (invariant status: coverage, horizon fit, termination coverage, obligation derivation, oos substrate-naming, and each plan condition's topology-freedom — an AI semantic judgment over the plan condition's predicate content, not a structural proof — over the current apportionment)
 Phase 2 Qc           (constitution) → present (apportionment + derived conditions + residual dispositions + invariant status: Confirm / Adjust / Reopen) [Tool]
 Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's obligation into Λ.accepted, materializing accepted_uncovered for the convergence predicate; also writes ρ.disposition := AcceptUncovered for each ρ ∈ R so the field reads correctly in the Phase 3 trace — the pre-Confirm guard does not depend on this write, see unit_termination_covered)
-Phase 3 Emit         (track)        → TaskCreate (one goal entry per unit: unit_ref + subject + the conjoined leaf predicate + its unconjoined conjuncts with kind; plan-level conditions as their own entries carrying scope + kind + condition + dischargeable_when; TodoWrite is the harness-equivalent realization) [Tool]
+Phase 3 Emit         (track)        → TaskCreate (one goal entry per unit: unit_ref + subject + the conjoined leaf predicate + its unconjoined conjuncts with kind; plan-level conditions as their own entries carrying scope + kind + condition + dischargeable_when; TodoWrite is the harness-equivalent realization; sets Λ.emitted on completion, and the handoff record that follows sets Λ.handoff_recorded — the two convergence terms are state this phase writes, not prose the trace asserts) [Tool]
 Phase 3 package      (track)        → Internal state update (constructs the returned ConditionBearingUnitPlan from E plus every qualifying fact Λ already holds: each Λ-accepted residual as an AcceptedResidualEntry, the computed oos set, and Λ.unbounded_approved — these travel on the RESULT ITSELF, not only in the convergence trace text presented at emission)
 converge             (extension)    → TextPresent+Proceed (apportionment trace; handoff recorded; deactivate)
 esc                  (extension)    → TextPresent+Proceed (no emission; deactivate as EarlyExit, not ConditionBearingUnitPlan)
@@ -424,6 +424,8 @@ seam                 (extension)    → TextPresent+Proceed (two seams, scoped s
       unbounded_approved: Bool,          -- written by Qt on ApproveUnbounded
       invariant_status: InvariantStatus,
       U_history: List(Set(Unit)), A_history: List(UnitJudgment),
+      emitted: Bool,                     -- written by Phase 3 Emit; emitted(E) ≡ Λ.emitted
+      handoff_recorded: Bool,            -- written by Phase 3 Record-the-handoff; handoff_recorded ≡ Λ.handoff_recorded
       active: Bool, cause_tag: String }
 -- Coverage partition invariant: residual, (⋃ᵤ u.obligations) and {d.obligation | d ∈ oos} are pairwise
 --   disjoint and together equal G.obligations at every cycle boundary — an obligation is always exactly one
