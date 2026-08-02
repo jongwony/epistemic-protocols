@@ -17,7 +17,9 @@ The check separates two things that usually collapse into one: **who wrote the o
 gate    : (implicit) | explicit draft   -- optional; defaults to the gate drafted in the current turn
 advisor : { codex }                     -- optional; the independent adjudicator behind the
                                         --   (frozen option set, settled constraints, pointers)
-                                        --   → { verdict, axis reading, cited grounds, falsifier } interface
+                                        --   → { verdict, axis reading, cited grounds, falsifier,
+                                        --      and on a collapse verdict, the option
+                                        --      the set reduces to } interface
 ```
 
 The advisor is a parameter, not the identity. Any adjudicator satisfying that interface can drive the check, provided it is a genuinely separate reasoner — a second pass by the drafting agent does not satisfy it, because the independence is the whole mechanism.
@@ -84,6 +86,8 @@ Where the running environment carries its own standing policy about when gates g
 
 Ask it for four things back: a verdict (`genuine | collapse | malformed`), its reading of what axis the options actually stand on, the grounds it cites for that reading, and — stated after the rest, so it accounts for what it just said rather than shaping it — the observation that would break its own reading.
 
+On a `collapse` verdict, ask for a fifth: which option of the frozen set the others reduce to. It is asked for rather than worked out afterwards because naming it *is* the substance of that verdict — a set said to collapse without saying what it collapses to has not been adjudicated. Leaving it to be supplied later would hand the choice back to the side whose option set is under judgment, which is the collapse of drafter and judge this skill exists to keep apart.
+
 **Input boundary.** The dispatch never carries which option the drafting side prefers, the rationale behind the option set, or any prior disposition. An adjudicator told the preferred answer is no longer adjudicating; it is agreeing. Naming the constraint the user settled is conveyance; adding what the advisor should therefore conclude is not.
 
 **Precommit.** While the advisor runs, record — as text that will still be there afterwards — two things:
@@ -135,7 +139,7 @@ A `malformed` verdict means the options stand on the wrong axis. The advisor sup
 2. **A change of answer kind routes back.** If the relocated axis needs a different answer kind, or belongs to a different phase of the work, return control to wherever the original gate was constructed. Do not present the replacement as though it were a sharpening of the original.
 3. **Every original option is accounted for.** Each one is retained, collapsed into another, removed as off-axis, or reframed — and each disposition names the advisor ground that licensed it. An option that quietly disappears is a deletion wearing a rewrite's clothes.
 4. **No unsupported additions.** A new option derives from the relocated axis and cited substrate. An option that traces only to the drafting side's unrecorded preference is an injection, and injection is the failure mode this skill was built against.
-5. **The replacement is itself checked, once.** Run the same collapse test on the new set: if analysis converges on a single dominant option, it is a relay, not a gate. Then send it for **one** external recheck — bounded at one. If it comes back `malformed` or `indeterminate` again, **stop**: surface the diagnosis and the two attempts, and do not present a third unverified gate. Recursion here manufactures confidence rather than earning it.
+5. **The replacement is itself checked, once, and the recheck is a full pass.** Run the same collapse test on the new set: if analysis converges on a single dominant option, it is a relay, not a gate. Then send it for **one** external recheck — bounded at one. What comes back re-enters the same ground verification and lands on exactly one disposition, the way the first answer did; a lighter second look would let the rebuilt gate reach you on a verdict that was never checked, which is the one thing no verdict here is allowed to do. A recheck that lands on `genuine` presents the rebuilt gate; one that lands on `collapse` relays the option it settles on. Any other landing — the advisor returning `malformed` again, any indeterminate disposition, or an answer that never arrives — ends the cycle here: surface the diagnosis and both attempts, and do not present a third unverified gate. Recursion here manufactures confidence rather than earning it.
 6. **Provenance stays separable.** The original gate, the advisor's response, the precommit, the verification result, and the synthesized gate remain distinguishable from one another at every point. Merging them into one narrative destroys the only record that shows how the conclusion was reached.
 
 ## Presentation
@@ -192,7 +196,7 @@ Keeping these separate is what prevents one unavailable advisor from leaving eve
 
 ## Rules
 
-1. **The advisor's verdict is an input, never a ruling.** It enters the record as one reasoner's grounded reading and is checked before it reaches you. Adopting it unchecked would replace one unaudited judgment with another and lose the independence the exchange was for.
+1. **The advisor's verdict is an input, never a ruling.** It enters the record as one reasoner's grounded reading and is checked before it reaches you. On `collapse` the answer also names which option the set reduces to, because naming it is what that verdict asserts — supplying it afterwards would return the choice to the side under judgment. Adopting any of it unchecked would replace one unaudited judgment with another and lose the independence the exchange was for.
 2. **Launch before precommit, and never read partial output first.** The ordering is the mechanism. A judgment recorded after the answer is visible cannot be distinguished from the answer, and the whole question the precommit answers — did this converge or follow — becomes unanswerable.
 3. **The precommit records expected controlling sources and verification criteria, not a preferred option.** A recorded preference turns the later comparison into an agreement check, which is what the ordering exists to avoid.
 4. **The audit vertex checks grounds, not options.** The side that drafted the options has no independent opinion about them. Its independent contribution is whether the advisor represented and applied the evidence correctly.
@@ -202,7 +206,7 @@ Keeping these separate is what prevents one unavailable advisor from leaving eve
 8. **The option set is frozen before dispatch, and rewording restarts the cycle.** A verdict adjudicates the text it was given; silently editing the options afterwards makes the verdict about something that no longer exists.
 9. **The dispatch carries the frozen set, settled constraints, and pointers — nothing else.** Not the preferred option, not the drafting rationale, not prior dispositions. Stating a settled constraint is conveyance; appending what to conclude from it is not.
 10. **Synthesis preserves the answer kind, accounts for every original option, and adds nothing unsupported.** Making a generic option concrete while keeping the answer kind is a sharpening; needing a new answer kind is a different gate and routes back to where the original was constructed. Adding options not in the original set, dropping options that were, or swapping one for another are the three ways a rebuilt gate stops being the same question — each is a defect, not a shortcut.
-11. **One recheck, then stop.** A replacement set that fails its recheck ends the cycle with a surfaced diagnosis. A third attempt would be confidence manufactured by repetition.
+11. **One recheck, and it is a full pass.** The replacement's answer re-enters ground verification and lands on exactly one disposition, as the first answer did — the rebuilt gate presented on a checked `genuine`, a relay on a checked `collapse`. Every other landing ends the cycle with a surfaced diagnosis and both attempts. A third attempt would be confidence manufactured by repetition.
 12. **Provenance stays separable to the end.** Original gate, advisor answer, precommit, verification result, synthesized gate — five distinct records. Merged into one account, nothing afterwards can show how the conclusion was reached, which is the only thing that distinguishes a checked gate from a confident one.
 13. **Context and question stay separate.** All analysis, evidence, and verification output are text before the gate; the gate carries only the question and each option's differential implication.
 14. **Plain everyday language in everything you read.** The verdict names, the axis reading, and the options are written to be recognized at a glance, not decoded.
