@@ -1100,6 +1100,7 @@ describe('package.js CLI', () => {
         'lens-review.zip',
         'misuse.zip',
         'onboard.zip',
+        'place.zip',
         'preview.zip',
         'probe.zip',
         'realign.zip',
