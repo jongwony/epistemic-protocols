@@ -16,44 +16,45 @@ Apportion an autonomous goal into coarse execution units and derive each unit's 
 Merismos(G) → Probe(G) → goal_plan_uncompiled? →
   ¬autonomous_intent(G):  → relay(no autonomous interval in scope) (extension) → deactivate   -- an ordinary explanatory plan is not this deficit
   condition_bearing(G):   → relay(units and conditions already present) (extension) → deactivate
-  uncompiled: init_loop_state: cycle_n=1, U=∅, residual=obligations(G), K=∅, R=∅, P=∅, oos=∅,
-                              invariant_status=⊥, accepted=∅, unbounded_approved=⊥, history=∅, loop:
+  uncompiled: VelocityFilter(G) → oos → init_loop_state: cycle_n=1, U=∅, residual=obligations(G) \ {d.obligation | d∈oos}, K=∅, R=∅, P=∅,
+                              invariant_status=⊥, accepted=∅, unbounded_approved=⊥, history=∅, loop:   -- oos is computed once, before residual is seeded, so a pre-action obligation never enters the packing loop
     Phase 1 Scan(G, residual, cycle_n) [per-cycle re-scan] → seams(residual) → Pack(seams, horizon) → (Anchor[cycle_n], proposed_unit, SpanFit, Seam) →
-      Anchor empty ∧ residual = ∅:  → Phase 2                                  -- every obligation apportioned
+      Anchor empty ∧ residual = ∅ ∧ U = ∅ ∧ oos = ∅:  → relay(goal's scope too thin to read any obligation — route to /inquire) (extension) → deactivate  -- nothing was ever apportioned; emitting an empty plan would misreport that apportionment occurred
+      Anchor empty ∧ residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅):  → Phase 2                -- every obligation apportioned or visibly delegated, and something was actually read
       Anchor empty ∧ residual ≠ ∅:  → autonomous_pack(residual) (track) → [any packed unit with SpanFit ≠ Fits, or residual ≠ ∅ after packing: it re-enters as the next cycle's Anchor (reason surfaced as relay) → cycle_n += 1, loop] | (U'', residual := ∅) → surface (extension) → Phase 2  -- seam evidence exhausted; AI packs the remainder at Heuristic seams, surfaced as relay; a packed unit never enters U on an unfitting span
       SingleDominantUnit(Anchor, proposed_unit) ∧ SpanFit = Fits: → relay(AcceptUnit) (extension) → integrate_unit → cycle_n += 1, loop  -- no genuine alternative apportionment exists for this Anchor
       else:                         → Qu(Anchor[cycle_n], proposed_unit, SpanFit, Seam, U_snapshot, cycle_n) → Stop → Aᵤ →
         Esc:                → ungraceful deactivate (EarlyExit — no emission, no handoff recorded)
-        Aᵤ = AcceptUnit     → integrate_unit(proposed_unit) → cycle_n += 1, loop                -- offered iff SpanFit = Fits
+        Aᵤ = AcceptUnit     → integrate_unit(proposed_unit) → cycle_n += 1, loop                -- offered iff SpanFit = Fits; assigns the accepted unit a fresh UnitRef
         Aᵤ = Recut(d)       → re-derive the Anchor frame under d → cycle_n += 1, loop           -- same residual, different cut
         Aᵤ = OverrideFit    → Λ.fit_overrides ∪= {proposed_unit} → integrate_unit → cycle_n += 1, loop  -- offered iff SpanFit ≠ Fits: an Overflows/Indeterminate unit committed on record
         Aᵤ = Sufficient     → autonomous_pack(residual) (track) → [any packed unit with SpanFit ≠ Fits, or residual ≠ ∅ after packing: next cycle's Anchor → cycle_n += 1, loop] | (U'', residual := ∅) → surface (extension) → Phase 2
-    Phase 2 ∀u∈U: Derive(u) → κ ∨ ρ → (K, R) ∥ DerivePlan(G, U) → P ∥ VelocityFilter(G) → oos →
-      oos ≠ ∅ → OOS(oos) (extension)                                            -- obligations needing pre-action interception: out of scope, substrate named
+    Phase 2 ∀u∈U: Derive(u) → κ ∨ ρ → (K, R) ∥ DerivePlan(G, U) → P →
+      oos ≠ ∅ → OOS(oos) (extension)                                            -- obligations needing pre-action interception: out of scope, substrate named; oos was computed at Phase 1 entry, not re-computed here
       ¬acceptance_present(P) → Qt(K, P) → Stop → Vₜ →                            -- the whole goal has no acceptance criterion yet
         Vₜ = DefineNow(d)     → P := P ∪ {plan_condition(d)}                     -- acceptance_present(P) now holds by construction
         Vₜ = RouteBound       → deactivate                                       -- Rerouted: the acceptance boundary goes to /bound; a later /apportion recompiles fresh
         Vₜ = ApproveUnbounded → Λ.unbounded_approved := ⊤                        -- recorded acceptance, visible in the trace
-      check(U, K, R, P) → InvariantStatus                                        -- coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived
+      check(U, K, R, P, oos) → InvariantStatus                                   -- coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named
       Qc(U, K, R, P, InvariantStatus, oos) → Stop → V →
         V = Adjust(d)  → rederive(K, R, P, d) → (K, R, P) := (K', R', P') → [¬acceptance_present(P') → Qt(K', P') → Stop → Vₜ] → Qc(...)   -- over the SAME U: K' ∪ R' spans every obligation of every unit (no removal; a withdrawn condition becomes a residual); an Adjust that clears whole-goal acceptance re-fires Qt before re-presenting
         V = Reopen(u)  → residual := residual ∪ u.obligations; U := U \ {u} → cycle_n += 1 → Phase 1   -- the conditions revealed a bad cut; that unit returns to the apportionment loop
         V = Confirm ∧ ¬hard_invariants_hold(Λ): → re-present Qc with the violated invariant named   -- a hard invariant is never waived by confirming past it
-        V = Confirm ∧ hard_invariants_hold(Λ):  → AcceptResiduals(R) → Phase 3
+        V = Confirm ∧ hard_invariants_hold(Λ):  → AcceptResiduals(R) → ∀ρ∈R: ρ.disposition := AcceptUncovered → Phase 3
     Phase 3 Emit(U, K, P) → E [TaskCreate] → converge(apportionment trace) → ConditionBearingUnitPlan
 
 ── MORPHISM ──
 AutonomousGoal × ExecutionHorizon
   → probe(goal)                        -- detect a stated autonomous goal whose unit plan and conditions are uncompiled
   → scan(seams)                        -- read the goal's obligations for cuttable seams: dependency, deliverable, verification, ownership
+  → filter(velocity) → oos             -- an obligation guardable only by pre-action interception is declared out of scope with the delegated substrate recorded on the declaration; computed once before packing begins, so it never enters a unit
   → pack(seams, horizon) → Unit        -- THE IRREDUCIBLE CORE, part one: apportion the obligations into coarse units such that each unit fits one execution horizon and every obligation lands in some unit
   → fit(unit, horizon) → SpanFit       -- per-unit horizon-fit predicate; Indeterminate is surfaced, never silently read as Fits
   → qualify(cut) → Seam                -- Grounded when a dependency / deliverable / verification / ownership seam is cited; Heuristic when the goal carries no such evidence — declared, not asserted as a natural joint
   → [SingleDominantUnit(Anchor, proposed_unit) ∧ SpanFit = Fits: relay(AcceptUnit) (extension) | else: present(anchor, proposed_unit, SpanFit, Seam) (constitution)]
-  → integrate(unit_judgment, U, residual) → (U', residual')   -- monotone in coverage: an obligation leaves residual only when it enters some unit
+  → integrate(unit_judgment, U, residual) → (U', residual')   -- monotone in coverage: an obligation leaves residual only when it enters some unit; a fresh UnitRef is assigned to the accepted unit
   → derive(unit) → (Set(κ), Set(ρ))    -- THE IRREDUCIBLE CORE, part two: per obligation of the unit, a verifiable predicate (completion or invariant) or a residual; every obligation of the unit lands in exactly one of the two sets
   → derive_plan(goal, U) → P           -- conditions whose subject is the whole goal, not any one unit; NOT distributed across units to fit the leaf type
-  → filter(velocity) → oos             -- an obligation guardable only by pre-action interception is declared out of scope with the delegated substrate recorded on the declaration
   → confirm(unit_plan)                 -- user judges the apportionment together with its conditions
   → emit(goal_entries)                 -- one entry per unit; that unit's conditions conjoined into one leaf predicate; handoff recorded
   → ConditionBearingUnitPlan
@@ -71,17 +72,24 @@ ProtocolOutput = prior protocol's converged output in current session (e.g., a b
 Obligation     = a stated or inferred requirement the goal must satisfy — the unit of coverage; each cites its evidence in G
 H              = ExecutionHorizon      -- the budget one autonomous run is expected to fit (turns, time, context lifecycle); read from context, cue cited
 U              = Set(Unit)             -- the apportionment
-Unit           = { subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam }
+Unit           = { unit_ref: UnitRef, subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam }
                -- subject: a coarse framing of the work the unit carries, not a procedural step decomposition
+               -- unit_ref: a stable identity assigned at integration, independent of subject — see UnitRef.
+               --   Structural equality over Unit is therefore sound: two units are never equal by accident
+               --   of sharing a subject, because unit_ref differs
 SpanFit        ∈ {Fits, Overflows, Indeterminate}
                -- Fits: the unit's work completes within one execution horizon
                -- Overflows: exceeds it — recut, or commit under an explicit user override recorded on fit
                -- Indeterminate: not judgeable from available evidence; surfaced at the gate, never silently read as Fits
 fit_override_recorded(u) ≡ u ∈ Λ.fit_overrides   -- written by OverrideFit, not inferred
-Seam           = { quality: SeamQuality, basis: Option(Evidence) }
-SeamQuality    ∈ {Grounded, Heuristic}
-               -- Grounded: the cut sits on a cited seam — a dependency edge, a deliverable boundary, a
-               --   verification point, or an ownership change; basis carries that citation
+Seam           = Grounded(Evidence) ⊎ Heuristic
+               -- a coproduct, not a record with an optional field: Grounded CARRIES its citation by
+               --   construction — there is no representable state where the quality reads Grounded and no
+               --   evidence exists. Heuristic carries nothing because it declares an absence, not a missing
+               --   field. This enforces Declared Seam over Asserted Joint at the type level rather than by
+               --   an unenforced side condition
+               -- Grounded(e): the cut sits on a cited seam — a dependency edge, a deliverable boundary, a
+               --   verification point, or an ownership change; e is that citation
                -- Heuristic: the goal carries no such seam evidence; the cut is an emergent judgment,
                --   declared as such. Not a violation — an abstract goal may simply have no evidenced joint,
                --   and claiming one would be false precision
@@ -109,23 +117,44 @@ ResidualDisposition ∈ {Sharpen, AcceptUncovered}
                --   is unguarded during the interval, recorded in the trace, never emitted as prose
 K              = Set(CompiledCondition)          -- unit-local conditions
 P              = Set(PlanCondition)              -- cross-unit conditions
-PlanCondition  = { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate, fires_after: Unit ⊎ terminal }
+PlanCondition  = { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate,
+                   dischargeable_when: PlanStateRequirement }
 PlanScope      ∈ {FinalIntegration, GlobalNonRegression, WholeGoalAcceptance} ∪ Emergent(PlanScope)
-               -- a condition whose subject is the whole goal rather than any one unit. It fires after the
-               --   named reconciliation unit or at terminal — it is NOT distributed across every unit to fit
-               --   the leaf type, which would multiply false failures and hide which unit actually owns it
+               -- a condition whose subject is the whole goal rather than any one unit. dischargeable_when
+               --   states WHEN the plan state makes it safe to discharge the condition — a property of plan
+               --   state alone, never a named unit or order-position: naming an order fact is /conduct's
+               --   axis (Apportion over Order), not this protocol's. It is NOT distributed across every unit
+               --   to fit the leaf type, which would multiply false failures and hide which unit owns it
+UnitRef        = a stable identity carried by an emitted unit, assigned at integration and never reused —
+               --   what a downstream consumer (a plan condition's basis, or /conduct's binding) keys on
+               --   instead of subject, which is not unique across units
+PlanStateRequirement = { predicate: VerifiablePredicate, basis: Set(Evidence) }
+               -- a self-contained property of PLAN STATE: contains no UnitRef, Move, MoveRegion, or
+               --   order-position reference. This is what makes Apportion over Order CONSTRUCTIVE rather
+               --   than merely asserted — the type itself cannot carry an ordering fact, so a plan
+               --   condition's firing criterion can never smuggle one in. "First evaluable" (when the
+               --   predicate can first be checked) and "safe to discharge" (when its result is authoritative)
+               --   are different predicates: dischargeable_when states the latter — e.g. a coverage
+               --   predicate over K ∪ R, or a completion-count threshold — never a turn count or a named unit
+topology_free(req) ≡ req contains no UnitRef, Move, MoveRegion, or order-position reference
+               -- holds by construction for any well-typed PlanStateRequirement; stated as a checkable
+               --   convergence conjunct rather than left as an unstated assumption about the type's shape
 leaf(u)        = ⋀ { κ.condition | κ ∈ K, κ.unit = u }
                -- THE JOIN RULE: one unit = one execution interval = one conjoined leaf predicate. A unit's
                --   conditions are an all-of, not several entries: per-condition entries would duplicate the
                --   unit's execution identity, and a cartesian product does the same more explicitly
 E              = Set(GoalEntry)        -- emission
-GoalEntry      = UnitEntry { subject: String, condition: VerifiablePredicate }
-               ⊎ PlanEntry { framing: String, condition: VerifiablePredicate, fires_after: Unit ⊎ terminal }
+GoalEntry      = UnitEntry { unit_ref: UnitRef, subject: String, condition: VerifiablePredicate }
+               ⊎ PlanEntry { scope: PlanScope, kind: PredicateKind, condition: VerifiablePredicate,
+                             dischargeable_when: PlanStateRequirement }
                -- a coproduct, not one record with an optional field: a unit entry has no firing point at all
-               --   (its interval IS when it fires), while a plan entry without one is not a compiled plan —
-               --   the downstream executor cannot tell when to evaluate it
-               -- per unit: UnitEntry(u.subject, leaf(u)); per plan condition: PlanEntry(p.scope framing,
-               --   p.condition, p.fires_after)
+               --   (its interval IS when it fires), while a plan entry carries dischargeable_when as a
+               --   topology-free property of plan state — WHEN it becomes safe to discharge, never WHICH
+               --   unit or order-position it follows; naming an order fact is /conduct's, not this
+               --   protocol's, and scope+kind are retained (not reduced to a framing string) because a
+               --   context-less consumer cannot recover them from prose
+               -- per unit: UnitEntry(u.unit_ref, u.subject, leaf(u)); per plan condition:
+               --   PlanEntry(p.scope, p.kind, p.condition, p.dischargeable_when)
 oos            = Set(OOSDeclaration)   -- obligations guardable only by pre-action interception
 OOSDeclaration = { obligation: Obligation, substrate: String, basis: Evidence }
                -- substrate names the delegated enforcement channel. It is a field rather than prose because
@@ -136,13 +165,15 @@ VelocityFilter = G → oos               -- an obligation whose violation must b
                --   (destructive command blocking, permission escalation, prompt-injection defense) cannot be a
                --   stop-time predicate: a completion check evaluates after the harm. Declared out of scope with
                --   its substrate named; deriving it into a leaf would simulate protection while providing none
-InvariantStatus = { coverage_complete: Bool, span_fit: Bool,
-                    termination_covered: Bool, obligations_derived: Bool }
+InvariantStatus = { coverage_complete: Bool, span_fit: Bool, termination_covered: Bool,
+                    obligations_derived: Bool, oos_substrate_named: Bool }
 hard_invariants_hold(Λ) ≡ Λ.invariant_status.coverage_complete ∧ Λ.invariant_status.span_fit
                         ∧ Λ.invariant_status.termination_covered ∧ Λ.invariant_status.obligations_derived
+                        ∧ Λ.invariant_status.oos_substrate_named
                -- every clause of apportioned(G) that a Qc judgment can still violate. The transition to
                --   emission is guarded by this conjunction, so no clause of the result equation is left
-               --   asserted-but-unenforced
+               --   asserted-but-unenforced — oos_substrate_named closes the fifth clause: a delegated
+               --   obligation with no substrate named is as unenforceable as an uncovered one
 coverage_complete(U, G) ≡ ∀ o ∈ G.obligations : (∃ u ∈ U : o ∈ u.obligations) ∨ declared_oos(o) ∨ accepted_uncovered(o)
                -- HARD invariant. Every goal obligation is apportioned to some unit, visibly delegated, or
                --   accepted as uncovered on record — never silently absent
@@ -153,11 +184,20 @@ obligation_derived(u, K, R) ≡ ∀ o ∈ u.obligations : (∃ κ ∈ K : κ.uni
                -- what the Adjust no-loss constraint checks: every obligation of every unit is carried by a
                --   predicate or by a residual. Checkable only because κ carries its obligation
 unit_termination_covered(u, K, R) ≡ (∃ κ ∈ K : κ.unit = u ∧ κ.kind = completion)
-                                 ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.kind = completion
-                                              ∧ ρ.disposition = AcceptUncovered)
+                                 ∨ (∃ ρ ∈ R : ρ.unit = Some(u) ∧ ρ.kind = completion)
                -- a unit with no completion predicate is not an executable interval; it closes as a predicate
                --   or as an acceptance OF ITS TERMINATION, never on an unrelated residual that happens to
-               --   sit in the same unit
+               --   sit in the same unit — ρ.unit = Some(u) ∧ ρ.kind = completion pins BOTH the unit and the
+               --   predicate kind, so a residual for a different unit, or an invariant-kind residual for the
+               --   same unit, cannot satisfy this clause
+               -- evaluated PRE-Confirm as the guard on entering Confirm: tests whether the unit WILL be
+               --   covered once AcceptResiduals commits, not whether ρ.disposition already reads
+               --   AcceptUncovered. AcceptResiduals(R) accepts every residual in R unconditionally, so a
+               --   scoped completion-kind residual already guarantees the disposition Confirm is about to
+               --   set; checking the disposition field here would ask the guard to observe a transition
+               --   that has not yet run — the deadlock this formulation avoids. AcceptResiduals additionally
+               --   writes ρ.disposition := AcceptUncovered for each ρ ∈ R so the field reads correctly in
+               --   the Phase 3 trace, but this guard does not depend on that write having happened yet
 acceptance_present(P) ≡ ∃ p ∈ P : p.scope = WholeGoalAcceptance
                -- whether the GOAL as a whole has an acceptance criterion — distinct from per-unit completion.
                --   Its absence is what the Qt gate makes a decision instead of a default
@@ -176,7 +216,10 @@ Vₜ             = TerminationJudgment ∈ {DefineNow(direction), RouteBound, Ap
                --   /apportion recompiles fresh
                -- ApproveUnbounded: informed acceptance of a goal with no whole-goal acceptance criterion
 plan_condition(d) = PlanCondition materialized from a DefineNow direction
-               -- scope = WholeGoalAcceptance, kind = completion, fires_after = terminal
+               -- scope = WholeGoalAcceptance, kind = completion, dischargeable_when = plan_terminal
+plan_terminal  = a distinguished PlanStateRequirement whose predicate holds once every unit's leaf predicate
+               --   has resolved (κ-covered or accepted-uncovered) — the ordinary terminal case, expressed
+               --   as a property of plan state rather than as an order fact (after unit U / at terminal)
 Rerouted       = routed_to_bound       -- deliberate non-emission exit at Qt; distinct from EarlyExit (abort)
 EarlyExit      = user_esc              -- non-convergent abort: no emission, no handoff recorded
 Emit           = (U, K, P) → E [Tool: TaskCreate]
@@ -185,41 +228,47 @@ Phase          ∈ {0, 1, 2, 3}
 Qu             = Per-cycle apportionment interaction with (Anchor, proposed_unit, SpanFit, Seam, cut-set snapshot, cycle counter) [Tool: Constitution interaction]
 Qt             = Whole-goal acceptance interaction, conditional on ¬acceptance_present(P) [Tool: Constitution interaction]
 Qc             = Unit-plan confirmation interaction with (U, K, R, P, InvariantStatus, oos) [Tool: Constitution interaction]
-ConditionBearingUnitPlan = apportioned(G) — defined in CONVERGENCE
+ConditionBearingUnitPlan = { units: Set(UnitEntry), plan_conditions: Set(PlanEntry) }
+               -- the emitted result: E partitioned by its coproduct constructor. Well-formed exactly when
+               --   apportioned(G) holds (see CONVERGENCE) — the predicate is checked over E, not embedded
+               --   in the type
 
 ── PHASE TRANSITIONS ──
 Phase 0: G → Probe(G) → goal_plan_uncompiled?                          -- activation checkpoint (sense)
            ¬autonomous_intent(G) → relay → deactivate                  -- no autonomous interval in scope (extension)
            condition_bearing(G)  → relay → deactivate                  -- units and conditions already present (extension)
            uncompiled            → Phase 1
-Phase 1: (G, residual, cycle_n) → Scan [Tool] → seams → Pack(seams, H) → (Anchor, proposed_unit, SpanFit, Seam)   -- apportionment loop (sense)
-           Anchor empty ∧ residual = ∅ → Phase 2
+Phase 1: entry → VelocityFilter(G) → oos; residual := obligations(G) \ {d.obligation | d∈oos}   -- computed once, before packing begins
+         (G, residual, cycle_n) → Scan [Tool] → seams → Pack(seams, H) → (Anchor, proposed_unit, SpanFit, Seam)   -- apportionment loop (sense)
+           Anchor empty ∧ residual = ∅ ∧ U = ∅ ∧ oos = ∅ → relay(goal's scope too thin to read any obligation — route to /inquire) (extension) → deactivate   -- scope too thin to read any obligation; an empty plan would misreport apportionment as having occurred
+           Anchor empty ∧ residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅) → Phase 2
            Anchor empty ∧ residual ≠ ∅ → autonomous_pack(residual) (track) → surface (extension) → Phase 2 | re-anchor → cycle_n += 1, Phase 1
            SingleDominantUnit ∧ SpanFit = Fits → relay(AcceptUnit) (extension) → integrate → cycle_n += 1, Phase 1
            else → Qu → Stop → Aᵤ (constitution) [Tool]
-             Aᵤ = AcceptUnit   → integrate(U, residual) → cycle_n += 1, Phase 1        -- offered iff SpanFit = Fits
+             Aᵤ = AcceptUnit   → integrate(U, residual) → cycle_n += 1, Phase 1        -- offered iff SpanFit = Fits; assigns the accepted unit a fresh UnitRef
              Aᵤ = Recut(d)     → re-derive Anchor frame under d → cycle_n += 1, Phase 1
              Aᵤ = OverrideFit  → Λ.fit_overrides := Λ.fit_overrides ∪ {proposed_unit} → integrate → cycle_n += 1, Phase 1   -- offered iff SpanFit ≠ Fits
              Aᵤ = Sufficient   → autonomous_pack(residual) (track) → surface (extension) → Phase 2 | re-anchor → cycle_n += 1, Phase 1
              Esc               → deactivate (EarlyExit)
-Phase 2: U → ∀u∈U: Derive(u) → (Set(κ), Set(ρ)) → (K, R) ∥ DerivePlan(G, U) → P ∥ VelocityFilter(G) → oos   -- condition derivation (sense)
+Phase 2: U → ∀u∈U: Derive(u) → (Set(κ), Set(ρ)) → (K, R) ∥ DerivePlan(G, U) → P   -- condition derivation (sense); oos already computed at Phase 1 entry
            oos ≠ ∅ → OOS(oos) (extension)                              -- out-of-scope declaration, substrate recorded on each OOSDeclaration
            ¬acceptance_present(P) → Qt(K, P) → Stop → Vₜ (constitution) [Tool]   -- fires at pass entry, and again after any Adjust that clears acceptance
              Vₜ = DefineNow(d)     → P := P ∪ {plan_condition(d)}
              Vₜ = RouteBound       → deactivate (Rerouted)
              Vₜ = ApproveUnbounded → Λ.unbounded_approved := ⊤
-           check(U, K, R, P) → InvariantStatus                         -- coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived (track)
+           check(U, K, R, P, oos) → InvariantStatus                    -- coverage_complete ∧ span_fit ∧ termination_covered ∧ obligations_derived ∧ oos_substrate_named (track)
            Qc(U, K, R, P, InvariantStatus, oos) → Stop → V (constitution) [Tool]
              V = Adjust(d) → rederive over the SAME U → (K, R, P) := (K', R', P') → [¬acceptance_present(P') → Qt] → re-present Qc   -- obligation_derived(u, K', R') holds for every u ∈ U
              V = Reopen(u) → residual := residual ∪ u.obligations; U := U \ {u} → cycle_n += 1 → Phase 1
              V = Confirm ∧ ¬hard_invariants_hold(Λ) → re-present Qc naming the violated invariant   -- a hard invariant is not waivable by confirming past it
-             V = Confirm ∧ hard_invariants_hold(Λ) → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.obligation | ρ ∈ R} (track) → Phase 3
+             V = Confirm ∧ hard_invariants_hold(Λ) → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.obligation | ρ ∈ R}; ∀ρ∈R: ρ.disposition := AcceptUncovered (track) → Phase 3
 Phase 3: (U, K, P) → Emit → E [Tool: TaskCreate] → converge(apportionment trace) (extension) → ConditionBearingUnitPlan
 
 Phase 0 → Phase 1: goal_plan_uncompiled(G)                             -- an autonomous goal whose unit plan and conditions are uncompiled
 Phase 0 → deactivate: ¬autonomous_intent(G) ∨ condition_bearing(G)     -- relay the scan result; no activation
+Phase 1 → deactivate: residual = ∅ ∧ U = ∅ ∧ oos = ∅                   -- nothing could be read from the goal's scope; relays to /inquire rather than emitting an empty plan
 Phase 1 → Phase 1: cycle_n += 1                                        -- next anchor; bounded by coverage (residual strictly shrinks on AcceptUnit/OverrideFit) and by user agency (Recut/Sufficient/Esc)
-Phase 1 → Phase 2: residual = ∅                                        -- every obligation apportioned or visibly delegated
+Phase 1 → Phase 2: residual = ∅ ∧ (U ≠ ∅ ∨ oos ≠ ∅)                    -- every obligation apportioned or visibly delegated, and something was actually read
 Phase 2 → Phase 1: V = Reopen(u)                                       -- the derived conditions revealed a bad cut; that unit's obligations return to residual. User-driven, so bounded by user agency exactly as Adjust is
 Phase 2 → Phase 2: V = Adjust(d)                                       -- rederive over the same apportionment; U unchanged
 Phase 2 → Phase 2: V = Confirm ∧ ¬hard_invariants_hold(Λ)              -- Qc re-presents with the violated invariant named; no state advances
@@ -256,7 +305,7 @@ Convergence evidence (relay, at emission): present the apportionment trace —
   (a) Plan readback — the goal restated as its units in plain single-sentence form;
   (b) Per-unit: (obligations covered, seam quality with its citation or heuristic declaration, horizon fit or
       the recorded override) → the conjoined leaf predicate, with each conjunct's kind;
-  (c) Plan-level conditions with what each fires after;
+  (c) Plan-level conditions with the plan-state requirement that makes each safe to discharge;
   (d) Each accepted-uncovered residual with its obligation, and each out-of-scope obligation with its substrate;
   (e) When unbounded_approved: the recorded whole-goal acceptance waiver with its gate site.
 Convergence is demonstrated, not asserted.
@@ -264,25 +313,29 @@ Convergence is demonstrated, not asserted.
 ── CONVERGENCE ──
 apportioned(G) = emitted(E) ∧ handoff_recorded
                  ∧ coverage_complete(U, G) ∧ span_fit(U)
+                 ∧ (U ≠ ∅ ∨ oos ≠ ∅)                                                -- a goal with nothing read from it never claims apportionment occurred
                  ∧ (∀u∈U: unit_termination_covered(u, K, R))
                  ∧ (∀u∈U: obligation_derived(u, K, R))
-                 ∧ (∀u∈U: |{e ∈ E : e is UnitEntry ∧ e.subject = u.subject}| = 1)   -- the join rule holds: one unit entry per unit
-                 ∧ (∀p∈P: ∃! e ∈ E : e is PlanEntry ∧ e.condition = p.condition ∧ e.fires_after = p.fires_after)
+                 ∧ (∀u∈U: |{e ∈ E : e is UnitEntry ∧ e.unit_ref = u.unit_ref}| = 1)   -- the join rule holds: one unit entry per unit, keyed on unit_ref — subject is not unique across units
+                 ∧ (∀p∈P: ∃! e ∈ E : e is PlanEntry ∧ e.scope = p.scope ∧ e.kind = p.kind
+                                     ∧ e.condition = p.condition ∧ e.dischargeable_when = p.dischargeable_when)
+                 ∧ (∀p∈P: topology_free(p.dischargeable_when))
                  ∧ (acceptance_present(P) ∨ unbounded_approved)
                  ∧ (∀d∈oos: d.substrate ≠ "")
-ConditionBearingUnitPlan = apportioned(G)
 -- Rerouted (Qt RouteBound) is a deliberate non-emission exit and EarlyExit a user abort — neither claims
--- ConditionBearingUnitPlan.
+-- ConditionBearingUnitPlan (see TYPES): the emitted result is well-formed exactly when apportioned(G) holds.
 -- The guarantee is compile-time and pre-conduct: every goal obligation is apportioned to a unit that fits one
 -- horizon (or carries a recorded override), each unit's done is a determinate predicate (or a recorded
 -- acceptance), each cut declares whether its seam is evidenced or heuristic, whole-goal acceptance is a
--- decision on record rather than a default, and every pre-action risk is visibly delegated. Order,
+-- decision on record rather than a default, and every pre-action risk is visibly delegated, and every plan
+-- condition's firing criterion is a topology-free property of plan state, never an order fact. Order,
 -- independence, reconciliation, termination topology and routing are NOT claimed — they remain /conduct's.
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
 Phase 0 Probe        (sense)        → Internal analysis (autonomous intent + uncompiled-plan detection over the goal; cue cited)
 Phase 0 relay        (extension)    → TextPresent+Proceed (no autonomous interval in scope, or the plan already carries units and conditions: surface the scan result; deactivate without activating)
+Phase 1 VelocityFilter (sense)      → Internal analysis (obligations guardable only by pre-action interception; computed once at Phase 1 entry directly from G — before residual is seeded — so an out-of-scope obligation never enters the packing loop; empty scope with no obligation and no delegation relays to /inquire rather than proceeding)
 Phase 1 Scan         (observe)      → Read, Grep (optional seam evidence gathering over the goal's cited substrate; read-only)
 Phase 1 Pack         (sense)        → Internal analysis (apportionment search: units fitting one horizon, coverage over obligations)
 Phase 1 fit          (sense)        → Internal analysis (per-unit horizon-fit verdict; Indeterminate surfaced, never read as Fits)
@@ -290,17 +343,16 @@ Phase 1 qualify      (sense)        → Internal analysis (seam quality: Grounde
 Phase 1 relay        (extension)    → TextPresent+Proceed (SingleDominantUnit with a fitting horizon: accept the unit without a turn yield — no genuine alternative apportionment exists for this anchor)
 Phase 1 autonomous_pack (track)     → Internal state update (extension — pack the remainder at Heuristic seams when seam evidence is exhausted or the user declares the apportionment sufficient; each packed unit re-checks fit and is surfaced as relay with its heuristic declaration; a packed unit whose fit is not Fits does NOT enter U — it re-enters as the next cycle's anchor for Qu, where the override is the user's to record; a still-non-empty residual likewise re-anchors)
 Phase 1 Qu           (constitution) → present (the anchor's proposed unit + horizon-fit verdict + seam quality with its basis + current cut-set + cycle counter; the accept option is fit-complementary — AcceptUnit when the span fits, OverrideFit when it does not; Esc → EarlyExit) [Tool]
-Phase 1 integrate    (track)        → Internal state update (the accepted unit enters the apportionment and its obligations leave the residual; OverrideFit additionally records the unit in Λ.fit_overrides)
+Phase 1 integrate    (track)        → Internal state update (the accepted unit enters the apportionment and its obligations leave the residual; a fresh UnitRef is assigned to the unit, stable for the remainder of the apportionment; OverrideFit additionally records the unit in Λ.fit_overrides)
 Phase 2 Derive       (sense)        → Internal analysis (per-unit completion and invariant predicates; an obligation with no verifiable predicate becomes a residual)
 Phase 2 DerivePlan   (sense)        → Internal analysis (conditions whose subject is the whole goal; never distributed across units)
-Phase 2 VelocityFilter (sense)      → Internal analysis (obligations guardable only by pre-action interception)
 Phase 2 OOS          (extension)    → TextPresent+Proceed (out-of-scope declaration per obligation, with the delegated substrate named)
 Phase 2 Qt           (constitution) → present (conditional: the whole goal has no acceptance criterion — define it now / route its definition to /bound / proceed unbounded on record; fires at pass entry and again after any Adjust that clears acceptance, always before Qc re-presents) [Tool]
 Phase 2 ApproveUnbounded (track)    → Internal state update (record Λ.unbounded_approved, materializing the informed acceptance for the convergence predicate)
-Phase 2 check        (track)        → Internal state update (invariant status: coverage and horizon fit over the current apportionment)
+Phase 2 check        (track)        → Internal state update (invariant status: coverage, horizon fit, termination coverage, obligation derivation, and oos substrate-naming over the current apportionment)
 Phase 2 Qc           (constitution) → present (apportionment + derived conditions + residual dispositions + invariant status: Confirm / Adjust / Reopen) [Tool]
-Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's obligation into Λ.accepted, materializing accepted_uncovered for the convergence predicate)
-Phase 3 Emit         (track)        → TaskCreate (one goal entry per unit: subject + the conjoined leaf predicate; plan-level conditions as their own entries with what each fires after; TodoWrite is the harness-equivalent realization) [Tool]
+Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's obligation into Λ.accepted, materializing accepted_uncovered for the convergence predicate; also writes ρ.disposition := AcceptUncovered for each ρ ∈ R so the field reads correctly in the Phase 3 trace — the pre-Confirm guard does not depend on this write, see unit_termination_covered)
+Phase 3 Emit         (track)        → TaskCreate (one goal entry per unit: unit_ref + subject + the conjoined leaf predicate; plan-level conditions as their own entries carrying scope + kind + condition + dischargeable_when; TodoWrite is the harness-equivalent realization) [Tool]
 converge             (extension)    → TextPresent+Proceed (apportionment trace; handoff recorded; deactivate)
 esc                  (extension)    → TextPresent+Proceed (no emission; deactivate as EarlyExit, not ConditionBearingUnitPlan)
 seam                 (extension)    → TextPresent+Proceed (two seams, scoped separately. INBOUND activation seam (before this protocol activates): the `/bound → /apportion` and `/conduct → /apportion` legs of the `## Composition` chain relay when a user-declared chain names `/apportion` next, or an invocation follows that declared composition edge — proceed directly, citing the settling source; this seam fires at the upstream handoff, not after this protocol's emission. OUTBOUND emission seam (after this protocol emits): the `/apportion → enforcer` edge is EXCLUDED — Rule 8 (Separate activation) governs it, keeping the enforcer's start the user's own constitutive act; the `/apportion → /conduct` edge relays only under a user-declared chain naming /conduct next, never automatically, and carries the no-reentry guard of Rule 9. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
@@ -317,7 +369,9 @@ seam                 (extension)    → TextPresent+Proceed (two seams, scoped s
       active: Bool, cause_tag: String }
 -- Coverage partition invariant: residual, (⋃ᵤ u.obligations) and {d.obligation | d ∈ oos} are pairwise
 --   disjoint and together equal G.obligations at every cycle boundary — an obligation is always exactly one
---   of: still residual, apportioned to a unit, or visibly delegated out of scope.
+--   of: still residual, apportioned to a unit, or visibly delegated out of scope. Holds from cycle 1: oos is
+--   computed once at Phase 1 entry, before residual is seeded, so an out-of-scope obligation never transits
+--   through a unit on its way into oos.
 --   Λ.accepted is NOT a fourth cell: it is a MARKING over obligations that already sit in a unit, recording
 --   that the unit carries no verifiable predicate for them. An accepted obligation is therefore in a unit AND
 --   in Λ.accepted, by construction — ρ.unit is what ties them
@@ -449,7 +503,7 @@ The loop ends when every obligation is apportioned to a unit or visibly delegate
 For each unit, derive its conditions; for the goal as a whole, derive the conditions no single unit owns.
 
 - **Per-unit** — a completion predicate (the unit achieved its result) and any invariant predicates (the run preserved a boundary while achieving it). Both kinds are verifiable predicates: executable checks with determinate pass/fail outcomes. A condition expressible only as prose judgment ("the code is clean enough") is not derivable — surface it as a residual for the user to sharpen into a predicate or accept as uncovered. A unit with no completion predicate is not an executable interval; it closes as a predicate or as a recorded acceptance, never silently.
-- **Plan-level** — conditions whose subject is the whole goal rather than any one unit: final integration, global non-regression, whole-goal acceptance. These stay plan-level and fire after the reconciliation unit they name, or at terminal. Do not distribute a global condition across every unit to make it fit the leaf type — that multiplies false failures and hides which unit actually owns the obligation.
+- **Plan-level** — conditions whose subject is the whole goal rather than any one unit: final integration, global non-regression, whole-goal acceptance. These stay plan-level and carry a plan-state requirement — a self-contained property of when the condition becomes safe to discharge, never a named unit or order-position: naming an order fact belongs to `/conduct`, not this protocol. Do not distribute a global condition across every unit to make it fit the leaf type — that multiplies false failures and hides which unit actually owns the obligation.
 - **Out of scope** — an obligation whose violation must be caught *before* an action executes cannot be a stop-time predicate: a completion check evaluates after the harm. Declare it out of scope as relay text with the delegated substrate named. Deriving it into a leaf would simulate protection while providing none.
 
 **Whole-goal acceptance check** (before the confirmation gate): per-unit completion predicates make each interval determinate, but they do not say when the *goal* is accepted. When no plan-level acceptance condition exists, present the gap and its consequence, then **present** via Cognitive Partnership Move (Constitution). This fires on entering the confirmation step, and again if an adjustment clears an acceptance criterion the user had already stated — adjusting the conditions replaces the plan-level set wholesale, and an acceptance must not disappear into an emission:
@@ -463,7 +517,7 @@ Options:
 3. **Proceed without one, on record** — the units run to their own conditions and nothing checks the whole; the acceptance is recorded and visible in the trace
 ```
 
-Then present the apportionment together with its conditions as pre-gate text — per unit: obligations covered, seam quality and citation, fit verdict, each derived predicate with its kind; per plan condition: scope and what it fires after; each residual with its uncovered-obligation note; each out-of-scope obligation with its substrate; and the invariant status for coverage and fit — then **present** via Cognitive Partnership Move (Constitution):
+Then present the apportionment together with its conditions as pre-gate text — per unit: obligations covered, seam quality and citation, fit verdict, each derived predicate with its kind; per plan condition: scope, kind, and the plan-state requirement that makes it safe to discharge; each residual with its uncovered-obligation note; each out-of-scope obligation with its substrate; and the invariant status for coverage and fit — then **present** via Cognitive Partnership Move (Constitution):
 
 ```
 Unit plan ready. How should it land?
@@ -480,7 +534,7 @@ Adjust rederives over the same apportionment and re-presents. Reopen returns exa
 
 On Confirm:
 
-1. **Emit** one goal entry per unit via TaskCreate — the unit's subject, and its conditions conjoined into a single leaf predicate carried as the entry's verifiable completion criterion. One unit is one execution interval is one entry; plan-level conditions are emitted as their own entries with what each fires after.
+1. **Emit** one goal entry per unit via TaskCreate — the unit's identity and subject, and its conditions conjoined into a single leaf predicate carried as the entry's verifiable completion criterion. One unit is one execution interval is one entry; plan-level conditions are emitted as their own entries carrying the plan-state requirement under which each becomes safe to discharge.
 2. **Present the apportionment trace**: the plan readback, then per unit its covered obligations, seam quality, fit verdict and leaf predicate with each conjunct's kind; the plan-level conditions; each accepted-uncovered residual; each out-of-scope obligation with its substrate; and any recorded acceptance waiver.
 3. **Record the handoff** and deactivate.
 
@@ -516,11 +570,11 @@ Merismos is the apportion-and-condition step ahead of an autonomous run. The com
 
 1. **User-initiated, AI-apportioned**: User declares autonomous execution intent via `/apportion`; AI reads the obligations, searches the apportionment, and derives the conditions; the user settles each unit at Phase 1 and the conditioned plan at Phase 2 via Cognitive Partnership Move (Constitution).
 2. **Apportion, do not order**: Merismos cuts the units and conditions them. Order, independence, reconciliation, termination topology and routing are `/conduct`'s; an emitted plan that carries them has absorbed `/conduct` and violates this protocol's identity. The emitted artifact is pre-conduct by construction.
-3. **Coverage is a hard invariant**: Every obligation read from the goal belongs to some unit, is visibly declared out of scope, or is accepted as uncovered on record. A plan that leaves an obligation silently unowned is not emitted — the gap is surfaced at the confirmation gate for the user to close by recutting, by accepting it as an uncovered residual, or by delegating it out of scope.
+3. **Coverage is a hard invariant**: Every obligation read from the goal belongs to some unit, is visibly declared out of scope, or is accepted as uncovered on record. A plan that leaves an obligation silently unowned is not emitted — the gap is surfaced at the confirmation gate for the user to close by recutting, by accepting it as an uncovered residual, or by delegating it out of scope. A goal from which nothing could be read at all (no unit, no delegation) does not emit an empty plan — it relays to `/inquire` instead, matching the Skip condition for a goal whose scope is too thin to read obligations from.
 4. **Fit is a hard invariant with an override path**: Every unit fits one execution horizon, or carries an override the user recorded on that unit. An unjudgeable fit surfaces as indeterminate at the gate; it is never quietly read as fitting, and an overflowing unit is never committed without the recorded override. The gate enforces this by offering the accept options fit-complementarily — plain acceptance only on a fitting unit, the recorded override as the only way an unfitting one enters — and neither the autonomous packing pass nor a confirmation may carry an unfitting unit past it.
 5. **Seam quality is declared, not asserted**: Each cut cites the dependency, deliverable, verification or ownership seam it sits on, or declares itself heuristic. Seam quality is a disposition rather than an invariant — an abstract goal may carry no evidenced joint, and claiming one anyway would be false precision.
 6. **The join rule — one unit, one interval, one conjoined leaf**: A unit's completion and invariant predicates are conjoined into a single leaf predicate and emitted as one entry. Per-condition entries duplicate the unit's execution identity; a cartesian product does the same more explicitly. Predicate kind is retained on each conjunct so provenance stays readable even though enforcement conjoins them.
-7. **Plan conditions stay plan-level**: A condition whose subject is the whole goal fires after the reconciliation unit it names, or at terminal. It is never distributed across every unit to fit the leaf type — that multiplies false failures and hides which unit owns the obligation.
+7. **Plan conditions stay plan-level**: A condition whose subject is the whole goal carries a plan-state requirement — a topology-free property of when it becomes safe to discharge, never a named unit or order-position, which is `/conduct`'s axis to resolve. It is never distributed across every unit to fit the leaf type — that multiplies false failures and hides which unit owns the obligation.
 8. **Separate activation**: Emitting the plan is the epistemic endpoint. Merismos does not invoke the downstream enforcer; starting the autonomous interval is the user's separate constitutive act.
 9. **No-reentry across the `/conduct` seam**: Both directions of the `/conduct` edge are advisory and guarded. A condition-bearing unit plan consumed by `/conduct` supplies stated termination grounds and does not route back to `/apportion`; an already-conducted autonomous region consumed by `/apportion` has fixed topology and is not re-conducted. A single unit or a trivially ordered unit set bypasses `/conduct`. Neither edge is a precondition, so neither activation depends on the other having run.
 10. **Verifiable predicate required**: Every emitted condition is an executable check with a determinate pass/fail outcome. A condition expressible only as prose judgment is surfaced as a residual — sharpened into a predicate or accepted as uncovered — and is never emitted as prose.
