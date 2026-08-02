@@ -52,7 +52,7 @@ const DESCRIPTION_OVERRIDES = {
   triage: 'Work-unit triage — group GitHub issues, fuse with AGENTS.md northstar, externalize routed work units to substrate records a collaborator session is pointed at.',
   'comment-review': "Reviews markdown/HTML artifacts before fixation (publish/commit/merge) via a channel-first browser preview loop.",
   forge: "Reference-grounded prompt-artifact formation — surfaces under-determined contract coordinates from a reference doc and projects a ready-to-use prompt or skill recipe.",
-  'gate-check': "Advisor-checked decision gates — freezes a drafted option set, takes an independent verdict on it, verifies the cited grounds, then presents or relays.",
+  'gate-check': "Advisor-checked decision gates — freezes a drafted option set, takes an independent adjudication of it (a verdict, or the repairs it could not clear), verifies the cited grounds, then presents, relays, or unfolds.",
   'lens-review': "Frame-driven multi-perspective PR review — derives fitting lenses per diff, cross-verifies findings, posts one consolidated PR comment.",
   misuse: "Retrospective protocol contract-violation detector — scans past sessions and surfaces violation records for review.",
   'reduced-space-test': "Scoped empirical validation — decomposes a target↔surrogate equivalence claim, bounds a test space, captures evidence, carries the untested complement forward.",
