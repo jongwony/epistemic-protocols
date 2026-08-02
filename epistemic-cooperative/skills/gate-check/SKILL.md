@@ -108,10 +108,11 @@ Then check it, ground by ground, against the anchored substrate:
 - **Does the cited ground carry the axis conclusion, or only one premise inside it?** A true premise that does not reach the conclusion is the most common way a verdict looks grounded and is not.
 - **Is the advisor's stated falsifier actually present in the substrate?** Present means the reading is live-contested. Absent means that particular objection does not apply — not that the reading is right.
 - **Is any material premise inaccessible, ambiguous, or a matter of reading rather than fact?**
+- **Did the answer turn on the sources the precommit named?** This is where the precommit is read, and reading it is the only thing that makes it more than a record. A source it named that the answer never reaches is an uncovered ground no present citation can speak for — the answer did not refute that source, it went somewhere else. Every citation checking out and the controlling source going untouched are perfectly compatible, which is exactly the shape a followed answer takes.
 
 This phase is the audit vertex, and it is deliberately narrow: it checks whether the advisor represented and applied the evidence correctly. It does not re-argue the options. A second opinion from the side that drafted them is not independent evidence, and offering it as one would quietly restore the collapse the skill exists to prevent.
 
-**Snapshot consistency.** If the substrate moved between the anchor and this verification, the cycle is indeterminate — re-run it against a fresh anchor rather than reconciling across two states.
+**Snapshot consistency.** If the substrate moved between the anchor and this verification, re-anchor and run the cycle once more rather than reconciling across two states. Bounded at one, for the same reason the synthesis recheck is: if it moves again, stop re-anchoring and let the cycle land on `indeterminate (anchor)`. A gate held open until the ground stops shifting is a gate that never fires.
 
 ## Phase 3: Disposition
 
@@ -120,8 +121,9 @@ Exactly one of these holds. They are checked in order, and the first that applie
 | Condition | Disposition | What happens |
 |---|---|---|
 | No usable answer — the advisor failed, timed out, or returned nothing readable | **failed** | Present the original gate, labeled as unchecked, with what went wrong. The cycle ends in failure; the gate still fires |
+| The substrate moved again after the one permitted re-anchor | **indeterminate (anchor)** | Unfold everything, naming both anchors and what moved between them. Grounds read against a substrate that will not hold still are not grounds |
 | A cited ground is missing, or says something other than what was attributed to it | **indeterminate (uncitable)** | Unfold everything; the user decides with both readings in view |
-| Grounds located, but the entailment to the axis conclusion is contestable, or a material premise is interpretive | **indeterminate (audit)** | Unfold everything |
+| Grounds located, but the entailment to the axis conclusion is contestable, a material premise is interpretive, or a source the precommit named went untouched | **indeterminate (audit)** | Unfold everything, naming what the answer did not reach |
 | The advisor's own stated falsifier is present in the substrate | **indeterminate (falsifier live)** | Unfold everything, naming the live falsifier |
 | Grounds check out, falsifier absent, verdict `genuine` | **genuine** | Present the original gate, now checked, with the axis reading |
 | Grounds check out, falsifier absent, verdict `collapse` | **collapse** | Relay: state the finding and the option it settles on, with the ground that settles it. No gate |
@@ -144,22 +146,22 @@ A `malformed` verdict means the options stand on the wrong axis. The advisor sup
 
 ## Presentation
 
-**Three vantage points are always shown.** They never fold, whatever the disposition:
+**Three vantage points are always shown.** They never fold, whatever the disposition — and where a disposition leaves one of them empty, the emptiness is what gets shown, because an omitted vantage point and an empty one read identically once they are both absent:
 
-- the advisor's axis reading, in its own terms
-- the resulting option set — the original when `genuine`, the settled option when `collapse`, the rebuilt set when `malformed`
+- the advisor's axis reading, in its own terms; on `failed` there is none, and saying that plainly is the reading
+- the resulting option set — the original when `genuine` or `failed`, the settled option when `collapse`, the rebuilt set when `malformed`, and on any indeterminate disposition the original set beside the advisor's contested reading of it
 - the axis that set stands on
 
 These are what you read in order to decide, so they belong in front of you at the moment of deciding.
 
-**The ground-by-ground detail folds to one line.** Something like *"nine of ten cited grounds confirmed; one citation pointed at the wrong location though its claim holds elsewhere; falsifier absent."* The full detail stays available and is produced on request. It folds because it is what you read to decide whether to *trust* the conclusion, not to reach it — a later and rarer need, and one that keeps its own place.
+**The ground-by-ground detail folds to one line.** Something like *"nine of ten cited grounds confirmed; one citation pointed at the wrong location though its claim holds elsewhere; the answer turned on both sources the precommit named; falsifier absent."* The precommit comparison rides that line either way — stating that the answer did reach what was expected is what makes the converged case distinguishable from an unasked question. The full detail stays available and is produced on request. It folds because it is what you read to decide whether to *trust* the conclusion, not to reach it — a later and rarer need, and one that keeps its own place.
 
 Two things never fold, even inside the summary line:
 
-- **any ground that failed**, with what failed about it — a failed ground is what routes the disposition, so hiding it hides the reasoning
-- **the falsifier's status** — present or absent, always stated
+- **whatever routed the disposition**, with what it turned on — the ground that failed and how, the entailment that would not carry, the premise that was a reading rather than a fact, the named source the answer never reached, the anchor that moved. Hiding the router hides the reasoning, and each Phase 3 row names its own
+- **the falsifier's status** — present or absent, always stated, because its absence is a result and not a silence
 
-Folding the detail while dropping these would not be compression; it would be concealment wearing compression's shape.
+Folding the detail while dropping either would not be compression; it would be concealment wearing compression's shape.
 
 **The advisor's full text is referenced, not inlined** — its path is given so it can be read directly. Inlining it would push the three vantage points below the fold, which inverts exactly the ordering above.
 
@@ -191,22 +193,22 @@ Keeping these separate is what prevents one unavailable advisor from leaving eve
 | Advisor unavailable in the current environment | Surface what is missing and what would make it available; present the gate unchecked rather than substituting a self-check under the same name |
 | Advisor times out | Report the timeout; disposition is `failed`; the gate fires unchecked and labeled |
 | Answer arrives but cites nothing | Treat as `indeterminate (uncitable)` — an ungrounded verdict is not a checked verdict |
-| Substrate moved between anchor and verification | Re-run against a fresh anchor; do not reconcile across two states |
+| Substrate moved between anchor and verification | Re-anchor and run once more; do not reconcile across two states. Movement after that one re-anchor is `indeterminate (anchor)` |
 | The gate turns out to be excluded after dispatch | Discard the verdict; the gate fires on its own terms |
 
 ## Rules
 
 1. **The advisor's verdict is an input, never a ruling.** It enters the record as one reasoner's grounded reading and is checked before it reaches you. On `collapse` the answer also names which option the set reduces to, because naming it is what that verdict asserts — supplying it afterwards would return the choice to the side under judgment. Adopting any of it unchecked would replace one unaudited judgment with another and lose the independence the exchange was for.
 2. **Launch before precommit, and never read partial output first.** The ordering is the mechanism. A judgment recorded after the answer is visible cannot be distinguished from the answer, and the whole question the precommit answers — did this converge or follow — becomes unanswerable.
-3. **The precommit records expected controlling sources and verification criteria, not a preferred option.** A recorded preference turns the later comparison into an agreement check, which is what the ordering exists to avoid.
+3. **The precommit records expected controlling sources and verification criteria, not a preferred option — and the verification reads it back.** A recorded preference turns the later comparison into an agreement check, which is what the ordering exists to avoid. A precommit nothing later reads is a record impersonating a safeguard: the check that reads it asks whether the answer turned on the sources it named, a named source left untouched routes the cycle to an indeterminate audit, and what the comparison showed is stated when the result is presented.
 4. **The audit vertex checks grounds, not options.** The side that drafted the options has no independent opinion about them. Its independent contribution is whether the advisor represented and applied the evidence correctly.
 5. **Silence, error, and timeout resolve as failure — never as agreement.** No absent answer produces a folded conclusion.
-6. **The three vantage points always show; only the ground-by-ground detail folds.** Any failed ground and the falsifier's status stay visible inside the folded line. Detail that decides the disposition is not detail.
+6. **The three vantage points always show; only the ground-by-ground detail folds.** Where a disposition leaves a vantage point empty, the emptiness is shown rather than the point dropped — an omitted vantage point and an empty one are indistinguishable once both are absent. Whatever routed the disposition, and the falsifier's status, stay visible inside the folded line. Detail that decides the disposition is not detail.
 7. **Excluded gates fire on their own terms.** Gates measuring you, options turning on private preference, irreversible actions, and environment-mutating actions are outside the check, and no verdict changes that. A relay on an irreversible decision would remove the confirmation its irreversibility requires.
 8. **The option set is frozen before dispatch, and rewording restarts the cycle.** A verdict adjudicates the text it was given; silently editing the options afterwards makes the verdict about something that no longer exists.
 9. **The dispatch carries the frozen set, settled constraints, and pointers — nothing else.** Not the preferred option, not the drafting rationale, not prior dispositions. Stating a settled constraint is conveyance; appending what to conclude from it is not.
-10. **Synthesis preserves the answer kind, accounts for every original option, and adds nothing unsupported.** Making a generic option concrete while keeping the answer kind is a sharpening; needing a new answer kind is a different gate and routes back to where the original was constructed. Adding options not in the original set, dropping options that were, or swapping one for another are the three ways a rebuilt gate stops being the same question — each is a defect, not a shortcut.
-11. **One recheck, and it is a full pass.** The replacement's answer re-enters ground verification and lands on exactly one disposition, as the first answer did — the rebuilt gate presented on a checked `genuine`, a relay on a checked `collapse`. Every other landing ends the cycle with a surfaced diagnosis and both attempts. A third attempt would be confidence manufactured by repetition.
+10. **Synthesis preserves the answer kind, accounts for every original option, and adds nothing unsupported.** Making a generic option concrete while keeping the answer kind is a sharpening; needing a new answer kind is a different gate and routes back to where the original was constructed. An addition tracing to no relocated-axis ground, a removal naming neither a ground nor a disposition, and a swap that quietly puts one option where another stood are the three ways a rebuilt gate stops being the same question — each is a defect, not a shortcut. A grounded addition and a removal recorded as off-axis are neither: what makes a change legal here is the ground that licenses it and the record that it happened, never the direction of the change.
+11. **Each repetition is bounded at one, and the repeat is a full pass.** The replacement's answer re-enters ground verification and lands on exactly one disposition, as the first answer did — the rebuilt gate presented on a checked `genuine`, a relay on a checked `collapse`. Every other landing ends the cycle with a surfaced diagnosis and both attempts. A substrate that moved is re-anchored once on the same terms, and movement after that lands on `indeterminate (anchor)`. A third attempt at either would be confidence manufactured by repetition.
 12. **Provenance stays separable to the end.** Original gate, advisor answer, precommit, verification result, synthesized gate — five distinct records. Merged into one account, nothing afterwards can show how the conclusion was reached, which is the only thing that distinguishes a checked gate from a confident one.
 13. **Context and question stay separate.** All analysis, evidence, and verification output are text before the gate; the gate carries only the question and each option's differential implication.
 14. **Plain everyday language in everything you read.** The verdict names, the axis reading, and the options are written to be recognized at a glance, not decoded.
