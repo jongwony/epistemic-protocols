@@ -171,7 +171,7 @@ After Phase 3: re-scan X' for remaining or newly emerged uncertainties.
 New uncertainties accumulate into uncertainties (cumulative, never replace).
 If Uᵢ' remains: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
-User can exit at Phase 2 (early_exit).
+User can declare the context sufficient at Phase 2 (sufficiency_declared): the remaining uncertainties are dismissed with the declaration recorded and the loop converges, rather than exiting. User can exit at Phase 2 (early_exit).
 Continue until: informed(X') OR user ESC.
 Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.empirically_observed ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
 On user ESC (EarlyExit, not InformedExecution): present the same partial transformation trace restricted to uncertainties already resolved, then declare `remaining` as explicit unresolved residual.
@@ -181,7 +181,8 @@ actionable(Λ) = uncertainties \ non_factual_detected       -- Fiber(Factual) + 
 informed(X') = remaining = ∅                                -- non_factual_detected does not block convergence
 progress(Λ) = 1 if |actionable(Λ)| = 0 else 1 - |remaining| / |actionable(Λ)|   -- |actionable| = 0 (zero-signal or all-nonactionable trivial convergence) is fully converged, not undefined; denominator excludes non-actionable (CrossDomain + detect-only dimensions)
 narrowing(Q, A) = |remaining(after)| < |remaining(before)| ∨ context(remaining(after)) ⊃ context(remaining(before))
-early_exit = user_declares_sufficient
+sufficiency_declared = user_declares_sufficient   -- consumed by the sufficiency transition in TOOL GROUNDING: every u ∈ Λ.remaining moves to Λ.dismissed with the declaration recorded, so remaining = ∅ and informed(X') holds. A success-flavoured event lands on the SUCCESS terminal, which is where the per-item Dismiss it generalizes already lands
+early_exit = user_esc   -- bound to the event the type it names already required (EarlyExit = X' where user_esc); the prior binding to a sufficiency declaration named a success-flavoured event with an exit-flavoured type, so no transition could consume either reading
 
 ── TOOL GROUNDING ──
 -- Realization: Constitution → TextPresent+Stop; Extension → TextPresent+Proceed
@@ -196,6 +197,7 @@ Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering,
 Phase 2 Qs      (constitution)        → present (mandatory: classify result + uncertainty surfacing; user provides context judgment on insufficiency; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
+sufficiency  (extension)       → TextPresent+Proceed (fires on sufficiency_declared: the user declares the context sufficient as a free response at any Phase 2. Every uncertainty still in Λ.remaining moves to Λ.dismissed carrying the declaration as its recorded reason, so remaining = ∅ and informed(X') holds — the run converges as InformedExecution, not as an exit. It is a free-response pathway rather than a peer option in the Phase 2 set because declaring the WHOLE inquiry sufficient produces no trajectory on the per-item axis those options occupy: it disposes of the axis instead of taking a position on it. Present the dismissed set with the declaration recorded against each, so the convergence trace shows what was accepted unresolved rather than asserting resolution)
 esc          (extension)       → TextPresent+Proceed (partial transformation trace + unresolved residual declaration; terminate as EarlyExit, not InformedExecution)
 seam         (extension)       → TextPresent+Proceed (fires at deactivation/handoff: a user-declared chain naming the next protocol, or a composition edge this SKILL.md declares — the CrossDomain/Relevance/Emergent deficit-matched routing targets in Phase 1 Step 2 (MappingUncertain→/ground, BoundaryUndefined→/bound, FrameworkAbsent→/frame, GapUnnoticed→/gap, AbstractAporia→/elicit, DirectionUnrecognizable→/preview) — settles the next move; proceed directly to it, citing that settling source; every Constitution gate inside this protocol and inside the next protocol fires unchanged)
 
@@ -275,7 +277,7 @@ Heuristic signals for context insufficiency inference (not hard gates): **Novel 
 
 ### Mode Deactivation
 
-All uncertainties resolved (context, read-only, observed, or user) → proceed with updated prospect. All remaining uncertainties dismissed → proceed with original prospect + defaults. User Esc key → EarlyExit (not InformedExecution): present partial transformation trace + declare `remaining` as unresolved residual, then return to normal operation.
+All uncertainties resolved (context, read-only, observed, or user) → proceed with updated prospect. All remaining uncertainties dismissed → proceed with original prospect + defaults. User declares the context sufficient at any Phase 2 → every remaining uncertainty is dismissed with the declaration recorded against it → proceed with updated prospect (InformedExecution): a declaration of sufficiency accepts the residual rather than abandoning the inquiry, so it lands where the per-item Dismiss it generalizes already lands. User Esc key → EarlyExit (not InformedExecution): present partial transformation trace + declare `remaining` as unresolved residual, then return to normal operation.
 
 ## Uncertainty Identification
 
@@ -445,6 +447,7 @@ After user response:
 1. **Provide(context)**: Integrate user-provided context into prospect `X'`
 2. **Point(location)**: Record location, resolve via next Phase 1 iteration
 3. **Dismiss**: Mark uncertainty as dismissed, note default assumption used
+4. **Unknown(Partial)**: Promote the uncertainty to the next-preferred EvidenceSource in `ValidSources(v)` and re-enter Phase 1 classification via the backward arc
 
 After integration:
 - Re-scan `X'` for remaining or newly emerged uncertainties
@@ -470,7 +473,7 @@ After integration:
 | Session immunity | Dismissed (domain, description) → skip for session | Respects user's dismissal |
 | Current-uncertainty framing | Phase 2 surfaces the uncertainty currently in play (the kind of context being resolved this cycle) — a framing readout, not an `[N resolved / M]` completion count | User recognizes which context is being resolved without parsing a progress tally; granular progress stays in session |
 | Narrowing signal | Signal when `narrowing(Q, A)` shows diminishing returns | User can exit when remaining uncertainties are marginal |
-| Early exit | User can declare sufficient at any Phase 2 | Full control over inquiry depth |
+| Early exit | User can declare sufficient at any Phase 2 as a free response; every remaining uncertainty is dismissed with the declaration recorded against it, and the run converges as InformedExecution rather than exiting | Full control over inquiry depth, with what was accepted unresolved visible in the convergence trace |
 | Cross-protocol fatigue | Syneidesis triggered → suppress Aitesis for same task scope | Prevents protocol stacking (asymmetric: Aitesis context uncertainties ≠ Syneidesis decision gaps, so reverse suppression not needed) |
 | Classify transparency | Always show classify results (dimension + verifiability) in Phase 2 surfacing format | User sees AI's reasoning and resolution path per uncertainty |
 | Routing transparency | Uₙ items show `→ /protocol` in Phase 2 classify summary | User sees routing destination at detection time |
@@ -490,7 +493,7 @@ After integration:
 3. **Evidence over Inference over Detection** (Aitesis Core Principle): Three-level hierarchy. Lower boundary (Inference > Detection): infer the highest-gain question rather than detecting via fixed checklist. Upper boundary (Evidence > Inference): when a factual uncertainty is empirically observable, observe directly rather than infer from reasoning alone — Cite-or-observe is the structural guard. Direct-resolve admissibility has two axes: **coverage** (verify scope ⊇ claim) and **support_integrity** (verify provenance_coupled(source × claim) and the evidence→behavior link, not silently desynced). Partial coverage is inference for the uncovered portion; present evidence with the wrong referent/source-kind/scope is inference dressed as evidence for a different claim; current-but-unenforced evidence is inference dressed as evidence for the behavior it asserts. Verify both before treating as resolved, and reclassify a failing portion separately (coverage gap → split; support-unlinked or provenance-uncoupled → EmpiricallyObservable). **Inquiry above Evidence in cost**: facts discoverable by AI through Evidence (codebase, memory, observation, canonical external) are resolved at Phase 1; Phase 2 surfaces only judgment-requiring uncertainties.
 4. **Open scan**: No fixed uncertainty taxonomy — identify uncertainties dynamically per prospect requirements; every surfaced uncertainty cites specific observable evidence or collection results, not speculation.
 5. **Context collection precedes classification precedes inquiry**: Phase 1 Step 1 (codebase + memory + history collection) → Step 2 (dimension + verifiability + EvidenceSource classification) → Step 3 (read-only verification) → Step 4 (empirical observation) before Phase 2 inquiry. Memory and version-control evidence is staleness-guarded — tagged `source: "memory:{path}"` or `source: "history:{ref}"` and NOT eligible for Factual/ReadOnly direct-resolve; verify against current state or escalate via classify summary with the `staleness:unverified` flag (the temporal sub-case of the general `support_integrity:unverified` tag). Procedural detail in Phase 1 Step 1-2.
-6. **Convergence persistence**: Mode active until all identified uncertainties are resolved (context, read-only, observed, user-responded) or dismissed; convergence demonstrated via per-uncertainty transformation trace before declaring remaining = ∅.
+6. **Convergence persistence**: Mode active until one of the termination paths is reached — all identified uncertainties resolved (context, read-only, observed, user-responded) or dismissed, converging as InformedExecution; the user declaring the context sufficient, which dismisses every remaining uncertainty with the declaration recorded and likewise converges as InformedExecution; or user Esc, terminating as EarlyExit. Convergence demonstrated via per-uncertainty transformation trace before declaring remaining = ∅; a non-convergent path presents the partial trace and declares the residual instead.
 7. **Always show classification**: Phase 2 surfacing always includes classify results (dimension + verifiability + EvidenceSource); free response can override classification — visible by default, ask only on exception.
 8. **Context-Question Separation**: Analysis, evidence, rationale as text output before the gate; the gate contains the essential question and option-specific differential implications only.
 9. **Option-set relay test (Extension classification)**: Single dominant option (entropy → 0) presented as relay. Each Constitution option genuinely viable under different user value weightings; shared-trajectory options collapse to one; off-axis prompts surface as free-response pathways rather than peer options.
