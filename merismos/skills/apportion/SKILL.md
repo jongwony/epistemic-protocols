@@ -77,7 +77,7 @@ O_G            = ReadObligations(G) = G.obligations ∪ (owed_unit(G) ? owed_obl
                --   residual seeding, and coverage_complete. It is an augmented READ of G, not a write into
                --   G.obligations; this is the carrier that lets MORPHISM preserve G while still accepting an
                --   owed /conduct unit into a fresh apportionment pass
-ProtocolOutput = prior protocol's converged output in current session (e.g., a boundary map, a conducted method's autonomous region, or /conduct's owed-reapportionment entry for a unit it could not place a move for — see Composition, "Owed reapportionment from /conduct's withdrawal")
+ProtocolOutput = prior protocol's converged output in current session (e.g., a boundary map, a conducted method's autonomous region — read via the general heuristic scan below, no dedicated reader (see Known Limitations, "Obligation reading is heuristic") — or /conduct's owed-reapportionment entry for a unit it could not place a move for — see Composition, "Owed reapportionment from /conduct's withdrawal", which DOES have one: ReadObligations/owed_unit/owed_obligations, below)
 owed_unit(G)   ≡ G.prior names a /conduct owed-reapportionment entry for a unit it could not place a move for
                -- the OwedReapportionment(unit, resolver) HandoffAnnotation hyphegesis's SubstrateHandoff
                --   carries (see hyphegesis SKILL.md TYPES, HandoffAnnotation); opaque here beyond its unit
@@ -91,6 +91,22 @@ owed_obligations(G) = (the named entry's unit).obligations   -- defined when owe
 Obligation     = a stated or inferred requirement the goal must satisfy — the unit of coverage; each cites its evidence in G
 H              = ExecutionHorizon      -- the budget one autonomous run is expected to fit (turns, time, context lifecycle); read from context, cue cited
 U              = Set(Unit)             -- the apportionment
+Anchor         = Set(Obligation)
+               -- Pack's per-cycle focus region: the (possibly proper) subset of `residual` Scan's seam
+               --   evidence gives Pack something to prioritize a cut around this cycle — "the
+               --   highest-leverage unapportioned region" of the Rules' Phase 1 framing. Pack's INPUT frame,
+               --   chosen BEFORE the specific cut (see ProposedUnit, next)
+               -- Anchor empty ≡ Pack found no region to prioritize THIS cycle — independent of residual = ∅:
+               --   residual may still hold obligations no evidenced seam currently distinguishes (FLOW's
+               --   "Anchor empty ∧ residual ≠ ∅" branch, resolved by autonomous_pack's Heuristic fallback
+               --   over the whole remainder), or residual may itself already be exhausted (the two
+               --   "residual = ∅" branches) — the three FLOW branches on this predicate stay distinct
+               -- STABLE under Recut: Recut re-derives proposed_unit from the SAME Anchor under a new
+               --   direction, never re-scoping it (LOOP: "re-frames the SAME anchor"); cycle-indexed
+               --   (Anchor[cycle_n]) because Scan may select a DIFFERENT region once this one is packed
+               -- re-seeded when a cycle closes via autonomous_pack: the next cycle's Anchor becomes
+               --   whichever of a packed leftover unit's obligations (fit ≠ Fits) or the post-pack residual
+               --   is non-empty ("a still-non-empty residual likewise re-anchors")
 ProposedUnit   = { subject: String, obligations: Set(Obligation), fit: SpanFit, seam: Seam,
                     capability_requirements: Set(CapabilityRequirement), feasibility_notes: Set(FeasibilityNote) }
                -- Pack's and autonomous_pack's output shape — everything a cut carries BEFORE integration
@@ -441,8 +457,15 @@ plan_terminal(n) = PlanStateRequirement {
                --   count below n, |candidate_plan.units| = n reads false and stays false — by design, not
                --   oversight. A withdrawn unit's obligations are owed back to /apportion (see hyphegesis
                --   SKILL.md HandoffAnnotation); accepting whole-goal completion while that obligation stands
-               --   would accept a goal whose plan no longer covers it. The requirement discharges again only
-               --   after /apportion re-apportions the returned obligations and re-emits with the restored count
+               --   would accept a goal whose plan no longer covers it. THIS SPECIFIC requirement instance never
+               --   discharges again: no step merges a later /apportion pass's output back into the carried plan
+               --   this n was fixed against, or rebinds this p.dischargeable_when to a new n — a fresh
+               --   apportionment over the returned obligations is a SEPARATE emission (Phase 3 Emit constructs
+               --   a new E, package a new plan), and granularity is deliberately not re-cut (see Known
+               --   Limitations), so nothing obligates that fresh cut to reproduce the withdrawn count. Whole-goal
+               --   acceptance for the goal, if reached at all, is reached through that fresh plan's own
+               --   freshly-derived WholeGoalAcceptance condition and its own plan_terminal(n') over its own
+               --   units — a distinct requirement instance, not a restoration of this one
 Rerouted       = routed_to_bound       -- deliberate non-emission exit at Qt; distinct from EarlyExit (abort)
 EarlyExit      = user_esc              -- non-convergent abort: no emission, no handoff recorded
 Emit           = (U, K, P) → E [Tool: TaskCreate]
@@ -759,10 +782,17 @@ Gate predicate:
 ```
 goal_plan_uncompiled(G) ≡ autonomous_intent(G) ∧ ¬condition_bearing(G)
   autonomous_intent(G)  ≡ an autonomous or long-running execution interval is intended for G (cue cited from context)
-  condition_bearing(G)  ≡ G already carries units whose completion conditions are determinate predicates —
+  condition_bearing(G)  ≡ (G already carries units whose completion conditions are determinate predicates —
                           a prior /apportion plan covering this goal, or an explicit unit-and-condition set the
-                          user supplied. A goal with units but no conditions, or conditions but no units, is
-                          uncompiled: both halves are this protocol's product
+                          user supplied) ∧ ¬owed_unit(G). A goal with units but no conditions, or conditions but
+                          no units, is uncompiled: both halves are this protocol's product. The exclusion is
+                          load-bearing, not decorative: when owed_unit(G) holds, G.prior names a /conduct
+                          owed-reapportionment entry — a UnitEntry that structurally LOOKS like a prior unit
+                          with a determinate completion condition, but exists BECAUSE /conduct could arrange no
+                          move for it and returned it for a fresh cut. Without this exclusion, a scan could read
+                          that returned UnitEntry as evidence of condition_bearing(G) and relay-deactivate before
+                          the uncompiled branch's ReadObligations ever runs — starving owed_obligations(G) of the
+                          one read that exists to serve it (see TYPES O_G, ReadObligations; R6)
 ```
 
 **Activation layer**:
@@ -902,7 +932,7 @@ Merismos is the apportion-and-condition step ahead of an autonomous run. The com
 
 **Bounded platform claim**: The leaf-executor characterization of `/goal` (stop-hook predicate enforcer, no external step injection) is verified against Claude Code v2.1.140 only. A harness version change requires re-verification before relying on the composition guidance above.
 
-**Obligation reading is heuristic**: The goal's obligations are read from its utterance, prior protocol output, and session context. An obligation the user holds but never uttered, and that no upstream protocol captured, will not be read — and therefore will not be covered, even though coverage is a hard invariant over what *was* read. The Phase 2 gate is the correction point: the apportionment is presented with its covered obligations precisely so a missing one becomes visible. One case is not heuristic: when the prior protocol output is `/conduct`'s owed-reapportionment entry for a unit it could not place a move for, `ReadObligations` reads that unit's obligations directly off the entry's `obligations` field into local `O_G` — the same set this protocol emitted and `/conduct` carried through unread — not inferred from prose and not written back into G. This is a FORMAL step (`ReadObligations`, `owed_unit`, and `owed_obligations`; see TYPES and Phase 0's FLOW/PHASE TRANSITIONS/TOOL GROUNDING), not only a claim about how the surrounding heuristic reading happens to behave in that one case (R6).
+**Obligation reading is heuristic**: The goal's obligations are read from its utterance, prior protocol output, and session context. An obligation the user holds but never uttered, and that no upstream protocol captured, will not be read — and therefore will not be covered, even though coverage is a hard invariant over what *was* read. The Phase 2 gate is the correction point: the apportionment is presented with its covered obligations precisely so a missing one becomes visible. One case is not heuristic: when the prior protocol output is `/conduct`'s owed-reapportionment entry for a unit it could not place a move for, `ReadObligations` reads that unit's obligations directly off the entry's `obligations` field into local `O_G` — the same set this protocol emitted and `/conduct` carried through unread — not inferred from prose and not written back into G. This is a FORMAL step (`ReadObligations`, `owed_unit`, and `owed_obligations`; see TYPES and Phase 0's FLOW/PHASE TRANSITIONS/TOOL GROUNDING), not only a claim about how the surrounding heuristic reading happens to behave in that one case (R6). A DIFFERENT `/conduct`-origin case stays heuristic and is not a second formal reader: a `TerminationGround` recorded as `resolution_required(/apportion)` (hyphegesis SKILL.md TYPES) names this protocol as the owed resolver for a WHOLE region, not one unit's obligations, and no `ReadObligations`-analogous step exists for it — per the Epistemic Completeness Boundary, `/conduct` records that ground and stops, and discharge happens through this protocol's own ordinary activation on a later invocation, reading whatever the operator supplies from that region through the SAME heuristic prior-protocol-output scan `ProtocolOutput`'s "conducted method's autonomous region" example names (see TYPES), never through a dedicated ingress function.
 
 **Seam evidence is often absent**: An abstract goal frequently supplies no dependency, deliverable, verification or ownership seam. Those cuts are declared heuristic rather than certified, and the resulting units may carry duplicated setup, cross-unit state leakage, or awkward predicates. The declaration makes the risk visible; it does not remove it.
 
@@ -926,7 +956,7 @@ Merismos is the apportion-and-condition step ahead of an autonomous run. The com
 6. **The join rule — one unit, one interval, one resolution certificate**: A unit's completion and invariant predicates are conjoined into a single leaf predicate and emitted in one certificate. Per-condition entries duplicate the unit's execution identity; a cartesian product does the same more explicitly. The certificate retains each conjunct's kind so provenance stays readable. A compiled completion predicate selects `DeterminateResolution`; without one, Confirm must have produced at least one accepted completion residual, and `AcceptedUncoveredResolution` carries that non-empty witness plus any compiled invariant conjuncts. Thus a residual-only unit has an accepted certificate with no conjuncts, while an invariant-bearing/completion-uncovered unit has an accepted certificate with invariant conjuncts; neither becomes a vacuous TRUE and neither loses provenance at the seam.
 7. **Plan conditions stay plan-level**: A condition whose subject is the whole goal carries a plan-state requirement — a topology-free property of when it becomes safe to discharge, never a named unit or order-position, which is `/conduct`'s axis to resolve. It is never distributed across every unit to fit the leaf type — that multiplies false failures and hides which unit owns the obligation.
 8. **Separate activation**: Emitting the plan is the epistemic endpoint. Merismos does not invoke the downstream enforcer; starting the autonomous interval is the user's separate constitutive act.
-9. **No-reentry across the `/conduct` seam**: Both directions of the `/conduct` edge are advisory and guarded. A condition-bearing unit plan consumed by `/conduct` supplies stated termination grounds only for the regions whose resolved termination is `until_goal_met` — conjoining that region's `DeterminateResolution` predicates, or naming `/apportion` as the owed resolver when none exist. Every other region enforces the executable conditions its unit resolutions actually carry inside their own intervals and records a coverage limit; an accepted completion residual remains an acceptance record rather than a fabricated leaf. None of it routes back to `/apportion`. An already-conducted autonomous region consumed by `/apportion` has fixed topology and is not re-conducted. A single unit, or a unit set whose order, independence, reconciliation, termination and routing are all trivial, bypasses `/conduct`. Neither edge is a precondition, so neither activation depends on the other having run. A unit `/conduct` withdraws because it could arrange no move for it is a separate, third edge — an owed re-apportionment back to `/apportion` (see Composition, "Owed reapportionment from `/conduct`'s withdrawal") — not a case of either guarded edge above.
+9. **No-reentry across the `/conduct` seam**: Both directions of the `/conduct` edge are advisory and guarded. A condition-bearing unit plan consumed by `/conduct` supplies stated termination grounds only for the regions whose resolved termination is `until_goal_met` — conjoining that region's `DeterminateResolution` predicates, or naming `/apportion` as the owed resolver when none exist; on a MIXED such region (some units `DeterminateResolution`, some `AcceptedUncoveredResolution`), the accepted units' own compiled invariant conjuncts sit outside that conjunction, so `/conduct` carries them on the same per-unit binding for the executing substrate to still enforce inside each unit's own interval — a region never terminates "goal met" over an invariant this protocol compiled but `/conduct` left unenforced (see hyphegesis SKILL.md TYPES, `UnitGroundDisposition`). Every other region enforces the executable conditions its unit resolutions actually carry inside their own intervals and records a coverage limit; an accepted completion residual remains an acceptance record rather than a fabricated leaf. None of it routes back to `/apportion`. An already-conducted autonomous region consumed by `/apportion` has fixed topology and is not re-conducted. A single unit, or a unit set whose order, independence, reconciliation, termination and routing are all trivial, bypasses `/conduct`. Neither edge is a precondition, so neither activation depends on the other having run. A unit `/conduct` withdraws because it could arrange no move for it is a separate, third edge — an owed re-apportionment back to `/apportion` (see Composition, "Owed reapportionment from `/conduct`'s withdrawal") — not a case of either guarded edge above.
 10. **Verifiable predicate or witnessed acceptance required**: Every emitted unit resolution is either a `DeterminateResolution` carrying an executable check with a determinate pass/fail outcome, or an `AcceptedUncoveredResolution` carrying a non-empty accepted-completion witness — never a vacuous always-true check and never an unwitnessed tag. Every emitted plan condition is an executable check with a determinate pass/fail outcome. A condition expressible only as prose judgment is surfaced as a residual — sharpened into a predicate or accepted as uncovered — and is never emitted as prose.
 11. **Stop-time only**: Only conditions evaluable when an interval stops are derived. An obligation requiring pre-action interception is declared out of scope with its delegated substrate named; deriving it into a stop-time leaf simulates protection while providing none.
 12. **Stateless compile**: Emission is terminal. No session approvals, no per-action classification, no mid-execution checkpoint; re-invocation recompiles from current context rather than resuming prior state.
