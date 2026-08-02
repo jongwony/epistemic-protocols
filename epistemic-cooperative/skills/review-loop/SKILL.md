@@ -128,11 +128,15 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    the loop adversarially scans each planned edit site before delegating — does the fix
    interact with adjacent code, break an invariant the finding did not mention, or recur
    at unswept sites? The scan compiles the self-contained fix brief: each fix
-   file:line-anchored with its verified basis and fix direction, plus any licensed
-   completeness-sweep predicate with its candidate sites enumerated at scan time — each
-   site semantically verified and risk-screened per site (Rule 6) before it enters the
-   brief; a site the writer discovers beyond the brief is returned for screening, never
-   written unbriefed.
+   file:line-anchored with its verified basis and fix direction, and — for every fix —
+   the predicate that fix instantiates, named explicitly, with that predicate's sites
+   enumerated across the artifact at scan time. Naming it is what makes the sweep below
+   runnable, so the slot is answered rather than left open: a fix whose predicate holds
+   at exactly one site records that as its answer, which is a different statement from
+   never having looked. Each enumerated site is semantically verified and risk-screened
+   per site (Rule 6) before it enters the brief; a site the writer discovers beyond the
+   brief is returned for screening, never written unbriefed. A brief carrying a fix whose
+   predicate is unnamed is incomplete and does not hand off.
 2. **Write on the low-cost tier**: hand the brief to a fresh subagent on the low-cost
    executor tier — a role, not a model name: the running harness's configuration (its
    tier registry or agent config) resolves the concrete model — the normal case, since
@@ -154,7 +158,7 @@ landed at the Phase 3 gate and the risk screen. Split the apply by model tier:
    surface — the loop's own convergence check remains the final reviewer of the delegated
    writing.
 
-**Completeness sweep on apply.** When an applied fix instantiates a predicate or pattern that plausibly recurs across multiple sites in the artifact — a vocabulary rename, a guard that must hold at every mention of a symbol, a stale predicate repeated in several blocks — scan the artifact for all sites of that predicate and apply the fix consistently in the **same apply pass**, rather than waiting for later rounds to re-surface them piecemeal. **Over-reach guard**: verify each candidate site actually instantiates the same predicate (a semantic match, not a superficial string match) before applying, and risk-screen each swept site the same way — a swept edit is still an apply that lands, so Rule 6's risk screen applies per site, not only to the originally-flagged edit; sites swept beyond the originally-flagged one ride as relay annotations on the trace entry. The Phase 5 full re-review still catches any miss, so the sweep is an efficiency move, not a correctness dependency.
+**Completeness sweep on apply.** The predicate the scan named for each fix (Apply executor, step 1) is what this sweep ranges over. Where that predicate recurs across multiple sites in the artifact — a vocabulary rename, a guard that must hold at every mention of a symbol, a stale predicate repeated in several blocks — apply the fix consistently at every one of its sites in the **same apply pass**, rather than waiting for later rounds to re-surface them piecemeal. **Over-reach guard**: verify each candidate site actually instantiates the same predicate (a semantic match, not a superficial string match) before applying, and risk-screen each swept site the same way — a swept edit is still an apply that lands, so Rule 6's risk screen applies per site, not only to the originally-flagged edit; sites swept beyond the originally-flagged one ride as relay annotations on the trace entry. The sweep is a required step of the apply pass: an apply that closes the flagged site while leaving its predicate's remaining sites open has not completed, and the Phase 5 full re-review is the backstop for what a sweep missed rather than the reason to defer it. Closing the site the finding named while its predicate stays open is what returns the same defect at a sibling site next round, one round at a time.
 
 ## Phase 5: Re-review + Convergence
 
@@ -262,8 +266,15 @@ At exit — converged or free — surface each ledger entry with the durable hom
 5. **Verify before apply** — a finding that fails support-integrity or context-fit is dropped with its cited basis; only support-integrity-passing findings proceed to apply.
 6. **Risk screening gates risky applies regardless of class** — a Mechanical edit is still risk-screened before it lands; risk is orthogonal to the Mechanical/Judgment axis. The venue splits by substrate: destructive operations, external communication, and production mutation route to the harness permission layer; epistemic risk judgments surface as direct Constitution decisions in the loop.
 7. **Pass design intent upstream** — alongside the diff pointer, harvest the design intent already captured for the changed surface (the relevant `.claude/rules/*.md` + design-rationale sections of the project guide (`CLAUDE.md` or `AGENTS.md`), plus the design comments adjacent to the changed hunks) and pass it to the source as context, bounded to the changed files, as pointers not copied content. The source then pre-filters findings that an intentional documented choice already explains, so that refutation happens upstream in the review request rather than being re-derived in Phase 2 each round; Phase 2 verify remains the safety net for any intent-explained finding the source still surfaces. Documented intent pre-filters only findings whose objection is the choice itself — it never licenses suppressing a real defect the documented choice actually causes, which the source still flags. Because Phase 4 can grow the changed surface (completeness sweep or licensed scope expansion), the bundle is re-harvested for the current changed surface before each full re-review rather than frozen at the Phase 0 harvest. The bundle additionally folds in decisions constituted at this loop's own gates (the design-decision ledger) as its one copied element — session-constituted decisions have no repository location to point at, so each is conveyed as content with its constitutive basis — and conveys the project's mission anchor with an explicit severity-calibration steer (conventions are what the source checks against; the mission anchor is how it weighs severity). Conveyance boundary: design intent only — never fix-status records, do-not-reflag lists, or verdict-conditioning instructions; the source re-verifies fixed code fresh, and its verdict is its own.
-8. **Tiered apply with recurrence escalation** — the inherit-tier session adversarially
-   scans the change points and compiles the fix brief; a low-cost subagent writes the
+8. **Tiered apply with a required completeness sweep, and recurrence escalation** — the
+   inherit-tier session adversarially scans the change points and compiles the fix brief,
+   naming for every fix the predicate that fix instantiates and enumerating that
+   predicate's sites across the artifact; a brief whose fix carries an unnamed predicate
+   is incomplete and does not hand off, and a predicate holding at exactly one site is an
+   answered slot rather than an empty one. The sweep over those sites runs in the same
+   apply pass and is required for the apply to complete — the Phase 5 re-review is its
+   backstop, not its substitute — with each swept site semantically verified and
+   risk-screened per site (Rule 6). A low-cost subagent writes the
    fixes (fork only when context-bound; inline only for trivial batches or parent-held
    risky edits); the side-effect is verified before the Phase 5 re-review closes the
    loop. When fix-induced follow-up findings recur across consecutive rounds, the write
