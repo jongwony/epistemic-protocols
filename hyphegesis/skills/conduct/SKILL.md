@@ -99,8 +99,16 @@ UnitRef        = a stable identity carried by an emitted unit, assigned at meris
                --   this protocol — never re-derived, only compared for equality
 PredicateKind  ∈ {completion, invariant}
 LeafConjunct   = { condition: VerifiablePredicate, kind: PredicateKind }
+CapabilityRequirement = a functional description of what realizing a unit requires — never a concrete
+               --   executor, model, runtime or tool token; opaque here, read by the consuming runtime
+FeasibilityNote = a free-text feasibility concern merismos read from the goal; opaque here
 UnitEntry      = { unit_ref: UnitRef, subject: String, condition: VerifiablePredicate,
-                   conjuncts: Set(LeafConjunct) }
+                   conjuncts: Set(LeafConjunct), capability_requirements: Set(CapabilityRequirement),
+                   feasibility_notes: Set(FeasibilityNote) }
+               -- restated with EVERY producer field. capability_requirements and feasibility_notes are what
+               --   let the consuming runtime bind an executor without re-deriving what merismos already read;
+               --   this protocol neither reads nor binds them (Conduction over Substrate), and a consumer view
+               --   that omits them makes this seam the place executor-binding information dies
                -- conjuncts carries each leaf conjunct's provenance (completion vs invariant); this protocol
                --   never re-derives it, but must not drop it either — it is what lets a stop-time failure be
                --   read as an unfinished unit rather than a violated boundary
