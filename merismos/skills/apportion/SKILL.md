@@ -41,7 +41,7 @@ Merismos(G) → Probe(G) → goal_plan_uncompiled? →
         V = Reopen(u)  → residual := residual ∪ u.obligations; U := U \ {u} → cycle_n += 1 → Phase 1   -- the conditions revealed a bad cut; that unit returns to the apportionment loop
         V = Confirm ∧ ¬hard_invariants_hold(Λ): → re-present Qc with the violated invariant named   -- a hard invariant is never waived by confirming past it
         V = Confirm ∧ hard_invariants_hold(Λ):  → AcceptResiduals(R) → ∀ρ∈R: ρ.disposition := AcceptUncovered → Phase 3
-    Phase 3 Emit(U, K, P) → E [TaskCreate] → package(E, R, oos, Λ.unbounded_approved) → converge(apportionment trace) → ConditionBearingUnitPlan
+    Phase 3 Emit(U, K, P) → E [TaskCreate] → package(E, R, oos, Λ.unbounded_approved) → record_handoff → converge(apportionment trace) → ConditionBearingUnitPlan
 
 ── MORPHISM ──
 AutonomousGoal × ExecutionHorizon
@@ -56,8 +56,9 @@ AutonomousGoal × ExecutionHorizon
   → derive(unit) → (Set(κ), Set(ρ))    -- THE IRREDUCIBLE CORE, part two: per obligation of the unit, a verifiable predicate (completion or invariant) or a residual; every obligation of the unit lands in exactly one of the two sets
   → derive_plan(goal, U) → P           -- conditions whose subject is the whole goal, not any one unit; NOT distributed across units to fit the leaf type
   → confirm(unit_plan)                 -- user judges the apportionment together with its conditions
-  → emit(goal_entries)                 -- one entry per unit; that unit's conditions conjoined into one leaf predicate; handoff recorded
+  → emit(goal_entries)                 -- one entry per unit; that unit's conditions conjoined into one leaf predicate
   → package(E, accepted_residuals, oos, unbounded_approved)  -- constructs units/plan_conditions from E's own coproduct partition, plus every other qualifying fact — all travel on the RESULT, not only in the trace shown at emission
+  → record_handoff                     -- writes Λ.handoff_recorded: the Phase 3 protocol's "record the handoff" step realized as a state update, not only as trace prose
   → ConditionBearingUnitPlan
 requires: user_initiated(G)            -- user declares autonomous execution intent via /apportion
 deficit:  GoalPlanUncompiled           -- activation precondition (Layer 1)
@@ -325,7 +326,7 @@ Phase 2: U → ∀u∈U: Derive(u) → (Set(κ), Set(ρ)) → (K, R) ∥ DeriveP
              V = Reopen(u) → residual := residual ∪ u.obligations; U := U \ {u} → cycle_n += 1 → Phase 1
              V = Confirm ∧ ¬hard_invariants_hold(Λ) → re-present Qc naming the violated invariant   -- a hard invariant is not waivable by confirming past it
              V = Confirm ∧ hard_invariants_hold(Λ) → AcceptResiduals(R) → Λ.accepted := Λ.accepted ∪ {ρ.obligation | ρ ∈ R}; ∀ρ∈R: ρ.disposition := AcceptUncovered (track) → Phase 3
-Phase 3: (U, K, P) → Emit → E [Tool: TaskCreate] → package(E, R, oos, Λ.unbounded_approved) → converge(apportionment trace) (extension) → ConditionBearingUnitPlan
+Phase 3: (U, K, P) → Emit → E [Tool: TaskCreate] → package(E, R, oos, Λ.unbounded_approved) → record_handoff (track) → converge(apportionment trace) (extension) → ConditionBearingUnitPlan
 
 Phase 0 → Phase 1: goal_plan_uncompiled(G)                             -- an autonomous goal whose unit plan and conditions are uncompiled
 Phase 0 → deactivate: ¬autonomous_intent(G) ∨ condition_bearing(G)     -- relay the scan result; no activation
@@ -441,8 +442,9 @@ Phase 2 ApproveUnbounded (track)    → Internal state update (record Λ.unbound
 Phase 2 check        (track)        → Internal state update (invariant status: coverage, horizon fit, termination coverage, obligation derivation, oos substrate-naming, and each plan condition's topology-freedom — an AI semantic judgment over the plan condition's predicate content, not a structural proof — over the current apportionment; RE-RUN every time Qc is about to (re-)present — at pass entry, and again after every Adjust plus any Qt re-fire it triggers — so Λ.invariant_status is never read stale against a state check has not yet seen)
 Phase 2 Qc           (constitution) → present (apportionment + derived conditions + residual dispositions + invariant status: Confirm / Adjust / Reopen) [Tool]
 Phase 2 AcceptResiduals (track)     → Internal state update (on Confirm: record each remaining residual's obligation into Λ.accepted, materializing accepted_uncovered for the convergence predicate; also writes ρ.disposition := AcceptUncovered for each ρ ∈ R so the field reads correctly in the Phase 3 trace — the pre-Confirm guard does not depend on this write, see unit_termination_covered)
-Phase 3 Emit         (track)        → TaskCreate (one goal entry per unit: unit_ref + subject + the conjoined leaf predicate + its unconjoined conjuncts with kind + its capability requirements and feasibility notes carried verbatim from the unit; plan-level conditions as their own entries carrying scope + kind + condition + dischargeable_when; TodoWrite is the harness-equivalent realization; sets Λ.emitted on completion, and the handoff record that follows sets Λ.handoff_recorded — the two convergence terms are state this phase writes, not prose the trace asserts) [Tool]
+Phase 3 Emit         (track)        → TaskCreate (one goal entry per unit: unit_ref + subject + the conjoined leaf predicate + its unconjoined conjuncts with kind + its capability requirements and feasibility notes carried verbatim from the unit; plan-level conditions as their own entries carrying scope + kind + condition + dischargeable_when; TodoWrite is the harness-equivalent realization; sets Λ.emitted on completion — the record_handoff step that follows writes Λ.handoff_recorded separately) [Tool]
 Phase 3 package      (track)        → Internal state update (constructs the returned ConditionBearingUnitPlan: units and plan_conditions as E's own UnitEntry/PlanEntry partition — not a separately re-derived copy — plus every qualifying fact Λ already holds: each Λ-accepted residual as an AcceptedResidualEntry keyed by unit_ref, the computed oos set, and Λ.unbounded_approved — all travel on the RESULT ITSELF, not only in the convergence trace text presented at emission)
+Phase 3 record_handoff (track)      → Internal state update (writes Λ.handoff_recorded := ⊤, realizing the Phase 3 protocol's "record the handoff" step as a state update the Phase 3 → converge transition and apportioned(G) both read — not an assertion converge's trace merely narrates)
 converge             (extension)    → TextPresent+Proceed (apportionment trace; handoff recorded; deactivate)
 esc                  (extension)    → TextPresent+Proceed (no emission; deactivate as EarlyExit, not ConditionBearingUnitPlan)
 seam                 (extension)    → TextPresent+Proceed (two seams, scoped separately. INBOUND activation seam (before this protocol activates): the `/bound → /apportion` and `/conduct → /apportion` legs of the `## Composition` chain relay when a user-declared chain names `/apportion` next, or an invocation follows that declared composition edge — proceed directly, citing the settling source; this seam fires at the upstream handoff, not after this protocol's emission. OUTBOUND emission seam (after this protocol emits): the `/apportion → enforcer` edge is EXCLUDED — Rule 8 (Separate activation) governs it, keeping the enforcer's start the user's own constitutive act; the `/apportion → /conduct` edge relays only under a user-declared chain naming /conduct next, never automatically, and carries the no-reentry guard of Rule 9. Every Constitution gate inside this protocol and inside the next protocol fires unchanged)
@@ -457,7 +459,7 @@ seam                 (extension)    → TextPresent+Proceed (two seams, scoped s
       invariant_status: InvariantStatus,
       U_history: List(Set(Unit)), A_history: List(UnitJudgment),
       emitted: Bool,                     -- written by Phase 3 Emit; emitted(E) ≡ Λ.emitted
-      handoff_recorded: Bool,            -- written by Phase 3 Record-the-handoff; handoff_recorded ≡ Λ.handoff_recorded
+      handoff_recorded: Bool,            -- written by Phase 3 record_handoff; handoff_recorded ≡ Λ.handoff_recorded
       active: Bool, cause_tag: String }
 -- Coverage partition invariant: residual, (⋃ᵤ u.obligations) and {d.obligation | d ∈ oos} are pairwise
 --   disjoint and together equal G.obligations at every cycle boundary — an obligation is always exactly one
