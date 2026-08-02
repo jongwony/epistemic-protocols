@@ -53,9 +53,7 @@ Uᵣ       = Context-resolved uncertainties (resolved during collection)
 Q        = Inquiry (Constitution interaction), ordered by information gain
 A        = User answer ∈ {Provide(context), Point(location), Dismiss, Unknown(Partial)}
              -- Unknown(Partial) = user declines certainty; Phase 3 auto-promotes via Cite-or-observe tiebreaker (UserTacit → next-preferred
-             -- untried EvidenceSource in ValidSources(v)) and re-enters Phase 1 for reclassification. When no untried valid source remains,
-             -- automatic promotion has no warranted move: the item stays in remaining and its disposition returns to the user at the next
-             -- Phase 2 — an item the evidence channels could not reach is not thereby dismissible on the user's behalf; arcs in PHASE TRANSITIONS
+             -- untried EvidenceSource in ValidSources(v)) and re-enters Phase 1 for reclassification; both arcs formalized in PHASE TRANSITIONS
 Ac         = User coherence classification ∈ CoherenceType     -- Phase 1 Qc gate answer type
 X'       = Updated prospect (context-enriched)
 InformedExecution = X' where remaining = ∅
@@ -166,8 +164,8 @@ Phase 1: Uᵢ → Step₁ Ctx(Uᵢ) → (Uᵢ', Uᵣ) →                    -- 
          [if Uₑ_candidates ≠ ∅] Step₄ EmpiricalObservation(Uₑ_candidates) → Uₑ  -- Step 4: dynamic evidence gathering [Tool]
 Phase 2: Qs(classify_result + Uₑ + Uᵢ''[cluster], framing) → Stop → A          -- uncertainty surfacing [Tool]; cluster = one coherent cluster (size ≤ 4)
 Phase 3: A → integrate(A, X) → X'                               -- prospect update (track: mutates Λ.X)
-         [if A = Unknown(Partial) ∧ some valid source for u is untried] auto_promote(u, next-preferred untried source in ValidSources(v)) → goto Phase 1  -- backward arc (T2): user declines certainty → re-enter classification with that source. The guard is what bounds the arc: a source already tried is not re-selected, so the automatic path runs out rather than cycling
-         [if A = Unknown(Partial) ∧ no valid source for u is untried] u stays in Λ.remaining → Phase 2  -- the arc has no target; automatic resolution is spent for u and Phase 2 discloses that, leaving the disposition to the user rather than resolving or dismissing it on their behalf
+         [if A = Unknown(Partial) ∧ some valid source for u is untried] auto_promote(u, next-preferred untried source in ValidSources(v)) → goto Phase 1  -- backward arc (T2): a tried source is not re-selected
+         [if A = Unknown(Partial) ∧ no valid source for u is untried] u stays in Λ.remaining → Phase 2  -- promotion has no target; disposition is the user's, not an AI dismissal
 
 ── LOOP ──
 After Phase 3: re-scan X' for remaining or newly emerged uncertainties.
@@ -175,7 +173,6 @@ New uncertainties accumulate into uncertainties (cumulative, never replace).
 If Uᵢ' remains: return to Phase 1 (collect context for new uncertainties).
 If remaining = ∅: proceed with execution.
 User can declare the context sufficient at Phase 2 (sufficiency_declared): the remaining uncertainties are dismissed with the declaration recorded and the loop converges, rather than exiting. User can exit at Phase 2 (early_exit).
-When automatic promotion is spent for an uncertainty, the loop does not terminate on that account: the item is surfaced as spent at Phase 2 and waits for the user's disposition — supplying or pointing to context re-enters Phase 1, Dismiss records the stated default, a sufficiency declaration converges, and Esc exits. Spent automatic reach is a disclosure, not a terminal.
 Continue until: informed(X') OR user ESC.
 Convergence evidence: At remaining = ∅, present transformation trace — for each u ∈ (Λ.context_resolved ∪ Λ.read_only_resolved ∪ Λ.empirically_observed ∪ Λ.user_responded), show (ContextInsufficient(u) → resolution(u)). Convergence is demonstrated, not asserted.
 On user ESC (EarlyExit, not InformedExecution): present the same partial transformation trace restricted to uncertainties already resolved, then declare `remaining` as explicit unresolved residual.
@@ -198,7 +195,7 @@ Phase 1 Qc      (constitution)        → present (conditional: Coherence 2D off
 Phase 2 Qs_emergent_channel (constitution) → present (specialization of Phase 2 Qs: channel unvalidated by definition; regardless of parent Verifiability, the classify summary records the observed channel description and awaits user confirmation before proceeding; confirmation rides the parent A coproduct — Point(location) designates/validates the authoritative channel, Provide(context) supersedes it, Dismiss declines it (proceed-with-assumption), Unknown(Partial) leaves the item unresolved — no answer auto-resolves the item through the unconfirmed channel; the answer is recorded in Λ.channel_validations — a channel already Point-validated this session skips this gate only (prior in-session user decision); each later item on that channel still takes the claim-specific Phase 1 evidence pass against the validated channel, per the Point(location) semantics (record location, resolve via next Phase 1 iteration) — never blanket-resolved as user-responded)
 Phase 2 Qs_staleness (constitution) → present (specialization of Phase 2 Qs: when staleness cannot be verified; require BOTH `staleness:unverified` tag — the temporal sub-case of the general `support_integrity:unverified` tag — AND classify summary surfacing — no silent escalation path; publishing authority claim warrants user awareness)
 Phase 1 Observe (transform)   → Write, Bash, Read (dynamic evidence gathering, Factual only); cleanup via Bash
-Phase 2 Qs      (constitution)        → present (mandatory: classify result + uncertainty surfacing; user provides context judgment on insufficiency; when automatic promotion is spent for an uncertainty, the classify summary states that — which channels the automatic path reached and that it holds no further move — so the user recognizes its reach instead of recalling it; the answer rides the A coproduct unchanged, no separate gate; Esc key → loop termination at LOOP level, not an Answer)
+Phase 2 Qs      (constitution)        → present (mandatory: classify result + uncertainty surfacing; user provides context judgment on insufficiency; an item whose promotion is spent is marked as such in the classify summary, so its reach is recognized rather than recalled; Esc key → loop termination at LOOP level, not an Answer)
 Phase 3         (track)       → Internal state update
 converge     (extension)       → TextPresent+Proceed (convergence evidence trace; proceed with informed execution)
 sufficiency  (extension)       → TextPresent+Proceed (fires on sufficiency_declared: the user declares the context sufficient as a free response at any Phase 2. Every uncertainty still in Λ.remaining moves to Λ.dismissed carrying the declaration as its recorded reason, so remaining = ∅ and informed(X') holds — the run converges as InformedExecution, not as an exit. It is a free-response pathway rather than a peer option in the Phase 2 set because declaring the WHOLE inquiry sufficient produces no trajectory on the per-item axis those options occupy: it disposes of the axis instead of taking a position on it. Present the dismissed set with the declaration recorded against each, so the convergence trace shows what was accepted unresolved rather than asserting resolution)
@@ -451,7 +448,7 @@ After user response:
 1. **Provide(context)**: Integrate user-provided context into prospect `X'`
 2. **Point(location)**: Record location, resolve via next Phase 1 iteration
 3. **Dismiss**: Mark uncertainty as dismissed, note default assumption used
-4. **Unknown(Partial)**: Promote the uncertainty to the next-preferred untried EvidenceSource in `ValidSources(v)` and re-enter Phase 1 classification via the backward arc. When every valid source has been tried, promotion has no target: keep the uncertainty in `remaining` and state at the next Phase 2 that automatic resolution is spent for it, so the user disposes of it — do not dismiss it on their behalf
+4. **Unknown(Partial)**: Promote the uncertainty to the next-preferred untried EvidenceSource in `ValidSources(v)` and re-enter Phase 1 classification via the backward arc; when none is untried, keep it in `remaining` and mark it spent for the user to dispose of
 
 After integration:
 - Re-scan `X'` for remaining or newly emerged uncertainties
