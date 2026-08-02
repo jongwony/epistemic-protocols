@@ -21,6 +21,7 @@
 | `/reduced-space-test` | bounded 대리 공간에서의 scoped 실증 검증 | scoped resolution + carried residual |
 | `/review-loop` | source-agnostic 코드/PR 리뷰-resolve 루프 (수렴까지) | 적용된 수정 + 수렴 trace |
 | `/place` | 배치 감사 — 지시문 산문의 절 각각을 다섯 목적지(로드 계층 셋, ledger, 삭제) 중 하나로 라우팅하고 집행 축을 설정 | 라우팅 보고서 — 라우트 블록 + 리포트 수준 발견 (읽기 전용) |
+| `/gate-check` | 자문 검증 결정 게이트 — 독립 판정자가 작업이 아니라 초안 옵션 집합 자체를 판정하고, 그 인용 근거를 검증한 뒤에야 사용자에게 도달 | 초안대로의 게이트, 릴레이로 제시되는 확정 옵션, 또는 재구성된 옵션 집합 — 각각이 선 축과 함께 |
 | `/white-bear` | 프로즈 감사 — 불필요한 경쟁-대상 언급 (금지 프레이밍, 대체된-경로 언급, 부정 앵커링) | JSON findings (읽기 전용) |
 | `/zero-shot` | 프로즈 감사 — 앵커링 예시 대신 원칙 진술 | JSON findings (읽기 전용) |
 

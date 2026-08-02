@@ -21,6 +21,7 @@ A utility plugin for epistemic protocol onboarding, analytics, and work orchestr
 | `/reduced-space-test` | Scoped empirical validation in a bounded stand-in space | Scoped resolution + carried residual |
 | `/review-loop` | Source-agnostic code/PR review-resolve loop to convergence | Applied fixes + convergence trace |
 | `/place` | Placement audit — routes each clause of instruction prose to one of five destinations (three load tiers, ledger, delete) and sets its enforcement axis | Routing report — route blocks plus report-level findings (read-only) |
+| `/gate-check` | Advisor-checked decision gates — an independent adjudicator judges the drafted option set itself, and its cited grounds are verified before either reaches you | The gate as drafted, a settled option presented as relay, or a rebuilt option set — with the axis each stands on |
 | `/white-bear` | Prose audit — unnecessary competing-target mentions (prohibition framing, superseded-path mention, negated anchoring) | JSON findings (read-only) |
 | `/zero-shot` | Prose audit — principle statement over anchoring examples | JSON findings (read-only) |
 
