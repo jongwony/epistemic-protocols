@@ -376,8 +376,8 @@ growth_items: [{
 
 <!-- CARD: Horizon (replicate per protocol adoption opportunity) -->
 <div class="card horizon-card">
-  <div class="card-title">/apportion for Autonomous Pipelines</div>
-  <p>Your work trajectory points toward autonomous PR pipelines (unattended-run directives in 12 of 84 sessions). As execution becomes less human-gated, /apportion becomes critical — compiling boundaries into verifiable goal conditions before autonomous execution begins prevents scope and done-criteria from being improvised mid-run...</p>
+  <div class="card-title">/gap before high-rework commits</div>
+  <p>Your edit trajectory concentrates rework in a few files (the same 3 files account for 41 of 96 edits across 84 sessions). As those files keep absorbing changes, /gap earns its place in the pre-commit step — surfacing the blind spot that drives the next edit before the commit lands, rather than after...</p>
   <div class="resume-cmd">cd ~/myproject && claude --resume a1b2c3d4</div>
 </div>
 
