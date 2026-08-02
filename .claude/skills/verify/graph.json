@@ -271,7 +271,7 @@
       "source": "merismos",
       "target": "hyphegesis",
       "type": "advisory",
-      "satisfies": "조건 보유 단위 계획이 conduct의 WorkProspect로 흐름 — 단위 배열(순서·독립성·조정·종료·라우팅)이 자명하지 않을 때만. 단위 술어는 UnitConditionBinding을 통해 conduct의 stated_condition 종료 근거로 바인딩되고, 위상-무관 계획 조건(dischargeable_when)은 PlanConditionBinding을 통해 위상 프론티어(FiringSite)에 바인딩되며, 둘 다 merismos로 되돌아오지 않음 (재진입 금지 가드); 단일 단위 또는 순서가 자명한 집합은 conduct를 건너뜀"
+      "satisfies": "조건 보유 단위 계획이 conduct의 WorkProspect로 흐름 — 단위 배열(순서·독립성·조정·종료·라우팅)이 자명하지 않을 때만. 종료가 until_goal_met으로 귀결된 구역은 그 구역의 확정된(Determinate) 단위 leaf들을 UnitConditionBinding을 통해 conduct의 stated_condition 종료 근거로 결합하고(확정된 leaf가 하나도 없으면 대신 /apportion을 귀속 해결자로 기록), 다른 종료값으로 귀결된 구역은 각 단위의 leaf를 그 실행 구간 안에서 개별 집행하고 CoverageLimit으로 기록한다 — 위상-무관 계획 조건(dischargeable_when)은 PlanConditionBinding을 통해 위상 프론티어(FiringSite)에 바인딩되며, 어느 쪽도 merismos로 되돌아오지 않음 (재진입 금지 가드); 단일 단위, 또는 순서·독립성·조정·종료·라우팅이 모두 자명한 집합은 conduct를 건너뜀. conduct가 이동을 배치하지 못해 철회한 단위는 별도로 /apportion에 재분배 귀속 의무(owed re-apportionment)로 되돌아감 — 위 두 가장자리와 다른 세 번째 경로"
     },
     {
       "source": "anamnesis",
