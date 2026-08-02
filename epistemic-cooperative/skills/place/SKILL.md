@@ -7,7 +7,7 @@ allowed-tools: Read, Grep, Glob
 
 # Placement Audit
 
-A read-only audit of LLM-facing instruction prose that answers one question per clause: **where does this belong?** Every routing unit receives a destination, whether or not it bears a decision. The audit emits routes; the human author applies them.
+A read-only audit of LLM-facing instruction prose that answers one question per clause: **where does this belong?** Every routing unit receives a destination, whether or not it bears a decision, and a pass that did not reach every unit reports that instead of reading as a finished audit. The audit emits routes; the human author applies them.
 
 ## Purpose
 
@@ -132,7 +132,7 @@ Step 4 is the one that fails silently. An instruction that reads correctly to so
 
 A report in three sections, written for the author who will weigh it. The order is fixed.
 
-**1. Summary.** Files audited, and routes emitted. Unresolved host bindings are listed by name — a count reports how many places the host left unbound without saying which, and the which is the actionable part. Emit no count that the emitted material does not already contain: a denominator over routing units is a judgment, and an exact integer over a judgment reads as measurement while resting on none. Name the spans the pass covered as a summary of the per-unit lines below, never as a substitute for them: a span read is not evidence that every scan unit inside it went through extraction and routing, and a claim about the pass's own execution carries what makes it checkable like any other.
+**1. Summary.** Files audited, and routes emitted. Unresolved host bindings are listed by name — a count reports how many places the host left unbound without saying which, and the which is the actionable part. Emit no count that the emitted material does not already contain: a denominator over routing units is a judgment, and an exact integer over a judgment reads as measurement while resting on none. Name the spans the pass covered as a summary of the per-unit lines below, never as a substitute for them: a span read is not evidence that every scan unit inside it went through extraction and routing, and a claim about the pass's own execution carries what makes it checkable like any other. State the coverage on the same footing. The pass is complete only where every routing unit in the target emitted the representation it is owed; where it is not, the summary says so, names the boundary the pass reached and the target it left unrouted, and the report is not a completed audit. Whether to narrow the target, take the partial report as it stands, or route the remainder is the caller's, and the summary carries what that judgment needs rather than making it — the pass reads the surface and never the situation the caller is auditing it from, so a completion policy fixed here would be decided without the half that decides it.
 
 **2. Report-level findings**, only when the section fires. Defined below.
 
