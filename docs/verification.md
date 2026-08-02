@@ -38,6 +38,16 @@ node .claude/skills/verify/scripts/static-checks.js .
 28. **ink-body-identity**: Verifies that each Ink-derived sibling style (currently `epistemic-cooperative/styles/proactive-epistemic-ink.md`) reproduces the canonical Epistemic Ink body — the region from its own `# Epistemic Protocol Formatting` heading up to its closing heading (e.g. `# Per-Turn Reminder`) — byte-identical (module trailing-newline padding at the cut point) to `epistemic-cooperative/styles/epistemic-ink.md`'s `# Epistemic Protocol Formatting` heading through EOF. A per-turn injected Output Style cannot dereference a sibling file at runtime, so a verbatim copy is the only safe carrier; this check guards that copy against silent drift. Fail level. Repair: re-sync the sibling's reproduced body to match the canonical file exactly
 29. **routing-map-sync**: Verifies `routing-map.md` (the agent-facing SessionStart routing directive) stays in sync with its canonical sources — the catalog When-to-Use triggers plus the load-protocols deficit → resolution spine. `routing-map.md` pairs entries generated from those sources with a hand-maintained preamble constant in the generator, so this check re-generates the whole file in-memory and fails on any divergence from the committed file, the same drift posture as cross-ref-scan/catalog-sync (a stale committed map would inject a wrong routing directive at SessionStart). The generator fails loudly (throws) when a protocol has no catalog row; that throw is surfaced here as a fail rather than crashing the verifier. Fail level. Repair: `node scripts/generate-routing-map.js`
 
+## Tests
+
+Run:
+
+```bash
+node --test scripts/package.test.js anamnesis/scripts/hypomnesis-write.test.mjs
+```
+
+`scripts/package.test.js` enforces the hand-maintained expected release-ZIP list; the static suite does not inspect that list, so a skill missing from it fails here and nowhere else.
+
 ## Review Criteria Not Yet Static Failures
 
 Use these checks during protocol edits and reviews. Do not promote them to static failure until a pilot protocol shows the criterion is stable with low false positives.
@@ -55,7 +65,7 @@ Use these checks during protocol edits and reviews. Do not promote them to stati
 
 - Preserves `<skill>/SKILL.md` exactly and uses `.codex-plugin/plugin.json` as the version source; a differing Claude manifest version fails closed.
 - Strips frontmatter fields: `allowed-tools`, `license`, `compatibility`, `metadata`.
-- Applies compact description overrides when the source description exceeds 200 characters.
+- Applies compact description overrides when the source description exceeds 200 characters. A description over that limit with no `DESCRIPTION_OVERRIDES` entry emits a packaging warning and the long description is preserved as-is; it is not a static failure.
 - Includes runtime support files and directly referenced plugin agents while excluding unrelated agents, commands, evals, README files, and forbidden secret/session paths.
 - The default release selects every active skill and adds the all-skills bundle plus release notes. Its support-file surface is a safe superset for utility sidecars such as `routing-map.md`, `templates/`, and `adapters/`.
 - `--profile codex-submit` selects the explicit public-core set, enforces its narrower support allowlist and full packaged-text reference closure, and emits `submission-index.json` with byte sizes and SHA-256 digests.
