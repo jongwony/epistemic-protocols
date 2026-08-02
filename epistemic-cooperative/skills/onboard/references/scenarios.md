@@ -197,7 +197,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 
 **Intervention**: `/apportion` reads the album job's obligations and cuts it into coarse units at the seams it can cite — perhaps one unit per hundred-photo batch (a deliverable seam) or one per layout section (a verification seam) — and judges each against how much a single run can plausibly finish. For each unit it derives a completion condition (every photo in that batch appears somewhere in the layout; the section renders with no missing thumbnail) and any invariant the unit must preserve while it works (no file outside the album folder is touched). You confirm the cut and its conditions, and each unit becomes its own checkable finish line the run is held to. Anything that would need split-second blocking (like deleting originals) is named out of its hands and left to your tool's permission prompts.
 
-**Trial prompt**: "Let's practice: describe a task you'd hand to an unattended run and I'll show how /apportion compiles its boundaries into verifiable conditions"
+**Trial prompt**: "Let's practice: describe a goal you'd hand to an unattended run and I'll show how /apportion cuts it into units and gives each one a checkable finish line"
 
 **Quiz Q (situation)**: You're about to let Claude run unattended overnight migrating hundreds of files, and you want certainty that "done" really means done — and that it stayed inside the folders you named.
 - A) Aitesis `/inquire` — B) Merismos `/apportion` — C) Syneidesis `/gap` — D) Horismos `/bound`
@@ -286,11 +286,11 @@ When you say "find me that café we talked about — and check if it's open toda
 
 **Shape**: empty intention → recognized prior context → grounded current fact.
 
-### `/apportion * /contextualize` — Guardrail-compiled execution plus context-fit check
+### `/apportion * /contextualize` — Unit-cut execution plus context-fit check
 
-When you say "run the inbox cleanup while I'm out, and check it actually fits my inbox style after." `/apportion` compiles the cleanup's boundaries into verifiable conditions for the autonomous run (what counts as done, what must remain untouched), then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
+When you say "run the inbox cleanup while I'm out, and check it actually fits my inbox style after." `/apportion` cuts the cleanup into units the run can finish one at a time and derives each one's completion condition (what counts as done for that unit, what it must leave untouched while it works), then `/contextualize` checks that the resulting state matches the accumulated context you've established (your actual email habits, not a generic clean inbox).
 
-**Shape**: pre-execution guardrail compilation → post-execution context-fit.
+**Shape**: pre-execution unit cut with conditions → post-execution context-fit.
 
 ### `/sublate * (downstream)` — Pre-execution vetting plus deficit-matched handoff
 

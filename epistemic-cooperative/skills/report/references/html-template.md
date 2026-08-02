@@ -236,7 +236,7 @@ growth_items: [{
   </div>
   <div class="glance-block">
     <h4>Unstructured Decisions</h4>
-    <p>81 wrong_approach events occurred without /elicit or /inquire. Execution sessions show unattended-run directives without /apportion in 3 of 8 sessions...</p>
+    <p>81 wrong_approach events occurred without /elicit or /inquire. 14 commits landed after 3+ edits to the same file with no /gap beforehand...</p>
   </div>
   <div class="glance-block">
     <h4>Coverage Delta</h4>

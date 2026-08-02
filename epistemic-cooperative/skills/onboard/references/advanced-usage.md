@@ -9,8 +9,6 @@ Protocols whose output naturally feeds into the next. These are observed chains,
 | Chain | Frequency | Pattern |
 |-------|-----------|---------|
 | `/inquire` → `/gap` | Common | Inquire gathers missing context → Gap audits the decision now that context is complete |
-| `/inquire` → `/gap` → `/apportion` | Observed | Three-step pre-execution: context → decision audit → guardrail compilation |
-| `/dashboard` → `/inquire` → `/apportion` | Observed | Analytics surface a question → inquire about it → compile guardrails for the resulting execution |
 
 ## Multi-Protocol Sessions
 
