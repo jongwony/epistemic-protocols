@@ -16,7 +16,7 @@ Conduct how a session's epistemic work will be carried out — the order, indepe
 Hyphegesis(WP) → BindPlanInput(WP) → PI →
   [PI = LivePlan(plan, loc): bind_I(Some(plan)) ∧ Λ.carried_handoff := loc |
    PI = Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) (extension) → deactivate | E → ReadPlan(E) → plan → bind_I(Some(plan)) ∧ Λ.carried_handoff := Some(N)) |
-   PI = NoPlan: bind_I(None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] →
+   PI = NoPlan: bind_I(None) ∧ Λ.carried_handoff := None] → MethodBrief(WP) → guard[relay-test, anti-self-application] →
   [single-move ∨ trivial-conduct: relay-route(extension) → deactivate] |
   [multi-move ∧ non-trivial:
     Qc(brief, warrant) → A_w → [Accept: continue | Amend(WP'): re-brief over WP'] →
@@ -47,7 +47,7 @@ invariant: Conduction over Substrate
 WP     = WorkProspect: the work or goal facing object-level cognition, with its method (conduct plan) not yet determined
 PG     = ProtocolGraph: available protocols and move-neighbors (the dependency graph plus ad-hoc moves)
 Move   = CognitiveMove { step: protocol invocation | analysis pass | delegation, unit_ref: Option(UnitRef) }
-MS     = MoveSet: (WP × PG) → {Move₁ … Moveₙ}, n ≥ 2
+MS     = MoveSet: (WP × PG) → {Move₁ … Moveₙ}  -- MoveId yields n ≥ 2 under the warrant; a Phase 1 selection may reduce it, and |MS| < 2 is what the Phase 1 relay terminals handle
 A_s    = SelectionJudgment ∈ {Confirm(MS'), Withdraw(Set(UnitEntry)), Esc}
 A_w    = BriefJudgment ∈ {Accept, Amend(WP'), Esc}   -- Amend carries the corrected prospect: this protocol is Hybrid, so the Phase 0 gate is where the AI-inferred WP is constituted
 MethodBrief = AI-inferred summary of WP: { work_intent, expected_handoff, span }  -- span = invocation → the next planned /compact or /clear
@@ -169,9 +169,9 @@ I = LivePlan(plan, _) → Some(plan) | Navigation(N) → DereferencePlan(N) → 
     support-integrity check stops and deactivates; it never selects None
 
 ── PHASE TRANSITIONS ──
-Phase 0: WP → BindPlanInput(WP) → PI → [LivePlan(plan, loc): bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := loc) | Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) → deactivate | E → ReadPlan(E) → plan → bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := Some(N))) | NoPlan: bind_I(None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → A_w → [A_w = Accept: continue | A_w = Amend(WP'): Λ.work_prospect := WP' → re-enter Phase 0 at BindPlanInput(WP'), rebinding PI, I and carried_handoff against the corrected prospect | A_w = Esc: deactivate]]   [Tool]
+Phase 0: WP → BindPlanInput(WP) → PI → [LivePlan(plan, loc): bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := loc) | Navigation(N): DereferencePlan(N) → (unreachable ∨ support-integrity failure: relay(handoff unreadable) → deactivate | E → ReadPlan(E) → plan → bind_I(Some(plan)) → retain_handoff(track: Λ.carried_handoff := Some(N))) | NoPlan: bind_I(None) → retain_handoff(track: Λ.carried_handoff := None)] → MethodBrief(WP) → guard[relay-test, anti-self-application] → warrant? → [warrant=relay: relay_route(extension) → deactivate | warrant=warranted: Qc(brief, conduction-warrant) → Stop → A_w → [A_w = Accept: continue | A_w = Amend(WP'): Λ.work_prospect := WP' → re-enter Phase 0 at BindPlanInput(WP'), rebinding PI, I and carried_handoff against the corrected prospect | A_w = Esc: deactivate]]   [Tool]
 Phase 1: (WP, PG) → MoveId(WP × PG) → Sc(MoveSet) → Stop → A_s →                                                                      [Tool]
-           A_s = Confirm(MS')      → [I ≠ None ∧ ¬(every unit_ref stamped anywhere in MS' is stamped by exactly one move of MS' ∧ every u ∈ I.units has its unit_ref stamped in MS' or already recorded in withdrawn_units): re-present Sc naming the units with more than one stamped move, and the units with none — NOT accepted | MS := MS' →
+           A_s = Confirm(MS')      → [I ≠ None ∧ ¬(every unit_ref stamped anywhere in MS' is stamped by exactly one move of MS' ∧ every u ∈ I.units has its unit_ref stamped in MS' or already recorded in withdrawn_units ∧ no move of MS' is stamped with a unit_ref already in withdrawn_units): re-present Sc naming the units with more than one stamped move, the units with none, and the withdrawn units still holding a move — NOT accepted | MS := MS' →
                                        [|MS| = 1 ∧ withdrawn_units = ∅: relay-route to the surviving move's protocol, deactivate
                                        | |MS| = 1 ∧ withdrawn_units ≠ ∅: PresentOwedReapportionment(withdrawn_units) → relay-route to the surviving move's protocol AND present {owed_reapportionment(w) | (w, r) ∈ withdrawn_units} directly in that same relay text
                                        | |MS| = 0 ∧ withdrawn_units = ∅: relay(no move survives — nothing to conduct or route to), deactivate
@@ -273,10 +273,10 @@ Phase 0 BindPlanInput (sense)        → Internal analysis (classify the incomin
 Phase 0 DereferencePlan (observe)    → TaskGet, Read (when PI = Navigation(N): follow N.dereference_instruction at N.canonical_locator — reading its record identity within the session that locator names — honor its snapshot anchor when present, and run the grounding instruction; an unreachable source, an absent session half, or an unsupported load-bearing premise surfaces handoff unreadable and deactivates)
 Phase 0 ReadPlan (sense)             → Internal analysis (read E exactly as ReadPlan(E) defines; no field comes from session memory)
 Phase 0 bind_I (track)               → Internal state update (write Λ.incoming_plan from the resolved carrier: Some(live plan), Some(ReadPlan(E)), or None only for explicit NoPlan)
-Phase 0 retain_handoff (track)       → Internal state update (write Λ.carried_handoff on either plan-bearing arm: the navigation block the live carrier supplied beside the plan, or Some(N) after a successful dereference)
+Phase 0 retain_handoff (track)       → Internal state update (write Λ.carried_handoff on EVERY arm: the navigation block the live carrier supplied beside the plan, Some(N) after a successful dereference, or None on the NoPlan arm. The write is total, so an Amend re-entry never leaves a prior block standing beside a plan that no longer exists)
 Phase 0 MethodBrief (sense)           → Internal analysis (infer the work prospect's method-brief + span from the session)
 Phase 0 guard (sense)                 → Internal analysis (relay-test: single-move ∨ trivial-conduct → relay; anti-self-application; no Λ mutation)
-Phase 0 relay_route (extension)       → TextPresent+Proceed (single-move resolution: route to that one protocol as the recommendation, deactivate)
+Phase 0 relay_route (extension)       → TextPresent+Proceed (the relay-test's two causes: a single-move resolution routes to that one protocol as the recommendation; a trivial-conduct multi-move prospect presents its moves in their evident order, with no topology designed and no move dropped. Either way, deactivate)
 Phase 0 Qc (constitution)             → present (conditional: warrant=warranted only — the guard decides warrant before this gate opens; work prospect confirmation + conduction-warrant; relay-test result as pre-gate text; the response is parsed as A_w — Accept proceeds, Amend(WP') writes Λ.work_prospect and re-enters the brief and its guard over the corrected prospect, Esc → loop termination at LOOP level)
 Phase 1 MoveId (observe)              → Read, Grep, Glob (the dependency graph + session context to identify candidate moves; when I ≠ None, every move derived from an incoming UnitEntry is STAMPED with that unit's unit_ref, and a unit for which no move is identified is surfaced here)
 Phase 1 Sc (constitution)            → present (MoveSet confirmation; multiSelect: true; Esc key → loop termination at LOOP level. When I ≠ None, a deselection that would leave some I.units entry with no stamped move is surfaced BEFORE the selection is accepted, naming the units it would strand. The user resolves it in the same gate via A_s: Confirm(MS') restores the move set, Withdraw(units) removes those units from I and records them in Λ.withdrawn_units as an owed re-apportionment, then re-presents over the reduced plan)
