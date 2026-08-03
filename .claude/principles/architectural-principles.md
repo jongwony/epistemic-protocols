@@ -132,15 +132,13 @@ Principle: side effects require explicit answer types, not tool-level escape. Wh
 
 ## Audience Reach
 
-CLAUDE.md principles guide contributors (protocol designers). End users receive only SKILL.md content via the plugin system. For a principle to affect runtime protocol behavior, it must be structurally embedded in SKILL.md — documenting it in CLAUDE.md alone is insufficient.
+General principle (a principle has behavioral effect only when it is structurally embedded in what the target reader actually receives; audience partitioning is symmetric): `premise/instruction-authoring.md` §Audience Reach. This project's instance: CLAUDE.md principles guide contributors (protocol designers). End users receive only SKILL.md content via the plugin system. For a principle to affect runtime protocol behavior, it must be structurally embedded in SKILL.md — documenting it in CLAUDE.md alone is insufficient.
 
 **Session-level observer exception**: The Dual Advisory Layer principle establishes Output Style nudge as a legitimate runtime mechanism complementary to graph.json. Nudge operates as a session-level cross-cutting observer — it belongs to no single SKILL.md because it observes across all protocols. Audience Reach applies to protocol-specific runtime behavior (which must be embedded in that protocol's SKILL.md), not to session-level observation patterns that are architecturally cross-cutting. Each SKILL.md governs its own protocol's detection (e.g., Post-Convergence conditions); Output Style governs the session-level observation layer.
 
 ### Amendment: Bidirectional Reach
 
-The original Audience Reach principle addresses leakage FROM contributor-facing text INTO LLM-runtime context. The reverse direction — LLM-runtime text leaking into contributor docs — is a symmetric failure mode.
-
-**Bidirectional rule**: audience partitioning is symmetric. Contributor docs must not assume runtime state; runtime text must not assume contributor-onboarding context.
+The original Audience Reach principle above addresses leakage FROM contributor-facing text INTO LLM-runtime context; the reverse direction — LLM-runtime text leaking into contributor docs — is the same partitioning symmetry (full statement: `premise/instruction-authoring.md` §Audience Reach, Bidirectional Reach).
 
 **Static-check candidate**: structural-specs can detect reverse-leakage by flagging contributor-doc sections that reference runtime-only symbols (mode state variables, protocol internal invariants).
 
@@ -150,8 +148,6 @@ General principle (pure-relay utilities delegate adversarial guards to the proto
 
 ## Direction over Accumulated Workload
 
-Contributors are not bound by accumulated workload (prior commits, SKILL.md size, co-change ripple, documentation pages) when evaluating a protocol direction. When the direction is theoretically justified — axiom coherence, type soundness, formal block integrity — full rewrites, large refactorings, and invalidation of prior contributions are legitimate choices. Contributor **authoring labor** converges toward zero under AI-assisted editing; **verification labor** remains bounded but non-zero and must be budgeted explicitly. The principle applies to authoring decisions; verification overhead does not vanish and constrains refactor scope through bounded investment reasoning. Structural misalignment accumulates and pollutes all downstream contributions regardless.
+General principle (a contributor disregards accumulated workload when a direction is theoretically justified; authoring labor trends toward zero while verification labor stays bounded and must be budgeted explicitly; the operational test distinguishing accumulated-work resistance from a genuine structural-deficit signal): `premise/instruction-authoring.md` §Direction over Accumulated Workload.
 
-**Audience-scoped to contributors**: Theoretical rigor refers to coherence of existing structure (typed soundness, cross-reference integrity, formal block consistency), not structural expansion. Over-categorization is itself workload that pollutes epistemic space. This principle applies only to protocol designers; end users interacting with SKILL.md are governed by the original Epistemic Cost Topology formulation (execution-layer cost → 0 for the user). Contributors disregard their own workload precisely to preserve that user-facing minimization.
-
-Operational test: "Is the resistance to this refactor grounded in accumulated work, or in observed structural deficit (typed unsoundness, cross-reference break, formal block inconsistency, or convergent use evidence of misalignment)?" Former → this principle applies (proceed). Latter → halt and investigate the deficit before proceeding. When both grounds co-occur, the structural deficit arm dominates: halt regardless of accumulated work investment.
+**Audience-scoped to contributors**: this project applies the principle only to protocol designers — end users interacting with SKILL.md are governed by the Epistemic Cost Topology formulation above (execution-layer cost → 0 for the user), not by this one.

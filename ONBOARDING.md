@@ -90,8 +90,8 @@ Contributors are expected to dogfood the protocols they edit — the list above 
 
 Two principles to internalize before your first PR:
 
-- **Audience Reach** — `CLAUDE.md` and `.claude/rules/` are contributor-facing. Runtime protocol behavior must be inscribed in SKILL.md itself; documenting something in `CLAUDE.md` alone does not affect user-facing behavior.
-- **Direction over Accumulated Workload** — Contributor authoring labor converges toward zero under AI-assisted editing; structural misalignment accumulates and pollutes all downstream work. When a refactor is theoretically justified, prior commits are not protection from invalidation. Verification labor remains bounded and must be budgeted explicitly.
+- **Audience Reach** — `CLAUDE.md` and `.claude/rules/` are contributor-facing. Runtime protocol behavior must be inscribed in SKILL.md itself; documenting something in `CLAUDE.md` alone does not affect user-facing behavior (general principle, portable form: `premise/instruction-authoring.md` §Audience Reach).
+- **Direction over Accumulated Workload** — Contributor authoring labor converges toward zero under AI-assisted editing; structural misalignment accumulates and pollutes all downstream work. When a refactor is theoretically justified, prior commits are not protection from invalidation. Verification labor remains bounded and must be budgeted explicitly (general principle, portable form: `premise/instruction-authoring.md` §Direction over Accumulated Workload).
 
 ## Get Started
 

@@ -26,11 +26,7 @@ The Recognition over Recall principle is a content invariant — the protocol fu
 
 ## Zero-Shot Instruction Preference
 
-LLM-facing instructions (Output Style, SKILL.md prose, agent prompts) state principles, not examples. When a rendering rule, behavioral guideline, or structural constraint can be expressed as a principle, do not append few-shot examples or category-level mapping lists. Few-shot examples create a soft-table effect — anchoring the model to specific instances rather than letting it apply the principle to novel contexts. A principle that requires examples to be understood is underspecified; fix the principle, do not patch it with examples.
-
-Scope boundary: this principle applies to instructions the LLM interprets and applies at runtime — not to contributor-facing documentation where examples serve comprehension. The boundary test: "would removing this example increase the LLM's latitude in applying the principle to novel contexts, without losing the output-format or behavioral reliability that the containing instruction depends on?" If yes, the example is anchoring and should be removed. An example whose primary effect is stabilizing output format or anchoring a subtle, high-failure-rate behavior is exempt — removing it costs adherence, not latitude. If the example aids human understanding without constraining LLM application, it is outside scope. SKILL.md formal blocks (Definition code blocks) are LLM-facing by definition; prose outside formal blocks in SKILL.md is hybrid (read by both LLMs and contributors) — err toward principle-only in hybrid contexts.
-
-Unnecessary-mention-axis complement: `.claude/principles/safeguards.md §White Bear Avoidance` (Safeguard tier; prohibition framing is its strongest-evidenced form).
+LLM-facing instructions state principles, not examples — a principle that needs an example to be understood is underspecified; fix the principle rather than patching it with examples. Full text, including the scope boundary distinguishing runtime-interpreted instructions from contributor-facing documentation: `premise/instruction-authoring.md`.
 
 ## Loop Continuity under Bounded Regret
 
@@ -38,9 +34,7 @@ Within any execution loop, Extension actions must not trigger Stop — the loop 
 
 ## Currency is not Support-Integrity
 
-Temporal currency (an artifact exists and is fresh in the current environment) does not establish support_integrity — that the artifact actually tracks the behavior or current reality it asserts. A current-but-unenforced artifact (a comment, doc, or note that claims a behavior with no enforcement channel coupling it to that behavior) is inference dressed as evidence: reading it is not relay (A2), because its basis is not authoritatively citable — the artifact could silently disagree with the behavior it describes. The direct-resolve (relay) path must therefore verify support_integrity (evidence→behavior coupling), not currency alone; evidence that is present and fresh but support-unlinked is routed to verification (observe the behavior) rather than auto-resolved.
-
-Operationally this distinguishes two defeater axes on the admissibility boundary (rebutting/undercutting, per Pollock — two kinds of defeater, not an exhaustive taxonomy of evidence defects): **coverage** (does the evidence span the whole claim?) and **support_integrity** (does the evidence track what it asserts?). Currency is a temporal sub-case of support_integrity, not a peer of it.
+Temporal currency (an artifact exists and is fresh in the current environment) does not establish support_integrity — that the artifact actually tracks the behavior it asserts. Reading a current-but-unenforced artifact is not simple relay, because its basis is not authoritatively citable. Full text, including the coverage/support_integrity defeater-axis distinction: `premise/instruction-authoring.md`.
 
 Commit-form runtime enforcement is materialized per-protocol in each SKILL.md; Aitesis (`/inquire`) is the first such materialization.
 
