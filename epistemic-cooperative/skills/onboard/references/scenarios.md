@@ -272,7 +272,7 @@ Design note: scenarios anchor on AI-collaboration moments (meta-primary) with fa
 - Answer: C
 
 **Quiz Q (design)**: You face a multi-move task where the order, independence, and stopping criterion all genuinely divide the plan. How would you settle the method before starting, without locking choices that depend on what you'll only learn mid-way?
-- Hint: The problem isn't which perspectives to use for one inquiry (that's `/frame`) or who owns what (that's `/bound`) — it's how the whole session's moves relate. Settle the most-constrained axis first, lock what's stable, and defer the volatile choices to an in-session checkpoint.
+- Hint: The problem isn't which perspectives to use for one inquiry (that's `/frame`) or who owns what (that's `/bound`) — it's how the whole session's moves relate. Settle the most-constrained axis first, let the rest bind to their defaults, and give an in-session checkpoint only to a decision whose evidence doesn't exist yet.
 
 **Philosophy**: ὑφήγησις (leading from just ahead, guiding) — conducting the method of the work, not doing the work. Core principle: **Conduction over Substrate**. How a session's moves are ordered, isolated, reconciled, and stopped is substrate-invariant — it survives deleting every runtime noun — so the conduct form is designed independently and only then matched to a substrate, declaring degradation rather than binding one it cannot realize. Workflow position: cross-cutting, Hybrid initiator — conducts the session's whole move set before object-level cognition. Game feel: "I know what I want, but how do I run this?" → confirm it's multi-move → design the topology impact-first → hand off a method plan with checkpoints.
 
